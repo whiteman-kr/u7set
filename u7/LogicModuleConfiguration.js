@@ -46,7 +46,7 @@ function(root, confCollection, log, signalSet, subsystemStorage, connectionStora
 
     var result = true;
 
-    result = module_lm_1(root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+    result = module_lm_1(root, root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
     if (result == false)
     {
         return false;
@@ -110,7 +110,7 @@ function storeHash64(confFirmware, log, frameIndex, offset, data)
     return result;
 }
 
-function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -127,7 +127,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, c
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+            return generate_lm_1_rev3(device, root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
         }
         return true;
     }
@@ -135,7 +135,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, c
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1(child, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
+        if (module_lm_1(child, root, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
         {
             return false;
         }
@@ -218,14 +218,18 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 // confCollection - Hardware::ModuleConfCollection
 //
 //
-function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
 	if (module.propertyValue("StrID") == undefined
 		|| module.propertyValue("SubsysID") == undefined || module.propertyValue("Channel") == undefined
 		|| module.propertyValue("ConfigFrameSize") == undefined || module.propertyValue("ConfigFrameCount") == undefined
+		|| module.propertyValue("TuningDataSize") == undefined
 		|| module.propertyValue("RegIP1") == undefined || module.propertyValue("RegIP2") == undefined
 		|| module.propertyValue("DiagIP1") == undefined || module.propertyValue("DiagIP2") == undefined
+		|| module.propertyValue("DiagDataAcquisitionServiceStrID1") == undefined || module.propertyValue("DiagDataAcquisitionServiceStrID2") == undefined
+		|| module.propertyValue("RegDataAcquisitionServiceStrID1") == undefined || module.propertyValue("RegDataAcquisitionServiceStrID2") == undefined
 		|| module.propertyValue("SourcePort") == undefined 
+		|| module.propertyValue("RegDataSize") == undefined || module.propertyValue("DiagDataSize") == undefined 
 		|| module.propertyValue("TuningPort") == undefined || module.propertyValue("TuningServerPort") == undefined
 		|| module.propertyValue("TuningIP") == undefined  || module.propertyValue("TuningServerIP") == undefined
 		)
@@ -280,6 +284,9 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	confFirmware.writeLog("UartID = " + uartId+ "\r\n");
 	confFirmware.writeLog("Frame size = " + frameSize+ "\r\n");
 	confFirmware.writeLog("Channel = " + channel + "\r\n");
+
+	var regWordsCount = module.propertyValue("RegDataSize");
+	var diagWordsCount = module.propertyValue("DiagDataSize");
 
     // Configuration storage format
     //
@@ -356,7 +363,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         var ioModule = parent.jsChild(i);
 		
 		if (ioModule.propertyValue("ModuleFamily") == undefined || ioModule.propertyValue("StrID") == undefined
-			|| ioModule.propertyValue("Place") == undefined)
+			|| ioModule.propertyValue("Place") == undefined || ioModule.propertyValue("DiagDataSize") == undefined)
 		{
 			log.writeError("Undefined ioModule properties in function generate_lm_1_rev3");
 			return false;
@@ -397,6 +404,9 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
             {
                 generate_dom(confFirmware, ioModule, frame, log);
             }
+			
+			var diagWordsIoCount = ioModule.propertyValue("DiagDataSize");
+			diagWordsCount += diagWordsIoCount;
         }
     }
 	
@@ -408,10 +418,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 
     var lanStartFrame = 19;
 	
-	var tuningWordsCount = 1432;
-	
-	var regWordsCount = 3580;
-	var diagWordsCount = 3580;
+	var tuningWordsCount = module.propertyValue("TuningDataSize");
+
 	
 	var sourcePort = module.propertyValue("SourcePort");
 
@@ -436,16 +444,59 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	// REG / DIAG
 	//
 
-	var regServerSubnetwork = [11, 12];			//	Take from software!!!
-	var regServerIP = [254, 254];
-	var regServerPort = [13322, 13322];
+	var regServerSubnetwork = [0, 0];			//	Take from software!!!
+	var regServerIP = [0, 0];
+	var regServerPort = [0, 0];
 	
-	var diagServerSubnetwork = [21, 22];		//	Take from software!!!
-	var diagServerIP = [254, 254];
-	var diagServerPort = [13323, 13323];
+	var diagServerSubnetwork = [0, 0];		//	Take from software!!!
+	var diagServerIP = [0, 0];
+	var diagServerPort = [0, 0];
 	
 	for (var i = 0; i < 2; i++)
 	{
+		var regAcqID = module.propertyValue("RegDataAcquisitionServiceStrID" + (i + 1));
+		var diagAcqID = module.propertyValue("DiagDataAcquisitionServiceStrID" + (i + 1));
+		
+		var regAcq = root.jsFindChildObjectByMask(regAcqID);
+		var diagAcq = root.jsFindChildObjectByMask(diagAcqID);
+		
+		if (diagAcq == null || regAcq == null)
+		{
+			log.writeWarning("WARNING: " + module.propertyValue("StrID") + ": one of data acquisition services " + diagAcqID + ", " + regAcqID + " was not found, using defaults.");
+		}
+		else
+		{
+			var regServerIPValue  = regAcq.jsPropertyIP("RegDataReceivingIP" + (i + 1));
+			if (regServerIPValue == null)
+			{
+				log.writeWarning("Error: software " + regAcq.propertyValue("StrID") + " has no property " + "RegDataReceivingIP" + (i + 1));
+				return false;
+			}
+			regServerSubnetwork[i] = (regServerIPValue >> 8) & 0xff;
+			regServerIP[i] = regServerIPValue & 0xff;
+			regServerPort[i] = regAcq.propertyValue("RegDataReceivingPort" + (i + 1))
+			if (regServerPort[i] == null)
+			{
+				log.writeWarning("Error: software " + regAcq.propertyValue("StrID") + " has no property " + "RegDataReceivingPort" + (i + 1));
+				return false;
+			}
+			
+			var diagServerIPValue  = diagAcq.jsPropertyIP("DiagDataReceivingIP" + (i + 1));
+			if (diagServerIPValue == null)
+			{
+				log.writeWarning("Error: software " + diagAcq.propertyValue("StrID") + " has no property " + "DiagDataReceivingIP" + (i + 1));
+				return false;
+			}
+			diagServerSubnetwork[i] = (diagServerIPValue >> 8) & 0xff;
+			diagServerIP[i] = diagServerIPValue & 0xff;
+			diagServerPort[i] = diagAcq.propertyValue("DiagDataReceivingPort" + (i + 1))
+			if (diagServerPort[i] == null)
+			{
+				log.writeWarning("Error: software " + diagAcq.propertyValue("StrID") + " has no property " + "DiagDataReceivingPort" + (i + 1));
+				return false;
+			}
+		}
+	
 		var regIP = module.jsPropertyIP("RegIP" + (i + 1));
 		var regAddress = regIP & 0xff;
 		
