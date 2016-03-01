@@ -2169,6 +2169,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	qDebug();
 	qDebug() << "EquipmentView::updateDeviceFromPreset"
 			 << ", device: " << device->strId()
+			 << "(" << device->strIdExpanded() << ")"
 			 << ", " << device->caption()
 			 << ", place: " << device->place();
 
@@ -2315,7 +2316,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		for (int i = 0; i < preset->childrenCount(); i++)
 		{
 			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(i);
-			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtrByPresetUuid(preset->presetObjectUuid());
+			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtrByPresetUuid(presetChild->presetObjectUuid());
 
 			if (deviceChild == nullptr)
 			{
