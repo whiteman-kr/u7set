@@ -30,12 +30,31 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	m_pSerialPortLabel = new QLabel(tr("&Serial Port"));
 	m_pSerialPortLabel->setBuddy(m_pSerialPort);
 
-	for (const QSerialPortInfo& pi : ports)
-	{
-		m_pSerialPort->addItem(pi.systemLocation());
-	}
+    if (ports.size() != 0)
+    {
 
-	m_pSerialPort->setCurrentText(m_settings.serialPort());
+        bool serialPortFound = false;
+
+        for (const QSerialPortInfo& pi : ports)
+        {
+            QString port = pi.systemLocation();
+            m_pSerialPort->addItem(port);
+
+            if (port == m_settings.serialPort())
+            {
+                serialPortFound = true;
+                m_pSerialPort->setCurrentText(port);
+            }
+        }
+
+        if (serialPortFound == false)
+        {
+            m_pSerialPort->setCurrentIndex(0);
+            m_settings.setSerialPort(ports[0].systemLocation());
+        }
+    }
+
+
 
 
 /*
