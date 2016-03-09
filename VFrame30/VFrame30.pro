@@ -6,7 +6,7 @@
 TARGET = VFrame30
 
 TEMPLATE = lib
-QT += widgets qml script
+QT += widgets qml
 
 win32:LIBS += -lGdi32
 
