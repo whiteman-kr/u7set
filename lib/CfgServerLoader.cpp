@@ -87,7 +87,7 @@ void CfgServer::readBuildXml()
 			continue;
 		}
 
-		if (xmlReader.name() == "build")
+		if (xmlReader.name() == "BuildInfo")
 		{
 			m_buildInfo.readFromXml(xmlReader);
 			continue;
@@ -95,7 +95,7 @@ void CfgServer::readBuildXml()
 
 		// find "file" element
 		//
-		if (xmlReader.name() != "file")
+		if (xmlReader.name() != "File")
 		{
 			continue;
 		}
@@ -106,8 +106,9 @@ void CfgServer::readBuildXml()
 
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
-}
 
+	qDebug() << "File " << m_buildXmlPathFileName << " has been readed";
+}
 
 // -------------------------------------------------------------------------------------
 //

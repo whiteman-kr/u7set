@@ -70,6 +70,8 @@ namespace Tcp
 	{
 		onDisconnection();
 
+		qDebug() << "Socket disconnected";
+
 		emit disconnected(this);
 	}
 
@@ -555,23 +557,9 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	TcpServer::TcpServer(Listener* parent) :
-		QTcpServer(parent)
-	{
-	}
-
-
 	void TcpServer::incomingConnection(qintptr socketDescriptor)
 	{
-		Listener* listener = dynamic_cast<Listener*>(parent());
-
-		if (listener == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		listener->onNewConnection(socketDescriptor);
+		emit newConnection(socketDescriptor);
 	}
 
 
@@ -583,7 +571,6 @@ namespace Tcp
 
 	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server) :
 		m_listenAddressPort(listenAddressPort),
-		m_tcpServer(this),
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
@@ -591,7 +578,6 @@ namespace Tcp
 
 		m_serverInstance->setParent(this);
 
-		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::onPeriodicTimer);
 	}
 
 
@@ -614,6 +600,9 @@ namespace Tcp
 	void Listener::onThreadStarted()
 	{
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
+
+		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::onPeriodicTimer);
+
 		m_periodicTimer.start();
 
 		startListening();
@@ -622,13 +611,24 @@ namespace Tcp
 
 	void Listener::onThreadFinished()
 	{
-		m_tcpServer.close();
+		if (m_tcpServer != nullptr)
+		{
+			m_tcpServer->close();
+			delete m_tcpServer;
+		}
 	}
 
 
 	void Listener::startListening()
 	{
-		if (m_tcpServer.listen(m_listenAddressPort.address(), m_listenAddressPort.port()))
+		if (m_tcpServer == nullptr)
+		{
+			m_tcpServer = new TcpServer();
+
+			connect(m_tcpServer, &TcpServer::newConnection, this, &Listener::onNewConnection);
+		}
+
+		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()))
 		{
 			qDebug() << qPrintable(QString("Start listening %1 OK").arg(m_listenAddressPort.addressPortStr()));
 		}
@@ -636,14 +636,14 @@ namespace Tcp
 		{
 			qDebug() << qPrintable(QString("Error on start listening %1: %2").
 									arg(m_listenAddressPort.addressPortStr()).
-									arg(m_tcpServer.errorString()));
+									arg(m_tcpServer->errorString()));
 		}
 	}
 
 
 	void Listener::onPeriodicTimer()
 	{
-		if (!m_tcpServer.isListening())
+		if (!m_tcpServer->isListening())
 		{
 			startListening();
 		}
@@ -677,6 +677,8 @@ namespace Tcp
 
 	void Listener::onServerDisconnected(const SocketWorker* server)
 	{
+		qDebug() << "onServerDisconnected";
+
 		if (!m_runningServers.contains(server))
 		{
 			assert(false);

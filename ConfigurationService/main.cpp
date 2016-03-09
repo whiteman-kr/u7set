@@ -17,7 +17,7 @@
 
 int main(int argc, char *argv[])
 {
-	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", new ConfigurationServiceWorker());
+	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", new ConfigurationServiceWorker("d:/temp/build"));
 
 	return serviceStarter.exec();
 }

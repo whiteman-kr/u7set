@@ -11,6 +11,7 @@
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
 #include "../include/SimpleThread.h"
+#include <Signal.h>
 
 
 class Service;
@@ -83,10 +84,33 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 	Service* m_service = nullptr;
 
+	static void exit(int result);
+
 public:
 	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 
 	int exec();
+};
+
+
+class CtrlCWaiter : public QObject
+{
+	Q_OBJECT
+
+private:
+	static void exit(int result)
+	{
+		qDebug() << "Call QCoreApplication::exit(0)";
+
+		QCoreApplication::exit(result);
+	}
+
+public:
+	explicit CtrlCWaiter(QObject* parent = 0) : QObject(parent)
+	{
+		signal(SIGINT, &CtrlCWaiter::exit);
+		signal(SIGTERM, &CtrlCWaiter::exit);
+	}
 };
 
 
@@ -103,7 +127,10 @@ public:
 		char c = 0;
 		std::cin >> c;
 
-		emit keyReaded();
+		qDebug() <<  "Emit keyReaded()";
+
+		QCoreApplication::exit(0);
+		//emit keyReaded();
 	}
 };
 
