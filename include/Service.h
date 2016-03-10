@@ -62,7 +62,7 @@ private:
 	void stop() final;				// override QtService::stop
 
 public:
-	DaemonServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+    DaemonServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 	virtual ~DaemonServiceStarter();
 
 	int exec() { return QtService<QCoreApplication>::exec(); }
@@ -84,33 +84,10 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 	Service* m_service = nullptr;
 
-	static void exit(int result);
-
 public:
-	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+    ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 
 	int exec();
-};
-
-
-class CtrlCWaiter : public QObject
-{
-	Q_OBJECT
-
-private:
-	static void exit(int result)
-	{
-		qDebug() << "Call QCoreApplication::exit(0)";
-
-		QCoreApplication::exit(result);
-	}
-
-public:
-	explicit CtrlCWaiter(QObject* parent = 0) : QObject(parent)
-	{
-		signal(SIGINT, &CtrlCWaiter::exit);
-		signal(SIGTERM, &CtrlCWaiter::exit);
-	}
 };
 
 
@@ -118,20 +95,13 @@ class ConsoleServiceKeyReaderThread : public QThread
 {
 	Q_OBJECT
 
-signals:
-	void keyReaded();
-
 public:
 	virtual void run()
 	{
 		char c = 0;
 		std::cin >> c;
-
-		qDebug() <<  "Emit keyReaded()";
-
 		QCoreApplication::exit(0);
-		//emit keyReaded();
-	}
+    }
 };
 
 

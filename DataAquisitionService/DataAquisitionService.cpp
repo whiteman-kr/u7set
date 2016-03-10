@@ -59,7 +59,7 @@ void DataServiceWorker::runCfgLoaderThread()
 {
 	CfgLoader* cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
 
-	m_cfgLoaderThread = new Tcp::Thread(cfgLoader);
+    m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
 	connect(cfgLoader, &CfgLoader::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 
@@ -277,6 +277,24 @@ void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	qDebug() << "Configuration Ready!";
+
+    if (m_cfgLoaderThread == nullptr)
+    {
+        return;
+    }
+
+    for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+    {
+        QByteArray fileData;
+        QString errStr;
+
+        bool result = m_cfgLoaderThread->downloadCfgFile(bfi.pathFileName, &fileData, &errStr);
+
+        if (result == true)
+        {
+            qDebug() << "File " << bfi.pathFileName << " download OK";
+        }
+    }
 }
 
 
