@@ -12,8 +12,8 @@ namespace Hardware
     public:
         enum class ConnectionMode
         {
-            ModeRS232,
-            ModeRS485
+			RS232,
+			RS485
         };
         Q_ENUM(ConnectionMode)
 
@@ -166,7 +166,7 @@ namespace Hardware
         quint32 m_device2TxRsDataUID = 0;
 
 
-        ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
+		ConnectionMode m_connectionMode = ConnectionMode::RS232;
 		ConnectionType m_connectionType = ConnectionType::OpticalConnectionType;
         bool m_enable = false;
         bool m_enableDuplex = false;
