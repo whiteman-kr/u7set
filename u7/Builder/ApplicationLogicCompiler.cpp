@@ -2742,7 +2742,8 @@ namespace Builder
 
         if (lmChassis == nullptr)
         {
-            LOG_ERROR(m_log, QString(tr("LM (%1) must be installed in the chassis")).arg(m_lm->strId()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("LM (%1) must be installed in the chassis")).arg(m_lm->strId()));
             return false;
         }
 
@@ -2770,7 +2771,8 @@ namespace Builder
 
             if (port == nullptr)
             {
-                LOG_ERROR(m_log, QString(tr("OCM port '%1' is not found (serial connection '%2')")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("OCM port '%1' is not found (serial connection '%2')")).
                           arg(connection->ocmPortStrID().
                           arg(connection->caption())));
                 return false;
@@ -2780,7 +2782,8 @@ namespace Builder
 
             if (ocmChassis == nullptr)
             {
-                LOG_ERROR(m_log, QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
                           arg(connection->ocmPortStrID().
                           arg(connection->caption())));
                 return false;
@@ -2813,7 +2816,8 @@ namespace Builder
         {
             if (m_signalsStrID.contains(signalStrID) == false)
             {
-                LOG_ERROR(m_log, QString(tr("Signal '%1' is not found (serial connection '%2)")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Signal '%1' is not found (serial connection '%2)")).
                           arg(signalStrID).arg(connection->caption()));
                 result &= false;
             }
