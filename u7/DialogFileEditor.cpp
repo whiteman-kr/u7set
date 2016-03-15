@@ -35,7 +35,7 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 	ui->m_text->blockSignals(true);
 
     ui->m_text->setPlainText(s);
-    ui->m_text->setFont(QFont("Courier", 14));
+    ui->m_text->setFont(QFont("Courier", font().pointSize() + 2));
 
 	ui->m_text->blockSignals(false);
 
