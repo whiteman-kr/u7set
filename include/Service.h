@@ -11,7 +11,7 @@
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
 #include "../include/SimpleThread.h"
-#include <Signal.h>
+#include "Signal.h"
 
 
 class Service;

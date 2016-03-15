@@ -26,8 +26,8 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 100% пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+		// Graphcis пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (0, 0 - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 		//
 		virtual void Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const override;
 
@@ -54,7 +54,7 @@ namespace VFrame30
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 	protected:
-		void addDynamicParamProperties();
+		void addSpecificParamProperties();
 		bool executeScript(const QString& script, const Afb::AfbElement& afb);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
 

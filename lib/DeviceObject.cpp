@@ -82,7 +82,7 @@ namespace Hardware
 		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
-		auto dynamicProp = ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
+		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, SpecificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
 		ADD_PROPERTY_GETTER(bool, Preset, true, DeviceObject::preset);
 		ADD_PROPERTY_GETTER(bool, PresetRoot, true, DeviceObject::presetRoot);
 		if (preset == true)
@@ -95,7 +95,7 @@ namespace Hardware
 
 		captionProp->setUpdateFromPreset(true);
 		childRestrProp->setUpdateFromPreset(true);
-		dynamicProp->setUpdateFromPreset(true);
+		specificProp->setUpdateFromPreset(true);
 	}
 
 	DeviceObject::~DeviceObject()
@@ -136,18 +136,18 @@ namespace Hardware
 			Proto::Write(mutableDeviceObject->mutable_childrestriction(), m_childRestriction);
 		}
 
-		if (m_dynamicPropertiesStruct.isEmpty() == false)
+		if (m_specificPropertiesStruct.isEmpty() == false)
 		{
-			mutableDeviceObject->set_dynamic_properties_struct(m_dynamicPropertiesStruct.toStdString());
+			mutableDeviceObject->set_specific_properties_struct(m_specificPropertiesStruct.toStdString());
 		}
 
-		// Save dynamic properties' values
+		// Save specific properties' values
 		//
 		std::vector<std::shared_ptr<Property>> props = this->properties();
 
 		for (auto p : props)
 		{
-			if (p->dynamic() == true)
+			if (p->specific() == true)
 			{
 				::Proto::Property* protoProp = mutableDeviceObject->mutable_properties()->Add();
 				p->saveValue(protoProp);
@@ -194,29 +194,29 @@ namespace Hardware
 			m_childRestriction.clear();
 		}
 
-		if (deviceobject.has_dynamic_properties_struct() == true)
+		if (deviceobject.has_specific_properties_struct() == true)
 		{
-			m_dynamicPropertiesStruct = QString::fromStdString(deviceobject.dynamic_properties_struct());
-			parseDynamicPropertiesStruct();
+			m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
+			parseSpecificPropertiesStruct();
 		}
 		else
 		{
-			m_dynamicPropertiesStruct.clear();
+			m_specificPropertiesStruct.clear();
 		}
 
-		// Load dynamic properties' values. They are already exists after calling parseDynamicPropertiesStruct()
+		// Load specific properties' values. They are already exists after calling parseSpecificPropertiesStruct()
 		//
-		std::vector<std::shared_ptr<Property>> dynamicProps = this->properties();
+		std::vector<std::shared_ptr<Property>> specificProps = this->properties();
 
 		for (const ::Proto::Property& p :  deviceobject.properties())
 		{
-			auto it = std::find_if(dynamicProps.begin(), dynamicProps.end(),
+			auto it = std::find_if(specificProps.begin(), specificProps.end(),
 				[p](std::shared_ptr<Property> dp)
 				{
 					return dp->caption().toStdString() == p.name();
 				});
 
-			if (it == dynamicProps.end())
+			if (it == specificProps.end())
 			{
 				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in m_strId";
 			}
@@ -224,7 +224,7 @@ namespace Hardware
 			{
 				std::shared_ptr<Property> property = *it;
 
-				assert(property->dynamic() == true);	// it's suppose to be dynamic property;
+				assert(property->specific() == true);	// it's suppose to be specific property;
 
 				bool loadOk = property->loadValue(p);
 
@@ -236,9 +236,9 @@ namespace Hardware
 
 //		for (const ::Proto::Property& p :  deviceobject.properties())
 //		{
-//			auto it = m_dynamicProperties.find(p.name().c_str());
+//			auto it = m_specificProperties.find(p.name().c_str());
 
-//			if (it == m_dynamicProperties.end())
+//			if (it == m_specificProperties.end())
 //			{
 //				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in m_strId";
 //			}
@@ -351,23 +351,23 @@ namespace Hardware
 		return false;
 	}
 
-	// Parse m_dynamicProperties and create PropertyObject meta system dynamic properies
+	// Parse m_specificProperties and create PropertyObject meta system specific properies
 	//
-	void DeviceObject::parseDynamicPropertiesStruct()
+	void DeviceObject::parseSpecificPropertiesStruct()
 	{
-		// Save all dynamic properties values
+		// Save all specific properties values
 		//
 		auto oldProperties = this->properties();
 
 		oldProperties.erase(std::remove_if(oldProperties.begin(), oldProperties.end(),
 			[](std::shared_ptr<Property> p)
 			{
-				return p->dynamic();
+				return p->specific();
 			}), oldProperties.end());
 
-		// Delete all previous object's dynamic properties
+		// Delete all previous object's specific properties
 		//
-		this->removeDynamicProperties();
+		this->removeSpecificProperties();
 
 		// Parse struct (rows, divided by semicolon) and create new properties
 		//
@@ -395,7 +395,7 @@ namespace Hardware
         updateFromPreset:   property will be updated from preset
 		*/
 
-		QStringList rows = m_dynamicPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
+		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
 
 		for (const QString& r : rows)
 		{
@@ -418,13 +418,13 @@ namespace Hardware
             int version = strVersion.toInt(&ok);
             if (ok == false || version < 1)
             {
-                qDebug() << Q_FUNC_INFO << " DynamicProperties: version should be greater than 0: " << strVersion;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: version should be greater than 0: " << strVersion;
                 continue;
             }
 
             if (version > 1)
             {
-                qDebug() << Q_FUNC_INFO << " DynamicProperties: Unsupported property version: " << version;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: Unsupported property version: " << version;
                 continue;
             }
 
@@ -449,7 +449,7 @@ namespace Hardware
 
                 if (name.isEmpty() || name.size() > 1024)
                 {
-                    qDebug() << Q_FUNC_INFO << " DynamicProperties: filed name must have size  from 1 to 1024, name: " << name;
+					qDebug() << Q_FUNC_INFO << " SpecificProperties: filed name must have size  from 1 to 1024, name: " << name;
                     continue;
                 }
 
@@ -459,7 +459,7 @@ namespace Hardware
                         type != "double" &&
                         type != "string")
                 {
-                    qDebug() << Q_FUNC_INFO << " DynamicProperties: wrong filed tyep: " << type;
+					qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
                     continue;
                 }
 
@@ -491,7 +491,7 @@ namespace Hardware
                     //
                     auto newProperty = addProperty<QVariant>(name, true);
 
-                    newProperty->setDynamic(true);
+					newProperty->setSpecific(true);
                     newProperty->setCategory(category);
                     newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
                     newProperty->setValue(QVariant(defaultInt));
@@ -529,7 +529,7 @@ namespace Hardware
                     //
                     auto newProperty = addProperty<QVariant>(name, true);
 
-                    newProperty->setDynamic(true);
+					newProperty->setSpecific(true);
                     newProperty->setCategory(category);
                     newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
                     newProperty->setValue(QVariant(defaultUInt));
@@ -567,7 +567,7 @@ namespace Hardware
                     //
                     auto newProperty = addProperty<QVariant>(name, true);
 
-                    newProperty->setDynamic(true);
+					newProperty->setSpecific(true);
                     newProperty->setCategory(category);
                     newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
                     newProperty->setValue(QVariant(defaultDouble));
@@ -588,7 +588,7 @@ namespace Hardware
                     //
                     auto newProperty = addProperty<QVariant>(name, true);
 
-                    newProperty->setDynamic(true);
+					newProperty->setSpecific(true);
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultBool));
                     newProperty->setReadOnly(false);
@@ -604,7 +604,7 @@ namespace Hardware
                     //
                     auto newProperty = addProperty<QVariant>(name, true);
 
-                    newProperty->setDynamic(true);
+					newProperty->setSpecific(true);
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultValue.toString()));
                     newProperty->setReadOnly(false);
@@ -1469,17 +1469,17 @@ namespace Hardware
 		m_childRestriction = value;
 	}
 
-	QString DeviceObject::dynamicProperties() const
+	QString DeviceObject::specificProperties() const
 	{
-		return m_dynamicPropertiesStruct;
+		return m_specificPropertiesStruct;
 	}
 
-	void DeviceObject::setDynamicProperties(QString value)
+	void DeviceObject::setSpecificProperties(QString value)
 	{
-		if (m_dynamicPropertiesStruct != value)
+		if (m_specificPropertiesStruct != value)
 		{
-			m_dynamicPropertiesStruct = value;
-			parseDynamicPropertiesStruct();
+			m_specificPropertiesStruct = value;
+			parseSpecificPropertiesStruct();
 		}
 	}
 
@@ -2678,11 +2678,11 @@ R"DELIM({
 						return;
 					}
 
-					pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
+					pDeviceObject->setSpecificProperties(attr.value("SpecificProperties").toString());
 
 					for (auto p : pDeviceObject->properties())
 					{
-						if (p->readOnly() || p->caption() == "DynamicProperties")
+						if (p->readOnly() || p->caption() == "SpecificProperties")
 						{
 							continue;
 						}

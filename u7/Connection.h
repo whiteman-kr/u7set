@@ -168,6 +168,7 @@ namespace Hardware
 
         SerialMode m_serialMode = SerialMode::RS232;
         Type m_type = Type::Optical;
+
         bool m_enable = false;
         bool m_enableDuplex = false;
 

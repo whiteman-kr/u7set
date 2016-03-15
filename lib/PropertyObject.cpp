@@ -163,14 +163,14 @@ void Property::setUpdateFromPreset(bool value)
 	m_updateFromPreset = value;
 }
 
-bool Property::dynamic() const
+bool Property::specific() const
 {
-	return m_dynamic;
+	return m_specific;
 }
 
-void Property::setDynamic(bool value)
+void Property::setSpecific(bool value)
 {
-	m_dynamic = value;
+	m_specific = value;
 }
 
 bool Property::visible() const
@@ -213,7 +213,7 @@ void Property::copy(const Property* source)
 	m_category = source->m_category;
 	m_readOnly = source->m_readOnly;
 	m_updateFromPreset = source->m_updateFromPreset;
-	m_dynamic = source->m_dynamic;
+	m_specific = source->m_specific;
 	m_visible = source->m_visible;
 	m_precision = source->m_precision;
 
@@ -262,11 +262,11 @@ void PropertyObject::addProperties(std::vector<std::shared_ptr<Property>> proper
 	}
 }
 
-void PropertyObject::removeDynamicProperties()
+void PropertyObject::removeSpecificProperties()
 {
 	for(auto it = m_properties.begin(); it != m_properties.end();)
 	{
-		if(it->second->dynamic() == true)
+		if(it->second->specific() == true)
 		{
 			it = m_properties.erase(it);
 		}

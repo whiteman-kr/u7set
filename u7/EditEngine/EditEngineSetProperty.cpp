@@ -51,7 +51,7 @@ namespace EditEngine
 			auto property = r.item->propertyByCaption(r.propertyName);
 			assert(property);
 
-			if (property.get() != nullptr && property->dynamic() == true)
+			if (property.get() != nullptr && property->specific() == true)
 			{
 				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
@@ -84,7 +84,7 @@ namespace EditEngine
 			auto property = r.item->propertyByCaption(r.propertyName);
 			assert(property);
 
-			if (property.get() != nullptr && property->dynamic() == true)
+			if (property.get() != nullptr && property->specific() == true)
 			{
 				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//

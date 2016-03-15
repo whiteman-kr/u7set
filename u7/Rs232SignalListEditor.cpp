@@ -15,20 +15,20 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	assert(m_db);
 
 	setWindowTitle(tr("Serial port signal list editor"));
-	resize(640, 480);
+	resize(800, 600);
 
 	m_rs232Connections->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_rs232Connections->fontMetrics().height() * 1.4));
 
 	QStringList l;
 	l << tr("Caption")
-		<< tr("OCM StrID")
+		<< tr("OCM Port StrID")
 		<< tr("Mode")
         << tr("Enabled")
         << tr("Duplex");
     m_rs232Connections->setColumnCount(l.size());
     m_rs232Connections->setHorizontalHeaderLabels(l);
 	m_rs232Connections->setColumnWidth(0, 150);
-	m_rs232Connections->setColumnWidth(1, 150);
+	m_rs232Connections->setColumnWidth(1, 300);
 	m_rs232Connections->setColumnWidth(2, 70);
     m_rs232Connections->setColumnWidth(3, 70);
     m_rs232Connections->setColumnWidth(4, 70);
@@ -269,6 +269,8 @@ void Rs232SignalListEditor::editConnection()
 	*editConnection = *connection;
 
 	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &m_connections);
+	pd->resize(640, 300);
+	pd->setWindowTitle(tr("Connection properties"));
 
 	if (pd->exec() == QDialog::Accepted)
 	{
