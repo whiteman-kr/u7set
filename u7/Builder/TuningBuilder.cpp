@@ -42,7 +42,7 @@ namespace Builder
         {
             assert(db());
             assert(log());
-            LOG_ERROR(m_log, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
             return false;
         }
 
@@ -59,28 +59,28 @@ namespace Builder
             if (m->propertyExists("SubsysID") == false)
             {
                 assert(false);
-                LOG_ERROR(m_log, QString(tr("No property SubsysID found in LM %1")).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("No property SubsysID found in LM %1")).arg(m->caption()));
                 return false;
             }
 
             if (m->propertyExists("Channel") == false)
             {
                 assert(false);
-                LOG_ERROR(m_log, QString(tr("No property Channel found in LM %1")).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("No property Channel found in LM %1")).arg(m->caption()));
                 return false;
             }
 
             if (m->propertyExists("TuningFrameSize") == false)
             {
                 assert(false);
-                LOG_ERROR(m_log, QString(tr("No property TuningFrameSize found in LM %1")).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("No property TuningFrameSize found in LM %1")).arg(m->caption()));
                 return false;
             }
 
             if (m->propertyExists("TuningFrameCount") == false)
             {
                 assert(false);
-                LOG_ERROR(m_log, QString(tr("No property TuningFrameCount found in LM %1")).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("No property TuningFrameCount found in LM %1")).arg(m->caption()));
                 return false;
             }
 
@@ -96,7 +96,7 @@ namespace Builder
 
             if (subsysID == -1)
             {
-                LOG_ERROR(m_log, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(m->caption()));
                 return false;
             }
 
@@ -112,7 +112,7 @@ namespace Builder
 
             if (firmware->setChannelData(channel, frameSize, frameCount, data, &errorString) == false)
             {
-                LOG_ERROR(m_log, QString(tr("%1, LM %2")).arg(errorString).arg(m->caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("%1, LM %2")).arg(errorString).arg(m->caption()));
                 return false;
             }
         }
@@ -124,7 +124,7 @@ namespace Builder
 
             if (f.storeChannelData(&errorString) == false)
             {
-                LOG_ERROR(m_log, QString(tr("%1, LM %2")).arg(errorString).arg(f.caption()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("%1, LM %2")).arg(errorString).arg(f.caption()));
                 return false;
             }
 
@@ -133,7 +133,7 @@ namespace Builder
             QString errorMsg;
             if (f.save(data, &errorMsg) == false)
             {
-                LOG_ERROR(m_log, errorMsg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, errorMsg);
                 return false;
             }
 
@@ -142,18 +142,18 @@ namespace Builder
 
             if (path.isEmpty())
             {
-                LOG_ERROR(m_log, tr("Failed to save module configuration output file, subsystemId is empty."));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
                 return false;
             }
             if (fileName.isEmpty())
             {
-                LOG_ERROR(m_log, tr("Failed to save module configuration output file, module type string is empty."));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
                 return false;
             }
 
             if (m_buildWriter->addFile(path, fileName + ".tub", data) == false)
             {
-                LOG_ERROR(m_log, tr("Failed to save tuning parameters output file for") + f.subsysId() + ", " + f.caption() + "!");
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save tuning parameters output file for") + f.subsysId() + ", " + f.caption() + "!");
                 return false;
             }
 

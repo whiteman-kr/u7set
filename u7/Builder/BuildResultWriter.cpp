@@ -88,7 +88,7 @@ namespace Builder
 
 		if (dir.mkpath(fullPath) == false)
 		{
-			LOG_ERROR(log, QString(tr("Can't create directory: %1")).arg(fullPath));
+			LOG_ERROR(log, IssuePrexif::NotDefined, QString(tr("Can't create directory: %1")).arg(fullPath));
 			return false;
 		}
 
@@ -107,7 +107,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(log, QString(tr("Can't create file: %1")).arg(fullPathFileName));
+			LOG_ERROR(log, IssuePrexif::NotDefined, QString(tr("Can't create file: %1")).arg(fullPathFileName));
 
 			return false;
 		}
@@ -147,7 +147,7 @@ namespace Builder
 
 		if (written == -1)
 		{
-			LOG_ERROR(log, QString(tr("Write error of file: ")).arg(m_info.pathFileName));
+			LOG_ERROR(log, IssuePrexif::NotDefined, QString(tr("Write error of file: ")).arg(m_info.pathFileName));
 			result = false;
 		}
 
@@ -238,7 +238,8 @@ namespace Builder
 
 		if (buildFile == nullptr)
 		{
-			LOG_ERROR(m_log, QString(tr("Build file '%1' is not found, can't link to '%2/configuration.xml'")).
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Build file '%1' is not found, can't link to '%2/configuration.xml'")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
 		}
@@ -295,7 +296,7 @@ namespace Builder
 
 		if (m_moduleFirmware.setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg) == false)
 		{
-			LOG_ERROR(m_log, errorMsg);
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, errorMsg);
 			return false;
 		}
 
@@ -309,7 +310,7 @@ namespace Builder
 
 		if (m_moduleFirmware.save(fileData, &errorMsg) == false)
 		{
-			LOG_ERROR(m_log, errorMsg);
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, errorMsg);
 			return false;
 		}
 
@@ -356,7 +357,7 @@ namespace Builder
 
 			if (m_log != nullptr)
 			{
-				LOG_ERROR(log, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
+				LOG_ERROR(log, IssuePrexif::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
 			}
 
 			m_runBuild = false;
@@ -370,7 +371,7 @@ namespace Builder
 
 		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
-			LOG_ERROR(log, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
+			LOG_ERROR(log, IssuePrexif::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
 			m_runBuild = false;
 			return m_runBuild;
 		}
@@ -384,13 +385,13 @@ namespace Builder
 
 		if (m_buildInfo.release == true)
 		{
-			LOG_ERROR(m_log, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
 			m_runBuild = false;
 			return m_runBuild;
 		}
 		else
 		{
-			LOG_WARNING(m_log, QString(tr("WARNING: The workcopies of the checked out files will be compiled!")));
+			LOG_WARNING(m_log, IssuePrexif::NotDefined, QString(tr("WARNING: The workcopies of the checked out files will be compiled!")));
 		}
 
 		if (createBuildDirectory() == false)
@@ -467,7 +468,7 @@ namespace Builder
 
 		if (QDir().mkpath(m_buildFullPath) == false)
 		{
-			LOG_ERROR(m_log, QString(tr("Can't create build directory: %1")).arg(m_buildFullPath));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Can't create build directory: %1")).arg(m_buildFullPath));
 			m_runBuild = false;
 			return false;
 		}
@@ -488,7 +489,7 @@ namespace Builder
 
 		if (m_buildFiles.contains(pathFileName))
 		{
-			LOG_ERROR(m_log, QString(tr("File already exists: %1")).arg(pathFileName));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("File already exists: %1")).arg(pathFileName));
 
 			delete buildFile;
 
@@ -655,7 +656,8 @@ namespace Builder
 
 			if (multichannelFile->subsysID() != subsysID)
 			{
-				LOG_ERROR(m_log, QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
 						  arg(multichannelFile->subsysID()).arg(subsysID).arg(subsysStrID));
 
 				return nullptr;

@@ -53,8 +53,8 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR(m_log, db.lastError());
-			LOG_ERROR(m_log, tr("Opening project %1: error").arg(projectName()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, db.lastError());
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Opening project %1: error").arg(projectName()));
 			return;
 		}
 		else
@@ -74,7 +74,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, tr("lastChangesetId Error."));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("lastChangesetId Error."));
 				break;
 			}
 
@@ -83,14 +83,15 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, tr("isAnyCheckedOut Error."));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("isAnyCheckedOut Error."));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
 			if (release() == true && isAnyCheckedOut == true)
 			{
-				LOG_ERROR(m_log, tr("There are some checked out objects. Please check in all objects before building release version."));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  tr("There are some checked out objects. Please check in all objects before building release version."));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -115,7 +116,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, tr("Error"));
+				//LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -177,7 +178,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, tr("Error"));
+				//LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -199,10 +200,10 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, tr("Can't load subsystems file"));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Can't load subsystems file"));
 				if (errorCode.isEmpty() == false)
 				{
-					LOG_ERROR(m_log, errorCode);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, errorCode);
                     break;
 				}
 			}
@@ -217,10 +218,10 @@ namespace Builder
 
             if (ok == false)
             {
-                LOG_ERROR(m_log, tr("Can't load connections file"));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Can't load connections file"));
                 if (errorCode.isEmpty() == false)
                 {
-                    LOG_ERROR(m_log, errorCode);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, errorCode);
                     break;
                 }
             }
@@ -271,12 +272,12 @@ namespace Builder
                 break;
             }
 
-            if (ok == false)
-            {
-                LOG_ERROR(m_log, tr("Error"));
-                QThread::currentThread()->requestInterruption();
-                break;
-            }
+			if (ok == false)
+			{
+//				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Error"));
+				QThread::currentThread()->requestInterruption();
+				break;
+			}
 
 
             //
@@ -292,12 +293,12 @@ namespace Builder
                 break;
             }
 
-            if (ok == false)
-            {
-                LOG_ERROR(m_log, tr("Error"));
-                QThread::currentThread()->requestInterruption();
-                break;
-            }
+			if (ok == false)
+			{
+//                LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Error"));
+				QThread::currentThread()->requestInterruption();
+				break;
+			}
 
             LOG_SUCCESS(m_log, tr("Ok"));
         }
@@ -341,7 +342,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR(m_log, tr("Cannot get equipment file list"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Cannot get equipment file list"));
 			return false;
 		}
 
@@ -371,7 +372,7 @@ namespace Builder
 
 			if (file == nullptr || ok == false)
 			{
-				LOG_ERROR(m_log, tr("Cannot get %1 instance.").arg(fi.fileName()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Cannot get %1 instance.").arg(fi.fileName()));
 				return false;
 			}
 
@@ -459,10 +460,11 @@ namespace Builder
 
 		if (foundSameUuid != uuidMap.end())
 		{
-			LOG_ERROR(m_log, tr("There are DeviceObjects with the same Uuid %1, StrID1: %2, StrID2: %3")
-					  .arg(device->uuid().toString())
-					  .arg(device->strId())
-					  .arg(foundSameUuid->second->strId()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  tr("There are DeviceObjects with the same Uuid %1, StrID1: %2, StrID2: %3")
+						.arg(device->uuid().toString())
+						.arg(device->strId())
+						.arg(foundSameUuid->second->strId()));
 
 			ok = false;
 		}
@@ -473,10 +475,11 @@ namespace Builder
 
 		if (foundSameStrId != strIdMap.end())
 		{
-			LOG_ERROR(m_log, tr("There are DeviceObjects with the same StrID %1, Parent1: %2, Parent2: %3")
-					  .arg(device->strId())
-					  .arg(device->parent()->strId())
-					  .arg(foundSameStrId->second->parent()->strId()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  tr("There are DeviceObjects with the same StrID %1, Parent1: %2, Parent2: %3")
+						  .arg(device->strId())
+						  .arg(device->parent()->strId())
+						  .arg(foundSameStrId->second->parent()->strId()));
 
 			ok = false;
 		}
@@ -518,7 +521,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(m_log, tr("Error"));
+			//LOG_ERROR(m_log, tr("Error"));
 			return false;
 		}
 
@@ -545,7 +548,7 @@ namespace Builder
 
 		if (db->getFileList(&files, db->afblFileId(), "afb", true, nullptr) == false)
 		{
-			LOG_ERROR(m_log, QObject::tr("Cannot get application functional block file list."));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QObject::tr("Cannot get application functional block file list."));
 			return false;
 		}
 
@@ -560,7 +563,8 @@ namespace Builder
 
 			if (db->getLatestVersion(fi, &f, nullptr) == false)
 			{
-				LOG_ERROR(m_log, QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()));
 				result = false;
 				continue;
 			}
@@ -571,11 +575,12 @@ namespace Builder
 
 			if (e->loadFromXml(&reader) == false)
 			{
-				LOG_ERROR(m_log, QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()));
 
 				if (reader.errorString().isEmpty() == false)
 				{
-					LOG_ERROR(m_log, "XML error: " + reader.errorString());
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, "XML error: " + reader.errorString());
 				}
 
 				result = false;

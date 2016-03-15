@@ -84,7 +84,7 @@ namespace Builder
 		{
 			assert(db());
 			assert(log());
-			LOG_ERROR(m_log, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
 			return false;
 		}
 
@@ -112,7 +112,8 @@ namespace Builder
 					m_deviceRoot->findChildObjectsByMask(connection->device1StrID(), list);
 					if (list.empty() == true)
 					{
-						LOG_ERROR(m_log, tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
 						return false;
 					}
 				}
@@ -123,7 +124,8 @@ namespace Builder
 					m_deviceRoot->findChildObjectsByMask(connection->device2StrID(), list);
 					if (list.empty() == true)
 					{
-						LOG_ERROR(m_log, tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
 						return false;
 					}
 				}
@@ -133,7 +135,8 @@ namespace Builder
                 m_deviceRoot->findChildObjectsByMask(connection->ocmPortStrID(), list);
                 if (list.empty() == true)
                 {
-                    LOG_ERROR(m_log, tr("No port %1 was found for serial connection %2").arg(connection->ocmPortStrID()).arg(connection->caption()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  tr("No port %1 was found for serial connection %2").arg(connection->ocmPortStrID()).arg(connection->caption()));
                     return false;
                 }
             }
@@ -157,7 +160,8 @@ namespace Builder
 
 		if (ok == false || fileList.size() != 1)
 		{
-			LOG_ERROR(m_log, tr("Can't get file list and find Module Configuration description file"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  tr("Can't get file list and find Module Configuration description file"));
 			return false;
 		}
 
@@ -174,7 +178,8 @@ namespace Builder
 
 		if (ok == false || scriptFile == nullptr)
 		{
-			LOG_ERROR(m_log, tr("Can't get Module Configuration description file"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  tr("Can't get Module Configuration description file"));
 			return false;
 		}
 
@@ -214,7 +219,7 @@ namespace Builder
 		QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
 		if (jsEval.isError() == true)
 		{
-			LOG_ERROR(m_log, tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
 			return false;
 		}
 
@@ -231,13 +236,13 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			LOG_ERROR(m_log, tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
 			return false;
 		}
 
 		if (jsResult.toBool() == false)
 		{
-			LOG_ERROR(m_log, tr("Module configuration generating failed!"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Module configuration generating failed!"));
 			return false;
 		}
 		qDebug() << jsResult.toInt();
@@ -300,7 +305,7 @@ namespace Builder
 
 		if (m_buildWriter->addFile("Reports", "lmJumpers.txt", lmReportData) == false)
 		{
-			LOG_ERROR(m_log, tr("Failed to save lmJumpers.txt file!"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save lmJumpers.txt file!"));
 			return false;
 		}
 
@@ -321,7 +326,7 @@ namespace Builder
 				QString errorMsg;
 				if (f.save(data, &errorMsg) == false)
 				{
-					LOG_ERROR(m_log, errorMsg);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, errorMsg);
 					return false;
 				}
 
@@ -330,24 +335,24 @@ namespace Builder
 
 				if (path.isEmpty())
 				{
-					LOG_ERROR(m_log, tr("Failed to save module configuration output file, subsystemId is empty."));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 					return false;
 				}
 				if (fileName.isEmpty())
 				{
-					LOG_ERROR(m_log, tr("Failed to save module configuration output file, module type string is empty."));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
 					return false;
 				}
 
 				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
 				{
-					LOG_ERROR(m_log, tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!");
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!");
 					return false;
 				}
 
                 if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
                 {
-                    LOG_ERROR(m_log, tr("Failed to save module configuration output log file for") + f.subsysId() + ", " + f.caption() + "!");
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output log file for") + f.subsysId() + ", " + f.caption() + "!");
                     return false;
                 }
             }
