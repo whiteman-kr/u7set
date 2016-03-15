@@ -85,8 +85,8 @@ public:
 	bool updateFromPreset() const;
 	void setUpdateFromPreset(bool value);
 
-	bool dynamic() const;
-	void setDynamic(bool value);
+	bool specific() const;
+	void setSpecific(bool value);
 
 	bool visible() const;
 	void setVisible(bool value);
@@ -124,7 +124,7 @@ private:
 	QString m_validator;
 	bool m_readOnly = false;
 	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
-	bool m_dynamic = false;					// Dynamic property, used in DeviceObject
+	bool m_specific = false;				// Specific property, used in DeviceObject
 	bool m_visible = false;
 	int m_precision = 2;
 };
@@ -309,7 +309,7 @@ private:
 			}
 			else
 			{
-				// Theres is no setter or getter, it is dynamic property
+				// Theres is no setter or getter, it is specific property
 				//
 				assert(m_lowLimit.type() == m_value.type());
 
@@ -329,7 +329,7 @@ private:
 			}
 			else
 			{
-				// Theres is no setter or getter, it is dynamic property
+				// Theres is no setter or getter, it is specific property
 				//
 				assert(m_highLimit.type() == m_value.type());
 
@@ -737,7 +737,7 @@ public:
 
 	// Delete all deynamic properties
 	//
-	void removeDynamicProperties();
+	void removeSpecificProperties();
 
     Q_INVOKABLE bool propertyExists(QString caption) const;
 
