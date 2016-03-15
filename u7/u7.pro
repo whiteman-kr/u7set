@@ -13,7 +13,9 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+
 # DESTDIR
+# If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
 #
 win32 {
 	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
@@ -23,6 +25,8 @@ unix {
 	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
+# /DESTDIR
+#
 
 CONFIG(debug, debug|release) {
 	OBJECTS_DIR = debug
@@ -296,11 +300,6 @@ PRECOMPILED_HEADER = Stable.h
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
 
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-
 #Optimization flags
 #
 win32 {
@@ -314,6 +313,8 @@ unix {
 
 #protobuf
 #
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf
 
