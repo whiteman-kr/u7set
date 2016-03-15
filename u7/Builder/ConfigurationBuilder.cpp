@@ -104,7 +104,7 @@ namespace Builder
 
             std::vector<Hardware::DeviceObject*> list;
 
-            if (connection->connectionType() == Hardware::Connection::ConnectionType::OpticalConnectionType)
+            if (connection->type() == Hardware::Connection::Type::Optical)
             {
 				if (connection->device1StrID().length() > 0)
 				{

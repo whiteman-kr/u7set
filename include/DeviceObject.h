@@ -146,6 +146,15 @@ namespace Hardware
 		const Hardware::DeviceModule* toModule() const;
 		Hardware::DeviceModule* toModule();
 
+        const Hardware::DeviceController* toController() const;
+        Hardware::DeviceController* toController();
+
+        const Hardware::DeviceController* getParentController() const;
+        const Hardware::DeviceModule* getParentModule() const;
+        const Hardware::DeviceChassis* getParentChassis() const;
+        const Hardware::DeviceRack* getParentRack() const;
+        const Hardware::DeviceSystem* getParentSystem() const;
+
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
 

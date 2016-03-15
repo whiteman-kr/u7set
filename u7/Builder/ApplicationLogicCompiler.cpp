@@ -482,12 +482,12 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment,
-													   SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
-													   AppLogicData* appLogicData, BuildResultWriter* buildResultWriter,
-													   OutputLog *log, Hardware::ConnectionStorage *connections) :
+    ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::EquipmentSet *equipmentSet,
+                                                       SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
+                                                       AppLogicData* appLogicData, BuildResultWriter* buildResultWriter,
+                                                       OutputLog *log, Hardware::ConnectionStorage *connections) :
 		m_subsystems(subsystems),
-		m_equipment(equipment),
+        m_equipmentSet(equipmentSet),
 		m_signals(signalSet),
 		m_afbl(afblSet),
 		m_appLogicData(appLogicData),
@@ -495,6 +495,10 @@ namespace Builder
 		m_log(log),
 		m_connections(connections)
 	{
+        if (m_equipmentSet != nullptr)
+        {
+            m_deviceRoot = m_equipmentSet->root();
+        }
 	}
 
 
@@ -507,7 +511,7 @@ namespace Builder
 		}
 
 		if (m_subsystems == nullptr ||
-			m_equipment == nullptr ||
+            m_equipmentSet == nullptr ||
 			m_signals == nullptr ||
 			m_afbl == nullptr ||
 			m_appLogicData == nullptr ||
@@ -538,7 +542,7 @@ namespace Builder
 	{
 		m_lm.clear();
 
-		findLM(m_equipment);
+        findLM(m_deviceRoot);
 
 		if (m_lm.count() == 0)
 		{
@@ -673,7 +677,8 @@ namespace Builder
 		m_memoryMap(appLogicCompiler.m_log),
 		m_appSignals(*this)
 	{
-		m_equipment = appLogicCompiler.m_equipment;
+        m_equipmentSet = appLogicCompiler.m_equipmentSet;
+        m_deviceRoot = m_equipmentSet->root();
 		m_signals = appLogicCompiler.m_signals;
 		m_afbl = appLogicCompiler.m_afbl;
 		m_appLogicData = appLogicCompiler.m_appLogicData;
@@ -765,6 +770,8 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
+            if (generateRS232ConectionCode()) break;
+
 			if (!finishAppLogicCode()) break;
 
 			if (!calculateCodeRunTime()) break;
@@ -804,10 +811,6 @@ namespace Builder
 			LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
 
 			displayTimingInfo();
-
-
-
-
 		}
 		else
 		{
@@ -2726,6 +2729,105 @@ namespace Builder
 	}
 
 
+    bool ModuleLogicCompiler::generateRS232ConectionCode()
+    {
+        if (m_lm == nullptr)
+        {
+            LOG_INTERNAL_ERROR(m_log);
+            assert(false);
+            return false;
+        }
+
+        Hardware::DeviceChassis* lmChassis = m_lm->parent()->toChassis();
+
+        if (lmChassis == nullptr)
+        {
+            LOG_ERROR(m_log, QString(tr("LM (%1) must be installed in the chassis")).arg(m_lm->strId()));
+            return false;
+        }
+
+        int connectionCount = m_connections->count();
+
+        bool result = true;
+
+        for(int i = 0; i < connectionCount; i++)
+        {
+            std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
+
+            if (connection == nullptr)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                assert(false);
+                continue;
+            }
+
+            if (connection->type() != Hardware::Connection::Type::Serial)
+            {
+                continue;
+            }
+
+            Hardware::DeviceObject* port = m_equipmentSet->deviceObject(connection->ocmPortStrID());
+
+            if (port == nullptr)
+            {
+                LOG_ERROR(m_log, QString(tr("OCM port '%1' is not found (serial connection '%2')")).
+                          arg(connection->ocmPortStrID().
+                          arg(connection->caption())));
+                return false;
+            }
+
+            const Hardware::DeviceChassis* ocmChassis = port->getParentChassis();
+
+            if (ocmChassis == nullptr)
+            {
+                LOG_ERROR(m_log, QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
+                          arg(connection->ocmPortStrID().
+                          arg(connection->caption())));
+                return false;
+            }
+
+            if (ocmChassis->strId() != lmChassis->strId())
+            {
+                continue;
+            }
+
+            // this connection must be processed in this LM
+            //
+
+            result &= generateRS232ConectionCode(connection);
+        }
+
+        return result;
+    }
+
+
+    bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection)
+    {
+        // build analog and discrete signals list
+        //
+        QStringList& signslList = connection->signalList();
+
+        bool result = false;
+
+        for(QString signalStrID : signslList)
+        {
+            if (m_signalsStrID.contains(signalStrID) == false)
+            {
+                LOG_ERROR(m_log, QString(tr("Signal '%1' is not found (serial connection '%2)")).
+                          arg(signalStrID).arg(connection->caption()));
+                result &= false;
+            }
+        }
+
+        if (result == false)
+        {
+            return result;
+        }
+
+        return result;
+    }
+
+
 	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
 	{
 		m_code.comment(QString(tr("Copying DOM data place %1 to modules memory")).arg(module.place));
@@ -3063,7 +3165,7 @@ namespace Builder
 			for (int i = 0; i < m_connections->count(); i++)
 			{
 				auto connection = m_connections->get(i);
-				if (connection->connectionType() != Hardware::Connection::ConnectionType::SerialConnectionType)
+                if (connection->type() != Hardware::Connection::Type::Serial)
 				{
 					continue;
 				}
