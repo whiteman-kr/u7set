@@ -10,19 +10,19 @@ namespace Hardware
         Q_OBJECT
 
     public:
-        enum class ConnectionMode
+        enum class SerialMode
         {
-            ModeRS232,
-            ModeRS485
+            RS232,
+            RS485
         };
-        Q_ENUM(ConnectionMode)
+        Q_ENUM(SerialMode)
 
-		enum class ConnectionType
+        enum class Type
 		{
-			OpticalConnectionType,
-			SerialConnectionType
+            Optical,
+            Serial
 		};
-		Q_ENUM(ConnectionType)
+        Q_ENUM(Type)
 
         Connection();
         Connection(const Connection& that);
@@ -97,11 +97,11 @@ namespace Hardware
         //
         //
 
-        ConnectionMode connectionMode() const;
-        void setConnectionMode(const ConnectionMode& value);
+        SerialMode serialMode() const;
+        void setSerialMode(const SerialMode& value);
 
-		ConnectionType connectionType() const;
-		void setConnectionType(const ConnectionType& value);
+        Type type() const;
+        void setType(const Type& value);
 
 		bool enable() const;
         void setEnable(bool value);
@@ -134,11 +134,11 @@ namespace Hardware
             m_device2TxRsID = that.m_device2TxRsID;
             m_device2TxRsDataUID = that.m_device2TxRsDataUID;
 
-            m_connectionMode = that.m_connectionMode;
+            m_serialMode = that.m_serialMode;
             m_enable = that.m_enable;
             m_enableDuplex = that.m_enableDuplex;
 
-			setConnectionType(that.connectionType());
+            setType(that.type());
 			setSignalList(that.signalList());
 
             return *this;
@@ -166,8 +166,8 @@ namespace Hardware
         quint32 m_device2TxRsDataUID = 0;
 
 
-        ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
-		ConnectionType m_connectionType = ConnectionType::OpticalConnectionType;
+        SerialMode m_serialMode = SerialMode::RS232;
+        Type m_type = Type::Optical;
         bool m_enable = false;
         bool m_enableDuplex = false;
 

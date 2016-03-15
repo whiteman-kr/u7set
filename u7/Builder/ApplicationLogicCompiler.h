@@ -18,10 +18,12 @@
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
 #include "Subsystem.h"
+#include "Connection.h"
 
-namespace Hardware {
+/*namespace Hardware {
 	class ConnectionStorage;
-}
+    class Connection;
+}*/
 
 namespace Builder
 {
@@ -92,7 +94,8 @@ namespace Builder
 
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
-		Hardware::DeviceObject* m_equipment = nullptr;
+        Hardware::EquipmentSet* m_equipmentSet = nullptr;
+        Hardware::DeviceObject* m_deviceRoot = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
@@ -113,7 +116,7 @@ namespace Builder
 		bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
 	public:
-		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
+        ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::EquipmentSet* equipmentSet, SignalSet* signalSet,
 								 Afb::AfbElementCollection* afblSet, AppLogicData* appLogicData,
 								 BuildResultWriter* buildResultWriter, OutputLog* log, Hardware::ConnectionStorage* connections);
 
@@ -734,7 +737,8 @@ namespace Builder
 		//
 
 		ApplicationLogicCompiler& m_appLogicCompiler;
-		Hardware::DeviceObject* m_equipment = nullptr;
+        Hardware::EquipmentSet* m_equipmentSet = nullptr;
+        Hardware::DeviceObject* m_deviceRoot = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
@@ -858,6 +862,9 @@ namespace Builder
 		bool copyDiscreteSignalsToRegBuf();
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
+
+        bool generateRS232ConectionCode();
+        bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection);
 
 		bool copyDomDataToModuleMemory(const Module& module);
 		bool copyAomDataToModuleMemory(const Module& module);

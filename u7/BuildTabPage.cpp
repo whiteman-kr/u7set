@@ -198,7 +198,8 @@ void BuildTabPage::build()
 
 	// init build log file
 	//
-	QString logFileName = theSettings.buildOutputPath();
+    QString logFileName = QDir::fromNativeSeparators(theSettings.buildOutputPath());
+
 	if (logFileName.endsWith('/') == false)
 	{
 		logFileName += '/';

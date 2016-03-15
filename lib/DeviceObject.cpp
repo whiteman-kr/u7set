@@ -872,6 +872,113 @@ namespace Hardware
 		return d;
 	}
 
+    const Hardware::DeviceController* DeviceObject::toController() const
+    {
+        const Hardware::DeviceController* d = dynamic_cast<const Hardware::DeviceController*>(this);
+        assert(d != nullptr);
+
+        return d;
+    }
+
+    Hardware::DeviceController* DeviceObject::toController()
+    {
+        Hardware::DeviceController* d = dynamic_cast<Hardware::DeviceController*>(this);
+        assert(d != nullptr);
+
+        return d;
+    }
+
+
+    const Hardware::DeviceController* DeviceObject::getParentController() const
+    {
+        const Hardware::DeviceObject* deviceObject = this;
+
+        do
+        {
+            deviceObject = deviceObject->parent();
+
+            if (deviceObject->isController())
+            {
+                return deviceObject->toController();
+            }
+        }
+        while(deviceObject != nullptr);
+
+        return nullptr;
+    }
+
+    const Hardware::DeviceModule* DeviceObject::getParentModule() const
+    {
+        const Hardware::DeviceObject* deviceObject = this;
+
+        do
+        {
+            deviceObject = deviceObject->parent();
+
+            if (deviceObject->isModule())
+            {
+                return deviceObject->toModule();
+            }
+        }
+        while(deviceObject != nullptr);
+
+        return nullptr;
+    }
+
+    const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
+    {
+        const Hardware::DeviceObject* deviceObject = this;
+
+        do
+        {
+            deviceObject = deviceObject->parent();
+
+            if (deviceObject->isChassis())
+            {
+                return deviceObject->toChassis();
+            }
+        }
+        while(deviceObject != nullptr);
+
+        return nullptr;
+    }
+
+    const Hardware::DeviceRack* DeviceObject::getParentRack() const
+    {
+        const Hardware::DeviceObject* deviceObject = this;
+
+        do
+        {
+            deviceObject = deviceObject->parent();
+
+            if (deviceObject->isRack())
+            {
+                return deviceObject->toRack();
+            }
+        }
+        while(deviceObject != nullptr);
+
+        return nullptr;
+    }
+
+    const Hardware::DeviceSystem* DeviceObject::getParentSystem() const
+    {
+        const Hardware::DeviceObject* deviceObject = this;
+
+        do
+        {
+            deviceObject = deviceObject->parent();
+
+            if (deviceObject->isSystem())
+            {
+                return deviceObject->toSystem();
+            }
+        }
+        while(deviceObject != nullptr);
+
+        return nullptr;
+    }
+
 	QString DeviceObject::fileExtension() const
 	{
 		size_t index = static_cast<size_t>(deviceType());
