@@ -11,6 +11,7 @@ QT       -= gui
 QT       += network
 
 QT		 += widgets
+QT      += qml
 
 TARGET = BaseSrv
 CONFIG   += console

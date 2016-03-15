@@ -83,7 +83,11 @@ private:
 	struct CfgFileInfo : public Builder::BuildFileInfo
 	{
 		QByteArray fileData;
+        bool md5IsValid = false;
 	};
+
+    typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
+
 
 	struct FileDownloadRequest
 	{
@@ -130,7 +134,10 @@ private:
 	int m_autoDownloadIndex = 0;
 
 	Builder::BuildInfo m_buildInfo;
-	HashedVector<QString, CfgFileInfo> m_cfgFileInfo;
+    CfgFilesInfo m_cfgFilesInfo;
+
+    bool m_hasValidSavedConfiguration = false;
+    HashedVector<QString, CfgFileInfo> m_savedCfgFileInfo;
 
 	void shutdown();
 
@@ -145,6 +152,8 @@ private:
 
 	bool startConfigurationXmlLoading();
 	bool readConfigurationXml();
+
+    void readSavedConfiguration();
 
 	bool readCfgFile(const QString& pathFileName, QByteArray* fileData);
 
@@ -168,4 +177,16 @@ public:
 	void changeApp(const QString& appStrID, int appInstance);
 
 	bool downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+};
+
+
+class CfgLoaderThread : public Tcp::Thread
+{
+private:
+    CfgLoader* m_cfgLoader = nullptr;
+
+public:
+    CfgLoaderThread(CfgLoader* cfgLoader);
+
+    bool downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
 };
