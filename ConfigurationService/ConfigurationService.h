@@ -13,6 +13,8 @@ private:
 
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
+	QString m_buildFolder;
+
 	void startCfgServerThread();
 	void stopCfgServerThread();
 
@@ -24,11 +26,11 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 public:
-	ConfigurationServiceWorker() : ServiceWorker(ServiceType::Configuration) {}
+	ConfigurationServiceWorker(const QString& buildFolder);
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	ServiceWorker* createInstance() override { return new ConfigurationServiceWorker; }
+	ServiceWorker* createInstance() override { return new ConfigurationServiceWorker(m_buildFolder); }
 
 signals:
 	void ackInformationRequest(UdpRequest request);

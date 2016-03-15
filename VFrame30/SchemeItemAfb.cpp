@@ -39,7 +39,7 @@ namespace VFrame30
 			addOutput(s);
 		}
 
-		addDynamicParamProperties();
+		addSpecificParamProperties();
 
 		QString afterCreationScript = fblElement.afterCreationScript();
 		if (afterCreationScript.isEmpty() == false)
@@ -285,7 +285,7 @@ namespace VFrame30
 
 		// Add afb properties to class meta object
 		//
-		addDynamicParamProperties();
+		addSpecificParamProperties();
 
 		return true;
 	}
@@ -467,11 +467,11 @@ namespace VFrame30
 //		return m_cachedGridSize * 16;
 	}
 
-	void SchemeItemAfb::addDynamicParamProperties()
+	void SchemeItemAfb::addSpecificParamProperties()
 	{
 		// Clear all dynamic properties
 		//
-		removeDynamicProperties();
+		removeSpecificProperties();
 
 		// Set new Param Propereties
 		//
@@ -488,7 +488,7 @@ namespace VFrame30
 
 			prop->setValue(value);
 			prop->setReadOnly(false);
-			prop->setDynamic(true);
+			prop->setSpecific(true);
 			prop->setCategory(tr("Parameters"));
 			prop->setLimits(p.lowLimit(), p.highLimit());
 			prop->setPrecision(precision());
@@ -627,7 +627,7 @@ namespace VFrame30
 
 			auto prop = this->propertyByCaption(p.caption());
 
-			if (prop.get() != nullptr && prop->dynamic() == true)
+			if (prop.get() != nullptr && prop->specific() == true)
 			{
 				prop->setPrecision(m_precision);
 			}

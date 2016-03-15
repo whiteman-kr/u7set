@@ -132,7 +132,7 @@ ConsoleServiceStarter::ConsoleServiceStarter(int argc, char ** argv, const QStri
 int ConsoleServiceStarter::exec()
 {
 	qDebug() << "\n======" << C_STR(m_name) << "sarted ======\n";
-	qDebug() << "Press any key and <Return> to finish service\n";
+    qDebug() << "Press any key and RETURN to finish service\n";
 
 	if (m_serviceWorker == nullptr)
 	{
@@ -140,11 +140,9 @@ int ConsoleServiceStarter::exec()
 		return 0;
 	}
 
-	// run keyboard reading thread
-	//
-	ConsoleServiceKeyReaderThread* keyReader = new ConsoleServiceKeyReaderThread();
-	connect(keyReader, &ConsoleServiceKeyReaderThread::keyReaded, this, &QCoreApplication::quit);
-	keyReader->start();
+    ConsoleServiceKeyReaderThread* keyReaderThread = new ConsoleServiceKeyReaderThread();
+
+    keyReaderThread->start();
 
 	// run service
 	//
@@ -159,10 +157,9 @@ int ConsoleServiceStarter::exec()
 	delete m_service;
 	m_service = nullptr;
 
-	// delete keyboard reading thread
-	//
-	keyReader->wait();
-	delete keyReader;
+    keyReaderThread->quit();
+    keyReaderThread->wait();
+    delete keyReaderThread;
 
 	qDebug() << "\n======" << C_STR(m_name) << "finished ======\n";
 

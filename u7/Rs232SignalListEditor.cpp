@@ -15,20 +15,20 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	assert(m_db);
 
 	setWindowTitle(tr("Serial port signal list editor"));
-	resize(640, 480);
+	resize(800, 600);
 
 	m_rs232Connections->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_rs232Connections->fontMetrics().height() * 1.4));
 
 	QStringList l;
 	l << tr("Caption")
-		<< tr("OCM StrID")
+		<< tr("OCM Port StrID")
 		<< tr("Mode")
         << tr("Enabled")
         << tr("Duplex");
     m_rs232Connections->setColumnCount(l.size());
     m_rs232Connections->setHorizontalHeaderLabels(l);
 	m_rs232Connections->setColumnWidth(0, 150);
-	m_rs232Connections->setColumnWidth(1, 150);
+	m_rs232Connections->setColumnWidth(1, 300);
 	m_rs232Connections->setColumnWidth(2, 70);
     m_rs232Connections->setColumnWidth(3, 70);
     m_rs232Connections->setColumnWidth(4, 70);
@@ -217,7 +217,7 @@ void Rs232SignalListEditor::addConnection()
 	}
 	connection->setCaption("New Connection");
 	connection->setOcmPortStrID("OCM_ID");
-	connection->setConnectionMode(Hardware::Connection::ConnectionMode::ModeRS232);
+	connection->setConnectionMode(Hardware::Connection::ConnectionMode::RS232);
 	connection->setConnectionType(Hardware::Connection::ConnectionType::SerialConnectionType);
 	connection->setEnable(true);
 
@@ -228,7 +228,7 @@ void Rs232SignalListEditor::addConnection()
 	m_rs232Connections->item(index, 0)->setData(Qt::UserRole, m_connections.count() - 1);
 	m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->ocmPortStrID()));
 	m_rs232Connections->item(index, 1)->setData(Qt::UserRole, m_connections.count() - 1);
-	m_rs232Connections->setItem(index, 2, new QTableWidgetItem(connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485"));
+	m_rs232Connections->setItem(index, 2, new QTableWidgetItem(connection->connectionMode() == Hardware::Connection::ConnectionMode::RS232 ? "RS-232" : "RS-485"));
 	m_rs232Connections->item(index, 2)->setData(Qt::UserRole, m_connections.count() - 1);
 	m_rs232Connections->setItem(index, 3, new QTableWidgetItem(connection->enable() ? "true" : "false"));
 	m_rs232Connections->item(index, 3)->setData(Qt::UserRole, m_connections.count() - 1);
@@ -269,6 +269,8 @@ void Rs232SignalListEditor::editConnection()
 	*editConnection = *connection;
 
 	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &m_connections);
+	pd->resize(640, 300);
+	pd->setWindowTitle(tr("Connection properties"));
 
 	if (pd->exec() == QDialog::Accepted)
 	{
@@ -461,7 +463,7 @@ void Rs232SignalListEditor::fillConnectionsList()
 		m_rs232Connections->item(rowCount, 0)->setData(Qt::UserRole, i);
 		m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->ocmPortStrID()));
 		m_rs232Connections->item(rowCount, 1)->setData(Qt::UserRole, i);
-		m_rs232Connections->setItem(rowCount, 2, new QTableWidgetItem(connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485"));
+		m_rs232Connections->setItem(rowCount, 2, new QTableWidgetItem(connection->connectionMode() == Hardware::Connection::ConnectionMode::RS232 ? "RS-232" : "RS-485"));
 		m_rs232Connections->item(rowCount, 2)->setData(Qt::UserRole, i);
 		m_rs232Connections->setItem(rowCount, 3, new QTableWidgetItem(connection->enable() ? "true" : "false"));
 		m_rs232Connections->item(rowCount, 3)->setData(Qt::UserRole, i);

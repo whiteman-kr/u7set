@@ -57,6 +57,7 @@ void CfgServer::readBuildXml()
 	if (dir.exists(m_buildXmlPathFileName) == false)
 	{
 		m_errorCode = ErrorCode::BuildNotFound;
+        qDebug() << "File not found: " << m_buildXmlPathFileName;
 		return;
 	}
 
@@ -87,7 +88,7 @@ void CfgServer::readBuildXml()
 			continue;
 		}
 
-		if (xmlReader.name() == "build")
+		if (xmlReader.name() == "BuildInfo")
 		{
 			m_buildInfo.readFromXml(xmlReader);
 			continue;
@@ -95,7 +96,7 @@ void CfgServer::readBuildXml()
 
 		// find "file" element
 		//
-		if (xmlReader.name() != "file")
+		if (xmlReader.name() != "File")
 		{
 			continue;
 		}
@@ -106,8 +107,9 @@ void CfgServer::readBuildXml()
 
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
-}
 
+	qDebug() << "File " << m_buildXmlPathFileName << " has been readed";
+}
 
 // -------------------------------------------------------------------------------------
 //
@@ -242,16 +244,16 @@ void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileD
 		return;
 	}
 
-	if (m_cfgFileInfo.contains(fileName) == false)
+    if (m_cfgFilesInfo.contains(fileName) == false)
 	{
 		*errorCode = Tcp::FileTransferResult::NotFoundRemoteFile;
 		emit signal_endCfgFileDownload();
 		return;
 	}
 
-	if (readCfgFileIfExists(fileName, fileData, m_cfgFileInfo[fileName].md5) == true)
+    if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5) == true)
 	{
-		qDebug() << "File " << fileName << " allready exists, md5 = " << m_cfgFileInfo[fileName].md5;
+        qDebug() << "File " << fileName << " allready exists, md5 = " << m_cfgFilesInfo[fileName].md5;
 
 		*errorCode = Tcp::FileTransferResult::Ok;
 		emit signal_endCfgFileDownload();
@@ -268,7 +270,7 @@ void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileD
 	fdr.isAutoRequest = false;			// manual request
 	fdr.fileData = fileData;
 	fdr.errorCode = errorCode;
-	fdr.etalonMD5 = m_cfgFileInfo[fileName].md5;
+    fdr.etalonMD5 = m_cfgFilesInfo[fileName].md5;
 
 	m_downloadQueue.append(fdr);
 
@@ -319,7 +321,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		//
 		if (m_currentDownloadRequest.isTestCfgRequest)
 		{
-			if (m_cfgFileInfo[CONFIGURATION_XML].md5 != md5)
+            if (m_cfgFilesInfo[CONFIGURATION_XML].md5 != md5)
 			{
 				// configuration changed !!!!!!!!!!!!
 			}
@@ -334,7 +336,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				BuildFileInfoArray bfiArray;
 
-				for(const CfgFileInfo& cfi : m_cfgFileInfo)
+                for(const CfgFileInfo& cfi : m_cfgFilesInfo)
 				{
 					Builder::BuildFileInfo bfi;
 
@@ -347,7 +349,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				qDebug() << "Readed configuration.xml";
 
-				emit signal_configurationReady(m_cfgFileInfo[CONFIGURATION_XML].fileData, bfiArray);
+                emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML].fileData, bfiArray);
 			}
 		}
 	}
@@ -380,7 +382,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 	}
 
-	if (m_autoDownloadIndex == m_cfgFileInfo.count())
+    if (m_autoDownloadIndex == m_cfgFilesInfo.count())
 	{
 		m_allFilesLoaded = true;
 	}
@@ -400,7 +402,7 @@ void CfgLoader::onTimer()
 		return;
 	}
 
-	if (m_autoDownloadIndex >= m_cfgFileInfo.count() ||
+    if (m_autoDownloadIndex >= m_cfgFilesInfo.count() ||
 		isConnected() == false ||
 		m_configurationXmlReady == false ||
 		isTransferInProgress() ||
@@ -410,9 +412,9 @@ void CfgLoader::onTimer()
 		return;
 	}
 
-	while(m_autoDownloadIndex < m_cfgFileInfo.count())
+    while(m_autoDownloadIndex < m_cfgFilesInfo.count())
 	{
-		CfgFileInfo& cfi = m_cfgFileInfo[m_autoDownloadIndex];
+        CfgFileInfo& cfi = m_cfgFilesInfo[m_autoDownloadIndex];
 
 		if (isCfgFileIsExists(cfi.pathFileName, cfi.md5) == true)
 		{
@@ -425,8 +427,8 @@ void CfgLoader::onTimer()
 		{
 			FileDownloadRequest fdr;
 
-			fdr.pathFileName = m_cfgFileInfo[m_autoDownloadIndex].pathFileName;
-			fdr.etalonMD5 = m_cfgFileInfo[m_autoDownloadIndex].md5;
+            fdr.pathFileName = m_cfgFilesInfo[m_autoDownloadIndex].pathFileName;
+            fdr.etalonMD5 = m_cfgFilesInfo[m_autoDownloadIndex].md5;
 			fdr.isAutoRequest = true;
 
 			m_downloadQueue.append(fdr);
@@ -460,7 +462,18 @@ void CfgLoader::changeApp(const QString& appStrID, int appInstance)
 
 	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
 
+    readSavedConfiguration();
+
 	resetStatuses();
+}
+
+
+void CfgLoader::readSavedConfiguration()
+{
+    // if exists, read previously loaded configuration
+    //
+
+   // if ()
 }
 
 
@@ -517,7 +530,7 @@ bool CfgLoader::readConfigurationXml()
 		return false;
 	}
 
-	m_cfgFileInfo.clear();
+    m_cfgFilesInfo.clear();
 
 	CfgFileInfo cfi;
 
@@ -528,7 +541,7 @@ bool CfgLoader::readConfigurationXml()
 
 	// configuration.xml info always first item in m_cfgFileInfo
 	//
-	m_cfgFileInfo.insert(cfi.pathFileName, cfi);
+    m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
 
 	QXmlStreamReader xmlReader(cfi.fileData);
 
@@ -556,7 +569,7 @@ bool CfgLoader::readConfigurationXml()
 
 		cfi.readFromXml(xmlReader);
 
-		m_cfgFileInfo.insert(cfi.pathFileName, cfi);
+        m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
 	}
 
 	return true;
@@ -635,6 +648,30 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 
 
 
+CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
+    Tcp::Thread(cfgLoader),
+    m_cfgLoader(cfgLoader)
+{
+}
+
+
+bool CfgLoaderThread::downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString *errorStr)
+{
+    if (fileData == nullptr || errorStr == nullptr)
+    {
+        assert(false);
+        return false;
+    }
+
+    if (m_cfgLoader == nullptr)
+    {
+        assert(false);
+        *errorStr = tr("CfgLoaderThread vember m_cfgLoader is not initialized");
+        return false;
+    }
+
+    return m_cfgLoader->downloadCfgFile(pathFileName, fileData, errorStr);
+}
 
 
 

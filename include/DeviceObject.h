@@ -105,8 +105,8 @@ namespace Hardware
 		//
 	protected:
 
-		// Parse m_dynamicProperties and create Qt meta system dynamic properies
-		void parseDynamicPropertiesStruct();
+		// Parse m_specificProperties and create Qt meta system specific properies
+		void parseSpecificPropertiesStruct();
 
 		// Get all signals, including signals from child items
 		void getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const;
@@ -202,8 +202,8 @@ namespace Hardware
 		QString childRestriction() const;
 		void setChildRestriction(QString value);
 
-		QString dynamicProperties() const;
-		void setDynamicProperties(QString value);
+		QString specificProperties() const;
+		void setSpecificProperties(QString value);
 
 		int place() const;
 		Q_INVOKABLE int jsPlace() const;
@@ -237,7 +237,7 @@ namespace Hardware
 		DbFileInfo m_fileInfo;
 
 		QString m_childRestriction;			// Restriction script for child items
-		QString m_dynamicPropertiesStruct;	// Desctription of the Object's dynamic properties
+		QString m_specificPropertiesStruct;	// Desctription of the Object's specific properties
 
 		int m_place = -1;
 

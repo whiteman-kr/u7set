@@ -24,7 +24,7 @@ private:
 
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
-	Tcp::Thread* m_cfgLoaderThread = nullptr;
+    CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
 	SignalSet m_signalSet;

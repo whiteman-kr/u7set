@@ -2,7 +2,7 @@
 
 #include "TypesAndEnums.h"
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <assert.h>
 
 #ifdef _MSC_VER

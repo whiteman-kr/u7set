@@ -762,7 +762,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, childrestriction_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, place_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, dynamic_properties_struct_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, specific_properties_struct_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, properties_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, preset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetroot_),
@@ -1299,45 +1299,45 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ring\022\024\n\tprecision\030\004 \001(\005:\0012\"d\n\017SchemeItem"
     "Const\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010intValue\030\002 \001(\005"
     ":\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010\022\024\n\tprecision\030"
-    "\004 \001(\005:\0012\"\273\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132"
+    "\004 \001(\005:\0012\"\274\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132"
     "\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstr"
     "ing\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020"
     "childRestriction\030\004 \001(\0132\016.Proto.wstring\022\020"
-    "\n\005place\030\005 \001(\005:\0010\022!\n\031dynamic_properties_s"
-    "truct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto."
-    "Property\022\025\n\006preset\030  \001(\010:\005false\022\031\n\nprese"
-    "tRoot\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016"
-    ".Proto.wstring\022%\n\020presetObjectUuid\030# \001(\013"
-    "2\013.Proto.Uuid\022\037\n\004Root\030d \001(\0132\021.Proto.Devi"
-    "ceRoot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSys"
-    "tem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007"
-    "Chassis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006M"
-    "odule\030h \001(\0132\023.Proto.DeviceModule\022+\n\nCont"
-    "roller\030i \001(\0132\027.Proto.DeviceController\022#\n"
-    "\006Signal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Wo"
-    "rkstation\030k \001(\0132\022.Proto.Workstation\022!\n\010S"
-    "oftware\030l \001(\0132\017.Proto.Software\"\014\n\nDevice"
-    "Root\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\rDe"
-    "viceChassis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceMo"
-    "dule\022\017\n\004type\030\001 \001(\005:\0010\"\022\n\020DeviceControlle"
-    "r\"\347\001\n\014DeviceSignal\022\027\n\014obsoletetype\030\001 \001(\005"
-    ":\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001("
-    "\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validityOffset\030"
-    "\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013valu"
-    "eOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n"
-    "\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013W"
-    "orkstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022"
-    "\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022"
-    "\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030\002 "
-    "\003(\0132\037.Proto.ModuleConfigurationValue\022\016\n\004"
-    "name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue"
-    "\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Propert"
-    "y\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nScheme"
-    "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
-    "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
-    "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
-    "\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsign"
-    "edInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 5993);
+    "\n\005place\030\005 \001(\005:\0010\022\"\n\032specific_properties_"
+    "struct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto"
+    ".Property\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npres"
+    "etRoot\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132"
+    "\016.Proto.wstring\022%\n\020presetObjectUuid\030# \001("
+    "\0132\013.Proto.Uuid\022\037\n\004Root\030d \001(\0132\021.Proto.Dev"
+    "iceRoot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSy"
+    "stem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n"
+    "\007Chassis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006"
+    "Module\030h \001(\0132\023.Proto.DeviceModule\022+\n\nCon"
+    "troller\030i \001(\0132\027.Proto.DeviceController\022#"
+    "\n\006Signal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013W"
+    "orkstation\030k \001(\0132\022.Proto.Workstation\022!\n\010"
+    "Software\030l \001(\0132\017.Proto.Software\"\014\n\nDevic"
+    "eRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\rD"
+    "eviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceM"
+    "odule\022\017\n\004type\030\001 \001(\005:\0010\"\022\n\020DeviceControll"
+    "er\"\347\001\n\014DeviceSignal\022\027\n\014obsoletetype\030\001 \001("
+    "\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001"
+    "(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validityOffset"
+    "\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013val"
+    "ueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017"
+    "\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013"
+    "Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software"
+    "\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration"
+    "\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030\002"
+    " \003(\0132\037.Proto.ModuleConfigurationValue\022\016\n"
+    "\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValu"
+    "e\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Proper"
+    "ty\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchem"
+    "eUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
+    "ch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022"
+    "\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000"
+    "\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsig"
+    "nedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 5994);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -12861,7 +12861,7 @@ const int DeviceObject::kStrIdFieldNumber;
 const int DeviceObject::kCaptionFieldNumber;
 const int DeviceObject::kChildRestrictionFieldNumber;
 const int DeviceObject::kPlaceFieldNumber;
-const int DeviceObject::kDynamicPropertiesStructFieldNumber;
+const int DeviceObject::kSpecificPropertiesStructFieldNumber;
 const int DeviceObject::kPropertiesFieldNumber;
 const int DeviceObject::kPresetFieldNumber;
 const int DeviceObject::kPresetRootFieldNumber;
@@ -12914,7 +12914,7 @@ void DeviceObject::SharedCtor() {
   caption_ = NULL;
   childrestriction_ = NULL;
   place_ = 0;
-  dynamic_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  specific_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   preset_ = false;
   presetroot_ = false;
   presetname_ = NULL;
@@ -12936,8 +12936,8 @@ DeviceObject::~DeviceObject() {
 }
 
 void DeviceObject::SharedDtor() {
-  if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
-    delete dynamic_properties_struct_;
+  if (specific_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+    delete specific_properties_struct_;
   }
   if (this != default_instance_) {
     delete uuid_;
@@ -12994,9 +12994,9 @@ void DeviceObject::Clear() {
       if (childrestriction_ != NULL) childrestriction_->::Proto::wstring::Clear();
     }
     place_ = 0;
-    if (has_dynamic_properties_struct()) {
-      if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
-        dynamic_properties_struct_->clear();
+    if (has_specific_properties_struct()) {
+      if (specific_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+        specific_properties_struct_->clear();
       }
     }
     preset_ = false;
@@ -13117,19 +13117,19 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(50)) goto parse_dynamic_properties_struct;
+        if (input->ExpectTag(50)) goto parse_specific_properties_struct;
         break;
       }
 
-      // optional string dynamic_properties_struct = 6;
+      // optional string specific_properties_struct = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_dynamic_properties_struct:
+         parse_specific_properties_struct:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_dynamic_properties_struct()));
+                input, this->mutable_specific_properties_struct()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+            this->specific_properties_struct().data(), this->specific_properties_struct().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -13386,13 +13386,13 @@ void DeviceObject::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->place(), output);
   }
 
-  // optional string dynamic_properties_struct = 6;
-  if (has_dynamic_properties_struct()) {
+  // optional string specific_properties_struct = 6;
+  if (has_specific_properties_struct()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+      this->specific_properties_struct().data(), this->specific_properties_struct().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      6, this->dynamic_properties_struct(), output);
+      6, this->specific_properties_struct(), output);
   }
 
   // repeated .Proto.Property properties = 7;
@@ -13518,14 +13518,14 @@ void DeviceObject::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->place(), target);
   }
 
-  // optional string dynamic_properties_struct = 6;
-  if (has_dynamic_properties_struct()) {
+  // optional string specific_properties_struct = 6;
+  if (has_specific_properties_struct()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+      this->specific_properties_struct().data(), this->specific_properties_struct().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        6, this->dynamic_properties_struct(), target);
+        6, this->specific_properties_struct(), target);
   }
 
   // repeated .Proto.Property properties = 7;
@@ -13668,11 +13668,11 @@ int DeviceObject::ByteSize() const {
           this->place());
     }
 
-    // optional string dynamic_properties_struct = 6;
-    if (has_dynamic_properties_struct()) {
+    // optional string specific_properties_struct = 6;
+    if (has_specific_properties_struct()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->dynamic_properties_struct());
+          this->specific_properties_struct());
     }
 
     // optional bool preset = 32 [default = false];
@@ -13817,8 +13817,8 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_place()) {
       set_place(from.place());
     }
-    if (from.has_dynamic_properties_struct()) {
-      set_dynamic_properties_struct(from.dynamic_properties_struct());
+    if (from.has_specific_properties_struct()) {
+      set_specific_properties_struct(from.specific_properties_struct());
     }
     if (from.has_preset()) {
       set_preset(from.preset());
@@ -13913,7 +13913,7 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(caption_, other->caption_);
     std::swap(childrestriction_, other->childrestriction_);
     std::swap(place_, other->place_);
-    std::swap(dynamic_properties_struct_, other->dynamic_properties_struct_);
+    std::swap(specific_properties_struct_, other->specific_properties_struct_);
     properties_.Swap(&other->properties_);
     std::swap(preset_, other->preset_);
     std::swap(presetroot_, other->presetroot_);

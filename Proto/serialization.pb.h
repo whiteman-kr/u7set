@@ -4108,17 +4108,17 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 place() const;
   inline void set_place(::google::protobuf::int32 value);
 
-  // optional string dynamic_properties_struct = 6;
-  inline bool has_dynamic_properties_struct() const;
-  inline void clear_dynamic_properties_struct();
-  static const int kDynamicPropertiesStructFieldNumber = 6;
-  inline const ::std::string& dynamic_properties_struct() const;
-  inline void set_dynamic_properties_struct(const ::std::string& value);
-  inline void set_dynamic_properties_struct(const char* value);
-  inline void set_dynamic_properties_struct(const char* value, size_t size);
-  inline ::std::string* mutable_dynamic_properties_struct();
-  inline ::std::string* release_dynamic_properties_struct();
-  inline void set_allocated_dynamic_properties_struct(::std::string* dynamic_properties_struct);
+  // optional string specific_properties_struct = 6;
+  inline bool has_specific_properties_struct() const;
+  inline void clear_specific_properties_struct();
+  static const int kSpecificPropertiesStructFieldNumber = 6;
+  inline const ::std::string& specific_properties_struct() const;
+  inline void set_specific_properties_struct(const ::std::string& value);
+  inline void set_specific_properties_struct(const char* value);
+  inline void set_specific_properties_struct(const char* value, size_t size);
+  inline ::std::string* mutable_specific_properties_struct();
+  inline ::std::string* release_specific_properties_struct();
+  inline void set_allocated_specific_properties_struct(::std::string* specific_properties_struct);
 
   // repeated .Proto.Property properties = 7;
   inline int properties_size() const;
@@ -4257,8 +4257,8 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_childrestriction();
   inline void set_has_place();
   inline void clear_has_place();
-  inline void set_has_dynamic_properties_struct();
-  inline void clear_has_dynamic_properties_struct();
+  inline void set_has_specific_properties_struct();
+  inline void clear_has_specific_properties_struct();
   inline void set_has_preset();
   inline void clear_has_preset();
   inline void set_has_presetroot();
@@ -4292,7 +4292,7 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
   ::Proto::wstring* childrestriction_;
-  ::std::string* dynamic_properties_struct_;
+  ::std::string* specific_properties_struct_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Property > properties_;
   ::google::protobuf::int32 place_;
   bool preset_;
@@ -9873,73 +9873,73 @@ inline void DeviceObject::set_place(::google::protobuf::int32 value) {
   place_ = value;
 }
 
-// optional string dynamic_properties_struct = 6;
-inline bool DeviceObject::has_dynamic_properties_struct() const {
+// optional string specific_properties_struct = 6;
+inline bool DeviceObject::has_specific_properties_struct() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void DeviceObject::set_has_dynamic_properties_struct() {
+inline void DeviceObject::set_has_specific_properties_struct() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void DeviceObject::clear_has_dynamic_properties_struct() {
+inline void DeviceObject::clear_has_specific_properties_struct() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void DeviceObject::clear_dynamic_properties_struct() {
-  if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
-    dynamic_properties_struct_->clear();
+inline void DeviceObject::clear_specific_properties_struct() {
+  if (specific_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+    specific_properties_struct_->clear();
   }
-  clear_has_dynamic_properties_struct();
+  clear_has_specific_properties_struct();
 }
-inline const ::std::string& DeviceObject::dynamic_properties_struct() const {
-  return *dynamic_properties_struct_;
+inline const ::std::string& DeviceObject::specific_properties_struct() const {
+  return *specific_properties_struct_;
 }
-inline void DeviceObject::set_dynamic_properties_struct(const ::std::string& value) {
-  set_has_dynamic_properties_struct();
-  if (dynamic_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
-    dynamic_properties_struct_ = new ::std::string;
+inline void DeviceObject::set_specific_properties_struct(const ::std::string& value) {
+  set_has_specific_properties_struct();
+  if (specific_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
+    specific_properties_struct_ = new ::std::string;
   }
-  dynamic_properties_struct_->assign(value);
+  specific_properties_struct_->assign(value);
 }
-inline void DeviceObject::set_dynamic_properties_struct(const char* value) {
-  set_has_dynamic_properties_struct();
-  if (dynamic_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
-    dynamic_properties_struct_ = new ::std::string;
+inline void DeviceObject::set_specific_properties_struct(const char* value) {
+  set_has_specific_properties_struct();
+  if (specific_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
+    specific_properties_struct_ = new ::std::string;
   }
-  dynamic_properties_struct_->assign(value);
+  specific_properties_struct_->assign(value);
 }
-inline void DeviceObject::set_dynamic_properties_struct(const char* value, size_t size) {
-  set_has_dynamic_properties_struct();
-  if (dynamic_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
-    dynamic_properties_struct_ = new ::std::string;
+inline void DeviceObject::set_specific_properties_struct(const char* value, size_t size) {
+  set_has_specific_properties_struct();
+  if (specific_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
+    specific_properties_struct_ = new ::std::string;
   }
-  dynamic_properties_struct_->assign(reinterpret_cast<const char*>(value), size);
+  specific_properties_struct_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceObject::mutable_dynamic_properties_struct() {
-  set_has_dynamic_properties_struct();
-  if (dynamic_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
-    dynamic_properties_struct_ = new ::std::string;
+inline ::std::string* DeviceObject::mutable_specific_properties_struct() {
+  set_has_specific_properties_struct();
+  if (specific_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
+    specific_properties_struct_ = new ::std::string;
   }
-  return dynamic_properties_struct_;
+  return specific_properties_struct_;
 }
-inline ::std::string* DeviceObject::release_dynamic_properties_struct() {
-  clear_has_dynamic_properties_struct();
-  if (dynamic_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DeviceObject::release_specific_properties_struct() {
+  clear_has_specific_properties_struct();
+  if (specific_properties_struct_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = dynamic_properties_struct_;
-    dynamic_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = specific_properties_struct_;
+    specific_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DeviceObject::set_allocated_dynamic_properties_struct(::std::string* dynamic_properties_struct) {
-  if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
-    delete dynamic_properties_struct_;
+inline void DeviceObject::set_allocated_specific_properties_struct(::std::string* specific_properties_struct) {
+  if (specific_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+    delete specific_properties_struct_;
   }
-  if (dynamic_properties_struct) {
-    set_has_dynamic_properties_struct();
-    dynamic_properties_struct_ = dynamic_properties_struct;
+  if (specific_properties_struct) {
+    set_has_specific_properties_struct();
+    specific_properties_struct_ = specific_properties_struct;
   } else {
-    clear_has_dynamic_properties_struct();
-    dynamic_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_specific_properties_struct();
+    specific_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

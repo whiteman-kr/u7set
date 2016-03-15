@@ -501,6 +501,8 @@ namespace Tcp
 		{
 			// all parts of file are sent
 			//
+			qDebug() << "File " << m_file.fileName() << " has been sent";
+
 			init();
 		}
 	}

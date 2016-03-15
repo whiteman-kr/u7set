@@ -10,11 +10,17 @@
 //
 // ------------------------------------------------------------------------------------
 
+ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& buildFolder) :
+	ServiceWorker(ServiceType::Configuration),
+	m_buildFolder(buildFolder)
+{
+}
+
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
 	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST),
-											  new CfgServer(""));
+											  new CfgServer(m_buildFolder));
 
 	m_cfgServerThread->start();
 }
@@ -52,7 +58,7 @@ void ConfigurationServiceWorker::stopUdpThreads()
 void ConfigurationServiceWorker::initialize()
 {
 	startCfgServerThread();
-	startUdpThreads();
+	//startUdpThreads();
 
 	qDebug() << "ConfigurationServiceWorker initialized";
 }
@@ -60,7 +66,7 @@ void ConfigurationServiceWorker::initialize()
 
 void ConfigurationServiceWorker::shutdown()
 {
-	stopUdpThreads();
+	//stopUdpThreads();
 	stopCfgServerThread();
 
 	qDebug() << "ConfigurationServiceWorker stoped";

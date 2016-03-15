@@ -11,7 +11,7 @@
 DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage *connections)
     :PropertyEditorDialog(object, parent)
 {
-    m_connections = connections;
+	m_connections = connections;
 }
 
 bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<PropertyObject> object)

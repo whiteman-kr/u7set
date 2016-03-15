@@ -54,7 +54,6 @@
 #include <QDebug>
 #include <QRect>
 #include <QMutex>
-#include <QtScript/QtScript>
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QAction>

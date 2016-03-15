@@ -214,9 +214,13 @@ namespace Tcp
 
 	class TcpServer : public QTcpServer
 	{
+		Q_OBJECT
+
 	public:
-		TcpServer(Listener* parent);
-		virtual void incomingConnection(qintptr socketDescriptor) override;
+		virtual void incomingConnection(qintptr socketDescriptor) final;
+
+	signals:
+		void newConnection(qintptr socketDescriptor);
 	};
 
 
@@ -232,7 +236,7 @@ namespace Tcp
 
 	private:
 		HostAddressPort m_listenAddressPort;
-		TcpServer m_tcpServer;
+		TcpServer* m_tcpServer = nullptr;
 		QTimer m_periodicTimer;
 
 		Server* m_serverInstance = nullptr;

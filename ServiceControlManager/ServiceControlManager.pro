@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -96,6 +96,19 @@ include(../qtsingleapplication/src/qtsingleapplication.pri)
 gcc:QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
+#protobuf
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+
+win32 {
+	LIBS += -L$$DESTDIR -lprotobuf
+
+	INCLUDEPATH += ./../Protobuf
+}
+unix {
+	LIBS += -lprotobuf
+}
 
 
 # Visual Leak Detector
