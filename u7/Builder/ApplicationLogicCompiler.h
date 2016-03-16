@@ -864,7 +864,7 @@ namespace Builder
 		bool copyOutModulesAppLogicDataToModulesMemory();
 
         bool generateRS232ConectionCode();
-        bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection);
+        bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::DeviceObject *port);
 
 		bool copyDomDataToModuleMemory(const Module& module);
 		bool copyAomDataToModuleMemory(const Module& module);
