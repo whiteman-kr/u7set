@@ -198,9 +198,21 @@ void OutputLog::writeWarning(const QString& str)
 	return write(str, OutputMessageLevel::Warning, QString(""), 0, QString(""));
 }
 
+void OutputLog::writeWarning(IssuePrexif prefix, const QString& str)
+{
+	QString prefixStr = issuePrefixToString(prefix) + ": ";
+	return write(prefixStr + str, OutputMessageLevel::Warning, QString(""), 0, QString(""));
+}
+
 void OutputLog::writeError(const QString& str)
 {
 	return write(str, OutputMessageLevel::Error, QString(""), 0, QString(""));
+}
+
+void OutputLog::writeError(IssuePrexif prefix, const QString& str)
+{
+	QString prefixStr = issuePrefixToString(prefix) + ": ";
+	return write(prefixStr + str, OutputMessageLevel::Error, QString(""), 0, QString(""));
 }
 
 void OutputLog::writeMessage(const QString& str, QString file, int fileLine, QString func)
@@ -218,9 +230,21 @@ void OutputLog::writeWarning(const QString& str, QString file, int fileLine, QSt
 	return write(str, OutputMessageLevel::Warning, file, fileLine, func);
 }
 
+void OutputLog::writeWarning(IssuePrexif prefix, const QString& str, QString file, int fileLine, QString func)
+{
+	QString prefixStr = issuePrefixToString(prefix) + ": ";
+	return write(prefixStr + str, OutputMessageLevel::Warning, file, fileLine, func);
+}
+
 void OutputLog::writeError(const QString& str, QString file, int fileLine, QString func)
 {
 	return write(str, OutputMessageLevel::Error, file, fileLine, func);
+}
+
+void OutputLog::writeError(IssuePrexif prefix, const QString& str, QString file, int fileLine, QString func)
+{
+	QString prefixStr = issuePrefixToString(prefix) + ": ";
+	return write(prefixStr + str, OutputMessageLevel::Error, file, fileLine, func);
 }
 
 void OutputLog::writeDump(const std::vector<quint8>& data)
@@ -294,6 +318,32 @@ QString OutputLog::finishStrLogging()
 	str.swap(m_strFullLog);
 
 	return str;
+}
+
+QString OutputLog::issuePrefixToString(IssuePrexif prefix)
+{
+	switch(prefix)
+	{
+		case IssuePrexif::NotDefined:
+			return "NDF";
+		case IssuePrexif::Common:
+			return "CMN";
+		case IssuePrexif::Internal:
+			return "INT";
+		case IssuePrexif::ProjectDatabase:
+			return "PDB";
+		case IssuePrexif::FscConfiguration:
+			return "CFG";
+		case IssuePrexif::AlParsing:
+			return "ALP";
+		case IssuePrexif::AlCompiler:
+			return "ALC";
+		case IssuePrexif::Equipment:
+			return "EQP";
+		default:
+			assert(false);
+			return "NDF";
+	}
 }
 
 int OutputLog::errorCount() const

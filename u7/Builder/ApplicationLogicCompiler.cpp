@@ -183,7 +183,7 @@ namespace Builder
 
 		if (m_appBitAdressed.nonRegDiscretSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
 		{
-			LOG_ERROR(m_log, tr("Out of bit-addressed memory range!"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Out of bit-addressed memory range!"));
 
 			return false;
 		}
@@ -235,7 +235,7 @@ namespace Builder
 
 		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
-			LOG_ERROR(m_log, tr("Out of word-addressed memory range!"));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Out of word-addressed memory range!"));
 
 			return false;
 		}
@@ -520,7 +520,7 @@ namespace Builder
 		{
 			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
 
-			LOG_ERROR(m_log, msg);
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 			qDebug() << msg;
 
@@ -565,7 +565,7 @@ namespace Builder
 
 			msg = QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
 
-			LOG_ERROR(m_log, msg);
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 			return;
 		}
@@ -595,7 +595,7 @@ namespace Builder
 					{
 						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->strId());
 
-						LOG_WARNING(m_log, msg);
+						LOG_WARNING(m_log, IssuePrexif::NotDefined, msg);
 
 						qDebug() << msg;
 					}
@@ -644,7 +644,8 @@ namespace Builder
 
 		if (subsysID == -1)
 		{
-			LOG_ERROR(m_log, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
 
 			return false;
 		}
@@ -715,7 +716,7 @@ namespace Builder
 		if (parent->deviceType() != Hardware::DeviceType::Chassis)
 		{
 			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->strId());
-			LOG_ERROR(m_log, msg);
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 			return false;
 		}
 
@@ -850,12 +851,14 @@ namespace Builder
 		{
 			if (idrPhaseTimeUsed < 100)
 			{
-				LOG_WARNING(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
-							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
+				LOG_WARNING(m_log, IssuePrexif::NotDefined,
+							QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+								arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 			else
 			{
-				LOG_ERROR(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
 							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 		}
@@ -882,12 +885,14 @@ namespace Builder
 		{
 			if (alpPhaseTimeUsed < 100)
 			{
-				LOG_WARNING(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+				LOG_WARNING(m_log, IssuePrexif::NotDefined,
+							QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
 							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 			else
 			{
-				LOG_ERROR(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
 							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 		}
@@ -966,7 +971,7 @@ namespace Builder
 		}
 		else
 		{
-			LOG_ERROR(m_log, QString(tr("LM settings are not loaded")));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("LM settings are not loaded")));
 		}
 
 		return result;
@@ -1028,7 +1033,7 @@ namespace Builder
 		}
 		else
 		{
-			LOG_ERROR(m_log, QString(tr("Modules settings are not loaded")));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Modules settings are not loaded")));
 		}
 
 		return result;
@@ -1046,7 +1051,7 @@ namespace Builder
 		if (m_moduleLogic == nullptr)
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
-			LOG_WARNING(m_log, msg);
+			LOG_WARNING(m_log, IssuePrexif::NotDefined, msg);
 		}
 
 		do
@@ -1286,14 +1291,14 @@ namespace Builder
 					break;
 
 				case E::DataFormat::Float:
-					LOG_ERROR(m_log, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
 					result = false;
 					break;
 
 				default:
 					assert(false);
 
-					LOG_ERROR(m_log, tr("Unknown Afb parameter data format"));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Unknown Afb parameter data format"));
 					result = false;
 				}
 			}
@@ -1425,7 +1430,7 @@ namespace Builder
 				break;
 
 			default:
-				LOG_ERROR(m_log, QString(tr("Unknown input module %1 family type")).arg(module.device->strId()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Unknown input module %1 family type")).arg(module.device->strId()));
 
 				result = false;
 			}
@@ -1495,7 +1500,7 @@ namespace Builder
 
 		if (moduleSignalsCount != 128)
 		{
-			LOG_ERROR(m_log, QString(tr("AIM module must have 128 input signals")));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("AIM module must have 128 input signals")));
 			return false;
 		}
 
@@ -1544,7 +1549,8 @@ namespace Builder
 
 			if (boundSignals.count() > 1)
 			{
-				LOG_ERROR(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
 				result = false;
 				break;
 			}
@@ -1565,7 +1571,8 @@ namespace Builder
 
 				if (signal->dataSize() != SIZE_32BIT)
 				{
-					LOG_ERROR(m_log, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
 					RESULT_FALSE_BREAK
 				}
 
@@ -1633,7 +1640,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAifmDataToRegBuf(const Module& module)
 	{
-		LOG_WARNING(m_log, QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->strId()));
+		LOG_WARNING(m_log, IssuePrexif::NotDefined,
+					QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->strId()));
 
 		return true;
 	}
@@ -1719,7 +1727,8 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(appItem->guid()))
 		{
-			LOG_ERROR(m_log, QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()));
 			return false;
 		}
 
@@ -1756,7 +1765,8 @@ namespace Builder
 			{
 				if (connectedPinsCount > 1)
 				{
-					LOG_ERROR(m_log, QString(tr("More than one pin is connected to the input")));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("More than one pin is connected to the input")));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -1795,7 +1805,8 @@ namespace Builder
 					//
 					if (!m_outPinSignal.contains(connectedPinGuid))
 					{
-						LOG_ERROR(m_log, QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
 
 						ASSERT_RESULT_FALSE_BREAK
 					}
@@ -1805,7 +1816,8 @@ namespace Builder
 
 				if (!m_appSignals.contains(srcSignalGuid))
 				{
-					LOG_ERROR(m_log, QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -1833,7 +1845,8 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			LOG_ERROR(m_log, QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
 		}
 
 		return result;
@@ -1853,7 +1866,8 @@ namespace Builder
 
 			if (!constItem.isIntegral())
 			{
-				LOG_ERROR(m_log, QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()));
 
 				return false;
 			}
@@ -1888,7 +1902,8 @@ namespace Builder
 					}
 					else
 					{
-						LOG_ERROR(m_log, QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
 								  arg(constItem.floatValue()).arg(appSignal.strID()));
 					}
 					break;
@@ -1902,7 +1917,8 @@ namespace Builder
 					}
 					else
 					{
-						LOG_ERROR(m_log, QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
 								  arg(constItem.intValue()).arg(appSignal.strID()));
 					}
 					break;
@@ -1944,7 +1960,7 @@ namespace Builder
 				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
 						arg(srcSignal.strID()).arg(appSignal.strID());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -1954,7 +1970,7 @@ namespace Builder
 				msg = QString(tr("Signals %1 and %2 data formats are not compatible")).
 						arg(appSignal.strID()).arg(srcSignal.strID());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -1964,7 +1980,7 @@ namespace Builder
 				msg = QString(tr("Signals %1 and %2 have different data sizes")).
 						arg(appSignal.strID()).arg(srcSignal.strID());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -1978,7 +1994,7 @@ namespace Builder
 					msg = QString(tr("Analog signal %1 connected to discrete signal %2")).
 							arg(srcSignal.strID()).arg(appSignal.strID());
 
-					LOG_ERROR(m_log, msg);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 					return false;
 				}
@@ -1992,16 +2008,18 @@ namespace Builder
 
 		if (appSignal.dataFormat() != srcSignal.dataFormat())
 		{
-			LOG_ERROR(m_log, QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
-							  arg(srcSignal.strID()).arg(appSignal.strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
+					  arg(srcSignal.strID()).arg(appSignal.strID()));
 
 			return false;
 		}
 
 		if (appSignal.dataSize() != srcSignal.dataSize())
 		{
-			LOG_ERROR(m_log, QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
-							  arg(srcSignal.strID()).arg(appSignal.strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
+					  arg(srcSignal.strID()).arg(appSignal.strID()));
 
 			return false;
 		}
@@ -2016,15 +2034,17 @@ namespace Builder
 
 		if (srcRamAddrOffset == -1 || srcRamAddrBit == -1)
 		{
-			LOG_ERROR(m_log, QString(tr("Signal %1 RAM addreess is not calculated")).
-							  arg(srcSignal.strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signal %1 RAM addreess is not calculated")).
+					  arg(srcSignal.strID()));
 			return false;
 		}
 
 		if (destRamAddrOffset == -1 || destRamAddrBit == -1)
 		{
-			LOG_ERROR(m_log, QString(tr("Signal %1 RAM addreess is not calculated")).
-							  arg(appSignal.strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signal %1 RAM addreess is not calculated")).
+					  arg(appSignal.strID()));
 			return false;
 		}
 
@@ -2043,8 +2063,9 @@ namespace Builder
 				break;
 
 			default:
-				LOG_ERROR(m_log, QString(tr("Unknown data size of signal %1 - %2 bit")).
-								  arg(appSignal.strID()).arg(appSignal.dataSize()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Unknown data size of signal %1 - %2 bit")).
+						  arg(appSignal.strID()).arg(appSignal.dataSize()));
 				return false;
 			}
 		}
@@ -2137,7 +2158,8 @@ namespace Builder
 		{
 			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
 			{
-				LOG_ERROR(m_log, QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()));
 				RESULT_FALSE_BREAK
 			}
 
@@ -2147,7 +2169,7 @@ namespace Builder
 			{
 				if (connectedPinsCount > 1)
 				{
-					LOG_ERROR(m_log, QString(tr("More than one pin is connected to the input")));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("More than one pin is connected to the input")));
 
 					RESULT_FALSE_BREAK
 				}
@@ -2156,7 +2178,7 @@ namespace Builder
 
 				if (!m_pinParent.contains(connectedPinGuid))
 				{
-					LOG_ERROR(m_log, QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
@@ -2165,7 +2187,7 @@ namespace Builder
 
 				if (connectedPinParent == nullptr)
 				{
-					LOG_ERROR(m_log, QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()));
 					RESULT_FALSE_BREAK
 				}
 
@@ -2189,7 +2211,8 @@ namespace Builder
 					//
 					if (!m_outPinSignal.contains(connectedPinGuid))
 					{
-						LOG_ERROR(m_log, QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
 
 						RESULT_FALSE_BREAK
 					}
@@ -2199,7 +2222,7 @@ namespace Builder
 
 				if (!m_appSignals.contains(signalGuid))
 				{
-					LOG_ERROR(m_log, QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
@@ -2208,14 +2231,14 @@ namespace Builder
 
 				if (appSignal == nullptr)
 				{
-					LOG_ERROR(m_log, QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
 
 				if (!appSignal->isComputed())
 				{
-					LOG_ERROR(m_log, QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
 
 					RESULT_FALSE_BREAK
 				}
@@ -2270,7 +2293,7 @@ namespace Builder
 			//
 			if (!constItem.isIntegral())
 			{
-				LOG_ERROR(m_log, QString(tr("Floating point constant connected to discrete input")));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Floating point constant connected to discrete input")));
 			}
 			else
 			{
@@ -2345,7 +2368,7 @@ namespace Builder
 				msg = QString(tr("Discrete signal %1 connected to analog input '%2' of %3")).
 						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2355,7 +2378,7 @@ namespace Builder
 				msg = QString(tr("Signal %1 data format is not compatible with input '%2' data format of %3 ")).
 						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2366,7 +2389,7 @@ namespace Builder
 						arg(appSignal.strID()).arg(appSignal.dataSize()).
 						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2380,7 +2403,7 @@ namespace Builder
 					msg = QString(tr("Analog signal %1 connected to discrete input '%2' of %3")).
 							arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
 
-					LOG_ERROR(m_log, msg);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 					return false;
 				}
@@ -2399,7 +2422,8 @@ namespace Builder
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
-			LOG_ERROR(m_log, QString(tr("Address of signal '%1' is not calculated")).
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Address of signal '%1' is not calculated")).
 					  arg(appSignal.strID()));
 			return false;
 		}
@@ -2508,7 +2532,8 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(signalGuid))
 		{
-			LOG_ERROR(m_log, QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 			return false;
 		}
 
@@ -2537,7 +2562,7 @@ namespace Builder
 				msg = QString(tr("Analog output %1.%2 connected to discrete signal %3")).
 						arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2547,7 +2572,7 @@ namespace Builder
 				msg = QString(tr("Signal %1 data format is not compatible with output '%2' data format of %3 ")).
 						arg(appSignal->strID()).arg(afbSignal.caption()).arg(appFb.caption());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2558,7 +2583,7 @@ namespace Builder
 						arg(appSignal->strID()).arg(appSignal->dataSize()).
 						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
 
-				LOG_ERROR(m_log, msg);
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 				return false;
 			}
@@ -2572,7 +2597,7 @@ namespace Builder
 					msg = QString(tr("Discrete output %1.%2 connected to analog signal %3")).
 							arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
 
-					LOG_ERROR(m_log, msg);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 					return false;
 				}
@@ -2591,7 +2616,7 @@ namespace Builder
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
-			LOG_ERROR(m_log, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->strID()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->strID()));
 			return false;
 		}
 		else
@@ -2694,7 +2719,7 @@ namespace Builder
 				//
 				assert(false);
 
-				LOG_ERROR(m_log, tr("Unknown output module family type"));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Unknown output module family type"));
 
 				result = false;
 			}
@@ -2717,7 +2742,8 @@ namespace Builder
 
         if (lmChassis == nullptr)
         {
-            LOG_ERROR(m_log, QString(tr("LM (%1) must be installed in the chassis")).arg(m_lm->strId()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("LM (%1) must be installed in the chassis")).arg(m_lm->strId()));
             return false;
         }
 
@@ -2745,7 +2771,8 @@ namespace Builder
 
             if (port == nullptr)
             {
-                LOG_ERROR(m_log, QString(tr("OCM port '%1' is not found (serial connection '%2')")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("OCM port '%1' is not found (serial connection '%2')")).
                           arg(connection->ocmPortStrID().
                           arg(connection->caption())));
                 return false;
@@ -2755,7 +2782,8 @@ namespace Builder
 
             if (ocmChassis == nullptr)
             {
-                LOG_ERROR(m_log, QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
                           arg(connection->ocmPortStrID().
                           arg(connection->caption())));
                 return false;
@@ -2788,7 +2816,8 @@ namespace Builder
         {
             if (m_signalsStrID.contains(signalStrID) == false)
             {
-                LOG_ERROR(m_log, QString(tr("Signal '%1' is not found (serial connection '%2)")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Signal '%1' is not found (serial connection '%2)")).
                           arg(signalStrID).arg(connection->caption()));
                 result &= false;
             }
@@ -2870,7 +2899,7 @@ namespace Builder
 
 		if (moduleSignalsCount != 32)
 		{
-			LOG_ERROR(m_log, QString(tr("AOM module must have 32 output signals")));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("AOM module must have 32 output signals")));
 			return false;
 		}
 
@@ -2904,7 +2933,7 @@ namespace Builder
 
 			if (boundSignals.count() > 1)
 			{
-				LOG_ERROR(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
 				result = false;
 				break;
 			}
@@ -2925,7 +2954,7 @@ namespace Builder
 
 				if (signal->dataSize() != SIZE_32BIT)
 				{
-					LOG_ERROR(m_log, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
 					RESULT_FALSE_BREAK
 				}
 
@@ -3020,7 +3049,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(m_log, QString(tr("Code runtime calculcation error!")))
+			LOG_ERROR(m_log, IssuePrexif::NotDefined, QString(tr("Code runtime calculcation error!")))
 		}
 
 		return result;
@@ -3180,7 +3209,7 @@ namespace Builder
 					Signal* s = getSignal(signalId);
 					if (s == nullptr)
 					{
-						LOG_ERROR(m_log, tr("Signal %1 listed in OCM connections not found in database").arg(signalId));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Signal %1 listed in OCM connections not found in database").arg(signalId));
 						continue;
 					}
 					connectionSignalList << s;
@@ -3300,25 +3329,29 @@ namespace Builder
 
 				if (fb.x1ParamIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required parameter 'InputLow' of AFB %1 is not found")).arg(fb.caption))
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required parameter 'InputLow' of AFB %1 is not found")).arg(fb.caption))
 					result = false;
 				}
 
 				if (fb.x2ParamIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required parameter 'InputHigh' of AFB %1 is not found")).arg(fb.caption))
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required parameter 'InputHigh' of AFB %1 is not found")).arg(fb.caption))
 					result = false;
 				}
 
 				if (fb.y1ParamIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required parameter 'OutputLow' of AFB %1 is not found")).arg(fb.caption))
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required parameter 'OutputLow' of AFB %1 is not found")).arg(fb.caption))
 					result = false;
 				}
 
 				if (fb.y2ParamIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required parameter 'OutputHigh' of AFB %1 is not found")).arg(fb.caption))
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required parameter 'OutputHigh' of AFB %1 is not found")).arg(fb.caption))
 					result = false;
 				}
 
@@ -3338,7 +3371,8 @@ namespace Builder
 
 				if (fb.inputSignalIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required input signal %1 of AFB %2 is not found")).
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required input signal %1 of AFB %2 is not found")).
 							  arg(FB_SCALE_INPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
@@ -3355,7 +3389,8 @@ namespace Builder
 
 				if (fb.outputSignalIndex == -1)
 				{
-					LOG_ERROR(m_log, QString(tr("Required output signal %1 of AFB %2 is not found")).
+					LOG_ERROR(m_log, IssuePrexif::NotDefined,
+							  QString(tr("Required output signal %1 of AFB %2 is not found")).
 							  arg(FB_SCALE_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
@@ -3366,7 +3401,8 @@ namespace Builder
 
 			if (fbFound == false)
 			{
-				LOG_ERROR(m_log, QString(tr("Required AFB %1 is not found")).arg(fbCaption));
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Required AFB %1 is not found")).arg(fbCaption));
 				result = false;
 				break;
 			}
@@ -3408,7 +3444,8 @@ namespace Builder
 
 				if (boundSignals.count() > 1)
 				{
-					LOG_WARNING(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+					LOG_WARNING(m_log, IssuePrexif::NotDefined,
+								QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
 				}
 
 				for(Signal* signal : boundSignals)
@@ -3437,12 +3474,14 @@ namespace Builder
 						break;
 
 					case E::SignalInOutType::Internal:
-						LOG_ERROR(m_log, QString(tr("Internal signal %1 can not be connected to device signal. Connect this signal to appropriate LM module or change its type to Input or Output")).
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Internal signal %1 can not be connected to device signal. Connect this signal to appropriate LM module or change its type to Input or Output")).
 								  arg(signal->strID()));
 						break;
 
 					default:
-						LOG_ERROR(m_log, QString(tr("Unknown inOutType of signal %1.")).
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Unknown inOutType of signal %1.")).
 								  arg(signal->strID()));
 					}
 
@@ -3475,7 +3514,8 @@ namespace Builder
 
 		if (x2 - x1 == 0)
 		{
-			LOG_ERROR(m_log, QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
 			return nullptr;
 		}
 
@@ -3517,7 +3557,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
 					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
 		}
 
@@ -3536,7 +3577,8 @@ namespace Builder
 
 		if (x2 - x1 == 0.0)
 		{
-			LOG_ERROR(m_log, QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
 			return nullptr;
 		}
 
@@ -3578,7 +3620,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
 					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
 		}
 
@@ -3614,7 +3657,7 @@ namespace Builder
 					msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
 							arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
 
-					LOG_ERROR(m_log, msg);
+					LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 					result = false;
 
@@ -3640,7 +3683,7 @@ namespace Builder
 						msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
 								arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-						LOG_ERROR(m_log, msg);
+						LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 						result = false;
 
@@ -3661,7 +3704,7 @@ namespace Builder
 						msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
 								arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-						LOG_ERROR(m_log, msg);
+						LOG_ERROR(m_log, IssuePrexif::NotDefined, msg);
 
 						result = false;
 
@@ -3740,7 +3783,7 @@ namespace Builder
 			if (m_signalsStrID.contains(s->strID()))
 			{
 				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
-				LOG_WARNING(m_log, msg);
+				LOG_WARNING(m_log, IssuePrexif::NotDefined, msg);
 			}
 			else
 			{
@@ -3882,7 +3925,7 @@ namespace Builder
 
 				if (boundSignals.count() > 1)
 				{
-					LOG_WARNING(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+					LOG_WARNING(m_log, IssuePrexif::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
 				}
 
 				for(Signal* signal : boundSignals)
@@ -3903,7 +3946,8 @@ namespace Builder
 					{
 						if (signalOffset >= module.appLogicDataSize)
 						{
-							LOG_ERROR(m_log, QString(tr("Signal %1 offset out of module application data size")).arg(signal->strID()));
+							LOG_ERROR(m_log, IssuePrexif::NotDefined,
+									  QString(tr("Signal %1 offset out of module application data size")).arg(signal->strID()));
 
 							result = false;
 						}
@@ -3967,7 +4011,8 @@ namespace Builder
 					}
 					else
 					{
-						LOG_ERROR(m_log, QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()));
+						LOG_ERROR(m_log, IssuePrexif::NotDefined,
+								  QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()));
 
 						result = false;
 					}
@@ -4079,7 +4124,8 @@ namespace Builder
 
 		if (val.isValid() == false)
 		{
-			LOG_ERROR(m_log, QString(tr("Property %1 is not found in device %2")).arg(name).arg(device->strId()));
+			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Property %1 is not found in device %2")).arg(name).arg(device->strId()));
 			return false;
 		}
 
@@ -4510,7 +4556,8 @@ namespace Builder
 			}
 		}
 
-		LOG_ERROR(m_log, QString(tr("Not found parameter with opIndex = %1 int FB %2")).arg(index).arg(caption()));
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Not found parameter with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
 		return false;
 	}
@@ -4541,7 +4588,8 @@ namespace Builder
 			}
 		}
 
-		LOG_ERROR(m_log, QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
 		return false;
 	}
@@ -4596,7 +4644,8 @@ namespace Builder
 		{
 			if (m_paramValuesArray.contains(opName) == false)
 			{
-				LOG_ERROR(m_log, QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
+				LOG_ERROR(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
 						  arg(opName).arg(caption()).arg(typeCaption()));
 				result = false;
 			}
@@ -4613,7 +4662,8 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt")).
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt")).
 				  arg(paramValue.opName()).arg(afb().caption()));
 
 		return false;
@@ -4627,7 +4677,8 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt16")).
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt16")).
 				  arg(paramValue.opName()).arg(afb().caption()));
 
 		return false;
@@ -4641,7 +4692,8 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt32")).
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt32")).
 				  arg(paramValue.opName()).arg(afb().caption()));
 
 		return false;
@@ -4655,7 +4707,8 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Parameter '%1' of FB '%2' must have type SignedInt32")).
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Parameter '%1' of FB '%2' must have type SignedInt32")).
 				  arg(paramValue.opName()).arg(afb().caption()));
 
 		return false;
@@ -4669,7 +4722,8 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Parameter '%1' of FB '%2' must have type Float32")).
+		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Parameter '%1' of FB '%2' must have type Float32")).
 				  arg(paramValue.opName()).arg(afb().caption()));
 
 		return false;
@@ -4819,7 +4873,7 @@ namespace Builder
 		{
 			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
 
-			LOG_ERROR(m_compiler.log(), msg);
+			LOG_ERROR(m_compiler.log(), IssuePrexif::NotDefined, msg);
 
 			return false;
 		}
