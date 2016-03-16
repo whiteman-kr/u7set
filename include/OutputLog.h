@@ -6,8 +6,8 @@
 
 #define LOG_EMPTY_LINE(logObject)	logObject->writeEmptyLine();
 
-#define LOG_ERROR(logObject, prefix, message)	logObject->writeError(prefix, message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_WARNING(logObject, prefix, message)	logObject->writeWarning(prefix, message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_ERROR_OBSOLETE(logObject, prefix, message)		logObject->writeError(message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, Q_FUNC_INFO);
 
@@ -20,18 +20,6 @@ enum class OutputMessageLevel
 	Success,
 	Warning,
 	Error
-};
-
-enum class IssuePrexif
-{
-	NotDefined,
-	Common,
-	Internal,
-	ProjectDatabase,
-	FscConfiguration,
-	AlParsing,
-	AlCompiler,
-	Equipment
 };
 
 class OutputLogItem
@@ -82,16 +70,16 @@ public:
 	Q_INVOKABLE void writeMessage(const QString& str);
 	Q_INVOKABLE void writeSuccess(const QString& str);
 	Q_INVOKABLE void writeWarning(const QString& str);
-	Q_INVOKABLE void writeWarning(IssuePrexif prefix, const QString& str);
+	Q_INVOKABLE void writeWarning(QString issue, const QString& str);
 	Q_INVOKABLE void writeError(const QString& str);
-	Q_INVOKABLE void writeError(IssuePrexif prefix, const QString& str);
+	Q_INVOKABLE void writeError(QString issue, const QString& str);
 
 	Q_INVOKABLE void writeMessage(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeSuccess(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeWarning(const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeWarning(IssuePrexif prefix, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning(QString issue, const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeError(const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeError(IssuePrexif prefix, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeError(QString issue, const QString& str, QString file, int fileLine, QString func);
 
     Q_INVOKABLE void writeDump(const std::vector<quint8> &data);
 	Q_INVOKABLE void writeEmptyLine();
@@ -101,8 +89,6 @@ public:
 
 	void startStrLogging();
 	QString finishStrLogging();
-
-	static QString issuePrefixToString(IssuePrexif prefix);
 
 	// Signals
 	//

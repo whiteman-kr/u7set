@@ -1,7 +1,8 @@
 #include "Parser.h"
 
+#include "IssueLogger.h"
+
 #include "../../include/DbController.h"
-#include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
 
 #include "../../VFrame30/LogicScheme.h"
@@ -272,7 +273,7 @@ namespace Builder
 	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 			const BushContainer& bushContainer,
 			Afb::AfbElementCollection* afbCollection,
-			OutputLog* log)
+			IssueLogger* log)
 	{
 		if (logicScheme == nullptr ||
 			log == nullptr ||
@@ -286,7 +287,7 @@ namespace Builder
 
 		if (bushContainer.bushes.empty() == true)
 		{
-			LOG_WARNING(log, IssuePrexif::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
 			return true;
 		}
 
@@ -307,7 +308,7 @@ namespace Builder
 					if (afbElement == nullptr)
 					{
 						assert(afbElement != nullptr);
-						LOG_ERROR(log, IssuePrexif::NotDefined,
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 								  QObject::tr("%1 does not have Afb description, scheme: %2, element: %3")
 								  .arg(f->buildName())
 								  .arg(logicScheme->strID())
@@ -326,7 +327,7 @@ namespace Builder
 		return result;
 	}
 
-	bool AppLogicModule::orderItems(OutputLog* log)
+	bool AppLogicModule::orderItems(IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -397,7 +398,7 @@ namespace Builder
 			// Imposible set exucution order for branch, there is no first item,
 			// firts item can be item without inputs
 			//
-			LOG_ERROR(log, IssuePrexif::NotDefined, tr("There is no start point for the logic scheme branch"));
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined, tr("There is no start point for the logic scheme branch"));
 
 			result = false;
 			return result;
@@ -521,7 +522,7 @@ namespace Builder
 			//
 			for (const AppLogicItem& item : fblItems)
 			{
-				LOG_ERROR(log, IssuePrexif::NotDefined,
+				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 						  tr("%1 was not processed").arg(item.m_fblItem->buildName()));
 			}
 
@@ -575,7 +576,7 @@ namespace Builder
 		return result;
 	}
 
-	bool AppLogicModule::setInputOutputsElementsConnection(OutputLog* log)
+	bool AppLogicModule::setInputOutputsElementsConnection(IssueLogger* log)
 	{
 		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
@@ -614,7 +615,7 @@ namespace Builder
 
 				if (signalOutputItems.contains(signalStrId) == true)
 				{
-					LOG_ERROR(log, IssuePrexif::NotDefined,
+					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 							  QObject::tr("%1 has duplicate StrId, element1: %2, element2:%3, StrId: %4")
 							  .arg(signalElement->buildName())
 							  .arg(signalElement->guid().toString())
@@ -797,12 +798,11 @@ namespace Builder
 	}
 
 
-	bool AppLogicData::addData(
-			const BushContainer& bushContainer,
+	bool AppLogicData::addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
-			OutputLog* log)
+			IssueLogger* log)
 	{
 		if (bushContainer.bushes.empty() == true)
 		{
@@ -859,7 +859,7 @@ namespace Builder
 	}
 
 
-	bool AppLogicData::orderItems(OutputLog* log)
+	bool AppLogicData::orderItems(IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -904,7 +904,7 @@ namespace Builder
 
 
 	Parser::Parser(DbController* db,
-				   OutputLog* log,
+				   IssueLogger* log,
 				   AppLogicData* appLogicData,
 				   Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipmentSet,
 				   int changesetId,
@@ -962,7 +962,7 @@ namespace Builder
 				if (deviceStrIds.isEmpty() == true)
 				{
 					QString message = tr("DeviceStrIds is not set for scheme %1").arg(scheme->strID());
-					LOG_WARNING(m_log, IssuePrexif::NotDefined, message);
+					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
 					continue;
 				}
 
@@ -973,14 +973,14 @@ namespace Builder
 					if (device == nullptr)
 					{
 						QString message = tr("Cannot find HardwareStrId %1 for scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING(m_log, IssuePrexif::NotDefined, message);
+						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
 						continue;
 					}
 
 					if (device->isModule() == false)
 					{
 						QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING(m_log, IssuePrexif::NotDefined, message);
+						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
 						continue;
 					}
 					else
@@ -993,7 +993,7 @@ namespace Builder
 						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
 						{
 							QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-							LOG_WARNING(m_log, IssuePrexif::NotDefined, message);
+							LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
 							continue;
 						}
 					}
@@ -1061,7 +1061,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Cannot get application logic file list."));
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file list."));
 			return false;
 		}
 
@@ -1091,7 +1091,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("Cannot get application logic file instances."));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file instances."));
 				return false;
 			}
 
@@ -1102,13 +1102,13 @@ namespace Builder
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-				LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("File loading error."));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("File loading error."));
 				return false;
 			}
 
 			if (ls->excludeFromBuild() == true)
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, tr("Scheme %1 excluded from build.").arg(ls->strID()));
+				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Scheme %1 excluded from build.").arg(ls->strID()));
 				continue;
 			}
 			else
@@ -1155,7 +1155,7 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			LOG_ERROR(m_log, IssuePrexif::NotDefined, tr("There is no compile layer in the scheme."));
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("There is no compile layer in the scheme."));
 			return false;
 		}
 
@@ -1181,7 +1181,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(log(), IssuePrexif::NotDefined, tr("Finding bushes error."));
+			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("Finding bushes error."));
 			return false;
 		}
 
@@ -1191,7 +1191,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(log(), IssuePrexif::NotDefined, "setBranchConnectionToPin function error.");
+			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, "setBranchConnectionToPin function error.");
 			return false;
 		}
 
@@ -1205,7 +1205,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(log(), IssuePrexif::NotDefined, tr("Internal error: Cannot set data to ApplicationLogicData."));
+			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("Internal error: Cannot set data to ApplicationLogicData."));
 			return false;
 		}
 
@@ -1431,7 +1431,7 @@ namespace Builder
 					assert(schemeItem);
 					assert(link);
 
-					LOG_ERROR(log(), IssuePrexif::NotDefined, tr("%1 Internal error, expected VFrame30::SchemeItemLink").arg(__FUNCTION__));
+					LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("%1 Internal error, expected VFrame30::SchemeItemLink").arg(__FUNCTION__));
 					return false;
 				}
 
@@ -1440,7 +1440,7 @@ namespace Builder
 				if (pointList.size() < 2)
 				{
 					assert(pointList.size() >= 2);
-					LOG_ERROR(log(), IssuePrexif::NotDefined,
+					LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 							  tr("%1 Internal error, Link has less the two points").arg(__FUNCTION__));
 					return false;
 				}
@@ -1525,7 +1525,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						LOG_ERROR(log(), IssuePrexif::NotDefined,
+						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicScheme %1: %2 has unconnected pin %3")
 								  .arg(scheme->caption())
 								  .arg(fblItem->buildName())
@@ -1552,7 +1552,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						LOG_ERROR(log(), IssuePrexif::NotDefined,
+						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicScheme %1: %2 has unconnected pin %3")
 								  .arg(scheme->caption())
 								  .arg(fblItem->buildName())
@@ -1567,10 +1567,9 @@ namespace Builder
 
 					if (bushContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
-						LOG_ERROR(log(), IssuePrexif::NotDefined,
-								  tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
-								  .arg(scheme->caption())
-								  .arg(layer->name()));
+						// Branch has multiple outputs.
+						//
+						log()->errALP4000(scheme->caption());
 
 						result = false;
 						continue;
@@ -1636,7 +1635,7 @@ namespace Builder
 						//
 						assert(false);
 
-						LOG_ERROR(log(), IssuePrexif::NotDefined,
+						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
 								  .arg(scheme->caption())
 								  .arg(__FUNCTION__));
@@ -1674,7 +1673,7 @@ namespace Builder
 						//
 						assert(false);
 
-						LOG_ERROR(log(), IssuePrexif::NotDefined,
+						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
 								  .arg(scheme->caption())
 								  .arg(__FUNCTION__));
@@ -1701,7 +1700,7 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			LOG_WARNING(log(), IssuePrexif::NotDefined,
+			LOG_WARNING_OBSOLETE(log(), Builder::IssueType::NotDefined,
 						QString("Empty logic scheme %1, functional blocks were not found.").arg(scheme->strID()));
 			return true;
 		}
@@ -1730,7 +1729,7 @@ namespace Builder
 					}
 				}
 
-				LOG_ERROR(log(), IssuePrexif::NotDefined,
+				LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 						  tr("Input is not defined, for items: %1").arg(strItems));
 			}
 
@@ -1746,7 +1745,7 @@ namespace Builder
 					{
 						if (out.associatedIOs().empty() == true)
 						{
-							LOG_ERROR(log(), IssuePrexif::NotDefined,
+							LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 									  tr("%1 has unconnected pin %2").arg(item->buildName()).arg(out.caption()));
 						}
 					}
@@ -1763,7 +1762,7 @@ namespace Builder
 		return m_db;
 	}
 
-	OutputLog* Parser::log() const
+	IssueLogger* Parser::log() const
 	{
 		return m_log;
 	}

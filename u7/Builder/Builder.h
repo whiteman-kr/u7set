@@ -5,12 +5,12 @@
 #include "Subsystem.h"
 #include "Connection.h"
 #include "../Builder/BuildResultWriter.h"
+#include "../Builder/IssueLogger.h"
 
 // Forware declarations
 //
 
 class QThread;
-class OutputLog;
 class DbController;
 
 
@@ -120,7 +120,7 @@ namespace Builder
 		QString serverPassword() const;
 		void setServerPassword(const QString& value);
 
-		void setOutputLog(OutputLog* value);
+		void setIssueLog(IssueLogger* value);
 
 		QString projectUserName() const;
 		void setProjectUserName(const QString& value);
@@ -148,9 +148,9 @@ namespace Builder
 		QString m_projectUserName;
 		QString m_projectUserPassword;
 
-		bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
+		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 
-		OutputLog* m_log = nullptr;					// Probably it's better to make it as shared_ptr
+		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 	};
 
 
@@ -165,7 +165,7 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		Builder(OutputLog* log);
+		Builder(IssueLogger* log);
 		virtual ~Builder();
 
 		// Public methods
@@ -204,7 +204,7 @@ namespace Builder
 		//
 	private:
 		BuildWorkerThread* m_thread = nullptr;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 	};
 
 }

@@ -9,7 +9,6 @@
 // Forware delcarations
 //
 class QThread;
-class OutputLog;
 class DbController;
 
 namespace Hardware
@@ -36,6 +35,7 @@ namespace Afb
 
 namespace Builder
 {
+	class IssueLogger;
 
 	struct Link
 	{
@@ -119,14 +119,14 @@ namespace Builder
 		bool addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 					   const BushContainer& bushContainer,
 					   Afb::AfbElementCollection* afbCollection,
-					   OutputLog* log);
+					   IssueLogger* log);
 
-		bool orderItems(OutputLog* log);
+		bool orderItems(IssueLogger* log);
 
 	private:
 		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
-		bool setInputOutputsElementsConnection(OutputLog* log);
+		bool setInputOutputsElementsConnection(IssueLogger* log);
 
 		template<typename Iter>
 		std::list<AppLogicItem> getItemsWithInput(
@@ -167,9 +167,9 @@ namespace Builder
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
-			OutputLog* log);
+			IssueLogger* log);
 
-		bool orderItems(OutputLog* log);
+		bool orderItems(IssueLogger* log);
 
 		// Properties
 		//
@@ -194,7 +194,7 @@ namespace Builder
 	public:
 		Parser() = delete;
 		Parser(DbController* db,
-			   OutputLog* log,
+			   IssueLogger* log,
 			   AppLogicData* appLogicData,
 			   Afb::AfbElementCollection* afbCollection,
 			   Hardware::EquipmentSet* equipmentSet,
@@ -227,7 +227,7 @@ namespace Builder
 
 	private:
 		DbController* db();
-		OutputLog* log() const;
+		IssueLogger* log() const;
 		int changesetId() const;
 
 		bool debug() const;
@@ -238,7 +238,7 @@ namespace Builder
 
 	private:
 		DbController* m_db = nullptr;
-		mutable OutputLog* m_log = nullptr;
+		mutable IssueLogger* m_log = nullptr;
 		int m_changesetId = 0;
 		int m_debug = false;
 

@@ -229,7 +229,7 @@ void BuildTabPage::build()
 	}
 	else
 	{
-		LOG_WARNING((&m_outputLog), IssuePrexif::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
+		LOG_WARNING_OBSOLETE((&m_outputLog), Builder::IssueType::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
 	}
 
 	// --

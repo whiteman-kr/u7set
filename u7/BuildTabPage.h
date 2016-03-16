@@ -1,6 +1,7 @@
 #pragma once
 #include "MainTabPage.h"
 #include "./Builder/Builder.h"
+#include "./Builder/IssueLogger.h"
 #include "../include/DeviceObject.h"
 #include "../include/OutputLog.h"
 
@@ -69,7 +70,7 @@ private:
 	QWidget* m_settingsWidget = nullptr;
 	QCheckBox* m_debugCheckBox = nullptr;
 
-	OutputLog m_outputLog;
+	Builder::IssueLogger m_outputLog;
 	int m_logTimerId = -1;
 
 	QFile m_logFile;

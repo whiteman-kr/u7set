@@ -38,7 +38,7 @@ namespace Builder
 
 		if (m_cfgXml == nullptr)
 		{
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Can't create 'configuration.xml' file for software %1")).
 					  arg(m_software->strId()));
 			return false;
@@ -69,7 +69,7 @@ namespace Builder
 
 		default:
 			assert(false);
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Unknown type of software %1")).arg(m_software->strId()));
 			result = false;
 		}
@@ -138,42 +138,42 @@ namespace Builder
 
 			if (!dataFormatInfo.contains(signal.dataFormatInt()))
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.unitID()))
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.inputUnitID()))
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.outputUnitID()))
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (signal.inputSensorID() < 0 || signal.inputSensorID() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (signal.outputSensorID() < 0 || signal.outputSensorID() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 			if (signal.inOutType() < 0 || signal.inOutType() >= IN_OUT_TYPE_COUNT)
 			{
-				LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
 				hasWrongField = true;
 			}
 
@@ -183,7 +183,7 @@ namespace Builder
 				case E::ByteOrder::BigEndian:
 					break;
 				default:
-					LOG_WARNING(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
+					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
 					hasWrongField = true;
 			}
 
