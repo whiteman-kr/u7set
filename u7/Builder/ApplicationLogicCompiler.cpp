@@ -2769,20 +2769,32 @@ namespace Builder
             // this connection must be processed in this LM
             //
 
-            result &= generateRS232ConectionCode(connection);
+            result &= generateRS232ConectionCode(connection, port);
         }
 
         return result;
     }
 
 
-    bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection)
+    bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::DeviceObject* port)
     {
+        if (port == nullptr)
+        {
+            assert(false);
+            return false;
+        }
+
         // build analog and discrete signals list
         //
         QStringList& signslList = connection->signalList();
 
         bool result = false;
+
+        HashedVector<QString, Signal*> analogSignals;
+        HashedVector<QString, Signal*> discreteSignals;
+
+        int analogSgnalsSizeW = 0;
+        int discreteSignalsSizeBit = 0;
 
         for(QString signalStrID : signslList)
         {
@@ -2791,6 +2803,29 @@ namespace Builder
                 LOG_ERROR(m_log, QString(tr("Signal '%1' is not found (serial connection '%2)")).
                           arg(signalStrID).arg(connection->caption()));
                 result &= false;
+                continue;
+            }
+
+            Signal* signal = m_signalsStrID[signalStrID];
+
+            if (signal == nullptr)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                result &= false;
+                continue;
+            }
+
+            if (signal->isAnalog())
+            {
+                analogSignals.insert(signalStrID, signal);
+
+                analogSgnalsSizeW += signal->dataSize() / WORD_SIZE;
+            }
+            else
+            {
+                discreteSignals.insert(signalStrID, signal);
+
+                discreteSignalsSizeBit++;
             }
         }
 
@@ -2798,6 +2833,8 @@ namespace Builder
         {
             return result;
         }
+
+        int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
 
         return result;
     }
