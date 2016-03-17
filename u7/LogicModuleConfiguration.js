@@ -1393,7 +1393,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			}
 	
 			var checkProperties = ["Caption", "OcmPortStrID", "Device1StrID", "Device2StrID", 
-			"Enable", "EnableDuplex", "ConnectionMode",
+			"Enable", "EnableDuplex", "SerialMode",
 			"Device1TxWordsQuantity", "Device1TxRxOptoID", "Device1RxWordsQuantity", "Device1TxRxOptoDataUID", "Device1TxRsID", "Device1TxRsDataUID", 
 			"Device2TxWordsQuantity", "Device2TxRxOptoID", "Device2RxWordsQuantity", "Device2TxRxOptoDataUID", "Device2TxRsID", "Device2TxRsDataUID" ];
 
@@ -1545,7 +1545,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				}
 				
 				var txStandard = Mode_RS232;	//0 - rs232, 1 - rs485
-				if (connection.propertyValue("ConnectionMode") == Mode_RS485)
+				if (connection.propertyValue("SerialMode") == Mode_RS485)
 				{
 					txStandard = Mode_RS485;
 				}
