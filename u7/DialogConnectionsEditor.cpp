@@ -59,8 +59,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     QStringList l;
     l << tr("ID");
     l << tr("Caption");
-    l << tr("Device1 StrID");
-    l << tr("Device2 StrID");
+    l << tr("Port1 StrID");
+    l << tr("Port2 StrID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
@@ -106,8 +106,8 @@ void DialogConnectionsEditor::fillConnectionsList()
 
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                     connection->caption() <<
-                                                    connection->device1StrID() <<
-													connection->device2StrID());
+                                                    connection->port1StrID() <<
+                                                    connection->port2StrID());
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
     }
@@ -192,16 +192,16 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         return;
     }
     connection->setCaption("New Connection");
-    connection->setDevice1StrID("SYS_RACKID_CHID_MD_PORT1");
-    connection->setDevice2StrID("SYS_RACKID_CHID_MD_PORT2");
+    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+    connection->setPort2StrID("SYSTEMID_RACKID_CHID_MD00_PORT02");
     connection->setEnable(true);
 
     connections.add(connection);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                 connection->caption() <<
-                                                connection->device1StrID() <<
-												connection->device2StrID());
+                                                connection->port1StrID() <<
+                                                connection->port2StrID());
     item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
     ui->m_list->insertTopLevelItem(index, item);
 

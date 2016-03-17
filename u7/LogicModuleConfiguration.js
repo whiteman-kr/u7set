@@ -37,6 +37,9 @@ var Mode_420mA = 1;
 var Mode_10V = 2;
 var Mode_05mA = 3;
 
+var Mode_Optical = 0;
+var Mode_Serial = 1;
+
 var Mode_RS232 = 0;
 var Mode_RS485 = 1;
 
@@ -1392,10 +1395,10 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				continue;
 			}
 	
-			var checkProperties = ["Caption", "OcmPortStrID", "Device1StrID", "Device2StrID", 
-			"Enable", "EnableDuplex", "SerialMode",
-			"Device1TxWordsQuantity", "Device1TxRxOptoID", "Device1RxWordsQuantity", "Device1TxRxOptoDataUID", "Device1TxRsID", "Device1TxRsDataUID", 
-			"Device2TxWordsQuantity", "Device2TxRxOptoID", "Device2RxWordsQuantity", "Device2TxRxOptoDataUID", "Device2TxRsID", "Device2TxRsDataUID" ];
+			var checkProperties = ["Caption", "Port1StrID", "Port2StrID", 
+			"Enable", "EnableDuplex", "SerialMode", "Mode",
+			"Port1TxWordsQuantity", "Port1TxRxOptoID", "Port1RxWordsQuantity", "Port1TxRxOptoDataUID", "Port1TxRsID", "Port1TxRsDataUID", 
+			"Port2TxWordsQuantity", "Port2TxRxOptoID", "Port2RxWordsQuantity", "Port2TxRxOptoDataUID", "Port2TxRsID", "Port2TxRsDataUID" ];
 
 			for (var cp = 0; cp < checkProperties.length; cp++)
 			{
@@ -1409,7 +1412,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			var deviceNo = -1;
 			var rsConnection = false;
 		
-            if (controller.propertyValue("StrID") == connection.propertyValue("OcmPortStrID"))
+            if (controller.propertyValue("Mode") == Mode_Serial)
 			{
 				// this is rs connection
 				//
@@ -1420,13 +1423,13 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			{
 				// this is optical connection
 				//
-				if (controller.propertyValue("StrID") == connection.propertyValue("Device1StrID"))
+				if (controller.propertyValue("StrID") == connection.propertyValue("Port1StrID"))
 				{
 					deviceNo = 1;
 				}
 				else
 				{
-					if (controller.propertyValue("StrID") == connection.propertyValue("Device2StrID"))
+					if (controller.propertyValue("StrID") == connection.propertyValue("Port2StrID"))
 					{
 						deviceNo = 2;
 					}
@@ -1444,15 +1447,15 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			if (rsConnection == true)
 			{
 				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Rs connection  ID = " + connection.propertyValue("Caption") + ":" + 
-                    connection.propertyValue("OcmPortStrID") + "\r\n");
+                    connection.propertyValue("Port1StrID") + "\r\n");
 			}
 			else
 			{
 				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Opto connection device No " + deviceNo + " ID = " + connection.propertyValue("Caption") + ":" + 
-					connection.propertyValue("Device1StrID") + " <=> " + connection.propertyValue("Device2StrID") + "\r\n");	
+					connection.propertyValue("Port1StrID") + " <=> " + connection.propertyValue("Port2StrID") + "\r\n");	
 			}
 					
-			var deviceName = "Device" + deviceNo;
+			var deviceName = "Port" + deviceNo;
 
 			var ptr = 0 + p * 2;
 			var value = txStartAddress;

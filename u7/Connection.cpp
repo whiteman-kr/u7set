@@ -13,29 +13,28 @@ namespace Hardware
 	Connection::Connection()
 	{
 		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(QString, Device1StrID, true, Connection::device1StrID, Connection::setDevice1StrID);
-		ADD_PROPERTY_GETTER_SETTER(QString, Device2StrID, true, Connection::device2StrID, Connection::setDevice2StrID);
+        ADD_PROPERTY_GETTER_SETTER(QString, Port1StrID, true, Connection::port1StrID, Connection::setPort1StrID);
+        ADD_PROPERTY_GETTER_SETTER(QString, Port2StrID, true, Connection::port2StrID, Connection::setPort2StrID);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, OcmPortStrID, false, Connection::ocmPortStrID, Connection::setOcmPortStrID);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1TxWordsQuantity, true, Connection::port1TxWordsQuantity, Connection::setPort1TxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1RxWordsQuantity, true, Connection::port1RxWordsQuantity, Connection::setPort1RxWordsQuantity);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device1TxWordsQuantity, true, Connection::device1TxWordsQuantity, Connection::setDevice1TxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Device1RxWordsQuantity, true, Connection::device1RxWordsQuantity, Connection::setDevice1RxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1TxRxOptoID, false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRxOptoDataUID, false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device1TxRxOptoID, false, Connection::device1TxRxOptoID, Connection::setDevice1TxRxOptoID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device1TxRxOptoDataUID, false, Connection::device1TxRxOptoDataUID, Connection::setDevice1TxRxOptoDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1TxRsID, false, Connection::port1TxRsID, Connection::setPort1TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRsDataUID, false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device1TxRsID, false, Connection::device1TxRsID, Connection::setDevice1TxRsID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device1TxRsDataUID, false, Connection::device1TxRsDataUID, Connection::setDevice1TxRsDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2TxWordsQuantity, true, Connection::port2TxWordsQuantity, Connection::setPort2TxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2RxWordsQuantity, true, Connection::port2RxWordsQuantity, Connection::setPort2RxWordsQuantity);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device2TxWordsQuantity, true, Connection::device2TxWordsQuantity, Connection::setDevice2TxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Device2RxWordsQuantity, true, Connection::device2RxWordsQuantity, Connection::setDevice2RxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2TxRxOptoID, false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Port2TxRxOptoDataUID, false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device2TxRxOptoID, false, Connection::device2TxRxOptoID, Connection::setDevice2TxRxOptoID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRxOptoDataUID, false, Connection::device2TxRxOptoDataUID, Connection::setDevice2TxRxOptoDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device2TxRsID, false, Connection::device2TxRsID, Connection::setDevice2TxRsID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRsDataUID, false, Connection::device2TxRsDataUID, Connection::setDevice2TxRsDataUID);
-
+        ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, Mode, false, Connection::mode, Connection::setMode);
         ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
         ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
@@ -51,9 +50,8 @@ namespace Hardware
 	{
 		writer.writeAttribute("Index", QString::number(index()));
 		writer.writeAttribute("Caption", caption());
-		writer.writeAttribute("OcmPortStrID", ocmPortStrID());
-		writer.writeAttribute("Device1StrID", device1StrID());
-		writer.writeAttribute("Device2StrID", device2StrID());
+        writer.writeAttribute("Port1StrID", port1StrID());
+        writer.writeAttribute("Port2StrID", port2StrID());
         writer.writeAttribute("SerialMode", QString::number(static_cast<int>(serialMode())));
         writer.writeAttribute("Mode", QString::number(static_cast<int>(mode())));
 		writer.writeAttribute("Enable", enable() ? "true" : "false");
@@ -63,10 +61,10 @@ namespace Hardware
 
         // Tx/Rx words quantity
         //
-        writer.writeAttribute("Device1TxWordsQuantity", QString::number(device1TxWordsQuantity()));
-        writer.writeAttribute("Device1RxWordsQuantity", QString::number(device1RxWordsQuantity()));
-        writer.writeAttribute("Device2TxWordsQuantity", QString::number(device2TxWordsQuantity()));
-        writer.writeAttribute("Device2RxWordsQuantity", QString::number(device2RxWordsQuantity()));
+        writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1TxWordsQuantity()));
+        writer.writeAttribute("Port1RxWordsQuantity", QString::number(port1RxWordsQuantity()));
+        writer.writeAttribute("Port2TxWordsQuantity", QString::number(port2TxWordsQuantity()));
+        writer.writeAttribute("Port2RxWordsQuantity", QString::number(port2RxWordsQuantity()));
 
         return true;
 	}
@@ -84,19 +82,14 @@ namespace Hardware
 			setCaption(reader.attributes().value("Caption").toString());
 		}
 
-		if (reader.attributes().hasAttribute("OcmPortStrID"))
+        if (reader.attributes().hasAttribute("Port1StrID"))
 		{
-			setOcmPortStrID(reader.attributes().value("OcmPortStrID").toString());
+            setPort1StrID(reader.attributes().value("Port1StrID").toString());
 		}
 
-		if (reader.attributes().hasAttribute("Device1StrID"))
+        if (reader.attributes().hasAttribute("Port2StrID"))
 		{
-			setDevice1StrID(reader.attributes().value("Device1StrID").toString());
-		}
-
-		if (reader.attributes().hasAttribute("Device2StrID"))
-		{
-			setDevice2StrID(reader.attributes().value("Device2StrID").toString());
+            setPort2StrID(reader.attributes().value("Port2StrID").toString());
 		}
 
         if (reader.attributes().hasAttribute("SerialMode"))
@@ -132,24 +125,24 @@ namespace Hardware
         // Tx/Rx words quantity, may be overloaded later
         //
 
-        if (reader.attributes().hasAttribute("Device1TxWordsQuantity"))
+        if (reader.attributes().hasAttribute("Port1TxWordsQuantity"))
         {
-            setDevice1TxWordsQuantity(reader.attributes().value("Device1TxWordsQuantity").toInt());
+            setPort1TxWordsQuantity(reader.attributes().value("Port1TxWordsQuantity").toInt());
         }
 
-        if (reader.attributes().hasAttribute("Device1RxWordsQuantity"))
+        if (reader.attributes().hasAttribute("Port1RxWordsQuantity"))
         {
-            setDevice1RxWordsQuantity(reader.attributes().value("Device1RxWordsQuantity").toInt());
+            setPort1RxWordsQuantity(reader.attributes().value("Port1RxWordsQuantity").toInt());
         }
 
-        if (reader.attributes().hasAttribute("Device2TxWordsQuantity"))
+        if (reader.attributes().hasAttribute("Port2TxWordsQuantity"))
         {
-            setDevice2TxWordsQuantity(reader.attributes().value("Device2TxWordsQuantity").toInt());
+            setPort2TxWordsQuantity(reader.attributes().value("Port2TxWordsQuantity").toInt());
         }
 
-        if (reader.attributes().hasAttribute("Device2RxWordsQuantity"))
+        if (reader.attributes().hasAttribute("Port2RxWordsQuantity"))
         {
-            setDevice2RxWordsQuantity(reader.attributes().value("Device2RxWordsQuantity").toInt());
+            setPort2RxWordsQuantity(reader.attributes().value("Port2RxWordsQuantity").toInt());
         }
 
 
@@ -163,12 +156,12 @@ namespace Hardware
         // Generate Connection IDs as a hash of caption or ocmPortStrID
         //
         quint16 hashOpto = CUtils::calcHash16(m_caption.data(), m_caption.size() * sizeof(QChar));
-        setDevice1TxRxOptoID(hashOpto);
-        setDevice2TxRxOptoID(hashOpto);
+        setPort1TxRxOptoID(hashOpto);
+        setPort2TxRxOptoID(hashOpto);
 
-        quint16 hashRs = CUtils::calcHash16(m_ocmPortStrID.data(), m_ocmPortStrID.size() * sizeof(QChar));
-        setDevice1TxRsID(hashRs);
-        setDevice2TxRsID(hashRs);
+        quint16 hashRs = CUtils::calcHash16(m_port1StrID.data(), m_port1StrID.size() * sizeof(QChar));
+        setPort1TxRsID(hashRs);
+        setPort2TxRsID(hashRs);
 
 		return true;
 	}
@@ -193,172 +186,162 @@ namespace Hardware
 		m_caption = value;
 	}
 
-	QString Connection::ocmPortStrID() const
-	{
-		return m_ocmPortStrID;
-	}
-
-	void Connection::setOcmPortStrID(const QString& value)
-	{
-		m_ocmPortStrID = value;
-	}
-
-	QString Connection::device1StrID() const
+    QString Connection::port1StrID() const
     {
-        return m_device1StrID;
+        return m_port1StrID;
     }
 
-    void Connection::setDevice1StrID(const QString& value)
+    void Connection::setPort1StrID(const QString& value)
     {
-        m_device1StrID = value;
+        m_port1StrID = value;
     }
 
-	QString Connection::device2StrID() const
+    QString Connection::port2StrID() const
     {
-        return m_device2StrID;
+        return m_port2StrID;
     }
 
-    void Connection::setDevice2StrID(const QString& value)
+    void Connection::setPort2StrID(const QString& value)
     {
-        m_device2StrID = value;
+        m_port2StrID = value;
     }
 
     //
-    // Device1
+    // port1
     //
 
-    int Connection::device1TxWordsQuantity() const
+    int Connection::port1TxWordsQuantity() const
     {
-        return m_device1TxWordsQuantity;
+        return m_port1TxWordsQuantity;
     }
 
-    void Connection::setDevice1TxWordsQuantity(int value)
+    void Connection::setPort1TxWordsQuantity(int value)
     {
-        m_device1TxWordsQuantity = value;
+        m_port1TxWordsQuantity = value;
     }
 
-    int Connection::device1RxWordsQuantity() const
+    int Connection::port1RxWordsQuantity() const
     {
-        return m_device1RxWordsQuantity;
+        return m_port1RxWordsQuantity;
     }
 
-    void Connection::setDevice1RxWordsQuantity(int value)
+    void Connection::setPort1RxWordsQuantity(int value)
     {
-        m_device1RxWordsQuantity = value;
+        m_port1RxWordsQuantity = value;
     }
 
     //
     //
 
-    int Connection::device1TxRxOptoID() const
+    int Connection::port1TxRxOptoID() const
     {
-        return m_device1TxRxOptoID;
+        return m_port1TxRxOptoID;
     }
 
-    void Connection::setDevice1TxRxOptoID(int value)
+    void Connection::setPort1TxRxOptoID(int value)
     {
-        m_device1TxRxOptoID = value;
+        m_port1TxRxOptoID = value;
     }
 
-    quint32 Connection::device1TxRxOptoDataUID() const
+    quint32 Connection::port1TxRxOptoDataUID() const
     {
-        return m_device1TxRxOptoDataUID;
-
-    }
-
-    void Connection::setDevice1TxRxOptoDataUID(quint32 value)
-    {
-        m_device1TxRxOptoDataUID = value;
+        return m_port1TxRxOptoDataUID;
 
     }
 
-    int Connection::device1TxRsID() const
+    void Connection::setPort1TxRxOptoDataUID(quint32 value)
     {
-        return m_device1TxRsID;
+        m_port1TxRxOptoDataUID = value;
+
     }
 
-    void Connection::setDevice1TxRsID(int value)
+    int Connection::port1TxRsID() const
     {
-        m_device1TxRsID = value;
+        return m_port1TxRsID;
     }
 
-    quint32 Connection::device1TxRsDataUID() const
+    void Connection::setPort1TxRsID(int value)
     {
-        return m_device1TxRsDataUID;
+        m_port1TxRsID = value;
     }
 
-    void Connection::setDevice1TxRsDataUID(quint32 value)
+    quint32 Connection::port1TxRsDataUID() const
     {
-        m_device1TxRsDataUID = value;
+        return m_port1TxRsDataUID;
     }
 
-    //
-    // Device2
-    //
-
-    int Connection::device2TxWordsQuantity() const
+    void Connection::setPort1TxRsDataUID(quint32 value)
     {
-        return m_device2TxWordsQuantity;
-    }
-
-    void Connection::setDevice2TxWordsQuantity(int value)
-    {
-        m_device2TxWordsQuantity = value;
-    }
-
-    int Connection::device2RxWordsQuantity() const
-    {
-        return m_device2RxWordsQuantity;
-    }
-
-    void Connection::setDevice2RxWordsQuantity(int value)
-    {
-        m_device2RxWordsQuantity = value;
+        m_port1TxRsDataUID = value;
     }
 
     //
+    // port2
     //
 
-    int Connection::device2TxRxOptoID() const
+    int Connection::port2TxWordsQuantity() const
     {
-        return m_device2TxRxOptoID;
+        return m_port2TxWordsQuantity;
     }
 
-    void Connection::setDevice2TxRxOptoID(int value)
+    void Connection::setPort2TxWordsQuantity(int value)
     {
-        m_device2TxRxOptoID = value;
+        m_port2TxWordsQuantity = value;
     }
 
-    quint32 Connection::device2TxRxOptoDataUID() const
+    int Connection::port2RxWordsQuantity() const
     {
-        return m_device2TxRxOptoDataUID;
+        return m_port2RxWordsQuantity;
+    }
+
+    void Connection::setPort2RxWordsQuantity(int value)
+    {
+        m_port2RxWordsQuantity = value;
+    }
+
+    //
+    //
+
+    int Connection::port2TxRxOptoID() const
+    {
+        return m_port2TxRxOptoID;
+    }
+
+    void Connection::setPort2TxRxOptoID(int value)
+    {
+        m_port2TxRxOptoID = value;
+    }
+
+    quint32 Connection::port2TxRxOptoDataUID() const
+    {
+        return m_port2TxRxOptoDataUID;
 
     }
 
-    void Connection::setDevice2TxRxOptoDataUID(quint32 value)
+    void Connection::setPort2TxRxOptoDataUID(quint32 value)
     {
-        m_device2TxRxOptoDataUID = value;
+        m_port2TxRxOptoDataUID = value;
 
     }
 
-    int Connection::device2TxRsID() const
+    int Connection::port2TxRsID() const
     {
-        return m_device2TxRsID;
+        return m_port2TxRsID;
     }
 
-    void Connection::setDevice2TxRsID(int value)
+    void Connection::setPort2TxRsID(int value)
     {
-        m_device2TxRsID = value;
+        m_port2TxRsID = value;
     }
 
-    quint32 Connection::device2TxRsDataUID() const
+    quint32 Connection::port2TxRsDataUID() const
     {
-        return m_device2TxRsDataUID;
+        return m_port2TxRsDataUID;
     }
 
-    void Connection::setDevice2TxRsDataUID(quint32 value)
+    void Connection::setPort2TxRsDataUID(quint32 value)
     {
-        m_device2TxRsDataUID = value;
+        m_port2TxRsDataUID = value;
     }
 
     OptoPort::SerialMode Connection::serialMode() const
@@ -390,21 +373,25 @@ namespace Hardware
 		switch(value)
 		{
             case OptoPort::Mode::Optical:
-				propertyVisibilityChanger("OcmPortStrID", false);
-				propertyVisibilityChanger("ConnectionMode", false);
+                propertyVisibilityChanger("SerialMode", false);
 				propertyVisibilityChanger("Enable", false);
                 propertyVisibilityChanger("EnableDuplex", false);
-				propertyVisibilityChanger("Device1StrID", true);
-				propertyVisibilityChanger("Device2StrID", true);
+
+                propertyVisibilityChanger("Port2StrID", true);
+                propertyVisibilityChanger("Port2TxWordsQuantity", true);
+                propertyVisibilityChanger("Port2RxWordsQuantity", true);
+
+
 				break;
             case OptoPort::Mode::Serial:
-				propertyVisibilityChanger("OcmPortStrID", true);
-				propertyVisibilityChanger("ConnectionMode", true);
+                propertyVisibilityChanger("SerialMode", true);
 				propertyVisibilityChanger("Enable", true);
                 propertyVisibilityChanger("EnableDuplex", true);
-				propertyVisibilityChanger("Device1StrID", false);
-				propertyVisibilityChanger("Device2StrID", false);
-				break;
+
+                propertyVisibilityChanger("Port2StrID", false);
+                propertyVisibilityChanger("Port2TxWordsQuantity", false);
+                propertyVisibilityChanger("Port2RxWordsQuantity", false);
+                break;
 			default:
 				assert(false);
 		}
@@ -551,121 +538,81 @@ namespace Hardware
 
     bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-        if (editObject->mode() != OptoPort::Mode::Optical)
-		{
-			// Serial connection
-			//
-			for (std::shared_ptr<Hardware::Connection> c : m_connections)
-			{
-				if (editObject->index() == c->index())
-				{
-					continue;
-				}
+        // Optical connection
+        //
+        if (editObject->port1StrID() == editObject->port2StrID())
+        {
+            return false;
+        }
 
-				if (editObject->ocmPortStrID().length() == 0)
-				{
-					continue;
-				}
+        for (std::shared_ptr<Hardware::Connection> c : m_connections)
+        {
+            if (editObject->index() == c->index())
+            {
+                continue;
+            }
 
-				if (editObject->ocmPortStrID() == c->device1StrID())
-				{
-					return false;
-				}
-				if (editObject->ocmPortStrID() == c->device2StrID())
-				{
-					return false;
-				}
-				if (editObject->ocmPortStrID() == c->ocmPortStrID())
-				{
-					return false;
-				}
-			}
+            if (editObject->port1StrID().length() > 0)
+            {
+                if (editObject->port1StrID() == c->port1StrID())
+                {
+                    return false;
+                }
+                if (editObject->port1StrID() == c->port2StrID())
+                {
+                    return false;
+                }
+            }
 
-			return true;
-		}
-		else
-		{
-			// Optical connection
-			//
-			if (editObject->device1StrID() == editObject->device2StrID())
-			{
-				return false;
-			}
-
-			for (std::shared_ptr<Hardware::Connection> c : m_connections)
-			{
-				if (editObject->index() == c->index())
-				{
-					continue;
-				}
-
-				if (editObject->device1StrID().length() > 0)
-				{
-					if (editObject->device1StrID() == c->device1StrID())
-					{
-						return false;
-					}
-					if (editObject->device1StrID() == c->device2StrID())
-					{
-						return false;
-					}
-					if (editObject->device1StrID() == c->ocmPortStrID())
-					{
-						return false;
-					}
-				}
-
-				if (editObject->device2StrID().length() > 0)
-				{
-					if (editObject->device2StrID() == c->device2StrID())
-					{
-						return false;
-					}
-					if (editObject->device2StrID() == c->device1StrID())
-					{
-						return false;
-					}
-					if (editObject->device2StrID() == c->ocmPortStrID())
-					{
-						return false;
-					}
-				}
-			}
-		}
+            if (editObject->mode() == OptoPort::Mode::Optical)
+            {
+                if (editObject->port2StrID().length() > 0)
+                {
+                    if (editObject->port2StrID() == c->port2StrID())
+                    {
+                        return false;
+                    }
+                    if (editObject->port2StrID() == c->port1StrID())
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
 
         return true;
     }
 
-    bool ConnectionStorage::setLMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+    bool ConnectionStorage::setLMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                              int m_txRxOptoID, quint32 m_txRxOptoDataUID)
     {
-        return setOCMConnectionParams(deviceStrID, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
+        return setOCMConnectionParams(portStrID, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
     }
 
-    bool ConnectionStorage::setOCMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+    bool ConnectionStorage::setOCMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                              int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID)
     {
         for (std::shared_ptr<Hardware::Connection> c : m_connections)
         {
-            if (c->device1StrID() == deviceStrID)
+            if (c->port1StrID() == portStrID)
             {
-                c->setDevice1TxWordsQuantity(m_txWordsQuantity);
-                c->setDevice1RxWordsQuantity(m_rxWordsQuantity);
-                c->setDevice1TxRxOptoID(m_txRxOptoID);
-                c->setDevice1TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice1TxRsID(m_txRsID);
-                c->setDevice1TxRsDataUID(m_txRsDataUID);
+                c->setPort1TxWordsQuantity(m_txWordsQuantity);
+                c->setPort1RxWordsQuantity(m_rxWordsQuantity);
+                c->setPort1TxRxOptoID(m_txRxOptoID);
+                c->setPort1TxRxOptoDataUID(m_txRxOptoDataUID);
+                c->setPort1TxRsID(m_txRsID);
+                c->setPort1TxRsDataUID(m_txRsDataUID);
                 return true;
             }
 
-            if (c->device2StrID() == deviceStrID)
+            if (c->port2StrID() == portStrID)
             {
-                c->setDevice2TxWordsQuantity(m_txWordsQuantity);
-                c->setDevice2RxWordsQuantity(m_rxWordsQuantity);
-                c->setDevice2TxRxOptoID(m_txRxOptoID);
-                c->setDevice2TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice2TxRsID(m_txRsID);
-                c->setDevice2TxRsDataUID(m_txRsDataUID);
+                c->setPort2TxWordsQuantity(m_txWordsQuantity);
+                c->setPort2RxWordsQuantity(m_rxWordsQuantity);
+                c->setPort2TxRxOptoID(m_txRxOptoID);
+                c->setPort2TxRxOptoDataUID(m_txRxOptoDataUID);
+                c->setPort2TxRsID(m_txRsID);
+                c->setPort2TxRsDataUID(m_txRsDataUID);
                 return true;
             }
         }
