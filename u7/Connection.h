@@ -110,6 +110,9 @@ namespace Hardware
         bool enableDuplex() const;
         void setEnableDuplex(bool value);
 
+        bool manualSettings() const;
+        void setManualSettings(bool value);
+
         QStringList signalList() const;
 		void setSignalList(const QStringList& value);
 
@@ -138,6 +141,7 @@ namespace Hardware
             m_serialMode = that.m_serialMode;
             m_enable = that.m_enable;
             m_enableDuplex = that.m_enableDuplex;
+            m_manualSettings = that.m_manualSettings;
 
             setMode(that.mode());
 			setSignalList(that.signalList());
@@ -171,6 +175,7 @@ namespace Hardware
 
         bool m_enable = false;
         bool m_enableDuplex = false;
+        bool m_manualSettings = false;
 
 		QStringList m_signalList;
     };

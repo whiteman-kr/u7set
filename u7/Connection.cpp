@@ -39,6 +39,7 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
         ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
+        ADD_PROPERTY_GETTER_SETTER(bool, ManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
 	}
 
     Connection::Connection(const Connection& that):Connection()
@@ -53,10 +54,11 @@ namespace Hardware
 		writer.writeAttribute("OcmPortStrID", ocmPortStrID());
 		writer.writeAttribute("Device1StrID", device1StrID());
 		writer.writeAttribute("Device2StrID", device2StrID());
-        writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(serialMode())));
-        writer.writeAttribute("ConnectionType", QString::number(static_cast<int>(mode())));
+        writer.writeAttribute("SerialMode", QString::number(static_cast<int>(serialMode())));
+        writer.writeAttribute("Mode", QString::number(static_cast<int>(mode())));
 		writer.writeAttribute("Enable", enable() ? "true" : "false");
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
+        writer.writeAttribute("ManualSettings", manualSettings() ? "true" : "false");
 		writer.writeAttribute("SignalList", signalList().join(';'));
 
         // Tx/Rx words quantity
@@ -97,14 +99,14 @@ namespace Hardware
 			setDevice2StrID(reader.attributes().value("Device2StrID").toString());
 		}
 
-		if (reader.attributes().hasAttribute("ConnectionMode"))
+        if (reader.attributes().hasAttribute("SerialMode"))
 		{
-            setSerialMode(static_cast<OptoPort::SerialMode>(reader.attributes().value("ConnectionMode").toInt()));
+            setSerialMode(static_cast<OptoPort::SerialMode>(reader.attributes().value("SerialMode").toInt()));
 		}
 
-		if (reader.attributes().hasAttribute("ConnectionType"))
+        if (reader.attributes().hasAttribute("Mode"))
 		{
-            setMode(static_cast<OptoPort::Mode>(reader.attributes().value("ConnectionType").toInt()));
+            setMode(static_cast<OptoPort::Mode>(reader.attributes().value("Mode").toInt()));
 		}
 
 		if (reader.attributes().hasAttribute("Enable"))
@@ -115,6 +117,11 @@ namespace Hardware
         if (reader.attributes().hasAttribute("EnableDuplex"))
         {
             setEnableDuplex(reader.attributes().value("EnableDuplex").toString() == "true" ? true : false);
+        }
+
+        if (reader.attributes().hasAttribute("ManualSettings"))
+        {
+            setManualSettings(reader.attributes().value("ManualSettings").toString() == "true" ? true : false);
         }
 
         if (reader.attributes().hasAttribute("SignalList"))
@@ -421,6 +428,16 @@ namespace Hardware
     void Connection::setEnableDuplex(bool value)
     {
         m_enableDuplex = value;
+    }
+
+    bool Connection::manualSettings() const
+    {
+        return m_manualSettings;
+    }
+
+    void Connection::setManualSettings(bool value)
+    {
+        m_manualSettings = value;
     }
 
     QStringList Connection::signalList() const
