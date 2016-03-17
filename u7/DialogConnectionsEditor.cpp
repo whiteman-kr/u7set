@@ -99,7 +99,7 @@ void DialogConnectionsEditor::fillConnectionsList()
             break;
         }
 
-		if (connection->type() != Hardware::Connection::Type::Optical)
+        if (connection->mode() != Hardware::OptoPort::Mode::Optical)
 		{
 			continue;
 		}

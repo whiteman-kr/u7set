@@ -770,7 +770,7 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
-            if (generateRS232ConectionCode()) break;
+            if (!generateRS232ConectionCode()) break;
 
 			if (!finishAppLogicCode()) break;
 
@@ -2762,7 +2762,7 @@ namespace Builder
                 continue;
             }
 
-            if (connection->type() != Hardware::Connection::Type::Serial)
+            if (connection->mode() != Hardware::OptoPort::Mode::Serial)
             {
                 continue;
             }
@@ -3206,7 +3206,8 @@ namespace Builder
 			for (int i = 0; i < m_connections->count(); i++)
 			{
 				auto connection = m_connections->get(i);
-                if (connection->type() != Hardware::Connection::Type::Serial)
+
+                if (connection->mode() != Hardware::OptoPort::Mode::Serial)
 				{
 					continue;
 				}

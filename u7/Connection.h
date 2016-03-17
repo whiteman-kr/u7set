@@ -2,6 +2,7 @@
 #define CONNECTION_H
 
 #include "../include/DbController.h"
+#include "./Builder/OptoModule.h"
 
 namespace Hardware
 {
@@ -10,7 +11,7 @@ namespace Hardware
         Q_OBJECT
 
     public:
-        enum class SerialMode
+      /*  enum class SerialMode
         {
             RS232,
             RS485
@@ -22,7 +23,7 @@ namespace Hardware
             Optical,
             Serial
 		};
-        Q_ENUM(Type)
+        Q_ENUM(Type)*/
 
         Connection();
         Connection(const Connection& that);
@@ -97,11 +98,11 @@ namespace Hardware
         //
         //
 
-        SerialMode serialMode() const;
-        void setSerialMode(const SerialMode& value);
+        OptoPort::SerialMode serialMode() const;
+        void setSerialMode(const OptoPort::SerialMode value);
 
-        Type type() const;
-        void setType(const Type& value);
+        OptoPort::Mode mode() const;
+        void setMode(const OptoPort::Mode value);
 
 		bool enable() const;
         void setEnable(bool value);
@@ -138,7 +139,7 @@ namespace Hardware
             m_enable = that.m_enable;
             m_enableDuplex = that.m_enableDuplex;
 
-            setType(that.type());
+            setMode(that.mode());
 			setSignalList(that.signalList());
 
             return *this;
@@ -165,9 +166,8 @@ namespace Hardware
         int m_device2TxRsID = 0;
         quint32 m_device2TxRsDataUID = 0;
 
-
-        SerialMode m_serialMode = SerialMode::RS232;
-        Type m_type = Type::Optical;
+        OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
+        OptoPort::Mode m_mode = OptoPort::Mode::Optical;
 
         bool m_enable = false;
         bool m_enableDuplex = false;

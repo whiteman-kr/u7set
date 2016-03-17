@@ -36,7 +36,7 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(int, Device2TxRsID, false, Connection::device2TxRsID, Connection::setDevice2TxRsID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRsDataUID, false, Connection::device2TxRsDataUID, Connection::setDevice2TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
+        ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
         ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
 	}
@@ -54,7 +54,7 @@ namespace Hardware
 		writer.writeAttribute("Device1StrID", device1StrID());
 		writer.writeAttribute("Device2StrID", device2StrID());
         writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(serialMode())));
-        writer.writeAttribute("ConnectionType", QString::number(static_cast<int>(type())));
+        writer.writeAttribute("ConnectionType", QString::number(static_cast<int>(mode())));
 		writer.writeAttribute("Enable", enable() ? "true" : "false");
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
 		writer.writeAttribute("SignalList", signalList().join(';'));
@@ -99,12 +99,12 @@ namespace Hardware
 
 		if (reader.attributes().hasAttribute("ConnectionMode"))
 		{
-            setSerialMode(static_cast<SerialMode>(reader.attributes().value("ConnectionMode").toInt()));
+            setSerialMode(static_cast<OptoPort::SerialMode>(reader.attributes().value("ConnectionMode").toInt()));
 		}
 
 		if (reader.attributes().hasAttribute("ConnectionType"))
 		{
-            setType(static_cast<Type>(reader.attributes().value("ConnectionType").toInt()));
+            setMode(static_cast<OptoPort::Mode>(reader.attributes().value("ConnectionType").toInt()));
 		}
 
 		if (reader.attributes().hasAttribute("Enable"))
@@ -354,24 +354,24 @@ namespace Hardware
         m_device2TxRsDataUID = value;
     }
 
-    Connection::SerialMode Connection::serialMode() const
+    OptoPort::SerialMode Connection::serialMode() const
     {
         return m_serialMode;
     }
 
-    void Connection::setSerialMode(const SerialMode& value)
+    void Connection::setSerialMode(const OptoPort::SerialMode value)
     {
         m_serialMode = value;
 	}
 
-    Connection::Type Connection::type() const
+    OptoPort::Mode Connection::mode() const
 	{
-        return m_type;
+        return m_mode;
 	}
 
-    void Connection::setType(const Type &value)
+    void Connection::setMode(const OptoPort::Mode value)
 	{
-        m_type = value;
+        m_mode = value;
 		auto propertyVisibilityChanger = [this](const char* propertyName, bool visible) {
 			auto property = propertyByCaption(propertyName);
 			if (property != nullptr)
@@ -382,7 +382,7 @@ namespace Hardware
 
 		switch(value)
 		{
-            case Type::Optical:
+            case OptoPort::Mode::Optical:
 				propertyVisibilityChanger("OcmPortStrID", false);
 				propertyVisibilityChanger("ConnectionMode", false);
 				propertyVisibilityChanger("Enable", false);
@@ -390,7 +390,7 @@ namespace Hardware
 				propertyVisibilityChanger("Device1StrID", true);
 				propertyVisibilityChanger("Device2StrID", true);
 				break;
-            case Type::Serial:
+            case OptoPort::Mode::Serial:
 				propertyVisibilityChanger("OcmPortStrID", true);
 				propertyVisibilityChanger("ConnectionMode", true);
 				propertyVisibilityChanger("Enable", true);
@@ -534,7 +534,7 @@ namespace Hardware
 
     bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-        if (editObject->type() != Hardware::Connection::Type::Optical)
+        if (editObject->mode() != OptoPort::Mode::Optical)
 		{
 			// Serial connection
 			//
