@@ -1,9 +1,12 @@
 #pragma once
 
 #include <QObject>
+#include "../include/OrderedHash.h"
 
 namespace Hardware
 {
+    class DeviceModule;
+
     class OptoPort : public QObject
     {
         Q_OBJECT
@@ -24,8 +27,12 @@ namespace Hardware
         Q_ENUM(Mode)
 
     private:
+        int m_rxStartAddress = 0;
         int m_rxSizeW = 0;
+
+        int m_txStartAddress = 0;
         int m_txSizeW = 0;
+
         bool enable = true;             // serial mode only
         bool enableDuplex = false;      // serial mode and OCMN only
     };
@@ -35,6 +42,9 @@ namespace Hardware
     //
     class OptoModule
     {
+    private:
+        HashedVector<QString, OptoPort> m_ports;
+
     public:
     };
 
@@ -42,8 +52,9 @@ namespace Hardware
     class OptoModuleStorage
     {
     private:
+        HashedVector<QString, OptoModule> m_modules;
 
     public:
-        //void AddOptoModule(const QString& optoModuleStrID);
+        void AddModule(const DeviceModule& module);
     };
 }
