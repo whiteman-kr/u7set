@@ -91,7 +91,7 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Parameter's values calculation for FB %1 (opcode %2) is not implemented")).
 					  arg(afb().caption()).arg(afb().type().toOpCode()));
 			result = false;
@@ -191,7 +191,7 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
 					  arg(i_conf.unsignedIntValue()).arg(caption()));
 			return false;
@@ -330,7 +330,7 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
 
 		return false;
@@ -386,7 +386,7 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
 			return false;
 		}
@@ -567,7 +567,7 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, IssuePrexif::NotDefined,
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
 
 		return false;
@@ -602,7 +602,7 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Value %1 of parameter 'i_conf' of FB %2 is incorrect")).arg(iConf.unsignedIntValue()).arg(caption()));
 
 			return false;
@@ -614,7 +614,7 @@ namespace Builder
 
 		if (v > 65535)
 		{
-			LOG_ERROR(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Value %1 of parameter 'i_del' of FB %2 out of range (0..65535). The damper time should be less than %3 ms")).
 					  arg(v).arg(caption()).arg((65535 * m_compiler->lmCycleDuration()) / 1000));
 			return false;
