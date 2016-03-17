@@ -107,5 +107,8 @@ void DialogSettings::on_browseOutputPath_clicked()
 													QFileDialog::ShowDirsOnly
 													| QFileDialog::DontResolveSymlinks));
 
-	ui->editOutputPath->setText(dir);
+    if (dir.isEmpty() == false)
+    {
+        ui->editOutputPath->setText(dir);
+    }
 }

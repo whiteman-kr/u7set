@@ -251,6 +251,11 @@ namespace Builder
 		//
 		std::vector<Hardware::DeviceModule*> lmModules;
 		findLmModules(m_deviceRoot, lmModules);
+        std::sort(lmModules.begin(), lmModules.end(),
+                  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+                  {
+                      return a->strId() > b->strId();
+                  });
 
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
