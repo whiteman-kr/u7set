@@ -2816,7 +2816,7 @@ namespace Builder
         //
         QStringList& signslList = connection->signalList();
 
-        bool result = false;
+        bool result = true;
 
         HashedVector<QString, Signal*> analogSignals;
         HashedVector<QString, Signal*> discreteSignals;
