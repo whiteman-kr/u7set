@@ -21,7 +21,7 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	QStringList l;
 	l << tr("Caption")
-		<< tr("OCM Port StrID")
+        << tr("Port StrID")
 		<< tr("Mode")
         << tr("Enabled")
         << tr("Duplex");
@@ -216,7 +216,7 @@ void Rs232SignalListEditor::addConnection()
 		return;
 	}
 	connection->setCaption("New Connection");
-	connection->setOcmPortStrID("OCM_ID");
+    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
     connection->setSerialMode(Hardware::OptoPort::SerialMode::RS232);
     connection->setMode(Hardware::OptoPort::Mode::Serial);
 	connection->setEnable(true);
@@ -226,7 +226,7 @@ void Rs232SignalListEditor::addConnection()
 	m_rs232Connections->insertRow(index);
 	m_rs232Connections->setItem(index, 0, new QTableWidgetItem(connection->caption()));
 	m_rs232Connections->item(index, 0)->setData(Qt::UserRole, m_connections.count() - 1);
-	m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->ocmPortStrID()));
+    m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->port1StrID()));
 	m_rs232Connections->item(index, 1)->setData(Qt::UserRole, m_connections.count() - 1);
     m_rs232Connections->setItem(index, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 	m_rs232Connections->item(index, 2)->setData(Qt::UserRole, m_connections.count() - 1);
@@ -461,7 +461,7 @@ void Rs232SignalListEditor::fillConnectionsList()
 		m_rs232Connections->insertRow(rowCount);
 		m_rs232Connections->setItem(rowCount, 0, new QTableWidgetItem(connection->caption()));
 		m_rs232Connections->item(rowCount, 0)->setData(Qt::UserRole, i);
-		m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->ocmPortStrID()));
+        m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->port1StrID()));
 		m_rs232Connections->item(rowCount, 1)->setData(Qt::UserRole, i);
         m_rs232Connections->setItem(rowCount, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 		m_rs232Connections->item(rowCount, 2)->setData(Qt::UserRole, i);

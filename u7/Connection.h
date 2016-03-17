@@ -41,58 +41,55 @@ namespace Hardware
 		QString caption() const;
 		void setCaption(const QString& value);
 
-		QString ocmPortStrID() const;
-		void setOcmPortStrID(const QString& value);
+        QString port1StrID() const;
+        void setPort1StrID(const QString& value);
 
-		QString device1StrID() const;
-        void setDevice1StrID(const QString& value);
-
-		QString device2StrID() const;
-        void setDevice2StrID(const QString& value);
+        QString port2StrID() const;
+        void setPort2StrID(const QString& value);
 
         //
         //
         //
 
-        int device1TxWordsQuantity() const;
-        void setDevice1TxWordsQuantity(int value);
+        int port1TxWordsQuantity() const;
+        void setPort1TxWordsQuantity(int value);
 
-        int device1RxWordsQuantity() const;
-        void setDevice1RxWordsQuantity(int value);
+        int port1RxWordsQuantity() const;
+        void setPort1RxWordsQuantity(int value);
 
-        int device1TxRxOptoID() const;
-        void setDevice1TxRxOptoID(int value);
+        int port1TxRxOptoID() const;
+        void setPort1TxRxOptoID(int value);
 
-        quint32 device1TxRxOptoDataUID() const;
-        void setDevice1TxRxOptoDataUID(quint32 value);
+        quint32 port1TxRxOptoDataUID() const;
+        void setPort1TxRxOptoDataUID(quint32 value);
 
-        int device1TxRsID() const;
-        void setDevice1TxRsID(int value);
+        int port1TxRsID() const;
+        void setPort1TxRsID(int value);
 
-        quint32 device1TxRsDataUID() const;
-        void setDevice1TxRsDataUID(quint32 value);
+        quint32 port1TxRsDataUID() const;
+        void setPort1TxRsDataUID(quint32 value);
 
         //
         //
         //
 
-        int device2TxWordsQuantity() const;
-        void setDevice2TxWordsQuantity(int value);
+        int port2TxWordsQuantity() const;
+        void setPort2TxWordsQuantity(int value);
 
-        int device2RxWordsQuantity() const;
-        void setDevice2RxWordsQuantity(int value);
+        int port2RxWordsQuantity() const;
+        void setPort2RxWordsQuantity(int value);
 
-        int device2TxRxOptoID() const;
-        void setDevice2TxRxOptoID(int value);
+        int port2TxRxOptoID() const;
+        void setPort2TxRxOptoID(int value);
 
-        quint32 device2TxRxOptoDataUID() const;
-        void setDevice2TxRxOptoDataUID(quint32 value);
+        quint32 port2TxRxOptoDataUID() const;
+        void setPort2TxRxOptoDataUID(quint32 value);
 
-        int device2TxRsID() const;
-        void setDevice2TxRsID(int value);
+        int port2TxRsID() const;
+        void setPort2TxRsID(int value);
 
-        quint32 device2TxRsDataUID() const;
-        void setDevice2TxRsDataUID(quint32 value);
+        quint32 port2TxRsDataUID() const;
+        void setPort2TxRsDataUID(quint32 value);
 
         //
         //
@@ -120,23 +117,22 @@ namespace Hardware
         {
             m_index = that.m_index;
             m_caption = that.m_caption;
-			m_ocmPortStrID = that.m_ocmPortStrID;
-            m_device1StrID = that.m_device1StrID;
-            m_device2StrID = that.m_device2StrID;
+            m_port1StrID = that.m_port1StrID;
+            m_port2StrID = that.m_port2StrID;
 
-            m_device1TxWordsQuantity = that.m_device1TxWordsQuantity;
-            m_device1RxWordsQuantity = that.m_device1RxWordsQuantity;
-            m_device1TxRxOptoID = that.m_device1TxRxOptoID;
-            m_device1TxRxOptoDataUID = that.m_device1TxRxOptoDataUID;
-            m_device1TxRsID = that.m_device1TxRsID;
-            m_device1TxRsDataUID = that.m_device1TxRsDataUID;
+            m_port1TxWordsQuantity = that.m_port1TxWordsQuantity;
+            m_port1RxWordsQuantity = that.m_port1RxWordsQuantity;
+            m_port1TxRxOptoID = that.m_port1TxRxOptoID;
+            m_port1TxRxOptoDataUID = that.m_port1TxRxOptoDataUID;
+            m_port1TxRsID = that.m_port1TxRsID;
+            m_port1TxRsDataUID = that.m_port1TxRsDataUID;
 
-            m_device2TxWordsQuantity = that.m_device2TxWordsQuantity;
-            m_device2RxWordsQuantity = that.m_device2RxWordsQuantity;
-            m_device2TxRxOptoID = that.m_device2TxRxOptoID;
-            m_device2TxRxOptoDataUID = that.m_device2TxRxOptoDataUID;
-            m_device2TxRsID = that.m_device2TxRsID;
-            m_device2TxRsDataUID = that.m_device2TxRsDataUID;
+            m_port2TxWordsQuantity = that.m_port2TxWordsQuantity;
+            m_port2RxWordsQuantity = that.m_port2RxWordsQuantity;
+            m_port2TxRxOptoID = that.m_port2TxRxOptoID;
+            m_port2TxRxOptoDataUID = that.m_port2TxRxOptoDataUID;
+            m_port2TxRsID = that.m_port2TxRsID;
+            m_port2TxRsDataUID = that.m_port2TxRsDataUID;
 
             m_serialMode = that.m_serialMode;
             m_enable = that.m_enable;
@@ -152,23 +148,22 @@ namespace Hardware
     private:
         int m_index = -1;
         QString m_caption;
-		QString m_ocmPortStrID;
 
-        QString m_device1StrID;
-        int m_device1TxWordsQuantity = 479;
-        int m_device1RxWordsQuantity = 479;
-        int m_device1TxRxOptoID = 0;
-        quint32 m_device1TxRxOptoDataUID = 0;
-        int m_device1TxRsID = 0;
-        quint32 m_device1TxRsDataUID = 0;
+        QString m_port1StrID;
+        int m_port1TxWordsQuantity = 479;
+        int m_port1RxWordsQuantity = 479;
+        int m_port1TxRxOptoID = 0;
+        quint32 m_port1TxRxOptoDataUID = 0;
+        int m_port1TxRsID = 0;
+        quint32 m_port1TxRsDataUID = 0;
 
-        QString m_device2StrID;
-        int m_device2TxWordsQuantity = 479;
-        int m_device2RxWordsQuantity = 479;
-        int m_device2TxRxOptoID = 0;
-        quint32 m_device2TxRxOptoDataUID = 0;
-        int m_device2TxRsID = 0;
-        quint32 m_device2TxRsDataUID = 0;
+        QString m_port2StrID;
+        int m_port2TxWordsQuantity = 479;
+        int m_port2RxWordsQuantity = 479;
+        int m_port2TxRxOptoID = 0;
+        quint32 m_port2TxRxOptoDataUID = 0;
+        int m_port2TxRsID = 0;
+        quint32 m_port2TxRsDataUID = 0;
 
         OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
         OptoPort::Mode m_mode = OptoPort::Mode::Optical;
@@ -199,10 +194,10 @@ namespace Hardware
         void clear();
         bool checkUniqueConnections(Connection *editObject);
 
-        bool setLMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+        bool setLMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID);
 
-        bool setOCMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+        bool setOCMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);
 
         bool load(DbController* db, QString &errorCode);

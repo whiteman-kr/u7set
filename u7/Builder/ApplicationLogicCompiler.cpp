@@ -2767,13 +2767,13 @@ namespace Builder
                 continue;
             }
 
-            Hardware::DeviceObject* port = m_equipmentSet->deviceObject(connection->ocmPortStrID());
+            Hardware::DeviceObject* port = m_equipmentSet->deviceObject(connection->port1StrID());
 
             if (port == nullptr)
             {
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("OCM port '%1' is not found (serial connection '%2')")).
-                          arg(connection->ocmPortStrID().
+                          arg(connection->port1StrID().
                           arg(connection->caption())));
                 return false;
             }
@@ -2784,7 +2784,7 @@ namespace Builder
             {
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("Chassis for OCM with port '%1' is not found (serial connection '%2')")).
-                          arg(connection->ocmPortStrID().
+                          arg(connection->port1StrID().
                           arg(connection->caption())));
                 return false;
             }
@@ -3211,7 +3211,7 @@ namespace Builder
 				{
 					continue;
 				}
-				if (connection->ocmPortStrID() != port->strId())
+                if (connection->port1StrID() != port->strId())
 				{
 					continue;
 				}
@@ -3227,7 +3227,7 @@ namespace Builder
 
 				serialDataXml.writeStartElement("PortInfo");
 
-				serialDataXml.writeAttribute("StrID", connection->ocmPortStrID());
+                serialDataXml.writeAttribute("StrID", connection->port1StrID());
 				serialDataXml.writeAttribute("ID", QString::number(connection->index()));
 				serialDataXml.writeAttribute("DataID", "12334");
 				serialDataXml.writeAttribute("Speed", "115200");
@@ -3278,7 +3278,7 @@ namespace Builder
 				serialDataXml.writeEndElement();	// </SerialData>
 				serialDataXml.writeEndDocument();
 
-				m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->ocmPortStrID()), data);
+                m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->port1StrID()), data);
 			}
 		});
 
