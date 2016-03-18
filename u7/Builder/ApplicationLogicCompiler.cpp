@@ -482,15 +482,21 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-    ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::EquipmentSet *equipmentSet,
-                                                       SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
-                                                       AppLogicData* appLogicData, BuildResultWriter* buildResultWriter,
-                                                       OutputLog *log, Hardware::ConnectionStorage *connections) :
+    ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+                                                       Hardware::EquipmentSet *equipmentSet,
+                                                       Hardware::OptoModuleStorage *optoModuleStorage,
+                                                       Hardware::ConnectionStorage *connections,
+                                                       SignalSet* signalSet,
+                                                       Afb::AfbElementCollection *afblSet,
+                                                       AppLogicData* appLogicData,
+                                                       BuildResultWriter* buildResultWriter,
+                                                       OutputLog *log) :
 		m_subsystems(subsystems),
         m_equipmentSet(equipmentSet),
 		m_signals(signalSet),
 		m_afbl(afblSet),
 		m_appLogicData(appLogicData),
+        m_optoModuleStorage(optoModuleStorage),
 		m_resultWriter(buildResultWriter),
 		m_log(log),
 		m_connections(connections)
@@ -531,9 +537,105 @@ namespace Builder
 
 		findLMs();
 
-		return compileModulesLogics();
+        bool result = false;
+
+        do
+        {
+            if (checkOptoConnections() == false) break;
+
+            if (compileModulesLogics() == false) break;
+
+            result = true;
+
+            break;
+
+        } while(true);
+
+        return result;
 	}
 
+
+    bool ApplicationLogicCompiler::checkOptoConnections()
+    {
+        if (m_optoModuleStorage == nullptr ||
+            m_connections == nullptr ||
+            m_optoModuleStorage == nullptr)
+        {
+            assert(false);
+            LOG_INTERNAL_ERROR(m_log);
+            return false;
+        }
+
+        if (m_optoModuleStorage->build() == false)
+        {
+            return false;
+        }
+
+        LOG_EMPTY_LINE(m_log);
+        LOG_MESSAGE(m_log, QString(tr("Checking opto connections")));
+
+        int connectionsCount = m_connections->count();
+
+        if (connectionsCount == 0)
+        {
+            LOG_MESSAGE(m_log, QString(tr("No opto connections found")));
+            LOG_SUCCESS(m_log, QString(tr("Ok")));
+            return true;
+        }
+
+        int serialConnectionCount = 0;
+
+        bool result = true;
+
+        for(int i = 0; i < connectionsCount; i++)
+        {
+            std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
+
+            Hardware::OptoPort* optoPort = nullptr;
+
+            optoPort = m_optoModuleStorage->getOptoPort(connection->port1StrID());
+
+            // check port 1
+            //
+            if (optoPort == nullptr)
+            {
+                LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                    QString(tr("Undefined port StrID '%1' (connection '%2')")).
+                                   arg(connection->port1StrID()).arg(connection->caption()));
+
+                result = false;
+            }
+
+            if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+            {
+                serialConnectionCount++;
+            }
+            else
+            {
+                assert(connection->mode() == Hardware::OptoPort::Mode::Optical);
+
+                // check port 2
+                //
+                optoPort = m_optoModuleStorage->getOptoPort(connection->port2StrID());
+
+                if (optoPort == nullptr)
+                {
+                    LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                        QString(tr("Undefined port StrID '%1' (connection '%2')")).
+                                       arg(connection->port2StrID()).arg(connection->caption()));
+
+                    result = false;
+                }
+            }
+        }
+
+        if (result == true)
+        {
+            LOG_SUCCESS(m_log, QString(tr("Ok")));
+        }
+
+        return result;
+    }
 
 	// find all logic modules (LMs) in project
 	// fills m_lm vector
@@ -686,6 +788,7 @@ namespace Builder
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
 		m_connections = appLogicCompiler.m_connections;
+        m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -743,6 +846,8 @@ namespace Builder
 			if (!loadModulesSettings()) break;
 
 			if (!prepareAppLogicGeneration()) break;
+
+//            if (!buildOptoModulesStorage()) break;
 
 			if (!generateAppStartCommand()) break;
 
@@ -1080,7 +1185,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateLmMemoryMap()
+    bool ModuleLogicCompiler::buildOptoModulesStorage()
+    {
+        return true;
+    }
+
+
+    bool ModuleLogicCompiler::calculateLmMemoryMap()
 	{
 		return true;
 	}

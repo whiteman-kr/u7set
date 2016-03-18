@@ -207,6 +207,8 @@ namespace Builder
 				}
 			}
 
+            Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
+
             //
             // Loading connections
             //
@@ -240,7 +242,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-            compileApplicationLogic(&subsystems, &equipmentSet, &signalSet, &afbCollection, &appLogicData, &buildWriter, &connections);
+            compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -673,16 +675,17 @@ namespace Builder
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
                                                     Hardware::EquipmentSet* equipmentSet,
+                                                    Hardware::OptoModuleStorage* optoModuleStorage,
+                                                    Hardware::ConnectionStorage* connections,
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
-													BuildResultWriter* buildResultWriter,
-													Hardware::ConnectionStorage* connections)
+                                                    BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-        ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, signalSet, afbCollection, appLogicData, buildResultWriter, m_log, connections);
+        ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 
