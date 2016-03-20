@@ -4,6 +4,7 @@
 #include "FileListView.h"
 #include "../include/DbController.h"
 #include "EditSchemeWidget.h"
+#include "GlobalMessanger.h"
 
 //
 //
@@ -62,10 +63,6 @@ public:
 	bool hasUnsavedSchemes() const;
 	bool saveUnsavedSchemes();
 
-signals:
-	void buildStarted();
-	void buildFinished();
-
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -111,8 +108,8 @@ public:
 
 		// --
 		//
-		//connect(dbcontroller, &DbController::projectOpened, this, &SchemeControlTabPage::projectOpened);
-		//connect(dbcontroller, &DbController::projectClosed, this, &SchemeControlTabPage::projectClosed);
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemeControlTabPage::projectOpened);
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemeControlTabPage::projectClosed);
 
 		connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
 		connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);

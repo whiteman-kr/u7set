@@ -2,10 +2,11 @@
 #include "Parser.h"
 #include "TuningBuilder.h"
 #include "ConfigurationBuilder.h"
+#include "Subsystem.h"
+#include "GlobalMessanger.h"
 
 #include "../../include/DbController.h"
 #include "../../include/DeviceObject.h"
-#include "Subsystem.h"
 
 #include "../../VFrame30/LogicScheme.h"
 #include "../../VFrame30/SchemeItemLink.h"
@@ -36,6 +37,7 @@ namespace Builder
 		// Start logging to output string, this string will be written as file to build output
 		//
 		m_log->startStrLogging();
+		m_log->clearItemsIssues();
 
 		// Create database controller and open project
 		//
@@ -873,8 +875,8 @@ namespace Builder
 
 		connect(m_thread, &BuildWorkerThread::resultReady, this, &Builder::handleResults);
 
-		connect(m_thread, &BuildWorkerThread::started, this, &Builder::buildStarted);
-		connect(m_thread, &BuildWorkerThread::finished, this, &Builder::buildFinished);
+		connect(m_thread, &BuildWorkerThread::started, GlobalMessanger::instance(), &GlobalMessanger::buildStarted);
+		connect(m_thread, &BuildWorkerThread::finished, GlobalMessanger::instance(), &GlobalMessanger::buildFinished);
 
 		return;
 	}

@@ -16,6 +16,7 @@
 #include "DialogConnectionsEditor.h"
 #include "Rs232SignalListEditor.h"
 #include "BuildTabPage.h"
+#include "GlobalMessanger.h"
 
 #include "../VFrame30/VFrame30.h"
 
@@ -38,8 +39,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &MainWindow::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &MainWindow::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &MainWindow::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
 
 	////connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
 	////connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
@@ -64,16 +65,6 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
-
-	// Connect BuildStarted and BuildFinished signals to SchemesTabPage
-	//
-	connect(buildTabPage, &BuildTabPage::buildStarted, m_logicScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, m_logicScheme, &SchemesTabPage::buildFinished);
-	connect(buildTabPage, &BuildTabPage::buildStarted, m_workflowScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, m_workflowScheme, &SchemesTabPage::buildFinished);
-	connect(buildTabPage, &BuildTabPage::buildStarted, m_diagScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, m_diagScheme, &SchemesTabPage::buildFinished);
-
 
 	// --
 	//

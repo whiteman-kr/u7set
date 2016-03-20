@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "FileListView.h"
 #include "CheckInDialog.h"
+#include "GlobalMessanger.h"
 #include "../include/DbController.h"
 
 
@@ -436,8 +437,8 @@ FileListView::FileListView(DbController* pDbStore, const QString& parentFileName
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &FileListView::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &FileListView::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FileListView::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FileListView::projectClosed);
 
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileListView::filesViewSelectionChanged);
 

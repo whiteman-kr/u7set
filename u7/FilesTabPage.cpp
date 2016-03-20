@@ -1,9 +1,14 @@
 #include "FilesTabPage.h"
-#include "DialogFileEditor.h"
-#include "CheckInDialog.h"
-#include "../include/DbController.h"
+
 #include <QDir>
 #include <QMessageBox>
+
+#include "../include/DbController.h"
+
+#include "DialogFileEditor.h"
+#include "CheckInDialog.h"
+#include "GlobalMessanger.h"
+
 
 //
 //
@@ -127,8 +132,8 @@ FileTreeModel::FileTreeModel(DbController* dbcontroller, QWidget* parentWidget, 
 {
 	assert(m_dbc);
 
-	connect(dbcontroller, &DbController::projectOpened, this, &FileTreeModel::projectOpened);
-	connect(dbcontroller, &DbController::projectClosed, this, &FileTreeModel::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FileTreeModel::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FileTreeModel::projectClosed);
 }
 
 FileTreeModel::~FileTreeModel()
@@ -1525,8 +1530,8 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &FilesTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &FilesTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FilesTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FilesTabPage::projectClosed);
 
 	connect(m_fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FilesTabPage::selectionChanged);
 	connect(m_fileModel, &FileTreeModel::dataChanged, this, &FilesTabPage::modelDataChanged);

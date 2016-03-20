@@ -1,6 +1,11 @@
 #ifndef ISSUELOGGER_H
 #define ISSUELOGGER_H
 
+#include <map>
+
+#include <QMutex>
+#include <QUuid>
+
 #include "../include/OutputLog.h"
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, Q_FUNC_INFO);
@@ -9,7 +14,6 @@
 
 namespace Builder
 {
-
 	enum class IssueType
 	{
 		NotDefined,
@@ -45,7 +49,7 @@ namespace Builder
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
-		void errALP4000(QString scheme);
+		void errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids);
 
 		// ALC			Application logic compiler				5000-5999
 		//
@@ -53,8 +57,17 @@ namespace Builder
 		// EQP			Equipment issues						6000-6999
 		//
 
+	public:
+		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
+		void swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues);
+		void clearItemsIssues();
+
 	private:
 		static QString issuePTypeToString(IssueType it);
+
+	private:
+		QMutex m_mutex;
+		std::map<QUuid, OutputMessageLevel> m_itemsIssues;
 	};
 
 }

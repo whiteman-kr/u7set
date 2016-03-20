@@ -1,4 +1,5 @@
 #include "MainTabPage.h"
+#include "GlobalMessanger.h"
 #include "../include/DbController.h"
 
 MainTabPage::MainTabPage(DbController* dbcontroller, QWidget* parent) :
@@ -18,4 +19,9 @@ DbController* MainTabPage::db()
 {
 	assert(m_dbController != nullptr);
 	return m_dbController;
+}
+
+GlobalMessanger* MainTabPage::globalMesssanger()
+{
+	return GlobalMessanger::instance();
 }

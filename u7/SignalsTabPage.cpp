@@ -1,8 +1,5 @@
 #include "Stable.h"
-#include "SignalsTabPage.h"
-#include "../include/DbController.h"
-#include "Settings.h"
-#include "SignalPropertiesDialog.h"
+
 #include <QFormLayout>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -14,6 +11,13 @@
 #include <QButtonGroup>
 #include <QToolButton>
 #include <QTimer>
+
+#include "../include/DbController.h"
+
+#include "SignalsTabPage.h"
+#include "Settings.h"
+#include "SignalPropertiesDialog.h"
+#include "GlobalMessanger.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -1310,8 +1314,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &SignalsTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &SignalsTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//

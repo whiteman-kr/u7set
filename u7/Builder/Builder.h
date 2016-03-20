@@ -187,8 +187,8 @@ namespace Builder
 		// Signlas
 		//
 	signals:
-		void buildStarted();
-		void buildFinished();
+		//void buildStarted();
+		//void buildFinished();
 
 		// Slots
 		//

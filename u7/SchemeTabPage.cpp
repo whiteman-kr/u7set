@@ -3,6 +3,7 @@
 #include "CreateSchemeDialog.h"
 #include "ChangesetDialog.h"
 #include "CheckInDialog.h"
+#include "GlobalMessanger.h"
 
 //
 //
@@ -91,8 +92,8 @@ SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &SchemesTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &SchemesTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemesTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemesTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//
@@ -629,7 +630,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	connect(schemesTabPage, &SchemesTabPage::buildStarted, editTabPage, &EditSchemeTabPage::saveWorkcopy);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemeTabPage::saveWorkcopy);
 
 	// --
 	//

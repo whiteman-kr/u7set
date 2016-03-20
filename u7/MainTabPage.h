@@ -1,6 +1,7 @@
 #pragma once
 
 class DbController;
+class GlobalMessanger;
 
 class MainTabPage : public QWidget
 {
@@ -20,6 +21,8 @@ public slots:
 protected:
 	DbController* dbController();
 	DbController* db();
+
+	GlobalMessanger* globalMesssanger();
 
 	// Data
 	//

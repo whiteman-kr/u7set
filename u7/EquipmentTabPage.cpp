@@ -6,6 +6,7 @@
 #include "Subsystem.h"
 #include "EquipmentVcsDialog.h"
 #include "DialogConnectionsEditor.h"
+#include "GlobalMessanger.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -34,10 +35,8 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 
 	m_root = m_configuration;	// Edit configuration default mode
 
-	assert(dbcontroller);
-
-	connect(dbcontroller, &DbController::projectOpened, this, &EquipmentModel::projectOpened);
-	connect(dbcontroller, &DbController::projectClosed, this, &EquipmentModel::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
 }
 
 EquipmentModel::~EquipmentModel()
@@ -2474,8 +2473,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 

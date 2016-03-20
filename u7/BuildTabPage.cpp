@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "BuildTabPage.h"
 #include "Settings.h"
+#include "GlobalMessanger.h"
 #include "../include/DbController.h"
 
 
@@ -88,17 +89,17 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &BuildTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &BuildTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
 
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
-	connect(&m_builder, &Builder::Builder::buildStarted, this, &BuildTabPage::buildWasStarted);
-	connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildWasFinished);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &BuildTabPage::buildWasStarted);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &BuildTabPage::buildWasFinished);
 
-	//connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
-	connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
+	////connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
+	//connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
 
 	// Output Log
 	//
@@ -117,6 +118,11 @@ BuildTabPage::~BuildTabPage()
 
 	theSettings.m_buildTabPageSplitterState = m_vsplitter->saveState();
 	theSettings.writeUserScope();
+}
+
+const std::map<QUuid, OutputMessageLevel>* BuildTabPage::itemsIssues() const
+{
+	return &m_itemsIssues;
 }
 
 //BuildTabPage* BuildTabPage::instance()
@@ -234,7 +240,7 @@ void BuildTabPage::build()
 
 	// --
 	//
-	emit buildStarted();
+	GlobalMessanger::instance()->fireBuildStarted();
 
 	bool debug = m_debugCheckBox->isChecked();
 
@@ -266,5 +272,10 @@ void BuildTabPage::buildWasFinished()
 {
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
+
+	m_itemsIssues.clear();
+	//m_outputLog.swapItemsIssues(&itemsIssues);
+
+	return;
 }
 

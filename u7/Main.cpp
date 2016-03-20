@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "MainWindow.h"
 #include "Settings.h"
+#include "GlobalMessanger.h"
 #include "../VFrame30/VFrame30Library.h"
 #include "../include/DbController.h"
 #include "../include/DeviceObject.h"
@@ -98,6 +99,8 @@ int main(int argc, char *argv[])
 	VFrame30::VFrame30Library::Init();
 	Hardware::Init();
 
+	GlobalMessanger::instance();		// Create instance of GlobalMessanger
+
 	// Read settings
 	//
 	theSettings.load();
@@ -135,6 +138,8 @@ int main(int argc, char *argv[])
 	dbController.enableProgress();
 
 	int result = a.exec();
+
+	GlobalMessanger::free();		// Delete instance of GlobalMessanger
 
 	VFrame30::VFrame30Library::Shutdown();
 	Hardware::Shutdwon();

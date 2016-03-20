@@ -26,8 +26,23 @@ namespace Builder
 
 	// ALP			Application Logic Parsing				4000-4999
 	//
-	void IssueLogger::errALP4000(QString scheme)
+
+	/// IssueCode: ALP4000
+	///
+	/// IssueType: Error
+	///
+	/// Title: Branch has multiple outputs (LogicScheme '%1').
+	///
+	/// Parameters:
+	///		%1 Logic Scheme StrID
+	///
+	/// Description:
+	///		Error may occur if there are more than one output is linked to input
+	///
+	void IssueLogger::errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids)
 	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4000,
 				  tr("Branch has multiple outputs (LogicScheme '%1').")
@@ -44,6 +59,34 @@ namespace Builder
 
 	// --
 	//
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)
+	{
+		QMutexLocker l(&m_mutex);
+
+		for (auto id : itemsUuids)
+		{
+			m_itemsIssues[id] = level;
+		}
+	}
+
+	void IssueLogger::swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues)
+	{
+		if (itemsIssues == nullptr)
+		{
+			assert(itemsIssues);
+			return;
+		}
+
+		QMutexLocker l(&m_mutex);
+		std::swap(m_itemsIssues, *itemsIssues);
+	}
+
+	void IssueLogger::clearItemsIssues()
+	{
+		QMutexLocker l(&m_mutex);
+		m_itemsIssues.clear();
+	}
+
 	QString IssueLogger::issuePTypeToString(IssueType it)
 	{
 		switch(it)

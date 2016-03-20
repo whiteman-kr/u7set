@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
+#include "../include/DbStruct.h"
 
 class QListWidget;
 class DbController;
@@ -15,7 +16,7 @@ protected:
 	virtual void showEvent(QShowEvent* event) override;
 
 public slots:
-	void projectOpened();
+	void projectOpened(DbProject project);
 	void projectClosed();
 
 private slots:

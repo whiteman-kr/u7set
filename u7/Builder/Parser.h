@@ -59,6 +59,8 @@ namespace Builder
 
 		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
 		VFrame30::AfbPin pinByGuid(QUuid pinId);
+
+		std::vector<QUuid> getAllUuid() const;	// Used for IssueLogger
 	};
 
 	struct BushContainer

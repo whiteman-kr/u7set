@@ -4,6 +4,7 @@
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 #include "Settings.h"
+#include "GlobalMessanger.h"
 
 ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
@@ -118,7 +119,7 @@ void ProjectsTabPage::showEvent(QShowEvent* event)
 	QWidget::showEvent(event);
 }
 
-void ProjectsTabPage::projectOpened()
+void ProjectsTabPage::projectOpened(DbProject project)
 {
 	refreshProjectList();
 
@@ -127,6 +128,8 @@ void ProjectsTabPage::projectOpened()
 	m_pCloseProject->setEnabled(true);
 	m_pDeleteProject->setEnabled(false);
 	m_pRefreshProjectList->setEnabled(true);
+
+	GlobalMessanger::instance()->fireProjectOpened(project);
 }
 
 void ProjectsTabPage::projectClosed()
@@ -138,6 +141,8 @@ void ProjectsTabPage::projectClosed()
 	m_pCloseProject->setEnabled(false);
 	m_pDeleteProject->setEnabled(true);
 	m_pRefreshProjectList->setEnabled(true);
+
+	GlobalMessanger::instance()->fireProjectClosed();
 }
 
 void ProjectsTabPage::createProject()

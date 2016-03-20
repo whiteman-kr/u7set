@@ -152,7 +152,8 @@ SOURCES +=\
     ../lib/BuildInfo.cpp \
     Rs232SignalListEditor.cpp \
     Builder/TuningBuilder.cpp \
-    Builder/IssueLogger.cpp
+    Builder/IssueLogger.cpp \
+    GlobalMessanger.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -231,7 +232,8 @@ HEADERS  += \
     ../include/BuildInfo.h \
     Rs232SignalListEditor.h \
     Builder/TuningBuilder.h \
-    Builder/IssueLogger.h
+    Builder/IssueLogger.h \
+    GlobalMessanger.h
 
 
 FORMS    += \

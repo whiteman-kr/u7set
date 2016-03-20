@@ -89,6 +89,19 @@ namespace Builder
 		return VFrame30::AfbPin();
 	}
 
+	std::vector<QUuid> Bush::getAllUuid() const
+	{
+		std::vector<QUuid> v;
+		v.reserve(links.size() + 1);
+
+		for (auto it : links)
+		{
+			v.push_back(it.first);
+		}
+
+		return v;
+	}
+
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
@@ -1569,7 +1582,7 @@ namespace Builder
 					{
 						// Branch has multiple outputs.
 						//
-						log()->errALP4000(scheme->caption());
+						log()->errALP4000(scheme->strID(), bushContainer->bushes[branchIndex].getAllUuid());
 
 						result = false;
 						continue;

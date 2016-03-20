@@ -26,14 +26,14 @@ public:
 public:
 	//static BuildTabPage* instance();
 
+	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
+
 protected:
 	void CreateActions();
 
 	void writeOutputLog(const OutputLogItem& logItem);
 
 signals:
-	void buildStarted();
-	void buildFinished();
 
 	// Events
 	//
@@ -76,7 +76,9 @@ private:
 	QFile m_logFile;
 	static const char* m_buildLogFileName;
 
-	Builder::Builder m_builder;				// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
+	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
+
+	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all scheme items with issues
 };
 
 
