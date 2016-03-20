@@ -153,6 +153,7 @@ SOURCES +=\
     Rs232SignalListEditor.cpp \
     Builder/TuningBuilder.cpp \
     Builder/IssueLogger.cpp \
+	Builder/OptoModule.cpp \
     GlobalMessanger.cpp
 
 HEADERS  += \
@@ -233,8 +234,8 @@ HEADERS  += \
     Rs232SignalListEditor.h \
     Builder/TuningBuilder.h \
     Builder/IssueLogger.h \
-    GlobalMessanger.h
-
+	Builder/OptoModule.h \
+	GlobalMessanger.h
 
 FORMS    += \
     ChangesetDialog.ui \

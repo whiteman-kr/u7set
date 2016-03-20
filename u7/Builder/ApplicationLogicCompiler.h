@@ -96,6 +96,7 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
         Hardware::EquipmentSet* m_equipmentSet = nullptr;
         Hardware::DeviceObject* m_deviceRoot = nullptr;
+        Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
@@ -112,13 +113,20 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool compileModulesLogics();
+        bool checkOptoConnections();
 
 		bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
 	public:
-        ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::EquipmentSet* equipmentSet, SignalSet* signalSet,
-								 Afb::AfbElementCollection* afblSet, AppLogicData* appLogicData,
-								 BuildResultWriter* buildResultWriter, OutputLog* log, Hardware::ConnectionStorage* connections);
+        ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+                                 Hardware::EquipmentSet* equipmentSet,
+                                 Hardware::OptoModuleStorage* optoModuleStorage,
+                                 Hardware::ConnectionStorage* connections,
+                                 SignalSet* signalSet,
+                                 Afb::AfbElementCollection* afblSet,
+                                 AppLogicData* appLogicData,
+                                 BuildResultWriter* buildResultWriter,
+                                 OutputLog* log);
 
 		bool run();
 
@@ -748,6 +756,7 @@ namespace Builder
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
+        Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 
 		// compiler settings
 		//
@@ -896,6 +905,8 @@ namespace Builder
 		bool calculateLmMemoryMap();
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
+
+        bool buildOptoModulesStorage();
 
 		bool generateApplicationLogicCode();
 

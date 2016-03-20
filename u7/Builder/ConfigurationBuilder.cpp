@@ -104,44 +104,32 @@ namespace Builder
 
             std::vector<Hardware::DeviceObject*> list;
 
-            if (connection->type() == Hardware::Connection::Type::Optical)
+            if (connection->port1StrID().length() > 0)
             {
-				if (connection->device1StrID().length() > 0)
-				{
-					list.clear();
-					m_deviceRoot->findChildObjectsByMask(connection->device1StrID(), list);
-					if (list.empty() == true)
-					{
-						LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-								  tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
-						return false;
-					}
-				}
-
-				if (connection->device2StrID().length() > 0)
-				{
-					list.clear();
-					m_deviceRoot->findChildObjectsByMask(connection->device2StrID(), list);
-					if (list.empty() == true)
-					{
-						LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-								  tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
-						return false;
-					}
-				}
-            }
-            else
-            {
-                m_deviceRoot->findChildObjectsByMask(connection->ocmPortStrID(), list);
+                list.clear();
+                m_deviceRoot->findChildObjectsByMask(connection->port1StrID(), list);
                 if (list.empty() == true)
                 {
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-							  tr("No port %1 was found for serial connection %2").arg(connection->ocmPortStrID()).arg(connection->caption()));
+                    LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+                              tr("No source port %1 was found for connection %2").arg(connection->port1StrID()).arg(connection->caption()));
                     return false;
                 }
             }
 
-
+            if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+            {
+                if (connection->port2StrID().length() > 0)
+				{
+					list.clear();
+                    m_deviceRoot->findChildObjectsByMask(connection->port2StrID(), list);
+					if (list.empty() == true)
+					{
+						LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+                                  tr("No target port %1 was found for connection %2").arg(connection->port2StrID()).arg(connection->caption()));
+						return false;
+					}
+				}
+            }
         }
 
 
@@ -251,6 +239,11 @@ namespace Builder
 		//
 		std::vector<Hardware::DeviceModule*> lmModules;
 		findLmModules(m_deviceRoot, lmModules);
+        std::sort(lmModules.begin(), lmModules.end(),
+                  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+                  {
+                      return a->strId() > b->strId();
+                  });
 
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
