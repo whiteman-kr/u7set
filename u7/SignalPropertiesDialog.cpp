@@ -119,7 +119,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	QSettings settings;
 
 	QVBoxLayout* vl = new QVBoxLayout;
-	ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+    ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
@@ -133,6 +133,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 		m_objList.push_back(signal);
 	}
 	pe->setObjects(m_objList);
+    pe->resizeColumnToContents(0);
 	vl->addWidget(pe);
 
 	QDialogButtonBox* buttonBox;

@@ -269,7 +269,6 @@ void Rs232SignalListEditor::editConnection()
 	*editConnection = *connection;
 
 	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &m_connections);
-	pd->resize(640, 300);
 	pd->setWindowTitle(tr("Connection properties"));
 
 	if (pd->exec() == QDialog::Accepted)

@@ -44,6 +44,7 @@ void Settings::writeUserScope() const
 	s.setValue("ConfigurationTabPage/Splitter/state", m_configurationTabPageSplitterState);
 
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
+    s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
@@ -61,6 +62,14 @@ void Settings::writeUserScope() const
 
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
+    s.setValue("Connection/pos", m_connectionPropertiesWindowPos);
+    s.setValue("Connection/geometry", m_connectionPropertiesWindowGeometry);
+    s.setValue("Connection/Splitter/state", m_connectionSplitterState);
+
+    s.setValue("SchemeItem/pos", m_schemeItemPropertiesWindowPos);
+    s.setValue("SchemeItem/geometry", m_schemeItemPropertiesWindowGeometry);
+    s.setValue("SchemeItem/Splitter/state", m_schemeItemSplitterState);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -77,7 +86,11 @@ void Settings::loadUserScope()
 
 	m_equipmentTabPageSplitterState = s.value("EquipmentTabPage/Splitter/state").toByteArray();
 
-	m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
+    m_equipmentTabPagePropertiesSplitterState = s.value("EquipmentTabPage/PropertiesSplitter/state").toInt();
+    if (m_equipmentTabPagePropertiesSplitterState < 150)
+        m_equipmentTabPagePropertiesSplitterState = 150;
+
+    m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
     m_abflEditorWindowPos = s.value("AFBLEditor/pos", QPoint(-1, -1)).toPoint();
     m_abflEditorWindowGeometry = s.value("AFBLEditor/geometry").toByteArray();
@@ -97,6 +110,25 @@ void Settings::loadUserScope()
 	{
 		m_loginCompleter << "Administrator";
 	}
+
+    //
+
+    m_connectionPropertiesWindowPos = s.value("Connection/pos", QPoint(-1, -1)).toPoint();
+    m_connectionPropertiesWindowGeometry = s.value("Connection/geometry").toByteArray();
+
+    m_connectionSplitterState = s.value("Connection/Splitter/state").toInt();
+    if (m_connectionSplitterState < 175)
+        m_connectionSplitterState = 175;
+
+    //
+
+    m_schemeItemPropertiesWindowPos = s.value("SchemeItem/pos", QPoint(-1, -1)).toPoint();
+    m_schemeItemPropertiesWindowGeometry = s.value("SchemeItem/geometry").toByteArray();
+
+    m_schemeItemSplitterState = s.value("SchemeItem/Splitter/state").toInt();
+    if (m_schemeItemSplitterState < 150)
+        m_schemeItemSplitterState = 150;
+
 
     return;
 }

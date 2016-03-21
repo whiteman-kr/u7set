@@ -2436,6 +2436,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_splitter = new QSplitter(this);
 
     m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
+    m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
+
 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
@@ -2492,6 +2494,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 EquipmentTabPage::~EquipmentTabPage()
 {
 	theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
+    theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
 	theSettings.writeUserScope();
 }
 
