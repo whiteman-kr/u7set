@@ -7,10 +7,8 @@ CentralWidget::CentralWidget(QWidget* parent) :
 {
 }
 
-void CentralWidget::addTabPage(MainTabPage* tabPage, const QString& label)
+int CentralWidget::addTabPage(MainTabPage* tabPage, const QString& label)
 {
 	assert(tabPage != nullptr);
-
-	addTab(tabPage, label);
-    return;
+	return addTab(tabPage, label);
 }

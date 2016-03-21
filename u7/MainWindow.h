@@ -4,6 +4,7 @@
 class CentralWidget;
 class DbController;
 class SchemesTabPage;
+class FilesTabPage;
 
 namespace Ui {
 class MainWindow;
@@ -68,6 +69,7 @@ private slots:
 	//
 protected:
 	DbController* dbController();
+	DbController* db();
     
 	// Data
 	//
@@ -96,5 +98,8 @@ private:
 	SchemesTabPage* m_diagScheme = nullptr;
 
 	DbController* m_dbController = nullptr;
+
+	int m_filesTabPageIndex = 0;
+	FilesTabPage* m_filesTabPage = nullptr;
 };
 
