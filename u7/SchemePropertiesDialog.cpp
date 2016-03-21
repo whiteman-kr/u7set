@@ -10,6 +10,7 @@ SchemePropertiesDialog::SchemePropertiesDialog(EditEngine::EditEngine* editEngin
 	ui->setupUi(this);
 
 	m_propertyEditor = new SchemePropertyEditor(editEngine, this);
+    m_propertyEditor->setResizeMode(ExtWidgets::PropertyEditor::ResizeToContents);
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 	return;

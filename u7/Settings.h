@@ -65,6 +65,8 @@ public:
 	//
 	QByteArray m_equipmentTabPageSplitterState;
 
+    int m_equipmentTabPagePropertiesSplitterState = 0;
+
 	// Signals Tab Page
 	//
 	//QByteArray m_equipmentTabPageSplitterState;
@@ -92,6 +94,18 @@ public:
 	//
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
+
+    //Connection properties
+    //
+    QPoint m_connectionPropertiesWindowPos;
+    QByteArray m_connectionPropertiesWindowGeometry;
+    int m_connectionSplitterState = 0;
+
+    //SchemeItem properties
+    //
+    QPoint m_schemeItemPropertiesWindowPos;
+    QByteArray m_schemeItemPropertiesWindowGeometry;
+    int m_schemeItemSplitterState = 0;
 
 private:
 	// --

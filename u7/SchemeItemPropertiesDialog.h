@@ -32,7 +32,14 @@ public:
 	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
 
 private:
-	Ui::SchemeItemPropertiesDialog *ui;
+    virtual void closeEvent(QCloseEvent * e);
+    virtual void done(int r);
+
+    void saveSettings();
+
+private:
+
+    Ui::SchemeItemPropertiesDialog *ui;
 
 	SchemeItemPropertyEditor* m_propertyEditor = nullptr;
 

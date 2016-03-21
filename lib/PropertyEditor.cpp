@@ -1543,6 +1543,8 @@ namespace ExtWidgets
 	PropertyEditor::PropertyEditor(QWidget* parent) :
 		QtTreePropertyBrowser(parent)
 	{
+        setResizeMode(ResizeMode::Interactive);
+
 		m_propertyGroupManager = new QtGroupPropertyManager(this);
 		m_propertyVariantManager = new QtMultiVariantPropertyManager(this);
 
