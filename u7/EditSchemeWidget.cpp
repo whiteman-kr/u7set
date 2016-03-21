@@ -9,6 +9,7 @@
 #include "SchemeItemPropertiesDialog.h"
 #include "ChooseAfbDialog.h"
 #include "SignalPropertiesDialog.h"
+#include "GlobalMessanger.h"
 #include "../VFrame30/SchemeItemLine.h"
 #include "../VFrame30/SchemeItemRect.h"
 #include "../VFrame30/SchemeItemPath.h"
@@ -121,6 +122,10 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	drawParam.setControlBarSize(
 		scheme()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
+	// Draw Build Issues
+	//
+	drawBuildIssues(&drawParam, clipRect);
+
 	// Draw selection
 	//
 	if (m_selectedItems.empty() == false)
@@ -155,6 +160,51 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	// --
 	//
 	p.end();
+
+	return;
+}
+
+void EditSchemeView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect)
+{
+	if (drawParam == nullptr)
+	{
+		assert(drawParam != nullptr);
+		return;
+	}
+
+	// Draw items by layers which has Show flag
+	//
+	double clipX = static_cast<double>(clipRect.left());
+	double clipY = static_cast<double>(clipRect.top());
+	double clipWidth = static_cast<double>(clipRect.width());
+	double clipHeight = static_cast<double>(clipRect.height());
+
+	// Find compile layer
+	//
+	for (auto layer = scheme()->Layers.cbegin(); layer != scheme()->Layers.cend(); ++layer)
+	{
+		const VFrame30::SchemeLayer* pLayer = layer->get();
+
+		if (pLayer->compile() == false || pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		{
+			const std::shared_ptr<VFrame30::SchemeItem>& item = *vi;
+
+			OutputMessageLevel issue = GlobalMessanger::instance()->issueForSchemeItem(item->guid());
+
+			if ((issue == OutputMessageLevel::Warning || issue == OutputMessageLevel::Error) &&
+				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			{
+				// Draw item issue
+				//
+				item->DrawIssue(drawParam, issue);
+			}
+		}
+	}
 
 	return;
 }
@@ -375,7 +425,6 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// --
 	//
 	p->setRenderHints(oldrenderhints);
-
 
 	return;
 }
@@ -809,7 +858,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			double diffX = m_editEndMovingEdgeX - points[m_movingEdgePointIndex].X;
 			double diffY = m_editEndMovingEdgeY - points[m_movingEdgePointIndex].Y;
 
-			// Сдвинуть предыдущую точку
+			// Shift the previouse point
 			//
 			if (m_movingEdgePointIndex - 1 >= 0)
 			{
@@ -827,7 +876,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 					{
 						if (wasVert == true)
 						{
-							// Линия вертикальная
+							// The line is vertical
+							//
 							prevPoint.X += diffX;
 							wasHorz = false;
 							wasVert = true;
@@ -841,7 +891,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 					{
 						if (wasHorz == true)
 						{
-							// Линия горизонтальная
+							// The line is horizontal
+							//
 							prevPoint.Y += diffY;
 							wasHorz = true;
 							wasVert = false;
@@ -862,7 +913,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				}
 			}
 
-			// Сдвинуть следующую точку
+			// Shift the next point
 			//
 			if (m_movingEdgePointIndex + 1 < static_cast<int>(points.size()))
 			{
@@ -880,7 +931,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 					{
 						if (wasVert == true)
 						{
-							// Линия вертикальная
+							// The line is vertical
 							//
 							nextPoint.X += diffX;
 							wasHorz = false;
@@ -895,7 +946,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 					{
 						if (wasHorz == true)
 						{
-							// Линия горизонтальная
+							// The line is horizontal
 							//
 							nextPoint.Y += diffY;
 							wasHorz = true;
@@ -917,7 +968,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				}
 			}
 
-			// Сдвинуть перемещаемую вершину
+			// Shift the moving point
 			//
 			VFrame30::SchemePoint pt = points[m_movingEdgePointIndex];
 
@@ -1226,7 +1277,7 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 			//
 			if (std::abs(x1 - x2) < std::abs(y1 - y2))
 			{
-				// Линия вертикальная
+				// The line is vertical
 				//
 				x1 -= controlBarSize / 4;
 				x2 += controlBarSize / 4;
@@ -1240,7 +1291,7 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 			}
 			else
 			{
-				// Линия горизонтальная
+				// The line is horizontal
 				//
 				y1 -= controlBarSize / 4;
 				y2 += controlBarSize / 4;
