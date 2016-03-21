@@ -921,6 +921,11 @@ void QtTreePropertyBrowser::setResizeMode(QtTreePropertyBrowser::ResizeMode mode
     d_ptr->m_treeWidget->header()->setResizeMode(m);
 }
 
+void QtTreePropertyBrowser::resizeColumnToContents(int column)
+{
+    d_ptr->m_treeWidget->resizeColumnToContents(column);
+}
+
 /*!
     \property QtTreePropertyBrowser::splitterPosition
     \brief the position of the splitter between the colunms.

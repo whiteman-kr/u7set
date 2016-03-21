@@ -90,6 +90,8 @@ public:
     ResizeMode resizeMode() const;
     void setResizeMode(ResizeMode mode);
 
+    void resizeColumnToContents(int column);
+
     int splitterPosition() const;
     void setSplitterPosition(int position);
 

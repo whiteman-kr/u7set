@@ -1,6 +1,7 @@
 #include "DialogConnectionsEditor.h"
 #include "ui_DialogConnectionsEditor.h"
 #include "../include/PropertyEditorDialog.h"
+#include "Settings.h"
 
 //
 //
@@ -12,6 +13,17 @@ DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr
     :PropertyEditorDialog(object, parent)
 {
 	m_connections = connections;
+
+    setSplitterPosition(theSettings.m_connectionSplitterState);
+    if (theSettings.m_connectionPropertiesWindowPos.x() != -1 && theSettings.m_connectionPropertiesWindowPos.y() != -1)
+    {
+        move(theSettings.m_connectionPropertiesWindowPos);
+        restoreGeometry(theSettings.m_connectionPropertiesWindowGeometry);
+    }
+}
+
+DialogConnectionsPropertyEditor::~DialogConnectionsPropertyEditor()
+{
 }
 
 bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
@@ -36,6 +48,26 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
         return false;
     }
     return true;
+}
+
+void DialogConnectionsPropertyEditor::closeEvent(QCloseEvent * e)
+{
+    Q_UNUSED(e);
+    saveSettings();
+
+}
+
+void DialogConnectionsPropertyEditor::done(int r)
+{
+    saveSettings();
+    PropertyEditorDialog::done(r);
+}
+
+void DialogConnectionsPropertyEditor::saveSettings()
+{
+    theSettings.m_connectionSplitterState = splitterPosition();
+    theSettings.m_connectionPropertiesWindowPos = pos();
+    theSettings.m_connectionPropertiesWindowGeometry = saveGeometry();
 }
 
 
