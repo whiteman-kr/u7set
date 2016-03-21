@@ -65,6 +65,10 @@ namespace VFrame30
 		//
 		virtual void DrawOutline(CDrawParam* drawParam) const override;
 
+		// Draw item issue
+		//
+		virtual void DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
+
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
 		virtual void DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;

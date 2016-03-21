@@ -100,6 +100,7 @@ public:
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
 
+	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawSelection(QPainter* p);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);
