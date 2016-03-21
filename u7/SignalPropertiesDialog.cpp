@@ -121,6 +121,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	QVBoxLayout* vl = new QVBoxLayout;
     ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
 
+	connect(pe, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::checkoutSignal);
+
 	for (int i = 0; i < signalVector.count(); i++)
 	{
 		std::shared_ptr<Signal> signal = std::make_shared<Signal>(*signalVector[i]);
@@ -136,28 +138,26 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
     pe->resizeColumnToContents(0);
 	vl->addWidget(pe);
 
-	QDialogButtonBox* buttonBox;
-
 	if (!readOnly)
 	{
 		setWindowTitle("Signal properties editing");
-		buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-		connect(buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::checkAndSaveSignal);
+		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::checkAndSaveSignal);
 	}
 	else
 	{
 		setWindowTitle("Signal properties (read only)");
-		buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
-		connect(buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
+		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
+		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
 	}
-	connect(buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
 	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
 	if (m_signalsModel != nullptr)
 	{
 		connect(this, &SignalPropertiesDialog::onError, m_signalsModel, static_cast<void (SignalsModel::*)(QString)>(&SignalsModel::showError));
 	}
 
-	vl->addWidget(buttonBox);
+	vl->addWidget(m_buttonBox);
 	setLayout(vl);
 
 	resize(settings.value("Signal properties dialog: size", QSize(320, 640)).toSize());
@@ -184,20 +184,23 @@ void SignalPropertiesDialog::saveDialogSettings()
 	//Save expand state ???
 }
 
-void SignalPropertiesDialog::checkoutSignal()
+void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject> > objects)
 {
 	if (m_signalsModel == nullptr)
 	{
 		return;
 	}
 
-	for (int i = 0; i < m_signalVector.count(); i++)
+	for (std::shared_ptr<PropertyObject> object : objects)
 	{
-		int row = m_signalsModel->keyIndex(m_signalVector[i]->ID());
+		Signal* signal = dynamic_cast<Signal*>(object.get());
+		int row = m_signalsModel->keyIndex(signal->ID());
 		QString message;
 		if (!m_signalsModel->checkoutSignal(row, message) && !message.isEmpty())
 		{
 			emit onError(message);
+			setWindowTitle("Signal properties (read only)");
+			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
 		}
 	}
