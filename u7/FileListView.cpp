@@ -259,7 +259,14 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 	//
 	for (QModelIndex& oldIndex : pers)
 	{
-		std::shared_ptr<DbFileInfo> oldFile = oldFileOrder.at(oldIndex.row());
+		int oldIndexRow = oldIndex.row();
+		if (oldIndexRow < 0 || oldIndex.row() >= oldFileOrder.size())
+		{
+			assert(oldIndex.row() < oldFileOrder.size());
+			break;
+		}
+
+		std::shared_ptr<DbFileInfo> oldFile = oldFileOrder.at(oldIndexRow);
 		QModelIndex newIndex = index(getFileRow(oldFile->fileId()), oldIndex.column());
 
 		if (oldIndex != newIndex)

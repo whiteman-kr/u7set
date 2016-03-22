@@ -272,7 +272,7 @@ protected:
 	int m_fileId = DbFileInfo::Null;
 	int m_parentId = 0;
 	int m_size = 0;
-	bool m_deleted = false;		// File was deleted from database, from all tables, such FileInfo does not exist anymore
+	bool m_deleted = false;				// File was deleted from database, from all tables, such FileInfo does not exist anymore
 
 	int m_changeset = 0;
 	QDateTime m_created;

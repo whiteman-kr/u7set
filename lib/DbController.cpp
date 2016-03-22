@@ -458,16 +458,41 @@ bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, 
 		for (size_t i = 0; i < files->size(); i++)
 		{
 			// FileID can be different, as for permanently deleted files it is marked as -1
-			// so, we rely only on the file order
+			// and, we cannot rely  on the file order
 			//
-			if (files->operator [](i)->fileId() != -1 &&
-				v[i].fileId() != -1)
+			auto& f = files->operator [](i);
+
+			auto findInResult = std::find_if(v.begin(), v.end(),
+				[&f](const DbFileInfo& vf)
+				{
+					return vf.fileName() == f->fileName() && vf.parentId() == f->parentId();
+				});
+
+			if (findInResult == v.end())
 			{
-				assert(files->operator [](i)->fileId() == v[i].fileId());
+				assert(false);			// file not found here
+				continue;
+			}
+			else
+			{
+				*(f.get()) = *findInResult;
 			}
 
-			auto& f = files->operator [](i);
-			*(f.get()) = v[i];
+//			if (files->operator [](i)->fileId() != -1 &&
+//				v[i].fileId() != -1)
+//			{
+//				qDebug() << Q_FUNC_INFO << "files->operator [](i)->fileId() " << files->operator [](i)->fileId();
+//				std::for_each(files->begin(), files->end(), [](auto f){ qDebug() << f->fileId();});
+
+//				qDebug() << Q_FUNC_INFO << "v[i].fileId() " << v[i].fileId();
+//				std::for_each(v.begin(), v.end(), [](auto f){ qDebug() << f.fileId();});
+
+//				assert(files->operator [](i)->fileId() == v[i].fileId());
+//				continue;
+//			}
+
+
+//			*(f.get()) = v[i];
 		}
 	}
 
