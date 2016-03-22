@@ -43,6 +43,7 @@ namespace Builder
 
 		// PDB			Project database issues					2000-2999
 		//
+		void wrnPDB2000();
 
 		// CFG			FSC configuration						3000-3999
 		//

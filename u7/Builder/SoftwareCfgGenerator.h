@@ -17,7 +17,7 @@ namespace Builder
 		SignalSet* m_signalSet = nullptr;
 		Hardware::EquipmentSet* m_equipment = nullptr;
 		BuildResultWriter* m_buildResultWriter = nullptr;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 		ConfigurationXmlFile * m_cfgXml = nullptr;
 		QString m_subDir;
 

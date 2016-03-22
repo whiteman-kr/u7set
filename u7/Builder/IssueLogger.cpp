@@ -21,6 +21,24 @@ namespace Builder
 	// PDB			Project database issues					2000-2999
 	//
 
+	/// IssueCode: PDB2000
+	///
+	/// IssueType: Warning
+	///
+	/// Title: The workcopies of the checked out files will be compiled.
+	///
+	/// Description:
+	///		Warning will occur if a project is built with DEBUG option. Unchecked In files can be built thus all
+	///		changes on workcopies can be undo later. Debug build does not guarantee keep tracking of changes.\n
+	///		Note that during RELEASE compile only checked in files will be taken for build process.
+	///
+	void IssueLogger::wrnPDB2000()
+	{
+		LOG_WARNING(IssueType::ProjectDatabase,
+				  2000,
+				  tr("The workcopies of the checked out files will be compiled."));
+	}
+
 	// CFG			FSC configuration						3000-3999
 	//
 
@@ -37,7 +55,7 @@ namespace Builder
 	///		%1 Logic Scheme StrID
 	///
 	/// Description:
-	///		Error may occur if there are more than one output is linked to input
+	///		Error may occur if there are more than one output is linked to input.
 	///
 	void IssueLogger::errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids)
 	{
