@@ -493,10 +493,10 @@ namespace Builder
                                                        OutputLog *log) :
 		m_subsystems(subsystems),
         m_equipmentSet(equipmentSet),
+		m_optoModuleStorage(optoModuleStorage),
 		m_signals(signalSet),
 		m_afbl(afblSet),
 		m_appLogicData(appLogicData),
-        m_optoModuleStorage(optoModuleStorage),
 		m_resultWriter(buildResultWriter),
 		m_log(log),
 		m_connections(connections)
@@ -2925,7 +2925,7 @@ namespace Builder
 
         // build analog and discrete signals list
         //
-        QStringList& signslList = connection->signalList();
+		QStringList&& signslList = connection->signalList();
 
         bool result = true;
 
@@ -2975,6 +2975,7 @@ namespace Builder
         }
 
         int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
+		Q_UNUSED(discreteSignalsSizeW)
 
         return result;
     }

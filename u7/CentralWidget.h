@@ -11,7 +11,7 @@ public:
 	// public methods
 	//
 public:
-	void addTabPage(MainTabPage* tabPage, const QString& label);
+	int addTabPage(MainTabPage* tabPage, const QString& label);
 	
 signals:
 	

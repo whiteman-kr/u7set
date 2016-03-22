@@ -5,6 +5,7 @@
 #include "../include/ProtoSerialization.h"
 #include "../include/DebugInstCounter.h"
 #include "../include/TypesAndEnums.h"
+#include "../include/OutputLog.h"
 
 namespace VFrame30
 {
@@ -170,10 +171,14 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* pDrawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const;
 
-		// Draw item outlien, while creation or changing
+		// Draw item outline, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
 		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items);
+
+		// Draw item issue
+		//
+		virtual void DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
@@ -253,6 +258,11 @@ namespace VFrame30
 
 		bool m_acceptClick;			// The SchemeItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
+
+	public:
+		static const QColor errorColor;
+		static const QColor warningColor;
+		static const QColor selectionColor;
 	};
 
 #ifdef VFRAME30LIB_LIBRARY

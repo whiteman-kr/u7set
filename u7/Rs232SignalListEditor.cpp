@@ -27,9 +27,9 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
         << tr("Duplex");
     m_rs232Connections->setColumnCount(l.size());
     m_rs232Connections->setHorizontalHeaderLabels(l);
-	m_rs232Connections->setColumnWidth(0, 150);
+	m_rs232Connections->setColumnWidth(0, 165);
 	m_rs232Connections->setColumnWidth(1, 300);
-	m_rs232Connections->setColumnWidth(2, 70);
+	m_rs232Connections->setColumnWidth(2, 60);
     m_rs232Connections->setColumnWidth(3, 70);
     m_rs232Connections->setColumnWidth(4, 70);
 
@@ -215,7 +215,7 @@ void Rs232SignalListEditor::addConnection()
 		assert(connection);
 		return;
 	}
-	connection->setCaption("New Connection");
+	connection->setCaption(QString("RS232/485 connection %1").arg(index + 1));
     connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
     connection->setSerialMode(Hardware::OptoPort::SerialMode::RS232);
     connection->setMode(Hardware::OptoPort::Mode::Serial);

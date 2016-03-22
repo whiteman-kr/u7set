@@ -13,6 +13,7 @@ class QtDoublePropertyManager;
 class QtBoolPropertyManager;
 class QtTreePropertyBrowser;
 class SignalsModel;
+class QDialogButtonBox;
 enum class SignalType;
 
 
@@ -32,11 +33,12 @@ signals:
 public slots:
 	void checkAndSaveSignal();
 	void saveDialogSettings();
-	void checkoutSignal();
+	void checkoutSignal(QList<std::shared_ptr<PropertyObject>> objects);
 	void saveLastEditedSignalProperties();
 
 private:
 	QVector<Signal*> m_signalVector;
+	QDialogButtonBox* m_buttonBox;
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
 	QList<std::shared_ptr<PropertyObject>> m_objList;

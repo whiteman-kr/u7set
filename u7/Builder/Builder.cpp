@@ -311,6 +311,15 @@ namespace Builder
 
 		db.closeProject(nullptr);
 
+		// Set Shceme Items Issues to GlobalMessanger
+		//
+		std::map<QUuid, OutputMessageLevel> schemeItemsIssues;
+		m_log->swapItemsIssues(&schemeItemsIssues);
+
+		GlobalMessanger::instance()->swapSchemeIssues(schemeItemsIssues);
+
+		// We've done, exit
+		//
 		emit resultReady(QString("Cool, we've done!"));
 
 		return;

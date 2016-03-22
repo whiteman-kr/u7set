@@ -207,6 +207,52 @@ namespace VFrame30
 		return;
 	}
 
+	void PosConnectionImpl::DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		double cbs = drawParam->controlBarSize();
+
+		// Draw the main part
+		//
+		QPolygonF polyline(static_cast<int>(points.size()));
+		int index = 0;
+
+		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
+		{
+			polyline[index++] = QPointF(pt->X + cbs / 3.0, pt->Y + cbs / 3.0);
+		}
+
+		QColor color;
+
+		switch (issue)
+		{
+		case OutputMessageLevel::Error:
+			color = SchemeItem::errorColor;
+			break;
+		case OutputMessageLevel::Warning:
+			color = SchemeItem::warningColor;
+			break;
+		default:
+			assert(false);
+		}
+
+		QPen pen(color);
+		pen.setWidthF(0);
+		p->setPen(pen);
+
+		p->drawPolyline(polyline);
+
+		return;
+	}
+
+
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
 	void PosConnectionImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
@@ -233,7 +279,7 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(QColor(0x33, 0x99, 0xFF, 0x80));
+		QPen pen(SchemeItem::selectionColor);
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
 

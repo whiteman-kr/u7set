@@ -56,6 +56,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Left Side
 	//
+	m_vsplitter = new QSplitter(this);
+
 	m_settingsWidget = new QWidget(m_vsplitter);
 	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
 
@@ -68,8 +70,6 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// V Splitter
 	//
-	m_vsplitter = new QSplitter(this);
-
 	m_vsplitter->addWidget(m_settingsWidget);
 	m_vsplitter->addWidget(m_rightSideWidget);
 

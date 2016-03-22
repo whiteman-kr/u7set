@@ -173,6 +173,57 @@ namespace VFrame30
 		p->setRenderHints(oldrenderhints);
 		return;
 	}
+
+	void PosRectImpl::DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		// Draw the main part
+		//
+		QColor color;
+
+		switch (issue)
+		{
+		case OutputMessageLevel::Error:
+			color = SchemeItem::errorColor;
+			break;
+		case OutputMessageLevel::Warning:
+			color = SchemeItem::warningColor;
+			break;
+		default:
+			assert(false);
+		}
+
+		QPen pen(color);
+		pen.setWidthF(0);
+		p->setPen(pen);
+
+		// --
+		//
+		double cbs = drawParam->controlBarSize();
+		QRectF r(leftDocPt() + cbs / 3.0, topDocPt() + cbs / 3.0, widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001f);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001f);
+		}
+
+		p->drawLine(r.bottomLeft(), r.bottomRight());
+		p->drawLine(r.topRight(), r.bottomRight());
+
+		return;
+	}
 	
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
