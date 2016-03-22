@@ -52,6 +52,9 @@ namespace Builder
 		//
 		void errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids);
 		void wrnALP4001(QString scheme);
+		void wrnALP4002(QString scheme, QString hardwareStrId);
+		void wrnALP4003(QString scheme, QString hardwareStrId);
+		void wrnALP4004(QString scheme);
 
 		// ALC			Application logic compiler				5000-5999
 		//

@@ -88,6 +88,71 @@ namespace Builder
 				  .arg(scheme));
 	}
 
+	/// IssueCode: ALP4002
+	///
+	/// IssueType: Warning
+	///
+	/// Title: HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2').
+	///
+	/// Parameters:
+	///		%1 Logic Modules StrID
+	///		%2 Logic Scheme StrID
+	///
+	/// Description:
+	///		Logic Scheme has property HardwareStrIds but Logic Module with pointed StrID is not found in the project equipment.
+	///
+	void IssueLogger::wrnALP4002(QString scheme, QString hardwareStrId)
+	{
+		LOG_WARNING(IssueType::AlParsing,
+					4002,
+					tr("HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2').")
+					.arg(hardwareStrId)
+					.arg(scheme));
+	}
+
+	/// IssueCode: ALP4003
+	///
+	/// IssueType: Warning
+	///
+	/// Title: HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+	///
+	/// Parameters:
+	///		%1 Logic Modules StrID
+	///		%2 Logic Scheme StrID
+	///
+	/// Description:
+	///		Logic Scheme has property HardwareStrIds but the equipment object with pointed StrID is not a module or is not LM family type.
+	///
+	void IssueLogger::wrnALP4003(QString scheme, QString hardwareStrId)
+	{
+		LOG_WARNING(IssueType::AlParsing,
+					4003,
+					tr("HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').")
+					.arg(hardwareStrId)
+					.arg(scheme));
+	}
+
+	/// IssueCode: ALP4004
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Scheme is excluded from build (Scheme '%1').
+	///
+	/// Parameters:
+	///		%1 Scheme StrID
+	///
+	/// Description:
+	///			Scheme is excluded from build and will not be parsed. To include scheme in the build process set
+	///		scheme property ExcludeFromBuild to false.
+	///
+	void IssueLogger::wrnALP4004(QString scheme)
+	{
+		LOG_WARNING(IssueType::AlParsing,
+					4004,
+					tr("Scheme is excluded from build (Scheme '%1').")
+					.arg(scheme));
+	}
+
 	// ALC			Application logic compiler				5000-5999
 	//
 

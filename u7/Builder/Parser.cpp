@@ -986,15 +986,17 @@ namespace Builder
 
 					if (device == nullptr)
 					{
-						QString message = tr("Cannot find HardwareStrId %1 for scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2')
+						//
+						m_log->wrnALP4002(scheme->strID(), strid);
 						continue;
 					}
 
 					if (device->isModule() == false)
 					{
-						QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+						//
+						m_log->wrnALP4003(scheme->strID(), strid);
 						continue;
 					}
 					else
@@ -1006,8 +1008,9 @@ namespace Builder
 
 						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
 						{
-							QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-							LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+							// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+							//
+							m_log->wrnALP4003(scheme->strID(), strid);
 							continue;
 						}
 					}
@@ -1122,7 +1125,9 @@ namespace Builder
 
 			if (ls->excludeFromBuild() == true)
 			{
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Scheme %1 excluded from build.").arg(ls->strID()));
+				// Scheme is excluded from build (Scheme '%1').
+				//
+				m_log->wrnALP4004(ls->strID());
 				continue;
 			}
 			else
@@ -1714,6 +1719,7 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
+
 			LOG_WARNING_OBSOLETE(log(), Builder::IssueType::NotDefined,
 						QString("Empty logic scheme %1, functional blocks were not found.").arg(scheme->strID()));
 			return true;
