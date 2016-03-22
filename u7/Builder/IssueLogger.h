@@ -55,6 +55,9 @@ namespace Builder
 		void wrnALP4002(QString scheme, QString hardwareStrId);
 		void wrnALP4003(QString scheme, QString hardwareStrId);
 		void wrnALP4004(QString scheme);
+		void wrnALP4005(QString scheme);	// Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').
+		void errALP4006(QString scheme, QString schemeItem, QString pin, QUuid itemUuid);
+		void errALP4006(QString scheme, QString schemeItem, QString pin, const std::vector<QUuid>& itemsUuids);
 
 		// ALC			Application logic compiler				5000-5999
 		//
@@ -64,6 +67,8 @@ namespace Builder
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
+		void addItemsIssue(OutputMessageLevel level, QUuid itemsUuid);
+
 		void swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues);
 		void clearItemsIssues();
 

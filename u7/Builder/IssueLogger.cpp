@@ -49,7 +49,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Branch has multiple outputs (LogicScheme '%1').
+	/// Title: Branch has multiple outputs (Logic Scheme '%1').
 	///
 	/// Parameters:
 	///		%1 Logic Scheme StrID
@@ -63,7 +63,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4000,
-				  tr("Branch has multiple outputs (LogicScheme '%1').")
+				  tr("Branch has multiple outputs (Logic Scheme '%1').")
 				  .arg(scheme));
 	}
 
@@ -153,6 +153,60 @@ namespace Builder
 					.arg(scheme));
 	}
 
+	/// IssueCode: ALP4005
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').
+	///
+	/// Parameters:
+	///		%1 Logic Scheme StrID
+	///
+	/// Description:
+	///			Logic Scheme is empty, there are no any functional blocks in the compile layer.
+	///
+	void IssueLogger::wrnALP4005(QString scheme)
+	{
+		LOG_WARNING(IssueType::AlParsing,
+					4005,
+					tr("Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').")
+					.arg(scheme));
+	}
+
+	/// IssueCode: ALP4006
+	///
+	/// IssueType: Error
+	///
+	/// Title: Scheme item '%1' has not linked pin '%2' (Logic Scheme '%3').
+	///
+	/// Parameters:
+	///		%1 Scheme item description
+	///		%2 Pin
+	///		%3 Logic Scheme StrID
+	///
+	/// Description:
+	///		Scheme item has not linked pin(s), all pins of the function block must be linked.
+	///
+	void IssueLogger::errALP4006(QString scheme, QString schemeItem, QString pin, QUuid itemUuid)
+	{
+		std::vector<QUuid> itemsUuids;
+		itemsUuids.push_back(itemUuid);
+
+		return errALP4006(scheme, schemeItem, pin, itemsUuids);
+	}
+
+	void IssueLogger::errALP4006(QString scheme, QString schemeItem, QString pin, const std::vector<QUuid>& itemsUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4006,
+				  tr("Scheme item '%1' has not linked pin '%2' (Logic Scheme '%3').")
+				  .arg(schemeItem)
+				  .arg(pin)
+				  .arg(scheme));
+	}
+
 	// ALC			Application logic compiler				5000-5999
 	//
 
@@ -171,6 +225,12 @@ namespace Builder
 		{
 			m_itemsIssues[id] = level;
 		}
+	}
+
+	void IssueLogger::addItemsIssue(OutputMessageLevel level, QUuid itemsUuid)
+	{
+		QMutexLocker l(&m_mutex);
+		m_itemsIssues[itemsUuid] = level;
 	}
 
 	void IssueLogger::swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues)
