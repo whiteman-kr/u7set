@@ -67,6 +67,27 @@ namespace Builder
 				  .arg(scheme));
 	}
 
+	/// IssueCode: ALP4001
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Property DeviceStrIds for Logic Scheme is not set (LogicScheme '%1').
+	///
+	/// Parameters:
+	///		%1 Logic Scheme StrID
+	///
+	/// Description:
+	///		Property DeviceStrIds for an application logic scheme is empty. To bind a scheme to a Logic Module this field must be set
+	///		to the Logic Module StrID. (Note that expanded StrID must be used).
+	///
+	void IssueLogger::wrnALP4001(QString scheme)
+	{
+		LOG_WARNING(IssueType::AlParsing,
+				  4001,
+				  tr("Property DeviceStrIds for Logic Scheme is not set (LogicScheme '%1').")
+				  .arg(scheme));
+	}
+
 	// ALC			Application logic compiler				5000-5999
 	//
 

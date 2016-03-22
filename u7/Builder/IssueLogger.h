@@ -51,6 +51,7 @@ namespace Builder
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids);
+		void wrnALP4001(QString scheme);
 
 		// ALC			Application logic compiler				5000-5999
 		//

@@ -974,8 +974,9 @@ namespace Builder
 
 				if (deviceStrIds.isEmpty() == true)
 				{
-					QString message = tr("DeviceStrIds is not set for scheme %1").arg(scheme->strID());
-					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+					// Property DeviceStrIds is not set (LogicScheme '%1')
+					//
+					m_log->wrnALP4001(scheme->strID());
 					continue;
 				}
 
