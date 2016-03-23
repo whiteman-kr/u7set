@@ -160,7 +160,20 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	vl->addWidget(m_buttonBox);
 	setLayout(vl);
 
-	resize(settings.value("Signal properties dialog: size", QSize(320, 640)).toSize());
+	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
+	QPoint center = desktopRect.center();
+	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
+	desktopRect.moveCenter(center);
+	QRect windowRect = settings.value("Signal properties dialog: geometry", desktopRect).toRect();
+	if (windowRect.height() > desktopRect.height())
+	{
+		windowRect.setHeight(desktopRect.height());
+	}
+	if (windowRect.width() > desktopRect.width())
+	{
+		windowRect.setWidth(desktopRect.width());
+	}
+	setGeometry(windowRect);
 }
 
 
@@ -181,7 +194,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 void SignalPropertiesDialog::saveDialogSettings()
 {
-	//Save expand state ???
+	QSettings settings;
+	settings.setValue("Signal properties dialog: geometry", geometry());
 }
 
 void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject> > objects)
