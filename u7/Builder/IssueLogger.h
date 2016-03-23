@@ -40,6 +40,7 @@ namespace Builder
 
 		// INT			Internal issues							1000-1999
 		//
+		void errINT1000(QString debugMessage);
 
 		// PDB			Project database issues					2000-2999
 		//
@@ -58,6 +59,8 @@ namespace Builder
 		void wrnALP4005(QString scheme);	// Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').
 		void errALP4006(QString scheme, QString schemeItem, QString pin, QUuid itemUuid);
 		void errALP4006(QString scheme, QString schemeItem, QString pin, const std::vector<QUuid>& itemsUuids);
+		void errALP4007(QString scheme, QString schemeItem, QString afbElement, QUuid itemUuid);
+		void errALP4008(QString logicModule);
 
 		// ALC			Application logic compiler				5000-5999
 		//
@@ -67,7 +70,7 @@ namespace Builder
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
-		void addItemsIssue(OutputMessageLevel level, QUuid itemsUuid);
+		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
 
 		void swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues);
 		void clearItemsIssues();

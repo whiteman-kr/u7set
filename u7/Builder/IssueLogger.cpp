@@ -18,6 +18,27 @@ namespace Builder
 	// INT			Internal issues							1000-1999
 	//
 
+	/// IssueCode: INT1000
+	///
+	/// IssueType: Error
+	///
+	/// Title: Input parameter(s) error, debug info: %1.
+	///
+	/// Parameters:
+	///		%1 Debug information
+	///
+	/// Description:
+	///		Error may occur if function gets wrong input parameters.
+	/// In most cases it is an internal software error and it shoud be reported to developers.
+	///
+	void IssueLogger::errINT1000(QString debugMessage)
+	{
+		LOG_ERROR(IssueType::Internal,
+				  1000,
+				  tr("Input parameter(s) error, debug info: %1.")
+				  .arg(debugMessage));
+	}
+
 	// PDB			Project database issues					2000-2999
 	//
 
@@ -26,6 +47,8 @@ namespace Builder
 	/// IssueType: Warning
 	///
 	/// Title: The workcopies of the checked out files will be compiled.
+	///
+	/// Parameters:
 	///
 	/// Description:
 	///		Warning will occur if a project is built with DEBUG option. Unchecked In files can be built thus all
@@ -177,7 +200,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Scheme item '%1' has not linked pin '%2' (Logic Scheme '%3').
+	/// Title: Scheme item '%1' has unlinked pin(s) '%2' (Logic Scheme '%3').
 	///
 	/// Parameters:
 	///		%1 Scheme item description
@@ -185,7 +208,7 @@ namespace Builder
 	///		%3 Logic Scheme StrID
 	///
 	/// Description:
-	///		Scheme item has not linked pin(s), all pins of the function block must be linked.
+	///		Scheme item has unlinked pin(s), all pins of the function block must be linked.
 	///
 	void IssueLogger::errALP4006(QString scheme, QString schemeItem, QString pin, QUuid itemUuid)
 	{
@@ -201,10 +224,56 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4006,
-				  tr("Scheme item '%1' has not linked pin '%2' (Logic Scheme '%3').")
+				  tr("Scheme item '%1' has unlinked pin(s) '%2' (Logic Scheme '%3').")
 				  .arg(schemeItem)
 				  .arg(pin)
 				  .arg(scheme));
+	}
+
+	/// IssueCode: ALP4007
+	///
+	/// IssueType: Error
+	///
+	/// Title: AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
+	///
+	/// Parameters:
+	///		%1 Application Functional Block StrID
+	///		%2 Scheme item description
+	///		%3 Logic Scheme StrID
+	///
+	/// Description:
+	///		To proccess logic block it is required AFB description which in not found.
+	///
+	void IssueLogger::errALP4007(QString scheme, QString schemeItem, QString afbElement, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4007,
+				  tr("AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').")
+				  .arg(afbElement)
+				  .arg(schemeItem)
+				  .arg(scheme));
+	}
+
+	/// IssueCode: ALP4008
+	///
+	/// IssueType: Error
+	///
+	/// Title: There is no any input element in applictaion logic for Logic Module '%1'.
+	///
+	/// Parameters:
+	///		%1 Logic Module StrID
+	///
+	/// Description:
+	///		Imposible to set execution order for logic items in logic module as there is no any input element.
+	///
+	void IssueLogger::errALP4008(QString logicModule)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4008,
+				  tr("There is no any input element in applictaion logic for Logic Module '%1'.")
+				  .arg(logicModule));
 	}
 
 	// ALC			Application logic compiler				5000-5999
@@ -227,7 +296,7 @@ namespace Builder
 		}
 	}
 
-	void IssueLogger::addItemsIssue(OutputMessageLevel level, QUuid itemsUuid)
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, QUuid itemsUuid)
 	{
 		QMutexLocker l(&m_mutex);
 		m_itemsIssues[itemsUuid] = level;

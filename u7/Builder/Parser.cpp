@@ -351,16 +351,24 @@ namespace Builder
 			assert(logicScheme);
 			assert(afbCollection);
 			assert(log);
+
+			if (log != nullptr)
+			{
+				log->errINT1000(QString(__FUNCTION__ " scheme %1, log %2, afbCollection %3")
+								.arg(reinterpret_cast<size_t>(logicScheme.get()))
+								.arg(reinterpret_cast<size_t>(log))
+								.arg(reinterpret_cast<size_t>(afbCollection)));
+			}
+
 			return false;
 		}
 
 		if (bushContainer.bushes.empty() == true)
 		{
-			LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			assert(false);	// if fires then add error to IussueLogger
 			return true;
 		}
-
-		bool result = true;
 
 		// Save all items to accumulator, they will be ordered in orderItems()
 		//
@@ -376,13 +384,9 @@ namespace Builder
 
 					if (afbElement == nullptr)
 					{
-						assert(afbElement != nullptr);
-						LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-								  QObject::tr("%1 does not have Afb description, scheme: %2, element: %3")
-								  .arg(f->buildName())
-								  .arg(logicScheme->strID())
-								  .arg(f->guid().toString()));
-
+						// AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
+						//
+						log->errALP4007(logicScheme->strID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
 						return false;
 					}
 				}
@@ -393,7 +397,7 @@ namespace Builder
 			}
 		}
 
-		return result;
+		return true;
 	}
 
 	bool AppLogicModule::orderItems(IssueLogger* log)
@@ -464,10 +468,10 @@ namespace Builder
 
 		if (hasItemsWithouInputs == false)
 		{
-			// Imposible set exucution order for branch, there is no first item,
+			// Imposible set exucution order for module, there is no first item,
 			// firts item can be item without inputs
 			//
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined, tr("There is no start point for the logic scheme branch"));
+			log->errALP4008(moduleStrId());
 
 			result = false;
 			return result;
@@ -882,11 +886,19 @@ namespace Builder
 
 		if (scheme == nullptr ||
 			layer == nullptr ||
-			log == nullptr)
+			log == nullptr ||
+			afbCollection == nullptr)
 		{
 			assert(scheme);
 			assert(layer);
 			assert(log);
+			assert(afbCollection);
+
+			log->errINT1000(QString(__FUNCTION__ " scheme %1, layer %2, log %3, afbCollection %4")
+							.arg(reinterpret_cast<size_t>(scheme.get()))
+							.arg(reinterpret_cast<size_t>(layer.get()))
+							.arg(reinterpret_cast<size_t>(log))
+							.arg(reinterpret_cast<size_t>(afbCollection)));
 			return false;
 		}
 
@@ -1280,7 +1292,8 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("Internal error: Cannot set data to ApplicationLogicData."));
+			// function addData will report about errors
+			//
 			return false;
 		}
 
