@@ -123,7 +123,7 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 		return;
 	}
 
-	emit layoutAboutToBeChanged();
+	emit layoutAboutToBeChanged(QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint);
 
 	QModelIndexList pers = persistentIndexList();
 	std::vector<std::shared_ptr<DbFileInfo>> oldFileOrder(m_files);
@@ -263,7 +263,7 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 		if (oldIndexRow < 0 || oldIndex.row() >= oldFileOrder.size())
 		{
 			assert(oldIndex.row() < oldFileOrder.size());
-			break;
+			continue;
 		}
 
 		std::shared_ptr<DbFileInfo> oldFile = oldFileOrder.at(oldIndexRow);
@@ -292,6 +292,11 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 {
 	emit layoutAboutToBeChanged();
 
+	QModelIndexList pers = persistentIndexList();
+	std::vector<std::shared_ptr<DbFileInfo>> oldFileOrder(m_files);
+
+	// --
+	//
 	m_files.clear();
 
 	for (auto f = files.begin(); f != files.end(); ++f)
@@ -301,6 +306,26 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 		if (spf->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
 		{
 			m_files.push_back(spf);
+		}
+	}
+
+	// Move pers indexes
+	//
+	for (QModelIndex& oldIndex : pers)
+	{
+		int oldIndexRow = oldIndex.row();
+		if (oldIndexRow < 0 || oldIndex.row() >= oldFileOrder.size())
+		{
+			assert(oldIndex.row() < oldFileOrder.size());
+			continue;
+		}
+
+		std::shared_ptr<DbFileInfo> oldFile = oldFileOrder.at(oldIndexRow);
+		QModelIndex newIndex = index(getFileRow(oldFile->fileId()), oldIndex.column());
+
+		if (oldIndex != newIndex)
+		{
+			changePersistentIndex(oldIndex, newIndex);
 		}
 	}
 

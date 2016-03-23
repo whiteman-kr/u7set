@@ -477,22 +477,6 @@ bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, 
 			{
 				*(f.get()) = *findInResult;
 			}
-
-//			if (files->operator [](i)->fileId() != -1 &&
-//				v[i].fileId() != -1)
-//			{
-//				qDebug() << Q_FUNC_INFO << "files->operator [](i)->fileId() " << files->operator [](i)->fileId();
-//				std::for_each(files->begin(), files->end(), [](auto f){ qDebug() << f->fileId();});
-
-//				qDebug() << Q_FUNC_INFO << "v[i].fileId() " << v[i].fileId();
-//				std::for_each(v.begin(), v.end(), [](auto f){ qDebug() << f.fileId();});
-
-//				assert(files->operator [](i)->fileId() == v[i].fileId());
-//				continue;
-//			}
-
-
-//			*(f.get()) = v[i];
 		}
 	}
 
