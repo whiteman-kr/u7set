@@ -73,6 +73,19 @@ namespace Builder
 		return nullptr;
 	}
 
+	VFrame30::FblItemRect* Bush::itemByGuid(QUuid uuid) const
+	{
+		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
+		{
+			if (item->guid() == uuid)
+			{
+				return item.get();
+			};
+		}
+
+		return nullptr;
+	}
+
 	VFrame30::AfbPin Bush::pinByGuid(QUuid pinId)
 	{
 		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
@@ -100,6 +113,49 @@ namespace Builder
 		}
 
 		return v;
+	}
+
+	std::vector<QUuid> Bush::getLinksUuids() const
+	{
+		std::vector<QUuid> v;
+		v.reserve(links.size());
+
+		for (auto it : links)
+		{
+			v.push_back(it.first);
+		}
+
+		return v;
+	}
+
+	std::vector<VFrame30::AfbPin> Bush::getInputPinsForItem(QUuid fblItemUuid) const
+	{
+		// Get all input pins (for this bush) for an item
+		//
+		std::vector<VFrame30::AfbPin> result;
+
+		VFrame30::FblItemRect* item = itemByGuid(fblItemUuid);
+		if (item == nullptr)
+		{
+			assert(item);
+			return result;
+		}
+
+		for (auto id : inputPins)
+		{
+			auto foundPin = std::find_if(std::begin(item->inputs()), std::end(item->inputs()),
+				[&id](const VFrame30::AfbPin& itemInput)
+				{
+					return itemInput.guid() == id;
+				});
+
+			if (foundPin != std::end(item->inputs()))
+			{
+				result.push_back(*foundPin);
+			}
+		}
+
+		return result;
 	}
 
 	// Function finds branch with a point on it.
@@ -974,8 +1030,9 @@ namespace Builder
 
 				if (deviceStrIds.isEmpty() == true)
 				{
-					QString message = tr("DeviceStrIds is not set for scheme %1").arg(scheme->strID());
-					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+					// Property DeviceStrIds is not set (LogicScheme '%1')
+					//
+					m_log->wrnALP4001(scheme->strID());
 					continue;
 				}
 
@@ -985,15 +1042,17 @@ namespace Builder
 
 					if (device == nullptr)
 					{
-						QString message = tr("Cannot find HardwareStrId %1 for scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2')
+						//
+						m_log->wrnALP4002(scheme->strID(), strid);
 						continue;
 					}
 
 					if (device->isModule() == false)
 					{
-						QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+						//
+						m_log->wrnALP4003(scheme->strID(), strid);
 						continue;
 					}
 					else
@@ -1005,8 +1064,9 @@ namespace Builder
 
 						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
 						{
-							QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-							LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+							// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+							//
+							m_log->wrnALP4003(scheme->strID(), strid);
 							continue;
 						}
 					}
@@ -1121,7 +1181,9 @@ namespace Builder
 
 			if (ls->excludeFromBuild() == true)
 			{
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Scheme %1 excluded from build.").arg(ls->strID()));
+				// Scheme is excluded from build (Scheme '%1').
+				//
+				m_log->wrnALP4004(ls->strID());
 				continue;
 			}
 			else
@@ -1713,8 +1775,9 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			LOG_WARNING_OBSOLETE(log(), Builder::IssueType::NotDefined,
-						QString("Empty logic scheme %1, functional blocks were not found.").arg(scheme->strID()));
+			// Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1')
+			//
+			m_log->wrnALP4005(scheme->strID());
 			return true;
 		}
 
@@ -1729,21 +1792,23 @@ namespace Builder
 
 			if (bush.outputPin.isNull() == true)
 			{
-				QString strItems;
 				for (std::shared_ptr<VFrame30::FblItemRect> i : bush.fblItems)
 				{
-					if (strItems.isEmpty() == true)
-					{
-						strItems.append(i->buildName());
-					}
-					else
-					{
-						strItems.append(QString(", %1").arg(i->buildName()));
-					}
-				}
+					// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+					//
+					std::vector<VFrame30::AfbPin> inputs = bush.getInputPinsForItem(i->guid());
 
-				LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-						  tr("Input is not defined, for items: %1").arg(strItems));
+					QString inputsStr;
+					for (auto input : inputs)
+					{
+						inputsStr += (inputsStr.isEmpty() == true) ? input.caption() : QString(", %1").arg(input.caption());
+					}
+
+					std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
+					issuedItemsUuid.push_back(i->guid());
+
+					m_log->errALP4006(scheme->strID(), i->buildName(), inputsStr, issuedItemsUuid);
+				}
 			}
 
 			if (bush.inputPins.empty() == true)
@@ -1758,8 +1823,12 @@ namespace Builder
 					{
 						if (out.associatedIOs().empty() == true)
 						{
-							LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-									  tr("%1 has unconnected pin %2").arg(item->buildName()).arg(out.caption()));
+							// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+							//
+							std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
+							issuedItemsUuid.push_back(item->guid());
+
+							m_log->errALP4006(scheme->strID(), item->buildName(), out.caption(), issuedItemsUuid);
 						}
 					}
 				}

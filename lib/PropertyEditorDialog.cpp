@@ -38,6 +38,7 @@ int PropertyEditorDialog::splitterPosition()
     {
         return pe->splitterPosition();
     }
+    return 0;
 }
 
 void PropertyEditorDialog::setSplitterPosition(int value)

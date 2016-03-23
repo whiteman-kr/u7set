@@ -11,7 +11,6 @@ QT       -= gui
 TARGET = CfgSrv
 CONFIG   += console
 CONFIG   -= app_bundle
-CONFIG += debug
 
 TEMPLATE = app
 

@@ -343,7 +343,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::start(DbController* db, OutputLog* log, bool release, int changesetID)
+	bool BuildResultWriter::start(DbController* db, IssueLogger* log, bool release, int changesetID)
 	{
 		m_dbController = db;
 		m_log = log;
@@ -392,7 +392,9 @@ namespace Builder
 		}
 		else
 		{
-			LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("WARNING: The workcopies of the checked out files will be compiled!")));
+			// The workcopies of the checked out files will be compiled.
+			//
+			m_log->wrnPDB2000();
 		}
 
 		if (createBuildDirectory() == false)
