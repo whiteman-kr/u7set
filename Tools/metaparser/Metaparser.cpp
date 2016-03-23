@@ -286,7 +286,10 @@ int Metaparser::writeToHtml()
 		//
 		QString htmlAnchor = block.issueCode;
 
-		if (htmlAnchor == "Error: IssueCode was not found. Check the code.")
+		// Creating html anchors. In case, that block has no or wrong IssueCode - we will match it is anchor
+		// as error_#
+		//
+		if (htmlAnchor == "Error")
 		{
 			htmlAnchor = "error_" + QString::number(errorCounter);
 			errorCounter++;
@@ -298,16 +301,38 @@ int Metaparser::writeToHtml()
 
 		dataForOutputFile << "\n\t\t<tr>\n\t\t\t<td><a href=\"#"
 						  << htmlAnchor
-						  << "\">"
-						  << block.issueCode.remove(block.issueCode.indexOf("IssueCode: "), 11).replace("\\n", "<br>")
-						  << "</a></td>\n\t\t\t<td>";
+						  << "\">";
 
+		// If IssueCode is wrong - just type Error
+		//
+		if (block.issueCode == "Error")
+		{
+			dataForOutputFile << block.issueCode;
+		}
+		else
+		{
+			dataForOutputFile << block.issueCode.remove(block.issueCode.indexOf("IssueCode: "), 11).replace("\\n", "<br>");
+		}
+
+		dataForOutputFile << "</a></td>\n\t\t\t<td>";
+
+		// If our block has some errors - match it is IssueType and Title with red color
+		//
 		if (block.error == true)
 		{
 			dataForOutputFile << "<font color=\"red\">";
 		}
 
-		dataForOutputFile << block.issueType.remove(block.issueType.indexOf("IssueType: "), 11).replace("\\n", "<br>");
+		// If IssueType is wrong - just print "Type error"
+		//
+		if (block.issueType == "Type error")
+		{
+			dataForOutputFile << block.issueType;
+		}
+		else
+		{
+			dataForOutputFile << block.issueType.remove(block.issueType.indexOf("IssueType: "), 11).replace("\\n", "<br>");
+		}
 
 		if (block.error == true)
 		{
@@ -321,7 +346,16 @@ int Metaparser::writeToHtml()
 			dataForOutputFile << "<font color=\"red\">";
 		}
 
-		dataForOutputFile << block.title.remove(block.title.indexOf("Title: "), 7).replace("\\n", "<br>");
+		// If title is wrong or not exist - just print error message
+		//
+		if (block.title == "Error: Title was not found. Check the code.")
+		{
+			dataForOutputFile << block.title;
+		}
+		else
+		{
+			dataForOutputFile << block.title.remove(block.title.indexOf("Title: "), 7).replace("\\n", "<br>");
+		}
 
 		if (block.error == true)
 		{
@@ -331,7 +365,7 @@ int Metaparser::writeToHtml()
 		dataForOutputFile << "</td>";
 	}
 
-	// When table was generated - let's start showing messages
+	// When table was generated - let's start showing full block information
 	//
 	dataForOutputFile << "\n\t</table>";
 	dataForOutputFile << "\n\t<h3>Descriptions</h3>";
@@ -351,7 +385,7 @@ int Metaparser::writeToHtml()
 		}
 		QString htmlAnchor = block.issueCode;
 
-		if (htmlAnchor == "Error: IssueCode was not found. Check the code.")
+		if (htmlAnchor == "Error")
 		{
 			htmlAnchor = "error_" + QString::number(errorCounter);
 			errorCounter++;
