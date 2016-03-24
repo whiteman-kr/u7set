@@ -42,7 +42,8 @@ int Metaparser::searchBlocks()
 	// Read every line from file
 	//
 	QTextStream dataFromInputFile(&inputFile);
-	QString oneLineFromInputFile = dataFromInputFile.readLine();
+
+	QString oneLineFromInputFile = dataFromInputFile.readLine().trimmed();
 
 	// Create dynamic array of type "parse". It will contain
 	// foubded blocks
@@ -76,9 +77,9 @@ int Metaparser::searchBlocks()
 				while (dataFromInputFile.atEnd() == false &&
 					   oneLineFromInputFile.indexOf("///") != -1 &&
 					   oneLineFromInputFile[oneLineFromInputFile.indexOf("///") + 3] != '/' &&
-					   stringForCheckingLineBeginning.replace(" ", "").indexOf("///") == 0)
+					   stringForCheckingLineBeginning.indexOf("///") == 0)
 				{
-					oneLineFromInputFile = dataFromInputFile.readLine();
+					oneLineFromInputFile = dataFromInputFile.readLine().trimmed();
 					stringForCheckingLineBeginning = oneLineFromInputFile;
 					buff << oneLineFromInputFile;
 				}
@@ -96,7 +97,7 @@ int Metaparser::searchBlocks()
 
 		}
 
-		oneLineFromInputFile = dataFromInputFile.readLine();
+		oneLineFromInputFile = dataFromInputFile.readLine().trimmed();
 	}
 
 	// Call writing function to generate html file
@@ -296,7 +297,7 @@ int Metaparser::writeToHtml()
 		}
 		else
 		{
-			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).replace(" ", "");
+			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).trimmed();
 		}
 
 		dataForOutputFile << "\n\t\t<tr>\n\t\t\t<td><a href=\"#"
@@ -392,7 +393,7 @@ int Metaparser::writeToHtml()
 		}
 		else
 		{
-			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).replace(" ", "");
+			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).trimmed();
 		}
 
 		dataForOutputFile << "\n\t<a id=\"" << htmlAnchor << "\"></a>"
