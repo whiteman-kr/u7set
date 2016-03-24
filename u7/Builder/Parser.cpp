@@ -1256,7 +1256,9 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("There is no compile layer in the scheme."));
+			// Scheme does not have Logic layer (Logic Scheme '%1').
+			//
+			m_log->errALP4010(logicScheme->strID());
 			return false;
 		}
 

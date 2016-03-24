@@ -65,6 +65,7 @@ namespace Builder
 		void errALP4007(QString scheme, QString schemeItem, QString afbElement, QUuid itemUuid);
 		void errALP4008(QString logicModule);
 		void errALP4009(QString logicModule, QString scheme1, QString scheme2, QString schemeItem1, QString schemeItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
+		void errALP4010(QString scheme);
 
 		// ALC			Application logic compiler				5000-5999
 		//

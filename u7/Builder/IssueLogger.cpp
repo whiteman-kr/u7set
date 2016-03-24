@@ -374,6 +374,25 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: ALP4010
+	///
+	/// IssueType: Error
+	///
+	/// Title: Scheme does not have Logic layer (Logic Scheme '%1').
+	///
+	/// Parameters:
+	///		%1 Logic scheme StrID
+	///
+	/// Description:
+	///		Each logic scheme has several layers (Logic, Frame and Notes), but the Logic layer is not found.
+	///
+	void IssueLogger::errALP4010(QString scheme)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4010,
+				  tr("Scheme does not have Logic layer (Logic Scheme '%1').").arg(scheme));
+	}
+
 	// ALC			Application logic compiler				5000-5999
 	//
 
