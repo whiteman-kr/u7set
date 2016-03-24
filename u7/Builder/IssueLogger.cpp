@@ -15,6 +15,26 @@ namespace Builder
 	// CMN			Common issues							0000-0999
 	//
 
+	/// IssueCode: CMN0010
+	///
+	/// IssueType: Error
+	///
+	/// Title: File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		May occur if a file is damaged or has incompatible format.
+	///
+	void IssueLogger::errCMN0010(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  10,
+				  tr("File loading/parsing error, file is damaged or has incompatible format, file name '%1'.")
+				  .arg(fileName));
+	}
+
 	// INT			Internal issues							1000-1999
 	//
 

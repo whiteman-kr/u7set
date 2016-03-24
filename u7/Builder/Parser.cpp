@@ -354,7 +354,7 @@ namespace Builder
 
 			if (log != nullptr)
 			{
-				log->errINT1000(QString(__FUNCTION__ " scheme %1, log %2, afbCollection %3")
+				log->errINT1000(QString(__FUNCTION__ ", scheme %1, log %2, afbCollection %3")
 								.arg(reinterpret_cast<size_t>(logicScheme.get()))
 								.arg(reinterpret_cast<size_t>(log))
 								.arg(reinterpret_cast<size_t>(afbCollection)));
@@ -901,7 +901,7 @@ namespace Builder
 			assert(log);
 			assert(afbCollection);
 
-			log->errINT1000(QString(__FUNCTION__ " scheme %1, layer %2, log %3, afbCollection %4")
+			log->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, log %3, afbCollection %4")
 							.arg(reinterpret_cast<size_t>(scheme.get()))
 							.arg(reinterpret_cast<size_t>(layer.get()))
 							.arg(reinterpret_cast<size_t>(log))
@@ -1132,7 +1132,7 @@ namespace Builder
 		if (out == nullptr)
 		{
 			assert(out);
-			m_log->errINT1000(QString(__FUNCTION__ " out %1").arg(reinterpret_cast<size_t>(out)));
+			m_log->errINT1000(QString(__FUNCTION__ ", out %1").arg(reinterpret_cast<size_t>(out)));
 			return false;
 		}
 
@@ -1199,7 +1199,9 @@ namespace Builder
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("File loading error."));
+				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+				//
+				m_log->errCMN0010(file->fileName());
 				return false;
 			}
 
@@ -1290,7 +1292,8 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, "setBranchConnectionToPin function error.");
+			// All log errors should be reported in setBranchConnectionToPin
+			//
 			return false;
 		}
 
@@ -1584,6 +1587,12 @@ namespace Builder
 			assert(scheme);
 			assert(layer);
 			assert(bushContainer);
+
+			log()->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, bushContainer %3")
+							  .arg(reinterpret_cast<size_t>(scheme.get()))
+							  .arg(reinterpret_cast<size_t>(layer.get()))
+							  .arg(reinterpret_cast<size_t>(bushContainer)));
+
 			return false;
 		}
 
@@ -1652,11 +1661,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicScheme %1: %2 has unconnected pin %3")
-								  .arg(scheme->caption())
-								  .arg(fblItem->buildName())
-								  .arg(out.caption()));
+						log()->errALP4006(scheme->strID(), fblItem->buildName(), out.caption(), item->guid());
 
 						result = false;
 						continue;
