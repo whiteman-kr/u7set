@@ -297,7 +297,7 @@ int Metaparser::writeToHtml()
 		}
 		else
 		{
-			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).trimmed();
+			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).replace(" ", "");
 		}
 
 		dataForOutputFile << "\n\t\t<tr>\n\t\t\t<td><a href=\"#"
@@ -393,7 +393,7 @@ int Metaparser::writeToHtml()
 		}
 		else
 		{
-			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).trimmed();
+			htmlAnchor.remove(block.issueCode.indexOf("IssueCode: "), 10).replace(" ", "");
 		}
 
 		dataForOutputFile << "\n\t<a id=\"" << htmlAnchor << "\"></a>"
