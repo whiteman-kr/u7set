@@ -45,6 +45,8 @@ namespace Builder
 		// PDB			Project database issues					2000-2999
 		//
 		void wrnPDB2000();
+		void errPDB2001(int parentFileId, QString filter, QString databaseMessage);
+		void errPDB2002(int fileId, QString fileName, QString databaseMessage);
 
 		// CFG			FSC configuration						3000-3999
 		//
@@ -61,6 +63,7 @@ namespace Builder
 		void errALP4006(QString scheme, QString schemeItem, QString pin, const std::vector<QUuid>& itemsUuids);
 		void errALP4007(QString scheme, QString schemeItem, QString afbElement, QUuid itemUuid);
 		void errALP4008(QString logicModule);
+		void errALP4009(QString logicModule, QString scheme1, QString scheme2, QString schemeItem1, QString schemeItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 
 		// ALC			Application logic compiler				5000-5999
 		//

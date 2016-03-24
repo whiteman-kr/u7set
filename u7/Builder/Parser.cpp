@@ -686,15 +686,22 @@ namespace Builder
 				//
 				QString signalStrId = signalElement->signalStrIds();
 
-				if (signalOutputItems.contains(signalStrId) == true)
+				auto duplicateItem = signalOutputItems.find(signalStrId);
+				if (duplicateItem != signalOutputItems.end())
 				{
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-							  QObject::tr("%1 has duplicate StrId, element1: %2, element2:%3, StrId: %4")
-							  .arg(signalElement->buildName())
-							  .arg(signalElement->guid().toString())
-							  .arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
-							  .arg(signalStrId));
+					// Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').
+					//
+					std::vector<QUuid> itemsUuids;
+					itemsUuids.push_back(li.m_fblItem->guid());
+					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
+					log->errALP4009(moduleStrId(),
+									li.m_scheme->strID(),
+									duplicateItem->m_scheme->strID(),
+									li.m_fblItem->buildName(),
+									duplicateItem->m_fblItem->buildName(),
+									signalStrId,
+									itemsUuids);
 					continue;
 				}
 
@@ -1125,6 +1132,7 @@ namespace Builder
 		if (out == nullptr)
 		{
 			assert(out);
+			m_log->errINT1000(QString(__FUNCTION__ " out %1").arg(reinterpret_cast<size_t>(out)));
 			return false;
 		}
 
@@ -1146,7 +1154,9 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file list."));
+			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
+			//
+			m_log->errPDB2001(db->alFileId(), "%.als", db->lastError());
 			return false;
 		}
 
@@ -1176,7 +1186,9 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file instances."));
+				// Getting file instance error, file ID %1, file name '%2', database message '%3'.
+				//
+				m_log->errPDB2002(fi.fileId(), fi.fileName(), db->lastError());
 				return false;
 			}
 

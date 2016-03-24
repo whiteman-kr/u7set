@@ -62,6 +62,54 @@ namespace Builder
 				  tr("The workcopies of the checked out files will be compiled."));
 	}
 
+	/// IssueCode: PDB2001
+	///
+	/// IssueType: Error
+	///
+	/// Title: Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.
+	///
+	/// Parameters:
+	///			%1 Parent file identifier
+	///			%2 Filter
+	///			%3 Database message
+	///
+	/// Description:
+	///			May occur if database function getFileList fails or database connection is lost.
+	///
+	void IssueLogger::errPDB2001(int parentFileId, QString filter, QString databaseMessage)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2001,
+				  tr("Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.")
+				  .arg(parentFileId)
+				  .arg(filter)
+				  .arg(databaseMessage));
+	}
+
+	/// IssueCode: PDB2002
+	///
+	/// IssueType: Error
+	///
+	/// Title: Getting file instance error, file ID %1, file name '%2', database message '%3'.
+	///
+	/// Parameters:
+	///			%1 Database file identifier
+	///			%2 File Name
+	///			%3 Data message
+	///
+	/// Description:
+	///			May occur if database function getLatestVersion fails or database connection is lost.
+	///
+	void IssueLogger::errPDB2002(int fileId, QString fileName, QString databaseMessage)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2002,
+				  tr("Getting file instance error, file ID %1, file name '%2', database message '%3'.")
+				  .arg(fileId)
+				  .arg(fileName)
+				  .arg(databaseMessage));
+	}
+
 	// CFG			FSC configuration						3000-3999
 	//
 
@@ -75,7 +123,7 @@ namespace Builder
 	/// Title: Branch has multiple outputs (Logic Scheme '%1').
 	///
 	/// Parameters:
-	///		%1 Logic Scheme StrID
+	///		%1 Logic scheme StrID
 	///
 	/// Description:
 	///		Error may occur if there are more than one output is linked to input.
@@ -97,7 +145,7 @@ namespace Builder
 	/// Title: Property DeviceStrIds for Logic Scheme is not set (LogicScheme '%1').
 	///
 	/// Parameters:
-	///		%1 Logic Scheme StrID
+	///		%1 Logic scheme StrID
 	///
 	/// Description:
 	///		Property DeviceStrIds for an application logic scheme is empty. To bind a scheme to a Logic Module this field must be set
@@ -118,8 +166,8 @@ namespace Builder
 	/// Title: HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2').
 	///
 	/// Parameters:
-	///		%1 Logic Modules StrID
-	///		%2 Logic Scheme StrID
+	///		%1 Logic modules StrID
+	///		%2 Logic scheme StrID
 	///
 	/// Description:
 	///		Logic Scheme has property HardwareStrIds but Logic Module with pointed StrID is not found in the project equipment.
@@ -140,8 +188,8 @@ namespace Builder
 	/// Title: HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
 	///
 	/// Parameters:
-	///		%1 Logic Modules StrID
-	///		%2 Logic Scheme StrID
+	///		%1 Logic modules StrID
+	///		%2 Logic scheme StrID
 	///
 	/// Description:
 	///		Logic Scheme has property HardwareStrIds but the equipment object with pointed StrID is not a module or is not LM family type.
@@ -183,7 +231,7 @@ namespace Builder
 	/// Title: Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').
 	///
 	/// Parameters:
-	///		%1 Logic Scheme StrID
+	///		%1 Logic scheme StrID
 	///
 	/// Description:
 	///			Logic Scheme is empty, there are no any functional blocks in the compile layer.
@@ -205,7 +253,7 @@ namespace Builder
 	/// Parameters:
 	///		%1 Scheme item description
 	///		%2 Pin
-	///		%3 Logic Scheme StrID
+	///		%3 Logic scheme StrID
 	///
 	/// Description:
 	///		Scheme item has unlinked pin(s), all pins of the function block must be linked.
@@ -237,9 +285,9 @@ namespace Builder
 	/// Title: AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
 	///
 	/// Parameters:
-	///		%1 Application Functional Block StrID
+	///		%1 Application functional block StrID
 	///		%2 Scheme item description
-	///		%3 Logic Scheme StrID
+	///		%3 Logic scheme StrID
 	///
 	/// Description:
 	///		To proccess logic block it is required AFB description which in not found.
@@ -263,7 +311,7 @@ namespace Builder
 	/// Title: There is no any input element in applictaion logic for Logic Module '%1'.
 	///
 	/// Parameters:
-	///		%1 Logic Module StrID
+	///		%1 Logic module StrID
 	///
 	/// Description:
 	///		Imposible to set execution order for logic items in logic module as there is no any input element.
@@ -274,6 +322,36 @@ namespace Builder
 				  4008,
 				  tr("There is no any input element in applictaion logic for Logic Module '%1'.")
 				  .arg(logicModule));
+	}
+
+	/// IssueCode: ALP4009
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').
+	///
+	/// Parameters:
+	///		%1 Logic signal StrID
+	///		%1 Logic module StrID
+	///
+	/// Description:
+	///		Error may occur if there are two or more outputs have the same logic signal StrID.
+	/// Note, outputs can be on different logic schemes for the same logic module.
+	///
+	void IssueLogger::errALP4009(QString logicModule, QString scheme1, QString scheme2, QString schemeItem1, QString schemeItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4009,
+				  tr("Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').")
+				  .arg(signalStrID)
+				  .arg(schemeItem1)
+				  .arg(scheme1)
+				  .arg(schemeItem2)
+				  .arg(scheme2)
+				  .arg(logicModule)
+				  );
 	}
 
 	// ALC			Application logic compiler				5000-5999
