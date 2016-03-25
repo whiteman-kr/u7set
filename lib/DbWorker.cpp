@@ -1804,6 +1804,8 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 		DbFileInfo fileInfo;
 
 		db_dbFileInfo(q, &fileInfo);
+
+		out->push_back(fileInfo);
 	}
 
 	return;

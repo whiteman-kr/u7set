@@ -58,9 +58,13 @@ namespace Builder
 		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 
 		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
+		VFrame30::FblItemRect* itemByGuid(QUuid uuid) const;
 		VFrame30::AfbPin pinByGuid(QUuid pinId);
 
-		std::vector<QUuid> getAllUuid() const;	// Used for IssueLogger
+		std::vector<QUuid> getAllUuid() const;					// Used for IssueLogger
+		std::vector<QUuid> getLinksUuids() const;				// Used for IssueLogger
+
+		std::vector<VFrame30::AfbPin> getInputPinsForItem(QUuid fblItemUuid) const;
 	};
 
 	struct BushContainer

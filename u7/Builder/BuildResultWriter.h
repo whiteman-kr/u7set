@@ -16,6 +16,7 @@ class DbController;
 
 namespace Builder
 {
+	class IssueLogger;
 
 	class BuildFile : public QObject
 	{
@@ -121,7 +122,7 @@ namespace Builder
 
 		BuildInfo m_buildInfo;
 
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 		DbController* m_dbController = nullptr;
 
 		HashedVector<QString, BuildFile*> m_buildFiles;
@@ -147,7 +148,7 @@ namespace Builder
 		BuildResultWriter(QObject *parent = 0);
 		~BuildResultWriter();
 
-		bool start(DbController *db, OutputLog *log, bool release, int changesetID);
+		bool start(DbController *db, IssueLogger* log, bool release, int changesetID);
 		bool finish();
 
 		bool addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
@@ -171,7 +172,7 @@ namespace Builder
 
 		BuildInfo buildInfo() const { return m_buildInfo; }
 
-		OutputLog* log() { return m_log; }
+		IssueLogger* log() { return m_log; }
 
 		BuildFile* getBuildFile(const QString& pathFileName);
 	};

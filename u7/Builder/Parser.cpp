@@ -73,6 +73,19 @@ namespace Builder
 		return nullptr;
 	}
 
+	VFrame30::FblItemRect* Bush::itemByGuid(QUuid uuid) const
+	{
+		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
+		{
+			if (item->guid() == uuid)
+			{
+				return item.get();
+			};
+		}
+
+		return nullptr;
+	}
+
 	VFrame30::AfbPin Bush::pinByGuid(QUuid pinId)
 	{
 		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
@@ -100,6 +113,49 @@ namespace Builder
 		}
 
 		return v;
+	}
+
+	std::vector<QUuid> Bush::getLinksUuids() const
+	{
+		std::vector<QUuid> v;
+		v.reserve(links.size());
+
+		for (auto it : links)
+		{
+			v.push_back(it.first);
+		}
+
+		return v;
+	}
+
+	std::vector<VFrame30::AfbPin> Bush::getInputPinsForItem(QUuid fblItemUuid) const
+	{
+		// Get all input pins (for this bush) for an item
+		//
+		std::vector<VFrame30::AfbPin> result;
+
+		VFrame30::FblItemRect* item = itemByGuid(fblItemUuid);
+		if (item == nullptr)
+		{
+			assert(item);
+			return result;
+		}
+
+		for (auto id : inputPins)
+		{
+			auto foundPin = std::find_if(std::begin(item->inputs()), std::end(item->inputs()),
+				[&id](const VFrame30::AfbPin& itemInput)
+				{
+					return itemInput.guid() == id;
+				});
+
+			if (foundPin != std::end(item->inputs()))
+			{
+				result.push_back(*foundPin);
+			}
+		}
+
+		return result;
 	}
 
 	// Function finds branch with a point on it.
@@ -295,16 +351,24 @@ namespace Builder
 			assert(logicScheme);
 			assert(afbCollection);
 			assert(log);
+
+			if (log != nullptr)
+			{
+				log->errINT1000(QString(__FUNCTION__ ", scheme %1, log %2, afbCollection %3")
+								.arg(reinterpret_cast<size_t>(logicScheme.get()))
+								.arg(reinterpret_cast<size_t>(log))
+								.arg(reinterpret_cast<size_t>(afbCollection)));
+			}
+
 			return false;
 		}
 
 		if (bushContainer.bushes.empty() == true)
 		{
-			LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			assert(false);	// if fires then add error to IussueLogger
 			return true;
 		}
-
-		bool result = true;
 
 		// Save all items to accumulator, they will be ordered in orderItems()
 		//
@@ -320,13 +384,9 @@ namespace Builder
 
 					if (afbElement == nullptr)
 					{
-						assert(afbElement != nullptr);
-						LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-								  QObject::tr("%1 does not have Afb description, scheme: %2, element: %3")
-								  .arg(f->buildName())
-								  .arg(logicScheme->strID())
-								  .arg(f->guid().toString()));
-
+						// AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
+						//
+						log->errALP4007(logicScheme->strID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
 						return false;
 					}
 				}
@@ -337,7 +397,7 @@ namespace Builder
 			}
 		}
 
-		return result;
+		return true;
 	}
 
 	bool AppLogicModule::orderItems(IssueLogger* log)
@@ -408,10 +468,10 @@ namespace Builder
 
 		if (hasItemsWithouInputs == false)
 		{
-			// Imposible set exucution order for branch, there is no first item,
+			// Imposible set exucution order for module, there is no first item,
 			// firts item can be item without inputs
 			//
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined, tr("There is no start point for the logic scheme branch"));
+			log->errALP4008(moduleStrId());
 
 			result = false;
 			return result;
@@ -626,15 +686,22 @@ namespace Builder
 				//
 				QString signalStrId = signalElement->signalStrIds();
 
-				if (signalOutputItems.contains(signalStrId) == true)
+				auto duplicateItem = signalOutputItems.find(signalStrId);
+				if (duplicateItem != signalOutputItems.end())
 				{
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-							  QObject::tr("%1 has duplicate StrId, element1: %2, element2:%3, StrId: %4")
-							  .arg(signalElement->buildName())
-							  .arg(signalElement->guid().toString())
-							  .arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
-							  .arg(signalStrId));
+					// Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').
+					//
+					std::vector<QUuid> itemsUuids;
+					itemsUuids.push_back(li.m_fblItem->guid());
+					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
+					log->errALP4009(moduleStrId(),
+									li.m_scheme->strID(),
+									duplicateItem->m_scheme->strID(),
+									li.m_fblItem->buildName(),
+									duplicateItem->m_fblItem->buildName(),
+									signalStrId,
+									itemsUuids);
 					continue;
 				}
 
@@ -826,11 +893,19 @@ namespace Builder
 
 		if (scheme == nullptr ||
 			layer == nullptr ||
-			log == nullptr)
+			log == nullptr ||
+			afbCollection == nullptr)
 		{
 			assert(scheme);
 			assert(layer);
 			assert(log);
+			assert(afbCollection);
+
+			log->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, log %3, afbCollection %4")
+							.arg(reinterpret_cast<size_t>(scheme.get()))
+							.arg(reinterpret_cast<size_t>(layer.get()))
+							.arg(reinterpret_cast<size_t>(log))
+							.arg(reinterpret_cast<size_t>(afbCollection)));
 			return false;
 		}
 
@@ -974,8 +1049,9 @@ namespace Builder
 
 				if (deviceStrIds.isEmpty() == true)
 				{
-					QString message = tr("DeviceStrIds is not set for scheme %1").arg(scheme->strID());
-					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+					// Property DeviceStrIds is not set (LogicScheme '%1')
+					//
+					m_log->wrnALP4001(scheme->strID());
 					continue;
 				}
 
@@ -985,15 +1061,17 @@ namespace Builder
 
 					if (device == nullptr)
 					{
-						QString message = tr("Cannot find HardwareStrId %1 for scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2')
+						//
+						m_log->wrnALP4002(scheme->strID(), strid);
 						continue;
 					}
 
 					if (device->isModule() == false)
 					{
-						QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+						// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+						//
+						m_log->wrnALP4003(scheme->strID(), strid);
 						continue;
 					}
 					else
@@ -1005,8 +1083,9 @@ namespace Builder
 
 						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
 						{
-							QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
-							LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, message);
+							// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+							//
+							m_log->wrnALP4003(scheme->strID(), strid);
 							continue;
 						}
 					}
@@ -1053,6 +1132,7 @@ namespace Builder
 		if (out == nullptr)
 		{
 			assert(out);
+			m_log->errINT1000(QString(__FUNCTION__ ", out %1").arg(reinterpret_cast<size_t>(out)));
 			return false;
 		}
 
@@ -1074,7 +1154,9 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file list."));
+			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
+			//
+			m_log->errPDB2001(db->alFileId(), "%.als", db->lastError());
 			return false;
 		}
 
@@ -1104,7 +1186,9 @@ namespace Builder
 
 			if (ok == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get application logic file instances."));
+				// Getting file instance error, file ID %1, file name '%2', database message '%3'.
+				//
+				m_log->errPDB2002(fi.fileId(), fi.fileName(), db->lastError());
 				return false;
 			}
 
@@ -1115,13 +1199,17 @@ namespace Builder
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("File loading error."));
+				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+				//
+				m_log->errCMN0010(file->fileName());
 				return false;
 			}
 
 			if (ls->excludeFromBuild() == true)
 			{
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Scheme %1 excluded from build.").arg(ls->strID()));
+				// Scheme is excluded from build (Scheme '%1').
+				//
+				m_log->wrnALP4004(ls->strID());
 				continue;
 			}
 			else
@@ -1168,7 +1256,9 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("There is no compile layer in the scheme."));
+			// Scheme does not have Logic layer (Logic Scheme '%1').
+			//
+			m_log->errALP4010(logicScheme->strID());
 			return false;
 		}
 
@@ -1204,7 +1294,8 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, "setBranchConnectionToPin function error.");
+			// All log errors should be reported in setBranchConnectionToPin
+			//
 			return false;
 		}
 
@@ -1218,7 +1309,8 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("Internal error: Cannot set data to ApplicationLogicData."));
+			// function addData will report about errors
+			//
 			return false;
 		}
 
@@ -1497,6 +1589,12 @@ namespace Builder
 			assert(scheme);
 			assert(layer);
 			assert(bushContainer);
+
+			log()->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, bushContainer %3")
+							  .arg(reinterpret_cast<size_t>(scheme.get()))
+							  .arg(reinterpret_cast<size_t>(layer.get()))
+							  .arg(reinterpret_cast<size_t>(bushContainer)));
+
 			return false;
 		}
 
@@ -1565,11 +1663,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicScheme %1: %2 has unconnected pin %3")
-								  .arg(scheme->caption())
-								  .arg(fblItem->buildName())
-								  .arg(out.caption()));
+						log()->errALP4006(scheme->strID(), fblItem->buildName(), out.caption(), item->guid());
 
 						result = false;
 						continue;
@@ -1713,8 +1807,9 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			LOG_WARNING_OBSOLETE(log(), Builder::IssueType::NotDefined,
-						QString("Empty logic scheme %1, functional blocks were not found.").arg(scheme->strID()));
+			// Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1')
+			//
+			m_log->wrnALP4005(scheme->strID());
 			return true;
 		}
 
@@ -1729,21 +1824,23 @@ namespace Builder
 
 			if (bush.outputPin.isNull() == true)
 			{
-				QString strItems;
 				for (std::shared_ptr<VFrame30::FblItemRect> i : bush.fblItems)
 				{
-					if (strItems.isEmpty() == true)
-					{
-						strItems.append(i->buildName());
-					}
-					else
-					{
-						strItems.append(QString(", %1").arg(i->buildName()));
-					}
-				}
+					// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+					//
+					std::vector<VFrame30::AfbPin> inputs = bush.getInputPinsForItem(i->guid());
 
-				LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-						  tr("Input is not defined, for items: %1").arg(strItems));
+					QString inputsStr;
+					for (auto input : inputs)
+					{
+						inputsStr += (inputsStr.isEmpty() == true) ? input.caption() : QString(", %1").arg(input.caption());
+					}
+
+					std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
+					issuedItemsUuid.push_back(i->guid());
+
+					m_log->errALP4006(scheme->strID(), i->buildName(), inputsStr, issuedItemsUuid);
+				}
 			}
 
 			if (bush.inputPins.empty() == true)
@@ -1758,8 +1855,12 @@ namespace Builder
 					{
 						if (out.associatedIOs().empty() == true)
 						{
-							LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-									  tr("%1 has unconnected pin %2").arg(item->buildName()).arg(out.caption()));
+							// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+							//
+							std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
+							issuedItemsUuid.push_back(item->guid());
+
+							m_log->errALP4006(scheme->strID(), item->buildName(), out.caption(), issuedItemsUuid);
 						}
 					}
 				}
