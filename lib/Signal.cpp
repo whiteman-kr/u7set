@@ -590,14 +590,6 @@ void SignalSet::resetAddresses()
 }
 
 
-void Address16::fromString(QString str)
-{
-	const QStringList& list = str.split(":");
-	m_offset = list[0].toInt();
-	m_bit = list[1].toInt();
-}
-
-
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
 {
 	QXmlStreamReader applicationSignalsReader;

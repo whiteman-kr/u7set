@@ -392,7 +392,7 @@ namespace Builder
 		}
 		else
 		{
-			LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("WARNING: The workcopies of the checked out files will be compiled!")));
+            LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("The workcopies of the checked out files will be compiled!")));
 		}
 
 		if (createBuildDirectory() == false)

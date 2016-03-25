@@ -1,18 +1,21 @@
-#include "Connection.h"
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+
+#include "../include/CUtils.h"
+
+#include "Connection.h"
 
 namespace Hardware
 {
 
-	//
-	//
-	// Connection
-	//
-	//
-	Connection::Connection()
-	{
-		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
+    //
+    //
+    // Connection
+    //
+    //
+    Connection::Connection()
+    {
+        ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
         ADD_PROPERTY_GETTER_SETTER(QString, Port1StrID, true, Connection::port1StrID, Connection::setPort1StrID);
         ADD_PROPERTY_GETTER_SETTER(QString, Port2StrID, true, Connection::port2StrID, Connection::setPort2StrID);
 
@@ -36,28 +39,28 @@ namespace Hardware
 
         ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, Mode, false, Connection::mode, Connection::setMode);
         ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
-		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
+        ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
         ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
         ADD_PROPERTY_GETTER_SETTER(bool, ManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
-	}
+    }
 
     Connection::Connection(const Connection& that):Connection()
     {
         *this = that;
     }
 
-	bool Connection::save(QXmlStreamWriter& writer)
-	{
-		writer.writeAttribute("Index", QString::number(index()));
-		writer.writeAttribute("Caption", caption());
+    bool Connection::save(QXmlStreamWriter& writer)
+    {
+        writer.writeAttribute("Index", QString::number(index()));
+        writer.writeAttribute("Caption", caption());
         writer.writeAttribute("Port1StrID", port1StrID());
         writer.writeAttribute("Port2StrID", port2StrID());
         writer.writeAttribute("SerialMode", QString::number(static_cast<int>(serialMode())));
         writer.writeAttribute("Mode", QString::number(static_cast<int>(mode())));
-		writer.writeAttribute("Enable", enable() ? "true" : "false");
+        writer.writeAttribute("Enable", enable() ? "true" : "false");
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
         writer.writeAttribute("ManualSettings", manualSettings() ? "true" : "false");
-		writer.writeAttribute("SignalList", signalList().join(';'));
+        writer.writeAttribute("SignalList", signalList().join(';'));
 
         // Tx/Rx words quantity
         //
@@ -67,45 +70,45 @@ namespace Hardware
         writer.writeAttribute("Port2RxWordsQuantity", QString::number(port2RxWordsQuantity()));
 
         return true;
-	}
+    }
 
 
-	bool Connection::load(QXmlStreamReader& reader)
-	{
-		if (reader.attributes().hasAttribute("Index"))
-		{
-			setIndex(reader.attributes().value("Index").toInt());
-		}
+    bool Connection::load(QXmlStreamReader& reader)
+    {
+        if (reader.attributes().hasAttribute("Index"))
+        {
+            setIndex(reader.attributes().value("Index").toInt());
+        }
 
-		if (reader.attributes().hasAttribute("Caption"))
-		{
-			setCaption(reader.attributes().value("Caption").toString());
-		}
+        if (reader.attributes().hasAttribute("Caption"))
+        {
+            setCaption(reader.attributes().value("Caption").toString());
+        }
 
         if (reader.attributes().hasAttribute("Port1StrID"))
-		{
+        {
             setPort1StrID(reader.attributes().value("Port1StrID").toString());
-		}
+        }
 
         if (reader.attributes().hasAttribute("Port2StrID"))
-		{
+        {
             setPort2StrID(reader.attributes().value("Port2StrID").toString());
-		}
+        }
 
         if (reader.attributes().hasAttribute("SerialMode"))
-		{
+        {
             setSerialMode(static_cast<OptoPort::SerialMode>(reader.attributes().value("SerialMode").toInt()));
-		}
+        }
 
         if (reader.attributes().hasAttribute("Mode"))
-		{
+        {
             setMode(static_cast<OptoPort::Mode>(reader.attributes().value("Mode").toInt()));
-		}
+        }
 
-		if (reader.attributes().hasAttribute("Enable"))
-		{
-			setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
-		}
+        if (reader.attributes().hasAttribute("Enable"))
+        {
+            setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
+        }
 
         if (reader.attributes().hasAttribute("EnableDuplex"))
         {
@@ -118,9 +121,9 @@ namespace Hardware
         }
 
         if (reader.attributes().hasAttribute("SignalList"))
-		{
-			setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
-		}
+        {
+            setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
+        }
 
         // Tx/Rx words quantity, may be overloaded later
         //
@@ -146,12 +149,12 @@ namespace Hardware
         }
 
 
-		QXmlStreamReader::TokenType endToken = reader.readNext();
-		if (endToken != QXmlStreamReader::EndElement && endToken != QXmlStreamReader::Invalid)
-		{
-			Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
-			return false;
-		}
+        QXmlStreamReader::TokenType endToken = reader.readNext();
+        if (endToken != QXmlStreamReader::EndElement && endToken != QXmlStreamReader::Invalid)
+        {
+            Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+            return false;
+        }
 
         // Generate Connection IDs as a hash of caption or ocmPortStrID
         //
@@ -163,10 +166,10 @@ namespace Hardware
         setPort1TxRsID(hashRs);
         setPort2TxRsID(hashRs);
 
-		return true;
-	}
+        return true;
+    }
 
-	int Connection::index() const
+    int Connection::index() const
     {
         return m_index;
     }
@@ -176,15 +179,15 @@ namespace Hardware
         m_index = value;
     }
 
-	QString Connection::caption() const
+    QString Connection::caption() const
     {
         return m_caption;
     }
 
     void Connection::setCaption(const QString& value)
     {
-		m_caption = value;
-	}
+        m_caption = value;
+    }
 
     QString Connection::port1StrID() const
     {
@@ -204,6 +207,19 @@ namespace Hardware
     void Connection::setPort2StrID(const QString& value)
     {
         m_port2StrID = value;
+    }
+
+    quint16 Connection::getID() const
+    {
+        // Connection ID calculation
+        // range 1..999
+        //
+
+        QString sourceStr = port1StrID() + port2StrID();
+
+        quint16 hash = CUtils::calcHash16(C_STR(sourceStr), sourceStr.length());
+
+        return (hash % 999) + 1;
     }
 
     //
@@ -352,29 +368,29 @@ namespace Hardware
     void Connection::setSerialMode(const OptoPort::SerialMode value)
     {
         m_serialMode = value;
-	}
+    }
 
     OptoPort::Mode Connection::mode() const
-	{
+    {
         return m_mode;
-	}
+    }
 
     void Connection::setMode(const OptoPort::Mode value)
-	{
+    {
         m_mode = value;
-		auto propertyVisibilityChanger = [this](const char* propertyName, bool visible) {
-			auto property = propertyByCaption(propertyName);
-			if (property != nullptr)
-			{
-				property->setVisible(visible);
-			}
-		};
+        auto propertyVisibilityChanger = [this](const char* propertyName, bool visible) {
+            auto property = propertyByCaption(propertyName);
+            if (property != nullptr)
+            {
+                property->setVisible(visible);
+            }
+        };
 
-		switch(value)
-		{
+        switch(value)
+        {
             case OptoPort::Mode::Optical:
                 propertyVisibilityChanger("SerialMode", false);
-				propertyVisibilityChanger("Enable", false);
+                propertyVisibilityChanger("Enable", false);
                 propertyVisibilityChanger("EnableDuplex", false);
 
                 propertyVisibilityChanger("Port2StrID", true);
@@ -382,22 +398,22 @@ namespace Hardware
                 propertyVisibilityChanger("Port2RxWordsQuantity", true);
 
 
-				break;
+                break;
             case OptoPort::Mode::Serial:
                 propertyVisibilityChanger("SerialMode", true);
-				propertyVisibilityChanger("Enable", true);
+                propertyVisibilityChanger("Enable", true);
                 propertyVisibilityChanger("EnableDuplex", true);
 
                 propertyVisibilityChanger("Port2StrID", false);
                 propertyVisibilityChanger("Port2TxWordsQuantity", false);
                 propertyVisibilityChanger("Port2RxWordsQuantity", false);
                 break;
-			default:
-				assert(false);
-		}
-	}
+            default:
+                assert(false);
+        }
+    }
 
-	bool Connection::enable() const
+    bool Connection::enable() const
     {
         return m_enable;
     }
@@ -405,7 +421,7 @@ namespace Hardware
     void Connection::setEnable(bool value)
     {
         m_enable = value;
-	}
+    }
 
     bool Connection::enableDuplex() const
     {
@@ -428,14 +444,14 @@ namespace Hardware
     }
 
     QStringList Connection::signalList() const
-	{
-		return m_signalList;
-	}
+    {
+        return m_signalList;
+    }
 
-	void Connection::setSignalList(const QStringList &value)
-	{
-		m_signalList = value;
-	}
+    void Connection::setSignalList(const QStringList &value)
+    {
+        m_signalList = value;
+    }
 
 
     //

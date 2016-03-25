@@ -8,6 +8,7 @@
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
 #include "../include/DataSource.h"
+#include "../include/Address16.h"
 #include "../VFrame30/Afb.h"
 
 
@@ -80,72 +81,6 @@ struct DataFormatPair
 };
 
 
-// signal address struct
-//
-// offset	- signal offset in memory in 16-bit words
-// bitNo	- discrete signal offset in memory in bits 0..15,
-//			  for analog signals always 0
-//
-//
-class Address16
-{
-private:
-	int m_offset = -1;
-	int m_bit = -1;
-
-public:
-	Address16() {}
-	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
-
-	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
-	void setOffset(int offset) { m_offset = offset; }
-	void setBit(int bit) { m_bit = bit; }
-
-	int addWord(int wordCount)
-	{
-		m_offset += wordCount;
-		return wordCount;
-	}
-
-	int addBit(int bitCount)
-	{
-		int old_offset = m_offset;
-		int totalBitCount = m_offset * 16 + m_bit + bitCount;
-
-		m_offset = totalBitCount / 16;
-		m_bit = totalBitCount % 16;
-
-		return m_offset - old_offset;
-	}
-
-	void add1Word() { addBit(1); }
-	void add1Bit() { addBit(1); }
-
-	int wordAlign()
-	{
-		int offset = 0;
-
-		if (m_bit != 0)
-		{
-			m_offset++;
-			m_bit = 0;
-
-			offset = 1;
-		}
-
-		return offset;
-	}
-
-	int offset() const { return m_offset; }
-	int bit() const { return m_bit; }
-
-	void reset() { 	m_offset = -1; m_bit = -1; }
-
-	bool isValid() const { return m_offset != -1 && m_bit != -1; }
-
-	QString toString() const { return QString("%1:%2").arg(m_offset).arg(m_bit); }
-	void fromString(QString str);
-};
 
 
 typedef OrderedHash<int, QString> UnitList;

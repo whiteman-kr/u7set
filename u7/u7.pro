@@ -154,7 +154,9 @@ SOURCES +=\
     Builder/TuningBuilder.cpp \
     Builder/IssueLogger.cpp \
 	Builder/OptoModule.cpp \
-    GlobalMessanger.cpp
+    GlobalMessanger.cpp \
+    Builder/LmMemoryMap.cpp \
+    Builder/ModuleLogicCompiler.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -235,7 +237,12 @@ HEADERS  += \
     Builder/TuningBuilder.h \
     Builder/IssueLogger.h \
 	Builder/OptoModule.h \
-	GlobalMessanger.h
+	GlobalMessanger.h \
+    Builder/LmMemoryMap.h \
+    Builder/LmLimits.h \
+    ../include/Address16.h \
+    Builder/ModuleLogicCompiler.h \
+    ../include/WUtils.h
 
 FORMS    += \
     ChangesetDialog.ui \
