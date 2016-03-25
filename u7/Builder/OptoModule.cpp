@@ -92,7 +92,9 @@ namespace Hardware
         //
         m_txDataID = CRC32(m_txDataID, C_STR(m_strID), m_strID.length(), false);
 
-        Address16 address(0, 0);
+        // m_txDataID first placed in buffer
+        //
+        Address16 address(sizeof(m_txDataID) / sizeof(quint16), 0);
 
         for(TxSignal& txAnalogSignal : m_txAnalogSignalList)
         {
@@ -618,16 +620,51 @@ namespace Hardware
                     return false;
                 }
 
-                port->setTxStartAddress(txStartAddress);
-
-                txStartAddress += port->txDataSizeW();
-                /*
-                if (txStartAddress > )
+                if (module->isLM())
                 {
+                    port->setTxStartAddress(txStartAddress);
 
-                }*/
+                    if (port->txDataSizeW() > module->m_optoPortAppDataSize)
+                    {
+                        LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                           QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
+                                           arg(txStartAddress).arg(port->strID()).
+                                           arg(module->m_optoPortAppDataSize).arg(port->connectionCaption()));
 
+                        result = false;
+                        break;
+                    }
+
+                    continue;
+                }
+
+                if (module->isOCM())
+                {
+                    // all data to transmit via all ports of OCM disposed in one buffer with max size - OptoPortAppDataSize
+                    //
+                    port->setTxStartAddress(txStartAddress);
+
+                    txStartAddress += port->txDataSizeW();
+
+                    if (txStartAddress > module->m_optoPortAppDataSize)
+                    {
+                        LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                           QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
+                                           arg(txStartAddress).arg(port->strID()).
+                                           arg(module->m_optoPortAppDataSize).arg(port->connectionCaption()));
+
+                        result = false;
+                        break;
+                    }
+                    continue;
+                }
+
+                LOG_INTERNAL_ERROR(m_log)
+                assert(false);      // unknown module type
+                result = false;
+                break;
             }
+
         }
 
         return result;

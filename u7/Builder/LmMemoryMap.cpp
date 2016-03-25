@@ -125,6 +125,9 @@ namespace Builder
         m_appBitAdressed.memory = appLogicBitData;
         m_appBitAdressed.memory.lock();
 
+        m_appBitAdressed.bitAccumulator.setStartAddress(appLogicBitData.startAddress());
+        m_appBitAdressed.bitAccumulator.setSizeW(1);        // bit accumulator has 1 word (16 bit) size
+
         m_appBitAdressed.regDiscretSignals.setStartAddress(appLogicBitData.startAddress());
         m_appBitAdressed.nonRegDiscretSignals.setStartAddress(appLogicBitData.startAddress());
 
@@ -163,6 +166,8 @@ namespace Builder
     {
         // recalc application bit-addressed memory mapping
         //
+
+        m_appBitAdressed.regDiscretSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 
         m_appBitAdressed.nonRegDiscretSignals.setStartAddress(m_appBitAdressed.regDiscretSignals.nextAddress());
 
@@ -291,6 +296,8 @@ namespace Builder
         //
 
         addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
+
+        addRecord(memFile, m_appBitAdressed.bitAccumulator, "bit accumulator");
 
         addRecord(memFile, m_appBitAdressed.regDiscretSignals, "registrated discrete signals");
 

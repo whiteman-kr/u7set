@@ -114,6 +114,7 @@ namespace Builder
         {
             MemoryArea memory;
 
+            MemoryArea bitAccumulator;
             MemoryArea regDiscretSignals;
             MemoryArea nonRegDiscretSignals;
 
@@ -179,6 +180,7 @@ namespace Builder
         int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscretSignals.sizeW(); }
 
         int bitAddressedMemoryAddress() const { return m_appBitAdressed.memory.startAddress(); }
+        int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
         int wordAddressedMemoryAddress() const { return m_appWordAdressed.memory.startAddress(); }
 
 

@@ -84,8 +84,6 @@ public:
 
     QString toString() const
     {
-        assert(isValid());
-
         return QString("%1:%2").arg(m_offset).arg(m_bit);
     }
 

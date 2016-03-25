@@ -293,7 +293,6 @@ namespace Builder
             {	"ModuleDataSize", m_moduleData.ptrSizeW() },
 
             {	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
-            {	"OptoInterfaceDataSize", m_optoInterfaceData.ptrSizeW() },
 
             {	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
             {	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
@@ -3586,6 +3585,8 @@ namespace Builder
         }
 
         m_memoryMap.recalculateAddresses();
+
+        m_bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
 
         return result;
     }

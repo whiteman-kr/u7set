@@ -484,6 +484,8 @@ namespace Builder
 
         LmMemoryMap m_memoryMap;
 
+        int m_bitAccumulatorAddress = 0;
+
         QVector<Module> m_modules;
 
         //

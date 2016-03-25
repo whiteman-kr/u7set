@@ -211,7 +211,7 @@ namespace Builder
 
                 optoPort1->addTxSignalsStrID(connection->signalList());
 
-                LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2")).
+                LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
                             arg(connection->caption()).arg(portID));
             }
             else
@@ -229,12 +229,13 @@ namespace Builder
                                        arg(connection->port2StrID()).arg(connection->caption()));
 
                     result = false;
+                    continue;
                 }
 
                 if (m_optoModuleStorage->isCompatiblePorts(optoPort1, optoPort2) == false)
                 {
                     LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-                                       QString(tr("Uncompatible ports '%1' and '%2' in connection '%3'. Only LM-LM and OCM-OCM connections possible.)")).
+                                       QString(tr("Uncompatible ports '%1' and '%2' in connection '%3'. Only LM-LM and OCM-OCM connections possible.")).
                                        arg(connection->port1StrID()).
                                        arg(connection->port2StrID()).
                                        arg(connection->caption()));
@@ -260,7 +261,7 @@ namespace Builder
                 optoPort1->setLinkedPortStrID(optoPort2->strID());
                 optoPort2->setLinkedPortStrID(optoPort1->strID());
 
-                LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2")).
+                LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
                             arg(connection->caption()).arg(portID));
             }
         }
