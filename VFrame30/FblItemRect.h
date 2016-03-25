@@ -77,7 +77,7 @@ namespace VFrame30
 		bool isConstElement() const;
 		bool isFblElement() const;
 
-		VFrame30::SchemeItemSignal *toSignalElement();
+		VFrame30::SchemeItemSignal* toSignalElement();
 		const VFrame30::SchemeItemSignal* toSignalElement() const;
 
 		VFrame30::SchemeItemInput* toInputSignalElement();

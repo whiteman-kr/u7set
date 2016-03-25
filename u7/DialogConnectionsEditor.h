@@ -12,10 +12,18 @@ class DialogConnectionsPropertyEditor : public PropertyEditorDialog
 {
 public:
     DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections);
+    ~DialogConnectionsPropertyEditor();
 
+private:
     virtual bool onPropertiesChanged(std::shared_ptr<PropertyObject> object);
+    virtual void closeEvent(QCloseEvent * e);
+    virtual void done(int r);
+
+    void saveSettings();
+
 private:
     Hardware::ConnectionStorage *m_connections = nullptr;
+
 };
 
 namespace Ui {

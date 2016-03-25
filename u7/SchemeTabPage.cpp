@@ -163,6 +163,8 @@ void SchemesTabPage::projectOpened()
 
 void SchemesTabPage::projectClosed()
 {
+	GlobalMessanger::instance()->clearBuildSchemeIssues();
+
 	// Close all opened documents
 	//
 	assert(m_tabWidget);

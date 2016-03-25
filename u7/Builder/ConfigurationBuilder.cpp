@@ -242,7 +242,7 @@ namespace Builder
         std::sort(lmModules.begin(), lmModules.end(),
                   [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
                   {
-                      return a->strId() > b->strId();
+                      return a->strId() < b->strId();
                   });
 
 		QStringList lmReport;

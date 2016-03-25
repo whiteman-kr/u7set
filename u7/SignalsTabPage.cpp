@@ -588,7 +588,7 @@ QString SignalsModel::errorMessage(const ObjectState& state) const
 {
 	switch(state.errCode)
 	{
-		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 could not be checked out").arg(state.id);
+		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 is not checked out").arg(state.id);
 		case ERR_SIGNAL_ALREADY_CHECKED_OUT: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
 		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
 		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);

@@ -35,6 +35,16 @@ DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent)
         move(theSettings.m_abflEditorWindowPos);
         restoreGeometry(theSettings.m_abflEditorWindowGeometry);
     }
+
+    if (m_pDbController->currentUser().isAdminstrator() == false)
+    {
+        ui->m_add->setEnabled(false);
+        ui->m_addXsd->setEnabled(false);
+        ui->m_remove->setEnabled(false);
+        ui->m_Undo->setEnabled(false);
+        ui->m_checkIn->setEnabled(false);
+        ui->m_checkOut->setEnabled(false);
+    }
 }
 
 DialogAfblEditor::~DialogAfblEditor()
@@ -430,7 +440,7 @@ void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int
 
     std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
 
-    if (selectedFiles.size() == 1 && selectedFiles[0]->state() == VcsState::CheckedOut)
+    if (selectedFiles.size() == 1 && selectedFiles[0]->state() == VcsState::CheckedOut && m_pDbController->currentUser().isAdminstrator())
     {
         on_m_edit_clicked();
     }
@@ -471,12 +481,16 @@ void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
     enableCheckIn = count != 0 && count == selectedFiles.size();
 
 
-    ui->m_edit->setEnabled(enableEdit);
+    if (m_pDbController->currentUser().isAdminstrator())
+    {
+        ui->m_edit->setEnabled(enableEdit);
+        ui->m_checkOut->setEnabled(enableCheckOut);
+        ui->m_checkIn->setEnabled(enableCheckIn);
+        ui->m_Undo->setEnabled(enableCheckIn);
+        ui->m_remove->setEnabled(selectedFiles.size() > 0);
+    }
     ui->m_view->setEnabled(enableView);
-    ui->m_checkOut->setEnabled(enableCheckOut);
-    ui->m_checkIn->setEnabled(enableCheckIn);
-    ui->m_Undo->setEnabled(enableCheckIn);
-    ui->m_remove->setEnabled(selectedFiles.size() > 0);
+
 }
 
 

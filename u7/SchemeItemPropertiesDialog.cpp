@@ -11,6 +11,18 @@ SchemeItemPropertiesDialog::SchemeItemPropertiesDialog(EditEngine::EditEngine* e
 
 	m_propertyEditor = new SchemeItemPropertyEditor(editEngine, this);
 
+    m_propertyEditor->setSplitterPosition(theSettings.m_schemeItemSplitterState);
+    if (theSettings.m_schemeItemPropertiesWindowPos.x() != -1 && theSettings.m_schemeItemPropertiesWindowPos.y() != -1)
+    {
+       move(theSettings.m_schemeItemPropertiesWindowPos);
+       restoreGeometry(theSettings.m_schemeItemPropertiesWindowGeometry);
+    }
+    else
+    {
+        QRect scr = QApplication::desktop()->screenGeometry();
+        move( scr.center() - rect().center() );
+    }
+
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 
 	return;
@@ -35,6 +47,26 @@ void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 	m_propertyEditor->setObjects(ol);
 
 	return;
+}
+
+void SchemeItemPropertiesDialog::closeEvent(QCloseEvent * e)
+{
+    Q_UNUSED(e);
+    saveSettings();
+
+}
+
+void SchemeItemPropertiesDialog::done(int r)
+{
+    saveSettings();
+    QDialog::done(r);
+}
+
+void SchemeItemPropertiesDialog::saveSettings()
+{
+    theSettings.m_schemeItemSplitterState = m_propertyEditor->splitterPosition();
+    theSettings.m_schemeItemPropertiesWindowPos = pos();
+    theSettings.m_schemeItemPropertiesWindowGeometry = saveGeometry();
 }
 
 

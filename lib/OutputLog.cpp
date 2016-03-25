@@ -47,7 +47,7 @@ QString OutputLogItem::toHtml() const
 		color = "green";
 		break;
 	case OutputMessageLevel::Warning:
-		color = "darkorange";
+		color = "#F87217";
 		break;
 	case OutputMessageLevel::Error:
 		color = "red";

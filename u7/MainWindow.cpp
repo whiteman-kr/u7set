@@ -42,18 +42,16 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &MainWindow::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
 
-	////connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
-	////connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
-
-	//connect(centralWidget(), SIGNAL(historyChanged(bool, bool)), this, SLOT(historyChanged(bool, bool)));
-
 	// Add main tab pages
 	//
 	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
 	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Equipment"));
 	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
-	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
-//	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
+
+	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
+	m_filesTabPage->setWindowTitle(tr("Files"));
+	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
+	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
 	m_logicScheme = SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr);
 	m_workflowScheme = SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr);
@@ -333,11 +331,6 @@ void MainWindow::runAfblEditor()
         return;
     }
 
-    if (dbController()->currentUser().isAdminstrator() == false)
-    {
-        return;
-    }
-
     DialogAfblEditor d(dbController(), this);
     d.exec();
 }
@@ -421,26 +414,6 @@ void MainWindow::debug()
 	fiv.push_back(static_cast<DbFileInfo>(*f1));
 	fiv.push_back(static_cast<DbFileInfo>(*f2));
 	dbController()->undoChanges(fiv, this);
-
-	/*DbFileInfo fi;
-	fi.setFileId(1);*/
-
-	//std::shared_ptr<DbFile> file;
-
-	//dbController()->getWorkcopy(fi, &file, this);
-
-	//qDebug() << "Get Workcopy, size:" << file->size() << " Name?:" << file->fileName();
-
-	//f1->setFileId(1);
-	//dbController()->setWorkcopy(files, this);
-
-
-	//dbController()->addFiles(&files, 0, this);
-	//dbController()->addFiles(&files, 0, this);
-
-	//std::vector<DbFileInfo> files;
-	//dbController()->getFileList(&files, this);
-
 }
 
 void MainWindow::projectOpened(DbProject project)
@@ -452,20 +425,24 @@ void MainWindow::projectOpened(DbProject project)
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(true);
-    m_afblEditorAction->setEnabled(dbController()->currentUser().isAdminstrator());
+    m_afblEditorAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_rs232SignalListEditorAction->setEnabled(true);
-
-	// Tab Pages, enable all tab pages
-	//
-	//getCentralWidget()->setEnabled(true);
 
 	// Status bar
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
 	m_statusBarConnectionState->setText(tr("Opened: ") + theSettings.serverIpAddress());
+
+	// Show and hide FilesTabPage
+	//
+	if (db()->currentUser().isAdminstrator() == true)
+	{
+		getCentralWidget()->insertTab(m_filesTabPageIndex, m_filesTabPage, m_filesTabPage->windowTitle());
+	}
+
 	return;
 }
 
@@ -483,20 +460,30 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_rs232SignalListEditorAction->setEnabled(false);
 
-	// Tab Pages, disable all tab pages except the first.
-	//
-	//getCentralWidget()->setDisabled(true);
-
 	// Status bar
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
 	m_statusBarConnectionState->setText(tr("Closed"));
+
+	// Remove FilesTabPage, it will be added again in projectOpened slot if user is an admin
+	//
+	if (getCentralWidget()->tabText(m_filesTabPageIndex) == m_filesTabPage->windowTitle())
+	{
+		getCentralWidget()->removeTab(m_filesTabPageIndex);
+	}
+
 	return;
 }
 
 
 DbController* MainWindow::dbController()
+{
+	assert(m_dbController != nullptr);
+	return m_dbController;
+}
+
+DbController* MainWindow::db()
 {
 	assert(m_dbController != nullptr);
 	return m_dbController;

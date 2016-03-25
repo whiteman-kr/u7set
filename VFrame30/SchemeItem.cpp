@@ -6,6 +6,10 @@ namespace VFrame30
 {
 	Factory<VFrame30::SchemeItem> SchemeItemFactory;
 
+	const QColor SchemeItem::errorColor(0xE0, 0x33, 0x33, 0xFF);
+	const QColor SchemeItem::warningColor(0xF8, 0x72, 0x17, 0xFF);
+	const QColor SchemeItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
+
 	// SchemeItem
 
 	SchemeItem::SchemeItem() :
@@ -18,7 +22,6 @@ namespace VFrame30
 
 		ADD_PROPERTY_GETTER_SETTER(bool, AcceptClick, true, SchemeItem::acceptClick, SchemeItem::setAcceptClick);
 		ADD_PROPERTY_GETTER_SETTER(QString, ClickScript, true, SchemeItem::clickScript, SchemeItem::setClickScript);
-
 	}
 
 	SchemeItem::~SchemeItem()
@@ -168,6 +171,11 @@ namespace VFrame30
 		{
 			vi->get()->DrawOutline(pDrawParam);
 		}
+	}
+
+	void SchemeItem::DrawIssue(CDrawParam* /*drawParam*/, OutputMessageLevel /*issue*/) const
+	{
+		assert(false);
 	}
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.

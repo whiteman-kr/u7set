@@ -1,4 +1,5 @@
 #include "../Builder/SoftwareCfgGenerator.h"
+#include "IssueLogger.h"
 
 namespace Builder
 {

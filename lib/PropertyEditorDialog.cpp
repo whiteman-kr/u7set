@@ -15,7 +15,7 @@ PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> objec
     connect(buttonBox, &QDialogButtonBox::accepted, this, &PropertyEditorDialog::onOk);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &PropertyEditorDialog::reject);
 
-    ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+    pe = new ExtWidgets::PropertyEditor(this);
 
     QList<std::shared_ptr<PropertyObject>> objList;
     objList.push_back(object);
@@ -26,6 +26,29 @@ PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> objec
     mainLayout->addWidget(buttonBox);
     setLayout(mainLayout);
 }
+
+PropertyEditorDialog::~PropertyEditorDialog()
+{
+
+}
+
+int PropertyEditorDialog::splitterPosition()
+{
+    if (pe != nullptr)
+    {
+        return pe->splitterPosition();
+    }
+    return 0;
+}
+
+void PropertyEditorDialog::setSplitterPosition(int value)
+{
+    if (pe != nullptr)
+    {
+        pe->setSplitterPosition(value);
+    }
+}
+
 
 bool PropertyEditorDialog::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
 {
