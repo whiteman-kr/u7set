@@ -331,11 +331,6 @@ void MainWindow::runAfblEditor()
         return;
     }
 
-    if (dbController()->currentUser().isAdminstrator() == false)
-    {
-        return;
-    }
-
     DialogAfblEditor d(dbController(), this);
     d.exec();
 }
@@ -430,7 +425,7 @@ void MainWindow::projectOpened(DbProject project)
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(true);
-    m_afblEditorAction->setEnabled(dbController()->currentUser().isAdminstrator());
+    m_afblEditorAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_rs232SignalListEditorAction->setEnabled(true);
