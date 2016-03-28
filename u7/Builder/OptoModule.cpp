@@ -94,7 +94,10 @@ namespace Hardware
 
         // m_txDataID first placed in buffer
         //
-        Address16 address(sizeof(m_txDataID) / sizeof(quint16), 0);
+
+        int txDataIDSizeW = sizeof(m_txDataID) / sizeof(quint16);
+
+        Address16 address(txDataIDSizeW, 0);
 
         for(TxSignal& txAnalogSignal : m_txAnalogSignalList)
         {
@@ -106,7 +109,7 @@ namespace Hardware
             m_txDataID = CRC32(m_txDataID, C_STR(txAnalogSignal.strID), txAnalogSignal.strID.length(), false);
         }
 
-        m_txAnalogSignalsSizeW = address.offset();
+        m_txAnalogSignalsSizeW = address.offset() - txDataIDSizeW ;
 
         for(TxSignal& txDiscreteSignal : m_txDiscreteSignalList)
         {
@@ -123,9 +126,9 @@ namespace Hardware
 
         address.wordAlign();
 
-        m_txDiscreteSignalsSizeW = address.offset() - m_txAnalogSignalsSizeW;
+        m_txDiscreteSignalsSizeW = address.offset() - m_txAnalogSignalsSizeW - txDataIDSizeW;
 
-        m_txDataSizeW = sizeof(m_txDataID) / 2 + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+        m_txDataSizeW = txDataIDSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
     }
 
 
@@ -146,6 +149,7 @@ namespace Hardware
         }
 
         m_strID = module->strId();
+        m_place = module->place();
 
         bool result = true;
 

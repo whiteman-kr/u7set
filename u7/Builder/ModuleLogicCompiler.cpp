@@ -131,7 +131,8 @@ namespace Builder
 
             if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
-            if (!generateRS232ConectionCode()) break;
+            //if (!generateRS232ConectionCode()) break;
+            if (!copyRS232Signals()) break;
 
             if (!finishAppLogicCode()) break;
 
@@ -760,7 +761,6 @@ namespace Builder
                     m_memoryMap.lmInOutsSizeW());
 
         m_code.append(cmd);
-        m_code.newLine();
 
         return true;
     }
@@ -1454,7 +1454,7 @@ namespace Builder
         {
             // move value of discrete signal
             //
-            cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
+            cmd.movBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
         }
 
         cmd.setComment(QString(tr("%1 (reg %2) <= %3 (reg %4)")).
@@ -2317,6 +2317,270 @@ namespace Builder
     }
 
 
+    bool ModuleLogicCompiler::copyRS232Signals()
+    {
+        if (m_lm == nullptr ||
+            m_optoModuleStorage == nullptr)
+        {
+            LOG_INTERNAL_ERROR(m_log);
+            assert(false);
+            return false;
+        }
+
+        QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->strId());
+
+        if (optoModules.isEmpty() == true)
+        {
+             return true;
+        }
+
+        bool result = true;
+
+        for(Hardware::OptoModule* optoModule : optoModules)
+        {
+            QList<Hardware::OptoPort*> rs232Ports = optoModule->getRS232Ports();
+
+            if (rs232Ports.isEmpty() == true)
+            {
+                continue;
+            }
+
+            for(Hardware::OptoPort* rs232Port : rs232Ports)
+            {
+                result &= copyPortRS232Signals(optoModule, rs232Port);
+            }
+        }
+
+        return result;
+    }
+
+
+    bool ModuleLogicCompiler::copyPortRS232Signals(Hardware::OptoModule* optoModule, Hardware::OptoPort* rs232Port)
+    {
+        if (optoModule == nullptr ||
+            rs232Port == nullptr)
+        {
+            LOG_INTERNAL_ERROR(m_log);
+            assert(false);
+            return false;
+        }
+
+        bool result = true;
+
+        m_code.newLine();
+
+        Comment comment(QString(tr("Copy signals to RS232/485 port %1, connection - %2")).
+                        arg(rs232Port->strID()).arg(rs232Port->connectionCaption()));
+
+        m_code.append(comment);
+
+        m_code.newLine();
+
+        int portDataAddress = optoModule->optoInterfaceDataOffset() +
+                              (optoModule->place() - 1) * optoModule->optoPortDataSize() +
+                              optoModule->optoPortAppDataOffset() + rs232Port->txStartAddress();
+        // write data UID
+        //
+        Command cmd;
+
+        cmd.movConstInt32(portDataAddress, rs232Port->txDataID());
+
+        QString hexStr;
+
+        hexStr.sprintf("0x%X", rs232Port->txDataID());
+
+        cmd.setComment(QString(tr("data UID - %1")).arg(hexStr));
+
+        m_code.append(cmd);
+
+        result &= copyPortRS232AnalogSignals(portDataAddress, rs232Port);
+        result &= copyPortRS232DiscreteSignals(portDataAddress, rs232Port);
+
+        return result;
+    }
+
+
+    bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port)
+    {
+        QList<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
+
+        if (txAnalogSignals.count() == 0)
+        {
+            return true;
+        }
+
+        bool result = true;
+
+        m_code.newLine();
+
+        Comment comment(QString(tr("analog signals")));
+
+        m_code.append(comment);
+        m_code.newLine();
+
+        Command cmd;
+
+        for(Hardware::OptoPort::TxSignal txSignal : txAnalogSignals)
+        {
+            if (m_signalsStrID.contains(txSignal.strID) == false)
+            {
+                LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                   QString(tr("Unknown signal StrID '%1'")).
+                                   arg(txSignal.strID));
+                result = false;
+                continue;
+            }
+
+            Signal* signal = m_signalsStrID[txSignal.strID];
+
+            if (signal == nullptr)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                assert(false);
+                result = false;
+                continue;
+            }
+
+            assert(signal->isAnalog());
+
+            int fromAddr = signal->ramAddr().offset();
+            int toAddr = portDataAddress + txSignal.address.offset();
+
+            if (txSignal.sizeBit == WORD_SIZE)
+            {
+                cmd.mov(toAddr, fromAddr);
+            }
+            else
+            {
+                if (txSignal.sizeBit == DWORD_SIZE)
+                {
+                    cmd.mov32(toAddr, fromAddr);
+                }
+                else
+                {
+                    LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                       QString(tr("Unknown size of analog signal '%1' - %2 bits)")).
+                                       arg(txSignal.strID).arg(txSignal.sizeBit));
+                    result = false;
+                }
+            }
+
+            cmd.setComment(QString("%1").arg(txSignal.strID));
+
+            m_code.append(cmd);
+        }
+
+        return result;
+    }
+
+
+    bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port)
+    {
+        portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
+
+        QList<Hardware::OptoPort::TxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
+
+        int txDiscreteSignalsCount = txDiscreteSignals.count();
+
+        if (txDiscreteSignalsCount == 0)
+        {
+            return true;
+        }
+
+        bool result = true;
+
+        m_code.newLine();
+
+        Comment comment(QString(tr("discrete signals")));
+
+        m_code.append(comment);
+
+        Command cmd;
+
+        int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+        int bitNo = 0;
+
+        int wordCount = 0;
+
+        bool lastWordCopied = false;
+
+        for(Hardware::OptoPort::TxSignal txSignal : txDiscreteSignals)
+        {
+            if (m_signalsStrID.contains(txSignal.strID) == false)
+            {
+                LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                   QString(tr("Unknown signal StrID '%1'")).
+                                   arg(txSignal.strID));
+                result = false;
+                continue;
+            }
+
+            Signal* signal = m_signalsStrID[txSignal.strID];
+
+            if (signal == nullptr)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                assert(false);
+                result = false;
+                continue;
+            }
+
+            assert(signal->isDiscrete());
+            assert(signal->dataSize() == 1);
+
+
+            if (bitNo == 0 && wordCount == rs232Port->txDiscreteSignalsSizeW() - 1)
+            {
+                // last word initialize by 0
+                //
+                m_code.newLine();
+                cmd.movConst(bitAccAddr, 0);
+                cmd.setComment("");
+                m_code.append(cmd);
+            }
+
+            if (bitNo == 0)
+            {
+                m_code.newLine();
+            }
+
+            Address16 fromAddr = signal->ramAddr();
+
+            cmd.movBit(bitAccAddr, bitNo, fromAddr.offset(), fromAddr.bit());
+            cmd.setComment(QString("%1").arg(txSignal.strID));
+            m_code.append(cmd);
+
+            lastWordCopied = false;
+
+            bitNo++;
+
+            if (bitNo == WORD_SIZE)
+            {
+                cmd.mov(portDataAddress + wordCount, bitAccAddr);
+                cmd.setComment("");
+                m_code.append(cmd);
+
+                lastWordCopied = true;
+
+                wordCount++;
+                bitNo = 0;
+            }
+        }
+
+        if (lastWordCopied == false)
+        {
+            cmd.mov(portDataAddress + wordCount, bitAccAddr);
+            cmd.setComment("");
+            m_code.append(cmd);
+        }
+
+        return result;
+    }
+
+
+
+
     bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
     {
         m_code.comment(QString(tr("Copying DOM data place %1 to modules memory")).arg(module.place));
@@ -2515,6 +2779,7 @@ namespace Builder
 
     bool ModuleLogicCompiler::finishAppLogicCode()
     {
+        m_code.newLine();
         m_code.comment("End of application logic code");
         m_code.newLine();
 

@@ -299,6 +299,8 @@ namespace Builder
 
         addRecord(memFile, m_appBitAdressed.bitAccumulator, "bit accumulator");
 
+        memFile.append("");
+
         addRecord(memFile, m_appBitAdressed.regDiscretSignals, "registrated discrete signals");
 
         memFile.append("");

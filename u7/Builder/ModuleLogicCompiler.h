@@ -585,9 +585,13 @@ namespace Builder
 
         bool copyOutModulesAppLogicDataToModulesMemory();
 
-
         bool generateRS232ConectionCode();
         bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);
+
+        bool copyRS232Signals();
+        bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);
+        bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port);
+        bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port);
 
         bool copyDomDataToModuleMemory(const Module& module);
         bool copyAomDataToModuleMemory(const Module& module);

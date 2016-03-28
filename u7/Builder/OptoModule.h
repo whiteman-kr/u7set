@@ -147,8 +147,19 @@ namespace Hardware
         Q_OBJECT
 
     private:
+        // device properties
+        //
         QString m_strID;
         DeviceModule* m_deviceModule = nullptr;
+        int m_place = 0;
+
+        int m_optoInterfaceDataOffset = 0;
+        int m_optoPortDataSize = 0;
+        int m_optoPortAppDataOffset = 0;
+        int m_optoPortAppDataSize = 0;
+        int m_optoPortCount = 0;
+
+        //
 
         QString m_lmStrID;
         DeviceModule* m_lmDeviceModule = nullptr;
@@ -158,13 +169,6 @@ namespace Hardware
 
         bool m_valid = false;
 
-        // device properties
-        //
-        int m_optoInterfaceDataOffset = 0;
-        int m_optoPortDataSize = 0;
-        int m_optoPortAppDataOffset = 0;
-        int m_optoPortAppDataSize = 0;
-        int m_optoPortCount = 0;
 
     public:
         OptoModule(DeviceModule* module, OutputLog* log);
@@ -177,6 +181,12 @@ namespace Hardware
 
         QString strID() const { return m_strID; }
         const DeviceModule* deviceModule() const { return m_deviceModule; }
+
+        int place() const { return m_place; }
+        int optoInterfaceDataOffset() const { return m_optoInterfaceDataOffset; }
+        int optoPortDataSize() const { return m_optoPortDataSize; }
+        int optoPortAppDataOffset() const { return m_optoPortAppDataOffset; }
+        int optoPortAppDataSize() const { return m_optoPortAppDataSize; }
 
         QString lmStrID() const { return m_lmStrID; }
         const DeviceModule* lmDeviceModule() const { return m_lmDeviceModule; }
