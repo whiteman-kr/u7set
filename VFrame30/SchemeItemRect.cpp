@@ -66,16 +66,16 @@ namespace VFrame30
 	bool SchemeItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 		
 		// --
 		//
-		Proto::SchemeItemRect* rectMessage = message->mutable_schemeitem()->mutable_rect();
+		Proto::SchemeItemRect* rectMessage = message->mutable_schemaitem()->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
 		rectMessage->set_linecolor(m_lineColor.rgba());
@@ -92,9 +92,9 @@ namespace VFrame30
 
 	bool SchemeItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -108,13 +108,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_rect() == false)
+		if (message.schemaitem().has_rect() == false)
 		{
-			assert(message.schemeitem().has_rect());
+			assert(message.schemaitem().has_rect());
 			return false;
 		}
 
-		const Proto::SchemeItemRect& rectMessage = message.schemeitem().rect();
+		const Proto::SchemeItemRect& rectMessage = message.schemaitem().rect();
 
 		m_weight = rectMessage.weight();
 		m_lineColor = QColor::fromRgba(rectMessage.linecolor());

@@ -5,8 +5,8 @@ namespace EditEngine
 {
 
 	SetPointsCommand::SetPointsCommand(EditSchemeView* schemeView,
-			const std::vector<std::vector<VFrame30::SchemePoint>>& points,
-			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
+			const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
+			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(schemeView, hScrollBar, vScrollBar)

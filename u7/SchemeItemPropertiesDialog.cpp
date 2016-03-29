@@ -33,7 +33,7 @@ SchemeItemPropertiesDialog::~SchemeItemPropertiesDialog()
 	delete ui;
 }
 
-void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
+void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
 	m_items = items;
 
@@ -98,11 +98,11 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 
 	// Set the new property value in all objects
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 
 	for (auto i : m_objects)
 	{
-		std::shared_ptr<VFrame30::SchemeItem> vi = std::dynamic_pointer_cast<VFrame30::SchemeItem>(i);
+		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		assert(vi.get() != nullptr);
 
 		// Do not set property, if it has same value

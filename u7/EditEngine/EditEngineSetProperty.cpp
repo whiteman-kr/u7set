@@ -8,7 +8,7 @@ namespace EditEngine
 	SetPropertyCommand::SetPropertyCommand(EditSchemeView* schemeView,
 			QString propertyName,
 			QVariant value,
-			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(schemeView, hScrollBar, vScrollBar)
@@ -41,7 +41,7 @@ namespace EditEngine
 
 	void SetPropertyCommand::executeCommand(EditSchemeView* schemeView)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemeItem>> selection;
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
 
 		for (Record& r : m_items)
 		{
@@ -73,7 +73,7 @@ namespace EditEngine
 
 	void SetPropertyCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> sel;
 
 		for (Record& r : m_items)
 		{

@@ -176,7 +176,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 			{
-				const std::shared_ptr<SchemeItem>& item = *vi;
+				const std::shared_ptr<SchemaItem>& item = *vi;
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -215,7 +215,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<SchemeItem>& item = *vi;
+				const std::shared_ptr<SchemaItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
@@ -234,7 +234,7 @@ namespace VFrame30
 		return;
 	}
 
-	void Schema::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
+	void Schema::RunClickScript(const std::shared_ptr<SchemaItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
 	{
 		assert(false);
 		Q_UNUSED(schemeItem);
@@ -329,7 +329,7 @@ namespace VFrame30
 				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
 				if (schemeItemLink != nullptr)
 				{
-					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
+					const std::list<SchemaPoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -374,7 +374,7 @@ namespace VFrame30
 
 				if (schemeItemLink != nullptr)
 				{
-					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
+					const std::list<SchemaPoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -410,7 +410,7 @@ namespace VFrame30
 				const std::list<AfbPin>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
-					SchemePoint pinPos = pin->point();
+					SchemaPoint pinPos = pin->point();
 					
 					pLayer->ConnectionMapPosInc(pinPos);
 
@@ -425,7 +425,7 @@ namespace VFrame30
 				const std::list<AfbPin>& outputs = pFblItem->outputs();
 				for (auto pin = outputs.begin(); pin != outputs.end(); ++pin)
 				{
-					SchemePoint pinPos = pin->point();
+					SchemaPoint pinPos = pin->point();
 
 					pLayer->ConnectionMapPosInc(pinPos);
 

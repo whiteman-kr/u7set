@@ -130,7 +130,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	//
 	if (m_selectedItems.empty() == false)
 	{
-		VFrame30::SchemeItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
+		VFrame30::SchemaItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
 
 	// Draw newItem outline
@@ -192,7 +192,7 @@ void EditSchemeView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 		{
-			const std::shared_ptr<VFrame30::SchemeItem>& item = *vi;
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
 
 			OutputMessageLevel issue = GlobalMessanger::instance()->issueForSchemeItem(item->guid());
 
@@ -224,15 +224,15 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	// Draw
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> outlines;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> outlines;
 	outlines.push_back(m_newItem);
 
-	VFrame30::SchemeItem::DrawOutline(drawParam, outlines);
+	VFrame30::SchemaItem::DrawOutline(drawParam, outlines);
 
 	// Draw ruller for newItem
 	//
 	bool drawRullers = false;
-	VFrame30::SchemePoint rullerPoint;
+	VFrame30::SchemaPoint rullerPoint;
 
 	bool posInterfaceFound = false;
 
@@ -279,7 +279,7 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		posInterfaceFound = true;
 		VFrame30::IPosConnection* pos = dynamic_cast<VFrame30::IPosConnection*>(m_newItem.get());
 
-		const std::list<VFrame30::SchemePoint>& extPoints = pos->GetExtensionPoints();
+		const std::list<VFrame30::SchemaPoint>& extPoints = pos->GetExtensionPoints();
 
 		if (extPoints.empty() == false)
 		{
@@ -346,7 +346,7 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// Shift position
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::SchemeItem> si)
+		[xdif, ydif](std::shared_ptr<VFrame30::SchemaItem> si)
 		{
 			si->MoveItem(xdif, ydif);
 		}
@@ -354,7 +354,7 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::SchemeItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
 
 	// Get bounding rect
 	//
@@ -374,11 +374,11 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			continue;
 		}
 
-		std::vector<VFrame30::SchemePoint> points = ipoint->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = ipoint->getPointList();
 
 		for (size_t i = 0; i < points.size(); i++)
 		{
-			const VFrame30::SchemePoint& p = points[i];
+			const VFrame30::SchemaPoint& p = points[i];
 
 			if (it == std::begin(m_selectedItems) && i == 0)
 			{
@@ -399,7 +399,7 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// Shift position back
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::SchemeItem> si)
+		[xdif, ydif](std::shared_ptr<VFrame30::SchemaItem> si)
 		{
 			si->MoveItem(-xdif, -ydif);
 		}
@@ -471,7 +471,7 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// save old state
 	//
-	std::vector<VFrame30::SchemePoint> oldPos = si->getPointList();
+	std::vector<VFrame30::SchemaPoint> oldPos = si->getPointList();
 
 	// set new pos
 	//
@@ -577,8 +577,8 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Save result for drawing rullers
 	//
-	m_addRectStartPoint = VFrame30::SchemePoint(x1, y1);
-	m_addRectEndPoint = VFrame30::SchemePoint(x2, y2);
+	m_addRectStartPoint = VFrame30::SchemaPoint(x1, y1);
+	m_addRectEndPoint = VFrame30::SchemaPoint(x2, y2);
 
 	// Draw rullers by bounding rect
 	//
@@ -632,7 +632,7 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Draw item outline
 	//
-	VFrame30::SchemeItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
 
 	// restore position
 	//
@@ -723,7 +723,7 @@ void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::SchemeItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
 
 	// Resotore points
 	//
@@ -762,8 +762,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
-	std::list<VFrame30::SchemePoint> pointsList = itemPos->GetPointList();
-	std::vector<VFrame30::SchemePoint> points(pointsList.begin(), pointsList.end());
+	std::list<VFrame30::SchemaPoint> pointsList = itemPos->GetPointList();
+	std::vector<VFrame30::SchemaPoint> points(pointsList.begin(), pointsList.end());
 
 	// Save position
 	//
@@ -786,10 +786,10 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		{
 			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
 
-			VFrame30::SchemePoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemePoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
+			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
+			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
 
-			VFrame30::SchemePoint op = points[m_movingEdgePointIndex];
+			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
 			op.Y += diff;
 
 			points[m_movingEdgePointIndex] = op;
@@ -822,10 +822,10 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		{
 			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
 
-			VFrame30::SchemePoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemePoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
+			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
+			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
 
-			VFrame30::SchemePoint op = points[m_movingEdgePointIndex];
+			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
 			op.X += diff;
 
 			points[m_movingEdgePointIndex] = op;
@@ -866,11 +866,11 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				bool sameDirrection = true;
 				bool wasVert = true;
 				bool wasHorz = true;
-				VFrame30::SchemePoint curPoint = points[index];
+				VFrame30::SchemaPoint curPoint = points[index];
 
 				while (index > 0 && sameDirrection == true)
 				{
-					VFrame30::SchemePoint prevPoint = points[index - 1];
+					VFrame30::SchemaPoint prevPoint = points[index - 1];
 
 					if (std::abs(prevPoint.X - curPoint.X) < std::abs(prevPoint.Y - curPoint.Y))
 					{
@@ -921,11 +921,11 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				bool sameDirrection = true;
 				bool wasVert = true;
 				bool wasHorz = true;
-				VFrame30::SchemePoint curPoint = points[index];
+				VFrame30::SchemaPoint curPoint = points[index];
 
 				while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
 				{
-					VFrame30::SchemePoint nextPoint = points[index + 1];
+					VFrame30::SchemaPoint nextPoint = points[index + 1];
 
 					if (std::abs(nextPoint.X - curPoint.X) < std::abs(nextPoint.Y - curPoint.Y))
 					{
@@ -970,7 +970,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 
 			// Shift the moving point
 			//
-			VFrame30::SchemePoint pt = points[m_movingEdgePointIndex];
+			VFrame30::SchemaPoint pt = points[m_movingEdgePointIndex];
 
 			pt.X += diffX;
 			pt.Y += diffY;
@@ -998,7 +998,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 
 	// Draw item outline
 	//
-	VFrame30::SchemeItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
 
 	// Draw rullers
 	//
@@ -1108,7 +1108,7 @@ void EditSchemeView::drawGrid(QPainter* p)
 	return;
 }
 
-SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeItem, QPointF point, int* outMovingEdgePointIndex)
+SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemaItem* schemeItem, QPointF point, int* outMovingEdgePointIndex)
 {
 	if (schemeItem == nullptr)
 	{
@@ -1239,7 +1239,7 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		//
-		std::list<VFrame30::SchemePoint> points = itemPos->GetPointList();
+		std::list<VFrame30::SchemaPoint> points = itemPos->GetPointList();
 
 		int pointIndex = 0;
 		for (auto pt = points.begin(); pt != points.end(); pt++, pointIndex++)
@@ -1255,7 +1255,7 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 
 		// Проверка всех отрезков
 		//
-		VFrame30::SchemePoint lastPoint;
+		VFrame30::SchemaPoint lastPoint;
 
 		pointIndex = 0;
 		for (auto pt = points.begin(); pt != points.end(); pt++, pointIndex++)
@@ -1367,12 +1367,12 @@ void EditSchemeView::setMouseState(MouseState state)
 	m_mouseState = state;
 }
 
-const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& EditSchemeView::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemeView::selectedItems() const
 {
 	return m_selectedItems;
 }
 
-void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
+void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
 	//
@@ -1403,7 +1403,7 @@ void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 	emit selectionChanged();
 }
 
-void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemeItem>>& items)
+void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
 	//
@@ -1435,7 +1435,7 @@ void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 	emit selectionChanged();
 }
 
-void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::SchemeItem>& item)
+void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
 {
 	if (m_selectedItems.size() == 1 && item == m_selectedItems.back())
 	{
@@ -1448,7 +1448,7 @@ void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::SchemeItem>
 	emit selectionChanged();
 }
 
-void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::SchemeItem>& item)
+void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item)
 {
 	auto fp = std::find(std::begin(m_selectedItems), std::end(m_selectedItems), item);
 
@@ -1472,7 +1472,7 @@ void EditSchemeView::clearSelection()
 	emit selectionChanged();
 }
 
-bool EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::SchemeItem>& item)
+bool EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 
@@ -1491,7 +1491,7 @@ bool EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::SchemeI
 	return false;
 }
 
-bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>& item)
+bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>& item)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 	return findResult != m_selectedItems.end();
@@ -2420,7 +2420,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			double gridSize = scheme()->gridSize();
 			double pinGridStep = static_cast<double>(scheme()->pinGridStep());
 
-			for (std::shared_ptr<VFrame30::SchemeItem> item : activeLayer()->Items)
+			for (std::shared_ptr<VFrame30::SchemaItem> item : activeLayer()->Items)
 			{
 				VFrame30::FblItemRect* fbRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item.get());
@@ -2751,10 +2751,10 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Copy SchemeItems and move copied items
 		//
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> newItems;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> newItems;
 
 		std::for_each(selectedItems().begin(), selectedItems().end(),
-			[xdif, ydif, &newItems](const std::shared_ptr<VFrame30::SchemeItem>& si)
+			[xdif, ydif, &newItems](const std::shared_ptr<VFrame30::SchemaItem>& si)
 			{
 				QByteArray data;
 
@@ -2767,14 +2767,14 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				VFrame30::SchemeItem* newItemRawPtr = VFrame30::SchemeItem::Create(data);
+				VFrame30::SchemaItem* newItemRawPtr = VFrame30::SchemaItem::Create(data);
 				if (newItemRawPtr == nullptr)
 				{
 					assert(newItemRawPtr != nullptr);
 					return;
 				}
 
-				std::shared_ptr<VFrame30::SchemeItem> newItem(newItemRawPtr);
+				std::shared_ptr<VFrame30::SchemaItem> newItem(newItemRawPtr);
 
 				newItem->setNewGuid();
 
@@ -2929,10 +2929,10 @@ void EditSchemeWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 
 	// --
 	//
-	std::vector<VFrame30::SchemePoint> itemPoints;
+	std::vector<VFrame30::SchemaPoint> itemPoints;
 
-	itemPoints.push_back(VFrame30::SchemePoint(std::min(x1, x2), std::min(y1, y2)));
-	itemPoints.push_back(VFrame30::SchemePoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
+	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2), std::min(y1, y2)));
+	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
 
 	m_editEngine->runSetPoints(itemPoints, si);
 
@@ -2963,7 +2963,7 @@ void EditSchemeWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 		return;
 	}
 
-	std::vector<VFrame30::SchemePoint> points(2);
+	std::vector<VFrame30::SchemaPoint> points(2);
 
 	QPointF spt = editSchemeView()->m_editStartDocPt;
 	QPointF ept = widgetPointToDocument(event->pos(), snapToGrid());
@@ -2981,14 +2981,14 @@ void EditSchemeWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 
 	if (mouseState() == MouseState::MovingStartLinePoint)
 	{
-		points[0] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->startXDocPt() + xdif,itemPos->startYDocPt() + ydif));
-		points[1] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->endXDocPt(), itemPos->endYDocPt()));
+		points[0] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->startXDocPt() + xdif,itemPos->startYDocPt() + ydif));
+		points[1] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->endXDocPt(), itemPos->endYDocPt()));
 	}
 
 	if (mouseState() == MouseState::MovingEndLinePoint)
 	{
-		points[0] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->startXDocPt(),itemPos->startYDocPt()));
-		points[1] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
+		points[0] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->startXDocPt(),itemPos->startYDocPt()));
+		points[1] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
 	}
 
 	m_editEngine->runSetPoints(points, si);
@@ -3117,8 +3117,8 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 		//
 		auto points = itemPos->GetPointList();
 
-		VFrame30::SchemePoint startPoint = points.front();
-		VFrame30::SchemePoint endPoint = points.back();
+		VFrame30::SchemaPoint startPoint = points.front();
+		VFrame30::SchemaPoint endPoint = points.back();
 
 		// Поиск элементов которые лежат на точках startPoint, endPoint
 		//
@@ -3126,13 +3126,13 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 		bool startPointAddedToOther = false;	// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 		bool endPointAddedToOther = false;		// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 
-		std::shared_ptr<VFrame30::SchemeItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
-		std::shared_ptr<VFrame30::SchemeItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
 
-		std::shared_ptr<VFrame30::SchemeItem> fblRectUnderStartPoint =
+		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderStartPoint =
 			activeLayer()->findPinUnderPoint(startPoint, scheme()->gridSize(), scheme()->pinGridStep());
 
-		std::shared_ptr<VFrame30::SchemeItem> fblRectUnderEndPoint =
+		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderEndPoint =
 			activeLayer()->findPinUnderPoint(endPoint, scheme()->gridSize(), scheme()->pinGridStep());
 
 		if (linkUnderStartPoint != nullptr &&
@@ -3163,7 +3163,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 				points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
-				std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 			}
 			else
@@ -3183,7 +3183,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 					points.clear();
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
-					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 				}
 			}
@@ -3223,7 +3223,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 
 					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
-					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 				else
@@ -3234,7 +3234,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 			}
@@ -3257,7 +3257,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 
 						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
-						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 					else
@@ -3268,7 +3268,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 						existingItemPoints.pop_front();
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
+						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 				}
@@ -3333,7 +3333,7 @@ void EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	std::vector<VFrame30::SchemePoint> setPoints(editSchemeView()->m_movingVertexPoints.begin(), editSchemeView()->m_movingVertexPoints.end());
+	std::vector<VFrame30::SchemaPoint> setPoints(editSchemeView()->m_movingVertexPoints.begin(), editSchemeView()->m_movingVertexPoints.end());
 	m_editEngine->runSetPoints(setPoints, si);
 
 	resetAction();
@@ -3559,7 +3559,7 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 		return;
 	}
 
-	VFrame30::SchemePoint ptBase = points.back();
+	VFrame30::SchemaPoint ptBase = points.back();
 
 	// Add extra points
 	//
@@ -3584,8 +3584,8 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 	//
 	if (points.size() > 1)
 	{
-		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
-		VFrame30::SchemePoint lastLinkPt2 = points.back();
+		VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
+		VFrame30::SchemaPoint lastLinkPt2 = points.back();
 
 		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
 			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
@@ -3702,7 +3702,7 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	const std::list<VFrame30::SchemePoint>& extPoints = itemPos->GetExtensionPoints();
+	const std::list<VFrame30::SchemaPoint>& extPoints = itemPos->GetExtensionPoints();
 
 	if (extPoints.empty() == true)
 	{
@@ -3710,12 +3710,12 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	for (VFrame30::SchemePoint p : extPoints)
+	for (VFrame30::SchemaPoint p : extPoints)
 	{
 		itemPos->AddPoint(p.X, p.Y);
 	}
 
-	VFrame30::SchemePoint lastExtPt = extPoints.back();	// Cache point before deleteing, as it can be removed from REFERENCED list
+	VFrame30::SchemaPoint lastExtPt = extPoints.back();	// Cache point before deleteing, as it can be removed from REFERENCED list
 	itemPos->DeleteAllExtensionPoints();
 
 	itemPos->AddExtensionPoint(lastExtPt.X, lastExtPt.Y);
@@ -3794,7 +3794,7 @@ const std::shared_ptr<VFrame30::LogicSchema> EditSchemeWidget::logicScheme() con
 	return logicScheme;
 }
 
-const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& EditSchemeWidget::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemeWidget::selectedItems() const
 {
 	return editSchemeView()->m_selectedItems;
 }
@@ -3826,7 +3826,7 @@ QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 	return result;
 }
 
-void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::SchemeItem> newItem)
+void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 {
 	if (newItem == nullptr)
 	{
@@ -4019,7 +4019,7 @@ QPointF EditSchemeWidget::magnetPointToPin(QPointF docPoint)
 	std::vector<VFrame30::AfbPin> itemPins;
 	itemPins.reserve(64);
 
-	for (const std::shared_ptr<VFrame30::SchemeItem>& item : activeLayer()->Items)
+	for (const std::shared_ptr<VFrame30::SchemaItem>& item : activeLayer()->Items)
 	{
 		VFrame30::FblItemRect* fblItemRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
@@ -4260,14 +4260,14 @@ void EditSchemeWidget::f2Key()
 	}
 
 
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() != 1)
 	{
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> item = selected.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
 	assert(item);
 
 	VFrame30::SchemeItemSignal* itemSignal = dynamic_cast<VFrame30::SchemeItemSignal*>(item.get());
@@ -4367,7 +4367,7 @@ void EditSchemeWidget::selectAll()
 {
 	editSchemeView()->clearSelection();
 
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 	items.assign(editSchemeView()->activeLayer()->Items.begin(), editSchemeView()->activeLayer()->Items.end());
 
 	editSchemeView()->setSelectedItems(items);
@@ -4383,10 +4383,10 @@ void EditSchemeWidget::editPaste()
 
 	// Paste strid to SchemeItemSignal
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemeView()->selectedItems();
 
 	bool allItemsAreSignals = true;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
 		{
@@ -4465,10 +4465,10 @@ void EditSchemeWidget::selectionChanged()
 
 	// Size
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemeView()->selectedItems();
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
 			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
@@ -4497,10 +4497,10 @@ void EditSchemeWidget::clipboardDataChanged()
 
 	// if Any SchemeItemSignal is selected and strId is in the clipboard
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemeView()->selectedItems();
 
 	bool allItemsAreSignals = true;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
 		{
@@ -4639,11 +4639,11 @@ void EditSchemeWidget::onDownKey()
 
 void EditSchemeWidget::sameWidth()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -4660,11 +4660,11 @@ void EditSchemeWidget::sameWidth()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
 
 	// find the most left and most right points
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -4672,10 +4672,10 @@ void EditSchemeWidget::sameWidth()
 		return;
 	}
 
-	VFrame30::SchemePoint leftPoint = firstItemPoints[0];
-	VFrame30::SchemePoint rightPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint leftPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint rightPoint = firstItemPoints[0];
 
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.X < leftPoint.X)
 		{
@@ -4692,10 +4692,10 @@ void EditSchemeWidget::sameWidth()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
@@ -4732,11 +4732,11 @@ void EditSchemeWidget::sameWidth()
 
 void EditSchemeWidget::sameHeight()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -4753,11 +4753,11 @@ void EditSchemeWidget::sameHeight()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
 
 	// find the top and bottom points
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -4765,10 +4765,10 @@ void EditSchemeWidget::sameHeight()
 		return;
 	}
 
-	VFrame30::SchemePoint topPoint = firstItemPoints[0];
-	VFrame30::SchemePoint bottomPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint topPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint bottomPoint = firstItemPoints[0];
 
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.Y < topPoint.Y)
 		{
@@ -4785,10 +4785,10 @@ void EditSchemeWidget::sameHeight()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
@@ -4825,11 +4825,11 @@ void EditSchemeWidget::sameHeight()
 
 void EditSchemeWidget::sameSize()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -4846,11 +4846,11 @@ void EditSchemeWidget::sameSize()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
 
 	// find the most left and most right points
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -4858,13 +4858,13 @@ void EditSchemeWidget::sameSize()
 		return;
 	}
 
-	VFrame30::SchemePoint leftPoint = firstItemPoints[0];
-	VFrame30::SchemePoint rightPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint leftPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint rightPoint = firstItemPoints[0];
 
-	VFrame30::SchemePoint topPoint = firstItemPoints[0];
-	VFrame30::SchemePoint bottomPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint topPoint = firstItemPoints[0];
+	VFrame30::SchemaPoint bottomPoint = firstItemPoints[0];
 
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.X < leftPoint.X)
 		{
@@ -4892,10 +4892,10 @@ void EditSchemeWidget::sameSize()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
@@ -4948,7 +4948,7 @@ void EditSchemeWidget::sameSize()
 
 void EditSchemeWidget::alignLeft()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() < 2)
 	{
@@ -4956,11 +4956,11 @@ void EditSchemeWidget::alignLeft()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
 
 	// find the most left point
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -4968,8 +4968,8 @@ void EditSchemeWidget::alignLeft()
 		return;
 	}
 
-	VFrame30::SchemePoint firstItemMostLeftPoint = firstItemPoints[0];
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	VFrame30::SchemaPoint firstItemMostLeftPoint = firstItemPoints[0];
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.X < firstItemMostLeftPoint.X)
 		{
@@ -4979,16 +4979,16 @@ void EditSchemeWidget::alignLeft()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		// find the most left point for the item
 		//
-		VFrame30::SchemePoint itemMostLeftPoint = points[0];
-		for (const VFrame30::SchemePoint& pt : points)
+		VFrame30::SchemaPoint itemMostLeftPoint = points[0];
+		for (const VFrame30::SchemaPoint& pt : points)
 		{
 			if (pt.X < itemMostLeftPoint.X)
 			{
@@ -4998,7 +4998,7 @@ void EditSchemeWidget::alignLeft()
 
 		double diff = firstItemMostLeftPoint.X - itemMostLeftPoint.X;
 
-		for (VFrame30::SchemePoint& pt : points)
+		for (VFrame30::SchemaPoint& pt : points)
 		{
 			pt.X += diff;
 		}
@@ -5013,7 +5013,7 @@ void EditSchemeWidget::alignLeft()
 
 void EditSchemeWidget::alignRight()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() < 2)
 	{
@@ -5021,11 +5021,11 @@ void EditSchemeWidget::alignRight()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
 
 	// find the most right point
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -5033,8 +5033,8 @@ void EditSchemeWidget::alignRight()
 		return;
 	}
 
-	VFrame30::SchemePoint firstItemMostRightPoint = firstItemPoints[0];
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	VFrame30::SchemaPoint firstItemMostRightPoint = firstItemPoints[0];
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.X > firstItemMostRightPoint.X)
 		{
@@ -5044,16 +5044,16 @@ void EditSchemeWidget::alignRight()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		// find the most right point for the item
 		//
-		VFrame30::SchemePoint itemMostRightPoint = points[0];
-		for (const VFrame30::SchemePoint& pt : points)
+		VFrame30::SchemaPoint itemMostRightPoint = points[0];
+		for (const VFrame30::SchemaPoint& pt : points)
 		{
 			if (pt.X > itemMostRightPoint.X)
 			{
@@ -5063,7 +5063,7 @@ void EditSchemeWidget::alignRight()
 
 		double diff = itemMostRightPoint.X - firstItemMostRightPoint.X;
 
-		for (VFrame30::SchemePoint& pt : points)
+		for (VFrame30::SchemaPoint& pt : points)
 		{
 			pt.X -= diff;
 		}
@@ -5078,7 +5078,7 @@ void EditSchemeWidget::alignRight()
 
 void EditSchemeWidget::alignTop()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() < 2)
 	{
@@ -5086,11 +5086,11 @@ void EditSchemeWidget::alignTop()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
 
 	// find the most top point
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -5098,8 +5098,8 @@ void EditSchemeWidget::alignTop()
 		return;
 	}
 
-	VFrame30::SchemePoint firstItemMostTopPoint = firstItemPoints[0];
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	VFrame30::SchemaPoint firstItemMostTopPoint = firstItemPoints[0];
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.Y < firstItemMostTopPoint.Y)
 		{
@@ -5109,16 +5109,16 @@ void EditSchemeWidget::alignTop()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		// find the most top point for the item
 		//
-		VFrame30::SchemePoint itemMostTopPoint = points[0];
-		for (const VFrame30::SchemePoint& pt : points)
+		VFrame30::SchemaPoint itemMostTopPoint = points[0];
+		for (const VFrame30::SchemaPoint& pt : points)
 		{
 			if (pt.Y < itemMostTopPoint.Y)
 			{
@@ -5128,7 +5128,7 @@ void EditSchemeWidget::alignTop()
 
 		double diff = firstItemMostTopPoint.Y - itemMostTopPoint.Y;
 
-		for (VFrame30::SchemePoint& pt : points)
+		for (VFrame30::SchemaPoint& pt : points)
 		{
 			pt.Y += diff;
 		}
@@ -5143,7 +5143,7 @@ void EditSchemeWidget::alignTop()
 
 void EditSchemeWidget::alignBottom()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() < 2)
 	{
@@ -5151,11 +5151,11 @@ void EditSchemeWidget::alignBottom()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
 
 	// find the most bottom point
 	//
-	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+	std::vector<VFrame30::SchemaPoint> firstItemPoints = firstItem->getPointList();
 
 	if (firstItemPoints.empty() == true)
 	{
@@ -5163,8 +5163,8 @@ void EditSchemeWidget::alignBottom()
 		return;
 	}
 
-	VFrame30::SchemePoint firstItemMostBottomPoint = firstItemPoints[0];
-	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	VFrame30::SchemaPoint firstItemMostBottomPoint = firstItemPoints[0];
+	for (const VFrame30::SchemaPoint& pt : firstItemPoints)
 	{
 		if (pt.Y > firstItemMostBottomPoint.Y)
 		{
@@ -5174,16 +5174,16 @@ void EditSchemeWidget::alignBottom()
 
 	// get new points for all items
 	//
-	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
 
 		// find the most bottom point for the item
 		//
-		VFrame30::SchemePoint itemMostBottomPoint = points[0];
-		for (const VFrame30::SchemePoint& pt : points)
+		VFrame30::SchemaPoint itemMostBottomPoint = points[0];
+		for (const VFrame30::SchemaPoint& pt : points)
 		{
 			if (pt.Y > itemMostBottomPoint.Y)
 			{
@@ -5193,7 +5193,7 @@ void EditSchemeWidget::alignBottom()
 
 		double diff = itemMostBottomPoint.Y - firstItemMostBottomPoint.Y;
 
-		for (VFrame30::SchemePoint& pt : points)
+		for (VFrame30::SchemaPoint& pt : points)
 		{
 			pt.Y -= diff;
 		}

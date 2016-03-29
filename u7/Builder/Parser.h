@@ -40,14 +40,14 @@ namespace Builder
 	struct Link
 	{
 		Link() = default;
-		Link(const std::list<VFrame30::SchemePoint>& points);
+		Link(const std::list<VFrame30::SchemaPoint>& points);
 
-		VFrame30::SchemePoint ptBegin() const;
-		VFrame30::SchemePoint ptEnd() const;
+		VFrame30::SchemaPoint ptBegin() const;
+		VFrame30::SchemaPoint ptEnd() const;
 
-		bool isPinOnLink(VFrame30::SchemePoint pt) const;
+		bool isPinOnLink(VFrame30::SchemaPoint pt) const;
 
-		std::list<VFrame30::SchemePoint> m_points;
+		std::list<VFrame30::SchemaPoint> m_points;
 	};
 
 	struct Bush
@@ -71,7 +71,7 @@ namespace Builder
 	{
 		std::vector<Bush> bushes;
 
-		int getBranchByPinPos(VFrame30::SchemePoint pt) const;
+		int getBranchByPinPos(VFrame30::SchemaPoint pt) const;
 		int getBranchByPinGuid(const QUuid& guid) const;
 
 		void removeEmptyBushes();

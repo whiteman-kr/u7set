@@ -9,7 +9,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<SchemeItemPath>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemeItemPath>;
 #endif
 
 	private:

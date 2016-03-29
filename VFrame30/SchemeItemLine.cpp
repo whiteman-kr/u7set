@@ -33,16 +33,16 @@ namespace VFrame30
 	bool SchemeItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosLineImpl::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemeItemLine* lineMessage = message->mutable_schemeitem()->mutable_line();
+		Proto::SchemeItemLine* lineMessage = message->mutable_schemaitem()->mutable_line();
 
 		lineMessage->set_weight(m_weight);
 		lineMessage->set_linecolor(m_lineColor);
@@ -52,9 +52,9 @@ namespace VFrame30
 
 	bool SchemeItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -67,13 +67,13 @@ namespace VFrame30
 		}
 
 		// --
-		if (message.schemeitem().has_line() == false)
+		if (message.schemaitem().has_line() == false)
 		{
-			assert(message.schemeitem().has_line());
+			assert(message.schemaitem().has_line());
 			return false;
 		}
 
-		const Proto::SchemeItemLine& lineMessage = message.schemeitem().line();
+		const Proto::SchemeItemLine& lineMessage = message.schemaitem().line();
 
 		m_weight = lineMessage.weight();
 		m_lineColor = lineMessage.linecolor();

@@ -32,9 +32,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* FontParam_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   FontParam_reflection_ = NULL;
-const ::google::protobuf::Descriptor* SchemePoint_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* SchemaPoint_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  SchemePoint_reflection_ = NULL;
+  SchemaPoint_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Envelope_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Envelope_reflection_ = NULL;
@@ -65,9 +65,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* SchemaLayer_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemaLayer_reflection_ = NULL;
-const ::google::protobuf::Descriptor* SchemeItem_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* SchemaItem_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  SchemeItem_reflection_ = NULL;
+  SchemaItem_reflection_ = NULL;
 const ::google::protobuf::Descriptor* PosRectImpl_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PosRectImpl_reflection_ = NULL;
@@ -236,26 +236,26 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FontParam));
-  SchemePoint_descriptor_ = file->message_type(4);
-  static const int SchemePoint_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemePoint, x_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemePoint, y_),
+  SchemaPoint_descriptor_ = file->message_type(4);
+  static const int SchemaPoint_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaPoint, x_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaPoint, y_),
   };
-  SchemePoint_reflection_ =
+  SchemaPoint_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      SchemePoint_descriptor_,
-      SchemePoint::default_instance_,
-      SchemePoint_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemePoint, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemePoint, _unknown_fields_),
+      SchemaPoint_descriptor_,
+      SchemaPoint::default_instance_,
+      SchemaPoint_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaPoint, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaPoint, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(SchemePoint));
+      sizeof(SchemaPoint));
   Envelope_descriptor_ = file->message_type(5);
   static const int Envelope_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, classnamehash_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemeitem_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemaitem_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, deviceobject_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schema_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemalayer_),
@@ -454,41 +454,41 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaLayer));
-  SchemeItem_descriptor_ = file->message_type(15);
-  static const int SchemeItem_offsets_[21] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, isstatic_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, islocked_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, itemunit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, acceptclick_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, clickscript_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, posrectimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, poslineimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, posconnectionimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitem_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitemrect_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitemline_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, rect_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, line_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, path_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, signal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, inputsignal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, outputsignal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, link_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, afb_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, constitem_),
+  SchemaItem_descriptor_ = file->message_type(15);
+  static const int SchemaItem_offsets_[21] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, uuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, isstatic_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, islocked_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, itemunit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, acceptclick_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, clickscript_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, posrectimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, poslineimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, posconnectionimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, fblitem_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, fblitemrect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, fblitemline_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, rect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, line_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, path_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, signal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, inputsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, outputsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, link_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, afb_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, constitem_),
   };
-  SchemeItem_reflection_ =
+  SchemaItem_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      SchemeItem_descriptor_,
-      SchemeItem::default_instance_,
-      SchemeItem_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, _unknown_fields_),
+      SchemaItem_descriptor_,
+      SchemaItem::default_instance_,
+      SchemaItem_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(SchemeItem));
+      sizeof(SchemaItem));
   PosRectImpl_descriptor_ = file->message_type(16);
   static const int PosRectImpl_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosRectImpl, leftdocpt_),
@@ -1003,7 +1003,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FontParam_descriptor_, &FontParam::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    SchemePoint_descriptor_, &SchemePoint::default_instance());
+    SchemaPoint_descriptor_, &SchemaPoint::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Envelope_descriptor_, &Envelope::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1025,7 +1025,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemaLayer_descriptor_, &SchemaLayer::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    SchemeItem_descriptor_, &SchemeItem::default_instance());
+    SchemaItem_descriptor_, &SchemaItem::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PosRectImpl_descriptor_, &PosRectImpl::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1097,8 +1097,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete wstring_reflection_;
   delete FontParam::default_instance_;
   delete FontParam_reflection_;
-  delete SchemePoint::default_instance_;
-  delete SchemePoint_reflection_;
+  delete SchemaPoint::default_instance_;
+  delete SchemaPoint_reflection_;
   delete Envelope::default_instance_;
   delete Envelope_reflection_;
   delete Configuration::default_instance_;
@@ -1119,8 +1119,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete LogicSchema_reflection_;
   delete SchemaLayer::default_instance_;
   delete SchemaLayer_reflection_;
-  delete SchemeItem::default_instance_;
-  delete SchemeItem_reflection_;
+  delete SchemaItem::default_instance_;
+  delete SchemaItem_reflection_;
   delete PosRectImpl::default_instance_;
   delete PosRectImpl_reflection_;
   delete PosLineImpl::default_instance_;
@@ -1195,9 +1195,9 @@ void protobuf_AddDesc_serialization_2eproto() {
     "(\010:\005false\"\027\n\007wstring\022\014\n\004text\030\001 \002(\014\"U\n\tFo"
     "ntParam\022\034\n\004name\030\001 \002(\0132\016.Proto.wstring\022\014\n"
     "\004size\030\002 \002(\001\022\014\n\004bold\030\003 \002(\010\022\016\n\006italic\030\004 \002("
-    "\010\"#\n\013SchemePoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"\217"
+    "\010\"#\n\013SchemaPoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"\217"
     "\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022%\n\nsc"
-    "hemeitem\030\006 \001(\0132\021.Proto.SchemeItem\022)\n\014dev"
+    "hemaitem\030\006 \001(\0132\021.Proto.SchemaItem\022)\n\014dev"
     "iceobject\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006"
     "schema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemalay"
     "er\030e \001(\0132\022.Proto.SchemaLayer\022%\n\nfbleleme"
@@ -1247,7 +1247,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\013SchemaLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022"
     "\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile"
     "\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005i"
-    "tems\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemeIt"
+    "tems\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemaIt"
     "em\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStati"
     "c\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 "
     "\002(\0162\021.Proto.SchemaUnit\022\032\n\013acceptClick\030\005 "
@@ -1273,7 +1273,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "neImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYDoc"
     "Pt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocPt"
     "\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030\001 "
-    "\003(\0132\022.Proto.SchemePoint\"\275\001\n\016SchemeItemRe"
+    "\003(\0132\022.Proto.SchemaPoint\"\275\001\n\016SchemeItemRe"
     "ct\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n"
     "\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto.w"
     "string\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\0132"
@@ -1282,7 +1282,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ght\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"3\n\016SchemeIt"
     "emPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002("
     "\r\"\260\001\n\022FblConnectionPoint\022!\n\005point\030\001 \001(\0132"
-    "\022.Proto.SchemePoint\022/\n\ndirrection\030\002 \001(\0162"
+    "\022.Proto.SchemaPoint\022/\n\ndirrection\030\002 \001(\0162"
     "\033.Proto.ConnectionDirrection\022\031\n\004uuid\030\003 \001"
     "(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002-"
     "1\022\021\n\007caption\030\005 \001(\t:\000\"4\n\007FblItem\022)\n\006point"
@@ -1344,7 +1344,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   qvariant::default_instance_ = new qvariant();
   wstring::default_instance_ = new wstring();
   FontParam::default_instance_ = new FontParam();
-  SchemePoint::default_instance_ = new SchemePoint();
+  SchemaPoint::default_instance_ = new SchemaPoint();
   Envelope::default_instance_ = new Envelope();
   Configuration::default_instance_ = new Configuration();
   AfbElementCollection::default_instance_ = new AfbElementCollection();
@@ -1355,7 +1355,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Schema::default_instance_ = new Schema();
   LogicSchema::default_instance_ = new LogicSchema();
   SchemaLayer::default_instance_ = new SchemaLayer();
-  SchemeItem::default_instance_ = new SchemeItem();
+  SchemaItem::default_instance_ = new SchemaItem();
   PosRectImpl::default_instance_ = new PosRectImpl();
   PosLineImpl::default_instance_ = new PosLineImpl();
   PosConnectionImpl::default_instance_ = new PosConnectionImpl();
@@ -1389,7 +1389,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   qvariant::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
   FontParam::default_instance_->InitAsDefaultInstance();
-  SchemePoint::default_instance_->InitAsDefaultInstance();
+  SchemaPoint::default_instance_->InitAsDefaultInstance();
   Envelope::default_instance_->InitAsDefaultInstance();
   Configuration::default_instance_->InitAsDefaultInstance();
   AfbElementCollection::default_instance_->InitAsDefaultInstance();
@@ -1400,7 +1400,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Schema::default_instance_->InitAsDefaultInstance();
   LogicSchema::default_instance_->InitAsDefaultInstance();
   SchemaLayer::default_instance_->InitAsDefaultInstance();
-  SchemeItem::default_instance_->InitAsDefaultInstance();
+  SchemaItem::default_instance_->InitAsDefaultInstance();
   PosRectImpl::default_instance_->InitAsDefaultInstance();
   PosLineImpl::default_instance_->InitAsDefaultInstance();
   PosConnectionImpl::default_instance_->InitAsDefaultInstance();
@@ -2631,62 +2631,62 @@ void FontParam::Swap(FontParam* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemePoint::kXFieldNumber;
-const int SchemePoint::kYFieldNumber;
+const int SchemaPoint::kXFieldNumber;
+const int SchemaPoint::kYFieldNumber;
 #endif  // !_MSC_VER
 
-SchemePoint::SchemePoint()
+SchemaPoint::SchemaPoint()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void SchemePoint::InitAsDefaultInstance() {
+void SchemaPoint::InitAsDefaultInstance() {
 }
 
-SchemePoint::SchemePoint(const SchemePoint& from)
+SchemaPoint::SchemaPoint(const SchemaPoint& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void SchemePoint::SharedCtor() {
+void SchemaPoint::SharedCtor() {
   _cached_size_ = 0;
   x_ = 0;
   y_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-SchemePoint::~SchemePoint() {
+SchemaPoint::~SchemaPoint() {
   SharedDtor();
 }
 
-void SchemePoint::SharedDtor() {
+void SchemaPoint::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void SchemePoint::SetCachedSize(int size) const {
+void SchemaPoint::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* SchemePoint::descriptor() {
+const ::google::protobuf::Descriptor* SchemaPoint::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return SchemePoint_descriptor_;
+  return SchemaPoint_descriptor_;
 }
 
-const SchemePoint& SchemePoint::default_instance() {
+const SchemaPoint& SchemaPoint::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-SchemePoint* SchemePoint::default_instance_ = NULL;
+SchemaPoint* SchemaPoint::default_instance_ = NULL;
 
-SchemePoint* SchemePoint::New() const {
-  return new SchemePoint;
+SchemaPoint* SchemaPoint::New() const {
+  return new SchemaPoint;
 }
 
-void SchemePoint::Clear() {
+void SchemaPoint::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     x_ = 0;
     y_ = 0;
@@ -2695,7 +2695,7 @@ void SchemePoint::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool SchemePoint::MergePartialFromCodedStream(
+bool SchemaPoint::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -2748,7 +2748,7 @@ bool SchemePoint::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void SchemePoint::SerializeWithCachedSizes(
+void SchemaPoint::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required double x = 1;
   if (has_x()) {
@@ -2766,7 +2766,7 @@ void SchemePoint::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* SchemePoint::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* SchemaPoint::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required double x = 1;
   if (has_x()) {
@@ -2785,7 +2785,7 @@ void SchemePoint::SerializeWithCachedSizes(
   return target;
 }
 
-int SchemePoint::ByteSize() const {
+int SchemaPoint::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -2811,10 +2811,10 @@ int SchemePoint::ByteSize() const {
   return total_size;
 }
 
-void SchemePoint::MergeFrom(const ::google::protobuf::Message& from) {
+void SchemaPoint::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const SchemePoint* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const SchemePoint*>(
+  const SchemaPoint* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SchemaPoint*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -2823,7 +2823,7 @@ void SchemePoint::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void SchemePoint::MergeFrom(const SchemePoint& from) {
+void SchemaPoint::MergeFrom(const SchemaPoint& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_x()) {
@@ -2836,25 +2836,25 @@ void SchemePoint::MergeFrom(const SchemePoint& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void SchemePoint::CopyFrom(const ::google::protobuf::Message& from) {
+void SchemaPoint::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SchemePoint::CopyFrom(const SchemePoint& from) {
+void SchemaPoint::CopyFrom(const SchemaPoint& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SchemePoint::IsInitialized() const {
+bool SchemaPoint::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   return true;
 }
 
-void SchemePoint::Swap(SchemePoint* other) {
+void SchemaPoint::Swap(SchemaPoint* other) {
   if (other != this) {
     std::swap(x_, other->x_);
     std::swap(y_, other->y_);
@@ -2864,11 +2864,11 @@ void SchemePoint::Swap(SchemePoint* other) {
   }
 }
 
-::google::protobuf::Metadata SchemePoint::GetMetadata() const {
+::google::protobuf::Metadata SchemaPoint::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = SchemePoint_descriptor_;
-  metadata.reflection = SchemePoint_reflection_;
+  metadata.descriptor = SchemaPoint_descriptor_;
+  metadata.reflection = SchemaPoint_reflection_;
   return metadata;
 }
 
@@ -2877,7 +2877,7 @@ void SchemePoint::Swap(SchemePoint* other) {
 
 #ifndef _MSC_VER
 const int Envelope::kClassnamehashFieldNumber;
-const int Envelope::kSchemeitemFieldNumber;
+const int Envelope::kSchemaitemFieldNumber;
 const int Envelope::kDeviceobjectFieldNumber;
 const int Envelope::kSchemaFieldNumber;
 const int Envelope::kSchemalayerFieldNumber;
@@ -2891,7 +2891,7 @@ Envelope::Envelope()
 }
 
 void Envelope::InitAsDefaultInstance() {
-  schemeitem_ = const_cast< ::Proto::SchemeItem*>(&::Proto::SchemeItem::default_instance());
+  schemaitem_ = const_cast< ::Proto::SchemaItem*>(&::Proto::SchemaItem::default_instance());
   deviceobject_ = const_cast< ::Proto::DeviceObject*>(&::Proto::DeviceObject::default_instance());
   schema_ = const_cast< ::Proto::Schema*>(&::Proto::Schema::default_instance());
   schemalayer_ = const_cast< ::Proto::SchemaLayer*>(&::Proto::SchemaLayer::default_instance());
@@ -2908,7 +2908,7 @@ Envelope::Envelope(const Envelope& from)
 void Envelope::SharedCtor() {
   _cached_size_ = 0;
   classnamehash_ = 0u;
-  schemeitem_ = NULL;
+  schemaitem_ = NULL;
   deviceobject_ = NULL;
   schema_ = NULL;
   schemalayer_ = NULL;
@@ -2923,7 +2923,7 @@ Envelope::~Envelope() {
 
 void Envelope::SharedDtor() {
   if (this != default_instance_) {
-    delete schemeitem_;
+    delete schemaitem_;
     delete deviceobject_;
     delete schema_;
     delete schemalayer_;
@@ -2956,8 +2956,8 @@ Envelope* Envelope::New() const {
 void Envelope::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     classnamehash_ = 0u;
-    if (has_schemeitem()) {
-      if (schemeitem_ != NULL) schemeitem_->::Proto::SchemeItem::Clear();
+    if (has_schemaitem()) {
+      if (schemaitem_ != NULL) schemaitem_->::Proto::SchemaItem::Clear();
     }
     if (has_deviceobject()) {
       if (deviceobject_ != NULL) deviceobject_->::Proto::DeviceObject::Clear();
@@ -2996,17 +2996,17 @@ bool Envelope::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(50)) goto parse_schemeitem;
+        if (input->ExpectTag(50)) goto parse_schemaitem;
         break;
       }
 
-      // optional .Proto.SchemeItem schemeitem = 6;
+      // optional .Proto.SchemaItem schemaitem = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_schemeitem:
+         parse_schemaitem:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_schemeitem()));
+               input, mutable_schemaitem()));
         } else {
           goto handle_uninterpreted;
         }
@@ -3107,10 +3107,10 @@ void Envelope::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->classnamehash(), output);
   }
 
-  // optional .Proto.SchemeItem schemeitem = 6;
-  if (has_schemeitem()) {
+  // optional .Proto.SchemaItem schemaitem = 6;
+  if (has_schemaitem()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      6, this->schemeitem(), output);
+      6, this->schemaitem(), output);
   }
 
   // optional .Proto.DeviceObject deviceobject = 7;
@@ -3156,11 +3156,11 @@ void Envelope::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->classnamehash(), target);
   }
 
-  // optional .Proto.SchemeItem schemeitem = 6;
-  if (has_schemeitem()) {
+  // optional .Proto.SchemaItem schemaitem = 6;
+  if (has_schemaitem()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        6, this->schemeitem(), target);
+        6, this->schemaitem(), target);
   }
 
   // optional .Proto.DeviceObject deviceobject = 7;
@@ -3216,11 +3216,11 @@ int Envelope::ByteSize() const {
           this->classnamehash());
     }
 
-    // optional .Proto.SchemeItem schemeitem = 6;
-    if (has_schemeitem()) {
+    // optional .Proto.SchemaItem schemaitem = 6;
+    if (has_schemaitem()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->schemeitem());
+          this->schemaitem());
     }
 
     // optional .Proto.DeviceObject deviceobject = 7;
@@ -3288,8 +3288,8 @@ void Envelope::MergeFrom(const Envelope& from) {
     if (from.has_classnamehash()) {
       set_classnamehash(from.classnamehash());
     }
-    if (from.has_schemeitem()) {
-      mutable_schemeitem()->::Proto::SchemeItem::MergeFrom(from.schemeitem());
+    if (from.has_schemaitem()) {
+      mutable_schemaitem()->::Proto::SchemaItem::MergeFrom(from.schemaitem());
     }
     if (from.has_deviceobject()) {
       mutable_deviceobject()->::Proto::DeviceObject::MergeFrom(from.deviceobject());
@@ -3325,8 +3325,8 @@ void Envelope::CopyFrom(const Envelope& from) {
 bool Envelope::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
-  if (has_schemeitem()) {
-    if (!this->schemeitem().IsInitialized()) return false;
+  if (has_schemaitem()) {
+    if (!this->schemaitem().IsInitialized()) return false;
   }
   if (has_deviceobject()) {
     if (!this->deviceobject().IsInitialized()) return false;
@@ -3349,7 +3349,7 @@ bool Envelope::IsInitialized() const {
 void Envelope::Swap(Envelope* other) {
   if (other != this) {
     std::swap(classnamehash_, other->classnamehash_);
-    std::swap(schemeitem_, other->schemeitem_);
+    std::swap(schemaitem_, other->schemaitem_);
     std::swap(deviceobject_, other->deviceobject_);
     std::swap(schema_, other->schema_);
     std::swap(schemalayer_, other->schemalayer_);
@@ -7335,35 +7335,35 @@ void SchemaLayer::Swap(SchemaLayer* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemeItem::kUuidFieldNumber;
-const int SchemeItem::kIsStaticFieldNumber;
-const int SchemeItem::kIsLockedFieldNumber;
-const int SchemeItem::kItemUnitFieldNumber;
-const int SchemeItem::kAcceptClickFieldNumber;
-const int SchemeItem::kClickScriptFieldNumber;
-const int SchemeItem::kPosRectImplFieldNumber;
-const int SchemeItem::kPosLineImplFieldNumber;
-const int SchemeItem::kPosConnectionImplFieldNumber;
-const int SchemeItem::kFblItemFieldNumber;
-const int SchemeItem::kFblItemRectFieldNumber;
-const int SchemeItem::kFblItemLineFieldNumber;
-const int SchemeItem::kRectFieldNumber;
-const int SchemeItem::kLineFieldNumber;
-const int SchemeItem::kPathFieldNumber;
-const int SchemeItem::kSignalFieldNumber;
-const int SchemeItem::kInputSignalFieldNumber;
-const int SchemeItem::kOutputSignalFieldNumber;
-const int SchemeItem::kLinkFieldNumber;
-const int SchemeItem::kAfbFieldNumber;
-const int SchemeItem::kConstItemFieldNumber;
+const int SchemaItem::kUuidFieldNumber;
+const int SchemaItem::kIsStaticFieldNumber;
+const int SchemaItem::kIsLockedFieldNumber;
+const int SchemaItem::kItemUnitFieldNumber;
+const int SchemaItem::kAcceptClickFieldNumber;
+const int SchemaItem::kClickScriptFieldNumber;
+const int SchemaItem::kPosRectImplFieldNumber;
+const int SchemaItem::kPosLineImplFieldNumber;
+const int SchemaItem::kPosConnectionImplFieldNumber;
+const int SchemaItem::kFblItemFieldNumber;
+const int SchemaItem::kFblItemRectFieldNumber;
+const int SchemaItem::kFblItemLineFieldNumber;
+const int SchemaItem::kRectFieldNumber;
+const int SchemaItem::kLineFieldNumber;
+const int SchemaItem::kPathFieldNumber;
+const int SchemaItem::kSignalFieldNumber;
+const int SchemaItem::kInputSignalFieldNumber;
+const int SchemaItem::kOutputSignalFieldNumber;
+const int SchemaItem::kLinkFieldNumber;
+const int SchemaItem::kAfbFieldNumber;
+const int SchemaItem::kConstItemFieldNumber;
 #endif  // !_MSC_VER
 
-SchemeItem::SchemeItem()
+SchemaItem::SchemaItem()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void SchemeItem::InitAsDefaultInstance() {
+void SchemaItem::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
   clickscript_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   posrectimpl_ = const_cast< ::Proto::PosRectImpl*>(&::Proto::PosRectImpl::default_instance());
@@ -7383,13 +7383,13 @@ void SchemeItem::InitAsDefaultInstance() {
   constitem_ = const_cast< ::Proto::SchemeItemConst*>(&::Proto::SchemeItemConst::default_instance());
 }
 
-SchemeItem::SchemeItem(const SchemeItem& from)
+SchemaItem::SchemaItem(const SchemaItem& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void SchemeItem::SharedCtor() {
+void SchemaItem::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
   isstatic_ = false;
@@ -7415,11 +7415,11 @@ void SchemeItem::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-SchemeItem::~SchemeItem() {
+SchemaItem::~SchemaItem() {
   SharedDtor();
 }
 
-void SchemeItem::SharedDtor() {
+void SchemaItem::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
     delete clickscript_;
@@ -7441,28 +7441,28 @@ void SchemeItem::SharedDtor() {
   }
 }
 
-void SchemeItem::SetCachedSize(int size) const {
+void SchemaItem::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* SchemeItem::descriptor() {
+const ::google::protobuf::Descriptor* SchemaItem::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return SchemeItem_descriptor_;
+  return SchemaItem_descriptor_;
 }
 
-const SchemeItem& SchemeItem::default_instance() {
+const SchemaItem& SchemaItem::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-SchemeItem* SchemeItem::default_instance_ = NULL;
+SchemaItem* SchemaItem::default_instance_ = NULL;
 
-SchemeItem* SchemeItem::New() const {
-  return new SchemeItem;
+SchemaItem* SchemaItem::New() const {
+  return new SchemaItem;
 }
 
-void SchemeItem::Clear() {
+void SchemaItem::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
@@ -7528,7 +7528,7 @@ void SchemeItem::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool SchemeItem::MergePartialFromCodedStream(
+bool SchemaItem::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -7856,7 +7856,7 @@ bool SchemeItem::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void SchemeItem::SerializeWithCachedSizes(
+void SchemaItem::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -7987,7 +7987,7 @@ void SchemeItem::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* SchemeItem::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* SchemaItem::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -8136,7 +8136,7 @@ void SchemeItem::SerializeWithCachedSizes(
   return target;
 }
 
-int SchemeItem::ByteSize() const {
+int SchemaItem::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -8296,10 +8296,10 @@ int SchemeItem::ByteSize() const {
   return total_size;
 }
 
-void SchemeItem::MergeFrom(const ::google::protobuf::Message& from) {
+void SchemaItem::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const SchemeItem* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const SchemeItem*>(
+  const SchemaItem* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SchemaItem*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -8308,7 +8308,7 @@ void SchemeItem::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void SchemeItem::MergeFrom(const SchemeItem& from) {
+void SchemaItem::MergeFrom(const SchemaItem& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_uuid()) {
@@ -8382,19 +8382,19 @@ void SchemeItem::MergeFrom(const SchemeItem& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void SchemeItem::CopyFrom(const ::google::protobuf::Message& from) {
+void SchemaItem::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SchemeItem::CopyFrom(const SchemeItem& from) {
+void SchemaItem::CopyFrom(const SchemaItem& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SchemeItem::IsInitialized() const {
+bool SchemaItem::IsInitialized() const {
   if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
 
   if (has_uuid()) {
@@ -8439,7 +8439,7 @@ bool SchemeItem::IsInitialized() const {
   return true;
 }
 
-void SchemeItem::Swap(SchemeItem* other) {
+void SchemaItem::Swap(SchemaItem* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
     std::swap(isstatic_, other->isstatic_);
@@ -8468,11 +8468,11 @@ void SchemeItem::Swap(SchemeItem* other) {
   }
 }
 
-::google::protobuf::Metadata SchemeItem::GetMetadata() const {
+::google::protobuf::Metadata SchemaItem::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = SchemeItem_descriptor_;
-  metadata.reflection = SchemeItem_reflection_;
+  metadata.descriptor = SchemaItem_descriptor_;
+  metadata.reflection = SchemaItem_reflection_;
   return metadata;
 }
 
@@ -9186,7 +9186,7 @@ bool PosConnectionImpl::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.SchemePoint points = 1;
+      // repeated .Proto.SchemaPoint points = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -9219,7 +9219,7 @@ bool PosConnectionImpl::MergePartialFromCodedStream(
 
 void PosConnectionImpl::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.SchemePoint points = 1;
+  // repeated .Proto.SchemaPoint points = 1;
   for (int i = 0; i < this->points_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->points(i), output);
@@ -9233,7 +9233,7 @@ void PosConnectionImpl::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* PosConnectionImpl::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.SchemePoint points = 1;
+  // repeated .Proto.SchemaPoint points = 1;
   for (int i = 0; i < this->points_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -9250,7 +9250,7 @@ void PosConnectionImpl::SerializeWithCachedSizes(
 int PosConnectionImpl::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.SchemePoint points = 1;
+  // repeated .Proto.SchemaPoint points = 1;
   total_size += 1 * this->points_size();
   for (int i = 0; i < this->points_size(); i++) {
     total_size +=
@@ -10334,7 +10334,7 @@ FblConnectionPoint::FblConnectionPoint()
 }
 
 void FblConnectionPoint::InitAsDefaultInstance() {
-  point_ = const_cast< ::Proto::SchemePoint*>(&::Proto::SchemePoint::default_instance());
+  point_ = const_cast< ::Proto::SchemaPoint*>(&::Proto::SchemaPoint::default_instance());
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
 }
 
@@ -10392,7 +10392,7 @@ FblConnectionPoint* FblConnectionPoint::New() const {
 void FblConnectionPoint::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_point()) {
-      if (point_ != NULL) point_->::Proto::SchemePoint::Clear();
+      if (point_ != NULL) point_->::Proto::SchemaPoint::Clear();
     }
     dirrection_ = 0;
     if (has_uuid()) {
@@ -10415,7 +10415,7 @@ bool FblConnectionPoint::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .Proto.SchemePoint point = 1;
+      // optional .Proto.SchemaPoint point = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -10514,7 +10514,7 @@ bool FblConnectionPoint::MergePartialFromCodedStream(
 
 void FblConnectionPoint::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional .Proto.SchemePoint point = 1;
+  // optional .Proto.SchemaPoint point = 1;
   if (has_point()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->point(), output);
@@ -10554,7 +10554,7 @@ void FblConnectionPoint::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* FblConnectionPoint::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional .Proto.SchemePoint point = 1;
+  // optional .Proto.SchemaPoint point = 1;
   if (has_point()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -10600,7 +10600,7 @@ int FblConnectionPoint::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .Proto.SchemePoint point = 1;
+    // optional .Proto.SchemaPoint point = 1;
     if (has_point()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -10662,7 +10662,7 @@ void FblConnectionPoint::MergeFrom(const FblConnectionPoint& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_point()) {
-      mutable_point()->::Proto::SchemePoint::MergeFrom(from.point());
+      mutable_point()->::Proto::SchemaPoint::MergeFrom(from.point());
     }
     if (from.has_dirrection()) {
       set_dirrection(from.dirrection());

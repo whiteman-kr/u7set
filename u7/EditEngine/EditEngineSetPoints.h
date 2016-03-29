@@ -11,8 +11,8 @@ namespace EditEngine
 	public:
 		SetPointsCommand(
 				EditSchemeView* schemeView,
-				const std::vector<std::vector<VFrame30::SchemePoint>>& points,
-				const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
+				const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
+				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
@@ -23,9 +23,9 @@ namespace EditEngine
 		// Data
 		//
 	private:
-		std::vector<std::vector<VFrame30::SchemePoint>> m_newPoints;
-		std::vector<std::vector<VFrame30::SchemePoint>> m_oldPoints;
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_items;
+		std::vector<std::vector<VFrame30::SchemaPoint>> m_newPoints;
+		std::vector<std::vector<VFrame30::SchemaPoint>> m_oldPoints;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 	};
 
 }

@@ -28,16 +28,16 @@ namespace VFrame30
 	bool SchemeItemLink::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemLine::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 		
 		// --
 		//
-		/*Proto::VideoItemLink* linkMessage = */message->mutable_schemeitem()->mutable_link();
+		/*Proto::VideoItemLink* linkMessage = */message->mutable_schemaitem()->mutable_link();
 
 		//linkMessage->set_weight(weight);
 		//linkMessage->set_linecolor(lineColor);
@@ -47,9 +47,9 @@ namespace VFrame30
 
 	bool SchemeItemLink::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -63,9 +63,9 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_link() == false)
+		if (message.schemaitem().has_link() == false)
 		{
-			assert(message.schemeitem().has_link());
+			assert(message.schemaitem().has_link());
 		}
 
 		//const Proto::VideoItemLink& linkMessage = message.videoitem(0).link();
@@ -107,7 +107,7 @@ namespace VFrame30
 
 		// Draw the main part
 		//
-		const std::list<SchemePoint>& poinlist = GetPointList();
+		const std::list<SchemaPoint>& poinlist = GetPointList();
 		if (poinlist.size() < 2)
 		{
 			assert(poinlist.size() >= 2);
@@ -138,7 +138,7 @@ namespace VFrame30
 
 		// вход/выход - рисование красного креста 
 		//
-		auto drawPin = [&](SchemePoint pt)
+		auto drawPin = [&](SchemaPoint pt)
 			{
 				int connectionCount = pLayer->GetPinPosConnectinCount(pt, itemUnit());
 
@@ -171,7 +171,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemeItemLink::GetConnectionPointPos(const QUuid&, SchemePoint*, double, int) const
+	bool SchemeItemLink::GetConnectionPointPos(const QUuid&, SchemaPoint*, double, int) const
 	{
 		return false;
 	}

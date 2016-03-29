@@ -29,7 +29,7 @@ public:
 	virtual ~SchemeItemPropertiesDialog();
 
 public:
-	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
 
 private:
     virtual void closeEvent(QCloseEvent * e);
@@ -43,7 +43,7 @@ private:
 
 	SchemeItemPropertyEditor* m_propertyEditor = nullptr;
 
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_items;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 };
 
 //

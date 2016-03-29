@@ -33,16 +33,16 @@ namespace VFrame30
 	bool SchemeItemPath::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 	
 		// --
 		//
-		Proto::SchemeItemPath* path = message->mutable_schemeitem()->mutable_path();
+		Proto::SchemeItemPath* path = message->mutable_schemaitem()->mutable_path();
 
 		path->set_weight(m_weight);
 		path->set_linecolor(m_lineColor);
@@ -52,9 +52,9 @@ namespace VFrame30
 
 	bool SchemeItemPath::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -68,13 +68,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_path() == false)
+		if (message.schemaitem().has_path() == false)
 		{
-			assert(message.schemeitem().has_path());
+			assert(message.schemaitem().has_path());
 			return false;
 		}
 
-		const Proto::SchemeItemPath& path = message.schemeitem().path();
+		const Proto::SchemeItemPath& path = message.schemaitem().path();
 
 		m_weight = path.weight();
 		m_lineColor = path.linecolor();
@@ -100,7 +100,7 @@ namespace VFrame30
 
 		// Draw the main part
 		//
-		const std::list<SchemePoint>& poinlist = GetPointList();
+		const std::list<SchemaPoint>& poinlist = GetPointList();
 
 		QPolygonF polyline(static_cast<int>(poinlist.size()));
 		int index = 0;

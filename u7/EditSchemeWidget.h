@@ -114,7 +114,7 @@ protected:
 	// Some determine functions
 	//
 protected:
-	SchemeItemAction getPossibleAction(VFrame30::SchemeItem* schemeItem, QPointF point, int* outMovingEdgePointIndex);
+	SchemeItemAction getPossibleAction(VFrame30::SchemaItem* schemeItem, QPointF point, int* outMovingEdgePointIndex);
 
 	// Signals
 signals:
@@ -134,15 +134,15 @@ public:
 
 	// Selection
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selectedItems() const;
-	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
-	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemeItem>>& items);
-	void setSelectedItem(const std::shared_ptr<VFrame30::SchemeItem>& item);
-	void addSelection(const std::shared_ptr<VFrame30::SchemeItem>& item);
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
+	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items);
+	void setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item);
+	void addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item);
 
 	void clearSelection();
-	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemeItem>& item);
-	bool isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>& item);
+	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item);
+	bool isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>& item);
 
 	// Data
 	//
@@ -151,8 +151,8 @@ private:
 	MouseState m_mouseState;
 
 protected:
-	std::shared_ptr<VFrame30::SchemeItem> m_newItem;
-	std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_selectedItems;
+	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
 
 	// Selection area variables
 	//
@@ -179,7 +179,7 @@ protected:
 												// При перемещении вершины соединительно линии здесь
 												// соххраняются точки (в отрисовке), и потом они
 												// используются при завершении (MouseUp) редактирования.
-	std::list<VFrame30::SchemePoint> m_movingVertexPoints;
+	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
 
 	//QRubberBand* m_rubberBand;					// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
 												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
@@ -268,7 +268,7 @@ public:
 
 
 protected:
-	void addItem(std::shared_ptr<VFrame30::SchemeItem> newItem);
+	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
 
@@ -343,7 +343,7 @@ public:
 
 	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
 
-	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selectedItems() const;
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
 
 	EditSchemeView* editSchemeView();
 	const EditSchemeView* editSchemeView() const;

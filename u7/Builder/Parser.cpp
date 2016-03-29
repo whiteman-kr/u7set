@@ -17,35 +17,35 @@
 namespace Builder
 {
 
-	Link::Link(const std::list<VFrame30::SchemePoint>& points) :
+	Link::Link(const std::list<VFrame30::SchemaPoint>& points) :
 		m_points(points)
 	{
 		assert(points.size() >= 2);
 	}
 
-	VFrame30::SchemePoint Link::ptBegin() const
+	VFrame30::SchemaPoint Link::ptBegin() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::SchemePoint();
+			return VFrame30::SchemaPoint();
 		}
 
 		return m_points.front();
 	}
 
-	VFrame30::SchemePoint Link::ptEnd() const
+	VFrame30::SchemaPoint Link::ptEnd() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::SchemePoint();
+			return VFrame30::SchemaPoint();
 		}
 
 		return m_points.back();
 	}
 
-	bool Link::isPinOnLink(VFrame30::SchemePoint pt) const
+	bool Link::isPinOnLink(VFrame30::SchemaPoint pt) const
 	{
 		VFrame30::CHorzVertLinks hvl;
 
@@ -161,7 +161,7 @@ namespace Builder
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
-	int BushContainer::getBranchByPinPos(VFrame30::SchemePoint pt) const
+	int BushContainer::getBranchByPinPos(VFrame30::SchemaPoint pt) const
 	{
 		for (size_t i = 0; i < bushes.size(); i++)
 		{
@@ -1354,7 +1354,7 @@ namespace Builder
 				{
 					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
 
-					VFrame30::SchemePoint pos = pt.point();
+					VFrame30::SchemaPoint pos = pt.point();
 
 					fakeLink->AddPoint(pos.X, pos.Y);
 					fakeLink->AddPoint(pos.X, pos.Y);
@@ -1366,7 +1366,7 @@ namespace Builder
 				{
 					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
 
-					VFrame30::SchemePoint pos = pt.point();
+					VFrame30::SchemaPoint pos = pt.point();
 
 					fakeLink->AddPoint(pos.X, pos.Y);
 					fakeLink->AddPoint(pos.X, pos.Y);
@@ -1390,7 +1390,7 @@ namespace Builder
 
 			if (link != nullptr)
 			{
-				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemaPoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
@@ -1419,7 +1419,7 @@ namespace Builder
 				continue;
 			}
 
-			const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
+			const std::list<VFrame30::SchemaPoint>& pointList = link->GetPointList();
 
 			if (pointList.size() < 2)
 			{
@@ -1527,7 +1527,7 @@ namespace Builder
 				// Get SchemeItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::SchemeItem> schemeItem = layer->getItemById(id);
+				std::shared_ptr<VFrame30::SchemaItem> schemeItem = layer->getItemById(id);
 				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(schemeItem.get());
 
 				if (schemeItem == nullptr ||
@@ -1540,7 +1540,7 @@ namespace Builder
 					return false;
 				}
 
-				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemaPoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
@@ -1600,7 +1600,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::SchemeItem> item : layer->Items)
+		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{
@@ -1626,7 +1626,7 @@ namespace Builder
 
 				for (VFrame30::AfbPin& in : *inputs)
 				{
-					VFrame30::SchemePoint pinPos = in.point();
+					VFrame30::SchemaPoint pinPos = in.point();
 
 					//qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
 
@@ -1653,7 +1653,7 @@ namespace Builder
 
 				for (const VFrame30::AfbPin& out : *outputs)
 				{
-					VFrame30::SchemePoint pinPos = out.point();
+					VFrame30::SchemaPoint pinPos = out.point();
 
 					//qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
 

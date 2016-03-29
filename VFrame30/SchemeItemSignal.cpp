@@ -162,16 +162,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemeItemSignal* signal = message->mutable_schemeitem()->mutable_signal();
+		Proto::SchemeItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
 
 		for (const QString& strId : m_signalStrIds)
 		{
@@ -184,9 +184,9 @@ namespace VFrame30
 
 	bool SchemeItemSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 		
@@ -200,13 +200,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_signal() == false)
+		if (message.schemaitem().has_signal() == false)
 		{
-			assert(message.schemeitem().has_signal());
+			assert(message.schemaitem().has_signal());
 			return false;
 		}
 
-		const Proto::SchemeItemSignal& signal = message.schemeitem().signal();
+		const Proto::SchemeItemSignal& signal = message.schemaitem().signal();
 
 		m_signalStrIds.clear();
 		m_signalStrIds.reserve(signal.signalstrids_size());
@@ -255,16 +255,16 @@ namespace VFrame30
 	{
 		bool result = SchemeItemSignal::SaveData(message);
 		
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemInputSignal* inputSignal = */message->mutable_schemeitem()->mutable_inputsignal();
+		/*Proto::VideoItemInputSignal* inputSignal = */message->mutable_schemaitem()->mutable_inputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -273,9 +273,9 @@ namespace VFrame30
 
 	bool SchemeItemInput::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -289,13 +289,13 @@ namespace VFrame30
 		
 		// --
 		//
-		if (message.schemeitem().has_inputsignal() == false)
+		if (message.schemaitem().has_inputsignal() == false)
 		{
-			assert(message.schemeitem().has_inputsignal());
+			assert(message.schemaitem().has_inputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemInputSignal& inputSignal = */message.schemeitem().inputsignal();
+		/*const Proto::VideoItemInputSignal& inputSignal = */message.schemaitem().inputsignal();
 		//fill = inputSignal.fill();
 
 		return true;
@@ -334,16 +334,16 @@ namespace VFrame30
 	{
 		bool result = SchemeItemSignal::SaveData(message);
 		
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* outputSignal = */message->mutable_schemeitem()->mutable_outputsignal();
+		/*Proto::VideoItemOutputSignal* outputSignal = */message->mutable_schemaitem()->mutable_outputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -352,9 +352,9 @@ namespace VFrame30
 
 	bool SchemeItemOutput::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -368,13 +368,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_outputsignal() == false)
+		if (message.schemaitem().has_outputsignal() == false)
 		{
-			assert(message.schemeitem().has_outputsignal());
+			assert(message.schemaitem().has_outputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& outputSignal = */message.schemeitem().outputsignal();
+		/*const Proto::VideoItemOutputSignal& outputSignal = */message.schemaitem().outputsignal();
 		//fill = inputSignal.fill();
 
 		return true;

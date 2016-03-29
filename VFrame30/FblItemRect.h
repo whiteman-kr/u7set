@@ -19,7 +19,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<FblItemRect>;
+		friend ::Factory<SchemaItem>::DerivedType<FblItemRect>;
 #endif
 
 	protected:
@@ -46,11 +46,11 @@ namespace VFrame30
 		// Вычислить координаты точки
 		//
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const override;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemaPoint* pResult, double gridSize, int pinGridStep) const override;
 
 		// Вычисление координат точки, для прямоугольного Fbl элемента
 		//
-		SchemePoint CalcPointPos(const QRectF& fblItemRect,
+		SchemaPoint CalcPointPos(const QRectF& fblItemRect,
 								 const AfbPin& connection,
 								 int pinCount,
 								 int index,

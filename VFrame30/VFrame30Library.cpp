@@ -41,16 +41,16 @@ namespace VFrame30
 
 		// Registering SchemeItems
 		//
-		SchemeItemFactory.Register<SchemeItemLine>();
-		SchemeItemFactory.Register<SchemeItemRect>();
-		SchemeItemFactory.Register<SchemeItemPath>();
-		SchemeItemFactory.Register<FblItemLine>();
-		SchemeItemFactory.Register<FblItemRect>();
-		SchemeItemFactory.Register<SchemeItemLink>();
-		SchemeItemFactory.Register<SchemeItemAfb>();
-		SchemeItemFactory.Register<SchemeItemInput>();
-		SchemeItemFactory.Register<SchemeItemOutput>();
-		SchemeItemFactory.Register<SchemeItemConst>();
+		SchemaItemFactory.Register<SchemeItemLine>();
+		SchemaItemFactory.Register<SchemeItemRect>();
+		SchemaItemFactory.Register<SchemeItemPath>();
+		SchemaItemFactory.Register<FblItemLine>();
+		SchemaItemFactory.Register<FblItemRect>();
+		SchemaItemFactory.Register<SchemeItemLink>();
+		SchemaItemFactory.Register<SchemeItemAfb>();
+		SchemaItemFactory.Register<SchemeItemInput>();
+		SchemaItemFactory.Register<SchemeItemOutput>();
+		SchemaItemFactory.Register<SchemeItemConst>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);
 
@@ -61,7 +61,7 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
-		SchemeItem::PrintRefCounter("SchemeItem");
+		SchemaItem::PrintRefCounter("SchemeItem");
 
 		google::protobuf::ShutdownProtobufLibrary();
 		return true;

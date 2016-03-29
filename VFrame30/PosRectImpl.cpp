@@ -23,17 +23,17 @@ namespace VFrame30
 
 	bool PosRectImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = SchemeItem::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		bool result = SchemaItem::SaveData(message);
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosRectImpl* posRectImplMessage = message->mutable_schemeitem()->mutable_posrectimpl();
+		Proto::PosRectImpl* posRectImplMessage = message->mutable_schemaitem()->mutable_posrectimpl();
 
 		posRectImplMessage->set_leftdocpt(m_leftDocPt);
 		posRectImplMessage->set_topdocpt(m_topDocPt);
@@ -45,28 +45,28 @@ namespace VFrame30
 
 	bool PosRectImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 		
 		// --
 		//
-		bool result = SchemeItem::LoadData(message);
+		bool result = SchemaItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
 		}
 
 		// --
-		if (message.schemeitem().has_posrectimpl() == false)
+		if (message.schemaitem().has_posrectimpl() == false)
 		{
-			assert(message.schemeitem().has_posrectimpl());
+			assert(message.schemaitem().has_posrectimpl());
 			return false;
 		}
 
-		const Proto::PosRectImpl& posRectImplMessage = message.schemeitem().posrectimpl();
+		const Proto::PosRectImpl& posRectImplMessage = message.schemaitem().posrectimpl();
 
 		m_leftDocPt = posRectImplMessage.leftdocpt();
 		m_topDocPt = posRectImplMessage.topdocpt();
@@ -191,10 +191,10 @@ namespace VFrame30
 		switch (issue)
 		{
 		case OutputMessageLevel::Error:
-			color = SchemeItem::errorColor;
+			color = SchemaItem::errorColor;
 			break;
 		case OutputMessageLevel::Warning:
-			color = SchemeItem::warningColor;
+			color = SchemaItem::warningColor;
 			break;
 		default:
 			assert(false);
@@ -505,17 +505,17 @@ namespace VFrame30
 		}
 	}
 
-	std::vector<SchemePoint> PosRectImpl::getPointList() const
+	std::vector<SchemaPoint> PosRectImpl::getPointList() const
 	{
-		std::vector<SchemePoint> v(2);
+		std::vector<SchemaPoint> v(2);
 
-		v[0] = SchemePoint(m_leftDocPt, m_topDocPt);
-		v[1] = SchemePoint(m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt);
+		v[0] = SchemaPoint(m_leftDocPt, m_topDocPt);
+		v[1] = SchemaPoint(m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt);
 
 		return v;
 	}
 
-	void PosRectImpl::setPointList(const std::vector<SchemePoint>& points)
+	void PosRectImpl::setPointList(const std::vector<SchemaPoint>& points)
 	{
 		if (points.size() != 2)
 		{

@@ -34,7 +34,7 @@ namespace VFrame30
 
 	// Реализация базовых интерефейсов для элементов прямоугольного типа
 	//
-	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemeItem, public IPosRect
+	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemaItem, public IPosRect
 	{
 		Q_OBJECT
 
@@ -138,8 +138,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<SchemePoint> getPointList() const override;
-		virtual void setPointList(const std::vector<SchemePoint>& points) override;
+		virtual std::vector<SchemaPoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemaPoint>& points) override;
 	};
 }
 

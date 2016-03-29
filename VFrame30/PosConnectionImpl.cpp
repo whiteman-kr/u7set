@@ -20,23 +20,23 @@ namespace VFrame30
 	//
 	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = SchemeItem::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		bool result = SchemaItem::SaveData(message);
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_schemeitem()->mutable_posconnectionimpl();
+		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_schemaitem()->mutable_posconnectionimpl();
 
 		// Сохранить точки
 		//
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
 		{
-			Proto::SchemePoint* pPointMessage = posConnectionImplMessage->add_points();
+			Proto::SchemaPoint* pPointMessage = posConnectionImplMessage->add_points();
 
 			pPointMessage->set_x(pt->X);
 			pPointMessage->set_y(pt->Y);
@@ -47,15 +47,15 @@ namespace VFrame30
 
 	bool PosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		bool result = SchemeItem::LoadData(message);
+		bool result = SchemaItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -63,18 +63,18 @@ namespace VFrame30
 		
 		//--
 		//
-		if (message.schemeitem().has_posconnectionimpl() == false)
+		if (message.schemaitem().has_posconnectionimpl() == false)
 		{
-			assert(message.schemeitem().has_posconnectionimpl());
+			assert(message.schemaitem().has_posconnectionimpl());
 			return false;
 		}
 
-		const Proto::PosConnectionImpl& posConnectionImplMessage = message.schemeitem().posconnectionimpl();
+		const Proto::PosConnectionImpl& posConnectionImplMessage = message.schemaitem().posconnectionimpl();
 
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)
 		{
-			points.push_back(SchemePoint(posConnectionImplMessage.points(i)));
+			points.push_back(SchemaPoint(posConnectionImplMessage.points(i)));
 		}
 
 		return true;
@@ -234,10 +234,10 @@ namespace VFrame30
 		switch (issue)
 		{
 		case OutputMessageLevel::Error:
-			color = SchemeItem::errorColor;
+			color = SchemaItem::errorColor;
 			break;
 		case OutputMessageLevel::Warning:
-			color = SchemeItem::warningColor;
+			color = SchemaItem::warningColor;
 			break;
 		default:
 			assert(false);
@@ -279,7 +279,7 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(SchemeItem::selectionColor);
+		QPen pen(SchemaItem::selectionColor);
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
 
@@ -318,7 +318,7 @@ namespace VFrame30
 		// Проверить, пересекает ли хоть одна прямая intersectRectangleIn
 		//
 		QRectF intersectRectangleIn(x, y, width, height);
-		SchemePoint prevPoint;
+		SchemaPoint prevPoint;
 
 		for(auto curPoint = points.cbegin(); curPoint != points.cend(); ++curPoint)
 		{
@@ -366,19 +366,19 @@ namespace VFrame30
 	
 	// IPosLine Implementation
 	//
-	const std::list<SchemePoint>& PosConnectionImpl::GetPointList() const
+	const std::list<SchemaPoint>& PosConnectionImpl::GetPointList() const
 	{
 		return points;
 	}
 
-	void PosConnectionImpl::SetPointList(const std::list<SchemePoint>& newpoints)
+	void PosConnectionImpl::SetPointList(const std::list<SchemaPoint>& newpoints)
 	{
 		points.assign(newpoints.begin(), newpoints.end());
 	}
 
 	void PosConnectionImpl::AddPoint(double x, double y)
 	{
-		points.push_back(SchemePoint(x, y));
+		points.push_back(SchemaPoint(x, y));
 	}
 
 	void PosConnectionImpl::RemoveSamePoints()
@@ -405,19 +405,19 @@ namespace VFrame30
 		}
 	}
 
-	const std::list<SchemePoint>& PosConnectionImpl::GetExtensionPoints() const
+	const std::list<SchemaPoint>& PosConnectionImpl::GetExtensionPoints() const
 	{
 		return extPoints;
 	}
 	
-	void PosConnectionImpl::SetExtensionPoints(const std::list<SchemePoint>& extPoints)
+	void PosConnectionImpl::SetExtensionPoints(const std::list<SchemaPoint>& extPoints)
 	{
 		this->extPoints = extPoints;
 	}
 
 	void PosConnectionImpl::AddExtensionPoint(double x, double y)
 	{
-		extPoints.push_back(SchemePoint(x, y));
+		extPoints.push_back(SchemaPoint(x, y));
 	}
 
 	void PosConnectionImpl::DeleteAllExtensionPoints()
@@ -575,13 +575,13 @@ namespace VFrame30
 		//
 	}
 
-	std::vector<SchemePoint> PosConnectionImpl::getPointList() const
+	std::vector<SchemaPoint> PosConnectionImpl::getPointList() const
 	{
-		std::vector<SchemePoint> v(points.begin(), points.end());
+		std::vector<SchemaPoint> v(points.begin(), points.end());
 		return v;
 	}
 
-	void PosConnectionImpl::setPointList(const std::vector<SchemePoint>& points)
+	void PosConnectionImpl::setPointList(const std::vector<SchemaPoint>& points)
 	{
 		this->points.assign(points.begin(), points.end());
 		extPoints.clear();

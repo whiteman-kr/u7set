@@ -24,17 +24,17 @@ namespace VFrame30
 	//
 	bool PosLineImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = SchemeItem::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		bool result = SchemaItem::SaveData(message);
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosLineImpl* posLineImplMessage = message->mutable_schemeitem()->mutable_poslineimpl();
+		Proto::PosLineImpl* posLineImplMessage = message->mutable_schemaitem()->mutable_poslineimpl();
 
 		posLineImplMessage->set_startxdocpt(m_startXDocPt);
 		posLineImplMessage->set_startydocpt(m_startYDocPt);
@@ -46,15 +46,15 @@ namespace VFrame30
 
 	bool PosLineImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		bool result = SchemeItem::LoadData(message);
+		bool result = SchemaItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -62,13 +62,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_poslineimpl() == false)
+		if (message.schemaitem().has_poslineimpl() == false)
 		{
-			assert(message.schemeitem().has_poslineimpl());
+			assert(message.schemaitem().has_poslineimpl());
 			return false;
 		}
 
-		const Proto::PosLineImpl& posLineImplMessage = message.schemeitem().poslineimpl();
+		const Proto::PosLineImpl& posLineImplMessage = message.schemaitem().poslineimpl();
 
 		m_startXDocPt = posLineImplMessage.startxdocpt();
 		m_startYDocPt = posLineImplMessage.startydocpt();
@@ -481,17 +481,17 @@ namespace VFrame30
 		}
 	}
 
-	std::vector<SchemePoint> PosLineImpl::getPointList() const
+	std::vector<SchemaPoint> PosLineImpl::getPointList() const
 	{
-		std::vector<SchemePoint> v(2);
+		std::vector<SchemaPoint> v(2);
 
-		v[0] = SchemePoint(m_startXDocPt, m_startYDocPt);
-		v[1] = SchemePoint(m_endXDocPt, m_endYDocPt);
+		v[0] = SchemaPoint(m_startXDocPt, m_startYDocPt);
+		v[1] = SchemaPoint(m_endXDocPt, m_endYDocPt);
 
 		return v;
 	}
 
-	void PosLineImpl::setPointList(const std::vector<SchemePoint>& points)
+	void PosLineImpl::setPointList(const std::vector<SchemaPoint>& points)
 	{
 		if (points.size() != 2)
 		{

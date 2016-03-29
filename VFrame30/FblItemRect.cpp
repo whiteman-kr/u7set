@@ -58,10 +58,10 @@ namespace VFrame30
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 
@@ -75,7 +75,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemRect* itemMessage = message->mutable_schemeitem()->mutable_fblitemrect();
+		Proto::FblItemRect* itemMessage = message->mutable_schemaitem()->mutable_fblitemrect();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -89,9 +89,9 @@ namespace VFrame30
 
 	bool FblItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -109,13 +109,13 @@ namespace VFrame30
 			return false;
 		}
 
-		if (message.schemeitem().has_fblitemrect() == false)
+		if (message.schemaitem().has_fblitemrect() == false)
 		{
-			assert(message.schemeitem().has_fblitemrect());
+			assert(message.schemaitem().has_fblitemrect());
 			return false;
 		}
 
-		const Proto::FblItemRect& itemMessage = message.schemeitem().fblitemrect();
+		const Proto::FblItemRect& itemMessage = message.schemaitem().fblitemrect();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
@@ -145,7 +145,7 @@ namespace VFrame30
 			{
 				assert(input->IsInput());
 
-				SchemePoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
+				SchemaPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
 				input->setPoint(calculatedPoint);
 
 				inputIndex ++;
@@ -163,7 +163,7 @@ namespace VFrame30
 			{
 				assert(output->IsOutput());
 
-				SchemePoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
+				SchemaPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
 				output->setPoint(calculatedPoint);
 
 				outputIndex ++;
@@ -173,7 +173,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, SchemaPoint* pResult, double gridSize, int pinGridStep) const
 	{
 		if (pResult == nullptr)
 		{
@@ -227,7 +227,7 @@ namespace VFrame30
 		return false;
 	}
 
-	SchemePoint FblItemRect::CalcPointPos(
+	SchemaPoint FblItemRect::CalcPointPos(
 			const QRectF& fblItemRect,
 			const AfbPin& connection,
 			int pinCount,
@@ -238,7 +238,7 @@ namespace VFrame30
 		if (pinCount == 0)
 		{
 			assert(pinCount != 0);
-			return SchemePoint(0, 0);
+			return SchemaPoint(0, 0);
 		}
 
 		// Cache values
@@ -258,7 +258,7 @@ namespace VFrame30
 		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
 		y = CUtils::snapToGrid(y, gridSize);
 
-		return SchemePoint(x, y);
+		return SchemaPoint(x, y);
 	}
 
 
@@ -342,7 +342,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			SchemePoint vip;
+			SchemaPoint vip;
 			GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
@@ -397,7 +397,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			SchemePoint vip;
+			SchemaPoint vip;
 			GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
@@ -511,7 +511,7 @@ namespace VFrame30
 	{
 		// Set new guid for the item
 		//
-		SchemeItem::setNewGuid();
+		SchemaItem::setNewGuid();
 
 		// Set new guids for all inputs/outputs
 		//

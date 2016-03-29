@@ -86,7 +86,7 @@ namespace VFrame30
 
 		for (int i = 0; i < layer.items().size(); i++)
 		{
-			SchemeItem* pItem = SchemeItem::Create(layer.items(i));
+			SchemaItem* pItem = SchemaItem::Create(layer.items(i));
 			
 			if (pItem == nullptr)
 			{
@@ -94,7 +94,7 @@ namespace VFrame30
 				continue;
 			}
 			
-			Items.push_back(std::shared_ptr<SchemeItem>(pItem));
+			Items.push_back(std::shared_ptr<SchemaItem>(pItem));
 		}
 
 		if (layer.items().size() != (int)Items.size())
@@ -133,10 +133,10 @@ namespace VFrame30
 	// Methods
 	//
 
-	std::shared_ptr<SchemeItem> SchemaLayer::getItemById(const QUuid& id) const
+	std::shared_ptr<SchemaItem> SchemaLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
-			[&](const std::shared_ptr<SchemeItem>& vi)
+			[&](const std::shared_ptr<SchemaItem>& vi)
 			{
 				return vi->guid() == id;
 			});
@@ -147,11 +147,11 @@ namespace VFrame30
 		}
 		else
 		{
-			return std::shared_ptr<SchemeItem>();
+			return std::shared_ptr<SchemaItem>();
 		}
 	}
 
-	void SchemaLayer::ConnectionMapPosInc(SchemePoint pinPos)
+	void SchemaLayer::ConnectionMapPosInc(SchemaPoint pinPos)
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -165,7 +165,7 @@ namespace VFrame30
 		}
 	}
 
-	int SchemaLayer::GetPinPosConnectinCount(SchemePoint pinPos, SchemaUnit /*unit*/) const
+	int SchemaLayer::GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit /*unit*/) const
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -179,14 +179,14 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<SchemeItem> SchemaLayer::getItemUnderPoint(QPointF point, QString className) const
+	std::shared_ptr<SchemaItem> SchemaLayer::getItemUnderPoint(QPointF point, QString className) const
 	{
 		double x = point.x();
 		double y = point.y();
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemeItem>& item = *it;
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
@@ -198,15 +198,15 @@ namespace VFrame30
 			}
 		}
 
-		return std::shared_ptr<SchemeItem>();
+		return std::shared_ptr<SchemaItem>();
 	}
 
-	std::list<std::shared_ptr<SchemeItem>> SchemaLayer::getItemListInRectangle(const QRectF& rect) const
+	std::list<std::shared_ptr<SchemaItem>> SchemaLayer::getItemListInRectangle(const QRectF& rect) const
 	{
-		std::list<std::shared_ptr<SchemeItem>> out;
+		std::list<std::shared_ptr<SchemaItem>> out;
 
 		std::copy_if(Items.begin(), Items.end(), std::back_inserter(out),
-				[&rect](std::shared_ptr<SchemeItem> item)
+				[&rect](std::shared_ptr<SchemaItem> item)
 				{
 					return item->IsIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
 				}
@@ -215,14 +215,14 @@ namespace VFrame30
 		return out;
 	}
 
-	std::shared_ptr<SchemeItem> SchemaLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
+	std::shared_ptr<SchemaItem> SchemaLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
 	{
 		double x = point.x();
 		double y = point.y();
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemeItem>& item = *it;
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
 
 			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
 				item->IsIntersectPoint(x, y) == true)
@@ -252,7 +252,7 @@ namespace VFrame30
 			}
 		}
 
-		return std::shared_ptr<SchemeItem>();
+		return std::shared_ptr<SchemaItem>();
 	}
 
 	// Properties

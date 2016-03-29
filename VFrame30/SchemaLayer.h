@@ -35,16 +35,16 @@ namespace VFrame30
 		//
 	public:
 
-		std::shared_ptr<SchemeItem> getItemById(const QUuid& id) const;
+		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
 		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
-		void ConnectionMapPosInc(SchemePoint pinPos);
-		int GetPinPosConnectinCount(SchemePoint pinPos, SchemaUnit unit) const;
+		void ConnectionMapPosInc(SchemaPoint pinPos);
+		int GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit unit) const;
 
-		std::shared_ptr<SchemeItem> getItemUnderPoint(QPointF point, QString className = "") const;
-		std::list<std::shared_ptr<SchemeItem>> getItemListInRectangle(const QRectF& rect) const;
+		std::shared_ptr<SchemaItem> getItemUnderPoint(QPointF point, QString className = "") const;
+		std::list<std::shared_ptr<SchemaItem>> getItemListInRectangle(const QRectF& rect) const;
 
-		std::shared_ptr<SchemeItem> findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const;
+		std::shared_ptr<SchemaItem> findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const;
 
 		// Properties
 		//
@@ -69,10 +69,10 @@ namespace VFrame30
 	public:
 
 		// Layer items
-		std::list<std::shared_ptr<SchemeItem>> Items;
+		std::list<std::shared_ptr<SchemaItem>> Items;
 
 		// Key is pin position, value is count of pins on the point
-		std::map<SchemePoint, int> connectionMap;
+		std::map<SchemaPoint, int> connectionMap;
 
 	private:
 		QUuid m_guid;

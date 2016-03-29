@@ -63,12 +63,12 @@ namespace VFrame30
 		return true;
 	}
 
-	const SchemePoint& AfbPin::point() const
+	const SchemaPoint& AfbPin::point() const
 	{
 		return m_point;
 	}
 
-	void AfbPin::setPoint(const SchemePoint& value)
+	void AfbPin::setPoint(const SchemaPoint& value)
 	{
 		m_point = value;
 	}
@@ -176,7 +176,7 @@ namespace VFrame30
 	//
 	bool FblItem::SaveData(Proto::Envelope* message) const
 	{
-		Proto::FblItem* fblItemMessage = message->mutable_schemeitem()->mutable_fblitem();
+		Proto::FblItem* fblItemMessage = message->mutable_schemaitem()->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
@@ -201,23 +201,23 @@ namespace VFrame30
 
 	bool FblItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
 		// --
 		//
-		if (message.schemeitem().has_fblitem() == false)
+		if (message.schemaitem().has_fblitem() == false)
 		{
-			assert(message.schemeitem().has_fblitem());
+			assert(message.schemaitem().has_fblitem());
 			return false;
 		}
 		
 		// --
 		//
-		const Proto::FblItem& fblItemMessage = message.schemeitem().fblitem();
+		const Proto::FblItem& fblItemMessage = message.schemaitem().fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();
@@ -407,7 +407,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItem::GetConnectionPointPos(const QUuid&, SchemePoint*, double /*gridSize*/, int /*pinGridStep*/) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, SchemaPoint*, double /*gridSize*/, int /*pinGridStep*/) const
 	{
 		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;

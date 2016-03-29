@@ -3,7 +3,7 @@
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 		: EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
 		assert(schemeView != nullptr);
@@ -30,7 +30,7 @@ namespace EditEngine
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
 			auto findResult = std::find_if(m_layer->Items.begin(), m_layer->Items.end(),
-				[&si](std::shared_ptr<VFrame30::SchemeItem> item)
+				[&si](std::shared_ptr<VFrame30::SchemaItem> item)
 				{
 					return item.get() == si->get();
 				});

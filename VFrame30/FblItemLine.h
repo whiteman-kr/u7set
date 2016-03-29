@@ -10,7 +10,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<FblItemLine>;
+		friend ::Factory<SchemaItem>::DerivedType<FblItemLine>;
 #endif
 
 	protected:

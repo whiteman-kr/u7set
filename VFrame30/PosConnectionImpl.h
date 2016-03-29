@@ -11,8 +11,8 @@ namespace VFrame30
 	class IPosConnection
 	{
 	public:
-		virtual const std::list<SchemePoint>& GetPointList() const = 0;
-		virtual void SetPointList(const std::list<SchemePoint>& points) = 0;
+		virtual const std::list<SchemaPoint>& GetPointList() const = 0;
+		virtual void SetPointList(const std::list<SchemaPoint>& points) = 0;
 
 		virtual void AddPoint(double x, double y) = 0;
 		virtual void RemoveSamePoints() = 0;
@@ -21,14 +21,14 @@ namespace VFrame30
 
 		// Работа с Extension точками, которые участвуют в отрисовке при создании элемента, DrawOutline
 		//
-		virtual const std::list<SchemePoint>& GetExtensionPoints() const = 0;
-		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) = 0;
+		virtual const std::list<SchemaPoint>& GetExtensionPoints() const = 0;
+		virtual void SetExtensionPoints(const std::list<SchemaPoint>& extPoints) = 0;
 		virtual void AddExtensionPoint(double x, double y) = 0;
 		virtual void DeleteAllExtensionPoints() = 0;
 		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemeItem, public IPosConnection
+	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemaItem, public IPosConnection
 	{
 		Q_OBJECT
 
@@ -88,19 +88,19 @@ namespace VFrame30
 		// IPosLine
 		//
 	private:
-		std::list<SchemePoint> points;
-		std::list<SchemePoint> extPoints;	// точки, которые используются при DrawOutline, не сериализируются
+		std::list<SchemaPoint> points;
+		std::list<SchemaPoint> extPoints;	// точки, которые используются при DrawOutline, не сериализируются
 
 	public:
-		virtual const std::list<SchemePoint>& GetPointList() const override;
-		virtual void SetPointList(const std::list<SchemePoint>& points) override;
+		virtual const std::list<SchemaPoint>& GetPointList() const override;
+		virtual void SetPointList(const std::list<SchemaPoint>& points) override;
 		virtual void AddPoint(double x, double y) override;
 		virtual void RemoveSamePoints() override;
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
 
-		virtual const std::list<SchemePoint>& GetExtensionPoints() const override;
-		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) override;
+		virtual const std::list<SchemaPoint>& GetExtensionPoints() const override;
+		virtual void SetExtensionPoints(const std::list<SchemaPoint>& extPoints) override;
 		virtual void AddExtensionPoint(double x, double y) override;
 		virtual void DeleteAllExtensionPoints() override;
 		virtual void DeleteLastExtensionPoint() override;
@@ -123,8 +123,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<SchemePoint> getPointList() const override;
-		virtual void setPointList(const std::vector<SchemePoint>& points) override;
+		virtual std::vector<SchemaPoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemaPoint>& points) override;
 	};
 
 }

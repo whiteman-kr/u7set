@@ -26,7 +26,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemeItem, public IPosLine
+	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemaItem, public IPosLine
 	{
 		Q_OBJECT
 
@@ -120,8 +120,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<SchemePoint> getPointList() const override;
-		virtual void setPointList(const std::vector<SchemePoint>& points) override;
+		virtual std::vector<SchemaPoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemaPoint>& points) override;
 	};
 }
 

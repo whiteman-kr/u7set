@@ -218,16 +218,16 @@ namespace VFrame30
 	bool SchemeItemAfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
-		if (result == false || message->has_schemeitem() == false)
+		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
-			assert(message->has_schemeitem());
+			assert(message->has_schemaitem());
 			return false;
 		}
 	
 		// --
 		//
-		Proto::SchemeItemAfb* vifble = message->mutable_schemeitem()->mutable_afb();
+		Proto::SchemeItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
 
 		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
@@ -244,9 +244,9 @@ namespace VFrame30
 
 	bool SchemeItemAfb::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemeitem() == false)
+		if (message.has_schemaitem() == false)
 		{
-			assert(message.has_schemeitem());
+			assert(message.has_schemaitem());
 			return false;
 		}
 
@@ -260,13 +260,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_afb() == false)
+		if (message.schemaitem().has_afb() == false)
 		{
-			assert(message.schemeitem().has_afb());
+			assert(message.schemaitem().has_afb());
 			return false;
 		}
 		
-		const Proto::SchemeItemAfb& vifble = message.schemeitem().afb();
+		const Proto::SchemeItemAfb& vifble = message.schemaitem().afb();
 		
 		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 

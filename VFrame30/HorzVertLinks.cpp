@@ -5,7 +5,7 @@ namespace VFrame30
 {
 	// -- Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
-	void CHorzVertLinks::AddLinks(const std::list<SchemePoint>& pointList, const QUuid& schemeItemGuid)
+	void CHorzVertLinks::AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemeItemGuid)
 	{
 		// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 		//
@@ -17,8 +17,8 @@ namespace VFrame30
 			auto prevpoint = linkpoint;
 			--prevpoint;
 
-			SchemePoint pt1 = *prevpoint;
-			SchemePoint pt2 = *linkpoint;
+			SchemaPoint pt1 = *prevpoint;
+			SchemaPoint pt2 = *linkpoint;
 
 			if (std::abs(pt1.X - pt2.X) < 0.000001)	// is it verical line?
 			{
@@ -42,7 +42,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPointOnLink(SchemePoint pt, const QUuid& schemeItemGuid)
+	bool CHorzVertLinks::IsPointOnLink(SchemaPoint pt, const QUuid& schemeItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -83,7 +83,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPinOnLink(SchemePoint pt, const QUuid& schemeItemGuid)
+	bool CHorzVertLinks::IsPinOnLink(SchemaPoint pt, const QUuid& schemeItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -122,7 +122,7 @@ namespace VFrame30
 		return false;
 	}
 
-	std::list<QUuid> CHorzVertLinks::getSchemeItemsUnderPoint(SchemePoint pt, QUuid schemeItemGuid)
+	std::list<QUuid> CHorzVertLinks::getSchemeItemsUnderPoint(SchemaPoint pt, QUuid schemeItemGuid)
 	{
 		std::list<QUuid> items;
 

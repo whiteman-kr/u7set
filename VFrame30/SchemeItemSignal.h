@@ -54,7 +54,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<SchemeItemInput>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemeItemInput>;
 #endif
 
 	private:
@@ -85,7 +85,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<SchemeItemOutput>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemeItemOutput>;
 #endif
 
 	private:

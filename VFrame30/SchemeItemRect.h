@@ -12,7 +12,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<SchemeItemRect>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemeItemRect>;
 #endif
 
 		SchemeItemRect(void);

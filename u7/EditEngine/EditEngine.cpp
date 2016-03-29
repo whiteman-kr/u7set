@@ -171,86 +171,86 @@ namespace EditEngine
 		}
 	}
 
-	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<AddItemCommand>(m_schemeView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemeItem>> l(items.begin(), items.end());
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> l(items.begin(), items.end());
 		addCommand(std::make_shared<AddItemCommand>(m_schemeView, l, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemeItem>> items;
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
 		addCommand(std::make_shared<AddItemCommand>(m_schemeView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<DeleteItemCommand>(m_schemeView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> v;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> v;
 		v.push_back(item);
 
 		return runDeleteItem(v, layer);
 	}
 
-	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
+	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 	{
 		addCommand(std::make_shared<SetPointsCommand>(m_schemeView, points, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::SchemeItem>& item)
+	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item)
 	{
-		std::vector<VFrame30::SchemePoint> ip(points.begin(), points.end());
+		std::vector<VFrame30::SchemaPoint> ip(points.begin(), points.end());
 
-		std::vector<std::vector<VFrame30::SchemePoint>> allpoints;
+		std::vector<std::vector<VFrame30::SchemaPoint>> allpoints;
 		allpoints.push_back(ip);
 
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
 		runSetPoints(allpoints, items);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool snapToGrid)
 	{
 		addCommand(std::make_shared<MoveItemCommand>(m_schemeView, xdiff, ydiff, items, snapToGrid, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemeItem>& item, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemaItem>& item, bool snapToGrid)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
 		runMoveItem(xdiff, ydiff, items, snapToGrid);
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 	{
 		addCommand(std::make_shared<SetPropertyCommand>(m_schemeView, propertyName, value, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemeItem>& item)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemaItem>& item)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
 		return runSetProperty(propertyName, value, items);
