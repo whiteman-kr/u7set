@@ -4,13 +4,13 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemeView : public QWidget
+	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit SchemeView(QWidget *parent = 0);
-		explicit SchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget *parent = 0);
+		explicit SchemaView(QWidget *parent = 0);
+		explicit SchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget *parent = 0);
 
 	protected:
 		void init();
@@ -29,10 +29,10 @@ namespace VFrame30
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-		std::shared_ptr<Schema>& scheme();
-		std::shared_ptr<Schema> scheme() const;
+		std::shared_ptr<Schema>& schema();
+		std::shared_ptr<Schema> schema() const;
 
-		void setScheme(std::shared_ptr<Schema>& scheme, bool repaint);
+		void setSchema(std::shared_ptr<Schema>& schema, bool repaint);
 		
 		// Events
 		//
@@ -48,7 +48,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		std::shared_ptr<VFrame30::Schema> m_scheme;
+		std::shared_ptr<VFrame30::Schema> m_schema;
 		double m_zoom = 100.0;
 	};
 }

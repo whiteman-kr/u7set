@@ -34,7 +34,7 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(schemeView->scheme()->gridSize());
+				item->snapToGrid(schemeView->schema()->gridSize());
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(schemeView->scheme()->gridSize());
+				item->snapToGrid(schemeView->schema()->gridSize());
 			}
 		}
 

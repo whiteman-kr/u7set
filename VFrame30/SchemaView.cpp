@@ -1,46 +1,46 @@
 #include "Stable.h"
-#include "SchemeView.h"
+#include "SchemaView.h"
 #include <QPdfWriter>
 
 namespace VFrame30
 {
-	SchemeView::SchemeView(QWidget *parent) :
+	SchemaView::SchemaView(QWidget *parent) :
 		QWidget(parent)
 	{
 		init();
 	}
 
-	SchemeView::SchemeView(std::shared_ptr<Schema>& scheme, QWidget* parent /*= 0*/) :
+	SchemaView::SchemaView(std::shared_ptr<Schema>& schema, QWidget* parent /*= 0*/) :
 		QWidget(parent),
-		m_scheme(scheme)
+		m_schema(schema)
 	{
 		init();
 	}
 
-	void SchemeView::init()
+	void SchemaView::init()
 	{
 		setMouseTracking(true);
 	}
 
-	std::shared_ptr<Schema>& SchemeView::scheme()
+	std::shared_ptr<Schema>& SchemaView::schema()
 	{
-		return m_scheme;
+		return m_schema;
 	}
 
-	std::shared_ptr<Schema> SchemeView::scheme() const
+	std::shared_ptr<Schema> SchemaView::schema() const
 	{
-		return m_scheme;
+		return m_schema;
 	}
 
-	void SchemeView::setScheme(std::shared_ptr<Schema>& scheme, bool repaint)
+	void SchemaView::setSchema(std::shared_ptr<Schema>& schema, bool repaint)
 	{
-		assert(scheme.get() != nullptr);
-		m_scheme = scheme;
+		assert(schema.get() != nullptr);
+		m_schema = schema;
 
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
 	}
 
-	void SchemeView::mouseMoveEvent(QMouseEvent* event)
+	void SchemaView::mouseMoveEvent(QMouseEvent* event)
 	{
 		// If any contrtol key is pressed, pass control further
 		//
@@ -54,9 +54,9 @@ namespace VFrame30
 			return;
 		}
 
-		if (scheme() == nullptr)
+		if (schema() == nullptr)
 		{
-			// Scheme is not loaded
+			// Schema is not loaded
 			//
 			return;
 		}
@@ -75,7 +75,7 @@ namespace VFrame30
 		double x = docPoint.x();
 		double y = docPoint.y();
 		
-		for (auto layer = scheme()->Layers.crbegin(); layer != scheme()->Layers.crend(); layer++)
+		for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
 		{
 			const SchemaLayer* pLayer = layer->get();
 
@@ -103,9 +103,9 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemeView::paintEvent(QPaintEvent*)
+	void SchemaView::paintEvent(QPaintEvent*)
 	{
-		if (scheme().get() == nullptr)
+		if (schema().get() == nullptr)
 		{
 			return;
 		}
@@ -113,12 +113,12 @@ namespace VFrame30
 		// --
 		//
 		QPainter p(this);
-		CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
+		CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 
 		// Calc size
 		//
-		int widthInPixel = scheme()->GetDocumentWidth(p.device()->logicalDpiX(), zoom());
-		int heightInPixel = scheme()->GetDocumentHeight(p.device()->logicalDpiY(), zoom());
+		int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), zoom());
+		int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), zoom());
 
 		// Clear device
 		//
@@ -129,24 +129,24 @@ namespace VFrame30
 		//
 		Ajust(&p, 0, 0, zoom());
 
-		// Draw Scheme
+		// Draw Schema
 		//
-		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
-		scheme()->Draw(&drawParam, clipRect);
+		schema()->Draw(&drawParam, clipRect);
 
 		// Ending
 		//
 		return;
 	}
 
-	void SchemeView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
+	void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
 	{
 		// Set transform matrix
 		//
 		painter->resetTransform();
 
-		if (m_scheme->unit() == SchemaUnit::Inch)
+		if (m_schema->unit() == SchemaUnit::Inch)
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(
@@ -165,9 +165,9 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemeView::exportToPdf(QString fileName) const
+	void SchemaView::exportToPdf(QString fileName) const
 	{
-		if (scheme().get() == nullptr)
+		if (schema().get() == nullptr)
 		{
 			return;
 		}
@@ -176,19 +176,19 @@ namespace VFrame30
 		//
 		QPdfWriter pdfWriter(fileName);
 
-		pdfWriter.setTitle(scheme()->caption());
+		pdfWriter.setTitle(schema()->caption());
 
 		QPageSize pageSize;
-		double pageWidth = scheme()->docWidth();
-		double pageHeight = scheme()->docHeight();
+		double pageWidth = schema()->docWidth();
+		double pageHeight = schema()->docHeight();
 
-		if (m_scheme->unit() == SchemaUnit::Inch)
+		if (m_schema->unit() == SchemaUnit::Inch)
 		{
 			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
 		}
 		else
 		{
-			assert(m_scheme->unit() == SchemaUnit::Display);
+			assert(m_schema->unit() == SchemaUnit::Display);
 			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
 			pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
@@ -201,12 +201,12 @@ namespace VFrame30
 		// --
 		//
 		QPainter p(&pdfWriter);
-		CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
+		CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 
 		// Calc size
 		//
-		int widthInPixel = scheme()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
-		int heightInPixel = scheme()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
+		int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
 
 		// Clear device
 		//
@@ -218,11 +218,11 @@ namespace VFrame30
 		//Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
 		Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
 
-		// Draw Scheme
+		// Draw Schema
 		//
-		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
-		scheme()->Draw(&drawParam, clipRect);
+		schema()->Draw(&drawParam, clipRect);
 
 		// Ending
 		//
@@ -230,7 +230,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemeView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	bool SchemaView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
 		if (pDestDocPos == nullptr)
 		{
@@ -241,7 +241,7 @@ namespace VFrame30
 		int x = mousePos.x();
 		int y = mousePos.y();
 
-		if (scheme()->unit() == SchemaUnit::Display)
+		if (schema()->unit() == SchemaUnit::Display)
 		{
 			pDestDocPos->setX(x / (m_zoom / 100.0));
 			pDestDocPos->setY(y / (m_zoom / 100.0));
@@ -261,12 +261,12 @@ namespace VFrame30
 	// Properties
 	//
 
-	double SchemeView::zoom() const
+	double SchemaView::zoom() const
 	{
 		return m_zoom;
 	}
 
-	void SchemeView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	void SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
 		value = value > 500 ? 500 : value;
 		value = value < 50 ? 50 : value;
@@ -280,8 +280,8 @@ namespace VFrame30
 
 		// resize widget
 		//
-		int widthInPixel = scheme()->GetDocumentWidth(dpiX, m_zoom);
-		int heightInPixel = scheme()->GetDocumentHeight(dpiY, m_zoom);
+		int widthInPixel = schema()->GetDocumentWidth(dpiX, m_zoom);
+		int heightInPixel = schema()->GetDocumentHeight(dpiY, m_zoom);
 
 		QSize scaledPixelSize;
 

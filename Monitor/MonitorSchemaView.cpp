@@ -1,7 +1,7 @@
 #include "MonitorSchemaView.h"
 
 MonitorSchemaView::MonitorSchemaView(QWidget *parent)
-	: SchemeView(parent)
+	: SchemaView(parent)
 {
 	qDebug() << Q_FUNC_INFO;
 }
@@ -15,14 +15,14 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 {
 	// Draw Scheme
 	//
-	VFrame30::SchemeView::paintEvent(pe);
+	VFrame30::SchemaView::paintEvent(pe);
 
 	QPainter p;
 	p.begin(this);
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 
 	// Calc size
 	//
@@ -34,7 +34,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 
 	// Draw Scheme
 	//
-	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
+	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
 	// Items are being moved drawing
 	//

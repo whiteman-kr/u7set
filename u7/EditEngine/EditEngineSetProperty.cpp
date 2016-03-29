@@ -17,7 +17,7 @@ namespace EditEngine
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
-		m_scheme = schemeView->scheme();
+		m_scheme = schemeView->schema();
 		assert(m_scheme != nullptr);
 
 		for (auto& i : items)

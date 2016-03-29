@@ -2,7 +2,7 @@
 
 #include "../VFrame30/BaseSchemeWidget.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemeView.h"
+#include "../VFrame30/SchemaView.h"
 #include "../VFrame30/SchemeItem.h"
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
@@ -84,13 +84,13 @@ namespace EditEngine
 // EditSchemeView
 //
 //
-class EditSchemeView : public VFrame30::SchemeView
+class EditSchemeView : public VFrame30::SchemaView
 {
 	Q_OBJECT
 
 public:
 	explicit EditSchemeView(QWidget* parent = 0);
-	explicit EditSchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget* parent = nullptr);
+	explicit EditSchemeView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent = nullptr);
 
 	virtual ~EditSchemeView();
 

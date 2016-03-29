@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../VFrame30/SchemeView.h"
+#include "../VFrame30/SchemaView.h"
 
 
-class MonitorSchemaView : public VFrame30::SchemeView
+class MonitorSchemaView : public VFrame30::SchemaView
 {
 	Q_OBJECT
 

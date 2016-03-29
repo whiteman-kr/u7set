@@ -58,7 +58,7 @@ const EditSchemeWidget::SizeActionToMouseCursor EditSchemeWidget::m_sizeActionTo
 //
 //
 EditSchemeView::EditSchemeView(QWidget* parent) :
-	VFrame30::SchemeView(parent),
+	VFrame30::SchemaView(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -73,7 +73,7 @@ EditSchemeView::EditSchemeView(QWidget* parent) :
 }
 
 EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget* parent)
-	: VFrame30::SchemeView(scheme, parent),
+	: VFrame30::SchemaView(scheme, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -95,7 +95,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 {
 	// Draw scheme
 	//
-	VFrame30::SchemeView::paintEvent(pe);
+	VFrame30::SchemaView::paintEvent(pe);
 
 	// Draw other -- selection, grid, outlines, rullers, etc
 	//
@@ -105,7 +105,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 
 	// Calc size
 	//
@@ -117,10 +117,10 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Draw scheme
 	//
-	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
+	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
 	drawParam.setControlBarSize(
-		scheme()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+		schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw Build Issues
 	//
@@ -181,7 +181,7 @@ void EditSchemeView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 	// Find compile layer
 	//
-	for (auto layer = scheme()->Layers.cbegin(); layer != scheme()->Layers.cend(); ++layer)
+	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
 	{
 		const VFrame30::SchemaLayer* pLayer = layer->get();
 
@@ -308,8 +308,8 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		p->setPen(outlinePen);
 
-		p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(scheme()->docWidth(), rullerPoint.Y));
+		p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(schema()->docWidth(), rullerPoint.Y));
 
 		p->setRenderHints(oldrenderhints);
 	}
@@ -416,11 +416,11 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	p->setRenderHint(QPainter::Antialiasing, false);
 
 	p->setPen(outlinePen);
-	p->drawLine(QPointF(left, 0.0), QPointF(left, scheme()->docHeight()));
-	p->drawLine(QPointF(right, 0.0), QPointF(right, scheme()->docHeight()));
+	p->drawLine(QPointF(left, 0.0), QPointF(left, schema()->docHeight()));
+	p->drawLine(QPointF(right, 0.0), QPointF(right, schema()->docHeight()));
 
-	p->drawLine(QPointF(0.0, top), QPointF(scheme()->docWidth(), top));
-	p->drawLine(QPointF(0.0, bottom), QPointF(scheme()->docWidth(), bottom));
+	p->drawLine(QPointF(0.0, top), QPointF(schema()->docWidth(), top));
+	p->drawLine(QPointF(0.0, bottom), QPointF(schema()->docWidth(), bottom));
 
 	// --
 	//
@@ -480,8 +480,8 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	double x2 = x1 + itemPos->widthDocPt();
 	double y2 = y1 + itemPos->heightDocPt();
 
-	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
-	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
 
 	switch (mouseState())
 	{
@@ -569,8 +569,8 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	itemPos->setLeftDocPt(std::min(x1, x2));
 	itemPos->setTopDocPt(std::min(y1, y2));
 
-	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
-	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
+	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep()));
+	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep()));
 
 	itemPos->setWidthDocPt(width);
 	itemPos->setHeightDocPt(height);
@@ -597,32 +597,32 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	switch (mouseState())
 	{
 	case MouseState::SizingTopLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
 		break;
 	case MouseState::SizingTop:
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
 		break;
 	case MouseState::SizingTopRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
 		break;
 	case MouseState::SizingRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
 		break;
 	case MouseState::SizingBottomRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
 		break;
 	case MouseState::SizingBottom:
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
 		break;
 	case MouseState::SizingBottomLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
 		break;
 	case MouseState::SizingLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
 		break;
 	default:
 		assert(false);
@@ -708,12 +708,12 @@ void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	switch (mouseState())
 	{
 	case MouseState::MovingStartLinePoint:
-		p->drawLine(QPointF(itemPos->startXDocPt(), 0.0), QPointF(itemPos->startXDocPt(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, itemPos->startYDocPt()), QPointF(scheme()->docWidth(), itemPos->startYDocPt()));
+		p->drawLine(QPointF(itemPos->startXDocPt(), 0.0), QPointF(itemPos->startXDocPt(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, itemPos->startYDocPt()), QPointF(schema()->docWidth(), itemPos->startYDocPt()));
 		break;
 	case MouseState::MovingEndLinePoint:
-		p->drawLine(QPointF(itemPos->endXDocPt(), 0.0), QPointF(itemPos->endXDocPt(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, itemPos->endYDocPt()), QPointF(scheme()->docWidth(), itemPos->endYDocPt()));
+		p->drawLine(QPointF(itemPos->endXDocPt(), 0.0), QPointF(itemPos->endXDocPt(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, itemPos->endYDocPt()), QPointF(schema()->docWidth(), itemPos->endYDocPt()));
 		break;
 	default:
 		assert(false);
@@ -1018,14 +1018,14 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(scheme()->docWidth(), rullerPoint.y()));
+		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
 		break;
 	case MouseState::MovingVerticalEdge:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), scheme()->docHeight()));
+		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), scheme()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(scheme()->docWidth(), rullerPoint.y()));
+		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
 		break;
 	default:
 		assert(false);
@@ -1045,12 +1045,12 @@ void EditSchemeView::drawGrid(QPainter* p)
 {
 	assert(p);
 
-	auto unit = scheme()->unit();
+	auto unit = schema()->unit();
 
-	double frameWidth = scheme()->docWidth();
-	double frameHeight = scheme()->docHeight();
+	double frameWidth = schema()->docWidth();
+	double frameHeight = schema()->docHeight();
 
-	double gridSize = scheme()->gridSize();
+	double gridSize = schema()->gridSize();
 
 	double scale = zoom() / 100.0;
 
@@ -1116,9 +1116,9 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 		return SchemeItemAction::NoAction;
 	}
 
-	if (schemeItem->itemUnit() != scheme()->unit())
+	if (schemeItem->itemUnit() != schema()->unit())
 	{
-		assert(schemeItem->itemUnit() == scheme()->unit());
+		assert(schemeItem->itemUnit() == schema()->unit());
 		return SchemeItemAction::NoAction;
 	}
 
@@ -1320,31 +1320,31 @@ SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeI
 
 QUuid EditSchemeView::activeLayerGuid() const
 {
-	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
+		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
 		return QUuid();
 	}
 
-	return scheme()->Layers[m_activeLayer]->guid();
+	return schema()->Layers[m_activeLayer]->guid();
 }
 
 std::shared_ptr<VFrame30::SchemaLayer> EditSchemeView::activeLayer()
 {
-	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
+		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
 		return std::make_shared<VFrame30::SchemaLayer>("Error", false);
 	}
 
-	return scheme()->Layers[m_activeLayer];
+	return schema()->Layers[m_activeLayer];
 }
 
 void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
 {
-	for (int i = 0; i < static_cast<int>(scheme()->Layers.size()); i++)
+	for (int i = 0; i < static_cast<int>(schema()->Layers.size()); i++)
 	{
-		if (scheme()->Layers[i] == layer)
+		if (schema()->Layers[i] == layer)
 		{
 			m_activeLayer = i;
 			return;
@@ -4588,7 +4588,7 @@ void EditSchemeWidget::onLeftKey()
 		return;
 	}
 
-	double dif = -schemeView()->scheme()->gridSize();
+	double dif = -schemeView()->schema()->gridSize();
 
 	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
 
@@ -4602,7 +4602,7 @@ void EditSchemeWidget::onRightKey()
 		return;
 	}
 
-	double dif = schemeView()->scheme()->gridSize();
+	double dif = schemeView()->schema()->gridSize();
 
 	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
 
@@ -4616,7 +4616,7 @@ void EditSchemeWidget::onUpKey()
 		return;
 	}
 
-	double dif = -schemeView()->scheme()->gridSize();
+	double dif = -schemeView()->schema()->gridSize();
 
 	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
 
@@ -4630,7 +4630,7 @@ void EditSchemeWidget::onDownKey()
 		return;
 	}
 
-	double dif = schemeView()->scheme()->gridSize();
+	double dif = schemeView()->schema()->gridSize();
 
 	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
 

@@ -50,7 +50,7 @@ SchemeLayersDialog::SchemeLayersDialog(EditSchemeView* schemeView, QWidget *pare
 	connect(m_printAction, &QAction::triggered, this, &SchemeLayersDialog::onPrintClick);
 
 	int index = 0;
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->scheme()->Layers)
+	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->schema()->Layers)
 	{
 		m_name << l->name();
 		m_compile << l->compile();
@@ -222,7 +222,7 @@ void SchemeLayersDialog::on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item
 void SchemeLayersDialog::on_SchemeLayersDialog_accepted()
 {
 	int index = 0;
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->scheme()->Layers)
+	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->schema()->Layers)
 	{
 		l->setCompile(m_compile[index]);
 		l->setShow(m_show[index]);

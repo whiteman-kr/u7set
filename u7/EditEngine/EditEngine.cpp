@@ -272,7 +272,7 @@ namespace EditEngine
 		m_zoom(100.0)
 	{
 		assert(schemeView != nullptr);
-		assert(schemeView->scheme() != nullptr);
+		assert(schemeView->schema() != nullptr);
 		assert(hScrollBar != nullptr);
 		assert(vScrollBar != nullptr);
 

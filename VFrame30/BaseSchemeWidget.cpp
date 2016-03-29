@@ -1,11 +1,11 @@
 #include "BaseSchemeWidget.h"
 #include "Schema.h"
-#include "SchemeView.h"
+#include "SchemaView.h"
 
 namespace VFrame30
 {
 
-	BaseSchemeWidget::BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemeView* schemeView)
+	BaseSchemeWidget::BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemaView* schemeView)
 	{
 		assert(scheme != nullptr);
 		assert(schemeView != nullptr);
@@ -17,7 +17,7 @@ namespace VFrame30
 		// --
 		//
 		m_schemeView = schemeView;
-		m_schemeView->setScheme(scheme, false);
+		m_schemeView->setSchema(scheme, false);
 
 		m_schemeView->setZoom(100);
 		setWidget(m_schemeView);
@@ -290,25 +290,25 @@ namespace VFrame30
 
 	std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme()
 	{
-		return m_schemeView->scheme();
+		return m_schemeView->schema();
 	}
 
 	const std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme() const
 	{
-		return m_schemeView->scheme();
+		return m_schemeView->schema();
 	}
 
 	void BaseSchemeWidget::setScheme(std::shared_ptr<VFrame30::Schema> scheme)
 	{
-		m_schemeView->setScheme(scheme, true);
+		m_schemeView->setSchema(scheme, true);
 	}
 
-	SchemeView* BaseSchemeWidget::schemeView()
+	SchemaView* BaseSchemeWidget::schemeView()
 	{
 		return m_schemeView;
 	}
 
-	const SchemeView* BaseSchemeWidget::schemeView() const
+	const SchemaView* BaseSchemeWidget::schemeView() const
 	{
 		return m_schemeView;
 	}
