@@ -6,12 +6,12 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT SchemeItemConst : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemaItemConst : public FblItemRect
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemConst>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemConst>;
 #endif
 
 		// Declarations
@@ -25,9 +25,9 @@ namespace VFrame30
 		Q_ENUM(ConstType)
 
 	public:
-		SchemeItemConst();
-		SchemeItemConst(SchemaUnit unit);
-		virtual ~SchemeItemConst();
+		SchemaItemConst();
+		SchemaItemConst(SchemaUnit unit);
+		virtual ~SchemaItemConst();
 
 		// Serialization
 		//
@@ -50,8 +50,8 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		SchemeItemConst::ConstType type() const;
-		void setType(SchemeItemConst::ConstType value);
+		SchemaItemConst::ConstType type() const;
+		void setType(SchemaItemConst::ConstType value);
 
 		bool isIntegral() const;
 		bool isFloat() const;

@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <memory>
-#include "../VFrame30/SchemeItem.h"
+#include "../VFrame30/SchemaItem.h"
 #include "../include/PropertyEditor.h"
 
 

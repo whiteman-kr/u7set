@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SchemeItem.h"
+#include "SchemaItem.h"
 #include "Settings.h"
 
 class QPen;

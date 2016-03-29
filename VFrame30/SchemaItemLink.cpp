@@ -1,17 +1,17 @@
 #include "Stable.h"
-#include "SchemeItemLink.h"
+#include "SchemaItemLink.h"
 #include "SchemaLayer.h"
 
 namespace VFrame30
 {
-	SchemeItemLink::SchemeItemLink(void)
+	SchemaItemLink::SchemaItemLink(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemLink::SchemeItemLink(SchemaUnit unit) :
+	SchemaItemLink::SchemaItemLink(SchemaUnit unit) :
 		FblItemLine(unit)
 	{
 		//AddInput();
@@ -19,13 +19,13 @@ namespace VFrame30
 	}
 
 
-	SchemeItemLink::~SchemeItemLink(void)
+	SchemaItemLink::~SchemaItemLink(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool SchemeItemLink::SaveData(Proto::Envelope* message) const
+	bool SchemaItemLink::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemLine::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemLink::LoadData(const Proto::Envelope& message)
+	bool SchemaItemLink::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItemLink::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* pLayer) const
+	void SchemaItemLink::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* pLayer) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -166,12 +166,12 @@ namespace VFrame30
 
 	// Вычислить координаты точки
 	//
-	void SchemeItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
+	void SchemaItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
 	{
 		return;
 	}
 
-	bool SchemeItemLink::GetConnectionPointPos(const QUuid&, SchemaPoint*, double, int) const
+	bool SchemaItemLink::GetConnectionPointPos(const QUuid&, SchemaPoint*, double, int) const
 	{
 		return false;
 	}

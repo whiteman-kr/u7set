@@ -6,15 +6,15 @@
 #include "MonitorSchema.h"
 #include "WiringSchema.h"
 #include "SchemaLayer.h"
-#include "SchemeItemLine.h"
-#include "SchemeItemRect.h"
-#include "SchemeItemPath.h"
+#include "SchemaItemLine.h"
+#include "SchemaItemRect.h"
+#include "SchemaItemPath.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"
-#include "SchemeItemLink.h"
-#include "SchemeItemAfb.h"
-#include "SchemeItemSignal.h"
-#include "SchemeItemConst.h"
+#include "SchemaItemLink.h"
+#include "SchemaItemAfb.h"
+#include "SchemaItemSignal.h"
+#include "SchemaItemConst.h"
 #include "../include/Types.h"
 
 namespace VFrame30
@@ -41,18 +41,18 @@ namespace VFrame30
 
 		// Registering SchemeItems
 		//
-		SchemaItemFactory.Register<SchemeItemLine>();
-		SchemaItemFactory.Register<SchemeItemRect>();
-		SchemaItemFactory.Register<SchemeItemPath>();
+		SchemaItemFactory.Register<SchemaItemLine>();
+		SchemaItemFactory.Register<SchemaItemRect>();
+		SchemaItemFactory.Register<SchemaItemPath>();
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
-		SchemaItemFactory.Register<SchemeItemLink>();
-		SchemaItemFactory.Register<SchemeItemAfb>();
-		SchemaItemFactory.Register<SchemeItemInput>();
-		SchemaItemFactory.Register<SchemeItemOutput>();
-		SchemaItemFactory.Register<SchemeItemConst>();
+		SchemaItemFactory.Register<SchemaItemLink>();
+		SchemaItemFactory.Register<SchemaItemAfb>();
+		SchemaItemFactory.Register<SchemaItemInput>();
+		SchemaItemFactory.Register<SchemaItemOutput>();
+		SchemaItemFactory.Register<SchemaItemConst>();
 
-		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);
+		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 
 		return true;
 	}

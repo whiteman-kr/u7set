@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "Schema.h"
 #include "FblItem.h"
-#include "SchemeItemLink.h"
+#include "SchemaItemLink.h"
 #include "HorzVertLinks.h"
 #include "../include/ProtoSerialization.h"
 
@@ -326,7 +326,7 @@ namespace VFrame30
 					continue;
 				}
 
-				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
+				SchemaItemLink* schemeItemLink = dynamic_cast<SchemaItemLink*>(item->get());
 				if (schemeItemLink != nullptr)
 				{
 					const std::list<SchemaPoint>& pointList = schemeItemLink->GetPointList();
@@ -370,7 +370,7 @@ namespace VFrame30
 			
 				// Если элемент SchemeItemLink, то в качестве координат пинов будут крайние точки
 				//
-				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
+				SchemaItemLink* schemeItemLink = dynamic_cast<SchemaItemLink*>(item->get());
 
 				if (schemeItemLink != nullptr)
 				{

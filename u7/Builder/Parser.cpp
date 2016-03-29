@@ -6,11 +6,11 @@
 #include "../../include/DeviceObject.h"
 
 #include "../../VFrame30/LogicSchema.h"
-#include "../../VFrame30/SchemeItemLink.h"
+#include "../../VFrame30/SchemaItemLink.h"
 #include "../../VFrame30/FblItemRect.h"
-#include "../../VFrame30/SchemeItemAfb.h"
-#include "../../VFrame30/SchemeItemSignal.h"
-#include "../../VFrame30/SchemeItemConst.h"
+#include "../../VFrame30/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItemSignal.h"
+#include "../../VFrame30/SchemaItemConst.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
 
@@ -666,7 +666,7 @@ namespace Builder
 		{
 			if (li.m_fblItem->isInputSignalElement())
 			{
-				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -679,7 +679,7 @@ namespace Builder
 
 			if (li.m_fblItem->isOutputSignalElement())
 			{
-				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -1352,7 +1352,7 @@ namespace Builder
 
 				for (const VFrame30::AfbPin& pt : inputs)
 				{
-					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
+					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
 
 					VFrame30::SchemaPoint pos = pt.point();
 
@@ -1364,7 +1364,7 @@ namespace Builder
 
 				for (const VFrame30::AfbPin& pt : outputs)
 				{
-					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
+					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
 
 					VFrame30::SchemaPoint pos = pt.point();
 
@@ -1386,7 +1386,7 @@ namespace Builder
 		{
 			// Decompose link to parts
 			//
-			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
+			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item->get());
 
 			if (link != nullptr)
 			{
@@ -1412,7 +1412,7 @@ namespace Builder
 
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
+			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item->get());
 
 			if (link == nullptr)
 			{
@@ -1528,7 +1528,7 @@ namespace Builder
 				// save it's and points to newBranch
 				//
 				std::shared_ptr<VFrame30::SchemaItem> schemeItem = layer->getItemById(id);
-				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(schemeItem.get());
+				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(schemeItem.get());
 
 				if (schemeItem == nullptr ||
 					link == nullptr)

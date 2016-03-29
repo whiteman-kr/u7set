@@ -1,6 +1,6 @@
 #include "EditEngineSetProperty.h"
 #include "EditSchemeWidget.h"
-#include "../../VFrame30/SchemeItemAfb.h"
+#include "../../VFrame30/SchemaItemAfb.h"
 
 namespace EditEngine
 {
@@ -55,7 +55,7 @@ namespace EditEngine
 			{
 				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
-				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
+				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 
 				if (fblElement == nullptr)
 				{
@@ -88,7 +88,7 @@ namespace EditEngine
 			{
 				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
-				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
+				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 
 				if (fblElement == nullptr)
 				{

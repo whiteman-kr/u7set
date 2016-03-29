@@ -1,29 +1,29 @@
 #include "Stable.h"
-#include "SchemeItemAfb.h"
+#include "SchemaItemAfb.h"
 #include "Schema.h"
 
 namespace VFrame30
 {
-	SchemeItemAfb::SchemeItemAfb(void) :
-		SchemeItemAfb(SchemaUnit::Inch)
+	SchemaItemAfb::SchemaItemAfb(void) :
+		SchemaItemAfb(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemAfb::SchemeItemAfb(SchemaUnit unit) :
+	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemAfb::precision, SchemeItemAfb::setPrecision);
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 	}
 
-	SchemeItemAfb::SchemeItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
+	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemAfb::precision, SchemeItemAfb::setPrecision);
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 
 		// Create input output signals in VFrame30::FblEtem
 		//
@@ -49,11 +49,11 @@ namespace VFrame30
 
 	}
 
-	SchemeItemAfb::~SchemeItemAfb(void)
+	SchemaItemAfb::~SchemaItemAfb(void)
 	{
 	}
 
-	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const
+	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const
 	{
 		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
@@ -215,7 +215,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool SchemeItemAfb::SaveData(Proto::Envelope* message) const
+	bool SchemaItemAfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
@@ -227,7 +227,7 @@ namespace VFrame30
 	
 		// --
 		//
-		Proto::SchemeItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
+		Proto::SchemaItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
 
 		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
@@ -242,7 +242,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemAfb::LoadData(const Proto::Envelope& message)
+	bool SchemaItemAfb::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -266,7 +266,7 @@ namespace VFrame30
 			return false;
 		}
 		
-		const Proto::SchemeItemAfb& vifble = message.schemaitem().afb();
+		const Proto::SchemaItemAfb& vifble = message.schemaitem().afb();
 		
 		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 
@@ -290,12 +290,12 @@ namespace VFrame30
 		return true;
 	}
 
-	QString SchemeItemAfb::buildName() const
+	QString SchemaItemAfb::buildName() const
 	{
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool SchemeItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> scheme)
+	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> scheme)
 	{
 		if (name.isEmpty() == true || scheme == nullptr)
 		{
@@ -343,7 +343,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemAfb::setAfbParamByOpName(const QString& opName, QVariant value)
+	bool SchemaItemAfb::setAfbParamByOpName(const QString& opName, QVariant value)
 	{
 		if (opName.isEmpty() == true)
 		{
@@ -368,7 +368,7 @@ namespace VFrame30
 	}
 
 
-	bool SchemeItemAfb::setAfbElementParams(Afb::AfbElement* afbElement) const
+	bool SchemaItemAfb::setAfbElementParams(Afb::AfbElement* afbElement) const
 	{
 		if (afbElement == nullptr)
 		{
@@ -399,7 +399,7 @@ namespace VFrame30
 		return true;
 	}
 
-	double SchemeItemAfb::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	double SchemaItemAfb::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
 		//
@@ -434,7 +434,7 @@ namespace VFrame30
 		return minHeight;
 	}
 
-	double SchemeItemAfb::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	double SchemaItemAfb::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
 		//
@@ -467,7 +467,7 @@ namespace VFrame30
 //		return m_cachedGridSize * 16;
 	}
 
-	void SchemeItemAfb::addSpecificParamProperties()
+	void SchemaItemAfb::addSpecificParamProperties()
 	{
 		// Clear all dynamic properties
 		//
@@ -495,7 +495,7 @@ namespace VFrame30
 		}
 	}
 
-	bool SchemeItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb)
+	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb)
 	{
 		if (script.isEmpty() == true)
 		{
@@ -546,7 +546,7 @@ namespace VFrame30
 
 	}
 
-	int SchemeItemAfb::getParamIntValue(const QString& name)
+	int SchemaItemAfb::getParamIntValue(const QString& name)
 	{
 		for (Afb::AfbParam& p : m_params)
 		{
@@ -567,42 +567,42 @@ namespace VFrame30
 		return -1;
 	}
 
-	void SchemeItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemaItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
 		addInput(opIndex, caption);
 	}
 
-	void SchemeItemAfb::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemaItemAfb::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
 		addOutput(opIndex, caption);
 	}
 
-	void SchemeItemAfb::removeInputSignals()
+	void SchemaItemAfb::removeInputSignals()
 	{
 		removeAllInputs();
 	}
 
-	void SchemeItemAfb::removeOutputSignals()
+	void SchemaItemAfb::removeOutputSignals()
 	{
 		removeAllOutputs();
 	}
 
-	const QString& SchemeItemAfb::afbStrID() const
+	const QString& SchemaItemAfb::afbStrID() const
 	{
 		return m_afbStrID;
 	}
 
-	const std::vector<Afb::AfbParam>& SchemeItemAfb::params() const
+	const std::vector<Afb::AfbParam>& SchemaItemAfb::params() const
 	{
 		return m_params;
 	}
 
-	int SchemeItemAfb::precision() const
+	int SchemaItemAfb::precision() const
 	{
 		return m_precision;
 	}
 
-	void SchemeItemAfb::setPrecision(int value)
+	void SchemaItemAfb::setPrecision(int value)
 	{
 		if (value < 0)
 		{

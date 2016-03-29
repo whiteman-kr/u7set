@@ -1,22 +1,22 @@
-#include "SchemeItemConst.h"
+#include "SchemaItemConst.h"
 
 namespace VFrame30
 {
 
-	SchemeItemConst::SchemeItemConst() :
-		SchemeItemConst(SchemaUnit::Inch)
+	SchemaItemConst::SchemaItemConst() :
+		SchemaItemConst(SchemaUnit::Inch)
 	{
 		// This constructor can be called while serialization
 		//
 	}
 
-	SchemeItemConst::SchemeItemConst(SchemaUnit unit) :
+	SchemaItemConst::SchemaItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemeItemConst::type, SchemeItemConst::setType);
-		ADD_PROPERTY_GETTER_SETTER(int, ValueIntegral, true, SchemeItemConst::intValue, SchemeItemConst::setIntValue);
-		ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemeItemConst::floatValue, SchemeItemConst::setFloatValue);
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemConst::precision, SchemeItemConst::setPrecision);
+		ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemaItemConst::type, SchemaItemConst::setType);
+		ADD_PROPERTY_GETTER_SETTER(int, ValueIntegral, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
+		ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
 
 		// --
 		//
@@ -24,11 +24,11 @@ namespace VFrame30
 		addOutput();
 	}
 
-	SchemeItemConst::~SchemeItemConst()
+	SchemaItemConst::~SchemaItemConst()
 	{
 	}
 
-	bool SchemeItemConst::SaveData(Proto::Envelope* message) const
+	bool SchemaItemConst::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 
@@ -41,7 +41,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::SchemeItemConst* constitem = message->mutable_schemaitem()->mutable_constitem();
+		Proto::SchemaItemConst* constitem = message->mutable_schemaitem()->mutable_constitem();
 
 		constitem->set_type(m_type);
 		constitem->set_intvalue(m_intValue);
@@ -51,7 +51,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemConst::LoadData(const Proto::Envelope& message)
+	bool SchemaItemConst::LoadData(const Proto::Envelope& message)
 	{
 		bool result = FblItemRect::LoadData(message);
 		if (result == false)
@@ -67,7 +67,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::SchemeItemConst& constitem = message.schemaitem().constitem();
+		const Proto::SchemaItemConst& constitem = message.schemaitem().constitem();
 
 		m_type = static_cast<ConstType>(constitem.type());
 		m_intValue = constitem.intvalue();
@@ -77,7 +77,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemeItemConst::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
+	void SchemaItemConst::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 
@@ -135,7 +135,7 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemeItemConst::valueToString() const
+	QString SchemaItemConst::valueToString() const
 	{
 		QString text;
 
@@ -155,56 +155,56 @@ namespace VFrame30
 		return text;
 	}
 
-	QString SchemeItemConst::buildName() const
+	QString SchemaItemConst::buildName() const
 	{
 		return QString("Const (%1)").arg(valueToString());
 	}
 
-	SchemeItemConst::ConstType SchemeItemConst::type() const
+	SchemaItemConst::ConstType SchemaItemConst::type() const
 	{
 		return m_type;
 	}
 
-	void SchemeItemConst::setType(SchemeItemConst::ConstType value)
+	void SchemaItemConst::setType(SchemaItemConst::ConstType value)
 	{
 		m_type = value;
 	}
 
-	bool SchemeItemConst::isIntegral() const
+	bool SchemaItemConst::isIntegral() const
 	{
-		return m_type == SchemeItemConst::ConstType::IntegralType;
+		return m_type == SchemaItemConst::ConstType::IntegralType;
 	}
 
-	bool SchemeItemConst::isFloat() const
+	bool SchemaItemConst::isFloat() const
 	{
-		return m_type == SchemeItemConst::ConstType::FloatType;
+		return m_type == SchemaItemConst::ConstType::FloatType;
 	}
 
-	int SchemeItemConst::intValue() const
+	int SchemaItemConst::intValue() const
 	{
 		return m_intValue;
 	}
 
-	void SchemeItemConst::setIntValue(int intValue)
+	void SchemaItemConst::setIntValue(int intValue)
 	{
 		m_intValue = intValue;
 	}
-	double SchemeItemConst::floatValue() const
+	double SchemaItemConst::floatValue() const
 	{
 		return m_floatValue;
 	}
 
-	void SchemeItemConst::setFloatValue(double doubleValue)
+	void SchemaItemConst::setFloatValue(double doubleValue)
 	{
 		m_floatValue = doubleValue;
 	}
 
-	int SchemeItemConst::precision() const
+	int SchemaItemConst::precision() const
 	{
 		return m_precision;
 	}
 
-	void SchemeItemConst::setPrecision(int value)
+	void SchemaItemConst::setPrecision(int value)
 	{
 		if (value < 0)
 		{

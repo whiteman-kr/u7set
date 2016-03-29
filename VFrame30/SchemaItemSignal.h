@@ -6,14 +6,14 @@ namespace VFrame30
 {
 	// CSchemeItemSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemeItemSignal : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemaItemSignal : public FblItemRect
 	{
 		Q_OBJECT
 
 	protected:
-		SchemeItemSignal(void);
-		SchemeItemSignal(SchemaUnit unit);
-		virtual ~SchemeItemSignal(void);
+		SchemaItemSignal(void);
+		SchemaItemSignal(SchemaUnit unit);
+		virtual ~SchemaItemSignal(void);
 	
 	public:
 
@@ -49,19 +49,19 @@ namespace VFrame30
 	//
 	// CSchemeItemInput
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemeItemInput : public SchemeItemSignal
+	class VFRAME30LIBSHARED_EXPORT SchemaItemInput : public SchemaItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemInput>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemInput>;
 #endif
 
 	private:
-		SchemeItemInput(void);
+		SchemaItemInput(void);
 	public:
-		explicit SchemeItemInput(SchemaUnit unit);
-		virtual ~SchemeItemInput(void);
+		explicit SchemaItemInput(SchemaUnit unit);
+		virtual ~SchemaItemInput(void);
 
 		virtual QString buildName() const override;
 
@@ -80,19 +80,19 @@ namespace VFrame30
 	//
 	// CSchemeItemInput
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemeItemOutput : public SchemeItemSignal
+	class VFRAME30LIBSHARED_EXPORT SchemaItemOutput : public SchemaItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemOutput>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemOutput>;
 #endif
 
 	private:
-		SchemeItemOutput(void);
+		SchemaItemOutput(void);
 	public:
-		explicit SchemeItemOutput(SchemaUnit unit);
-		virtual ~SchemeItemOutput(void);
+		explicit SchemaItemOutput(SchemaUnit unit);
+		virtual ~SchemaItemOutput(void);
 
 		virtual QString buildName() const override;
 

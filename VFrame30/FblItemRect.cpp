@@ -2,9 +2,9 @@
 #include "FblItemRect.h"
 #include "SchemaLayer.h"
 
-#include "SchemeItemSignal.h"
-#include "SchemeItemConst.h"
-#include "SchemeItemAfb.h"
+#include "SchemaItemSignal.h"
+#include "SchemaItemConst.h"
+#include "SchemaItemAfb.h"
 
 
 namespace VFrame30
@@ -539,25 +539,25 @@ namespace VFrame30
 
 	bool FblItemRect::isInputSignalElement() const
 	{
-		const VFrame30::SchemeItemInput* ptr = dynamic_cast<const VFrame30::SchemeItemInput*>(this);
+		const VFrame30::SchemaItemInput* ptr = dynamic_cast<const VFrame30::SchemaItemInput*>(this);
 		return ptr != nullptr;
 	}
 
 	bool FblItemRect::isOutputSignalElement() const
 	{
-		const VFrame30::SchemeItemOutput* ptr = dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
+		const VFrame30::SchemaItemOutput* ptr = dynamic_cast<const VFrame30::SchemaItemOutput*>(this);
 		return ptr != nullptr;
 	}
 
 	bool FblItemRect::isConstElement() const
 	{
-		const VFrame30::SchemeItemConst* ptr = dynamic_cast<const VFrame30::SchemeItemConst*>(this);
+		const VFrame30::SchemaItemConst* ptr = dynamic_cast<const VFrame30::SchemaItemConst*>(this);
 		return ptr != nullptr;
 	}
 
 	bool FblItemRect::isFblElement() const
 	{
-		const VFrame30::SchemeItemAfb* ptr = dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
+		const VFrame30::SchemaItemAfb* ptr = dynamic_cast<const VFrame30::SchemaItemAfb*>(this);
 		return ptr != nullptr;
 	}
 
@@ -566,54 +566,54 @@ namespace VFrame30
 		return isInputSignalElement() || isOutputSignalElement();
 	}
 
-	VFrame30::SchemeItemSignal* FblItemRect::toSignalElement()
+	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
-		return dynamic_cast<VFrame30::SchemeItemSignal*>(this);
+		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
 	}
 
-	const VFrame30::SchemeItemSignal* FblItemRect::toSignalElement() const
+	const VFrame30::SchemaItemSignal* FblItemRect::toSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemeItemSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemaItemSignal*>(this);
 	}
 
-	VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement()
+	VFrame30::SchemaItemInput* FblItemRect::toInputSignalElement()
 	{
-		return dynamic_cast<VFrame30::SchemeItemInput*>(this);
+		return dynamic_cast<VFrame30::SchemaItemInput*>(this);
 	}
 
-	const VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement() const
+	const VFrame30::SchemaItemInput* FblItemRect::toInputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemeItemInput*>(this);
+		return dynamic_cast<const VFrame30::SchemaItemInput*>(this);
 	}
 
-	VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement()
+	VFrame30::SchemaItemOutput* FblItemRect::toOutputSignalElement()
 	{
-		return dynamic_cast<VFrame30::SchemeItemOutput*>(this);
+		return dynamic_cast<VFrame30::SchemaItemOutput*>(this);
 	}
 
-	const VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement() const
+	const VFrame30::SchemaItemOutput* FblItemRect::toOutputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
+		return dynamic_cast<const VFrame30::SchemaItemOutput*>(this);
 	}
 
-	VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst()
+	VFrame30::SchemaItemConst* FblItemRect::toSchemeItemConst()
 	{
-		return dynamic_cast<VFrame30::SchemeItemConst*>(this);
+		return dynamic_cast<VFrame30::SchemaItemConst*>(this);
 	}
 
-	const VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst() const
+	const VFrame30::SchemaItemConst* FblItemRect::toSchemeItemConst() const
 	{
-		return dynamic_cast<const VFrame30::SchemeItemConst*>(this);
+		return dynamic_cast<const VFrame30::SchemaItemConst*>(this);
 	}
 
-	VFrame30::SchemeItemAfb* FblItemRect::toFblElement()
+	VFrame30::SchemaItemAfb* FblItemRect::toFblElement()
 	{
-		return dynamic_cast<VFrame30::SchemeItemAfb*>(this);
+		return dynamic_cast<VFrame30::SchemaItemAfb*>(this);
 	}
 
-	const VFrame30::SchemeItemAfb* FblItemRect::toFblElement() const
+	const VFrame30::SchemaItemAfb* FblItemRect::toFblElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
+		return dynamic_cast<const VFrame30::SchemaItemAfb*>(this);
 	}
 	
 	// Weight propertie

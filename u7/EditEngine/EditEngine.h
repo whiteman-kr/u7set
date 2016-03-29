@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/SchemeItem.h"
+#include "../VFrame30/SchemaItem.h"
 
 class EditSchemeView;
 

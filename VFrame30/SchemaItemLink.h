@@ -5,19 +5,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemeItemLink : public FblItemLine
+	class VFRAME30LIBSHARED_EXPORT SchemaItemLink : public FblItemLine
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemLink>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLink>;
 #endif
 
 	private:
-		SchemeItemLink(void);
+		SchemaItemLink(void);
 	public:
-		explicit SchemeItemLink(SchemaUnit unit);
-		virtual ~SchemeItemLink(void);
+		explicit SchemaItemLink(SchemaUnit unit);
+		virtual ~SchemaItemLink(void);
 
 		// Serialization
 		//

@@ -34,7 +34,7 @@ namespace VFrame30
 		 
 		for (auto vf = m_schemeIds.begin(); vf != m_schemeIds.end(); ++vf)
 		{
-			Proto::Uuid* pGuid = pMutableConfiguration->add_schemesids();
+			Proto::Uuid* pGuid = pMutableConfiguration->add_schemasids();
 			Proto::Write(pGuid, *vf);
 		}
 
@@ -42,8 +42,8 @@ namespace VFrame30
 
 		for (auto vf = m_schemes.begin(); vf != m_schemes.end(); ++vf)
 		{
-			Proto::Envelope* scheme = pMutableConfiguration->add_schemes();
-			saveFrameResult &= vf->get()->Save(scheme);
+			Proto::Envelope* schema = pMutableConfiguration->add_schemas();
+			saveFrameResult &= vf->get()->Save(schema);
 		}
 				
 		return saveFrameResult;
@@ -66,18 +66,18 @@ namespace VFrame30
 		Proto::Read(configuration.globals(), &m_globals);
 
 		m_schemeIds.clear();
-		for (int i = 0; i < configuration.schemesids().size(); i++)
+		for (int i = 0; i < configuration.schemasids().size(); i++)
 		{
-			const QUuid& schemeGuid = Proto::Read(configuration.schemesids(i));
+			const QUuid& schemeGuid = Proto::Read(configuration.schemasids(i));
 			m_schemeIds.push_back(schemeGuid);
 
 			assert(schemeGuid.isNull() == false);
 		}
 
 		m_schemes.clear();
-		for (int i = 0; i < configuration.schemes().size(); i++)
+		for (int i = 0; i < configuration.schemas().size(); i++)
 		{
-			Schema* scheme = Schema::Create(configuration.schemes(i));
+			Schema* scheme = Schema::Create(configuration.schemas(i));
 
 			if (scheme == nullptr)
 			{

@@ -103,14 +103,6 @@ HEADERS += VFrame30Lib_global.h \
     version.h \
     ../include/DbStruct.h \
     BaseSchemeWidget.h \
-    SchemeItemConst.h \
-    SchemeItem.h \
-    SchemeItemLine.h \
-    SchemeItemRect.h \
-    SchemeItemPath.h \
-    SchemeItemSignal.h \
-    SchemeItemAfb.h \
-    SchemeItemLink.h \
     Afb.h \
     ../include/DebugInstCounter.h \
 	../include/PropertyObject.h \
@@ -119,7 +111,15 @@ HEADERS += VFrame30Lib_global.h \
     WiringSchema.h \
     DiagSchema.h \
     SchemaLayer.h \
-    SchemaView.h
+    SchemaView.h \
+    SchemaItem.h \
+    SchemaItemAfb.h \
+    SchemaItemConst.h \
+    SchemaItemLine.h \
+    SchemaItemLink.h \
+    SchemaItemPath.h \
+    SchemaItemRect.h \
+    SchemaItemSignal.h
 
 SOURCES += \
     Settings.cpp \
@@ -142,14 +142,6 @@ SOURCES += \
 	MonitorSchema.cpp \
     ../lib/DbStruct.cpp \
     BaseSchemeWidget.cpp \
-    SchemeItemConst.cpp \
-    SchemeItem.cpp \
-    SchemeItemLine.cpp \
-    SchemeItemRect.cpp \
-    SchemeItemPath.cpp \
-    SchemeItemSignal.cpp \
-    SchemeItemAfb.cpp \
-    SchemeItemLink.cpp \
     Afb.cpp \
 	../lib/PropertyObject.cpp \
     Schema.cpp \
@@ -157,7 +149,15 @@ SOURCES += \
     WiringSchema.cpp \
     DiagSchema.cpp \
     SchemaLayer.cpp \
-    SchemaView.cpp
+    SchemaView.cpp \
+    SchemaItem.cpp \
+    SchemaItemAfb.cpp \
+    SchemaItemConst.cpp \
+    SchemaItemLine.cpp \
+    SchemaItemLink.cpp \
+    SchemaItemPath.cpp \
+    SchemaItemRect.cpp \
+    SchemaItemSignal.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

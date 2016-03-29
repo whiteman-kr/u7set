@@ -133,8 +133,8 @@ message Configuration
 	required wstring variables = 4;
 	required wstring globals = 5; 
 	
-	repeated Uuid schemesIDs = 100;
-	repeated Envelope schemes = 101;
+	repeated Uuid schemasIDs = 100;
+	repeated Envelope schemas = 101;
 }
 
 
@@ -342,16 +342,16 @@ message SchemaItem
 	
 	// Inherited from PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional SchemeItemRect Rect = 116;						// +PosRectImpl
-	optional SchemeItemLine Line = 117;						// +PosLineImpl
-	optional SchemeItemPath Path = 118;						// +PosConnectionImpl
+	optional SchemaItemRect Rect = 116;						// +PosRectImpl
+	optional SchemaItemLine Line = 117;						// +PosLineImpl
+	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
 	
-	optional SchemeItemSignal Signal = 124;						// +FblItemRect
-	optional SchemeItemInput InputSignal = 125;					// +Signal
-	optional SchemeItemOutput OutputSignal = 126;                                   // +Signal
-	optional SchemeItemLink Link = 127;						// +FblItemLine
-	optional SchemeItemAfb Afb = 128;						// +FblItemRect
-	optional SchemeItemConst ConstItem = 129;					// +FblItemRect
+	optional SchemaItemSignal Signal = 124;						// +FblItemRect
+	optional SchemaItemInput InputSignal = 125;					// +Signal
+	optional SchemaItemOutput OutputSignal = 126;                                   // +Signal
+	optional SchemaItemLink Link = 127;						// +FblItemLine
+	optional SchemaItemAfb Afb = 128;						// +FblItemRect
+	optional SchemaItemConst ConstItem = 129;					// +FblItemRect
 }
 
 
@@ -396,10 +396,10 @@ message PosConnectionImpl
 
 //
 //
-// SchemeItemRect
+// SchemaItemRect
 //
 //
-message SchemeItemRect
+message SchemaItemRect
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -413,10 +413,10 @@ message SchemeItemRect
 
 //
 //
-// SchemeItemLine
+// SchemaItemLine
 //
 //
-message SchemeItemLine
+message SchemaItemLine
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -424,10 +424,10 @@ message SchemeItemLine
 
 //
 //
-// SchemeItemPath
+// SchemaItemPath
 //
 //
-message SchemeItemPath
+message SchemaItemPath
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -492,10 +492,10 @@ message FblItemLine
 
 //
 //
-// SchemeItemSignal
+// SchemaItemSignal
 //
 //
-message SchemeItemSignal
+message SchemaItemSignal
 {
 	repeated wstring signalStrIDs = 1;
 }
@@ -503,40 +503,40 @@ message SchemeItemSignal
 
 //
 //
-// SchemeItemInput
+// SchemaItemInput
 //
 //
-message SchemeItemInput
+message SchemaItemInput
 {
 }
 
 
 //
 //
-// SchemeItemOutput
+// SchemaItemOutput
 //
 //
-message SchemeItemOutput
+message SchemaItemOutput
 {
 }
 
 
 //
 //
-// SchemeItemLink
+// SchemaItemLink
 //
 //
-message SchemeItemLink
+message SchemaItemLink
 {
 }
 
 
 //
 //
-// SchemeItemAfb
+// SchemaItemAfb
 //
 //
-message SchemeItemAfb
+message SchemaItemAfb
 {
 	repeated AfbParam params = 2;
 	optional wstring afbStrid = 3;
@@ -545,10 +545,10 @@ message SchemeItemAfb
 
 //
 //
-// SchemeItemConst
+// SchemaItemConst
 //
 //
-message SchemeItemConst
+message SchemaItemConst
 {
 	optional int32 type = 1 [default = 0];
 	optional int32 intValue = 2 [default = 0];

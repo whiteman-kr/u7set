@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "SchemeItemSignal.h"
+#include "SchemaItemSignal.h"
 #include "LogicSchema.h"
 
 namespace VFrame30
@@ -7,25 +7,25 @@ namespace VFrame30
 	//
 	// CSchemeItemSignal
 	//
-	SchemeItemSignal::SchemeItemSignal(void) :
-		SchemeItemSignal(SchemaUnit::Inch)
+	SchemaItemSignal::SchemaItemSignal(void) :
+		SchemaItemSignal(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemSignal::SchemeItemSignal(SchemaUnit unit) :
+	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, StrIDs, true, SchemeItemSignal::signalStrIds, SchemeItemSignal::setSignalStrIds);
+		ADD_PROPERTY_GETTER_SETTER(QString, StrIDs, true, SchemaItemSignal::signalStrIds, SchemaItemSignal::setSignalStrIds);
 	}
 
-	SchemeItemSignal::~SchemeItemSignal(void)
+	SchemaItemSignal::~SchemaItemSignal(void)
 	{
 	}
 
-	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
+	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 
@@ -119,7 +119,7 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemeItemSignal::signalStrIds() const
+	QString SchemaItemSignal::signalStrIds() const
 	{
 		QString result;
 
@@ -138,27 +138,27 @@ namespace VFrame30
 		return result;
 	}
 
-	const QStringList& SchemeItemSignal::signalStrIdList() const
+	const QStringList& SchemaItemSignal::signalStrIdList() const
 	{
 		return m_signalStrIds;
 	}
 
-	void SchemeItemSignal::setSignalStrIds(const QString& s)
+	void SchemaItemSignal::setSignalStrIds(const QString& s)
 	{
 		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
-	QStringList* SchemeItemSignal::mutable_signalStrIds()
+	QStringList* SchemaItemSignal::mutable_signalStrIds()
 	{
 		return &m_signalStrIds;
 	}
 
-	bool SchemeItemSignal::multiChannel() const
+	bool SchemaItemSignal::multiChannel() const
 	{
 		return m_signalStrIds.size() > 1;
 	}
 
-	bool SchemeItemSignal::SaveData(Proto::Envelope* message) const
+	bool SchemaItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 
@@ -171,7 +171,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::SchemeItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
+		Proto::SchemaItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
 
 		for (const QString& strId : m_signalStrIds)
 		{
@@ -182,7 +182,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemSignal::LoadData(const Proto::Envelope& message)
+	bool SchemaItemSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -206,7 +206,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::SchemeItemSignal& signal = message.schemaitem().signal();
+		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
 
 		m_signalStrIds.clear();
 		m_signalStrIds.reserve(signal.signalstrids_size());
@@ -223,37 +223,37 @@ namespace VFrame30
 
 
 	//
-	// CSchemeItemInputSignal
+	// CSchemaItemInputSignal
 	//
-	SchemeItemInput::SchemeItemInput(void)
+	SchemaItemInput::SchemaItemInput(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemInput::SchemeItemInput(SchemaUnit unit) :
-		SchemeItemSignal(unit)
+	SchemaItemInput::SchemaItemInput(SchemaUnit unit) :
+		SchemaItemSignal(unit)
 	{
 		addOutput();
 		setSignalStrIds("#IN_STRID");
 	}
 
-	SchemeItemInput::~SchemeItemInput(void)
+	SchemaItemInput::~SchemaItemInput(void)
 	{
 		assert(outputsCount() == 1);
 	}
 
-	QString SchemeItemInput::buildName() const
+	QString SchemaItemInput::buildName() const
 	{
 		return QString("Input (%1)").arg(signalStrIds());
 	}
 
 	// Serialization
 	//
-	bool SchemeItemInput::SaveData(Proto::Envelope* message) const
+	bool SchemaItemInput::SaveData(Proto::Envelope* message) const
 	{
-		bool result = SchemeItemSignal::SaveData(message);
+		bool result = SchemaItemSignal::SaveData(message);
 		
 		if (result == false || message->has_schemaitem() == false)
 		{
@@ -271,7 +271,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemInput::LoadData(const Proto::Envelope& message)
+	bool SchemaItemInput::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -281,7 +281,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = SchemeItemSignal::LoadData(message);
+		bool result = SchemaItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -302,37 +302,37 @@ namespace VFrame30
 	}
 	
 	//
-	// CSchemeItemOutputSignal
+	// CSchemaItemOutputSignal
 	//
-	SchemeItemOutput::SchemeItemOutput(void)
+	SchemaItemOutput::SchemaItemOutput(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemOutput::SchemeItemOutput(SchemaUnit unit) :
-		SchemeItemSignal(unit)
+	SchemaItemOutput::SchemaItemOutput(SchemaUnit unit) :
+		SchemaItemSignal(unit)
 	{
 		addInput();
 		setSignalStrIds("#OUT_STRID");
 	}
 
-	SchemeItemOutput::~SchemeItemOutput(void)
+	SchemaItemOutput::~SchemaItemOutput(void)
 	{
 		assert(inputsCount() == 1);
 	}
 
-	QString SchemeItemOutput::buildName() const
+	QString SchemaItemOutput::buildName() const
 	{
 		return QString("Output (%1)").arg(signalStrIds());
 	}
 
 	// Serialization
 	//
-	bool SchemeItemOutput::SaveData(Proto::Envelope* message) const
+	bool SchemaItemOutput::SaveData(Proto::Envelope* message) const
 	{
-		bool result = SchemeItemSignal::SaveData(message);
+		bool result = SchemaItemSignal::SaveData(message);
 		
 		if (result == false || message->has_schemaitem() == false)
 		{
@@ -350,7 +350,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemOutput::LoadData(const Proto::Envelope& message)
+	bool SchemaItemOutput::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -360,7 +360,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = SchemeItemSignal::LoadData(message);
+		bool result = SchemaItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;

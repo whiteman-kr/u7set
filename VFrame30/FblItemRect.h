@@ -5,11 +5,11 @@
 
 namespace VFrame30
 {
-	class SchemeItemSignal;
-	class SchemeItemInput;
-	class SchemeItemOutput;
-	class SchemeItemConst;
-	class SchemeItemAfb;
+	class SchemaItemSignal;
+	class SchemaItemInput;
+	class SchemaItemOutput;
+	class SchemaItemConst;
+	class SchemaItemAfb;
 }
 
 namespace VFrame30
@@ -77,20 +77,20 @@ namespace VFrame30
 		bool isConstElement() const;
 		bool isFblElement() const;
 
-		VFrame30::SchemeItemSignal* toSignalElement();
-		const VFrame30::SchemeItemSignal* toSignalElement() const;
+		VFrame30::SchemaItemSignal* toSignalElement();
+		const VFrame30::SchemaItemSignal* toSignalElement() const;
 
-		VFrame30::SchemeItemInput* toInputSignalElement();
-		const VFrame30::SchemeItemInput* toInputSignalElement() const;
+		VFrame30::SchemaItemInput* toInputSignalElement();
+		const VFrame30::SchemaItemInput* toInputSignalElement() const;
 
-		VFrame30::SchemeItemOutput* toOutputSignalElement();
-		const VFrame30::SchemeItemOutput* toOutputSignalElement() const;
+		VFrame30::SchemaItemOutput* toOutputSignalElement();
+		const VFrame30::SchemaItemOutput* toOutputSignalElement() const;
 
-		VFrame30::SchemeItemConst* toSchemeItemConst();
-		const VFrame30::SchemeItemConst* toSchemeItemConst() const;
+		VFrame30::SchemaItemConst* toSchemeItemConst();
+		const VFrame30::SchemaItemConst* toSchemeItemConst() const;
 
-		SchemeItemAfb* toFblElement();
-		const VFrame30::SchemeItemAfb* toFblElement() const;
+		SchemaItemAfb* toFblElement();
+		const VFrame30::SchemaItemAfb* toFblElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

@@ -1,38 +1,38 @@
 #include "Stable.h"
-#include "SchemeItemRect.h"
+#include "SchemaItemRect.h"
 
 namespace VFrame30
 {
-	SchemeItemRect::SchemeItemRect(void) :
-		SchemeItemRect(SchemaUnit::Inch)
+	SchemaItemRect::SchemaItemRect(void) :
+		SchemaItemRect(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemRect::SchemeItemRect(SchemaUnit unit) : 
+	SchemaItemRect::SchemaItemRect(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00)),
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
 		m_textColor(qRgb(0x00, 0x00, 0x00)),
 		m_fill(true)
 	{
-		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemeItemRect::weight, SchemeItemRect::setWeight);
+		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
 
-		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemeItemRect::lineColor, SchemeItemRect::setLineColor);
-		ADD_PROPERTY_GETTER_SETTER(QColor, FillColor, true, SchemeItemRect::fillColor, SchemeItemRect::setFillColor)
-		ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemeItemRect::textColor, SchemeItemRect::setTextColor);
+		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
+		ADD_PROPERTY_GETTER_SETTER(QColor, FillColor, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
+		ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
-		ADD_PROPERTY_GETTER_SETTER(bool, Fill, true, SchemeItemRect::fill, SchemeItemRect::setFill);
-		ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemeItemRect::text, SchemeItemRect::setText);
+		ADD_PROPERTY_GETTER_SETTER(bool, Fill, true, SchemaItemRect::fill, SchemaItemRect::setFill);
+		ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemaItemRect::text, SchemaItemRect::setText);
 
-		ADD_PROPERTY_GETTER_SETTER(bool, DrawRect, true, SchemeItemRect::drawRect, SchemeItemRect::setDrawRect);
+		ADD_PROPERTY_GETTER_SETTER(bool, DrawRect, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemeItemRect::getFontName, SchemeItemRect::setFontName);
-		ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemeItemRect::getFontSize, SchemeItemRect::setFontSize);
-		ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemeItemRect::getFontBold, SchemeItemRect::setFontBold);
-		ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemeItemRect::getFontItalic, SchemeItemRect::setFontItalic);
+		ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
+		ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
 
 		// --
 		//
@@ -57,13 +57,13 @@ namespace VFrame30
 		setItemUnit(unit);
 	}
 
-	SchemeItemRect::~SchemeItemRect(void)
+	SchemaItemRect::~SchemaItemRect(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool SchemeItemRect::SaveData(Proto::Envelope* message) const
+	bool SchemaItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
@@ -75,7 +75,7 @@ namespace VFrame30
 		
 		// --
 		//
-		Proto::SchemeItemRect* rectMessage = message->mutable_schemaitem()->mutable_rect();
+		Proto::SchemaItemRect* rectMessage = message->mutable_schemaitem()->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
 		rectMessage->set_linecolor(m_lineColor.rgba());
@@ -90,7 +90,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeItemRect::LoadData(const Proto::Envelope& message)
+	bool SchemaItemRect::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -114,7 +114,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::SchemeItemRect& rectMessage = message.schemaitem().rect();
+		const Proto::SchemaItemRect& rectMessage = message.schemaitem().rect();
 
 		m_weight = rectMessage.weight();
 		m_lineColor = QColor::fromRgba(rectMessage.linecolor());
@@ -134,7 +134,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
+	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -208,11 +208,11 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-	IMPLEMENT_FONT_PROPERTIES(SchemeItemRect, Font, m_font);
+	IMPLEMENT_FONT_PROPERTIES(SchemaItemRect, Font, m_font);
 
 	// Weight property
 	//
-	double SchemeItemRect::weight() const
+	double SchemaItemRect::weight() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -226,7 +226,7 @@ namespace VFrame30
 		}
 	}
 
-	void SchemeItemRect::setWeight(double weight)
+	void SchemaItemRect::setWeight(double weight)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -241,65 +241,65 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QColor SchemeItemRect::lineColor() const
+	QColor SchemaItemRect::lineColor() const
 	{
 		return m_lineColor;
 	}
-	void SchemeItemRect::setLineColor(QColor color)
+	void SchemaItemRect::setLineColor(QColor color)
 	{
 		m_lineColor = color;
 	}
 
 	// FillColor property
 	//
-	QColor SchemeItemRect::fillColor() const
+	QColor SchemaItemRect::fillColor() const
 	{
 		return m_fillColor;
 	}
-	void SchemeItemRect::setFillColor(QColor color)
+	void SchemaItemRect::setFillColor(QColor color)
 	{
 		m_fillColor = color;
 	}
 
 	// Fill property
 	//
-	bool SchemeItemRect::fill() const
+	bool SchemaItemRect::fill() const
 	{
 		return m_fill;
 	}
-	void SchemeItemRect::setFill(bool fill)
+	void SchemaItemRect::setFill(bool fill)
 	{
 		m_fill = fill;
 	}
 
 	// Text property
 	//
-	const QString& SchemeItemRect::text() const
+	const QString& SchemaItemRect::text() const
 	{
 		return m_text;
 	}
-	void SchemeItemRect::setText(QString value)
+	void SchemaItemRect::setText(QString value)
 	{
 		m_text = value;
 	}
 
 	// TextColor property
 	//
-	QColor SchemeItemRect::textColor() const
+	QColor SchemaItemRect::textColor() const
 	{
 		return m_textColor;
 	}
-	void SchemeItemRect::setTextColor(QColor color)
+	void SchemaItemRect::setTextColor(QColor color)
 	{
 		m_textColor = color;
 	}
 
-	bool SchemeItemRect::drawRect() const
+	bool SchemaItemRect::drawRect() const
 	{
 		return m_drawRect;
 	}
 
-	void SchemeItemRect::setDrawRect(bool value)
+	void SchemaItemRect::setDrawRect(bool value)
 	{
 		m_drawRect = value;
 	}

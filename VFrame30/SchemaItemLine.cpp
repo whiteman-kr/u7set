@@ -1,21 +1,21 @@
 #include "Stable.h"
-#include "SchemeItemPath.h"
+#include "SchemaItemLine.h"
 
 namespace VFrame30
 {
-	SchemeItemPath::SchemeItemPath(void) :
-		SchemeItemPath(SchemaUnit::Inch)
+	SchemaItemLine::SchemaItemLine(void) :
+		SchemaItemLine(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemPath::SchemeItemPath(SchemaUnit unit) : 
+	SchemaItemLine::SchemaItemLine(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
-		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemeItemPath::weight, SchemeItemPath::setWeight);
+		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemLine::weight, SchemaItemLine::setWeight);
 
 		// --
 		//
@@ -24,33 +24,33 @@ namespace VFrame30
 	}
 
 
-	SchemeItemPath::~SchemeItemPath(void)
+	SchemaItemLine::~SchemaItemLine(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool SchemeItemPath::SaveData(Proto::Envelope* message) const
+	bool SchemaItemLine::SaveData(Proto::Envelope* message) const
 	{
-		bool result = PosConnectionImpl::SaveData(message);
+		bool result = PosLineImpl::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
 			assert(message->has_schemaitem());
 			return false;
 		}
-	
+
 		// --
 		//
-		Proto::SchemeItemPath* path = message->mutable_schemaitem()->mutable_path();
+		Proto::SchemaItemLine* lineMessage = message->mutable_schemaitem()->mutable_line();
 
-		path->set_weight(m_weight);
-		path->set_linecolor(m_lineColor);
+		lineMessage->set_weight(m_weight);
+		lineMessage->set_linecolor(m_lineColor);
 
 		return true;
 	}
 
-	bool SchemeItemPath::LoadData(const Proto::Envelope& message)
+	bool SchemaItemLine::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -60,24 +60,23 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = PosConnectionImpl::LoadData(message);
+		bool result = PosLineImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
 		}
 
 		// --
-		//
-		if (message.schemaitem().has_path() == false)
+		if (message.schemaitem().has_line() == false)
 		{
-			assert(message.schemaitem().has_path());
+			assert(message.schemaitem().has_line());
 			return false;
 		}
 
-		const Proto::SchemeItemPath& path = message.schemaitem().path();
+		const Proto::SchemaItemLine& lineMessage = message.schemaitem().line();
 
-		m_weight = path.weight();
-		m_lineColor = path.linecolor();
+		m_weight = lineMessage.weight();
+		m_lineColor = lineMessage.linecolor();
 
 		return true;
 	}
@@ -88,7 +87,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItemPath::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
+	void SchemaItemLine::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -98,23 +97,21 @@ namespace VFrame30
 
 		QPainter* p = drawParam->painter();
 
-		// Draw the main part
-		//
-		const std::list<SchemaPoint>& poinlist = GetPointList();
+		QPointF p1(startXDocPt(), startYDocPt());
+		QPointF p2(endXDocPt(), endYDocPt());
 
-		QPolygonF polyline(static_cast<int>(poinlist.size()));
-		int index = 0;
-
-		for (auto pt = poinlist.cbegin(); pt != poinlist.cend(); ++pt)
+		if (std::abs(p1.x() - p2.x()) < 0.000001 && std::abs(p1.y() - p2.y()) < 0.000001)
 		{
-			polyline[index++] = QPointF(pt->X, pt->Y);
+			// Пустая линия, рисуется очень большой
+			//
+			return;
 		}
 
 		QPen pen(lineColor());
 		pen.setWidthF(m_weight);
 		p->setPen(pen);
 
-		p->drawPolyline(polyline);
+		p->drawLine(p1, p2);
 
 		return;
 	}
@@ -122,9 +119,9 @@ namespace VFrame30
 	// Properties and Data
 	//
 
-	// Weight property
+	// Weight propertie
 	//
-	double SchemeItemPath::weight() const
+	double SchemaItemLine::weight() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -137,7 +134,7 @@ namespace VFrame30
 		}
 	}
 
-	void SchemeItemPath::setWeight(double weight)
+	void SchemaItemLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -150,14 +147,14 @@ namespace VFrame30
 		}
 	}
 
-	// LineColor property
+	// LineColor propertie
 	//
-	QRgb SchemeItemPath::lineColor() const
+	QRgb SchemaItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void SchemeItemPath::setLineColor(QRgb color)
+	void SchemaItemLine::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}

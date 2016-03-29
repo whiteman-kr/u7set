@@ -14,9 +14,9 @@
 #include "../Builder/ModuleLogicCompiler.h"
 
 #include "../VFrame30/FblItemRect.h"
-#include "../VFrame30/SchemeItemSignal.h"
-#include "../VFrame30/SchemeItemAfb.h"
-#include "../VFrame30/SchemeItemConst.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
 
@@ -29,10 +29,10 @@ namespace Builder
     //
 
     typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
-    typedef VFrame30::SchemeItemSignal LogicSignal;
-    typedef VFrame30::SchemeItemAfb LogicFb;
+    typedef VFrame30::SchemaItemSignal LogicSignal;
+    typedef VFrame30::SchemaItemAfb LogicFb;
     typedef VFrame30::AfbPin LogicPin;
-    typedef VFrame30::SchemeItemConst LogicConst;
+    typedef VFrame30::SchemaItemConst LogicConst;
     typedef Afb::AfbSignal LogicAfbSignal;
     typedef Afb::AfbParam LogicAfbParam;
 

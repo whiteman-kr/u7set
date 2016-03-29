@@ -4196,7 +4196,7 @@ namespace Builder
     {
         m_appLogicItem.m_afbElement = *afbElement.get();
         m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
-                    new VFrame30::SchemeItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get()));
+                    new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get()));
 
         // copy parameters
         //
@@ -4211,7 +4211,7 @@ namespace Builder
     {
         if (m_appLogicItem.m_fblItem->isSignalElement())
         {
-            VFrame30::SchemeItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
+            VFrame30::SchemaItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
 
             if (itemSignal == nullptr)
             {
@@ -4224,7 +4224,7 @@ namespace Builder
 
         if (m_appLogicItem.m_fblItem->isFblElement())
         {
-            VFrame30::SchemeItemAfb* itemFb= m_appLogicItem.m_fblItem->toFblElement();
+            VFrame30::SchemaItemAfb* itemFb= m_appLogicItem.m_fblItem->toFblElement();
 
             if (itemFb == nullptr)
             {
@@ -4237,7 +4237,7 @@ namespace Builder
 
         if (m_appLogicItem.m_fblItem->isConstElement())
         {
-            VFrame30::SchemeItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemeItemConst();
+            VFrame30::SchemaItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemeItemConst();
 
             if (itemConst == nullptr)
             {

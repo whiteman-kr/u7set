@@ -7,21 +7,21 @@ namespace VFrame30
 	//
 	// SchemeItemAfb
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemeItemAfb : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemaItemAfb : public FblItemRect
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemAfb>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemAfb>;
 #endif
 
 	private:
-		SchemeItemAfb(void);
+		SchemaItemAfb(void);
 	public:
-		explicit SchemeItemAfb(SchemaUnit unit);
-		SchemeItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement);
+		explicit SchemaItemAfb(SchemaUnit unit);
+		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement);
 
-		virtual ~SchemeItemAfb(void);
+		virtual ~SchemaItemAfb(void);
 
 		// Draw Functions
 		//

@@ -7,19 +7,19 @@ class QBrush;
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemeItemRect : public PosRectImpl
+	class VFRAME30LIBSHARED_EXPORT SchemaItemRect : public PosRectImpl
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemRect>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemRect>;
 #endif
 
-		SchemeItemRect(void);
+		SchemaItemRect(void);
 
 	public:
-		explicit SchemeItemRect(SchemaUnit unit);
-		virtual ~SchemeItemRect(void);
+		explicit SchemaItemRect(SchemaUnit unit);
+		virtual ~SchemaItemRect(void);
 
 		// Serialization
 		//

@@ -10,13 +10,13 @@
 #include "ChooseAfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
-#include "../VFrame30/SchemeItemLine.h"
-#include "../VFrame30/SchemeItemRect.h"
-#include "../VFrame30/SchemeItemPath.h"
-#include "../VFrame30/SchemeItemSignal.h"
-#include "../VFrame30/SchemeItemAfb.h"
-#include "../VFrame30/SchemeItemLink.h"
-#include "../VFrame30/SchemeItemConst.h"
+#include "../VFrame30/SchemaItemLine.h"
+#include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemPath.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItemLink.h"
+#include "../VFrame30/SchemaItemConst.h"
 
 
 const EditSchemeWidget::MouseStateCursor EditSchemeWidget::m_mouseStateCursor[] =
@@ -1698,7 +1698,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemLine>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemaItemLine>(scheme()->unit()));
 			});
 
 	m_addPathAction = new QAction(tr("Path"), this);
@@ -1707,7 +1707,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addPathAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemPath>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemaItemPath>(scheme()->unit()));
 			});
 
 	m_addRectAction = new QAction(tr("Rect"), this);
@@ -1716,7 +1716,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemRect>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemaItemRect>(scheme()->unit()));
 			});
 
 	m_addSeparatorAction0 = new QAction(this);
@@ -1728,7 +1728,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				auto item = std::make_shared<VFrame30::SchemeItemInput>(scheme()->unit());
+				auto item = std::make_shared<VFrame30::SchemaItemInput>(scheme()->unit());
 				addItem(item);
 			});
 
@@ -1738,7 +1738,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				auto item = std::make_shared<VFrame30::SchemeItemOutput>(scheme()->unit());
+				auto item = std::make_shared<VFrame30::SchemaItemOutput>(scheme()->unit());
 				addItem(item);
 			});
 
@@ -1748,7 +1748,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addConstantAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemConst>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemaItemConst>(scheme()->unit()));
 			});
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
@@ -1762,7 +1762,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemLink>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemaItemLink>(scheme()->unit()));
 			});
 
 	//
@@ -2423,7 +2423,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			for (std::shared_ptr<VFrame30::SchemaItem> item : activeLayer()->Items)
 			{
 				VFrame30::FblItemRect* fbRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
-				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item.get());
+				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item.get());
 
 				if (fbRect != nullptr &&
 					std::find(selectedItems().begin(), selectedItems().end(), item) == selectedItems().end())	// Item is not selected, as in this case it can be resized or moved by control bars
@@ -2442,7 +2442,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 
 						if (pinArea.contains(docPoint) == true)
 						{
-							addItem(std::make_shared<VFrame30::SchemeItemLink>(scheme()->unit()));
+							addItem(std::make_shared<VFrame30::SchemaItemLink>(scheme()->unit()));
 
 							mouseLeftDown_AddSchemePosConnectionStartPoint(me);
 
@@ -4140,9 +4140,9 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 
 		for (auto item : selected)
 		{
-			if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) != nullptr)
+			if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
 			{
-				auto itemSignal = dynamic_cast<VFrame30::SchemeItemSignal*>(item.get());
+				auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				assert(itemSignal);
 
 				const QStringList& signalStrIdList = itemSignal->signalStrIdList();
@@ -4270,7 +4270,7 @@ void EditSchemeWidget::f2Key()
 	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
 	assert(item);
 
-	VFrame30::SchemeItemSignal* itemSignal = dynamic_cast<VFrame30::SchemeItemSignal*>(item.get());
+	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 	if (itemSignal == nullptr)
 	{
 		return;
@@ -4388,7 +4388,7 @@ void EditSchemeWidget::editPaste()
 	bool allItemsAreSignals = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
+		if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) == nullptr)
 		{
 			allItemsAreSignals = false;
 			break;
@@ -4502,7 +4502,7 @@ void EditSchemeWidget::clipboardDataChanged()
 	bool allItemsAreSignals = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
+		if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) == nullptr)
 		{
 			allItemsAreSignals = false;
 			break;
@@ -4575,7 +4575,7 @@ void EditSchemeWidget::addFblElement()
 
 		std::shared_ptr<Afb::AfbElement> afb = elements[index];
 
-		addItem(std::make_shared<VFrame30::SchemeItemAfb>(scheme()->unit(), *(afb.get())));
+		addItem(std::make_shared<VFrame30::SchemaItemAfb>(scheme()->unit(), *(afb.get())));
 	}
 
 	return;

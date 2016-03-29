@@ -3,7 +3,7 @@
 #include "../VFrame30/BaseSchemeWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaView.h"
-#include "../VFrame30/SchemeItem.h"
+#include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
 

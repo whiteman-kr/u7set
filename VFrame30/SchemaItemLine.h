@@ -1,22 +1,22 @@
 #pragma once
 
-#include "PosConnectionImpl.h"
+#include "PosLineImpl.h"
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemeItemPath : public PosConnectionImpl
+	class VFRAME30LIBSHARED_EXPORT SchemaItemLine : public PosLineImpl
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemeItemPath>;
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLine>;
 #endif
 
 	private:
-		SchemeItemPath(void);
+		SchemaItemLine(void);
 	public:
-		explicit SchemeItemPath(SchemaUnit unit);
-		virtual ~SchemeItemPath(void);
+		explicit SchemaItemLine(SchemaUnit unit);
+		virtual ~SchemaItemLine(void);
 
 		// Serialization
 		//

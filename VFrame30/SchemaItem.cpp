@@ -1,6 +1,6 @@
 #include "Stable.h"
-#include "SchemeItem.h"
-#include "SchemeItemRect.h"
+#include "SchemaItem.h"
+#include "SchemaItemRect.h"
 
 namespace VFrame30
 {
