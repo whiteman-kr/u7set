@@ -10,7 +10,7 @@ const char* const AfblFileName = "AFBL";		// Application Functional Block Librar
 const char* const AlFileName = "AL";			// Application Logic Schemes
 const char* const HcFileName = "HC";			// Hardware Configuratiun
 const char* const HpFileName = "HP";			// Hardware Presets
-const char* const WvsFileName = "WVS";			// Workflow Video Schemes
+const char* const MvsFileName = "MVS";			// Monitor Video Schemes
 const char* const DvsFileName = "DVS";			// Diagnostics Video Schemes
 const char* const McFileName = "MC";			// Module Configuration
 

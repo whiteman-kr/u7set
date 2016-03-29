@@ -40,5 +40,6 @@
         <file>Upgrade0038.sql</file>
         <file>Upgrade0039.sql</file>
         <file>Upgrade0040.sql</file>
+        <file>Upgrade0041.sql</file>
     </qresource>
 </RCC>

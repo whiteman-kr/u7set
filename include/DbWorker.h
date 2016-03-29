@@ -57,7 +57,7 @@ public:
 	int alFileId() const;
 	int hcFileId() const;
 	int hpFileId() const;
-	int wvsFileId() const;
+	int mvsFileId() const;
 	int dvsFileId() const;
 	int mcFileId() const;
 
@@ -193,7 +193,7 @@ private:
 	int m_alFileId = -1;	// Application Logic
 	int m_hcFileId = -1;	// Hardware Configuration
 	int m_hpFileId = -1;	// Hardware Presets
-	int m_wvsFileId = -1;	// Workflow Visualization Schemes
+	int m_mvsFileId = -1;	// Monitor Visualization Schemes
 	int m_dvsFileId = -1;	// Diagnostics Visualization Schemes
 	int m_mcFileId = -1;	// Module Configuration Template
 

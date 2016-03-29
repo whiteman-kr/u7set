@@ -9,7 +9,7 @@
 
 #include "Scheme.h"
 #include "LogicScheme.h"
-#include "WorkflowScheme.h"
+#include "MonitorSchema.h"
 #include "DiagScheme.h"
 #include "WiringScheme.h"
 

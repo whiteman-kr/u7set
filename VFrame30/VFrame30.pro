@@ -101,8 +101,8 @@ HEADERS += VFrame30Lib_global.h \
     ../include/CUtils.h \
     SchemeLayer.h \
     Scheme.h \
-    WorkflowScheme.h \
     LogicScheme.h \
+	MonitorSchema.h \
     DiagScheme.h \
     WiringScheme.h \
     SchemeView.h \
@@ -119,7 +119,7 @@ HEADERS += VFrame30Lib_global.h \
     SchemeItemLink.h \
     Afb.h \
     ../include/DebugInstCounter.h \
-    ../include/PropertyObject.h
+	../include/PropertyObject.h
 
 SOURCES += \
     Settings.cpp \
@@ -141,8 +141,8 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     SchemeLayer.cpp \
     Scheme.cpp \
-    WorkflowScheme.cpp \
     LogicScheme.cpp \
+	MonitorSchema.cpp \
     DiagScheme.cpp \
     WiringScheme.cpp \
     SchemeView.cpp \
@@ -157,7 +157,7 @@ SOURCES += \
     SchemeItemAfb.cpp \
     SchemeItemLink.cpp \
     Afb.cpp \
-    ../lib/PropertyObject.cpp
+	../lib/PropertyObject.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

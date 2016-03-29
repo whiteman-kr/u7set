@@ -94,7 +94,7 @@ private:
 	QLabel* m_statusBarConnectionState = nullptr;
 
 	SchemesTabPage* m_logicScheme = nullptr;
-	SchemesTabPage* m_workflowScheme = nullptr;
+	SchemesTabPage* m_monitorSchema = nullptr;
 	//SchemesTabPage* m_diagScheme = nullptr;
 
 	DbController* m_dbController = nullptr;

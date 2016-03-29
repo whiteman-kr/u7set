@@ -3,7 +3,7 @@
 #include "Scheme.h"
 #include "DiagScheme.h"
 #include "LogicScheme.h"
-#include "WorkflowScheme.h"
+#include "MonitorSchema.h"
 #include "WiringScheme.h"
 #include "SchemeLayer.h"
 #include "SchemeItemLine.h"
@@ -32,7 +32,7 @@ namespace VFrame30
 		//
 		SchemeFactory.Register<DiagScheme>();
 		SchemeFactory.Register<LogicScheme>();
-		SchemeFactory.Register<WorkflowScheme>();
+		SchemeFactory.Register<MonitorSchema>();
 		SchemeFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers

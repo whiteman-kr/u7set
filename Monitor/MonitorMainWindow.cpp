@@ -2,7 +2,7 @@
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "WorkflowSchemeWidget.h"
+#include "MonitorSchemaWidget.h"
 #include "../VFrame30/Scheme.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
@@ -208,7 +208,7 @@ void MonitorMainWindow::debug()
 
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 													"./",
-													tr("Workflow schemes (*.wvs);; All files (*.*)"));
+													tr("Monitor schemas (*.mvs);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
@@ -232,7 +232,7 @@ void MonitorMainWindow::debug()
 	QTabWidget* tabWidget = monitorCentralWidget();
 
 
-	WorkflowSchemeWidget* schemeWidget = new WorkflowSchemeWidget(scheme);
+	MonitorSchemaWidget* schemeWidget = new MonitorSchemaWidget(scheme);
 	tabWidget->addTab(schemeWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG

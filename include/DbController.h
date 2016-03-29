@@ -228,7 +228,7 @@ public:
 	int hcFileId() const;		// Hardware Configuration
 	int hpFileId() const;		// Hadware Presets
 	int mcFileId() const;		// Module Configuration
-	int wvsFileId() const;		// Workflow Video Schemes
+	int mvsFileId() const;		// Monotor Video Schemas
 	int dvsFileId() const;		// Diaginostics Video Schemes
 
 	std::vector<DbFileInfo> systemFiles() const;

@@ -1713,9 +1713,9 @@ int DbController::mcFileId() const
 	return m_worker->mcFileId();
 }
 
-int DbController::wvsFileId() const
+int DbController::mvsFileId() const
 {
-	return m_worker->wvsFileId();
+	return m_worker->mvsFileId();
 }
 
 int DbController::dvsFileId() const

@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "WorkflowScheme.h"
+#include "MonitorSchema.h"
 
 namespace VFrame30
 {
 
-	WorkflowScheme::WorkflowScheme(void)
+	MonitorSchema::MonitorSchema(void)
 	{
 		setUnit(SchemeUnit::Display);
 
@@ -20,7 +20,7 @@ namespace VFrame30
 		return;
 	}
 	
-	WorkflowScheme::~WorkflowScheme(void)
+	MonitorSchema::~MonitorSchema(void)
 	{
 	}
 }

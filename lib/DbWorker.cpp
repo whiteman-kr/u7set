@@ -54,6 +54,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 38", ":/DatabaseUpgrade/Upgrade0038.sql"},
 	{"Upgrade to version 39", ":/DatabaseUpgrade/Upgrade0039.sql"},
 	{"Upgrade to version 40", ":/DatabaseUpgrade/Upgrade0040.sql"},
+	{"Upgrade to version 41", ":/DatabaseUpgrade/Upgrade0041.sql"},
 };
 
 
@@ -199,10 +200,10 @@ int DbWorker::hpFileId() const
 	return m_hpFileId;
 }
 
-int DbWorker::wvsFileId() const
+int DbWorker::mvsFileId() const
 {
 	QMutexLocker m(&m_mutex);
-	return m_wvsFileId;
+	return m_mvsFileId;
 }
 
 int DbWorker::dvsFileId() const
@@ -714,7 +715,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_alFileId = -1;
 	m_hcFileId = -1;
 	m_hpFileId = -1;
-	m_wvsFileId = -1;
+	m_mvsFileId = -1;
 	m_dvsFileId = -1;
 	m_mcFileId = -1;
 	m_systemFiles.clear();
@@ -765,10 +766,10 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == WvsFileName)
+		if (fi.fileName() == MvsFileName)
 		{
 			QMutexLocker locker(&m_mutex);
-			m_wvsFileId = fi.fileId();
+			m_mvsFileId = fi.fileId();
 			m_systemFiles.push_back(fi);
 			continue;
 		}
@@ -796,7 +797,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_alFileId != -1;
 	result &= m_hcFileId != -1;
 	result &= m_hpFileId != -1;
-	result &= m_wvsFileId != -1;
+	result &= m_mvsFileId != -1;
 	result &= m_dvsFileId != -1;
 	result &= m_mcFileId != -1;
 	m_mutex.unlock();
@@ -813,7 +814,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		assert(m_alFileId != -1);
 		assert(m_hcFileId != -1);
 		assert(m_hpFileId != -1);
-		assert(m_wvsFileId != -1);
+		assert(m_mvsFileId != -1);
 		assert(m_dvsFileId != -1);
 		assert(m_mcFileId != -1);
 

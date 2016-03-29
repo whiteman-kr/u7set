@@ -1,17 +1,17 @@
-#include "WorkflowSchemeView.h"
+#include "MonitorSchemaView.h"
 
-WorkflowSchemeView::WorkflowSchemeView(QWidget *parent)
+MonitorSchemaView::MonitorSchemaView(QWidget *parent)
 	: SchemeView(parent)
 {
 	qDebug() << Q_FUNC_INFO;
 }
 
-WorkflowSchemeView::~WorkflowSchemeView()
+MonitorSchemaView::~MonitorSchemaView()
 {
 	qDebug() << Q_FUNC_INFO;
 }
 
-void WorkflowSchemeView::paintEvent(QPaintEvent* pe)
+void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 {
 	// Draw Scheme
 	//
