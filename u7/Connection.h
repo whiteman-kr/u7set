@@ -11,41 +11,29 @@ namespace Hardware
         Q_OBJECT
 
     public:
-      /*  enum class SerialMode
-        {
-            RS232,
-            RS485
-        };
-        Q_ENUM(SerialMode)
-
-        enum class Type
-		{
-            Optical,
-            Serial
-		};
-        Q_ENUM(Type)*/
-
         Connection();
         Connection(const Connection& that);
 
         bool save(QXmlStreamWriter& writer);
         bool load(QXmlStreamReader& reader);
 
-		// Properties
+        // Properties
         //
     public:
 
-		int index() const;
+        int index() const;
         void setIndex(int value);
 
-		QString caption() const;
-		void setCaption(const QString& value);
+        QString caption() const;
+        void setCaption(const QString& value);
 
         QString port1StrID() const;
         void setPort1StrID(const QString& value);
 
         QString port2StrID() const;
         void setPort2StrID(const QString& value);
+
+        quint16 getID() const;
 
         //
         //
@@ -101,7 +89,7 @@ namespace Hardware
         OptoPort::Mode mode() const;
         void setMode(const OptoPort::Mode value);
 
-		bool enable() const;
+        bool enable() const;
         void setEnable(bool value);
 
         bool enableDuplex() const;
@@ -111,7 +99,7 @@ namespace Hardware
         void setManualSettings(bool value);
 
         QStringList signalList() const;
-		void setSignalList(const QStringList& value);
+        void setSignalList(const QStringList& value);
 
         Hardware::Connection& operator = (const Hardware::Connection& that)
         {
@@ -140,7 +128,7 @@ namespace Hardware
             m_manualSettings = that.m_manualSettings;
 
             setMode(that.mode());
-			setSignalList(that.signalList());
+            setSignalList(that.signalList());
 
             return *this;
         }
@@ -172,7 +160,7 @@ namespace Hardware
         bool m_enableDuplex = false;
         bool m_manualSettings = false;
 
-		QStringList m_signalList;
+        QStringList m_signalList;
     };
 
 

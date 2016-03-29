@@ -6,6 +6,8 @@
 #include "../include/DeviceObject.h"
 #include "../include/OutputLog.h"
 #include "../include/OrderedHash.h"
+#include "../include/Address16.h"
+#include "../include/Signal.h"
 
 
 namespace Hardware
@@ -31,9 +33,32 @@ namespace Hardware
         };
         Q_ENUM(SerialMode)
 
+        struct TxSignal
+        {
+            QString strID;
+            Address16 address;        // offset from beginning of txBuffer
+            int sizeBit = 0;
+        };
+
     private:
         QString m_strID;
         DeviceController* m_deviceController = nullptr;
+
+        QString m_optoModuleStrID;
+
+        QString m_linkedPortStrID;
+
+        QString m_connectionCaption;
+
+        QStringList m_txSignalsStrIDList;
+
+        QList<TxSignal> m_txAnalogSignalList;
+        QList<TxSignal> m_txDiscreteSignalList;
+
+        int m_txAnalogSignalsSizeW = 0;     // variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
+        int m_txDiscreteSignalsSizeW = 0;   //
+        quint32 m_txDataID = 0;             // range 0..0xFFFFFFFF
+        int m_txDataSizeW = 0;                  //
 
         int m_port = 0;
 
@@ -41,19 +66,30 @@ namespace Hardware
         SerialMode m_serialMode = SerialMode::RS232;
 
         int m_rxStartAddress = 0;
-        int m_rxSizeW = 0;
+        int m_rxDataSizeW = 0;
 
         int m_txStartAddress = 0;
-        int m_txSizeW = 0;
 
-        bool m_enable = true;             // serial mode only
-        bool m_enableDuplex = false;      // serial mode and OCMN only
+        quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
+
+        bool m_enable = true;           // serial mode only
+        bool m_enableDuplex = false;    // serial mode and OCMN only
 
     public:
-        OptoPort(DeviceController* optoPortController, int port);
+        OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port);
+
+        quint16 portID() const { return m_portID; }
+        void setPortID(quint16 portID) { m_portID = portID; }
+
+        quint32 txDataID() const { return m_txDataID; }
 
         QString strID() const { return m_strID; }
-        void setStrID(const QString& strID) { m_strID = strID; }
+
+        QString linkedPortStrID() const { return m_linkedPortStrID; }
+        void setLinkedPortStrID(const QString& linkedPortStrID) { m_linkedPortStrID = linkedPortStrID; }
+
+        QString connectionCaption() const { return m_connectionCaption; }
+        void setConnectionCaption(const QString& connectionCaption) { m_connectionCaption = connectionCaption; }
 
         int port() const { return m_port; }
         void setPort(int port) { m_port = port; }
@@ -77,6 +113,30 @@ namespace Hardware
         void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
 
         const DeviceController* deviceController() const { return m_deviceController; }
+
+        QString optoModuleStrID() const { return m_optoModuleStrID; }
+
+        void addTxSignalStrID(const QString& signalStrID);
+        void addTxSignalsStrID(const QStringList& signalStrIDList);
+
+        QStringList getTxSignalsStrID() const { return m_txSignalsStrIDList; }
+
+        void addTxSignal(Signal* txSignal);
+        void calculateTxSignalsAddresses();
+
+        QList<TxSignal> txAnalogSignals() const { return m_txAnalogSignalList; }
+        QList<TxSignal> txDiscreteSignals() const { return m_txDiscreteSignalList; }
+
+        int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
+        int txAnalogSignalsCount() const { return m_txAnalogSignalList.count(); }
+
+        int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
+        int txDiscreteSignalsCount() const { return m_txDiscreteSignalList.count(); }
+
+        int txDataSizeW() const { return m_txDataSizeW; }
+
+        int rxDataSizeW() const { return m_rxDataSizeW; }
+        void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
     };
 
 
@@ -87,13 +147,28 @@ namespace Hardware
         Q_OBJECT
 
     private:
+        // device properties
+        //
         QString m_strID;
         DeviceModule* m_deviceModule = nullptr;
+        int m_place = 0;
+
+        int m_optoInterfaceDataOffset = 0;
+        int m_optoPortDataSize = 0;
+        int m_optoPortAppDataOffset = 0;
+        int m_optoPortAppDataSize = 0;
+        int m_optoPortCount = 0;
+
+        //
+
+        QString m_lmStrID;
+        DeviceModule* m_lmDeviceModule = nullptr;
 
         HashedVector<QString, OptoPort*> m_ports;
         OutputLog* m_log = nullptr;
 
         bool m_valid = false;
+
 
     public:
         OptoModule(DeviceModule* module, OutputLog* log);
@@ -101,7 +176,24 @@ namespace Hardware
 
         bool isValid() const { return m_valid; }
 
+        bool isLM();
+        bool isOCM();
+
+        QString strID() const { return m_strID; }
         const DeviceModule* deviceModule() const { return m_deviceModule; }
+
+        int place() const { return m_place; }
+        int optoInterfaceDataOffset() const { return m_optoInterfaceDataOffset; }
+        int optoPortDataSize() const { return m_optoPortDataSize; }
+        int optoPortAppDataOffset() const { return m_optoPortAppDataOffset; }
+        int optoPortAppDataSize() const { return m_optoPortAppDataSize; }
+
+        QString lmStrID() const { return m_lmStrID; }
+        const DeviceModule* lmDeviceModule() const { return m_lmDeviceModule; }
+
+        QList<OptoPort*> getRS232Ports();
+
+        QList<OptoPort*> ports();
 
         friend class OptoModuleStorage;
     };
@@ -119,6 +211,11 @@ namespace Hardware
         HashedVector<QString, OptoModule*> m_modules;
         HashedVector<QString, OptoPort*> m_ports;
 
+        QHash<QString, OptoModule*> m_lmAssociatedModules;
+
+        QList<OptoModule*> modules();
+        QList<OptoPort*> ports();
+
         bool addModule(DeviceModule* module);
 
         void clear();
@@ -130,6 +227,14 @@ namespace Hardware
         bool build();
 
         OptoModule* getOptoModule(const QString& optoModuleStrID);
+        OptoModule* getOptoModule(const OptoPort* optoPort);
         OptoPort* getOptoPort(const QString& optoPortStrID);
+
+        bool isCompatiblePorts(const OptoPort* optoPort1, const OptoPort* optoPort2);
+
+        QList<OptoModule*> getLmAssociatedOptoModules(const QString& lmStrID);
+
+        bool setPortsRxDataSizes();
+        bool calculatePortsTxRxStartAddresses();
     };
 }
