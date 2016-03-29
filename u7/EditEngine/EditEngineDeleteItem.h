@@ -10,15 +10,15 @@ namespace EditEngine
 		DeleteItemCommand();		// deleted;
 	public:
 		DeleteItemCommand(
-			EditSchemeView* schemeView,
+			EditSchemaView* schemeView,
 			std::vector<std::shared_ptr<VFrame30::SchemaItem>> items,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* schemeView) override;
-		virtual void unExecuteCommand(EditSchemeView* schemeView) override;
+		virtual void executeCommand(EditSchemaView* schemeView) override;
+		virtual void unExecuteCommand(EditSchemaView* schemeView) override;
 
 		// Data
 		//

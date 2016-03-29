@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include "FileListView.h"
 #include "../include/DbController.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 #include "GlobalMessanger.h"
 
 //
@@ -246,6 +246,6 @@ public:
 	// Data
 	//
 private:
-	EditSchemeWidget* m_schemeWidget = nullptr;
+	EditSchemaWidget* m_schemeWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
 };

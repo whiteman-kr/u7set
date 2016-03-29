@@ -10,19 +10,19 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks
 	{
 	public:
-		void AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemeItemGuid);
+		void AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemaItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 		//
-		bool IsPointOnLink(SchemaPoint pt, const QUuid& schemeItemGuid);
+		bool IsPointOnLink(SchemaPoint pt, const QUuid& schemaItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков vertlinks или на концах horzlinks
 		//
-		bool IsPinOnLink(SchemaPoint pt, const QUuid& schemeItemGuid);
+		bool IsPinOnLink(SchemaPoint pt, const QUuid& schemaItemGuid);
 
 		// Вернуть UUid элементов под точкой
 		//
-		std::list<QUuid> getSchemeItemsUnderPoint(SchemaPoint pt, QUuid schemeItemGuid);
+		std::list<QUuid> getSchemaItemsUnderPoint(SchemaPoint pt, QUuid schemaItemGuid);
 
 	public:
 		struct LINKS
@@ -31,12 +31,12 @@ namespace VFrame30
 			{
 				Pos1 = p1;
 				Pos2 = p2;
-				SchemeItemGuid = g;
+				SchemaItemGuid = g;
 			}
 
 			double Pos1;
 			double Pos2;
-			QUuid SchemeItemGuid;
+			QUuid SchemaItemGuid;
 
 			bool IsValInRange(double val)
 			{

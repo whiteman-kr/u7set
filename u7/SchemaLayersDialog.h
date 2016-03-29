@@ -7,14 +7,14 @@ namespace Ui {
 class SchemeLayersDialog;
 }
 
-class EditSchemeView;
+class EditSchemaView;
 
 class SchemeLayersDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit SchemeLayersDialog(EditSchemeView* schemeView, QWidget *parent = 0);
+	explicit SchemeLayersDialog(EditSchemaView* schemeView, QWidget *parent = 0);
 	~SchemeLayersDialog();
 
 private slots:
@@ -44,7 +44,7 @@ private:
 	QAction* m_showAction = nullptr;
 	QAction* m_printAction = nullptr;
 
-	EditSchemeView* m_schemeView;
+	EditSchemaView* m_schemeView;
 
 	int m_cmIndex = -1;
 };

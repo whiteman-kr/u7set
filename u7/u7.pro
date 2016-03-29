@@ -108,17 +108,12 @@ SOURCES +=\
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
-    SchemeTabPage.cpp \
-    EditSchemeWidget.cpp \
-    SchemeItemPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
     EditEngine/EditEngineAddItem.cpp \
     EditEngine/EditEngineDeleteItem.cpp \
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
     EditEngine/EditEngineSetProperty.cpp \
-    SchemePropertiesDialog.cpp \
-    EditEngine/EditEngineSetSchemeProperty.cpp \
     ../lib/ModuleConfiguration.cpp \
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
@@ -128,13 +123,11 @@ SOURCES +=\
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
 	Builder/BuildResultWriter.cpp \
-	SchemeLayersDialog.cpp \
     Builder/ConfigurationBuilder.cpp \
     Builder/ApplicationLogicCode.cpp \
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     Subsystem.cpp \
-    CreateSchemeDialog.cpp \
     ChooseAfbDialog.cpp \
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
@@ -156,7 +149,14 @@ SOURCES +=\
 	Builder/OptoModule.cpp \
     GlobalMessanger.cpp \
     Builder/LmMemoryMap.cpp \
-    Builder/ModuleLogicCompiler.cpp
+    Builder/ModuleLogicCompiler.cpp \
+    EditSchemaWidget.cpp \
+    SchemaPropertiesDialog.cpp \
+    SchemaItemPropertiesDialog.cpp \
+    SchemaLayersDialog.cpp \
+    SchemaTabPage.cpp \
+    CreateSchemaDialog.cpp \
+    EditEngine/EditEngineSetSchemaProperty.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -190,17 +190,12 @@ HEADERS  += \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
-    SchemeTabPage.h \
-    EditSchemeWidget.h \
-    SchemeItemPropertiesDialog.h \
     EditEngine/EditEngine.h \
     EditEngine/EditEngineAddItem.h \
     EditEngine/EditEngineDeleteItem.h \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
-    SchemePropertiesDialog.h \
-    EditEngine/EditEngineSetSchemeProperty.h \
     ../include/ModuleConfiguration.h \
     BuildTabPage.h \
     ../include/OutputLog.h \
@@ -211,14 +206,12 @@ HEADERS  += \
     DialogFileEditor.h \
     Builder/Builder.h \
 	Builder/BuildResultWriter.h \
-    SchemeLayersDialog.h \
     Builder/ConfigurationBuilder.h \
     Builder/ApplicationLogicCode.h \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
     Subsystem.h \
-    CreateSchemeDialog.h \
     ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
     ../include/DataSource.h \
@@ -242,7 +235,14 @@ HEADERS  += \
     Builder/LmLimits.h \
     ../include/Address16.h \
     Builder/ModuleLogicCompiler.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    EditSchemaWidget.h \
+    SchemaPropertiesDialog.h \
+    SchemaItemPropertiesDialog.h \
+    SchemaTabPage.h \
+    SchemaLayersDialog.h \
+    CreateSchemaDialog.h \
+    EditEngine/EditEngineSetSchemaProperty.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -258,10 +258,10 @@ FORMS    += \
     DialogFileEditor.ui \
     SchemeLayersDialog.ui \
     DialogSubsystemListEditor.ui \
-    CreateSchemeDialog.ui \
     ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
-    DialogConnectionsEditor.ui
+    DialogConnectionsEditor.ui \
+    CreateSchemaDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

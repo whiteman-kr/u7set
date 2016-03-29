@@ -4,7 +4,7 @@
 
 namespace VFrame30
 {
-	// CSchemeItemSignal
+	// SchemaItemSignal
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemaItemSignal : public FblItemRect
 	{
@@ -26,7 +26,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
 		// Properties
 		//
@@ -47,7 +47,7 @@ namespace VFrame30
 
 
 	//
-	// CSchemeItemInput
+	// SchemaItemInput
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemaItemInput : public SchemaItemSignal
 	{
@@ -78,7 +78,7 @@ namespace VFrame30
 
 
 	//
-	// CSchemeItemInput
+	// SchemaItemInput
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemaItemOutput : public SchemaItemSignal
 	{

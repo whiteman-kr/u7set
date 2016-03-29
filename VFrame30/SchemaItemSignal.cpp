@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 	//
-	// CSchemeItemSignal
+	// SchemaItemSignal
 	//
 	SchemaItemSignal::SchemaItemSignal(void) :
 		SchemaItemSignal(SchemaUnit::Inch)
@@ -25,9 +25,9 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
+	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		FblItemRect::Draw(drawParam, scheme, layer);
+		FblItemRect::Draw(drawParam, schema, layer);
 
 		//--
 		//
@@ -103,9 +103,9 @@ namespace VFrame30
 
 		QString text;
 
-		const VFrame30::LogicSchema* logicScheme = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->scheme());
+		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
 
-		if (multiChannel() == true && logicScheme != nullptr && signalStrIds().size() >= 1)
+		if (multiChannel() == true && logicSchema != nullptr && signalStrIds().size() >= 1)
 		{
 			text = signalStrIds();
 		}

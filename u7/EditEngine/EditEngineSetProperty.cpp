@@ -1,11 +1,11 @@
 #include "EditEngineSetProperty.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 #include "../../VFrame30/SchemaItemAfb.h"
 
 namespace EditEngine
 {
 
-	SetPropertyCommand::SetPropertyCommand(EditSchemeView* schemeView,
+	SetPropertyCommand::SetPropertyCommand(EditSchemaView* schemeView,
 			QString propertyName,
 			QVariant value,
 			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
@@ -39,7 +39,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::executeCommand(EditSchemeView* schemeView)
+	void SetPropertyCommand::executeCommand(EditSchemaView* schemeView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
 
@@ -71,7 +71,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::unExecuteCommand(EditSchemeView* schemeView)
+	void SetPropertyCommand::unExecuteCommand(EditSchemaView* schemeView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> sel;
 

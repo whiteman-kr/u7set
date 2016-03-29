@@ -5,7 +5,7 @@ namespace VFrame30
 {
 	// -- Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
-	void CHorzVertLinks::AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemeItemGuid)
+	void CHorzVertLinks::AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemaItemGuid)
 	{
 		// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 		//
@@ -22,14 +22,14 @@ namespace VFrame30
 
 			if (std::abs(pt1.X - pt2.X) < 0.000001)	// is it verical line?
 			{
-				LINKS l(std::min(pt1.Y, pt2.Y), std::max(pt1.Y, pt2.Y), schemeItemGuid);
+				LINKS l(std::min(pt1.Y, pt2.Y), std::max(pt1.Y, pt2.Y), schemaItemGuid);
 				vertlinks.insert(std::make_pair(pt1.X, l));
 				continue;
 			}
 
 			if (std::abs(pt1.Y - pt2.Y) < 0.000001)	// is it horizontal line?
 			{
-				LINKS l(std::min(pt1.X, pt2.X), std::max(pt1.X, pt2.X), schemeItemGuid);
+				LINKS l(std::min(pt1.X, pt2.X), std::max(pt1.X, pt2.X), schemaItemGuid);
 				horzlinks.insert(std::make_pair(pt1.Y, l));
 				continue;
 			}
@@ -42,7 +42,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPointOnLink(SchemaPoint pt, const QUuid& schemeItemGuid)
+	bool CHorzVertLinks::IsPointOnLink(SchemaPoint pt, const QUuid& schemaItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -50,7 +50,7 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != vertline->second.SchemaItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -70,7 +70,7 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValInRange(pt.X) == true &&
-				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != horzline->second.SchemaItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -83,7 +83,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPinOnLink(SchemaPoint pt, const QUuid& schemeItemGuid)
+	bool CHorzVertLinks::IsPinOnLink(SchemaPoint pt, const QUuid& schemaItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -91,7 +91,7 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != vertline->second.SchemaItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -111,7 +111,7 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValOnEndPoints(pt.X) == true &&
-				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != horzline->second.SchemaItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -122,7 +122,7 @@ namespace VFrame30
 		return false;
 	}
 
-	std::list<QUuid> CHorzVertLinks::getSchemeItemsUnderPoint(SchemaPoint pt, QUuid schemeItemGuid)
+	std::list<QUuid> CHorzVertLinks::getSchemaItemsUnderPoint(SchemaPoint pt, QUuid schemaItemGuid)
 	{
 		std::list<QUuid> items;
 
@@ -132,9 +132,9 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != vertline->second.SchemaItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
-				items.push_back(vertline->second.SchemeItemGuid);
+				items.push_back(vertline->second.SchemaItemGuid);
 			}
 
 			++ vertline;
@@ -152,9 +152,9 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValInRange(pt.X) == true &&
-				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemaItemGuid != horzline->second.SchemaItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
-				items.push_back(horzline->second.SchemeItemGuid);
+				items.push_back(horzline->second.SchemaItemGuid);
 			}
 
 			++ horzline;

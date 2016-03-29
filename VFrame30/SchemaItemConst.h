@@ -1,5 +1,4 @@
-#ifndef SCHEMEITEMCONST_H
-#define SCHEMEITEMCONST_H
+#pragma once
 
 #include "FblItemRect.h"
 
@@ -38,7 +37,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
 		// Public Methods
 		//
@@ -75,6 +74,3 @@ namespace VFrame30
 	};
 
 }
-
-
-#endif // SCHEMEITEMCONST_H

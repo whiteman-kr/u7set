@@ -3,8 +3,8 @@
 -- AL		Application Logic
 -- HC		Hardware Configuration
 -- HP		Hardware Preset
--- WVS		Workflow Visualization Schemes, Is not used anymore, kept for compatibility, TASK RPCT-673
--- DVS		Diagnostics Visualization Schemes
+-- WVS		Workflow Visualization Schemas, Is not used anymore, kept for compatibility, TASK RPCT-673
+-- DVS		Diagnostics Visualization Schemas
 
 SELECT CheckIn(ARRAY(SELECT * FROM AddFile(1, 'AFBL', 0, 0, '')), 1, 'Upgrade: AFBL system folder was added');
 SELECT CheckIn(ARRAY(SELECT * FROM AddFile(1, 'AL', 0, 0, '')), 1, 'Upgrade: AL system folder was added');

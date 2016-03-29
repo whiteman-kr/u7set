@@ -13,7 +13,7 @@ MonitorSchemaView::~MonitorSchemaView()
 
 void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 {
-	// Draw Scheme
+	// Draw Schema
 	//
 	VFrame30::SchemaView::paintEvent(pe);
 
@@ -32,7 +32,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 	//
 	Ajust(&p, 0, 0, zoom());
 
-	// Draw Scheme
+	// Draw Schema
 	//
 	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 

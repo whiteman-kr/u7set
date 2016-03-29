@@ -1,10 +1,10 @@
 #include "EditEngineMoveItem.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 
 namespace EditEngine
 {
 
-	MoveItemCommand::MoveItemCommand(EditSchemeView* schemeView,
+	MoveItemCommand::MoveItemCommand(EditSchemaView* schemeView,
 			double xdiff,
 			double ydiff,
 			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
@@ -24,7 +24,7 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(EditSchemeView* schemeView)
+	void MoveItemCommand::executeCommand(EditSchemaView* schemeView)
 	{
 		schemeView->setSelectedItems(m_items);
 
@@ -41,7 +41,7 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(EditSchemeView* schemeView)
+	void MoveItemCommand::unExecuteCommand(EditSchemaView* schemeView)
 	{
 		schemeView->setSelectedItems(m_items);
 

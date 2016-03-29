@@ -28,7 +28,7 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
-		// Registering Schemes
+		// Registering Schemas
 		//
 		SchemaFactory.Register<DiagSchema>();
 		SchemaFactory.Register<LogicSchema>();
@@ -39,7 +39,7 @@ namespace VFrame30
 		//
 		VideoLayerFactory.Register<SchemaLayer>();
 
-		// Registering SchemeItems
+		// Registering SchemaItems
 		//
 		SchemaItemFactory.Register<SchemaItemLine>();
 		SchemaItemFactory.Register<SchemaItemRect>();
@@ -61,7 +61,7 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
-		SchemaItem::PrintRefCounter("SchemeItem");
+		SchemaItem::PrintRefCounter("SchemaItem");
 
 		google::protobuf::ShutdownProtobufLibrary();
 		return true;

@@ -450,7 +450,7 @@ namespace VFrame30
 
 	Q_INVOKABLE void FblItemRect::adjustHeight()
 	{
-		// Here m_gridSize and m_pingGridStep are cached copies from Scheme, they set in CalcPointPos
+		// Here m_gridSize and m_pingGridStep are cached copies from Schema, they set in CalcPointPos
 		//
 		if (m_cachedGridSize < 0 || m_cachedPinGridStep == 0)
 		{
@@ -596,12 +596,12 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemOutput*>(this);
 	}
 
-	VFrame30::SchemaItemConst* FblItemRect::toSchemeItemConst()
+	VFrame30::SchemaItemConst* FblItemRect::toSchemaItemConst()
 	{
 		return dynamic_cast<VFrame30::SchemaItemConst*>(this);
 	}
 
-	const VFrame30::SchemaItemConst* FblItemRect::toSchemeItemConst() const
+	const VFrame30::SchemaItemConst* FblItemRect::toSchemaItemConst() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemConst*>(this);
 	}

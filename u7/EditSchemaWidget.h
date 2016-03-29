@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/BaseSchemeWidget.h"
+#include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/SchemaItem.h"
@@ -19,47 +19,47 @@ enum class MouseState
 	Scrolling,							// Scrolling with middle mouse button
 	Selection,							// Selection items
 	Moving,								// Moving Items
-	SizingTopLeft,						// Resizing ISchemeItemPosRect
-	SizingTop,							// Resizing ISchemeItemPosRect
-	SizingTopRight,						// Resizing ISchemeItemPosRect
-	SizingRight,						// Resizing ISchemeItemPosRect
-	SizingBottomRight,					// Resizing ISchemeItemPosRect
-	SizingBottom,						// Resizing ISchemeItemPosRect
-	SizingBottomLeft,					// Resizing ISchemeItemPosRect
-	SizingLeft,							// Resizing ISchemeItemPosRect
-	MovingStartLinePoint,				// Moving point ISchemeItemPosLine.StartDocPt
-	MovingEndLinePoint,					// Moving point ISchemeItemPosLine.EndDocPt
-	AddSchemePosLineStartPoint,			// Add item ISchemePosLine
-	AddSchemePosLineEndPoint,			// Add item ISchemePosLine
-	AddSchemePosRectStartPoint,			// Add item ISchemePosRect
-	AddSchemePosRectEndPoint,			// Add item ISchemePosRect
-	AddSchemePosConnectionStartPoint,	// Add item ISchemePosConnectionLine
-	AddSchemePosConnectionNextPoint,	// Add item ISchemePosConnectionLine
-	MovingHorizontalEdge,				// Moving horizntal edge ISchemePosConnectionLine
-	MovingVerticalEdge,					// Moving vertical edge ISchemePosConnectionLine
-	MovingConnectionLinePoint			// Moving point ISchemePosConnectionLine
+	SizingTopLeft,						// Resizing ISchemaItemPosRect
+	SizingTop,							// Resizing ISchemaItemPosRect
+	SizingTopRight,						// Resizing ISchemaItemPosRect
+	SizingRight,						// Resizing ISchemaItemPosRect
+	SizingBottomRight,					// Resizing ISchemaItemPosRect
+	SizingBottom,						// Resizing ISchemaItemPosRect
+	SizingBottomLeft,					// Resizing ISchemaItemPosRect
+	SizingLeft,							// Resizing ISchemaItemPosRect
+	MovingStartLinePoint,				// Moving point ISchemaItemPosLine.StartDocPt
+	MovingEndLinePoint,					// Moving point ISchemaItemPosLine.EndDocPt
+	AddSchemaPosLineStartPoint,			// Add item ISchemaPosLine
+	AddSchemaPosLineEndPoint,			// Add item ISchemaPosLine
+	AddSchemaPosRectStartPoint,			// Add item ISchemaPosRect
+	AddSchemaPosRectEndPoint,			// Add item ISchemaPosRect
+	AddSchemaPosConnectionStartPoint,	// Add item ISchemaPosConnectionLine
+	AddSchemaPosConnectionNextPoint,	// Add item ISchemaPosConnectionLine
+	MovingHorizontalEdge,				// Moving horizntal edge ISchemaPosConnectionLine
+	MovingVerticalEdge,					// Moving vertical edge ISchemaPosConnectionLine
+	MovingConnectionLinePoint			// Moving point ISchemaPosConnectionLine
 };
 
 
-// Possible action on SchemeItem
+// Possible action on SchemaItem
 //
-enum class SchemeItemAction
+enum class SchemaItemAction
 {
 	NoAction,							// No Action
 	MoveItem,							// Move Item
-	ChangeSizeTopLeft,					// Change rectangle size (ISchemePosRect)
-	ChangeSizeTop,						// Change rectangle size (ISchemePosRect)
-	ChangeSizeTopRight,					// Change rectangle size (ISchemePosRect)
-	ChangeSizeRight,					// Change rectangle size (ISchemePosRect)
-	ChangeSizeBottomRight,				// Change rectangle size (ISchemePosRect)
-	ChangeSizeBottom,					// Change rectangle size (ISchemePosRect)
-	ChangeSizeBottomLeft,				// Change rectangle size (ISchemePosRect)
-	ChangeSizeLeft,						// Change rectangle size (ISchemePosRect)
-	MoveHorizontalEdge,					// Move horizontal edge (ISchemePosConnection)
-	MoveVerticalEdge,					// Move vertical edge  (ISchemePosConnection)
-	MoveStartLinePoint,					// Move start point (ISchemePosLine)
-	MoveEndLinePoint,					// Move end point (ISchemePosLine)
-	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemePosConnectionLine)
+	ChangeSizeTopLeft,					// Change rectangle size (ISchemaPosRect)
+	ChangeSizeTop,						// Change rectangle size (ISchemaPosRect)
+	ChangeSizeTopRight,					// Change rectangle size (ISchemaPosRect)
+	ChangeSizeRight,					// Change rectangle size (ISchemaPosRect)
+	ChangeSizeBottomRight,				// Change rectangle size (ISchemaPosRect)
+	ChangeSizeBottom,					// Change rectangle size (ISchemaPosRect)
+	ChangeSizeBottomLeft,				// Change rectangle size (ISchemaPosRect)
+	ChangeSizeLeft,						// Change rectangle size (ISchemaPosRect)
+	MoveHorizontalEdge,					// Move horizontal edge (ISchemaPosConnection)
+	MoveVerticalEdge,					// Move vertical edge  (ISchemaPosConnection)
+	MoveStartLinePoint,					// Move start point (ISchemaPosLine)
+	MoveEndLinePoint,					// Move end point (ISchemaPosLine)
+	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemaPosConnectionLine)
 };
 
 
@@ -67,11 +67,11 @@ enum class SchemeItemAction
 //
 class QRubberBand;
 
-class EditSchemeWidget;
-class SchemePropertiesDialog;
-class SchemeLayersDialog;
-class SchemeItemPropertiesDialog;
-class EditSchemeTabPage;
+class EditSchemaWidget;
+class SchemaPropertiesDialog;
+class SchemaLayersDialog;
+class SchemaItemPropertiesDialog;
+class EditSchemaTabPage;
 
 
 namespace EditEngine
@@ -81,18 +81,18 @@ namespace EditEngine
 
 //
 //
-// EditSchemeView
+// EditSchemaView
 //
 //
-class EditSchemeView : public VFrame30::SchemaView
+class EditSchemaView : public VFrame30::SchemaView
 {
 	Q_OBJECT
 
 public:
-	explicit EditSchemeView(QWidget* parent = 0);
-	explicit EditSchemeView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent = nullptr);
+	explicit EditSchemaView(QWidget* parent = 0);
+	explicit EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent = nullptr);
 
-	virtual ~EditSchemeView();
+	virtual ~EditSchemaView();
 
 
 	// Painting
@@ -114,7 +114,7 @@ protected:
 	// Some determine functions
 	//
 protected:
-	SchemeItemAction getPossibleAction(VFrame30::SchemaItem* schemeItem, QPointF point, int* outMovingEdgePointIndex);
+	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
 
 	// Signals
 signals:
@@ -185,27 +185,27 @@ protected:
 												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
 
 
-	// Temporary data, can be changed in EditSchemeWidget
+	// Temporary data, can be changed in EditSchemaWidget
 	//
-	friend EditSchemeWidget;
+	friend EditSchemaWidget;
 };
 
 
 //
 //
-// EditSchemeWidget
+// EditSchemaWidget
 //
 //
-class EditSchemeWidget : public VFrame30::BaseSchemeWidget
+class EditSchemaWidget : public VFrame30::BaseSchemaWidget
 {
 	Q_OBJECT
 
 private:
-	EditSchemeWidget() = delete;
+	EditSchemaWidget() = delete;
 
 public:
-	EditSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbController);
-	virtual ~EditSchemeWidget();
+	EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController);
+	virtual ~EditSchemaWidget();
 	
 protected:
 	void createActions();
@@ -224,9 +224,9 @@ protected:
 	// Mouse Left Button Down
 	//
 	void mouseLeftDown_None(QMouseEvent* event);
-	void mouseLeftDown_AddSchemePosLineStartPoint(QMouseEvent* event);
-	void mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* event);
-	void mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEvent* event);
+	void mouseLeftDown_AddSchemaPosLineStartPoint(QMouseEvent* event);
+	void mouseLeftDown_AddSchemaPosRectStartPoint(QMouseEvent* event);
+	void mouseLeftDown_AddSchemaPosConnectionStartPoint(QMouseEvent* event);
 
 	// Mouse Left Button Up
 	//
@@ -234,9 +234,9 @@ protected:
 	void mouseLeftUp_Moving(QMouseEvent* event);
 	void mouseLeftUp_SizingRect(QMouseEvent* event);
 	void mouseLeftUp_MovingLinePoint(QMouseEvent* event);
-	void mouseLeftUp_AddSchemePosLineEndPoint(QMouseEvent* event);
-	void mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event);
-	void mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* event);
+	void mouseLeftUp_AddSchemaPosLineEndPoint(QMouseEvent* event);
+	void mouseLeftUp_AddSchemaPosRectEndPoint(QMouseEvent* event);
+	void mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
 	void mouseLeftUp_MovingEdgeOrVertex(QMouseEvent* event);
 
 	// Mouse Move
@@ -246,15 +246,15 @@ protected:
 	void mouseMove_Moving(QMouseEvent* event);
 	void mouseMove_SizingRect(QMouseEvent* event);
 	void mouseMove_MovingLinePoint(QMouseEvent* event);
-	void mouseMove_AddSchemePosLineEndPoint(QMouseEvent* event);
-	void mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event);
-	void mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* event);
+	void mouseMove_AddSchemaPosLineEndPoint(QMouseEvent* event);
+	void mouseMove_AddSchemaPosRectEndPoint(QMouseEvent* event);
+	void mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Down
 	//
 	void mouseRightDown_None(QMouseEvent* event);
-	void mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEvent* event);
+	void mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
 
 	// Mouse Right Button Up
 	//
@@ -285,8 +285,8 @@ signals:
 	void checkOutFile();					// Command to the owner to CheckOut the file.
 	void undoChangesFile();					// Command to the owner to Undo the file in version control system, and reread last version.
 	void saveWorkcopy();
-	void getCurrentWorkcopy();				// Save current scheme to a file
-	void setCurrentWorkcopy();				// Load a scheme from a file
+	void getCurrentWorkcopy();				// Save current schema to a file
+	void setCurrentWorkcopy();				// Load a schema from a file
 	void modifiedChanged(bool modified);	// Command to the owner to change title
 
 	// Slots
@@ -312,7 +312,7 @@ protected slots:
 	void selectAll();
 	void editPaste();
 
-	void schemeProperties();
+	void schemaProperties();
 	void properties();
 	void layers();
 	void selectionChanged();
@@ -345,13 +345,13 @@ public:
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
 
-	EditSchemeView* editSchemeView();
-	const EditSchemeView* editSchemeView() const;
+	EditSchemaView* editSchemaView();
+	const EditSchemaView* editSchemaView() const;
 
-	bool isLogicScheme() const;
+	bool isLogicSchema() const;
 
-	std::shared_ptr<VFrame30::LogicSchema> logicScheme();
-	const std::shared_ptr<VFrame30::LogicSchema> logicScheme() const;
+	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
+	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
@@ -381,8 +381,8 @@ private:
 
 	EditEngine::EditEngine* m_editEngine = nullptr;
 
-	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
-	SchemeItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
+	SchemaPropertiesDialog* m_schemaPropertiesDialog = nullptr;
+	SchemaItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
 
 	// Temporary and state variables
 	//
@@ -408,7 +408,7 @@ private:
 
 	struct SizeActionToMouseCursor
 	{
-		SchemeItemAction action;
+		SchemaItemAction action;
 		MouseState mouseState;
 		Qt::CursorShape cursorShape;
 	};

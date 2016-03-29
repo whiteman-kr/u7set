@@ -49,7 +49,7 @@ namespace VFrame30
 		void Print();
 
 		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
-		void RunClickScript(const std::shared_ptr<SchemaItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const;
+		void RunClickScript(const std::shared_ptr<SchemaItem>& schemaItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const;
 
 		// Получить размер документа в точка
 		//
@@ -59,7 +59,7 @@ namespace VFrame30
 		int GetLayerCount() const;
 		
 		// Заполнить connectionMap который хранится в каждом слое.
-		// std::map<SchemePoint, int> connectionMap		Ключ - координата пина, значение - количество подключений к пину
+		// std::map<SchemaPoint, int> connectionMap		Ключ - координата пина, значение - количество подключений к пину
 		//
 		void BuildFblConnectionMap() const;
 

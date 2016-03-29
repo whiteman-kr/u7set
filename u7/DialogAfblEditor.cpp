@@ -218,7 +218,7 @@ void DialogAfblEditor::on_m_add_clicked()
 void DialogAfblEditor::on_m_addXsd_clicked()
 {
     bool ok = false;
-    QString caption = QInputDialog::getText(this, tr("Add XSD"), tr("Enter the scheme name:"), QLineEdit::Normal, tr(""), &ok);
+	QString caption = QInputDialog::getText(this, tr("Add XSD"), tr("Enter the schema name:"), QLineEdit::Normal, tr(""), &ok);
     if (ok == false)
     {
         return;

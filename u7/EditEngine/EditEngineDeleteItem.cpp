@@ -1,9 +1,9 @@
 #include "EditEngineDeleteItem.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 
 namespace EditEngine
 {
-	DeleteItemCommand::DeleteItemCommand(EditSchemeView* schemeView,
+	DeleteItemCommand::DeleteItemCommand(EditSchemaView* schemeView,
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items,
 		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		QScrollBar* hScrollBar,
@@ -24,7 +24,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::executeCommand(EditSchemeView* schemeView)
+	void DeleteItemCommand::executeCommand(EditSchemaView* schemeView)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
 			[this](std::shared_ptr<VFrame30::SchemaItem> item)
@@ -37,7 +37,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::unExecuteCommand(EditSchemeView* schemeView)
+	void DeleteItemCommand::unExecuteCommand(EditSchemaView* schemeView)
 	{
 		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
 

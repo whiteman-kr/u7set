@@ -103,9 +103,9 @@ public:
 
     //SchemeItem properties
     //
-    QPoint m_schemeItemPropertiesWindowPos;
-    QByteArray m_schemeItemPropertiesWindowGeometry;
-    int m_schemeItemSplitterState = 0;
+    QPoint m_schemaItemPropertiesWindowPos;
+    QByteArray m_schemaItemPropertiesWindowGeometry;
+    int m_schemaItemSplitterState = 0;
 
 private:
 	// --

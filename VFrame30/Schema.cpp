@@ -234,20 +234,20 @@ namespace VFrame30
 		return;
 	}
 
-	void Schema::RunClickScript(const std::shared_ptr<SchemaItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
+	void Schema::RunClickScript(const std::shared_ptr<SchemaItem>& schemaItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
 	{
 		assert(false);
-		Q_UNUSED(schemeItem);
+		Q_UNUSED(schemaItem);
 
-/*		if (pVideoFrameWidgetAgent == nullptr || schemeItem->acceptClick() == false || schemeItem->clickScript().isEmpty() == true)
+/*		if (pVideoFrameWidgetAgent == nullptr || schemaItem->acceptClick() == false || schemaItem->clickScript().isEmpty() == true)
 		{
 			assert(pVideoFrameWidgetAgent != nullptr);
 			return;
 		}
 
-		// Extract script text from SchemeItem
+		// Extract script text from SchemaItem
 		//
-		QString script = schemeItem->clickScript();
+		QString script = schemaItem->clickScript();
 		QScriptEngine scriptEngine;
 		QScriptValue globalValue = scriptEngine.globalObject();
 
@@ -326,10 +326,10 @@ namespace VFrame30
 					continue;
 				}
 
-				SchemaItemLink* schemeItemLink = dynamic_cast<SchemaItemLink*>(item->get());
-				if (schemeItemLink != nullptr)
+				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item->get());
+				if (schemaItemLink != nullptr)
 				{
-					const std::list<SchemaPoint>& pointList = schemeItemLink->GetPointList();
+					const std::list<SchemaPoint>& pointList = schemaItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -339,7 +339,7 @@ namespace VFrame30
 					
 					// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 					//
-					horzVertLinks.AddLinks(pointList, schemeItemLink->guid());
+					horzVertLinks.AddLinks(pointList, schemaItemLink->guid());
 				}
 			}
 		}
@@ -368,13 +368,13 @@ namespace VFrame30
 				}
 
 			
-				// ≈сли элемент SchemeItemLink, то в качестве координат пинов будут крайние точки
+				// ≈сли элемент SchemaItemLink, то в качестве координат пинов будут крайние точки
 				//
-				SchemaItemLink* schemeItemLink = dynamic_cast<SchemaItemLink*>(item->get());
+				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item->get());
 
-				if (schemeItemLink != nullptr)
+				if (schemaItemLink != nullptr)
 				{
-					const std::list<SchemaPoint>& pointList = schemeItemLink->GetPointList();
+					const std::list<SchemaPoint>& pointList = schemaItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -387,12 +387,12 @@ namespace VFrame30
 
 					// проверить, не лежит ли пин на соединительной линии
 					//
-					if (horzVertLinks.IsPointOnLink(pointList.front(), schemeItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.front(), schemaItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.front());
 					}
 
-					if (horzVertLinks.IsPointOnLink(pointList.back(), schemeItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.back(), schemaItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.back());
 					}

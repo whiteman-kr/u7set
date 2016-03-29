@@ -388,7 +388,7 @@ namespace VFrame30
 		}
 	}
 
-	// Реализация интерефейса ISchemeItemPropertiesPos
+	// Реализация интерефейса ISchemaItemPropertiesPos
 	//
 	double PosRectImpl::left() const
 	{

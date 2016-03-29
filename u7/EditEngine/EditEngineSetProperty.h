@@ -13,7 +13,7 @@ namespace EditEngine
 		SetPropertyCommand();
 	public:
 		SetPropertyCommand(
-				EditSchemeView* schemeView,
+				EditSchemaView* schemeView,
 				QString propertyName,
 				QVariant value,
 				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
@@ -21,8 +21,8 @@ namespace EditEngine
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* schemeView) override;
-		virtual void unExecuteCommand(EditSchemeView* schemeView) override;
+		virtual void executeCommand(EditSchemaView* schemeView) override;
+		virtual void unExecuteCommand(EditSchemaView* schemeView) override;
 
 		//--
 		//

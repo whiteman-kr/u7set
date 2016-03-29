@@ -433,7 +433,7 @@ namespace VFrame30
 		}
 	}
 		
-	// Реализация интерефейса ISchemeItemPropertiesPos
+	// ISchemaItemPropertiesPos Implementation
 	//
 	double PosConnectionImpl::left() const
 	{

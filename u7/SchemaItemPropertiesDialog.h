@@ -1,5 +1,4 @@
-#ifndef SCHEMEITEMPROPERTIESDIALOG_H
-#define SCHEMEITEMPROPERTIESDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <memory>
@@ -16,17 +15,17 @@ namespace EditEngine
 	class EditEngine;
 }
 
-class SchemeItemPropertyEditor;
+class SchemaItemPropertyEditor;
 
 
 
-class SchemeItemPropertiesDialog : public QDialog
+class SchemaItemPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit SchemeItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget *parent = 0);
-	virtual ~SchemeItemPropertiesDialog();
+	explicit SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget *parent = 0);
+	virtual ~SchemaItemPropertiesDialog();
 
 public:
 	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
@@ -41,24 +40,24 @@ private:
 
     Ui::SchemeItemPropertiesDialog *ui;
 
-	SchemeItemPropertyEditor* m_propertyEditor = nullptr;
+	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
 
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 };
 
 //
 //
-//	SchemeItemPropertyBrowser
+//	SchemaItemPropertyBrowser
 //
 //
 
-class SchemeItemPropertyEditor : public ExtWidgets::PropertyEditor
+class SchemaItemPropertyEditor : public ExtWidgets::PropertyEditor
 {
 	Q_OBJECT
 
 public:
-	explicit SchemeItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent);
-	virtual ~SchemeItemPropertyEditor();
+	explicit SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent);
+	virtual ~SchemaItemPropertyEditor();
 
 protected slots:
 	virtual void valueChanged(QtProperty* property, QVariant value) override;
@@ -70,4 +69,3 @@ private:
 	EditEngine::EditEngine* m_editEngine = nullptr;
 };
 
-#endif // SCHEMEITEMPROPERTIESDIALOG_H

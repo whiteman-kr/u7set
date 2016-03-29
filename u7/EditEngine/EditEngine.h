@@ -2,7 +2,7 @@
 
 #include "../VFrame30/SchemaItem.h"
 
-class EditSchemeView;
+class EditSchemaView;
 
 namespace VFrame30
 {
@@ -16,7 +16,7 @@ namespace EditEngine
 
 	//
 	//
-	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemeView (Undo )
+	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemaView (Undo )
 	//
 	//
 	class EditEngine : public QObject
@@ -27,7 +27,7 @@ namespace EditEngine
 		EditEngine();		// deleted;
 
 	public:
-		EditEngine(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
+		EditEngine(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
 		virtual ~EditEngine();
 
 	public:
@@ -66,7 +66,7 @@ namespace EditEngine
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemaItem>& item);
 
-		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& scheme);
+		void runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema);
 
 //		/// <summary>
 //		/// Команда "Изменить размер"
@@ -74,9 +74,9 @@ namespace EditEngine
 //		/// <param name="width">размер объетка по горизонтали (может быть меньше 0)</param>
 //		/// <param name="height">размер объетка по вертикали (может быть меньше 0)</param>
 //		/// <param name="items">Список объектов для выполнения команды</param>
-//		public void RunResizeCommand(double width, double height, List<VFrame30Ext.SchemeItem> items)
+//		public void RunResizeCommand(double width, double height, List<VFrame30Ext.SchemaItem> items)
 //		{
-//			AddCommand(new ResizeSchemeItemCommand<SchemeType>(EditSchemeView, width, height, items, hScrollBar, vScrollBar), true);
+//			AddCommand(new ResizeSchemaItemCommand<SchemaType>(EditSchemaView, width, height, items, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -85,21 +85,21 @@ namespace EditEngine
 //		/// </summary>
 //		/// <param name="size">список размеров объектов (может быть меньше 0)</param>
 //		/// <param name="items">Список объектов для выполнения команды</param>
-//		public void RunResizeCommand(List<Tuple<double, double>> size, List<VFrame30Ext.SchemeItem> items)
+//		public void RunResizeCommand(List<Tuple<double, double>> size, List<VFrame30Ext.SchemaItem> items)
 //		{
-//			AddCommand(new ResizeSchemeItemCommand<SchemeType>(EditSchemeView, size, items, hScrollBar, vScrollBar), true);
+//			AddCommand(new ResizeSchemaItemCommand<SchemaType>(EditSchemaView, size, items, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
 //		/// <summary>
 //		/// Команда "Изменить свойства"
 //		/// </summary>
-//		/// <param name="item">scheme item</param>
+//		/// <param name="item">schema item</param>
 //		/// <param name="oldItem">old value</param>
 //		/// <param name="newItem">new value</param>
-//		public void RunSetSchemeItemProperties(VFrame30Ext.SchemeItem item, VFrame30Ext.StreamedData oldItem, VFrame30Ext.StreamedData newItem)
+//		public void RunSetSchemaItemProperties(VFrame30Ext.SchemaItem item, VFrame30Ext.StreamedData oldItem, VFrame30Ext.StreamedData newItem)
 //		{
-//			List<VFrame30Ext.SchemeItem> items = new List<VFrame30Ext.SchemeItem>(1);
+//			List<VFrame30Ext.SchemaItem> items = new List<VFrame30Ext.SchemaItem>(1);
 //			items.Add(item);
 
 //			List<VFrame30Ext.StreamedData> oldSd = new List<VFrame30Ext.StreamedData>(1);
@@ -108,7 +108,7 @@ namespace EditEngine
 //			List<VFrame30Ext.StreamedData> newSd = new List<VFrame30Ext.StreamedData>(1);
 //			newSd.Add(newItem);
 
-//			AddCommand(new SetSchemeItemPropertiesCommand<SchemeType>(EditSchemeView, items, oldSd, newSd, hScrollBar, vScrollBar), true);
+//			AddCommand(new SetSchemaItemPropertiesCommand<SchemaType>(EditSchemaView, items, oldSd, newSd, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -118,9 +118,9 @@ namespace EditEngine
 //		/// <param name="items">спиосок ссылок на элементы для установки свойств</param>
 //		/// <param name="oldItems">список старых значений элементов</param>
 //		/// <param name="newItems">список новых значений элементов</param>
-//		public void RunSetSchemeItemProperties(List<VFrame30Ext.SchemeItem> items, List<VFrame30Ext.StreamedData> oldItems, List<VFrame30Ext.StreamedData> newItems)
+//		public void RunSetSchemaItemProperties(List<VFrame30Ext.SchemaItem> items, List<VFrame30Ext.StreamedData> oldItems, List<VFrame30Ext.StreamedData> newItems)
 //		{
-//			AddCommand(new SetSchemeItemPropertiesCommand<SchemeType>(EditSchemeView, items, oldItems, newItems, hScrollBar, vScrollBar), true);
+//			AddCommand(new SetSchemaItemPropertiesCommand<SchemaType>(EditSchemaView, items, oldItems, newItems, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -128,9 +128,9 @@ namespace EditEngine
 //		/// Команда "На передний план"
 //		/// </summary>
 //		/// <param name="items">спиосок ссылок на элементы для установки свойств</param>
-//		public void RunBringToFrontSchemeItem(List<VFrame30Ext.SchemeItem> items, Guid layerGuid)
+//		public void RunBringToFrontSchemaItem(List<VFrame30Ext.SchemaItem> items, Guid layerGuid)
 //		{
-//			AddCommand(new ChangeOrderSchemeItemCommand<SchemeType>(EditSchemeView, items, ChangeOrderSchemeItemCommand<SchemeType>.ChangeOrderType.Front, layerGuid, hScrollBar, vScrollBar), true);
+//			AddCommand(new ChangeOrderSchemaItemCommand<SchemaType>(EditSchemaView, items, ChangeOrderSchemaItemCommand<SchemaType>.ChangeOrderType.Front, layerGuid, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -138,9 +138,9 @@ namespace EditEngine
 //		/// Команда "На задний план"
 //		/// </summary>
 //		/// <param name="items">спиосок ссылок на элементы для установки свойств</param>
-//		public void RunSendToBackSchemeItem(List<VFrame30Ext.SchemeItem> items, Guid layerGuid)
+//		public void RunSendToBackSchemaItem(List<VFrame30Ext.SchemaItem> items, Guid layerGuid)
 //		{
-//			AddCommand(new ChangeOrderSchemeItemCommand<SchemeType>(EditSchemeView, items, ChangeOrderSchemeItemCommand<SchemeType>.ChangeOrderType.Back, layerGuid, hScrollBar, vScrollBar), true);
+//			AddCommand(new ChangeOrderSchemaItemCommand<SchemaType>(EditSchemaView, items, ChangeOrderSchemaItemCommand<SchemaType>.ChangeOrderType.Back, layerGuid, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -148,9 +148,9 @@ namespace EditEngine
 //		/// Команда "На уровень вверх"
 //		/// </summary>
 //		/// <param name="items">спиосок ссылок на элементы для установки свойств</param>
-//		public void RunLevelUpSchemeItem(List<VFrame30Ext.SchemeItem> items, Guid layerGuid)
+//		public void RunLevelUpSchemaItem(List<VFrame30Ext.SchemaItem> items, Guid layerGuid)
 //		{
-//			AddCommand(new ChangeOrderSchemeItemCommand<SchemeType>(EditSchemeView, items, ChangeOrderSchemeItemCommand<SchemeType>.ChangeOrderType.Up, layerGuid, hScrollBar, vScrollBar), true);
+//			AddCommand(new ChangeOrderSchemaItemCommand<SchemaType>(EditSchemaView, items, ChangeOrderSchemaItemCommand<SchemaType>.ChangeOrderType.Up, layerGuid, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -158,9 +158,9 @@ namespace EditEngine
 //		/// Команда "На уровень вниз"
 //		/// </summary>
 //		/// <param name="items">спиосок ссылок на элементы для установки свойств</param>
-//		public void RunLevelDownSchemeItem(List<VFrame30Ext.SchemeItem> items, Guid layerGuid)
+//		public void RunLevelDownSchemaItem(List<VFrame30Ext.SchemaItem> items, Guid layerGuid)
 //		{
-//			AddCommand(new ChangeOrderSchemeItemCommand<SchemeType>(EditSchemeView, items, ChangeOrderSchemeItemCommand<SchemeType>.ChangeOrderType.Down, layerGuid, hScrollBar, vScrollBar), true);
+//			AddCommand(new ChangeOrderSchemaItemCommand<SchemaType>(EditSchemaView, items, ChangeOrderSchemaItemCommand<SchemaType>.ChangeOrderType.Down, layerGuid, hScrollBar, vScrollBar), true);
 //			return;
 //		}
 
@@ -174,7 +174,7 @@ namespace EditEngine
 	private:
 		static const int MaxCommandCount = 2048;
 
-		EditSchemeView* m_schemeView;
+		EditSchemaView* m_schemaView;
 		QScrollBar* m_hScrollBar;
 		QScrollBar* m_vScrollBar;
 
@@ -196,18 +196,18 @@ namespace EditEngine
 	private:
 		EditCommand();		// deleted;
 	public:
-		EditCommand(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		EditCommand(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	public:
-		void execute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void unExecute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void execute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void unExecute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* schemeView) = 0;
-		virtual void unExecuteCommand(EditSchemeView* schemeView) = 0;
+		virtual void executeCommand(EditSchemaView* schemaView) = 0;
+		virtual void unExecuteCommand(EditSchemaView* schemaView) = 0;
 
-		void saveViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void restoreViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void saveViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void restoreViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 		// Data
 		//

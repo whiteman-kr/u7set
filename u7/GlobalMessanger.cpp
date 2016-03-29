@@ -43,25 +43,25 @@ void GlobalMessanger::fireBuildFinished()
 	emit buildFinished();
 }
 
-void GlobalMessanger::clearBuildSchemeIssues()
+void GlobalMessanger::clearBuildSchemaIssues()
 {
 	QMutexLocker ml(&m_buildResultMutex);
-	m_buildSchemeIssues.clear();
+	m_buildSchemaIssues.clear();
 }
 
-void GlobalMessanger::swapSchemeIssues(std::map<QUuid, OutputMessageLevel>& data)
+void GlobalMessanger::swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data)
 {
 	QMutexLocker ml(&m_buildResultMutex);
-	std::swap(m_buildSchemeIssues, data);
+	std::swap(m_buildSchemaIssues, data);
 }
 
-OutputMessageLevel GlobalMessanger::issueForSchemeItem(const QUuid itemId) const
+OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid itemId) const
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
-	auto it = m_buildSchemeIssues.find(itemId);
+	auto it = m_buildSchemaIssues.find(itemId);
 
-	if (it == m_buildSchemeIssues.end())
+	if (it == m_buildSchemaIssues.end())
 	{
 		// Either Success or did not take part in build
 		//

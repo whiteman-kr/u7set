@@ -7,7 +7,7 @@ namespace VFrame30
 	//SchemaUnit CSettings::m_regionalUnit = SchemaUnit::Inch;
 	SchemaUnit Settings::m_regionalUnit = SchemaUnit::Millimeter;
 
-	// The min grid size for schemes for Fbl pins positioning
+	// The min grid size for schemas for Fbl pins positioning
 	//
 	const double Settings::m_defaultGridSizeIn = 0.03125;	// 1/32in
 	const double Settings::m_defaultGridSizeMm = mm2in(1);	// 1mm

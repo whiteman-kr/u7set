@@ -78,7 +78,7 @@ private:
 
 	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 
-	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all scheme items with issues
+	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schame items with issues
 };
 
 

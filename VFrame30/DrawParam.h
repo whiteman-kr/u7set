@@ -28,14 +28,14 @@ namespace VFrame30
 	{
 	public:
 		CDrawParam(void) = delete;
-		CDrawParam(QPainter* painter, Schema* scheme, double gridSize, int pinGridStep);
+		CDrawParam(QPainter* painter, Schema* schema, double gridSize, int pinGridStep);
 		virtual ~CDrawParam(void);
 
 	public:
 		QPainter* painter();
 		QPaintDevice* device();
 
-		const Schema* scheme() const;
+		const Schema* schema() const;
 
 		void Save() const;
 
@@ -56,7 +56,7 @@ namespace VFrame30
 
 	private:
 		QPainter* m_painter = nullptr;
-		Schema* m_scheme = nullptr;
+		Schema* m_schema = nullptr;
 
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;

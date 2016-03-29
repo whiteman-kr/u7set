@@ -1,14 +1,14 @@
-#include "BaseSchemeWidget.h"
+#include "BaseSchemaWidget.h"
 #include "Schema.h"
 #include "SchemaView.h"
 
 namespace VFrame30
 {
 
-	BaseSchemeWidget::BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemaView* schemeView)
+	BaseSchemaWidget::BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView)
 	{
-		assert(scheme != nullptr);
-		assert(schemeView != nullptr);
+		assert(schema != nullptr);
+		assert(schemaView != nullptr);
 
 		setBackgroundRole(QPalette::Dark);
 		setAlignment(Qt::AlignCenter);
@@ -16,11 +16,11 @@ namespace VFrame30
 
 		// --
 		//
-		m_schemeView = schemeView;
-		m_schemeView->setSchema(scheme, false);
+		m_schemaView = schemaView;
+		m_schemaView->setSchema(schema, false);
 
-		m_schemeView->setZoom(100);
-		setWidget(m_schemeView);
+		m_schemaView->setZoom(100);
+		setWidget(m_schemaView);
 
 		// --
 		//
@@ -29,12 +29,12 @@ namespace VFrame30
 		return;
 	}
 
-	BaseSchemeWidget::~BaseSchemeWidget()
+	BaseSchemaWidget::~BaseSchemaWidget()
 	{
 
 	}
 
-	void BaseSchemeWidget::createActions()
+	void BaseSchemaWidget::createActions()
 	{
 		// View->ZoomIn
 		//
@@ -42,7 +42,7 @@ namespace VFrame30
 		m_zoomInAction->setEnabled(true);
 		m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
 		m_zoomInAction->setShortcutContext(Qt::ShortcutContext::WindowShortcut);
-		connect(m_zoomInAction, &QAction::triggered, this, &BaseSchemeWidget::zoomIn);
+		connect(m_zoomInAction, &QAction::triggered, this, &BaseSchemaWidget::zoomIn);
 		addAction(m_zoomInAction);
 
 		// View->ZoomOut
@@ -50,7 +50,7 @@ namespace VFrame30
 		m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 		m_zoomOutAction->setEnabled(true);
 		m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-		connect(m_zoomOutAction, &QAction::triggered, this, &BaseSchemeWidget::zoomOut);
+		connect(m_zoomOutAction, &QAction::triggered, this, &BaseSchemaWidget::zoomOut);
 		addAction(m_zoomOutAction);
 
 		// View->Zoom100
@@ -58,11 +58,11 @@ namespace VFrame30
 		m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 		m_zoom100Action->setEnabled(true);
 		m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-		connect(m_zoom100Action, &QAction::triggered, this, &BaseSchemeWidget::zoom100);
+		connect(m_zoom100Action, &QAction::triggered, this, &BaseSchemaWidget::zoom100);
 		addAction(m_zoom100Action);
 	}
 
-	void BaseSchemeWidget::wheelEvent(QWheelEvent* event)
+	void BaseSchemaWidget::wheelEvent(QWheelEvent* event)
 	{
 		if (widget() == nullptr)
 		{
@@ -81,12 +81,12 @@ namespace VFrame30
 
 		if (numSteps != 0)
 		{
-			double zoom = schemeView()->zoom() + numSteps * 10;
+			double zoom = schemaView()->zoom() + numSteps * 10;
 
 			QPointF oldDocPos;
 			MousePosToDocPoint(event->pos(), &oldDocPos);
 
-			schemeView()->setZoom(zoom, false);
+			schemaView()->setZoom(zoom, false);
 
 			QPointF newDocPos;
 			MousePosToDocPoint(event->pos(), &newDocPos);
@@ -98,7 +98,7 @@ namespace VFrame30
 			int newHorzValue = 0;
 			int newVertValue = 0;
 
-			switch (scheme()->unit())
+			switch (schema()->unit())
 			{
 			case VFrame30::SchemaUnit::Display:
 				newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
@@ -120,7 +120,7 @@ namespace VFrame30
 		return;
 	}
 
-	void BaseSchemeWidget::mousePressEvent(QMouseEvent* event)
+	void BaseSchemaWidget::mousePressEvent(QMouseEvent* event)
 	{
 		if (event->button() == Qt::MidButton)
 		{
@@ -143,7 +143,7 @@ namespace VFrame30
 		return;
 	}
 
-	void BaseSchemeWidget::mouseMoveEvent(QMouseEvent* event)
+	void BaseSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (event->buttons().testFlag(Qt::MidButton) == true)
 		{
@@ -163,7 +163,7 @@ namespace VFrame30
 		return;
 	}
 
-	QPointF BaseSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint) const
+	QPointF BaseSchemaWidget::widgetPointToDocument(const QPoint& widgetPoint) const
 	{
 		double docX = 0;	// Result
 		double docY = 0;
@@ -171,8 +171,8 @@ namespace VFrame30
 		double dpiX = logicalDpiX();
 		double dpiY = logicalDpiY();
 
-		int widthInPixels = scheme()->GetDocumentWidth(dpiX, zoom());
-		int heightInPixels = scheme()->GetDocumentHeight(dpiY, zoom());
+		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom());
+		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom());
 
 		QRect clientRect = geometry();
 
@@ -202,7 +202,7 @@ namespace VFrame30
 
 		// Scaling to zoom factor
 		//
-		if (scheme()->unit() == VFrame30::SchemaUnit::Display)
+		if (schema()->unit() == VFrame30::SchemaUnit::Display)
 		{
 			docX = x / (zoom() / 100.0);
 			docY = y / (zoom() / 100.0);
@@ -216,7 +216,7 @@ namespace VFrame30
 		return QPointF(docX, docY);
 	}
 
-	bool BaseSchemeWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* destDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	bool BaseSchemaWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* destDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
 		if (destDocPos == nullptr)
 		{
@@ -227,10 +227,10 @@ namespace VFrame30
 		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
 		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
 
-		double zoom = schemeView()->zoom();
+		double zoom = schemaView()->zoom();
 
-		int widthInPixels = scheme()->GetDocumentWidth(dpiX, zoom);
-		int heightInPixels = scheme()->GetDocumentHeight(dpiY, zoom);
+		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom);
+		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom);
 
 		int startX = 0;
 		int startY = 0;
@@ -256,7 +256,7 @@ namespace VFrame30
 		int x = mousePos.x() - startX;
 		int y = mousePos.y() - startY;
 
-		if (scheme()->unit() == VFrame30::SchemaUnit::Display)
+		if (schema()->unit() == VFrame30::SchemaUnit::Display)
 		{
 			destDocPos->setX(x / (zoom / 100.0));
 			destDocPos->setY(y / (zoom / 100.0));
@@ -270,68 +270,68 @@ namespace VFrame30
 		return true;
 	}
 
-	void BaseSchemeWidget::zoomIn()
+	void BaseSchemaWidget::zoomIn()
 	{
 		setZoom(zoom() + 10);
 		return;
 	}
 
-	void BaseSchemeWidget::zoomOut()
+	void BaseSchemaWidget::zoomOut()
 	{
 		setZoom(zoom() - 10);
 		return;
 	}
 
-	void BaseSchemeWidget::zoom100()
+	void BaseSchemaWidget::zoom100()
 	{
 		setZoom(100);
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme()
+	std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schema()
 	{
-		return m_schemeView->schema();
+		return m_schemaView->schema();
 	}
 
-	const std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme() const
+	const std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schema() const
 	{
-		return m_schemeView->schema();
+		return m_schemaView->schema();
 	}
 
-	void BaseSchemeWidget::setScheme(std::shared_ptr<VFrame30::Schema> scheme)
+	void BaseSchemaWidget::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 	{
-		m_schemeView->setSchema(scheme, true);
+		m_schemaView->setSchema(schema, true);
 	}
 
-	SchemaView* BaseSchemeWidget::schemeView()
+	SchemaView* BaseSchemaWidget::schemaView()
 	{
-		return m_schemeView;
+		return m_schemaView;
 	}
 
-	const SchemaView* BaseSchemeWidget::schemeView() const
+	const SchemaView* BaseSchemaWidget::schemaView() const
 	{
-		return m_schemeView;
+		return m_schemaView;
 	}
 
-	double BaseSchemeWidget::zoom() const
+	double BaseSchemaWidget::zoom() const
 	{
-		if (schemeView() == nullptr)
+		if (schemaView() == nullptr)
 		{
-			assert(schemeView() != nullptr);
+			assert(schemaView() != nullptr);
 			return 0;
 		}
 
-		return schemeView()->zoom();
+		return schemaView()->zoom();
 	}
 
-	void BaseSchemeWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
+	void BaseSchemaWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
 	{
 		QPoint widgetCenterPoint(size().width() / 2, size().height() / 2);
 
 		QPointF oldDocPos;
 		MousePosToDocPoint(widgetCenterPoint, &oldDocPos);
 
-		schemeView()->setZoom(zoom, false);
+		schemaView()->setZoom(zoom, false);
 
 		QPointF newDocPos;
 		MousePosToDocPoint(widgetCenterPoint, &newDocPos);
@@ -345,7 +345,7 @@ namespace VFrame30
 		int newHorzValue = 0;
 		int newVertValue = 0;
 
-		switch (scheme()->unit())
+		switch (schema()->unit())
 		{
 		case VFrame30::SchemaUnit::Display:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
@@ -363,7 +363,6 @@ namespace VFrame30
 		verticalScrollBar()->setValue(vertScrollValue == -1 ? newVertValue : vertScrollValue);
 
 		return;
-
 	}
 
 }

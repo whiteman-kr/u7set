@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 	//
-	// SchemeItemAfb
+	// SchemaItemAfb
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemaItemAfb : public FblItemRect
 	{
@@ -29,7 +29,7 @@ namespace VFrame30
 		// ��������� ��������, ����������� � 100% ��������.
 		// Graphcis ������ ����� �������� ������������ ������� (0, 0 - ����� ������� ����, ���� � ������ - ������������� ����������)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const override;
 
 		// Serialization
 		//
@@ -43,7 +43,7 @@ namespace VFrame30
 
 		virtual QString buildName() const override;
 
-		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> scheme);
+		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema);
 		bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		// Set Afb element parameters

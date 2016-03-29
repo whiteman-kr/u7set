@@ -217,11 +217,11 @@ void MonitorMainWindow::debug()
 
 	QFileInfo fileInfo(fileName);
 
-	// Load scheme
+	// Load schema
 	//
-	std::shared_ptr<VFrame30::Schema> scheme = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
+	std::shared_ptr<VFrame30::Schema> schema = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
 
-	if (scheme == nullptr)
+	if (schema == nullptr)
 	{
 		QMessageBox::critical(this, "Monitor", "Cannot load file");
 		return;
@@ -232,8 +232,8 @@ void MonitorMainWindow::debug()
 	QTabWidget* tabWidget = monitorCentralWidget();
 
 
-	MonitorSchemaWidget* schemeWidget = new MonitorSchemaWidget(scheme);
-	tabWidget->addTab(schemeWidget, "Debug tab: " + fileInfo.fileName());
+	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
+	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
 }

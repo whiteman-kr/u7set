@@ -140,188 +140,188 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Branch has multiple outputs (Logic Scheme '%1').
+	/// Title: Branch has multiple outputs (Logic Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic scheme StrID
+	///		%1 Logic schema StrID
 	///
 	/// Description:
 	///		Error may occur if there are more than one output is linked to input.
 	///
-	void IssueLogger::errALP4000(QString scheme, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::errALP4000(QString schema, const std::vector<QUuid>& itemsUuids)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4000,
-				  tr("Branch has multiple outputs (Logic Scheme '%1').")
-				  .arg(scheme));
+				  tr("Branch has multiple outputs (Logic Schema '%1').")
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4001
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Property DeviceStrIds for Logic Scheme is not set (LogicScheme '%1').
+	/// Title: Property DeviceStrIds for Logic Schema is not set (LogicSchema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic scheme StrID
+	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///		Property DeviceStrIds for an application logic scheme is empty. To bind a scheme to a Logic Module this field must be set
+	///		Property DeviceStrIds for an application logic schema is empty. To bind a schema to a Logic Module this field must be set
 	///		to the Logic Module StrID. (Note that expanded StrID must be used).
 	///
-	void IssueLogger::wrnALP4001(QString scheme)
+	void IssueLogger::wrnALP4001(QString schema)
 	{
 		LOG_WARNING(IssueType::AlParsing,
 				  4001,
-				  tr("Property DeviceStrIds for Logic Scheme is not set (LogicScheme '%1').")
-				  .arg(scheme));
+				  tr("Property DeviceStrIds for Logic Schema is not set (LogicSchema '%1').")
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4002
 	///
 	/// IssueType: Warning
 	///
-	/// Title: HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2').
+	/// Title: HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
-	///		%2 Logic scheme StrID
+	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Scheme has property HardwareStrIds but Logic Module with pointed StrID is not found in the project equipment.
+	///		Logic Schema has property HardwareStrIds but Logic Module with pointed StrID is not found in the project equipment.
 	///
-	void IssueLogger::wrnALP4002(QString scheme, QString hardwareStrId)
+	void IssueLogger::wrnALP4002(QString schema, QString hardwareStrId)
 	{
 		LOG_WARNING(IssueType::AlParsing,
 					4002,
-					tr("HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2').")
+					tr("HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2').")
 					.arg(hardwareStrId)
-					.arg(scheme));
+					.arg(schema));
 	}
 
 	/// IssueCode: ALP4003
 	///
 	/// IssueType: Warning
 	///
-	/// Title: HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+	/// Title: HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
-	///		%2 Logic scheme StrID
+	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Scheme has property HardwareStrIds but the equipment object with pointed StrID is not a module or is not LM family type.
+	///		Logic Schema has property HardwareStrIds but the equipment object with pointed StrID is not a module or is not LM family type.
 	///
-	void IssueLogger::wrnALP4003(QString scheme, QString hardwareStrId)
+	void IssueLogger::wrnALP4003(QString schema, QString hardwareStrId)
 	{
 		LOG_WARNING(IssueType::AlParsing,
 					4003,
-					tr("HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').")
+					tr("HardwareStrId '%1' must be LM family module type (Logic Schema '%2').")
 					.arg(hardwareStrId)
-					.arg(scheme));
+					.arg(schema));
 	}
 
 	/// IssueCode: ALP4004
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Scheme is excluded from build (Scheme '%1').
+	/// Title: Schema is excluded from build (Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Scheme StrID
+	///		%1 Schema StrID
 	///
 	/// Description:
-	///			Scheme is excluded from build and will not be parsed. To include scheme in the build process set
-	///		scheme property ExcludeFromBuild to false.
+	///			Schema is excluded from build and will not be parsed. To include schema in the build process set
+	///		schema property ExcludeFromBuild to false.
 	///
-	void IssueLogger::wrnALP4004(QString scheme)
+	void IssueLogger::wrnALP4004(QString schema)
 	{
 		LOG_WARNING(IssueType::AlParsing,
 					4004,
-					tr("Scheme is excluded from build (Scheme '%1').")
-					.arg(scheme));
+					tr("Schema is excluded from build (Schem '%1').")
+					.arg(schema));
 	}
 
 	/// IssueCode: ALP4005
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').
+	/// Title: Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic scheme StrID
+	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///			Logic Scheme is empty, there are no any functional blocks in the compile layer.
+	///			Logic Schema is empty, there are no any functional blocks in the compile layer.
 	///
-	void IssueLogger::wrnALP4005(QString scheme)
+	void IssueLogger::wrnALP4005(QString schema)
 	{
 		LOG_WARNING(IssueType::AlParsing,
 					4005,
-					tr("Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1').")
-					.arg(scheme));
+					tr("Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').")
+					.arg(schema));
 	}
 
 	/// IssueCode: ALP4006
 	///
 	/// IssueType: Error
 	///
-	/// Title: Scheme item '%1' has unlinked pin(s) '%2' (Logic Scheme '%3').
+	/// Title: Schema item '%1' has unlinked pin(s) '%2' (Logic Schema '%3').
 	///
 	/// Parameters:
-	///		%1 Scheme item description
+	///		%1 Schema item description
 	///		%2 Pin
-	///		%3 Logic scheme StrID
+	///		%3 Logic schema StrID
 	///
 	/// Description:
-	///		Scheme item has unlinked pin(s), all pins of the function block must be linked.
+	///		Schema item has unlinked pin(s), all pins of the function block must be linked.
 	///
-	void IssueLogger::errALP4006(QString scheme, QString schemeItem, QString pin, QUuid itemUuid)
+	void IssueLogger::errALP4006(QString schema, QString schemaItem, QString pin, QUuid itemUuid)
 	{
 		std::vector<QUuid> itemsUuids;
 		itemsUuids.push_back(itemUuid);
 
-		return errALP4006(scheme, schemeItem, pin, itemsUuids);
+		return errALP4006(schema, schemaItem, pin, itemsUuids);
 	}
 
-	void IssueLogger::errALP4006(QString scheme, QString schemeItem, QString pin, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::errALP4006(QString schema, QString schemaItem, QString pin, const std::vector<QUuid>& itemsUuids)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4006,
-				  tr("Scheme item '%1' has unlinked pin(s) '%2' (Logic Scheme '%3').")
-				  .arg(schemeItem)
+				  tr("Schema item '%1' has unlinked pin(s) '%2' (Logic Schema '%3').")
+				  .arg(schemaItem)
 				  .arg(pin)
-				  .arg(scheme));
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4007
 	///
 	/// IssueType: Error
 	///
-	/// Title: AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
+	/// Title: AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
 	///
 	/// Parameters:
 	///		%1 Application functional block StrID
-	///		%2 Scheme item description
-	///		%3 Logic scheme StrID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
 	///
 	/// Description:
 	///		To proccess logic block it is required AFB description which in not found.
 	///
-	void IssueLogger::errALP4007(QString scheme, QString schemeItem, QString afbElement, QUuid itemUuid)
+	void IssueLogger::errALP4007(QString schema, QString schemaItem, QString afbElement, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4007,
-				  tr("AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').")
+				  tr("AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').")
 				  .arg(afbElement)
-				  .arg(schemeItem)
-				  .arg(scheme));
+				  .arg(schemaItem)
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4008
@@ -348,7 +348,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').
+	/// Title: Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').
 	///
 	/// Parameters:
 	///		%1 Logic signal StrID
@@ -356,20 +356,20 @@ namespace Builder
 	///
 	/// Description:
 	///		Error may occur if there are two or more outputs have the same logic signal StrID.
-	/// Note, outputs can be on different logic schemes for the same logic module.
+	/// Note, outputs can be on different logic schemas for the same logic module.
 	///
-	void IssueLogger::errALP4009(QString logicModule, QString scheme1, QString scheme2, QString schemeItem1, QString schemeItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::errALP4009(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4009,
-				  tr("Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').")
+				  tr("Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').")
 				  .arg(signalStrID)
-				  .arg(schemeItem1)
-				  .arg(scheme1)
-				  .arg(schemeItem2)
-				  .arg(scheme2)
+				  .arg(schemaItem1)
+				  .arg(schema1)
+				  .arg(schemaItem2)
+				  .arg(schema2)
 				  .arg(logicModule)
 				  );
 	}
@@ -378,19 +378,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Scheme does not have Logic layer (Logic Scheme '%1').
+	/// Title: Schema does not have Logic layer (Logic Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic scheme StrID
+	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///		Each logic scheme has several layers (Logic, Frame and Notes), but the Logic layer is not found.
+	///		Each logic schema has several layers (Logic, Frame and Notes), but the Logic layer is not found.
 	///
-	void IssueLogger::errALP4010(QString scheme)
+	void IssueLogger::errALP4010(QString schema)
 	{
 		LOG_ERROR(IssueType::AlParsing,
 				  4010,
-				  tr("Scheme does not have Logic layer (Logic Scheme '%1').").arg(scheme));
+				  tr("Schema does not have Logic layer (Logic Schema '%1').").arg(schema));
 	}
 
 	// ALC			Application logic compiler				5000-5999

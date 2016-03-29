@@ -1,44 +1,44 @@
-#include "CreateSchemeDialog.h"
-#include "ui_CreateSchemeDialog.h"
+#include "CreateSchemaDialog.h"
+#include "ui_CreateSchemaDialog.h"
 #include "../VFrame30/Settings.h"
 
-CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Schema> scheme, QWidget* parent) :
+CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::CreateSchemeDialog),
-	m_scheme(scheme)
+	ui(new Ui::CreateSchemaDialog),
+	m_schema(schema)
 {
-	assert(m_scheme.get() != nullptr);
+	assert(m_schema.get() != nullptr);
 	ui->setupUi(this);
 
-	ui->strdIdEdit->setText(m_scheme->strID());
-	ui->captionEdit->setText(m_scheme->caption());
+	ui->strdIdEdit->setText(m_schema->strID());
+	ui->captionEdit->setText(m_schema->caption());
 
 	double w = 0;
 	double h = 0;
 	double precision = 0;
 
-	if (m_scheme->unit() == VFrame30::SchemaUnit::Display)
+	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
 	{
-		w = m_scheme->docWidth();
-		h = m_scheme->docHeight();
+		w = m_schema->docWidth();
+		h = m_schema->docHeight();
 		precision = 0;
 	}
 	else
 	{
-		assert(m_scheme->unit() == VFrame30::SchemaUnit::Inch);
+		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
 		{
-			w = m_scheme->docWidth();
-			h = m_scheme->docHeight();
+			w = m_schema->docWidth();
+			h = m_schema->docHeight();
 			precision = 4;
 		}
 		else
 		{
 			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
 
-			w = m_scheme->docWidth() * 25.4;
-			h = m_scheme->docHeight() * 25.4;
+			w = m_schema->docWidth() * 25.4;
+			h = m_schema->docHeight() * 25.4;
 			precision = 2;
 		}
 	}
@@ -49,12 +49,12 @@ CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Schema> scheme,
 	return;
 }
 
-CreateSchemeDialog::~CreateSchemeDialog()
+CreateSchemaDialog::~CreateSchemaDialog()
 {
 	delete ui;
 }
 
-void CreateSchemeDialog::accept()
+void CreateSchemaDialog::accept()
 {
 	// StrdID
 	//
@@ -114,32 +114,32 @@ void CreateSchemeDialog::accept()
 		return;
 	}
 
-	// Assign values to the scheme
+	// Assign values to the schema
 	//
-	m_scheme->setStrID(strID);
-	m_scheme->setCaption(caption);
+	m_schema->setStrID(strID);
+	m_schema->setCaption(caption);
 
 
-	if (m_scheme->unit() == VFrame30::SchemaUnit::Display)
+	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
 	{
-		m_scheme->setDocWidth(width);
-		m_scheme->setDocHeight(height);
+		m_schema->setDocWidth(width);
+		m_schema->setDocHeight(height);
 	}
 	else
 	{
-		assert(m_scheme->unit() == VFrame30::SchemaUnit::Inch);
+		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
 		{
-			m_scheme->setDocWidth(width);
-			m_scheme->setDocHeight(height);
+			m_schema->setDocWidth(width);
+			m_schema->setDocHeight(height);
 		}
 		else
 		{
 			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
 
-			m_scheme->setDocWidth(width / 25.4);
-			m_scheme->setDocHeight(height / 25.4);
+			m_schema->setDocWidth(width / 25.4);
+			m_schema->setDocHeight(height / 25.4);
 		}
 	}
 

@@ -133,7 +133,7 @@ namespace Builder
         const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_afbElement.params(); }
 
         const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
-        const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemeItemConst(); }
+        const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
         const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
         const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
@@ -194,7 +194,7 @@ namespace Builder
 
 
     // Application Functional Block
-    // represent all FB items in application logic schemes
+	// represent all FB items in application logic schemas
     //
 
     class ModuleLogicCompiler;
@@ -282,7 +282,7 @@ namespace Builder
 
 
     // Application Signal
-    // represent all signal in application logic schemes, and signals, which createad in compiling time
+	// represent all signal in application logic schemas, and signals, which createad in compiling time
     //
 
     class AppSignal //: public Signal

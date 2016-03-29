@@ -1,9 +1,9 @@
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 
-#include "SchemeLayersDialog.h"
+#include "SchemaLayersDialog.h"
 #include "ui_SchemeLayersDialog.h"
 
-SchemeLayersDialog::SchemeLayersDialog(EditSchemeView* schemeView, QWidget *parent) :
+SchemeLayersDialog::SchemeLayersDialog(EditSchemaView* schemeView, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::SchemeLayersDialog),
 	m_schemeView(schemeView)

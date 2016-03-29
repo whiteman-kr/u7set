@@ -229,7 +229,7 @@ public:
 	int hpFileId() const;		// Hadware Presets
 	int mcFileId() const;		// Module Configuration
 	int mvsFileId() const;		// Monotor Video Schemas
-	int dvsFileId() const;		// Diaginostics Video Schemes
+	int dvsFileId() const;		// Diaginostics Video Schemas
 
 	std::vector<DbFileInfo> systemFiles() const;
 

@@ -313,10 +313,10 @@ namespace Builder
 
 		// Set Shceme Items Issues to GlobalMessanger
 		//
-		std::map<QUuid, OutputMessageLevel> schemeItemsIssues;
-		m_log->swapItemsIssues(&schemeItemsIssues);
+		std::map<QUuid, OutputMessageLevel> schemaItemsIssues;
+		m_log->swapItemsIssues(&schemaItemsIssues);
 
-		GlobalMessanger::instance()->swapSchemeIssues(schemeItemsIssues);
+		GlobalMessanger::instance()->swapSchemaIssues(schemaItemsIssues);
 
 		// We've done, exit
 		//

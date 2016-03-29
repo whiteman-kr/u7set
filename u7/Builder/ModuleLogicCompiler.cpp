@@ -4237,7 +4237,7 @@ namespace Builder
 
         if (m_appLogicItem.m_fblItem->isConstElement())
         {
-            VFrame30::SchemaItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemeItemConst();
+            VFrame30::SchemaItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemaItemConst();
 
             if (itemConst == nullptr)
             {
@@ -4579,7 +4579,7 @@ namespace Builder
     }
 
 
-    // insert signal from application logic scheme
+	// insert signal from application logic schema
     //
     bool AppSignalMap::insert(const AppItem* appItem)
     {

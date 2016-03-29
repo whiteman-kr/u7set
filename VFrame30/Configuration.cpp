@@ -32,7 +32,7 @@ namespace VFrame30
 		Proto::Write(pMutableConfiguration->mutable_variables(), m_variables);
 		Proto::Write(pMutableConfiguration->mutable_globals(), m_globals);
 		 
-		for (auto vf = m_schemeIds.begin(); vf != m_schemeIds.end(); ++vf)
+		for (auto vf = m_schemaIds.begin(); vf != m_schemaIds.end(); ++vf)
 		{
 			Proto::Uuid* pGuid = pMutableConfiguration->add_schemasids();
 			Proto::Write(pGuid, *vf);
@@ -40,7 +40,7 @@ namespace VFrame30
 
 		bool saveFrameResult = true;
 
-		for (auto vf = m_schemes.begin(); vf != m_schemes.end(); ++vf)
+		for (auto vf = m_schemas.begin(); vf != m_schemas.end(); ++vf)
 		{
 			Proto::Envelope* schema = pMutableConfiguration->add_schemas();
 			saveFrameResult &= vf->get()->Save(schema);
@@ -65,27 +65,27 @@ namespace VFrame30
 		Proto::Read(configuration.variables(), &m_variables);
 		Proto::Read(configuration.globals(), &m_globals);
 
-		m_schemeIds.clear();
+		m_schemaIds.clear();
 		for (int i = 0; i < configuration.schemasids().size(); i++)
 		{
-			const QUuid& schemeGuid = Proto::Read(configuration.schemasids(i));
-			m_schemeIds.push_back(schemeGuid);
+			const QUuid& schemaGuid = Proto::Read(configuration.schemasids(i));
+			m_schemaIds.push_back(schemaGuid);
 
-			assert(schemeGuid.isNull() == false);
+			assert(schemaGuid.isNull() == false);
 		}
 
-		m_schemes.clear();
+		m_schemas.clear();
 		for (int i = 0; i < configuration.schemas().size(); i++)
 		{
-			Schema* scheme = Schema::Create(configuration.schemas(i));
+			Schema* schema = Schema::Create(configuration.schemas(i));
 
-			if (scheme == nullptr)
+			if (schema == nullptr)
 			{
-				assert(scheme != nullptr);
+				assert(schema != nullptr);
 				continue;
 			}
 
-			m_schemes.push_back(std::shared_ptr<Schema>(scheme));
+			m_schemas.push_back(std::shared_ptr<Schema>(schema));
 		}
 
 		return true;
@@ -169,24 +169,24 @@ namespace VFrame30
 		m_globals = globals;
 	}
 
-	const std::vector<QUuid>& Configuration::schemesIDs() const
+	const std::vector<QUuid>& Configuration::schemasIDs() const
 	{
-		return m_schemeIds;
+		return m_schemaIds;
 	}
 
-	std::vector<QUuid>* Configuration::mutableSchemesIDs()
+	std::vector<QUuid>* Configuration::mutableSchemasIDs()
 	{
-		return &m_schemeIds;
+		return &m_schemaIds;
 	}
 
-	const std::vector<std::shared_ptr<Schema>>& Configuration::schemes() const
+	const std::vector<std::shared_ptr<Schema>>& Configuration::schemas() const
 	{
-		return m_schemes;
+		return m_schemas;
 	}
 
-	std::vector<std::shared_ptr<Schema>>* Configuration::mutableSchemes()
+	std::vector<std::shared_ptr<Schema>>* Configuration::mutableSchemas()
 	{
-		return &m_schemes;
+		return &m_schemas;
 	}
 
 }

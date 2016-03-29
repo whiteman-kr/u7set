@@ -102,7 +102,6 @@ HEADERS += VFrame30Lib_global.h \
 	MonitorSchema.h \
     version.h \
     ../include/DbStruct.h \
-    BaseSchemeWidget.h \
     Afb.h \
     ../include/DebugInstCounter.h \
 	../include/PropertyObject.h \
@@ -119,7 +118,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemLink.h \
     SchemaItemPath.h \
     SchemaItemRect.h \
-    SchemaItemSignal.h
+    SchemaItemSignal.h \
+    BaseSchemaWidget.h
 
 SOURCES += \
     Settings.cpp \
@@ -141,7 +141,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
 	MonitorSchema.cpp \
     ../lib/DbStruct.cpp \
-    BaseSchemeWidget.cpp \
     Afb.cpp \
 	../lib/PropertyObject.cpp \
     Schema.cpp \
@@ -157,7 +156,8 @@ SOURCES += \
     SchemaItemLink.cpp \
     SchemaItemPath.cpp \
     SchemaItemRect.cpp \
-    SchemaItemSignal.cpp
+    SchemaItemSignal.cpp \
+    BaseSchemaWidget.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

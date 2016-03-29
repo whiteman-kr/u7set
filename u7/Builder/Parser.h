@@ -89,7 +89,7 @@ namespace Builder
 		// Data
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
-		std::shared_ptr<VFrame30::LogicSchema> m_scheme;
+		std::shared_ptr<VFrame30::LogicSchema> m_schema;
 		Afb::AfbElement m_afbElement;							// Specific instance with initialized Params
 
 		// Methods
@@ -97,7 +97,7 @@ namespace Builder
 		AppLogicItem() = default;
 		AppLogicItem(const AppLogicItem&) = default;
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-				  std::shared_ptr<VFrame30::LogicSchema> scheme,
+				  std::shared_ptr<VFrame30::LogicSchema> schema,
 				  std::shared_ptr<Afb::AfbElement> afbElement);
 
 
@@ -122,7 +122,7 @@ namespace Builder
 		AppLogicModule() = delete;
 		AppLogicModule(QString moduleStrId);
 
-		bool addBranch(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+		bool addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 					   const BushContainer& bushContainer,
 					   Afb::AfbElementCollection* afbCollection,
 					   IssueLogger* log);
@@ -130,7 +130,7 @@ namespace Builder
 		bool orderItems(IssueLogger* log);
 
 	private:
-		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
+		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//
 		bool setInputOutputsElementsConnection(IssueLogger* log);
 
@@ -170,7 +170,7 @@ namespace Builder
 		//
 	public:
 		bool addData(const BushContainer& bushContainer,
-			std::shared_ptr<VFrame30::LogicSchema> scheme,
+			std::shared_ptr<VFrame30::LogicSchema> schema,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log);
@@ -214,20 +214,20 @@ namespace Builder
 	protected:
 		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out);
 
-		bool parseAppLogicScheme(std::shared_ptr<VFrame30::LogicSchema> logicScheme);
+		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema);
 
-		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 								  std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
 						BushContainer* bushContainer) const;
 
-		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> scheme,
+		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> schema,
 									  std::shared_ptr<VFrame30::SchemaLayer> layer,
 									  BushContainer* bushContainer) const;
 
-		bool setPinConnections(std::shared_ptr<VFrame30::LogicSchema> scheme,
+		bool setPinConnections(std::shared_ptr<VFrame30::LogicSchema> schema,
 							   std::shared_ptr<VFrame30::SchemaLayer> layer,
 							   BushContainer* bushContainer);
 

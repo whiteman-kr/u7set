@@ -113,7 +113,7 @@
        <item>
         <widget class="QPushButton" name="m_addXsd">
          <property name="text">
-          <string>Add XSD Scheme</string>
+          <string>Add XSD Schema</string>
          </property>
         </widget>
        </item>

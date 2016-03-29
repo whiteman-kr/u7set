@@ -1,19 +1,18 @@
-#ifndef BASESCHEMEWIDGET_H
-#define BASESCHEMEWIDGET_H
+#pragma once
 
 namespace VFrame30
 {
 	class SchemaView;
 	class Schema;
 
-	class VFRAME30LIBSHARED_EXPORT BaseSchemeWidget : public QScrollArea
+	class VFRAME30LIBSHARED_EXPORT BaseSchemaWidget : public QScrollArea
 	{
 		Q_OBJECT
 
 	public:
-		BaseSchemeWidget() = delete;
-		BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemaView* schemeView);
-		virtual ~BaseSchemeWidget();
+		BaseSchemaWidget() = delete;
+		BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView);
+		virtual ~BaseSchemaWidget();
 
 	protected:
 		void createActions();
@@ -38,12 +37,12 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		std::shared_ptr<VFrame30::Schema> scheme();
-		const std::shared_ptr<VFrame30::Schema> scheme() const;
-		void setScheme(std::shared_ptr<VFrame30::Schema> scheme);
+		std::shared_ptr<VFrame30::Schema> schema();
+		const std::shared_ptr<VFrame30::Schema> schema() const;
+		void setSchema(std::shared_ptr<VFrame30::Schema> schema);
 
-		SchemaView* schemeView();
-		const SchemaView* schemeView() const;
+		SchemaView* schemaView();
+		const SchemaView* schemaView() const;
 
 		double zoom() const;
 		void setZoom(double zoom, int horzScrollValue = -1, int vertScrollValue = -1);
@@ -56,7 +55,7 @@ namespace VFrame30
 		QAction* m_zoom100Action = nullptr;
 
 	private:
-		SchemaView* m_schemeView = nullptr;
+		SchemaView* m_schemaView = nullptr;
 
 		// Interface data
 		//
@@ -66,4 +65,4 @@ namespace VFrame30
 	};
 
 }
-#endif // BASESCHEMEWIDGET_H
+

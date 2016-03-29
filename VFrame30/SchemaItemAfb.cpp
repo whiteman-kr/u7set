@@ -53,9 +53,9 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const
+	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
 	{
-		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
 		{
 			// Such AfbItem was not found
@@ -82,7 +82,7 @@ namespace VFrame30
 
 		// Draw rect and pins
 		//
-		FblItemRect::Draw(drawParam, scheme, pLayer);
+		FblItemRect::Draw(drawParam, schema, pLayer);
 
 		// Draw other
 		//
@@ -295,12 +295,12 @@ namespace VFrame30
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> scheme)
+	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema)
 	{
-		if (name.isEmpty() == true || scheme == nullptr)
+		if (name.isEmpty() == true || schema == nullptr)
 		{
 			assert(name.isEmpty() != true);
-			assert(scheme != nullptr);
+			assert(schema != nullptr);
 			return false;
 		}
 
@@ -326,7 +326,7 @@ namespace VFrame30
 
 			// Call script here
 			//
-			std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+			std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
 			if (afb == nullptr)
 			{
 				assert(afb != nullptr);
@@ -443,7 +443,7 @@ namespace VFrame30
 
 		return m_cachedGridSize * 16;
 
-//		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+//		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
 //		if (afb.get() == nullptr)
 //		{
 //			// Such AfbItem was not found
@@ -558,7 +558,7 @@ namespace VFrame30
 				}
 				else
 				{
-					qDebug()<<"ERROR: SchemeItemAfb::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
+					qDebug()<<"ERROR: SchemaItemAfb::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
 					assert(false);
 					return -1;
 				}

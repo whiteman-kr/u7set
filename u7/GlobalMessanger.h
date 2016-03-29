@@ -27,9 +27,9 @@ public:
 	void fireBuildStarted();
 	void fireBuildFinished();
 
-	void clearBuildSchemeIssues();
-	void swapSchemeIssues(std::map<QUuid, OutputMessageLevel>& data);
-	OutputMessageLevel issueForSchemeItem(const QUuid itemId) const;
+	void clearBuildSchemaIssues();
+	void swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data);
+	OutputMessageLevel issueForSchemaItem(const QUuid itemId) const;
 
 	// --
 	//
@@ -49,7 +49,7 @@ private:
 	// --
 	//
 	mutable QMutex m_buildResultMutex;
-	std::map<QUuid, OutputMessageLevel> m_buildSchemeIssues;
+	std::map<QUuid, OutputMessageLevel> m_buildSchemaIssues;
 
 	// -- end of data for m_buildResultMutex
 	//

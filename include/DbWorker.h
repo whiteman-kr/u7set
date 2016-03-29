@@ -193,8 +193,8 @@ private:
 	int m_alFileId = -1;	// Application Logic
 	int m_hcFileId = -1;	// Hardware Configuration
 	int m_hpFileId = -1;	// Hardware Presets
-	int m_mvsFileId = -1;	// Monitor Visualization Schemes
-	int m_dvsFileId = -1;	// Diagnostics Visualization Schemes
+	int m_mvsFileId = -1;	// Monitor Visualization Schemas
+	int m_dvsFileId = -1;	// Diagnostics Visualization Schemas
 	int m_mcFileId = -1;	// Module Configuration Template
 
 	std::vector<DbFileInfo> m_systemFiles;		// All system files

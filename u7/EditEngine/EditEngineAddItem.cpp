@@ -1,31 +1,31 @@
 #include "EditEngineAddItem.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
-		: EditCommand(schemeView, hScrollBar, vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemaView* schemaView, std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+		: EditCommand(schemaView, hScrollBar, vScrollBar)
 	{
-		assert(schemeView != nullptr);
+		assert(schemaView != nullptr);
 		assert(items.empty() == false);
 		assert(layer != nullptr);
 
 		m_items = items;
 		m_layer = layer;
 
-		m_selectedItems = schemeView->selectedItems();
+		m_selectedItems = schemaView->selectedItems();
 
 		return;
 	}
 
-	void AddItemCommand::executeCommand(EditSchemeView* schemeView)
+	void AddItemCommand::executeCommand(EditSchemaView* schemaView)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
-		schemeView->setSelectedItems(m_items);
+		schemaView->setSelectedItems(m_items);
 	}
 
-	void AddItemCommand::unExecuteCommand(EditSchemeView* schemeView)
+	void AddItemCommand::unExecuteCommand(EditSchemaView* schemaView)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
@@ -45,6 +45,6 @@ namespace EditEngine
 			}
 		}
 
-		schemeView->setSelectedItems(m_selectedItems);
+		schemaView->setSelectedItems(m_selectedItems);
 	}
 }

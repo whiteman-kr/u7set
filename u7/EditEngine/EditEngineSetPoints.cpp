@@ -1,10 +1,10 @@
 #include "EditEngineSetPoints.h"
-#include "EditSchemeWidget.h"
+#include "EditSchemaWidget.h"
 
 namespace EditEngine
 {
 
-	SetPointsCommand::SetPointsCommand(EditSchemeView* schemeView,
+	SetPointsCommand::SetPointsCommand(EditSchemaView* schemeView,
 			const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
 			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 			QScrollBar* hScrollBar,
@@ -26,7 +26,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::executeCommand(EditSchemeView* schemeView)
+	void SetPointsCommand::executeCommand(EditSchemaView* schemeView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -44,7 +44,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::unExecuteCommand(EditSchemeView* schemeView)
+	void SetPointsCommand::unExecuteCommand(EditSchemaView* schemeView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{

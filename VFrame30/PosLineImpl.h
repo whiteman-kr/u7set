@@ -6,7 +6,7 @@
 
 namespace VFrame30
 {
-	// Интерфейс для SchemeItem который хранит координаты в виде направленной линии,
+	// Интерфейс для SchemaItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
 	class IPosLine
@@ -75,7 +75,7 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get SchemeItem bounding rectangle in itemUnit()
+		// Get SchemaItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
@@ -102,7 +102,7 @@ namespace VFrame30
 		virtual double endYDocPt() const  override;
 		virtual void setEndYDocPt(double value)  override;
 
-		// ISchemeItemPropertiesPos implementation
+		// ISchemaItemPropertiesPos implementation
 		//
 	public:
 		virtual double left() const  override;

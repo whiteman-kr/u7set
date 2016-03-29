@@ -20,11 +20,11 @@ const int	ERR_SIGNAL_OK = 0,
 //
 extern const char* const rootFileName;			// root file name
 extern const char* const AfblFileName;			// Application Functional Block Library
-extern const char* const AlFileName;			// Application Logic Schemes
+extern const char* const AlFileName;			// Application Logic Schemas
 extern const char* const HcFileName;			// Hardware Configuratiun
 extern const char* const HpFileName;			// Hardware Presets
-extern const char* const MvsFileName;			// Monitor Video Schemes
-extern const char* const DvsFileName;			// Diagnostics Video Schemes
+extern const char* const MvsFileName;			// Monitor Video Schemas
+extern const char* const DvsFileName;			// Diagnostics Video Schemas
 extern const char* const McFileName;			// Modules Configurations
 
 

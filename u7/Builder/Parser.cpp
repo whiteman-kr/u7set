@@ -227,13 +227,13 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-							   std::shared_ptr<VFrame30::LogicSchema> scheme,
+							   std::shared_ptr<VFrame30::LogicSchema> schema,
 							   std::shared_ptr<Afb::AfbElement> afbElement) :
 		m_fblItem(fblItem),
-		m_scheme(scheme)
+		m_schema(schema)
 	{
 		assert(m_fblItem);
-		assert(m_scheme);
+		assert(m_schema);
 
 		if (m_fblItem->isFblElement() == true)
 		{
@@ -268,7 +268,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			assert(this->m_scheme == li.m_scheme);
+			assert(this->m_schema == li.m_schema);
 		}
 
 		return result;
@@ -339,23 +339,23 @@ namespace Builder
 	{
 	}
 
-	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 			const BushContainer& bushContainer,
 			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log)
 	{
-		if (logicScheme == nullptr ||
+		if (logicSchema == nullptr ||
 			log == nullptr ||
 			afbCollection == nullptr)
 		{
-			assert(logicScheme);
+			assert(logicSchema);
 			assert(afbCollection);
 			assert(log);
 
 			if (log != nullptr)
 			{
-				log->errINT1000(QString(__FUNCTION__ ", scheme %1, log %2, afbCollection %3")
-								.arg(reinterpret_cast<size_t>(logicScheme.get()))
+				log->errINT1000(QString(__FUNCTION__ ", schema %1, log %2, afbCollection %3")
+								.arg(reinterpret_cast<size_t>(logicSchema.get()))
 								.arg(reinterpret_cast<size_t>(log))
 								.arg(reinterpret_cast<size_t>(afbCollection)));
 			}
@@ -365,7 +365,7 @@ namespace Builder
 
 		if (bushContainer.bushes.empty() == true)
 		{
-			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic scheme does no contains any correct links."));
+			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic schema does no contains any correct links."));
 			assert(false);	// if fires then add error to IussueLogger
 			return true;
 		}
@@ -384,14 +384,14 @@ namespace Builder
 
 					if (afbElement == nullptr)
 					{
-						// AFB description '%1' is not found for scheme item '%2' (Logic Scheme '%3').
+						// AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
 						//
-						log->errALP4007(logicScheme->strID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
+						log->errALP4007(logicSchema->strID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
 						return false;
 					}
 				}
 
-				AppLogicItem li{f, logicScheme, afbElement};
+				AppLogicItem li{f, logicSchema, afbElement};
 
 				m_fblItemsAcc.insert(li);
 			}
@@ -410,7 +410,7 @@ namespace Builder
 
 		bool result = true;
 
-		// The last preparation - connect SchemeItemInput to SchemeItemOutput
+		// The last preparation - connect SchemaItemInput to SchemaItemOutput
 		// Get all signals and put it to hash tables.
 		//
 		result = setInputOutputsElementsConnection(log);
@@ -624,7 +624,7 @@ namespace Builder
 
 				if (item.m_fblItem->isConstElement())
 				{
-					qDebug() << "Constant " << item.m_fblItem->toSchemeItemConst()->valueToString();
+					qDebug() << "Constant " << item.m_fblItem->toSchemaItemConst()->valueToString();
 					continue;
 				}
 
@@ -651,7 +651,7 @@ namespace Builder
 
 	bool AppLogicModule::setInputOutputsElementsConnection(IssueLogger* log)
 	{
-		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
+		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//
 		if (log == nullptr)
 		{
@@ -689,15 +689,15 @@ namespace Builder
 				auto duplicateItem = signalOutputItems.find(signalStrId);
 				if (duplicateItem != signalOutputItems.end())
 				{
-					// Duplicate output signal %1, item '%2' on scheme '%3', item '%4' on scheme '%5' (Logic Module '%6').
+					// Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').
 					//
 					std::vector<QUuid> itemsUuids;
 					itemsUuids.push_back(li.m_fblItem->guid());
 					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
 					log->errALP4009(moduleStrId(),
-									li.m_scheme->strID(),
-									duplicateItem->m_scheme->strID(),
+									li.m_schema->strID(),
+									duplicateItem->m_schema->strID(),
 									li.m_fblItem->buildName(),
 									duplicateItem->m_fblItem->buildName(),
 									signalStrId,
@@ -879,7 +879,7 @@ namespace Builder
 
 
 	bool AppLogicData::addData(const BushContainer& bushContainer,
-			std::shared_ptr<VFrame30::LogicSchema> scheme,
+			std::shared_ptr<VFrame30::LogicSchema> schema,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log)
@@ -891,18 +891,18 @@ namespace Builder
 			return true;
 		}
 
-		if (scheme == nullptr ||
+		if (schema == nullptr ||
 			layer == nullptr ||
 			log == nullptr ||
 			afbCollection == nullptr)
 		{
-			assert(scheme);
+			assert(schema);
 			assert(layer);
 			assert(log);
 			assert(afbCollection);
 
-			log->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, log %3, afbCollection %4")
-							.arg(reinterpret_cast<size_t>(scheme.get()))
+			log->errINT1000(QString(__FUNCTION__ ", schema %1, layer %2, log %3, afbCollection %4")
+							.arg(reinterpret_cast<size_t>(schema.get()))
 							.arg(reinterpret_cast<size_t>(layer.get()))
 							.arg(reinterpret_cast<size_t>(log))
 							.arg(reinterpret_cast<size_t>(afbCollection)));
@@ -911,7 +911,7 @@ namespace Builder
 
 		// Get module, if it is not in the list, add it
 		//
-		QStringList moduleStrIdList = scheme->hardwareStrIdList();
+		QStringList moduleStrIdList = schema->hardwareStrIdList();
 		bool result = true;
 
 		for (QString moduleStrId : moduleStrIdList)
@@ -940,7 +940,7 @@ namespace Builder
 
 			// add new branch to module
 			//
-			result &= module->addBranch(scheme, bushContainer, afbCollection, log);
+			result &= module->addBranch(schema, bushContainer, afbCollection, log);
 		}
 
 		return result;
@@ -1022,36 +1022,36 @@ namespace Builder
 	{
 		// Get Application Logic
 		//
-		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemes;
+		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemas;
 
-		bool ok = loadAppLogicFiles(db(), &schemes);
+		bool ok = loadAppLogicFiles(db(), &schemas);
 
 		if (ok == false)
 		{
 			return ok;
 		}
 
-		if (schemes.empty() == true)
+		if (schemas.empty() == true)
 		{
 			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
 		}
 
-		// Check schemes hardwareSetrIds
+		// Check schemas hardwareSetrIds
 		//
 		assert(m_equipmentSet);
 
 		if (m_equipmentSet != nullptr)
 		{
-			for (std::shared_ptr<VFrame30::LogicSchema> scheme : schemes)
+			for (std::shared_ptr<VFrame30::LogicSchema> schame : schemas)
 			{
-				QStringList deviceStrIds = scheme->hardwareStrIdList();
+				QStringList deviceStrIds = schame->hardwareStrIdList();
 
 				if (deviceStrIds.isEmpty() == true)
 				{
-					// Property DeviceStrIds is not set (LogicScheme '%1')
+					// Property DeviceStrIds is not set (LogicSchema '%1')
 					//
-					m_log->wrnALP4001(scheme->strID());
+					m_log->wrnALP4001(schame->strID());
 					continue;
 				}
 
@@ -1061,17 +1061,17 @@ namespace Builder
 
 					if (device == nullptr)
 					{
-						// HardwareStrId '%1' is not found in the project equipment (Logic Scheme '%2')
+						// HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2')
 						//
-						m_log->wrnALP4002(scheme->strID(), strid);
+						m_log->wrnALP4002(schame->strID(), strid);
 						continue;
 					}
 
 					if (device->isModule() == false)
 					{
-						// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+						// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 						//
-						m_log->wrnALP4003(scheme->strID(), strid);
+						m_log->wrnALP4003(schame->strID(), strid);
 						continue;
 					}
 					else
@@ -1083,9 +1083,9 @@ namespace Builder
 
 						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
 						{
-							// HardwareStrId '%1' must be LM family module type (Logic Scheme '%2').
+							// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 							//
-							m_log->wrnALP4003(scheme->strID(), strid);
+							m_log->wrnALP4003(schame->strID(), strid);
 							continue;
 						}
 					}
@@ -1096,15 +1096,15 @@ namespace Builder
 
 		// Compile application logic
 		//
-		LOG_MESSAGE(m_log, tr("Parsing schemes..."));
+		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::LogicSchema> scheme : schemes)
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			LOG_MESSAGE(m_log, scheme->caption());
+			LOG_MESSAGE(m_log, schema->caption());
 
-			ok = parseAppLogicScheme(scheme);
+			ok = parseAppLogicSchema(schema);
 
 			if (ok == false)
 			{
@@ -1207,14 +1207,14 @@ namespace Builder
 
 			if (ls->excludeFromBuild() == true)
 			{
-				// Scheme is excluded from build (Scheme '%1').
+				// Schema is excluded from build (Schema '%1').
 				//
 				m_log->wrnALP4004(ls->strID());
 				continue;
 			}
 			else
 			{
-				// Add LogicScheme to result
+				// Add LogicSchema to result
 				//
 				out->push_back(ls);
 			}
@@ -1223,9 +1223,9 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::parseAppLogicScheme(std::shared_ptr<VFrame30::LogicSchema> logicScheme)
+	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema)
 	{
-		if (logicScheme.get() == nullptr)
+		if (logicSchema.get() == nullptr)
 		{
 			assert(false);
 			return false;
@@ -1236,12 +1236,12 @@ namespace Builder
 		bool layerFound = false;
 		bool ok = false;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicScheme->Layers)
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
 		{
 			if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = parseAppLogicLayer(logicScheme, l);
+				ok = parseAppLogicLayer(logicSchema, l);
 
 				if (ok == false)
 				{
@@ -1256,9 +1256,9 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			// Scheme does not have Logic layer (Logic Scheme '%1').
+			// Schema does not have Logic layer (Logic Schema '%1').
 			//
-			m_log->errALP4010(logicScheme->strID());
+			m_log->errALP4010(logicSchema->strID());
 			return false;
 		}
 
@@ -1266,12 +1266,12 @@ namespace Builder
 	}
 
 	bool Parser::parseAppLogicLayer(
-		std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 		std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		if (logicScheme == nullptr || layer == nullptr)
+		if (logicSchema == nullptr || layer == nullptr)
 		{
-			assert(logicScheme);
+			assert(logicSchema);
 			assert(layer);
 			return false;
 		}
@@ -1280,7 +1280,7 @@ namespace Builder
 		//
 		BushContainer bushContainer;
 
-		bool result = findBushes(logicScheme, layer, &bushContainer);
+		bool result = findBushes(logicSchema, layer, &bushContainer);
 
 		if (result == false)
 		{
@@ -1290,7 +1290,7 @@ namespace Builder
 
 		// Set pins' guids to bushes
 		//
-		result = setBranchConnectionToPin(logicScheme, layer, &bushContainer);
+		result = setBranchConnectionToPin(logicSchema, layer, &bushContainer);
 
 		if (result == false)
 		{
@@ -1301,11 +1301,11 @@ namespace Builder
 
 		// Associates input/outputs
 		//
-		result = setPinConnections(logicScheme, layer, &bushContainer);
+		result = setPinConnections(logicSchema, layer, &bushContainer);
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData()->addData(bushContainer, logicScheme, layer, m_afbCollection, m_log);
+		result = applicationData()->addData(bushContainer, logicSchema, layer, m_afbCollection, m_log);
 
 		if (result == false)
 		{
@@ -1320,15 +1320,15 @@ namespace Builder
 	// Function connects all links, and compose them into bushes
 	//
 	bool Parser::findBushes(
-		std::shared_ptr<VFrame30::LogicSchema> logicScheme,
+		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		BushContainer* bushContainer) const
 	{
-		if (logicScheme.get() == nullptr ||
+		if (logicSchema.get() == nullptr ||
 			layer.get() == nullptr ||
 			bushContainer == nullptr)
 		{
-			assert(logicScheme);
+			assert(logicSchema);
 			assert(layer);
 			assert(bushContainer);
 			return false;
@@ -1345,7 +1345,7 @@ namespace Builder
 
 			if (fblItem != nullptr)
 			{
-				fblItem->SetConnectionsPos(logicScheme->gridSize(), logicScheme->pinGridStep());	// Calculate pins positions
+				fblItem->SetConnectionsPos(logicSchema->gridSize(), logicSchema->pinGridStep());	// Calculate pins positions
 
 				const std::list<VFrame30::AfbPin>& inputs = fblItem->inputs();
 				const std::list<VFrame30::AfbPin>& outputs = fblItem->outputs();
@@ -1429,8 +1429,8 @@ namespace Builder
 
 			// Check if end points on some link
 			//
-			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.front(), link->guid());
-			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.back(), link->guid());
+			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemaItemsUnderPoint(pointList.front(), link->guid());
+			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemaItemsUnderPoint(pointList.back(), link->guid());
 
 			// Find item branch, if branch is not exists, make a new brach
 			//
@@ -1524,19 +1524,19 @@ namespace Builder
 
 			for (QUuid id : b)
 			{
-				// Get SchemeItemLink by this id,
+				// Get SchemaItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::SchemaItem> schemeItem = layer->getItemById(id);
-				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(schemeItem.get());
+				std::shared_ptr<VFrame30::SchemaItem> schemaItem = layer->getItemById(id);
+				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(schemaItem.get());
 
-				if (schemeItem == nullptr ||
+				if (schemaItem == nullptr ||
 					link == nullptr)
 				{
-					assert(schemeItem);
+					assert(schemaItem);
 					assert(link);
 
-					LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("%1 Internal error, expected VFrame30::SchemeItemLink").arg(__FUNCTION__));
+					LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("%1 Internal error, expected VFrame30::SchemaItemLink").arg(__FUNCTION__));
 					return false;
 				}
 
@@ -1579,19 +1579,19 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> scheme, std::shared_ptr<VFrame30::SchemaLayer> layer,
+	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> schema, std::shared_ptr<VFrame30::SchemaLayer> layer,
 						BushContainer* bushContainer) const
 	{
-		if (scheme.get() == nullptr ||
+		if (schema.get() == nullptr ||
 			layer.get() == nullptr ||
 			bushContainer == nullptr)
 		{
-			assert(scheme);
+			assert(schema);
 			assert(layer);
 			assert(bushContainer);
 
-			log()->errINT1000(QString(__FUNCTION__ ", scheme %1, layer %2, bushContainer %3")
-							  .arg(reinterpret_cast<size_t>(scheme.get()))
+			log()->errINT1000(QString(__FUNCTION__ ", schema %1, layer %2, bushContainer %3")
+							  .arg(reinterpret_cast<size_t>(schema.get()))
 							  .arg(reinterpret_cast<size_t>(layer.get()))
 							  .arg(reinterpret_cast<size_t>(bushContainer)));
 
@@ -1614,12 +1614,12 @@ namespace Builder
 
 			if(fblItem != nullptr)
 			{
-				// SchemeItem has inputs and outputs
+				// SchemaItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
 				fblItem->ClearAssociatedConnections();
-				fblItem->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
+				fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
 
 				std::list<VFrame30::AfbPin>* inputs = fblItem->mutableInputs();
 				std::list<VFrame30::AfbPin>* outputs = fblItem->mutableOutputs();
@@ -1637,8 +1637,8 @@ namespace Builder
 						// Pin is not connectext to any link, this is error
 						//
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicScheme %1: %2 has unconnected pin %3")
-								  .arg(scheme->caption())
+								  tr("LogicSchema %1: %2 has unconnected pin %3")
+								  .arg(schema->caption())
 								  .arg(fblItem->buildName())
 								  .arg(in.caption()));
 
@@ -1663,7 +1663,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						log()->errALP4006(scheme->strID(), fblItem->buildName(), out.caption(), item->guid());
+						log()->errALP4006(schema->strID(), fblItem->buildName(), out.caption(), item->guid());
 
 						result = false;
 						continue;
@@ -1676,7 +1676,7 @@ namespace Builder
 					{
 						// Branch has multiple outputs.
 						//
-						log()->errALP4000(scheme->strID(), bushContainer->bushes[branchIndex].getAllUuid());
+						log()->errALP4000(schema->strID(), bushContainer->bushes[branchIndex].getAllUuid());
 
 						result = false;
 						continue;
@@ -1694,15 +1694,15 @@ namespace Builder
 
 
 	bool Parser::setPinConnections(
-		std::shared_ptr<VFrame30::LogicSchema> scheme,
+		std::shared_ptr<VFrame30::LogicSchema> schema,
 		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		BushContainer* bushContainer)
 	{
-		if (scheme.get() == nullptr ||
+		if (schema.get() == nullptr ||
 			layer.get() == nullptr ||
 			bushContainer == nullptr)
 		{
-			assert(scheme);
+			assert(schema);
 			assert(layer);
 			assert(bushContainer);
 			return false;
@@ -1722,12 +1722,12 @@ namespace Builder
 				std::shared_ptr<VFrame30::FblItemRect> fblElement =
 						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
-				// SchemeItem has inputs and outputs
+				// SchemaItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
 				fblElement->ClearAssociatedConnections();
-				fblElement->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
+				fblElement->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
 
 				std::list<VFrame30::AfbPin>* inputs = fblElement->mutableInputs();
 				std::list<VFrame30::AfbPin>* outputs = fblElement->mutableOutputs();
@@ -1743,8 +1743,8 @@ namespace Builder
 						assert(false);
 
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
-								  .arg(scheme->caption())
+								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
+								  .arg(schema->caption())
 								  .arg(__FUNCTION__));
 
 						result = false;
@@ -1781,8 +1781,8 @@ namespace Builder
 						assert(false);
 
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
-								  .arg(scheme->caption())
+								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
+								  .arg(schema->caption())
 								  .arg(__FUNCTION__));
 
 						result = false;
@@ -1807,9 +1807,9 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			// Logic Scheme is empty, there are no any functional blocks in the compile layer (Logic Scheme '%1')
+			// Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1')
 			//
-			m_log->wrnALP4005(scheme->strID());
+			m_log->wrnALP4005(schema->strID());
 			return true;
 		}
 
@@ -1826,7 +1826,7 @@ namespace Builder
 			{
 				for (std::shared_ptr<VFrame30::FblItemRect> i : bush.fblItems)
 				{
-					// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+					// Schema item %1 has not linked pin %2 (Logic Schema '%3').
 					//
 					std::vector<VFrame30::AfbPin> inputs = bush.getInputPinsForItem(i->guid());
 
@@ -1839,7 +1839,7 @@ namespace Builder
 					std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 					issuedItemsUuid.push_back(i->guid());
 
-					m_log->errALP4006(scheme->strID(), i->buildName(), inputsStr, issuedItemsUuid);
+					m_log->errALP4006(schema->strID(), i->buildName(), inputsStr, issuedItemsUuid);
 				}
 			}
 
@@ -1855,12 +1855,12 @@ namespace Builder
 					{
 						if (out.associatedIOs().empty() == true)
 						{
-							// Scheme item %1 has not linked pin %2 (Logic Scheme '%3').
+							// Schema item %1 has not linked pin %2 (Logic Schema '%3').
 							//
 							std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 							issuedItemsUuid.push_back(item->guid());
 
-							m_log->errALP4006(scheme->strID(), item->buildName(), out.caption(), issuedItemsUuid);
+							m_log->errALP4006(schema->strID(), item->buildName(), out.caption(), issuedItemsUuid);
 						}
 					}
 				}

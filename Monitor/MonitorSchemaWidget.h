@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/BaseSchemeWidget.h"
+#include "../VFrame30/BaseSchemaWidget.h"
 
 class MonitorSchemaView;
 
@@ -9,7 +9,7 @@ class MonitorSchemaView;
 // MonitorSchemaWidget
 //
 //
-class MonitorSchemaWidget : public VFrame30::BaseSchemeWidget
+class MonitorSchemaWidget : public VFrame30::BaseSchemaWidget
 {
 	Q_OBJECT
 
@@ -17,7 +17,7 @@ private:
 	MonitorSchemaWidget() = delete;
 
 public:
-	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> scheme);
+	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema);
 	virtual ~MonitorSchemaWidget();
 
 protected:

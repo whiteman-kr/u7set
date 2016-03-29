@@ -10,7 +10,7 @@ namespace VFrame30
 	const QColor SchemaItem::warningColor(0xF8, 0x72, 0x17, 0xFF);
 	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
 
-	// SchemeItem
+	// SchemaItem
 
 	SchemaItem::SchemaItem() :
 		m_static(true),

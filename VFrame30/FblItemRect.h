@@ -86,8 +86,8 @@ namespace VFrame30
 		VFrame30::SchemaItemOutput* toOutputSignalElement();
 		const VFrame30::SchemaItemOutput* toOutputSignalElement() const;
 
-		VFrame30::SchemaItemConst* toSchemeItemConst();
-		const VFrame30::SchemaItemConst* toSchemeItemConst() const;
+		VFrame30::SchemaItemConst* toSchemaItemConst();
+		const VFrame30::SchemaItemConst* toSchemaItemConst() const;
 
 		SchemaItemAfb* toFblElement();
 		const VFrame30::SchemaItemAfb* toFblElement() const;
@@ -107,8 +107,8 @@ namespace VFrame30
 		DECLARE_FONT_PROPERTIES(Font);
 		
 	protected:
-		// m_gridSize and m_pingGridStep are cached values from Scheme, they set in CalcPointPos.
-		// We need these variables in case we call functions and do not have scheme pointer.
+		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.
+		// We need these variables in case we call functions and do not have schema pointer.
 		// This is not good, it is subject to change.
 		//
 		mutable double m_cachedGridSize = -1;			// -1 means it is not iniotialized

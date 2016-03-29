@@ -8,7 +8,7 @@
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "SchemeTabPage.h"
+#include "SchemaTabPage.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"

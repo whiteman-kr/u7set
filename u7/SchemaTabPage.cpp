@@ -1,6 +1,6 @@
 #include "Stable.h"
-#include "SchemeTabPage.h"
-#include "CreateSchemeDialog.h"
+#include "SchemaTabPage.h"
+#include "CreateSchemaDialog.h"
 #include "ChangesetDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
@@ -163,7 +163,7 @@ void SchemesTabPage::projectOpened()
 
 void SchemesTabPage::projectClosed()
 {
-	GlobalMessanger::instance()->clearBuildSchemeIssues();
+	GlobalMessanger::instance()->clearBuildSchemaIssues();
 
 	// Close all opened documents
 	//
@@ -269,7 +269,7 @@ void SchemeControlTabPage::addFile()
 		scheme->setDocHeight(297.0 / 25.4);
 	}
 
-	CreateSchemeDialog propertiesDialog(scheme, this);
+	CreateSchemaDialog propertiesDialog(scheme, this);
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -758,16 +758,16 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, c
 
 	// Create controls
 	//
-	m_schemeWidget = new EditSchemeWidget(scheme, fileInfo, dbcontroller);
+	m_schemeWidget = new EditSchemaWidget(scheme, fileInfo, dbcontroller);
 
-	connect(m_schemeWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
-	connect(m_schemeWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
-	connect(m_schemeWidget, &EditSchemeWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
-	connect(m_schemeWidget, &EditSchemeWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
-	connect(m_schemeWidget, &EditSchemeWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
-	connect(m_schemeWidget, &EditSchemeWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
-	connect(m_schemeWidget, &EditSchemeWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
-	connect(m_schemeWidget, &EditSchemeWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
+	connect(m_schemeWidget, &EditSchemaWidget::closeTab, this, &EditSchemeTabPage::closeTab);
+	connect(m_schemeWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
+	connect(m_schemeWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
+	connect(m_schemeWidget, &EditSchemaWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
+	connect(m_schemeWidget, &EditSchemaWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
+	connect(m_schemeWidget, &EditSchemaWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
+	connect(m_schemeWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
+	connect(m_schemeWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
 
 
 	// ToolBar
@@ -832,11 +832,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_schemeWidget->scheme()->strID());
+			newTitle = QString("%1: ReadOnly").arg(m_schemeWidget->schema()->strID());
 		}
 		else
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_schemeWidget->scheme()->strID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_schemeWidget->schema()->strID()).arg(fileInfo().changeset());
 		}
 
 		if (fileInfo().deleted() == true)
@@ -848,11 +848,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (modified() == true)
 		{
-			newTitle = m_schemeWidget->scheme()->strID() + "*";
+			newTitle = m_schemeWidget->schema()->strID() + "*";
 		}
 		else
 		{
-			newTitle = m_schemeWidget->scheme()->strID();
+			newTitle = m_schemeWidget->schema()->strID();
 		}
 	}
 
@@ -993,7 +993,7 @@ void EditSchemeTabPage::checkOutFile()
 		return;
 	}
 
-	m_schemeWidget->scheme()->Load(out[0].get()->data());
+	m_schemeWidget->schema()->Load(out[0].get()->data());
 
 	setFileInfo(*(out.front().get()));
 
@@ -1113,7 +1113,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_schemeWidget->scheme()->Save(data);
+	m_schemeWidget->schema()->Save(data);
 
 	if (data.isEmpty() == true)
 	{
@@ -1154,7 +1154,7 @@ void EditSchemeTabPage::getCurrentWorkcopy()
 	//
 	QString fileName = dir + fileInfo().fileName();
 
-	bool writeResult = m_schemeWidget->scheme()->Save(fileName);
+	bool writeResult = m_schemeWidget->schema()->Save(fileName);
 
 	if (writeResult == false)
 	{
@@ -1187,7 +1187,7 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 
 	// Load file
 	//
-	bool readResult = m_schemeWidget->scheme()->Load(fileName);
+	bool readResult = m_schemeWidget->schema()->Load(fileName);
 	if (readResult == false)
 	{
 		QMessageBox mb(this);
