@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "WiringScheme.h"
+#include "WiringSchema.h"
 
 namespace VFrame30
 {
 
-	WiringScheme::WiringScheme(void)
+	WiringSchema::WiringSchema(void)
 	{
 		setUnit(SchemaUnit::Inch);
 
@@ -21,7 +21,7 @@ namespace VFrame30
 		return;
 	}
 	
-	WiringScheme::~WiringScheme(void)
+	WiringSchema::~WiringSchema(void)
 	{
 	}
 

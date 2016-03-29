@@ -10,7 +10,7 @@
 #include "Schema.h"
 #include "LogicSchema.h"
 #include "MonitorSchema.h"
-#include "DiagScheme.h"
-#include "WiringScheme.h"
+#include "DiagSchema.h"
+#include "WiringSchema.h"
 
 

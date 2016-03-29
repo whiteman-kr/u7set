@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "DiagScheme.h"
+#include "DiagSchema.h"
 
 namespace VFrame30
 {
 
-	DiagScheme::DiagScheme(void)
+	DiagSchema::DiagSchema(void)
 	{
 		setUnit(SchemaUnit::Display);
 
@@ -20,7 +20,7 @@ namespace VFrame30
 		return;
 	}
 
-	DiagScheme::~DiagScheme(void)
+	DiagSchema::~DiagSchema(void)
 	{
 	}
 
