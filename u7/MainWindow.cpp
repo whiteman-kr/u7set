@@ -55,11 +55,11 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_logicScheme = SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr);
 	m_workflowScheme = SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr);
-	m_diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
+	//m_diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
 
 	getCentralWidget()->addTabPage(m_logicScheme, tr("Application Logic"));
 	getCentralWidget()->addTabPage(m_workflowScheme, tr("Workflow Schemes"));
-	getCentralWidget()->addTabPage(m_diagScheme, tr("Diag Schemes"));
+	//getCentralWidget()->addTabPage(m_diagScheme, tr("Diag Schemes"));
 
 	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
@@ -84,19 +84,19 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	// check if any scheme is not saved
 	//
 	if (m_logicScheme == nullptr ||
-		m_workflowScheme == nullptr ||
-		m_diagScheme == nullptr)
+		m_workflowScheme == nullptr)
+		//m_diagScheme == nullptr)
 	{
 		assert(m_logicScheme);
 		assert(m_workflowScheme);
-		assert(m_diagScheme);
+		//assert(m_diagScheme);
 		e->accept();
 		return;
 	}
 
 	if (m_logicScheme->hasUnsavedSchemes() == true ||
-		m_workflowScheme->hasUnsavedSchemes() == true ||
-		m_diagScheme->hasUnsavedSchemes() == true)
+		m_workflowScheme->hasUnsavedSchemes() == true)
+		//m_diagScheme->hasUnsavedSchemes() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
 			 tr("Some schemes have unsaved changes."),
@@ -113,7 +113,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		{
 			m_logicScheme->saveUnsavedSchemes();
 			m_workflowScheme->saveUnsavedSchemes();
-			m_diagScheme->saveUnsavedSchemes();
+			//m_diagScheme->saveUnsavedSchemes();
 		}
 	}
 
