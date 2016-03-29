@@ -41,7 +41,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemeLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* layer) const override;
 
 		// Вычислить координаты точки
 		//

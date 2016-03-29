@@ -77,7 +77,7 @@ namespace VFrame30
 		
 		for (auto layer = scheme()->Layers.crbegin(); layer != scheme()->Layers.crend(); layer++)
 		{
-			const SchemeLayer* pLayer = layer->get();
+			const SchemaLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{

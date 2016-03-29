@@ -62,9 +62,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* LogicSchema_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   LogicSchema_reflection_ = NULL;
-const ::google::protobuf::Descriptor* SchemeLayer_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* SchemaLayer_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  SchemeLayer_reflection_ = NULL;
+  SchemaLayer_reflection_ = NULL;
 const ::google::protobuf::Descriptor* SchemeItem_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemeItem_reflection_ = NULL;
@@ -258,7 +258,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemeitem_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, deviceobject_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schema_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemelayer_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemalayer_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, fblelement_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, configuration_),
   };
@@ -434,26 +434,26 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(LogicSchema));
-  SchemeLayer_descriptor_ = file->message_type(14);
-  static const int SchemeLayer_offsets_[6] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, name_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, compile_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, show_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, print_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, items_),
+  SchemaLayer_descriptor_ = file->message_type(14);
+  static const int SchemaLayer_offsets_[6] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, uuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, compile_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, show_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, print_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, items_),
   };
-  SchemeLayer_reflection_ =
+  SchemaLayer_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      SchemeLayer_descriptor_,
-      SchemeLayer::default_instance_,
-      SchemeLayer_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeLayer, _unknown_fields_),
+      SchemaLayer_descriptor_,
+      SchemaLayer::default_instance_,
+      SchemaLayer_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(SchemeLayer));
+      sizeof(SchemaLayer));
   SchemeItem_descriptor_ = file->message_type(15);
   static const int SchemeItem_offsets_[21] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, uuid_),
@@ -1023,7 +1023,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     LogicSchema_descriptor_, &LogicSchema::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    SchemeLayer_descriptor_, &SchemeLayer::default_instance());
+    SchemaLayer_descriptor_, &SchemaLayer::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemeItem_descriptor_, &SchemeItem::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1117,8 +1117,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete Schema_reflection_;
   delete LogicSchema::default_instance_;
   delete LogicSchema_reflection_;
-  delete SchemeLayer::default_instance_;
-  delete SchemeLayer_reflection_;
+  delete SchemaLayer::default_instance_;
+  delete SchemaLayer_reflection_;
   delete SchemeItem::default_instance_;
   delete SchemeItem_reflection_;
   delete PosRectImpl::default_instance_;
@@ -1199,8 +1199,8 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022%\n\nsc"
     "hemeitem\030\006 \001(\0132\021.Proto.SchemeItem\022)\n\014dev"
     "iceobject\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006"
-    "schema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemelay"
-    "er\030e \001(\0132\022.Proto.SchemeLayer\022%\n\nfbleleme"
+    "schema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemalay"
+    "er\030e \001(\0132\022.Proto.SchemaLayer\022%\n\nfbleleme"
     "nt\030f \001(\0132\021.Proto.FblElement\022+\n\rconfigura"
     "tion\030g \001(\0132\024.Proto.Configuration\"\361\001\n\rCon"
     "figuration\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n"
@@ -1244,7 +1244,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ElementCollection\022)\n\014logic_schema\030\310\001 \001(\013"
     "2\022.Proto.LogicSchema\"6\n\013LogicSchema\022\'\n\017h"
     "ardware_strids\030\001 \003(\0132\016.Proto.wstring\"\224\001\n"
-    "\013SchemeLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022"
+    "\013SchemaLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022"
     "\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile"
     "\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005i"
     "tems\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemeIt"
@@ -1354,7 +1354,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   AfbParam::default_instance_ = new AfbParam();
   Schema::default_instance_ = new Schema();
   LogicSchema::default_instance_ = new LogicSchema();
-  SchemeLayer::default_instance_ = new SchemeLayer();
+  SchemaLayer::default_instance_ = new SchemaLayer();
   SchemeItem::default_instance_ = new SchemeItem();
   PosRectImpl::default_instance_ = new PosRectImpl();
   PosLineImpl::default_instance_ = new PosLineImpl();
@@ -1399,7 +1399,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   AfbParam::default_instance_->InitAsDefaultInstance();
   Schema::default_instance_->InitAsDefaultInstance();
   LogicSchema::default_instance_->InitAsDefaultInstance();
-  SchemeLayer::default_instance_->InitAsDefaultInstance();
+  SchemaLayer::default_instance_->InitAsDefaultInstance();
   SchemeItem::default_instance_->InitAsDefaultInstance();
   PosRectImpl::default_instance_->InitAsDefaultInstance();
   PosLineImpl::default_instance_->InitAsDefaultInstance();
@@ -2880,7 +2880,7 @@ const int Envelope::kClassnamehashFieldNumber;
 const int Envelope::kSchemeitemFieldNumber;
 const int Envelope::kDeviceobjectFieldNumber;
 const int Envelope::kSchemaFieldNumber;
-const int Envelope::kSchemelayerFieldNumber;
+const int Envelope::kSchemalayerFieldNumber;
 const int Envelope::kFblelementFieldNumber;
 const int Envelope::kConfigurationFieldNumber;
 #endif  // !_MSC_VER
@@ -2894,7 +2894,7 @@ void Envelope::InitAsDefaultInstance() {
   schemeitem_ = const_cast< ::Proto::SchemeItem*>(&::Proto::SchemeItem::default_instance());
   deviceobject_ = const_cast< ::Proto::DeviceObject*>(&::Proto::DeviceObject::default_instance());
   schema_ = const_cast< ::Proto::Schema*>(&::Proto::Schema::default_instance());
-  schemelayer_ = const_cast< ::Proto::SchemeLayer*>(&::Proto::SchemeLayer::default_instance());
+  schemalayer_ = const_cast< ::Proto::SchemaLayer*>(&::Proto::SchemaLayer::default_instance());
   fblelement_ = const_cast< ::Proto::FblElement*>(&::Proto::FblElement::default_instance());
   configuration_ = const_cast< ::Proto::Configuration*>(&::Proto::Configuration::default_instance());
 }
@@ -2911,7 +2911,7 @@ void Envelope::SharedCtor() {
   schemeitem_ = NULL;
   deviceobject_ = NULL;
   schema_ = NULL;
-  schemelayer_ = NULL;
+  schemalayer_ = NULL;
   fblelement_ = NULL;
   configuration_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2926,7 +2926,7 @@ void Envelope::SharedDtor() {
     delete schemeitem_;
     delete deviceobject_;
     delete schema_;
-    delete schemelayer_;
+    delete schemalayer_;
     delete fblelement_;
     delete configuration_;
   }
@@ -2965,8 +2965,8 @@ void Envelope::Clear() {
     if (has_schema()) {
       if (schema_ != NULL) schema_->::Proto::Schema::Clear();
     }
-    if (has_schemelayer()) {
-      if (schemelayer_ != NULL) schemelayer_->::Proto::SchemeLayer::Clear();
+    if (has_schemalayer()) {
+      if (schemalayer_ != NULL) schemalayer_->::Proto::SchemaLayer::Clear();
     }
     if (has_fblelement()) {
       if (fblelement_ != NULL) fblelement_->::Proto::FblElement::Clear();
@@ -3038,17 +3038,17 @@ bool Envelope::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(810)) goto parse_schemelayer;
+        if (input->ExpectTag(810)) goto parse_schemalayer;
         break;
       }
 
-      // optional .Proto.SchemeLayer schemelayer = 101;
+      // optional .Proto.SchemaLayer schemalayer = 101;
       case 101: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_schemelayer:
+         parse_schemalayer:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_schemelayer()));
+               input, mutable_schemalayer()));
         } else {
           goto handle_uninterpreted;
         }
@@ -3125,10 +3125,10 @@ void Envelope::SerializeWithCachedSizes(
       100, this->schema(), output);
   }
 
-  // optional .Proto.SchemeLayer schemelayer = 101;
-  if (has_schemelayer()) {
+  // optional .Proto.SchemaLayer schemalayer = 101;
+  if (has_schemalayer()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      101, this->schemelayer(), output);
+      101, this->schemalayer(), output);
   }
 
   // optional .Proto.FblElement fblelement = 102;
@@ -3177,11 +3177,11 @@ void Envelope::SerializeWithCachedSizes(
         100, this->schema(), target);
   }
 
-  // optional .Proto.SchemeLayer schemelayer = 101;
-  if (has_schemelayer()) {
+  // optional .Proto.SchemaLayer schemalayer = 101;
+  if (has_schemalayer()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        101, this->schemelayer(), target);
+        101, this->schemalayer(), target);
   }
 
   // optional .Proto.FblElement fblelement = 102;
@@ -3237,11 +3237,11 @@ int Envelope::ByteSize() const {
           this->schema());
     }
 
-    // optional .Proto.SchemeLayer schemelayer = 101;
-    if (has_schemelayer()) {
+    // optional .Proto.SchemaLayer schemalayer = 101;
+    if (has_schemalayer()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->schemelayer());
+          this->schemalayer());
     }
 
     // optional .Proto.FblElement fblelement = 102;
@@ -3297,8 +3297,8 @@ void Envelope::MergeFrom(const Envelope& from) {
     if (from.has_schema()) {
       mutable_schema()->::Proto::Schema::MergeFrom(from.schema());
     }
-    if (from.has_schemelayer()) {
-      mutable_schemelayer()->::Proto::SchemeLayer::MergeFrom(from.schemelayer());
+    if (from.has_schemalayer()) {
+      mutable_schemalayer()->::Proto::SchemaLayer::MergeFrom(from.schemalayer());
     }
     if (from.has_fblelement()) {
       mutable_fblelement()->::Proto::FblElement::MergeFrom(from.fblelement());
@@ -3334,8 +3334,8 @@ bool Envelope::IsInitialized() const {
   if (has_schema()) {
     if (!this->schema().IsInitialized()) return false;
   }
-  if (has_schemelayer()) {
-    if (!this->schemelayer().IsInitialized()) return false;
+  if (has_schemalayer()) {
+    if (!this->schemalayer().IsInitialized()) return false;
   }
   if (has_fblelement()) {
     if (!this->fblelement().IsInitialized()) return false;
@@ -3352,7 +3352,7 @@ void Envelope::Swap(Envelope* other) {
     std::swap(schemeitem_, other->schemeitem_);
     std::swap(deviceobject_, other->deviceobject_);
     std::swap(schema_, other->schema_);
-    std::swap(schemelayer_, other->schemelayer_);
+    std::swap(schemalayer_, other->schemalayer_);
     std::swap(fblelement_, other->fblelement_);
     std::swap(configuration_, other->configuration_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
@@ -6913,31 +6913,31 @@ void LogicSchema::Swap(LogicSchema* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemeLayer::kUuidFieldNumber;
-const int SchemeLayer::kNameFieldNumber;
-const int SchemeLayer::kCompileFieldNumber;
-const int SchemeLayer::kShowFieldNumber;
-const int SchemeLayer::kPrintFieldNumber;
-const int SchemeLayer::kItemsFieldNumber;
+const int SchemaLayer::kUuidFieldNumber;
+const int SchemaLayer::kNameFieldNumber;
+const int SchemaLayer::kCompileFieldNumber;
+const int SchemaLayer::kShowFieldNumber;
+const int SchemaLayer::kPrintFieldNumber;
+const int SchemaLayer::kItemsFieldNumber;
 #endif  // !_MSC_VER
 
-SchemeLayer::SchemeLayer()
+SchemaLayer::SchemaLayer()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void SchemeLayer::InitAsDefaultInstance() {
+void SchemaLayer::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
   name_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
 }
 
-SchemeLayer::SchemeLayer(const SchemeLayer& from)
+SchemaLayer::SchemaLayer(const SchemaLayer& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void SchemeLayer::SharedCtor() {
+void SchemaLayer::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
   name_ = NULL;
@@ -6947,39 +6947,39 @@ void SchemeLayer::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-SchemeLayer::~SchemeLayer() {
+SchemaLayer::~SchemaLayer() {
   SharedDtor();
 }
 
-void SchemeLayer::SharedDtor() {
+void SchemaLayer::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
     delete name_;
   }
 }
 
-void SchemeLayer::SetCachedSize(int size) const {
+void SchemaLayer::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* SchemeLayer::descriptor() {
+const ::google::protobuf::Descriptor* SchemaLayer::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return SchemeLayer_descriptor_;
+  return SchemaLayer_descriptor_;
 }
 
-const SchemeLayer& SchemeLayer::default_instance() {
+const SchemaLayer& SchemaLayer::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-SchemeLayer* SchemeLayer::default_instance_ = NULL;
+SchemaLayer* SchemaLayer::default_instance_ = NULL;
 
-SchemeLayer* SchemeLayer::New() const {
-  return new SchemeLayer;
+SchemaLayer* SchemaLayer::New() const {
+  return new SchemaLayer;
 }
 
-void SchemeLayer::Clear() {
+void SchemaLayer::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
@@ -6996,7 +6996,7 @@ void SchemeLayer::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool SchemeLayer::MergePartialFromCodedStream(
+bool SchemaLayer::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -7108,7 +7108,7 @@ bool SchemeLayer::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void SchemeLayer::SerializeWithCachedSizes(
+void SchemaLayer::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -7149,7 +7149,7 @@ void SchemeLayer::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* SchemeLayer::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* SchemaLayer::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -7194,7 +7194,7 @@ void SchemeLayer::SerializeWithCachedSizes(
   return target;
 }
 
-int SchemeLayer::ByteSize() const {
+int SchemaLayer::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -7247,10 +7247,10 @@ int SchemeLayer::ByteSize() const {
   return total_size;
 }
 
-void SchemeLayer::MergeFrom(const ::google::protobuf::Message& from) {
+void SchemaLayer::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const SchemeLayer* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const SchemeLayer*>(
+  const SchemaLayer* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SchemaLayer*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -7259,7 +7259,7 @@ void SchemeLayer::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void SchemeLayer::MergeFrom(const SchemeLayer& from) {
+void SchemaLayer::MergeFrom(const SchemaLayer& from) {
   GOOGLE_CHECK_NE(&from, this);
   items_.MergeFrom(from.items_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -7282,19 +7282,19 @@ void SchemeLayer::MergeFrom(const SchemeLayer& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void SchemeLayer::CopyFrom(const ::google::protobuf::Message& from) {
+void SchemaLayer::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SchemeLayer::CopyFrom(const SchemeLayer& from) {
+void SchemaLayer::CopyFrom(const SchemaLayer& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SchemeLayer::IsInitialized() const {
+bool SchemaLayer::IsInitialized() const {
   if ((_has_bits_[0] & 0x0000001f) != 0x0000001f) return false;
 
   if (has_uuid()) {
@@ -7309,7 +7309,7 @@ bool SchemeLayer::IsInitialized() const {
   return true;
 }
 
-void SchemeLayer::Swap(SchemeLayer* other) {
+void SchemaLayer::Swap(SchemaLayer* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
     std::swap(name_, other->name_);
@@ -7323,11 +7323,11 @@ void SchemeLayer::Swap(SchemeLayer* other) {
   }
 }
 
-::google::protobuf::Metadata SchemeLayer::GetMetadata() const {
+::google::protobuf::Metadata SchemaLayer::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = SchemeLayer_descriptor_;
-  metadata.reflection = SchemeLayer_reflection_;
+  metadata.descriptor = SchemaLayer_descriptor_;
+  metadata.reflection = SchemaLayer_reflection_;
   return metadata;
 }
 

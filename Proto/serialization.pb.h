@@ -48,7 +48,7 @@ class AfbSignal;
 class AfbParam;
 class Schema;
 class LogicSchema;
-class SchemeLayer;
+class SchemaLayer;
 class SchemeItem;
 class PosRectImpl;
 class PosLineImpl;
@@ -750,14 +750,14 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::Schema* release_schema();
   inline void set_allocated_schema(::Proto::Schema* schema);
 
-  // optional .Proto.SchemeLayer schemelayer = 101;
-  inline bool has_schemelayer() const;
-  inline void clear_schemelayer();
-  static const int kSchemelayerFieldNumber = 101;
-  inline const ::Proto::SchemeLayer& schemelayer() const;
-  inline ::Proto::SchemeLayer* mutable_schemelayer();
-  inline ::Proto::SchemeLayer* release_schemelayer();
-  inline void set_allocated_schemelayer(::Proto::SchemeLayer* schemelayer);
+  // optional .Proto.SchemaLayer schemalayer = 101;
+  inline bool has_schemalayer() const;
+  inline void clear_schemalayer();
+  static const int kSchemalayerFieldNumber = 101;
+  inline const ::Proto::SchemaLayer& schemalayer() const;
+  inline ::Proto::SchemaLayer* mutable_schemalayer();
+  inline ::Proto::SchemaLayer* release_schemalayer();
+  inline void set_allocated_schemalayer(::Proto::SchemaLayer* schemalayer);
 
   // optional .Proto.FblElement fblelement = 102;
   inline bool has_fblelement() const;
@@ -787,8 +787,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_deviceobject();
   inline void set_has_schema();
   inline void clear_has_schema();
-  inline void set_has_schemelayer();
-  inline void clear_has_schemelayer();
+  inline void set_has_schemalayer();
+  inline void clear_has_schemalayer();
   inline void set_has_fblelement();
   inline void clear_has_fblelement();
   inline void set_has_configuration();
@@ -799,7 +799,7 @@ class Envelope : public ::google::protobuf::Message {
   ::Proto::SchemeItem* schemeitem_;
   ::Proto::DeviceObject* deviceobject_;
   ::Proto::Schema* schema_;
-  ::Proto::SchemeLayer* schemelayer_;
+  ::Proto::SchemaLayer* schemalayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
   ::google::protobuf::uint32 classnamehash_;
@@ -1955,14 +1955,14 @@ class LogicSchema : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class SchemeLayer : public ::google::protobuf::Message {
+class SchemaLayer : public ::google::protobuf::Message {
  public:
-  SchemeLayer();
-  virtual ~SchemeLayer();
+  SchemaLayer();
+  virtual ~SchemaLayer();
 
-  SchemeLayer(const SchemeLayer& from);
+  SchemaLayer(const SchemaLayer& from);
 
-  inline SchemeLayer& operator=(const SchemeLayer& from) {
+  inline SchemaLayer& operator=(const SchemaLayer& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1976,17 +1976,17 @@ class SchemeLayer : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const SchemeLayer& default_instance();
+  static const SchemaLayer& default_instance();
 
-  void Swap(SchemeLayer* other);
+  void Swap(SchemaLayer* other);
 
   // implements Message ----------------------------------------------
 
-  SchemeLayer* New() const;
+  SchemaLayer* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const SchemeLayer& from);
-  void MergeFrom(const SchemeLayer& from);
+  void CopyFrom(const SchemaLayer& from);
+  void MergeFrom(const SchemaLayer& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2060,7 +2060,7 @@ class SchemeLayer : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
       mutable_items();
 
-  // @@protoc_insertion_point(class_scope:Proto.SchemeLayer)
+  // @@protoc_insertion_point(class_scope:Proto.SchemaLayer)
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
@@ -2090,7 +2090,7 @@ class SchemeLayer : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static SchemeLayer* default_instance_;
+  static SchemaLayer* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -5987,41 +5987,41 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
   }
 }
 
-// optional .Proto.SchemeLayer schemelayer = 101;
-inline bool Envelope::has_schemelayer() const {
+// optional .Proto.SchemaLayer schemalayer = 101;
+inline bool Envelope::has_schemalayer() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void Envelope::set_has_schemelayer() {
+inline void Envelope::set_has_schemalayer() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void Envelope::clear_has_schemelayer() {
+inline void Envelope::clear_has_schemalayer() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void Envelope::clear_schemelayer() {
-  if (schemelayer_ != NULL) schemelayer_->::Proto::SchemeLayer::Clear();
-  clear_has_schemelayer();
+inline void Envelope::clear_schemalayer() {
+  if (schemalayer_ != NULL) schemalayer_->::Proto::SchemaLayer::Clear();
+  clear_has_schemalayer();
 }
-inline const ::Proto::SchemeLayer& Envelope::schemelayer() const {
-  return schemelayer_ != NULL ? *schemelayer_ : *default_instance_->schemelayer_;
+inline const ::Proto::SchemaLayer& Envelope::schemalayer() const {
+  return schemalayer_ != NULL ? *schemalayer_ : *default_instance_->schemalayer_;
 }
-inline ::Proto::SchemeLayer* Envelope::mutable_schemelayer() {
-  set_has_schemelayer();
-  if (schemelayer_ == NULL) schemelayer_ = new ::Proto::SchemeLayer;
-  return schemelayer_;
+inline ::Proto::SchemaLayer* Envelope::mutable_schemalayer() {
+  set_has_schemalayer();
+  if (schemalayer_ == NULL) schemalayer_ = new ::Proto::SchemaLayer;
+  return schemalayer_;
 }
-inline ::Proto::SchemeLayer* Envelope::release_schemelayer() {
-  clear_has_schemelayer();
-  ::Proto::SchemeLayer* temp = schemelayer_;
-  schemelayer_ = NULL;
+inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
+  clear_has_schemalayer();
+  ::Proto::SchemaLayer* temp = schemalayer_;
+  schemalayer_ = NULL;
   return temp;
 }
-inline void Envelope::set_allocated_schemelayer(::Proto::SchemeLayer* schemelayer) {
-  delete schemelayer_;
-  schemelayer_ = schemelayer;
-  if (schemelayer) {
-    set_has_schemelayer();
+inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalayer) {
+  delete schemalayer_;
+  schemalayer_ = schemalayer;
+  if (schemalayer) {
+    set_has_schemalayer();
   } else {
-    clear_has_schemelayer();
+    clear_has_schemalayer();
   }
 }
 
@@ -7642,37 +7642,37 @@ LogicSchema::mutable_hardware_strids() {
 
 // -------------------------------------------------------------------
 
-// SchemeLayer
+// SchemaLayer
 
 // required .Proto.Uuid uuid = 1;
-inline bool SchemeLayer::has_uuid() const {
+inline bool SchemaLayer::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void SchemeLayer::set_has_uuid() {
+inline void SchemaLayer::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void SchemeLayer::clear_has_uuid() {
+inline void SchemaLayer::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void SchemeLayer::clear_uuid() {
+inline void SchemaLayer::clear_uuid() {
   if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
   clear_has_uuid();
 }
-inline const ::Proto::Uuid& SchemeLayer::uuid() const {
+inline const ::Proto::Uuid& SchemaLayer::uuid() const {
   return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Uuid* SchemeLayer::mutable_uuid() {
+inline ::Proto::Uuid* SchemaLayer::mutable_uuid() {
   set_has_uuid();
   if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
   return uuid_;
 }
-inline ::Proto::Uuid* SchemeLayer::release_uuid() {
+inline ::Proto::Uuid* SchemaLayer::release_uuid() {
   clear_has_uuid();
   ::Proto::Uuid* temp = uuid_;
   uuid_ = NULL;
   return temp;
 }
-inline void SchemeLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void SchemaLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
   delete uuid_;
   uuid_ = uuid;
   if (uuid) {
@@ -7683,34 +7683,34 @@ inline void SchemeLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
 }
 
 // required .Proto.wstring name = 2;
-inline bool SchemeLayer::has_name() const {
+inline bool SchemaLayer::has_name() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void SchemeLayer::set_has_name() {
+inline void SchemaLayer::set_has_name() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void SchemeLayer::clear_has_name() {
+inline void SchemaLayer::clear_has_name() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void SchemeLayer::clear_name() {
+inline void SchemaLayer::clear_name() {
   if (name_ != NULL) name_->::Proto::wstring::Clear();
   clear_has_name();
 }
-inline const ::Proto::wstring& SchemeLayer::name() const {
+inline const ::Proto::wstring& SchemaLayer::name() const {
   return name_ != NULL ? *name_ : *default_instance_->name_;
 }
-inline ::Proto::wstring* SchemeLayer::mutable_name() {
+inline ::Proto::wstring* SchemaLayer::mutable_name() {
   set_has_name();
   if (name_ == NULL) name_ = new ::Proto::wstring;
   return name_;
 }
-inline ::Proto::wstring* SchemeLayer::release_name() {
+inline ::Proto::wstring* SchemaLayer::release_name() {
   clear_has_name();
   ::Proto::wstring* temp = name_;
   name_ = NULL;
   return temp;
 }
-inline void SchemeLayer::set_allocated_name(::Proto::wstring* name) {
+inline void SchemaLayer::set_allocated_name(::Proto::wstring* name) {
   delete name_;
   name_ = name;
   if (name) {
@@ -7721,93 +7721,93 @@ inline void SchemeLayer::set_allocated_name(::Proto::wstring* name) {
 }
 
 // required bool compile = 3;
-inline bool SchemeLayer::has_compile() const {
+inline bool SchemaLayer::has_compile() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void SchemeLayer::set_has_compile() {
+inline void SchemaLayer::set_has_compile() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void SchemeLayer::clear_has_compile() {
+inline void SchemaLayer::clear_has_compile() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void SchemeLayer::clear_compile() {
+inline void SchemaLayer::clear_compile() {
   compile_ = false;
   clear_has_compile();
 }
-inline bool SchemeLayer::compile() const {
+inline bool SchemaLayer::compile() const {
   return compile_;
 }
-inline void SchemeLayer::set_compile(bool value) {
+inline void SchemaLayer::set_compile(bool value) {
   set_has_compile();
   compile_ = value;
 }
 
 // required bool show = 4;
-inline bool SchemeLayer::has_show() const {
+inline bool SchemaLayer::has_show() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void SchemeLayer::set_has_show() {
+inline void SchemaLayer::set_has_show() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void SchemeLayer::clear_has_show() {
+inline void SchemaLayer::clear_has_show() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void SchemeLayer::clear_show() {
+inline void SchemaLayer::clear_show() {
   show_ = false;
   clear_has_show();
 }
-inline bool SchemeLayer::show() const {
+inline bool SchemaLayer::show() const {
   return show_;
 }
-inline void SchemeLayer::set_show(bool value) {
+inline void SchemaLayer::set_show(bool value) {
   set_has_show();
   show_ = value;
 }
 
 // required bool print = 5;
-inline bool SchemeLayer::has_print() const {
+inline bool SchemaLayer::has_print() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void SchemeLayer::set_has_print() {
+inline void SchemaLayer::set_has_print() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void SchemeLayer::clear_has_print() {
+inline void SchemaLayer::clear_has_print() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void SchemeLayer::clear_print() {
+inline void SchemaLayer::clear_print() {
   print_ = false;
   clear_has_print();
 }
-inline bool SchemeLayer::print() const {
+inline bool SchemaLayer::print() const {
   return print_;
 }
-inline void SchemeLayer::set_print(bool value) {
+inline void SchemaLayer::set_print(bool value) {
   set_has_print();
   print_ = value;
 }
 
 // repeated .Proto.Envelope items = 15;
-inline int SchemeLayer::items_size() const {
+inline int SchemaLayer::items_size() const {
   return items_.size();
 }
-inline void SchemeLayer::clear_items() {
+inline void SchemaLayer::clear_items() {
   items_.Clear();
 }
-inline const ::Proto::Envelope& SchemeLayer::items(int index) const {
+inline const ::Proto::Envelope& SchemaLayer::items(int index) const {
   return items_.Get(index);
 }
-inline ::Proto::Envelope* SchemeLayer::mutable_items(int index) {
+inline ::Proto::Envelope* SchemaLayer::mutable_items(int index) {
   return items_.Mutable(index);
 }
-inline ::Proto::Envelope* SchemeLayer::add_items() {
+inline ::Proto::Envelope* SchemaLayer::add_items() {
   return items_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-SchemeLayer::items() const {
+SchemaLayer::items() const {
   return items_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-SchemeLayer::mutable_items() {
+SchemaLayer::mutable_items() {
   return &items_;
 }
 

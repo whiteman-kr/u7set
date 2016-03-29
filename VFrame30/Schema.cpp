@@ -91,7 +91,7 @@ namespace VFrame30
 
 		for (int i = 0; i < schema.layers().size(); i++)
 		{
-			SchemeLayer* pLayer = SchemeLayer::Create(schema.layers(i));
+			SchemaLayer* pLayer = SchemaLayer::Create(schema.layers(i));
 			
 			if (pLayer == nullptr)
 			{
@@ -99,7 +99,7 @@ namespace VFrame30
 				continue;
 			}
 			
-			Layers.push_back(std::shared_ptr<SchemeLayer>(pLayer));
+			Layers.push_back(std::shared_ptr<SchemaLayer>(pLayer));
 		}
 
 		if (schema.layers().size() != (int)Layers.size())
@@ -167,7 +167,7 @@ namespace VFrame30
 
 		for (auto layer = Layers.cbegin(); layer != Layers.cend(); ++layer)
 		{
-			const SchemeLayer* pLayer = layer->get();
+			const SchemaLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{
@@ -206,7 +206,7 @@ namespace VFrame30
 
 		for (auto layer = Layers.crbegin(); layer != Layers.crend(); layer++)
 		{
-			const SchemeLayer* pLayer = layer->get();
+			const SchemaLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{
@@ -310,7 +310,7 @@ namespace VFrame30
 		//
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			SchemeLayer* pLayer = layer->get();
+			SchemaLayer* pLayer = layer->get();
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
@@ -348,7 +348,7 @@ namespace VFrame30
 		//
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			SchemeLayer* pLayer = layer->get();
+			SchemaLayer* pLayer = layer->get();
 
 			pLayer->connectionMap.clear();
 

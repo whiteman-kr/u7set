@@ -26,7 +26,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const override;
 
 		// Properties
 		//

@@ -99,7 +99,6 @@ HEADERS += VFrame30Lib_global.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
     ../include/CUtils.h \
-    SchemeLayer.h \
 	MonitorSchema.h \
     SchemeView.h \
     version.h \
@@ -119,7 +118,8 @@ HEADERS += VFrame30Lib_global.h \
     Schema.h \
     LogicSchema.h \
     WiringSchema.h \
-    DiagSchema.h
+    DiagSchema.h \
+    SchemaLayer.h
 
 SOURCES += \
     Settings.cpp \
@@ -139,7 +139,6 @@ SOURCES += \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    SchemeLayer.cpp \
 	MonitorSchema.cpp \
     SchemeView.cpp \
     ../lib/DbStruct.cpp \
@@ -157,7 +156,8 @@ SOURCES += \
     Schema.cpp \
     LogicSchema.cpp \
     WiringSchema.cpp \
-    DiagSchema.cpp
+    DiagSchema.cpp \
+    SchemaLayer.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

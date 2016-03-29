@@ -5,7 +5,7 @@
 #include "LogicSchema.h"
 #include "MonitorSchema.h"
 #include "WiringSchema.h"
-#include "SchemeLayer.h"
+#include "SchemaLayer.h"
 #include "SchemeItemLine.h"
 #include "SchemeItemRect.h"
 #include "SchemeItemPath.h"
@@ -37,7 +37,7 @@ namespace VFrame30
 
 		// Registering VideoLayers
 		//
-		VideoLayerFactory.Register<SchemeLayer>();
+		VideoLayerFactory.Register<SchemaLayer>();
 
 		// Registering SchemeItems
 		//

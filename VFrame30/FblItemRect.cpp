@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "FblItemRect.h"
-#include "SchemeLayer.h"
+#include "SchemaLayer.h"
 
 #include "SchemeItemSignal.h"
 #include "SchemeItemConst.h"
@@ -268,7 +268,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemeLayer* layer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);

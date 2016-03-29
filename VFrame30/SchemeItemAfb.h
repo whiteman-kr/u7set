@@ -29,7 +29,7 @@ namespace VFrame30
 		// ��������� ��������, ����������� � 100% ��������.
 		// Graphcis ������ ����� �������� ������������ ������� (0, 0 - ����� ������� ����, ���� � ������ - ������������� ����������)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const override;
 
 		// Serialization
 		//

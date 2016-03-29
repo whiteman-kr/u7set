@@ -22,7 +22,7 @@ namespace Hardware
 namespace VFrame30
 {
 	class LogicSchema;
-	class SchemeLayer;
+	class SchemaLayer;
 	class SchemeItemAfb;
 	class FblItemRect;
 }
@@ -171,7 +171,7 @@ namespace Builder
 	public:
 		bool addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicSchema> scheme,
-			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log);
 
@@ -217,18 +217,18 @@ namespace Builder
 		bool parseAppLogicScheme(std::shared_ptr<VFrame30::LogicSchema> logicScheme);
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
-								  std::shared_ptr<VFrame30::SchemeLayer> layer);
+								  std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicScheme,
-						std::shared_ptr<VFrame30::SchemeLayer> layer,
+						std::shared_ptr<VFrame30::SchemaLayer> layer,
 						BushContainer* bushContainer) const;
 
 		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> scheme,
-									  std::shared_ptr<VFrame30::SchemeLayer> layer,
+									  std::shared_ptr<VFrame30::SchemaLayer> layer,
 									  BushContainer* bushContainer) const;
 
 		bool setPinConnections(std::shared_ptr<VFrame30::LogicSchema> scheme,
-							   std::shared_ptr<VFrame30::SchemeLayer> layer,
+							   std::shared_ptr<VFrame30::SchemaLayer> layer,
 							   BushContainer* bushContainer);
 
 	private:

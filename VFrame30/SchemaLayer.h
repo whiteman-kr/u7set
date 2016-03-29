@@ -4,28 +4,28 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemeLayer :
+	class VFRAME30LIBSHARED_EXPORT SchemaLayer :
 		public QObject,
-		public Proto::ObjectSerialization<SchemeLayer>,
-		public DebugInstCounter<SchemeLayer>
+		public Proto::ObjectSerialization<SchemaLayer>,
+		public DebugInstCounter<SchemaLayer>
 	{
 		Q_OBJECT
 
 	public:
-		SchemeLayer(void);
-		SchemeLayer(const QString& name, bool compile);
-		virtual ~SchemeLayer(void);
+		SchemaLayer(void);
+		SchemaLayer(const QString& name, bool compile);
+		virtual ~SchemaLayer(void);
 
 	private:
 		void Init(const QString& name, bool compile);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<SchemeLayer>;
+		friend Proto::ObjectSerialization<SchemaLayer>;
 
 	private:
 		// Use this func only while serialization, cause during obejcet creation it isnotfully initialized
-		static SchemeLayer* CreateObject(const Proto::Envelope& message);
+		static SchemaLayer* CreateObject(const Proto::Envelope& message);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -83,7 +83,7 @@ namespace VFrame30
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::SchemeLayer> VideoLayerFactory;
+	extern Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 #endif
 
 }

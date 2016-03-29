@@ -53,7 +53,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* pLayer) const
+	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* pLayer) const
 	{
 		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)

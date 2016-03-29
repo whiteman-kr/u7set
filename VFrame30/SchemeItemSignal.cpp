@@ -25,7 +25,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* layer) const
+	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 

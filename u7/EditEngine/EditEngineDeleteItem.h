@@ -12,7 +12,7 @@ namespace EditEngine
 		DeleteItemCommand(
 			EditSchemeView* schemeView,
 			std::vector<std::shared_ptr<VFrame30::SchemeItem>> items,
-			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar);
 
@@ -27,7 +27,7 @@ namespace EditEngine
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_prevOrder;			// Item's order in the layer before delete
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_selectedItems;
 
-		std::shared_ptr<VFrame30::SchemeLayer> m_layer;
+		std::shared_ptr<VFrame30::SchemaLayer> m_layer;
 	};
 
 }

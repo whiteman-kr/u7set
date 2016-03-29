@@ -6,7 +6,7 @@ class EditSchemeView;
 
 namespace VFrame30
 {
-	class SchemeLayer;
+	class SchemaLayer;
 	class Schema;
 }
 
@@ -50,12 +50,12 @@ namespace EditEngine
 		void resetModified();
 
 	public:
-		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		void runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		void runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		void runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
 		void runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::SchemeItem>& item);
@@ -212,7 +212,7 @@ namespace EditEngine
 		// Data
 		//
 	protected:
-		std::shared_ptr<VFrame30::SchemeLayer> m_activeLayer;		// Active Layer on operation start
+		std::shared_ptr<VFrame30::SchemaLayer> m_activeLayer;		// Active Layer on operation start
 
 		double m_zoom;
 

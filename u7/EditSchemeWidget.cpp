@@ -183,7 +183,7 @@ void EditSchemeView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 	//
 	for (auto layer = scheme()->Layers.cbegin(); layer != scheme()->Layers.cend(); ++layer)
 	{
-		const VFrame30::SchemeLayer* pLayer = layer->get();
+		const VFrame30::SchemaLayer* pLayer = layer->get();
 
 		if (pLayer->compile() == false || pLayer->show() == false)
 		{
@@ -1329,18 +1329,18 @@ QUuid EditSchemeView::activeLayerGuid() const
 	return scheme()->Layers[m_activeLayer]->guid();
 }
 
-std::shared_ptr<VFrame30::SchemeLayer> EditSchemeView::activeLayer()
+std::shared_ptr<VFrame30::SchemaLayer> EditSchemeView::activeLayer()
 {
 	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
 	{
 		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
-		return std::make_shared<VFrame30::SchemeLayer>("Error", false);
+		return std::make_shared<VFrame30::SchemaLayer>("Error", false);
 	}
 
 	return scheme()->Layers[m_activeLayer];
 }
 
-void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::SchemeLayer> layer)
+void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
 {
 	for (int i = 0; i < static_cast<int>(scheme()->Layers.size()); i++)
 	{
@@ -3799,7 +3799,7 @@ const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& EditSchemeWidget::sele
 	return editSchemeView()->m_selectedItems;
 }
 
-std::shared_ptr<VFrame30::SchemeLayer> EditSchemeWidget::activeLayer()
+std::shared_ptr<VFrame30::SchemaLayer> EditSchemeWidget::activeLayer()
 {
 	return editSchemeView()->activeLayer();
 }

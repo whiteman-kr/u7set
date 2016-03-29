@@ -171,20 +171,20 @@ namespace EditEngine
 		}
 	}
 
-	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<AddItemCommand>(m_schemeView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemeItem>> l(items.begin(), items.end());
 		addCommand(std::make_shared<AddItemCommand>(m_schemeView, l, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemeItem>> items;
 		items.push_back(item);
@@ -193,13 +193,13 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<DeleteItemCommand>(m_schemeView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> v;
 		v.push_back(item);

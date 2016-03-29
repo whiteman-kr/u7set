@@ -880,7 +880,7 @@ namespace Builder
 
 	bool AppLogicData::addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicSchema> scheme,
-			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log)
 	{
@@ -1236,7 +1236,7 @@ namespace Builder
 		bool layerFound = false;
 		bool ok = false;
 
-		for (std::shared_ptr<VFrame30::SchemeLayer> l : logicScheme->Layers)
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicScheme->Layers)
 		{
 			if (l->compile() == true)
 			{
@@ -1267,7 +1267,7 @@ namespace Builder
 
 	bool Parser::parseAppLogicLayer(
 		std::shared_ptr<VFrame30::LogicSchema> logicScheme,
-		std::shared_ptr<VFrame30::SchemeLayer> layer)
+		std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		if (logicScheme == nullptr || layer == nullptr)
 		{
@@ -1321,7 +1321,7 @@ namespace Builder
 	//
 	bool Parser::findBushes(
 		std::shared_ptr<VFrame30::LogicSchema> logicScheme,
-		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		BushContainer* bushContainer) const
 	{
 		if (logicScheme.get() == nullptr ||
@@ -1579,7 +1579,7 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
+	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> scheme, std::shared_ptr<VFrame30::SchemaLayer> layer,
 						BushContainer* bushContainer) const
 	{
 		if (scheme.get() == nullptr ||
@@ -1695,7 +1695,7 @@ namespace Builder
 
 	bool Parser::setPinConnections(
 		std::shared_ptr<VFrame30::LogicSchema> scheme,
-		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		BushContainer* bushContainer)
 	{
 		if (scheme.get() == nullptr ||

@@ -126,8 +126,8 @@ public:
 	// Layer props
 	//
 	QUuid activeLayerGuid() const;
-	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
-	void setActiveLayer(std::shared_ptr<VFrame30::SchemeLayer> layer);
+	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
+	void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
@@ -341,7 +341,7 @@ public:
 	DbController* dbcontroller();
 	DbController* db();
 
-	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
+	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selectedItems() const;
 

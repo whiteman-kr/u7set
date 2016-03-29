@@ -1,28 +1,28 @@
 #include "Stable.h"
-#include "SchemeLayer.h"
+#include "SchemaLayer.h"
 #include "FblItemRect.h"
 
 
 namespace VFrame30
 {
 
-	Factory<VFrame30::SchemeLayer> VideoLayerFactory;
+	Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 
-	SchemeLayer::SchemeLayer(void)
+	SchemaLayer::SchemaLayer(void)
 	{
 		Init("Undifined Layer", false);
 	}
 
-	SchemeLayer::SchemeLayer(const QString& name, bool compile)
+	SchemaLayer::SchemaLayer(const QString& name, bool compile)
 	{
 		Init(name, compile);
 	}
 
-	SchemeLayer::~SchemeLayer(void)
+	SchemaLayer::~SchemaLayer(void)
 	{
 	}
 
-	void SchemeLayer::Init(const QString& name, bool compile)
+	void SchemaLayer::Init(const QString& name, bool compile)
 	{
 		m_guid = QUuid::createUuid();
 		m_name = name;
@@ -32,14 +32,14 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool SchemeLayer::SaveData(Proto::Envelope* message) const
+	bool SchemaLayer::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
 
-		auto layer = message->mutable_schemelayer();
+		auto layer = message->mutable_schemalayer();
 
 		Proto::Write(layer->mutable_uuid(), m_guid);
 		Proto::Write(layer->mutable_name(), m_name);
@@ -63,15 +63,15 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemeLayer::LoadData(const Proto::Envelope& message)
+	bool SchemaLayer::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemelayer() == false)
+		if (message.has_schemalayer() == false)
 		{
-			assert(message.has_schemelayer());
+			assert(message.has_schemalayer());
 			return false;
 		}
 
-		const Proto::SchemeLayer& layer = message.schemelayer();
+		const Proto::SchemaLayer& layer = message.schemalayer();
 
 		m_guid = Proto::Read(layer.uuid());
 		Proto::Read(layer.name(), &m_name);
@@ -106,18 +106,18 @@ namespace VFrame30
 		return true;
 	}
 
-	SchemeLayer* SchemeLayer::CreateObject(const Proto::Envelope& message)
+	SchemaLayer* SchemaLayer::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//
-		if (message.has_schemelayer() == false)
+		if (message.has_schemalayer() == false)
 		{
-			assert(message.has_schemelayer());
+			assert(message.has_schemalayer());
 			return nullptr;
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		SchemeLayer* pLayer = VideoLayerFactory.Create(classNameHash);
+		SchemaLayer* pLayer = VideoLayerFactory.Create(classNameHash);
 
 		if (pLayer == nullptr)
 		{
@@ -133,7 +133,7 @@ namespace VFrame30
 	// Methods
 	//
 
-	std::shared_ptr<SchemeItem> SchemeLayer::getItemById(const QUuid& id) const
+	std::shared_ptr<SchemeItem> SchemaLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
 			[&](const std::shared_ptr<SchemeItem>& vi)
@@ -151,7 +151,7 @@ namespace VFrame30
 		}
 	}
 
-	void SchemeLayer::ConnectionMapPosInc(SchemePoint pinPos)
+	void SchemaLayer::ConnectionMapPosInc(SchemePoint pinPos)
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -165,7 +165,7 @@ namespace VFrame30
 		}
 	}
 
-	int SchemeLayer::GetPinPosConnectinCount(SchemePoint pinPos, SchemaUnit /*unit*/) const
+	int SchemaLayer::GetPinPosConnectinCount(SchemePoint pinPos, SchemaUnit /*unit*/) const
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -179,7 +179,7 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<SchemeItem> SchemeLayer::getItemUnderPoint(QPointF point, QString className) const
+	std::shared_ptr<SchemeItem> SchemaLayer::getItemUnderPoint(QPointF point, QString className) const
 	{
 		double x = point.x();
 		double y = point.y();
@@ -201,7 +201,7 @@ namespace VFrame30
 		return std::shared_ptr<SchemeItem>();
 	}
 
-	std::list<std::shared_ptr<SchemeItem>> SchemeLayer::getItemListInRectangle(const QRectF& rect) const
+	std::list<std::shared_ptr<SchemeItem>> SchemaLayer::getItemListInRectangle(const QRectF& rect) const
 	{
 		std::list<std::shared_ptr<SchemeItem>> out;
 
@@ -215,7 +215,7 @@ namespace VFrame30
 		return out;
 	}
 
-	std::shared_ptr<SchemeItem> SchemeLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
+	std::shared_ptr<SchemeItem> SchemaLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
 	{
 		double x = point.x();
 		double y = point.y();
@@ -257,48 +257,48 @@ namespace VFrame30
 
 	// Properties
 	//
-	QUuid SchemeLayer::guid() const
+	QUuid SchemaLayer::guid() const
 	{
 		return m_guid;
 	}
-	void SchemeLayer::setGuid(const QUuid& guid)
+	void SchemaLayer::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 	}
 
-	QString SchemeLayer::name() const
+	QString SchemaLayer::name() const
 	{
 		return m_name;
 	}
-	void SchemeLayer::setName(const QString& value)
+	void SchemaLayer::setName(const QString& value)
 	{
 		m_name = value;
 	}
 
-	bool SchemeLayer::compile() const
+	bool SchemaLayer::compile() const
 	{
 		return m_compile;
 	}
-	void SchemeLayer::setCompile(bool value)
+	void SchemaLayer::setCompile(bool value)
 	{
 		m_compile = value;
 	}
 
-	bool SchemeLayer::show() const
+	bool SchemaLayer::show() const
 	{
 		return m_show;
 	}
-	void SchemeLayer::setShow(bool value)
+	void SchemaLayer::setShow(bool value)
 	{
 		m_show = value;
 	}
 
-	bool SchemeLayer::print() const
+	bool SchemaLayer::print() const
 	{
 		return m_print;
 	}
 
-	void SchemeLayer::setPrint(bool value)
+	void SchemaLayer::setPrint(bool value)
 	{
 		m_print = value;
 	}

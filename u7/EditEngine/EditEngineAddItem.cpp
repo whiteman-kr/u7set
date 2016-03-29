@@ -3,7 +3,7 @@
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 		: EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
 		assert(schemeView != nullptr);

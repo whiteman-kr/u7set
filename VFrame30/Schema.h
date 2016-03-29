@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SchemeLayer.h"
+#include "SchemaLayer.h"
 #include "Afb.h"
 #include "../include/PropertyObject.h"
 #include "../include/TypesAndEnums.h"
@@ -9,7 +9,7 @@ namespace VFrame30
 {
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
-	class SchemeLayer;
+	class SchemaLayer;
 	class SchemeItem;
 
 	
@@ -97,7 +97,7 @@ namespace VFrame30
 		void setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements);
 		
 	public:
-		std::vector<std::shared_ptr<SchemeLayer>> Layers;
+		std::vector<std::shared_ptr<SchemaLayer>> Layers;
 
 	private:
 		QUuid m_guid;

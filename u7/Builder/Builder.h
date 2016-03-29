@@ -30,7 +30,7 @@ namespace Hardware
 namespace VFrame30
 {
 	class LogicSchema;
-	class SchemeLayer;
+	class SchemaLayer;
 }
 
 namespace Afb

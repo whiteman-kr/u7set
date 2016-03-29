@@ -14,8 +14,8 @@ namespace VFrame30
 		setDocWidth(1000);
 		setDocHeight(750);
 
-		Layers.push_back(std::make_shared<SchemeLayer>("Drawing", true));
-		Layers.push_back(std::make_shared<SchemeLayer>("Notes", false));
+		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
+		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
 		return;
 	}

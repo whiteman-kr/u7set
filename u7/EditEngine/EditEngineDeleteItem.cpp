@@ -5,7 +5,7 @@ namespace EditEngine
 {
 	DeleteItemCommand::DeleteItemCommand(EditSchemeView* schemeView,
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items,
-		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		QScrollBar* hScrollBar,
 		QScrollBar* vScrollBar)
 		: EditCommand(schemeView, hScrollBar, vScrollBar)

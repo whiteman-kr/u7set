@@ -112,7 +112,7 @@ message Envelope
 	optional SchemeItem schemeitem = 6;				// VFrame30::SchemeItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional Schema schema = 100;					// VFrame30::Schema
-	optional SchemeLayer schemelayer = 101;			// VFrame30::SchemeLayer
+	optional SchemaLayer schemalayer = 101;			// VFrame30::SchemaLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
@@ -296,11 +296,11 @@ message LogicSchema
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::SchemeLayer
+//			VFrame30::SchemaLayer
 //
 //
 //------------------------------------------------------------------------------------------
-message SchemeLayer
+message SchemaLayer
 {
 	required Uuid uuid = 1;
 	required wstring name = 2;
