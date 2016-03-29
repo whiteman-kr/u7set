@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "SchemeItemSignal.h"
-#include "LogicScheme.h"
+#include "LogicSchema.h"
 
 namespace VFrame30
 {
@@ -103,7 +103,7 @@ namespace VFrame30
 
 		QString text;
 
-		const VFrame30::LogicScheme* logicScheme = dynamic_cast<const VFrame30::LogicScheme*>(drawParam->scheme());
+		const VFrame30::LogicSchema* logicScheme = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->scheme());
 
 		if (multiChannel() == true && logicScheme != nullptr && signalStrIds().size() >= 1)
 		{

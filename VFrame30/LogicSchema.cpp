@@ -1,11 +1,11 @@
 #include "Stable.h"
-#include "LogicScheme.h"
+#include "LogicSchema.h"
 
 namespace VFrame30
 {
-	LogicScheme::LogicScheme(void)
+	LogicSchema::LogicSchema(void)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, HardwareStrIDs, true, LogicScheme::hardwareStrIds, LogicScheme::setHardwareStrIds)
+		ADD_PROPERTY_GETTER_SETTER(QString, HardwareStrIDs, true, LogicSchema::hardwareStrIds, LogicSchema::setHardwareStrIds)
 
 		setUnit(SchemaUnit::Inch);
 
@@ -22,11 +22,11 @@ namespace VFrame30
 		return;
 	}
 
-	LogicScheme ::~LogicScheme (void)
+	LogicSchema ::~LogicSchema (void)
 	{
 	}
 
-	bool LogicScheme::SaveData(Proto::Envelope* message) const
+	bool LogicSchema::SaveData(Proto::Envelope* message) const
 	{
 		bool result = Schema::SaveData(message);
 
@@ -39,7 +39,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::LogicScheme* ls = message->mutable_schema()->mutable_logics_scheme();
+		Proto::LogicSchema* ls = message->mutable_schema()->mutable_logic_schema();
 
 		for (const QString& strId : m_hardwareStrIds)
 		{
@@ -50,7 +50,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool LogicScheme::LoadData(const Proto::Envelope& message)
+	bool LogicSchema::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schema() == false)
 		{
@@ -68,13 +68,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schema().has_logics_scheme() == false)
+		if (message.schema().has_logic_schema() == false)
 		{
-			assert(message.schema().has_logics_scheme());
+			assert(message.schema().has_logic_schema());
 			return false;
 		}
 
-		const Proto::LogicScheme& ls = message.schema().logics_scheme();
+		const Proto::LogicSchema& ls = message.schema().logic_schema();
 
 		m_hardwareStrIds.clear();
 		m_hardwareStrIds.reserve(ls.hardware_strids_size());
@@ -89,7 +89,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void LogicScheme::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
+	void LogicSchema::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
 	{
 		BuildFblConnectionMap();
 
@@ -97,7 +97,7 @@ namespace VFrame30
 		return;
     }
 
-	QString LogicScheme::hardwareStrIds() const
+	QString LogicSchema::hardwareStrIds() const
 	{
 		QString result;
 
@@ -116,27 +116,27 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList LogicScheme::hardwareStrIdList() const
+	QStringList LogicSchema::hardwareStrIdList() const
 	{
 		return m_hardwareStrIds;
 	}
 
-	void LogicScheme::setHardwareStrIds(const QString& s)
+	void LogicSchema::setHardwareStrIds(const QString& s)
 	{
 		m_hardwareStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
-	QStringList* LogicScheme::mutable_hardwareStrIds()
+	QStringList* LogicSchema::mutable_hardwareStrIds()
 	{
 		return &m_hardwareStrIds;
 	}
 
-	bool LogicScheme::isMultichannelScheme() const
+	bool LogicSchema::isMultichannelSchema() const
 	{
 		return m_hardwareStrIds.size() > 1;
 	}
 
-	int LogicScheme::channelCount() const
+	int LogicSchema::channelCount() const
 	{
 		return m_hardwareStrIds.size();
 	}

@@ -8,7 +8,7 @@
 #include "../include/CUtils.h"
 
 #include "Schema.h"
-#include "LogicScheme.h"
+#include "LogicSchema.h"
 #include "MonitorSchema.h"
 #include "DiagScheme.h"
 #include "WiringScheme.h"

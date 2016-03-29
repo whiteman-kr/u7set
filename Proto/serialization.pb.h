@@ -47,7 +47,7 @@ class FblElement;
 class AfbSignal;
 class AfbParam;
 class Schema;
-class LogicScheme;
+class LogicSchema;
 class SchemeLayer;
 class SchemeItem;
 class PosRectImpl;
@@ -1815,14 +1815,14 @@ class Schema : public ::google::protobuf::Message {
   inline ::Proto::AfbElementCollection* release_afbs();
   inline void set_allocated_afbs(::Proto::AfbElementCollection* afbs);
 
-  // optional .Proto.LogicScheme logics_scheme = 200;
-  inline bool has_logics_scheme() const;
-  inline void clear_logics_scheme();
-  static const int kLogicsSchemeFieldNumber = 200;
-  inline const ::Proto::LogicScheme& logics_scheme() const;
-  inline ::Proto::LogicScheme* mutable_logics_scheme();
-  inline ::Proto::LogicScheme* release_logics_scheme();
-  inline void set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme);
+  // optional .Proto.LogicSchema logic_schema = 200;
+  inline bool has_logic_schema() const;
+  inline void clear_logic_schema();
+  static const int kLogicSchemaFieldNumber = 200;
+  inline const ::Proto::LogicSchema& logic_schema() const;
+  inline ::Proto::LogicSchema* mutable_logic_schema();
+  inline ::Proto::LogicSchema* release_logic_schema();
+  inline void set_allocated_logic_schema(::Proto::LogicSchema* logic_schema);
 
   // @@protoc_insertion_point(class_scope:Proto.Schema)
  private:
@@ -1842,8 +1842,8 @@ class Schema : public ::google::protobuf::Message {
   inline void clear_has_excludefrombuild();
   inline void set_has_afbs();
   inline void clear_has_afbs();
-  inline void set_has_logics_scheme();
-  inline void clear_has_logics_scheme();
+  inline void set_has_logic_schema();
+  inline void clear_has_logic_schema();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1856,7 +1856,7 @@ class Schema : public ::google::protobuf::Message {
   bool excludefrombuild_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
-  ::Proto::LogicScheme* logics_scheme_;
+  ::Proto::LogicSchema* logic_schema_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
@@ -1870,14 +1870,14 @@ class Schema : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class LogicScheme : public ::google::protobuf::Message {
+class LogicSchema : public ::google::protobuf::Message {
  public:
-  LogicScheme();
-  virtual ~LogicScheme();
+  LogicSchema();
+  virtual ~LogicSchema();
 
-  LogicScheme(const LogicScheme& from);
+  LogicSchema(const LogicSchema& from);
 
-  inline LogicScheme& operator=(const LogicScheme& from) {
+  inline LogicSchema& operator=(const LogicSchema& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1891,17 +1891,17 @@ class LogicScheme : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const LogicScheme& default_instance();
+  static const LogicSchema& default_instance();
 
-  void Swap(LogicScheme* other);
+  void Swap(LogicSchema* other);
 
   // implements Message ----------------------------------------------
 
-  LogicScheme* New() const;
+  LogicSchema* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const LogicScheme& from);
-  void MergeFrom(const LogicScheme& from);
+  void CopyFrom(const LogicSchema& from);
+  void MergeFrom(const LogicSchema& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1936,7 +1936,7 @@ class LogicScheme : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
       mutable_hardware_strids();
 
-  // @@protoc_insertion_point(class_scope:Proto.LogicScheme)
+  // @@protoc_insertion_point(class_scope:Proto.LogicSchema)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1951,7 +1951,7 @@ class LogicScheme : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static LogicScheme* default_instance_;
+  static LogicSchema* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -7573,70 +7573,70 @@ inline void Schema::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
   }
 }
 
-// optional .Proto.LogicScheme logics_scheme = 200;
-inline bool Schema::has_logics_scheme() const {
+// optional .Proto.LogicSchema logic_schema = 200;
+inline bool Schema::has_logic_schema() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void Schema::set_has_logics_scheme() {
+inline void Schema::set_has_logic_schema() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void Schema::clear_has_logics_scheme() {
+inline void Schema::clear_has_logic_schema() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void Schema::clear_logics_scheme() {
-  if (logics_scheme_ != NULL) logics_scheme_->::Proto::LogicScheme::Clear();
-  clear_has_logics_scheme();
+inline void Schema::clear_logic_schema() {
+  if (logic_schema_ != NULL) logic_schema_->::Proto::LogicSchema::Clear();
+  clear_has_logic_schema();
 }
-inline const ::Proto::LogicScheme& Schema::logics_scheme() const {
-  return logics_scheme_ != NULL ? *logics_scheme_ : *default_instance_->logics_scheme_;
+inline const ::Proto::LogicSchema& Schema::logic_schema() const {
+  return logic_schema_ != NULL ? *logic_schema_ : *default_instance_->logic_schema_;
 }
-inline ::Proto::LogicScheme* Schema::mutable_logics_scheme() {
-  set_has_logics_scheme();
-  if (logics_scheme_ == NULL) logics_scheme_ = new ::Proto::LogicScheme;
-  return logics_scheme_;
+inline ::Proto::LogicSchema* Schema::mutable_logic_schema() {
+  set_has_logic_schema();
+  if (logic_schema_ == NULL) logic_schema_ = new ::Proto::LogicSchema;
+  return logic_schema_;
 }
-inline ::Proto::LogicScheme* Schema::release_logics_scheme() {
-  clear_has_logics_scheme();
-  ::Proto::LogicScheme* temp = logics_scheme_;
-  logics_scheme_ = NULL;
+inline ::Proto::LogicSchema* Schema::release_logic_schema() {
+  clear_has_logic_schema();
+  ::Proto::LogicSchema* temp = logic_schema_;
+  logic_schema_ = NULL;
   return temp;
 }
-inline void Schema::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
-  delete logics_scheme_;
-  logics_scheme_ = logics_scheme;
-  if (logics_scheme) {
-    set_has_logics_scheme();
+inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schema) {
+  delete logic_schema_;
+  logic_schema_ = logic_schema;
+  if (logic_schema) {
+    set_has_logic_schema();
   } else {
-    clear_has_logics_scheme();
+    clear_has_logic_schema();
   }
 }
 
 // -------------------------------------------------------------------
 
-// LogicScheme
+// LogicSchema
 
 // repeated .Proto.wstring hardware_strids = 1;
-inline int LogicScheme::hardware_strids_size() const {
+inline int LogicSchema::hardware_strids_size() const {
   return hardware_strids_.size();
 }
-inline void LogicScheme::clear_hardware_strids() {
+inline void LogicSchema::clear_hardware_strids() {
   hardware_strids_.Clear();
 }
-inline const ::Proto::wstring& LogicScheme::hardware_strids(int index) const {
+inline const ::Proto::wstring& LogicSchema::hardware_strids(int index) const {
   return hardware_strids_.Get(index);
 }
-inline ::Proto::wstring* LogicScheme::mutable_hardware_strids(int index) {
+inline ::Proto::wstring* LogicSchema::mutable_hardware_strids(int index) {
   return hardware_strids_.Mutable(index);
 }
-inline ::Proto::wstring* LogicScheme::add_hardware_strids() {
+inline ::Proto::wstring* LogicSchema::add_hardware_strids() {
   return hardware_strids_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-LogicScheme::hardware_strids() const {
+LogicSchema::hardware_strids() const {
   return hardware_strids_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-LogicScheme::mutable_hardware_strids() {
+LogicSchema::mutable_hardware_strids() {
   return &hardware_strids_;
 }
 

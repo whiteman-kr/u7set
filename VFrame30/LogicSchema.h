@@ -5,13 +5,13 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT LogicScheme : public Schema
+	class VFRAME30LIBSHARED_EXPORT LogicSchema : public Schema
 	{
 		Q_OBJECT
 
 	public:
-		LogicScheme(void);
-		virtual ~LogicScheme(void);
+		LogicSchema(void);
+		virtual ~LogicSchema(void);
 
 		// Serialization
 		//
@@ -33,7 +33,7 @@ namespace VFrame30
 
 		QStringList* mutable_hardwareStrIds();
 
-		bool isMultichannelScheme() const;
+		bool isMultichannelSchema() const;
 		int channelCount() const;
 
 		// Data

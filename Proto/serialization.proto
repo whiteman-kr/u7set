@@ -278,16 +278,16 @@ message Schema
 
 	// Derived from Schema
 	//
-	optional LogicScheme logics_scheme = 200;
+	optional LogicSchema logic_schema = 200;
 }
 
 
 //
 //
-// LogicScheme
+// LogicSchema
 //
 //
-message LogicScheme
+message LogicSchema
 {
 	repeated wstring hardware_strids = 1;
 }

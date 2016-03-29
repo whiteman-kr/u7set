@@ -3778,19 +3778,19 @@ const EditSchemeView* EditSchemeWidget::editSchemeView() const
 
 bool EditSchemeWidget::isLogicScheme() const
 {
-	VFrame30::LogicScheme* logicScheme = dynamic_cast<VFrame30::LogicScheme*>(scheme().get());
+	VFrame30::LogicSchema* logicScheme = dynamic_cast<VFrame30::LogicSchema*>(scheme().get());
 	return logicScheme != nullptr;
 }
 
-std::shared_ptr<VFrame30::LogicScheme> EditSchemeWidget::logicScheme()
+std::shared_ptr<VFrame30::LogicSchema> EditSchemeWidget::logicScheme()
 {
-	std::shared_ptr<VFrame30::LogicScheme> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicScheme>(scheme());
+	std::shared_ptr<VFrame30::LogicSchema> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicSchema>(scheme());
 	return logicScheme;
 }
 
-const std::shared_ptr<VFrame30::LogicScheme> EditSchemeWidget::logicScheme() const
+const std::shared_ptr<VFrame30::LogicSchema> EditSchemeWidget::logicScheme() const
 {
-	const std::shared_ptr<VFrame30::LogicScheme> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicScheme>(scheme());
+	const std::shared_ptr<VFrame30::LogicSchema> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicSchema>(scheme());
 	return logicScheme;
 }
 

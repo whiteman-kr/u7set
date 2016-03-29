@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../VFrame30/BaseSchemeWidget.h"
-#include "../VFrame30/LogicScheme.h"
+#include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/SchemeItem.h"
 #include "../VFrame30/FblItem.h"
@@ -350,8 +350,8 @@ public:
 
 	bool isLogicScheme() const;
 
-	std::shared_ptr<VFrame30::LogicScheme> logicScheme();
-	const std::shared_ptr<VFrame30::LogicScheme> logicScheme() const;
+	std::shared_ptr<VFrame30::LogicSchema> logicScheme();
+	const std::shared_ptr<VFrame30::LogicSchema> logicScheme() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
