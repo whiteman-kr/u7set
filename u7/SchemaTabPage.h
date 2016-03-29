@@ -8,15 +8,15 @@
 
 //
 //
-// SchemeFileView
+// SchemaFileView
 //
 //
-class SchemeFileView : public FileListView
+class SchemaFileView : public FileListView
 {
 	Q_OBJECT
 public:
-	SchemeFileView(DbController* dbcontroller, const QString& parentFileName);
-	virtual ~SchemeFileView();
+	SchemaFileView(DbController* dbcontroller, const QString& parentFileName);
+	virtual ~SchemaFileView();
 
 	// Methods
 	//
@@ -44,24 +44,24 @@ protected:
 
 //
 //
-// SchemesTabPage
+// SchemasTabPage
 //
 //
-class SchemesTabPage : public MainTabPage
+class SchemasTabPage : public MainTabPage
 {
 	Q_OBJECT
 
 private:
-	SchemesTabPage(DbController* dbcontroller, QWidget* parent);
+	SchemasTabPage(DbController* dbcontroller, QWidget* parent);
 
 public:
-	virtual ~SchemesTabPage();
+	virtual ~SchemasTabPage();
 
-	template<typename SchemeType>
-	static SchemesTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
+	template<typename SchemaType>
+	static SchemasTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
-	bool hasUnsavedSchemes() const;
-	bool saveUnsavedSchemes();
+	bool hasUnsavedSchemas() const;
+	bool saveUnsavedSchemas();
 
 public slots:
 	void projectOpened();
@@ -70,27 +70,27 @@ public slots:
 	// Data
 	//
 protected:
-	std::function<VFrame30::Schema*()> m_createSchemeFunc;	// same as in SchemeControlTabPage
+	std::function<VFrame30::Schema*()> m_createSchemaFunc;	// same as in SchemaControlTabPage
 	QTabWidget* m_tabWidget;
 };
 
 
 //
 //
-// SchemeControlTabPage
+// SchemaControlTabPage
 //
 //
-class SchemeControlTabPage : public QWidget, public HasDbController
+class SchemaControlTabPage : public QWidget, public HasDbController
 {
     Q_OBJECT
 public:
-	SchemeControlTabPage(
+	SchemaControlTabPage(
 			const QString& fileExt,
 			DbController* db,
 			const QString& parentFileName,
-			std::function<VFrame30::Schema*()> createSchemeFunc) :
+			std::function<VFrame30::Schema*()> createSchemaFunc) :
 		HasDbController(db),
-		m_createSchemeFunc(createSchemeFunc)
+		m_createSchemaFunc(createSchemaFunc)
 	{
 		// Create actions
 		//
@@ -98,7 +98,7 @@ public:
 
 		// Create controls
 		//
-		m_filesView = new SchemeFileView(db, parentFileName);
+		m_filesView = new SchemaFileView(db, parentFileName);
 		m_filesView->filesModel().setFilter(fileExt);
 
 		QHBoxLayout* pMainLayout = new QHBoxLayout();
@@ -108,23 +108,23 @@ public:
 
 		// --
 		//
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemeControlTabPage::projectOpened);
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemeControlTabPage::projectClosed);
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPage::projectOpened);
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPage::projectClosed);
 
-		connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
-		connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
-		connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
-		connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
-		connect(m_filesView, &SchemeFileView::checkInSignal, this, &SchemeControlTabPage::checkIn);
-		connect(m_filesView, &SchemeFileView::undoChangesSignal, this, &SchemeControlTabPage::undoChanges);
+		connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
+		connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
+		connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
+		connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
+		connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
+		connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
 
 		return;
 	}
 
-    virtual ~SchemeControlTabPage();
+	virtual ~SchemaControlTabPage();
 
 public:
-	VFrame30::Schema* createScheme() const;
+	VFrame30::Schema* createSchema() const;
 
 protected:
     void CreateActions();
@@ -154,34 +154,34 @@ public:
     // Data
     //
 private:
-	std::function<VFrame30::Schema*()> m_createSchemeFunc;
-    SchemeFileView* m_filesView;
+	std::function<VFrame30::Schema*()> m_createSchemaFunc;
+	SchemaFileView* m_filesView;
 };
 
 
 // Create MainTab!!!
 //
-template<typename SchemeType>
-SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
+template<typename SchemaType>
+SchemasTabPage* SchemasTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
-	static_assert(std::is_base_of<VFrame30::Schema, SchemeType>::value, "Base class must be VFrame30::Scheme");
+	static_assert(std::is_base_of<VFrame30::Schema, SchemaType>::value, "Base class must be VFrame30::Schema");
 	assert(dbcontroller != nullptr);
 
-	SchemesTabPage* p = new SchemesTabPage(dbcontroller, parent);
+	SchemasTabPage* p = new SchemasTabPage(dbcontroller, parent);
 
-	// Create Scheme function, will be stored in two places, SchemeTabPage and SchemeControlTabPage
+	// Create Schema function, will be stored in two places, SchemaTabPage and SchemaControlTabPage
 	//
 	std::function<VFrame30::Schema*()> createFunc(
 		[]() -> VFrame30::Schema*
 		{
-			return new SchemeType();
+			return new SchemaType();
 		});
 
-	p->m_createSchemeFunc = createFunc;
+	p->m_createSchemaFunc = createFunc;
 
 	// Add control page
 	//
-	SchemeControlTabPage* controlTabPage = new SchemeControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
+	SchemaControlTabPage* controlTabPage = new SchemaControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
 	p->m_tabWidget->addTab(controlTabPage, tr("Control"));
 
 	return p;
@@ -190,17 +190,17 @@ SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbc
 
 //
 //
-// EditSchemeTabPage
+// EditSchemaTabPage
 //
 //
-class EditSchemeTabPage : public QWidget, public HasDbController
+class EditSchemaTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 
 public:
-	EditSchemeTabPage() = delete;
-	EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* db);
-	virtual ~EditSchemeTabPage();
+	EditSchemaTabPage() = delete;
+	EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* db);
+	virtual ~EditSchemaTabPage();
 
 	// Public methods
 public:
@@ -228,8 +228,8 @@ public:
 
 
 protected:
-	void getCurrentWorkcopy();				// Save current scheme to a file
-	void setCurrentWorkcopy();				// Load a scheme from a file
+	void getCurrentWorkcopy();				// Save current schema to a file
+	void setCurrentWorkcopy();				// Load a schema from a file
 
 	// Properties
 	//
@@ -246,6 +246,6 @@ public:
 	// Data
 	//
 private:
-	EditSchemaWidget* m_schemeWidget = nullptr;
+	EditSchemaWidget* m_schemaWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
 };

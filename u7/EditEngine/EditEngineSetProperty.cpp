@@ -5,20 +5,20 @@
 namespace EditEngine
 {
 
-	SetPropertyCommand::SetPropertyCommand(EditSchemaView* schemeView,
+	SetPropertyCommand::SetPropertyCommand(EditSchemaView* schemaView,
 			QString propertyName,
 			QVariant value,
 			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(schemeView, hScrollBar, vScrollBar)
+		EditCommand(schemaView, hScrollBar, vScrollBar)
 	{
 		assert(propertyName.isEmpty() == false);
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
-		m_scheme = schemeView->schema();
-		assert(m_scheme != nullptr);
+		m_schema = schemaView->schema();
+		assert(m_schema != nullptr);
 
 		for (auto& i : items)
 		{
@@ -39,7 +39,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::executeCommand(EditSchemaView* schemeView)
+	void SetPropertyCommand::executeCommand(EditSchemaView* schemaView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
 
@@ -53,7 +53,7 @@ namespace EditEngine
 
 			if (property.get() != nullptr && property->specific() == true)
 			{
-				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
 				//
 				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 
@@ -63,15 +63,15 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
+				fblElement->setAfbParam(r.propertyName, r.newValue, m_schema);
 			}
 		}
 
-		schemeView->setSelectedItems(selection);
+		schemaView->setSelectedItems(selection);
 		return;
 	}
 
-	void SetPropertyCommand::unExecuteCommand(EditSchemaView* schemeView)
+	void SetPropertyCommand::unExecuteCommand(EditSchemaView* schemaView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> sel;
 
@@ -86,7 +86,7 @@ namespace EditEngine
 
 			if (property.get() != nullptr && property->specific() == true)
 			{
-				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
 				//
 				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 
@@ -96,11 +96,11 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.oldValue, m_scheme);
+				fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema);
 			}
 		}
 
-		schemeView->setSelectedItems(sel);
+		schemaView->setSelectedItems(sel);
 		return;
 	}
 

@@ -7,7 +7,7 @@
 
 
 namespace Ui {
-	class SchemeItemPropertiesDialog;
+	class SchemaItemPropertiesDialog;
 }
 
 namespace EditEngine
@@ -38,7 +38,7 @@ private:
 
 private:
 
-    Ui::SchemeItemPropertiesDialog *ui;
+	Ui::SchemaItemPropertiesDialog *ui;
 
 	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
 

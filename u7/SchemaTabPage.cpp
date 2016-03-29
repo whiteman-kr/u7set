@@ -7,53 +7,53 @@
 
 //
 //
-//	SchemeFileView
+//	SchemaFileView
 //
 //
-SchemeFileView::SchemeFileView(DbController* dbcontroller, const QString& parentFileName) :
+SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parentFileName) :
 	FileListView(dbcontroller, parentFileName)
 {
 	filesModel().setFilter("vfr");
 	return;
 }
 
-SchemeFileView::~SchemeFileView()
+SchemaFileView::~SchemaFileView()
 {
 }
 
-void SchemeFileView::openFile(std::vector<DbFileInfo> files)
+void SchemaFileView::openFile(std::vector<DbFileInfo> files)
 {
 	emit openFileSignal(files);
 	return;
 }
 
-void SchemeFileView::viewFile(std::vector<DbFileInfo> files)
+void SchemaFileView::viewFile(std::vector<DbFileInfo> files)
 {
 	emit viewFileSignal(files);
 	return;
 }
 
-void SchemeFileView::addFile()
+void SchemaFileView::addFile()
 {
 	emit addFileSignal();
 }
 
-void SchemeFileView::checkIn(std::vector<DbFileInfo> files)
+void SchemaFileView::checkIn(std::vector<DbFileInfo> files)
 {
 	emit checkInSignal(files);
 }
 
-void SchemeFileView::undoChanges(std::vector<DbFileInfo> files)
+void SchemaFileView::undoChanges(std::vector<DbFileInfo> files)
 {
 	emit undoChangesSignal(files);
 }
 
-void SchemeFileView::deleteFile(std::vector<DbFileInfo> files)
+void SchemaFileView::deleteFile(std::vector<DbFileInfo> files)
 {
 	emit deleteFileSignal(files);
 }
 
-void SchemeFileView::fileDoubleClicked(DbFileInfo file)
+void SchemaFileView::fileDoubleClicked(DbFileInfo file)
 {
 	std::vector<DbFileInfo> v;
 	v.push_back(file);
@@ -74,10 +74,10 @@ void SchemeFileView::fileDoubleClicked(DbFileInfo file)
 
 //
 //
-// SchemesTabPage
+// SchemasTabPage
 //
 //
-SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
+SchemasTabPage::SchemasTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)
 {
 	m_tabWidget = new QTabWidget();
@@ -92,19 +92,19 @@ SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemesTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemesTabPage::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPage::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
 }
 
-SchemesTabPage::~SchemesTabPage()
+SchemasTabPage::~SchemasTabPage()
 {
 }
 
-bool SchemesTabPage::hasUnsavedSchemes() const
+bool SchemasTabPage::hasUnsavedSchemas() const
 {
 	for (int i = 0; i < m_tabWidget->count(); i++)
 	{
@@ -116,10 +116,10 @@ bool SchemesTabPage::hasUnsavedSchemes() const
 			continue;
 		}
 
-		EditSchemeTabPage* schemeTabPage = dynamic_cast<EditSchemeTabPage*>(tab);
-		if (schemeTabPage != nullptr)
+		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
+		if (schemaTabPage != nullptr)
 		{
-			if (schemeTabPage->modified() == true)
+			if (schemaTabPage->modified() == true)
 			{
 				return true;
 			}
@@ -129,7 +129,7 @@ bool SchemesTabPage::hasUnsavedSchemes() const
 	return false;
 }
 
-bool SchemesTabPage::saveUnsavedSchemes()
+bool SchemasTabPage::saveUnsavedSchemas()
 {
 	bool ok = true;
 
@@ -143,12 +143,12 @@ bool SchemesTabPage::saveUnsavedSchemes()
 			continue;
 		}
 
-		EditSchemeTabPage* schemeTabPage = dynamic_cast<EditSchemeTabPage*>(tab);
-		if (schemeTabPage != nullptr)
+		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
+		if (schemaTabPage != nullptr)
 		{
-			if (schemeTabPage->modified() == true)
+			if (schemaTabPage->modified() == true)
 			{
-				ok &= schemeTabPage->saveWorkcopy();
+				ok &= schemaTabPage->saveWorkcopy();
 			}
 		}
 	}
@@ -156,12 +156,12 @@ bool SchemesTabPage::saveUnsavedSchemes()
 	return ok;
 }
 
-void SchemesTabPage::projectOpened()
+void SchemasTabPage::projectOpened()
 {
 	this->setEnabled(true);
 }
 
-void SchemesTabPage::projectClosed()
+void SchemasTabPage::projectClosed()
 {
 	GlobalMessanger::instance()->clearBuildSchemaIssues();
 
@@ -176,7 +176,7 @@ void SchemesTabPage::projectClosed()
 	{
 		QWidget* tabPage = m_tabWidget->widget(i);
 
-		if (dynamic_cast<SchemeControlTabPage*>(tabPage) != nullptr)
+		if (dynamic_cast<SchemaControlTabPage*>(tabPage) != nullptr)
 		{
 			controlTab = tabPage;
 		}
@@ -201,26 +201,26 @@ void SchemesTabPage::projectClosed()
 
 //
 //
-// SchemeControlTabPage
+// SchemaControlTabPage
 //
 //
 
 
 
-SchemeControlTabPage::~SchemeControlTabPage()
+SchemaControlTabPage::~SchemaControlTabPage()
 {
 }
 
-VFrame30::Schema* SchemeControlTabPage::createScheme() const
+VFrame30::Schema* SchemaControlTabPage::createSchema() const
 {
-	return m_createSchemeFunc();
+	return m_createSchemaFunc();
 }
 
-void SchemeControlTabPage::CreateActions()
+void SchemaControlTabPage::CreateActions()
 {
 }
 
-void SchemeControlTabPage::addFile()
+void SchemaControlTabPage::addFile()
 {
 	// Choose Configuration file name
 	//
@@ -247,36 +247,36 @@ void SchemeControlTabPage::addFile()
 		fileName += "." + m_filesView->filesModel().filter();
 	}
 
-	// Create new Scheme and add it to the vcs
+	// Create new Schema and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::Schema> scheme(m_createSchemeFunc());
+	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
 
-	scheme->setGuid(QUuid::createUuid());
+	schema->setGuid(QUuid::createUuid());
 
-	scheme->setStrID("#STRID");
-	scheme->setCaption("Caption");
+	schema->setStrID("#STRID");
+	schema->setCaption("Caption");
 
-	if (scheme->unit() == VFrame30::SchemaUnit::Display)
+	if (schema->unit() == VFrame30::SchemaUnit::Display)
 	{
-		scheme->setDocWidth(1280);
-		scheme->setDocHeight(1024);
+		schema->setDocWidth(1280);
+		schema->setDocHeight(1024);
 	}
 	else
 	{
 		// A3 Landscape
 		//
-		scheme->setDocWidth(420.0 / 25.4);
-		scheme->setDocHeight(297.0 / 25.4);
+		schema->setDocWidth(420.0 / 25.4);
+		schema->setDocHeight(297.0 / 25.4);
 	}
 
-	CreateSchemaDialog propertiesDialog(scheme, this);
+	CreateSchemaDialog propertiesDialog(schema, this);
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
 	QByteArray data;
-	scheme->Save(data);
+	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
 	vfFile->setFileName(fileName);
@@ -311,7 +311,7 @@ void SchemeControlTabPage::addFile()
 }
 
 
-void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
+void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 {
 	if (files.empty() == true)
 	{
@@ -341,7 +341,7 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -364,7 +364,7 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 	return;
 }
 
-void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
+void SchemaControlTabPage::checkIn(std::vector<DbFileInfo> files)
 {
 	if (files.empty() == true)
 	{
@@ -382,7 +382,7 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 	//
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -437,7 +437,7 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 	//
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -459,7 +459,7 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 	return;
 }
 
-void SchemeControlTabPage::undoChanges(std::vector<DbFileInfo> files)
+void SchemaControlTabPage::undoChanges(std::vector<DbFileInfo> files)
 {
 	// 1 Ask user to confirm operation
 	// 2 Undo changes to database
@@ -510,7 +510,7 @@ void SchemeControlTabPage::undoChanges(std::vector<DbFileInfo> files)
 
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -533,7 +533,7 @@ void SchemeControlTabPage::undoChanges(std::vector<DbFileInfo> files)
 	refreshFiles();
 }
 
-void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
+void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 {
 	if (files.empty() == true || files.size() != 1)
 	{
@@ -577,7 +577,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -619,20 +619,20 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, db());
+	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(vf, fi, db());
 
-	connect(editTabPage, &EditSchemeTabPage::vcsFileStateChanged, this, &SchemeControlTabPage::refreshFiles);
+	connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, this, &SchemaControlTabPage::refreshFiles);
 
 	assert(tabWidget->parent());
 
-	SchemesTabPage* schemesTabPage = dynamic_cast<SchemesTabPage*>(tabWidget->parent());
-	if (schemesTabPage == nullptr)
+	SchemasTabPage* schemasTabPage = dynamic_cast<SchemasTabPage*>(tabWidget->parent());
+	if (schemasTabPage == nullptr)
 	{
-		assert(dynamic_cast<SchemesTabPage*>(tabWidget->parent()));
+		assert(dynamic_cast<SchemasTabPage*>(tabWidget->parent()));
 		return;
 	}
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemeTabPage::saveWorkcopy);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
 
 	// --
 	//
@@ -644,7 +644,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	return;
 }
 
-void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
+void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
 	if (files.empty() == true || files.size() != 1)
 	{
@@ -699,7 +699,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -719,7 +719,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	// Create TabPage and add it to the TabControl
 	//
 
-	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, db());
+	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(vf, fi, db());
 	editTabPage->setReadOnly(true);
 
 	tabWidget->addTab(editTabPage, tabPageTitle);
@@ -728,14 +728,14 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	return;
 }
 
-void SchemeControlTabPage::refreshFiles()
+void SchemaControlTabPage::refreshFiles()
 {
 	assert(m_filesView);
 	m_filesView->refreshFiles();
 	return;
 }
 
-const DbFileInfo& SchemeControlTabPage::parentFile() const
+const DbFileInfo& SchemaControlTabPage::parentFile() const
 {
 	return m_filesView->parentFile();
 }
@@ -743,31 +743,31 @@ const DbFileInfo& SchemeControlTabPage::parentFile() const
 
 //
 //
-// EditSchemeTabPage
+// EditSchemaTabPage
 //
 //
-EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
-	m_schemeWidget(nullptr)
+	m_schemaWidget(nullptr)
 {
-	assert(scheme.get() != nullptr);
+	assert(schema.get() != nullptr);
 
-	setWindowTitle(scheme->strID());
+	setWindowTitle(schema->strID());
 
 	CreateActions();
 
 	// Create controls
 	//
-	m_schemeWidget = new EditSchemaWidget(scheme, fileInfo, dbcontroller);
+	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
 
-	connect(m_schemeWidget, &EditSchemaWidget::closeTab, this, &EditSchemeTabPage::closeTab);
-	connect(m_schemeWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
-	connect(m_schemeWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
-	connect(m_schemeWidget, &EditSchemaWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
-	connect(m_schemeWidget, &EditSchemaWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
-	connect(m_schemeWidget, &EditSchemaWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
-	connect(m_schemeWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
-	connect(m_schemeWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPage::closeTab);
+	connect(m_schemaWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemaTabPage::modifiedChanged);
+	connect(m_schemaWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemaTabPage::saveWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::checkInFile, this, &EditSchemaTabPage::checkInFile);
+	connect(m_schemaWidget, &EditSchemaWidget::checkOutFile, this, &EditSchemaTabPage::checkOutFile);
+	connect(m_schemaWidget, &EditSchemaWidget::undoChangesFile, this, &EditSchemaTabPage::undoChangesFile);
+	connect(m_schemaWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemaTabPage::getCurrentWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemaTabPage::setCurrentWorkcopy);
 
 
 	// ToolBar
@@ -776,22 +776,22 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, c
 
 	m_toolBar->setOrientation(Qt::Vertical);
 
-	m_toolBar->addAction(m_schemeWidget->m_fileAction);
+	m_toolBar->addAction(m_schemaWidget->m_fileAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemeWidget->m_addLineAction);
-	m_toolBar->addAction(m_schemeWidget->m_addRectAction);
-	m_toolBar->addAction(m_schemeWidget->m_addPathAction);
+	m_toolBar->addAction(m_schemaWidget->m_addLineAction);
+	m_toolBar->addAction(m_schemaWidget->m_addRectAction);
+	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemeWidget->m_addLinkAction);
-	m_toolBar->addAction(m_schemeWidget->m_addInputSignalAction);
-	m_toolBar->addAction(m_schemeWidget->m_addOutputSignalAction);
-	m_toolBar->addAction(m_schemeWidget->m_addConstantAction);
-	m_toolBar->addAction(m_schemeWidget->m_addFblElementAction);
+	m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
+	m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
+	m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+	m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
+	m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemeWidget->m_sizeAndPosAction);
+	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
 	// --
 	//
@@ -801,23 +801,23 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, c
 	pMainLayout->setSpacing(0);
 
 	pMainLayout->addWidget(m_toolBar);
-	pMainLayout->addWidget(m_schemeWidget);
+	pMainLayout->addWidget(m_schemaWidget);
 
 	setLayout(pMainLayout);
 
 	// --
 	//
-	connect(m_schemeWidget->m_fileAction, &QAction::triggered, this, &EditSchemeTabPage::fileMenuTriggered);
-	connect(m_schemeWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemeTabPage::sizeAndPosMenuTriggered);
+	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPage::fileMenuTriggered);
+	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPage::sizeAndPosMenuTriggered);
 
 	return;
 }
 
-EditSchemeTabPage::~EditSchemeTabPage()
+EditSchemaTabPage::~EditSchemaTabPage()
 {
 }
 
-void EditSchemeTabPage::setPageTitle()
+void EditSchemaTabPage::setPageTitle()
 {
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -832,11 +832,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_schemeWidget->schema()->strID());
+			newTitle = QString("%1: ReadOnly").arg(m_schemaWidget->schema()->strID());
 		}
 		else
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_schemeWidget->schema()->strID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_schemaWidget->schema()->strID()).arg(fileInfo().changeset());
 		}
 
 		if (fileInfo().deleted() == true)
@@ -848,11 +848,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (modified() == true)
 		{
-			newTitle = m_schemeWidget->schema()->strID() + "*";
+			newTitle = m_schemaWidget->schema()->strID() + "*";
 		}
 		else
 		{
-			newTitle = m_schemeWidget->schema()->strID();
+			newTitle = m_schemaWidget->schema()->strID();
 		}
 	}
 
@@ -866,13 +866,13 @@ void EditSchemeTabPage::setPageTitle()
 	}
 }
 
-void EditSchemeTabPage::CreateActions()
+void EditSchemaTabPage::CreateActions()
 {
 }
 
-void EditSchemeTabPage::closeTab()
+void EditSchemaTabPage::closeTab()
 {
-	if (m_schemeWidget->modified() == true)
+	if (m_schemaWidget->modified() == true)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("The document has been modified."));
@@ -915,12 +915,12 @@ void EditSchemeTabPage::closeTab()
 	return;
 }
 
-void EditSchemeTabPage::modifiedChanged(bool /*modified*/)
+void EditSchemaTabPage::modifiedChanged(bool /*modified*/)
 {
 	setPageTitle();
 }
 
-void EditSchemeTabPage::checkInFile()
+void EditSchemaTabPage::checkInFile()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
@@ -966,7 +966,7 @@ void EditSchemeTabPage::checkInFile()
 	return;
 }
 
-void EditSchemeTabPage::checkOutFile()
+void EditSchemaTabPage::checkOutFile()
 {
 	if (readOnly() == false ||
 		fileInfo().state() != VcsState::CheckedIn)
@@ -993,23 +993,23 @@ void EditSchemeTabPage::checkOutFile()
 		return;
 	}
 
-	m_schemeWidget->schema()->Load(out[0].get()->data());
+	m_schemaWidget->schema()->Load(out[0].get()->data());
 
 	setFileInfo(*(out.front().get()));
 
 	setReadOnly(false);
 	setPageTitle();
 
-	m_schemeWidget->resetAction();
-	m_schemeWidget->clearSelection();
+	m_schemaWidget->resetAction();
+	m_schemaWidget->clearSelection();
 
-	m_schemeWidget->update();
+	m_schemaWidget->update();
 
 	emit vcsFileStateChanged();
 	return;
 }
 
-void EditSchemeTabPage::undoChangesFile()
+void EditSchemaTabPage::undoChangesFile()
 {
 	// 1 Ask user to confirm operation
 	// 2 Undo changes to database
@@ -1042,10 +1042,10 @@ void EditSchemeTabPage::undoChangesFile()
 			setReadOnly(true);
 			setPageTitle();
 
-			m_schemeWidget->resetAction();
-			m_schemeWidget->clearSelection();
+			m_schemaWidget->resetAction();
+			m_schemaWidget->clearSelection();
 
-			m_schemeWidget->update();
+			m_schemaWidget->update();
 		}
 	}
 
@@ -1053,7 +1053,7 @@ void EditSchemeTabPage::undoChangesFile()
 	return;
 }
 
-void EditSchemeTabPage::fileMenuTriggered()
+void EditSchemaTabPage::fileMenuTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
@@ -1061,7 +1061,7 @@ void EditSchemeTabPage::fileMenuTriggered()
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_schemeWidget->m_fileAction);
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
 
 	if (w == nullptr)
 	{
@@ -1072,12 +1072,12 @@ void EditSchemeTabPage::fileMenuTriggered()
 	QPoint pt = w->pos();
 	pt.rx() += w->width();
 
-	m_schemeWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
+	m_schemaWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
 
-void EditSchemeTabPage::sizeAndPosMenuTriggered()
+void EditSchemaTabPage::sizeAndPosMenuTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
@@ -1085,7 +1085,7 @@ void EditSchemeTabPage::sizeAndPosMenuTriggered()
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_schemeWidget->m_sizeAndPosAction);
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_sizeAndPosAction);
 
 	if (w == nullptr)
 	{
@@ -1096,12 +1096,12 @@ void EditSchemeTabPage::sizeAndPosMenuTriggered()
 	QPoint pt = w->pos();
 	pt.rx() += w->width();
 
-	m_schemeWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
+	m_schemaWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
 
-bool EditSchemeTabPage::saveWorkcopy()
+bool EditSchemaTabPage::saveWorkcopy()
 {
 	if (readOnly() == true ||
 		modified() == false ||
@@ -1113,7 +1113,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_schemeWidget->schema()->Save(data);
+	m_schemaWidget->schema()->Save(data);
 
 	if (data.isEmpty() == true)
 	{
@@ -1135,7 +1135,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	return false;
 }
 
-void EditSchemeTabPage::getCurrentWorkcopy()
+void EditSchemaTabPage::getCurrentWorkcopy()
 {
 	// Select destination folder
 	//
@@ -1154,7 +1154,7 @@ void EditSchemeTabPage::getCurrentWorkcopy()
 	//
 	QString fileName = dir + fileInfo().fileName();
 
-	bool writeResult = m_schemeWidget->schema()->Save(fileName);
+	bool writeResult = m_schemaWidget->schema()->Save(fileName);
 
 	if (writeResult == false)
 	{
@@ -1167,7 +1167,7 @@ void EditSchemeTabPage::getCurrentWorkcopy()
 	return;
 }
 
-void EditSchemeTabPage::setCurrentWorkcopy()
+void EditSchemaTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
@@ -1187,7 +1187,7 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 
 	// Load file
 	//
-	bool readResult = m_schemeWidget->schema()->Load(fileName);
+	bool readResult = m_schemaWidget->schema()->Load(fileName);
 	if (readResult == false)
 	{
 		QMessageBox mb(this);
@@ -1199,51 +1199,51 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 	// --
 	setPageTitle();
 
-	m_schemeWidget->resetAction();
-	m_schemeWidget->clearSelection();
+	m_schemaWidget->resetAction();
+	m_schemaWidget->clearSelection();
 
-	m_schemeWidget->resetEditEngine();
-	m_schemeWidget->setModified();
+	m_schemaWidget->resetEditEngine();
+	m_schemaWidget->setModified();
 
-	m_schemeWidget->update();
+	m_schemaWidget->update();
 
 	return;
 }
 
-const DbFileInfo& EditSchemeTabPage::fileInfo() const
+const DbFileInfo& EditSchemaTabPage::fileInfo() const
 {
-	assert(m_schemeWidget);
-	return m_schemeWidget->fileInfo();
+	assert(m_schemaWidget);
+	return m_schemaWidget->fileInfo();
 }
 
-void EditSchemeTabPage::setFileInfo(const DbFileInfo& fi)
+void EditSchemaTabPage::setFileInfo(const DbFileInfo& fi)
 {
-	assert(m_schemeWidget);
-	m_schemeWidget->setFileInfo(fi);
+	assert(m_schemaWidget);
+	m_schemaWidget->setFileInfo(fi);
 
 	setPageTitle();
 }
 
-bool EditSchemeTabPage::readOnly() const
+bool EditSchemaTabPage::readOnly() const
 {
-	assert(m_schemeWidget);
-	return m_schemeWidget->readOnly();
+	assert(m_schemaWidget);
+	return m_schemaWidget->readOnly();
 }
 
-void EditSchemeTabPage::setReadOnly(bool value)
+void EditSchemaTabPage::setReadOnly(bool value)
 {
-	assert(m_schemeWidget);
-	m_schemeWidget->setReadOnly(value);
+	assert(m_schemaWidget);
+	m_schemaWidget->setReadOnly(value);
 }
 
-bool EditSchemeTabPage::modified() const
+bool EditSchemaTabPage::modified() const
 {
-	assert(m_schemeWidget);
-	return m_schemeWidget->modified();
+	assert(m_schemaWidget);
+	return m_schemaWidget->modified();
 }
 
-void EditSchemeTabPage::resetModified()
+void EditSchemaTabPage::resetModified()
 {
-	assert(m_schemeWidget);
-	return m_schemeWidget->resetModified();
+	assert(m_schemaWidget);
+	return m_schemaWidget->resetModified();
 }

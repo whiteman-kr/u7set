@@ -66,9 +66,9 @@ void Settings::writeUserScope() const
     s.setValue("Connection/geometry", m_connectionPropertiesWindowGeometry);
     s.setValue("Connection/Splitter/state", m_connectionSplitterState);
 
-    s.setValue("SchemeItem/pos", m_schemaItemPropertiesWindowPos);
-    s.setValue("SchemeItem/geometry", m_schemaItemPropertiesWindowGeometry);
-    s.setValue("SchemeItem/Splitter/state", m_schemaItemSplitterState);
+	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
+	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
+	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
 
 	return;
 }
@@ -122,10 +122,10 @@ void Settings::loadUserScope()
 
     //
 
-    m_schemaItemPropertiesWindowPos = s.value("SchemeItem/pos", QPoint(-1, -1)).toPoint();
-    m_schemaItemPropertiesWindowGeometry = s.value("SchemeItem/geometry").toByteArray();
+	m_schemaItemPropertiesWindowPos = s.value("SchemaItem/pos", QPoint(-1, -1)).toPoint();
+	m_schemaItemPropertiesWindowGeometry = s.value("SchemaItem/geometry").toByteArray();
 
-    m_schemaItemSplitterState = s.value("SchemeItem/Splitter/state").toInt();
+	m_schemaItemSplitterState = s.value("SchemaItem/Splitter/state").toInt();
     if (m_schemaItemSplitterState < 150)
         m_schemaItemSplitterState = 150;
 

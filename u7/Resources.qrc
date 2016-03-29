@@ -8,14 +8,14 @@
         <file>Images/update.png</file>
         <file>Images/undo.png</file>
         <file>Images/changes.png</file>
-        <file>Images/SchemeLine.svg</file>
-        <file>Images/SchemeIconDevelop.html</file>
-        <file>Images/SchemeRect.svg</file>
-        <file>Images/SchemePath.svg</file>
-        <file>Images/SchemeInputSignal.svg</file>
-        <file>Images/SchemeOutputSignal.svg</file>
-        <file>Images/SchemeConstant.svg</file>
-        <file>Images/SchemeFblElement.svg</file>
-        <file>Images/SchemeLink.svg</file>
+        <file>Images/SchemaLine.svg</file>
+        <file>Images/SchemaIconDevelop.html</file>
+        <file>Images/SchemaRect.svg</file>
+        <file>Images/SchemaPath.svg</file>
+        <file>Images/SchemaInputSignal.svg</file>
+        <file>Images/SchemaOutputSignal.svg</file>
+        <file>Images/SchemaConstant.svg</file>
+        <file>Images/SchemaFblElement.svg</file>
+        <file>Images/SchemaLink.svg</file>
     </qresource>
 </RCC>

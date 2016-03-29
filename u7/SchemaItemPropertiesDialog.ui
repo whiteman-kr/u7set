@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SchemeItemPropertiesDialog</class>
- <widget class="QDialog" name="SchemeItemPropertiesDialog">
+ <class>SchemaItemPropertiesDialog</class>
+ <widget class="QDialog" name="SchemaItemPropertiesDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

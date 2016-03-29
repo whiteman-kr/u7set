@@ -72,8 +72,8 @@ EditSchemaView::EditSchemaView(QWidget* parent) :
 {
 }
 
-EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget* parent)
-	: VFrame30::SchemaView(scheme, parent),
+EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
+	: VFrame30::SchemaView(schema, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -93,7 +93,7 @@ EditSchemaView::~EditSchemaView()
 
 void EditSchemaView::paintEvent(QPaintEvent* pe)
 {
-	// Draw scheme
+	// Draw schema
 	//
 	VFrame30::SchemaView::paintEvent(pe);
 
@@ -115,7 +115,7 @@ void EditSchemaView::paintEvent(QPaintEvent* pe)
 	//
 	Ajust(&p, 0, 0, zoom());
 
-	// Draw scheme
+	// Draw schema
 	//
 	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
@@ -986,7 +986,7 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			void();
 	}
 
-	// Set calculated pos to SchemeItem
+	// Set calculated pos to SchemaItem
 	//
 	pointsList.assign(points.begin(), points.end());
 	itemPos->SetPointList(pointsList);
@@ -1129,13 +1129,13 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	float controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
 
-	// Координаты schemeItem и point одинакового типа
+	// Координаты schemaItem и point одинакового типа
 	//
 	if (dynamic_cast<VFrame30::IPosRect*>(schemaItem) != nullptr)
 	{
 		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemaItem) ;
 
-		// Если внутри прямоугольнка то SchemeItemAction.MoveItem
+		// Если внутри прямоугольнка то SchemaItemAction.MoveItem
 		//
 		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
@@ -1222,7 +1222,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::MoveEndLinePoint;
 		}
 
-		// Если просто на линии, то SchemeItemAction.MoveItem
+		// Если просто на линии, то SchemaItemAction.MoveItem
 		//
 		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
@@ -1500,98 +1500,10 @@ bool EditSchemaView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>&
 
 //
 //
-// EditSchemeWidget
+// EditSchemaWidget
 //
 //
-EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbController) :
-	VFrame30::BaseSchemaWidget(scheme, new EditSchemaView(scheme)),
-m_fileInfo(fileInfo),
-	m_dbcontroller(dbController)
-{
-	assert(scheme != nullptr);
-	assert(m_dbcontroller);
 
-	createActions();
-
-	// Left Button Down
-	//
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseLeftDown_None, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosLineStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosRectStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint, this, std::placeholders::_1)));
-
-	// Left Button Up
-	//
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseLeftUp_Selection, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseLeftUp_Moving, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-
-	// Moouse Mov
-	//
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseMove_Moving, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-
-	// Mouse Right Button Down
-	//
-	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemeWidget::mouseRightDown_None, this, std::placeholders::_1)));
-	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-
-	// Mouse Right Button Up
-	//
-	m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightUp_None, this, std::placeholders::_1)));
-
-	// --
-	//
-	connect(this, &QWidget::customContextMenuRequested, this, &EditSchemaWidget::contextMenu);
-	setCorrespondingContextMenu();
-
-	// Edit Engine
-	//
-	m_editEngine = new EditEngine::EditEngine(editSchemaView(), horizontalScrollBar(), verticalScrollBar(), this);
-
-	connect(m_editEngine, &EditEngine::EditEngine::stateChanged, this, &EditSchemaWidget::editEngineStateChanged);
-	connect(m_editEngine, &EditEngine::EditEngine::modifiedChanged, this, &EditSchemaWidget::modifiedChangedSlot);
-
-	connect(editSchemaView(), &EditSchemaView::selectionChanged, this, &EditSchemaWidget::selectionChanged);
-
-	// Clipboard
-	//
-	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EditSchemaWidget::clipboardDataChanged);
-
-	return;
-}
 
 EditSchemaWidget::~EditSchemaWidget()
 {
@@ -1650,7 +1562,7 @@ void EditSchemaWidget::createActions()
 	addAction(m_fileSaveAction);
 
 	m_fileExportToPdfAction = new QAction(tr("Export to PDF"), this);
-	m_fileExportToPdfAction->setStatusTip(tr("Export scheme to PDF..."));
+	m_fileExportToPdfAction->setStatusTip(tr("Export schema to PDF..."));
 	m_fileExportToPdfAction->setEnabled(true);
 	connect(m_fileExportToPdfAction, &QAction::triggered, this, &EditSchemaWidget::exportToPdf);
 	addAction(m_fileExportToPdfAction);
@@ -1672,7 +1584,7 @@ void EditSchemaWidget::createActions()
 	m_fileSeparatorAction2->setSeparator(true);
 
 	m_filePropertiesAction = new QAction(tr("Properties..."), this);
-	m_filePropertiesAction->setStatusTip(tr("Edit scheme properties"));
+	m_filePropertiesAction->setStatusTip(tr("Edit schema properties"));
 	m_filePropertiesAction->setEnabled(true);
 	connect(m_filePropertiesAction, &QAction::triggered, this, &EditSchemaWidget::schemaProperties);
 
@@ -1694,7 +1606,7 @@ void EditSchemaWidget::createActions()
 
 	m_addLineAction = new QAction(tr("Line"), this);
 	m_addLineAction->setEnabled(true);
-	m_addLineAction->setIcon(QIcon(":/Images/Images/SchemeLine.svg"));
+	m_addLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1703,7 +1615,7 @@ void EditSchemaWidget::createActions()
 
 	m_addPathAction = new QAction(tr("Path"), this);
 	m_addPathAction->setEnabled(true);
-	m_addPathAction->setIcon(QIcon(":/Images/Images/SchemePath.svg"));
+	m_addPathAction->setIcon(QIcon(":/Images/Images/SchemaPath.svg"));
 	connect(m_addPathAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1712,7 +1624,7 @@ void EditSchemaWidget::createActions()
 
 	m_addRectAction = new QAction(tr("Rect"), this);
 	m_addRectAction->setEnabled(true);
-	m_addRectAction->setIcon(QIcon(":/Images/Images/SchemeRect.svg"));
+	m_addRectAction->setIcon(QIcon(":/Images/Images/SchemaRect.svg"));
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1724,7 +1636,7 @@ void EditSchemaWidget::createActions()
 
 	m_addInputSignalAction = new QAction(tr("Input"), this);
 	m_addInputSignalAction->setEnabled(true);
-	m_addInputSignalAction->setIcon(QIcon(":/Images/Images/SchemeInputSignal.svg"));
+	m_addInputSignalAction->setIcon(QIcon(":/Images/Images/SchemaInputSignal.svg"));
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1734,7 +1646,7 @@ void EditSchemaWidget::createActions()
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
 	m_addOutputSignalAction->setEnabled(true);
-	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemeOutputSignal.svg"));
+	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1744,7 +1656,7 @@ void EditSchemaWidget::createActions()
 
 	m_addConstantAction = new QAction(tr("Constant"), this);
 	m_addConstantAction->setEnabled(true);
-	m_addConstantAction->setIcon(QIcon(":/Images/Images/SchemeConstant.svg"));
+	m_addConstantAction->setIcon(QIcon(":/Images/Images/SchemaConstant.svg"));
 	connect(m_addConstantAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1753,12 +1665,12 @@ void EditSchemaWidget::createActions()
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
-	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemeFblElement.svg"));
+	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
 	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemaWidget::addFblElement);
 
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
-	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemeLink.svg"));
+	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1810,7 +1722,7 @@ void EditSchemaWidget::createActions()
 	m_editCutAction = new QAction(tr("Cut"), this);
 	m_editCutAction->setEnabled(true);
 	m_editCutAction->setShortcut(QKeySequence::Cut);
-	//connect(m_editCutAction, &QAction::triggered, this, &EditSchemeWidget::___);
+	//connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::___);
 	addAction(m_editCutAction);
 
 	// Edit->Copy
@@ -1818,7 +1730,7 @@ void EditSchemaWidget::createActions()
 	m_editCopyAction = new QAction(tr("Copy"), this);
 	m_editCopyAction->setEnabled(true);
 	m_editCopyAction->setShortcut(QKeySequence::Copy);
-	//connect(m_editCopyAction, &QAction::triggered, this, &EditSchemeWidget::___);
+	//connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::___);
 	addAction(m_editCopyAction);
 
 	// Edit->Paste
@@ -1855,7 +1767,7 @@ void EditSchemaWidget::createActions()
 	m_propertiesAction->setMenuRole(QAction::NoRole);
 	m_propertiesAction->setShortcut(QKeySequence(tr("Alt+Return")));
 	// Shortcuts Alt+Return and Alt+Numeric Enter are different,
-	// Look for real call of EditSchemeWidget::properties in keyPressEvent!!!!
+	// Look for real call of EditSchemaWidget::properties in keyPressEvent!!!!
 	//
 	connect(m_propertiesAction, &QAction::triggered, this, &EditSchemaWidget::properties);
 	addAction(m_propertiesAction);
@@ -1926,13 +1838,13 @@ void EditSchemaWidget::createActions()
 	m_viewAction = new QAction(tr("View"), this);
 	m_viewAction->setEnabled(true);
 
-	// View->ZoomIn, creating of these actions was moved to VFrame30::BaseSchemeWidget
+	// View->ZoomIn, creating of these actions was moved to VFrame30::BaseSchemaWidget
 	//
 //	m_zoomInAction = new QAction(tr("Zoom In"), this);
 //	m_zoomInAction->setEnabled(true);
 //	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
 //	m_zoomInAction->setShortcutContext(Qt::ShortcutContext::WindowShortcut);
-//	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
+//	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemaWidget::zoomIn);
 //	addAction(m_zoomInAction);
 
 //	// View->ZoomOut
@@ -1940,7 +1852,7 @@ void EditSchemaWidget::createActions()
 //	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 //	m_zoomOutAction->setEnabled(true);
 //	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-//	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
+//	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemaWidget::zoomOut);
 //	addAction(m_zoomOutAction);
 
 //	// View->Zoom100
@@ -1948,7 +1860,7 @@ void EditSchemaWidget::createActions()
 //	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 //	m_zoom100Action->setEnabled(true);
 //	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-//	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
+//	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemaWidget::zoom100);
 //	addAction(m_zoom100Action);
 
 	// ------------------------------------
@@ -1960,7 +1872,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_snapToGridAction = new QAction(tr("Snap To Grid"), this);
 	m_snapToGridAction->setEnabled(true);
-	//connect(m_snapToGridAction, &QAction::triggered, this, &EditSchemeWidget::zoom100);
+	//connect(m_snapToGridAction, &QAction::triggered, this, &EditSchemaWidget::zoom100);
 
 
 	// High Level Menu
@@ -2505,8 +2417,8 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 	// Выделение элемента или области
 	//
-//	editSchemeView()->m_rubberBand->show();
-//	editSchemeView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
+//	editSchemaView()->m_rubberBand->show();
+//	editSchemaView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
 
 	editSchemaView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPoint = editSchemaView()->m_mouseSelectionStartPoint;
@@ -2628,7 +2540,7 @@ void EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint(QMouseEven
 	if (dynamic_cast<VFrame30::FblItem*>(editSchemaView()->m_newItem.get()) != nullptr)
 	{
 		// ??
-		//VFrame30Ext.IFblItem fblItem = schemeView.newItem as VFrame30Ext.IFblItem;
+		//VFrame30Ext.IFblItem fblItem = schemaView.newItem as VFrame30Ext.IFblItem;
 	}
 
 	setMouseState(MouseState::AddSchemaPosConnectionNextPoint);
@@ -2733,7 +2645,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 	if (std::abs(xdif) < 0.0000001 && std::abs(ydif) < 0.0000001)
 	{
-		// SchemeItem's have not changed positions
+		// SchemaItem's have not changed positions
 		//
 		resetAction();
 		return;
@@ -2749,7 +2661,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	}
 	else
 	{
-		// Copy SchemeItems and move copied items
+		// Copy SchemaItems and move copied items
 		//
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> newItems;
 
@@ -3140,8 +3052,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		{
 			assert(linkUnderStartPoint->metaObject()->className() == editSchemaView()->m_newItem->metaObject()->className());
 
-			// Это такой же эелемент, если точка schemeItemStartPoint лежит на первой или последней точке schemeItemStartPoint,
-			// то объеденить schemeItemStartPoint и новый элемент
+			// Это такой же эелемент, если точка schemaItemStartPoint лежит на первой или последней точке schemaItemStartPoint,
+			// то объеденить schemaItemStartPoint и новый элемент
 			//
 			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderStartPoint.get()) != nullptr);
 
@@ -3199,8 +3111,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			//
 			assert(linkUnderEndPoint->metaObject()->className() == editSchemaView()->m_newItem->metaObject()->className());
 
-			// Это такой же эелемент, если точка schemeItemEndPoint лежит на первой или последней точке schemeItemEndPoint,
-			// то объеденить schemeItemEndPoint и новый элемент
+			// Это такой же эелемент, если точка schemaItemEndPoint лежит на первой или последней точке schemaItemEndPoint,
+			// то объеденить schemaItemEndPoint и новый элемент
 			//
 			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get()) != nullptr);
 			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get());
@@ -3214,9 +3126,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				//
 				endPointAddedToOther = true;
 
-				if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemeItemStartPoint
+				if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemaItemStartPoint
 				{
-					// Объединения двух элемнтов - schemeItemStartPoint и schemeItemEndPoint
+					// Объединения двух элемнтов - schemaItemStartPoint и schemaItemEndPoint
 					//
 					existingItemPoints.pop_front();
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
@@ -3228,7 +3140,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				}
 				else
 				{
-					// К элементу schemeItemEndPoint добавить points
+					// К элементу schemaItemEndPoint добавить points
 					//
 					existingItemPoints.pop_front();
 
@@ -3247,9 +3159,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					//
 					endPointAddedToOther = true;
 
-					if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemeItemStartPoint
+					if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemaItemStartPoint
 					{
-						// Объединения двух элемнтов - schemeItemStartPoint и schemeItemEndPoint
+						// Объединения двух элемнтов - schemaItemStartPoint и schemaItemEndPoint
 						//
 						existingItemPoints.reverse();
 						existingItemPoints.pop_front();
@@ -3262,7 +3174,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					}
 					else
 					{
-						// К элементу schemeItemEndPoint добавить points
+						// К элементу schemaItemEndPoint добавить points
 						//
 						existingItemPoints.reverse();
 						existingItemPoints.pop_front();
@@ -3354,8 +3266,8 @@ void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->update();
 
-//	QRect selectionRect = QRect(editSchemeView()->m_rubberBand->pos(), me->pos()).normalized();
-//	editSchemeView()->m_rubberBand->setGeometry(selectionRect);
+//	QRect selectionRect = QRect(editSchemaView()->m_rubberBand->pos(), me->pos()).normalized();
+//	editSchemaView()->m_rubberBand->setGeometry(selectionRect);
 
 	return;
 }
@@ -3778,20 +3690,20 @@ const EditSchemaView* EditSchemaWidget::editSchemaView() const
 
 bool EditSchemaWidget::isLogicSchema() const
 {
-	VFrame30::LogicSchema* logicScheme = dynamic_cast<VFrame30::LogicSchema*>(schema().get());
-	return logicScheme != nullptr;
+	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema().get());
+	return logicSchema != nullptr;
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
 {
-	std::shared_ptr<VFrame30::LogicSchema> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
-	return logicScheme;
+	std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
+	return logicSchema;
 }
 
 const std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema() const
 {
-	const std::shared_ptr<VFrame30::LogicSchema> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
-	return logicScheme;
+	const std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
+	return logicSchema;
 }
 
 const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemaWidget::selectedItems() const
@@ -3838,7 +3750,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	bool posInterfaceFound = false;
 
-	// Добавляется элемент с расположением ISchemePosLine
+	// Добавляется элемент с расположением ISchemaPosLine
 	//
 	if (dynamic_cast<VFrame30::IPosLine*>(newItem.get()) != nullptr)
 	{
@@ -3846,7 +3758,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 		setMouseState(MouseState::AddSchemaPosLineStartPoint);
 	}
 
-	// Добавляется элемент с расположением ISchemePosRect
+	// Добавляется элемент с расположением ISchemaPosRect
 	//
 	if (dynamic_cast<VFrame30::IPosRect*>(newItem.get()) != nullptr)
 	{
@@ -3857,7 +3769,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 		itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());		// chachedGridSize and pinStep will be initialized here
 	}
 
-	// Добавляется элемент с расположением ISchemePosConnection
+	// Добавляется элемент с расположением ISchemaPosConnection
 	//
 	if (dynamic_cast<VFrame30::IPosConnection*>(newItem.get()) != nullptr)
 	{
@@ -4211,14 +4123,14 @@ void EditSchemaWidget::exportToPdf()
 	assert(schema());
 
 	QString fileName = QFileDialog::getSaveFileName(
-		this, "Export scheme to PDF", schema()->strID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+		this, "Export schema to PDF", schema()->strID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
 
 	if (fileName.isEmpty())
 	{
 		return;
 	}
 
-	qDebug() << "Export scheme " << schema()->caption() << " " << schema()->strID() << " to PDF, " << fileName;
+	qDebug() << "Export schema " << schema()->caption() << " " << schema()->strID() << " to PDF, " << fileName;
 
 	editSchemaView()->exportToPdf(fileName);
 
@@ -4378,10 +4290,10 @@ void EditSchemaWidget::selectAll()
 
 void EditSchemaWidget::editPaste()
 {
-	// To DO: Paste scheme items
+	// To DO: Paste schema items
 	//
 
-	// Paste strid to SchemeItemSignal
+	// Paste strid to SchemaItemSignal
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
@@ -4434,8 +4346,8 @@ void EditSchemaWidget::properties()
 
 void EditSchemaWidget::layers()
 {
-	SchemeLayersDialog schemeLayersDialog(editSchemaView(), this);
-	if (schemeLayersDialog.exec() == QDialog::Accepted)
+	SchemaLayersDialog schemaLayersDialog(editSchemaView(), this);
+	if (schemaLayersDialog.exec() == QDialog::Accepted)
 	{
 
 	}
@@ -4492,10 +4404,10 @@ void EditSchemaWidget::clipboardDataChanged()
 {
 	bool paste = false;
 
-	// TO DO: if same SchemeItems in the clipboard
+	// TO DO: if same SchemaItems in the clipboard
 	//
 
-	// if Any SchemeItemSignal is selected and strId is in the clipboard
+	// if Any SchemaItemSignal is selected and strId is in the clipboard
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
@@ -4539,7 +4451,7 @@ void EditSchemaWidget::addFblElement()
 		return;
 	}
 
-	// Read all Afb's and refresh it in scheme
+	// Read all Afb's and refresh it in schema
 	//
 	std::vector<std::shared_ptr<DbFile>> files;
 	result = db()->getLatestVersion(fileList, &files, this);

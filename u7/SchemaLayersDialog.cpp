@@ -1,18 +1,18 @@
 #include "EditSchemaWidget.h"
 
 #include "SchemaLayersDialog.h"
-#include "ui_SchemeLayersDialog.h"
+#include "ui_SchemaLayersDialog.h"
 
-SchemeLayersDialog::SchemeLayersDialog(EditSchemaView* schemeView, QWidget *parent) :
+SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *parent) :
 	QDialog(parent),
-	ui(new Ui::SchemeLayersDialog),
-	m_schemeView(schemeView)
+	ui(new Ui::SchemaLayersDialog),
+	m_schemaView(schemaView)
 {
 	ui->setupUi(this);
 
-	if (schemeView == nullptr)
+	if (schemaView == nullptr)
 	{
-		Q_ASSERT(schemeView);
+		Q_ASSERT(schemaView);
 		return;
 	}
 
@@ -28,7 +28,7 @@ SchemeLayersDialog::SchemeLayersDialog(EditSchemaView* schemeView, QWidget *pare
 	ui->m_layersList->setHeaderLabels(header);
 	ui->m_layersList->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(ui->m_layersList, &QTreeWidget::customContextMenuRequested, this, &SchemeLayersDialog::onContextMenu);
+	connect(ui->m_layersList, &QTreeWidget::customContextMenuRequested, this, &SchemaLayersDialog::onContextMenu);
 
 	// Create context menu actions
 	//
@@ -44,20 +44,20 @@ SchemeLayersDialog::SchemeLayersDialog(EditSchemaView* schemeView, QWidget *pare
 
 	//m_compileAction->setEnabled(false);
 
-	connect(m_activeAction, &QAction::triggered, this, &SchemeLayersDialog::onActiveClick);
-	connect(m_compileAction, &QAction::triggered, this, &SchemeLayersDialog::onCompileClick);
-	connect(m_showAction, &QAction::triggered, this, &SchemeLayersDialog::onShowClick);
-	connect(m_printAction, &QAction::triggered, this, &SchemeLayersDialog::onPrintClick);
+	connect(m_activeAction, &QAction::triggered, this, &SchemaLayersDialog::onActiveClick);
+	connect(m_compileAction, &QAction::triggered, this, &SchemaLayersDialog::onCompileClick);
+	connect(m_showAction, &QAction::triggered, this, &SchemaLayersDialog::onShowClick);
+	connect(m_printAction, &QAction::triggered, this, &SchemaLayersDialog::onPrintClick);
 
 	int index = 0;
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->schema()->Layers)
+	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
 	{
 		m_name << l->name();
 		m_compile << l->compile();
 		m_show << l->show();
 		m_print << l->print();
 
-		if (l->guid() == m_schemeView->activeLayer()->guid())
+		if (l->guid() == m_schemaView->activeLayer()->guid())
 		{
 			m_activeIndex = index;
 		}
@@ -67,7 +67,7 @@ SchemeLayersDialog::SchemeLayersDialog(EditSchemaView* schemeView, QWidget *pare
 	fillList(m_activeIndex);
 }
 
-void SchemeLayersDialog::fillList(int selectedIndex)
+void SchemaLayersDialog::fillList(int selectedIndex)
 {
 	// Fill list and select the item with "selectedLayer" guid
 	//
@@ -102,12 +102,12 @@ void SchemeLayersDialog::fillList(int selectedIndex)
 	}
 }
 
-SchemeLayersDialog::~SchemeLayersDialog()
+SchemaLayersDialog::~SchemaLayersDialog()
 {
 	delete ui;
 }
 
-void SchemeLayersDialog::onContextMenu(const QPoint &pos)
+void SchemaLayersDialog::onContextMenu(const QPoint &pos)
 {
 	QTreeWidgetItem* item = ui->m_layersList->itemAt(pos);
 	if (item == nullptr)
@@ -143,7 +143,7 @@ void SchemeLayersDialog::onContextMenu(const QPoint &pos)
 }
 
 
-void SchemeLayersDialog::onActiveClick(bool /*checked*/)
+void SchemaLayersDialog::onActiveClick(bool /*checked*/)
 {
 	if (m_cmIndex < 0 || m_cmIndex >= m_name.size())
 	{
@@ -155,7 +155,7 @@ void SchemeLayersDialog::onActiveClick(bool /*checked*/)
 	fillList(m_cmIndex);
 }
 
-void SchemeLayersDialog::onCompileClick(bool checked)
+void SchemaLayersDialog::onCompileClick(bool checked)
 {
 	if (m_cmIndex < 0 || m_cmIndex >= m_compile.size())
 	{
@@ -167,7 +167,7 @@ void SchemeLayersDialog::onCompileClick(bool checked)
 	fillList(m_cmIndex);
 }
 
-void SchemeLayersDialog::onShowClick(bool checked)
+void SchemaLayersDialog::onShowClick(bool checked)
 {
 	if (m_cmIndex < 0 || m_cmIndex >= m_show.size())
 	{
@@ -179,7 +179,7 @@ void SchemeLayersDialog::onShowClick(bool checked)
 	fillList(m_cmIndex);
 }
 
-void SchemeLayersDialog::onPrintClick(bool checked)
+void SchemaLayersDialog::onPrintClick(bool checked)
 {
 	if (m_cmIndex < 0 || m_cmIndex >= m_print.size())
 	{
@@ -191,7 +191,7 @@ void SchemeLayersDialog::onPrintClick(bool checked)
 	fillList(m_cmIndex);
 }
 
-void SchemeLayersDialog::on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item, int/* column*/)
+void SchemaLayersDialog::on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item, int/* column*/)
 {
 	if (item == nullptr)
 	{
@@ -219,17 +219,17 @@ void SchemeLayersDialog::on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item
 	accept();
 }
 
-void SchemeLayersDialog::on_SchemeLayersDialog_accepted()
+void SchemaLayersDialog::on_SchemaLayersDialog_accepted()
 {
 	int index = 0;
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemeView->schema()->Layers)
+	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
 	{
 		l->setCompile(m_compile[index]);
 		l->setShow(m_show[index]);
 		l->setPrint(m_print[index]);
 		if (index == m_activeIndex)
 		{
-			m_schemeView->setActiveLayer(l);
+			m_schemaView->setActiveLayer(l);
 		}
 
 		index++;

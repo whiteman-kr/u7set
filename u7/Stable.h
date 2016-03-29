@@ -91,6 +91,8 @@
 
 #include <QPainter>
 
+#include <QClipboard>
+
 
 // Qt Sql
 //

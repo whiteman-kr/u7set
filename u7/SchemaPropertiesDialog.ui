@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SchemePropertiesDialog</class>
- <widget class="QDialog" name="SchemePropertiesDialog">
+ <class>SchemaPropertiesDialog</class>
+ <widget class="QDialog" name="SchemaPropertiesDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Scheme Properties</string>
+   <string>Schema Properties</string>
   </property>
   <property name="modal">
    <bool>false</bool>

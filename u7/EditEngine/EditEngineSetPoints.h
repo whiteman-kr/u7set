@@ -10,15 +10,15 @@ namespace EditEngine
 		SetPointsCommand();		// deleted;
 	public:
 		SetPointsCommand(
-				EditSchemaView* schemeView,
+				EditSchemaView* schemaView,
 				const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
 				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemaView* schemeView) override;
-		virtual void unExecuteCommand(EditSchemaView* schemeView) override;
+		virtual void executeCommand(EditSchemaView* schemaView) override;
+		virtual void unExecuteCommand(EditSchemaView* schemaView) override;
 
 		// Data
 		//

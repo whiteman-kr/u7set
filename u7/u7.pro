@@ -253,15 +253,15 @@ FORMS    += \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
-    SchemeItemPropertiesDialog.ui \
-    SchemePropertiesDialog.ui \
     DialogFileEditor.ui \
-    SchemeLayersDialog.ui \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
     DialogConnectionsEditor.ui \
-    CreateSchemaDialog.ui
+    CreateSchemaDialog.ui \
+    SchemaLayersDialog.ui \
+    SchemaPropertiesDialog.ui \
+    SchemaItemPropertiesDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

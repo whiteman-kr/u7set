@@ -1,11 +1,11 @@
 #include "SchemaItemPropertiesDialog.h"
-#include "ui_SchemeItemPropertiesDialog.h"
+#include "ui_SchemaItemPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
 
 
 SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::SchemeItemPropertiesDialog)
+	ui(new Ui::SchemaItemPropertiesDialog)
 {
 	ui->setupUi(this);
 

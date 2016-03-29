@@ -53,13 +53,13 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_logicScheme = SchemesTabPage::create<VFrame30::LogicSchema>("als", dbController(), AlFileName, nullptr);
-	m_monitorSchema = SchemesTabPage::create<VFrame30::MonitorSchema>("mvs", dbController(), MvsFileName, nullptr);
-	//m_diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
+	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>("als", dbController(), AlFileName, nullptr);
+	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>("mvs", dbController(), MvsFileName, nullptr);
+	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>("dvs", dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(m_logicScheme, tr("Application Logic"));
+	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
 	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
-	//getCentralWidget()->addTabPage(m_diagScheme, tr("Diag Schemes"));
+	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
 
 	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
@@ -81,25 +81,25 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-	// check if any scheme is not saved
+	// check if any schema is not saved
 	//
-	if (m_logicScheme == nullptr ||
+	if (m_logicSchema == nullptr ||
 		m_monitorSchema == nullptr)
-		//m_diagScheme == nullptr)
+		//m_diagSchema == nullptr)
 	{
-		assert(m_logicScheme);
+		assert(m_logicSchema);
 		assert(m_monitorSchema);
-		//assert(m_diagScheme);
+		//assert(m_diagSchema);
 		e->accept();
 		return;
 	}
 
-	if (m_logicScheme->hasUnsavedSchemes() == true ||
-		m_monitorSchema->hasUnsavedSchemes() == true)
-		//m_diagScheme->hasUnsavedSchemes() == true)
+	if (m_logicSchema->hasUnsavedSchemas() == true ||
+		m_monitorSchema->hasUnsavedSchemas() == true)
+		//m_diagSchema->hasUnsavedSchemas() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-			 tr("Some schemes have unsaved changes."),
+			 tr("Some schemas have unsaved changes."),
 			QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
 			QMessageBox::SaveAll);
 
@@ -111,9 +111,9 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
 		if (result == QMessageBox::SaveAll)
 		{
-			m_logicScheme->saveUnsavedSchemes();
-			m_monitorSchema->saveUnsavedSchemes();
-			//m_diagScheme->saveUnsavedSchemes();
+			m_logicSchema->saveUnsavedSchemas();
+			m_monitorSchema->saveUnsavedSchemas();
+			//m_diagSchema->saveUnsavedSchemas();
 		}
 	}
 

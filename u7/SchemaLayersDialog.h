@@ -1,21 +1,20 @@
-#ifndef SCHEMELAYERSDIALOG_H
-#define SCHEMELAYERSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
 namespace Ui {
-class SchemeLayersDialog;
+class SchemaLayersDialog;
 }
 
 class EditSchemaView;
 
-class SchemeLayersDialog : public QDialog
+class SchemaLayersDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit SchemeLayersDialog(EditSchemaView* schemeView, QWidget *parent = 0);
-	~SchemeLayersDialog();
+	explicit SchemaLayersDialog(EditSchemaView* schemaView, QWidget *parent = 0);
+	~SchemaLayersDialog();
 
 private slots:
 	void onContextMenu(const QPoint &pos);
@@ -25,13 +24,13 @@ private slots:
 	void onShowClick(bool checked);
 	void onPrintClick(bool checked);
 	void on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item, int column);
-	void on_SchemeLayersDialog_accepted();
+	void on_SchemaLayersDialog_accepted();
 
 private:
 	void fillList(int selectedIndex);
 
 private:
-	Ui::SchemeLayersDialog *ui;
+	Ui::SchemaLayersDialog *ui;
 
 	int m_activeIndex = -1;
 	QList<QString> m_name;
@@ -44,9 +43,8 @@ private:
 	QAction* m_showAction = nullptr;
 	QAction* m_printAction = nullptr;
 
-	EditSchemaView* m_schemeView;
+	EditSchemaView* m_schemaView;
 
 	int m_cmIndex = -1;
 };
 
-#endif // SCHEMELAYERSDIALOG_H

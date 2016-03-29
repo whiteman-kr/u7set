@@ -101,7 +101,7 @@ public:
     QByteArray m_connectionPropertiesWindowGeometry;
     int m_connectionSplitterState = 0;
 
-    //SchemeItem properties
+	//SchemaItem properties
     //
     QPoint m_schemaItemPropertiesWindowPos;
     QByteArray m_schemaItemPropertiesWindowGeometry;

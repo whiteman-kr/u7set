@@ -3,7 +3,7 @@
 
 class CentralWidget;
 class DbController;
-class SchemesTabPage;
+class SchemasTabPage;
 class FilesTabPage;
 
 namespace Ui {
@@ -90,12 +90,12 @@ private:
 
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarSchemeZoom = nullptr;
+	QLabel* m_statusBarSchemaZoom = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
 
-	SchemesTabPage* m_logicScheme = nullptr;
-	SchemesTabPage* m_monitorSchema = nullptr;
-	//SchemesTabPage* m_diagScheme = nullptr;
+	SchemasTabPage* m_logicSchema = nullptr;
+	SchemasTabPage* m_monitorSchema = nullptr;
+	//SchemasTabPage* m_diagSchema = nullptr;
 
 	DbController* m_dbController = nullptr;
 

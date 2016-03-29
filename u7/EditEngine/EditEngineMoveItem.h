@@ -9,7 +9,7 @@ namespace EditEngine
 	{
 		MoveItemCommand();		// deleted;
 	public:
-		MoveItemCommand(EditSchemaView* schemeView,
+		MoveItemCommand(EditSchemaView* schemaView,
 				double xdiff,
 				double ydiff,
 				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
@@ -18,8 +18,8 @@ namespace EditEngine
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemaView* schemeView) override;
-		virtual void unExecuteCommand(EditSchemaView* schemeView) override;
+		virtual void executeCommand(EditSchemaView* schemaView) override;
+		virtual void unExecuteCommand(EditSchemaView* schemaView) override;
 
 		// Data
 		//

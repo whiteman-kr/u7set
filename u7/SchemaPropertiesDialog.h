@@ -6,7 +6,7 @@
 
 
 namespace Ui {
-	class SchemePropertiesDialog;
+	class SchemaPropertiesDialog;
 }
 
 namespace EditEngine
@@ -29,7 +29,7 @@ public:
 	void setSchema(std::shared_ptr<VFrame30::Schema> schema);
 
 private:
-	Ui::SchemePropertiesDialog *ui;
+	Ui::SchemaPropertiesDialog *ui;
 
 	SchemaPropertyEditor* m_propertyEditor = nullptr;
 	std::shared_ptr<VFrame30::Schema> m_schema;
