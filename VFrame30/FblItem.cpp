@@ -263,11 +263,11 @@ namespace VFrame30
 		p->drawEllipse(QPointF(x, y), radius, radius);
 	}
 
-	double FblItem::GetPinWidth(SchemeUnit unit, int dpi) const
+	double FblItem::GetPinWidth(SchemaUnit unit, int dpi) const
 	{
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!
 
-		if (unit == SchemeUnit::Display)
+		if (unit == SchemaUnit::Display)
 		{
 			pinWidth = pinWidth * dpi;
 		}

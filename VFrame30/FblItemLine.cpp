@@ -7,7 +7,7 @@ namespace VFrame30
 	{
 	}
 
-	FblItemLine::FblItemLine(SchemeUnit unit) :
+	FblItemLine::FblItemLine(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0xC0))
 	{
@@ -96,26 +96,26 @@ namespace VFrame30
 	//
 	double FblItemLine::weight() const
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 
 	void FblItemLine::setWeight(double weight)
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_weight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 			m_weight = pt;
 		}
 	}

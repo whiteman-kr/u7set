@@ -449,13 +449,13 @@ namespace VFrame30
 			val = std::min(val, pt->X);
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
@@ -482,13 +482,13 @@ namespace VFrame30
 			val = std::min(val, pt->Y);
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
@@ -519,13 +519,13 @@ namespace VFrame30
 
 		double val = maxval - minval;
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
@@ -556,13 +556,13 @@ namespace VFrame30
 
 		double val = maxval - minval;
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 

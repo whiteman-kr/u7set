@@ -12,7 +12,7 @@ class CreateSchemeDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	CreateSchemeDialog(std::shared_ptr<VFrame30::Scheme> scheme, QWidget* parent);
+	CreateSchemeDialog(std::shared_ptr<VFrame30::Schema> scheme, QWidget* parent);
 	~CreateSchemeDialog();
 
 protected slots:
@@ -21,6 +21,6 @@ protected slots:
 private:
 	Ui::CreateSchemeDialog *ui;
 
-	std::shared_ptr<VFrame30::Scheme> m_scheme;
+	std::shared_ptr<VFrame30::Schema> m_scheme;
 };
 

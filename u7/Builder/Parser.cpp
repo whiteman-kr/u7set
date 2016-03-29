@@ -1194,7 +1194,7 @@ namespace Builder
 
 			// Read Appliaction logic files
 			//
-			std::shared_ptr<VFrame30::LogicScheme> ls(dynamic_cast<VFrame30::LogicScheme*>(VFrame30::Scheme::Create(file.get()->data())));
+			std::shared_ptr<VFrame30::LogicScheme> ls(dynamic_cast<VFrame30::LogicScheme*>(VFrame30::Schema::Create(file.get()->data())));
 
 			if (ls == nullptr)
 			{

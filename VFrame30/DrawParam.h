@@ -18,7 +18,7 @@ class QPixmap;
 
 namespace VFrame30
 {
-	class Scheme;
+	class Schema;
 }
 
 
@@ -28,14 +28,14 @@ namespace VFrame30
 	{
 	public:
 		CDrawParam(void) = delete;
-		CDrawParam(QPainter* painter, Scheme* scheme, double gridSize, int pinGridStep);
+		CDrawParam(QPainter* painter, Schema* scheme, double gridSize, int pinGridStep);
 		virtual ~CDrawParam(void);
 
 	public:
 		QPainter* painter();
 		QPaintDevice* device();
 
-		const Scheme* scheme() const;
+		const Schema* scheme() const;
 
 		void Save() const;
 
@@ -56,7 +56,7 @@ namespace VFrame30
 
 	private:
 		QPainter* m_painter = nullptr;
-		Scheme* m_scheme = nullptr;
+		Schema* m_scheme = nullptr;
 
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;
@@ -68,7 +68,7 @@ namespace VFrame30
 	public:
 		static void DrawText(QPainter* p,
 							 const FontParam& font,
-							 SchemeUnit unit,
+							 SchemaUnit unit,
 							 const QString& str,
 							 const QRectF& rect,
 							 int flags);

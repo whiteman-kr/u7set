@@ -72,7 +72,7 @@ EditSchemeView::EditSchemeView(QWidget* parent) :
 {
 }
 
-EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidget* parent)
+EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget* parent)
 	: VFrame30::SchemeView(scheme, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
@@ -120,7 +120,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
 	drawParam.setControlBarSize(
-		scheme()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+		scheme()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw Build Issues
 	//
@@ -1056,7 +1056,7 @@ void EditSchemeView::drawGrid(QPainter* p)
 
 	// Thin out the grid
 	//
-	if (unit == VFrame30::SchemeUnit::Display)
+	if (unit == VFrame30::SchemaUnit::Display)
 	{
 		while (gridSize * scale < 11.0)
 		{
@@ -1085,8 +1085,8 @@ void EditSchemeView::drawGrid(QPainter* p)
 
 	QRegion visiblePart = visibleRegion();
 
-	double dpiX = unit == VFrame30::SchemeUnit::Display ? 1.0 : p->device()->logicalDpiX();
-	double dpiY = unit == VFrame30::SchemeUnit::Display ? 1.0 : p->device()->logicalDpiY();
+	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
+	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
 
 	for (int v = 0; v < vertGridCount; v++)
 	{
@@ -1503,7 +1503,7 @@ bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>&
 // EditSchemeWidget
 //
 //
-EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController) :
+EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbController) :
 	VFrame30::BaseSchemeWidget(scheme, new EditSchemeView(scheme)),
 m_fileInfo(fileInfo),
 	m_dbcontroller(dbController)

@@ -38,7 +38,7 @@ namespace EditEngine
 		//
 	private:
 		std::vector<Record> m_items;
-		std::shared_ptr<VFrame30::Scheme> m_scheme;
+		std::shared_ptr<VFrame30::Schema> m_scheme;
 	};
 
 }

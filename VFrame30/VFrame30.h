@@ -7,7 +7,7 @@
 #include "../include/TypesAndEnums.h"
 #include "../include/CUtils.h"
 
-#include "Scheme.h"
+#include "Schema.h"
 #include "LogicScheme.h"
 #include "MonitorSchema.h"
 #include "DiagScheme.h"

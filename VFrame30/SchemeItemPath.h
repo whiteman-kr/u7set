@@ -15,7 +15,7 @@ namespace VFrame30
 	private:
 		SchemeItemPath(void);
 	public:
-		explicit SchemeItemPath(SchemeUnit unit);
+		explicit SchemeItemPath(SchemaUnit unit);
 		virtual ~SchemeItemPath(void);
 
 		// Serialization
@@ -31,7 +31,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Properties and Data
 	public:

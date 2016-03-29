@@ -177,25 +177,25 @@ public:
 		}
 	}
 
-	// По сути floor, используется для приведения координат при SchemeUnit::Display
+	// По сути floor, используется для приведения координат при SchemaUnit::Display
 	static double RoundDisplayPoint(double value)
 	{
 		return floor(value);
 	}
 
 	// Округлить значение в зависимости от типа региональной метрики
-	static double RoundPoint(double p, VFrame30::SchemeUnit unit)
+	static double RoundPoint(double p, VFrame30::SchemaUnit unit)
 	{
 		switch (unit)
 		{
-		case VFrame30::SchemeUnit::Display:
+		case VFrame30::SchemaUnit::Display:
 			assert(false);
 			return 0;
 
-		case VFrame30::SchemeUnit::Inch:
+		case VFrame30::SchemaUnit::Inch:
 			return Round(p, InchesRoundDigits, VFrame30::MidpointRounding::AwayFromZero);
 
-		case VFrame30::SchemeUnit::Millimeter:
+		case VFrame30::SchemaUnit::Millimeter:
 			return Round(p, MillimetresRoundDigits, VFrame30::MidpointRounding::AwayFromZero);
 
 		default:
@@ -204,7 +204,7 @@ public:
 		}
 	}
 
-	static double ConvertPoint(double point, VFrame30::SchemeUnit convertFrom, VFrame30::SchemeUnit convertTo, VFrame30::ConvertDirection convertDirection)
+	static double ConvertPoint(double point, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, VFrame30::ConvertDirection convertDirection)
 	{
 		if (convertFrom == convertTo)
 		{
@@ -218,15 +218,15 @@ public:
 			return 0.0;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Display)
+		if (convertFrom == VFrame30::SchemaUnit::Display)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Inch)
+			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
 				point = point / dpi;
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Millimeter)
+			if (convertTo == VFrame30::SchemaUnit::Millimeter)
 			{
 				point = point * 25.4 / dpi;
 				return point;
@@ -236,15 +236,15 @@ public:
 			return 0.0;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Inch)
+		if (convertFrom == VFrame30::SchemaUnit::Inch)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Display)
+			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
 				point = point * dpi;
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Millimeter)
+			if (convertTo == VFrame30::SchemaUnit::Millimeter)
 			{
 				point = point * 25.4;
 				return point;
@@ -254,15 +254,15 @@ public:
 			return 0.0;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Millimeter)
+		if (convertFrom == VFrame30::SchemaUnit::Millimeter)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Display)
+			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
 				point = point * dpi / 25.4;
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Inch)
+			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
 				point = point / 25.4;
 				return point;
@@ -276,7 +276,7 @@ public:
 		return 0.0;
 	}
 
-	static void ConvertPoint(double& x, double& y, VFrame30::SchemeUnit convertFrom, VFrame30::SchemeUnit convertTo)
+	static void ConvertPoint(double& x, double& y, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo)
 	{
 		if (convertFrom == convertTo)
 		{
@@ -293,16 +293,16 @@ public:
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Display)
+		if (convertFrom == VFrame30::SchemaUnit::Display)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Inch)
+			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
 				x = x / dpiX;
 				y = y / dpiY;
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Millimeter)
+			if (convertTo == VFrame30::SchemaUnit::Millimeter)
 			{
 				x = x * 25.4 / dpiX;
 				y = y * 25.4 / dpiY;
@@ -313,16 +313,16 @@ public:
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Inch)
+		if (convertFrom == VFrame30::SchemaUnit::Inch)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Display)
+			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
 				x = x * dpiX;
 				y = y * dpiY;
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Millimeter)
+			if (convertTo == VFrame30::SchemaUnit::Millimeter)
 			{
 				x = x * 25.4;
 				y = y * 25.4;
@@ -333,16 +333,16 @@ public:
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemeUnit::Millimeter)
+		if (convertFrom == VFrame30::SchemaUnit::Millimeter)
 		{
-			if (convertTo == VFrame30::SchemeUnit::Display)
+			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
 				x = x * dpiX / 25.4;
 				y = y * dpiY / 25.4;
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemeUnit::Inch)
+			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
 				x = x / 25.4;
 				y = y / 25.4;

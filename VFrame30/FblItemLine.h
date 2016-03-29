@@ -15,7 +15,7 @@ namespace VFrame30
 
 	protected:
 		FblItemLine(void);
-		FblItemLine(SchemeUnit itemunit);
+		FblItemLine(SchemaUnit itemunit);
 	public:
 		virtual ~FblItemLine(void);
 		

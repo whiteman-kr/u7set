@@ -8,14 +8,14 @@ namespace VFrame30
 	// CSchemeItemSignal
 	//
 	SchemeItemSignal::SchemeItemSignal(void) :
-		SchemeItemSignal(SchemeUnit::Inch)
+		SchemeItemSignal(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemSignal::SchemeItemSignal(SchemeUnit unit) :
+	SchemeItemSignal::SchemeItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
 		ADD_PROPERTY_GETTER_SETTER(QString, StrIDs, true, SchemeItemSignal::signalStrIds, SchemeItemSignal::setSignalStrIds);
@@ -25,7 +25,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
+	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 
@@ -232,7 +232,7 @@ namespace VFrame30
 		//
 	}
 
-	SchemeItemInput::SchemeItemInput(SchemeUnit unit) :
+	SchemeItemInput::SchemeItemInput(SchemaUnit unit) :
 		SchemeItemSignal(unit)
 	{
 		addOutput();
@@ -311,7 +311,7 @@ namespace VFrame30
 		//
 	}
 
-	SchemeItemOutput::SchemeItemOutput(SchemeUnit unit) :
+	SchemeItemOutput::SchemeItemOutput(SchemaUnit unit) :
 		SchemeItemSignal(unit)
 	{
 		addInput();

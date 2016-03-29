@@ -7,7 +7,7 @@ class EditSchemeView;
 namespace VFrame30
 {
 	class SchemeLayer;
-	class Scheme;
+	class Schema;
 }
 
 namespace EditEngine
@@ -66,7 +66,7 @@ namespace EditEngine
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemeItem>& item);
 
-		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme);
+		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& scheme);
 
 //		/// <summary>
 //		/// Команда "Изменить размер"

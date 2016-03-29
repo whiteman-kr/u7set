@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Scheme.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT WiringScheme : public Scheme
+	class VFRAME30LIBSHARED_EXPORT WiringScheme : public Schema
 	{
 		Q_OBJECT
 

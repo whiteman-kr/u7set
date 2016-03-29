@@ -15,7 +15,7 @@ namespace VFrame30
 	SchemeItem::SchemeItem() :
 		m_static(true),
 		m_locked(false),
-		m_itemUnit(SchemeUnit::Display),
+		m_itemUnit(SchemaUnit::Display),
 		m_acceptClick(false)
 	{	
 		m_guid = QUuid::createUuid();
@@ -43,7 +43,7 @@ namespace VFrame30
 		Proto::Write(schemeItem->mutable_uuid(), m_guid);
 		schemeItem->set_isstatic(m_static);
 		schemeItem->set_islocked(m_locked);
-		schemeItem->set_itemunit(static_cast<Proto::SchemeUnit>(m_itemUnit));
+		schemeItem->set_itemunit(static_cast<Proto::SchemaUnit>(m_itemUnit));
 
 		schemeItem->set_acceptclick(m_acceptClick);
 
@@ -68,7 +68,7 @@ namespace VFrame30
 		m_guid = Proto::Read(schemeitem.uuid());
 		m_static = schemeitem.isstatic();
 		m_locked = schemeitem.islocked();
-		m_itemUnit = static_cast<SchemeUnit>(schemeitem.itemunit());
+		m_itemUnit = static_cast<SchemaUnit>(schemeitem.itemunit());
 
 		m_acceptClick = schemeitem.acceptclick();
 
@@ -149,7 +149,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItem::Draw(CDrawParam*, const Scheme*, const SchemeLayer*) const
+	void SchemeItem::Draw(CDrawParam*, const Schema*, const SchemeLayer*) const
 	{
 	}
 
@@ -202,7 +202,7 @@ namespace VFrame30
 	// 
 	bool SchemeItem::IsIntersectPoint(double x, double y) const
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return IsIntersectRect(x, y, 1, 1);
 		}
@@ -327,14 +327,14 @@ namespace VFrame30
 
 	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 	//
-	SchemeUnit SchemeItem::itemUnit() const
+	SchemaUnit SchemeItem::itemUnit() const
 	{
 		return m_itemUnit;
 	}
 
-	void SchemeItem::setItemUnit(SchemeUnit value)
+	void SchemeItem::setItemUnit(SchemaUnit value)
 	{
-		assert(value == SchemeUnit::Display || value == SchemeUnit::Inch);
+		assert(value == SchemaUnit::Display || value == SchemaUnit::Inch);
 		m_itemUnit = value;
 	}
 

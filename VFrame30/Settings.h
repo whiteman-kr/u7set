@@ -10,13 +10,13 @@ namespace VFrame30
 		~Settings(void);
 
 	public:
-		static SchemeUnit regionalUnit(void);
-		static void setRegionalUnit(SchemeUnit value);
+		static SchemaUnit regionalUnit(void);
+		static void setRegionalUnit(SchemaUnit value);
 
-		static double defaultGridSize(SchemeUnit unit);
+		static double defaultGridSize(SchemaUnit unit);
 		
 	private:
-		static SchemeUnit m_regionalUnit;
+		static SchemaUnit m_regionalUnit;
 
 		// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
 		//

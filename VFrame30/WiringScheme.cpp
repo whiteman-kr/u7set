@@ -6,7 +6,7 @@ namespace VFrame30
 
 	WiringScheme::WiringScheme(void)
 	{
-		setUnit(SchemeUnit::Inch);
+		setUnit(SchemaUnit::Inch);
 
 		setGridSize(Settings::defaultGridSize(unit()));
 		setPinGridStep(4);

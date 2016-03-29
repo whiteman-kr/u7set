@@ -18,8 +18,8 @@ namespace VFrame30
 	private:
 		SchemeItemAfb(void);
 	public:
-		explicit SchemeItemAfb(SchemeUnit unit);
-		SchemeItemAfb(SchemeUnit unit, const Afb::AfbElement& fblElement);
+		explicit SchemeItemAfb(SchemaUnit unit);
+		SchemeItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement);
 
 		virtual ~SchemeItemAfb(void);
 
@@ -29,7 +29,7 @@ namespace VFrame30
 		// ��������� ��������, ����������� � 100% ��������.
 		// Graphcis ������ ����� �������� ������������ ������� (0, 0 - ����� ������� ����, ���� � ������ - ������������� ����������)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* pLayer) const override;
 
 		// Serialization
 		//
@@ -43,7 +43,7 @@ namespace VFrame30
 
 		virtual QString buildName() const override;
 
-		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Scheme> scheme);
+		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> scheme);
 		bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		// Set Afb element parameters

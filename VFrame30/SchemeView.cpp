@@ -10,7 +10,7 @@ namespace VFrame30
 		init();
 	}
 
-	SchemeView::SchemeView(std::shared_ptr<Scheme>& scheme, QWidget* parent /*= 0*/) :
+	SchemeView::SchemeView(std::shared_ptr<Schema>& scheme, QWidget* parent /*= 0*/) :
 		QWidget(parent),
 		m_scheme(scheme)
 	{
@@ -22,17 +22,17 @@ namespace VFrame30
 		setMouseTracking(true);
 	}
 
-	std::shared_ptr<Scheme>& SchemeView::scheme()
+	std::shared_ptr<Schema>& SchemeView::scheme()
 	{
 		return m_scheme;
 	}
 
-	std::shared_ptr<Scheme> SchemeView::scheme() const
+	std::shared_ptr<Schema> SchemeView::scheme() const
 	{
 		return m_scheme;
 	}
 
-	void SchemeView::setScheme(std::shared_ptr<Scheme>& scheme, bool repaint)
+	void SchemeView::setScheme(std::shared_ptr<Schema>& scheme, bool repaint)
 	{
 		assert(scheme.get() != nullptr);
 		m_scheme = scheme;
@@ -146,7 +146,7 @@ namespace VFrame30
 		//
 		painter->resetTransform();
 
-		if (m_scheme->unit() == SchemeUnit::Inch)
+		if (m_scheme->unit() == SchemaUnit::Inch)
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(
@@ -182,13 +182,13 @@ namespace VFrame30
 		double pageWidth = scheme()->docWidth();
 		double pageHeight = scheme()->docHeight();
 
-		if (m_scheme->unit() == SchemeUnit::Inch)
+		if (m_scheme->unit() == SchemaUnit::Inch)
 		{
 			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
 		}
 		else
 		{
-			assert(m_scheme->unit() == SchemeUnit::Display);
+			assert(m_scheme->unit() == SchemaUnit::Display);
 			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
 			pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
@@ -241,7 +241,7 @@ namespace VFrame30
 		int x = mousePos.x();
 		int y = mousePos.y();
 
-		if (scheme()->unit() == SchemeUnit::Display)
+		if (scheme()->unit() == SchemaUnit::Display)
 		{
 			pDestDocPos->setX(x / (m_zoom / 100.0));
 			pDestDocPos->setY(y / (m_zoom / 100.0));

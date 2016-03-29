@@ -100,7 +100,6 @@ HEADERS += VFrame30Lib_global.h \
     ../include/ProtoSerialization.h \
     ../include/CUtils.h \
     SchemeLayer.h \
-    Scheme.h \
     LogicScheme.h \
 	MonitorSchema.h \
     DiagScheme.h \
@@ -119,7 +118,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemeItemLink.h \
     Afb.h \
     ../include/DebugInstCounter.h \
-	../include/PropertyObject.h
+	../include/PropertyObject.h \
+    Schema.h
 
 SOURCES += \
     Settings.cpp \
@@ -140,7 +140,6 @@ SOURCES += \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
     SchemeLayer.cpp \
-    Scheme.cpp \
     LogicScheme.cpp \
 	MonitorSchema.cpp \
     DiagScheme.cpp \
@@ -157,7 +156,8 @@ SOURCES += \
     SchemeItemAfb.cpp \
     SchemeItemLink.cpp \
     Afb.cpp \
-	../lib/PropertyObject.cpp
+	../lib/PropertyObject.cpp \
+    Schema.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

@@ -17,7 +17,7 @@ private:
 	MonitorSchemaWidget() = delete;
 
 public:
-	MonitorSchemaWidget(std::shared_ptr<VFrame30::Scheme> scheme);
+	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> scheme);
 	virtual ~MonitorSchemaWidget();
 
 protected:

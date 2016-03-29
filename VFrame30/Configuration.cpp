@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "Configuration.h"
-#include "Scheme.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
@@ -77,7 +77,7 @@ namespace VFrame30
 		m_schemes.clear();
 		for (int i = 0; i < configuration.schemes().size(); i++)
 		{
-			Scheme* scheme = Scheme::Create(configuration.schemes(i));
+			Schema* scheme = Schema::Create(configuration.schemes(i));
 
 			if (scheme == nullptr)
 			{
@@ -85,7 +85,7 @@ namespace VFrame30
 				continue;
 			}
 
-			m_schemes.push_back(std::shared_ptr<Scheme>(scheme));
+			m_schemes.push_back(std::shared_ptr<Schema>(scheme));
 		}
 
 		return true;
@@ -179,12 +179,12 @@ namespace VFrame30
 		return &m_schemeIds;
 	}
 
-	const std::vector<std::shared_ptr<Scheme>>& Configuration::schemes() const
+	const std::vector<std::shared_ptr<Schema>>& Configuration::schemes() const
 	{
 		return m_schemes;
 	}
 
-	std::vector<std::shared_ptr<Scheme>>* Configuration::mutableSchemes()
+	std::vector<std::shared_ptr<Schema>>* Configuration::mutableSchemes()
 	{
 		return &m_schemes;
 	}

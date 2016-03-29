@@ -11,7 +11,7 @@ namespace VFrame30
 		//
 	}
 
-	SchemeItemLink::SchemeItemLink(SchemeUnit unit) :
+	SchemeItemLink::SchemeItemLink(SchemaUnit unit) :
 		FblItemLine(unit)
 	{
 		//AddInput();
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItemLink::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
+	void SchemeItemLink::Draw(CDrawParam* drawParam, const Schema*, const SchemeLayer* pLayer) const
 	{
 		if (drawParam == nullptr)
 		{

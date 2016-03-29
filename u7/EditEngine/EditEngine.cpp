@@ -256,7 +256,7 @@ namespace EditEngine
 		return runSetProperty(propertyName, value, items);
 	}
 
-	void EditEngine::runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme)
+	void EditEngine::runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& scheme)
 	{
 		addCommand(std::make_shared<SetSchemePropertyCommand>(m_schemeView, propertyName, value, scheme, m_hScrollBar, m_vScrollBar), true);
 		return;

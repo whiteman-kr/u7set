@@ -10,11 +10,11 @@
 namespace VFrame30
 {
 	FblItemRect::FblItemRect(void) :
-		FblItemRect(SchemeUnit::Inch)
+		FblItemRect(SchemaUnit::Inch)
 	{
 	}
 
-	FblItemRect::FblItemRect(SchemeUnit unit) :
+	FblItemRect::FblItemRect(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0xC0)),
 		m_fillColor(qRgb(0xF0, 0xF0, 0xF0)),
@@ -32,14 +32,14 @@ namespace VFrame30
 
 		switch (itemUnit())
 		{
-		case SchemeUnit::Display:
-			m_font.setSize(10.0, SchemeUnit::Display);
+		case SchemaUnit::Display:
+			m_font.setSize(10.0, SchemaUnit::Display);
 			break;
-		case SchemeUnit::Inch:
-			m_font.setSize(mm2in(2.2), SchemeUnit::Inch);
+		case SchemaUnit::Inch:
+			m_font.setSize(mm2in(2.2), SchemaUnit::Inch);
 			break;
-		case SchemeUnit::Millimeter:
-			m_font.setSize(2.2, SchemeUnit::Millimeter);
+		case SchemaUnit::Millimeter:
+			m_font.setSize(2.2, SchemaUnit::Millimeter);
 			break;
 		default:
 			assert(false);
@@ -268,7 +268,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* layer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemeLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -620,26 +620,26 @@ namespace VFrame30
 	//
 	double FblItemRect::weight() const
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 
 	void FblItemRect::setWeight(double weight)
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_weight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 			m_weight = pt;
 		}
 	}

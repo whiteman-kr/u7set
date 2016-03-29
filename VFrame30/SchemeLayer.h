@@ -39,7 +39,7 @@ namespace VFrame30
 
 		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
 		void ConnectionMapPosInc(SchemePoint pinPos);
-		int GetPinPosConnectinCount(SchemePoint pinPos, SchemeUnit unit) const;
+		int GetPinPosConnectinCount(SchemePoint pinPos, SchemaUnit unit) const;
 
 		std::shared_ptr<SchemeItem> getItemUnderPoint(QPointF point, QString className = "") const;
 		std::list<std::shared_ptr<SchemeItem>> getItemListInRectangle(const QRectF& rect) const;

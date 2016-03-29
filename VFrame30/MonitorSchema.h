@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Scheme.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
 	// Технологический видеокадр
 	//
-	class VFRAME30LIBSHARED_EXPORT MonitorSchema : public Scheme
+	class VFRAME30LIBSHARED_EXPORT MonitorSchema : public Schema
 	{
 		Q_OBJECT
 

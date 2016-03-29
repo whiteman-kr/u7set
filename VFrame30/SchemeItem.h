@@ -9,7 +9,7 @@
 
 namespace VFrame30
 {
-	class Scheme;
+	class Schema;
 	class SchemeLayer;
 }
 
@@ -169,7 +169,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* pDrawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const;
+		virtual void Draw(CDrawParam* pDrawParam, const Schema* pFrame, const SchemeLayer* pLayer) const;
 
 		// Draw item outline, while creation or changing
 		//
@@ -235,8 +235,8 @@ namespace VFrame30
 
 		// Item position unit, can be inches or pixels
 		//
-		SchemeUnit itemUnit() const;
-		void setItemUnit(SchemeUnit value);
+		SchemaUnit itemUnit() const;
+		void setItemUnit(SchemaUnit value);
 
 		bool acceptClick() const;
 		void setAcceptClick(bool value);
@@ -254,7 +254,7 @@ namespace VFrame30
 		bool m_static;
 		bool m_locked;
 		QUuid m_guid;
-		SchemeUnit m_itemUnit;		// Item position unit, can be inches or pixels
+		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
 		bool m_acceptClick;			// The SchemeItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click

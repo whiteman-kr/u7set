@@ -7,7 +7,7 @@ namespace EditEngine
 	SetSchemePropertyCommand::SetSchemePropertyCommand(EditSchemeView* schemeView,
 			QString propertyName,
 			QVariant value,
-			std::shared_ptr<VFrame30::Scheme> scheme,
+			std::shared_ptr<VFrame30::Schema> scheme,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(schemeView, hScrollBar, vScrollBar)

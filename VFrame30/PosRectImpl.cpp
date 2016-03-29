@@ -320,7 +320,7 @@ namespace VFrame30
 	}
 	void PosRectImpl::setLeftDocPt(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_leftDocPt = CUtils::Round(value);
 		}
@@ -336,7 +336,7 @@ namespace VFrame30
 	}
 	void PosRectImpl::setTopDocPt(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_topDocPt = CUtils::Round(value);
 		}
@@ -352,7 +352,7 @@ namespace VFrame30
 	}
 	void PosRectImpl::setWidthDocPt(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_widthDocPt = CUtils::Round(value);
 		}
@@ -373,7 +373,7 @@ namespace VFrame30
 	}
 	void PosRectImpl::setHeightDocPt(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_heightDocPt = CUtils::Round(value);
 		}
@@ -392,67 +392,67 @@ namespace VFrame30
 	//
 	double PosRectImpl::left() const
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(leftDocPt());
 		}
 		else
 		{
 			double pt = leftDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void PosRectImpl::setLeft(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			setLeftDocPt(CUtils::RoundDisplayPoint(value));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 			setLeftDocPt(pt);
 		}
 	}
 
 	double PosRectImpl::top() const 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(topDocPt());
 		}
 		else
 		{
 			double pt = topDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
 	void PosRectImpl::setTop(double value) 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			double pt = CUtils::RoundDisplayPoint(value);
 			setTopDocPt(pt);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
 			setTopDocPt(pt);
 		}
 	}
 
 	double PosRectImpl::width() const 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(widthDocPt());
 		}
 		else
 		{
 			double pt = widthDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -463,27 +463,27 @@ namespace VFrame30
 			value = 0;
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			setWidthDocPt(CUtils::RoundDisplayPoint(value));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 			setWidthDocPt(pt);
 		}
 	}
 
 	double PosRectImpl::height() const 
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(heightDocPt());
 		}
 		else
 		{
 			double pt = heightDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
@@ -494,13 +494,13 @@ namespace VFrame30
 			value = 0;
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			setHeightDocPt(CUtils::RoundDisplayPoint(value));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
 			setHeightDocPt(pt);
 		}
 	}

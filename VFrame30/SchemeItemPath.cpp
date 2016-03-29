@@ -4,14 +4,14 @@
 namespace VFrame30
 {
 	SchemeItemPath::SchemeItemPath(void) :
-		SchemeItemPath(SchemeUnit::Inch)
+		SchemeItemPath(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemPath::SchemeItemPath(SchemeUnit unit) : 
+	SchemeItemPath::SchemeItemPath(SchemaUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
@@ -88,7 +88,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemeItemPath::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
+	void SchemeItemPath::Draw(CDrawParam* drawParam, const Schema*, const SchemeLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -126,26 +126,26 @@ namespace VFrame30
 	//
 	double SchemeItemPath::weight() const
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 
 	void SchemeItemPath::setWeight(double weight)
 	{
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_weight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 			m_weight = pt;
 		}
 	}

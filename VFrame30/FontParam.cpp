@@ -36,28 +36,28 @@ namespace VFrame30
 		m_name = value;
 	}
 
-	double FontParam::size(SchemeUnit unit) const
+	double FontParam::size(SchemaUnit unit) const
 	{
-		if (unit == SchemeUnit::Display)
+		if (unit == SchemaUnit::Display)
 		{
 			return CUtils::RoundDisplayPoint(m_size);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_size, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_size, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
-	void FontParam::setSize(double value, SchemeUnit unit)
+	void FontParam::setSize(double value, SchemaUnit unit)
 	{
 		value = std::max(value, 0.0);
-		if (unit == SchemeUnit::Display)
+		if (unit == SchemaUnit::Display)
 		{
 			m_size = CUtils::RoundDisplayPoint(value);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, unit, SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, unit, SchemaUnit::Inch, ConvertDirection::Horz);
 			m_size = pt;
 		}
 	}

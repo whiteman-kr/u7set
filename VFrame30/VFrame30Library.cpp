@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "VFrame30Library.h"
-#include "Scheme.h"
+#include "Schema.h"
 #include "DiagScheme.h"
 #include "LogicScheme.h"
 #include "MonitorSchema.h"
@@ -30,10 +30,10 @@ namespace VFrame30
 
 		// Registering Schemes
 		//
-		SchemeFactory.Register<DiagScheme>();
-		SchemeFactory.Register<LogicScheme>();
-		SchemeFactory.Register<MonitorSchema>();
-		SchemeFactory.Register<WiringScheme>();
+		SchemaFactory.Register<DiagScheme>();
+		SchemaFactory.Register<LogicScheme>();
+		SchemaFactory.Register<MonitorSchema>();
+		SchemaFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers
 		//

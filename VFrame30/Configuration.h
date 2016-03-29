@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	class Scheme;
+	class Schema;
 
 	class VFRAME30LIBSHARED_EXPORT Configuration : 
 		public QObject,
@@ -52,8 +52,8 @@ namespace VFrame30
 		const std::vector<QUuid>& schemesIDs() const;
 		std::vector<QUuid>* mutableSchemesIDs();
 
-		const std::vector<std::shared_ptr<Scheme>>& schemes() const;
-		std::vector<std::shared_ptr<Scheme>>* mutableSchemes();
+		const std::vector<std::shared_ptr<Schema>>& schemes() const;
+		std::vector<std::shared_ptr<Schema>>* mutableSchemes();
 
 	private:
 		QUuid m_guid;												// Configuration ID
@@ -63,7 +63,7 @@ namespace VFrame30
 		QString m_globals;											// Global scripts functions
 		
 		std::vector<QUuid> m_schemeIds;								// The list of Scheme's ID's
-		std::vector<std::shared_ptr<Scheme>> m_schemes;				// The list of Scheme's
+		std::vector<std::shared_ptr<Schema>> m_schemes;				// The list of Scheme's
 	};
 
 

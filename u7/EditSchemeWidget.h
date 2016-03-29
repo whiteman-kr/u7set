@@ -10,7 +10,7 @@
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
-#define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemeUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
+#define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
 
 enum class MouseState
@@ -90,7 +90,7 @@ class EditSchemeView : public VFrame30::SchemeView
 
 public:
 	explicit EditSchemeView(QWidget* parent = 0);
-	explicit EditSchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidget* parent = nullptr);
+	explicit EditSchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget* parent = nullptr);
 
 	virtual ~EditSchemeView();
 
@@ -204,7 +204,7 @@ private:
 	EditSchemeWidget() = delete;
 
 public:
-	EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController);
+	EditSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbController);
 	virtual ~EditSchemeWidget();
 	
 protected:

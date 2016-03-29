@@ -1,24 +1,24 @@
 #include "Stable.h"
 #include "SchemeItemAfb.h"
-#include "Scheme.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
 	SchemeItemAfb::SchemeItemAfb(void) :
-		SchemeItemAfb(SchemeUnit::Inch)
+		SchemeItemAfb(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit) :
+	SchemeItemAfb::SchemeItemAfb(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
 		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemAfb::precision, SchemeItemAfb::setPrecision);
 	}
 
-	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit, const Afb::AfbElement& fblElement) :
+	SchemeItemAfb::SchemeItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
@@ -53,7 +53,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
+	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* pLayer) const
 	{
 		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
@@ -295,7 +295,7 @@ namespace VFrame30
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool SchemeItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
+	bool SchemeItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> scheme)
 	{
 		if (name.isEmpty() == true || scheme == nullptr)
 		{

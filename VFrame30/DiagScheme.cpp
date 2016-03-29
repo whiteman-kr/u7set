@@ -6,7 +6,7 @@ namespace VFrame30
 
 	DiagScheme::DiagScheme(void)
 	{
-		setUnit(SchemeUnit::Display);
+		setUnit(SchemaUnit::Display);
 
 		setGridSize(Settings::defaultGridSize(unit()));
 		setPinGridStep(20);

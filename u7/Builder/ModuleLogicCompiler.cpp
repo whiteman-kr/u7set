@@ -4196,7 +4196,7 @@ namespace Builder
     {
         m_appLogicItem.m_afbElement = *afbElement.get();
         m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
-                    new VFrame30::SchemeItemAfb(VFrame30::SchemeUnit::Display, *afbElement.get()));
+                    new VFrame30::SchemeItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get()));
 
         // copy parameters
         //

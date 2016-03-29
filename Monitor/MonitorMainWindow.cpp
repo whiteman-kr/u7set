@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
-#include "../VFrame30/Scheme.h"
+#include "../VFrame30/Schema.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -219,7 +219,7 @@ void MonitorMainWindow::debug()
 
 	// Load scheme
 	//
-	std::shared_ptr<VFrame30::Scheme> scheme = std::shared_ptr<VFrame30::Scheme>(VFrame30::Scheme::Create(fileName.toStdWString().c_str()));
+	std::shared_ptr<VFrame30::Schema> scheme = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
 
 	if (scheme == nullptr)
 	{

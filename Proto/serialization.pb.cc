@@ -56,9 +56,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* AfbParam_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AfbParam_reflection_ = NULL;
-const ::google::protobuf::Descriptor* Scheme_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* Schema_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  Scheme_reflection_ = NULL;
+  Schema_reflection_ = NULL;
 const ::google::protobuf::Descriptor* LogicScheme_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   LogicScheme_reflection_ = NULL;
@@ -155,7 +155,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* Property_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Property_reflection_ = NULL;
-const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblDataFormat_descriptor_ = NULL;
@@ -257,7 +257,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, classnamehash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemeitem_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, deviceobject_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, scheme_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schema_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemelayer_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, fblelement_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, configuration_),
@@ -395,30 +395,30 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbParam));
-  Scheme_descriptor_ = file->message_type(12);
-  static const int Scheme_offsets_[10] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, strid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, caption_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, width_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, height_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, unit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, excludefrombuild_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, layers_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, afbs_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, logics_scheme_),
+  Schema_descriptor_ = file->message_type(12);
+  static const int Schema_offsets_[10] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, uuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, strid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, caption_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, width_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, height_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, unit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, excludefrombuild_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, layers_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, afbs_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, logics_scheme_),
   };
-  Scheme_reflection_ =
+  Schema_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      Scheme_descriptor_,
-      Scheme::default_instance_,
-      Scheme_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Scheme, _unknown_fields_),
+      Schema_descriptor_,
+      Schema::default_instance_,
+      Schema_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Scheme));
+      sizeof(Schema));
   LogicScheme_descriptor_ = file->message_type(13);
   static const int LogicScheme_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicScheme, hardware_strids_),
@@ -978,7 +978,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Property));
-  SchemeUnit_descriptor_ = file->enum_type(0);
+  SchemaUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
   FblDataFormat_descriptor_ = file->enum_type(3);
@@ -1019,7 +1019,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AfbParam_descriptor_, &AfbParam::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    Scheme_descriptor_, &Scheme::default_instance());
+    Schema_descriptor_, &Schema::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     LogicScheme_descriptor_, &LogicScheme::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1113,8 +1113,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete AfbSignal_reflection_;
   delete AfbParam::default_instance_;
   delete AfbParam_reflection_;
-  delete Scheme::default_instance_;
-  delete Scheme_reflection_;
+  delete Schema::default_instance_;
+  delete Schema_reflection_;
   delete LogicScheme::default_instance_;
   delete LogicScheme_reflection_;
   delete SchemeLayer::default_instance_;
@@ -1199,7 +1199,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022%\n\nsc"
     "hemeitem\030\006 \001(\0132\021.Proto.SchemeItem\022)\n\014dev"
     "iceobject\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006"
-    "scheme\030d \001(\0132\r.Proto.Scheme\022\'\n\013schemelay"
+    "schema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemelay"
     "er\030e \001(\0132\022.Proto.SchemeLayer\022%\n\nfbleleme"
     "nt\030f \001(\0132\021.Proto.FblElement\022+\n\rconfigura"
     "tion\030g \001(\0132\024.Proto.Configuration\"\361\001\n\rCon"
@@ -1234,11 +1234,11 @@ void protobuf_AddDesc_serialization_2eproto() {
     "highlimit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opNa"
     "me\030\021 \001(\0132\016.Proto.wstring\022\"\n\004type\030\022 \001(\0162\024"
     ".Proto.FblSignalType\022(\n\ndataFormat\030\023 \001(\016"
-    "2\024.Proto.FblDataFormat\"\274\002\n\006Scheme\022\031\n\004uui"
+    "2\024.Proto.FblDataFormat\"\274\002\n\006Schema\022\031\n\004uui"
     "d\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pr"
     "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
     "ring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004u"
-    "nit\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\020excludeF"
+    "nit\030\006 \002(\0162\021.Proto.SchemaUnit\022\037\n\020excludeF"
     "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
     "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
     "ElementCollection\022*\n\rlogics_scheme\030\310\001 \001("
@@ -1250,7 +1250,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "items\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemeI"
     "tem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStat"
     "ic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004"
-    " \002(\0162\021.Proto.SchemeUnit\022\032\n\013acceptClick\030\005"
+    " \002(\0162\021.Proto.SchemaUnit\022\032\n\013acceptClick\030\005"
     " \001(\010:\005false\022#\n\013clickScript\030\006 \001(\0132\016.Proto"
     ".wstring\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.Po"
     "sRectImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.P"
@@ -1333,7 +1333,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValu"
     "e\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Proper"
     "ty\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchem"
-    "eUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
+    "aUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
     "ch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022"
     "\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000"
     "\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsig"
@@ -1352,7 +1352,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   FblElement::default_instance_ = new FblElement();
   AfbSignal::default_instance_ = new AfbSignal();
   AfbParam::default_instance_ = new AfbParam();
-  Scheme::default_instance_ = new Scheme();
+  Schema::default_instance_ = new Schema();
   LogicScheme::default_instance_ = new LogicScheme();
   SchemeLayer::default_instance_ = new SchemeLayer();
   SchemeItem::default_instance_ = new SchemeItem();
@@ -1397,7 +1397,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   FblElement::default_instance_->InitAsDefaultInstance();
   AfbSignal::default_instance_->InitAsDefaultInstance();
   AfbParam::default_instance_->InitAsDefaultInstance();
-  Scheme::default_instance_->InitAsDefaultInstance();
+  Schema::default_instance_->InitAsDefaultInstance();
   LogicScheme::default_instance_->InitAsDefaultInstance();
   SchemeLayer::default_instance_->InitAsDefaultInstance();
   SchemeItem::default_instance_->InitAsDefaultInstance();
@@ -1439,11 +1439,11 @@ struct StaticDescriptorInitializer_serialization_2eproto {
     protobuf_AddDesc_serialization_2eproto();
   }
 } static_descriptor_initializer_serialization_2eproto_;
-const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor() {
+const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return SchemeUnit_descriptor_;
+  return SchemaUnit_descriptor_;
 }
-bool SchemeUnit_IsValid(int value) {
+bool SchemaUnit_IsValid(int value) {
   switch(value) {
     case 0:
     case 1:
@@ -2879,7 +2879,7 @@ void SchemePoint::Swap(SchemePoint* other) {
 const int Envelope::kClassnamehashFieldNumber;
 const int Envelope::kSchemeitemFieldNumber;
 const int Envelope::kDeviceobjectFieldNumber;
-const int Envelope::kSchemeFieldNumber;
+const int Envelope::kSchemaFieldNumber;
 const int Envelope::kSchemelayerFieldNumber;
 const int Envelope::kFblelementFieldNumber;
 const int Envelope::kConfigurationFieldNumber;
@@ -2893,7 +2893,7 @@ Envelope::Envelope()
 void Envelope::InitAsDefaultInstance() {
   schemeitem_ = const_cast< ::Proto::SchemeItem*>(&::Proto::SchemeItem::default_instance());
   deviceobject_ = const_cast< ::Proto::DeviceObject*>(&::Proto::DeviceObject::default_instance());
-  scheme_ = const_cast< ::Proto::Scheme*>(&::Proto::Scheme::default_instance());
+  schema_ = const_cast< ::Proto::Schema*>(&::Proto::Schema::default_instance());
   schemelayer_ = const_cast< ::Proto::SchemeLayer*>(&::Proto::SchemeLayer::default_instance());
   fblelement_ = const_cast< ::Proto::FblElement*>(&::Proto::FblElement::default_instance());
   configuration_ = const_cast< ::Proto::Configuration*>(&::Proto::Configuration::default_instance());
@@ -2910,7 +2910,7 @@ void Envelope::SharedCtor() {
   classnamehash_ = 0u;
   schemeitem_ = NULL;
   deviceobject_ = NULL;
-  scheme_ = NULL;
+  schema_ = NULL;
   schemelayer_ = NULL;
   fblelement_ = NULL;
   configuration_ = NULL;
@@ -2925,7 +2925,7 @@ void Envelope::SharedDtor() {
   if (this != default_instance_) {
     delete schemeitem_;
     delete deviceobject_;
-    delete scheme_;
+    delete schema_;
     delete schemelayer_;
     delete fblelement_;
     delete configuration_;
@@ -2962,8 +2962,8 @@ void Envelope::Clear() {
     if (has_deviceobject()) {
       if (deviceobject_ != NULL) deviceobject_->::Proto::DeviceObject::Clear();
     }
-    if (has_scheme()) {
-      if (scheme_ != NULL) scheme_->::Proto::Scheme::Clear();
+    if (has_schema()) {
+      if (schema_ != NULL) schema_->::Proto::Schema::Clear();
     }
     if (has_schemelayer()) {
       if (schemelayer_ != NULL) schemelayer_->::Proto::SchemeLayer::Clear();
@@ -3024,17 +3024,17 @@ bool Envelope::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(802)) goto parse_scheme;
+        if (input->ExpectTag(802)) goto parse_schema;
         break;
       }
 
-      // optional .Proto.Scheme scheme = 100;
+      // optional .Proto.Schema schema = 100;
       case 100: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_scheme:
+         parse_schema:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_scheme()));
+               input, mutable_schema()));
         } else {
           goto handle_uninterpreted;
         }
@@ -3119,10 +3119,10 @@ void Envelope::SerializeWithCachedSizes(
       7, this->deviceobject(), output);
   }
 
-  // optional .Proto.Scheme scheme = 100;
-  if (has_scheme()) {
+  // optional .Proto.Schema schema = 100;
+  if (has_schema()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      100, this->scheme(), output);
+      100, this->schema(), output);
   }
 
   // optional .Proto.SchemeLayer schemelayer = 101;
@@ -3170,11 +3170,11 @@ void Envelope::SerializeWithCachedSizes(
         7, this->deviceobject(), target);
   }
 
-  // optional .Proto.Scheme scheme = 100;
-  if (has_scheme()) {
+  // optional .Proto.Schema schema = 100;
+  if (has_schema()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        100, this->scheme(), target);
+        100, this->schema(), target);
   }
 
   // optional .Proto.SchemeLayer schemelayer = 101;
@@ -3230,11 +3230,11 @@ int Envelope::ByteSize() const {
           this->deviceobject());
     }
 
-    // optional .Proto.Scheme scheme = 100;
-    if (has_scheme()) {
+    // optional .Proto.Schema schema = 100;
+    if (has_schema()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->scheme());
+          this->schema());
     }
 
     // optional .Proto.SchemeLayer schemelayer = 101;
@@ -3294,8 +3294,8 @@ void Envelope::MergeFrom(const Envelope& from) {
     if (from.has_deviceobject()) {
       mutable_deviceobject()->::Proto::DeviceObject::MergeFrom(from.deviceobject());
     }
-    if (from.has_scheme()) {
-      mutable_scheme()->::Proto::Scheme::MergeFrom(from.scheme());
+    if (from.has_schema()) {
+      mutable_schema()->::Proto::Schema::MergeFrom(from.schema());
     }
     if (from.has_schemelayer()) {
       mutable_schemelayer()->::Proto::SchemeLayer::MergeFrom(from.schemelayer());
@@ -3331,8 +3331,8 @@ bool Envelope::IsInitialized() const {
   if (has_deviceobject()) {
     if (!this->deviceobject().IsInitialized()) return false;
   }
-  if (has_scheme()) {
-    if (!this->scheme().IsInitialized()) return false;
+  if (has_schema()) {
+    if (!this->schema().IsInitialized()) return false;
   }
   if (has_schemelayer()) {
     if (!this->schemelayer().IsInitialized()) return false;
@@ -3351,7 +3351,7 @@ void Envelope::Swap(Envelope* other) {
     std::swap(classnamehash_, other->classnamehash_);
     std::swap(schemeitem_, other->schemeitem_);
     std::swap(deviceobject_, other->deviceobject_);
-    std::swap(scheme_, other->scheme_);
+    std::swap(schema_, other->schema_);
     std::swap(schemelayer_, other->schemelayer_);
     std::swap(fblelement_, other->fblelement_);
     std::swap(configuration_, other->configuration_);
@@ -6089,24 +6089,24 @@ void AfbParam::Swap(AfbParam* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int Scheme::kUuidFieldNumber;
-const int Scheme::kStrIDFieldNumber;
-const int Scheme::kCaptionFieldNumber;
-const int Scheme::kWidthFieldNumber;
-const int Scheme::kHeightFieldNumber;
-const int Scheme::kUnitFieldNumber;
-const int Scheme::kExcludeFromBuildFieldNumber;
-const int Scheme::kLayersFieldNumber;
-const int Scheme::kAfbsFieldNumber;
-const int Scheme::kLogicsSchemeFieldNumber;
+const int Schema::kUuidFieldNumber;
+const int Schema::kStrIDFieldNumber;
+const int Schema::kCaptionFieldNumber;
+const int Schema::kWidthFieldNumber;
+const int Schema::kHeightFieldNumber;
+const int Schema::kUnitFieldNumber;
+const int Schema::kExcludeFromBuildFieldNumber;
+const int Schema::kLayersFieldNumber;
+const int Schema::kAfbsFieldNumber;
+const int Schema::kLogicsSchemeFieldNumber;
 #endif  // !_MSC_VER
 
-Scheme::Scheme()
+Schema::Schema()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void Scheme::InitAsDefaultInstance() {
+void Schema::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
   strid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
@@ -6114,13 +6114,13 @@ void Scheme::InitAsDefaultInstance() {
   logics_scheme_ = const_cast< ::Proto::LogicScheme*>(&::Proto::LogicScheme::default_instance());
 }
 
-Scheme::Scheme(const Scheme& from)
+Schema::Schema(const Schema& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void Scheme::SharedCtor() {
+void Schema::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
   strid_ = NULL;
@@ -6134,11 +6134,11 @@ void Scheme::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-Scheme::~Scheme() {
+Schema::~Schema() {
   SharedDtor();
 }
 
-void Scheme::SharedDtor() {
+void Schema::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
     delete strid_;
@@ -6148,28 +6148,28 @@ void Scheme::SharedDtor() {
   }
 }
 
-void Scheme::SetCachedSize(int size) const {
+void Schema::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* Scheme::descriptor() {
+const ::google::protobuf::Descriptor* Schema::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return Scheme_descriptor_;
+  return Schema_descriptor_;
 }
 
-const Scheme& Scheme::default_instance() {
+const Schema& Schema::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-Scheme* Scheme::default_instance_ = NULL;
+Schema* Schema::default_instance_ = NULL;
 
-Scheme* Scheme::New() const {
-  return new Scheme;
+Schema* Schema::New() const {
+  return new Schema;
 }
 
-void Scheme::Clear() {
+void Schema::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
@@ -6198,7 +6198,7 @@ void Scheme::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool Scheme::MergePartialFromCodedStream(
+bool Schema::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -6277,7 +6277,7 @@ bool Scheme::MergePartialFromCodedStream(
         break;
       }
 
-      // required .Proto.SchemeUnit unit = 6;
+      // required .Proto.SchemaUnit unit = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -6286,8 +6286,8 @@ bool Scheme::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::Proto::SchemeUnit_IsValid(value)) {
-            set_unit(static_cast< ::Proto::SchemeUnit >(value));
+          if (::Proto::SchemaUnit_IsValid(value)) {
+            set_unit(static_cast< ::Proto::SchemaUnit >(value));
           } else {
             mutable_unknown_fields()->AddVarint(6, value);
           }
@@ -6373,7 +6373,7 @@ bool Scheme::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void Scheme::SerializeWithCachedSizes(
+void Schema::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -6403,7 +6403,7 @@ void Scheme::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(5, this->height(), output);
   }
 
-  // required .Proto.SchemeUnit unit = 6;
+  // required .Proto.SchemaUnit unit = 6;
   if (has_unit()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       6, this->unit(), output);
@@ -6438,7 +6438,7 @@ void Scheme::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* Scheme::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* Schema::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -6471,7 +6471,7 @@ void Scheme::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(5, this->height(), target);
   }
 
-  // required .Proto.SchemeUnit unit = 6;
+  // required .Proto.SchemaUnit unit = 6;
   if (has_unit()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       6, this->unit(), target);
@@ -6510,7 +6510,7 @@ void Scheme::SerializeWithCachedSizes(
   return target;
 }
 
-int Scheme::ByteSize() const {
+int Schema::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -6545,7 +6545,7 @@ int Scheme::ByteSize() const {
       total_size += 1 + 8;
     }
 
-    // required .Proto.SchemeUnit unit = 6;
+    // required .Proto.SchemaUnit unit = 6;
     if (has_unit()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->unit());
@@ -6592,10 +6592,10 @@ int Scheme::ByteSize() const {
   return total_size;
 }
 
-void Scheme::MergeFrom(const ::google::protobuf::Message& from) {
+void Schema::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const Scheme* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const Scheme*>(
+  const Schema* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Schema*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -6604,7 +6604,7 @@ void Scheme::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void Scheme::MergeFrom(const Scheme& from) {
+void Schema::MergeFrom(const Schema& from) {
   GOOGLE_CHECK_NE(&from, this);
   layers_.MergeFrom(from.layers_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -6641,19 +6641,19 @@ void Scheme::MergeFrom(const Scheme& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void Scheme::CopyFrom(const ::google::protobuf::Message& from) {
+void Schema::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void Scheme::CopyFrom(const Scheme& from) {
+void Schema::CopyFrom(const Schema& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Scheme::IsInitialized() const {
+bool Schema::IsInitialized() const {
   if ((_has_bits_[0] & 0x0000013f) != 0x0000013f) return false;
 
   if (has_uuid()) {
@@ -6677,7 +6677,7 @@ bool Scheme::IsInitialized() const {
   return true;
 }
 
-void Scheme::Swap(Scheme* other) {
+void Schema::Swap(Schema* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
     std::swap(strid_, other->strid_);
@@ -6695,11 +6695,11 @@ void Scheme::Swap(Scheme* other) {
   }
 }
 
-::google::protobuf::Metadata Scheme::GetMetadata() const {
+::google::protobuf::Metadata Schema::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = Scheme_descriptor_;
-  metadata.reflection = Scheme_reflection_;
+  metadata.descriptor = Schema_descriptor_;
+  metadata.reflection = Schema_reflection_;
   return metadata;
 }
 
@@ -7579,7 +7579,7 @@ bool SchemeItem::MergePartialFromCodedStream(
         break;
       }
 
-      // required .Proto.SchemeUnit itemUnit = 4;
+      // required .Proto.SchemaUnit itemUnit = 4;
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -7588,8 +7588,8 @@ bool SchemeItem::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::Proto::SchemeUnit_IsValid(value)) {
-            set_itemunit(static_cast< ::Proto::SchemeUnit >(value));
+          if (::Proto::SchemaUnit_IsValid(value)) {
+            set_itemunit(static_cast< ::Proto::SchemaUnit >(value));
           } else {
             mutable_unknown_fields()->AddVarint(4, value);
           }
@@ -7874,7 +7874,7 @@ void SchemeItem::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->islocked(), output);
   }
 
-  // required .Proto.SchemeUnit itemUnit = 4;
+  // required .Proto.SchemaUnit itemUnit = 4;
   if (has_itemunit()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       4, this->itemunit(), output);
@@ -8006,7 +8006,7 @@ void SchemeItem::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->islocked(), target);
   }
 
-  // required .Proto.SchemeUnit itemUnit = 4;
+  // required .Proto.SchemaUnit itemUnit = 4;
   if (has_itemunit()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       4, this->itemunit(), target);
@@ -8157,7 +8157,7 @@ int SchemeItem::ByteSize() const {
       total_size += 1 + 1;
     }
 
-    // required .Proto.SchemeUnit itemUnit = 4;
+    // required .Proto.SchemaUnit itemUnit = 4;
     if (has_itemunit()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->itemunit());

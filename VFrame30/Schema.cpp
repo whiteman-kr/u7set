@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "Scheme.h"
+#include "Schema.h"
 #include "FblItem.h"
 #include "SchemeItemLink.h"
 #include "HorzVertLinks.h"
@@ -7,22 +7,22 @@
 
 namespace VFrame30
 {
-	Factory<VFrame30::Scheme> SchemeFactory;
+	Factory<VFrame30::Schema> SchemaFactory;
 
-	Scheme::Scheme(void)
+	Schema::Schema(void)
 	{
 		Init();
 	}
 
-	Scheme::~Scheme(void)
+	Schema::~Schema(void)
 	{
 	}
 
-	void Scheme::Init(void)
+	void Schema::Init(void)
 	{
-		ADD_PROPERTY_GETTER_SETTER(bool, ExcludeFromBuild, true, Scheme::excludeFromBuild, Scheme::setExcludeFromBuild);
-		ADD_PROPERTY_GETTER_SETTER(double, SchemeWidth, true, Scheme::docWidth, Scheme::setDocWidth);
-		ADD_PROPERTY_GETTER_SETTER(double, SchemeHeight, true, Scheme::docHeight, Scheme::setDocHeight);
+		ADD_PROPERTY_GETTER_SETTER(bool, ExcludeFromBuild, true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemaWidth, true, Schema::docWidth, Schema::setDocWidth);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemaHeight, true, Schema::docHeight, Schema::setDocHeight);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -32,23 +32,23 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool Scheme::SaveData(Proto::Envelope* message) const
+	bool Schema::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
 		
-		Proto::Scheme* mutableScheme = message->mutable_scheme();
+		Proto::Schema* mutableSchema = message->mutable_schema();
 
-		Proto::Write(mutableScheme->mutable_uuid(), m_guid);
-		Proto::Write(mutableScheme->mutable_strid(), m_strID);
-		Proto::Write(mutableScheme->mutable_caption(), m_caption);
+		Proto::Write(mutableSchema->mutable_uuid(), m_guid);
+		Proto::Write(mutableSchema->mutable_strid(), m_strID);
+		Proto::Write(mutableSchema->mutable_caption(), m_caption);
 
-		mutableScheme->set_width(m_width);
-		mutableScheme->set_height(m_height);
-		mutableScheme->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
-		mutableScheme->set_excludefrombuild(m_excludeFromBuild);
+		mutableSchema->set_width(m_width);
+		mutableSchema->set_height(m_height);
+		mutableSchema->set_unit(static_cast<Proto::SchemaUnit>(m_unit));
+		mutableSchema->set_excludefrombuild(m_excludeFromBuild);
 
 		// Save Layers
 		//
@@ -56,42 +56,42 @@ namespace VFrame30
 
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			Proto::Envelope* pLayerMessage = mutableScheme->add_layers();
+			Proto::Envelope* pLayerMessage = mutableSchema->add_layers();
 			saveLayersResult &= layer->get()->Save(pLayerMessage);
 		}
 
 		// Save Afb Collection
 		//
-		m_afbCollection.SaveData(mutableScheme->mutable_afbs());
+		m_afbCollection.SaveData(mutableSchema->mutable_afbs());
 
 		return saveLayersResult;
 	}
 
-	bool Scheme::LoadData(const Proto::Envelope& message)
+	bool Schema::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_scheme() == false)
+		if (message.has_schema() == false)
 		{
-			assert(message.has_scheme());
+			assert(message.has_schema());
 			return false;
 		}
 
-		const Proto::Scheme& scheme = message.scheme();
+		const Proto::Schema& schema = message.schema();
 
-		m_guid = Proto::Read(scheme.uuid());
-		Proto::Read(scheme.strid(), &m_strID);
-		Proto::Read(scheme.caption(), &m_caption);
-		m_width = scheme.width();
-		m_height = scheme.height();
-		m_unit = static_cast<SchemeUnit>(scheme.unit());
-		m_excludeFromBuild = scheme.excludefrombuild();
+		m_guid = Proto::Read(schema.uuid());
+		Proto::Read(schema.strid(), &m_strID);
+		Proto::Read(schema.caption(), &m_caption);
+		m_width = schema.width();
+		m_height = schema.height();
+		m_unit = static_cast<SchemaUnit>(schema.unit());
+		m_excludeFromBuild = schema.excludefrombuild();
 
 		// Прочитать Layers
 		//
 		Layers.clear();
 
-		for (int i = 0; i < scheme.layers().size(); i++)
+		for (int i = 0; i < schema.layers().size(); i++)
 		{
-			SchemeLayer* pLayer = SchemeLayer::Create(scheme.layers(i));
+			SchemeLayer* pLayer = SchemeLayer::Create(schema.layers(i));
 			
 			if (pLayer == nullptr)
 			{
@@ -102,45 +102,45 @@ namespace VFrame30
 			Layers.push_back(std::shared_ptr<SchemeLayer>(pLayer));
 		}
 
-		if (scheme.layers().size() != (int)Layers.size())
+		if (schema.layers().size() != (int)Layers.size())
 		{
-			assert(scheme.layers().size() == (int)Layers.size());
+			assert(schema.layers().size() == (int)Layers.size());
 			Layers.clear();
 			return false;
 		}
 
 		// Load Afb Collection
 		//
-		m_afbCollection.LoadData(scheme.afbs());
+		m_afbCollection.LoadData(schema.afbs());
 
 		return true;
 	}
 
-	Scheme* Scheme::CreateObject(const Proto::Envelope& message)
+	Schema* Schema::CreateObject(const Proto::Envelope& message)
 	{
 		// This function can create only one instance
 		//
-		if (message.has_scheme() == false)
+		if (message.has_schema() == false)
 		{
-			assert(message.has_scheme());
+			assert(message.has_schema());
 			return nullptr;
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		Scheme* scheme = SchemeFactory.Create(classNameHash);
+		Schema* schema = SchemaFactory.Create(classNameHash);
 
-		if (scheme == nullptr)
+		if (schema == nullptr)
 		{
-			assert(scheme);
+			assert(schema);
 			return nullptr;
 		}
 		
-		scheme->LoadData(message);
+		schema->LoadData(message);
 
-		return scheme;
+		return schema;
 	}
 
-	void Scheme::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
+	void Schema::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -186,12 +186,12 @@ namespace VFrame30
 		}
 	}
 
-	void Scheme::Print()
+	void Schema::Print()
 	{
 		assert(false);
 	}
 
-	void Scheme::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Schema::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
 	{
 		if (pVideoFrameWidgetAgent == nullptr)
 		{
@@ -234,7 +234,7 @@ namespace VFrame30
 		return;
 	}
 
-	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
+	void Schema::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
 	{
 		assert(false);
 		Q_UNUSED(schemeItem);
@@ -271,9 +271,9 @@ namespace VFrame30
 		return;
 	}
 
-	int Scheme::GetDocumentWidth(double DpiX, double zoom) const
+	int Schema::GetDocumentWidth(double DpiX, double zoom) const
 	{
-		if (unit() == SchemeUnit::Display)
+		if (unit() == SchemaUnit::Display)
 		{
 			return static_cast<int>(docWidth() * (zoom / 100.0));
 		}
@@ -283,9 +283,9 @@ namespace VFrame30
 		}
 	}
 
-	int Scheme::GetDocumentHeight(double DpiY, double zoom) const
+	int Schema::GetDocumentHeight(double DpiY, double zoom) const
 	{
-		if (unit() == SchemeUnit::Display)
+		if (unit() == SchemaUnit::Display)
 		{
 			return static_cast<int>(docHeight() * (zoom / 100.0));
 		}
@@ -295,12 +295,12 @@ namespace VFrame30
 		}
 	}
 
-	int Scheme::GetLayerCount() const
+	int Schema::GetLayerCount() const
 	{
 		return (int)Layers.size();
 	}
 
-	void Scheme::BuildFblConnectionMap() const
+	void Schema::BuildFblConnectionMap() const
 	{
 		// --
 		//
@@ -447,12 +447,12 @@ namespace VFrame30
 
 	// Guid
 	//
-	QUuid Scheme::guid() const
+	QUuid Schema::guid() const
 	{
 		return m_guid;
 	}
 
-	void Scheme::setGuid(const QUuid& guid)
+	void Schema::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 		return;
@@ -460,106 +460,106 @@ namespace VFrame30
 
 	// StrID
 	//
-	QString Scheme::strID() const
+	QString Schema::strID() const
 	{
 		return m_strID;
 	}
 
-	void Scheme::setStrID(const QString& strID)
+	void Schema::setStrID(const QString& strID)
 	{
 		m_strID = strID;
 	}
 
 	// Caption
 	//
-	QString Scheme::caption() const
+	QString Schema::caption() const
 	{
 		return m_caption;
 	}
 
-	void Scheme::setCaption(const QString& caption)
+	void Schema::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Width
 	//
-	double Scheme::docWidth() const
+	double Schema::docWidth() const
 	{
 		return m_width;
 	}
 
-	void Scheme::setDocWidth(double width)
+	void Schema::setDocWidth(double width)
 	{
 		m_width = width;
 	}
 
 	// Height
 	//
-	double Scheme::docHeight() const
+	double Schema::docHeight() const
 	{
 		return m_height;
 	}
 
-	void Scheme::setDocHeight(double height)
+	void Schema::setDocHeight(double height)
 	{
 		m_height = height;
 	}
 
 	// Unit
 	//
-	SchemeUnit Scheme::unit() const
+	SchemaUnit Schema::unit() const
 	{
 		return m_unit;
 	}
 
-	void Scheme::setUnit(SchemeUnit value)
+	void Schema::setUnit(SchemaUnit value)
 	{
 		m_unit = value;
 	}
 
-	double Scheme::gridSize() const
+	double Schema::gridSize() const
 	{
 		return m_gridSize;
 	}
 
-	void Scheme::setGridSize(double value)
+	void Schema::setGridSize(double value)
 	{
 		m_gridSize = value;
 	}
 
-	int Scheme::pinGridStep() const
+	int Schema::pinGridStep() const
 	{
 		return m_pinGridStep;
 	}
 
-	void Scheme::setPinGridStep(int value)
+	void Schema::setPinGridStep(int value)
 	{
 		m_pinGridStep = value;
 	}
 
-	bool Scheme::excludeFromBuild() const
+	bool Schema::excludeFromBuild() const
 	{
 		return m_excludeFromBuild;
 	}
 
-	void Scheme::setExcludeFromBuild(bool value)
+	void Schema::setExcludeFromBuild(bool value)
 	{
 		m_excludeFromBuild = value;
 	}
 
-	const Afb::AfbElementCollection& Scheme::afbCollection() const
+	const Afb::AfbElementCollection& Schema::afbCollection() const
 	{
 		return m_afbCollection;
 	}
 
-	void Scheme::setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements)
+	void Schema::setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements)
 	{
 		// set new collection
 		//
 		m_afbCollection.setElements(elements);
 
-		// update scheme items
+		// update schema items
 		//
 	}
 

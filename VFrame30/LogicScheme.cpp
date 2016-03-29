@@ -7,7 +7,7 @@ namespace VFrame30
 	{
 		ADD_PROPERTY_GETTER_SETTER(QString, HardwareStrIDs, true, LogicScheme::hardwareStrIds, LogicScheme::setHardwareStrIds)
 
-		setUnit(SchemeUnit::Inch);
+		setUnit(SchemaUnit::Inch);
 
 		setGridSize(Settings::defaultGridSize(unit()));
 		setPinGridStep(4);
@@ -28,18 +28,18 @@ namespace VFrame30
 
 	bool LogicScheme::SaveData(Proto::Envelope* message) const
 	{
-		bool result = Scheme::SaveData(message);
+		bool result = Schema::SaveData(message);
 
-		if (result == false || message->has_scheme() == false)
+		if (result == false || message->has_schema() == false)
 		{
 			assert(result);
-			assert(message->has_scheme());
+			assert(message->has_schema());
 			return false;
 		}
 
 		// --
 		//
-		Proto::LogicScheme* ls = message->mutable_scheme()->mutable_logics_scheme();
+		Proto::LogicScheme* ls = message->mutable_schema()->mutable_logics_scheme();
 
 		for (const QString& strId : m_hardwareStrIds)
 		{
@@ -52,15 +52,15 @@ namespace VFrame30
 
 	bool LogicScheme::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_scheme() == false)
+		if (message.has_schema() == false)
 		{
-			assert(message.has_scheme());
+			assert(message.has_schema());
 			return false;
 		}
 
 		// --
 		//
-		bool result = Scheme::LoadData(message);
+		bool result = Schema::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -68,13 +68,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.scheme().has_logics_scheme() == false)
+		if (message.schema().has_logics_scheme() == false)
 		{
-			assert(message.scheme().has_logics_scheme());
+			assert(message.schema().has_logics_scheme());
 			return false;
 		}
 
-		const Proto::LogicScheme& ls = message.scheme().logics_scheme();
+		const Proto::LogicScheme& ls = message.schema().logics_scheme();
 
 		m_hardwareStrIds.clear();
 		m_hardwareStrIds.reserve(ls.hardware_strids_size());
@@ -93,7 +93,7 @@ namespace VFrame30
 	{
 		BuildFblConnectionMap();
 
-		Scheme::Draw(pDrawParam, clipRect);
+		Schema::Draw(pDrawParam, clipRect);
 		return;
     }
 

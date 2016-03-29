@@ -70,7 +70,7 @@ public slots:
 	// Data
 	//
 protected:
-	std::function<VFrame30::Scheme*()> m_createSchemeFunc;	// same as in SchemeControlTabPage
+	std::function<VFrame30::Schema*()> m_createSchemeFunc;	// same as in SchemeControlTabPage
 	QTabWidget* m_tabWidget;
 };
 
@@ -88,7 +88,7 @@ public:
 			const QString& fileExt,
 			DbController* db,
 			const QString& parentFileName,
-			std::function<VFrame30::Scheme*()> createSchemeFunc) :
+			std::function<VFrame30::Schema*()> createSchemeFunc) :
 		HasDbController(db),
 		m_createSchemeFunc(createSchemeFunc)
 	{
@@ -124,7 +124,7 @@ public:
     virtual ~SchemeControlTabPage();
 
 public:
-	VFrame30::Scheme* createScheme() const;
+	VFrame30::Schema* createScheme() const;
 
 protected:
     void CreateActions();
@@ -154,7 +154,7 @@ public:
     // Data
     //
 private:
-	std::function<VFrame30::Scheme*()> m_createSchemeFunc;
+	std::function<VFrame30::Schema*()> m_createSchemeFunc;
     SchemeFileView* m_filesView;
 };
 
@@ -164,15 +164,15 @@ private:
 template<typename SchemeType>
 SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
-	static_assert(std::is_base_of<VFrame30::Scheme, SchemeType>::value, "Base class must be VFrame30::Scheme");
+	static_assert(std::is_base_of<VFrame30::Schema, SchemeType>::value, "Base class must be VFrame30::Scheme");
 	assert(dbcontroller != nullptr);
 
 	SchemesTabPage* p = new SchemesTabPage(dbcontroller, parent);
 
 	// Create Scheme function, will be stored in two places, SchemeTabPage and SchemeControlTabPage
 	//
-	std::function<VFrame30::Scheme*()> createFunc(
-		[]() -> VFrame30::Scheme*
+	std::function<VFrame30::Schema*()> createFunc(
+		[]() -> VFrame30::Schema*
 		{
 			return new SchemeType();
 		});
@@ -199,7 +199,7 @@ class EditSchemeTabPage : public QWidget, public HasDbController
 
 public:
 	EditSchemeTabPage() = delete;
-	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* db);
+	EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* db);
 	virtual ~EditSchemeTabPage();
 
 	// Public methods

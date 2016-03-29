@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scheme.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
@@ -10,7 +10,7 @@ namespace VFrame30
 
 	public:
 		explicit SchemeView(QWidget *parent = 0);
-		explicit SchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidget *parent = 0);
+		explicit SchemeView(std::shared_ptr<VFrame30::Schema>& scheme, QWidget *parent = 0);
 
 	protected:
 		void init();
@@ -29,10 +29,10 @@ namespace VFrame30
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-		std::shared_ptr<Scheme>& scheme();
-		std::shared_ptr<Scheme> scheme() const;
+		std::shared_ptr<Schema>& scheme();
+		std::shared_ptr<Schema> scheme() const;
 
-		void setScheme(std::shared_ptr<Scheme>& scheme, bool repaint);
+		void setScheme(std::shared_ptr<Schema>& scheme, bool repaint);
 		
 		// Events
 		//
@@ -48,7 +48,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		std::shared_ptr<VFrame30::Scheme> m_scheme;
+		std::shared_ptr<VFrame30::Schema> m_scheme;
 		double m_zoom = 100.0;
 	};
 }

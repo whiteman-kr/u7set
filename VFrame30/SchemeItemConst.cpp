@@ -4,13 +4,13 @@ namespace VFrame30
 {
 
 	SchemeItemConst::SchemeItemConst() :
-		SchemeItemConst(SchemeUnit::Inch)
+		SchemeItemConst(SchemaUnit::Inch)
 	{
 		// This constructor can be called while serialization
 		//
 	}
 
-	SchemeItemConst::SchemeItemConst(SchemeUnit unit) :
+	SchemeItemConst::SchemeItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
 		ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemeItemConst::type, SchemeItemConst::setType);
@@ -77,7 +77,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemeItemConst::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
+	void SchemeItemConst::Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 

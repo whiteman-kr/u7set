@@ -2,7 +2,7 @@
 #define SCHEMEPROPERTIESDIALOG_H
 
 #include <QDialog>
-#include "../VFrame30/Scheme.h"
+#include "../VFrame30/Schema.h"
 #include "../include/PropertyEditor.h"
 
 
@@ -27,13 +27,13 @@ public:
 	virtual ~SchemePropertiesDialog();
 
 public:
-	void setScheme(std::shared_ptr<VFrame30::Scheme> scheme);
+	void setScheme(std::shared_ptr<VFrame30::Schema> scheme);
 
 private:
 	Ui::SchemePropertiesDialog *ui;
 
 	SchemePropertyEditor* m_propertyEditor = nullptr;
-	std::shared_ptr<VFrame30::Scheme> m_scheme;
+	std::shared_ptr<VFrame30::Schema> m_scheme;
 };
 
 //

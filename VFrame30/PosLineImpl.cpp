@@ -329,13 +329,13 @@ namespace VFrame30
 	{
 		double pt = std::min(m_startXDocPt, m_endXDocPt);		// Value in UnitDocPt
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -345,16 +345,16 @@ namespace VFrame30
 	{
 		double left = std::min(m_startXDocPt, m_endXDocPt);
 
-		if (itemUnit() != SchemeUnit::Display)
+		if (itemUnit() != SchemaUnit::Display)
 		{
-			left = CUtils::ConvertPoint(left, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			left = CUtils::ConvertPoint(left, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 		}
 
 		double delta = value - left;
 
-		if (itemUnit() != SchemeUnit::Display)
+		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 		}
 
 		m_startXDocPt = m_startXDocPt + delta;
@@ -365,13 +365,13 @@ namespace VFrame30
 	{
 		double pt = std::min(m_startYDocPt, m_endYDocPt);		// Value in UnitDocPt
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 				
@@ -381,16 +381,16 @@ namespace VFrame30
 	{
 		double top = std::min(m_startYDocPt, m_endYDocPt);
 
-		if (itemUnit() != SchemeUnit::Display)
+		if (itemUnit() != SchemaUnit::Display)
 		{
-			top = CUtils::ConvertPoint(top, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			top = CUtils::ConvertPoint(top, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 		}
 
 		double delta = value - top;
 
-		if (itemUnit() != SchemeUnit::Display)
+		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
 		}
 
 		m_startYDocPt = m_startYDocPt + delta;
@@ -401,13 +401,13 @@ namespace VFrame30
 	{
 		double pt = std::abs(m_startXDocPt - m_endXDocPt);
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -421,12 +421,12 @@ namespace VFrame30
 			pt = 0;
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
 		}
 
 		if (m_endXDocPt >= m_startXDocPt)
@@ -443,13 +443,13 @@ namespace VFrame30
 	{
 		double pt = std::abs(m_startYDocPt - m_endYDocPt);
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -463,12 +463,12 @@ namespace VFrame30
 			pt = 0;
 		}
 
-		if (itemUnit() == SchemeUnit::Display)
+		if (itemUnit() == SchemaUnit::Display)
 		{
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
 		}
 
 		if (m_endYDocPt >= m_startYDocPt)

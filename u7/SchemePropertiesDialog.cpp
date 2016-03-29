@@ -21,7 +21,7 @@ SchemePropertiesDialog::~SchemePropertiesDialog()
 	delete ui;
 }
 
-void SchemePropertiesDialog::setScheme(std::shared_ptr<VFrame30::Scheme> scheme)
+void SchemePropertiesDialog::setScheme(std::shared_ptr<VFrame30::Schema> scheme)
 {
 	m_scheme = scheme;
 
@@ -65,7 +65,7 @@ void SchemePropertyEditor::valueChanged(QtProperty* property, QVariant value)
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Scheme> scheme = std::dynamic_pointer_cast<VFrame30::Scheme>(objects.front());
+	std::shared_ptr<VFrame30::Schema> scheme = std::dynamic_pointer_cast<VFrame30::Schema>(objects.front());
 	assert(scheme.get() != nullptr);
 
 	if (scheme->propertyValue(property->propertyName()) != value)

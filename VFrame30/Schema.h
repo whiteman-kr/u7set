@@ -13,24 +13,24 @@ namespace VFrame30
 	class SchemeItem;
 
 	
-	class VFRAME30LIBSHARED_EXPORT Scheme :
+	class VFRAME30LIBSHARED_EXPORT Schema :
 		public PropertyObject,
-		public Proto::ObjectSerialization<Scheme>,
-		public DebugInstCounter<Scheme>
+		public Proto::ObjectSerialization<Schema>,
+		public DebugInstCounter<Schema>
 	{
 		Q_OBJECT
 
 	protected:
-		Scheme(void);
+		Schema(void);
 	
 	public:
-		virtual ~Scheme(void);
+		virtual ~Schema(void);
 
 		void Init(void);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<Scheme>;
+		friend Proto::ObjectSerialization<Schema>;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -40,7 +40,7 @@ namespace VFrame30
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должен прочитаться
 		//
-		static Scheme* CreateObject(const Proto::Envelope& message);
+		static Schema* CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//
@@ -81,8 +81,8 @@ namespace VFrame30
 		double docHeight() const;
 		void setDocHeight(double height);
 
-		SchemeUnit unit() const;
-		void setUnit(SchemeUnit value);
+		SchemaUnit unit() const;
+		void setUnit(SchemaUnit value);
 
 		double gridSize() const;
 		void setGridSize(double value);
@@ -107,19 +107,19 @@ namespace VFrame30
 		double m_width;				// pixels or inches, depends on m_unit
 		double m_height;			// pixels or inches, depends on m_unit
 
-		SchemeUnit m_unit;			// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+		SchemaUnit m_unit;			// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 
-		double m_gridSize = 1.0;	// Grid size for this scheme, depends on SchemeUnit
+		double m_gridSize = 1.0;	// Grid size for this schema, depends on SchemaUnit
 		int m_pinGridStep = 2;		// Grid multiplier to determine vertical distance between pins
 
-		bool m_excludeFromBuild = false;	// Exclude Scheme from build or any other processing
+		bool m_excludeFromBuild = false;	// Exclude Schema from build or any other processing
 
 		Afb::AfbElementCollection m_afbCollection;
 	};
 
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::Scheme> SchemeFactory;
+	extern Factory<VFrame30::Schema> SchemaFactory;
 #endif
 }
 

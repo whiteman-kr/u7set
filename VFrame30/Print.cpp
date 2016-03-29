@@ -24,7 +24,7 @@ namespace VFrame30
 	{
 	}
 
-	void CPrint::Add(std::pair<std::shared_ptr<Scheme>, bool> VFrameItem)
+	void CPrint::Add(std::pair<std::shared_ptr<Schema>, bool> VFrameItem)
 	{
 		FrameList.push_back(VFrameItem);
 	}

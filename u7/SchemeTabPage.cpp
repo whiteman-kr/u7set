@@ -211,7 +211,7 @@ SchemeControlTabPage::~SchemeControlTabPage()
 {
 }
 
-VFrame30::Scheme* SchemeControlTabPage::createScheme() const
+VFrame30::Schema* SchemeControlTabPage::createScheme() const
 {
 	return m_createSchemeFunc();
 }
@@ -249,14 +249,14 @@ void SchemeControlTabPage::addFile()
 
 	// Create new Scheme and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::Scheme> scheme(m_createSchemeFunc());
+	std::shared_ptr<VFrame30::Schema> scheme(m_createSchemeFunc());
 
 	scheme->setGuid(QUuid::createUuid());
 
 	scheme->setStrID("#STRID");
 	scheme->setCaption("Caption");
 
-	if (scheme->unit() == VFrame30::SchemeUnit::Display)
+	if (scheme->unit() == VFrame30::SchemaUnit::Display)
 	{
 		scheme->setDocWidth(1280);
 		scheme->setDocHeight(1024);
@@ -607,7 +607,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
 
 	if (vf == nullptr)
 	{
@@ -690,7 +690,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
 
 	QString tabPageTitle;
 	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->strID()).arg(changesetId);
@@ -746,7 +746,7 @@ const DbFileInfo& SchemeControlTabPage::parentFile() const
 // EditSchemeTabPage
 //
 //
-EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Schema> scheme, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
 	m_schemeWidget(nullptr)
 {

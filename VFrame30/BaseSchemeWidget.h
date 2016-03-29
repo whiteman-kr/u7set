@@ -4,7 +4,7 @@
 namespace VFrame30
 {
 	class SchemeView;
-	class Scheme;
+	class Schema;
 
 	class VFRAME30LIBSHARED_EXPORT BaseSchemeWidget : public QScrollArea
 	{
@@ -12,7 +12,7 @@ namespace VFrame30
 
 	public:
 		BaseSchemeWidget() = delete;
-		BaseSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, SchemeView* schemeView);
+		BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemeView* schemeView);
 		virtual ~BaseSchemeWidget();
 
 	protected:
@@ -38,9 +38,9 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		std::shared_ptr<VFrame30::Scheme> scheme();
-		const std::shared_ptr<VFrame30::Scheme> scheme() const;
-		void setScheme(std::shared_ptr<VFrame30::Scheme> scheme);
+		std::shared_ptr<VFrame30::Schema> scheme();
+		const std::shared_ptr<VFrame30::Schema> scheme() const;
+		void setScheme(std::shared_ptr<VFrame30::Schema> scheme);
 
 		SchemeView* schemeView();
 		const SchemeView* schemeView() const;

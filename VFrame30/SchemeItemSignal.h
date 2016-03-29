@@ -12,7 +12,7 @@ namespace VFrame30
 
 	protected:
 		SchemeItemSignal(void);
-		SchemeItemSignal(SchemeUnit unit);
+		SchemeItemSignal(SchemaUnit unit);
 		virtual ~SchemeItemSignal(void);
 	
 	public:
@@ -26,7 +26,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* scheme, const SchemeLayer* layer) const override;
 
 		// Properties
 		//
@@ -60,7 +60,7 @@ namespace VFrame30
 	private:
 		SchemeItemInput(void);
 	public:
-		explicit SchemeItemInput(SchemeUnit unit);
+		explicit SchemeItemInput(SchemaUnit unit);
 		virtual ~SchemeItemInput(void);
 
 		virtual QString buildName() const override;
@@ -91,7 +91,7 @@ namespace VFrame30
 	private:
 		SchemeItemOutput(void);
 	public:
-		explicit SchemeItemOutput(SchemeUnit unit);
+		explicit SchemeItemOutput(SchemaUnit unit);
 		virtual ~SchemeItemOutput(void);
 
 		virtual QString buildName() const override;

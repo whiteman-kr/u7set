@@ -46,7 +46,7 @@ class AfbElementXml;
 class FblElement;
 class AfbSignal;
 class AfbParam;
-class Scheme;
+class Schema;
 class LogicScheme;
 class SchemeLayer;
 class SchemeItem;
@@ -80,25 +80,25 @@ class ModuleConfiguration;
 class ModuleConfigurationValue;
 class Property;
 
-enum SchemeUnit {
+enum SchemaUnit {
   Display = 0,
   Millimeter = 1,
   Inch = 2
 };
-bool SchemeUnit_IsValid(int value);
-const SchemeUnit SchemeUnit_MIN = Display;
-const SchemeUnit SchemeUnit_MAX = Inch;
-const int SchemeUnit_ARRAYSIZE = SchemeUnit_MAX + 1;
+bool SchemaUnit_IsValid(int value);
+const SchemaUnit SchemaUnit_MIN = Display;
+const SchemaUnit SchemaUnit_MAX = Inch;
+const int SchemaUnit_ARRAYSIZE = SchemaUnit_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor();
-inline const ::std::string& SchemeUnit_Name(SchemeUnit value) {
+const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor();
+inline const ::std::string& SchemaUnit_Name(SchemaUnit value) {
   return ::google::protobuf::internal::NameOfEnum(
-    SchemeUnit_descriptor(), value);
+    SchemaUnit_descriptor(), value);
 }
-inline bool SchemeUnit_Parse(
-    const ::std::string& name, SchemeUnit* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<SchemeUnit>(
-    SchemeUnit_descriptor(), name, value);
+inline bool SchemaUnit_Parse(
+    const ::std::string& name, SchemaUnit* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<SchemaUnit>(
+    SchemaUnit_descriptor(), name, value);
 }
 enum ConnectionDirrection {
   Input = 0,
@@ -741,14 +741,14 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::DeviceObject* release_deviceobject();
   inline void set_allocated_deviceobject(::Proto::DeviceObject* deviceobject);
 
-  // optional .Proto.Scheme scheme = 100;
-  inline bool has_scheme() const;
-  inline void clear_scheme();
-  static const int kSchemeFieldNumber = 100;
-  inline const ::Proto::Scheme& scheme() const;
-  inline ::Proto::Scheme* mutable_scheme();
-  inline ::Proto::Scheme* release_scheme();
-  inline void set_allocated_scheme(::Proto::Scheme* scheme);
+  // optional .Proto.Schema schema = 100;
+  inline bool has_schema() const;
+  inline void clear_schema();
+  static const int kSchemaFieldNumber = 100;
+  inline const ::Proto::Schema& schema() const;
+  inline ::Proto::Schema* mutable_schema();
+  inline ::Proto::Schema* release_schema();
+  inline void set_allocated_schema(::Proto::Schema* schema);
 
   // optional .Proto.SchemeLayer schemelayer = 101;
   inline bool has_schemelayer() const;
@@ -785,8 +785,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_schemeitem();
   inline void set_has_deviceobject();
   inline void clear_has_deviceobject();
-  inline void set_has_scheme();
-  inline void clear_has_scheme();
+  inline void set_has_schema();
+  inline void clear_has_schema();
   inline void set_has_schemelayer();
   inline void clear_has_schemelayer();
   inline void set_has_fblelement();
@@ -798,7 +798,7 @@ class Envelope : public ::google::protobuf::Message {
 
   ::Proto::SchemeItem* schemeitem_;
   ::Proto::DeviceObject* deviceobject_;
-  ::Proto::Scheme* scheme_;
+  ::Proto::Schema* schema_;
   ::Proto::SchemeLayer* schemelayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
@@ -1685,14 +1685,14 @@ class AfbParam : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class Scheme : public ::google::protobuf::Message {
+class Schema : public ::google::protobuf::Message {
  public:
-  Scheme();
-  virtual ~Scheme();
+  Schema();
+  virtual ~Schema();
 
-  Scheme(const Scheme& from);
+  Schema(const Schema& from);
 
-  inline Scheme& operator=(const Scheme& from) {
+  inline Schema& operator=(const Schema& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1706,17 +1706,17 @@ class Scheme : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const Scheme& default_instance();
+  static const Schema& default_instance();
 
-  void Swap(Scheme* other);
+  void Swap(Schema* other);
 
   // implements Message ----------------------------------------------
 
-  Scheme* New() const;
+  Schema* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const Scheme& from);
-  void MergeFrom(const Scheme& from);
+  void CopyFrom(const Schema& from);
+  void MergeFrom(const Schema& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1780,12 +1780,12 @@ class Scheme : public ::google::protobuf::Message {
   inline double height() const;
   inline void set_height(double value);
 
-  // required .Proto.SchemeUnit unit = 6;
+  // required .Proto.SchemaUnit unit = 6;
   inline bool has_unit() const;
   inline void clear_unit();
   static const int kUnitFieldNumber = 6;
-  inline ::Proto::SchemeUnit unit() const;
-  inline void set_unit(::Proto::SchemeUnit value);
+  inline ::Proto::SchemaUnit unit() const;
+  inline void set_unit(::Proto::SchemaUnit value);
 
   // optional bool excludeFromBuild = 7 [default = false];
   inline bool has_excludefrombuild() const;
@@ -1824,7 +1824,7 @@ class Scheme : public ::google::protobuf::Message {
   inline ::Proto::LogicScheme* release_logics_scheme();
   inline void set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme);
 
-  // @@protoc_insertion_point(class_scope:Proto.Scheme)
+  // @@protoc_insertion_point(class_scope:Proto.Schema)
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
@@ -1866,7 +1866,7 @@ class Scheme : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static Scheme* default_instance_;
+  static Schema* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2171,12 +2171,12 @@ class SchemeItem : public ::google::protobuf::Message {
   inline bool islocked() const;
   inline void set_islocked(bool value);
 
-  // required .Proto.SchemeUnit itemUnit = 4;
+  // required .Proto.SchemaUnit itemUnit = 4;
   inline bool has_itemunit() const;
   inline void clear_itemunit();
   static const int kItemUnitFieldNumber = 4;
-  inline ::Proto::SchemeUnit itemunit() const;
-  inline void set_itemunit(::Proto::SchemeUnit value);
+  inline ::Proto::SchemaUnit itemunit() const;
+  inline void set_itemunit(::Proto::SchemaUnit value);
 
   // optional bool acceptClick = 5 [default = false];
   inline bool has_acceptclick() const;
@@ -5949,41 +5949,41 @@ inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceob
   }
 }
 
-// optional .Proto.Scheme scheme = 100;
-inline bool Envelope::has_scheme() const {
+// optional .Proto.Schema schema = 100;
+inline bool Envelope::has_schema() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void Envelope::set_has_scheme() {
+inline void Envelope::set_has_schema() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void Envelope::clear_has_scheme() {
+inline void Envelope::clear_has_schema() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void Envelope::clear_scheme() {
-  if (scheme_ != NULL) scheme_->::Proto::Scheme::Clear();
-  clear_has_scheme();
+inline void Envelope::clear_schema() {
+  if (schema_ != NULL) schema_->::Proto::Schema::Clear();
+  clear_has_schema();
 }
-inline const ::Proto::Scheme& Envelope::scheme() const {
-  return scheme_ != NULL ? *scheme_ : *default_instance_->scheme_;
+inline const ::Proto::Schema& Envelope::schema() const {
+  return schema_ != NULL ? *schema_ : *default_instance_->schema_;
 }
-inline ::Proto::Scheme* Envelope::mutable_scheme() {
-  set_has_scheme();
-  if (scheme_ == NULL) scheme_ = new ::Proto::Scheme;
-  return scheme_;
+inline ::Proto::Schema* Envelope::mutable_schema() {
+  set_has_schema();
+  if (schema_ == NULL) schema_ = new ::Proto::Schema;
+  return schema_;
 }
-inline ::Proto::Scheme* Envelope::release_scheme() {
-  clear_has_scheme();
-  ::Proto::Scheme* temp = scheme_;
-  scheme_ = NULL;
+inline ::Proto::Schema* Envelope::release_schema() {
+  clear_has_schema();
+  ::Proto::Schema* temp = schema_;
+  schema_ = NULL;
   return temp;
 }
-inline void Envelope::set_allocated_scheme(::Proto::Scheme* scheme) {
-  delete scheme_;
-  scheme_ = scheme;
-  if (scheme) {
-    set_has_scheme();
+inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
+  delete schema_;
+  schema_ = schema;
+  if (schema) {
+    set_has_schema();
   } else {
-    clear_has_scheme();
+    clear_has_schema();
   }
 }
 
@@ -7305,37 +7305,37 @@ inline void AfbParam::set_dataformat(::Proto::FblDataFormat value) {
 
 // -------------------------------------------------------------------
 
-// Scheme
+// Schema
 
 // required .Proto.Uuid uuid = 1;
-inline bool Scheme::has_uuid() const {
+inline bool Schema::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Scheme::set_has_uuid() {
+inline void Schema::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Scheme::clear_has_uuid() {
+inline void Schema::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void Scheme::clear_uuid() {
+inline void Schema::clear_uuid() {
   if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
   clear_has_uuid();
 }
-inline const ::Proto::Uuid& Scheme::uuid() const {
+inline const ::Proto::Uuid& Schema::uuid() const {
   return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Uuid* Scheme::mutable_uuid() {
+inline ::Proto::Uuid* Schema::mutable_uuid() {
   set_has_uuid();
   if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
   return uuid_;
 }
-inline ::Proto::Uuid* Scheme::release_uuid() {
+inline ::Proto::Uuid* Schema::release_uuid() {
   clear_has_uuid();
   ::Proto::Uuid* temp = uuid_;
   uuid_ = NULL;
   return temp;
 }
-inline void Scheme::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void Schema::set_allocated_uuid(::Proto::Uuid* uuid) {
   delete uuid_;
   uuid_ = uuid;
   if (uuid) {
@@ -7346,34 +7346,34 @@ inline void Scheme::set_allocated_uuid(::Proto::Uuid* uuid) {
 }
 
 // required .Proto.wstring strID = 2;
-inline bool Scheme::has_strid() const {
+inline bool Schema::has_strid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Scheme::set_has_strid() {
+inline void Schema::set_has_strid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Scheme::clear_has_strid() {
+inline void Schema::clear_has_strid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Scheme::clear_strid() {
+inline void Schema::clear_strid() {
   if (strid_ != NULL) strid_->::Proto::wstring::Clear();
   clear_has_strid();
 }
-inline const ::Proto::wstring& Scheme::strid() const {
+inline const ::Proto::wstring& Schema::strid() const {
   return strid_ != NULL ? *strid_ : *default_instance_->strid_;
 }
-inline ::Proto::wstring* Scheme::mutable_strid() {
+inline ::Proto::wstring* Schema::mutable_strid() {
   set_has_strid();
   if (strid_ == NULL) strid_ = new ::Proto::wstring;
   return strid_;
 }
-inline ::Proto::wstring* Scheme::release_strid() {
+inline ::Proto::wstring* Schema::release_strid() {
   clear_has_strid();
   ::Proto::wstring* temp = strid_;
   strid_ = NULL;
   return temp;
 }
-inline void Scheme::set_allocated_strid(::Proto::wstring* strid) {
+inline void Schema::set_allocated_strid(::Proto::wstring* strid) {
   delete strid_;
   strid_ = strid;
   if (strid) {
@@ -7384,34 +7384,34 @@ inline void Scheme::set_allocated_strid(::Proto::wstring* strid) {
 }
 
 // required .Proto.wstring caption = 3;
-inline bool Scheme::has_caption() const {
+inline bool Schema::has_caption() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void Scheme::set_has_caption() {
+inline void Schema::set_has_caption() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void Scheme::clear_has_caption() {
+inline void Schema::clear_has_caption() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void Scheme::clear_caption() {
+inline void Schema::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& Scheme::caption() const {
+inline const ::Proto::wstring& Schema::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* Scheme::mutable_caption() {
+inline ::Proto::wstring* Schema::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* Scheme::release_caption() {
+inline ::Proto::wstring* Schema::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void Scheme::set_allocated_caption(::Proto::wstring* caption) {
+inline void Schema::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -7422,148 +7422,148 @@ inline void Scheme::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required double width = 4;
-inline bool Scheme::has_width() const {
+inline bool Schema::has_width() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void Scheme::set_has_width() {
+inline void Schema::set_has_width() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void Scheme::clear_has_width() {
+inline void Schema::clear_has_width() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void Scheme::clear_width() {
+inline void Schema::clear_width() {
   width_ = 0;
   clear_has_width();
 }
-inline double Scheme::width() const {
+inline double Schema::width() const {
   return width_;
 }
-inline void Scheme::set_width(double value) {
+inline void Schema::set_width(double value) {
   set_has_width();
   width_ = value;
 }
 
 // required double height = 5;
-inline bool Scheme::has_height() const {
+inline bool Schema::has_height() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void Scheme::set_has_height() {
+inline void Schema::set_has_height() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void Scheme::clear_has_height() {
+inline void Schema::clear_has_height() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void Scheme::clear_height() {
+inline void Schema::clear_height() {
   height_ = 0;
   clear_has_height();
 }
-inline double Scheme::height() const {
+inline double Schema::height() const {
   return height_;
 }
-inline void Scheme::set_height(double value) {
+inline void Schema::set_height(double value) {
   set_has_height();
   height_ = value;
 }
 
-// required .Proto.SchemeUnit unit = 6;
-inline bool Scheme::has_unit() const {
+// required .Proto.SchemaUnit unit = 6;
+inline bool Schema::has_unit() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void Scheme::set_has_unit() {
+inline void Schema::set_has_unit() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void Scheme::clear_has_unit() {
+inline void Schema::clear_has_unit() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void Scheme::clear_unit() {
+inline void Schema::clear_unit() {
   unit_ = 0;
   clear_has_unit();
 }
-inline ::Proto::SchemeUnit Scheme::unit() const {
-  return static_cast< ::Proto::SchemeUnit >(unit_);
+inline ::Proto::SchemaUnit Schema::unit() const {
+  return static_cast< ::Proto::SchemaUnit >(unit_);
 }
-inline void Scheme::set_unit(::Proto::SchemeUnit value) {
-  assert(::Proto::SchemeUnit_IsValid(value));
+inline void Schema::set_unit(::Proto::SchemaUnit value) {
+  assert(::Proto::SchemaUnit_IsValid(value));
   set_has_unit();
   unit_ = value;
 }
 
 // optional bool excludeFromBuild = 7 [default = false];
-inline bool Scheme::has_excludefrombuild() const {
+inline bool Schema::has_excludefrombuild() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void Scheme::set_has_excludefrombuild() {
+inline void Schema::set_has_excludefrombuild() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void Scheme::clear_has_excludefrombuild() {
+inline void Schema::clear_has_excludefrombuild() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void Scheme::clear_excludefrombuild() {
+inline void Schema::clear_excludefrombuild() {
   excludefrombuild_ = false;
   clear_has_excludefrombuild();
 }
-inline bool Scheme::excludefrombuild() const {
+inline bool Schema::excludefrombuild() const {
   return excludefrombuild_;
 }
-inline void Scheme::set_excludefrombuild(bool value) {
+inline void Schema::set_excludefrombuild(bool value) {
   set_has_excludefrombuild();
   excludefrombuild_ = value;
 }
 
 // repeated .Proto.Envelope layers = 100;
-inline int Scheme::layers_size() const {
+inline int Schema::layers_size() const {
   return layers_.size();
 }
-inline void Scheme::clear_layers() {
+inline void Schema::clear_layers() {
   layers_.Clear();
 }
-inline const ::Proto::Envelope& Scheme::layers(int index) const {
+inline const ::Proto::Envelope& Schema::layers(int index) const {
   return layers_.Get(index);
 }
-inline ::Proto::Envelope* Scheme::mutable_layers(int index) {
+inline ::Proto::Envelope* Schema::mutable_layers(int index) {
   return layers_.Mutable(index);
 }
-inline ::Proto::Envelope* Scheme::add_layers() {
+inline ::Proto::Envelope* Schema::add_layers() {
   return layers_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-Scheme::layers() const {
+Schema::layers() const {
   return layers_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-Scheme::mutable_layers() {
+Schema::mutable_layers() {
   return &layers_;
 }
 
 // required .Proto.AfbElementCollection afbs = 101;
-inline bool Scheme::has_afbs() const {
+inline bool Schema::has_afbs() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void Scheme::set_has_afbs() {
+inline void Schema::set_has_afbs() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void Scheme::clear_has_afbs() {
+inline void Schema::clear_has_afbs() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void Scheme::clear_afbs() {
+inline void Schema::clear_afbs() {
   if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
   clear_has_afbs();
 }
-inline const ::Proto::AfbElementCollection& Scheme::afbs() const {
+inline const ::Proto::AfbElementCollection& Schema::afbs() const {
   return afbs_ != NULL ? *afbs_ : *default_instance_->afbs_;
 }
-inline ::Proto::AfbElementCollection* Scheme::mutable_afbs() {
+inline ::Proto::AfbElementCollection* Schema::mutable_afbs() {
   set_has_afbs();
   if (afbs_ == NULL) afbs_ = new ::Proto::AfbElementCollection;
   return afbs_;
 }
-inline ::Proto::AfbElementCollection* Scheme::release_afbs() {
+inline ::Proto::AfbElementCollection* Schema::release_afbs() {
   clear_has_afbs();
   ::Proto::AfbElementCollection* temp = afbs_;
   afbs_ = NULL;
   return temp;
 }
-inline void Scheme::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
+inline void Schema::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
   delete afbs_;
   afbs_ = afbs;
   if (afbs) {
@@ -7574,34 +7574,34 @@ inline void Scheme::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
 }
 
 // optional .Proto.LogicScheme logics_scheme = 200;
-inline bool Scheme::has_logics_scheme() const {
+inline bool Schema::has_logics_scheme() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void Scheme::set_has_logics_scheme() {
+inline void Schema::set_has_logics_scheme() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void Scheme::clear_has_logics_scheme() {
+inline void Schema::clear_has_logics_scheme() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void Scheme::clear_logics_scheme() {
+inline void Schema::clear_logics_scheme() {
   if (logics_scheme_ != NULL) logics_scheme_->::Proto::LogicScheme::Clear();
   clear_has_logics_scheme();
 }
-inline const ::Proto::LogicScheme& Scheme::logics_scheme() const {
+inline const ::Proto::LogicScheme& Schema::logics_scheme() const {
   return logics_scheme_ != NULL ? *logics_scheme_ : *default_instance_->logics_scheme_;
 }
-inline ::Proto::LogicScheme* Scheme::mutable_logics_scheme() {
+inline ::Proto::LogicScheme* Schema::mutable_logics_scheme() {
   set_has_logics_scheme();
   if (logics_scheme_ == NULL) logics_scheme_ = new ::Proto::LogicScheme;
   return logics_scheme_;
 }
-inline ::Proto::LogicScheme* Scheme::release_logics_scheme() {
+inline ::Proto::LogicScheme* Schema::release_logics_scheme() {
   clear_has_logics_scheme();
   ::Proto::LogicScheme* temp = logics_scheme_;
   logics_scheme_ = NULL;
   return temp;
 }
-inline void Scheme::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
+inline void Schema::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
   delete logics_scheme_;
   logics_scheme_ = logics_scheme;
   if (logics_scheme) {
@@ -7897,7 +7897,7 @@ inline void SchemeItem::set_islocked(bool value) {
   islocked_ = value;
 }
 
-// required .Proto.SchemeUnit itemUnit = 4;
+// required .Proto.SchemaUnit itemUnit = 4;
 inline bool SchemeItem::has_itemunit() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -7911,11 +7911,11 @@ inline void SchemeItem::clear_itemunit() {
   itemunit_ = 0;
   clear_has_itemunit();
 }
-inline ::Proto::SchemeUnit SchemeItem::itemunit() const {
-  return static_cast< ::Proto::SchemeUnit >(itemunit_);
+inline ::Proto::SchemaUnit SchemeItem::itemunit() const {
+  return static_cast< ::Proto::SchemaUnit >(itemunit_);
 }
-inline void SchemeItem::set_itemunit(::Proto::SchemeUnit value) {
-  assert(::Proto::SchemeUnit_IsValid(value));
+inline void SchemeItem::set_itemunit(::Proto::SchemaUnit value) {
+  assert(::Proto::SchemaUnit_IsValid(value));
   set_has_itemunit();
   itemunit_ = value;
 }
@@ -11241,8 +11241,8 @@ namespace google {
 namespace protobuf {
 
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Proto::SchemeUnit>() {
-  return ::Proto::SchemeUnit_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::Proto::SchemaUnit>() {
+  return ::Proto::SchemaUnit_descriptor();
 }
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Proto::ConnectionDirrection>() {

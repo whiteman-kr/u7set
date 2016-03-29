@@ -16,7 +16,7 @@ namespace EditEngine
 				EditSchemeView* schemeView,
 				QString propertyName,
 				QVariant value,
-				std::shared_ptr<VFrame30::Scheme> scheme,
+				std::shared_ptr<VFrame30::Schema> scheme,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
@@ -31,7 +31,7 @@ namespace EditEngine
 		QVariant m_oldValue;
 		QVariant m_newValue;
 
-		std::shared_ptr<VFrame30::Scheme> m_scheme;
+		std::shared_ptr<VFrame30::Schema> m_scheme;
 	};
 
 }

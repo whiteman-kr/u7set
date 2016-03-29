@@ -1,11 +1,11 @@
 #include "BaseSchemeWidget.h"
-#include "Scheme.h"
+#include "Schema.h"
 #include "SchemeView.h"
 
 namespace VFrame30
 {
 
-	BaseSchemeWidget::BaseSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, SchemeView* schemeView)
+	BaseSchemeWidget::BaseSchemeWidget(std::shared_ptr<VFrame30::Schema> scheme, SchemeView* schemeView)
 	{
 		assert(scheme != nullptr);
 		assert(schemeView != nullptr);
@@ -100,11 +100,11 @@ namespace VFrame30
 
 			switch (scheme()->unit())
 			{
-			case VFrame30::SchemeUnit::Display:
+			case VFrame30::SchemaUnit::Display:
 				newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
 				newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * zoom / 100.0);
 				break;
-			case VFrame30::SchemeUnit::Inch:
+			case VFrame30::SchemaUnit::Inch:
 				newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * logicalDpiX());
 				newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * logicalDpiY());
 				break;
@@ -202,7 +202,7 @@ namespace VFrame30
 
 		// Scaling to zoom factor
 		//
-		if (scheme()->unit() == VFrame30::SchemeUnit::Display)
+		if (scheme()->unit() == VFrame30::SchemaUnit::Display)
 		{
 			docX = x / (zoom() / 100.0);
 			docY = y / (zoom() / 100.0);
@@ -256,7 +256,7 @@ namespace VFrame30
 		int x = mousePos.x() - startX;
 		int y = mousePos.y() - startY;
 
-		if (scheme()->unit() == VFrame30::SchemeUnit::Display)
+		if (scheme()->unit() == VFrame30::SchemaUnit::Display)
 		{
 			destDocPos->setX(x / (zoom / 100.0));
 			destDocPos->setY(y / (zoom / 100.0));
@@ -288,17 +288,17 @@ namespace VFrame30
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Scheme> BaseSchemeWidget::scheme()
+	std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme()
 	{
 		return m_schemeView->scheme();
 	}
 
-	const std::shared_ptr<VFrame30::Scheme> BaseSchemeWidget::scheme() const
+	const std::shared_ptr<VFrame30::Schema> BaseSchemeWidget::scheme() const
 	{
 		return m_schemeView->scheme();
 	}
 
-	void BaseSchemeWidget::setScheme(std::shared_ptr<VFrame30::Scheme> scheme)
+	void BaseSchemeWidget::setScheme(std::shared_ptr<VFrame30::Schema> scheme)
 	{
 		m_schemeView->setScheme(scheme, true);
 	}
@@ -347,11 +347,11 @@ namespace VFrame30
 
 		switch (scheme()->unit())
 		{
-		case VFrame30::SchemeUnit::Display:
+		case VFrame30::SchemaUnit::Display:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
 			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * zoom / 100.0);
 			break;
-		case VFrame30::SchemeUnit::Inch:
+		case VFrame30::SchemaUnit::Inch:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * logicalDpiX());
 			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * logicalDpiY());
 			break;

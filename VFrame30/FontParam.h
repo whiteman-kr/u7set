@@ -56,8 +56,8 @@ namespace VFrame30
 		const QString& name() const;
 		void setName(const QString& value);
 
-		double size(SchemeUnit unit) const;
-		void setSize(double value, SchemeUnit unit);
+		double size(SchemaUnit unit) const;
+		void setSize(double value, SchemaUnit unit);
 
 		double drawSize() const;
 		void setDrawSize(double value);

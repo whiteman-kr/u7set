@@ -2,7 +2,7 @@
 #include "ui_CreateSchemeDialog.h"
 #include "../VFrame30/Settings.h"
 
-CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Scheme> scheme, QWidget* parent) :
+CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Schema> scheme, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateSchemeDialog),
 	m_scheme(scheme)
@@ -17,7 +17,7 @@ CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Scheme> scheme,
 	double h = 0;
 	double precision = 0;
 
-	if (m_scheme->unit() == VFrame30::SchemeUnit::Display)
+	if (m_scheme->unit() == VFrame30::SchemaUnit::Display)
 	{
 		w = m_scheme->docWidth();
 		h = m_scheme->docHeight();
@@ -25,9 +25,9 @@ CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Scheme> scheme,
 	}
 	else
 	{
-		assert(m_scheme->unit() == VFrame30::SchemeUnit::Inch);
+		assert(m_scheme->unit() == VFrame30::SchemaUnit::Inch);
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemeUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
 		{
 			w = m_scheme->docWidth();
 			h = m_scheme->docHeight();
@@ -35,7 +35,7 @@ CreateSchemeDialog::CreateSchemeDialog(std::shared_ptr<VFrame30::Scheme> scheme,
 		}
 		else
 		{
-			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemeUnit::Millimeter);
+			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
 
 			w = m_scheme->docWidth() * 25.4;
 			h = m_scheme->docHeight() * 25.4;
@@ -120,23 +120,23 @@ void CreateSchemeDialog::accept()
 	m_scheme->setCaption(caption);
 
 
-	if (m_scheme->unit() == VFrame30::SchemeUnit::Display)
+	if (m_scheme->unit() == VFrame30::SchemaUnit::Display)
 	{
 		m_scheme->setDocWidth(width);
 		m_scheme->setDocHeight(height);
 	}
 	else
 	{
-		assert(m_scheme->unit() == VFrame30::SchemeUnit::Inch);
+		assert(m_scheme->unit() == VFrame30::SchemaUnit::Inch);
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemeUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
 		{
 			m_scheme->setDocWidth(width);
 			m_scheme->setDocHeight(height);
 		}
 		else
 		{
-			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemeUnit::Millimeter);
+			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
 
 			m_scheme->setDocWidth(width / 25.4);
 			m_scheme->setDocHeight(height / 25.4);

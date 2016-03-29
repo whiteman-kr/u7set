@@ -3,16 +3,16 @@
 
 namespace VFrame30
 {
-	// SchemeUnit
+	// SchemaUnit
 	//
-	enum class SchemeUnit
+	enum class SchemaUnit
 	{
-		Display,			// измерение в точках устройства (пиксели для дисплея)
-		Millimeter,			// измерение в мм
-		Inch				// измерение в дюймах
+		Display,			// display pixels
+		Millimeter,			// mm
+		Inch				// inches
 	};
 
-	// Направление конвертирования координат, по этому типу определяется какой Dpi (DpiX/DpiY) использовать
+	// Conversion directiun, by this DPI can be detected (dpi X/ dpi Y)
 	//
 	enum ConvertDirection
 	{

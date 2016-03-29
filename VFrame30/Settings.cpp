@@ -4,8 +4,8 @@
 
 namespace VFrame30
 {
-	//SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Inch;
-	SchemeUnit Settings::m_regionalUnit = SchemeUnit::Millimeter;
+	//SchemaUnit CSettings::m_regionalUnit = SchemaUnit::Inch;
+	SchemaUnit Settings::m_regionalUnit = SchemaUnit::Millimeter;
 
 	// The min grid size for schemes for Fbl pins positioning
 	//
@@ -13,30 +13,30 @@ namespace VFrame30
 	const double Settings::m_defaultGridSizeMm = mm2in(1);	// 1mm
 	const double Settings::m_defaultGridSizePx = 5;
 
-	SchemeUnit Settings::regionalUnit(void)
+	SchemaUnit Settings::regionalUnit(void)
 	{
 		return m_regionalUnit;
 	}
 
-	void Settings::setRegionalUnit(SchemeUnit value)
+	void Settings::setRegionalUnit(SchemaUnit value)
 	{
 		m_regionalUnit = value;
 	}
 
-	double Settings::defaultGridSize(SchemeUnit unit)
+	double Settings::defaultGridSize(SchemaUnit unit)
 	{
-		if (unit == SchemeUnit::Display)
+		if (unit == SchemaUnit::Display)
 		{
 			return m_defaultGridSizePx;
 		}
 
-		assert(regionalUnit() == SchemeUnit::Inch || regionalUnit() == SchemeUnit::Millimeter);
+		assert(regionalUnit() == SchemaUnit::Inch || regionalUnit() == SchemaUnit::Millimeter);
 
 		switch (regionalUnit())
 		{
-		case SchemeUnit::Inch:
+		case SchemaUnit::Inch:
 			return m_defaultGridSizeIn;
-		case SchemeUnit::Millimeter:
+		case SchemaUnit::Millimeter:
 			return m_defaultGridSizeMm;
 		default:
 			return m_defaultGridSizeIn;

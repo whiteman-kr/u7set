@@ -8,7 +8,7 @@
 //
 //
 
-MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Scheme> scheme) :
+MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> scheme) :
 	BaseSchemeWidget(scheme, new MonitorSchemaView())
 {
 	return;

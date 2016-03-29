@@ -4,7 +4,7 @@
 
 namespace VFrame30
 {
-	CDrawParam::CDrawParam(QPainter* painter, Scheme* scheme, double gridSize, int pinGridStep) :
+	CDrawParam::CDrawParam(QPainter* painter, Schema* scheme, double gridSize, int pinGridStep) :
 		m_painter(painter),
 		m_scheme(scheme),
 		m_gridSize(gridSize),
@@ -28,7 +28,7 @@ namespace VFrame30
 		return m_painter->device();
 	}
 
-	const Scheme* CDrawParam::scheme() const
+	const Schema* CDrawParam::scheme() const
 	{
 		return m_scheme;
 	}
@@ -64,7 +64,7 @@ namespace VFrame30
 	}
 
 
-	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemeUnit unit, const QString& str, const QRectF& rect, int flags)
+	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags)
 	{
 		if (painter == nullptr)
 		{
@@ -101,14 +101,14 @@ namespace VFrame30
 
 		QRectF rc;
 
-		if (unit == SchemeUnit::Display)
+		if (unit == SchemaUnit::Display)
 		{
 			f.setPointSize(static_cast<int>(font.drawSize()));
 			rc = rect;
 		}
 		else
 		{
-			assert(unit == SchemeUnit::Inch);
+			assert(unit == SchemaUnit::Inch);
 								
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
@@ -136,7 +136,7 @@ namespace VFrame30
 		return;
 	}
 
-//	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemeUnit unit, const QString& str, QPointF point, int flags)
+//	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, QPointF point, int flags)
 //	{
 //		if (painter == nullptr)
 //		{
@@ -172,14 +172,14 @@ namespace VFrame30
 
 //		QPointF pt;
 
-//		if (unit == SchemeUnit::Display)
+//		if (unit == SchemaUnit::Display)
 //		{
 //			f.setPointSize(static_cast<int>(font.drawSize()));
 //			pt = point;
 //		}
 //		else
 //		{
-//			assert(unit == SchemeUnit::Inch);
+//			assert(unit == SchemaUnit::Inch);
 
 //			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
