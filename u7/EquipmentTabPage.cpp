@@ -167,23 +167,23 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectPlaceColumn:
-				if (device->place() >= 0)
+				if (device->isRoot() ||
+					device->isSystem() ||
+					device->isRack())
 				{
-					v.setValue<int>(device->place());
+					v.setValue<QString>("");
 				}
 				else
 				{
-					v.setValue<QString>("");
+					v.setValue<int>(device->place());
 				}
 				break;
 
 			case ObjectStateColumn:
+				if (devieFileInfo.state() == VcsState::CheckedOut)
 				{
-					if (devieFileInfo.state() == VcsState::CheckedOut)
-					{
-						QString state = devieFileInfo.action().text();
-						v.setValue<QString>(state);
-					}
+					QString state = devieFileInfo.action().text();
+					v.setValue<QString>(state);
 				}
 				break;
 
@@ -1111,6 +1111,7 @@ void EquipmentView::addSystem()
 
 	system->setStrId("SYSTEMID");
 	system->setCaption(tr("System"));
+	system->setPlace(0);
 
 	addDeviceObject(system);
 
@@ -1124,10 +1125,11 @@ void EquipmentView::addRack()
 
 	rack->setStrId("$(PARENT)_RACKID");
 	rack->setCaption(tr("Rack"));
+	rack->setPlace(0);
 
 	addDeviceObject(rack);
 
-		emit updateState();
+	emit updateState();
 	return;
 }
 
@@ -1135,8 +1137,9 @@ void EquipmentView::addChassis()
 {
 	std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(isPresetMode());
 
-	chassis->setStrId("$(PARENT)_CHID");
+	chassis->setStrId("$(PARENT)_CH$(PLACE)");
     chassis->setCaption(tr("Chassis"));
+	chassis->setPlace(-1);
 
     addDeviceObject(chassis);
 
@@ -1150,6 +1153,7 @@ void EquipmentView::addModule()
 
 	module->setStrId("$(PARENT)_MD$(PLACE)");
 	module->setCaption(tr("Module"));
+	module->setPlace(-1);
 
 	addDeviceObject(module);
 
@@ -1218,6 +1222,7 @@ void EquipmentView::addPresetRack()
 
 		rack->setStrId("$(PARENT)_RACKID");
 		rack->setCaption(tr("Rack"));
+		rack->setPlace(0);
 
 		rack->setPresetRoot(true);
 		rack->setPresetName("PRESET_NAME");
@@ -1241,6 +1246,7 @@ void EquipmentView::addPresetChassis()
 
         chassis->setStrId("$(PARENT)_CHASSISID");
         chassis->setCaption(tr("Chassis"));
+		chassis->setPlace(-1);
 
         chassis->setPresetRoot(true);
         chassis->setPresetName("PRESET_NAME");
@@ -1263,6 +1269,7 @@ void EquipmentView::addPresetModule()
 
 		module->setStrId("$(PARENT)_MD00");
 		module->setCaption(tr("Module"));
+		module->setPlace(-1);
 
 		module->setPresetRoot(true);
 		module->setPresetName("PRESET_NAME");
@@ -1634,6 +1641,17 @@ void EquipmentView::addInOutsToSignals()
 	if (module == nullptr || module->isIOModule() == false)
 	{
 		assert(module);
+		return;
+	}
+
+	if (module->place() < 0)
+	{
+		QMessageBox::critical(this,
+							  QApplication::applicationName(),
+							  tr("Module's %1 property Place is %2, set the correct value (>=0).")
+							  .arg(module->strIdExpanded())
+							  .arg(module->place())
+							  );
 		return;
 	}
 
@@ -2588,8 +2606,8 @@ void EquipmentTabPage::CreateActions()
 		m_addPresetSoftwareAction->setEnabled(false);
 		connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
 
-	m_inOutsToSignals = new QAction(tr("Inputs/Outs to signals"), this);
-	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to signals..."));
+	m_inOutsToSignals = new QAction(tr("Add Inputs/Outs to App Signals"), this);
+	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
 	m_inOutsToSignals->setEnabled(false);
 	m_inOutsToSignals->setVisible(false);
 	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, &EquipmentView::addInOutsToSignals);

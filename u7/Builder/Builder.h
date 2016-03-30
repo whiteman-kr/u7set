@@ -63,8 +63,8 @@ namespace Builder
 
 		// Check same Uuids and same StrIds
 		//
-		bool checkSameUuidAndStrId(Hardware::DeviceObject* root);
-		bool checkSameUuidAndStrIdWorker(Hardware::DeviceObject* device,
+		bool checkUuidAndStrId(Hardware::DeviceObject* root);
+		bool checkUuidAndStrIdWorker(Hardware::DeviceObject* device,
 										 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
 										 std::map<QString, Hardware::DeviceObject*>& strIdMap);
 
