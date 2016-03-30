@@ -474,12 +474,9 @@ namespace Builder
 
 		if (foundSameUuid != uuidMap.end())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  tr("There are DeviceObjects with the same Uuid %1, StrID1: %2, StrID2: %3")
-						.arg(device->uuid().toString())
-						.arg(device->strId())
-						.arg(foundSameUuid->second->strId()));
-
+			// Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3').
+			//
+			m_log->errEQP6002(device->uuid(), device->strIdExpanded(), foundSameUuid->second->strIdExpanded());
 			ok = false;
 		}
 		else
@@ -489,12 +486,9 @@ namespace Builder
 
 		if (foundSameStrId != strIdMap.end())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  tr("There are DeviceObjects with the same StrID %1, Parent1: %2, Parent2: %3")
-						  .arg(device->strId())
-						  .arg(device->parent()->strId())
-						  .arg(foundSameStrId->second->parent()->strId()));
-
+			// Two or more equipment objects have the same StrID '%1'.
+			//
+			m_log->errEQP6001(device->strIdExpanded(), device->uuid(), foundSameStrId->second->uuid()) ;
 			ok = false;
 		}
 		else
@@ -506,6 +500,8 @@ namespace Builder
 		//
 		if (device->place() < 0 && device->isRoot() == false)
 		{
+			// Property Place is less then 0 (Equipment object '%1').
+			//
 			m_log->errEQP6000(device->strId(), device->uuid());
 			ok = false;
 		}

@@ -73,6 +73,8 @@ namespace Builder
 		// EQP			Equipment issues						6000-6999
 		//
 		void errEQP6000(QString deviceStrId, QUuid deviceUuid);
+		void errEQP6001(QString deviceStrId, QUuid deviceUuid1, QUuid deviceUuid2);
+		void errEQP6002(QUuid deviceUuid, QString deviceStrId1, QString deviceStrId2);
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
