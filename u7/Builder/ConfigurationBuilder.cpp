@@ -50,12 +50,12 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-    ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::ConnectionStorage* connections, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+    ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
-        m_connections(connections),
+        m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
 		m_buildWriter(buildWriter),
 		m_changesetId(changesetId),
@@ -67,7 +67,7 @@ namespace Builder
 		assert(m_deviceRoot);
 		assert(m_signalSet);
 		assert(m_subsystems);
-        assert(m_connections);
+        assert(m_opticModuleStorage);
 		assert(m_log);
 		assert(m_buildWriter);
 
@@ -98,7 +98,7 @@ namespace Builder
 
 		// Check if connections' identifiers (non-empty) exist in the database
         //
-        for (int i = 0; i < m_connections->count(); i++)
+        /*for (int i = 0; i < m_connections->count(); i++)
         {
             std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
 
@@ -130,7 +130,7 @@ namespace Builder
 					}
 				}
             }
-        }
+        }*/
 
 
 		// Get script file from the project databse
@@ -199,8 +199,8 @@ namespace Builder
 		QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-        QJSValue jsConnections = jsEngine.newQObject(m_connections);
-        QQmlEngine::setObjectOwnership(m_connections, QQmlEngine::CppOwnership);
+        QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
+        QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
@@ -218,7 +218,7 @@ namespace Builder
 		args << jsLog;
 		args << jsSignalSetObject;
 		args << jsSubsystems;
-        args << jsConnections;
+        args << jsOpticModuleStorage;
 
 		QJSValue jsResult = jsEval.call(args);
 

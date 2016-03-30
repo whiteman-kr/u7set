@@ -170,6 +170,7 @@ namespace Builder
                                    arg(connection->port1StrID()).arg(connection->caption()));
 
                 result = false;
+                continue;
             }
 
             if (optoPort1->connectionCaption().isEmpty() == true)

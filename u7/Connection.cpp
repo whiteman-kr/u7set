@@ -156,6 +156,7 @@ namespace Hardware
             return false;
         }
 
+        /*
         // Generate Connection IDs as a hash of caption or ocmPortStrID
         //
         quint16 hashOpto = CUtils::calcHash16(m_caption.data(), m_caption.size() * sizeof(QChar));
@@ -165,6 +166,7 @@ namespace Hardware
         quint16 hashRs = CUtils::calcHash16(m_port1StrID.data(), m_port1StrID.size() * sizeof(QChar));
         setPort1TxRsID(hashRs);
         setPort2TxRsID(hashRs);
+        */
 
         return true;
     }

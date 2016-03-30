@@ -43,19 +43,19 @@ var Mode_Serial = 1;
 var Mode_RS232 = 0;
 var Mode_RS485 = 1;
 
-function(root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 
     var result = true;
 
-    result = module_lm_1(root, root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+    result = module_lm_1(root, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
     }
 
-    result = module_lm_1_statistics(root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+    result = module_lm_1_statistics(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
@@ -113,7 +113,7 @@ function storeHash64(confFirmware, log, frameIndex, offset, data)
     return result;
 }
 
-function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -130,11 +130,11 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
 
         if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
-            log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
+            log.writeMessage("Generating configuration for LM-1: " + device.propertyValue("StrID"));
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+            return generate_lm_1_rev3(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
         }
         return true;
     }
@@ -142,7 +142,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1(child, root, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
+        if (module_lm_1(child, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -151,7 +151,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
     return true;
 }
 
-function module_lm_1_statistics(device, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function module_lm_1_statistics(device, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -167,7 +167,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 		
         if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
-            log.writeMessage("MODULE LM-1 (statistics): " + device.propertyValue("StrID"));
+            log.writeMessage("Generating statistics for LM-1: " + device.propertyValue("StrID"));
 
 			var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount"];
 			for (var cp = 0; cp < checkProperties.length; cp++)
@@ -218,7 +218,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1_statistics(child, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
+        if (module_lm_1_statistics(child, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -232,7 +232,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 // confCollection - Hardware::ModuleConfCollection
 //
 //
-function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
 	var checkProperties = ["StrID", "SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "TuningDataSize", 
 	"RegIP1", "RegIP2", "DiagIP1", "DiagIP2", 
@@ -407,7 +407,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyOCM)
             {
-                generate_ocm(confFirmware, ioModule, frame, log, connectionStorage);
+                generate_ocm(confFirmware, ioModule, frame, log, opticModuleStorage);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyDIM)
             {
@@ -535,9 +535,8 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	confFirmware.writeLog("Writing TxRx(Opto) configuration.\r\n");
 
 	var txRxConfigFrame = lanConfigFrame;
-	var optoCount = 3;
 	
-	/*var txWordsCount = */generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, false/*modeOCM*/);
+	/*var txWordsCount = */generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, opticModuleStorage, false/*modeOCM*/);
   
 	return true;
 }
@@ -583,8 +582,8 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 		}
 	}
 
-    log.writeMessage("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 0;
     
@@ -729,8 +728,8 @@ function generate_aifm(confFirmware, module, frame, log)
 		}
 	}
 
-    log.writeMessage("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 	
     var ptr = 0;
     
@@ -905,8 +904,8 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 		}
 	}
 
-    log.writeMessage("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 0;
     
@@ -1050,7 +1049,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 // frame - Number of frame to generate
 //
 //
-function generate_ocm(confFirmware, module, frame, log, connectionStorage)
+function generate_ocm(confFirmware, module, frame, log, opticModuleStorage)
 {
 	var checkProperties = ["StrID", "Place", "ModuleVersion"];
 	for (var cp = 0; cp < checkProperties.length; cp++)
@@ -1062,13 +1061,12 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 		}
 	}
 
-    log.writeMessage("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 	
 	var txRxConfigFrame = frame;
-	var optoCount = 5;
 	
-	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, true/*modeOCM*/);
+	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, opticModuleStorage, true/*modeOCM*/);
 	
     var ptr = 120;
     
@@ -1134,8 +1132,8 @@ function generate_dim(confFirmware, module, frame, log)
 		}
 	}
 
-    log.writeMessage("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 120;
     
@@ -1193,8 +1191,8 @@ function generate_dom(confFirmware, module, frame, log)
 		}
 	}
 
-    log.writeMessage("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+    log.writeMessage("Generating configuration for DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("Generating configuration for DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 120;
     
@@ -1355,19 +1353,22 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 
 // function returns the amount of transmitting words
 //
-function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connections, portCount, modeOCM)
+function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticModuleStorage, modeOCM)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
 		log.writeError("Property StrID was not found in a module in function generate_txRxOptoConfiguration");
 		return 0;
 	}
+	if (module.propertyValue("OptoPortCount") == undefined)
+	{
+		log.writeError("Property OptoPortCount was not found in a module " + module.propertyValue("StrID") + " in function generate_txRxOptoConfiguration");
+		return 0;
+	}
 	
-    // Create TxRx Blocks (Opto) configuration
-	//
-	confFirmware.writeLog("    There are " + connections.count() + " connections in the project.\r\n");
+	var portCount = module.propertyValue("OptoPortCount");
 	
-	var txStartAddress = 0;
+	var txWordsCount = 0;
 	
 	for (var p = 0; p < portCount; p++)
 	{
@@ -1387,203 +1388,109 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			return 0;
 		}
 
-		for (var c = 0; c < connections.count(); c++)
+		var optoPort = opticModuleStorage.jsGetOptoPort(controller.propertyValue("StrID"));
+		if (optoPort == null)
 		{
-			var connection = connections.jsGet(c);
-			if (connection == null)
-			{
-				continue;
-			}
-	
-			var checkProperties = ["Caption", "Port1StrID", "Port2StrID", 
-			"Enable", "EnableDuplex", "SerialMode", "Mode",
-			"Port1TxWordsQuantity", "Port1TxRxOptoID", "Port1RxWordsQuantity", "Port1TxRxOptoDataUID", "Port1TxRsID", "Port1TxRsDataUID", 
-			"Port2TxWordsQuantity", "Port2TxRxOptoID", "Port2RxWordsQuantity", "Port2TxRxOptoDataUID", "Port2TxRsID", "Port2TxRsDataUID" ];
-
-			for (var cp = 0; cp < checkProperties.length; cp++)
-			{
-				if (connection.propertyValue(checkProperties[cp]) == undefined)
-				{
-					log.writeError("Property " + checkProperties[cp] + " was not found in class Connection in function generate_txRxOptoConfiguration");
-					return 0;
-				}
-			}
-				
-			var deviceNo = -1;
-			var rsConnection = false;
-		
-            if (controller.propertyValue("Mode") == Mode_Serial)
-			{
-				// this is rs connection
-				//
-				rsConnection = true;
-				deviceNo = 1;
-			}
-			else
-			{
-				// this is optical connection
-				//
-				if (controller.propertyValue("StrID") == connection.propertyValue("Port1StrID"))
-				{
-					deviceNo = 1;
-				}
-				else
-				{
-					if (controller.propertyValue("StrID") == connection.propertyValue("Port2StrID"))
-					{
-						deviceNo = 2;
-					}
-				}
-			}
+			continue;
+		}
 			
-			if (deviceNo == -1)
-			{
-				continue;
-			}
-			
-			//
-			// A connection was found for this controller
-			//
-			if (rsConnection == true)
-			{
-				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Rs connection  ID = " + connection.propertyValue("Caption") + ":" + 
-                    connection.propertyValue("Port1StrID") + "\r\n");
-			}
-			else
-			{
-				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Opto connection device No " + deviceNo + " ID = " + connection.propertyValue("Caption") + ":" + 
-					connection.propertyValue("Port1StrID") + " <=> " + connection.propertyValue("Port2StrID") + "\r\n");	
-			}
+		if (optoPort.mode() == Mode_Optical)
+		{
+			confFirmware.writeLog("    OptoPort " + controller.propertyValue("StrID") + ": Opto connection ID = " + optoPort.strID() + 
+				" (" + optoPort.connectionCaption() + ")\r\n");
+		}
+		else
+		{
+			confFirmware.writeLog("    OptoPort " + controller.propertyValue("StrID") + ": RS connection ID = " + optoPort.strID() + 
+				" (" + optoPort.connectionCaption() + ")\r\n");
+		}
 					
-			var deviceName = "Port" + deviceNo;
-
-			var ptr = 0 + p * 2;
-			var value = txStartAddress;
+		var ptr = 0 + p * 2;
+		var value = optoPort.txStartAddress();
+		setData16(confFirmware, log, frame, ptr, value); 
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+				
+		ptr = 5 * 2 + p * 2;
+		value = optoPort.txDataSizeW();
+		setData16(confFirmware, log, frame, ptr, value); 
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+		txWordsCount += value;
+				
+		ptr = 10 * 2 + p * 2;
+		value = optoPort.portID();
+		setData16(confFirmware, log, frame, ptr, value); 
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+				
+		ptr = 15 * 2 + p * 2;
+		value = optoPort.rxDataSizeW();
+		setData16(confFirmware, log, frame, ptr, value); 
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+				
+		ptr = 20 * 2 + p * 4;
+		value = optoPort.txDataID();
+		setData32(confFirmware, log, frame, ptr, value); 
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
+				
+		if (modeOCM == true && optoPort.mode() == Mode_Serial)
+		{
+			ptr = 30 * 2 + p * 2;
+			value = optoPort.portID();	//???
 			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-				
-			ptr = 5 * 2 + p * 2;
-			value = connection.propertyValue(deviceName + "TxWordsQuantity");
-			if (value == undefined)
-			{
-				return 0;
-			}
-			else
-			{
-				txStartAddress += value;
-				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-			}
-				
-			ptr = 10 * 2 + p * 2;
-			value = connection.propertyValue(deviceName + "TxRxOptoID");
-			if (value == undefined)
-			{
-				return 0;
-			}
-			else
-			{
-				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-			}
-				
-			ptr = 15 * 2 + p * 2;
-			value = connection.propertyValue(deviceName + "RxWordsQuantity");
-			if (value == undefined)
-			{
-				return 0;
-			}
-			else
-			{
-				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-			}
-				
-			ptr = 20 * 2 + p * 4;
-			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
-			if (value == undefined)
-			{
-				return 0;
-			}
-			else
-			{
-				setData32(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
-			}
-				
-			if (modeOCM == true && rsConnection == true)
-			{
-				ptr = 30 * 2 + p * 2;
-				value = connection.propertyValue(deviceName + "TxRsID");
-				if (value == undefined)
-				{
-					return 0;
-				}
-				else
-				{
-					setData16(confFirmware, log, frame, ptr, value); 
-					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
-				}
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
 					
-				ptr = 35 * 2 + p * 4;
-				value = connection.propertyValue(deviceName + "TxRsDataUID");
-				if (value == undefined)
-				{
-					return 0;
-				}
-				else
-				{
-					setData32(confFirmware, log, frame, ptr, value); 
-					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
-				}
+			ptr = 35 * 2 + p * 4;
+			value = optoPort.txDataID();	//???
+			setData32(confFirmware, log, frame, ptr, value); 
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
 				
-				//
-				// RS232/485_CFG
-				//
+			//
+			// RS232/485_CFG
+			//
 				
-				var txEn = 0;	//1 - enabled
-				if (connection.propertyValue("Enable") == true)
-				{
-					txEn = 1;
-				}
+			var txEn = 0;	//1 - enabled
+			if (optoPort.enable() == true)
+			{
+				txEn = 1;
+			}
+			confFirmware.writeLog("    enabled = " + txEn + "\r\n");
 				
-				var txStandard = Mode_RS232;	//0 - rs232, 1 - rs485
-				if (connection.propertyValue("SerialMode") == Mode_RS485)
-				{
-					txStandard = Mode_RS485;
-				}
-
-				ptr = 45 * 2;
-				
-				//bits 9..0
-				//
-				var txMode = (txEn << 1) | txStandard;
-				txMode <<= (p * 2);
-				
-				
-				if (module.propertyValue("ModuleVersion") == 255)	// this is only for OCM version 255 (ACNF)
-				{
-					// bits 14..10
-					//
-					var txDuplex = 0;	//1 - enabled
-					
-					if (connection.propertyValue("EnableDuplex") == true)
-					{
-						txDuplex = 1;
-					}
-					txDuplex <<= 10;
-					txDuplex <<= p;
-					txMode |= txDuplex;
-				}
-				
-				
-				var allModes = confFirmware.data16(frame, ptr);
-				allModes |= txMode;
-				setData16(confFirmware, log, frame, ptr, allModes);
+			var txStandard = Mode_RS232;	//0 - rs232, 1 - rs485
+			if (optoPort.serialMode() == Mode_RS485)
+			{
+				txStandard = Mode_RS485;
 			}
 			
-			break;
-		} // c
+			confFirmware.writeLog("    serialMode = " + txStandard + "\r\n");
+
+			ptr = 45 * 2;
+				
+			//bits 9..0
+			//
+			var txMode = (txEn << 1) | txStandard;
+			txMode <<= (p * 2);
+				
+			if (module.propertyValue("ModuleVersion") == 255)	// this is only for OCM version 255 (ACNF)
+			{
+				// bits 14..10
+				//
+				var txDuplex = 0;	//1 - enabled
+					
+				if (optoPort.enableDuplex() == true)
+				{
+					txDuplex = 1;
+				}
+				confFirmware.writeLog("    enableDuplex = " + txDuplex + "\r\n");
+				
+				txDuplex <<= 10;
+				txDuplex <<= p;
+				txMode |= txDuplex;
+			}
+				
+				
+			var allModes = confFirmware.data16(frame, ptr);
+			allModes |= txMode;
+			setData16(confFirmware, log, frame, ptr, allModes);
+		}
 	} // p
 	
 	if (modeOCM == true)
@@ -1593,5 +1500,5 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS mode configuration = " + allModes + "\r\n");
 	}
 	
-	return txStartAddress;
+	return txWordsCount;
 }
