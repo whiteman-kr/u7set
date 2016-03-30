@@ -69,9 +69,9 @@ namespace Builder
 			break;
 
 		default:
-			assert(false);
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Unknown type of software %1")).arg(m_software->strId()));
+			// Unknown software type (Software object StrID '%1').
+			//
+			m_log->errEQP6100(m_software->strId(), m_software->uuid());
 			result = false;
 		}
 

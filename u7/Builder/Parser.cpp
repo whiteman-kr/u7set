@@ -1636,12 +1636,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicSchema %1: %2 has unconnected pin %3")
-								  .arg(schema->caption())
-								  .arg(fblItem->buildName())
-								  .arg(in.caption()));
-
+						log()->errALP4006(schema->strID(), fblItem->buildName(), in.caption(), item->guid());
 						result = false;
 						continue;
 					}

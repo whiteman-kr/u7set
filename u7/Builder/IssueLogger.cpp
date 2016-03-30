@@ -477,6 +477,29 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6003
+	///
+	/// IssueType: Error
+	///
+	/// Title: Unknown software type (Software object StrID '%1').
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Unknown software type. It is required to set proprety Type to the correct value.
+	///
+	void IssueLogger::errEQP6100(QString softwareObjectStrId, QUuid uuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6003,
+				  tr("Unknown software type (Software object StrID '%1').")
+				  .arg(softwareObjectStrId)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

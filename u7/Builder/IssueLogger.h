@@ -76,6 +76,11 @@ namespace Builder
 		void errEQP6001(QString deviceStrId, QUuid deviceUuid1, QUuid deviceUuid2);
 		void errEQP6002(QUuid deviceUuid, QString deviceStrId1, QString deviceStrId2);
 
+		// Subset of EQP -- Generation Software Configuration
+		//
+		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
+
+
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
 		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
