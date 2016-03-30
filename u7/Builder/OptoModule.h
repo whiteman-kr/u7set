@@ -58,7 +58,7 @@ namespace Hardware
         int m_txAnalogSignalsSizeW = 0;     // variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
         int m_txDiscreteSignalsSizeW = 0;   //
         quint32 m_txDataID = 0;             // range 0..0xFFFFFFFF
-        int m_txDataSizeW = 0;                  //
+        int m_txDataSizeW = 0;              //
 
         int m_port = 0;
 
@@ -72,8 +72,14 @@ namespace Hardware
 
         quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
 
-        bool m_enable = true;           // serial mode only
+        // serial RS323/485 mode properies only
+        //
+        bool m_enable = true;
         bool m_enableDuplex = false;    // serial mode and OCMN only
+
+        bool m_manualSettings = false;
+        int m_manualTxSizeW = 0;
+        int m_manualRxSizeW = 0;
 
     public:
         OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port);
@@ -122,7 +128,7 @@ namespace Hardware
         QStringList getTxSignalsStrID() const { return m_txSignalsStrIDList; }
 
         void addTxSignal(Signal* txSignal);
-        void calculateTxSignalsAddresses();
+        bool calculateTxSignalsAddresses(OutputLog* log);
 
         QList<TxSignal> txAnalogSignals() const { return m_txAnalogSignalList; }
         QList<TxSignal> txDiscreteSignals() const { return m_txDiscreteSignalList; }
@@ -137,6 +143,15 @@ namespace Hardware
 
         Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
         void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
+
+        bool manualSettings() const { return m_manualSettings; }
+        void setManualSettings(bool manualSettings) { m_manualSettings = manualSettings; }
+
+        int manualTxSizeW() const { return m_manualTxSizeW; }
+        void setManualTxSizeW(int manualTxSizeW) { m_manualTxSizeW = manualTxSizeW; }
+
+        int manualRxSizeW() const { return m_manualRxSizeW; }
+        void setManualRxSizeW(int manualRxSizeW) { m_manualRxSizeW = manualRxSizeW; }
     };
 
 

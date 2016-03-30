@@ -39,11 +39,11 @@ namespace Hardware
         //
         //
 
-        int port1TxWordsQuantity() const;
-        void setPort1TxWordsQuantity(int value);
+        int port1ManualTxWordsQuantity() const;
+        void setPort1ManualTxWordsQuantity(int value);
 
-        int port1RxWordsQuantity() const;
-        void setPort1RxWordsQuantity(int value);
+        int port1ManualRxWordsQuantity() const;
+        void setPort1ManualRxWordsQuantity(int value);
 
         int port1TxRxOptoID() const;
         void setPort1TxRxOptoID(int value);
@@ -61,11 +61,11 @@ namespace Hardware
         //
         //
 
-        int port2TxWordsQuantity() const;
-        void setPort2TxWordsQuantity(int value);
+        int port2ManualTxWordsQuantity() const;
+        void setPort2ManualTxWordsQuantity(int value);
 
-        int port2RxWordsQuantity() const;
-        void setPort2RxWordsQuantity(int value);
+        int port2ManualRxWordsQuantity() const;
+        void setPort2ManualRxWordsQuantity(int value);
 
         int port2TxRxOptoID() const;
         void setPort2TxRxOptoID(int value);
@@ -108,15 +108,15 @@ namespace Hardware
             m_port1StrID = that.m_port1StrID;
             m_port2StrID = that.m_port2StrID;
 
-            m_port1TxWordsQuantity = that.m_port1TxWordsQuantity;
-            m_port1RxWordsQuantity = that.m_port1RxWordsQuantity;
+            m_port1ManualTxWordsQuantity = that.m_port1ManualTxWordsQuantity;
+            m_port1ManualRxWordsQuantity = that.m_port1ManualRxWordsQuantity;
             m_port1TxRxOptoID = that.m_port1TxRxOptoID;
             m_port1TxRxOptoDataUID = that.m_port1TxRxOptoDataUID;
             m_port1TxRsID = that.m_port1TxRsID;
             m_port1TxRsDataUID = that.m_port1TxRsDataUID;
 
-            m_port2TxWordsQuantity = that.m_port2TxWordsQuantity;
-            m_port2RxWordsQuantity = that.m_port2RxWordsQuantity;
+            m_port2ManualTxWordsQuantity = that.m_port2ManualTxWordsQuantity;
+            m_port2ManualRxWordsQuantity = that.m_port2ManualRxWordsQuantity;
             m_port2TxRxOptoID = that.m_port2TxRxOptoID;
             m_port2TxRxOptoDataUID = that.m_port2TxRxOptoDataUID;
             m_port2TxRsID = that.m_port2TxRsID;
@@ -138,16 +138,16 @@ namespace Hardware
         QString m_caption;
 
         QString m_port1StrID;
-        int m_port1TxWordsQuantity = 479;
-        int m_port1RxWordsQuantity = 479;
+        int m_port1ManualTxWordsQuantity = 479;
+        int m_port1ManualRxWordsQuantity = 479;
         int m_port1TxRxOptoID = 0;
         quint32 m_port1TxRxOptoDataUID = 0;
         int m_port1TxRsID = 0;
         quint32 m_port1TxRsDataUID = 0;
 
         QString m_port2StrID;
-        int m_port2TxWordsQuantity = 479;
-        int m_port2RxWordsQuantity = 479;
+        int m_port2ManualTxWordsQuantity = 479;
+        int m_port2ManualRxWordsQuantity = 479;
         int m_port2TxRxOptoID = 0;
         quint32 m_port2TxRxOptoDataUID = 0;
         int m_port2TxRsID = 0;

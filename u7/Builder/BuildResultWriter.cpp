@@ -704,7 +704,7 @@ namespace Builder
             }
             else
             {
-                assert(false);
+                //assert(false);
                 result = false;
             }
 

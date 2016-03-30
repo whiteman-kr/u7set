@@ -84,8 +84,17 @@ namespace Hardware
         }
     }
 
-    void OptoPort::calculateTxSignalsAddresses()
+
+    bool OptoPort::calculateTxSignalsAddresses(OutputLog* log)
     {
+        if (log == nullptr)
+        {
+            assert(false);
+            return false;
+        }
+
+        bool result = true;
+
         m_txDataID = CRC32_INITIAL_VALUE;
 
         // mix port StrID in dataID
@@ -128,7 +137,28 @@ namespace Hardware
 
         m_txDiscreteSignalsSizeW = address.offset() - m_txAnalogSignalsSizeW - txDataIDSizeW;
 
-        m_txDataSizeW = txDataIDSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+        int fullTxDataSizeW = txDataIDSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+
+        if (manualSettings())
+        {
+            m_txDataSizeW = m_manualTxSizeW;
+
+            if (fullTxDataSizeW > m_txDataSizeW)
+            {
+                LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+                                   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (connection %3)")).
+                                   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
+                                   arg(m_connectionCaption));
+
+                result = false;
+            }
+        }
+        else
+        {
+            m_txDataSizeW = fullTxDataSizeW;
+        }
+
+        return result;
     }
 
 
@@ -578,6 +608,11 @@ namespace Hardware
             {
                 // RS232/485 port has no linked ports
                 //
+                if (port->manualSettings())
+                {
+                    port->setRxDataSizeW(port->manualRxSizeW());
+                }
+
                 continue;
             }
 
@@ -601,7 +636,23 @@ namespace Hardware
                     break;
                 }
 
-                linkedPort->setRxDataSizeW(port->txDataSizeW());
+                if (linkedPort->manualSettings())
+                {
+                    linkedPort->setRxDataSizeW(linkedPort->manualRxSizeW());
+
+                    if (port->txDataSizeW() > linkedPort->rxDataSizeW())
+                    {
+                        LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                           QString(tr("Manual rxDataSizeW of port '%1' less then txDataSizeW of linked port '%2' (connection %3)")).
+                                           arg(linkedPort->strID()).arg(port->strID()).
+                                           arg(port->connectionCaption()));
+                        result = false;
+                    }
+                }
+                else
+                {
+                    linkedPort->setRxDataSizeW(port->txDataSizeW());
+                }
             }
         }
 

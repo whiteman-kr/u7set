@@ -19,8 +19,8 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(QString, Port1StrID, true, Connection::port1StrID, Connection::setPort1StrID);
         ADD_PROPERTY_GETTER_SETTER(QString, Port2StrID, true, Connection::port2StrID, Connection::setPort2StrID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port1TxWordsQuantity, true, Connection::port1TxWordsQuantity, Connection::setPort1TxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Port1RxWordsQuantity, true, Connection::port1RxWordsQuantity, Connection::setPort1RxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1TxWordsQuantity, true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port1RxWordsQuantity, true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
 
         ADD_PROPERTY_GETTER_SETTER(int, Port1TxRxOptoID, false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRxOptoDataUID, false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
@@ -28,8 +28,8 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(int, Port1TxRsID, false, Connection::port1TxRsID, Connection::setPort1TxRsID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRsDataUID, false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port2TxWordsQuantity, true, Connection::port2TxWordsQuantity, Connection::setPort2TxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Port2RxWordsQuantity, true, Connection::port2RxWordsQuantity, Connection::setPort2RxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2TxWordsQuantity, true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
+        ADD_PROPERTY_GETTER_SETTER(int, Port2RxWordsQuantity, true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
 
         ADD_PROPERTY_GETTER_SETTER(int, Port2TxRxOptoID, false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Port2TxRxOptoDataUID, false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
@@ -64,10 +64,10 @@ namespace Hardware
 
         // Tx/Rx words quantity
         //
-        writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1TxWordsQuantity()));
-        writer.writeAttribute("Port1RxWordsQuantity", QString::number(port1RxWordsQuantity()));
-        writer.writeAttribute("Port2TxWordsQuantity", QString::number(port2TxWordsQuantity()));
-        writer.writeAttribute("Port2RxWordsQuantity", QString::number(port2RxWordsQuantity()));
+        writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1ManualTxWordsQuantity()));
+        writer.writeAttribute("Port1RxWordsQuantity", QString::number(port1ManualRxWordsQuantity()));
+        writer.writeAttribute("Port2TxWordsQuantity", QString::number(port2ManualTxWordsQuantity()));
+        writer.writeAttribute("Port2RxWordsQuantity", QString::number(port2ManualRxWordsQuantity()));
 
         return true;
     }
@@ -130,22 +130,22 @@ namespace Hardware
 
         if (reader.attributes().hasAttribute("Port1TxWordsQuantity"))
         {
-            setPort1TxWordsQuantity(reader.attributes().value("Port1TxWordsQuantity").toInt());
+            setPort1ManualTxWordsQuantity(reader.attributes().value("Port1TxWordsQuantity").toInt());
         }
 
         if (reader.attributes().hasAttribute("Port1RxWordsQuantity"))
         {
-            setPort1RxWordsQuantity(reader.attributes().value("Port1RxWordsQuantity").toInt());
+            setPort1ManualRxWordsQuantity(reader.attributes().value("Port1RxWordsQuantity").toInt());
         }
 
         if (reader.attributes().hasAttribute("Port2TxWordsQuantity"))
         {
-            setPort2TxWordsQuantity(reader.attributes().value("Port2TxWordsQuantity").toInt());
+            setPort2ManualTxWordsQuantity(reader.attributes().value("Port2TxWordsQuantity").toInt());
         }
 
         if (reader.attributes().hasAttribute("Port2RxWordsQuantity"))
         {
-            setPort2RxWordsQuantity(reader.attributes().value("Port2RxWordsQuantity").toInt());
+            setPort2ManualRxWordsQuantity(reader.attributes().value("Port2RxWordsQuantity").toInt());
         }
 
 
@@ -228,24 +228,24 @@ namespace Hardware
     // port1
     //
 
-    int Connection::port1TxWordsQuantity() const
+    int Connection::port1ManualTxWordsQuantity() const
     {
-        return m_port1TxWordsQuantity;
+        return m_port1ManualTxWordsQuantity;
     }
 
-    void Connection::setPort1TxWordsQuantity(int value)
+    void Connection::setPort1ManualTxWordsQuantity(int value)
     {
-        m_port1TxWordsQuantity = value;
+        m_port1ManualTxWordsQuantity = value;
     }
 
-    int Connection::port1RxWordsQuantity() const
+    int Connection::port1ManualRxWordsQuantity() const
     {
-        return m_port1RxWordsQuantity;
+        return m_port1ManualRxWordsQuantity;
     }
 
-    void Connection::setPort1RxWordsQuantity(int value)
+    void Connection::setPort1ManualRxWordsQuantity(int value)
     {
-        m_port1RxWordsQuantity = value;
+        m_port1ManualRxWordsQuantity = value;
     }
 
     //
@@ -297,24 +297,24 @@ namespace Hardware
     // port2
     //
 
-    int Connection::port2TxWordsQuantity() const
+    int Connection::port2ManualTxWordsQuantity() const
     {
-        return m_port2TxWordsQuantity;
+        return m_port2ManualTxWordsQuantity;
     }
 
-    void Connection::setPort2TxWordsQuantity(int value)
+    void Connection::setPort2ManualTxWordsQuantity(int value)
     {
-        m_port2TxWordsQuantity = value;
+        m_port2ManualTxWordsQuantity = value;
     }
 
-    int Connection::port2RxWordsQuantity() const
+    int Connection::port2ManualRxWordsQuantity() const
     {
-        return m_port2RxWordsQuantity;
+        return m_port2ManualRxWordsQuantity;
     }
 
-    void Connection::setPort2RxWordsQuantity(int value)
+    void Connection::setPort2ManualRxWordsQuantity(int value)
     {
-        m_port2RxWordsQuantity = value;
+        m_port2ManualRxWordsQuantity = value;
     }
 
     //
@@ -614,8 +614,8 @@ namespace Hardware
         {
             if (c->port1StrID() == portStrID)
             {
-                c->setPort1TxWordsQuantity(m_txWordsQuantity);
-                c->setPort1RxWordsQuantity(m_rxWordsQuantity);
+                c->setPort1ManualTxWordsQuantity(m_txWordsQuantity);
+                c->setPort1ManualRxWordsQuantity(m_rxWordsQuantity);
                 c->setPort1TxRxOptoID(m_txRxOptoID);
                 c->setPort1TxRxOptoDataUID(m_txRxOptoDataUID);
                 c->setPort1TxRsID(m_txRsID);
@@ -625,8 +625,8 @@ namespace Hardware
 
             if (c->port2StrID() == portStrID)
             {
-                c->setPort2TxWordsQuantity(m_txWordsQuantity);
-                c->setPort2RxWordsQuantity(m_rxWordsQuantity);
+                c->setPort2ManualTxWordsQuantity(m_txWordsQuantity);
+                c->setPort2ManualRxWordsQuantity(m_rxWordsQuantity);
                 c->setPort2TxRxOptoID(m_txRxOptoID);
                 c->setPort2TxRxOptoDataUID(m_txRxOptoDataUID);
                 c->setPort2TxRsID(m_txRsID);

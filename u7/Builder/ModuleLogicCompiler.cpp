@@ -2171,7 +2171,7 @@ namespace Builder
                     port->addTxSignal(txSignal);
                 }
 
-                port->calculateTxSignalsAddresses();
+                result &= port->calculateTxSignalsAddresses(m_log);
 
                 QString idStr;
 
@@ -4579,7 +4579,7 @@ namespace Builder
     }
 
 
-	// insert signal from application logic schema
+    // insert signal from application logic schema
     //
     bool AppSignalMap::insert(const AppItem* appItem)
     {
