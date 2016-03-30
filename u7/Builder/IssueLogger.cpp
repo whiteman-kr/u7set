@@ -423,6 +423,83 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6001
+	///
+	/// IssueType: Error
+	///
+	/// Title: Two or more equipment objects have the same StrID '%1'.
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Error may occur if two or more equipment objects have the same StrID.
+	/// All equipmnet objects must have unique StrID.
+	///
+	void IssueLogger::errEQP6001(QString deviceStrId, QUuid deviceUuid1, QUuid deviceUuid2)
+	{
+		addItemsIssues(OutputMessageLevel::Error, deviceUuid1);
+		addItemsIssues(OutputMessageLevel::Error, deviceUuid2);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6001,
+				  tr("Two or more equipment objects have the same StrID '%1'.")
+				  .arg(deviceStrId)
+				  );
+	}
+
+	/// IssueCode: EQP6002
+	///
+	/// IssueType: Error
+	///
+	/// Title: Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3').
+	///
+	/// Parameters:
+	///		%1 Equipmnet objects Uuid
+	///		%2 Equipmnet object StrID 1
+	///		%2 Equipmnet object StrID 2
+	///
+	/// Description:
+	///		Error may occur if two or more equipment objects have the same Uuid.
+	/// All equipmnet objects must have unique Uuid. In some cases it can be an internal
+	/// software error and it shoud be reported to developers.
+	///
+	void IssueLogger::errEQP6002(QUuid deviceUuid, QString deviceStrId1, QString deviceStrId2)
+	{
+		addItemsIssues(OutputMessageLevel::Error, deviceUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6002,
+				  tr("Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3')")
+				  .arg(deviceUuid.toString())
+				  .arg(deviceStrId1)
+				  .arg(deviceStrId2)
+				  );
+	}
+
+	/// IssueCode: EQP6003
+	///
+	/// IssueType: Error
+	///
+	/// Title: Unknown software type (Software object StrID '%1').
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Unknown software type. It is required to set proprety Type to the correct value.
+	///
+	void IssueLogger::errEQP6100(QString softwareObjectStrId, QUuid uuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6003,
+				  tr("Unknown software type (Software object StrID '%1').")
+				  .arg(softwareObjectStrId)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

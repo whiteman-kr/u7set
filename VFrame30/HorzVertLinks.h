@@ -52,7 +52,7 @@ namespace VFrame30
 		class LessClassFunctor
 		{
 		public:
-			bool operator () (double v1, double v2)
+			bool operator () (double v1, double v2) const
 			{
 				if (std::abs(v1 - v2) <= 0.000001)
 				{
