@@ -144,7 +144,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Checking for same Uuids and StrIds"));
 
-			ok = checkSameUuidAndStrId(deviceRoot.get());
+			ok = checkUuidAndStrId(deviceRoot.get());
 
 			if (ok == false)
 			{
@@ -436,7 +436,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::checkSameUuidAndStrId(Hardware::DeviceObject* root)
+	bool BuildWorkerThread::checkUuidAndStrId(Hardware::DeviceObject* root)
 	{
 		if (root == nullptr)
 		{
@@ -450,12 +450,12 @@ namespace Builder
 		// Recursive function
 		//
 
-		bool ok = checkSameUuidAndStrIdWorker(root, uuidMap, strIdMap);
+		bool ok = checkUuidAndStrIdWorker(root, uuidMap, strIdMap);
 
 		return ok;
 	}
 
-	bool BuildWorkerThread::checkSameUuidAndStrIdWorker(Hardware::DeviceObject* device,
+	bool BuildWorkerThread::checkUuidAndStrIdWorker(Hardware::DeviceObject* device,
 									 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
 									 std::map<QString, Hardware::DeviceObject*>& strIdMap)
 	{
@@ -465,6 +465,8 @@ namespace Builder
 			return false;
 		}
 
+		// Check for the same Uuid and StrID
+		//
 		auto foundSameUuid = uuidMap.find(device->uuid());
 		auto foundSameStrId = strIdMap.find(device->strId());
 
@@ -500,11 +502,21 @@ namespace Builder
 			strIdMap[device->strId()] = device;
 		}
 
+		// Check property Place, must not be -1
+		//
+		if (device->place() < 0 && device->isRoot() == false)
+		{
+			m_log->errEQP6000(device->strId(), device->uuid());
+			ok = false;
+		}
+
+		// --
+		//
 		int childCount = device->childrenCount();
 
 		for (int i = 0; i < childCount; i++)
 		{
-			ok &= checkSameUuidAndStrIdWorker(device->child(i), uuidMap, strIdMap);
+			ok &= checkUuidAndStrIdWorker(device->child(i), uuidMap, strIdMap);
 		}
 
 		return ok;

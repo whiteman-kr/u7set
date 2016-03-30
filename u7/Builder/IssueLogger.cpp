@@ -399,7 +399,29 @@ namespace Builder
 	// EQP			Equipment issues						6000-6999
 	//
 
+	/// IssueCode: EQP6000
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property Place is less then 0 (Equipment object '%1').
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Property Place for Chassis, Rack, Module, Controller, Signal, Workstation or Software cannot be less then 0.
+	///	By default in most cases property Place is -1 to make user to set the correct value.
+	///
+	void IssueLogger::errEQP6000(QString deviceStrId, QUuid deviceUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, deviceUuid);
 
+		LOG_ERROR(IssueType::Equipment,
+				  6000,
+				  tr("Property Place is less then 0 (Equipment object '%1').")
+				  .arg(deviceStrId)
+				  );
+	}
 
 	// --
 	//
