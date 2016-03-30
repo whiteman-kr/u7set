@@ -504,6 +504,19 @@ namespace Hardware
         return nullptr;
     }
 
+    Hardware::OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
+    {
+        Hardware::OptoPort* port = getOptoPort(optoPortStrID);
+
+        if (port != nullptr)
+        {
+            QQmlEngine::setObjectOwnership(port, QQmlEngine::ObjectOwnership::CppOwnership);
+            return port;
+        }
+
+        return nullptr;
+    }
+
 
     bool OptoModuleStorage::isCompatiblePorts(const OptoPort* optoPort1, const OptoPort* optoPort2)
     {

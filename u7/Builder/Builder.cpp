@@ -268,7 +268,7 @@ namespace Builder
             LOG_EMPTY_LINE(m_log);
             LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
+            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
             if (QThread::currentThread()->isInterruptionRequested() == true)
             {
@@ -289,7 +289,7 @@ namespace Builder
             LOG_EMPTY_LINE(m_log);
             LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-            ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
+            ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
             if (QThread::currentThread()->isInterruptionRequested() == true)
             {
@@ -607,19 +607,20 @@ namespace Builder
 		return result;
 	}
 
-    bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter)
+    bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
 			signalSet == nullptr ||
 			subsystems == nullptr ||
+            opticModuleStorage == nullptr ||
 			buildWriter == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-        ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, connections, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+        ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
@@ -627,19 +628,20 @@ namespace Builder
 
 	}
 
-    bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter)
+    bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
     {
         if (db == nullptr ||
             deviceRoot == nullptr ||
             signalSet == nullptr ||
             subsystems == nullptr ||
+            opticModuleStorage == nullptr ||
             buildWriter == nullptr)
         {
             assert(false);
             return false;
         }
 
-        TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, connections, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+        TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
         bool result = tunBuilder.build();
 

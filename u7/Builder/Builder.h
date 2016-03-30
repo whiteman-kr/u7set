@@ -78,11 +78,11 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-        bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter);
+        bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
 
         // Generate Tuning configuration
         //
-        bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter);
+        bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
 
         // Build Application Logic
 		//

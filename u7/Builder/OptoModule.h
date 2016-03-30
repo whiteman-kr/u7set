@@ -78,38 +78,38 @@ namespace Hardware
     public:
         OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port);
 
-        quint16 portID() const { return m_portID; }
+        Q_INVOKABLE quint16 portID() const { return m_portID; }
         void setPortID(quint16 portID) { m_portID = portID; }
 
-        quint32 txDataID() const { return m_txDataID; }
+        Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
 
-        QString strID() const { return m_strID; }
+        Q_INVOKABLE QString strID() const { return m_strID; }
 
         QString linkedPortStrID() const { return m_linkedPortStrID; }
         void setLinkedPortStrID(const QString& linkedPortStrID) { m_linkedPortStrID = linkedPortStrID; }
 
-        QString connectionCaption() const { return m_connectionCaption; }
+        Q_INVOKABLE QString connectionCaption() const { return m_connectionCaption; }
         void setConnectionCaption(const QString& connectionCaption) { m_connectionCaption = connectionCaption; }
 
         int port() const { return m_port; }
         void setPort(int port) { m_port = port; }
 
-        Mode mode() const { return m_mode; }
+        Q_INVOKABLE Mode mode() const { return m_mode; }
         void setMode(Mode mode) { m_mode = mode; }
 
-        SerialMode serialMode() const { return m_serialMode; }
+        Q_INVOKABLE SerialMode serialMode() const { return m_serialMode; }
         void setSerialMode(SerialMode serialMode) { m_serialMode = serialMode; }
 
         int rxStartAddress() const { return m_rxStartAddress; }
         void setRxStartAddress(int address) { m_rxStartAddress = address; }
 
-        int txStartAddress() const { return m_txStartAddress; }
+        Q_INVOKABLE int txStartAddress() const { return m_txStartAddress; }
         void setTxStartAddress(int address) { m_txStartAddress = address; }
 
-        bool enable() const { return m_enable; }
+        Q_INVOKABLE bool enable() const { return m_enable; }
         void setEnable(bool enable) { m_enable = enable; }
 
-        bool enableDuplex() const { return m_enableDuplex; }
+        Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
         void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
 
         const DeviceController* deviceController() const { return m_deviceController; }
@@ -133,9 +133,9 @@ namespace Hardware
         int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
         int txDiscreteSignalsCount() const { return m_txDiscreteSignalList.count(); }
 
-        int txDataSizeW() const { return m_txDataSizeW; }
+        Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
 
-        int rxDataSizeW() const { return m_rxDataSizeW; }
+        Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
         void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
     };
 
@@ -229,6 +229,8 @@ namespace Hardware
         OptoModule* getOptoModule(const QString& optoModuleStrID);
         OptoModule* getOptoModule(const OptoPort* optoPort);
         OptoPort* getOptoPort(const QString& optoPortStrID);
+
+        Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortStrID);
 
         bool isCompatiblePorts(const OptoPort* optoPort1, const OptoPort* optoPort2);
 

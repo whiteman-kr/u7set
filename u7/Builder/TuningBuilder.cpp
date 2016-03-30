@@ -8,12 +8,12 @@ namespace Builder
     //
     // ------------------------------------------------------------------------
 
-    TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::ConnectionStorage* connections, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+    TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
         m_db(db),
         m_deviceRoot(deviceRoot),
         m_signalSet(signalSet),
         m_subsystems(subsystems),
-        m_connections(connections),
+        m_opticModuleStorage(opticModuleStorage),
         m_log(log),
         m_buildWriter(buildWriter),
         m_changesetId(changesetId),
@@ -25,7 +25,7 @@ namespace Builder
         assert(m_deviceRoot);
         assert(m_signalSet);
         assert(m_subsystems);
-        assert(m_connections);
+        assert(m_opticModuleStorage);
         assert(m_log);
         assert(m_buildWriter);
 

@@ -6,6 +6,7 @@
 #include "../include/DbController.h"
 #include "../include/DeviceObject.h"
 #include "../include/PropertyObject.h"
+#include "Builder/OptoModule.h"
 
 #include <QtQml>
 
@@ -118,6 +119,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<E::SignalType>();
 
     qmlRegisterType<QJsVariantList>();
+    qmlRegisterType<Hardware::OptoPort>();
 
     // Start database communication thread
 	//
