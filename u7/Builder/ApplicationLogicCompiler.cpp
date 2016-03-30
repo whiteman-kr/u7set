@@ -195,11 +195,17 @@ namespace Builder
                 continue;
             }
 
-            optoPort1->setPortID(portID);
-
             if (connection->mode() == Hardware::OptoPort::Mode::Serial)
             {
+                optoPort1->setPortID(portID);
                 optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
+                optoPort1->setSerialMode(connection->serialMode());
+                optoPort1->setEnable(connection->enable());
+                optoPort1->setEnableDuplex(connection->enableDuplex());
+
+                optoPort1->setManualSettings(connection->manualSettings());
+                optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
+                optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 
                 if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
                 {
@@ -257,7 +263,17 @@ namespace Builder
                     continue;
                 }
 
+                optoPort1->setPortID(portID);
+                optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
+                optoPort1->setManualSettings(connection->manualSettings());
+                optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
+                optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
+
                 optoPort2->setPortID(portID);
+                optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
+                optoPort2->setManualSettings(connection->manualSettings());
+                optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
+                optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 
                 optoPort1->setLinkedPortStrID(optoPort2->strID());
                 optoPort2->setLinkedPortStrID(optoPort1->strID());
