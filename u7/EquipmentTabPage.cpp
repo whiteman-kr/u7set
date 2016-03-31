@@ -1644,15 +1644,24 @@ void EquipmentView::addInOutsToSignals()
 		return;
 	}
 
-	if (module->place() < 0)
+	// Check if the Place property coorect for the object and all it's parents
+	//
+	Hardware::DeviceObject* checkPlaceObject = module;
+
+	while (checkPlaceObject != nullptr)
 	{
-		QMessageBox::critical(this,
-							  QApplication::applicationName(),
-							  tr("Module's %1 property Place is %2, set the correct value (>=0).")
-							  .arg(module->strIdExpanded())
-							  .arg(module->place())
-							  );
-		return;
+		if (checkPlaceObject->isRoot() == false && checkPlaceObject->place() < 0)
+		{
+			QMessageBox::critical(this,
+								  QApplication::applicationName(),
+								  tr("Object's %1 property Place is %2, set the correct value (>=0).")
+								  .arg(checkPlaceObject->strIdExpanded())
+								  .arg(checkPlaceObject->place())
+								  );
+			return;
+		}
+
+		checkPlaceObject = checkPlaceObject->parent();
 	}
 
 	// Get module from the DB as here it can be not fully loaded
