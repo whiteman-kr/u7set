@@ -4,6 +4,7 @@
 #include "../include/Signal.h"
 #include "../include/DeviceObject.h"
 #include "../Builder/BuildResultWriter.h"
+#include "IssueLogger.h"
 
 namespace Builder
 {

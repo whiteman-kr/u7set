@@ -2262,7 +2262,7 @@ namespace Builder
 
         // build analog and discrete signals list
         //
-        QStringList& signslList = connection->signalList();
+		QStringList&& signslList = connection->signalList();
 
         bool result = true;
 
