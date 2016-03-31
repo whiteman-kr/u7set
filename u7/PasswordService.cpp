@@ -70,7 +70,7 @@ static const QString standardPassword[] = {
 		}
 	}
 
-	// Check if the password simbols are same
+	// Check if the password symbols are same
 	//
 	bool sameChars = true;
 	QChar firstChar = password[0];

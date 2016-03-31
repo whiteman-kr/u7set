@@ -27,6 +27,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_deleteProject, m_worker, &DbWorker::slot_deleteProject);
 	connect(this, &DbController::signal_upgradeProject, m_worker, &DbWorker::slot_upgradeProject);
 
+	connect(this, &DbController::signal_setProjectProperty, m_worker, &DbWorker::slot_setProjectProperty);
+	connect(this, &DbController::signal_getProjectProperty, m_worker, &DbWorker::slot_getProjectProperty);
+
 	connect(this, &DbController::signal_createUser, m_worker, &DbWorker::slot_createUser);
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
@@ -256,6 +259,60 @@ bool DbController::upgradeProject(const QString& projectName, const QString& pas
 	emit signal_upgradeProject(projectName, password, doNotBackup);
 
 	bool result = waitForComplete(parentWidget, tr("Upgrading project"));
+	return result;
+}
+
+bool DbController::setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true)
+	{
+		assert(propertyName.isEmpty() == false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_setProjectProperty(propertyName, propertyValue);
+
+	bool result = waitForComplete(parentWidget, tr("Setting project property"));
+	return result;
+}
+
+bool DbController::getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true ||
+		out == nullptr)
+	{
+		assert(propertyName.isEmpty() == false);
+		assert(out);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getProjectProperty(propertyName, out);
+
+	bool result = waitForComplete(parentWidget, tr("Getting project property"));
 	return result;
 }
 

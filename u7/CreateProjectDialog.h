@@ -17,6 +17,7 @@ public:
 	// Result
 public:
 	QString projectName;
+	QString projectDescription;
 	QString adminstratorPassword;
 	
 private slots:

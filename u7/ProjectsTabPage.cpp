@@ -174,6 +174,15 @@ void ProjectsTabPage::createProject()
 			if (result == true)
 			{
 				dbController()->upgradeProject(projectName, administratorPassword, false, this);
+
+				// Open project to write Description property
+				//
+				result = dbController()->openProject(projectName, "Administrator", administratorPassword, this);
+				if (result == true)
+				{
+					dbController()->setProjectProperty("Description", dialog.projectDescription, this);
+					dbController()->closeProject(this);
+				}
 			}
 
 			refreshProjectList();

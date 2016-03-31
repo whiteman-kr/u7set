@@ -9,6 +9,7 @@ CreateProjectDialog::CreateProjectDialog(QWidget *parent) :
 	ui->setupUi(this);
 
 	ui->projectNameEdit->setText("CUSTOMER_6USB1");
+	ui->projectDescriptionEdit->setText("Description");
 
 	connect(ui->cancelButton, &QAbstractButton::clicked, this, &CreateProjectDialog::reject);
 }
@@ -21,6 +22,8 @@ CreateProjectDialog::~CreateProjectDialog()
 void CreateProjectDialog::on_okButton_clicked()
 {
 	projectName = ui->projectNameEdit->text().trimmed();
+	projectDescription = ui->projectDescriptionEdit->text().trimmed();
+
 	adminstratorPassword = ui->passwordEdit->text();
 	const QString& confirmedPassword = ui->confirmPasswordEdit->text();
 

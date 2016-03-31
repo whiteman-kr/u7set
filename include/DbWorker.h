@@ -76,6 +76,10 @@ public slots:
 	void slot_deleteProject(QString projectName, QString password, bool doNotBackup);
 	void slot_upgradeProject(QString projectName, QString password, bool doNotBackup);
 
+	void slot_setProjectProperty(QString propertyName, QString propertyValue);
+	void slot_getProjectProperty(QString propertyName, QString* out);
+	void getProjectProperty_worker(QString propertyName, QString* out);
+
 	// User management
 	//
 	void slot_createUser(DbUser user);

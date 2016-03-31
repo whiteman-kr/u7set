@@ -37,6 +37,9 @@ public:
 	bool deleteProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
 	bool upgradeProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
 
+	bool setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget);
+	bool getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget);
+
 	// User management
 	//
 	bool createUser(const DbUser& user, QWidget* parentWidget);
@@ -126,6 +129,9 @@ signals:
 	void signal_closeProject();
 	void signal_deleteProject(QString projectName, QString password, bool doNotBackup);
 	void signal_upgradeProject(QString projectName, QString password, bool doNotBackup);
+
+	void signal_setProjectProperty(QString propertyName, QString propertyValue);
+	void signal_getProjectProperty(QString propertyName, QString* out);
 
 	void signal_createUser(DbUser user);
 	void signal_updateUser(DbUser user);

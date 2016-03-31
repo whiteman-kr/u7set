@@ -306,6 +306,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 			DbProject p;
 			p.setDatabaseName(databaseName);
 			p.setProjectName(projectName);
+			p.setProjectName(projectName);
 
 			out->push_back(p);
 		}
@@ -340,31 +341,59 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				continue;
 			}
 
-			// Get project version
+			// Get project version, scope is for versionQuery
 			//
-
-			QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
-
-			QSqlQuery versionQuery(projectDb);
-			result = versionQuery.exec(createVersionTableSql);
-
-			int projectVersion = -1;
-
-			if (result == false)
 			{
-				qDebug() << versionQuery.lastError();
-			}
-			else
-			{
-				if (versionQuery.next())
+				QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
+
+				QSqlQuery versionQuery(projectDb);
+				result = versionQuery.exec(createVersionTableSql);
+
+				int projectVersion = -1;
+
+				if (result == false)
 				{
-					projectVersion = versionQuery.value(0).toInt();
+					qDebug() << versionQuery.lastError();
 				}
+				else
+				{
+					if (versionQuery.next())
+					{
+						projectVersion = versionQuery.value(0).toInt();
+					}
+				}
+
+				pi->setVersion(projectVersion);
 			}
 
-			pi->setVersion(projectVersion);
+			// From this version ProjectProperties table is added, so it is possible to request propertyes
+			//
+			if (pi->version() >= 41)
+			{
+				QString getProjectDescriptionSql = QString("SELECT * FROM get_project_property('Description');");
 
-			versionQuery.clear();
+				QSqlQuery q(projectDb);
+				result = q.exec(getProjectDescriptionSql);
+
+				QString projectDescription;
+
+				if (result == false)
+				{
+					qDebug() << q.lastError();
+				}
+				else
+				{
+					if (q.next())
+					{
+						projectDescription = q.value(0).toString();
+					}
+				}
+
+				pi->setDescription(projectDescription);
+			}
+
+			// --
+			//
 			projectDb.close();
 		}
 	}
@@ -686,7 +715,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (user.isDisabled() == true)
 	{
-		emitError(tr("User %1 is not allowed to open the project. User was disabled by Administrator.").arg(username));
+		emitError(tr("User %1 is not allowed to open the project. User is disabled by Administrator.").arg(username));
 
 		query.clear();
 		db.close();
@@ -701,6 +730,11 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	project.setDatabaseName(databaseName);
 	project.setProjectName(projectName);
+
+	QString projectDescription;
+	getProjectProperty_worker("Description", &projectDescription);
+
+	project.setDescription(projectDescription);
 
 	setCurrentProject(project);
 
@@ -1343,6 +1377,115 @@ WHERE
 				}
 			}
 		}
+	}
+
+	return;
+}
+
+void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyValue)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true)
+	{
+		assert(propertyName.isEmpty() == false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not openned."));
+		return;
+	}
+
+	// Check if such user already exists
+	// SELECT * FROM creat_user();
+	//
+	QString request = QString("SELECT * FROM set_project_property('%1', '%2');")
+					  .arg(propertyName)
+					  .arg(propertyValue);
+
+	QSqlQuery query(db);
+	bool result = query.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Cannot set property %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		return;
+	}
+
+	if (query.size() > 0)
+	{
+		result = query.next();
+		assert(result);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getProjectProperty(QString propertyName, QString* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	return getProjectProperty_worker(propertyName, out);
+}
+
+void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
+{
+	// Check parameters
+	//
+	if (propertyName.isEmpty() == true || out == nullptr)
+	{
+		assert(propertyName.isEmpty() == false);
+		assert(out);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not openned."));
+		return;
+	}
+
+	// Check if such user already exists
+	// SELECT * FROM creat_user();
+	//
+	QString request = QString("SELECT * FROM get_project_property('%1');")
+					  .arg(propertyName);
+
+	QSqlQuery query(db);
+	bool result = query.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Cannot get project property value %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		return;
+	}
+
+	if (query.size() > 0)
+	{
+		result = query.next();
+		assert(result);
+
+		*out = query.value(0).toString();
 	}
 
 	return;
