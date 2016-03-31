@@ -194,7 +194,7 @@ namespace Builder
 
 
     // Application Functional Block
-	// represent all FB items in application logic schemas
+    // represent all FB items in application logic schemas
     //
 
     class ModuleLogicCompiler;
@@ -282,7 +282,7 @@ namespace Builder
 
 
     // Application Signal
-	// represent all signal in application logic schemas, and signals, which createad in compiling time
+    // represent all signal in application logic schemas, and signals, which createad in compiling time
     //
 
     class AppSignal //: public Signal
@@ -590,8 +590,9 @@ namespace Builder
 
         bool copyRS232Signals();
         bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);
-        bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port);
-        bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port);
+        bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
+        bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
+        bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals);
 
         bool copyDomDataToModuleMemory(const Module& module);
         bool copyAomDataToModuleMemory(const Module& module);

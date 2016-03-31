@@ -2365,6 +2365,32 @@ namespace Builder
             return false;
         }
 
+        QByteArray xmlData;
+        QXmlStreamWriter xmlWriter(&xmlData);
+
+        xmlWriter.setAutoFormatting(true);
+        xmlWriter.writeStartDocument();
+        xmlWriter.writeStartElement("SerialData");
+
+        m_resultWriter->buildInfo().writeToXml(xmlWriter);
+
+        xmlWriter.writeStartElement("PortInfo");
+
+        xmlWriter.writeAttribute("StrID", rs232Port->strID());
+        xmlWriter.writeAttribute("ID", QString::number(rs232Port->portID()));
+        xmlWriter.writeAttribute("DataID", QString::number(rs232Port->txDataID()));
+        xmlWriter.writeAttribute("Speed", "115200");
+        xmlWriter.writeAttribute("Bits", "8");
+        xmlWriter.writeAttribute("StopBits", "2");
+        xmlWriter.writeAttribute("ParityControl", "false");
+        xmlWriter.writeAttribute("DataSize", QString::number(rs232Port->txDataSizeW()));
+
+        xmlWriter.writeEndElement();	// </PortInfo>
+
+        xmlWriter.writeStartElement("Signals");
+
+        xmlWriter.writeAttribute("Count", QString::number(rs232Port->txAnalogSignalsCount() + rs232Port->txDiscreteSignalsCount()));
+
         bool result = true;
 
         m_code.newLine();
@@ -2393,14 +2419,65 @@ namespace Builder
 
         m_code.append(cmd);
 
-        result &= copyPortRS232AnalogSignals(portDataAddress, rs232Port);
-        result &= copyPortRS232DiscreteSignals(portDataAddress, rs232Port);
+        result &= copyPortRS232AnalogSignals(portDataAddress, rs232Port, xmlWriter);
+        result &= copyPortRS232DiscreteSignals(portDataAddress, rs232Port, xmlWriter);
+
+        xmlWriter.writeEndElement();	// </Signals>
+
+        xmlWriter.writeEndElement();	// </SerialData>
+        xmlWriter.writeEndDocument();
+
+        m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs232-%1.xml").arg(rs232Port->strID()), xmlData);
 
         return result;
     }
 
 
-    bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port)
+    bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals)
+    {
+        bool result = true;
+
+        for(Hardware::OptoPort::TxSignal txSignal : txSignals)
+        {
+            if (m_signalsStrID.contains(txSignal.strID) == false)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                assert(false);
+                result = false;
+                continue;
+            }
+
+            Signal* s = m_signalsStrID[txSignal.strID];
+
+            if (s == nullptr)
+            {
+                LOG_INTERNAL_ERROR(m_log);
+                assert(false);
+                result = false;
+                continue;
+            }
+
+            xmlWriter.writeStartElement("Signal");
+
+            xmlWriter.writeAttribute("StrID", s->strID());
+            xmlWriter.writeAttribute("ExtStrID", s->extStrID());
+            xmlWriter.writeAttribute("Name", s->name());
+            xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
+            xmlWriter.writeAttribute("Unit", Signal::m_unitList->valueAt(s->unitID()));
+            xmlWriter.writeAttribute("DataSize", QString::number(s->dataSize()));
+            xmlWriter.writeAttribute("DataFormat", QMetaEnum::fromType<E::DataFormat>().valueToKey(s->dataFormatInt()));
+            xmlWriter.writeAttribute("ByteOrder", QMetaEnum::fromType<E::ByteOrder>().valueToKey(s->byteOrderInt()));
+            xmlWriter.writeAttribute("Offset", QString::number(txSignal.address.offset()));
+            xmlWriter.writeAttribute("BitNo", QString::number(txSignal.address.bit()));
+
+            xmlWriter.writeEndElement();
+        }
+
+        return result;
+    }
+
+
+    bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
     {
         QList<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
 
@@ -2470,11 +2547,16 @@ namespace Builder
             m_code.append(cmd);
         }
 
+        if (result == true)
+        {
+            result &= writeSignalsToSerialXml(xmlWriter, txAnalogSignals);
+        }
+
         return result;
     }
 
 
-    bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port)
+    bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
     {
         portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
 
@@ -2573,6 +2655,11 @@ namespace Builder
             cmd.mov(portDataAddress + wordCount, bitAccAddr);
             cmd.setComment("");
             m_code.append(cmd);
+        }
+
+        if (result == true)
+        {
+            result &= writeSignalsToSerialXml(xmlWriter, txDiscreteSignals);
         }
 
         return result;
