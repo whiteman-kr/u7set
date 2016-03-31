@@ -16,7 +16,7 @@ class SubnetChecker : public QObject
 {
 	Q_OBJECT
 public:
-    explicit SubnetChecker(QList<QPair<quint32,uint>>& subnetList, QObject *parent = 0);
+	explicit SubnetChecker(QList<QPair<quint32,uint>>& subnetList, int totalHostCount, QObject *parent = 0);
 
 signals:
 	void setChecked(int count);
@@ -38,6 +38,7 @@ private:
 	RequestHeader m_requestHeader;
 	QUdpSocket* m_socket;
 	QTimer* m_sendPacketTimer;
+	int m_totalHostCount;
 
 	void setSubnet(int index);
 };
