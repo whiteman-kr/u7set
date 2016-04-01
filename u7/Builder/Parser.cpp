@@ -354,7 +354,7 @@ namespace Builder
 
 			if (log != nullptr)
 			{
-				log->errINT1000(QString(__FUNCTION__ ", schema %1, log %2, afbCollection %3")
+				log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %2, afbCollection %3")
 								.arg(reinterpret_cast<size_t>(logicSchema.get()))
 								.arg(reinterpret_cast<size_t>(log))
 								.arg(reinterpret_cast<size_t>(afbCollection)));
@@ -901,7 +901,7 @@ namespace Builder
 			assert(log);
 			assert(afbCollection);
 
-			log->errINT1000(QString(__FUNCTION__ ", schema %1, layer %2, log %3, afbCollection %4")
+			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, log %3, afbCollection %4")
 							.arg(reinterpret_cast<size_t>(schema.get()))
 							.arg(reinterpret_cast<size_t>(layer.get()))
 							.arg(reinterpret_cast<size_t>(log))
@@ -1132,7 +1132,7 @@ namespace Builder
 		if (out == nullptr)
 		{
 			assert(out);
-			m_log->errINT1000(QString(__FUNCTION__ ", out %1").arg(reinterpret_cast<size_t>(out)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", out %1").arg(reinterpret_cast<size_t>(out)));
 			return false;
 		}
 
@@ -1590,7 +1590,7 @@ namespace Builder
 			assert(layer);
 			assert(bushContainer);
 
-			log()->errINT1000(QString(__FUNCTION__ ", schema %1, layer %2, bushContainer %3")
+			log()->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, bushContainer %3")
 							  .arg(reinterpret_cast<size_t>(schema.get()))
 							  .arg(reinterpret_cast<size_t>(layer.get()))
 							  .arg(reinterpret_cast<size_t>(bushContainer)));

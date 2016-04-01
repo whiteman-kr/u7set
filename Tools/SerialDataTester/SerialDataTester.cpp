@@ -247,7 +247,7 @@ SerialDataTester::~SerialDataTester()
 
 void SerialDataTester::parseFile()
 {
-	int calculatedDataSize=0;
+	//int calculatedDataSize=0;
 
 	// Try to open signals xml to read signals
 	//
@@ -289,9 +289,9 @@ void SerialDataTester::parseFile()
 		{
 			QXmlStreamAttributes attributes = xmlReader.attributes();
 
-			if(xmlReader.name() == "port")
+			if(xmlReader.name() == "PortInfo")
 			{
-				if (attributes.hasAttribute("PortInfoStrID")
+				if (attributes.hasAttribute("StrID")
 					&& attributes.hasAttribute("ID")
 					&& attributes.hasAttribute("DataID")
 					&& attributes.hasAttribute("Speed")
@@ -304,7 +304,7 @@ void SerialDataTester::parseFile()
 					for (QAction* port : m_setPort->actions())
 					{
 						port->setChecked(false);
-						if (port->text() == attributes.value("PortInfoStrID").toString())
+						if (port->text() == attributes.value("StrID").toString())
 						{
 							portExists = true;
 							port->setChecked(true);
@@ -381,7 +381,7 @@ void SerialDataTester::parseFile()
 						}
 					}
 
-					m_dataSize = attributes.value("DataSize").toInt()/8;
+					//m_dataSize = attributes.value("DataSize").toInt()/8;
 
 					if (!portExists)
 					{
@@ -399,7 +399,7 @@ void SerialDataTester::parseFile()
 			if(xmlReader.name() == "Signal")
 			{
 
-				if(attributes.hasAttribute("SignalStrID")
+				if(attributes.hasAttribute("StrID")
 				   && attributes.hasAttribute("ExtStrID")
 				   && attributes.hasAttribute("Name")
 				   && attributes.hasAttribute("Type")
@@ -410,7 +410,7 @@ void SerialDataTester::parseFile()
 				   && attributes.hasAttribute("Offset")
 				   && attributes.hasAttribute("BitNo"))
 				{
-					currentSignal.strId  = attributes.value("SignalStrID").toString();
+					currentSignal.strId  = attributes.value("StrID").toString();
 					currentSignal.exStrId = attributes.value("ExtStrID").toString();
 					currentSignal.name =  attributes.value("Name").toString();
 					currentSignal.type = attributes.value("Type").toString();
@@ -438,7 +438,7 @@ void SerialDataTester::parseFile()
 						currentSignal.dataSize/=8;
 					}
 
-					calculatedDataSize += currentSignal.dataSize;
+//					calculatedDataSize += currentSignal.dataSize;
 
 					m_signalsFromXml.push_back(currentSignal);
 				}
@@ -490,7 +490,7 @@ void SerialDataTester::parseFile()
 	// In case errors in xml-file show message
 	//
 
-	if (m_dataSize != calculatedDataSize)
+	/*if (m_dataSize != calculatedDataSize)
 	{
 		QMessageBox::warning(this, tr("Warning"), tr(qPrintable("Packet size is not equal to summ of signals size: possible loss of data. Please, check the packet data amount, and sizes of each signal data.\nCalculated size: " + QString::number(calculatedDataSize) + "\nSetted size: " + QString::number(m_dataSize))));
 		m_dataSize = 0;
@@ -503,7 +503,7 @@ void SerialDataTester::parseFile()
 		ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
 		ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 		ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
-	}
+	}*/
 }
 
 void SerialDataTester::reloadConfig()
@@ -783,7 +783,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 
 				signalValueBits.resize(signal.dataSize*8);
 				QString valueString;
-				for (int pos = signal.offset + signal.bit; pos < signal.offset + signal.bit + signal.dataSize*8; pos ++)
+				for (int pos = signal.offset*16 + signal.bit; pos < signal.offset + signal.bit + signal.dataSize*8; pos ++)
 				{
 					switch (dataArray.at(pos))
 					{

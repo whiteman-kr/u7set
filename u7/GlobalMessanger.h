@@ -22,6 +22,10 @@ public:
 	void fireProjectOpened(DbProject project);
 	void fireProjectClosed();
 
+	// Equipment Editor
+	//
+	void fireShowDeviceApplicationSignals(QStringList deviceStrIds);
+
 	// Build
 	//
 	void fireBuildStarted();
@@ -40,6 +44,8 @@ signals:
 
 	void buildStarted();
 	void buildFinished();
+
+	void showDeviceApplicationSignals(QStringList deviceStrIds);
 
 public slots:
 

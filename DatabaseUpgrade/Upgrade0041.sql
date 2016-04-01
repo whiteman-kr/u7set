@@ -26,6 +26,11 @@ DECLARE
 	result boolean;
 BEGIN
 
+	IF (property_name IS NULL OR char_length(property_name) = 0)
+	THEN
+		return FALSE;
+	END IF;
+
 	INSERT INTO ProjectProperties(Name, Value)
 		VALUES (property_name, property_value)
 		ON CONFLICT (Name) DO

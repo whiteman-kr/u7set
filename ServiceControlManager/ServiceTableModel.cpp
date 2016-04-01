@@ -1,4 +1,4 @@
-#include "servicetablemodel.h"
+#include "ServiceTableModel.h"
 #include <QBrush>
 #include <QDebug>
 #include "../include/UdpSocket.h"

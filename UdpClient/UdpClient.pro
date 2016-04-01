@@ -61,8 +61,8 @@ QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES += \
-        mainwindow.cpp \
-        clientmain.cpp \
+        MainWindow.cpp \
+        ClientMain.cpp \
         ../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
     ../lib/SocketIO.cpp \
@@ -75,7 +75,7 @@ SOURCES += \
     ../lib/JsonSerializable.cpp
 
 
-HEADERS  += mainwindow.h \
+HEADERS  += MainWindow.h \
         ../include/SocketIO.h \
         ../include/UdpSocket.h \
 	../include/Service.h \
@@ -91,7 +91,7 @@ HEADERS  += mainwindow.h \
 
 include(../qtservice/src/qtservice.pri)
 
-FORMS    += mainwindow.ui
+FORMS    += MainWindow.ui
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 

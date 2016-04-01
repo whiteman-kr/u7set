@@ -148,6 +148,7 @@ public slots:
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
 	void addInOutsToSignals();
+	void showAppSignals();			// Show application signals for this object
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
@@ -247,7 +248,10 @@ private:
 		QAction* m_addPresetWorkstationAction = nullptr;
 		QAction* m_addPresetSoftwareAction = nullptr;
 
+	//----------------------------------
+	QAction* m_SeparatorAction0 = nullptr;
 	QAction* m_inOutsToSignals = nullptr;
+	QAction* m_showAppSignals = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_deleteObjectAction = nullptr;
