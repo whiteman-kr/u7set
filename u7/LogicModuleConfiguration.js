@@ -467,15 +467,18 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	
 	for (var i = 0; i < 2; i++)
 	{
-		var regAcqID = module.propertyValue("RegDataAcquisitionServiceStrID" + (i + 1));
-		var diagAcqID = module.propertyValue("DiagDataAcquisitionServiceStrID" + (i + 1));
+		var reqAcqProp = "RegDataAcquisitionServiceStrID" + (i + 1);
+		var diagAcqProp = "DiagDataAcquisitionServiceStrID" + (i + 1);
+	
+		var regAcqID = module.propertyValue(reqAcqProp);
+		var diagAcqID = module.propertyValue(diagAcqProp);
 		
 		var regAcq = root.jsFindChildObjectByMask(regAcqID);
 		var diagAcq = root.jsFindChildObjectByMask(diagAcqID);
 		
-		if (diagAcq == null || regAcq == null)
+		if (regAcq == null)
 		{
-			log.writeWarning(module.propertyValue("StrID") + ": one of data acquisition services " + diagAcqID + ", " + regAcqID + " was not found, using defaults.");
+			log.writeWarning(module.propertyValue("StrID") + ": reg data acquisition service " + (i + 1) + " ID='" + regAcqID + "' was not found, using defaults.");
 		}
 		else
 		{
@@ -493,7 +496,14 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				log.writeError("Software " + regAcq.propertyValue("StrID") + " has no property " + "RegDataReceivingPort" + (i + 1) + " in function generate_lm_1_rev3");
 				return false;
 			}
-			
+		}
+
+		if (diagAcq == null)
+		{
+			log.writeWarning(module.propertyValue("StrID") + ": diag data acquisition service " + (i + 1) + " ID='" + diagAcqID + "' was not found, using defaults.");
+		}
+		else
+		{
 			var diagServerIPValue  = diagAcq.jsPropertyIP("DiagDataReceivingIP" + (i + 1));
 			if (diagServerIPValue == null)
 			{
@@ -509,6 +519,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				return false;
 			}
 		}
+		
 	
 		var regIP = module.jsPropertyIP("RegIP" + (i + 1));
 		var regAddress = regIP & 0xff;
