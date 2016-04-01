@@ -1772,6 +1772,34 @@ void EquipmentView::addInOutsToSignals()
 	return;
 }
 
+void EquipmentView::showAppSignals()
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.isEmpty() == true)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	QStringList strIds;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		assert(device);
+
+		if (device != nullptr)
+		{
+			strIds.push_back(device->strIdExpanded());
+		}
+	}
+
+	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds);
+
+	return;
+}
+
 
 void EquipmentView::deleteSelectedDevices()
 {
@@ -2434,7 +2462,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addPresetMenu->addAction(m_addPresetWorkstationAction);
 		m_addPresetMenu->addAction(m_addPresetSoftwareAction);
 
+	// -----------------
+	m_equipmentView->addAction(m_SeparatorAction0);
 	m_equipmentView->addAction(m_inOutsToSignals);
+	m_equipmentView->addAction(m_showAppSignals);
 
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction1);
@@ -2615,11 +2646,20 @@ void EquipmentTabPage::CreateActions()
 		m_addPresetSoftwareAction->setEnabled(false);
 		connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
 
+	//-----------------------------------
+	m_SeparatorAction0 = new QAction(tr("Application Signals"), this);
+	m_SeparatorAction0->setSeparator(true);
+
 	m_inOutsToSignals = new QAction(tr("Add Inputs/Outs to App Signals"), this);
 	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
 	m_inOutsToSignals->setEnabled(false);
 	m_inOutsToSignals->setVisible(false);
 	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, &EquipmentView::addInOutsToSignals);
+
+	m_showAppSignals = new QAction(tr("Show Application Signals"), this);
+	m_showAppSignals->setStatusTip(tr("Show application signals for object and all its children"));
+	m_showAppSignals->setEnabled(false);
+	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, &EquipmentView::showAppSignals);
 
 	//-----------------------------------
 	m_SeparatorAction1 = new QAction(this);
@@ -2756,6 +2796,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addPresetWorkstationAction);
 	assert(m_addPresetSoftwareAction);
 	assert(m_inOutsToSignals);
+	assert(m_showAppSignals);
 
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
@@ -2792,6 +2833,7 @@ void EquipmentTabPage::setActionState()
 	m_inOutsToSignals->setEnabled(false);
 	m_inOutsToSignals->setVisible(false);
 
+	m_showAppSignals->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -2818,6 +2860,13 @@ void EquipmentTabPage::setActionState()
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);
 		}
+	}
+
+	// Show Application Logic Signal for current object
+	//
+	if (selectedIndexList.size() > 0)
+	{
+		m_showAppSignals->setEnabled(true);
 	}
 
 	// Delete Items action
