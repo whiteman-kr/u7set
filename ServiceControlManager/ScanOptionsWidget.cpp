@@ -1,5 +1,5 @@
-#include "scanoptionswidget.h"
-#include "servicetablemodel.h"
+#include "ScanOptionsWidget.h"
+#include "ServiceTableModel.h"
 #include <QRegExpValidator>
 #include <QLineEdit>
 #include <QFormLayout>

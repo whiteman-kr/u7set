@@ -1,4 +1,4 @@
-#include "servermainwindow.h"
+#include "ServerMainWindow.h"
 #include "ui_servermainwindow.h"
 
 namespace Tcp
