@@ -133,6 +133,284 @@ namespace Builder
 	// CFG			FSC configuration						3000-3999
 	//
 
+    /// IssueCode: CFG3000
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Property StrID does not exist in object %1.
+    ///
+    /// Parameters:
+    ///			%1 Object description
+    ///
+    /// Description:
+    ///			Occurs if the StrID property does not exist in connections, systems, modules, controllers and signals
+    ///
+    void IssueLogger::errCFG3000(QString object)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3000,
+                  tr("Property StrID does not exist in object %1.")
+                  .arg(object));
+    }
+
+    /// IssueCode: CFG3001
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Property %1 does not exist in object %2.
+    ///
+    /// Parameters:
+    ///         %1 Property name
+    ///			%2 Object StrID
+    ///
+    /// Description:
+    ///			Occurs if a property does not exist an object
+    ///
+    void IssueLogger::errCFG3001(QString propertyName, QString object)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3001,
+                  tr("Property %1 does not exist in object %2.")
+                  .arg(propertyName)
+                  .arg(object));
+    }
+
+    /// IssueCode: CFG3002
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Subsystem %1, set in LM module %2, does not exist.
+    ///
+    /// Parameters:
+    ///         %1 Subsystem StrID
+    ///			%2 Module StrID
+    ///
+    /// Description:
+    ///			Occurs if subsystem set in LM module does not exist in the project database
+    ///
+    void IssueLogger::errCFG3002(QString subSysID, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3002,
+                  tr("Subsystem %1 set in LM module %2 does not exist.")
+                  .arg(subSysID)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3003
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Wrong frameSize (%1) and/or frameCount(%2) values in module %3.
+    ///
+    /// Parameters:
+    ///         %1 FrameSize
+    ///         %2 FrameCount
+    ///			%3 Module StrID
+    ///
+    /// Description:
+    ///			Occurs if frameSize is less than 1024 or frameCount is less than 76 in module
+    ///
+    void IssueLogger::errCFG3003(int frameSize, int frameCount, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3003,
+                  tr("Wrong frameSize (%1) or frameCount(%2) values in module %3.")
+                  .arg(frameSize)
+                  .arg(frameCount)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3004
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Channel number (%1) is less than 1 or bigger than %2 in module %3.
+    ///
+    /// Parameters:
+    ///         %1 Channel
+    ///         %2 MaxChannel
+    ///			%3 Module StrID
+    ///
+    /// Description:
+    ///			Occurs if LM channel number is less than 1 or bigger than max number (4)
+    ///
+    void IssueLogger::errCFG3004(int channel, int maxChannel, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3004,
+                  tr("Channel number (%1) is less than 1 or bigger than %2 in module %3.")
+                  .arg(channel)
+                  .arg(maxChannel)
+                  .arg(module));
+    }
+
+
+    /// IssueCode: CFG3005
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Channel number (%1) is not unique in LM module %2.
+    ///
+    /// Parameters:
+    ///         %1 Channel
+    ///			%2 Module StrID
+    ///
+    /// Description:
+    ///			Occurs if LM channel number is not unique
+    ///
+    void IssueLogger::errCFG3005(int channel, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3005,
+                  tr("Channel number (%1) is not unique in LM module %2.")
+                  .arg(channel)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3006
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Wrong i/o module %1 place (%2), expected 1-14.
+    ///
+    /// Parameters:
+    ///			%1 Module StrID
+    ///         %2 Place
+    ///
+    /// Description:
+    ///			I/o module place should be 1-14
+    ///
+    void IssueLogger::errCFG3006(QString module, int place)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3006,
+                  tr("Wrong i/o module %1 place (%2), expected 1-14")
+                  .arg(module)
+                  .arg(place));
+    }
+
+
+
+    /// IssueCode: CFG3100
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Input controller %1 was not found in module %2
+    ///
+    /// Parameters:
+    ///			%1 Controller StrID
+    ///         %2 Module StrID
+    ///
+    /// Description:
+    ///			Input controller was not found in a  module
+    ///
+    void IssueLogger::errCFG3100(QString controllerID, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3100,
+                  tr("Input controller %1 was not found in module %2")
+                  .arg(controllerID)
+                  .arg(module));
+    }
+
+
+    /// IssueCode: CFG3101
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Output controller %1 was not found in module %2
+    ///
+    /// Parameters:
+    ///			%1 Controller StrID
+    ///         %2 Module StrID
+    ///
+    /// Description:
+    ///			Output controller was not found in a  module
+    ///
+    void IssueLogger::errCFG3101(QString controllerID, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3101,
+                  tr("Output controller %1 was not found in module %2")
+                  .arg(controllerID)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3102
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Different MaxDifference values in one channel in AIM module %5
+    ///
+    /// Parameters:
+    ///			%1 Place 1
+    ///			%2 MaxDifference 1
+    ///			%3 Place 2
+    ///			%4 MaxDifference 2
+    ///         %5 Module StrID
+    ///
+    /// Description:
+    ///			MaxDifference values should be equal in one channel in AIM module
+    ///
+    void IssueLogger::errCFG3102(int place1, double maxDifference1, int place2, double maxDifference2, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3102,
+                  tr("Different MaxDifference values (place %1, maxDiffedence = %2 <=> place %3, maxDiffedence = %4) in one channel in AIM module %5")
+                  .arg(place1)
+                  .arg(maxDifference1)
+                  .arg(place2)
+                  .arg(maxDifference2)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3103
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Invalid OutputRangeMode value (%1) in place %2 in AOM module %3
+    ///
+    /// Parameters:
+    ///			%1 Place
+    ///			%2 OutputRangeMode
+    ///         %3 Module StrID
+    ///
+    /// Description:
+    ///			OutputRangeMode of AOM module is an enumeration, out-of-range values are prohibited
+    ///
+    void IssueLogger::errCFG3103(int outputRangeMode, double place, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3103,
+                  tr("Invalid OutputRangeMode value (%1) in place %2 in AOM module %3")
+                  .arg(outputRangeMode)
+                  .arg(place)
+                  .arg(module));
+    }
+
+    /// IssueCode: CFG3200
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Port controller %1 was not found in module %2
+    ///
+    /// Parameters:
+    ///			%1 Controller StrID
+    ///         %2 Module StrID
+    ///
+    /// Description:
+    ///			Port controller was not found in a  module
+    ///
+    void IssueLogger::errCFG3200(QString controllerID, QString module)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3200,
+                  tr("Port controller %1 was not found in module %2")
+                  .arg(controllerID)
+                  .arg(module));
+    }
+
 	// ALP			Application Logic Parsing				4000-4999
 	//
 
