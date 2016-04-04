@@ -11,7 +11,7 @@ namespace Builder
         Q_OBJECT
     public:
         TuningBuilder() = delete;
-        TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
+        TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
         virtual ~TuningBuilder();
 
         bool build();
@@ -33,7 +33,7 @@ namespace Builder
         SignalSet* m_signalSet = nullptr;
         Hardware::SubsystemStorage* m_subsystems = nullptr;
         Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
-        mutable OutputLog* m_log = nullptr;
+        mutable IssueLogger* m_log = nullptr;
         BuildResultWriter* m_buildWriter = nullptr;
 
         int m_changesetId = 0;

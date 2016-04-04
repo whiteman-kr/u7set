@@ -1336,12 +1336,20 @@ namespace Hardware
 	std::vector<DeviceObject*> DeviceObject::findChildObjectsByMask(const QString& mask)
 	{
 		std::vector<DeviceObject*> list;
-		findChildObjectsByMask(mask, list);
+        if (mask.isEmpty() == false)
+        {
+            findChildObjectsByMask(mask, list);
+        }
 		return list;
 	}
 
 	void DeviceObject::findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list)
 	{
+        if (mask.isEmpty() == true)
+        {
+            return;
+        }
+
 		for (auto c : m_children)
 		{
 			if (CUtils::processDiagSignalMask(mask, c->strId()) == true)
@@ -1354,6 +1362,11 @@ namespace Hardware
 
 	QObject* DeviceObject::jsFindChildObjectByMask(const QString& mask)
 	{
+        if (mask.isEmpty() == true)
+        {
+            return nullptr;
+        }
+
 		std::vector<DeviceObject*> list = findChildObjectsByMask(mask);
 		if (list.empty() == true)
 		{
