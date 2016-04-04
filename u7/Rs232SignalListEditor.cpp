@@ -27,8 +27,8 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
         << tr("Duplex");
     m_rs232Connections->setColumnCount(l.size());
     m_rs232Connections->setHorizontalHeaderLabels(l);
-	m_rs232Connections->setColumnWidth(0, 165);
-	m_rs232Connections->setColumnWidth(1, 300);
+	m_rs232Connections->setColumnWidth(0, 170);
+	m_rs232Connections->setColumnWidth(1, 295);
 	m_rs232Connections->setColumnWidth(2, 60);
     m_rs232Connections->setColumnWidth(3, 70);
     m_rs232Connections->setColumnWidth(4, 70);
@@ -115,11 +115,12 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	updateButtons(m_connections.isCheckedOut(m_db));
 	fillConnectionsList();
+	m_rs232Connections->selectionModel()->select(m_rs232Connections->model()->index(0, 0), QItemSelectionModel::SelectCurrent);
 }
 
 void Rs232SignalListEditor::closeEvent(QCloseEvent *e)
 {
-	if (!m_connections.isCheckedOut(m_db) || saveChanges())
+	if (askForSaveChanged())
 	{
 		e->accept();
 	}
@@ -238,7 +239,7 @@ void Rs232SignalListEditor::addConnection()
 	// Select the created element
 	//
 	m_rs232Connections->clearSelection();
-	m_rs232Connections->selectionModel()->select(m_rs232Connections->model()->index(index, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	m_rs232Connections->selectionModel()->select(m_rs232Connections->model()->index(0, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
 	m_modified = true;
 }
@@ -328,8 +329,8 @@ void Rs232SignalListEditor::addSignal()
 
 	bool ok;
 	QString&& id = QInputDialog::getText(this, windowTitle(),
-										tr("Please enter new id:"), QLineEdit::Normal,
-										"#NEW_SIGNAL_ID", &ok);
+										tr("Please enter new id:                                    "),
+										 QLineEdit::Normal, "#NEW_SIGNAL_ID", &ok);
 	if (ok && !id.isEmpty())
 	{
 		QStringList&& signalList = connection->signalList();
@@ -347,12 +348,13 @@ void Rs232SignalListEditor::addSignal()
 		}
 		else
 		{
-			int row = m_signalList->row(items[0]);
+			int row = m_signalList->row(items[0]) + 1;
 			signalList.insert(row, id);
 			connection->setSignalList(signalList);
 			fillSignalList(true);
 			m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
 		}
+		m_modified = true;
 	}
 }
 
@@ -375,9 +377,10 @@ void Rs232SignalListEditor::editSignal()
 	QStringList&& signalList = connection->signalList();
 	bool ok;
 	int row = m_signalList->row(items[0]);
+
 	QString id = QInputDialog::getText(this, windowTitle(),
-											tr("Please enter new id:"), QLineEdit::Normal,
-											signalList[row], &ok);
+										tr("Please enter new id:                                    "),
+										QLineEdit::Normal, "#NEW_SIGNAL_ID", &ok);;
 
 	if (ok && !id.isEmpty())
 	{
@@ -390,6 +393,7 @@ void Rs232SignalListEditor::editSignal()
 		connection->setSignalList(signalList);
 		fillSignalList(true);
 		m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
+		m_modified = true;
 	}
 }
 
@@ -418,6 +422,7 @@ void Rs232SignalListEditor::removeSignal()
 	connection->setSignalList(signalList);
 	fillSignalList(true);
 	m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
+	m_modified = true;
 }
 
 void Rs232SignalListEditor::onConnectionChanged()
@@ -440,6 +445,15 @@ void Rs232SignalListEditor::onConnectionChanged()
 
 void Rs232SignalListEditor::fillConnectionsList()
 {
+	int row = -1;
+	int col = -1;
+	QList<QTableWidgetItem*> items = m_rs232Connections->selectedItems();
+	if (items.size() != 0)
+	{
+		row = m_rs232Connections->row(items[0]);
+		col = m_rs232Connections->column(items[0]);
+	}
+
 	m_rs232Connections->setRowCount(0);
 
 	int rowCount = 0;
@@ -470,6 +484,11 @@ void Rs232SignalListEditor::fillConnectionsList()
         m_rs232Connections->item(rowCount, 4)->setData(Qt::UserRole, i);
         rowCount++;
 	}
+
+	if (row != -1 && col != -1)
+	{
+		m_rs232Connections->selectionModel()->select(m_rs232Connections->model()->index(row, col), QItemSelectionModel::SelectCurrent);
+	}
 }
 
 void Rs232SignalListEditor::fillSignalList(bool forceUpdate)
@@ -486,6 +505,14 @@ void Rs232SignalListEditor::fillSignalList(bool forceUpdate)
 		return;
 	}
 	m_currentConnection = selectedConnection;
+
+	int row = -1;
+	items = m_signalList->selectedItems();
+	if (items.size() != 0)
+	{
+		row = m_signalList->row(items[0]);
+	}
+
 	m_signalList->setRowCount(0);
 	QStringList&& list = m_connections.get(selectedConnection)->signalList();
 	for (int i = 0; i < list.count(); i++)
@@ -493,6 +520,36 @@ void Rs232SignalListEditor::fillSignalList(bool forceUpdate)
 		m_signalList->insertRow(i);
 		m_signalList->setItem(i, 0, new QTableWidgetItem(list[i]));
 	}
+
+	if (row != -1)
+	{
+		m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
+	}
+}
+
+bool Rs232SignalListEditor::askForSaveChanged()
+{
+	if (m_modified == false)
+	{
+		return true;
+	}
+
+	QMessageBox::StandardButton result = QMessageBox::warning(this, windowTitle(), "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+	if (result == QMessageBox::Yes)
+	{
+		if (saveChanges() == false)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	if (result == QMessageBox::No)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 bool Rs232SignalListEditor::saveChanges()

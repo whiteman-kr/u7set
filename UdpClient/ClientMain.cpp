@@ -1,5 +1,4 @@
-#include "servermainwindow.h"
-#include "../include/UdpSocket.h"
+#include "MainWindow.h"
 #include <QApplication>
 
 
@@ -14,11 +13,16 @@
     #endif
 #endif
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-	ServerMainWindow w;
+
+	//qRegisterMetaType<QHostAddress>("QHostAddress");
+
+	//qRegisterMetaType<QByteArrayRef>();
+	//Q_DECLARE_METATYPE(QByteArrayRef);
+
+    MainWindow w;
     w.show();
 
     return a.exec();

@@ -7,6 +7,7 @@
 #include "../include/DeviceObject.h"
 #include "../include/PropertyObject.h"
 #include "Builder/OptoModule.h"
+#include "version.h"
 
 #include <QtQml>
 
@@ -96,6 +97,8 @@ int main(int argc, char *argv[])
 	a.setApplicationName("u7");
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
+
+	a.setApplicationVersion(QString("0.7.%1").arg(USED_SERVER_COMMIT_NUMBER));
 
 	VFrame30::VFrame30Library::Init();
 	Hardware::Init();

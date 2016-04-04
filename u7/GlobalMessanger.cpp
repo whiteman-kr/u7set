@@ -33,6 +33,12 @@ void GlobalMessanger::fireProjectClosed()
 	emit projectClosed();
 }
 
+void GlobalMessanger::fireShowDeviceApplicationSignals(QStringList deviceStrIds)
+{
+	qDebug() << "Show Application signals for devices " << deviceStrIds;
+	emit showDeviceApplicationSignals(deviceStrIds);
+}
+
 void GlobalMessanger::fireBuildStarted()
 {
 	emit buildStarted();

@@ -62,11 +62,11 @@ unix {
 
 
 SOURCES +=\
-    servermain.cpp \
+    ServerMain.cpp \
     ../lib/UdpSocket.cpp \
     ServerSocket.cpp \
 	../lib/Service.cpp \
-    servermainwindow.cpp \
+    ServerMainWindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
 	../lib/ProtoUdp.cpp \
@@ -82,7 +82,7 @@ HEADERS  += \
     ../include/UdpSocket.h \
     ServerSocket.h \
 	../include/Service.h \
-    servermainwindow.h \
+    ServerMainWindow.h \
     ../include/CircularLogger.h \
     version.h \
 	../include/ProtoUdp.h \
@@ -98,7 +98,7 @@ HEADERS  += \
 include(../qtservice/src/qtservice.pri)
 
 FORMS    += \
-    servermainwindow.ui
+    ServerMainWindow.ui
 
 
 unix:QMAKE_CXXFLAGS += -std=c++11

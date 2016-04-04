@@ -57,9 +57,9 @@ unix {
 #PRE_TARGETDEPS += version.h
 #QMAKE_EXTRA_TARGETS += versionTarget
 
-SOURCES += mainwindow.cpp \
-    scanoptionswidget.cpp \
-    servicetablemodel.cpp \
+SOURCES += MainWindow.cpp \
+    ScanOptionsWidget.cpp \
+    ServiceTableModel.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DataSource.cpp \
@@ -70,9 +70,9 @@ SOURCES += mainwindow.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp
 
-HEADERS  += mainwindow.h \
-    scanoptionswidget.h \
-    servicetablemodel.h \
+HEADERS  += MainWindow.h \
+    ScanOptionsWidget.h \
+    ServiceTableModel.h \
     ../include/UdpSocket.h \
     ../include/SocketIO.h \
     ../include/DataSource.h \

@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include <QTableWidget>
 #include <QHBoxLayout>
 #include <QMenu>
@@ -11,8 +11,8 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QApplication>
-#include "scanoptionswidget.h"
-#include "servicetablemodel.h"
+#include "ScanOptionsWidget.h"
+#include "ServiceTableModel.h"
 #include "../include/UdpSocket.h"
 #include <functional>
 

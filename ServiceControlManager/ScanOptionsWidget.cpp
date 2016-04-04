@@ -1,5 +1,5 @@
-#include "scanoptionswidget.h"
-#include "servicetablemodel.h"
+#include "ScanOptionsWidget.h"
+#include "ServiceTableModel.h"
 #include <QRegExpValidator>
 #include <QLineEdit>
 #include <QFormLayout>
@@ -122,7 +122,7 @@ void ScanOptionsWidget::startChecking()
 		}
 
 		// Go!
-		SubnetChecker* checker = new SubnetChecker(subnetList);
+		SubnetChecker* checker = new SubnetChecker(subnetList, hostCount);
 
 		QThread* thread = new QThread;
 		checker->moveToThread(thread);
@@ -136,6 +136,7 @@ void ScanOptionsWidget::startChecking()
 		connect(progress, &QProgressDialog::canceled, progress, &QObject::deleteLater);
 		connect(progress, &QProgressDialog::rejected, progress, &QObject::deleteLater);
 		connect(thread, &QThread::started, checker, &SubnetChecker::startChecking, Qt::QueuedConnection);
+		connect(thread, &QThread::finished, progress, &QProgressDialog::reject, Qt::QueuedConnection);
 		connect(thread, &QThread::finished, checker, &QObject::deleteLater);
 		connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 		thread->start();
@@ -150,10 +151,11 @@ void ScanOptionsWidget::startChecking()
 }
 
 
-SubnetChecker::SubnetChecker(QList<QPair<quint32,uint>>& subnetList, QObject* parent) :
+SubnetChecker::SubnetChecker(QList<QPair<quint32,uint>>& subnetList, int totalHostCount, QObject* parent) :
 	QObject(parent),
 	m_subnetList(std::move(subnetList)),
-	m_socket(nullptr)
+	m_socket(nullptr),
+	m_totalHostCount(totalHostCount)
 {
 	setSubnet(0);
 }
@@ -212,7 +214,10 @@ void SubnetChecker::checkNextHost()
 		setSubnet(m_subnetIndex);
 	}
 	m_checkedHostCount++;
-	emit setChecked(m_checkedHostCount);
+	if (m_totalHostCount < 50 || (m_checkedHostCount % (m_totalHostCount / 50) == 0))
+	{
+		emit setChecked(m_checkedHostCount);
+	}
 }
 
 void SubnetChecker::stopChecking()
