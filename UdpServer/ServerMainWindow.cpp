@@ -1,5 +1,5 @@
 #include "ServerMainWindow.h"
-#include "ui_servermainwindow.h"
+#include "ui_ServerMainWindow.h"
 
 namespace Tcp
 {
