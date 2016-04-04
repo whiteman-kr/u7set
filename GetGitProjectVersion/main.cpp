@@ -328,8 +328,9 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		versionFile.open(versionFileName);
+		versionFile.open(versionFileName, std::ofstream::out | std::ofstream::trunc);
 		versionFile << versionInfoText.rdbuf();
+		versionFile.close();
 		cout << versionFileName.c_str() << " was generated\n";
 	}
 
