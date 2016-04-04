@@ -38,6 +38,7 @@ public slots:
 private:
 	void fillConnectionsList();
 	void fillSignalList(bool forceUpdate = false);
+	bool askForSaveChanged();
 	bool saveChanges();
 	void updateButtons(bool checkOut);
 

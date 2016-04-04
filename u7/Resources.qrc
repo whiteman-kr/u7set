@@ -17,5 +17,6 @@
         <file>Images/SchemaConstant.svg</file>
         <file>Images/SchemaFblElement.svg</file>
         <file>Images/SchemaLink.svg</file>
+        <file>Images/logo.png</file>
     </qresource>
 </RCC>

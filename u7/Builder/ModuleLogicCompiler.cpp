@@ -2520,6 +2520,15 @@ namespace Builder
 
             assert(signal->isAnalog());
 
+            if (signal->ramAddr().isValid() == false)
+            {
+                LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                   QString(tr("Undefined RAM address of signal '%1'")).
+                                   arg(signal->strID()));
+                result = false;
+                continue;
+            }
+
             int fromAddr = signal->ramAddr().offset();
             int toAddr = portDataAddress + txSignal.address.offset();
 
@@ -2611,6 +2620,14 @@ namespace Builder
             assert(signal->isDiscrete());
             assert(signal->dataSize() == 1);
 
+            if (signal->ramAddr().isValid() == false)
+            {
+                LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                                   QString(tr("Undefined RAM address of signal '%1'")).
+                                   arg(signal->strID()));
+                result = false;
+                continue;
+            }
 
             if (bitNo == 0 && wordCount == rs232Port->txDiscreteSignalsSizeW() - 1)
             {
