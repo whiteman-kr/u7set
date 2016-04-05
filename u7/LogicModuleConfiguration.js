@@ -1461,7 +1461,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 	
 	for (var p = 0; p < portCount; p++)
 	{
-		var controllerID = module.propertyValue("StrID") + "_PORT0";
+		var controllerID = module.propertyValue("StrID") + "_OPTOPORT0";
 		controllerID = controllerID + (p + 1);
 	    
 		var controller = module.jsFindChildObjectByMask(controllerID);
