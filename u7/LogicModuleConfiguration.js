@@ -249,10 +249,12 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		return false;
 	}
 	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "TuningDataSize", 
-	"AppIP1", "AppIP2", "DiagIP1", "DiagIP2", 
+	/*"AppIP1", "AppIP2", "DiagIP1", "DiagIP2", 
 	"DiagDataServiceStrID1", "DiagDataServiceStrID2", 
 	"AppDataServiceStrID1", "AppDataServiceStrID2", 
-	"SourcePort", "RegDataSize", "DiagDataSize", "TuningPort", "TuningIP", "TuningServiceIP"];
+	"SourcePort", 
+	"TuningPort", "TuningIP", "TuningServiceIP",*/
+	"RegDataSize", "DiagDataSize"];
 	for (var cp = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -453,6 +455,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	// Create LANs configuration
     //
+	/*
 	
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
@@ -572,6 +575,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				
 		lanConfigFrame++;
 	}
+	*/
 	
 	// Create TX/RX configuration
 	//
