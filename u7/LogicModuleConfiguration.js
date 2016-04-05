@@ -249,10 +249,10 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		return false;
 	}
 	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "TuningDataSize", 
-	"RegIP1", "RegIP2", "DiagIP1", "DiagIP2", 
-	"DiagDataAcquisitionServiceStrID1", "DiagDataAcquisitionServiceStrID2", 
-	"RegDataAcquisitionServiceStrID1", "RegDataAcquisitionServiceStrID2", 
-	"SourcePort", "RegDataSize", "DiagDataSize", "TuningPort", "TuningServerPort", "TuningIP", "TuningServerIP"];
+	"AppIP1", "AppIP2", "DiagIP1", "DiagIP2", 
+	"DiagDataServiceStrID1", "DiagDataServiceStrID2", 
+	"AppDataServiceStrID1", "AppDataServiceStrID2", 
+	"SourcePort", "RegDataSize", "DiagDataSize", "TuningPort", "TuningIP", "TuningServiceIP"];
 	for (var cp = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -340,7 +340,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     
     if (oldChannelCount == channel)
     {
-        log.errCFG3005(module.propertyValue("StrID"), channel);
+        log.errCFG3005(channel, module.propertyValue("StrID"));
         return false;
     }
     
@@ -411,31 +411,38 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
                 return false;
             }
             var frame = frameIOConfig + (ioModule.propertyValue("Place") - 1);
+			
+			var result = true;
             
             if (ioModule.propertyValue("ModuleFamily") == FamilyAIM)
             {
-                generate_aim(confFirmware, ioModule, frame, log, signalSet);
+                result = generate_aim(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyAIFM)
             {
-                generate_aifm(confFirmware, ioModule, frame, log);
+                result = generate_aifm(confFirmware, ioModule, frame, log);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyAOM)
             {
-                generate_aom(confFirmware, ioModule, frame, log, signalSet);
+                result = generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyOCM)
             {
-                generate_ocm(confFirmware, ioModule, frame, log, opticModuleStorage);
+                result = generate_ocm(confFirmware, ioModule, frame, log, opticModuleStorage);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyDIM)
             {
-                generate_dim(confFirmware, ioModule, frame, log);
+                result = generate_dim(confFirmware, ioModule, frame, log);
             }
             if (ioModule.propertyValue("ModuleFamily") == FamilyDOM)
             {
-                generate_dom(confFirmware, ioModule, frame, log);
+                result = generate_dom(confFirmware, ioModule, frame, log);
             }
+			
+			if (result == false)
+			{
+				return false;
+			}
 			
 			var diagWordsIoCount = ioModule.propertyValue("DiagDataSize");
 			diagWordsCount += diagWordsIoCount;
@@ -446,6 +453,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	// Create LANs configuration
     //
+	
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
     var lanStartFrame = 19;
@@ -458,10 +466,9 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	// Tuning
 	//
 
-	var tuningServerIP = module.jsPropertyIP("TuningServerIP");
-	var tuningServerAddress = tuningServerIP & 0xff;
-	var tuningServerSubnetwork = (tuningServerIP >> 8) & 0xff;
-	var tuningServerPort = module.propertyValue("TuningServerPort");
+	var tuningServiceIP = module.jsPropertyIP("TuningServiceIP");
+	var tuningServiceAddress = tuningServiceIP & 0xff;
+	var tuningServiceSubnetwork = (tuningServiceIP >> 8) & 0xff;
 	
 	var tuningIP = module.jsPropertyIP("TuningIP");
 	var tuningAddress = tuningIP & 0xff;
@@ -469,93 +476,99 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, tuningWordsCount, 0, 
 								tuningIP, sourcePort, tuningPort,
-								tuningServerSubnetwork, tuningServerAddress, tuningServerPort,
+								tuningServiceSubnetwork, tuningServiceAddress, 13332,
 								0, 0, 0);	//Subnet2 is not used
 	lanConfigFrame++;
 								
 	// REG / DIAG
 	//
 
-	var regServerSubnetwork = [0, 0];			//	Take from software!!!
-	var regServerIP = [0, 0];
-	var regServerPort = [0, 0];
+	var appServiceSubnetwork = [0, 0];			//	Take from software!!!
+	var appServiceIP = [0, 0];
+	var appServicePort = [0, 0];
 	
-	var diagServerSubnetwork = [0, 0];		//	Take from software!!!
-	var diagServerIP = [0, 0];
-	var diagServerPort = [0, 0];
+	var diagServiceSubnetwork = [0, 0];		//	Take from software!!!
+	var diagServiceIP = [0, 0];
+	var diagServicePort = [0, 0];
 	
 	for (var i = 0; i < 2; i++)
 	{
-		var reqAcqProp = "RegDataAcquisitionServiceStrID" + (i + 1);
-		var diagAcqProp = "DiagDataAcquisitionServiceStrID" + (i + 1);
-	
-		var regAcqID = module.propertyValue(reqAcqProp);
-		var diagAcqID = module.propertyValue(diagAcqProp);
+		var appAcqProp = "AppDataServiceStrID" + (i + 1);
+		var appAcqID = module.propertyValue(appAcqProp);
 		
-		var regAcq = root.jsFindChildObjectByMask(regAcqID);
-		var diagAcq = root.jsFindChildObjectByMask(diagAcqID);
+		if (appAcqID != "")
+		{
+			var appAcq = root.jsFindChildObjectByMask(appAcqID);
 		
-		if (regAcq == null)
-		{
-			log.writeWarning(module.propertyValue("StrID") + ": reg data acquisition service " + (i + 1) + " ID='" + regAcqID + "' was not found, using defaults.");
-		}
-		else
-		{
-			var regServerIPValue  = regAcq.jsPropertyIP("RegDataReceivingIP" + (i + 1));
-			if (regServerIPValue == null)
+			if (appAcq == null)
 			{
-				log.errCFG3001("RegDataReceivingIP" + (i + 1), regAcq.propertyValue("StrID"));
-				return false;
+				log.wrnCFG3300(appAcqID, module.propertyValue("StrID"));
 			}
-			regServerSubnetwork[i] = (regServerIPValue >> 8) & 0xff;
-			regServerIP[i] = regServerIPValue & 0xff;
-			
-			regServerPort[i] = regAcq.propertyValue("RegDataReceivingPort" + (i + 1))
-			if (regServerPort[i] == null)
+			else
 			{
-				log.errCFG3001("RegDataReceivingPort" + (i + 1), regAcq.propertyValue("StrID"));
-				return false;
+				var appServiceIPValue  = appAcq.jsPropertyIP("RegDataReceivingIP" + (i + 1));
+				if (appServiceIPValue == null)
+				{
+					log.errCFG3001("RegDataReceivingIP" + (i + 1), appAcq.propertyValue("StrID"));
+					return false;
+				}
+				appServiceSubnetwork[i] = (appServiceIPValue >> 8) & 0xff;
+				appServiceIP[i] = appServiceIPValue & 0xff;
+				
+				appServicePort[i] = appAcq.propertyValue("RegDataReceivingPort" + (i + 1))
+				if (appServicePort[i] == null)
+				{
+					log.errCFG3001("RegDataReceivingPort" + (i + 1), appAcq.propertyValue("StrID"));
+					return false;
+				}
 			}
 		}
 
-		if (diagAcq == null)
-		{
-			log.writeWarning(module.propertyValue("StrID") + ": diag data acquisition service " + (i + 1) + " ID='" + diagAcqID + "' was not found, using defaults.");
-		}
-		else
-		{
-			var diagServerIPValue  = diagAcq.jsPropertyIP("DiagDataReceivingIP" + (i + 1));
-			if (diagServerIPValue == null)
-			{
-				log.errCFG3001("DiagDataReceivingIP" + (i + 1), diagAcq.propertyValue("StrID"));
-				return false;
-			}
-			diagServerSubnetwork[i] = (diagServerIPValue >> 8) & 0xff;
-			diagServerIP[i] = diagServerIPValue & 0xff;
-			diagServerPort[i] = diagAcq.propertyValue("DiagDataReceivingPort" + (i + 1))
-			if (diagServerPort[i] == null)
-			{
-				log.errCFG3001("DiagDataReceivingPort" + (i + 1), diagAcq.propertyValue("StrID"));
-				return false;
-			}
-		}
+		var diagAcqProp = "DiagDataServiceStrID" + (i + 1);
+		var diagAcqID = module.propertyValue(diagAcqProp);
 		
+		if (diagAcqID != "")
+		{
+			var diagAcq = root.jsFindChildObjectByMask(diagAcqID);
+
+			if (diagAcq == null)
+			{
+				log.wrnCFG3300(diagAcqID, module.propertyValue("StrID"));
+			}
+			else
+			{
+				var diagServiceIPValue  = diagAcq.jsPropertyIP("DiagDataReceivingIP" + (i + 1));
+				if (diagServiceIPValue == null)
+				{
+					log.errCFG3001("DiagDataReceivingIP" + (i + 1), diagAcq.propertyValue("StrID"));
+					return false;
+				}
+				diagServiceSubnetwork[i] = (diagServiceIPValue >> 8) & 0xff;
+				diagServiceIP[i] = diagServiceIPValue & 0xff;
+				diagServicePort[i] = diagAcq.propertyValue("DiagDataReceivingPort" + (i + 1))
+				if (diagServicePort[i] == null)
+				{
+					log.errCFG3001("DiagDataReceivingPort" + (i + 1), diagAcq.propertyValue("StrID"));
+					return false;
+				}
+			}
+		}
 	
-		var regIP = module.jsPropertyIP("RegIP" + (i + 1));
-		var regAddress = regIP & 0xff;
+		var AppIP = module.jsPropertyIP("AppIP" + (i + 1));
+		var regAddress = AppIP & 0xff;
 		
 		var diagIP = module.jsPropertyIP("DiagIP" + (i + 1));
 		var diagAddress = diagIP & 0xff;
 		
 		if (regAddress != diagAddress || tuningAddress != regAddress || tuningAddress != diagAddress)
 		{
-			log.writeWarning("Different module " + module.propertyValue("StrID") + " IP addresses! regAddress = " + regAddress + ", diagAddress = " + diagAddress + ", tuningAddress = " + tuningAddress + "! regAddress is used.");
+			//log.writeWarning("Different module " + module.propertyValue("StrID") + " IP addresses! regAddress = " + regAddress + ", diagAddress = " + diagAddress + ", tuningAddress = " + tuningAddress + "! regAddress is used.");
 		}
 
 		generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, regWordsCount, diagWordsCount, 
-				regIP, sourcePort, 0,
-				regServerSubnetwork[i], regServerIP[i], regServerPort[i],
-				diagServerSubnetwork[i], diagServerIP[i], diagServerPort[i]); 
+				AppIP, sourcePort, 0,
+				appServiceSubnetwork[i], appServiceIP[i], appServicePort[i],
+				diagServiceSubnetwork[i], diagServiceIP[i], diagServicePort[i]); 
 				
 		lanConfigFrame++;
 	}
@@ -567,7 +580,11 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	var txRxConfigFrame = lanConfigFrame;
 	
-	/*var txWordsCount = */generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, opticModuleStorage, false/*modeOCM*/);
+	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, opticModuleStorage, false/*modeOCM*/);
+	if (txWordsCount == -1)
+	{
+		return false;
+	}
   
 	return true;
 }
@@ -795,11 +812,12 @@ function generate_aifm(confFirmware, module, frame, log)
 	{
 		for (var i = 0; i < aifmChannelCount; i++)
 		{
-			var signal = inController.jsFindChildObjectByMask(inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k]);
+			var signalID = inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k];
+			var signal = inController.jsFindChildObjectByMask(signalID);
 			var value = 1;
 			if (signal == null)
 			{
-				log.writeWarning("No signal " + inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
+				log.wrnCFG3104(signalID, inController.propertyValue("StrID"));
 			}
 			else
 			{
@@ -809,7 +827,7 @@ function generate_aifm(confFirmware, module, frame, log)
 				}
 				else
 				{
-					log.writeWarning("No property PowerCoefficient exists in " + signal.propertyValue("StrID") + "! Using default values.");
+					log.wrnCFG3106("PowerCoefficient", signal.propertyValue("StrID"));
 				}
 			}
 			
@@ -846,11 +864,12 @@ function generate_aifm(confFirmware, module, frame, log)
 			{
 				for (var p = 0; p < setPointCount; p++)
 				{
-					var signal = inController.jsFindChildObjectByMask(inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k] + modeNames[m]);
+					var signalID = inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k] + modeNames[m];
+					var signal = inController.jsFindChildObjectByMask(signalID);
 					var value = 1;
 					if (signal == null)
 					{
-						log.writeWarning("No signal " + inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k]  + modeNames[m] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
+						log.wrnCFG3104(signalID, inController.propertyValue("StrID"));
 					}
 					else
 					{
@@ -862,7 +881,7 @@ function generate_aifm(confFirmware, module, frame, log)
 						}
 						else
 						{
-							log.writeWarning("No property " + setPointName + "	exists in " + signal.propertyValue("StrID") + "! Using default values.");
+							log.wrnCFG3106(setPointName, signal.propertyValue("StrID"));
 						}
 					}
 					
@@ -1045,7 +1064,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
     {
         return null;
     }
-	if (device.propertyValue("StrID") == undefined)
+	if (parent.propertyValue("StrID") == undefined)
 	{
 		log.errCFG3000("Class_Controller");
 		return null;
@@ -1081,13 +1100,13 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
             signal = signalSet.getSignalByDeviceStrID(strID);
             if (signal == null)    
             {
-                log.writeWarning("Signal " + strID + " was not found in the signal database!");
+				log.wrnCFG3107(strID);
             }
             return signal;
         }
     }
     
-    log.writeWarning("No signal with place " + place + " was found in " + parent.propertyValue("StrID"));
+	log.wrnCFG3105(place, parent.propertyValue("StrID"));
     return null;
 }
 
@@ -1119,6 +1138,10 @@ function generate_ocm(confFirmware, module, frame, log, opticModuleStorage)
 	var txRxConfigFrame = frame;
 	
 	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, opticModuleStorage, true/*modeOCM*/);
+	if (txWordsCount == -1)
+	{
+		return false;
+	}
 	
     var ptr = 120;
     
@@ -1318,8 +1341,8 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
 }
 function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCount, diagWordsCount, 
 									sourceIP, sourcePort, destPort,
-									regServerSubnetwork, regServerAddress, regServerPort, 
-									diagServerSubnetwork, diagServerAddress, diagServerPort)
+									appServiceSubnetwork, appServiceAddress, appServicePort, 
+									diagServiceSubnetwork, diagServiceAddress, diagServicePort)
 {
 
 	var ptr = 0;		
@@ -1328,7 +1351,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	
 	//mac
 	//
-	var hashName = "S" + regServerSubnetwork + module.propertyValue("StrID") + sourceIP;
+	var hashName = "S" + appServiceSubnetwork + module.propertyValue("StrID") + sourceIP;
 	var hashList = confFirmware.calcHash64(hashName);
 	var size = hashList.jsSize();
 	if (size != 2)
@@ -1375,16 +1398,16 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	// subnet 1
 	//
 	
-	setData8(confFirmware, log, frame, ptr, regServerSubnetwork); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork1 [REG/TUN] = " + regServerSubnetwork + "\r\n");
+	setData8(confFirmware, log, frame, ptr, appServiceSubnetwork); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork1 [REG/TUN] = " + appServiceSubnetwork + "\r\n");
 	ptr += 1;
 	
-	setData8(confFirmware, log, frame, ptr, regServerAddress); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP1 [REG/TUN] = " + regServerAddress + "\r\n");
+	setData8(confFirmware, log, frame, ptr, appServiceAddress); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP1 [REG/TUN] = " + appServiceAddress + "\r\n");
 	ptr += 1;
 	
-	setData16(confFirmware, log, frame, ptr, regServerPort); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port1 [REG/TUN] = " + regServerPort + "\r\n");
+	setData16(confFirmware, log, frame, ptr, appServicePort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port1 [REG/TUN] = " + appServicePort + "\r\n");
 	ptr += 2;
 	
 	setData16(confFirmware, log, frame, ptr, regWordsCount); 
@@ -1394,16 +1417,16 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	// subnet 2
 	//
 	
-	setData8(confFirmware, log, frame, ptr, diagServerSubnetwork); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork2 [DIAG] = " + diagServerSubnetwork + "\r\n");
+	setData8(confFirmware, log, frame, ptr, diagServiceSubnetwork); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork2 [DIAG] = " + diagServiceSubnetwork + "\r\n");
 	ptr += 1;
 	
-	setData8(confFirmware, log, frame, ptr, diagServerAddress); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP2 [DIAG] = " + diagServerAddress + "\r\n");
+	setData8(confFirmware, log, frame, ptr, diagServiceAddress); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP2 [DIAG] = " + diagServiceAddress + "\r\n");
 	ptr += 1;
 	
-	setData16(confFirmware, log, frame, ptr, diagServerPort); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port2 [DIAG] = " + diagServerPort + "\r\n");
+	setData16(confFirmware, log, frame, ptr, diagServicePort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port2 [DIAG] = " + diagServicePort + "\r\n");
 	ptr += 2;
 	
 	setData16(confFirmware, log, frame, ptr, diagWordsCount); 
@@ -1420,12 +1443,12 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 	if (module.propertyValue("StrID") == undefined)
 	{
 		log.errCFG3000("Class_Module");
-		return 0;
+		return -1;
 	}
 	if (module.propertyValue("OptoPortCount") == undefined)
 	{
 		log.errCFG3001("OptoPortCount", module.propertyValue("StrID"));
-		return 0;
+		return -1;
 	}
 	
 	var portCount = module.propertyValue("OptoPortCount");
@@ -1441,13 +1464,13 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 		if (controller == null)
 		{
 			log.errCFG3200(controllerID, module.propertyValue("StrID"));
-			return 0;
+			return -1;
 		}
 		
 		if (controller.propertyValue("StrID") == undefined)
 		{
 			log.errCFG3000("Class_Controller");
-			return 0;
+			return -1;
 		}
 
 		var optoPort = opticModuleStorage.jsGetOptoPort(controller.propertyValue("StrID"));

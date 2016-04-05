@@ -250,7 +250,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Channel number (%1) is not unique in LM module %2.
+    /// Title: Channel number (%1) is not unique in module %2.
     ///
     /// Parameters:
     ///         %1 Channel
@@ -263,7 +263,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3005,
-                  tr("Channel number (%1) is not unique in LM module %2.")
+                  tr("Channel number (%1) is not unique in module %2.")
                   .arg(channel)
                   .arg(module));
     }
@@ -341,7 +341,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Different MaxDifference values in one channel in AIM module %5
+    /// Title: Different maxDifference values (place %1: %2; place %3: %4) in module %5.
     ///
     /// Parameters:
     ///			%1 Place 1
@@ -357,7 +357,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3102,
-                  tr("Different MaxDifference values (place %1, maxDiffedence = %2 <=> place %3, maxDiffedence = %4) in one channel in AIM module %5")
+                  tr("Different maxDifference values (place %1: %2; place %3: %4) in module %5.")
                   .arg(place1)
                   .arg(maxDifference1)
                   .arg(place2)
@@ -369,7 +369,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Invalid OutputRangeMode value (%1) in place %2 in AOM module %3
+    /// Title: Invalid OutputRangeMode value (%1) in place %2 in module %3
     ///
     /// Parameters:
     ///			%1 Place
@@ -383,17 +383,103 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3103,
-                  tr("Invalid OutputRangeMode value (%1) in place %2 in AOM module %3")
+                  tr("Invalid OutputRangeMode value (%1) in place %2 in module %3")
                   .arg(outputRangeMode)
                   .arg(place)
                   .arg(module));
+    }
+
+    /// IssueCode: CFG3104
+    ///
+    /// IssueType: Warning
+    ///
+    /// Title: Signal %1 was not found in controller %2, using default values.
+    ///
+    /// Parameters:
+    ///			%1 Signal StrID
+    ///         %2 Controller StrID
+    ///
+    /// Description:
+    ///			Signal was not found in a controller, default values will be used.
+    ///
+    void IssueLogger::wrnCFG3104(QString signalID, QString controllerID)
+    {
+        LOG_WARNING(IssueType::FscConfiguration,
+                  3104,
+                  tr("Signal %1 was not found in controller %2, using default values.")
+                  .arg(signalID)
+                  .arg(controllerID));
+    }
+
+    /// IssueCode: CFG3105
+    ///
+    /// IssueType: Warning
+    ///
+    /// Title: Signal with place %1 was not found in controller %2.
+    ///
+    /// Parameters:
+    ///			%1 Signal place
+    ///         %2 Controller StrID
+    ///
+    /// Description:
+    ///			Signal with specified place not found in a controller.
+    ///
+    void IssueLogger::wrnCFG3105(int signalPlace, QString controllerID)
+    {
+        LOG_WARNING(IssueType::FscConfiguration,
+                  3105,
+                  tr("Signal with place %1 was not found in controller %2.")
+                  .arg(signalPlace)
+                  .arg(controllerID));
+    }
+
+    /// IssueCode: CFG3106
+    ///
+    /// IssueType: Warning
+    ///
+    /// Title: Property %1 was not found in signal %2, using default values.
+    ///
+    /// Parameters:
+    ///			%1 Property Name
+    ///         %2 Signal StrID
+    ///
+    /// Description:
+    ///			Property was not found in a signal, default values will be used.
+    ///
+    void IssueLogger::wrnCFG3106(QString property, QString signalID)
+    {
+        LOG_WARNING(IssueType::FscConfiguration,
+                  3106,
+                  tr("Property %1 was not found in signal %2, using default values.")
+                  .arg(property)
+                  .arg(signalID));
+    }
+
+    /// IssueCode: CFG3107
+    ///
+    /// IssueType: Warning
+    ///
+    /// Title: Signal %1 was not found in the signal database
+    ///
+    /// Parameters:
+    ///         %1 Signal StrID
+    ///
+    /// Description:
+    ///			Signal was not found in the signal database
+    ///
+    void IssueLogger::wrnCFG3107(QString signalID)
+    {
+        LOG_WARNING(IssueType::FscConfiguration,
+                  3107,
+                  tr("Signal %1 was not found in the signal database.")
+                  .arg(signalID));
     }
 
     /// IssueCode: CFG3200
     ///
     /// IssueType: Error
     ///
-    /// Title: Port controller %1 was not found in module %2
+    /// Title: Port controller %1 was not found in module %2.
     ///
     /// Parameters:
     ///			%1 Controller StrID
@@ -406,12 +492,34 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3200,
-                  tr("Port controller %1 was not found in module %2")
+                  tr("Port controller %1 was not found in module %2.")
                   .arg(controllerID)
                   .arg(module));
     }
 
-	// ALP			Application Logic Parsing				4000-4999
+    /// IssueCode: CFG3300
+    ///
+    /// IssueType: Warning
+    ///
+    /// Title: Software %1 set in module %2 was not found, using default values.
+    ///
+    /// Parameters:
+    ///			%1 Software StrID
+    ///         %2 Module StrID
+    ///
+    /// Description:
+    ///			Software object was not found in the equipment database. Default values will be used.
+    ///
+    void IssueLogger::wrnCFG3300(QString softwareID, QString module)
+    {
+        LOG_WARNING(IssueType::FscConfiguration,
+                  3300,
+                  tr("Software '%1' set in module %2 was not found, using default values.")
+                  .arg(softwareID)
+                  .arg(module));
+    }
+
+    // ALP			Application Logic Parsing				4000-4999
 	//
 
 	/// IssueCode: ALP4000
