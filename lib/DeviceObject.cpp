@@ -21,10 +21,10 @@ namespace Hardware
 			L".hrk",		// Rack
 			L".hcs",		// Chassis
 			L".hmd",		// Module
-			L".hcr",		// Controller
 			L".hws",		// Workstation
 			L".hsw",		// Software
-			L".hds",		// Diagnostics Signal
+			L".hcr",		// Controller
+			L".hds",		// Signal
 		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
@@ -1094,13 +1094,13 @@ namespace Hardware
 			return;
 		}
 
-		if (child->deviceType() == DeviceType::Software &&
-			deviceType() != DeviceType::Workstation &&
-			deviceType() != DeviceType::Root)
-		{
-			assert(false);
-			return;
-		}
+//		if (child->deviceType() == DeviceType::Software &&
+//			deviceType() != DeviceType::Workstation &&
+//			deviceType() != DeviceType::Root)
+//		{
+//			assert(false);
+//			return;
+//		}
 
 		child->m_parent = this;
 		m_children.push_back(child);
