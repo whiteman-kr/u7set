@@ -45,7 +45,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 	}
 	if (!wrongIds.isEmpty())
 	{
-		QMessageBox::critical(parent, "Error", "Wrong id detected:\n\n" + wrongIds);
+		QMessageBox::critical(parent, "Error", "Signal ID not found:\n\n" + wrongIds);
 	}
 	for (Signal* signal : signalVector)
 	{
@@ -54,6 +54,12 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			readOnly = true;
 		}
 	}
+
+	if (signalVector.isEmpty())
+	{
+		return;
+	}
+
 	SignalPropertiesDialog dlg(signalVector, *Signal::m_unitList.get(), readOnly, nullptr, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
