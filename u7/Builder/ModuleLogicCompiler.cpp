@@ -2312,6 +2312,7 @@ namespace Builder
         }
 
         int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
+		Q_UNUSED(discreteSignalsSizeW)
 
         return result;
     }
