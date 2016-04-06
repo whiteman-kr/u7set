@@ -29,6 +29,8 @@ namespace Builder
 
 	class IssueLogger : public OutputLog
 	{
+        Q_OBJECT
+
 	public:
 		IssueLogger();
 		virtual ~IssueLogger();
@@ -51,8 +53,28 @@ namespace Builder
 
 		// CFG			FSC configuration						3000-3999
 		//
+        Q_INVOKABLE void errCFG3000(QString object);                            // general errors
+        Q_INVOKABLE void errCFG3001(QString propertyName, QString object);
+        Q_INVOKABLE void errCFG3002(QString subSysID, QString module);
+        Q_INVOKABLE void errCFG3003(int frameSize, int frameCount, QString module);
+        Q_INVOKABLE void errCFG3004(int channel, int maxChannel, QString module);
+        Q_INVOKABLE void errCFG3005(int channel, QString module);
+        Q_INVOKABLE void errCFG3006(QString module, int place);
 
-		// ALP			Application Logic Parsing				4000-4999
+        Q_INVOKABLE void errCFG3100(QString controllerID, QString module);      // in-out modules errors
+        Q_INVOKABLE void errCFG3101(QString controllerID, QString module);
+        Q_INVOKABLE void errCFG3102(int place1, double maxDifference1, int place2, double maxDifference2, QString module);
+        Q_INVOKABLE void errCFG3103(int outputRangeMode, double place, QString module);
+        Q_INVOKABLE void wrnCFG3104(QString signalID, QString controllerID);
+        Q_INVOKABLE void wrnCFG3105(int signalPlace, QString controllerID);
+        Q_INVOKABLE void wrnCFG3106(QString property, QString signalID);
+        Q_INVOKABLE void wrnCFG3107(QString signalID);
+
+        Q_INVOKABLE void errCFG3200(QString controllerID, QString module);      // connections errors
+
+        Q_INVOKABLE void wrnCFG3300(QString softwareID, QString module);      // software errors
+
+        // ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
 		void wrnALP4001(QString schema);

@@ -6,7 +6,7 @@
 // Forware delcarations
 //
 class QThread;
-class OutputLog;
+class IssueLogger;
 class DbController;
 
 namespace Hardware
@@ -55,7 +55,7 @@ namespace Builder
 	private:
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>& modules);
 		DbController* db();
-		OutputLog* log() const;
+        IssueLogger* log() const;
 		int changesetId() const;
 		bool debug() const;
 		bool release() const;

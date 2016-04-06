@@ -1,7 +1,7 @@
 #include "ConfigurationBuilder.h"
 
 #include "../../include/DbController.h"
-#include "../../include/OutputLog.h"
+#include "Builder/IssueLogger.h"
 #include "../../include/DeviceObject.h"
 #include "Connection.h"
 #include "../../include/Crc.h"
@@ -387,7 +387,7 @@ namespace Builder
 		return m_db;
 	}
 
-	OutputLog* ConfigurationBuilder::log() const
+    IssueLogger *ConfigurationBuilder::log() const
 	{
 		return m_log;
 	}

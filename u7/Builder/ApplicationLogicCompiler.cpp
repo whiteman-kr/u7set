@@ -441,7 +441,7 @@ namespace Builder
             result &= m_moduleCompilers[i]->secondPass();
         }
 
-        m_resultWriter->writeMultichannelFiles();
+        result &= m_resultWriter->writeMultichannelFiles();
 
         return result;
     }
