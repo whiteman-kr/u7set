@@ -288,7 +288,7 @@ namespace Builder
         MemoryArea m_lmDiagData;
         MemoryArea m_lmIntOutData;
 
-        const PropertyNameVar memSettings[] =
+        const IntPropertyNameVar memSettings[] =
         {
             {	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
             {	"ModuleDataSize", m_moduleData.ptrSizeW() },
@@ -311,7 +311,7 @@ namespace Builder
             {	"LMInOutDataSize", m_lmIntOutData.ptrSizeW() }
         };
 
-        for(PropertyNameVar memSetting : memSettings)
+        for(IntPropertyNameVar memSetting : memSettings)
         {
             result &= getLMIntProperty(memSetting.name, memSetting.var);
         }
@@ -376,7 +376,7 @@ namespace Builder
             m.device = device;
             m.place = place;
 
-            const PropertyNameVar moduleSettings[] =
+            const IntPropertyNameVar moduleSettings[] =
             {
                 {	"TxDataSize", &m.txDataSize },
                 {	"RxDataSize", &m.rxDataSize },
@@ -391,7 +391,7 @@ namespace Builder
                 {	"AppLogicRegDataSize", &m.appLogicRegDataSize },
             };
 
-            for(PropertyNameVar moduleSetting : moduleSettings)
+            for(IntPropertyNameVar moduleSetting : moduleSettings)
             {
                 result &= ApplicationLogicCompiler::getDeviceIntProperty(device, moduleSetting.name, moduleSetting.var);
             }
@@ -2262,7 +2262,7 @@ namespace Builder
 
         // build analog and discrete signals list
         //
-		QStringList&& signslList = connection->signalList();
+        QStringList&& signslList = connection->signalList();
 
         bool result = true;
 

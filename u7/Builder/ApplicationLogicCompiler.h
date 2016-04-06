@@ -12,6 +12,24 @@
 namespace Builder
 {
 
+    struct IntPropertyNameVar
+    {
+        const char* name = nullptr;
+        int* var = nullptr;
+
+        IntPropertyNameVar(const char* n, int* v) : name(n), var(v) {}
+    };
+
+
+    struct StrPropertyNameVar
+    {
+        const char* name = nullptr;
+        QString* var = nullptr;
+
+        StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
+    };
+
+
     class ApplicationLogicCompiler : public QObject
     {
         Q_OBJECT
@@ -64,6 +82,7 @@ namespace Builder
         bool run();
 
         static bool getDeviceIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value);
+        static bool getDeviceStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value);
 
         friend class ModuleLogicCompiler;
     };
