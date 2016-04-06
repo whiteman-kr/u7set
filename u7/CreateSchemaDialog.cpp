@@ -46,6 +46,8 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	ui->widthEdit->setText(QString::number(w, 'f', precision));
 	ui->heightEdit->setText(QString::number(h, 'f', precision));
 
+	setWindowTitle(tr("Schema Properties"));
+
 	return;
 }
 
