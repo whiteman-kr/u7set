@@ -4137,7 +4137,8 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 			}
 			else
 			{
-				assert(itemSignal);
+				// it is not VFrame30::SchemaItemSignal
+				//
 			}
 		}
 	}

@@ -169,7 +169,8 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 			case ObjectPlaceColumn:
 				if (device->isRoot() ||
 					device->isSystem() ||
-					device->isRack())
+					device->isRack() ||
+					device->isSoftware())
 				{
 					v.setValue<QString>("");
 				}
@@ -1193,6 +1194,7 @@ void EquipmentView::addWorkstation()
 
 	workstation->setStrId("$(PARENT)_WS$(PLACE)");
 	workstation->setCaption(tr("Workstation"));
+	workstation->setPlace(0);
 
 	addDeviceObject(workstation);
 
@@ -1206,6 +1208,7 @@ void EquipmentView::addSoftware()
 
 	software->setStrId("$(PARENT)_SWNAME");
 	software->setCaption(tr("Software"));
+	software->setPlace(0);
 
 	addDeviceObject(software);
 
@@ -1314,6 +1317,7 @@ void EquipmentView::addPresetWorkstation()
 
 		workstation->setStrId("$(PARENT)_WS00");
 		workstation->setCaption(tr("Workstation"));
+		workstation->setPlace(0);
 
 		workstation->setPresetRoot(true);
 		workstation->setPresetName("PRESET_NAME");
@@ -1336,6 +1340,7 @@ void EquipmentView::addPresetSoftware()
 
 		software->setStrId("$(PARENT)_SWNAME");
 		software->setCaption(tr("Software"));
+		software->setPlace(0);
 
 		software->setPresetRoot(true);
 		software->setPresetName("PRESET_NAME");
