@@ -54,6 +54,7 @@ namespace Hardware
 	};
 
 
+
 	// Forward declarations
 	//
 	class DeviceSignal;
@@ -428,6 +429,7 @@ namespace Hardware
 		bool isIOModule() const;
 		bool isInputModule() const;
 		bool isOutputModule() const;
+		bool isLM() const;
 
 		// Data
 		//

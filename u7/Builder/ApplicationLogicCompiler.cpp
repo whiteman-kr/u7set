@@ -24,10 +24,10 @@ namespace Builder
                                                        OutputLog *log) :
         m_subsystems(subsystems),
         m_equipmentSet(equipmentSet),
+		m_optoModuleStorage(optoModuleStorage),
         m_signals(signalSet),
         m_afbl(afblSet),
         m_appLogicData(appLogicData),
-        m_optoModuleStorage(optoModuleStorage),
         m_resultWriter(buildResultWriter),
         m_connections(connections)
     {
@@ -504,6 +504,32 @@ namespace Builder
 
         return true;
     }
+
+
+    bool ApplicationLogicCompiler::getDeviceStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value)
+    {
+        if (device == nullptr ||
+            value == nullptr ||
+            m_log == nullptr)
+        {
+            assert(false);
+            return false;
+        }
+
+        QVariant val = device->propertyValue(name);
+
+        if (val.isValid() == false)
+        {
+            LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+                      QString(tr("Property %1 is not found in device %2")).arg(name).arg(device->strId()));
+            return false;
+        }
+
+        *value = val.toString();
+
+        return true;
+    }
+
 }
 
 

@@ -1944,6 +1944,11 @@ R"DELIM({
 				family == FamilyType::DOM;
 	}
 
+	bool DeviceModule::isLM() const
+	{
+		return	moduleFamily() == FamilyType::LM;
+	}
+
 	//
 	//
 	// DeviceController

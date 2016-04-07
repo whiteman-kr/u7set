@@ -8,101 +8,107 @@
 
 namespace Builder
 {
-	class SoftwareCfgGenerator : public QObject
-	{
-		Q_OBJECT
+    class SoftwareCfgGenerator : public QObject
+    {
+        Q_OBJECT
 
-	private:
-		DbController* m_dbController = nullptr;
-		Hardware::Software* m_software = nullptr;
-		SignalSet* m_signalSet = nullptr;
-		Hardware::EquipmentSet* m_equipment = nullptr;
-		BuildResultWriter* m_buildResultWriter = nullptr;
-		IssueLogger* m_log = nullptr;
-		ConfigurationXmlFile * m_cfgXml = nullptr;
-		QString m_subDir;
+    private:
+        DbController* m_dbController = nullptr;
+        Hardware::Software* m_software = nullptr;
+        SignalSet* m_signalSet = nullptr;
+        Hardware::EquipmentSet* m_equipment = nullptr;
+        BuildResultWriter* m_buildResultWriter = nullptr;
+        IssueLogger* m_log = nullptr;
+        ConfigurationXmlFile * m_cfgXml = nullptr;
+        QString m_subDir;
 
-		bool generateMonitorCfg();
-		bool writeMonitorSettings();
+        QList<Hardware::DeviceModule*> m_lmList;
 
-		template <typename TYPE>
-		TYPE getObjectProperty(QString strId, QString property, bool* ok);
+        Hardware::DeviceRoot* m_deviceRoot = nullptr;
 
-		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
+        bool generateMonitorCfg();
+        bool writeMonitorSettings();
 
-		bool writeAppSignalsXml();
-		bool writeEquipmentXml();
+        template <typename TYPE>
+        TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
-		bool generateDataAcqisitionServiceCfg();
+        void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
-	public:
-		SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+        bool buildLMList();
+        bool writeAppSignalsXml();
+        bool writeEquipmentXml();
+        bool writeDataSourcesXml();
 
-		bool run();
-	};
+        bool generateDataAcqisitionServiceCfg();
+
+    public:
+        SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+
+        bool run();
+    };
 
 
-	template <typename TYPE>
-	TYPE SoftwareCfgGenerator::getObjectProperty(QString strId, QString property, bool* ok)
-	{
-		if (ok == nullptr)
-		{
-			assert(false);
-			return TYPE();
-		}
+    template <typename TYPE>
+    TYPE SoftwareCfgGenerator::getObjectProperty(QString strId, QString property, bool* ok)
+    {
+        if (ok == nullptr)
+        {
+            assert(false);
+            return TYPE();
+        }
 
-		*ok = true;
+        *ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
-		if (object == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found")
-							   .arg(strId);
+        Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+        if (object == nullptr)
+        {
+            QString errorStr = tr("Object %1 is not found")
+                               .arg(strId);
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+            m_log->writeError(errorStr);
+            writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-			*ok = false;
-			return TYPE();
-		}
+            *ok = false;
+            return TYPE();
+        }
 
-		bool exists = object->propertyExists(property);
-		if (exists == false)
-		{
-			QString errorStr = tr("Object %1 does not have property %2").arg(strId).arg(property);
+        bool exists = object->propertyExists(property);
+        if (exists == false)
+        {
+            QString errorStr = tr("Object %1 does not have property %2").arg(strId).arg(property);
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+            m_log->writeError(errorStr);
+            writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-			*ok = false;
-			return TYPE();
-		}
+            *ok = false;
+            return TYPE();
+        }
 
-		QVariant v = object->propertyValue(property);
-		if (v.isValid() == false)
-		{
-			QString errorStr = tr("Object %1, property %2 is invalid").arg(strId).arg(property);
+        QVariant v = object->propertyValue(property);
+        if (v.isValid() == false)
+        {
+            QString errorStr = tr("Object %1, property %2 is invalid").arg(strId).arg(property);
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+            m_log->writeError(errorStr);
+            writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-			*ok = false;
-			return TYPE();
-		}
+            *ok = false;
+            return TYPE();
+        }
 
-		if (v.canConvert<TYPE>() == false)
-		{
-			QString errorStr = tr("Object %1, property %2 has wrong type").arg(strId).arg(property);
+        if (v.canConvert<TYPE>() == false)
+        {
+            QString errorStr = tr("Object %1, property %2 has wrong type").arg(strId).arg(property);
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+            m_log->writeError(errorStr);
+            writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-			*ok = false;
-			return TYPE();
-		}
+            *ok = false;
+            return TYPE();
+        }
 
-		TYPE t = v.value<TYPE>();
+        TYPE t = v.value<TYPE>();
 
-		return t;
-	}
+        return t;
+    }
 }

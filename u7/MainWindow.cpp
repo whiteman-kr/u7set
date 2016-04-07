@@ -41,6 +41,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	//
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &MainWindow::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
 
 	// Add main tab pages
 	//

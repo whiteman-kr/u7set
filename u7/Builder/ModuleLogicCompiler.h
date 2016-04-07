@@ -385,15 +385,6 @@ namespace Builder
     private:
         static const int ERR_VALUE = -1;
 
-
-        struct PropertyNameVar
-        {
-            const char* name = nullptr;
-            int* var = nullptr;
-
-            PropertyNameVar(const char* n, int* v) : name(n), var(v) {}
-        };
-
         struct Module
         {
             Hardware::DeviceModule* device = nullptr;

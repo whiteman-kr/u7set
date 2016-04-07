@@ -22,6 +22,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 	QString wrongIds;
 	for (QString id : signalId)
 	{
+		id = id.trimmed();
 		if (signalIndexMap.contains(id))
 		{
 			int index = signalIndexMap[id];
@@ -45,7 +46,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 	}
 	if (!wrongIds.isEmpty())
 	{
-		QMessageBox::critical(parent, "Error", "Wrong id detected:\n\n" + wrongIds);
+		QMessageBox::critical(parent, "Error", "Signal ID not found:\n\n" + wrongIds);
 	}
 	for (Signal* signal : signalVector)
 	{
@@ -54,6 +55,12 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			readOnly = true;
 		}
 	}
+
+	if (signalVector.isEmpty())
+	{
+		return;
+	}
+
 	SignalPropertiesDialog dlg(signalVector, *Signal::m_unitList.get(), readOnly, nullptr, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
@@ -184,6 +191,10 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		Signal& signal = *m_signalVector[i];
 
 		signal = *(dynamic_cast<Signal*>(m_objList[i].get()));
+
+		signal.setStrID(signal.strID().trimmed());
+		signal.setExtStrID(signal.extStrID().trimmed());
+		signal.setDeviceStrID(signal.deviceStrID().trimmed());
 	}
 
 	saveLastEditedSignalProperties();

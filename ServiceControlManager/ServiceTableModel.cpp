@@ -83,15 +83,14 @@ void ServiceTableModel::startUdpSocketThread()
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
-			if (clientSocket == nullptr)
-			{
-				clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), serviceInfo[j].port);
-				connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
-				connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
-				m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
+			assert(clientSocket == nullptr);
 
-				m_socketThread->addWorker(clientSocket);
-			}
+			clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), serviceInfo[j].port);
+			connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
+			connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
+			m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
+
+			m_socketThread->addWorker(clientSocket);
 
 			if (!clientSocket->isWaitingForAck())
 			{
@@ -114,6 +113,14 @@ void ServiceTableModel::finishtUdpSocketThread()
 	m_socketThread->quitAndWait();
 	delete m_socketThread;
 	m_socketThread = nullptr;
+
+	for (int i = 0; i < m_hostsInfo.count(); i++)
+	{
+		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+		{
+			m_hostsInfo[i].servicesData[j].clientSocket = nullptr;
+		}
+	}
 }
 
 
@@ -258,6 +265,9 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 	beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
 	m_hostsInfo.append(hi);
 	endInsertRows();
+
+	restartUdpSocketThread();
+
 	emit serviceStateChanged(m_hostsInfo.count() - 1);
 }
 
@@ -337,10 +347,12 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 				HostInfo hi;
 				hi.ip = sa.toIPv4Address();
 				hi.servicesData[place.second].information = *(ServiceInformation*)udpRequest.data();
-				hi.servicesData[place.second].clientSocket = socket;
 				beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
 				m_hostsInfo.append(hi);
 				endInsertRows();
+
+				restartUdpSocketThread();
+
 				return;
 			}
 
@@ -394,13 +406,23 @@ void ServiceTableModel::checkServiceStates()
 		return;
 	}
 
-	startUdpSocketThread();
+	if (m_socketThread == nullptr)
+	{
+		startUdpSocketThread();
+	}
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
 		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
+
+			assert(clientSocket != nullptr);
+
+			if (clientSocket == nullptr)
+			{
+				continue;
+			}
 
 			if (!clientSocket->isWaitingForAck())
 			{
@@ -472,6 +494,8 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, ServiceI
 		beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
 		m_hostsInfo.append(hi);
 		endInsertRows();
+
+		restartUdpSocketThread();
 	}
 	else
 	{

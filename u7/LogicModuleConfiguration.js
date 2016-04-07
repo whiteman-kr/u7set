@@ -119,7 +119,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
     {
 		if (device.propertyValue("StrID") == undefined)
 		{
-			log.errCFG3000("LM-1");
+			log.errCFG3000("StrID", "LM-1");
 			return false;
 		}
 		var checkProperties = ["ModuleFamily"];
@@ -127,7 +127,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
 		{
 			if (device.propertyValue(checkProperties[cp]) == undefined)
 			{
-				log.errCFG3001(checkProperties[cp], device.propertyValue("StrID"));
+				log.errCFG3000(checkProperties[cp], device.propertyValue("StrID"));
 				return false;
 			}
 		}
@@ -161,7 +161,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
     {
 		if (device.propertyValue("StrID") == undefined)
 		{
-			log.errCFG3000("LM-1");
+			log.errCFG3000("StrID", "LM-1");
 			return false;
 		}
 		var checkProperties = ["ModuleFamily"];
@@ -169,7 +169,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 		{
 			if (device.propertyValue(checkProperties[cp]) == undefined)
 			{
-				log.errCFG3001(checkProperties[cp], device.propertyValue("StrID"));
+				log.errCFG3000(checkProperties[cp], device.propertyValue("StrID"));
 				return false;
 			}
 		}
@@ -183,7 +183,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 			{
 				if (device.propertyValue(checkProperties[cp]) == undefined)
 				{
-					log.errCFG3001(checkProperties[cp], device.propertyValue("StrID"));
+					log.errCFG3000(checkProperties[cp], device.propertyValue("StrID"));
 					return false;
 				}
 			}
@@ -203,7 +203,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 			var ssKeyValue = subsystemStorage.ssKey(subSysID);
 			if (ssKeyValue == -1)
 			{
-				log.errCFG3002(subSysID, device.propertyValue("StrID"));
+				log.errCFG3001(subSysID, device.propertyValue("StrID"));
 				return false;
 			}
 
@@ -245,7 +245,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("LM-1");
+		log.errCFG3000("StrID", "LM-1");
 		return false;
 	}
 	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "TuningDataSize", 
@@ -259,7 +259,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -274,9 +274,15 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     var frameSize = module.jsPropertyInt("ConfigFrameSize");
     var frameCount = module.jsPropertyInt("ConfigFrameCount");
     
-    if (frameSize < 1016 || frameCount < 76 /*19  frames * 4 channels*/)
+    if (frameSize < 1016)
     {
-		log.errCFG3003(frameSize, frameCount, module.propertyValue("StrID"));
+		log.errCFG3002("FlashMemory/ConfigFrameSize", frameSize, 1016, 65535, module.propertyValue("StrID"));
+        return false;
+    }
+
+	if (frameCount < 76 /*19  frames * 4 channels*/)
+    {
+		log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 76, 65535, module.propertyValue("StrID"));
         return false;
     }
     
@@ -285,7 +291,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
     if (ssKeyValue == -1)
     {
-		log.errCFG3002(subSysID, module.propertyValue("StrID"));
+		log.errCFG3001(subSysID, module.propertyValue("StrID"));
         return false;
     }
 
@@ -296,7 +302,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     
     if (channel < 1 || channel > maxChannel)
     {
-		log.errCFG3004(channel, maxChannel, module.propertyValue("StrID"));
+		log.errCFG3002("System/Channel", channel, 1, maxChannel, module.propertyValue("StrID"));
         return false;
     }
 
@@ -342,7 +348,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     
     if (oldChannelCount == channel)
     {
-        log.errCFG3005(channel, module.propertyValue("StrID"));
+        log.errCFG3003(channel, module.propertyValue("StrID"));
         return false;
     }
     
@@ -390,7 +396,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		
 		if (ioModule.propertyValue("StrID") == undefined)
 		{
-			log.errCFG3000("I/O_module");
+			log.errCFG3000("StrID", "I/O_module");
 			return false;
 		}
 		var checkProperties = ["ModuleFamily", "Place", "DiagDataSize"];
@@ -398,7 +404,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		{
 			if (ioModule.propertyValue(checkProperties[cp]) == undefined)
 			{
-				log.errCFG3001(checkProperties[cp], ioModule.propertyValue("StrID"));
+				log.errCFG3000(checkProperties[cp], ioModule.propertyValue("StrID"));
 				return false;
 			}
 		}
@@ -407,12 +413,16 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
             ioModule.propertyValue("ModuleFamily") == FamilyAOM || ioModule.propertyValue("ModuleFamily") == FamilyOCM ||
             ioModule.propertyValue("ModuleFamily") == FamilyDIM || ioModule.propertyValue("ModuleFamily") == FamilyDOM)
         {
-            if (ioModule.propertyValue("Place") < 1 || ioModule.propertyValue("Place") > ioModulesMaxCount)
+		
+			var place = ioModule.propertyValue("Place");
+		
+            if (place < 1 || place > ioModulesMaxCount)
             {
-				log.errCFG3006(ioModule.propertyValue("StrID"), ioModule.propertyValue("Place"));
+				log.errCFG3002("Place", place, 1, ioModulesMaxCount, ioModule.propertyValue("StrID"));
                 return false;
             }
-            var frame = frameIOConfig + (ioModule.propertyValue("Place") - 1);
+			
+            var frame = frameIOConfig + place - 1;
 			
 			var result = true;
             
@@ -505,14 +515,14 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		
 			if (appAcq == null)
 			{
-				log.wrnCFG3300(appAcqID, module.propertyValue("StrID"));
+				log.wrnCFG3008(appAcqID, module.propertyValue("StrID"));
 			}
 			else
 			{
 				var appServiceIPValue  = appAcq.jsPropertyIP("RegDataReceivingIP" + (i + 1));
 				if (appServiceIPValue == null)
 				{
-					log.errCFG3001("RegDataReceivingIP" + (i + 1), appAcq.propertyValue("StrID"));
+					log.errCFG3000("RegDataReceivingIP" + (i + 1), appAcq.propertyValue("StrID"));
 					return false;
 				}
 				appServiceSubnetwork[i] = (appServiceIPValue >> 8) & 0xff;
@@ -521,7 +531,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				appServicePort[i] = appAcq.propertyValue("RegDataReceivingPort" + (i + 1))
 				if (appServicePort[i] == null)
 				{
-					log.errCFG3001("RegDataReceivingPort" + (i + 1), appAcq.propertyValue("StrID"));
+					log.errCFG3000("RegDataReceivingPort" + (i + 1), appAcq.propertyValue("StrID"));
 					return false;
 				}
 			}
@@ -536,14 +546,14 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 			if (diagAcq == null)
 			{
-				log.wrnCFG3300(diagAcqID, module.propertyValue("StrID"));
+				log.wrnCFG3008(diagAcqID, module.propertyValue("StrID"));
 			}
 			else
 			{
 				var diagServiceIPValue  = diagAcq.jsPropertyIP("DiagDataReceivingIP" + (i + 1));
 				if (diagServiceIPValue == null)
 				{
-					log.errCFG3001("DiagDataReceivingIP" + (i + 1), diagAcq.propertyValue("StrID"));
+					log.errCFG3000("DiagDataReceivingIP" + (i + 1), diagAcq.propertyValue("StrID"));
 					return false;
 				}
 				diagServiceSubnetwork[i] = (diagServiceIPValue >> 8) & 0xff;
@@ -551,7 +561,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				diagServicePort[i] = diagAcq.propertyValue("DiagDataReceivingPort" + (i + 1))
 				if (diagServicePort[i] == null)
 				{
-					log.errCFG3001("DiagDataReceivingPort" + (i + 1), diagAcq.propertyValue("StrID"));
+					log.errCFG3000("DiagDataReceivingPort" + (i + 1), diagAcq.propertyValue("StrID"));
 					return false;
 				}
 			}
@@ -626,7 +636,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_AIM");
+		log.errCFG3000("StrID", "Module_AIM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -634,7 +644,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -654,7 +664,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var inController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLIN");
     if (inController == null)
     {
-		log.errCFG3100(module.propertyValue("StrID") + "_CTRLIN", module.propertyValue("StrID"));
+		log.errCFG3004(module.propertyValue("StrID") + "_CTRLIN", module.propertyValue("StrID"));
 		return false;
     }
 	
@@ -707,7 +717,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 					// this is B input, next to saved A
 					if (maxDifference != channelAMaxDifference)
 					{
-						log.errCFG3102(channelAPlace, channelAMaxDifference, i, maxDifference, module.propertyValue("StrID"));
+						log.errCFG3009(channelAPlace, channelAMaxDifference, i, maxDifference, signal.propertyValue("StrID"));
 						return false;
 					}
 				}
@@ -777,7 +787,7 @@ function generate_aifm(confFirmware, module, frame, log)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_AIFM");
+		log.errCFG3000("StrID", "Module_AIFM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -785,7 +795,7 @@ function generate_aifm(confFirmware, module, frame, log)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -799,7 +809,7 @@ function generate_aifm(confFirmware, module, frame, log)
     var inController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLIN");
     if (inController == null)
     {
-		log.errCFG3100(module.propertyValue("StrID") + "_CTRLIN", module.propertyValue("StrID"));
+		log.errCFG3004(module.propertyValue("StrID") + "_CTRLIN", module.propertyValue("StrID"));
 		return false;
     }
 	
@@ -821,7 +831,7 @@ function generate_aifm(confFirmware, module, frame, log)
 			var value = 1;
 			if (signal == null)
 			{
-				log.wrnCFG3104(signalID, inController.propertyValue("StrID"));
+				log.wrnCFG3005(signalID, inController.propertyValue("StrID"));
 			}
 			else
 			{
@@ -831,7 +841,8 @@ function generate_aifm(confFirmware, module, frame, log)
 				}
 				else
 				{
-					log.wrnCFG3106("PowerCoefficient", signal.propertyValue("StrID"));
+					log.errCFG3000("PowerCoefficient", signal.propertyValue("StrID"));
+					return false;
 				}
 			}
 			
@@ -873,7 +884,7 @@ function generate_aifm(confFirmware, module, frame, log)
 					var value = 1;
 					if (signal == null)
 					{
-						log.wrnCFG3104(signalID, inController.propertyValue("StrID"));
+						log.wrnCFG3005(signalID, inController.propertyValue("StrID"));
 					}
 					else
 					{
@@ -885,7 +896,8 @@ function generate_aifm(confFirmware, module, frame, log)
 						}
 						else
 						{
-							log.wrnCFG3106(setPointName, signal.propertyValue("StrID"));
+							log.errCFG3000(setPointName, signal.propertyValue("StrID"));
+							return false;
 						}
 					}
 					
@@ -960,7 +972,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_AOM");
+		log.errCFG3000("StrID", "Module_AOM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -968,7 +980,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -984,7 +996,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var outController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLOUT");
     if (outController == null)
     {
-		log.errCFG3101(module.propertyValue("StrID") + "_CTRLOUT", module.propertyValue("StrID"));
+		log.errCFG3004(module.propertyValue("StrID") + "_CTRLOUT", module.propertyValue("StrID"));
 		return false;
     }
 
@@ -1006,7 +1018,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 				var outputRangeMode = signal.jsOutputRangeMode();
                 if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
                 {
-					log.errCFG3103(outputRangeMode, place, signal.propertyValue("StrID"));
+					log.errCFG3002("Signal/OutputRangeMode", outputRangeMode, 0, Mode_05mA, signal.propertyValue("StrID"));
 					return false;
                 }
 
@@ -1070,7 +1082,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
     }
 	if (parent.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Class_Controller");
+		log.errCFG3000("StrID", "Class_Controller");
 		return null;
 	}
 
@@ -1093,7 +1105,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 		
 		if (s.propertyValue("StrID") == undefined)
 		{
-			log.errCFG3000("Class_Signal");
+			log.errCFG3000("StrID", "Class_Signal");
 			return null;
 		}
 
@@ -1104,13 +1116,13 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
             signal = signalSet.getSignalByDeviceStrID(strID);
             if (signal == null)    
             {
-				log.wrnCFG3107(strID);
+				log.wrnCFG3007(strID);
             }
             return signal;
         }
     }
     
-	log.wrnCFG3105(place, parent.propertyValue("StrID"));
+	log.wrnCFG3006(place, parent.propertyValue("StrID"));
     return null;
 }
 
@@ -1123,7 +1135,7 @@ function generate_ocm(confFirmware, module, frame, log, opticModuleStorage)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_OCM");
+		log.errCFG3000("StrID", "Module_OCM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -1131,7 +1143,7 @@ function generate_ocm(confFirmware, module, frame, log, opticModuleStorage)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -1203,7 +1215,7 @@ function generate_dim(confFirmware, module, frame, log)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_DIM");
+		log.errCFG3000("StrID", "Module_DIM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -1211,7 +1223,7 @@ function generate_dim(confFirmware, module, frame, log)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -1267,7 +1279,7 @@ function generate_dom(confFirmware, module, frame, log)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Module_DOM");
+		log.errCFG3000("StrID", "Module_DOM");
 		return false;
 	}
 	var checkProperties = ["Place", "ModuleVersion"];
@@ -1275,7 +1287,7 @@ function generate_dom(confFirmware, module, frame, log)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
 		{
-			log.errCFG3001(checkProperties[cp], module.propertyValue("StrID"));
+			log.errCFG3000(checkProperties[cp], module.propertyValue("StrID"));
 			return false;
 		}
 	}
@@ -1446,12 +1458,12 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
-		log.errCFG3000("Class_Module");
+		log.errCFG3000("StrID", "Class_Module");
 		return -1;
 	}
 	if (module.propertyValue("OptoPortCount") == undefined)
 	{
-		log.errCFG3001("OptoPortCount", module.propertyValue("StrID"));
+		log.errCFG3000("OptoPortCount", module.propertyValue("StrID"));
 		return -1;
 	}
 	
@@ -1467,13 +1479,13 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 		var controller = module.jsFindChildObjectByMask(controllerID);
 		if (controller == null)
 		{
-			log.errCFG3200(controllerID, module.propertyValue("StrID"));
+			log.errCFG3004(controllerID, module.propertyValue("StrID"));
 			return -1;
 		}
 		
 		if (controller.propertyValue("StrID") == undefined)
 		{
-			log.errCFG3000("Class_Controller");
+			log.errCFG3000("StrID", "Class_Controller");
 			return -1;
 		}
 

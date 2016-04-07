@@ -3510,6 +3510,12 @@ QString DbWorker::toSqlStr(QString& str)
 }
 
 
+QString DbWorker::toSqlStr(QString&& str)
+{
+	return str.replace("'", "''");
+}
+
+
 void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
     AUTO_COMPLETE
