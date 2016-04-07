@@ -35,6 +35,10 @@ public:
 	void swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data);
 	OutputMessageLevel issueForSchemaItem(const QUuid itemId) const;
 
+	// Select tab
+	//
+	void fireChangeCurrentTab(QWidget* tab);
+
 	// --
 	//
 
@@ -46,6 +50,8 @@ signals:
 	void buildFinished();
 
 	void showDeviceApplicationSignals(QStringList deviceStrIds);
+
+	void changeCurrentTab(QWidget* tab);
 
 public slots:
 

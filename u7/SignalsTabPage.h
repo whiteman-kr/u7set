@@ -18,6 +18,7 @@ class QComboBox;
 class SignalsTabPage;
 class QTimer;
 class QCheckBox;
+class QLineEdit;
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -142,10 +143,12 @@ public:
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 	void setSignalTypeFilter(int signalType);
+	void setSignalIdFilter(QStringList deviceStrIds);
 
 private:
 	SignalsModel* m_sourceModel;
 	int m_signalType = ST_ANY;
+	QStringList m_deviceStrIds;
 };
 
 
@@ -247,6 +250,9 @@ public slots:
 	void restoreSelection();
 
 	void changeSignalTypeFilter(int selectedType);
+	void changeSignalIdFilter(QStringList deviceStrIds);
+	void applySignalIdFilter();
+	void clearSignalIdFilter();
 
 	void showError(QString message);
 
@@ -257,6 +263,7 @@ private:
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
+	QLineEdit* m_filterEdit = nullptr;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
 
