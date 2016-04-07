@@ -1274,6 +1274,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QPushButton* applyButton = new QPushButton("Apply", this);
 	connect(applyButton, &QPushButton::clicked, this, &SignalsTabPage::applySignalIdFilter);
+	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SignalsTabPage::applySignalIdFilter);
 	filterToolBar->addWidget(applyButton);
 
 	QPushButton* clearButton = new QPushButton("Clear", this);
