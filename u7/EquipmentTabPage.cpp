@@ -2976,131 +2976,72 @@ void EquipmentTabPage::setActionState()
 				break;
 
 			case Hardware::DeviceType::Rack:
+				m_addChassisAction->setEnabled(true);
+				m_addModuleAction->setEnabled(true);
+				m_addControllerAction->setEnabled(true);
+				m_addSignalAction->setEnabled(true);
+				m_addWorkstationAction->setEnabled(true);
+
 				if (isConfigurationMode() == true)
 				{
-					m_addRackAction->setEnabled(true);
-					m_addChassisAction->setEnabled(true);
-					m_addModuleAction->setEnabled(true);
-					m_addControllerAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
-					m_addWorkstationAction->setEnabled(true);
+					m_addPresetChassisAction->setEnabled(true);
+					m_addPresetModuleAction->setEnabled(true);
+					m_addPresetControllerAction->setEnabled(true);
+					m_addPresetWorkstationAction->setEnabled(true);
 				}
-				else
-				{
-					m_addRackAction->setEnabled(selectedObject->presetRoot() == false);
-					m_addChassisAction->setEnabled(true);
-					m_addModuleAction->setEnabled(true);
-					m_addControllerAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
-					m_addWorkstationAction->setEnabled(true);
-				}
-
-				m_addPresetRackAction->setEnabled(true);
-				m_addPresetChassisAction->setEnabled(true);
-				m_addPresetModuleAction->setEnabled(true);
-				m_addPresetControllerAction->setEnabled(true);
-				m_addPresetWorkstationAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Chassis:
+				m_addModuleAction->setEnabled(true);
+				m_addControllerAction->setEnabled(true);
+				m_addSignalAction->setEnabled(true);
+				m_addWorkstationAction->setEnabled(true);
+
 				if (isConfigurationMode() == true)
 				{
-					m_addChassisAction->setEnabled(true);
-					m_addModuleAction->setEnabled(true);
-					m_addControllerAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
-					m_addWorkstationAction->setEnabled(true);
+					m_addPresetModuleAction->setEnabled(true);
+					m_addPresetControllerAction->setEnabled(true);
+					m_addPresetWorkstationAction->setEnabled(true);
 				}
-				else
-				{
-					m_addChassisAction->setEnabled(selectedObject->presetRoot() == false);
-					m_addModuleAction->setEnabled(true);
-					m_addControllerAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
-					m_addWorkstationAction->setEnabled(true);
-				}
-
-				m_addPresetChassisAction->setEnabled(true);
-				m_addPresetModuleAction->setEnabled(true);
-				m_addPresetControllerAction->setEnabled(true);
-				m_addPresetWorkstationAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Module:
-				if (isConfigurationMode() == true)
-				{
-					m_addModuleAction->setEnabled(true);
-				}
-				else
-				{
-					m_addModuleAction->setEnabled(selectedObject->presetRoot() == false);
-				}
-
 				m_addControllerAction->setEnabled(true);
 				m_addSignalAction->setEnabled(true);
 
-				m_addPresetModuleAction->setEnabled(true);
-				m_addPresetControllerAction->setEnabled(true);
-				break;
-
-			case Hardware::DeviceType::Controller:
 				if (isConfigurationMode() == true)
 				{
-					m_addControllerAction->setEnabled(true);
+					m_addPresetControllerAction->setEnabled(true);
 				}
-				else
-				{
-					m_addControllerAction->setEnabled(selectedObject->presetRoot() == false);
-				}
-
-				m_addSignalAction->setEnabled(true);
-
-				m_addPresetControllerAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Workstation:
+				m_addSoftwareAction->setEnabled(true);
+				m_addControllerAction->setEnabled(true);
+				m_addSignalAction->setEnabled(true);
+
 				if (isConfigurationMode() == true)
 				{
-					m_addWorkstationAction->setEnabled(true);
-					m_addSoftwareAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
+					m_addPresetSoftwareAction->setEnabled(true);
+					m_addPresetControllerAction->setEnabled(true);
 				}
-				else
-				{
-					m_addWorkstationAction->setEnabled(selectedObject->presetRoot() == false);
-					m_addSoftwareAction->setEnabled(true);
-					m_addSignalAction->setEnabled(true);
-				}
-
-				m_addPresetWorkstationAction->setEnabled(true);
-				m_addPresetSoftwareAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Software:
-				if (isConfigurationMode() == true)
-				{
-					m_addSoftwareAction->setEnabled(true);
-				}
-				else
-				{
-					m_addSoftwareAction->setEnabled(selectedObject->presetRoot() == false);
-				}
-
+				m_addControllerAction->setEnabled(true);
 				m_addSignalAction->setEnabled(true);
 
-				m_addPresetSoftwareAction->setEnabled(true);
+				if (isConfigurationMode() == true)
+				{
+					m_addPresetControllerAction->setEnabled(true);
+				}
+				break;
+
+			case Hardware::DeviceType::Controller:
+				m_addSignalAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Signal:
-				if (isConfigurationMode() == true)
-				{
-					m_addSignalAction->setEnabled(true);
-				}
-				else
-				{
-					m_addSignalAction->setEnabled(selectedObject->presetRoot() == false);
-				}
-
 				break;
 
 			default:

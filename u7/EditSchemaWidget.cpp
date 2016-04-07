@@ -4044,72 +4044,106 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	// Signal properties
 	//
-	QSet<QString> signalStrIds;		// QSet for unique strIds
-
-	if (selectedItems().empty() == false)
+	if (isLogicSchema() == true)
 	{
-		auto& selected = selectedItems();
+		QSet<QString> signalStrIds;		// QSet for unique strIds
 
-		for (auto item : selected)
+		if (selectedItems().empty() == false)
 		{
-			if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
+			auto& selected = selectedItems();
+
+			for (auto item : selected)
 			{
-				auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-				assert(itemSignal);
-
-				const QStringList& signalStrIdList = itemSignal->signalStrIdList();
-
-				for (const QString& s : signalStrIdList)
+				if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
 				{
-					if (s.isEmpty() == false)
+					auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+					assert(itemSignal);
+
+					const QStringList& signalStrIdList = itemSignal->signalStrIdList();
+
+					for (const QString& s : signalStrIdList)
 					{
-						signalStrIds << s;
+						if (s.isEmpty() == false)
+						{
+							signalStrIds << s;
+						}
 					}
 				}
 			}
-		}
 
-		if (signalStrIds.empty() == false)
-		{
-			QAction* signalSeparator = new QAction(tr("Signals"), &menu);
-			signalSeparator->setSeparator(true);
-			actions << signalSeparator;
-
-			for (QString s : signalStrIds)
+			if (signalStrIds.empty() == false)
 			{
-				QAction* signalAction = new QAction(s, &menu);
-				connect(signalAction, &QAction::triggered,
-						[s, this](bool)
-						{
-							QStringList sl;
-							sl << s;
-							this->signalsProperties(sl);
-						});
+				QAction* signalSeparator = new QAction(tr("Signals"), &menu);
+				signalSeparator->setSeparator(true);
+				actions << signalSeparator;
 
-				actions << signalAction;
-			}
-
-			if (signalStrIds.size() > 1)
-			{
-				QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
-				connect(allSignals, &QAction::triggered,
-						[&signalStrIds, this](bool)
-						{
-							QStringList sl;
-							for (auto s : signalStrIds)
+				for (QString s : signalStrIds)
+				{
+					QAction* signalAction = new QAction(s, &menu);
+					connect(signalAction, &QAction::triggered,
+							[s, this](bool)
 							{
+								QStringList sl;
 								sl << s;
-							}
+								this->signalsProperties(sl);
+							});
 
-							this->signalsProperties(sl);
-						});
+					actions << signalAction;
+				}
 
-				actions << allSignals;
+				if (signalStrIds.size() > 1)
+				{
+					QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
+					connect(allSignals, &QAction::triggered,
+							[&signalStrIds, this](bool)
+							{
+								QStringList sl;
+								for (auto s : signalStrIds)
+								{
+									sl << s;
+								}
+
+								this->signalsProperties(sl);
+							});
+
+					actions << allSignals;
+				}
 			}
 		}
 	}
 
-	// --
+	// Add new Application Logic signal
+	//
+	if (isLogicSchema())
+	{
+		if (selectedItems().size() == 1)
+		{
+			std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+
+			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
+
+			if (itemSignal != nullptr)
+			{
+				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
+
+				connect(addSignal, &QAction::triggered,
+					[this](bool)
+					{
+						this->addNewAppSignal();
+					});
+
+				actions << addSignal;
+
+			}
+			else
+			{
+				assert(itemSignal);
+			}
+		}
+	}
+
+	// Layer, Item property etc
+	//
 	actions << m_separatorAction0;
 	actions << m_layersAction;
 	actions << m_propertiesAction;
@@ -4139,6 +4173,12 @@ void EditSchemaWidget::exportToPdf()
 
 void EditSchemaWidget::signalsProperties(QStringList strIds)
 {
+	if (isLogicSchema() == false)
+	{
+		assert(isLogicSchema() == false);
+		return;
+	}
+
 	if (strIds.isEmpty() == true)
 	{
 		return;
@@ -4147,6 +4187,17 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 	editApplicationSignals(strIds, db(), this);
 
 	return;
+}
+
+void EditSchemaWidget::addNewAppSignal()
+{
+	if (isLogicSchema() == false)
+	{
+		assert(isLogicSchema() == false);
+		return;
+	}
+
+	qDebug() << "Add new application signal to schema " << schema()->strID() << ", module " << logicSchema()->hardwareStrIds();
 }
 
 void EditSchemaWidget::escapeKey()

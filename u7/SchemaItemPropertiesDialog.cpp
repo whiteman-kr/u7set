@@ -25,6 +25,8 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 
+	setWindowTitle(tr("Schema Item(s) Properties"));
+
 	return;
 }
 
