@@ -11,7 +11,7 @@
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
 #include "../include/SimpleThread.h"
-#include "Signal.h"
+//#include "Signal.h"
 
 
 class Service;
@@ -62,7 +62,7 @@ private:
 	void stop() final;				// override QtService::stop
 
 public:
-    DaemonServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+	DaemonServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 	virtual ~DaemonServiceStarter();
 
 	int exec() { return QtService<QCoreApplication>::exec(); }
@@ -85,7 +85,7 @@ private:
 	Service* m_service = nullptr;
 
 public:
-    ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 
 	int exec();
 };
@@ -101,7 +101,7 @@ public:
 		char c = 0;
 		std::cin >> c;
 		QCoreApplication::exit(0);
-    }
+	}
 };
 
 

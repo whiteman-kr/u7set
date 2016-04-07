@@ -4,13 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
-
-QT       += network
-
-QT		 += widgets
+QT      += core
+QT      -= gui
+QT      += network
+QT	+= widgets
 QT      += qml
 
 TARGET = BaseSrv
@@ -40,27 +37,27 @@ unix:system([ -e ./version.h ] || touch ./version.h)
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-        contains(QMAKE_TARGET.arch, x86_64){
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/BaseService.pro
-        }
-        else{
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/BaseService.pro
-        }
+	contains(QMAKE_TARGET.arch, x86_64){
+	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+	    nmake & \
+	    chdir $$PWD & \
+	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/BaseService.pro
+	}
+	else{
+	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+	    nmake & \
+	    chdir $$PWD & \
+	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/BaseService.pro
+	}
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/BaseService.pro
+	qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+	make; \
+	cd $$PWD; \
+	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/BaseService.pro
 }
 PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
@@ -111,14 +108,14 @@ unix {
 # Visual Leak Detector
 #
 win32 {
-        contains(QMAKE_TARGET.arch, x86_64) {
-                LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-                LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-        } else {
-                LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-                LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-        }
+	contains(QMAKE_TARGET.arch, x86_64) {
+		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
+		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	} else {
+		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
+		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
+	}
 
-        INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-        INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
+	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
+	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
