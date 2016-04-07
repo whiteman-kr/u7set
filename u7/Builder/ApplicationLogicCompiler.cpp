@@ -24,10 +24,10 @@ namespace Builder
                                                        OutputLog *log) :
         m_subsystems(subsystems),
         m_equipmentSet(equipmentSet),
+		m_optoModuleStorage(optoModuleStorage),
         m_signals(signalSet),
         m_afbl(afblSet),
         m_appLogicData(appLogicData),
-        m_optoModuleStorage(optoModuleStorage),
         m_resultWriter(buildResultWriter),
         m_connections(connections)
     {

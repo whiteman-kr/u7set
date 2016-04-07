@@ -260,9 +260,9 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 	for (QModelIndex& oldIndex : pers)
 	{
 		int oldIndexRow = oldIndex.row();
-		if (oldIndexRow < 0 || oldIndex.row() >= oldFileOrder.size())
+		if (oldIndexRow < 0 || oldIndex.row() >= static_cast<int>(oldFileOrder.size()))
 		{
-			assert(oldIndex.row() < oldFileOrder.size());
+			assert(oldIndex.row() < static_cast<int>(oldFileOrder.size()));
 			continue;
 		}
 
@@ -314,9 +314,9 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 	for (QModelIndex& oldIndex : pers)
 	{
 		int oldIndexRow = oldIndex.row();
-		if (oldIndexRow < 0 || oldIndex.row() >= oldFileOrder.size())
+		if (oldIndexRow < 0 || oldIndex.row() >= static_cast<int>(oldFileOrder.size()))
 		{
-			assert(oldIndex.row() < oldFileOrder.size());
+			assert(oldIndex.row() < static_cast<int>(oldFileOrder.size()));
 			continue;
 		}
 

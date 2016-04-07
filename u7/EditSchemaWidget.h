@@ -363,6 +363,7 @@ public:
 	void clearSelection();
 
 	// Signals
+	//
 signals:
 	void closeTab(QWidget* tabWidget);		// Command to the owner to Close current tab
 	void checkInFile();						// Command to the owner to CheckIn the file.
@@ -382,6 +383,7 @@ protected slots:
 	void exportToPdf();
 
 	void signalsProperties(QStringList strIds);
+	void addNewAppSignal();
 
 	void escapeKey();
 	void f2Key();

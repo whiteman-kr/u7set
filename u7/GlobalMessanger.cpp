@@ -76,3 +76,8 @@ OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid itemId) const
 
 	return it->second;
 }
+
+void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
+{
+	emit changeCurrentTab(tab);
+}

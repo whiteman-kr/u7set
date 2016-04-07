@@ -40,8 +40,6 @@
 	</Library>
             <AfterCreation>
 	</AfterCreation>
-            <AfterCreation>
-	</AfterCreation>
         </CommonScript>
     </AfbElement>
 </ApplicationFunctionalBlocks>

@@ -13,8 +13,8 @@ namespace Hardware
 	// ------------------------------------------------------------------
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
-		m_optoModuleStrID(optoModuleStrID),
-		m_deviceController(optoPortController)
+		m_deviceController(optoPortController),
+		m_optoModuleStrID(optoModuleStrID)
 	{
 		if (optoPortController == nullptr)
 		{
