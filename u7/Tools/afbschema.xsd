@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="ApplicationFunctionalBlocks">
     <xs:complexType>
@@ -6,41 +6,67 @@
         <xs:element name="AfbElement">
           <xs:complexType>
             <xs:sequence>
+              <xs:element name="Properties">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Caption" type="xs:string" />
+                    <xs:element name="Version" type="xs:decimal" />
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="Category" type="xs:string" />
+                    <xs:element name="OpCode" type="xs:unsignedInt" />
+                    <xs:element name="HasRam" type="xs:boolean" />
+                    <xs:element name="RequiredStart" type="xs:boolean" />
+                    <xs:element name="InternalUse" type="xs:boolean" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
               <xs:element name="InputSignals">
                 <xs:complexType>
                   <xs:sequence>
                     <xs:element maxOccurs="unbounded" name="AfbElementSignal">
                       <xs:complexType>
+                        <xs:attribute name="OpName" type="xs:string" use="required" />
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
-                        <xs:attribute name="Index" type="xs:decimal" use="required" />
-                        <xs:attribute name="Size" type="xs:decimal" use="required" />
+                        <xs:attribute name="DataFormat" type="xs:string" use="optional" />
+                        <xs:attribute name="OpIndex" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="Size" type="xs:unsignedInt" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
-				<xs:unique name = "InputSignalsUnique">
-					 <xs:selector xpath="AfbElementSignal"/>  
-				        <xs:field xpath="@Caption"/>  
-				</xs:unique>
+                <xs:unique name = "InputSignalsUnique1">
+                  <xs:selector xpath="AfbElementSignal"/>
+                  <xs:field xpath="@OpName"/>
+                </xs:unique>
+                <xs:unique name = "InputSignalsUnique2">
+                  <xs:selector xpath="AfbElementSignal"/>
+                  <xs:field xpath="@Caption"/>
+                </xs:unique>
               </xs:element>
               <xs:element name="OutputSignals">
                 <xs:complexType>
                   <xs:sequence>
                     <xs:element maxOccurs="unbounded" name="AfbElementSignal">
                       <xs:complexType>
+                        <xs:attribute name="OpName" type="xs:string" use="required" />
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
-                        <xs:attribute name="Index" type="xs:decimal" use="required" />
-                        <xs:attribute name="Size" type="xs:decimal" use="required" />
+                        <xs:attribute name="DataFormat" type="xs:string" use="optional" />
+                        <xs:attribute name="OpIndex" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="Size" type="xs:unsignedInt" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
-				<xs:unique name = "OutputSignalsUnique">
-					 <xs:selector xpath="AfbElementSignal"/>  
-				        <xs:field xpath="@Caption"/>  
-				</xs:unique>
+                <xs:unique name = "OutputSignalsUnique1">
+                  <xs:selector xpath="AfbElementSignal"/>
+                  <xs:field xpath="@OpName"/>
+                </xs:unique>
+                <xs:unique name = "OutputSignalsUnique2">
+                  <xs:selector xpath="AfbElementSignal"/>
+                  <xs:field xpath="@Caption"/>
+                </xs:unique>
               </xs:element>
               <xs:element name="Params">
                 <xs:complexType>
@@ -48,144 +74,50 @@
                     <xs:element minOccurs = "0" maxOccurs="unbounded" name="AfbElementParam">
                       <xs:complexType>
                         <xs:sequence>
-                          <xs:element name="Value">
+                          <xs:element name="Value" type="xs:double" />
+                          <xs:element name="Default" type="xs:double"  minOccurs = "0" maxOccurs="1" />
+                          <xs:element name="LowLimit" type="xs:double"  minOccurs = "0" maxOccurs="1"/>
+                          <xs:element name="HighLimit" type="xs:double"  minOccurs = "0" maxOccurs="1"/>
+                          <xs:element name="Script">
                             <xs:complexType>
                               <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element name="Default">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element name="LowLimit">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element name="HighLimit">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
+                                <xs:element name="Changed" type="xs:string" />
                               </xs:sequence>
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>
+                        <xs:attribute name="OpName" type="xs:string" use="required" />
                         <xs:attribute name="Caption" type="xs:string" use="required" />
-                        <xs:attribute name="Visible" type="xs:decimal" use="required" />
+                        <xs:attribute name="Visible" type="xs:boolean" use="required" />
+                        <xs:attribute name="OpIndex" type="xs:byte" use="required" />
+                        <xs:attribute name="Size" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="Instantiator" type="xs:boolean" use="required" />
+                        <xs:attribute name="User" type="xs:boolean" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
-                        <xs:attribute name="Index" type="xs:decimal" use="required" />
-                        <xs:attribute name="Size" type="xs:decimal" use="required" />
+                        <xs:attribute name="DataFormat" type="xs:string" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
-				<xs:unique name = "ParamsUnique">
-					 <xs:selector xpath="AfbElementParam"/>  
-				        <xs:field xpath="@Caption"/>  
-				</xs:unique>
+                <xs:unique name = "ParamsUnique1">
+                  <xs:selector xpath="AfbElementParam"/>
+                  <xs:field xpath="@OpName"/>
+                </xs:unique>
+                <xs:unique name = "ParamsUnique2">
+                  <xs:selector xpath="AfbElementParam"/>
+                  <xs:field xpath="@Caption"/>
+                </xs:unique>
               </xs:element>
-              <xs:element name="ConstParams">
+              <xs:element name="CommonScript">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element minOccurs = "0" maxOccurs="unbounded" name="AfbElementParam">
-                      <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="Value">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element minOccurs = "0" name="Default">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element minOccurs = "0" name="LowLimit">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element minOccurs = "0" name="HighLimit">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="AfbParamValue">
-                                  <xs:complexType>
-                                    <xs:attribute name="Type" type="xs:string" use="required" />
-                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
-                        </xs:sequence>
-                        <xs:attribute name="Caption" type="xs:string" use="required" />
-                        <xs:attribute name="Visible" type="xs:decimal" use="required" />
-                        <xs:attribute name="Type" type="xs:string" use="required" />
-                        <xs:attribute name="Index" type="xs:decimal" use="required" />
-                        <xs:attribute name="Size" type="xs:decimal" use="required" />
-                      </xs:complexType>
-                    </xs:element>
+                    <xs:element name="Library" />
+                    <xs:element name="AfterCreation" />
                   </xs:sequence>
                 </xs:complexType>
-				<xs:unique name = "ConstParamsUnique">
-					 <xs:selector xpath="AfbElementParam"/>  
-				        <xs:field xpath="@Caption"/>  
-				</xs:unique>
               </xs:element>
             </xs:sequence>
-            <xs:attribute name="Guid" type="xs:string" use="required" />
             <xs:attribute name="StrId" type="xs:string" use="required" />
-            <xs:attribute name="Caption" type="xs:string" use="required" />
-            <xs:attribute name="OpCode" type="xs:unsignedByte" use="required" />
-            <xs:attribute name="hasRam" type="xs:unsignedByte" use="required" />
           </xs:complexType>
         </xs:element>
       </xs:sequence>
