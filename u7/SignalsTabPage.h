@@ -19,6 +19,7 @@ class SignalsTabPage;
 class QTimer;
 class QCheckBox;
 class QLineEdit;
+class QCompleter;
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -264,6 +265,8 @@ private:
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
+	QCompleter* m_completer = nullptr;
+	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
 

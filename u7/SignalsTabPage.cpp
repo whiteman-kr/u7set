@@ -11,6 +11,8 @@
 #include <QButtonGroup>
 #include <QToolButton>
 #include <QTimer>
+#include <QCompleter>
+#include <QStringListModel>
 
 #include "../include/DbController.h"
 
@@ -1272,6 +1274,15 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	filterToolBar->addWidget(new QLabel("Filter:", this));
 	filterToolBar->addWidget(m_filterEdit);
 
+	QSettings settings;
+	m_filterHistory = settings.value("SignalsTabPage::m_filterHistory").toStringList();
+
+	m_completer = new QCompleter(m_filterHistory, this);
+	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+	m_filterEdit->setCompleter(m_completer);
+	connect(m_filterEdit, &QLineEdit::textEdited, [=](){m_completer->complete();});
+	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_filterEdit, &QLineEdit::setText);
+
 	QPushButton* applyButton = new QPushButton("Apply", this);
 	connect(applyButton, &QPushButton::clicked, this, &SignalsTabPage::applySignalIdFilter);
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SignalsTabPage::applySignalIdFilter);
@@ -1571,10 +1582,31 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds)
 {
 	m_signalsProxyModel->setSignalIdFilter(deviceStrIds);
-	m_filterEdit->setText(deviceStrIds.join(" || "));
+
+	QString newFilter = deviceStrIds.join(" || ");
+	while (newFilter.indexOf("  ") != -1)
+	{
+		newFilter.replace("  ", " ");
+	}
+
+	if (!newFilter.isEmpty() && !m_filterHistory.contains(newFilter))
+	{
+		m_filterHistory.append(newFilter);
+
+		QStringListModel* model = dynamic_cast<QStringListModel*>(m_completer->model());
+		assert(model != nullptr);
+		if (model != nullptr)
+		{
+			model->setStringList(m_filterHistory);
+		}
+
+		QSettings settings;
+		settings.setValue("SignalsTabPage::m_filterHistory", m_filterHistory);
+	}
+
+	m_filterEdit->setText(newFilter);
 
 	GlobalMessanger::instance()->fireChangeCurrentTab(this);
-	//m_signalsProxyModel->setFilterWildcard();
 }
 
 void SignalsTabPage::applySignalIdFilter()
