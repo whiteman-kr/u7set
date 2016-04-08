@@ -10,6 +10,14 @@ namespace VFrame30
 	class Schema;
 }
 
+enum class SetOrder
+{
+	BringToFront,
+	BringForward,
+	SendToBack,
+	SendBackward
+};
+
 namespace EditEngine
 {
 	class EditCommand;
@@ -62,6 +70,8 @@ namespace EditEngine
 
 		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool snapToGrid);
 		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemaItem>& item, bool snapToGrid);
+
+		//void runSetOrder(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemaItem>& item);

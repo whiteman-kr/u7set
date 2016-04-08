@@ -589,7 +589,7 @@ void SignalSet::resetAddresses()
 	}
 }
 
-QStringList SignalSet::CreateSignal(const QStringList &lmIdList, int shemaCounter, const QString &shemaId, const QString &shemaName)
+QStringList SignalSet::createSignal(const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)
 {
 	// Do something
 	//

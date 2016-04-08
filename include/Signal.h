@@ -381,7 +381,7 @@ public:
 
 	void resetAddresses();
 
-	QStringList CreateSignal(const QStringList& lmIdList, int shemaCounter, const QString& shemaId, const QString& shemaName);
+	static QStringList createSignal(const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption);
 };
 
 
