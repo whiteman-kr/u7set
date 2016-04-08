@@ -290,6 +290,7 @@ message Schema
 message LogicSchema
 {
 	repeated wstring hardware_strids = 1;
+	optional int32 counter = 2 [default = 0];
 }
 
 

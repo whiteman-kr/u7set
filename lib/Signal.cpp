@@ -589,6 +589,13 @@ void SignalSet::resetAddresses()
 	}
 }
 
+QStringList SignalSet::createSignal(const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)
+{
+	// Do something
+	//
+	return QStringList();
+}
+
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
 {

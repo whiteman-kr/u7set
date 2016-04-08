@@ -47,6 +47,8 @@ namespace VFrame30
 			Proto::Write(hs, strId);
 		}
 
+		ls->set_counter(m_counter);
+
 		return true;
 	}
 
@@ -85,6 +87,8 @@ namespace VFrame30
 			Proto::Read(ls.hardware_strids(i), &s);
 			m_hardwareStrIds.push_back(s);
 		}
+
+		m_counter = ls.counter();
 
 		return true;
 	}
@@ -139,6 +143,11 @@ namespace VFrame30
 	int LogicSchema::channelCount() const
 	{
 		return m_hardwareStrIds.size();
+	}
+
+	int LogicSchema::nextCounterValue()
+	{
+		return ++m_counter;
 	}
 
 }
