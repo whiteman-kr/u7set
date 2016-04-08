@@ -15,7 +15,7 @@ ServiceData::ServiceData() :
 	clientSocket(nullptr),
 	statusWidget(nullptr)
 {
-	information.type = ServiceType::Base;
+	information.type = ServiceType::BaseService;
 	information.serviceState = ServiceState::Undefined;
 }
 
@@ -460,10 +460,10 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		}
 		switch (serviceType)
 		{
-			case ServiceType::DataAcquisition:
+			case ServiceType::DataAcquisitionService:
 				serviceData.statusWidget = new DataAquisitionServiceWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
-			case ServiceType::Configuration:
+			case ServiceType::ConfigurationService:
 				serviceData.statusWidget = new ConfigurationServiceWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:

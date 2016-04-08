@@ -16,7 +16,7 @@
 class TuningServiceWorker : public ServiceWorker
 {
 public:
-	TuningServiceWorker() : ServiceWorker(ServiceType::Tuning) {}
+	TuningServiceWorker() : ServiceWorker(ServiceType::TuningService) {}
 	TuningServiceWorker* createInstance() override { return new TuningServiceWorker(); }
 };
 

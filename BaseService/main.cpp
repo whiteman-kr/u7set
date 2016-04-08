@@ -16,7 +16,7 @@
 class BaseServiceWorker : public ServiceWorker
 {
 public:
-	BaseServiceWorker() : ServiceWorker(ServiceType::Base) {}
+	BaseServiceWorker() : ServiceWorker(ServiceType::BaseService) {}
 	ServiceWorker* createInstance() override { return new BaseServiceWorker(); }
 };
 

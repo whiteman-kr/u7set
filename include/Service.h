@@ -120,7 +120,7 @@ public:
 private:
 	QMutex m_mutex;
 
-	ServiceType m_type = ServiceType::Base;
+	ServiceType m_type = ServiceType::BaseService;
 
 	quint32 m_majorVersion = 0;
 	quint32 m_minorVersion = 0;
@@ -195,7 +195,7 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 private:
-	ServiceType m_serviceType = ServiceType::Base;
+	ServiceType m_serviceType = ServiceType::BaseService;
 
 	Service* m_service = nullptr;
 
@@ -236,11 +236,11 @@ struct ServiceInfo
 
 const ServiceInfo serviceInfo[] =
 {
-	{ ServiceType::Base, PORT_BASE_SERVICE, "Base Service" },
-	{ ServiceType::Configuration, PORT_CONFIGURATION_SERVICE, "Configuration Service" },
-	{ ServiceType::DataAcquisition, PORT_DATA_AQUISITION_SERVICE, "Data Acquisition Service" },
-	{ ServiceType::Tuning, PORT_TUNING_SERVICE, "Tuning Service" },
-	{ ServiceType::Archiving, PORT_ARCHIVING_SERVICE, "Data Archiving Service" },
+	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service" },
+	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service" },
+	{ ServiceType::DataAcquisitionService, PORT_DATA_AQUISITION_SERVICE, "Data Acquisition Service" },
+	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service" },
+	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service" },
 };
 
 

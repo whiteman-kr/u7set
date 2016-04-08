@@ -26,6 +26,7 @@ const quint16   PORT_BASE_SERVICE = 13300,
 
 				PORT_TUNING_SERVICE = 13330,
 				PORT_TUNING_SERVICE_DATA = 13332,
+				PORT_TUNING_SERVICE_CLIENT_REQUEST = 13333,
 
 				PORT_ARCHIVING_SERVICE = 13340,
 				PORT_ARCHIVING_SERVICE_INFO = 13341,
@@ -48,7 +49,7 @@ const quint32   RQID_SERVICE_GET_INFO = 1000,
 				RQID_SERVICE_GET_SETTINGS = 1103,
 				RQID_SERVICE_SET_SETTINGS = 1104,
 
-                RQID_SEND_FILE_START = 1200,
+				RQID_SEND_FILE_START = 1200,
 				RQID_SEND_FILE_NEXT = 1201;
 
 
@@ -176,12 +177,12 @@ public:
 
 struct RequestHeader
 {
-    quint32 id;
-    quint32 clientID;
-    quint32 version;
-    quint32 no;
-    quint32 errorCode;
-    quint32 dataSize;
+	quint32 id;
+	quint32 clientID;
+	quint32 version;
+	quint32 no;
+	quint32 errorCode;
+	quint32 dataSize;
 };
 
 
@@ -196,11 +197,11 @@ struct ServiceSettings
 
 enum ServiceType
 {
-	Base,
-	Configuration,
-	DataAcquisition,
-	Tuning,
-	Archiving
+	BaseService,
+	ConfigurationService,
+	DataAcquisitionService,
+	TuningService,
+	ArchivingService
 };
 
 
@@ -237,7 +238,7 @@ struct ServiceInformation
 
 struct AckGetServiceInfo
 {
-    RequestHeader header;
+	RequestHeader header;
 
 	ServiceInformation serviceInfo;
 };
