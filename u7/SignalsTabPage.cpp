@@ -1357,6 +1357,11 @@ SignalsTabPage::~SignalsTabPage()
 {
 }
 
+QStringList SignalsTabPage::createSignal(DbController *dbController, const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)
+{
+	return QStringList();
+}
+
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
 	QAction* action = new QAction(QIcon(":/Images/Images/update.png"), tr("Refresh signal list"), this);

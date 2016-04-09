@@ -380,8 +380,6 @@ public:
 	void reserve(int n);
 
 	void resetAddresses();
-
-	static QStringList createSignal(const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption);
 };
 
 
