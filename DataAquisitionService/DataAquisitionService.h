@@ -50,7 +50,7 @@ private:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-	DataServiceWorker() : ServiceWorker(ServiceType::DataAcquisition) {}
+	DataServiceWorker() : ServiceWorker(ServiceType::DataAcquisitionService) {}
 	virtual void initialize() override;
 	virtual void shutdown() override;
 

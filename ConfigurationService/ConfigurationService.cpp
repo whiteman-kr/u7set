@@ -11,7 +11,7 @@
 // ------------------------------------------------------------------------------------
 
 ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& buildFolder) :
-	ServiceWorker(ServiceType::Configuration),
+	ServiceWorker(ServiceType::ConfigurationService),
 	m_buildFolder(buildFolder)
 {
 }

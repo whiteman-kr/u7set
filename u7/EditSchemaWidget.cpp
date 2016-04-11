@@ -17,6 +17,7 @@
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
+#include "SignalsTabPage.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -4248,10 +4249,11 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	QStringList signalsIds = SignalSet::createSignal(logicSchema()->hardwareStrIdList(),
-													 logicSchema()->nextCounterValue(),
-													 schema()->strID(),
-													 schema()->caption());
+	QStringList signalsIds = SignalsTabPage::createSignal(db(),
+														  logicSchema()->hardwareStrIdList(),
+														  logicSchema()->nextCounterValue(),
+														  schema()->strID(),
+														  schema()->caption());
 
 	if (signalsIds.isEmpty() == false)
 	{

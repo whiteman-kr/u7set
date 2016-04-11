@@ -2462,7 +2462,7 @@ namespace Builder
 
             xmlWriter.writeAttribute("StrID", s->strID());
             xmlWriter.writeAttribute("ExtStrID", s->extStrID());
-            xmlWriter.writeAttribute("Name", s->name());
+            xmlWriter.writeAttribute("Name", s->caption());
             xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
             xmlWriter.writeAttribute("Unit", Signal::m_unitList->valueAt(s->unitID()));
             xmlWriter.writeAttribute("DataSize", QString::number(s->dataSize()));

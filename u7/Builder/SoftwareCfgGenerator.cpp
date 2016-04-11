@@ -246,7 +246,7 @@ namespace Builder
             appSignalsXml.writeAttribute("Type", signal.type() == E::SignalType::Analog ? "Analog" : "Discrete");
             appSignalsXml.writeAttribute("StrID", signal.strID());
             appSignalsXml.writeAttribute("ExtStrID", signal.extStrID());
-            appSignalsXml.writeAttribute("Name", signal.name());
+            appSignalsXml.writeAttribute("Name", signal.caption());
             appSignalsXml.writeAttribute("DataFormat", dataFormatInfo.value(signal.dataFormatInt()));
             appSignalsXml.writeAttribute("DataSize", QString::number(signal.dataSize()));
             appSignalsXml.writeAttribute("LowADC", QString::number(signal.lowADC()));

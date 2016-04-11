@@ -19,5 +19,6 @@ SUBDIRS += qtservice \
 	u7 \
     Monitor \
     PacketViewer \
-    TcpClient
+    TcpClient \
+    TuningService
 
