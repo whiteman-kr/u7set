@@ -213,7 +213,7 @@ void MultiThreadSignalTest::run()
 		sd.signalInstanceId = checkedOutInstanceId;
 		sd.strId = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
 		sd.extStrId = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
-		sd.name = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
+		sd.caption = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
 		sd.dataFormatId = 1;
 		sd.dataSize = 2;
 		sd.lowAdc = 3;
@@ -244,6 +244,7 @@ void MultiThreadSignalTest::run()
 		sd.filteringTime = 25;
 		sd.maxDifference = 26;
 		sd.byteOrder = 27;
+		sd.enableTuning = "true";
 
 		QString arguments = QString("%1, %2, %3, %4, %5, %6, %7, %8, '%9', %10, ")
 				.arg(sd.signalId)
@@ -262,7 +263,7 @@ void MultiThreadSignalTest::run()
 						 .arg(sd.action)
 						 .arg(sd.strId)
 						 .arg(sd.extStrId)
-						 .arg(sd.name)
+						 .arg(sd.caption)
 						 .arg(sd.dataFormatId)
 						 .arg(sd.dataSize)
 						 .arg(sd.lowAdc)
@@ -293,12 +294,13 @@ void MultiThreadSignalTest::run()
 						 .arg(sd.aperture)
 						 .arg(sd.inOutType));
 
-		arguments.append(QString("'%1', %2, %3, %4, %5")
+		arguments.append(QString("'%1', %2, %3, %4, %5, '%6'")
 						 .arg(sd.deviceStrId)
 						 .arg(sd.outputRangeMode)
 						 .arg(sd.filteringTime)
 						 .arg(sd.maxDifference)
-						 .arg(sd.byteOrder));
+						 .arg(sd.byteOrder)
+						 .arg(sd.enableTuning));
 
 		// Start function
 		//
@@ -371,9 +373,9 @@ void MultiThreadSignalTest::run()
 			error = true;
 		}
 
-		if (query.value("name") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
+		if (query.value("caption") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
 		{
-			qDebug() << "Error in data read-write: wrong name\nThread: " << m_threadNumber << "\nSigal: " << signalId;
+			qDebug() << "Error in data read-write: wrong caption\nThread: " << m_threadNumber << "\nSigal: " << signalId;
 			error = true;
 		}
 

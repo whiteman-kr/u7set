@@ -106,7 +106,7 @@ void SignalTests::add_signalTest()
 
 		QVERIFY2(tempQuery.value("strId").toString() == QString("#SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value strId in table signalInstance not match"));
 		QVERIFY2(tempQuery.value("extStrId").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value extStrId in table signalInstance not match"));
-		QVERIFY2(tempQuery.value("name").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value name in table signalInstance not match"));
+		QVERIFY2(tempQuery.value("caption").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value name in table signalInstance not match"));
 
 		// Check data size to be correct
 		//
@@ -174,7 +174,7 @@ void SignalTests::add_signalTest()
 
 	QVERIFY2(tempQuery.value("strId").toString() == QString("#SIGNAL" + query.value("id").toString()), qPrintable("Error: value strId in table signalInstance not match"));
 	QVERIFY2(tempQuery.value("extStrId").toString() == QString("SIGNAL" + query.value("id").toString()), qPrintable("Error: value extStrId in table signalInstance not match"));
-	QVERIFY2(tempQuery.value("name").toString() == QString("SIGNAL" + query.value("id").toString()), qPrintable("Error: value name in table signalInstance not match"));
+	QVERIFY2(tempQuery.value("caption").toString() == QString("SIGNAL" + query.value("id").toString()), qPrintable("Error: value name in table signalInstance not match"));
 	QVERIFY2(tempQuery.value("dataSize").toInt() == 1, qPrintable("Error: wrong dataSize in table signalInstance"));
 	QVERIFY2(tempQuery.value("action").toInt() == 1, qPrintable("Error: value action in table signalInstance not match"));
 	QVERIFY2(tempQuery.value("signalInstanceId").toInt() == checkOutInstanceId, qPrintable("Error: wrong checkedOutInstanceId"));
@@ -1035,7 +1035,7 @@ void SignalTests::get_latest_signalsTest()
 
 	const QString nameToChange = "TEST";
 
-	ok = query.exec(QString("UPDATE signalInstance SET name = '%1' WHERE changeSetId IS NULL AND signalId = %2").arg(nameToChange).arg(signalId));
+	ok = query.exec(QString("UPDATE signalInstance SET caption = '%1' WHERE changeSetId IS NULL AND signalId = %2").arg(nameToChange).arg(signalId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM checkin_signals (%1, '{%2}', '%3')").arg(m_secondUserForTest).arg(signalId).arg("TEST"));
@@ -1045,7 +1045,7 @@ void SignalTests::get_latest_signalsTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2 (query.value("name").toString() == nameToChange, qPrintable("Error: function returns wrong name after function checkin_signals()"));
+	QVERIFY2 (query.value("caption").toString() == nameToChange, qPrintable("Error: function returns wrong name after function checkin_signals()"));
 
 	// Check deleted signal. Nobody must see deleted signal
 	//
@@ -1336,7 +1336,7 @@ void SignalTests::set_signal_workcopyTest()
 	sd.signalInstanceId = query.value("checkedOutInstanceId").toInt();
 	sd.strId = "strId";
 	sd.extStrId = "exStrId";
-	sd.name = "name";
+	sd.caption = "name";
 	sd.dataFormatId = 1;
 	sd.dataSize = 2;
 	sd.lowAdc = 3;
@@ -1367,6 +1367,7 @@ void SignalTests::set_signal_workcopyTest()
 	sd.filteringTime = 25;
 	sd.maxDifference = 26;
 	sd.byteOrder = 27;
+	sd.enableTuning = "true";
 
 	QString arguments = QString("%1, %2, %3, %4, %5, %6, %7, %8, '%9', %10, ")
 					.arg(sd.signalId)
@@ -1385,7 +1386,7 @@ void SignalTests::set_signal_workcopyTest()
 					 .arg(sd.action)
 					 .arg(sd.strId)
 					 .arg(sd.extStrId)
-					 .arg(sd.name)
+					 .arg(sd.caption)
 					 .arg(sd.dataFormatId)
 					 .arg(sd.dataSize)
 					 .arg(sd.lowAdc)
@@ -1416,12 +1417,13 @@ void SignalTests::set_signal_workcopyTest()
 					 .arg(sd.aperture)
 					 .arg(sd.inOutType));
 
-	arguments.append(QString("'%1', %2, %3, %4, %5")
+	arguments.append(QString("'%1', %2, %3, %4, %5, '%6'")
 					 .arg(sd.deviceStrId)
 					 .arg(sd.outputRangeMode)
 					 .arg(sd.filteringTime)
 					 .arg(sd.maxDifference)
-					 .arg(sd.byteOrder));
+					 .arg(sd.byteOrder)
+					 .arg(sd.enableTuning));
 
 	// Start function
 	//
@@ -1445,7 +1447,7 @@ void SignalTests::set_signal_workcopyTest()
 	QVERIFY2(query.value("signalId").toInt() == sd.signalId, qPrintable(QString("Error: value signalId is not match (Actual: %1, Expected: %2)").arg(query.value("signalId").toInt()).arg(sd.signalId)));
 	QVERIFY2(query.value("strId").toString() == sd.strId, qPrintable(QString("Error: value strId is not match (Actual: %1, Expected: %2)").arg(query.value("strId").toString()).arg(sd.strId)));
 	QVERIFY2(query.value("extStrId").toString() == sd.extStrId, qPrintable(QString("Error: value exStrId is not match (Actual: %1, Expected: %2)").arg(query.value("extStrId").toString()).arg(sd.extStrId)));
-	QVERIFY2(query.value("name").toString() == sd.name, qPrintable(QString("Error: value name is not match (Actual: %1, Expected: %2)").arg(query.value("name").toString()).arg(sd.name)));
+	QVERIFY2(query.value("caption").toString() == sd.caption, qPrintable(QString("Error: value name is not match (Actual: %1, Expected: %2)").arg(query.value("caption").toString()).arg(sd.caption)));
 	QVERIFY2(query.value("dataFormatId").toInt() == sd.dataFormatId, qPrintable(QString("Error: value dataFormatId is not match (Actual: %1, Expected: %2)").arg(query.value("dataFormatId").toInt()).arg(sd.dataFormatId)));
 	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: value dataSize is not match (Actual: %1, Expected: %2)").arg(query.value("dataSize").toInt()).arg(sd.dataSize)));
 	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: value lowAdc is not match (Actual: %1, Expected: %2)").arg(query.value("lowAdc").toInt()).arg(sd.lowAdc)));
@@ -1476,6 +1478,7 @@ void SignalTests::set_signal_workcopyTest()
 	QVERIFY2(query.value("filteringTime").toInt() == sd.filteringTime, qPrintable(QString("Error: value filteringTime is not match (Actual: %1, Expected: %2)").arg(query.value("filteringTime").toInt()).arg(sd.filteringTime)));
 	QVERIFY2(query.value("maxDifference").toInt() == sd.maxDifference, qPrintable(QString("Error: value maxDifference is not match (Actual: %1, Expected: %2)").arg(query.value("maxDifference").toInt()).arg(sd.maxDifference)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: value byteOrder is not match (Actual: %1, Expected: %2)").arg(query.value("byteOrder").toInt()).arg(sd.byteOrder)));
+	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: value enableTuning is not match (Actual: %1, Expected: %2)").arg(query.value("enableTuning").toString()).arg(sd.enableTuning)));
 
 	// Call checked out by another user error
 	//
