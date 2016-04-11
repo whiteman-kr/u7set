@@ -183,11 +183,11 @@ namespace Hardware
 
 		bool result = true;
 
-		result &= Builder::ApplicationLogicCompiler::getDeviceIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset);
-		result &= Builder::ApplicationLogicCompiler::getDeviceIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize);
-		result &= Builder::ApplicationLogicCompiler::getDeviceIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset);
-		result &= Builder::ApplicationLogicCompiler::getDeviceIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize);
-		result &= Builder::ApplicationLogicCompiler::getDeviceIntProperty(module, "OptoPortCount", &m_optoPortCount);
+		result &= Builder::DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
+		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
+		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
+		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
+		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
 
 		if (result == false)
 		{
