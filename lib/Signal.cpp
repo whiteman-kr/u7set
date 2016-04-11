@@ -166,7 +166,7 @@ void Signal::InitProperties()
 	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
 	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
-	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::caption, Signal::setCaption);
+	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator("^.+$");
 	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, DataFormat, true, Signal::dataFormat, Signal::setDataFormat);
 	ADD_PROPERTY_GETTER_SETTER(int, DataSize, true, Signal::dataSize, Signal::setDataSize);
@@ -221,6 +221,7 @@ void Signal::InitProperties()
 	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
 	ADD_PROPERTY_GETTER_SETTER(QString, DeviceStrID, true, Signal::deviceStrID, Signal::setDeviceStrID);
+	ADD_PROPERTY_GETTER_SETTER(bool, EnableTuning, true, Signal::enableTuning, Signal::setEnableTuning);
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))

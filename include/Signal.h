@@ -349,7 +349,7 @@ public:
 	void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 	Q_INVOKABLE bool enableTuning() const { return m_enableTuning; }
-	void setEnableTuning(bool enableTuning) { m_acquire = enableTuning; }
+	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 

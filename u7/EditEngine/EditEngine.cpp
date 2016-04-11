@@ -5,6 +5,7 @@
 #include "EditEngineSetPoints.h"
 #include "EditEngineDeleteItem.h"
 #include "EditEngineMoveItem.h"
+#include "EditEngineSetOrder.h"
 #include "EditEngineSetProperty.h"
 #include "EditEngineSetSchemaProperty.h"
 
@@ -239,6 +240,18 @@ namespace EditEngine
 		items.push_back(item);
 
 		runMoveItem(xdiff, ydiff, items, snapToGrid);
+		return;
+	}
+
+	void EditEngine::runSetOrder(SetOrder setOrder, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	{
+		bool willThisChangeTheActualOrder = SetOrderCommand::checkIfCommandChangesOrder(setOrder, items, layer->Items);
+		if (willThisChangeTheActualOrder == false)
+		{
+			return;
+		}
+
+		addCommand(std::make_shared<SetOrderCommand>(m_schemaView, setOrder, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 

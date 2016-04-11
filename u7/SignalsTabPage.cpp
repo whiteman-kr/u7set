@@ -56,21 +56,22 @@ SC_APERTURE = 31,
 SC_FILTERING_TIME = 32,
 SC_MAX_DIFFERENCE = 33,
 SC_BYTE_ORDER = 34,
-SC_LAST_CHANGE_USER = 35;
+SC_ENABLE_TUNING = 35,
+SC_LAST_CHANGE_USER = 36;
 
 
 const char* Columns[] =
 {
-	"ID",
+	"StrID",
 	"External ID",
-	"Name",
+	"Caption",
 	"Channel",
 	"A/D",
 	"Data format",
-	"Data size",
-	"Normal state",
+	"Data\nsize",
+	"Normal\nstate",
 	"Acquire",
-	"Input-output type",
+	"Input-output\ntype",
 	"Device ID",
 	"Low ADC",
 	"High ADC",
@@ -81,21 +82,22 @@ const char* Columns[] =
 	"Drop limit",
 	"Excess limit",
 	"Unbalance limit",
-	"InputLow limit",
-	"InputHigh limit",
-	"Input unit",
-	"Input sensor",
-	"Output low Limit",
-	"Output high Limit",
-	"Output unit",
-	"Output range mode",
-	"Output sensor",
+	"Input\nLow limit",
+	"Input\nHigh limit",
+	"Input\nunit",
+	"Input\nsensor",
+	"Output\nlow Limit",
+	"Output\nhigh Limit",
+	"Output\nunit",
+	"Output\nrange mode",
+	"Output\nsensor",
 	"Calculated",
-	"Decimal places",
+	"Decimal\nplaces",
 	"Aperture",
 	"Filtering time",
 	"Max difference",
 	"Byte order",
+	"Enable\ntuning",
 	"Last change user",
 };
 
@@ -230,9 +232,10 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_ACQUIRE:
 		case SC_CALCULATED:
+		case SC_ENABLE_TUNING:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(QStringList() << tr("No") << tr("Yes"));
+			cb->addItems(QStringList() << tr("False") << tr("True"));
 			return cb;
 		}
 		case SC_IN_OUT_TYPE:
@@ -316,6 +319,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_OUTPUT_RANGE_MODE: if (cb) cb->setCurrentIndex(s.outputRangeMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(s.calculated()); break;
+		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(s.inOutType()); break;
 		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrderInt()); break;
 		case SC_LAST_CHANGE_USER:
@@ -376,7 +380,8 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputRangeMode(static_cast<E::OutputRangeMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
-	case SC_IN_OUT_TYPE: if (cb) s.setInOutType(static_cast<E::SignalInOutType>(cb->currentIndex())); break;
+		case SC_ENABLE_TUNING: if (cb) s.setEnableTuning(cb->currentIndex() == 0 ? false : true); break;
+		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(static_cast<E::SignalInOutType>(cb->currentIndex())); break;
 		case SC_BYTE_ORDER: if (cb) s.setByteOrder(E::ByteOrder(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
@@ -681,8 +686,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
 				case SC_OUTPUT_RANGE_MODE: return getOutputRangeModeStr(signal.outputRangeMode());
 
-				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
-				case SC_CALCULATED: return signal.calculated() ? tr("Yes") : tr("No");
+				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
+				case SC_CALCULATED: return signal.calculated() ? tr("True") : tr("False");
+				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 				case SC_NORMAL_STATE: return signal.normalState();
 				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 				case SC_APERTURE: return signal.aperture();
@@ -717,7 +723,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					}
 
 				case SC_DATA_SIZE: return signal.dataSize();
-				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
+				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
+				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
@@ -840,6 +847,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_OUTPUT_RANGE_MODE: signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
+			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
@@ -1316,6 +1324,11 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
 
+	for (int i = 0; i < COLUMNS_COUNT; i++)
+	{
+		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage::columnWidth[%1]").arg(Columns[i]).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
+	}
+
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
 	connect(m_signalsModel, &SignalsModel::signalActivated, m_signalsView, &QTableView::selectRow);
@@ -1355,6 +1368,12 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
+	QSettings settings;
+
+	for (int i = 0; i < COLUMNS_COUNT; i++)
+	{
+		settings.setValue(QString("SignalsTabPage::columnWidth[%1]").arg(Columns[i]).replace("\n", " "), m_signalsView->columnWidth(i));
+	}
 }
 
 QStringList SignalsTabPage::createSignal(DbController *dbController, const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)

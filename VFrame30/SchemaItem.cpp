@@ -143,6 +143,17 @@ namespace VFrame30
 		assert(false);	// Implement in child classes
 	}
 
+	void SchemaItem::debug(std::shared_ptr<SchemaItem> item)
+	{
+		QString str = QString("SchemeItem %1, [ptr: %2, counter: %3], uuid: %4")
+					  .arg(item->metaObject()->className())
+					  .arg(reinterpret_cast<qulonglong>(item.get()))
+					  .arg(item.use_count())
+					  .arg(item->guid().toString());
+
+		qDebug() << str;
+	}
+
 	// Drawing Functions
 	//
 

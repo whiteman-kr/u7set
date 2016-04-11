@@ -162,6 +162,8 @@ namespace VFrame30
 
 		virtual void SetWidthInDocPt(double widthInDocPt);
 		virtual void SetHeightInDocPt(double heightInDocPt);
+
+		static void debug(std::shared_ptr<SchemaItem> item);
 		
 		// Draw Functions
 		//

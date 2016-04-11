@@ -1834,6 +1834,44 @@ void EditSchemaWidget::createActions()
 	addAction(m_alignBottomAction);
 
 	//
+	// Items Order
+	//
+	m_orderAction = new QAction(tr("Order"), this);
+	m_orderAction->setEnabled(true);
+
+	// Items Order->Bring to Front
+	//
+	m_bringToFrontAction = new QAction(tr("Bring to Front"), this);
+	m_bringToFrontAction->setEnabled(false);
+	m_bringToFrontAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
+	connect(m_bringToFrontAction, &QAction::triggered, this, &EditSchemaWidget::bringToFront);
+	addAction(m_bringToFrontAction);
+
+	// Items Order->Bring Forward
+	//
+	m_bringForwardAction = new QAction(tr("Bring Forward"), this);
+	m_bringForwardAction->setEnabled(false);
+	m_bringForwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp));
+	connect(m_bringForwardAction, &QAction::triggered, this, &EditSchemaWidget::bringForward);
+	addAction(m_bringForwardAction);
+
+	// Items Order->Send to Back
+	//
+	m_sendToBackAction = new QAction(tr("Send to Back"), this);
+	m_sendToBackAction->setEnabled(false);
+	m_sendToBackAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_End));
+	connect(m_sendToBackAction, &QAction::triggered, this, &EditSchemaWidget::sendToBack);
+	addAction(m_sendToBackAction);
+
+	// Items Order->Send Backward
+	//
+	m_sendBackwardAction = new QAction(tr("Send Backward"), this);
+	m_sendBackwardAction->setEnabled(false);
+	m_sendBackwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown));
+	connect(m_sendBackwardAction, &QAction::triggered, this, &EditSchemaWidget::sendBackward);
+	addAction(m_sendBackwardAction);
+
+	//
 	// View
 	//
 	m_viewAction = new QAction(tr("View"), this);
@@ -1948,6 +1986,13 @@ void EditSchemaWidget::createActions()
 		m_sizeAndPosMenu->addAction(m_alignRightAction);
 		m_sizeAndPosMenu->addAction(m_alignTopAction);
 		m_sizeAndPosMenu->addAction(m_alignBottomAction);
+
+	m_orderMenu = new QMenu(this);
+	m_orderAction->setMenu(m_orderMenu);
+		m_orderMenu->addAction(m_bringToFrontAction);
+		m_orderMenu->addAction(m_bringForwardAction);
+		m_orderMenu->addAction(m_sendBackwardAction);
+		m_orderMenu->addAction(m_sendToBackAction);
 
 	m_viewMenu = new QMenu(this);
 	m_viewAction->setMenu(m_viewMenu);
@@ -4041,6 +4086,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	actions << m_fileAction;
 	actions << m_addAction;
 	actions << m_editAction;
+	actions << m_orderAction;
 	actions << m_sizeAndPosAction;
 
 	// Signal properties
@@ -4471,6 +4517,16 @@ void EditSchemaWidget::selectionChanged()
 	m_sameHeightAction->setEnabled(allowSize);
 	m_sameSizeAction->setEnabled(allowSize);
 
+	// Order
+	//
+	bool allowSetOrder = selectedItems().empty() == false;
+	m_bringToFrontAction->setEnabled(allowSetOrder);
+	m_bringForwardAction->setEnabled(allowSetOrder);
+	m_sendToBackAction->setEnabled(allowSetOrder);
+	m_sendBackwardAction->setEnabled(allowSetOrder);
+
+	// --
+	//
 	clipboardDataChanged();
 
 	return;
@@ -5192,6 +5248,30 @@ void EditSchemaWidget::alignBottom()
 	m_editEngine->runSetPoints(newPoints, selected);
 
 	return;
+}
+
+void EditSchemaWidget::bringToFront()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	m_editEngine->runSetOrder(EditEngine::SetOrder::BringToFront, selected, activeLayer());
+}
+
+void EditSchemaWidget::bringForward()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	m_editEngine->runSetOrder(EditEngine::SetOrder::BringForward, selected, activeLayer());
+}
+
+void EditSchemaWidget::sendToBack()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	m_editEngine->runSetOrder(EditEngine::SetOrder::SendToBack, selected, activeLayer());
+}
+
+void EditSchemaWidget::sendBackward()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
 }
 
 MouseState EditSchemaWidget::mouseState() const

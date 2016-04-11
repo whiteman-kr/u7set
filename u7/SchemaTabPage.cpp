@@ -791,6 +791,7 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemaWidget->m_orderAction);
 	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
 	// --
@@ -808,6 +809,7 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	// --
 	//
 	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPage::fileMenuTriggered);
+	connect(m_schemaWidget->m_orderAction, &QAction::triggered, this, &EditSchemaTabPage::itemsOrderTriggered);
 	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPage::sizeAndPosMenuTriggered);
 
 	return;
@@ -1097,6 +1099,30 @@ void EditSchemaTabPage::sizeAndPosMenuTriggered()
 	pt.rx() += w->width();
 
 	m_schemaWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EditSchemaTabPage::itemsOrderTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_orderAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.rx() += w->width();
+
+	m_schemaWidget->m_orderMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
