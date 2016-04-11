@@ -283,7 +283,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		//
 		case SC_STR_ID: if (le) le->setText(s.strID()); break;
 		case SC_EXT_STR_ID: if (le) le->setText(s.extStrID()); break;
-		case SC_NAME: if (le) le->setText(s.name()); break;
+		case SC_NAME: if (le) le->setText(s.caption()); break;
 		case SC_DEVICE_STR_ID: if (le) le->setText(s.deviceStrID()); break;
 
 		case SC_DATA_SIZE: if (le) le->setText(QString::number(s.dataSize())); break;
@@ -343,7 +343,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		//
 		case SC_STR_ID: if (le) s.setStrID(le->text()); break;
 		case SC_EXT_STR_ID: if (le) s.setExtStrID(le->text()); break;
-		case SC_NAME: if (le) s.setName(le->text()); break;
+		case SC_NAME: if (le) s.setCaption(le->text()); break;
 		case SC_DEVICE_STR_ID: if (le) s.setDeviceStrID(le->text()); break;
 
 		case SC_DATA_SIZE: if (le) s.setDataSize(le->text().toInt()); break;
@@ -645,7 +645,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
 				case SC_STR_ID: return signal.strID();
 				case SC_EXT_STR_ID: return signal.extStrID();
-				case SC_NAME: return signal.name();
+				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('A');
 				case SC_DATA_FORMAT:
@@ -703,7 +703,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
 				case SC_STR_ID: return signal.strID();
 				case SC_EXT_STR_ID: return signal.extStrID();
-				case SC_NAME: return signal.name();
+				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('D');
 				case SC_DATA_FORMAT:
@@ -817,7 +817,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 		{
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
-			case SC_NAME: signal.setName(value.toString()); break;
+			case SC_NAME: signal.setCaption(value.toString()); break;
 			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<E::DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
@@ -1104,7 +1104,7 @@ void SignalsModel::addSignal()
 			{
 				signalVector << signal;
 				QString strID = signal.strID();
-				QString name = signal.name();
+				QString name = signal.caption();
 
 				if (!deviceIdEdit->text().isEmpty())
 				{
@@ -1123,7 +1123,7 @@ void SignalsModel::addSignal()
 				}
 
 				signalVector[i].setStrID(strID.toUpper());
-				signalVector[i].setName(name);
+				signalVector[i].setCaption(name);
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))

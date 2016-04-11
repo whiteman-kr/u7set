@@ -1,4 +1,4 @@
-#include "TuningUdpSocket.h"
+#include "TuningSocket.h"
 
 namespace Tuning
 {

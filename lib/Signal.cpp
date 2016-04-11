@@ -75,7 +75,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 		deviceSignalStrID = deviceSignalStrID.mid(pos + 1);
 	}
 
-	m_name = QString("Signal #%1").arg(deviceSignalStrID);
+	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
 	m_deviceStrID = deviceSignal.strId();
 
 	if (m_type == E::SignalType::Analog)
@@ -110,7 +110,7 @@ Signal& Signal::operator =(const Signal& signal)
 
 	m_strID = signal.strID();
 	m_extStrID = signal.extStrID();
-	m_name = signal.name();
+	m_caption = signal.caption();
 	m_dataFormat = signal.dataFormat();
 	m_dataSize = signal.dataSize();
 	m_lowADC = signal.lowADC();
@@ -165,7 +165,7 @@ void Signal::InitProperties()
 	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
 	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
-	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::name, Signal::setName);
+	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator("^.+$");
 	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, DataFormat, true, Signal::dataFormat, Signal::setDataFormat);
 	ADD_PROPERTY_GETTER_SETTER(int, DataSize, true, Signal::dataSize, Signal::setDataSize);
@@ -433,7 +433,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "Type", &Signal::setType);
 	serializeField(attr, "StrID", &Signal::setStrID);
 	serializeField(attr, "ExtStrID", &Signal::setExtStrID);
-	serializeField(attr, "Name", &Signal::setName);
+	serializeField(attr, "Name", &Signal::setCaption);
 	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setDataFormat);
 	serializeField(attr, "DataSize", &Signal::setDataSize);
 	serializeField(attr, "LowADC", &Signal::setLowADC);

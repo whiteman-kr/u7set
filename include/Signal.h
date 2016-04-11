@@ -27,26 +27,26 @@ const int IN_OUT_TYPE_COUNT = sizeof(InOutTypeStr) / sizeof(InOutTypeStr[0]);
 
 const char* const SensorTypeStr[] =
 {
-    "Not used",
+	"Not used",
 
-    "TSP-50P-1.391",
-    "TSP-100P-1.391",
-    "TSP-50P-1.385",
-    "TSP-100P-1.385",
-    "TSM-50M-1.428",
+	"TSP-50P-1.391",
+	"TSP-100P-1.391",
+	"TSP-50P-1.385",
+	"TSP-100P-1.385",
+	"TSM-50M-1.428",
 	"TSM-100M-1.428",
-    "TSM-50M-1.426",
-    "TSM-100M-1.426",
-    "TSP-21",
-    "TSM-23",
-    "Rheochord",
+	"TSM-50M-1.426",
+	"TSM-100M-1.426",
+	"TSP-21",
+	"TSM-23",
+	"Rheochord",
 
-    "ТХА(K)",
-    "TXK(L) 84",
-    "TXK(L) 94",
-    "TNN(N)",
+	"ТХА(K)",
+	"TXK(L) 84",
+	"TXK(L) 94",
+	"TNN(N)",
 
-    "BPS",
+	"BPS",
 };
 
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
@@ -119,7 +119,7 @@ private:
 
 	QString m_strID;
 	QString m_extStrID;
-	QString m_name;
+	QString m_caption;
 	E::DataFormat m_dataFormat = E::DataFormat::Float;
 	int m_dataSize = 32;
 	int m_lowADC = 0;
@@ -150,6 +150,7 @@ private:
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+	bool m_enableTuning = false;
 
 	Address16 m_iobufferAddr;			// only for modules input/output signals
 										// signal address in i/o modules buffers
@@ -245,96 +246,96 @@ public:
 
 	void serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList& unitInfo);
 
-    Q_INVOKABLE QString strID() const { return m_strID; }
+	Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }
 
-    Q_INVOKABLE QString extStrID() const { return m_extStrID; }
+	Q_INVOKABLE QString extStrID() const { return m_extStrID; }
 	void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
 
-    Q_INVOKABLE QString name() const { return m_name; }
-	void setName(const QString& name) { m_name = name; }
+	Q_INVOKABLE QString caption() const { return m_caption; }
+	void setCaption(const QString& caption) { m_caption = caption; }
 
 	Q_INVOKABLE E::DataFormat dataFormat() const { return m_dataFormat; }
 	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_dataFormat); }
 	void setDataFormat(E::DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
-    Q_INVOKABLE int dataSize() const { return m_dataSize; }
+	Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
 
-    Q_INVOKABLE int lowADC() const { return m_lowADC; }
+	Q_INVOKABLE int lowADC() const { return m_lowADC; }
 	void setLowADC(int lowADC) { m_lowADC = lowADC; }
 
-    Q_INVOKABLE int highADC() const { return m_highADC; }
+	Q_INVOKABLE int highADC() const { return m_highADC; }
 	void setHighADC(int highADC) { m_highADC = highADC;}
 
-    Q_INVOKABLE double lowLimit() const { return m_lowLimit; }
+	Q_INVOKABLE double lowLimit() const { return m_lowLimit; }
 	void setLowLimit(double lowLimit) { m_lowLimit = lowLimit; }
 
-    Q_INVOKABLE double highLimit() const { return m_highLimit; }
+	Q_INVOKABLE double highLimit() const { return m_highLimit; }
 	void setHighLimit(double highLimit) { m_highLimit = highLimit; }
 
-    Q_INVOKABLE int unitID() const { return m_unitID; }
+	Q_INVOKABLE int unitID() const { return m_unitID; }
 	void setUnitID(int unitID) { m_unitID = unitID; }
 
-    Q_INVOKABLE double adjustment() const { return m_adjustment; }
+	Q_INVOKABLE double adjustment() const { return m_adjustment; }
 	void setAdjustment(double adjustment) { m_adjustment = adjustment; }
 
-    Q_INVOKABLE double dropLimit() const { return m_dropLimit; }
+	Q_INVOKABLE double dropLimit() const { return m_dropLimit; }
 	void setDropLimit(double dropLimit) { m_dropLimit = dropLimit; }
 
-    Q_INVOKABLE double excessLimit() const { return m_excessLimit; }
+	Q_INVOKABLE double excessLimit() const { return m_excessLimit; }
 	void setExcessLimit(double excessLimit) { m_excessLimit = excessLimit; }
 
-    Q_INVOKABLE double unbalanceLimit() const { return m_unbalanceLimit; }
+	Q_INVOKABLE double unbalanceLimit() const { return m_unbalanceLimit; }
 	void setUnbalanceLimit(double unbalanceLimit) { m_unbalanceLimit = unbalanceLimit; }
 
-    Q_INVOKABLE double inputLowLimit() const { return m_inputLowLimit; }
+	Q_INVOKABLE double inputLowLimit() const { return m_inputLowLimit; }
 	void setInputLowLimit(double inputLowLimit) { m_inputLowLimit = inputLowLimit; }
 
-    Q_INVOKABLE double inputHighLimit() const { return m_inputHighLimit; }
+	Q_INVOKABLE double inputHighLimit() const { return m_inputHighLimit; }
 	void setInputHighLimit(double inputHighLimit) { m_inputHighLimit = inputHighLimit; }
 
-    Q_INVOKABLE int inputUnitID() const { return m_inputUnitID; }
+	Q_INVOKABLE int inputUnitID() const { return m_inputUnitID; }
 	void setInputUnitID(int inputUnitID) { m_inputUnitID = inputUnitID; }
 
-    Q_INVOKABLE int inputSensorID() const { return m_inputSensorID; }
+	Q_INVOKABLE int inputSensorID() const { return m_inputSensorID; }
 	void setInputSensorID(int inputSensorID) { m_inputSensorID = inputSensorID; }
 
-    Q_INVOKABLE double outputLowLimit() const { return m_outputLowLimit; }
+	Q_INVOKABLE double outputLowLimit() const { return m_outputLowLimit; }
 	void setOutputLowLimit(double outputLowLimit) { m_outputLowLimit = outputLowLimit; }
 
-    Q_INVOKABLE double outputHighLimit() const { return m_outputHighLimit; }
+	Q_INVOKABLE double outputHighLimit() const { return m_outputHighLimit; }
 	void setOutputHighLimit(double outputHighLimit) { m_outputHighLimit = outputHighLimit; }
 
-    Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
+	Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
 	E::OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
 	Q_INVOKABLE int jsOutputRangeMode() const { return static_cast<int>(outputRangeMode());}
 	void setOutputRangeMode(E::OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
 
-    Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
+	Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
 	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }
 
-    Q_INVOKABLE bool acquire() const { return m_acquire; }
+	Q_INVOKABLE bool acquire() const { return m_acquire; }
 	void setAcquire(bool acquire) { m_acquire = acquire; }
 
-    Q_INVOKABLE bool calculated() const { return m_calculated; }
+	Q_INVOKABLE bool calculated() const { return m_calculated; }
 	void setCalculated(bool calculated) { m_calculated = calculated; }
 
-    Q_INVOKABLE int normalState() const { return m_normalState; }
+	Q_INVOKABLE int normalState() const { return m_normalState; }
 	void setNormalState	(int normalState) { m_normalState = normalState; }
 
-    Q_INVOKABLE int decimalPlaces() const { return m_decimalPlaces; }
+	Q_INVOKABLE int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
-    Q_INVOKABLE double aperture() const { return m_aperture; }
+	Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
-    Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
+	Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
 	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
 
 	Q_INVOKABLE double filteringTime() const { return m_filteringTime; }
@@ -346,6 +347,9 @@ public:
 	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_byteOrder; }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }
 	void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
+
+	Q_INVOKABLE bool enableTuning() const { return m_enableTuning; }
+	void setEnableTuning(bool enableTuning) { m_acquire = enableTuning; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 

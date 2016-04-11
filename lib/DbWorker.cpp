@@ -55,6 +55,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 39", ":/DatabaseUpgrade/Upgrade0039.sql"},
 	{"Upgrade to version 40", ":/DatabaseUpgrade/Upgrade0040.sql"},
 	{"Upgrade to version 41", ":/DatabaseUpgrade/Upgrade0041.sql"},
+	{"Upgrade to version 42", ":/DatabaseUpgrade/Upgrade0042.sql"},
 };
 
 
@@ -3353,7 +3354,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
 	s.setStrID(q.value(12).toString());
 	s.setExtStrID(q.value(13).toString());
-	s.setName(q.value(14).toString());
+	s.setCaption(q.value(14).toString());
 	s.setDataFormat(static_cast<E::DataFormat>(q.value(15).toInt()));
 	s.setDataSize(q.value(16).toInt());
 	s.setLowADC(q.value(17).toInt());
@@ -3384,6 +3385,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setFilteringTime(q.value(42).toDouble());										//
 	s.setMaxDifference(q.value(43).toDouble());										//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
+	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
 }
 
 
@@ -3394,7 +3396,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42,%43,%44,%45)'")
+			"\"%41\",%42,%43,%44,%45,%46)'")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -3409,7 +3411,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.instanceAction())
 	.arg(toSqlStr(s.strID()))
 	.arg(toSqlStr(s.extStrID()))
-	.arg(toSqlStr(s.name()))
+	.arg(toSqlStr(s.caption()))
 	.arg(TO_INT(s.dataFormat()))
 	.arg(s.dataSize())
 	.arg(s.lowADC())
@@ -3436,10 +3438,11 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.aperture())
 	.arg(s.inOutType())
 	.arg(toSqlStr(s.deviceStrID()))
-	.arg(s.outputRangeMode())			// since version 35 of database
-	.arg(s.filteringTime())				//
-	.arg(s.maxDifference())				//
-	.arg(TO_INT(s.byteOrder()));				//
+	.arg(s.outputRangeMode())					// since version 35 of database
+	.arg(s.filteringTime())						//
+	.arg(s.maxDifference())						//
+	.arg(TO_INT(s.byteOrder()))					//
+	.arg(s.enableTuning() ? "TRUE" : "FALSE");	// since version 42 of database
 
 	qDebug() << str;
 

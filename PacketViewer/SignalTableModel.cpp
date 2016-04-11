@@ -50,7 +50,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 		switch (index.column())
 		{
 			case C_STR_ID: return signal.strID();
-			case C_DESCRIPTION: return signal.name();
+			case C_DESCRIPTION: return signal.caption();
 			case C_RAW_DATA:
 			{
 				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
