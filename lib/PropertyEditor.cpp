@@ -1882,7 +1882,8 @@ namespace ExtWidgets
 			}
 			else
 			{
-				values.insert(property, QVariant());
+				values.insert(property, QVariant(value));		//  IS BUG HERE!!!!!!????????
+				//values.insert(property, QVariant());			//  IS BUG HERE!!!!!!????????
 			}
         }
 	}
