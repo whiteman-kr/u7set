@@ -384,8 +384,6 @@ public:
 	void reserve(int n);
 
 	void resetAddresses();
-
-	QStringList CreateSignal(const QStringList& lmIdList, int shemaCounter, const QString& shemaId, const QString& shemaName);
 };
 
 

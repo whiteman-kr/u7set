@@ -1936,15 +1936,25 @@ class LogicSchema : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
       mutable_hardware_strids();
 
+  // optional int32 counter = 2 [default = 0];
+  inline bool has_counter() const;
+  inline void clear_counter();
+  static const int kCounterFieldNumber = 2;
+  inline ::google::protobuf::int32 counter() const;
+  inline void set_counter(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.LogicSchema)
  private:
+  inline void set_has_counter();
+  inline void clear_has_counter();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::wstring > hardware_strids_;
+  ::google::protobuf::int32 counter_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -7638,6 +7648,28 @@ LogicSchema::hardware_strids() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
 LogicSchema::mutable_hardware_strids() {
   return &hardware_strids_;
+}
+
+// optional int32 counter = 2 [default = 0];
+inline bool LogicSchema::has_counter() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void LogicSchema::set_has_counter() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void LogicSchema::clear_has_counter() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void LogicSchema::clear_counter() {
+  counter_ = 0;
+  clear_has_counter();
+}
+inline ::google::protobuf::int32 LogicSchema::counter() const {
+  return counter_;
+}
+inline void LogicSchema::set_counter(::google::protobuf::int32 value) {
+  set_has_counter();
+  counter_ = value;
 }
 
 // -------------------------------------------------------------------

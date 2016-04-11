@@ -17,6 +17,7 @@
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
+#include "SignalsTabPage.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -4127,9 +4128,9 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
 
 				connect(addSignal, &QAction::triggered,
-					[this](bool)
+					[this, selected](bool)
 					{
-						this->addNewAppSignal();
+						this->addNewAppSignal(selected);
 					});
 
 				actions << addSignal;
@@ -4190,15 +4191,38 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 	return;
 }
 
-void EditSchemaWidget::addNewAppSignal()
+void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
 {
-	if (isLogicSchema() == false)
+	if (isLogicSchema() == false ||
+		schemaItem == false ||
+		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
 	{
 		assert(isLogicSchema() == false);
+		assert(schemaItem);
+		assert(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
 		return;
 	}
 
-	qDebug() << "Add new application signal to schema " << schema()->strID() << ", module " << logicSchema()->hardwareStrIds();
+	QStringList signalsIds = SignalsTabPage::createSignal(db(),
+														  logicSchema()->hardwareStrIdList(),
+														  logicSchema()->nextCounterValue(),
+														  schema()->strID(),
+														  schema()->caption());
+
+	if (signalsIds.isEmpty() == false)
+	{
+		// Set value
+		//
+		QString oneStringIds;
+		for (QString s : signalsIds)
+		{
+			oneStringIds += s + QChar::LineFeed;
+		}
+
+		m_editEngine->runSetProperty("StrIDs", QVariant(oneStringIds), schemaItem);
+	}
+
+	return;
 }
 
 void EditSchemaWidget::escapeKey()

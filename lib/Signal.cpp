@@ -171,6 +171,14 @@ void Signal::InitProperties()
 	ADD_PROPERTY_GETTER_SETTER(int, DataSize, true, Signal::dataSize, Signal::setDataSize);
 	if (isAnalog())
 	{
+		static std::shared_ptr<OrderedHash<int, QString>> sensorList = std::make_shared<OrderedHash<int, QString>>();
+		if (sensorList->isEmpty())
+		{
+			for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
+			{
+				sensorList->append(i, SensorTypeStr[i]);
+			}
+		}
 		ADD_PROPERTY_GETTER_SETTER(int, LowADC, true, Signal::lowADC, Signal::setLowADC);
 		ADD_PROPERTY_GETTER_SETTER(int, HighADC, true, Signal::highADC, Signal::setHighADC);
 		ADD_PROPERTY_GETTER_SETTER(double, LowLimit, true, Signal::lowLimit, Signal::setLowLimit);
@@ -186,8 +194,8 @@ void Signal::InitProperties()
 		inputHighLimitPropetry->setCategory("Input sensor");
 		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(InputUnit, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);/*ADD_PROPERTY_GETTER_SETTER(int, InputUnitID, true, Signal::inputUnitID, Signal::setInputUnitID);*/
 		inputUnitIDPropetry->setCategory("Input sensor");
-		auto inputSensorIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, InputSensorID, true, Signal::inputSensorID, Signal::setInputSensorID);
-		inputSensorIDPropetry->setCategory("Input sensor");
+		auto inputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(InputSensor, true, sensorList, Signal::inputSensorID, Signal::setInputSensorID);
+		inputSensorPropetry->setCategory("Input sensor");
 		auto outputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, OutputLowLimit, true, Signal::outputLowLimit, Signal::setOutputLowLimit);
 		outputLowLimitPropetry->setCategory("Output sensor");
 		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, OutputHighLimit, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
@@ -196,8 +204,8 @@ void Signal::InitProperties()
 		outputUnitIDPropetry->setCategory("Output sensor");
 		auto outputRangeModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputRangeMode, OutputRangeMode, true, Signal::outputRangeMode, Signal::setOutputRangeMode);
 		outputRangeModePropetry->setCategory("Output sensor");
-		auto outputSensorIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, OutputSensorID, true, Signal::outputSensorID, Signal::setOutputSensorID);
-		outputSensorIDPropetry->setCategory("Output sensor");
+		auto outputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(OutputSensor, true, sensorList, Signal::outputSensorID, Signal::setOutputSensorID);
+		outputSensorPropetry->setCategory("Output sensor");
 	}
 	ADD_PROPERTY_GETTER_SETTER(bool, Acquire, true, Signal::acquire, Signal::setAcquire);
 	if (isAnalog())
@@ -587,13 +595,6 @@ void SignalSet::resetAddresses()
 	{
 		(*this)[i].resetAddresses();
 	}
-}
-
-QStringList SignalSet::CreateSignal(const QStringList &lmIdList, int shemaCounter, const QString &shemaId, const QString &shemaName)
-{
-	// Do something
-	//
-	return QStringList();
 }
 
 

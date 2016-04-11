@@ -383,7 +383,7 @@ protected slots:
 	void exportToPdf();
 
 	void signalsProperties(QStringList strIds);
-	void addNewAppSignal();
+	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
 
 	void escapeKey();
 	void f2Key();

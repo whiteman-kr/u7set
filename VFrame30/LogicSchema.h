@@ -36,10 +36,13 @@ namespace VFrame30
 		bool isMultichannelSchema() const;
 		int channelCount() const;
 
+		int nextCounterValue();
+
 		// Data
 		//
 	private:
 		QStringList m_hardwareStrIds;
+		int m_counter = 0;					// Count is used to generate new uniques StrIDs for App Siagnals
 	};
 
 }

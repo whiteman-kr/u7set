@@ -1036,10 +1036,12 @@ void SignalsModel::addSignal()
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
 		signal.setDataFormat(E::DataFormat::Float);
+		signal.setType(E::SignalType::Analog);
 	}
 	else
 	{
 		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(settings.value("LastEditedSignal: dataFormat").toInt())));
+		signal.setType(E::SignalType::Discrete);
 	}
 	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
 	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
@@ -1353,6 +1355,11 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
+}
+
+QStringList SignalsTabPage::createSignal(DbController *dbController, const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)
+{
+	return QStringList();
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
@@ -1901,7 +1908,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
-	setWindowTitle(tr("Undo signals to precheckout state"));
+	setWindowTitle(tr("Undo signal changes"));
 
 	QSettings settings;
 	resize(settings.value("Undo signals dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
