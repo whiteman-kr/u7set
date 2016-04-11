@@ -108,7 +108,7 @@ public:
 		int action = 0;
 		QString strId;
 		QString extStrId;
-		QString name;
+		QString caption;
 		int dataFormatId = 0;
 		int dataSize = 0;
 		int lowAdc = 0;
@@ -139,5 +139,6 @@ public:
 		int filteringTime = 0;
 		int maxDifference = 0;
 		int byteOrder = 0;
+		QString enableTuning;
 	};
 };
