@@ -1381,18 +1381,21 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 {
 	QVector<Signal> signalVector;
 	QStringList signalTypeList;
+
 	auto values = E::enumValues<E::SignalType>();
 	for (auto pair : values)
 	{
 		signalTypeList << pair.second;
 	}
+
 	bool ok = true;
-	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList, 0, false, &ok);
+	E::SignalType type = E::SignalType::Discrete;
+	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList, TO_INT(type), false, &ok);
 	if (!ok)
 	{
 		return QStringList();
 	}
-	E::SignalType type = E::SignalType::Analog;
+
 	for (auto pair : values)
 	{
 		if (typeString == pair.second)
