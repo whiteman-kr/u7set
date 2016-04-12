@@ -1698,6 +1698,17 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 
 void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds)
 {
+	if (sender() != nullptr && typeid(*sender()) == typeid(GlobalMessanger))
+	{
+		for (int i = 0; i < m_signalTypeFilterCombo->count(); i++)
+		{
+			if (m_signalTypeFilterCombo->itemData(i) == ST_ANY)
+			{
+				m_signalTypeFilterCombo->setCurrentIndex(i);
+			}
+		}
+		m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
+	}
 	m_signalsProxyModel->setSignalIdFilter(deviceStrIds);
 
 	QString newFilter = deviceStrIds.join(" || ");
