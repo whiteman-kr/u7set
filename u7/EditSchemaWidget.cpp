@@ -4207,7 +4207,8 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 														  logicSchema()->hardwareStrIdList(),
 														  logicSchema()->nextCounterValue(),
 														  schema()->strID(),
-														  schema()->caption());
+														  schema()->caption(),
+														  this);
 
 	if (signalsIds.isEmpty() == false)
 	{

@@ -1318,6 +1318,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->horizontalHeader()->setDefaultSectionSize(150);
+	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
+#warning Add column visibility actions
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
@@ -1376,9 +1378,84 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-QStringList SignalsTabPage::createSignal(DbController *dbController, const QStringList &lmIdList, int schemaCounter, const QString &schemaId, const QString &schemaCaption)
+QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
 {
-	return QStringList();
+	QVector<Signal> signalVector;
+	QStringList signalTypeList;
+	auto values = E::enumValues<E::SignalType>();
+	for (auto pair : values)
+	{
+		signalTypeList << pair.second;
+	}
+	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList);
+	E::SignalType type = E::SignalType::Analog;
+	for (auto pair : values)
+	{
+		if (typeString == pair.second)
+		{
+			type = static_cast<E::SignalType>(pair.first);
+			break;
+		}
+	}
+
+	QStringList result;
+	int channelNo = 0;
+	for (QString lmId : lmIdList)
+	{
+		QString newSignalExtStrId = QString("%1_SCHEMA_%2_SIGNAL_%3").arg(lmId).arg(schemaId).arg(schemaCounter);
+		newSignalExtStrId.replace("#", "");
+		QString newSignalStrId = newSignalExtStrId;
+		if (lmIdList.count() > 1)
+		{
+			newSignalStrId += QString("_%1").arg(QChar('A' + channelNo));
+		}
+		QString newSignalCaption = QString("LM ID %1 at schema \"%2\"").arg(lmId).arg(schemaCaption);
+		if (newSignalExtStrId[0] == QChar('#'))
+		{
+			newSignalExtStrId = newSignalExtStrId.mid(1);
+		}
+		if (newSignalStrId[0] != QChar('#'))
+		{
+			newSignalStrId = "#" + newSignalStrId;
+		}
+
+		Signal newSignal;
+
+		newSignal.setType(type);
+		if (type == E::SignalType::Analog)
+		{
+			newSignal.setDataFormat(E::DataFormat::Float);
+		}
+		else
+		{
+			newSignal.setDataFormat(E::DataFormat::UnsignedInt);
+		}
+		newSignal.setStrID(newSignalStrId);
+		newSignal.setExtStrID(newSignalExtStrId);
+		newSignal.setCaption(newSignalCaption);
+		signalVector.push_back(newSignal);
+
+		result << newSignalStrId;
+	}
+
+	if (signalVector.isEmpty())
+	{
+		return QStringList();
+	}
+
+	QVector<Signal*> signalPtrVector;
+	for (Signal& signal : signalVector)
+	{
+		signalPtrVector.push_back(&signal);
+	}
+	SignalPropertiesDialog dlg(signalPtrVector, *Signal::m_unitList.get(), false, nullptr, parent);
+
+	if (dlg.exec() != QDialog::Accepted || !dbController->addSignal(type, &signalVector, parent))
+	{
+		return QStringList();
+	}
+
+	return result;
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)

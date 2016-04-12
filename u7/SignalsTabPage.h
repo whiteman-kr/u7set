@@ -224,7 +224,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption);
+	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
