@@ -222,6 +222,7 @@ protected slots:
 
 	void fileMenuTriggered();
 	void sizeAndPosMenuTriggered();
+	void itemsOrderTriggered();
 
 public:
 	bool saveWorkcopy();

@@ -11,82 +11,91 @@
 
 namespace Builder
 {
+	class ApplicationLogicCompiler : public QObject
+	{
+		Q_OBJECT
 
-    struct IntPropertyNameVar
-    {
-        const char* name = nullptr;
-        int* var = nullptr;
+	private:
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		Hardware::EquipmentSet* m_equipmentSet = nullptr;
+		Hardware::DeviceObject* m_deviceRoot = nullptr;
+		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
+		SignalSet* m_signals = nullptr;
+		Afb::AfbElementCollection* m_afbl = nullptr;
+		AppLogicData* m_appLogicData = nullptr;
+		BuildResultWriter* m_resultWriter = nullptr;
+		Hardware::ConnectionStorage* m_connections = nullptr;
 
-        IntPropertyNameVar(const char* n, int* v) : name(n), var(v) {}
-    };
+		static OutputLog* m_log;
+
+		QVector<ModuleLogicCompiler*> m_moduleCompilers;
+
+		QVector<Hardware::DeviceModule*> m_lm;
+
+		QString msg;
+
+	private:
+		void findLMs();
+		void findLM(Hardware::DeviceObject* startFromDevice);
+
+		bool checkOptoConnections();
+		bool compileModulesLogicsPass1();
+		bool compileModulesLogicsPass2();
+		bool disposeOptoModulesTxRxBuffers();
+
+		bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+
+		void clear();
+
+	public:
+		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+								 Hardware::EquipmentSet* equipmentSet,
+								 Hardware::OptoModuleStorage* optoModuleStorage,
+								 Hardware::ConnectionStorage* connections,
+								 SignalSet* signalSet,
+								 Afb::AfbElementCollection* afblSet,
+								 AppLogicData* appLogicData,
+								 BuildResultWriter* buildResultWriter,
+								 OutputLog* log);
+
+		~ApplicationLogicCompiler();
+
+		bool run();
+
+		friend class ModuleLogicCompiler;
+	};
 
 
-    struct StrPropertyNameVar
-    {
-        const char* name = nullptr;
-        QString* var = nullptr;
+	struct IntPropertyNameVar
+	{
+		const char* name = nullptr;
+		int* var = nullptr;
 
-        StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
-    };
+		IntPropertyNameVar(const char* n, int* v) : name(n), var(v) {}
+	};
 
 
-    class ApplicationLogicCompiler : public QObject
-    {
-        Q_OBJECT
+	struct StrPropertyNameVar
+	{
+		const char* name = nullptr;
+		QString* var = nullptr;
 
-    private:
-        Hardware::SubsystemStorage* m_subsystems = nullptr;
-        Hardware::EquipmentSet* m_equipmentSet = nullptr;
-        Hardware::DeviceObject* m_deviceRoot = nullptr;
-        Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
-        SignalSet* m_signals = nullptr;
-        Afb::AfbElementCollection* m_afbl = nullptr;
-        AppLogicData* m_appLogicData = nullptr;
-        BuildResultWriter* m_resultWriter = nullptr;
-        Hardware::ConnectionStorage* m_connections = nullptr;
+		StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
+	};
 
-        static OutputLog* m_log;
 
-        QVector<ModuleLogicCompiler*> m_moduleCompilers;
+	class DeviceHelper : public QObject
+	{
+		Q_OBJECT
 
-        QVector<Hardware::DeviceModule*> m_lm;
+	private:
+		static void logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, OutputLog* log);
 
-        QString msg;
-
-    private:
-        void findLMs();
-        void findLM(Hardware::DeviceObject* startFromDevice);
-
-        bool checkOptoConnections();
-        bool compileModulesLogicsPass1();
-        bool compileModulesLogicsPass2();
-        bool disposeOptoModulesTxRxBuffers();
-
-        bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
-
-        void clear();
-
-    public:
-        ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
-                                 Hardware::EquipmentSet* equipmentSet,
-                                 Hardware::OptoModuleStorage* optoModuleStorage,
-                                 Hardware::ConnectionStorage* connections,
-                                 SignalSet* signalSet,
-                                 Afb::AfbElementCollection* afblSet,
-                                 AppLogicData* appLogicData,
-                                 BuildResultWriter* buildResultWriter,
-                                 OutputLog* log);
-
-        ~ApplicationLogicCompiler();
-
-        bool run();
-
-        static bool getDeviceIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value);
-        static bool getDeviceStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value);
-
-        friend class ModuleLogicCompiler;
-    };
-
+	public:
+		static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, OutputLog* log);
+		static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, OutputLog* log);
+		static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, OutputLog* log);
+	};
 
 }
 

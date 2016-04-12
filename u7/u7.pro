@@ -156,7 +156,8 @@ SOURCES +=\
     SchemaLayersDialog.cpp \
     SchemaTabPage.cpp \
     CreateSchemaDialog.cpp \
-    EditEngine/EditEngineSetSchemaProperty.cpp
+    EditEngine/EditEngineSetSchemaProperty.cpp \
+    EditEngine/EditEngineSetOrder.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -242,7 +243,8 @@ HEADERS  += \
     SchemaTabPage.h \
     SchemaLayersDialog.h \
     CreateSchemaDialog.h \
-    EditEngine/EditEngineSetSchemaProperty.h
+    EditEngine/EditEngineSetSchemaProperty.h \
+    EditEngine/EditEngineSetOrder.h
 
 FORMS    += \
     ChangesetDialog.ui \

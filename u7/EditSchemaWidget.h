@@ -421,6 +421,11 @@ protected slots:
 	void alignTop();
 	void alignBottom();
 
+	void bringToFront();
+	void bringForward();
+	void sendToBack();
+	void sendBackward();
+
 	// Properties
 	//
 public:
@@ -591,6 +596,14 @@ private:
 		QAction* m_alignRightAction = nullptr;
 		QAction* m_alignBottomAction = nullptr;
 
+	// Order
+	//
+	QMenu* m_orderMenu = nullptr;
+	QAction* m_orderAction = nullptr;
+		QAction* m_bringToFrontAction = nullptr;
+		QAction* m_bringForwardAction = nullptr;
+		QAction* m_sendToBackAction = nullptr;
+		QAction* m_sendBackwardAction = nullptr;
 
 	// View
 	//
