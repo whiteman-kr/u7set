@@ -305,6 +305,17 @@ namespace VFrame30
 	{
 		QRectF itemRect(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 		QRectF detRect(x, y, width, height);
+
+		if (detRect.isEmpty() == true)
+		{
+			bool result = false;
+
+			result |= CUtils::IsLineIntersectRect(x, y, x, y + height, itemRect);
+			result |= CUtils::IsLineIntersectRect(x, y, x + width, y, itemRect);
+
+			return result;
+		}
+
 		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 

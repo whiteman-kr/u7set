@@ -114,3 +114,72 @@ void DataSource::setStatistics(const DataSourceStatistics& dss)
 }
 
 
+QString DataSource::dataTypeToString(DataType dataType)
+{
+	switch(dataType)
+	{
+	case DataType::App:
+		return "App";
+
+	case DataType::Diag:
+		return "Diag";
+
+	default:
+		assert(false);
+	}
+
+	return "";
+}
+
+
+DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
+{
+	if (dataTypeStr == "App")
+	{
+		return DataType::App;
+	}
+
+	if (dataTypeStr == "Diag")
+	{
+		return DataType::Diag;
+	}
+
+	assert(false);
+	return DataType::App;
+}
+
+
+void DataSource::serializeToXml(QXmlStreamWriter& xml)
+{
+	xml.writeStartElement("DataSource");
+
+	xml.writeAttribute("EthernetChannel", QString::number(m_ethernetChannel));
+	xml.writeAttribute("Type", dataTypeToString(m_dataType));
+	xml.writeAttribute("LmStrID", m_lmStrID);
+	xml.writeAttribute("LmCaption", m_lmCaption);
+	xml.writeAttribute("LmAdapterStrID", m_lmAdapterStrID);
+	xml.writeAttribute("LmDataEnable", m_lmDataEnable ? "true" : "false");
+	xml.writeAttribute("LmDataIP", m_lmAddressPort.addressStr());
+	xml.writeAttribute("LmDataPort", QString::number(m_lmAddressPort.port()));
+	xml.writeAttribute("LmDataID", QString::number(m_lmDataID));
+
+	xml.writeEndElement();	// </DataSource>
+}
+
+
+void DataSource::serializeFromXml(QXmlStreamWriter& xml)
+{
+	/*xml.writeStartElement("DataSource");
+
+	xml.writeAttribute("EthernetChannel", QString::number(m_ethernetChannel));
+	xml.writeAttribute("Type", dataTypeToString(m_dataType));
+	xml.writeAttribute("LmStrID", m_lmStrID);
+	xml.writeAttribute("LmCaption", m_lmCaption());
+	xml.writeAttribute("LmAdapterStrID", m_lmAdapterStrID);
+	xml.writeAttribute("LmDataEnable", m_lmDataEnable ? "true" : "false");
+	xml.writeAttribute("LmDataIP", m_lmAddressPort.addressStr());
+	xml.writeAttribute("LmDataPort", QString::number(m_lmAddressPort.port()));
+
+	xml.writeEndElement();	// </DataSource>*/
+}
+

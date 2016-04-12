@@ -367,6 +367,8 @@ namespace Builder
 		xml.writeStartDocument();
 		xml.writeStartElement("DataSources");
 
+		DataSource ds;
+
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
 			if (lm == nullptr)
@@ -397,34 +399,30 @@ namespace Builder
 
 				if (lmNetProperties.appDataServiceStrID == m_software->strId())
 				{
-					xml.writeStartElement("DataSource");
+					ds.setEthernetChannel(channel);
+					ds.setDataType(DataSource::DataType::App);
+					ds.setLmStrID(lm->strId());
+					ds.setLmCaption(lm->caption());
+					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
+					ds.setLmDataEnable(lmNetProperties.appDataEnable);
+					ds.setLmAddressStr(lmNetProperties.appDataIP);
+					ds.setLmPort(lmNetProperties.appDataPort);
 
-					xml.writeAttribute("EthernetChannel", QString::number(channel));
-					xml.writeAttribute("Type", "AppData");
-					xml.writeAttribute("LmStrID", lm->strId());
-					xml.writeAttribute("LmCaption", lm->caption());
-					xml.writeAttribute("AdapterStrID", lmNetProperties.adapterStrID);
-					xml.writeAttribute("DataEnable", lmNetProperties.appDataEnable ? "true" : "false");
-					xml.writeAttribute("DataIP", lmNetProperties.appDataIP);
-					xml.writeAttribute("DataPort", QString::number(lmNetProperties.appDataPort));
-
-					xml.writeEndElement();	// </DataSource>
+					ds.serializeToXml(xml);
 				}
 
 				if (lmNetProperties.diagDataServiceStrID == m_software->strId())
 				{
-					xml.writeStartElement("DataSource");
+					ds.setEthernetChannel(channel);
+					ds.setDataType(DataSource::DataType::Diag);
+					ds.setLmStrID(lm->strId());
+					ds.setLmCaption(lm->caption());
+					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
+					ds.setLmDataEnable(lmNetProperties.diagDataEnable);
+					ds.setLmAddressStr(lmNetProperties.diagDataIP);
+					ds.setLmPort(lmNetProperties.diagDataPort);
 
-					xml.writeAttribute("EthernetChannel", QString::number(channel));
-					xml.writeAttribute("Type", "DiagData");
-					xml.writeAttribute("LmStrID", lm->strId());
-					xml.writeAttribute("LmCaption", lm->caption());
-					xml.writeAttribute("AdapterStrID", lmNetProperties.adapterStrID);
-					xml.writeAttribute("DataEnable", lmNetProperties.diagDataEnable ? "true" : "false");
-					xml.writeAttribute("DataIP", lmNetProperties.diagDataIP);
-					xml.writeAttribute("DataPort", QString::number(lmNetProperties.diagDataPort));
-
-					xml.writeEndElement();	// </DataSource>
+					ds.serializeToXml(xml);
 				}
 			}
 

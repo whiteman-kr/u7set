@@ -78,9 +78,9 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	pRightLayout->addWidget(m_pNewProject);
 	pRightLayout->addWidget(m_pOpenProject);
 	pRightLayout->addWidget(m_pCloseProject);
+	pRightLayout->addWidget(m_pRefreshProjectList);
 	pRightLayout->addStretch();
 	pRightLayout->addWidget(m_pDeleteProject);
-	pRightLayout->addWidget(m_pRefreshProjectList);
 
 	// Main Layout
 	//
