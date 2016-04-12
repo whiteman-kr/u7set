@@ -49,7 +49,15 @@ protected:
 
 class DataSource : public QObject
 {
+public:
+	enum class DataType
+	{
+		App,
+		Diag,
+	};
+
 private:
+
 	// static information
 	//
 	quint32 m_id = 0;
@@ -66,12 +74,54 @@ private:
 	quint64 m_receivedDataSize = 0;
 	double m_dataReceivingRate = 0;
 
+	// XML-serializable members
+	//
+	int m_ethernetChannel = 0;
+	DataType m_dataType = DataType::App;
+	QString m_lmStrID;
+	QString m_lmCaption;
+	QString m_lmAdapterStrID;
+	bool m_lmDataEnable = false;
+	HostAddressPort m_lmAddressPort;
+	quint32 m_lmDataID = 0;
+
 public:
 	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
 
 	DataSource() {}
 	DataSource(const DataSource& ds);
 	DataSource& operator = (const DataSource& ds);
+
+	int ethernetChannel() const { return m_ethernetChannel; }
+	void setEthernetChannel(int channel) { m_ethernetChannel = channel; }
+
+	DataType dataType() const { return m_dataType; }
+	void setDataType(DataType dataType) { m_dataType = dataType; }
+
+	QString lmStrID() const { return m_lmStrID; }
+	void setLmStrID(const QString& lmStrID) { m_lmStrID = lmStrID; }
+
+	QString lmCaption() const { return m_lmCaption; }
+	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
+
+	QString lmAdapterStrID() const { return m_lmAdapterStrID; }
+	void setLmAdapterStrID(const QString& lmAdapterStrID) { m_lmAdapterStrID = lmAdapterStrID; }
+
+	bool lmDataEnable() const { return m_lmDataEnable; }
+	void setLmDataEnable(bool lmDataEnable) { m_lmDataEnable = lmDataEnable; }
+
+	QString lmAddressStr() const { return m_lmAddressPort.addressStr(); }
+	void setLmAddressStr(const QString& addressStr) { m_lmAddressPort.setAddress(addressStr); }
+
+	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
+
+	int lmPort() const { return m_lmAddressPort.port(); }
+	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
+
+	quint32 lmDataID() const { return m_lmDataID; }
+	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
+
+
 
 	quint32 ID() const { return m_id; }
 	QHostAddress hostAddress() const { return m_hostAddress; }
@@ -100,6 +150,12 @@ public:
 
 	void stop();
 	void resume();
+
+	static QString dataTypeToString(DataType dataType);
+	static DataType stringToDataType(const QString& dataTypeStr);
+
+	void serializeToXml(QXmlStreamWriter& xml);
+	void serializeFromXml(QXmlStreamWriter& xml);
 };
 
 
