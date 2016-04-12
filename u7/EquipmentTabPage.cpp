@@ -1715,7 +1715,7 @@ void EquipmentView::addInOutsToSignals()
 	}
 
 	// Expand StrID for signals,
-	// track aprents from the module, and children from the dbModuke
+	// track parents from the module, and children from the dbModule
 	//
 	std::list<std::shared_ptr<Hardware::DeviceObject>> equipmentDevices;
 
@@ -1765,19 +1765,25 @@ void EquipmentView::addInOutsToSignals()
 
 	// Add signals to the project DB
 	//
-
 	std::sort(std::begin(inOuts), std::end(inOuts),
 		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
 		{
 			return a->strId() < b->strId();
 		});
 
-	db()->autoAddSignals(&inOuts, this);
+	bool result = db()->autoAddSignals(&inOuts, this);
+
+	if (result == true)
+	{
+		// Show application signals for current module
+		//
+		showAppSignals(true);
+	}
 
 	return;
 }
 
-void EquipmentView::showAppSignals()
+void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
@@ -1800,7 +1806,7 @@ void EquipmentView::showAppSignals()
 		}
 	}
 
-	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds);
+	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds, refreshSignalList);
 
 	return;
 }

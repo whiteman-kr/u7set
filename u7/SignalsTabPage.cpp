@@ -1696,8 +1696,25 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	m_signalsView->resizeColumnsToContents();
 }
 
-void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds)
+void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refreshSignalList)
 {
+	if (sender() != nullptr && typeid(*sender()) == typeid(GlobalMessanger))
+	{
+		for (int i = 0; i < m_signalTypeFilterCombo->count(); i++)
+		{
+			if (m_signalTypeFilterCombo->itemData(i) == ST_ANY)
+			{
+				m_signalTypeFilterCombo->setCurrentIndex(i);
+			}
+		}
+		m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
+	}
+
+	if (refreshSignalList == true)
+	{
+		m_signalsModel->loadSignals();
+	}
+
 	m_signalsProxyModel->setSignalIdFilter(deviceStrIds);
 
 	QString newFilter = deviceStrIds.join(" || ");
@@ -1728,7 +1745,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds)
 
 void SignalsTabPage::applySignalIdFilter()
 {
-	changeSignalIdFilter(m_filterEdit->text().trimmed().split("||", QString::SkipEmptyParts));
+	changeSignalIdFilter(m_filterEdit->text().trimmed().split("||", QString::SkipEmptyParts), false);
 }
 
 void SignalsTabPage::clearSignalIdFilter()
