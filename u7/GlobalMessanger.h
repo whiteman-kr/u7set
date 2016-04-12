@@ -24,7 +24,7 @@ public:
 
 	// Equipment Editor
 	//
-	void fireShowDeviceApplicationSignals(QStringList deviceStrIds);
+	void fireShowDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
 
 	// Build
 	//
@@ -49,7 +49,7 @@ signals:
 	void buildStarted();
 	void buildFinished();
 
-	void showDeviceApplicationSignals(QStringList deviceStrIds);
+	void showDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
 
 	void changeCurrentTab(QWidget* tab);
 

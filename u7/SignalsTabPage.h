@@ -253,7 +253,7 @@ public slots:
 	void restoreSelection();
 
 	void changeSignalTypeFilter(int selectedType);
-	void changeSignalIdFilter(QStringList deviceStrIds);
+	void changeSignalIdFilter(QStringList deviceStrIds, bool refreshSignalList);
 	void applySignalIdFilter();
 	void clearSignalIdFilter();
 

@@ -148,7 +148,7 @@ public slots:
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
 	void addInOutsToSignals();
-	void showAppSignals();			// Show application signals for this object
+	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
