@@ -1390,7 +1390,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	bool ok = true;
 	E::SignalType type = E::SignalType::Discrete;
-	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList, TO_INT(type), false, &ok);
+	QString typeString = QInputDialog::getItem(parent, "Select signal type", "Signal type:", signalTypeList, TO_INT(type), false, &ok);
 	if (!ok)
 	{
 		return QStringList();
@@ -1447,6 +1447,8 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		signalVector.push_back(newSignal);
 
 		result << newSignalStrId;
+
+		channelNo++;
 	}
 
 	if (signalVector.isEmpty())
