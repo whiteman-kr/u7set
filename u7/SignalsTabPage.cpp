@@ -1387,7 +1387,12 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalTypeList << pair.second;
 	}
-	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList);
+	bool ok = true;
+	QString typeString = QInputDialog::getItem(nullptr, "Select signal type", "Signal type:", signalTypeList, 0, false, &ok);
+	if (!ok)
+	{
+		return QStringList();
+	}
 	E::SignalType type = E::SignalType::Analog;
 	for (auto pair : values)
 	{
@@ -1402,14 +1407,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	int channelNo = 0;
 	for (QString lmId : lmIdList)
 	{
-		QString newSignalExtStrId = QString("%1_SCHEMA_%2_SIGNAL_%3").arg(lmId).arg(schemaId).arg(schemaCounter);
+		QString newSignalExtStrId = QString("%1_%2%3").arg(schemaId).arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
 		newSignalExtStrId.replace("#", "");
 		QString newSignalStrId = newSignalExtStrId;
+		QString newSignalDeviceStrId = QString("%1_%2%3").arg(lmId).arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
 		if (lmIdList.count() > 1)
 		{
-			newSignalStrId += QString("_%1").arg(QChar('A' + channelNo));
+			QString channel = QString("_%1").arg(QChar('A' + channelNo));
+			newSignalStrId += channel;
+			newSignalDeviceStrId += channel;
 		}
-		QString newSignalCaption = QString("LM ID %1 at schema \"%2\"").arg(lmId).arg(schemaCaption);
+		QString newSignalCaption = QString("App signal at schema \"%1\"").arg(schemaCaption);
 		if (newSignalExtStrId[0] == QChar('#'))
 		{
 			newSignalExtStrId = newSignalExtStrId.mid(1);
@@ -1432,6 +1440,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		}
 		newSignal.setStrID(newSignalStrId);
 		newSignal.setExtStrID(newSignalExtStrId);
+		newSignal.setDeviceStrID(newSignalDeviceStrId);
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
 
