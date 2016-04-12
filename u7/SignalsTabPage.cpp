@@ -1319,7 +1319,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->horizontalHeader()->setDefaultSectionSize(150);
 	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
-#warning Add column visibility actions
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
