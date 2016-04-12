@@ -4249,6 +4249,13 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
+	QStringList hardwareStrIdList = logicSchema()->hardwareStrIdList();
+	if (hardwareStrIdList.isEmpty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property HardwareStrIDs is empty."));
+		return;
+	}
+
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
 														  logicSchema()->hardwareStrIdList(),
 														  logicSchema()->nextCounterValue(),
