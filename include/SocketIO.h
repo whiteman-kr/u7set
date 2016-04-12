@@ -169,6 +169,7 @@ public:
 	quint16 port() const { return m_port; }
 
 	QString addressPortStr() const { return QString("%1:%2").arg(address().toString()).arg(port()); }
+	QString addressStr() const { return QString("%1").arg(address().toString()); }
 };
 
 
