@@ -4142,7 +4142,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				{
 					QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
 					connect(allSignals, &QAction::triggered,
-							[&signalStrIds, this](bool)
+							[signalStrIds, this](bool)
 							{
 								QStringList sl;
 								for (auto s : signalStrIds)
@@ -4256,8 +4256,10 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
+	qDebug() << hardwareStrIdList;
+
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  logicSchema()->hardwareStrIdList(),
+														  hardwareStrIdList,
 														  logicSchema()->nextCounterValue(),
 														  schema()->strID(),
 														  schema()->caption(),
