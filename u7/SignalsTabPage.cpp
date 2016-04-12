@@ -1409,17 +1409,18 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	int channelNo = 0;
 	for (QString lmId : lmIdList)
 	{
-		QString newSignalExtStrId = QString("%1_%2%3").arg(schemaId).arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
-		newSignalExtStrId.replace("#", "");
-		QString newSignalStrId = newSignalExtStrId;
-		QString newSignalDeviceStrId = QString("%1_%2%3").arg(lmId).arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
+		QString signalSuffix = QString("%1%2").arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
 		if (lmIdList.count() > 1)
 		{
-			QString channel = QString("_%1").arg(QChar('A' + channelNo));
-			newSignalStrId += channel;
-			newSignalDeviceStrId += channel;
+			signalSuffix += QString("_%1").arg(QChar('A' + channelNo));
 		}
-		QString newSignalCaption = QString("App signal at schema \"%1\"").arg(schemaCaption);
+
+		QString newSignalExtStrId = QString("%1_%2").arg(schemaId).arg(signalSuffix);
+		newSignalExtStrId.replace("#", "");
+		QString newSignalStrId = newSignalExtStrId;
+
+		QString newSignalCaption = QString("App signal %1 at schema \"%2\"").arg(signalSuffix).arg(schemaCaption);
+
 		if (newSignalExtStrId[0] == QChar('#'))
 		{
 			newSignalExtStrId = newSignalExtStrId.mid(1);
@@ -1442,7 +1443,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		}
 		newSignal.setStrID(newSignalStrId);
 		newSignal.setExtStrID(newSignalExtStrId);
-		newSignal.setDeviceStrID(newSignalDeviceStrId);
+		newSignal.setDeviceStrID(lmId);
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
 
