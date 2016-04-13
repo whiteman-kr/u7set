@@ -739,13 +739,12 @@ CfgLoaderThread::CfgLoaderThread(const QString& appStrID, int appInstance, const
 	addWorker(m_cfgLoader);
 
 	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
-	connect(this, &CfgLoaderThread::signal_enableDownloadConfiguration, m_cfgLoader, &CfgLoader::slot_enableDownloadConfiguration);
 }
 
 
 void CfgLoaderThread::enableDownloadConfiguration()
 {
-	emit signal_enableDownloadConfiguration();
+	m_cfgLoader->slot_enableDownloadConfiguration();
 }
 
 

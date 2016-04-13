@@ -142,7 +142,7 @@ private:
 	bool m_fileReady = false;
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
-	bool m_enableDownloadConfiguration = false;
+	volatile bool m_enableDownloadConfiguration = false;
 
 	void shutdown();
 
@@ -209,7 +209,6 @@ private:
 signals:
 	void signal_configurationChanged();
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-	void signal_enableDownloadConfiguration();
 
 public:
 	CfgLoaderThread(CfgLoader* cfgLoader);
