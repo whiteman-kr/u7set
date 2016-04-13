@@ -91,6 +91,9 @@ unix {
 #
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+# _DEBUG define, Windows memmory detection leak depends on it
+#
+CONFIG(debug, debug|release): DEFINES += _DEBUG
 
 # Add curent dir to a list of library directory paths
 #

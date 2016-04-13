@@ -112,6 +112,29 @@ void Settings::setInstanceStrId(QString value)
 	m_instanceStrId = value;
 }
 
+
+HostAddressPort Settings::configuratorAddress1() const
+{
+	QMutexLocker l(&m_mutex);
+
+	HostAddressPort result;
+	result.setAddress(m_configuratorIpAddress1);
+	result.setPort(m_configuratorPort1);
+
+	return result;
+}
+
+HostAddressPort Settings::configuratorAddress2() const
+{
+	QMutexLocker l(&m_mutex);
+
+	HostAddressPort result;
+	result.setAddress(m_configuratorIpAddress2);
+	result.setPort(m_configuratorPort2);
+
+	return result;
+}
+
 QString Settings::configuratorIpAddress1() const
 {
 	QMutexLocker l(&m_mutex);

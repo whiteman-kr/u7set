@@ -23,6 +23,7 @@
 //
 #include <QApplication>
 #include <QGuiApplication>
+#include <QSharedMemory>
 #include <QThread>
 #include <QDebug>
 #include <QtNetwork/QHostAddress>
@@ -120,12 +121,15 @@
 //
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 #define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
 #include <crtdbg.h>
-   #ifndef DBG_NEW
-	  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-	  #define new DBG_NEW
-   #endif
+#ifndef DBG_NEW
+   #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+   #define new DBG_NEW
 #endif
+#endif
+
+
 
 
 #endif // MONITOR_STABLE_H

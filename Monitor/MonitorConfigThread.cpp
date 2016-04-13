@@ -1,62 +1,70 @@
 #include "MonitorConfigThread.h"
 
-MonitorConfigThread::MonitorConfigThread(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo)
+MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
-	HostAddressPort addr1;
-	HostAddressPort addr2;
+	// Communication instance no
+	//
+	QSharedMemory instanceNoMemory("MonitorInstanceNo");
 
-	addr1.setAddress(ip1);
-	addr1.setPort(port1);
+	bool ok = instanceNoMemory.create(16);
+	if (ok == false)
+	{
+		if (instanceNoMemory.error() == QSharedMemory::SharedMemoryError::AlreadyExists)
+		{
+			ok = instanceNoMemory.attach();
+		}
 
-	addr2.setAddress(ip2);
-	addr2.setPort(port2);
+		if (ok == false)
+		{
+			QMessageBox::critical(nullptr,
+								  qApp->applicationName(),
+								  QString("Cannot create or attach to shared memory to determine software instance no. Error: %1").arg(instanceNoMemory.errorString()));
+			return;
+		}
+	}
+	else
+	{
+		// Shared memory created, initialize it
+		//
+		instanceNoMemory.lock();
+		quint32* sharedData = static_cast<quint32*>(instanceNoMemory.data());
+		*sharedData = 0;
+		instanceNoMemory.unlock();
+	}
 
-	m_cfgLoader = new CfgLoader(instanceStrId, instanceNo, addr1, addr2);
-	m_cfgLoaderThread = new Tcp::Thread(m_cfgLoader);
+	assert(instanceNoMemory.isAttached() == true);
+
+	instanceNoMemory.lock();
+	quint32* sharedData = static_cast<quint32*>(instanceNoMemory.data());
+
+	int instanceNo = static_cast<int>(*sharedData);
+	instanceNo++;
+	*sharedData = static_cast<quint32>(instanceNo);
+
+	instanceNoMemory.unlock();
+
+	qDebug() << "MonitorInstanceNo: " << instanceNo;
+
+	// --
+	//
+	m_cfgLoader = new CfgLoader("Monitor", instanceNo, address1,  address2);
+	m_cfgLoaderThread = new CfgLoaderThread(m_cfgLoader);
+
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
+
 	m_cfgLoaderThread->start();
 
 	return;
 }
 
-MonitorConfigThread::~MonitorConfigThread()
+MonitorConfigController::~MonitorConfigController()
 {
-	requestInterruption();
-	for (int i = 0; i < 200 && isFinished() == false; i++)		// Wait for about 6 sec to complete thread
-	{
-		QThread::msleep(30);
-	}
-	if (isRunning() == true)
-	{
-		qDebug() << "MonitorConfigThread IS NOT FINISHED";
-	}
-
 	m_cfgLoaderThread->quit();
 	delete m_cfgLoaderThread;
 }
 
-
-void MonitorConfigThread::run()
+void MonitorConfigController::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
-	qDebug() << "MonitorConfigThread::run() START";
-
-	while (isInterruptionRequested() == false)
-	{
-		QThread::msleep(0);
-	}
-
-	qDebug() << "MonitorConfigThread::run() EXIT";
-	return;
-}
-
-void MonitorConfigThread::reconnect(QString /*ip1*/, int /*port1*/, QString /*ip2*/, int /*port2*/, QString /*instanceStrId*/, int /*instanceNo*/)
-{
-	assert(false);		// TO DO
-	//assert(m_cfgLoader);
-	//m_cfgLoader->setServers();
-}
-
-void MonitorConfigThread::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
-{
-
+	qDebug() << "MonitorConfigThread::slot_configurationReady";
 }
 
