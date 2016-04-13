@@ -34,7 +34,7 @@ namespace Builder
 		static QString removeHeadTailSeparator(const QString& str);
 
 	public:
-		BuildFile(const QString& subDir, const QString& fileName);
+		BuildFile(const QString& subDir, const QString& fileName, const QString& group);
 
 		bool open(const QString& fullBuildPath, bool textMode, OutputLog* log);
 
@@ -134,7 +134,7 @@ namespace Builder
 		bool m_runBuild = true;
 
 	private:
-		BuildFile* createBuildFile(const QString& subDir, const QString& fileName);
+		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& group);
 
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
@@ -154,6 +154,11 @@ namespace Builder
 		bool addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
 		bool addFile(const QString& subDir, const QString& fileName, const QString& dataString);
 		bool addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
+
+		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QByteArray& data);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QString& dataString);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QStringList& stringList);
+
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 

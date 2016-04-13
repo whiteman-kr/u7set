@@ -51,7 +51,8 @@ HEADERS  += SourceListWidget.h \
     PacketBufferTableModel.h \
     ../include/PropertyObject.h \
     SignalTableModel.h \
-    ../include/Types.h
+    ../include/Types.h \
+    ../include/DataProtocols.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
