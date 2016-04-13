@@ -59,7 +59,7 @@ void DataServiceWorker::runCfgLoaderThread()
 {
 	CfgLoader* cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
 
-    m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
+	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
 	connect(cfgLoader, &CfgLoader::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 
@@ -92,11 +92,25 @@ void DataServiceWorker::stopFscDataReceivingThreads()
 }
 
 
+void DataServiceWorker::runTimer()
+{
+	connect(&m_timer, &QTimer::timeout, this, &DataServiceWorker::onTimer);
+
+	m_timer.setInterval(1000);
+	m_timer.start();
+}
+
+
+void DataServiceWorker::stopTimer()
+{
+	m_timer.stop();
+}
+
+
 void DataServiceWorker::initialize()
 {
 	// Service Main Function initialization
 	//
-
 	runCfgLoaderThread();
 
 	readConfigurationFiles();
@@ -104,6 +118,8 @@ void DataServiceWorker::initialize()
 
 	runUdpThreads();
 	runFscDataReceivingThreads();
+
+	runTimer();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
 }
@@ -113,6 +129,7 @@ void DataServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
+	stopTimer();
 
 	stopFscDataReceivingThreads();
 	stopUdpThreads();
@@ -193,6 +210,20 @@ void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 	}
 
 	emit ackInformationRequest(ack);
+}
+
+
+void DataServiceWorker::onTimer()
+{
+	static int a = 0;
+
+	a++;
+
+	if (a == 10)
+	{
+		m_cfgLoaderThread->enableDownloadConfiguration();
+	}
+
 }
 
 
@@ -278,23 +309,41 @@ void DataServiceWorker::onConfigurationReady(const QByteArray /*configurationXml
 {
 	qDebug() << "Configuration Ready!";
 
-    if (m_cfgLoaderThread == nullptr)
-    {
-        return;
-    }
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
 
-    for(Builder::BuildFileInfo bfi : buildFileInfoArray)
-    {
-        QByteArray fileData;
-        QString errStr;
+	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
 
-        bool result = m_cfgLoaderThread->downloadCfgFile(bfi.pathFileName, &fileData, &errStr);
+/*		bool result = m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
-        if (result == true)
-        {
-            qDebug() << "File " << bfi.pathFileName << " download OK";
-        }
-    }
+		if (result == true)
+		{
+			qDebug() << "File " << bfi.pathFileName << " download OK";
+		}*/
+
+		bool result = m_cfgLoaderThread->getFile(bfi.pathFileName, &fileData);
+
+		while(m_cfgLoaderThread->isFileReady() == false)
+		{
+			;
+		}
+
+		errStr = m_cfgLoaderThread->getLastErrorStr();
+
+		if (errStr.isEmpty())
+		{
+			qDebug() << "File " << bfi.pathFileName << " download OK";
+		}
+		else
+		{
+			qDebug() << "File loading error - " << errStr;
+		}
+	}
 }
 
 
