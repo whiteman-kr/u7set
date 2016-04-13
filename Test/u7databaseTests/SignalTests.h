@@ -27,7 +27,7 @@ public:
 	int m_secondUserForTest = -1;
 	static const int maxValueId = 9999999;
 
-	struct signalData
+	struct SignalData
 	{
 		int signalId = 0;
 		int signalGroupId = 0;
