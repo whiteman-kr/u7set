@@ -11,6 +11,7 @@
 #include "SourceStatusWidget.h"
 #include <QDirIterator>
 #include <QMessageBox>
+#include "../include/DataProtocols.h"
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)

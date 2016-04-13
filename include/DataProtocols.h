@@ -1,5 +1,4 @@
-#ifndef DATAPROTOCOLS_H
-#define DATAPROTOCOLS_H
+#pragma once
 
 #include "SocketIO.h"
 #pragma pack(push, 2)
@@ -16,9 +15,9 @@ struct RupFrameFlags
 struct RupTimeStamp
 {
 	quint16 hour;			// 0..23
-	quint16 Minute;			// 0..59
-	quint16 Second;			// 0..59
-	quint16 Millisecond;	// 0..999
+	quint16 minute;			// 0..59
+	quint16 second;			// 0..59
+	quint16 millisecond;	// 0..999
 
 	quint16 day;	// 1..31
 	quint16 month;	// 1..12
@@ -27,22 +26,22 @@ struct RupTimeStamp
 
 struct RupFrameHeader
 {
-	quint16 packetSize;			// packet size including header, bytes
+	quint16 frameSize;			// frame size including header, bytes
 	quint16 protocolVersion;
 
 	RupFrameFlags flags;
 
-	quint32 moduleFactoryNo;
-	quint16 moduleType;			// module type ID
-	quint16 packetNo;
-	quint16 partCount;			// >=1
-	quint16 partNo;				// 0..(partCount-1)
+	quint32 dataUid;
+	quint16 moduleId;			// module ID
+	quint16 numerator;
+	quint16 frameQuantity;		// >=1
+	quint16 frameNumber;		// 0..(frameQuantity-1)
 
 	RupTimeStamp TimeStamp;
 };
 
 
-const int RUP_FRAME_DATA_SIZE = ENTIRE_UDP_SIZE - sizeof(RupFrameHeader) - sizeof(quint64/*CRC*/);
+const int RUP_FRAME_DATA_SIZE = ENTIRE_UDP_SIZE - sizeof(RupFrameHeader) - sizeof(quint64/*CRC64*/);
 const int RUP_MAX_FRAME_COUNT = 10;
 const int RUP_BUFFER_SIZE = RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE;
 
@@ -59,5 +58,3 @@ struct RupFrame
 };
 
 #pragma pack(pop)
-
-#endif // DATAPROTOCOLS_H
