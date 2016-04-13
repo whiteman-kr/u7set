@@ -5,9 +5,9 @@
 
 struct RupFrameFlags
 {
-	quint16 registration : 1;
-	quint16 diagnostics : 1;
-	quint16 control : 1;
+	quint16 appData : 1;
+	quint16 diagData : 1;
+	quint16 tuningData : 1;
 	quint16 test : 1;
 };
 
@@ -31,10 +31,10 @@ struct RupFrameHeader
 
 	RupFrameFlags flags;
 
-	quint32 dataUid;
-	quint16 moduleId;			// module ID
+	quint32 dataId;
+	quint16 moduleType;			// module ID
 	quint16 numerator;
-	quint16 frameQuantity;		// >=1
+	quint16 framesQuantity;		// >=1
 	quint16 frameNumber;		// 0..(frameQuantity-1)
 
 	RupTimeStamp TimeStamp;
@@ -50,9 +50,9 @@ typedef quint8 RupFrameData[RUP_FRAME_DATA_SIZE];
 
 struct RupFrame
 {
-	RupFrameHeader Header;
+	RupFrameHeader header;
 
-	RupFrameData Data;
+	RupFrameData data;
 
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 };
