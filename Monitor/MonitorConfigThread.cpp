@@ -1,4 +1,5 @@
 #include "MonitorConfigThread.h"
+#include "Settings.h"
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
@@ -90,12 +91,13 @@ MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostA
 
 	// --
 	//
-	m_cfgLoader = new CfgLoader("Monitor", m_appInstanceNo, address1,  address2);
-	m_cfgLoaderThread = new CfgLoaderThread(m_cfgLoader);
+	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2);
 
-	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 
 	m_cfgLoaderThread->start();
+
+	m_cfgLoaderThread->enableDownloadConfiguration();
 
 	return;
 }

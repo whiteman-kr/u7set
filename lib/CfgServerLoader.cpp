@@ -736,20 +736,16 @@ CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
 CfgLoaderThread::CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
 {
 	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2);
-
 	addWorker(m_cfgLoader);
+
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+	connect(this, &CfgLoaderThread::signal_enableDownloadConfiguration, m_cfgLoader, &CfgLoader::slot_enableDownloadConfiguration);
 }
 
 
 void CfgLoaderThread::enableDownloadConfiguration()
 {
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	emit m_cfgLoader->signal_enableDownloadConfiguration();
+	emit signal_enableDownloadConfiguration();
 }
 
 

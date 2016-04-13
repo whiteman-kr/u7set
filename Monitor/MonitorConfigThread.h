@@ -24,7 +24,6 @@ private:
 	QSharedMemory m_appInstanceSharedMemory;
 	int m_appInstanceNo = -1;
 
-	CfgLoader* m_cfgLoader = nullptr;
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 };
 

@@ -194,6 +194,8 @@ public:
 	QString getLastErrorStr();
 
 	bool isFileReady();
+
+friend class CfgLoaderThread;
 };
 
 
@@ -206,6 +208,8 @@ private:
 
 signals:
 	void signal_configurationChanged();
+	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_enableDownloadConfiguration();
 
 public:
 	CfgLoaderThread(CfgLoader* cfgLoader);
