@@ -105,14 +105,14 @@ void TcpClientMainWindow::on_pushButton_clicked()
 	QByteArray fileData;
 	QString errorStr;
 
-	bool result = m_cfgLoader->downloadCfgFile("/SYSTEMID_RACKID_WS00_DACQSERVICE/equipment.xml", &fileData, &errorStr);
+	bool result = m_cfgLoader->getFileBlocked("/SYSTEMID_RACKID_WS00_DACQSERVICE/equipment.xml", &fileData, &errorStr);
 
 	if (result == false)
 	{
 		qDebug() << errorStr;
 	}
 
-	result = m_cfgLoader->downloadCfgFile("/SYSTEMID_RACKID_WS00_DACQSERVICE/appSignals.xml", &fileData, &errorStr);
+	result = m_cfgLoader->getFileBlocked("/SYSTEMID_RACKID_WS00_DACQSERVICE/appSignals.xml", &fileData, &errorStr);
 
 	if (result == false)
 	{

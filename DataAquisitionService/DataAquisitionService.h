@@ -24,11 +24,13 @@ private:
 
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
-    CfgLoaderThread* m_cfgLoaderThread = nullptr;
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
 	SignalSet m_signalSet;
 	UnitList m_unitInfo;
+
+	QTimer m_timer;
 
 	void initDataSources();
 	void initListeningPorts();
@@ -43,14 +45,21 @@ private:
 	void runFscDataReceivingThreads();
 	void stopFscDataReceivingThreads();
 
+	void runTimer();
+	void stopTimer();
+
 	void onGetDataSourcesIDs(UdpRequest& request);
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
+	void onTimer();
+
 public:
-	DataServiceWorker() : ServiceWorker(ServiceType::DataAcquisitionService) {}
+	DataServiceWorker() :
+		ServiceWorker(ServiceType::DataAcquisitionService),
+		m_timer(this)	{}
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
@@ -63,12 +72,3 @@ public slots:
 	void onInformationRequest(UdpRequest request);
 };
 
-
-/*
-class DataAquisitionService : public Service
-{
-public:
-	DataAquisitionService(int argc, char ** argv);
-	~DataAquisitionService();
-};
-*/
