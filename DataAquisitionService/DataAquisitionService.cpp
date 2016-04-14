@@ -57,13 +57,12 @@ void DataServiceWorker::runFscDataReceivingThreads()
 
 void DataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
+	m_cfgLoaderThread = new CfgLoaderThread("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
 
-	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
-
-	connect(cfgLoader, &CfgLoader::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 
 	m_cfgLoaderThread->start();
+	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
 

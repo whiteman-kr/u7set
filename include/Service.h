@@ -11,7 +11,6 @@
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
 #include "../include/SimpleThread.h"
-//#include "Signal.h"
 
 
 class Service;
@@ -245,6 +244,3 @@ const ServiceInfo serviceInfo[] =
 
 
 const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
-
-
-

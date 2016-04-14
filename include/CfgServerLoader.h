@@ -71,14 +71,13 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
-
-const int CONFIGURATION_XML = 0;
-
 class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
 {
 	Q_OBJECT
 
 private:
+	static const int CONFIGURATION_XML = 0;
+
 	QMutex mutex;
 
 	struct CfgFileInfo : public Builder::BuildFileInfo
@@ -195,9 +194,15 @@ public:
 
 	bool isFileReady();
 
-friend class CfgLoaderThread;
+	friend class CfgLoaderThread;
 };
 
+
+// -------------------------------------------------------------------------------------
+//
+// CfgLoaderThread class declaration
+//
+// -------------------------------------------------------------------------------------
 
 class CfgLoaderThread : public Tcp::Thread
 {
@@ -211,7 +216,6 @@ signals:
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-	CfgLoaderThread(CfgLoader* cfgLoader);
 	CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
 	void enableDownloadConfiguration();

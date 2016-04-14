@@ -135,3 +135,6 @@ private:
 #define USR_MSG(log,str) (log).userMsg(MESSAGE_POSITION,str);
 
 #endif // CIRCULARLOGGER_H
+
+extern CircularLogger logger;
+

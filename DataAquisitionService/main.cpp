@@ -15,6 +15,10 @@
 
 int main(int argc, char *argv[])
 {
+	logger.initLog("da.log", 10, 10, "");
+
+	APP_MSG(logger, "Start");
+
 	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", new DataServiceWorker);
 
 	return service.exec();
