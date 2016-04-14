@@ -70,6 +70,8 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
 
+	s.setValue("m_freezeBuildPath", m_freezeBuildPath);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -88,7 +90,9 @@ void Settings::loadUserScope()
 
     m_equipmentTabPagePropertiesSplitterState = s.value("EquipmentTabPage/PropertiesSplitter/state").toInt();
     if (m_equipmentTabPagePropertiesSplitterState < 150)
+	{
         m_equipmentTabPagePropertiesSplitterState = 150;
+	}
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
@@ -118,7 +122,9 @@ void Settings::loadUserScope()
 
     m_connectionSplitterState = s.value("Connection/Splitter/state").toInt();
     if (m_connectionSplitterState < 175)
+	{
         m_connectionSplitterState = 175;
+	}
 
     //
 
@@ -127,8 +133,11 @@ void Settings::loadUserScope()
 
 	m_schemaItemSplitterState = s.value("SchemaItem/Splitter/state").toInt();
     if (m_schemaItemSplitterState < 150)
+	{
         m_schemaItemSplitterState = 150;
+	}
 
+	m_freezeBuildPath = s.value("m_freezeBuildPath", false).toBool();
 
     return;
 }
@@ -214,3 +223,9 @@ QStringList& Settings::loginCompleter()
 {
 	return m_loginCompleter;
 }
+
+bool Settings::freezeBuildPath() const
+{
+	return m_freezeBuildPath;
+}
+

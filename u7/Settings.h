@@ -43,6 +43,8 @@ public:
 	const QStringList& loginCompleter() const;
 	QStringList& loginCompleter();
 
+	bool freezeBuildPath() const;
+
 	// Data
 	//
 public:
@@ -117,6 +119,8 @@ private:
 	QString m_buildOutputPath;
 
 	QStringList m_loginCompleter;
+
+	bool m_freezeBuildPath = false;
 };
 
 extern Settings theSettings;
