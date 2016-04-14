@@ -1,6 +1,7 @@
 #include "SignalTableModel.h"
 #include "../include/Signal.h"
 #include "PacketBufferTableModel.h"
+#include "../include/DataProtocols.h"
 
 const int C_STR_ID = 0,
 C_DESCRIPTION = 1,
@@ -53,7 +54,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 			case C_DESCRIPTION: return signal.caption();
 			case C_RAW_DATA:
 			{
-				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
+				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
 				{
 					return "???";
 				}
@@ -68,7 +69,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 			}
 			case C_VALUE:
 			{
-				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
+				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
 				{
 					return "???";
 				}
@@ -161,8 +162,8 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 			m_relatedSignalIndexes.removeAt(i + 1);
 		}
 	}
-	m_frameSignalIndexLimits.resize(RP_MAX_FRAME_COUNT);
-	for (int i = 0; i < RP_MAX_FRAME_COUNT; i++)
+	m_frameSignalIndexLimits.resize(RUP_MAX_FRAME_COUNT);
+	for (int i = 0; i < RUP_MAX_FRAME_COUNT; i++)
 	{
 		std::pair<int, int> limits;
 		limits.first = -1;
@@ -170,9 +171,9 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 		bool firstTime = true;
 		for (int j = 0; j < m_relatedSignalIndexes.size(); j++)
 		{
-			if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() >= int(RP_PACKET_DATA_SIZE * i / sizeof(m_buffer[0])))
+			if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() >= int(RUP_FRAME_DATA_SIZE * i / sizeof(m_buffer[0])))
 			{
-				if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() < int((RP_PACKET_DATA_SIZE * (i + 1) / sizeof(m_buffer[0]) + 1)))
+				if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() < int((RUP_FRAME_DATA_SIZE * (i + 1) / sizeof(m_buffer[0]) + 1)))
 				{
 					if (firstTime)
 					{
@@ -226,7 +227,7 @@ TYPE SignalTableModel::getAdc(const Signal& signal) const
 	}
 	int offset = signal.regAddr().offset();
 	int bit = signal.regAddr().bit();
-	if ((offset < 0) || (offset + (bit + size) / 8 >= RP_BUFFER_SIZE))
+	if ((offset < 0) || (offset + (bit + size) / 8 >= RUP_BUFFER_SIZE))
 	{
 		return 0;
 	}

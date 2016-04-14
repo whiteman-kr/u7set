@@ -2,6 +2,7 @@
 #include <../include/SocketIO.h>
 #include <algorithm>
 #include <QSettings>
+#include "../include/DataProtocols.h"
 
 const int C_DECIMAL = 0,
 C_HEXADECIMAL = 1,
@@ -18,6 +19,7 @@ const char* const Columns[] =
 PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& lastHeader, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_buffer(reinterpret_cast<quint16*>(buffer)),
+	m_frameDataSize(RUP_FRAME_DATA_SIZE),
 	m_lastHeader(lastHeader),
 	needToSwapBytes(false)
 {
@@ -27,7 +29,7 @@ PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& l
 
 int PacketBufferTableModel::rowCount(const QModelIndex&) const
 {
-	return RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]);
+	return m_frameDataSize * m_lastHeader.partCount / sizeof(m_buffer[0]);
 }
 
 int PacketBufferTableModel::columnCount(const QModelIndex&) const
@@ -78,11 +80,33 @@ QVariant PacketBufferTableModel::headerData(int section, Qt::Orientation orienta
 	return QVariant();
 }
 
-void PacketBufferTableModel::updateFrame(int frameNo)
+void PacketBufferTableModel::updateFrame(int frameNo, int version)
 {
-	emit dataChanged(index(frameNo * RP_PACKET_DATA_SIZE / sizeof(m_buffer[0]), C_DECIMAL),
-			index((frameNo + 1) * RP_PACKET_DATA_SIZE / sizeof(m_buffer[0]) - 1, C_BINARY),
-			QVector<int>() << Qt::DisplayRole);
+	int newFrameDataSize = 0;
+	switch (version)
+	{
+		case 3:
+			newFrameDataSize = RP_PACKET_DATA_SIZE;
+			break;
+		case 4:
+			newFrameDataSize = RUP_FRAME_DATA_SIZE;
+			break;
+		default:
+			assert(false);
+	}
+
+	if (m_frameDataSize != newFrameDataSize)
+	{
+		beginResetModel();
+		m_frameDataSize = newFrameDataSize;
+		endResetModel();
+	}
+	else
+	{
+		emit dataChanged(index(frameNo * m_frameDataSize / sizeof(m_buffer[0]), C_DECIMAL),
+				index((frameNo + 1) * m_frameDataSize / sizeof(m_buffer[0]) - 1, C_BINARY),
+				QVector<int>() << Qt::DisplayRole);
+	}
 }
 
 void PacketBufferTableModel::checkPartCount(int newPartCount)
@@ -94,14 +118,14 @@ void PacketBufferTableModel::checkPartCount(int newPartCount)
 	if (newPartCount > m_lastHeader.partCount)
 	{
 		emit beginInsertRows(QModelIndex(),
-							RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]),
-							RP_PACKET_DATA_SIZE * newPartCount / sizeof(m_buffer[0]) - 1);
+							m_frameDataSize * m_lastHeader.partCount / sizeof(m_buffer[0]),
+							m_frameDataSize * newPartCount / sizeof(m_buffer[0]) - 1);
 	}
 	if (newPartCount < m_lastHeader.partCount)
 	{
 		emit beginInsertRows(QModelIndex(),
-							RP_PACKET_DATA_SIZE * newPartCount / sizeof(m_buffer[0]),
-							RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]) - 1);
+							m_frameDataSize * newPartCount / sizeof(m_buffer[0]),
+							m_frameDataSize * m_lastHeader.partCount / sizeof(m_buffer[0]) - 1);
 	}
 }
 
