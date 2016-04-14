@@ -92,10 +92,10 @@ void Settings::loadSystemScope()
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_MONITOR").toString();
 
 	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE).toInt();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE).toInt();
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
 
 	return;
 }
@@ -110,6 +110,29 @@ void Settings::setInstanceStrId(QString value)
 {
 	QMutexLocker l(&m_mutex);
 	m_instanceStrId = value;
+}
+
+
+HostAddressPort Settings::configuratorAddress1() const
+{
+	QMutexLocker l(&m_mutex);
+
+	HostAddressPort result;
+	result.setAddress(m_configuratorIpAddress1);
+	result.setPort(m_configuratorPort1);
+
+	return result;
+}
+
+HostAddressPort Settings::configuratorAddress2() const
+{
+	QMutexLocker l(&m_mutex);
+
+	HostAddressPort result;
+	result.setAddress(m_configuratorIpAddress2);
+	result.setPort(m_configuratorPort2);
+
+	return result;
 }
 
 QString Settings::configuratorIpAddress1() const

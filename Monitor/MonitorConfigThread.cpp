@@ -1,62 +1,131 @@
 #include "MonitorConfigThread.h"
+#include "Settings.h"
 
-MonitorConfigThread::MonitorConfigThread(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo)
+MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
-	HostAddressPort addr1;
-	HostAddressPort addr2;
+	// Communication instance no
+	//
+	m_appInstanceSharedMemory.setKey("MonitorInstanceNo");
+	int maxInstanceCount = 512;
 
-	addr1.setAddress(ip1);
-	addr1.setPort(port1);
+	bool ok = m_appInstanceSharedMemory.create(maxInstanceCount * sizeof(qint64));
 
-	addr2.setAddress(ip2);
-	addr2.setPort(port2);
+	if (ok == true)
+	{
+		// Shared memory created, initialize it
+		//
+		m_appInstanceSharedMemory.lock();
 
-	m_cfgLoader = new CfgLoader(instanceStrId, instanceNo, addr1, addr2);
-	m_cfgLoaderThread = new Tcp::Thread(m_cfgLoader);
+		qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
+
+		for (int i = 0; i < maxInstanceCount; i++)
+		{
+			sharedData[i] = 0;
+		}
+
+		sharedData[0] = qApp->applicationPid();
+		m_appInstanceNo = 0;
+
+		m_appInstanceSharedMemory.unlock();
+	}
+	else
+	{
+		if (m_appInstanceSharedMemory.error() == QSharedMemory::SharedMemoryError::AlreadyExists)
+		{
+			ok = m_appInstanceSharedMemory.attach();
+		}
+
+		if (ok == false)
+		{
+			QMessageBox::critical(nullptr,
+								  qApp->applicationName(),
+								  QString("Cannot create or attach to shared memory to determine software instance no. Error: %1")
+								  .arg(m_appInstanceSharedMemory.errorString()));
+
+			// Set "Some" Application Instance No
+			//
+			m_appInstanceNo = static_cast<int>(QDateTime::currentMSecsSinceEpoch());		// cut the highest bytes
+		}
+		else
+		{
+			// Get empty slot from shared memory
+			//
+			assert(m_appInstanceSharedMemory.isAttached() == true);
+
+			m_appInstanceSharedMemory.lock();
+
+			qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
+			m_appInstanceNo = -1;
+
+			for (int i = 0; i < maxInstanceCount; i++)
+			{
+				if (sharedData[i] == 0)
+				{
+					// This is an empty slot, use it
+					//
+					sharedData[i] = qApp->applicationPid();	// 1 means
+					m_appInstanceNo = i;
+
+					break;
+				}
+			}
+
+			if (m_appInstanceNo == -1)
+			{
+				assert(m_appInstanceNo > 0);
+
+				QMessageBox::critical(nullptr,
+									  qApp->applicationName(),
+									  tr("Cannot determine software instance no. It seems all slots are occupied"));
+
+				// Set "Some" Application Instance No
+				//
+				m_appInstanceNo = static_cast<int>(QDateTime::currentMSecsSinceEpoch());		// cut the highest bytes
+			}
+
+			m_appInstanceSharedMemory.unlock();
+		}
+	}
+
+	qDebug() << "MonitorInstanceNo: " << m_appInstanceNo;
+
+	// --
+	//
+	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2);
+
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
+
 	m_cfgLoaderThread->start();
+
+	m_cfgLoaderThread->enableDownloadConfiguration();
 
 	return;
 }
 
-MonitorConfigThread::~MonitorConfigThread()
+MonitorConfigController::~MonitorConfigController()
 {
-	requestInterruption();
-	for (int i = 0; i < 200 && isFinished() == false; i++)		// Wait for about 6 sec to complete thread
+	// Release application instance slot
+	//
+	if (m_appInstanceNo != -1)
 	{
-		QThread::msleep(30);
-	}
-	if (isRunning() == true)
-	{
-		qDebug() << "MonitorConfigThread IS NOT FINISHED";
+		assert(m_appInstanceSharedMemory.isAttached() == true);
+
+		m_appInstanceSharedMemory.lock();
+
+		qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
+		sharedData[m_appInstanceNo] = 0;
+
+		m_appInstanceSharedMemory.unlock();
 	}
 
+	// Stop communication
+	//
 	m_cfgLoaderThread->quit();
 	delete m_cfgLoaderThread;
 }
 
-
-void MonitorConfigThread::run()
+void MonitorConfigController::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
-	qDebug() << "MonitorConfigThread::run() START";
-
-	while (isInterruptionRequested() == false)
-	{
-		QThread::msleep(0);
-	}
-
-	qDebug() << "MonitorConfigThread::run() EXIT";
-	return;
-}
-
-void MonitorConfigThread::reconnect(QString /*ip1*/, int /*port1*/, QString /*ip2*/, int /*port2*/, QString /*instanceStrId*/, int /*instanceNo*/)
-{
-	assert(false);		// TO DO
-	//assert(m_cfgLoader);
-	//m_cfgLoader->setServers();
-}
-
-void MonitorConfigThread::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
-{
-
+	qDebug() << "MonitorConfigThread::slot_configurationReady";
 }
 

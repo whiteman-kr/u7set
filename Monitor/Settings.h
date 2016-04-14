@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMutex>
+#include <../include/SocketIO.h>
 
 class Settings
 {
@@ -27,6 +28,9 @@ public:
 public:
 	QString instanceStrId() const;
 	void setInstanceStrId(QString value);
+
+	HostAddressPort configuratorAddress1() const;
+	HostAddressPort configuratorAddress2() const;
 
 	QString configuratorIpAddress1() const;
 	void setConfiguratorIpAddress1(QString configuratorIpAddress);

@@ -79,15 +79,15 @@ class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
 	Q_OBJECT
 
 private:
+	QMutex mutex;
 
 	struct CfgFileInfo : public Builder::BuildFileInfo
 	{
 		QByteArray fileData;
-        bool md5IsValid = false;
+		bool md5IsValid = false;
 	};
 
-    typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
-
+	typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
 
 	struct FileDownloadRequest
 	{
@@ -134,10 +134,15 @@ private:
 	int m_autoDownloadIndex = 0;
 
 	Builder::BuildInfo m_buildInfo;
-    CfgFilesInfo m_cfgFilesInfo;
+	CfgFilesInfo m_cfgFilesInfo;
 
-    bool m_hasValidSavedConfiguration = false;
-    HashedVector<QString, CfgFileInfo> m_savedCfgFileInfo;
+	bool m_hasValidSavedConfiguration = false;
+	HashedVector<QString, CfgFileInfo> m_savedCfgFileInfo;
+
+	bool m_fileReady = false;
+	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
+
+	volatile bool m_enableDownloadConfiguration = false;
 
 	void shutdown();
 
@@ -153,21 +158,27 @@ private:
 	bool startConfigurationXmlLoading();
 	bool readConfigurationXml();
 
-    void readSavedConfiguration();
+	void readSavedConfiguration();
 
 	bool readCfgFile(const QString& pathFileName, QByteArray* fileData);
 
 	bool readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5);
 	bool isCfgFileIsExists(const QString& filePathName, const QString& etalonMd5);
 
+	void configurationChanged();
+
+	void setFileReady(bool value);
+
 signals:
+	void signal_enableDownloadConfiguration();
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-	void signal_downloadCfgFile(const QString& fileName, QByteArray* fileData, Tcp::FileTransferResult* errorCode);
-	void signal_endCfgFileDownload();					// emit only for manual requests
+	void signal_getFile(const QString& fileName, QByteArray* fileData);
+	void signal_fileReady();					// emit only for manual requests
+	void signal_configurationChanged();
 
 private slots:
-
-	void slot_downloadCfgdFile(const QString& fileName, QByteArray *fileData, Tcp::FileTransferResult* errorCode);
+	void slot_enableDownloadConfiguration();
+	void slot_getFile(QString fileName, QByteArray *fileData);
 
 public:
 	CfgLoader(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
@@ -176,17 +187,39 @@ public:
 
 	void changeApp(const QString& appStrID, int appInstance);
 
-	bool downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFile(QString pathFileName, QByteArray* fileData);
+
+	Tcp::FileTransferResult getLastError() const { return m_lastError; }
+	QString getLastErrorStr();
+
+	bool isFileReady();
+
+friend class CfgLoaderThread;
 };
 
 
 class CfgLoaderThread : public Tcp::Thread
 {
+	Q_OBJECT
+
 private:
-    CfgLoader* m_cfgLoader = nullptr;
+	CfgLoader* m_cfgLoader = nullptr;
+
+signals:
+	void signal_configurationChanged();
+	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-    CfgLoaderThread(CfgLoader* cfgLoader);
+	CfgLoaderThread(CfgLoader* cfgLoader);
+	CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
-    bool downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+	void enableDownloadConfiguration();
+
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFile(const QString& pathFileName, QByteArray* fileData);
+
+	bool isFileReady();
+
+	QString getLastErrorStr();
 };

@@ -5,19 +5,15 @@
 #include "../include/CfgServerLoader.h"
 #include "../include/SocketIO.h"
 
-class MonitorConfigThread : public QThread
+class MonitorConfigController : public QObject
 {
 	Q_OBJECT
 
 public:
-	MonitorConfigThread(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo);
-	virtual ~MonitorConfigThread();
+	MonitorConfigController() = delete;
 
-private:
-	void run() override;
-
-public:
-	void reconnect(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo);
+	MonitorConfigController(HostAddressPort address1, HostAddressPort address2);
+	virtual ~MonitorConfigController();
 
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -25,8 +21,10 @@ private slots:
 	// Data section
 	//
 private:
-	CfgLoader* m_cfgLoader = nullptr;
-	Tcp::Thread* m_cfgLoaderThread = nullptr;
+	QSharedMemory m_appInstanceSharedMemory;
+	int m_appInstanceNo = -1;
+
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 };
 
 #endif // MONITORCONFIGTHREAD_H
