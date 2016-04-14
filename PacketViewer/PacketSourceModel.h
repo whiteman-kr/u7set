@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include "../include/Signal.h"
+#include "../include/DataProtocols.h"
 
 class QUdpSocket;
 class PacketSourceModel;
@@ -97,7 +98,7 @@ signals:
 	void fieldsChanged();
 
 private:
-	quint8 m_buffer[RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE];
+	quint8 m_buffer[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 	RpPacketHeader m_lastHeader;
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;
@@ -105,6 +106,7 @@ private:
 	const QHash<quint32, DataSource>* m_dataSources;
 
 	void swapHeader(RpPacketHeader& header);
+	void swapHeader(RupFrameHeader& header);
 };
 
 

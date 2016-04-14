@@ -27,7 +27,7 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-	void updateFrame(int frameNo);
+	void updateFrame(int frameNo, int version);
 	void checkPartCount(int newPartCount);
 
 signals:
@@ -38,6 +38,7 @@ public slots:
 
 private:
 	quint16* m_buffer;
+	int m_frameDataSize;
 	RpPacketHeader& m_lastHeader;
 	bool needToSwapBytes;
 };

@@ -450,7 +450,7 @@ Source::Source(QString address, int port, const SignalSet& signalSet, const QHas
 	m_dataSources(&dataSources)
 {
 	m_lastHeader.packetNo = -1;
-	memset(m_buffer, 0, RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE);
+	memset(m_buffer, 0, RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE);
 }
 
 Source::~Source()
@@ -461,10 +461,59 @@ Source::~Source()
 	}
 }
 
+void V4toV3Header(RpPacketHeader& v3header, const RupFrameHeader& v4header) // copy assignment
+{
+	v3header.packetSize = v4header.frameSize;
+	v3header.protocolVersion = v4header.protocolVersion;
+	memcpy(&v3header.flags, &v4header.flags, sizeof(RpPacketFlags));
+	v3header.moduleFactoryNo = v4header.dataId;
+	v3header.moduleType = v4header.moduleType;
+	v3header.subblockID = 0;
+	v3header.packetNo = v4header.numerator;
+	v3header.partCount = v4header.framesQuantity;
+	v3header.partNo = v4header.frameNumber;
+	memcpy(&v3header.TimeStamp, &v4header.TimeStamp, sizeof(RpTimeStamp));
+}
+
 void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 {
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
-	RpPacketHeader& header = packet.Header;
+	quint16 version = packet.Header.protocolVersion;
+	bool needSwap = false;
+	if (packet.Header.packetSize > ENTIRE_UDP_SIZE)
+	{
+		quint16 swapedPacketSize = packet.Header.packetSize;
+		swapBytes(swapedPacketSize);
+		if (swapedPacketSize == ENTIRE_UDP_SIZE)
+		{
+			needSwap = true;
+			swapBytes(version);
+		}
+	}
+	RpPacketHeader header;
+	switch (version)
+	{
+		case 3:
+			if (needSwap)
+			{
+				swapHeader(packet.Header);
+			}
+			header = packet.Header;
+			break;
+		case 4:
+		{
+			RupFrameHeader& v4Header = *reinterpret_cast<RupFrameHeader*>(buffer);
+			if (needSwap)
+			{
+				swapHeader(v4Header);
+			}
+			V4toV3Header(header, v4Header);
+			break;
+		}
+		default:
+			assert(false);
+	}
+
 	//swapHeader(header);
 	incrementPacketReceivedCount();
 	if (readBytes != header.packetSize)
@@ -487,12 +536,24 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	{
 		incrementPartialPacketCount();
 	}
-	int currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
-	memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
+	int currentDataSize = 0;
+	switch (version)
+	{
+		case 3:
+			currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
+			memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
+			break;
+		case 4:
+			currentDataSize = header.packetSize - sizeof(RupFrameHeader) - sizeof(packet.CRC64);
+			memcpy(m_buffer + header.partNo * currentDataSize, buffer + sizeof(RupFrameHeader), currentDataSize);
+			break;
+		default:
+			assert(false);
+	}
 	if (!dependentWidgets.empty())
 	{
 		m_signalTableModel->updateFrame(header.partNo);
-		m_packetBufferModel->updateFrame(header.partNo);
+		m_packetBufferModel->updateFrame(header.partNo, version);
 		m_packetBufferModel->checkPartCount(header.partCount);
 	}
 	memcpy(&m_lastHeader, &header, sizeof(RpPacketHeader));
@@ -554,6 +615,25 @@ void Source::swapHeader(RpPacketHeader &header)
 	swapBytes(header.TimeStamp.Minute);
 	swapBytes(header.TimeStamp.Second);
 	swapBytes(header.TimeStamp.Millisecond);
+	swapBytes(header.TimeStamp.day);
+	swapBytes(header.TimeStamp.month);
+	swapBytes(header.TimeStamp.year);
+}
+
+void Source::swapHeader(RupFrameHeader& header)
+{
+	swapBytes(header.frameSize);
+	swapBytes(header.protocolVersion);
+	swapBytes(header.flags);
+	swapBytes(header.dataId);
+	swapBytes(header.moduleType);
+	swapBytes(header.numerator);
+	swapBytes(header.framesQuantity);
+	swapBytes(header.frameNumber);
+	swapBytes(header.TimeStamp.hour);
+	swapBytes(header.TimeStamp.minute);
+	swapBytes(header.TimeStamp.second);
+	swapBytes(header.TimeStamp.millisecond);
 	swapBytes(header.TimeStamp.day);
 	swapBytes(header.TimeStamp.month);
 	swapBytes(header.TimeStamp.year);
