@@ -27,6 +27,7 @@ public:
 	//static BuildTabPage* instance();
 
 	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
+	void cancelBuild();
 
 protected:
 	void CreateActions();

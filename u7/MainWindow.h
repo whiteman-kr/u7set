@@ -5,6 +5,7 @@ class CentralWidget;
 class DbController;
 class SchemasTabPage;
 class FilesTabPage;
+class BuildTabPage;
 
 namespace Ui {
 class MainWindow;
@@ -95,6 +96,7 @@ private:
 
 	SchemasTabPage* m_logicSchema = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;
+	BuildTabPage* m_buildTabPage = nullptr;
 	//SchemasTabPage* m_diagSchema = nullptr;
 
 	DbController* m_dbController = nullptr;
