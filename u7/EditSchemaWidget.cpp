@@ -1973,8 +1973,6 @@ void EditSchemaWidget::createActions()
 		m_editMenu->addAction(m_editPasteAction);
 		m_editMenu->addAction(m_editSeparatorAction2);
 		m_editMenu->addAction(m_deleteAction);
-		m_editMenu->addAction(m_editSeparatorAction3);
-		m_editMenu->addAction(m_propertiesAction);
 
 	m_sizeAndPosMenu = new QMenu(this);
 	m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);
