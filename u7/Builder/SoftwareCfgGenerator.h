@@ -24,6 +24,15 @@ namespace Builder
 
 		static QList<Hardware::DeviceModule*> m_lmList;
 
+		struct SchemaFile
+		{
+			QString id;
+			QString subDir;
+			QString fileName;
+			QString group;
+		};
+		static QList<SchemaFile> m_schemaFileList;
+
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 
 		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);

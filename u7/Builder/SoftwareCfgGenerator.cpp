@@ -8,7 +8,7 @@
 namespace Builder
 {
 	QList<Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
-
+	QList<SoftwareCfgGenerator::SchemaFile> SoftwareCfgGenerator::m_schemaFileList;
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
 		m_dbController(db),
@@ -132,6 +132,8 @@ namespace Builder
 
 		// Get all Application Logic schemas
 		//
+		m_schemaFileList.clear();
+
 		bool result = true;
 		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), AlFileExtension, "LogicSchemas", "LogicSchema", log);
 
@@ -209,12 +211,20 @@ namespace Builder
 			// Add file to build result
 			//
 			result = buildResultWriter->addFile(subDir, schema->strID() + "." + fileExtension, group, file->data());
-
 			if (result == false)
 			{
 				returnResult = false;
 				continue;
 			}
+
+			SchemaFile schemaFile;
+
+			schemaFile.id = schema->strID();
+			schemaFile.subDir = subDir;
+			schemaFile.fileName = schema->strID() + "." + fileExtension;		// File is stored under this name
+			schemaFile.group = group;
+
+			m_schemaFileList.push_back(schemaFile);
 		}
 
 		return returnResult;

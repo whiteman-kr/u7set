@@ -37,7 +37,10 @@ namespace Builder
 		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
 
-		//m_cfgXml->addLinkToFile("")
+		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+		{
+			m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
+		}
 
 		return result;
 	}
