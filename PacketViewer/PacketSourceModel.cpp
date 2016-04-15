@@ -200,15 +200,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 	connect(listener.get(), &Listener::endAddSource, this, &PacketSourceModel::endInsertSource, Qt::DirectConnection);
 	if (saveList)
 	{
-		QSettings settings;
-		settings.beginWriteArray("PacketSourceModel/listenAddresses", static_cast<int>(m_listeners.size()));
-		for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
-		{
-			settings.setArrayIndex(i);
-			settings.setValue("ip", m_listeners[i]->ip());
-			settings.setValue("port", m_listeners[i]->port());
-		}
-		settings.endArray();
+		saveListenerList();
 	}
 	emit contentChanged(0);
 }
@@ -223,6 +215,19 @@ int PacketSourceModel::index(Listener* listener)
 		}
 	}
 	return -1;
+}
+
+void PacketSourceModel::saveListenerList()
+{
+	QSettings settings;
+	settings.beginWriteArray("PacketSourceModel/listenAddresses", static_cast<int>(m_listeners.size()));
+	for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
+	{
+		settings.setArrayIndex(i);
+		settings.setValue("ip", m_listeners[i]->ip());
+		settings.setValue("port", m_listeners[i]->port());
+	}
+	settings.endArray();
 }
 
 void PacketSourceModel::loadProject(const QString& projectPath)
