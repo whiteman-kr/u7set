@@ -372,7 +372,7 @@ namespace ExtWidgets
 		// Private Data
 		//
 	private:
-		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
+        void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty *, std::pair<QVariant, bool> > &values);
         QtProperty* createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 	};
 
