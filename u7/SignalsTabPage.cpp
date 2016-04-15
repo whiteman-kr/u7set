@@ -1313,12 +1313,13 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	m_signalsView->horizontalHeader()->setHighlightSections(false);
+	horizontalHeader->setHighlightSections(false);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
-	m_signalsView->horizontalHeader()->setDefaultSectionSize(150);
-	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
+	horizontalHeader->setDefaultSectionSize(150);
+	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
@@ -1328,6 +1329,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
 		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage::columnWidth[%1]").arg(Columns[i]).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
+		//horizontalHeader->add
 	}
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -1698,6 +1700,15 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 
 void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refreshSignalList)
 {
+	// Update signals
+	//
+	if (refreshSignalList == true)
+	{
+		m_signalsModel->loadSignals();
+	}
+
+	// Reset signal type filter
+	//
 	if (sender() != nullptr && typeid(*sender()) == typeid(GlobalMessanger))
 	{
 		for (int i = 0; i < m_signalTypeFilterCombo->count(); i++)
@@ -1710,13 +1721,12 @@ void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refresh
 		m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
 	}
 
-	if (refreshSignalList == true)
-	{
-		m_signalsModel->loadSignals();
-	}
-
+	// Set signal id filter
+	//
 	m_signalsProxyModel->setSignalIdFilter(deviceStrIds);
 
+	// Set signal id filter editor text and save filter history
+	//
 	QString newFilter = deviceStrIds.join(" || ");
 	while (newFilter.indexOf("  ") != -1)
 	{
