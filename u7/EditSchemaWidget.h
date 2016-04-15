@@ -537,8 +537,8 @@ private:
 		QAction* m_fileExportToPdfAction = nullptr;
 		QAction* m_fileSeparatorAction1 = nullptr;
 		// ------------------------------
-		QAction* m_fileGetWorkcopyAction = nullptr;
-		QAction* m_fileSetWorkcopyAction = nullptr;
+		QAction* m_fileExportAction = nullptr;
+		QAction* m_fileImportAction = nullptr;
 		// ------------------------------
 		QAction* m_fileSeparatorAction2 = nullptr;
 		QAction* m_filePropertiesAction = nullptr;
