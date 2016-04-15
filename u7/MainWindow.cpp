@@ -54,9 +54,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>("als", dbController(), AlFileName, nullptr);
-	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>("mvs", dbController(), MvsFileName, nullptr);
-	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>("dvs", dbController(), DvsFileName, nullptr);
+	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(AlFileExtension, dbController(), AlFileName, nullptr);
+	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(MvsFileExtension, dbController(), MvsFileName, nullptr);
+	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
 	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
 	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));

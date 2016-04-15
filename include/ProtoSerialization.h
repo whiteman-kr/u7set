@@ -176,7 +176,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = ParseFromString(message, data.data());
+			bool result = ParseFromArray(message, data.data());
 			if (result == false)
 			{
 				return false;

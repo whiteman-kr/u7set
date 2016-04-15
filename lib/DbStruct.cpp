@@ -14,6 +14,9 @@ const char* const MvsFileName = "MVS";			// Monitor Video Schemas
 const char* const DvsFileName = "DVS";			// Diagnostics Video Schemas
 const char* const McFileName = "MC";			// Module Configuration
 
+const char* const AlFileExtension = "als";		// Application Logic schema file extnesion
+const char* const MvsFileExtension = "mvs";		// Monitor schema file extnesion
+const char* const DvsFileExtension = "dvs";		// Diagnostics schema file extnesion
 
 //
 //

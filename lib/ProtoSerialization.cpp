@@ -37,7 +37,7 @@ namespace Proto
 
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data)
 	{
-		bool result = message.ParseFromArray(data.data(), data.size());
+		bool result = message.ParseFromArray(data.constData(), data.size());
 		return result;
 	}
 
