@@ -388,6 +388,7 @@ void MainWindow::showAbout()
 	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
 	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2>");
 	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
+	aboutDialog.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	aboutDialog.exec();
 }
 
