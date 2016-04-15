@@ -139,6 +139,7 @@ namespace Builder
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
 		bool createBuildDirectory();
+		bool clearDirectory(QString directory);
 
 		bool createBuildXml();
 		bool writeBuildXmlFilesSection();

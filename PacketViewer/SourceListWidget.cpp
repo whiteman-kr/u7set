@@ -36,7 +36,7 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 			}
 			m_netListCombo->addItem(ip.toString());
 			QSettings settings;
-			int count = settings.beginReadArray("listenAddresses");
+			int count = settings.beginReadArray("PacketSourceModel/listenAddresses");
 			for (int i = 0; i < count; i++)
 			{
 				settings.setArrayIndex(i);

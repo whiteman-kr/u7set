@@ -27,7 +27,7 @@ ServiceTableModel::ServiceTableModel(QObject *parent) :
 {
 	QSettings settings;
 
-	int size = settings.beginReadArray("server list");
+	int size = settings.beginReadArray("ServiceTableModel/ServerList");
 
 	for (int i = 0; i < size; i++)
 	{
@@ -48,7 +48,7 @@ ServiceTableModel::~ServiceTableModel()
 	m_timer.stop();
 
 	QSettings settings;
-	settings.beginWriteArray("server list", m_hostsInfo.count());
+	settings.beginWriteArray("ServiceTableModel/ServerList", m_hostsInfo.count());
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{

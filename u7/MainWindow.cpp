@@ -305,7 +305,9 @@ void MainWindow::showSettings()
 	DialogSettings d(this);
 	d.setSettings(theSettings);
 
-	if (d.exec() == QDialog::Accepted)
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
 	{
 		theSettings = d.settings();
 		theSettings.writeSystemScope();

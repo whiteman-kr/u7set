@@ -201,7 +201,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 	if (saveList)
 	{
 		QSettings settings;
-		settings.beginWriteArray("listenAddresses", static_cast<int>(m_listeners.size()));
+		settings.beginWriteArray("PacketSourceModel/listenAddresses", static_cast<int>(m_listeners.size()));
 		for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 		{
 			settings.setArrayIndex(i);

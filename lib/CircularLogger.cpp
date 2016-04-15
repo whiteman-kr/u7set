@@ -8,6 +8,9 @@
 #include <QDebug>
 
 
+CircularLogger logger;
+
+
 const char* const MessageTypeStr[] =
 {
 	"USR",

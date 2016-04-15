@@ -1048,53 +1048,53 @@ void SignalsModel::addSignal()
 	}
 	else
 	{
-		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(settings.value("LastEditedSignal: dataFormat").toInt())));
+		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(settings.value("SignalsTabPage/LastEditedSignal/dataFormat").toInt())));
 		signal.setType(E::SignalType::Discrete);
 	}
-	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
-	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
-	signal.setHighADC(settings.value("LastEditedSignal: highADC").toInt());
-	signal.setLowLimit(settings.value("LastEditedSignal: lowLimit").toDouble());
-	signal.setHighLimit(settings.value("LastEditedSignal: highLimit").toDouble());
-	int unit = settings.value("LastEditedSignal: unitID").toInt();
+	signal.setDataSize(settings.value("SignalsTabPage/LastEditedSignal/dataSize").toInt());
+	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
+	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
+	signal.setLowLimit(settings.value("SignalsTabPage/LastEditedSignal/lowLimit").toDouble());
+	signal.setHighLimit(settings.value("SignalsTabPage/LastEditedSignal/highLimit").toDouble());
+	int unit = settings.value("SignalsTabPage/LastEditedSignal/unitID").toInt();
 	if (unit != -1)
 	{
 		signal.setUnitID(m_unitInfo.keyAt(unit));
 	}
-	signal.setAdjustment(settings.value("LastEditedSignal: adjustment").toDouble());
-	signal.setDropLimit(settings.value("LastEditedSignal: dropLimit").toDouble());
-	signal.setExcessLimit(settings.value("LastEditedSignal: excessLimit").toDouble());
-	signal.setUnbalanceLimit(settings.value("LastEditedSignal: unbalanceLimit").toDouble());
+	signal.setAdjustment(settings.value("SignalsTabPage/LastEditedSignal/adjustment").toDouble());
+	signal.setDropLimit(settings.value("SignalsTabPage/LastEditedSignal/dropLimit").toDouble());
+	signal.setExcessLimit(settings.value("SignalsTabPage/LastEditedSignal/excessLimit").toDouble());
+	signal.setUnbalanceLimit(settings.value("SignalsTabPage/LastEditedSignal/unbalanceLimit").toDouble());
 
-	signal.setInputLowLimit(settings.value("LastEditedSignal: inputLowLimit").toDouble());
-	signal.setInputHighLimit(settings.value("LastEditedSignal: inputHighLimit").toDouble());
-	unit = settings.value("LastEditedSignal: inputUnitID").toInt();
+	signal.setInputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/inputLowLimit").toDouble());
+	signal.setInputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/inputHighLimit").toDouble());
+	unit = settings.value("SignalsTabPage/LastEditedSignal/inputUnitID").toInt();
 	if (unit != -1)
 	{
 		signal.setInputUnitID(m_unitInfo.keyAt(unit));
 	}
-	signal.setInputSensorID(settings.value("LastEditedSignal: inputSensorID").toInt());
+	signal.setInputSensorID(settings.value("SignalsTabPage/LastEditedSignal/inputSensorID").toInt());
 
-	signal.setOutputLowLimit(settings.value("LastEditedSignal: outputLowLimit").toDouble());
-	signal.setOutputHighLimit(settings.value("LastEditedSignal: outputHighLimit").toDouble());
-	unit = settings.value("LastEditedSignal: outputUnitID").toInt();
+	signal.setOutputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/outputLowLimit").toDouble());
+	signal.setOutputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/outputHighLimit").toDouble());
+	unit = settings.value("SignalsTabPage/LastEditedSignal/outputUnitID").toInt();
 	if (unit != -1)
 	{
 		signal.setOutputUnitID(m_unitInfo.keyAt(unit));
 	}
-	signal.setOutputSensorID(settings.value("LastEditedSignal: outputSensorID").toInt());
+	signal.setOutputSensorID(settings.value("SignalsTabPage/LastEditedSignal/outputSensorID").toInt());
 
-	signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(settings.value("LastEditedSignal: outputRangeMode").toInt()));
+	signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(settings.value("SignalsTabPage/LastEditedSignal/outputRangeMode").toInt()));
 
-	signal.setAcquire(settings.value("LastEditedSignal: acquire").toBool());
-	signal.setCalculated(settings.value("LastEditedSignal: calculated").toBool());
-	signal.setNormalState(settings.value("LastEditedSignal: normalState").toInt());
-	signal.setDecimalPlaces(settings.value("LastEditedSignal: decimalPlaces").toInt());
-	signal.setAperture(settings.value("LastEditedSignal: aperture").toDouble());
-	signal.setFilteringTime(settings.value("LastEditedSignal: filteringTime").toDouble());
-	signal.setMaxDifference(settings.value("LastEditedSignal: maxDifference").toDouble());
+	signal.setAcquire(settings.value("SignalsTabPage/LastEditedSignal/acquire").toBool());
+	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());
+	signal.setNormalState(settings.value("SignalsTabPage/LastEditedSignal/normalState").toInt());
+	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
+	signal.setAperture(settings.value("SignalsTabPage/LastEditedSignal/aperture").toDouble());
+	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
+	signal.setMaxDifference(settings.value("SignalsTabPage/LastEditedSignal/maxDifference").toDouble());
 	signal.setInOutType(E::Internal);
-	signal.setByteOrder(E::ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
+	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
@@ -1285,7 +1285,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	filterToolBar->addWidget(m_filterEdit);
 
 	QSettings settings;
-	m_filterHistory = settings.value("SignalsTabPage::m_filterHistory").toStringList();
+	m_filterHistory = settings.value("SignalsTabPage/filterHistory").toStringList();
 
 	m_completer = new QCompleter(m_filterHistory, this);
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -1328,8 +1328,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage::columnWidth[%1]").arg(Columns[i]).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
-		//horizontalHeader->add
+		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
 	}
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -1375,7 +1374,7 @@ SignalsTabPage::~SignalsTabPage()
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		settings.setValue(QString("SignalsTabPage::columnWidth[%1]").arg(Columns[i]).replace("\n", " "), m_signalsView->columnWidth(i));
+		settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(i));
 	}
 }
 
@@ -1745,7 +1744,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refresh
 		}
 
 		QSettings settings;
-		settings.setValue("SignalsTabPage::m_filterHistory", m_filterHistory);
+		settings.setValue("SignalsTabPage/filterHistory", m_filterHistory);
 	}
 
 	m_filterEdit->setText(newFilter);
@@ -1928,7 +1927,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	setLayout(vl1);
 
 	QSettings settings;
-	resize(settings.value("Pending changes dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
+	resize(settings.value("PendingChangesDialog/size", qApp->desktop()->size() * 3 / 4).toSize());
 	m_splitter->setChildrenCollapsible(false);
 
 	QList<int> list = m_splitter->sizes();
@@ -1936,7 +1935,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	list[1] = m_commentEdit->height();
 	m_splitter->setSizes(list);
 
-	m_splitter->restoreState(settings.value("Pending changes dialog: splitter position", m_splitter->saveState()).toByteArray());
+	m_splitter->restoreState(settings.value("PendingChangesDialog/splitterPosition", m_splitter->saveState()).toByteArray());
 }
 
 void CheckinSignalsDialog::checkinSelected()
@@ -2035,8 +2034,8 @@ void CheckinSignalsDialog::openUndoDialog()
 void CheckinSignalsDialog::saveGeometry()
 {
 	QSettings settings;
-	settings.setValue("Pending changes dialog: size", size());
-	settings.setValue("Pending changes dialog: splitter position", m_splitter->saveState());
+	settings.setValue("PendingChangesDialog/size", size());
+	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
 }
 
 
@@ -2048,7 +2047,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	setWindowTitle(tr("Undo signal changes"));
 
 	QSettings settings;
-	resize(settings.value("Undo signals dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
+	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->size() * 3 / 4).toSize());
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
@@ -2119,7 +2118,7 @@ void UndoSignalsDialog::undoSelected()
 	}
 
 	QSettings settings;
-	settings.setValue("Undo signals dialog: size", size());
+	settings.setValue("UndoSignalsDialog/size", size());
 
 	accept();
 }

@@ -139,6 +139,106 @@ void CfgLoader::onClientThreadStarted()
 }
 
 
+void CfgLoader::changeApp(const QString& appStrID, int appInstance)
+{
+	shutdown();
+
+	m_appStrID = appStrID;
+	m_appInstance = appInstance;
+
+	m_appDataPath = "/" + m_appStrID + "-" + QString::number(m_appInstance);
+
+	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
+
+	//m_rootFolder = "d:/cfgloader" + m_appDataPath;		// for debugging only!!!
+
+	setRootFolder(m_rootFolder);
+
+	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
+
+	readSavedConfiguration();
+
+	resetStatuses();
+}
+
+
+bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr)
+{
+	// execute in context of calling thread
+	//
+	if (fileData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	fileData->clear();
+
+	WaitForSignalHelper wsh(this, SIGNAL(signal_fileReady()));
+
+	QByteArray localFileData;
+
+	emit signal_getFile(pathFileName, &localFileData);
+
+	if (wsh.wait(5000) == true)
+	{
+		*errorStr = getLastErrorStr();
+
+		if (errorStr->isEmpty())
+		{
+			fileData->swap(localFileData);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	*errorStr = tr("File reading timeout");
+
+	return false;
+}
+
+
+bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
+{
+	// execute in context of calling thread
+	//
+	setFileReady(false);
+
+	if (fileData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	fileData->clear();
+
+	emit signal_getFile(pathFileName, fileData);
+
+	return true;
+}
+
+
+bool CfgLoader::isFileReady()
+{
+	mutex.lock();
+
+	bool result = m_fileReady;
+
+	mutex.unlock();
+
+	return result;
+}
+
+
+QString CfgLoader::getLastErrorStr()
+{
+	return getErrorStr(getLastError());
+}
+
+
 void CfgLoader::slot_enableDownloadConfiguration()
 {
 	m_enableDownloadConfiguration = true;
@@ -222,81 +322,6 @@ void CfgLoader::startDownload()
 }
 
 
-bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr)
-{
-	// execute in context of calling thread
-	//
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	fileData->clear();
-
-	WaitForSignalHelper wsh(this, SIGNAL(signal_fileReady()));
-
-	QByteArray localFileData;
-
-	emit signal_getFile(pathFileName, &localFileData);
-
-	if (wsh.wait(5000) == true)
-	{
-		*errorStr = getLastErrorStr();
-
-		if (errorStr->isEmpty())
-		{
-			fileData->swap(localFileData);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	*errorStr = tr("File reading timeout");
-
-	return false;
-}
-
-
-bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
-{
-	// execute in context of calling thread
-	//
-	setFileReady(false);
-
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	fileData->clear();
-
-	emit signal_getFile(pathFileName, fileData);
-
-	return true;
-}
-
-
-bool CfgLoader::isFileReady()
-{
-	mutex.lock();
-
-	bool result = m_fileReady;
-
-	mutex.unlock();
-
-	return result;
-}
-
-
-QString CfgLoader::getLastErrorStr()
-{
-	return getErrorStr(getLastError());
-}
 
 
 void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
@@ -514,27 +539,6 @@ void CfgLoader::onTimer()
 }
 
 
-void CfgLoader::changeApp(const QString& appStrID, int appInstance)
-{
-	shutdown();
-
-	m_appStrID = appStrID;
-	m_appInstance = appInstance;
-
-	m_appDataPath = "/" + m_appStrID + "-" + QString::number(m_appInstance);
-
-	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
-
-	//m_rootFolder = "d:/cfgloader" + m_appDataPath;		// for debugging only!!!
-
-	setRootFolder(m_rootFolder);
-
-	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
-
-	readSavedConfiguration();
-
-	resetStatuses();
-}
 
 
 void CfgLoader::readSavedConfiguration()
@@ -722,20 +726,10 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
-	Tcp::Thread(cfgLoader),
-	m_cfgLoader(cfgLoader)
-{
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-	}
-}
-
-
 CfgLoaderThread::CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
 {
-	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2);
+	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2);		// it will be deleted during SimpleThread destruction
+
 	addWorker(m_cfgLoader);
 
 	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
@@ -756,12 +750,6 @@ bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fi
 		return false;
 	}
 
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
 	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
 }
 
@@ -774,39 +762,18 @@ bool CfgLoaderThread::getFile(const QString& pathFileName, QByteArray* fileData)
 		return false;
 	}
 
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
 	return m_cfgLoader->getFile(pathFileName, fileData);
 }
 
 
-
 bool CfgLoaderThread::isFileReady()
 {
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
 	return m_cfgLoader->isFileReady();
 }
 
 
-
-
 QString CfgLoaderThread::getLastErrorStr()
 {
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return "";
-	}
-
 	return m_cfgLoader->getLastErrorStr();
 }
 

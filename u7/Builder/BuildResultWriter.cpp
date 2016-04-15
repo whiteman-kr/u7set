@@ -460,13 +460,22 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		QString buildNoStr;
+		if (theSettings.freezeBuildPath() == false)
+		{
+			QString buildNoStr;
 
-		buildNoStr.sprintf("%06d", m_buildInfo.id);
+			buildNoStr.sprintf("%06d", m_buildInfo.id);
 
-		m_buildDirectory = QString("%1-%2-%3")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
+			m_buildDirectory = QString("%1-%2-%3")
+					.arg(m_dbController->currentProject().projectName())
+					.arg(m_buildInfo.typeStr()).arg(buildNoStr);
+		}
+		else
+		{
+			m_buildDirectory = QString("%1-%2")
+					.arg(m_dbController->currentProject().projectName())
+					.arg(m_buildInfo.typeStr());
+		}
 
 		m_buildFullPath = appDataPath + "/" + m_buildDirectory;
 
@@ -477,10 +486,43 @@ namespace Builder
 			return false;
 		}
 
+		clearDirectory(m_buildFullPath);
+
 		LOG_MESSAGE(m_log, QString(tr("Build directory was created: %1")).arg(m_buildFullPath));
 
 		return true;
 	}
+
+
+	bool BuildResultWriter::clearDirectory(QString directory)
+	{
+		bool result = true;
+		QDir dir(directory);
+
+		if (dir.exists(directory))
+		{
+			QFileInfoList dirContent = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
+			foreach(QFileInfo entry, dirContent)
+			{
+				if (entry.isDir())
+				{
+					result = clearDirectory(entry.absoluteFilePath());
+					result = dir.rmdir(entry.absoluteFilePath());
+				}
+				else
+				{
+					result = QFile::remove(entry.absoluteFilePath());
+				}
+
+				if (!result)
+				{
+						return result;
+				}
+			}
+		}
+		return result;
+	}
+
 
 	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& group)
 	{
