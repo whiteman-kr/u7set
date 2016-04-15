@@ -77,9 +77,13 @@ namespace VFrame30
 
 		double docWidth() const;
 		void setDocWidth(double width);
+		double docWidthRegional() const;
+		void setDocWidthRegional(double width);
 
 		double docHeight() const;
 		void setDocHeight(double height);
+		double docHeightRegional() const;
+		void setDocHeightRegional(double height);
 
 		SchemaUnit unit() const;
 		void setUnit(SchemaUnit value);

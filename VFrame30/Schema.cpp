@@ -21,8 +21,8 @@ namespace VFrame30
 	void Schema::Init(void)
 	{
 		ADD_PROPERTY_GETTER_SETTER(bool, ExcludeFromBuild, true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
-		ADD_PROPERTY_GETTER_SETTER(double, SchemaWidth, true, Schema::docWidth, Schema::setDocWidth);
-		ADD_PROPERTY_GETTER_SETTER(double, SchemaHeight, true, Schema::docHeight, Schema::setDocHeight);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemaWidth, true, Schema::docWidthRegional, Schema::setDocWidthRegional);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemaHeight, true, Schema::docHeightRegional, Schema::setDocHeightRegional);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -494,6 +494,75 @@ namespace VFrame30
 		m_width = width;
 	}
 
+	double Schema::docWidthRegional() const
+	{
+		switch (unit())
+		{
+		case SchemaUnit::Display:
+			return m_width;
+
+		case SchemaUnit::Inch:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				return m_width;
+			}
+			else
+			{
+				return in2mm(m_width);
+			}
+
+		case SchemaUnit::Millimeter:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				return mm2in(m_width);
+			}
+			else
+			{
+				return m_width;
+			}
+
+		default:
+			assert(false);
+			return 0.0;
+		}
+	}
+
+	void Schema::setDocWidthRegional(double width)
+	{
+		switch (unit())
+		{
+		case SchemaUnit::Display:
+			m_width = width;
+			return;
+
+		case SchemaUnit::Inch:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				m_width = width;
+			}
+			else
+			{
+				m_width = mm2in(width);
+			}
+			return;
+
+		case SchemaUnit::Millimeter:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				m_width = in2mm(width);
+			}
+			else
+			{
+				m_width = width;
+			}
+			return;
+
+		default:
+			assert(false);
+			return;
+		}
+	}
+
 	// Height
 	//
 	double Schema::docHeight() const
@@ -504,6 +573,75 @@ namespace VFrame30
 	void Schema::setDocHeight(double height)
 	{
 		m_height = height;
+	}
+
+	double Schema::docHeightRegional() const
+	{
+		switch (unit())
+		{
+		case SchemaUnit::Display:
+			return m_height;
+
+		case SchemaUnit::Inch:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				return m_height;
+			}
+			else
+			{
+				return in2mm(m_height);
+			}
+
+		case SchemaUnit::Millimeter:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				return mm2in(m_height);
+			}
+			else
+			{
+				return m_height;
+			}
+
+		default:
+			assert(false);
+			return 0.0;
+		}
+	}
+
+	void Schema::setDocHeightRegional(double height)
+	{
+		switch (unit())
+		{
+		case SchemaUnit::Display:
+			m_height = height;
+			return;
+
+		case SchemaUnit::Inch:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				m_height = height;
+			}
+			else
+			{
+				m_height = mm2in(height);
+			}
+			return;
+
+		case SchemaUnit::Millimeter:
+			if (Settings::regionalUnit() == SchemaUnit::Inch)
+			{
+				m_height = in2mm(height);
+			}
+			else
+			{
+				m_height = height;
+			}
+			return;
+
+		default:
+			assert(false);
+			return;
+		}
 	}
 
 	// Unit

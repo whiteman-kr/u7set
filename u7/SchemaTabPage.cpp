@@ -204,7 +204,41 @@ void SchemasTabPage::projectClosed()
 // SchemaControlTabPage
 //
 //
+SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
+										   DbController* db,
+										   const QString& parentFileName,
+										   std::function<VFrame30::Schema*()> createSchemaFunc) :
+		HasDbController(db),
+		m_createSchemaFunc(createSchemaFunc)
+{
+	// Create actions
+	//
+	CreateActions();
 
+	// Create controls
+	//
+	m_filesView = new SchemaFileView(db, parentFileName);
+	m_filesView->filesModel().setFilter(fileExt);
+
+	QHBoxLayout* pMainLayout = new QHBoxLayout();
+	pMainLayout->addWidget(m_filesView);
+
+	setLayout(pMainLayout);
+
+	// --
+	//
+	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPage::projectOpened);
+	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPage::projectClosed);
+
+	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
+	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
+	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
+	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
+	connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
+	connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
+
+	return;
+}
 
 
 SchemaControlTabPage::~SchemaControlTabPage()
@@ -222,31 +256,6 @@ void SchemaControlTabPage::CreateActions()
 
 void SchemaControlTabPage::addFile()
 {
-	// Choose Configuration file name
-	//
-	bool ok = false;
-
-	QString fileName = QInputDialog::getText(this, tr("Choose file name"), tr("file name:"), QLineEdit::Normal, "filename", &ok);
-	if (ok == false)
-	{
-		return;
-	}
-
-	if (fileName.isEmpty() == true)
-	{
-		QMessageBox msg(this);
-		msg.setText(tr("File name must not be empty."));
-		msg.exec();
-		return;
-	}
-
-	// Add extension if required
-	//
-	if (fileName.endsWith("." + m_filesView->filesModel().filter()) == false)	// ".vfr"
-	{
-		fileName += "." + m_filesView->filesModel().filter();
-	}
-
 	// Create new Schema and add it to the vcs
 	//
 	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
@@ -255,6 +264,12 @@ void SchemaControlTabPage::addFile()
 
 	schema->setStrID("#STRID");
 	schema->setCaption("Caption");
+
+	if (dynamic_cast<VFrame30::LogicSchema*>(schema.get()) != nullptr)
+	{
+		VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
+		logicSchema->setHardwareStrIds("SYSTEMID_RACKID_CH01_MD00");
+	}
 
 	if (schema->unit() == VFrame30::SchemaUnit::Display)
 	{
@@ -279,7 +294,7 @@ void SchemaControlTabPage::addFile()
 	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
-	vfFile->setFileName(fileName);
+	vfFile->setFileName(schema->strID() + "." + m_filesView->filesModel().filter());
 	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
