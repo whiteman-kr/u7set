@@ -1,10 +1,14 @@
 #include "../Builder/SoftwareCfgGenerator.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
+#include "../include/DeviceHelper.h"
 
 
 namespace Builder
 {
+	QList<Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
+
+
 	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
 		m_dbController(db),
 		m_software(software),
@@ -89,14 +93,39 @@ namespace Builder
 	}
 
 
-	bool SoftwareCfgGenerator::generateDataAcqisitionServiceCfg()
+	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter)
 	{
-		bool result = buildLMList();
-
-		if (result == false)
+		if (buildResultWriter == nullptr)
 		{
+			assert(false);
 			return false;
 		}
+
+		IssueLogger* log = buildResultWriter->log();
+
+		if (db == nullptr ||
+			signalSet == nullptr ||
+			equipment == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			assert(false);
+			return false;
+		}
+
+		bool result = true;
+
+		// add general software cfg generation here:
+		//
+
+		result &= buildLmList(equipment, log);
+
+		return result;
+	}
+
+
+	bool SoftwareCfgGenerator::generateDataAcqisitionServiceCfg()
+	{
+		bool result = true;
 
 		result &= writeAppSignalsXml();
 		result &= writeEquipmentXml();
@@ -106,13 +135,19 @@ namespace Builder
 	}
 
 
-	bool SoftwareCfgGenerator::buildLMList()
+	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
 	{
+		if (equipment == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
 		bool result = true;
 
 		m_lmList.clear();
 
-		equipmentWalker(m_deviceRoot, [this, &result](Hardware::DeviceObject* currentDevice)
+		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice == nullptr)
 				{
@@ -136,6 +171,15 @@ namespace Builder
 				m_lmList.append(module);
 			}
 		);
+
+		if (result == true)
+		{
+			LOG_MESSAGE(log, QString(tr("Logic Modules list building... OK")));
+		}
+		else
+		{
+			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build Logic Modules lis")));
+		}
 
 		return result;
 	}

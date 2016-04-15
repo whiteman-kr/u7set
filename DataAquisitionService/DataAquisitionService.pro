@@ -73,7 +73,6 @@ SOURCES += main.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
 	../lib/CircularLogger.cpp \
-    DataAquisitionService.cpp \
     ../lib/DataSource.cpp \
     FscDataAcquisitionThread.cpp \
     ../lib/DeviceObject.cpp \
@@ -87,7 +86,11 @@ SOURCES += main.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/SimpleThread.cpp
+    ../lib/SimpleThread.cpp \
+    DataAcquisitionService.cpp \
+    ../lib/ServicesSettings.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/OutputLog.cpp
 
 HEADERS += \
 	Stable.h \
@@ -95,7 +98,6 @@ HEADERS += \
 	../include/UdpSocket.h \
 	../include/Service.h \
 	../include/CircularLogger.h \
-    DataAquisitionService.h \
     ../include/DataSource.h \
     FscDataAcquisitionThread.h \
     version.h \
@@ -111,7 +113,11 @@ HEADERS += \
     ../include/Tcp.h \
     ../include/TcpFileTransfer.h \
     ../include/BuildInfo.h \
-    ../include/SimpleThread.h
+    ../include/SimpleThread.h \
+    DataAcquisitionService.h \
+    ../include/ServicesSettings.h \
+    ../include/DeviceHelper.h \
+    ../include/OutputLog.h
 
 include(../qtservice/src/qtservice.pri)
 

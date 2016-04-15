@@ -22,10 +22,9 @@ namespace Builder
 		ConfigurationXmlFile * m_cfgXml = nullptr;
 		QString m_subDir;
 
-		QList<Hardware::DeviceModule*> m_lmList;
+		static QList<Hardware::DeviceModule*> m_lmList;
 
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
-
 
 		bool generateMonitorCfg();
 		bool writeMonitorSettings();
@@ -35,7 +34,8 @@ namespace Builder
 
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
-		bool buildLMList();
+		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
+
 		bool writeAppSignalsXml();
 		bool writeEquipmentXml();
 		bool writeDataSourcesXml();
@@ -73,12 +73,12 @@ namespace Builder
 			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, OutputLog *log);
 		};
 
-
-
 	public:
 		SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
 
 		bool run();
+
+		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
 	};
 
 

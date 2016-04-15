@@ -7,9 +7,11 @@
 
 #include "FscDataAcquisitionThread.h"
 
-namespace Hardware {
+namespace Hardware
+{
 	class DeviceRoot;
 }
+
 
 
 class DataServiceWorker : public ServiceWorker

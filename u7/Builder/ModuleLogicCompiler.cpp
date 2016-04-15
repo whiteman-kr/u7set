@@ -1,5 +1,6 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
+#include "../include/DeviceHelper.h"
 
 namespace Builder
 {
@@ -288,7 +289,7 @@ namespace Builder
 		MemoryArea m_lmDiagData;
 		MemoryArea m_lmIntOutData;
 
-		const IntPropertyNameVar memSettings[] =
+		const DeviceHelper::IntPropertyNameVar memSettings[] =
 		{
 			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
 			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
@@ -311,7 +312,7 @@ namespace Builder
 			{	"LMInOutDataSize", m_lmIntOutData.ptrSizeW() }
 		};
 
-		for(IntPropertyNameVar memSetting : memSettings)
+		for(DeviceHelper::IntPropertyNameVar memSetting : memSettings)
 		{
 			result &= getLMIntProperty(memSetting.name, memSetting.var);
 		}
@@ -376,7 +377,7 @@ namespace Builder
 			m.device = device;
 			m.place = place;
 
-			const IntPropertyNameVar moduleSettings[] =
+			const DeviceHelper::IntPropertyNameVar moduleSettings[] =
 			{
 				{	"TxDataSize", &m.txDataSize },
 				{	"RxDataSize", &m.rxDataSize },
@@ -391,7 +392,7 @@ namespace Builder
 				{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
 			};
 
-			for(IntPropertyNameVar moduleSetting : moduleSettings)
+			for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
 			{
 				result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
 			}

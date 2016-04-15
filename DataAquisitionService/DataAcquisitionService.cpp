@@ -1,7 +1,7 @@
-#include "DataAquisitionService.h"
 #include <QXmlStreamReader>
-#include "../include/DeviceObject.h"
 #include <QMetaProperty>
+#include "../include/DeviceObject.h"
+#include "DataAcquisitionService.h"
 
 
 // DataServiceMainFunctionWorker class implementation
