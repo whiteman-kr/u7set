@@ -171,7 +171,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	QPoint center = desktopRect.center();
 	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
 	desktopRect.moveCenter(center);
-	QRect windowRect = settings.value("Signal properties dialog: geometry", desktopRect).toRect();
+	QRect windowRect = settings.value("SignalPropertiesDialog/geometry", desktopRect).toRect();
 	if (windowRect.height() > desktopRect.height())
 	{
 		windowRect.setHeight(desktopRect.height());
@@ -206,7 +206,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 void SignalPropertiesDialog::saveDialogSettings()
 {
 	QSettings settings;
-	settings.setValue("Signal properties dialog: geometry", geometry());
+	settings.setValue("SignalPropertiesDialog/geometry", geometry());
 }
 
 void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject> > objects)
@@ -233,5 +233,34 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 
 void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
-	// Save one of signals for signal adding template
+	QSettings settings;
+	Signal& signal = *m_signalVector[0];
+	settings.setValue("SignalsTabPage/LastEditedSignal/dataFormat", signal.dataFormat());
+	settings.setValue("SignalsTabPage/LastEditedSignal/dataSize", signal.dataSize());
+	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
+	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());
+	settings.setValue("SignalsTabPage/LastEditedSignal/lowLimit", signal.lowLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/highLimit", signal.highLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/unitID", signal.unitID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/adjustment", signal.adjustment());
+	settings.setValue("SignalsTabPage/LastEditedSignal/dropLimit", signal.dropLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/excessLimit", signal.excessLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/unbalanceLimit", signal.unbalanceLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputUnitID", signal.inputUnitID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputLowLimit", signal.outputLowLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputHighLimit", signal.outputHighLimit());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputUnitID", signal.outputUnitID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputRangeMode", signal.outputRangeMode());
+	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
+	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
+	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());
+	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
+	settings.setValue("SignalsTabPage/LastEditedSignal/aperture", signal.aperture());
+	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
+	settings.setValue("SignalsTabPage/LastEditedSignal/maxDifference", signal.maxDifference());
+	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());
 }
