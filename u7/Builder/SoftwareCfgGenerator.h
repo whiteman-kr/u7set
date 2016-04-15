@@ -79,6 +79,14 @@ namespace Builder
 		bool run();
 
 		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		static bool writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
+		static bool writeSchemasList(DbController* db,
+									 BuildResultWriter* buildResultWriter,
+									 int parentFileId,
+									 QString fileExtension,
+									 QString subDir,
+									 QString group,
+									 IssueLogger* log);
 	};
 
 

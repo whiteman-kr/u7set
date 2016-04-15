@@ -27,6 +27,10 @@ extern const char* const MvsFileName;			// Monitor Video Schemas
 extern const char* const DvsFileName;			// Diagnostics Video Schemas
 extern const char* const McFileName;			// Modules Configurations
 
+extern const char* const AlFileExtension;		// Application Logic schema file extnesion
+extern const char* const MvsFileExtension;		// Monitor schema file extnesion
+extern const char* const DvsFileExtension;		// Diagnostics schema file extnesion
+
 
 //
 //

@@ -2,6 +2,7 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
 #include "../include/DeviceHelper.h"
+#include "../VFrame30/LogicSchema.h"
 
 
 namespace Builder
@@ -125,7 +126,113 @@ namespace Builder
 
 		result &= buildLmList(equipment, log);
 
+		// Add Schemas to Build result
+		//
+		result &= writeSchemas(db, buildResultWriter, log);
+
 		return result;
+	}
+
+	bool SoftwareCfgGenerator::writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log)
+	{
+		if (db == nullptr ||
+			buildResultWriter == nullptr ||
+			log == nullptr)
+		{
+			assert(db);
+			assert(buildResultWriter);
+			assert(log);
+			return false;
+		}
+
+		// Get all Application Logic schemas
+		//
+		bool result = true;
+		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), AlFileExtension, "LogicSchemas", "LogicSchema", log);
+
+		// Get all Monitor schemas
+		//
+		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
+
+		return result;
+	}
+
+	bool SoftwareCfgGenerator::writeSchemasList(DbController* db, BuildResultWriter* buildResultWriter, int parentFileId, QString fileExtension, QString subDir, QString group, IssueLogger* log)
+	{
+		if (db == nullptr ||
+			buildResultWriter == nullptr ||
+			log == nullptr)
+		{
+			assert(db);
+			assert(buildResultWriter);
+			assert(log);
+			return false;
+		}
+
+		// Get File list
+		//
+		std::vector<DbFileInfo> fileList;
+
+		bool returnResult = true;
+		bool result = false;
+
+		if (buildResultWriter->isRelease() == true)
+		{
+			// To Do getting files for release
+			//
+			assert(false);
+			returnResult = false;
+		}
+		else
+		{
+			 result = db->getFileList(&fileList, parentFileId, fileExtension, true, nullptr);
+			 if (result == false)
+			 {
+				 log->errPDB2001(parentFileId, fileExtension, db->lastError());
+				 return false;
+			 }
+		}
+
+		// Get file instance and parse it
+		//
+		for (const DbFileInfo& f : fileList)
+		{
+			std::shared_ptr<DbFile> file;
+
+			result = db->getLatestVersion(f, &file, nullptr);
+			if (result == false || file.get() == nullptr)
+			{
+				log->errPDB2002(f.fileId(), f.fileName(), db->lastError());
+				returnResult = false;
+				continue;
+			}
+
+			// Parse file
+			//
+			VFrame30::Schema* schemaRawPtr = VFrame30::Schema::Create(file->data());
+			std::shared_ptr<VFrame30::Schema> schema(schemaRawPtr);
+
+			if (schemaRawPtr == false)
+			{
+				log->errCMN0010(f.fileName());
+				returnResult = false;
+				continue;
+			}
+
+			qDebug() << "Build: schema " << schema->strID() << " is loaded";
+
+			// Add file to build result
+			//
+			result = buildResultWriter->addFile(subDir, schema->strID() + "." + fileExtension, group, file->data());
+
+			if (result == false)
+			{
+				returnResult = false;
+				continue;
+			}
+		}
+
+		return returnResult;
 	}
 
 
@@ -514,11 +621,10 @@ namespace Builder
 		//
 		result &= writeMonitorSettings();
 
-		// write any files via m_buildResultWriter->addFile(...)
-		//
-
 		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
+
+		//m_cfgXml->addLinkToFile("")
 
 		return result;
 	}
