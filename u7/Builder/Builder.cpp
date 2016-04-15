@@ -740,7 +740,7 @@ namespace Builder
 		SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
-			[&db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
+			[this, &db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -767,8 +767,12 @@ namespace Builder
 				case E::SoftwareType::ConfigurationService:
 				case E::SoftwareType::DataArchivingService:
 				case E::SoftwareType::TuningService:
+					assert(false);
+					//softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
 				default:
-					softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					m_log->errEQP6100(software->strId(), software->uuid());
 					result = false;
 				}
 
