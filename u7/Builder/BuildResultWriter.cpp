@@ -802,4 +802,14 @@ namespace Builder
 		return nullptr;
 	}
 
+	bool BuildResultWriter::isDebug() const
+	{
+		return !m_buildInfo.release;
+	}
+
+	bool BuildResultWriter::isRelease() const
+	{
+		return m_buildInfo.release;
+	}
+
 }
