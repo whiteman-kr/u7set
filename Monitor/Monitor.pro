@@ -51,9 +51,10 @@ SOURCES += main.cpp \
     ../lib/Tcp.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    MonitorConfigThread.cpp \
     MonitorSchemaView.cpp \
-    MonitorSchemaWidget.cpp
+    MonitorSchemaWidget.cpp \
+    ../lib/Types.cpp \
+    MonitorConfigController.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -67,9 +68,10 @@ HEADERS  += \
     ../include/CfgServerLoader.h \
     ../include/BuildInfo.h \
     ../include/SimpleThread.h \
-    MonitorConfigThread.h \
     MonitorSchemaView.h \
-    MonitorSchemaWidget.h
+    MonitorSchemaWidget.h \
+    ../include/Types.h \
+    MonitorConfigController.h
 
 FORMS    += \
     DialogSettings.ui

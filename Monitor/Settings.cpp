@@ -8,9 +8,9 @@ Settings theSettings;
 Settings::Settings() :
 	m_instanceStrId("SYSTEM_RACKID_WS00_MONITOR"),
 	m_configuratorIpAddress1("127.0.0.1"),
-	m_configuratorPort1(PORT_CONFIGURATION_SERVICE),
+	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE)
+	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST)
 {
 }
 
@@ -28,7 +28,7 @@ Settings& Settings::operator = (const Settings& src)
 		setConfiguratorPort1(src.configuratorPort1());
 
 		setConfiguratorIpAddress2(src.configuratorIpAddress2());
-		setConfiguratorPort1(src.configuratorPort2());
+		setConfiguratorPort2(src.configuratorPort2());
 	}
 
 	return *this;
@@ -68,7 +68,7 @@ void Settings::loadUserScope()
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
-    return;
+	return;
 }
 
 void Settings::writeSystemScope() const
