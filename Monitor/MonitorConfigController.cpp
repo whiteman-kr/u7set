@@ -1,4 +1,4 @@
-#include "MonitorConfigThread.h"
+#include "MonitorConfigController.h"
 #include "Settings.h"
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
@@ -124,8 +124,123 @@ MonitorConfigController::~MonitorConfigController()
 	delete m_cfgLoaderThread;
 }
 
-void MonitorConfigController::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
+void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
+
+	QString errorMessage;
+
+	QXmlStreamReader xmlReader(configurationXmlData);
+
+	while(xmlReader.atEnd() == false)
+	{
+		if (xmlReader.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (xmlReader.name() == "Software")
+		{
+			bool result = xmlReadSoftwareSection(xmlReader);
+			if (result == false)
+			{
+				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Software.");
+			}
+			continue;
+		}
+
+		if (xmlReader.name() == "Settings")
+		{
+			bool result = xmlReadSettingsSection(xmlReader);
+			if (result == false)
+			{
+				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Settings.");
+			}
+			continue;
+		}
+	}
+
+	if (errorMessage.isEmpty() == false)
+	{
+		QMessageBox::critical(nullptr, qApp->applicationName(), errorMessage);
+	}
+
+	return;
 }
 
+bool MonitorConfigController::xmlReadSoftwareSection(QXmlStreamReader& xmlReader)
+{
+	if (xmlReader.name() != "Software")
+	{
+		assert(false);
+		return false;
+	}
+
+	QString appStrId = xmlReader.attributes().value("StrID").toString();
+
+	if (theSettings.instanceStrId() != appStrId)
+	{
+		// The received file has different StrID then expected
+		//
+		return false;
+	}
+
+	int softwareType = xmlReader.attributes().value("Type").toInt();
+
+	if (softwareType != E::SoftwareType::Monitor)
+	{
+		// The received file has different type then expected,
+		//
+		return false;
+	}
+
+	return true;
+}
+
+bool MonitorConfigController::xmlReadSettingsSection(QXmlStreamReader& xmlReader)
+{
+	if (xmlReader.name() != "Settings")
+	{
+		assert(false);
+		return false;
+	}
+
+	while(xmlReader.atEnd() == false)
+	{
+		if (xmlReader.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (xmlReader.name() == "DataAquisitionService")
+		{
+			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
+			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
+
+			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
+			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
+
+			int dasPort1 = xmlReader.attributes().value("port1").toInt();
+			int dasPort2 = xmlReader.attributes().value("port2").toInt();
+
+			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
+								 .arg(dasStrId1)
+								 .arg(dasIp1)
+								 .arg(dasPort1);
+			qDebug() << logString1;
+
+			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
+								 .arg(dasStrId2)
+								 .arg(dasIp2)
+								 .arg(dasPort2);
+			qDebug() << logString2;
+
+			// Send new settings to DAS thread etc
+			//
+
+			continue;
+		}
+	}
+
+	return true;
+}

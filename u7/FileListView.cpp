@@ -461,8 +461,8 @@ FileListView::FileListView(DbController* pDbStore, const QString& parentFileName
 	addAction(m_deleteFileAction);
 
 	addAction(m_separatorAction2);
-	addAction(m_getWorkcopyAction);
-	addAction(m_setWorkcopyAction);
+	addAction(m_exportWorkingcopyAction);
+	addAction(m_importWorkingcopyAction);
 
 	addAction(m_separatorAction3);
 	addAction(m_refreshFileAction);
@@ -529,15 +529,15 @@ void FileListView::CreateActions()
 	m_separatorAction2 = new QAction(this);
 	m_separatorAction2->setSeparator(true);
 
-	m_getWorkcopyAction = new QAction(tr("Get Workcopy..."), this);
-	m_getWorkcopyAction->setStatusTip(tr("Get file workcopy..."));
-	m_getWorkcopyAction->setEnabled(false);
-	connect(m_getWorkcopyAction, &QAction::triggered, this, &FileListView::slot_GetWorkcopy);
+	m_exportWorkingcopyAction = new QAction(tr("Export Workingcopy..."), this);
+	m_exportWorkingcopyAction->setStatusTip(tr("Export workingcopy file to disk..."));
+	m_exportWorkingcopyAction->setEnabled(false);
+	connect(m_exportWorkingcopyAction, &QAction::triggered, this, &FileListView::slot_GetWorkcopy);
 
-	m_setWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
-	m_setWorkcopyAction->setStatusTip(tr("Set file workcopy..."));
-	m_setWorkcopyAction->setEnabled(false);
-	connect(m_setWorkcopyAction, &QAction::triggered, this, &FileListView::slot_SetWorkcopy);
+	m_importWorkingcopyAction = new QAction(tr("Import Workingcopy..."), this);
+	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy from disk file to project file..."));
+	m_importWorkingcopyAction->setEnabled(false);
+	connect(m_importWorkingcopyAction, &QAction::triggered, this, &FileListView::slot_SetWorkcopy);
 
 	m_separatorAction3 = new QAction(this);
 	m_separatorAction3->setSeparator(true);
@@ -1214,8 +1214,8 @@ void FileListView::filesViewSelectionChanged(const QItemSelection& /*selected*/,
 	m_checkInAction->setEnabled(hasCheckInPossibility);
 	m_undoChangesAction->setEnabled(hasUndoPossibility);
 
-	m_getWorkcopyAction->setEnabled(canGetWorkcopy);
-	m_setWorkcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
+	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
+	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
 
 	m_deleteFileAction->setEnabled(hasDeletePossibility);
 

@@ -298,7 +298,6 @@ namespace Builder
 
 			if (ok == false)
 			{
-//                LOG_ERROR(m_log, Builder::IssueType::NotDefined, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -321,6 +320,8 @@ namespace Builder
 		// We've done, exit
 		//
 		emit resultReady(QString("Cool, we've done!"));
+
+		qDebug("Leave BuildWorkerThread::run()");
 
 		return;
 	}

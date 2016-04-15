@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include <QMessageBox>
 #include "../VFrame30/VFrame30Library.h"
-#include "MonitorConfigThread.h"
+#include "MonitorConfigController.h"
 
 int main(int argc, char *argv[])
 {

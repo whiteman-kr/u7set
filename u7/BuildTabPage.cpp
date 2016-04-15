@@ -20,7 +20,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-//	BuildTabPage::m_this = this;
+	//	BuildTabPage::m_this = this;
 
 	//
 	// Controls
@@ -123,6 +123,26 @@ BuildTabPage::~BuildTabPage()
 const std::map<QUuid, OutputMessageLevel>* BuildTabPage::itemsIssues() const
 {
 	return &m_itemsIssues;
+}
+
+void BuildTabPage::cancelBuild()
+{
+	if (m_builder.isRunning() == true)
+	{
+		m_builder.stop();
+
+		// wait for 20 seconds while bild stops
+		//
+		for (int i = 0; i < 2000 && m_builder.isRunning() == true; i++)
+		{
+			QThread::msleep(10);
+		}
+
+		if (m_builder.isRunning() == true)
+		{
+			qDebug() << "WARNING: Exit while the build thread is still running!";
+		}
+	}
 }
 
 //BuildTabPage* BuildTabPage::instance()
@@ -274,7 +294,6 @@ void BuildTabPage::buildWasFinished()
 	m_cancelButton->setEnabled(false);
 
 	m_itemsIssues.clear();
-	//m_outputLog.swapItemsIssues(&itemsIssues);
 
 	return;
 }

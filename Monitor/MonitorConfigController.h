@@ -15,8 +15,14 @@ public:
 	MonitorConfigController(HostAddressPort address1, HostAddressPort address2);
 	virtual ~MonitorConfigController();
 
+public:
+
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+private:
+	bool xmlReadSoftwareSection(QXmlStreamReader& xmlReader);
+	bool xmlReadSettingsSection(QXmlStreamReader& xmlReader);
 
 	// Data section
 	//

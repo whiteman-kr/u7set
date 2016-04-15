@@ -54,7 +54,6 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
-
 private:
 	mutable QMutex m_mutex;
 
@@ -67,7 +66,6 @@ private:
 
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
-
 };
 
 extern Settings theSettings;

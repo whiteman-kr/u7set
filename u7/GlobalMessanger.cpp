@@ -20,6 +20,7 @@ GlobalMessanger* GlobalMessanger::instance()
 
 void GlobalMessanger::free()
 {
+	qDebug() << "GlobalMessanger::free()";
 	delete m_instance;
 }
 

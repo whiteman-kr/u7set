@@ -1571,15 +1571,15 @@ void EditSchemaWidget::createActions()
 	m_fileSeparatorAction1 = new QAction(this);
 	m_fileSeparatorAction1->setSeparator(true);
 
-	m_fileGetWorkcopyAction = new QAction(tr("Get Workcopy..."), this);
-	m_fileGetWorkcopyAction->setStatusTip(tr("Get file workcopy"));
-	m_fileGetWorkcopyAction->setEnabled(true);
-	connect(m_fileGetWorkcopyAction, &QAction::triggered, this, &EditSchemaWidget::getCurrentWorkcopy);
+	m_fileExportAction = new QAction(tr("Export File..."), this);
+	m_fileExportAction->setStatusTip(tr("Export file to disk"));
+	m_fileExportAction->setEnabled(true);
+	connect(m_fileExportAction, &QAction::triggered, this, &EditSchemaWidget::getCurrentWorkcopy);
 
-	m_fileSetWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
-	m_fileSetWorkcopyAction->setStatusTip(tr("Set file workcopy"));
-	m_fileSetWorkcopyAction->setEnabled(false);
-	connect(m_fileSetWorkcopyAction, &QAction::triggered, this, &EditSchemaWidget::setCurrentWorkcopy);
+	m_fileImportAction = new QAction(tr("Import file..."), this);
+	m_fileImportAction->setStatusTip(tr("Import file from disk to project"));
+	m_fileImportAction->setEnabled(false);
+	connect(m_fileImportAction, &QAction::triggered, this, &EditSchemaWidget::setCurrentWorkcopy);
 
 	m_fileSeparatorAction2 = new QAction(this);
 	m_fileSeparatorAction2->setSeparator(true);
@@ -1941,8 +1941,8 @@ void EditSchemaWidget::createActions()
 		m_fileMenu->addAction(m_fileSaveAction);
 		m_fileMenu->addAction(m_fileExportToPdfAction);
 		m_fileMenu->addAction(m_fileSeparatorAction1);
-		m_fileMenu->addAction(m_fileGetWorkcopyAction);
-		m_fileMenu->addAction(m_fileSetWorkcopyAction);
+		m_fileMenu->addAction(m_fileExportAction);
+		m_fileMenu->addAction(m_fileImportAction);
 		m_fileMenu->addAction(m_fileSeparatorAction2);
 		m_fileMenu->addAction(m_filePropertiesAction);
 		m_fileMenu->addAction(m_fileSeparatorAction3);
@@ -1973,8 +1973,6 @@ void EditSchemaWidget::createActions()
 		m_editMenu->addAction(m_editPasteAction);
 		m_editMenu->addAction(m_editSeparatorAction2);
 		m_editMenu->addAction(m_deleteAction);
-		m_editMenu->addAction(m_editSeparatorAction3);
-		m_editMenu->addAction(m_propertiesAction);
 
 	m_sizeAndPosMenu = new QMenu(this);
 	m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);
@@ -4072,8 +4070,8 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
 	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == VcsState::CheckedIn);
 	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
-	m_fileGetWorkcopyAction->setEnabled(true);
-	m_fileSetWorkcopyAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileExportAction->setEnabled(true);
+	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
 
 	m_propertiesAction->setDisabled(editSchemaView()->selectedItems().empty());
 
