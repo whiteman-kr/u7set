@@ -24,7 +24,7 @@ PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& l
 	needToSwapBytes(false)
 {
 	QSettings settings;
-	needToSwapBytes = settings.value("needToSwapBytes", needToSwapBytes).toBool();
+	needToSwapBytes = settings.value("PacketBufferTableModel/needToSwapBytes", needToSwapBytes).toBool();
 }
 
 int PacketBufferTableModel::rowCount(const QModelIndex&) const
@@ -135,7 +135,7 @@ void PacketBufferTableModel::setNeedToSwapBytes(bool value)
 	needToSwapBytes = value;
 	endResetModel();
 	QSettings settings;
-	settings.setValue("needToSwapBytes", needToSwapBytes);
+	settings.setValue("PacketBufferTableModel/needToSwapBytes", needToSwapBytes);
 }
 
 void PacketBufferTableModel::updateData()

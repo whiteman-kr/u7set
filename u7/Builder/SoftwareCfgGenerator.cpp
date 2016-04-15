@@ -534,6 +534,26 @@ namespace Builder
 			//
 			bool ok = true;
 
+			// StartSchemaStrID
+			//
+			QString startSchemaStrId = getObjectProperty<QString>(m_software->strId(), "StartSchemaStrID", &ok).trimmed();
+			if (ok == false)
+			{
+				return false;
+			}
+
+			if (startSchemaStrId.isEmpty() == true)
+			{
+				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID1 is invalid")
+								   .arg(m_software->strId());
+
+				m_log->writeError(errorStr);
+				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			xmlWriter.writeTextElement("StartSchemaStrID", startSchemaStrId);
+
 			// DataAquisitionServiceStrID1
 			//
 			QString dacStrID1 = getObjectProperty<QString>(m_software->strId(), "DataAquisitionServiceStrID1", &ok).trimmed();

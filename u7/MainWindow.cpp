@@ -62,8 +62,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
 
-	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
+	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
 
 	// --
 	//
@@ -82,6 +82,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+	// Cancel build
+	//
+	if (m_buildTabPage != nullptr)
+	{
+		m_buildTabPage->cancelBuild();
+	}
+	else
+	{
+		assert(m_buildTabPage);
+	}
+
 	// check if any schema is not saved
 	//
 	if (m_logicSchema == nullptr ||
@@ -377,6 +388,7 @@ void MainWindow::showAbout()
 	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
 	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2>");
 	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
+	aboutDialog.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	aboutDialog.exec();
 }
 

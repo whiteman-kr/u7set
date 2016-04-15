@@ -1499,7 +1499,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_fileView->addAction(m_SeparatorAction2);
 	m_fileView->addAction(m_getLatestVersionAction);
 	m_fileView->addAction(m_getLatestTreeVersionAction);
-	m_fileView->addAction(m_setWorkcopyAction);
+	m_fileView->addAction(m_importWorkingcopyAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction3);
 	m_fileView->addAction(m_refreshAction);
@@ -1592,10 +1592,10 @@ void FilesTabPage::createActions()
 	m_getLatestTreeVersionAction->setEnabled(false);
 	connect(m_getLatestTreeVersionAction, &QAction::triggered, m_fileView, &FileTreeView::getLatestTreeVersion);
 
-	m_setWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
-	m_setWorkcopyAction->setStatusTip(tr("Set work copy of the file(s)..."));
-	m_setWorkcopyAction->setEnabled(false);
-	connect(m_setWorkcopyAction, &QAction::triggered, m_fileView, &FileTreeView::setWorkcopy);
+	m_importWorkingcopyAction = new QAction(tr("Import Workingcopy..."), this);
+	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy disk file to project file..."));
+	m_importWorkingcopyAction->setEnabled(false);
+	connect(m_importWorkingcopyAction, &QAction::triggered, m_fileView, &FileTreeView::setWorkcopy);
 
 
 	//----------------------------------
@@ -1622,7 +1622,7 @@ void FilesTabPage::setActionState()
 	m_undoChangesAction->setEnabled(false);
 	m_getLatestVersionAction->setEnabled(false);
 	m_getLatestTreeVersionAction->setEnabled(false);
-	m_setWorkcopyAction->setEnabled(false);
+	m_importWorkingcopyAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -1702,7 +1702,7 @@ void FilesTabPage::setActionState()
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
-	m_setWorkcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
+	m_importWorkingcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
     // Enable edit only files with several extensions!
     //

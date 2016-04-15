@@ -183,14 +183,15 @@ void MonitorMainWindow::showSettings()
 	DialogSettings d(this);
 	d.setSettings(theSettings);
 
-	if (d.exec() == QDialog::Accepted)
+	int result = d.exec();
+
+	if (result == QDialog::DialogCode::Accepted)
 	{
 		theSettings = d.settings();
 		theSettings.writeSystemScope();
 
 		// Apply settings here
 		//
-		//dbController()->setHost(theSettings.serverIpAddress());
 		return;
 	}
 

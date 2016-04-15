@@ -49,7 +49,7 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
 	}
 
 	QSettings settings;
-	m_addressEdit->setText(settings.value("last scan target", addressCombo->currentText()).toString());
+	m_addressEdit->setText(settings.value("ScanOptionsWidget/lastScanTarget", addressCombo->currentText()).toString());
 
 	connect(addressCombo, &QComboBox::currentTextChanged, m_addressEdit, &QLineEdit::setText);
 
@@ -145,7 +145,7 @@ void ScanOptionsWidget::startChecking()
 	}
 
 	QSettings settings;
-	settings.setValue("last scan target", m_addressEdit->text());
+	settings.setValue("ScanOptionsWidget/lastScanTarget", m_addressEdit->text());
 
 	accept();
 }

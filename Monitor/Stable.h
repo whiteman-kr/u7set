@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <stdint.h>
 
-
 // C++ includes
 //
 #include <memory>
@@ -106,6 +105,8 @@
 //#include "../include/TypesAndEnums.h"
 //#include "../include/CUtils.h"
 
+#include "../include/Types.h"
+
 // Disable some warnings
 //
 #ifdef Q_OS_WIN
@@ -128,8 +129,6 @@
    #define new DBG_NEW
 #endif
 #endif
-
-
 
 
 #endif // MONITOR_STABLE_H

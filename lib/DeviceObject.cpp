@@ -2648,7 +2648,7 @@ R"DELIM({
 		QXmlStreamReader equipmentReader;
 		QFile file(filePath);
 
-		Hardware::DeviceObject* pCurrentDevice;
+		Hardware::DeviceObject* pCurrentDevice = nullptr;
 
 		if (file.open(QIODevice::ReadOnly))
 		{
@@ -2714,7 +2714,7 @@ R"DELIM({
 					break;
 				}
 				case QXmlStreamReader::EndElement:
-					if (typeid(*pCurrentDevice) != typeid(Hardware::DeviceRoot))
+					if (pCurrentDevice != nullptr && typeid(*pCurrentDevice) != typeid(Hardware::DeviceRoot))
 					{
 						if (pCurrentDevice->parent() == nullptr)
 						{

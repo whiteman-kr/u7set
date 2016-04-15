@@ -152,8 +152,8 @@ protected:
 	QAction* m_deleteFileAction = nullptr;
 	// --
 	QAction* m_separatorAction2 = nullptr;
-	QAction* m_getWorkcopyAction = nullptr;
-	QAction* m_setWorkcopyAction = nullptr;
+	QAction* m_exportWorkingcopyAction = nullptr;
+	QAction* m_importWorkingcopyAction = nullptr;
 	// --
 	QAction* m_separatorAction3 = nullptr;
 	QAction* m_refreshFileAction = nullptr;
