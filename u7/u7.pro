@@ -158,7 +158,9 @@ SOURCES +=\
     CreateSchemaDialog.cpp \
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
-    ../lib/DeviceHelper.cpp
+    ../lib/DeviceHelper.cpp \
+    ../lib/XmlHelper.cpp \
+    Builder/DASCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -246,7 +248,9 @@ HEADERS  += \
     CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
-    ../include/DeviceHelper.h
+    ../include/DeviceHelper.h \
+    ../include/XmlHelper.h \
+    Builder/DASCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \

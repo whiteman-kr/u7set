@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include/DeviceHelper.h"
-#include "../include/SocketIO.h"
+#include "../include/XmlHelper.h"
 
 
 const int	CHANNEL1 = 0,
@@ -11,10 +11,10 @@ const int	CHANNEL1 = 0,
 struct DataAcquisitionServiceEthernetChannel
 {
 	HostAddressPort appDataReceivingIP;
-	QHostAddress appDataReceivingNetmask;
+	QHostAddress appDataNetmask;
 
 	HostAddressPort diagDataReceivingIP;
-	QHostAddress diagDataReceivingNetmask;
+	QHostAddress diagDataNetmask;
 
 	QString archivingServiceStrID;
 	HostAddressPort archivingServiceIP;

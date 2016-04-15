@@ -103,6 +103,12 @@ namespace Builder
 
 		IssueLogger* log = buildResultWriter->log();
 
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
 		if (db == nullptr ||
 			signalSet == nullptr ||
 			equipment == nullptr)

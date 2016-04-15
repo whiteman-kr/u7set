@@ -90,7 +90,8 @@ SOURCES += main.cpp \
     DataAcquisitionService.cpp \
     ../lib/ServicesSettings.cpp \
     ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp
+    ../lib/OutputLog.cpp \
+    ../lib/XmlHelper.cpp
 
 HEADERS += \
 	Stable.h \
@@ -117,7 +118,8 @@ HEADERS += \
     DataAcquisitionService.h \
     ../include/ServicesSettings.h \
     ../include/DeviceHelper.h \
-    ../include/OutputLog.h
+    ../include/OutputLog.h \
+    ../include/XmlHelper.h
 
 include(../qtservice/src/qtservice.pri)
 

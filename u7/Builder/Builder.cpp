@@ -14,6 +14,8 @@
 
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../Builder/SoftwareCfgGenerator.h"
+#include "../Builder/DASCfgGenerator.h"
+
 #include <QBuffer>
 #include <functional>
 
@@ -753,9 +755,29 @@ namespace Builder
 					return;
 				}
 
-				SoftwareCfgGenerator softwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+				SoftwareCfgGenerator* softwareCfgGenerator = nullptr;
 
-				result &= softwareCfgGenerator.run();
+				switch(software->type())
+				{
+				case E::SoftwareType::DataAcquisitionService:
+					softwareCfgGenerator = new DASCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::Monitor:
+				case E::SoftwareType::ConfigurationService:
+				case E::SoftwareType::DataArchivingService:
+				case E::SoftwareType::TuningService:
+				default:
+					softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					result = false;
+				}
+
+				if (softwareCfgGenerator != nullptr)
+				{
+					result &= softwareCfgGenerator->run();
+
+					delete softwareCfgGenerator;
+				}
 			}
 		);
 

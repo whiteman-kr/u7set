@@ -19,7 +19,7 @@ namespace Builder
 		Hardware::EquipmentSet* m_equipment = nullptr;
 		BuildResultWriter* m_buildResultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
-		ConfigurationXmlFile * m_cfgXml = nullptr;
+		ConfigurationXmlFile* m_cfgXml = nullptr;
 		QString m_subDir;
 
 		static QList<Hardware::DeviceModule*> m_lmList;
