@@ -15,6 +15,7 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../Builder/SoftwareCfgGenerator.h"
 #include "../Builder/DASCfgGenerator.h"
+#include "../Builder/MonitorCfgGenerator.h"
 
 #include <QBuffer>
 #include <functional>
@@ -764,6 +765,9 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::Monitor:
+					softwareCfgGenerator = new MonitorCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
 				case E::SoftwareType::ConfigurationService:
 				case E::SoftwareType::DataArchivingService:
 				case E::SoftwareType::TuningService:

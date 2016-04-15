@@ -160,7 +160,8 @@ SOURCES +=\
     EditEngine/EditEngineSetOrder.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/XmlHelper.cpp \
-    Builder/DASCfgGenerator.cpp
+    Builder/DASCfgGenerator.cpp \
+    Builder/MonitorCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -250,7 +251,8 @@ HEADERS  += \
     EditEngine/EditEngineSetOrder.h \
     ../include/DeviceHelper.h \
     ../include/XmlHelper.h \
-    Builder/DASCfgGenerator.h
+    Builder/DASCfgGenerator.h \
+    Builder/MonitorCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \
