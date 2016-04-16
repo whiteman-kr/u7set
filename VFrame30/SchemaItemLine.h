@@ -38,11 +38,11 @@ namespace VFrame30
 		double weight() const;
 		void setWeight(double weight);
 
-		QRgb lineColor() const;
-		void setLineColor(QRgb color);
+		QColor lineColor() const;
+		void setLineColor(QColor color);
 
 	private:
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
-		QRgb m_lineColor;
+		QColor m_lineColor;
 	};
 }
