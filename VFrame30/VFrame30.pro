@@ -119,7 +119,9 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemPath.h \
     SchemaItemRect.h \
     SchemaItemSignal.h \
-    BaseSchemaWidget.h
+    BaseSchemaWidget.h \
+    SchemaPoint.h \
+    ../include/Types.h
 
 SOURCES += \
     Settings.cpp \
@@ -157,7 +159,9 @@ SOURCES += \
     SchemaItemPath.cpp \
     SchemaItemRect.cpp \
     SchemaItemSignal.cpp \
-    BaseSchemaWidget.cpp
+    BaseSchemaWidget.cpp \
+    SchemaPoint.cpp \
+    ../lib/Types.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

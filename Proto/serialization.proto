@@ -410,6 +410,8 @@ message SchemaItemRect
 	required FontParam font = 6;
 	required bool fill = 7;
 	optional bool drawrect = 8 [default = true];
+	optional int32 horzAlign = 9  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 10  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
 }
 
 //

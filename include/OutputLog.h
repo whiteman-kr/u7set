@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QDateTime>
+#include "Types.h"
 
 #define LOG_STRING(PARAM) #PARAM
 
@@ -13,14 +14,6 @@
 
 #define LOG_INTERNAL_ERROR(logObject)	logObject->writeError(QString(tr("Internal error! File: %1 Line: %2 Function: %3")).arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, Q_FUNC_INFO);
 
-
-enum class OutputMessageLevel
-{
-	Message,
-	Success,
-	Warning,
-	Error
-};
 
 class OutputLogItem
 {

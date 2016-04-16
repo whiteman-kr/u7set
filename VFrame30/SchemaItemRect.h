@@ -48,12 +48,18 @@ namespace VFrame30
 		QColor fillColor() const;
 		void setFillColor(QColor color);
 
+		QColor textColor() const;
+		void setTextColor(QColor color);
+
 		const QString& text() const;
 		void setText(QString value);
 
-		QColor textColor() const;
-		void setTextColor(QColor color);
-		
+		E::HorzAlign horzAlign() const;
+		void setHorzAlign(E::HorzAlign align);
+
+		E::VertAlign vertAlign() const;
+		void setVertAlign(E::VertAlign align);
+
 		DECLARE_FONT_PROPERTIES(Font);
 
 		bool fill() const;
@@ -63,13 +69,15 @@ namespace VFrame30
 		void setDrawRect(bool value);
 
 	private:
-		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
+		double m_weight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
 		QColor m_lineColor;
 		QColor m_fillColor;
 		QColor m_textColor;
 		QString m_text;
+		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
+		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 		FontParam m_font;
-		bool m_fill;
+		bool m_fill = true;
 		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
 
 		// Drawing resources
