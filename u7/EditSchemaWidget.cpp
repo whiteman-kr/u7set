@@ -2611,7 +2611,8 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 
 	// Высислить координаты выделения для листа
 	//
-	QRectF pageSelectionArea = QRectF(editSchemaView()->m_mouseSelectionStartPoint, editSchemaView()->m_mouseSelectionEndPoint);
+	QRectF pageSelectionArea = QRectF(editSchemaView()->m_mouseSelectionStartPoint, editSchemaView()->m_mouseSelectionEndPoint)
+							   .normalized();
 
 	// Поиск элементов внутри pageSelectionArea
 	//
