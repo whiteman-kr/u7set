@@ -22,7 +22,7 @@ Remote:	       	????
 		
 	hotfix-<name>	- required if needed to add an important fix to codebase quickly, 
 			  created from stable branch. Should be merged with the stable AND develop branches
-			  "hotfix-rcpct-730"
+			  "hotfix-rpct-730"
 
 	develop 	- branch for everyday developing, merged to stable as programms are stable and ready to use
 
