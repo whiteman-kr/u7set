@@ -380,10 +380,10 @@ namespace VFrame30
 	{
 		SchemaPoint p(x, y);
 
-		if (points.empty() == false && points.back() == p)
-		{
-			return;
-		}
+//		if (points.empty() == false && points.back() == p)
+//		{
+//			return;
+//		}
 
 		points.push_back(p);
 	}
