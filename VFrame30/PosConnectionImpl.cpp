@@ -380,6 +380,10 @@ namespace VFrame30
 	{
 		SchemaPoint p(x, y);
 
+		// Do not filter consiquent same points in this functiosn, as on build proccess fake links with
+		// two same points can be added.
+		// That's why its commented, do not uncomment if you want build to work!
+		//
 //		if (points.empty() == false && points.back() == p)
 //		{
 //			return;
