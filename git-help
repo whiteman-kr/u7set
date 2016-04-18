@@ -43,7 +43,7 @@ Remote:	       	????
 3.4	Create branch and switch to it (3.2 + 3.3)
 	$ git checkout -b <branch>
 
-
+4. Stable/release strategy
 
 
 
