@@ -41,6 +41,8 @@ namespace Tuning
 
 	void TuningSocketWorker::Request::initToRead(const TuningSettings& settings, quint64 tuningID, int frameNo)
 	{
+		Q_UNUSED(settings);
+		Q_UNUSED(frameNo);
 		header.version = 1;
 		header.tuningID = tuningID;
 //		header.subsystemKey = subsystemKey;

@@ -98,6 +98,8 @@ bool DataAcquisitionServiceSettings::writeToXml(QXmlStreamWriter& xml)
 
 bool DataAcquisitionServiceSettings::readFromXml(QXmlStreamWriter& xml)
 {
+	Q_UNUSED(xml);
+
 	bool result = true;
 
 	return result;

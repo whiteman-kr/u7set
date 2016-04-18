@@ -54,4 +54,5 @@ bool XmlHelper::readHostAddressElement(QXmlStreamReader& xml, const QString& nam
 	}
 
 	hostAddress->setAddress(xml.attributes().value("IP").toString());
+	return true;
 }

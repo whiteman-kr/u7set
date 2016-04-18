@@ -18,7 +18,7 @@ namespace Builder
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
 		template <typename TYPE>
-		TYPE MonitorCfgGenerator::getObjectProperty(QString strId, QString property, bool* ok);
+		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 	};
 
 
