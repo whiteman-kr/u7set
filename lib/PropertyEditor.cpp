@@ -1821,7 +1821,7 @@ namespace ExtWidgets
 	void PropertyEditor::updateProperty(const QString& propertyName)
 	{
         QSet<QtProperty*> props;
-		QMap<QtProperty*, QVariant> vals;
+        QMap<QtProperty*, std::pair<QVariant, bool>> vals;
 
 		if (propertyName.isEmpty() == true)
 		{
@@ -1836,7 +1836,15 @@ namespace ExtWidgets
 
 		for (auto p : props)
 		{
-            m_propertyVariantManager->setValue(p, vals.value(p));
+            QVariant value = vals.value(p).first;
+            bool sameValue = vals.value(p).second;
+
+            m_propertyVariantManager->setAttribute(p, "@propertyEditor@sameValue", sameValue);
+
+            if (sameValue == true)
+            {
+                m_propertyVariantManager->setValue(p, value);
+            }
         }
 	}
 
@@ -1845,7 +1853,7 @@ namespace ExtWidgets
 		updateProperty(QString());
 	}
 
-	void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values)
+    void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool>>& values)
 	{
         values.clear();
 
@@ -1876,15 +1884,7 @@ namespace ExtWidgets
 				}
 			}
 
-			if (sameValue == true)
-			{
-				values.insert(property, value);
-			}
-			else
-			{
-				values.insert(property, QVariant(value));		//  IS BUG HERE!!!!!!????????
-				//values.insert(property, QVariant());			//  IS BUG HERE!!!!!!????????
-			}
+            values.insert(property, std::make_pair(value, sameValue));
         }
 	}
 
