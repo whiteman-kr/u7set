@@ -14,6 +14,9 @@
 
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../Builder/SoftwareCfgGenerator.h"
+#include "../Builder/DASCfgGenerator.h"
+#include "../Builder/MonitorCfgGenerator.h"
+
 #include <QBuffer>
 #include <functional>
 
@@ -190,9 +193,9 @@ namespace Builder
 
 			LOG_MESSAGE(m_log, tr("%1 elements loaded.").arg(afbCollection.elements().size()));
 
-            //
-            // Loading subsystems
-            //
+			//
+			// Loading subsystems
+			//
 
 			Hardware::SubsystemStorage subsystems;
 
@@ -205,29 +208,29 @@ namespace Builder
 				if (errorCode.isEmpty() == false)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorCode);
-                    break;
+					break;
 				}
 			}
 
-            Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
+			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
 
-            //
-            // Loading connections
-            //
+			//
+			// Loading connections
+			//
 
-            Hardware::ConnectionStorage connections;
+			Hardware::ConnectionStorage connections;
 
-            ok = connections.load(&db, errorCode);
+			ok = connections.load(&db, errorCode);
 
-            if (ok == false)
-            {
+			if (ok == false)
+			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load connections file"));
-                if (errorCode.isEmpty() == false)
-                {
+				if (errorCode.isEmpty() == false)
+				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorCode);
-                    break;
-                }
-            }
+					break;
+				}
+			}
 
 			//
 			// Parse application logic
@@ -244,7 +247,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-            compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &buildWriter);
+			compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -262,18 +265,18 @@ namespace Builder
 			}
 
 
-            //
-            // Compile Module configuration
-            //
-            LOG_EMPTY_LINE(m_log);
-            LOG_MESSAGE(m_log, tr("Module configurations compilation"));
+			//
+			// Compile Module configuration
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
-            if (QThread::currentThread()->isInterruptionRequested() == true)
-            {
-                break;
-            }
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
 
 			if (ok == false)
 			{
@@ -283,18 +286,18 @@ namespace Builder
 			}
 
 
-            //
-            // Tuning parameters
-            //
-            LOG_EMPTY_LINE(m_log);
-            LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
+			//
+			// Tuning parameters
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-            ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
+			ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
-            if (QThread::currentThread()->isInterruptionRequested() == true)
-            {
-                break;
-            }
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
 
 			if (ok == false)
 			{
@@ -302,8 +305,8 @@ namespace Builder
 				break;
 			}
 
-            LOG_SUCCESS(m_log, tr("Ok"));
-        }
+			LOG_SUCCESS(m_log, tr("Ok"));
+		}
 		while (false);
 
 		buildWriter.finish();
@@ -616,20 +619,20 @@ namespace Builder
 		return result;
 	}
 
-    bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
 			signalSet == nullptr ||
 			subsystems == nullptr ||
-            opticModuleStorage == nullptr ||
+			opticModuleStorage == nullptr ||
 			buildWriter == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-        ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
@@ -637,28 +640,28 @@ namespace Builder
 
 	}
 
-    bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
-    {
-        if (db == nullptr ||
-            deviceRoot == nullptr ||
-            signalSet == nullptr ||
-            subsystems == nullptr ||
-            opticModuleStorage == nullptr ||
-            buildWriter == nullptr)
-        {
-            assert(false);
-            return false;
-        }
+	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
+	{
+		if (db == nullptr ||
+			deviceRoot == nullptr ||
+			signalSet == nullptr ||
+			subsystems == nullptr ||
+			opticModuleStorage == nullptr ||
+			buildWriter == nullptr)
+		{
+			assert(false);
+			return false;
+		}
 
-        TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
-        bool result = tunBuilder.build();
+		bool result = tunBuilder.build();
 
-        return result;
+		return result;
 
-    }
+	}
 
-    bool BuildWorkerThread::parseApplicationLogic(DbController* db,
+	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
 												  Hardware::EquipmentSet* equipment,
@@ -696,18 +699,18 @@ namespace Builder
 
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
-                                                    Hardware::EquipmentSet* equipmentSet,
-                                                    Hardware::OptoModuleStorage* optoModuleStorage,
-                                                    Hardware::ConnectionStorage* connections,
+													Hardware::EquipmentSet* equipmentSet,
+													Hardware::OptoModuleStorage* optoModuleStorage,
+													Hardware::ConnectionStorage* connections,
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
-                                                    BuildResultWriter* buildResultWriter)
+													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-        ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 
@@ -732,11 +735,13 @@ namespace Builder
 		bool result = true;
 
 		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("OMS and Tuning software configuration generation...")))
+		LOG_EMPTY_LINE(m_log);
 
-		LOG_MESSAGE(m_log, QString(tr("SCADA sofware configuration generation...")))
+		SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
-			[&db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
+			[this, &db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -751,9 +756,36 @@ namespace Builder
 					return;
 				}
 
-				SoftwareCfgGenerator softwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+				SoftwareCfgGenerator* softwareCfgGenerator = nullptr;
 
-				result &= softwareCfgGenerator.run();
+				switch(software->type())
+				{
+				case E::SoftwareType::DataAcquisitionService:
+					softwareCfgGenerator = new DASCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::Monitor:
+					softwareCfgGenerator = new MonitorCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::ConfigurationService:
+				case E::SoftwareType::DataArchivingService:
+				case E::SoftwareType::TuningService:
+					assert(false);
+					//softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				default:
+					m_log->errEQP6100(software->strId(), software->uuid());
+					result = false;
+				}
+
+				if (softwareCfgGenerator != nullptr)
+				{
+					result &= softwareCfgGenerator->run();
+
+					delete softwareCfgGenerator;
+				}
 			}
 		);
 

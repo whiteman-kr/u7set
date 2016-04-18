@@ -181,6 +181,9 @@ namespace Builder
 		IssueLogger* log() { return m_log; }
 
 		BuildFile* getBuildFile(const QString& pathFileName);
+
+		bool isDebug() const;
+		bool isRelease() const;
 	};
 }
 

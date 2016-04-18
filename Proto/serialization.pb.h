@@ -2843,6 +2843,20 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline bool drawrect() const;
   inline void set_drawrect(bool value);
 
+  // optional int32 horzAlign = 9 [default = 4];
+  inline bool has_horzalign() const;
+  inline void clear_horzalign();
+  static const int kHorzAlignFieldNumber = 9;
+  inline ::google::protobuf::int32 horzalign() const;
+  inline void set_horzalign(::google::protobuf::int32 value);
+
+  // optional int32 vertAlign = 10 [default = 128];
+  inline bool has_vertalign() const;
+  inline void clear_vertalign();
+  static const int kVertAlignFieldNumber = 10;
+  inline ::google::protobuf::int32 vertalign() const;
+  inline void set_vertalign(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemRect)
  private:
   inline void set_has_weight();
@@ -2861,6 +2875,10 @@ class SchemaItemRect : public ::google::protobuf::Message {
   inline void clear_has_fill();
   inline void set_has_drawrect();
   inline void clear_has_drawrect();
+  inline void set_has_horzalign();
+  inline void clear_has_horzalign();
+  inline void set_has_vertalign();
+  inline void clear_has_vertalign();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2872,9 +2890,11 @@ class SchemaItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
   bool drawrect_;
+  ::google::protobuf::int32 horzalign_;
+  ::google::protobuf::int32 vertalign_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9005,6 +9025,50 @@ inline bool SchemaItemRect::drawrect() const {
 inline void SchemaItemRect::set_drawrect(bool value) {
   set_has_drawrect();
   drawrect_ = value;
+}
+
+// optional int32 horzAlign = 9 [default = 4];
+inline bool SchemaItemRect::has_horzalign() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SchemaItemRect::set_has_horzalign() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SchemaItemRect::clear_has_horzalign() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItemRect::clear_horzalign() {
+  horzalign_ = 4;
+  clear_has_horzalign();
+}
+inline ::google::protobuf::int32 SchemaItemRect::horzalign() const {
+  return horzalign_;
+}
+inline void SchemaItemRect::set_horzalign(::google::protobuf::int32 value) {
+  set_has_horzalign();
+  horzalign_ = value;
+}
+
+// optional int32 vertAlign = 10 [default = 128];
+inline bool SchemaItemRect::has_vertalign() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItemRect::set_has_vertalign() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItemRect::clear_has_vertalign() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SchemaItemRect::clear_vertalign() {
+  vertalign_ = 128;
+  clear_has_vertalign();
+}
+inline ::google::protobuf::int32 SchemaItemRect::vertalign() const {
+  return vertalign_;
+}
+inline void SchemaItemRect::set_vertalign(::google::protobuf::int32 value) {
+  set_has_vertalign();
+  vertalign_ = value;
 }
 
 // -------------------------------------------------------------------

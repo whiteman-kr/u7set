@@ -16,6 +16,7 @@ namespace VFrame30
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
 		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemLine::weight, SchemaItemLine::setWeight);
+		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemaItemLine::lineColor, SchemaItemLine::setLineColor);
 
 		// --
 		//
@@ -45,7 +46,7 @@ namespace VFrame30
 		Proto::SchemaItemLine* lineMessage = message->mutable_schemaitem()->mutable_line();
 
 		lineMessage->set_weight(m_weight);
-		lineMessage->set_linecolor(m_lineColor);
+		lineMessage->set_linecolor(m_lineColor.rgba());
 
 		return true;
 	}
@@ -76,7 +77,7 @@ namespace VFrame30
 		const Proto::SchemaItemLine& lineMessage = message.schemaitem().line();
 
 		m_weight = lineMessage.weight();
-		m_lineColor = lineMessage.linecolor();
+		m_lineColor = QColor::fromRgba(lineMessage.linecolor());
 
 		return true;
 	}
@@ -149,12 +150,12 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb SchemaItemLine::lineColor() const
+	QColor SchemaItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void SchemaItemLine::setLineColor(QRgb color)
+	void SchemaItemLine::setLineColor(QColor color)
 	{
 		m_lineColor = color;
 	}

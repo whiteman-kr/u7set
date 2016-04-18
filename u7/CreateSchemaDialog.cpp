@@ -10,6 +10,55 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	assert(m_schema.get() != nullptr);
 	ui->setupUi(this);
 
+	// Set StrID label
+	//
+	QString idLable = "ID";
+
+	if (isLogicSchema() == true)
+	{
+		idLable = "AppSchemaID";
+	}
+
+	if (isMonitorSchema() == true)
+	{
+		idLable = "MonitorSchemaID";
+	}
+
+	if (isDiagSchema() == true)
+	{
+		idLable = "DiagSchemaID";
+	}
+
+	assert(idLable != "ID");			// Should be corresponded to schema type
+
+	ui->strIdLabel->setText(idLable);
+
+	// Set height and width lables, append px, in or mm
+	//
+	QString units;
+
+	if (schema->unit() == VFrame30::SchemaUnit::Display)
+	{
+		units = tr(", px");
+	}
+	else
+	{
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units = tr(", in");
+		}
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter)
+		{
+			units = tr(", mm");
+		}
+	}
+
+	ui->widthLabel->setText(ui->widthLabel->text() + units);
+	ui->heigtLabel->setText(ui->heigtLabel->text() + units);
+
+	// Set height and width
+	//
 	ui->strdIdEdit->setText(m_schema->strID());
 	ui->captionEdit->setText(m_schema->caption());
 
@@ -45,6 +94,21 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	ui->widthEdit->setText(QString::number(w, 'f', precision));
 	ui->heightEdit->setText(QString::number(h, 'f', precision));
+
+	// LogicSchame Equipment ID
+	//
+	if (isLogicSchema() == true)
+	{
+		ui->equipmentIdLabel->setVisible(true);
+		ui->equipmentIdEdit->setVisible(true);
+
+		ui->equipmentIdEdit->setText(logicSchema()->hardwareStrIds());
+	}
+	else
+	{
+		ui->equipmentIdLabel->setVisible(false);
+		ui->equipmentIdEdit->setVisible(false);
+	}
 
 	setWindowTitle(tr("Schema Properties"));
 
@@ -116,11 +180,19 @@ void CreateSchemaDialog::accept()
 		return;
 	}
 
+	// EquipmentID for LogicSchema
+	//
+	QString equipmnetId;
+
+	if (isLogicSchema() == true)
+	{
+		equipmnetId = ui->equipmentIdEdit->text();
+	}
+
 	// Assign values to the schema
 	//
 	m_schema->setStrID(strID);
 	m_schema->setCaption(caption);
-
 
 	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
 	{
@@ -145,5 +217,32 @@ void CreateSchemaDialog::accept()
 		}
 	}
 
+	if (isLogicSchema() == true)
+	{
+		logicSchema()->setHardwareStrIds(equipmnetId);
+	}
+
 	QDialog::accept();
+}
+
+bool CreateSchemaDialog::isLogicSchema() const
+{
+	return (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr);
+}
+
+bool CreateSchemaDialog::isMonitorSchema() const
+{
+	return (dynamic_cast<VFrame30::MonitorSchema*>(m_schema.get()) != nullptr);
+}
+
+bool CreateSchemaDialog::isDiagSchema() const
+{
+	return (dynamic_cast<VFrame30::DiagSchema*>(m_schema.get()) != nullptr);
+}
+
+std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()
+{
+	assert(isLogicSchema());
+
+	return std::dynamic_pointer_cast<VFrame30::LogicSchema>(m_schema);
 }

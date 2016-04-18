@@ -169,6 +169,7 @@ public:
 
 	void addListener(QString ip, int port, bool saveList = true);
 	int index(Listener* listener);
+	void saveListenerList();
 
 	const SignalSet& signalSet() { return m_signalSet; }
 	const QHash<quint32, DataSource>& dataSources() { return m_dataSources; }

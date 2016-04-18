@@ -110,7 +110,7 @@ namespace VFrame30
 		{
 			assert(unit == SchemaUnit::Inch);
 								
-			painter->scale(1.0 / dpiX, 1.0 / dpiY);
+			painter->scale(1.0 / static_cast<double>(dpiX), 1.0 / static_cast<double>(dpiY));
 
 			// FontInfo is required to claculate point to pixels ratio
 			//

@@ -174,12 +174,16 @@ namespace EditEngine
 
 	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
+		qDebug() << "EditEngine::runAddItem";
+
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
 	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
+		qDebug() << "EditEngine::runAddItem";
+
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> l(items.begin(), items.end());
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, l, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
@@ -187,6 +191,8 @@ namespace EditEngine
 
 	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
+		qDebug() << "EditEngine::runAddItem";
+
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
@@ -210,12 +216,16 @@ namespace EditEngine
 
 	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 	{
+		qDebug() << "EditEngine::runSetPoints";
+
 		addCommand(std::make_shared<SetPointsCommand>(m_schemaView, points, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
 	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item)
 	{
+		qDebug() << "EditEngine::runSetPoints";
+
 		std::vector<VFrame30::SchemaPoint> ip(points.begin(), points.end());
 
 		std::vector<std::vector<VFrame30::SchemaPoint>> allpoints;
@@ -230,12 +240,16 @@ namespace EditEngine
 
 	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool snapToGrid)
 	{
+		qDebug() << "EditEngine::runMoveItem";
+
 		addCommand(std::make_shared<MoveItemCommand>(m_schemaView, xdiff, ydiff, items, snapToGrid, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
 	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemaItem>& item, bool snapToGrid)
 	{
+		qDebug() << "EditEngine::runMoveItem";
+
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
@@ -245,6 +259,8 @@ namespace EditEngine
 
 	void EditEngine::runSetOrder(SetOrder setOrder, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
+		qDebug() << "EditEngine::runSetOrder";
+
 		bool willThisChangeTheActualOrder = SetOrderCommand::checkIfCommandChangesOrder(setOrder, items, layer->Items);
 		if (willThisChangeTheActualOrder == false)
 		{
@@ -257,6 +273,8 @@ namespace EditEngine
 
 	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 	{
+		qDebug() << "EditEngine::runSetProperty";
+
 		addCommand(std::make_shared<SetPropertyCommand>(m_schemaView, propertyName, value, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
@@ -271,6 +289,8 @@ namespace EditEngine
 
 	void EditEngine::runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema)
 	{
+		qDebug() << "EditEngine::runSetSchemaProperty";
+
 		addCommand(std::make_shared<SetSchemaPropertyCommand>(m_schemaView, propertyName, value, schema, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}

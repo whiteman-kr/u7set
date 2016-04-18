@@ -1,0 +1,51 @@
+1. Get server IP addresses
+
+Local:		192.168.75.3
+Remote:	       	???? 
+
+
+2. Clonning
+
+	Clone u7set git repository
+	$ git clone ssh://git@192.168.75.3:/opt/git/u7set.git
+
+	Clone u7set install git repository
+	$ git clone ssh://git@192.168.75.3:/opt/git/u7setinstall.git
+
+
+3. Branch, a simple branch tutorial https://backlogtool.com/git-guide/en/stepup/stepup2_2.html
+
+3.0	Branches
+
+	stable		- stable branch, merged from develop branch, no developing in this branch
+			  all commits are new stable versions tagged by version (0.7.1518)
+		
+	hotfix-<name>	- required if needed to add an important fix to codebase quickly, 
+			  created from stable branch. Should be merged with the stable AND develop branches
+			  "hotfix-rpct-730"
+
+	develop 	- branch for everyday developing, merged to stable as programms are stable and ready to use
+
+	topic-<name>	- specific topic developmnet or bugfix branch, "topic-tbupgrade43", "topic-rpct-652". 
+			  Shoud be merged to develop
+
+		
+
+3.1     Show branch list (the asterisk indicates the current active branch)
+	$ git branch
+
+3.2	Create branch
+	$ git branch <branch>
+
+3.3	Swicth to branch
+	$ git checkout <branch>
+
+3.4	Create branch and switch to it (3.2 + 3.3)
+	$ git checkout -b <branch>
+
+4. Stable/release strategy
+
+4.1
+
+
+

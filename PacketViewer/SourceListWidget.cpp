@@ -115,6 +115,7 @@ void SourceListWidget::removeListener()
 			m_listenerModel->removeListener(selected[i].row());
 		}
 	}
+	m_listenerModel->saveListenerList();
 }
 
 void SourceListWidget::reloadFiles()

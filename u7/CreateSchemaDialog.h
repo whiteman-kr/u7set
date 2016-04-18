@@ -17,6 +17,13 @@ public:
 
 protected slots:
 	virtual void accept();
+
+private:
+	bool isLogicSchema() const;
+	bool isMonitorSchema() const;
+	bool isDiagSchema() const;
+
+	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	
 private:
 	Ui::CreateSchemaDialog *ui;

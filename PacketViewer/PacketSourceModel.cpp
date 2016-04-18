@@ -200,15 +200,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 	connect(listener.get(), &Listener::endAddSource, this, &PacketSourceModel::endInsertSource, Qt::DirectConnection);
 	if (saveList)
 	{
-		QSettings settings;
-		settings.beginWriteArray("PacketSourceModel/listenAddresses", static_cast<int>(m_listeners.size()));
-		for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
-		{
-			settings.setArrayIndex(i);
-			settings.setValue("ip", m_listeners[i]->ip());
-			settings.setValue("port", m_listeners[i]->port());
-		}
-		settings.endArray();
+		saveListenerList();
 	}
 	emit contentChanged(0);
 }
@@ -223,6 +215,19 @@ int PacketSourceModel::index(Listener* listener)
 		}
 	}
 	return -1;
+}
+
+void PacketSourceModel::saveListenerList()
+{
+	QSettings settings;
+	settings.beginWriteArray("PacketSourceModel/listenAddresses", static_cast<int>(m_listeners.size()));
+	for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
+	{
+		settings.setArrayIndex(i);
+		settings.setValue("ip", m_listeners[i]->ip());
+		settings.setValue("port", m_listeners[i]->port());
+	}
+	settings.endArray();
 }
 
 void PacketSourceModel::loadProject(const QString& projectPath)
@@ -451,6 +456,7 @@ Source::Source(QString address, int port, const SignalSet& signalSet, const QHas
 {
 	m_lastHeader.packetNo = -1;
 	memset(m_buffer, 0, RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE);
+	memset(&m_lastHeader, 0, sizeof(m_lastHeader));
 }
 
 Source::~Source()
@@ -520,30 +526,45 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	{
 		incrementPartialFrameCount();
 	}
-	if (header.partCount > RP_MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
+
+	if (header.partCount > RUP_MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
 	{
 		incrementFormatErrorCount();
 		delete [] buffer;
 		return;
 	}
-	if (header.packetNo > m_lastHeader.packetNo && header.packetNo - m_lastHeader.packetNo > header.partCount)
-	{
-		incrementPacketLostCount((header.packetNo - m_lastHeader.packetNo) / header.partCount);
-	}
-	// Check correct packet part sequence
-	if (!((header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == m_lastHeader.partNo + 1) ||
-		  (header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
-	{
-		incrementPartialPacketCount();
-	}
+
 	int currentDataSize = 0;
 	switch (version)
 	{
 		case 3:
+			if (m_lastHeader.packetSize != 0 && header.packetNo > m_lastHeader.packetNo && header.packetNo - m_lastHeader.packetNo > header.partCount)
+			{
+				incrementPacketLostCount((header.packetNo - m_lastHeader.packetNo) / header.partCount);
+			}
+			// Check correct packet part sequence
+			if (!((m_lastHeader.packetSize == 0) ||
+				  (header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == m_lastHeader.partNo + 1) ||
+				  (header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
+			{
+				incrementPartialPacketCount();
+			}
 			currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
 			memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
 			break;
 		case 4:
+			if (m_lastHeader.packetSize != 0 && header.packetNo > m_lastHeader.packetNo && header.packetNo - m_lastHeader.packetNo > 1)
+			{
+				incrementPacketLostCount(header.packetNo - m_lastHeader.packetNo - 1);
+			}
+			// Check correct frame sequence
+			if (!((m_lastHeader.packetSize == 0) ||
+				  (header.packetNo == m_lastHeader.packetNo && header.partNo == m_lastHeader.partNo + 1) ||
+				  (header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
+			{
+				incrementPartialPacketCount();
+			}
+
 			currentDataSize = header.packetSize - sizeof(RupFrameHeader) - sizeof(packet.CRC64);
 			memcpy(m_buffer + header.partNo * currentDataSize, buffer + sizeof(RupFrameHeader), currentDataSize);
 			break;

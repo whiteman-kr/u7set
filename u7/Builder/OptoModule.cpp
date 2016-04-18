@@ -2,6 +2,7 @@
 
 #include "../Builder/Builder.h"
 #include "../Builder/ApplicationLogicCompiler.h"
+#include "../include/DeviceHelper.h"
 
 namespace Hardware
 {
@@ -183,11 +184,11 @@ namespace Hardware
 
 		bool result = true;
 
-		result &= Builder::DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
-		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
-		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
-		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
-		result &= Builder::DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
+		result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
+		result &= DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
+		result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
+		result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
+		result &= DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
 
 		if (result == false)
 		{

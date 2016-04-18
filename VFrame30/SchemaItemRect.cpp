@@ -12,27 +12,44 @@ namespace VFrame30
 	}
 
 	SchemaItemRect::SchemaItemRect(SchemaUnit unit) :
-		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00)),
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
-		m_textColor(qRgb(0x00, 0x00, 0x00)),
-		m_fill(true)
+		m_textColor(qRgb(0x00, 0x00, 0x00))
 	{
 		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
 
 		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
 		ADD_PROPERTY_GETTER_SETTER(QColor, FillColor, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
-		ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
 		ADD_PROPERTY_GETTER_SETTER(bool, Fill, true, SchemaItemRect::fill, SchemaItemRect::setFill);
-		ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemaItemRect::text, SchemaItemRect::setText);
+
+		// Text Category Properties
+		//
+		auto textColorProp = ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
+		textColorProp->setCategory("Text");
+
+		auto textProp = ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemaItemRect::text, SchemaItemRect::setText);
+		textProp->setCategory("Text");
+
+		auto horzAlignProp = ADD_PROPERTY_GETTER_SETTER(E::HorzAlign, AlignHorz, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
+		horzAlignProp->setCategory("Text");
+
+		auto vertAlignProp = ADD_PROPERTY_GETTER_SETTER(E::VertAlign, AlignVert, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
+		vertAlignProp->setCategory("Text");
 
 		ADD_PROPERTY_GETTER_SETTER(bool, DrawRect, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
-		ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
-		ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
-		ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		auto fontNameProp = ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
+		fontNameProp->setCategory("Text");
+
+		auto fontSizeProp = ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
+		fontSizeProp->setCategory("Text");
+
+		auto fontBoldProp = ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
+		fontBoldProp->setCategory("Text");
+
+		auto fontItalicProp = ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		fontItalicProp->setCategory("Text");
 
 		// --
 		//
@@ -83,6 +100,9 @@ namespace VFrame30
 		rectMessage->set_fill(m_fill);
 		rectMessage->set_drawrect(m_drawRect);
 
+		rectMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
+		rectMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
+
 		Proto::Write(rectMessage->mutable_text(), m_text);
 		rectMessage->set_textcolor(m_textColor.rgba());
 		m_font.SaveData(rectMessage->mutable_font());
@@ -123,6 +143,10 @@ namespace VFrame30
 		Proto::Read(rectMessage.text(), &m_text);
 		m_textColor = QColor::fromRgba(rectMessage.textcolor());
 		m_drawRect = rectMessage.drawrect();
+
+		m_horzAlign = static_cast<E::HorzAlign>(rectMessage.horzalign());
+		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
+
 		m_font.LoadData(rectMessage.font());
 
 		return true;
@@ -200,7 +224,7 @@ namespace VFrame30
 		if (m_text.isEmpty() == false)
 		{
 			p->setPen(textColor());
-			DrawHelper::DrawText(p, m_font, itemUnit(), m_text, r, Qt::AlignLeft | Qt::AlignTop);
+			DrawHelper::DrawText(p, m_font, itemUnit(), m_text, r, horzAlign() | vertAlign());
 		}
 
 		return;
@@ -261,15 +285,15 @@ namespace VFrame30
 		m_fillColor = color;
 	}
 
-	// Fill property
+	// TextColor property
 	//
-	bool SchemaItemRect::fill() const
+	QColor SchemaItemRect::textColor() const
 	{
-		return m_fill;
+		return m_textColor;
 	}
-	void SchemaItemRect::setFill(bool fill)
+	void SchemaItemRect::setTextColor(QColor color)
 	{
-		m_fill = fill;
+		m_textColor = color;
 	}
 
 	// Text property
@@ -283,16 +307,38 @@ namespace VFrame30
 		m_text = value;
 	}
 
-	// TextColor property
+	// Align propertis
 	//
-	QColor SchemaItemRect::textColor() const
+	E::HorzAlign SchemaItemRect::horzAlign() const
 	{
-		return m_textColor;
+		return m_horzAlign;
 	}
-	void SchemaItemRect::setTextColor(QColor color)
+	void SchemaItemRect::setHorzAlign(E::HorzAlign align)
 	{
-		m_textColor = color;
+		m_horzAlign = align;
 	}
+
+	E::VertAlign SchemaItemRect::vertAlign() const
+	{
+		return m_vertAlign;
+	}
+
+	void SchemaItemRect::setVertAlign(E::VertAlign align)
+	{
+		m_vertAlign = align;
+	}
+
+	// Fill property
+	//
+	bool SchemaItemRect::fill() const
+	{
+		return m_fill;
+	}
+	void SchemaItemRect::setFill(bool fill)
+	{
+		m_fill = fill;
+	}
+
 
 	bool SchemaItemRect::drawRect() const
 	{

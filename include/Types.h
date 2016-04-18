@@ -5,14 +5,36 @@
 #include <QMetaEnum>
 #include <QVariant>
 
-
 class E : public QObject
 {
 	Q_OBJECT
 public:
 	E();
 
+	// Horz/Vert text Align enums
+	// This enum type is used to describe alignment. It contains horizontal and vertical flags that can be
+	// combined to produce the required effect.
+	//
+	enum HorzAlign
+	{
+		AlignLeft = Qt::AlignLeft,				// Aligns with the left edge.
+		AlignRight = Qt::AlignRight,			// Aligns with the right edge.
+		AlignHCenter = Qt::AlignHCenter,		// Centers horizontally in the available space.
+		AlignJustify = Qt::AlignJustify			// Justifies the text in the available space.
+	};
+	Q_ENUM(HorzAlign)
 
+	enum VertAlign
+	{
+		AlignTop = Qt::AlignTop,				// Aligns with the top.
+		AlignBottom = Qt::AlignBottom,			// Aligns with the bottom.
+		AlignVCenter = Qt::AlignVCenter,		// Centers vertically in the available space.
+		AlignBaseline = Qt::AlignBaseline		// Aligns with the baseline.
+	};
+	Q_ENUM(VertAlign)
+
+	// SignalType
+	//
 	enum SignalType
 	{
 		Analog,
@@ -164,4 +186,14 @@ EnumType IntToEnum(int value)
 	return static_cast<EnumType>(value);
 }
 
+//
+// OutputMessageLevel
+//
+enum class OutputMessageLevel
+{
+	Message,
+	Success,
+	Warning,
+	Error
+};
 

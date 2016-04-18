@@ -56,7 +56,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 40", ":/DatabaseUpgrade/Upgrade0040.sql"},
 	{"Upgrade to version 41", ":/DatabaseUpgrade/Upgrade0041.sql"},
 	{"Upgrade to version 42", ":/DatabaseUpgrade/Upgrade0042.sql"},
-    {"Upgrade to version 43", ":/DatabaseUpgrade/Upgrade0043.sql"},
+	{"Upgrade to version 43", ":/DatabaseUpgrade/Upgrade0043.sql"},
+	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
 };
 
 
@@ -1544,7 +1545,7 @@ void DbWorker::slot_createUser(DbUser user)
 
 	if (result == false)
 	{
-		emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
+		emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
 		return;
 	}
 
@@ -4223,7 +4224,7 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		QSqlQuery query(db);
 
 		bool result = query.exec(
-			QString("SELECT UserID FROM Users WHERE Username='%1' AND Password='%2'").arg(username).arg(password));
+			QString("SELECT UserID FROM Users WHERE Username ILIKE '%1' AND Password='%2'").arg(username).arg(password));
 
 		if (result == false)
 		{

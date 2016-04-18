@@ -1,11 +1,12 @@
 #pragma once
 
+#include "SchemaPoint.h"
 #include "DrawParam.h"
 #include "../include/PropertyObject.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/DebugInstCounter.h"
+#include "../include/Types.h"
 #include "../include/TypesAndEnums.h"
-#include "../include/OutputLog.h"
 
 namespace VFrame30
 {
@@ -16,81 +17,6 @@ namespace VFrame30
 
 namespace VFrame30
 {
-	struct VFRAME30LIBSHARED_EXPORT SchemaPoint
-	{
-		double X;
-		double Y;
-
-		// Methods
-		//
-		SchemaPoint() :
-			X(0),
-			Y(0)
-		{
-		}
-
-		explicit SchemaPoint(const Proto::SchemaPoint& vip)
-		{
-			LoadData(vip);
-		}
-
-		explicit SchemaPoint(QPointF point) :
-			X(point.x()),
-			Y(point.y())
-		{
-		}
-
-		SchemaPoint(double x, double y) :
-			X(x),
-			Y(y)
-		{
-		}
-
-		bool operator == (const SchemaPoint& pt) const
-		{
-			return std::abs(pt.X - X) < 0.000001 && std::abs(pt.Y - Y) < 0.000001;
-		}
-
-		bool operator < (const SchemaPoint& pt) const
-		{
-			if (operator==(pt) == true)
-			{
-				return false;
-			}
-
-			if (std::abs(pt.Y - Y) < 0.000001)
-			{
-				return X < pt.X;
-			}
-
-			if (Y < pt.Y)
-				return true;
-
-			if (Y > pt.Y)
-				return false;
-
-			return false;
-		}
-
-		operator QPointF() const
-		{
-			return QPointF(X, Y);
-		}
-
-		bool SaveData(Proto::SchemaPoint* vip) const
-		{
-			vip->set_x(X);
-			vip->set_y(Y);
-			return true;
-		}
-		bool LoadData(const Proto::SchemaPoint& vip)
-		{
-			this->X = vip.x();
-			this->Y = vip.y();
-			return true;
-		}
-	};
-
 	// Интерфейс для SchemaItem который перводит любой тип хранения координат (ISchemaPosRect, ISchemaPosLine, ...) в
 	// прямоугольник, для отображения в СВОЙСТВАХ ОБЪЕКТА. ВНИМАНИЕ! возврат элементов происходит в единицах мм, дюймы, точки.
 	// ВНИМАНИЕ! Эти свойства нельзя использовать для рисования и вычисления новых координат!

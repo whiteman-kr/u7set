@@ -84,43 +84,10 @@ class SchemaControlTabPage : public QWidget, public HasDbController
 {
     Q_OBJECT
 public:
-	SchemaControlTabPage(
-			const QString& fileExt,
-			DbController* db,
-			const QString& parentFileName,
-			std::function<VFrame30::Schema*()> createSchemaFunc) :
-		HasDbController(db),
-		m_createSchemaFunc(createSchemaFunc)
-	{
-		// Create actions
-		//
-		CreateActions();
-
-		// Create controls
-		//
-		m_filesView = new SchemaFileView(db, parentFileName);
-		m_filesView->filesModel().setFilter(fileExt);
-
-		QHBoxLayout* pMainLayout = new QHBoxLayout();
-		pMainLayout->addWidget(m_filesView);
-
-		setLayout(pMainLayout);
-
-		// --
-		//
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPage::projectOpened);
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPage::projectClosed);
-
-		connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
-		connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
-		connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
-		connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
-		connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
-		connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
-
-		return;
-	}
-
+	SchemaControlTabPage(const QString& fileExt,
+						 DbController* db,
+						 const QString& parentFileName,
+						 std::function<VFrame30::Schema*()> createSchemaFunc);
 	virtual ~SchemaControlTabPage();
 
 public:
