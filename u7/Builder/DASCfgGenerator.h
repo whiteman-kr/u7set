@@ -40,6 +40,7 @@ namespace Builder
 			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, OutputLog *log);
 		};
 
+		bool writeSettings();
 		bool writeAppSignalsXml();
 		bool writeEquipmentXml();
 		bool writeDataSourcesXml();

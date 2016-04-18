@@ -4,6 +4,7 @@
 #include "../include/DataSource.h"
 #include "../include/Signal.h"
 #include "../include/CfgServerLoader.h"
+#include "../include/ServiceSettings.h"
 
 #include "FscDataAcquisitionThread.h"
 
@@ -33,6 +34,8 @@ private:
 	UnitList m_unitInfo;
 
 	QTimer m_timer;
+
+	DASSettings m_settings;
 
 	void initDataSources();
 	void initListeningPorts();

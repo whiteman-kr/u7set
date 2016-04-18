@@ -66,7 +66,7 @@ namespace Builder
 		m_cfgXml->xmlWriter().writeStartElement("Software");
 
 		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("StrID", m_software->strId());
+		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->strId());
 		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
 
 		m_cfgXml->xmlWriter().writeEndElement();	// </Software>

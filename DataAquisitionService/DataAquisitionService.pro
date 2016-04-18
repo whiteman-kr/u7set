@@ -88,7 +88,7 @@ SOURCES += main.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
     DataAcquisitionService.cpp \
-    ../lib/ServicesSettings.cpp \
+    ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp
@@ -116,7 +116,7 @@ HEADERS += \
     ../include/BuildInfo.h \
     ../include/SimpleThread.h \
     DataAcquisitionService.h \
-    ../include/ServicesSettings.h \
+    ../include/ServiceSettings.h \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
     ../include/XmlHelper.h

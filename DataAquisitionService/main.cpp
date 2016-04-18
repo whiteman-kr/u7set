@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
 	APP_MSG(logger, "Start");
 
-	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", new DataServiceWorker);
+	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", new DataServiceWorker());
 
 	return service.exec();
 }
