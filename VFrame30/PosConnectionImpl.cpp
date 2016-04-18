@@ -378,7 +378,14 @@ namespace VFrame30
 
 	void PosConnectionImpl::AddPoint(double x, double y)
 	{
-		points.push_back(SchemaPoint(x, y));
+		SchemaPoint p(x, y);
+
+		if (points.empty() == false && points.back() == p)
+		{
+			return;
+		}
+
+		points.push_back(p);
 	}
 
 	void PosConnectionImpl::RemoveSamePoints()
