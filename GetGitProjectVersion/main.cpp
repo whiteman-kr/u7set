@@ -186,8 +186,6 @@ int main(int argc, char *argv[])
 	}
 
 	string dir = argv[1];
-	//string dir = "/home/vsapronenko/GitData/u7set/u7/u7.pro";
-	//string dir = "D:/GitData/u7set/ServiceControlManager/ServiceControlManager.pro";
 	if (!fileExists(dir))
 	{
 		cout << "Project file doesn't exists" << endl;
@@ -284,9 +282,22 @@ int main(int argc, char *argv[])
 					<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
 	}
 
+	git_reference* currentReference = NULL;
+	REPORT(git_repository_head(&currentReference, repo));
+	if (currentReference != NULL)
+	{
+		string branchName = git_reference_shorthand(currentReference);
+		if (branchName == "master")
+		{
+			branchName = "stable";
+		}
+		versionInfoText << "#define BUILD_BRANCH \"" << branchName << "\"\n";
+		git_reference_free(currentReference);
+	}
+
 	if (fileCount > 0)
 	{
-		versionInfoText << "#define BUILD_STATE = \"Local build\"\n"
+		versionInfoText << "#define BUILD_STATE \"Local build\"\n"
 					<< "#ifndef Q_DEBUG\n"
 					<< "#ifdef _MSC_VER\n"
 					<< " #pragma warning ()\n"

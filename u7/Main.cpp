@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	a.setApplicationVersion(QString("0.7.%1").arg(USED_SERVER_COMMIT_NUMBER));
+	a.setApplicationVersion(QString("0.7.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
 
 	VFrame30::VFrame30Library::Init();
 	Hardware::Init();
