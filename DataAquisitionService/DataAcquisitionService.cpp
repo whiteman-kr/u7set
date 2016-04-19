@@ -316,7 +316,9 @@ void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlDa
 
 	QXmlStreamReader xmlReader(configurationXmlData);
 
-	bool result = m_settings.readFromXml(xmlReader);
+	XmlReadHelper xml(xmlReader);
+
+	bool result = m_settings.readFromXml(xml);
 
 	if (result == true)
 	{

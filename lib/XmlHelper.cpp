@@ -1,175 +1,229 @@
 #include "../include/XmlHelper.h"
 
 
+// -------------------------------------------------------------------------------------
+//
+// XmlWriteHelper class implementation
+//
+// -------------------------------------------------------------------------------------
 
-XmlHelper::XmlHelper(QXmlStreamWriter& xmlWriter) :
-	m_xmlWriter(&xmlWriter)
+XmlWriteHelper::XmlWriteHelper(QXmlStreamWriter& xmlWriter) :
+	m_xmlWriter(xmlWriter)
 {
 }
 
 
-XmlHelper::XmlHelper(QXmlStreamReader& xmlReader) :
-	m_xmlReader(&xmlReader)
+void XmlWriteHelper::writeStartElement(const QString& name)
+{
+	m_xmlWriter.writeStartElement(name);
+}
+
+
+void XmlWriteHelper::writeEndElement()
+{
+	m_xmlWriter.writeEndElement();
+}
+
+
+void XmlWriteHelper::writeStringAttribute(const QString& name, const QString& value)
+{
+	m_xmlWriter.writeAttribute(name, value);
+}
+
+
+void XmlWriteHelper::writeIntAttribute(const QString& name, int value)
+{
+	m_xmlWriter.writeAttribute(name, QString::number(value));
+}
+
+
+void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
+{
+	m_xmlWriter.writeTextElement(name, value);
+}
+
+
+void XmlWriteHelper::writeIntElement(const QString& name, int value)
+{
+	m_xmlWriter.writeTextElement(name, QString::number(value));
+}
+
+
+void XmlWriteHelper::writeHostAddressPort(const QString& nameIP, const QString& namePort,HostAddressPort& hostAddressPort)
+{
+	writeStringElement(nameIP, hostAddressPort.addressStr());
+	writeIntElement(namePort, hostAddressPort.port());
+}
+
+
+void XmlWriteHelper::writeHostAddress(const QString& nameIP, QHostAddress& hostAddress)
+{
+	writeStringElement(nameIP, hostAddress.toString());
+}
+
+
+// -------------------------------------------------------------------------------------
+//
+// XmlReadHelper class implementation
+//
+// -------------------------------------------------------------------------------------
+
+XmlReadHelper::XmlReadHelper(QXmlStreamReader& xmlReader) :
+	m_xmlReader(xmlReader)
 {
 }
 
 
-void XmlHelper::writeHostAddressPortElement(const QString& name, HostAddressPort& hostAddressPort)
+bool XmlReadHelper::readNextStartElement()
 {
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeStartElement(name);
-
-	m_xmlWriter->writeAttribute("IP", hostAddressPort.addressStr());
-	m_xmlWriter->writeAttribute("Port", QString::number(hostAddressPort.port()));
-
-	m_xmlWriter->writeEndElement();
+	return m_xmlReader.readNextStartElement();
 }
 
 
-bool XmlHelper::readHostAddressPortElement(const QString& name, HostAddressPort* hostAddressPort)
+void XmlReadHelper::skipCurrentElement()
 {
-	if (m_xmlReader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	if (m_xmlReader->name() != name)
-	{
-		return false;
-	}
-
-	if (hostAddressPort == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	hostAddressPort->setAddress(m_xmlReader->attributes().value("IP").toString());
-	hostAddressPort->setPort(m_xmlReader->attributes().value("Port").toInt());
-
-	m_xmlReader->skipCurrentElement();
-
-	return true;
+	m_xmlReader.skipCurrentElement();
 }
 
 
-void XmlHelper::writeHostAddressElement(const QString& name, QHostAddress& hostAddress)
+QString XmlReadHelper::name()
 {
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeStartElement(name);
-	m_xmlWriter->writeAttribute("IP", hostAddress.toString());
-	m_xmlWriter->writeEndElement();
+	return m_xmlReader.name().toString();
 }
 
 
-bool XmlHelper::readHostAddressElement(const QString& name, QHostAddress *hostAddress)
+bool XmlReadHelper::atEnd()
 {
-	if (m_xmlReader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	if (m_xmlReader->name() != name)
-	{
-		return false;
-	}
-
-	if (hostAddress == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	hostAddress->setAddress(m_xmlReader->attributes().value("IP").toString());
-
-	m_xmlReader->skipCurrentElement();
-
-	return true;
+	return m_xmlReader.atEnd();
 }
 
 
-void XmlHelper::writeStartElement(const QString& name)
+bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 {
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeStartElement(name);
-}
-
-
-void XmlHelper::writeEndElement()
-{
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeEndElement();
-}
-
-
-void XmlHelper::writeAttribute(const QString& name, const QString& value)
-{
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeAttribute(name, value);
-}
-
-
-void XmlHelper::writeTextElement(const QString& name, const QString& value)
-{
-	if (m_xmlWriter == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_xmlWriter->writeTextElement(name, value);
-}
-
-
-bool XmlHelper::readIntAttribute(const QString& name, int* value)
-{
-	if (m_xmlReader == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
 	if(value == nullptr)
 	{
 		assert(false);
 		return false;
 	}
 
-	QStringRef strValue = m_xmlReader->attributes().value(name);
-
-	if (strValue == "")
+	if (m_xmlReader.attributes().hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = strValue.toInt();
+	*value = m_xmlReader.attributes().value(name).toInt();
 
 	return true;
+}
+
+
+bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	{
+		return false;
+	}
+
+	*value = m_xmlReader.attributes().value(name).toString();
+
+	return true;
+}
+
+
+bool XmlReadHelper::readStringElement(const QString& elementName, QString* value)
+{
+	if (value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	readNextStartElement();
+
+	if (name() != elementName)
+	{
+		return false;
+	}
+
+	QString str = m_xmlReader.readElementText();
+
+	*value = str;
+
+	return true;
+}
+
+
+bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
+{
+	if (value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	readNextStartElement();
+
+	if (name() != elementName)
+	{
+		return false;
+	}
+
+	QString str = m_xmlReader.readElementText();
+
+	*value = str.toInt();
+
+	return true;
+}
+
+
+bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort* hostAddressPort)
+{
+	if (hostAddressPort == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString addressStr;
+	int port = 0;
+
+	bool result = true;
+
+	result &= readStringElement(nameIP, &addressStr);
+	result &= readIntElement(namePort, &port);
+
+	if (result == true)
+	{
+		hostAddressPort->setAddress(addressStr);
+		hostAddressPort->setPort(port);
+	}
+
+	return result;
+}
+
+
+bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAddress)
+{
+	if (hostAddress == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString addressStr;
+
+	bool result = readStringElement(nameIP, &addressStr);
+
+	if (result == true)
+	{
+		hostAddress->setAddress(addressStr);
+	}
+
+	return result;
 }

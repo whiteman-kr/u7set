@@ -3,6 +3,12 @@
 #include "../include/ServiceSettings.h"
 
 
+// -------------------------------------------------------------------------------------
+//
+// DASEthernetChannel class implementation
+//
+// -------------------------------------------------------------------------------------
+
 bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, OutputLog *log)
 {
 	bool result = true;
@@ -11,27 +17,21 @@ bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, 
 	QString appDataReceivingIPStr;
 	int appDataReceivingPort = 0;
 
-	result &= DeviceHelper::getStrProperty(controller, QString("AppDataNetmask"), &appDataNetmaskStr, log);
-	result &= DeviceHelper::getStrProperty(controller, QString("AppDataReceivingIP"), &appDataReceivingIPStr, log);
-	result &= DeviceHelper::getIntProperty(controller, QString("AppDataReceivingPort"), &appDataReceivingPort, log);
+	result &= DeviceHelper::getStrProperty(controller, PROP_APP_DATA_NETMASK, &appDataNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(controller, PROP_APP_DATA_RECEIVING_IP, &appDataReceivingIPStr, log);
+	result &= DeviceHelper::getIntProperty(controller, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingPort, log);
 
 	QString diagDataNetmaskStr;
 	QString diagDataReceivingIPStr;
 	int diagDataReceivingPort = 0;
 
-	result &= DeviceHelper::getStrProperty(controller, QString("DiagDataNetmask"), &diagDataNetmaskStr, log);
-	result &= DeviceHelper::getStrProperty(controller, QString("DiagDataReceivingIP"), &diagDataReceivingIPStr, log);
-	result &= DeviceHelper::getIntProperty(controller, QString("DiagDataReceivingPort"), &diagDataReceivingPort, log);
+	result &= DeviceHelper::getStrProperty(controller, PROP_DIAG_DATA_NETMASK, &diagDataNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(controller, PROP_DIAG_DATA_RECEIVING_IP, &diagDataReceivingIPStr, log);
+	result &= DeviceHelper::getIntProperty(controller, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataReceivingPort, log);
 
-	QString archivingServiceLocalIPStr;
+	result &= DeviceHelper::getStrProperty(controller, PROP_ARCH_SERVICE_ID, &archServiceStrID, log);
 
-	result &= DeviceHelper::getStrProperty(controller, QString("ArchivingServiceLocalIP"), &archivingServiceLocalIPStr, log);
-	result &= DeviceHelper::getStrProperty(controller, QString("ArchivingServiceID"), &archivingServiceStrID, log);
-
-	QString cfgServiceLocalIPStr;
-
-	result &= DeviceHelper::getStrProperty(controller, QString("CfgServiceLocalIP"), &cfgServiceLocalIPStr, log);
-	result &= DeviceHelper::getStrProperty(controller, QString("CfgServiceID"), &cfgServiceStrID, log);
+	result &= DeviceHelper::getStrProperty(controller, PROP_CFG_SERVICE_ID, &cfgServiceStrID, log);
 
 	if (result == true)
 	{
@@ -40,50 +40,46 @@ bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, 
 
 		diagDataNetmask.setAddress(diagDataNetmaskStr);
 		diagDataReceivingIP = HostAddressPort(diagDataReceivingIPStr, diagDataReceivingPort);
-
-		archivingServiceLocalIP.setAddress(archivingServiceLocalIPStr);
-		cfgServiceLocalIP.setAddress(cfgServiceLocalIPStr);
 	}
 
 	return result;
 }
 
 
-bool DASEthernetChannel::writeToXml(QXmlStreamWriter& xmlWriter, int channel)
+QString DASEthernetChannel::sectionName(int channel)
 {
-	XmlHelper xml(xmlWriter);
+	return QString(SECTION_FORMAT_STR).arg(channel + 1);
+}
 
-	xml.writeStartElement("Ethernet");
-	xml.writeAttribute("Channel", QString::number(channel));
 
-	xml.writeHostAddressPortElement("AppDataReceivingIP", appDataReceivingIP);
-	xml.writeHostAddressElement("AppDataNetmask", appDataNetmask);
+bool DASEthernetChannel::writeToXml(XmlWriteHelper& xml, int channel)
+{
+	xml.writeStartElement(sectionName(channel));
 
-	xml.writeHostAddressPortElement("DiagDataReceivingIP", diagDataReceivingIP);
-	xml.writeHostAddressElement("DiagDataNetmask", diagDataNetmask);
+	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
+	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
 
-	xml.writeTextElement("ArchivingServiceID", archivingServiceStrID);
-	xml.writeHostAddressElement("ArchivingServiceLocalIP", archivingServiceLocalIP);
+	xml.writeHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
+	xml.writeHostAddress(PROP_DIAG_DATA_NETMASK, diagDataNetmask);
 
-	xml.writeTextElement("CfgServiceID", cfgServiceStrID);
-	xml.writeHostAddressElement("CfgServiceLocalIP", cfgServiceLocalIP);
+	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceStrID);
 
-	xml.writeEndElement();		//	</Ethernet>
+	xml.writeStringElement(PROP_CFG_SERVICE_ID, cfgServiceStrID);
+
+	xml.writeEndElement();		//	</EthernetChannelN>
 
 	return true;
 }
 
 
-bool DASEthernetChannel::readFromXml(QXmlStreamReader& xmlReader, int channel)
+bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 {
-	if (xmlReader.name() != "Ethernet")
+	if (xml.name() != sectionName(channel))
 	{
 		return false;
 	}
 
 	bool result = true;
-
-	XmlHelper xml(xmlReader);
 
 	int ch = 0;
 
@@ -94,23 +90,24 @@ bool DASEthernetChannel::readFromXml(QXmlStreamReader& xmlReader, int channel)
 		return false;
 	}
 
-	xmlReader.readNextStartElement();
-	result &= xml.readHostAddressPortElement("AppDataReceivingIP", &appDataReceivingIP);
+	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
+	result &= xml.readHostAddress(PROP_APP_DATA_NETMASK, &appDataNetmask);
 
-	xmlReader.readNextStartElement();
-	result &= xml.readHostAddressElement("AppDataNetmask", &appDataNetmask);
+	result &= xml.readHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataReceivingIP);
+	result &= xml.readHostAddress(PROP_DIAG_DATA_NETMASK, &diagDataNetmask);
 
-	xmlReader.readNextStartElement();
-	result &= xml.readHostAddressPortElement("DiagDataReceivingIP", &diagDataReceivingIP);
-
-	///////////////////////////////////////////////////////////////////////////
-
+	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
+	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
 
 	return result;
 }
 
 
-
+// -------------------------------------------------------------------------------------
+//
+// DASSettings class implementation
+//
+// -------------------------------------------------------------------------------------
 
 bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
 {
@@ -127,10 +124,10 @@ bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientRequestNetmaskStr);
 
-	for(int channel = 0; channel <= 1; channel++)
+	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
 		Hardware::DeviceController* ethernet =
-				DeviceHelper::getChildControllerBySuffix(software, QString("_ETHERNET0%1").arg(ETHERNET01 + channel));
+				DeviceHelper::getChildControllerBySuffix(software, QString("_ETHERNET0%1").arg(channel + 1));
 
 		if (ethernet != nullptr)
 		{
@@ -142,20 +139,18 @@ bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
 }
 
 
-bool DASSettings::writeToXml(QXmlStreamWriter& xmlWriter)
+bool DASSettings::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
 
-	XmlHelper xml(xmlWriter);
+	xml.writeStartElement(SECTION_NAME);
 
-	xml.writeStartElement("Settings");
+	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeHostAddressPortElement("ClientRequestIP", clientRequestIP);
-	xml.writeHostAddressElement("ClientRequestNetmask", clientRequestNetmask);
-
-	for(int channel = 0; channel <= 1; channel++)
+	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
-		ethernetChannel[channel].writeToXml(xmlWriter, ETHERNET01 + channel);
+		ethernetChannel[channel].writeToXml(xml, channel);
 	}
 
 	xml.writeEndElement();	// </Settings>
@@ -164,38 +159,31 @@ bool DASSettings::writeToXml(QXmlStreamWriter& xmlWriter)
 }
 
 
-bool DASSettings::readFromXml(QXmlStreamReader &xmlReader)
+bool DASSettings::readFromXml(XmlReadHelper& xml)
 {
-	XmlHelper xml(xmlReader);
-
 	bool result = false;
 
-	while(xmlReader.atEnd() == false)
+	while(xml.atEnd() == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		if (xml.readNextStartElement() == false)
 		{
 			continue;
 		}
 
-		//QString name = xmlReader.name().toString();
+		qDebug() << xml.name();
 
-		qDebug() << xmlReader.name().toString();
-
-		if (xmlReader.name() == "Settings")
+		if (xml.name() == "Settings")
 		{
 			result = true;
 
-			xmlReader.readNextStartElement();
-			result &= xml.readHostAddressPortElement("ClientRequestIP", &clientRequestIP);
+			result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
 
-			xmlReader.readNextStartElement();
-			result &= xml.readHostAddressElement("ClientRequestNetmask", &clientRequestNetmask);
+			result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
-			xmlReader.readNextStartElement();
-			ethernetChannel[0].readFromXml(xmlReader, ETHERNET01);
-
-			xmlReader.readNextStartElement();
-			ethernetChannel[1].readFromXml(xmlReader, ETHERNET02);
+			for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
+			{
+				ethernetChannel[channel].readFromXml(xml, channel);
+			}
 
 			break;
 		}

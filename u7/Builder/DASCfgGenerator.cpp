@@ -41,7 +41,9 @@ namespace Builder
 			return false;
 		}
 
-		dasSettings.writeToXml(m_cfgXml->xmlWriter());
+		XmlWriteHelper xml(m_cfgXml->xmlWriter());
+
+		dasSettings.writeToXml(xml);
 
 		return true;
 	}
