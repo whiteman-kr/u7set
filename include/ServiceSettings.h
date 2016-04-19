@@ -20,7 +20,7 @@ private:
 
 	const char* const PROP_CFG_SERVICE_ID = "ConfigurationServiceID";
 
-	const char* const SECTION_FORMAT_STR = "EthernetChannel%1";
+	const char* const SECTION_FORMAT_STR = "DataChannel%1";
 
 	QString sectionName(int channel);			// channel from 0
 
@@ -37,7 +37,7 @@ public:
 	QString cfgServiceStrID;
 	HostAddressPort cfgServiceIP;
 
-	bool readFromDevice(Hardware::DeviceController *controller, OutputLog *log);
+	bool readFromDevice(Hardware::DeviceController *controller, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml, int channel);
 	bool readFromXml(XmlReadHelper& xml, int channel);
 };
@@ -48,6 +48,7 @@ class DASSettings
 private:
 	const int DATA_CHANNEL_COUNT = 2;
 
+	const char* const DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR = "_DATACH0%1";
 	const char* const SECTION_NAME = "Settings";
 	const char* const PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 	const char* const PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
@@ -59,7 +60,7 @@ public:
 
 	DASEthernetChannel ethernetChannel[2];
 
-	bool readFromDevice(Hardware::Software *software, OutputLog* log);
+	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 };

@@ -1,6 +1,6 @@
 #include "../include/DeviceHelper.h"
 
-bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, OutputLog* log)
+bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -24,7 +24,7 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 }
 
 
-bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, OutputLog* log)
+bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -48,7 +48,7 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 }
 
 
-bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, OutputLog* log)
+bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -72,7 +72,7 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 }
 
 
-void DeviceHelper::logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, OutputLog* log)
+void DeviceHelper::logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, Builder::IssueLogger *log)
 {
 	if (log == nullptr)
 	{

@@ -169,7 +169,7 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModule::OptoModule(DeviceModule* module, OutputLog* log) :
+	OptoModule::OptoModule(DeviceModule* module, Builder::IssueLogger* log) :
 		m_deviceModule(module),
 		m_log(log)
 	{
@@ -390,7 +390,7 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, OutputLog *log) :
+	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::IssueLogger *log) :
 		m_equipmentSet(equipmentSet),
 		m_log(log)
 	{

@@ -349,7 +349,7 @@ namespace Builder
 	}
 
 
-	bool DASCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, OutputLog* log)
+	bool DASCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
 	{
 		if (log == nullptr)
 		{

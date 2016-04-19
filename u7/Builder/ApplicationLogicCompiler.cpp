@@ -10,7 +10,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------
 
 
-	OutputLog* ApplicationLogicCompiler::m_log = nullptr;
+	IssueLogger* ApplicationLogicCompiler::m_log = nullptr;
 
 
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
@@ -21,7 +21,7 @@ namespace Builder
 													   Afb::AfbElementCollection *afblSet,
 													   AppLogicData* appLogicData,
 													   BuildResultWriter* buildResultWriter,
-													   OutputLog *log) :
+													   IssueLogger *log) :
 		m_subsystems(subsystems),
 		m_equipmentSet(equipmentSet),
 		m_optoModuleStorage(optoModuleStorage),

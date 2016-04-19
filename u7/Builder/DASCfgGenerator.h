@@ -37,7 +37,7 @@ namespace Builder
 			int diagDataPort = 0;
 			QString diagDataServiceStrID;
 
-			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, OutputLog *log);
+			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, IssueLogger* log);
 		};
 
 		bool writeSettings();

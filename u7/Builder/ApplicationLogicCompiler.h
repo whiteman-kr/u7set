@@ -26,7 +26,7 @@ namespace Builder
 		BuildResultWriter* m_resultWriter = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
 
-		static OutputLog* m_log;
+		static IssueLogger* m_log;
 
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 
@@ -56,7 +56,7 @@ namespace Builder
 								 Afb::AfbElementCollection* afblSet,
 								 AppLogicData* appLogicData,
 								 BuildResultWriter* buildResultWriter,
-								 OutputLog* log);
+								 IssueLogger* log);
 
 		~ApplicationLogicCompiler();
 

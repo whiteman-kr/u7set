@@ -9,7 +9,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, OutputLog *log)
+bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -66,7 +66,7 @@ bool DASEthernetChannel::writeToXml(XmlWriteHelper& xml, int channel)
 
 	xml.writeStringElement(PROP_CFG_SERVICE_ID, cfgServiceStrID);
 
-	xml.writeEndElement();		//	</EthernetChannelN>
+	xml.writeEndElement();		//	</DataChannelN>
 
 	return true;
 }
@@ -80,15 +80,6 @@ bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 	}
 
 	bool result = true;
-
-	int ch = 0;
-
-	result &= xml.readIntAttribute("Channel", &ch);
-
-	if (ch != channel)
-	{
-		return false;
-	}
 
 	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
 	result &= xml.readHostAddress(PROP_APP_DATA_NETMASK, &appDataNetmask);
@@ -109,7 +100,7 @@ bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 //
 // -------------------------------------------------------------------------------------
 
-bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
+bool DASSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -117,9 +108,9 @@ bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
 	int clientRequestPort = 0;
 	QString clientRequestNetmaskStr;
 
-	result &= DeviceHelper::getStrProperty(software, "ClientRequestIP", &clientRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, "ClientRequestPort", &clientRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, "ClientRequestNetmask", &clientRequestNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmaskStr, log);
 
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientRequestNetmaskStr);
@@ -127,7 +118,8 @@ bool DASSettings::readFromDevice(Hardware::Software* software, OutputLog *log)
 	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
 		Hardware::DeviceController* ethernet =
-				DeviceHelper::getChildControllerBySuffix(software, QString("_ETHERNET0%1").arg(channel + 1));
+				DeviceHelper::getChildControllerBySuffix(software,
+					QString(DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR).arg(channel + 1), log);
 
 		if (ethernet != nullptr)
 		{
@@ -172,7 +164,7 @@ bool DASSettings::readFromXml(XmlReadHelper& xml)
 
 		qDebug() << xml.name();
 
-		if (xml.name() == "Settings")
+		if (xml.name() == SECTION_NAME)
 		{
 			result = true;
 
