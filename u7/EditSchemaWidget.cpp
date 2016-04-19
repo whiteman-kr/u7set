@@ -3061,16 +3061,6 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		return;
 	}
 
-	// Filter same points
-	//
-	itemPos->RemoveSamePoints();
-
-	if (itemPos->GetPointList().size() < 2)
-	{
-		resetAction();
-		return;
-	}
-
 	// Add the last point, where cursor is now
 	//
 	mouseRightDown_AddSchemaPosConnectionNextPoint(e);
@@ -3242,9 +3232,16 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			}
 		}
 
-		if (startPointAddedToOther == false && endPointAddedToOther == false)
+		if (startPointAddedToOther == false &&
+			endPointAddedToOther == false)
 		{
-			m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
+			if (itemPos->GetPointList().size() > 2 ||
+					(itemPos->GetPointList().size() == 2 &&
+					itemPos->GetPointList().front() != itemPos->GetPointList().back())
+				)
+			{
+				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
+			}
 		}
 	}
 
