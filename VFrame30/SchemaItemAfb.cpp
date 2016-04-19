@@ -21,6 +21,8 @@ namespace VFrame30
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
+        m_afbImplementationVersion(fblElement.implementationVersion()),
+        m_afbImplementationOpIndex(fblElement.implementationOpIndex()),
 		m_params(fblElement.params())
 	{
 		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
@@ -591,6 +593,17 @@ namespace VFrame30
 	{
 		return m_afbStrID;
 	}
+
+    int SchemaItemAfb::afbImplementationVersion() const
+    {
+        return m_afbImplementationVersion;
+    }
+
+    int SchemaItemAfb::afbImplementationOpIndex() const
+    {
+        return m_afbImplementationOpIndex;
+    }
+
 
 	const std::vector<Afb::AfbParam>& SchemaItemAfb::params() const
 	{

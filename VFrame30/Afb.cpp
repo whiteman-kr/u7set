@@ -867,6 +867,8 @@ namespace Afb
 
 	AfbElement::AfbElement(void) :
 		m_version("0.0"),
+        m_implementationVersion(0),
+        m_implementationOpIndex(0),
 		m_hasRam(false),
         m_requiredStart(true),
 		m_internalUse(false)
@@ -895,6 +897,8 @@ namespace Afb
 		m_caption = that.m_caption;
 		m_description = that.m_description;
         m_version = that.m_version;
+        m_implementationVersion = that.m_implementationVersion;
+        m_implementationOpIndex = that.m_implementationOpIndex;
         m_category = that.m_category;
 		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
@@ -986,6 +990,21 @@ namespace Afb
                     if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
                     {
                         setVersion(xmlReader->readElementText());
+                        continue;
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "Implementation", Qt::CaseInsensitive) == 0)
+                    {
+                        if (xmlReader->attributes().hasAttribute("Version"))
+                        {
+                            setImplementationVersion(xmlReader->attributes().value("Version").toInt());
+                        }
+                        if (xmlReader->attributes().hasAttribute("OpIndex"))
+                        {
+                            setImplementationOpIndex(xmlReader->attributes().value("OpIndex").toInt());
+                        }
+
+                        xmlReader->readElementText();
                         continue;
                     }
 
@@ -1174,6 +1193,12 @@ namespace Afb
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("Description", description());
         xmlWriter->writeTextElement("Version", version());
+
+        xmlWriter->writeStartElement("Implementation");
+        xmlWriter->writeAttribute("Version", QString::number(implementationVersion()));
+        xmlWriter->writeAttribute("OpIndex", QString::number(implementationOpIndex()));
+        xmlWriter->writeEndElement();
+
         xmlWriter->writeTextElement("Category", category());
         xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
@@ -1418,6 +1443,26 @@ namespace Afb
     void AfbElement::setVersion(const QString& value)
     {
         m_version = value;
+    }
+
+    int AfbElement::implementationVersion() const
+    {
+        return m_implementationVersion;
+    }
+
+    void AfbElement::setImplementationVersion(int value)
+    {
+        m_implementationVersion = value;
+    }
+
+    int AfbElement::implementationOpIndex() const
+    {
+        return m_implementationOpIndex;
+    }
+
+    void AfbElement::setImplementationOpIndex(int value)
+    {
+        m_implementationOpIndex = value;
     }
 
     QString AfbElement::category() const
