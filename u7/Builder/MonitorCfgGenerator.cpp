@@ -62,17 +62,17 @@ namespace Builder
 			//
 			bool ok = true;
 
-			// StartSchemaStrID
+			// StartSchemaID
 			//
-			QString startSchemaStrId = getObjectProperty<QString>(m_software->strId(), "StartSchemaStrID", &ok).trimmed();
+			QString startSchemaId = getObjectProperty<QString>(m_software->strId(), "StartSchemaID", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
 			}
 
-			if (startSchemaStrId.isEmpty() == true)
+			if (startSchemaId.isEmpty() == true)
 			{
-				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID1 is invalid")
+				QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid")
 								   .arg(m_software->strId());
 
 				m_log->writeError(errorStr);
@@ -80,7 +80,7 @@ namespace Builder
 				return false;
 			}
 
-			xmlWriter.writeTextElement("StartSchemaStrID", startSchemaStrId);
+			xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
 
 			// DataAquisitionServiceStrID1
 			//

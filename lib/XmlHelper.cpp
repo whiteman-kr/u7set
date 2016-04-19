@@ -216,6 +216,7 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAdd
 		return false;
 	}
 
+<<<<<<< HEAD
 	QString addressStr;
 
 	bool result = readStringElement(nameIP, &addressStr);
@@ -226,4 +227,8 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAdd
 	}
 
 	return result;
+=======
+	hostAddress->setAddress(xml.attributes().value("IP").toString());
+	return true;
+>>>>>>> b78d8d6ea2847d5e61f340b715d92187b4cf5263
 }

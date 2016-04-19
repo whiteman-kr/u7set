@@ -186,8 +186,6 @@ int main(int argc, char *argv[])
 	}
 
 	string dir = argv[1];
-	//string dir = "/home/vsapronenko/GitData/u7set/u7/u7.pro";
-	//string dir = "D:/GitData/u7set/ServiceControlManager/ServiceControlManager.pro";
 	if (!fileExists(dir))
 	{
 		cout << "Project file doesn't exists" << endl;
@@ -224,10 +222,19 @@ int main(int argc, char *argv[])
 #endif
 	REPORT(git_repository_open(&repo, dir.c_str()));
 
-	git_oid master_oid = {0};
-	vector<git_oid> master_history;
-	REPORT_RETURN1(git_reference_name_to_id(&master_oid, repo, "refs/remotes/origin/master"));
-	print_commit_info("LAST_SERVER_COMMIT", master_oid, &master_history);
+	git_reference* currentReference = NULL;
+	string branchName;
+	REPORT(git_repository_head(&currentReference, repo));
+	if (currentReference != NULL)
+	{
+		branchName = git_reference_shorthand(currentReference);
+		git_reference_free(currentReference);
+	}
+
+	git_oid branch_oid = {0};
+	vector<git_oid> branch_history;
+	REPORT_RETURN1(git_reference_name_to_id(&branch_oid, repo, ("refs/remotes/origin/"+branchName).c_str()));
+	print_commit_info("LAST_SERVER_COMMIT", branch_oid, &branch_history);
 
 	// Fill local local commit history vector
 	//
@@ -247,14 +254,14 @@ int main(int argc, char *argv[])
 	//
 
 	unsigned int commit_index = 0;
-	for (; commit_index < min(master_history.size(), head_history.size()); commit_index++)
+	for (; commit_index < min(branch_history.size(), head_history.size()); commit_index++)
 	{
-		if (memcmp(master_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
+		if (memcmp(branch_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
 		{
 			break;
 		}
 	}
-	git_oid used_server_oid = master_history[commit_index - 1];
+	git_oid used_server_oid = branch_history[commit_index - 1];
 	print_commit_info("USED_SERVER_COMMIT", used_server_oid);
 
 	versionInfoText << "const char* const ChangedFilesList[] =\n{\n";
@@ -284,9 +291,15 @@ int main(int argc, char *argv[])
 					<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
 	}
 
+	if (branchName == "master")
+	{
+		branchName = "stable";
+	}
+	versionInfoText << "#define BUILD_BRANCH \"" << branchName << "\"\n";
+
 	if (fileCount > 0)
 	{
-		versionInfoText << "#define BUILD_STATE = \"Local build\"\n"
+		versionInfoText << "#define BUILD_STATE \"Local build\"\n"
 					<< "#ifndef Q_DEBUG\n"
 					<< "#ifdef _MSC_VER\n"
 					<< " #pragma warning ()\n"

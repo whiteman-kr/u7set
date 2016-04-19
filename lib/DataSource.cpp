@@ -169,6 +169,7 @@ void DataSource::serializeToXml(QXmlStreamWriter& xml)
 
 void DataSource::serializeFromXml(QXmlStreamWriter& xml)
 {
+	Q_UNUSED(xml);
 	/*xml.writeStartElement("DataSource");
 
 	xml.writeAttribute("EthernetChannel", QString::number(m_ethernetChannel));

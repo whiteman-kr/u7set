@@ -305,6 +305,12 @@ private:
         QString version() const;
         void setVersion(const QString& value);
 
+        int implementationVersion() const;
+        void setImplementationVersion(int value);
+
+        int implementationOpIndex() const;
+        void setImplementationOpIndex(int value);
+
         QString category() const;
         void setCategory(const QString& value);
 
@@ -344,6 +350,8 @@ private:
 		QString m_caption;
 		QString m_description;
         QString m_version;
+        int m_implementationVersion;
+        int m_implementationOpIndex;
         QString m_category;
 		Afb::AfbType m_type;
 		bool m_hasRam;

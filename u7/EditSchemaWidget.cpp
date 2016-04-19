@@ -3232,9 +3232,16 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			}
 		}
 
-		if (startPointAddedToOther == false && endPointAddedToOther == false)
+		if (startPointAddedToOther == false &&
+			endPointAddedToOther == false)
 		{
-		m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
+			if (itemPos->GetPointList().size() > 2 ||
+					(itemPos->GetPointList().size() == 2 &&
+					itemPos->GetPointList().front() != itemPos->GetPointList().back())
+				)
+			{
+				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
+			}
 		}
 	}
 
