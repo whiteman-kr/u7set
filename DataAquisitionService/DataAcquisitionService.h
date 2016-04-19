@@ -62,13 +62,17 @@ private:
 	void onTimer();
 
 public:
-	DataServiceWorker() :
-		ServiceWorker(ServiceType::DataAcquisitionService),
-		m_timer(this)	{}
+	DataServiceWorker(const QString& serviceStrID,
+					  const QString& cfgServiceIP1,
+					  const QString& cfgServiceIP2);
+
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	ServiceWorker* createInstance() override { return new DataServiceWorker; }
+	ServiceWorker* createInstance() override
+	{
+		return new DataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+	}
 
 signals:
 	void ackInformationRequest(UdpRequest request);

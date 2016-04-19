@@ -18,6 +18,29 @@ ServiceStarter::ServiceStarter(int argc, char ** argv, const QString& name, Serv
 }
 
 
+QString ServiceStarter::getCommandLineKeyValue(int argc, char **argv, const QString& key)
+{
+	QString value;
+
+	QString keyStr = QString("-%1=").arg(key);
+
+	int keyStrLen = keyStr.length();
+
+	for(int i = 0; i <argc; i++)
+	{
+		QString arg = argv[i];
+
+		if (arg.mid(0, keyStrLen) == keyStr)
+		{
+			value = arg.mid(keyStrLen);
+			break;
+		}
+	}
+
+	return value;
+}
+
+
 int ServiceStarter::exec()
 {
 	bool consoleMode = false;
@@ -48,6 +71,7 @@ int ServiceStarter::exec()
 
 	return result;
 }
+
 
 
 // -------------------------------------------------------------------------------------
@@ -132,7 +156,7 @@ ConsoleServiceStarter::ConsoleServiceStarter(int argc, char ** argv, const QStri
 int ConsoleServiceStarter::exec()
 {
 	qDebug() << "\n======" << C_STR(m_name) << "sarted ======\n";
-    qDebug() << "Press any key and RETURN to finish service\n";
+	qDebug() << "Press any key and RETURN to finish service\n";
 
 	if (m_serviceWorker == nullptr)
 	{
@@ -140,9 +164,9 @@ int ConsoleServiceStarter::exec()
 		return 0;
 	}
 
-    ConsoleServiceKeyReaderThread* keyReaderThread = new ConsoleServiceKeyReaderThread();
+	ConsoleServiceKeyReaderThread* keyReaderThread = new ConsoleServiceKeyReaderThread();
 
-    keyReaderThread->start();
+	keyReaderThread->start();
 
 	// run service
 	//
@@ -157,9 +181,9 @@ int ConsoleServiceStarter::exec()
 	delete m_service;
 	m_service = nullptr;
 
-    keyReaderThread->quit();
-    keyReaderThread->wait();
-    delete keyReaderThread;
+	keyReaderThread->quit();
+	keyReaderThread->wait();
+	delete keyReaderThread;
 
 	qDebug() << "\n======" << C_STR(m_name) << "finished ======\n";
 
@@ -393,8 +417,14 @@ void Service::initLog()
 //
 // -------------------------------------------------------------------------------------
 
-ServiceWorker::ServiceWorker(ServiceType serviceType) :
-	m_serviceType(serviceType)
+ServiceWorker::ServiceWorker(ServiceType serviceType,
+							 const QString& serviceStrID,
+							 const QString& cfgServiceIP1,
+							 const QString& cfgServiceIP2) :
+	m_serviceType(serviceType),
+	m_serviceStrID(serviceStrID),
+	m_cfgServiceIP1(cfgServiceIP1),
+	m_cfgServiceIP2(cfgServiceIP2)
 {
 }
 
