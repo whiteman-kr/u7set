@@ -5,6 +5,31 @@
 #include "../include/CfgServerLoader.h"
 #include "../include/SocketIO.h"
 
+
+class ConfigConnection
+{
+	ConfigConnection() {}
+
+public:
+	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
+
+protected:
+	QString m_equipmentId;
+	QString m_ip;
+	int m_port;
+
+	friend struct ConfigSettings;
+};
+
+struct ConfigSettings
+{
+	QString startSchemaId;				// Start Schema ID
+	ConfigConnection das1;				// Data Aquisition Service connection params
+	ConfigConnection das2;				// Data Aquisition Service connection params
+
+	QString errorMessage;				// Parsing error message, empty if no errors
+};
+
 class MonitorConfigController : public QObject
 {
 	Q_OBJECT
@@ -21,8 +46,8 @@ private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	bool xmlReadSoftwareSection(QXmlStreamReader& xmlReader);
-	bool xmlReadSettingsSection(QXmlStreamReader& xmlReader);
+	bool xmlReadSoftwareNode(QDomNode& softwareNode, ConfigSettings* outSetting);
+	bool xmlReadSettingsNode(QDomNode& settingsNode, ConfigSettings* outSetting);
 
 	// Data section
 	//

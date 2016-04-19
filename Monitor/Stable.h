@@ -88,6 +88,9 @@
 
 #include <QPainter>
 
+// Qt XML
+//
+#include <QDomDocument>
 
 //// Qt Sql
 ////

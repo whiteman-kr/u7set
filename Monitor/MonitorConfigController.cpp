@@ -1,5 +1,15 @@
 #include "MonitorConfigController.h"
 #include "Settings.h"
+#include <QDomElement>
+#include <QDomNodeList>
+
+ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
+	m_equipmentId(EquipmentId),
+	m_ip(ipAddress),
+	m_port(port)
+{
+}
+
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
@@ -128,119 +138,202 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
-	QString errorMessage;
+	ConfigSettings readSettings;
 
-	QXmlStreamReader xmlReader(configurationXmlData);
+	// Parse XML
+	//
+	QDomDocument xml;
+	QString parsingError;
 
-	while(xmlReader.atEnd() == false)
+	bool result = xml.setContent(configurationXmlData, false, &parsingError);
+
+	if (result == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		readSettings.errorMessage += parsingError + "\n";
+	}
+	else
+	{
+		// Get <Configuration>
+		//
+		QDomElement configElement = xml.documentElement();
+
+		// Software node
+		//
+		QDomNodeList softwareNodes = configElement.elementsByTagName("Software");
+		if (softwareNodes.size() != 1)
 		{
-			continue;
+			readSettings.errorMessage += tr("Parsing Software node error.\n");
+		}
+		else
+		{
+			result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
 		}
 
-		if (xmlReader.name() == "Software")
+		// Settings node
+		//
+		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
+		if (settingsNodes.size() != 1)
 		{
-			bool result = xmlReadSoftwareSection(xmlReader);
-			if (result == false)
-			{
-				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Software.");
-			}
-			continue;
+			readSettings.errorMessage += tr("Parsing Settings node error.\n");
 		}
-
-		if (xmlReader.name() == "Settings")
+		else
 		{
-			bool result = xmlReadSettingsSection(xmlReader);
-			if (result == false)
-			{
-				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Settings.");
-			}
-			continue;
+			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
 		}
 	}
 
-	if (errorMessage.isEmpty() == false)
+	// Error handling
+	//
+	if (result == false ||
+		readSettings.errorMessage.isEmpty() == false)
 	{
-		QMessageBox::critical(nullptr, qApp->applicationName(), errorMessage);
+		QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
+
+		qDebug() << completeErrorMessage;
+		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
 	}
 
 	return;
 }
 
-bool MonitorConfigController::xmlReadSoftwareSection(QXmlStreamReader& xmlReader)
+bool MonitorConfigController::xmlReadSoftwareNode(QDomNode& softwareNode, ConfigSettings* outSetting)
 {
-	if (xmlReader.name() != "Software")
+	if (outSetting == nullptr ||
+		softwareNode.nodeName() != "Software")
 	{
-		assert(false);
+		assert(outSetting);
+		assert(softwareNode.nodeName() == "Software");
 		return false;
 	}
 
-	QString appStrId = xmlReader.attributes().value("StrID").toString();
+	QDomElement softwareElement = softwareNode.toElement();
 
-	if (theSettings.instanceStrId() != appStrId)
+	// Read StrID attribute
+	//
+	QString appEquipmentId = softwareElement.attribute("StrID");
+
+	if (theSettings.instanceStrId() != appEquipmentId)
 	{
 		// The received file has different StrID then expected
 		//
+		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
 		return false;
 	}
 
-	int softwareType = xmlReader.attributes().value("Type").toInt();
+	// Read Type attribute
+	//
+	int softwareType = softwareElement.attribute("Type").toInt();
 
 	if (softwareType != E::SoftwareType::Monitor)
 	{
 		// The received file has different type then expected,
 		//
+		outSetting->errorMessage += "The received file has different software type then expected.\n";
 		return false;
 	}
 
-	return true;
+	return outSetting->errorMessage.isEmpty();
 }
 
-bool MonitorConfigController::xmlReadSettingsSection(QXmlStreamReader& xmlReader)
+bool MonitorConfigController::xmlReadSettingsNode(QDomNode& settingsNode, ConfigSettings* outSetting)
 {
-	if (xmlReader.name() != "Settings")
+	if (outSetting == nullptr ||
+		settingsNode.nodeName() != "Settings")
 	{
-		assert(false);
+		assert(outSetting);
+		assert(settingsNode.nodeName() == "Settings");
 		return false;
 	}
 
-	while(xmlReader.atEnd() == false)
+	QDomElement settingsElement = settingsNode.toElement();
+
+	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
+
+	if (errorNodes.isEmpty() == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		for (int i = 0; i < errorNodes.count();  i++)
 		{
-			continue;
+			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
 		}
 
-		if (xmlReader.name() == "DataAquisitionService")
-		{
-			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
-			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
-
-			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
-			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
-
-			int dasPort1 = xmlReader.attributes().value("port1").toInt();
-			int dasPort2 = xmlReader.attributes().value("port2").toInt();
-
-			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
-								 .arg(dasStrId1)
-								 .arg(dasIp1)
-								 .arg(dasPort1);
-			qDebug() << logString1;
-
-			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
-								 .arg(dasStrId2)
-								 .arg(dasIp2)
-								 .arg(dasPort2);
-			qDebug() << logString2;
-
-			// Send new settings to DAS thread etc
-			//
-
-			continue;
-		}
+		return false;
 	}
 
-	return true;
+
+	return outSetting->errorMessage.isEmpty();
+//	if (outSetting == nullptr ||
+//		xmlReader.name() != "Settings")
+//	{
+//		assert(outSetting);
+//		//assert(xmlReader.name() == "Settings");
+//		return false;
+//	}
+
+//	// Parse
+//	//
+//	while(xmlReader.atEnd() == false)
+//	{
+//		if (xmlReader.readNextStartElement() == false)
+//		{
+//			//qDebug() << "readNextStartElement() == false: " << xmlReader.name() << ", Text: " << xmlReader.text();
+//			continue;
+//		}
+
+//		QString tagName = xmlReader.name().toString();
+
+//		qDebug() << tagName;
+
+//		if (xmlReader.isStartElement() == true && tagName == "Error")
+//		{
+//			outSetting->errorMessage += xmlReader.readElementText() + "\n";
+//			xmlReader.skipCurrentElement();
+//			continue;
+//		}
+
+//		if (xmlReader.isStartElement() == true && tagName == "StartSchemaID")
+//		{
+//			outSetting->startSchemaId = xmlReader.text().toString();
+//			xmlReader.skipCurrentElement();
+//			continue;
+//		}
+
+//		if (xmlReader.isStartElement() == true && tagName == "DataAquisitionService")
+//		{
+//			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
+//			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
+
+//			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
+//			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
+
+//			int dasPort1 = xmlReader.attributes().value("port1").toInt();
+//			int dasPort2 = xmlReader.attributes().value("port2").toInt();
+
+//			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
+//								 .arg(dasStrId1)
+//								 .arg(dasIp1)
+//								 .arg(dasPort1);
+
+//			qDebug() << logString1;
+
+//			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
+//								 .arg(dasStrId2)
+//								 .arg(dasIp2)
+//								 .arg(dasPort2);
+
+//			qDebug() << logString2;
+
+//			// Save data
+//			//
+//			outSetting->das1 = ConfigConnection(dasStrId1, dasIp1, dasPort1);
+//			outSetting->das2 = ConfigConnection(dasStrId2, dasIp2, dasPort2);;
+
+//			xmlReader.skipCurrentElement();
+//			continue;
+//		}
+
+//		outSetting->errorMessage += QString("Unknown xml tag %1\n").arg(tagName);
+//		xmlReader.skipCurrentElement();
+//	}
+
+//	return outSetting->errorMessage.isEmpty();
 }

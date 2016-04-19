@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network xmlpatterns qml
+QT       += core gui widgets network xmlpatterns qml xml
 
 TARGET = Monitor
 TEMPLATE = app
