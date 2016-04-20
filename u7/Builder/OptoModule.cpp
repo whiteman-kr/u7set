@@ -23,7 +23,7 @@ namespace Hardware
 			return;
 		}
 
-		m_strID = optoPortController->strId();
+		m_strID = optoPortController->equipmentIdTemplate();
 		m_port = port;
 	}
 
@@ -179,7 +179,7 @@ namespace Hardware
 			return;
 		}
 
-		m_strID = module->strId();
+		m_strID = module->equipmentIdTemplate();
 		m_place = module->place();
 
 		bool result = true;
@@ -199,7 +199,7 @@ namespace Hardware
 
 		for(int i = 0; i < m_optoPortCount; i++)
 		{
-			QString portStrID = QString("%1_OPTOPORT0%2").arg(module->strId()).arg(i + 1);
+			QString portStrID = QString("%1_OPTOPORT0%2").arg(module->equipmentIdTemplate()).arg(i + 1);
 
 			int childrenCount = module->childrenCount();
 
@@ -213,7 +213,7 @@ namespace Hardware
 					continue;
 				}
 
-				if (child->isController() && child->strId() == portStrID)
+				if (child->isController() && child->equipmentIdTemplate() == portStrID)
 				{
 					DeviceController* optoPortController = child->toController();
 
@@ -224,9 +224,9 @@ namespace Hardware
 						return;
 					}
 
-					OptoPort* optoPort = new OptoPort(module->strId(), optoPortController, i + 1);
+					OptoPort* optoPort = new OptoPort(module->equipmentIdTemplate(), optoPortController, i + 1);
 
-					m_ports.insert(optoPortController->strId(), optoPort);
+					m_ports.insert(optoPortController->equipmentIdTemplate(), optoPort);
 
 					findPortCount++;
 
@@ -238,7 +238,7 @@ namespace Hardware
 		if (findPortCount != m_optoPortCount)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Not all opto-port controllers found in module '%1'")).arg(module->strId()));
+							   QString(tr("Not all opto-port controllers found in module '%1'")).arg(module->equipmentIdTemplate()));
 			return;
 		}
 
@@ -246,7 +246,7 @@ namespace Hardware
 		{
 			// OCM module
 			//
-			m_lmStrID = module->strId();
+			m_lmStrID = module->equipmentIdTemplate();
 			m_lmDeviceModule = module;
 		}
 		else
@@ -264,7 +264,7 @@ namespace Hardware
 			if (chassis == nullptr)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Not found chassis to module '%1'")).arg(module->strId()));
+								   QString(tr("Not found chassis to module '%1'")).arg(module->equipmentIdTemplate()));
 				return;
 			}
 
@@ -302,7 +302,7 @@ namespace Hardware
 						assert(false);          // second LM in chassis ?
 					}
 
-					m_lmStrID = childModule->strId();
+					m_lmStrID = childModule->equipmentIdTemplate();
 					m_lmDeviceModule = childModule;
 
 					lmAlreadyFound = true;
@@ -489,7 +489,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_modules.insert(module->strId(), optoModule);
+		m_modules.insert(module->equipmentIdTemplate(), optoModule);
 
 		m_lmAssociatedModules.insertMulti(optoModule->lmStrID(), optoModule);
 

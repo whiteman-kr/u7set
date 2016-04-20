@@ -421,7 +421,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(Schema));
   LogicSchema_descriptor_ = file->message_type(13);
   static const int LogicSchema_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, hardware_strids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, equipmentids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, counter_),
   };
   LogicSchema_reflection_ =
@@ -761,7 +761,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   DeviceObject_descriptor_ = file->message_type(32);
   static const int DeviceObject_offsets_[20] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, strid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, childrestriction_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, place_),
@@ -1245,104 +1245,104 @@ void protobuf_AddDesc_serialization_2eproto() {
     "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
     "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
     "ElementCollection\022)\n\014logic_schema\030\310\001 \001(\013"
-    "2\022.Proto.LogicSchema\"J\n\013LogicSchema\022\'\n\017h"
-    "ardware_strids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007"
-    "counter\030\002 \001(\005:\0010\"\224\001\n\013SchemaLayer\022\031\n\004uuid"
-    "\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Prot"
-    "o.wstring\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010"
-    "\022\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.E"
-    "nvelope\"\224\006\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.P"
-    "roto.Uuid\022\020\n\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030"
-    "\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021.Proto.SchemaUn"
-    "it\022\032\n\013acceptClick\030\005 \001(\010:\005false\022#\n\013clickS"
-    "cript\030\006 \001(\0132\016.Proto.wstring\022\'\n\013PosRectIm"
-    "pl\030\n \001(\0132\022.Proto.PosRectImpl\022\'\n\013PosLineI"
-    "mpl\030\013 \001(\0132\022.Proto.PosLineImpl\0223\n\021PosConn"
-    "ectionImpl\030\014 \001(\0132\030.Proto.PosConnectionIm"
-    "pl\022\037\n\007FblItem\030j \001(\0132\016.Proto.FblItem\022\'\n\013F"
-    "blItemRect\030k \001(\0132\022.Proto.FblItemRect\022\'\n\013"
-    "FblItemLine\030l \001(\0132\022.Proto.FblItemLine\022#\n"
-    "\004Rect\030t \001(\0132\025.Proto.SchemaItemRect\022#\n\004Li"
-    "ne\030u \001(\0132\025.Proto.SchemaItemLine\022#\n\004Path\030"
-    "v \001(\0132\025.Proto.SchemaItemPath\022\'\n\006Signal\030|"
-    " \001(\0132\027.Proto.SchemaItemSignal\022+\n\013InputSi"
-    "gnal\030} \001(\0132\026.Proto.SchemaItemInput\022-\n\014Ou"
-    "tputSignal\030~ \001(\0132\027.Proto.SchemaItemOutpu"
-    "t\022#\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLink\022\""
-    "\n\003Afb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n\tCo"
-    "nstItem\030\201\001 \001(\0132\026.Proto.SchemaItemConst\"["
-    "\n\013PosRectImpl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topD"
-    "ocPt\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013height"
-    "DocPt\030\004 \002(\001\"]\n\013PosLineImpl\022\023\n\013startXDocP"
-    "t\030\001 \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocP"
-    "t\030\003 \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n\021PosConnect"
-    "ionImpl\022\"\n\006points\030\001 \003(\0132\022.Proto.SchemaPo"
-    "int\"\353\001\n\016SchemaItemRect\022\016\n\006weight\030\001 \002(\001\022\021"
-    "\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004"
-    "text\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030"
-    "\005 \002(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n"
-    "\004fill\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\th"
-    "orzAlign\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\00312"
-    "8\"3\n\016SchemaItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tl"
-    "ineColor\030\002 \002(\r\"3\n\016SchemaItemPath\022\016\n\006weig"
-    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\260\001\n\022FblConne"
-    "ctionPoint\022!\n\005point\030\001 \001(\0132\022.Proto.Schema"
-    "Point\022/\n\ndirrection\030\002 \001(\0162\033.Proto.Connec"
-    "tionDirrection\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uui"
-    "d\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005"
-    " \001(\t:\000\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Prot"
-    "o.FblConnectionPoint\"v\n\013FblItemRect\022\016\n\006w"
-    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillCo"
-    "lor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002"
-    "(\0132\020.Proto.FontParam\"0\n\013FblItemLine\022\016\n\006w"
-    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"8\n\020Schema"
-    "ItemSignal\022$\n\014signalStrIDs\030\001 \003(\0132\016.Proto"
-    ".wstring\"\021\n\017SchemaItemInput\"\022\n\020SchemaIte"
-    "mOutput\"\020\n\016SchemaItemLink\"h\n\rSchemaItemA"
-    "fb\022\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010a"
-    "fbStrid\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecisi"
-    "on\030\004 \001(\005:\0012\"d\n\017SchemaItemConst\022\017\n\004type\030\001"
-    " \001(\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatVal"
-    "ue\030\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\274\005\n\014De"
-    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n"
-    "\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030"
-    "\003 \002(\0132\016.Proto.wstring\022(\n\020childRestrictio"
-    "n\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\001"
-    "0\022\"\n\032specific_properties_struct\030\006 \001(\t\022#\n"
-    "\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n\006pr"
-    "eset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005f"
-    "alse\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring"
-    "\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uuid\022"
-    "\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Syst"
-    "em\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f "
-    "\001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001(\0132"
-    "\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\0132\023."
-    "Proto.DeviceModule\022+\n\nController\030i \001(\0132\027"
-    ".Proto.DeviceController\022#\n\006Signal\030j \001(\0132"
-    "\023.Proto.DeviceSignal\022\'\n\013Workstation\030k \001("
-    "\0132\022.Proto.Workstation\022!\n\010Software\030l \001(\0132"
-    "\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Device"
-    "System\"\014\n\nDeviceRack\" \n\rDeviceChassis\022\017\n"
-    "\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004type\030\001"
-    " \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014DeviceSi"
-    "gnal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteOrd"
-    "er\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004"
-    " \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013va"
-    "lidityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:"
-    "\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010"
-    "\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstation\022\017\n\004"
-    "type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:"
-    "\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_desc"
-    "ription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Mo"
-    "duleConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7"
-    "\n\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t"
-    "\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002("
-    "\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007Displa"
-    "y\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connect"
-    "ionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\r"
-    "FblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*"
-    ":\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSig"
-    "nedInt\020\001\022\t\n\005Float\020\002", 6059);
+    "2\022.Proto.LogicSchema\"G\n\013LogicSchema\022$\n\014e"
+    "quipmentids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007cou"
+    "nter\030\002 \001(\005:\0010\"\224\001\n\013SchemaLayer\022\031\n\004uuid\030\001 "
+    "\002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.w"
+    "string\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n"
+    "\005print\030\005 \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Enve"
+    "lope\"\224\006\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Prot"
+    "o.Uuid\022\020\n\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002"
+    "(\010\022#\n\010itemUnit\030\004 \002(\0162\021.Proto.SchemaUnit\022"
+    "\032\n\013acceptClick\030\005 \001(\010:\005false\022#\n\013clickScri"
+    "pt\030\006 \001(\0132\016.Proto.wstring\022\'\n\013PosRectImpl\030"
+    "\n \001(\0132\022.Proto.PosRectImpl\022\'\n\013PosLineImpl"
+    "\030\013 \001(\0132\022.Proto.PosLineImpl\0223\n\021PosConnect"
+    "ionImpl\030\014 \001(\0132\030.Proto.PosConnectionImpl\022"
+    "\037\n\007FblItem\030j \001(\0132\016.Proto.FblItem\022\'\n\013FblI"
+    "temRect\030k \001(\0132\022.Proto.FblItemRect\022\'\n\013Fbl"
+    "ItemLine\030l \001(\0132\022.Proto.FblItemLine\022#\n\004Re"
+    "ct\030t \001(\0132\025.Proto.SchemaItemRect\022#\n\004Line\030"
+    "u \001(\0132\025.Proto.SchemaItemLine\022#\n\004Path\030v \001"
+    "(\0132\025.Proto.SchemaItemPath\022\'\n\006Signal\030| \001("
+    "\0132\027.Proto.SchemaItemSignal\022+\n\013InputSigna"
+    "l\030} \001(\0132\026.Proto.SchemaItemInput\022-\n\014Outpu"
+    "tSignal\030~ \001(\0132\027.Proto.SchemaItemOutput\022#"
+    "\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLink\022\"\n\003A"
+    "fb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n\tConst"
+    "Item\030\201\001 \001(\0132\026.Proto.SchemaItemConst\"[\n\013P"
+    "osRectImpl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocP"
+    "t\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDoc"
+    "Pt\030\004 \002(\001\"]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001"
+    " \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003"
+    " \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n\021PosConnection"
+    "Impl\022\"\n\006points\030\001 \003(\0132\022.Proto.SchemaPoint"
+    "\"\353\001\n\016SchemaItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tl"
+    "ineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004tex"
+    "t\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030\005 \002"
+    "(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fi"
+    "ll\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorz"
+    "Align\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\"3"
+    "\n\016SchemaItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tline"
+    "Color\030\002 \002(\r\"3\n\016SchemaItemPath\022\016\n\006weight\030"
+    "\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\260\001\n\022FblConnecti"
+    "onPoint\022!\n\005point\030\001 \001(\0132\022.Proto.SchemaPoi"
+    "nt\022/\n\ndirrection\030\002 \001(\0162\033.Proto.Connectio"
+    "nDirrection\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uuid\022\030"
+    "\n\014operandIndex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001("
+    "\t:\000\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Proto.F"
+    "blConnectionPoint\"v\n\013FblItemRect\022\016\n\006weig"
+    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor"
+    "\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132"
+    "\020.Proto.FontParam\"0\n\013FblItemLine\022\016\n\006weig"
+    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"8\n\020SchemaIte"
+    "mSignal\022$\n\014signalStrIDs\030\001 \003(\0132\016.Proto.ws"
+    "tring\"\021\n\017SchemaItemInput\"\022\n\020SchemaItemOu"
+    "tput\"\020\n\016SchemaItemLink\"h\n\rSchemaItemAfb\022"
+    "\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010afbS"
+    "trid\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecision\030"
+    "\004 \001(\005:\0012\"d\n\017SchemaItemConst\022\017\n\004type\030\001 \001("
+    "\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030"
+    "\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\302\005\n\014Devic"
+    "eObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013eq"
+    "uipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007capti"
+    "on\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestric"
+    "tion\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001("
+    "\005:\0010\022\"\n\032specific_properties_struct\030\006 \001(\t"
+    "\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n"
+    "\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010"
+    ":\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstr"
+    "ing\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uu"
+    "id\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006S"
+    "ystem\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack"
+    "\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001"
+    "(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\013"
+    "2\023.Proto.DeviceModule\022+\n\nController\030i \001("
+    "\0132\027.Proto.DeviceController\022#\n\006Signal\030j \001"
+    "(\0132\023.Proto.DeviceSignal\022\'\n\013Workstation\030k"
+    " \001(\0132\022.Proto.Workstation\022!\n\010Software\030l \001"
+    "(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Dev"
+    "iceSystem\"\014\n\nDeviceRack\" \n\rDeviceChassis"
+    "\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004typ"
+    "e\030\001 \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014Devic"
+    "eSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyte"
+    "Order\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004siz"
+    "e\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n"
+    "\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001"
+    "(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005"
+    ":\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstation\022"
+    "\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001"
+    "(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_d"
+    "escription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto"
+    ".ModuleConfigurationValue\022\016\n\004name\030\003 \001(\t:"
+    "\000\"7\n\030ModuleConfigurationValue\022\014\n\004name\030\001 "
+    "\002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001"
+    " \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007Dis"
+    "play\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conn"
+    "ectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*"
+    ")\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete"
+    "\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\t"
+    "SignedInt\020\001\022\t\n\005Float\020\002", 6062);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -6712,7 +6712,7 @@ void Schema::Swap(Schema* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int LogicSchema::kHardwareStridsFieldNumber;
+const int LogicSchema::kEquipmentidsFieldNumber;
 const int LogicSchema::kCounterFieldNumber;
 #endif  // !_MSC_VER
 
@@ -6770,7 +6770,7 @@ void LogicSchema::Clear() {
   if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     counter_ = 0;
   }
-  hardware_strids_.Clear();
+  equipmentids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -6781,17 +6781,17 @@ bool LogicSchema::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.wstring hardware_strids = 1;
+      // repeated .Proto.wstring equipmentids = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_hardware_strids:
+         parse_equipmentids:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_hardware_strids()));
+                input, add_equipmentids()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_hardware_strids;
+        if (input->ExpectTag(10)) goto parse_equipmentids;
         if (input->ExpectTag(16)) goto parse_counter;
         break;
       }
@@ -6830,10 +6830,10 @@ bool LogicSchema::MergePartialFromCodedStream(
 
 void LogicSchema::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.wstring hardware_strids = 1;
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->hardware_strids(i), output);
+      1, this->equipmentids(i), output);
   }
 
   // optional int32 counter = 2 [default = 0];
@@ -6849,11 +6849,11 @@ void LogicSchema::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* LogicSchema::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.wstring hardware_strids = 1;
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->hardware_strids(i), target);
+        1, this->equipmentids(i), target);
   }
 
   // optional int32 counter = 2 [default = 0];
@@ -6880,12 +6880,12 @@ int LogicSchema::ByteSize() const {
     }
 
   }
-  // repeated .Proto.wstring hardware_strids = 1;
-  total_size += 1 * this->hardware_strids_size();
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  total_size += 1 * this->equipmentids_size();
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->hardware_strids(i));
+        this->equipmentids(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -6913,7 +6913,7 @@ void LogicSchema::MergeFrom(const ::google::protobuf::Message& from) {
 
 void LogicSchema::MergeFrom(const LogicSchema& from) {
   GOOGLE_CHECK_NE(&from, this);
-  hardware_strids_.MergeFrom(from.hardware_strids_);
+  equipmentids_.MergeFrom(from.equipmentids_);
   if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     if (from.has_counter()) {
       set_counter(from.counter());
@@ -6936,15 +6936,15 @@ void LogicSchema::CopyFrom(const LogicSchema& from) {
 
 bool LogicSchema::IsInitialized() const {
 
-  for (int i = 0; i < hardware_strids_size(); i++) {
-    if (!this->hardware_strids(i).IsInitialized()) return false;
+  for (int i = 0; i < equipmentids_size(); i++) {
+    if (!this->equipmentids(i).IsInitialized()) return false;
   }
   return true;
 }
 
 void LogicSchema::Swap(LogicSchema* other) {
   if (other != this) {
-    hardware_strids_.Swap(&other->hardware_strids_);
+    equipmentids_.Swap(&other->equipmentids_);
     std::swap(counter_, other->counter_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
@@ -12994,7 +12994,7 @@ void SchemaItemConst::Swap(SchemaItemConst* other) {
 
 #ifndef _MSC_VER
 const int DeviceObject::kUuidFieldNumber;
-const int DeviceObject::kStrIdFieldNumber;
+const int DeviceObject::kEquipmentIdFieldNumber;
 const int DeviceObject::kCaptionFieldNumber;
 const int DeviceObject::kChildRestrictionFieldNumber;
 const int DeviceObject::kPlaceFieldNumber;
@@ -13022,7 +13022,7 @@ DeviceObject::DeviceObject()
 
 void DeviceObject::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
-  strid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  equipmentid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   childrestriction_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   presetname_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
@@ -13047,7 +13047,7 @@ DeviceObject::DeviceObject(const DeviceObject& from)
 void DeviceObject::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
-  strid_ = NULL;
+  equipmentid_ = NULL;
   caption_ = NULL;
   childrestriction_ = NULL;
   place_ = 0;
@@ -13078,7 +13078,7 @@ void DeviceObject::SharedDtor() {
   }
   if (this != default_instance_) {
     delete uuid_;
-    delete strid_;
+    delete equipmentid_;
     delete caption_;
     delete childrestriction_;
     delete presetname_;
@@ -13121,8 +13121,8 @@ void DeviceObject::Clear() {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
     }
-    if (has_strid()) {
-      if (strid_ != NULL) strid_->::Proto::wstring::Clear();
+    if (has_equipmentid()) {
+      if (equipmentid_ != NULL) equipmentid_->::Proto::wstring::Clear();
     }
     if (has_caption()) {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
@@ -13196,17 +13196,17 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_strId;
+        if (input->ExpectTag(18)) goto parse_equipmentId;
         break;
       }
 
-      // required .Proto.wstring strId = 2;
+      // required .Proto.wstring equipmentId = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_strId:
+         parse_equipmentId:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_strid()));
+               input, mutable_equipmentid()));
         } else {
           goto handle_uninterpreted;
         }
@@ -13500,10 +13500,10 @@ void DeviceObject::SerializeWithCachedSizes(
       1, this->uuid(), output);
   }
 
-  // required .Proto.wstring strId = 2;
-  if (has_strid()) {
+  // required .Proto.wstring equipmentId = 2;
+  if (has_equipmentid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->strid(), output);
+      2, this->equipmentid(), output);
   }
 
   // required .Proto.wstring caption = 3;
@@ -13629,11 +13629,11 @@ void DeviceObject::SerializeWithCachedSizes(
         1, this->uuid(), target);
   }
 
-  // required .Proto.wstring strId = 2;
-  if (has_strid()) {
+  // required .Proto.wstring equipmentId = 2;
+  if (has_equipmentid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->strid(), target);
+        2, this->equipmentid(), target);
   }
 
   // required .Proto.wstring caption = 3;
@@ -13777,11 +13777,11 @@ int DeviceObject::ByteSize() const {
           this->uuid());
     }
 
-    // required .Proto.wstring strId = 2;
-    if (has_strid()) {
+    // required .Proto.wstring equipmentId = 2;
+    if (has_equipmentid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->strid());
+          this->equipmentid());
     }
 
     // required .Proto.wstring caption = 3;
@@ -13942,8 +13942,8 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
     }
-    if (from.has_strid()) {
-      mutable_strid()->::Proto::wstring::MergeFrom(from.strid());
+    if (from.has_equipmentid()) {
+      mutable_equipmentid()->::Proto::wstring::MergeFrom(from.equipmentid());
     }
     if (from.has_caption()) {
       mutable_caption()->::Proto::wstring::MergeFrom(from.caption());
@@ -14022,8 +14022,8 @@ bool DeviceObject::IsInitialized() const {
   if (has_uuid()) {
     if (!this->uuid().IsInitialized()) return false;
   }
-  if (has_strid()) {
-    if (!this->strid().IsInitialized()) return false;
+  if (has_equipmentid()) {
+    if (!this->equipmentid().IsInitialized()) return false;
   }
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
@@ -14046,7 +14046,7 @@ bool DeviceObject::IsInitialized() const {
 void DeviceObject::Swap(DeviceObject* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
-    std::swap(strid_, other->strid_);
+    std::swap(equipmentid_, other->equipmentid_);
     std::swap(caption_, other->caption_);
     std::swap(childrestriction_, other->childrestriction_);
     std::swap(place_, other->place_);

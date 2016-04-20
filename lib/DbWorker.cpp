@@ -3987,7 +3987,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
 	{
 		QString request = QString("SELECT * FROM delete_signal_by_device_str_id(%1, '%2'')")
-			.arg(currentUser().userId()).arg(deviceSignal->strId());
+			.arg(currentUser().userId()).arg(deviceSignal->equipmentIdTemplate());
 
 		QSqlQuery q(db);
 

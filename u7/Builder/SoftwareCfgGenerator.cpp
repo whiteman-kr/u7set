@@ -48,7 +48,7 @@ namespace Builder
 			return false;
 		}
 
-		m_subDir = m_software->strId();
+		m_subDir = m_software->equipmentIdTemplate();
 
 		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(m_subDir);
 
@@ -56,17 +56,17 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Can't create 'configuration.xml' file for software %1")).
-					  arg(m_software->strId()));
+					  arg(m_software->equipmentIdTemplate()));
 			return false;
 		}
 
 		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
-					arg(m_software->strId()));
+					arg(m_software->equipmentIdTemplate()));
 
 		m_cfgXml->xmlWriter().writeStartElement("Software");
 
 		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->strId());
+		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->equipmentIdTemplate());
 		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
 
 		m_cfgXml->xmlWriter().writeEndElement();	// </Software>

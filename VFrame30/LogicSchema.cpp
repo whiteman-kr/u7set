@@ -43,7 +43,7 @@ namespace VFrame30
 
 		for (const QString& strId : m_hardwareStrIds)
 		{
-			::Proto::wstring* hs = ls->add_hardware_strids();
+			::Proto::wstring* hs = ls->add_equipmentids();
 			Proto::Write(hs, strId);
 		}
 
@@ -79,12 +79,12 @@ namespace VFrame30
 		const Proto::LogicSchema& ls = message.schema().logic_schema();
 
 		m_hardwareStrIds.clear();
-		m_hardwareStrIds.reserve(ls.hardware_strids_size());
+		m_hardwareStrIds.reserve(ls.equipmentids_size());
 
-		for (int i = 0; i < ls.hardware_strids_size(); i++)
+		for (int i = 0; i < ls.equipmentids_size(); i++)
 		{
 			QString s;
-			Proto::Read(ls.hardware_strids(i), &s);
+			Proto::Read(ls.equipmentids(i), &s);
 			m_hardwareStrIds.push_back(s);
 		}
 

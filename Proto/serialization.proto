@@ -289,7 +289,7 @@ message Schema
 //
 message LogicSchema
 {
-	repeated wstring hardware_strids = 1;
+	repeated wstring equipmentids = 1;
 	optional int32 counter = 2 [default = 0];
 }
 
@@ -570,7 +570,7 @@ message SchemaItemConst
 message DeviceObject
 {
 	required Uuid uuid = 1;
-	required wstring strId = 2;
+	required wstring equipmentId = 2;
 	required wstring caption = 3;
 	optional wstring childRestriction = 4;
 	optional int32 place = 5 [default = 0];

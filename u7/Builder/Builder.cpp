@@ -435,7 +435,7 @@ namespace Builder
 			return false;
 		}
 
-		device->expandStrId();
+		device->expandEquipmentId();
 
 		return true;
 	}
@@ -472,7 +472,7 @@ namespace Builder
 		// Check for the same Uuid and StrID
 		//
 		auto foundSameUuid = uuidMap.find(device->uuid());
-		auto foundSameStrId = strIdMap.find(device->strId());
+		auto foundSameStrId = strIdMap.find(device->equipmentIdTemplate());
 
 		bool ok = true;
 
@@ -480,7 +480,7 @@ namespace Builder
 		{
 			// Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3').
 			//
-			m_log->errEQP6002(device->uuid(), device->strIdExpanded(), foundSameUuid->second->strIdExpanded());
+			m_log->errEQP6002(device->uuid(), device->equipmentId(), foundSameUuid->second->equipmentId());
 			ok = false;
 		}
 		else
@@ -492,12 +492,12 @@ namespace Builder
 		{
 			// Two or more equipment objects have the same StrID '%1'.
 			//
-			m_log->errEQP6001(device->strIdExpanded(), device->uuid(), foundSameStrId->second->uuid()) ;
+			m_log->errEQP6001(device->equipmentId(), device->uuid(), foundSameStrId->second->uuid()) ;
 			ok = false;
 		}
 		else
 		{
-			strIdMap[device->strId()] = device;
+			strIdMap[device->equipmentIdTemplate()] = device;
 		}
 
 		// Check property Place, must not be -1
@@ -506,7 +506,7 @@ namespace Builder
 		{
 			// Property Place is less then 0 (Equipment object '%1').
 			//
-			m_log->errEQP6000(device->strId(), device->uuid());
+			m_log->errEQP6000(device->equipmentIdTemplate(), device->uuid());
 			ok = false;
 		}
 
@@ -776,7 +776,7 @@ namespace Builder
 					break;
 
 				default:
-					m_log->errEQP6100(software->strId(), software->uuid());
+					m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
 					result = false;
 				}
 

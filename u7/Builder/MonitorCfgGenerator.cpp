@@ -65,7 +65,7 @@ namespace Builder
 
 			// StartSchemaID
 			//
-			QString startSchemaId = getObjectProperty<QString>(m_software->strId(), "StartSchemaID", &ok).trimmed();
+			QString startSchemaId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
@@ -74,7 +74,7 @@ namespace Builder
 			if (startSchemaId.isEmpty() == true)
 			{
 				QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid")
-								   .arg(m_software->strId());
+								   .arg(m_software->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(xmlWriter, errorStr);
@@ -86,7 +86,7 @@ namespace Builder
 			//
 			// DataAquisitionServiceID1(2)
 			//
-			QString dacStrID1 = getObjectProperty<QString>(m_software->strId(), "DataAquisitionServiceID1", &ok).trimmed();
+			QString dacStrID1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "DataAquisitionServiceID1", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
@@ -95,7 +95,7 @@ namespace Builder
 			if (dacStrID1.isEmpty() == true)
 			{
 				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceID1 is invalid")
-								   .arg(m_software->strId());
+								   .arg(m_software->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(xmlWriter, errorStr);
@@ -105,7 +105,7 @@ namespace Builder
 			//
 			// DataAquisitionServiceID2
 			//
-			QString dacStrID2 = getObjectProperty<QString>(m_software->strId(), "DataAquisitionServiceID2", &ok).trimmed();
+			QString dacStrID2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "DataAquisitionServiceID2", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
@@ -114,7 +114,7 @@ namespace Builder
 			if (dacStrID2.isEmpty() == true)
 			{
 				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceID2 is invalid")
-								   .arg(m_software->strId());
+								   .arg(m_software->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(xmlWriter, errorStr);
@@ -129,7 +129,7 @@ namespace Builder
 
 			if (dasObject1 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dasObject1->strId());
+				QString errorStr = tr("Object %1 is not found").arg(dasObject1->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
@@ -138,7 +138,7 @@ namespace Builder
 
 			if (dasObject2 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dasObject2->strId());
+				QString errorStr = tr("Object %1 is not found").arg(dasObject2->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);

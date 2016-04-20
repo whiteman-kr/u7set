@@ -242,7 +242,7 @@ namespace Builder
         std::sort(lmModules.begin(), lmModules.end(),
                   [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
                   {
-                      return a->strId() < b->strId();
+                      return a->equipmentIdTemplate() < b->equipmentIdTemplate();
                   });
 
 		QStringList lmReport;
@@ -252,14 +252,14 @@ namespace Builder
 		{
             if (m->propertyExists("SubsysID") == false)
             {
-                lmReport << "No SubsysID property found in " + m->strId();
+                lmReport << "No SubsysID property found in " + m->equipmentIdTemplate();
                 assert(false);
                 continue;
             }
 
             if (m->propertyExists("Channel") == false)
             {
-                lmReport << "No Channel property found in " + m->strId();
+                lmReport << "No Channel property found in " + m->equipmentIdTemplate();
                 assert(false);
                 continue;
             }
@@ -268,7 +268,7 @@ namespace Builder
             int channel = m->propertyValue("Channel").toInt();
 
 			lmReport << "\r\n";
-			lmReport << "StrID: " + m->strId();
+			lmReport << "StrID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
             lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();

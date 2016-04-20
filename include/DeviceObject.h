@@ -96,8 +96,9 @@ namespace Hardware
 		// Public methods
 		//
 	public:
-		// Expand str id for this and for all children
-		void expandStrId();
+		// Expand EquipmentIDTemplate for this and for all children
+		//
+		void expandEquipmentId();
 
 		// Get all signals, including signals from child items
 		std::vector<std::shared_ptr<DeviceSignal>> getAllSignals() const;
@@ -182,7 +183,7 @@ namespace Hardware
 		bool checkChild(DeviceObject* child, QString* errorMessage);
 
 		void sortByPlace(Qt::SortOrder order);
-		void sortByStrId(Qt::SortOrder order);
+		void sortByEquipmentId(Qt::SortOrder order);
 		void sortByCaption(Qt::SortOrder order);
 		void sortByState(Qt::SortOrder order);
 		void sortByUser(Qt::SortOrder order);
@@ -199,10 +200,10 @@ namespace Hardware
 		QUuid uuid() const;
 		void setUuid(QUuid value);
 
-		QString strId() const;
-		void setStrId(QString value);
+		QString equipmentIdTemplate() const;
+		void setEquipmentIdTemplate(QString value);
 
-		QString strIdExpanded() const;
+		QString equipmentId() const;
 
 		QString caption() const;
 		void setCaption(QString value);
@@ -221,7 +222,7 @@ namespace Hardware
 		Q_INVOKABLE int jsPlace() const;
 		void setPlace(int value);
 
-		QString details() const;		// JSON short description, uuid, strId, caption, place, etc
+		QString details() const;		// JSON short description, uuid, equipmentId, caption, place, etc
 
 		// Preset
 		//
@@ -243,7 +244,7 @@ namespace Hardware
 		std::vector<std::shared_ptr<DeviceObject>> m_children;
 
 		QUuid m_uuid;
-		QString m_strId;
+		QString m_equipmentId;
 		QString m_caption;
 
 		DbFileInfo m_fileInfo;
@@ -655,8 +656,8 @@ namespace Hardware
 	public:
 		void set(std::shared_ptr<DeviceObject> root);
 
-		DeviceObject* deviceObject(const QString& strId);
-		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& strId);
+		DeviceObject* deviceObject(const QString& equipmentId);
+		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& equipmentId);
 
 		DeviceRoot* root();
 		const DeviceRoot* root() const;

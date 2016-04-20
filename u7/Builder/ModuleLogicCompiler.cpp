@@ -54,7 +54,7 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(m_lm->strId());
+		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
 
 		LOG_MESSAGE(m_log, msg);
 
@@ -80,13 +80,13 @@ namespace Builder
 		if (result == true)
 		{
 			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
-					arg(m_lm->strId());
+					arg(m_lm->equipmentIdTemplate());
 
 			LOG_SUCCESS(m_log, msg);
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->strId());
+			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
 
@@ -98,7 +98,7 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(m_lm->strId());
+		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
 
 		LOG_MESSAGE(m_log, msg);
 
@@ -150,7 +150,7 @@ namespace Builder
 		if (result == true)
 		{
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
-					arg(m_lm->strId());
+					arg(m_lm->equipmentIdTemplate());
 
 			LOG_SUCCESS(m_log, msg);
 
@@ -177,7 +177,7 @@ namespace Builder
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(m_lm->strId());
+			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
 
@@ -268,7 +268,7 @@ namespace Builder
 
 		if (m_chassis == nullptr)
 		{
-			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->strId());
+			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->equipmentIdTemplate());
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 			return false;
 		}
@@ -421,13 +421,13 @@ namespace Builder
 	{
 		bool result = false;
 
-		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
+		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->equipmentIdTemplate());
 
 		m_moduleLogic = appLogicModule.get();
 
 		if (m_moduleLogic == nullptr)
 		{
-			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
+			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->equipmentIdTemplate());
 			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 		}
 
@@ -812,7 +812,7 @@ namespace Builder
 				break;
 
 			default:
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Unknown input module %1 family type")).arg(module.device->strId()));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Unknown input module %1 family type")).arg(module.device->equipmentIdTemplate()));
 
 				result = false;
 			}
@@ -922,17 +922,17 @@ namespace Builder
 				continue;
 			}
 
-			if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
 			}
 
-			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
 
 			if (boundSignals.count() > 1)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
 				result = false;
 				break;
 			}
@@ -1023,7 +1023,7 @@ namespace Builder
 	bool ModuleLogicCompiler::copyAifmDataToRegBuf(const Module& module)
 	{
 		LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->strId()));
+					QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->equipmentIdTemplate()));
 
 		return true;
 	}
@@ -2119,7 +2119,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->strId());
+		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
 
 		if (optoModules.isEmpty())
 		{
@@ -2238,7 +2238,7 @@ namespace Builder
 				continue;
 			}
 
-			if (optoModule->lmStrID() == m_lm->strId())
+			if (optoModule->lmStrID() == m_lm->equipmentIdTemplate())
 			{
 				// this serial connection must be processed in this LM
 				//
@@ -2329,7 +2329,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->strId());
+		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
 
 		if (optoModules.isEmpty() == true)
 		{
@@ -2779,16 +2779,16 @@ namespace Builder
 				continue;
 			}
 
-			if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
 			}
 
-			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
 
 			if (boundSignals.count() > 1)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
 				result = false;
 				break;
 			}
@@ -3296,17 +3296,17 @@ namespace Builder
 
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
-				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
 				{
 					continue;
 				}
 
-				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
 
 				if (boundSignals.count() > 1)
 				{
 					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+								QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
 				}
 
 				for(Signal* signal : boundSignals)
@@ -3777,16 +3777,16 @@ namespace Builder
 
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
-				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
 				{
 					continue;
 				}
 
-				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
 
 				if (boundSignals.count() > 1)
 				{
-					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
 				}
 
 				for(Signal* signal : boundSignals)

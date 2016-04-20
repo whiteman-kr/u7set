@@ -162,8 +162,8 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				v.setValue<QString>(device->caption());
 				break;
 
-			case ObjectStrIdColumn:
-				v.setValue<QString>(device->strId());
+			case ObjectEquipmentIdColumn:
+				v.setValue<QString>(device->equipmentIdTemplate());
 				break;
 
 			case ObjectPlaceColumn:
@@ -218,13 +218,13 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo.action().toInt()))
 				{
 				case VcsItemAction::Added:
-					b.setColor(QColor(0xF9, 0xFF, 0xF9));
+					b.setColor(QColor(0xE9, 0xFF, 0xE9));
 					break;
 				case VcsItemAction::Modified:
-					b.setColor(QColor(0xF4, 0xFA, 0xFF));
+					b.setColor(QColor(0xEA, 0xF0, 0xFF));
 					break;
 				case VcsItemAction::Deleted:
-					b.setColor(QColor(0xFF, 0xF4, 0xF4));
+					b.setColor(QColor(0xFF, 0xF0, 0xF0));
 					break;
 				}
 
@@ -247,8 +247,8 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 			case ObjectNameColumn:
 				return QObject::tr("Object");
 
-			case ObjectStrIdColumn:
-				return QObject::tr("StrId");
+			case ObjectEquipmentIdColumn:
+				return QObject::tr("EquipmentID");
 
 				case ObjectPlaceColumn:
 					return QObject::tr("Place");
@@ -397,8 +397,8 @@ void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column
 	case ObjectNameColumn:
 		object->sortByCaption(order);
 		break;
-	case ObjectStrIdColumn:
-		object->sortByStrId(order);
+	case ObjectEquipmentIdColumn:
+		object->sortByEquipmentId(order);
 		break;
 	case ObjectPlaceColumn:
 		object->sortByPlace(order);
@@ -1110,7 +1110,7 @@ void EquipmentView::addSystem()
 	//
 	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>(isPresetMode());
 
-	system->setStrId("SYSTEMID");
+	system->setEquipmentIdTemplate("SYSTEMID");
 	system->setCaption(tr("System"));
 	system->setPlace(0);
 
@@ -1124,7 +1124,7 @@ void EquipmentView::addRack()
 {
 	std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(isPresetMode());
 
-	rack->setStrId("$(PARENT)_RACKID");
+	rack->setEquipmentIdTemplate("$(PARENT)_RACKID");
 	rack->setCaption(tr("Rack"));
 	rack->setPlace(0);
 
@@ -1138,7 +1138,7 @@ void EquipmentView::addChassis()
 {
 	std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(isPresetMode());
 
-	chassis->setStrId("$(PARENT)_CH$(PLACE)");
+	chassis->setEquipmentIdTemplate("$(PARENT)_CH$(PLACE)");
     chassis->setCaption(tr("Chassis"));
 	chassis->setPlace(-1);
 
@@ -1152,7 +1152,7 @@ void EquipmentView::addModule()
 {
 	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(isPresetMode());
 
-	module->setStrId("$(PARENT)_MD$(PLACE)");
+	module->setEquipmentIdTemplate("$(PARENT)_MD$(PLACE)");
 	module->setCaption(tr("Module"));
 	module->setPlace(-1);
 
@@ -1166,7 +1166,7 @@ void EquipmentView::addController()
 {
 	std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(isPresetMode());
 
-	controller->setStrId("$(PARENT)_CTRLXX");
+	controller->setEquipmentIdTemplate("$(PARENT)_CTRLXX");
 	controller->setCaption(tr("Controller"));
 
 	addDeviceObject(controller);
@@ -1179,7 +1179,7 @@ void EquipmentView::addSignal()
 {
 	std::shared_ptr<Hardware::DeviceObject> signal = std::make_shared<Hardware::DeviceSignal>(isPresetMode());
 
-	signal->setStrId("$(PARENT)_SIGNAL");
+	signal->setEquipmentIdTemplate("$(PARENT)_SIGNAL");
 	signal->setCaption(tr("Signal"));
 
 	addDeviceObject(signal);
@@ -1192,7 +1192,7 @@ void EquipmentView::addWorkstation()
 {
 	std::shared_ptr<Hardware::DeviceObject> workstation = std::make_shared<Hardware::Workstation>(isPresetMode());
 
-	workstation->setStrId("$(PARENT)_WS$(PLACE)");
+	workstation->setEquipmentIdTemplate("$(PARENT)_WS$(PLACE)");
 	workstation->setCaption(tr("Workstation"));
 	workstation->setPlace(0);
 
@@ -1206,7 +1206,7 @@ void EquipmentView::addSoftware()
 {
 	std::shared_ptr<Hardware::DeviceObject> software = std::make_shared<Hardware::Software>(isPresetMode());
 
-	software->setStrId("$(PARENT)_SWNAME");
+	software->setEquipmentIdTemplate("$(PARENT)_SWNAME");
 	software->setCaption(tr("Software"));
 	software->setPlace(0);
 
@@ -1223,7 +1223,7 @@ void EquipmentView::addPresetRack()
 	{
 		std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(true);
 
-		rack->setStrId("$(PARENT)_RACKID");
+		rack->setEquipmentIdTemplate("$(PARENT)_RACKID");
 		rack->setCaption(tr("Rack"));
 		rack->setPlace(0);
 
@@ -1247,7 +1247,7 @@ void EquipmentView::addPresetChassis()
 	{
         std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(true);
 
-        chassis->setStrId("$(PARENT)_CHASSISID");
+        chassis->setEquipmentIdTemplate("$(PARENT)_CHASSISID");
         chassis->setCaption(tr("Chassis"));
 		chassis->setPlace(-1);
 
@@ -1270,7 +1270,7 @@ void EquipmentView::addPresetModule()
 	{
 		std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(true);
 
-		module->setStrId("$(PARENT)_MD00");
+		module->setEquipmentIdTemplate("$(PARENT)_MD00");
 		module->setCaption(tr("Module"));
 		module->setPlace(-1);
 
@@ -1293,7 +1293,7 @@ void EquipmentView::addPresetController()
 	{
 		std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(true);
 
-		controller->setStrId("$(PARENT)_CRRLXXX");
+		controller->setEquipmentIdTemplate("$(PARENT)_CRRLXXX");
 		controller->setCaption(tr("Controller"));
 
 		controller->setPresetRoot(true);
@@ -1315,7 +1315,7 @@ void EquipmentView::addPresetWorkstation()
 	{
 		std::shared_ptr<Hardware::DeviceObject> workstation = std::make_shared<Hardware::Workstation>(true);
 
-		workstation->setStrId("$(PARENT)_WS00");
+		workstation->setEquipmentIdTemplate("$(PARENT)_WS00");
 		workstation->setCaption(tr("Workstation"));
 		workstation->setPlace(0);
 
@@ -1338,7 +1338,7 @@ void EquipmentView::addPresetSoftware()
 	{
 		std::shared_ptr<Hardware::DeviceObject> software = std::make_shared<Hardware::Software>(true);
 
-		software->setStrId("$(PARENT)_SWNAME");
+		software->setEquipmentIdTemplate("$(PARENT)_SWNAME");
 		software->setCaption(tr("Software"));
 		software->setPlace(0);
 
@@ -1660,7 +1660,7 @@ void EquipmentView::addInOutsToSignals()
 			QMessageBox::critical(this,
 								  QApplication::applicationName(),
 								  tr("Object's %1 property Place is %2, set the correct value (>=0).")
-								  .arg(checkPlaceObject->strIdExpanded())
+								  .arg(checkPlaceObject->equipmentId())
 								  .arg(checkPlaceObject->place())
 								  );
 			return;
@@ -1758,17 +1758,17 @@ void EquipmentView::addInOutsToSignals()
 		}
 		while(it != equipmentDevices.end());
 
-		equipmentDevices.front()->expandStrId();
+		equipmentDevices.front()->expandEquipmentId();
 	}
 
-	dbModule->expandStrId();	// StrIds in getInOuts will be updated also
+	dbModule->expandEquipmentId();	// StrIds in getInOuts will be updated also
 
 	// Add signals to the project DB
 	//
 	std::sort(std::begin(inOuts), std::end(inOuts),
 		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
 		{
-			return a->strId() < b->strId();
+			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
 	bool result = db()->autoAddSignals(&inOuts, this);
@@ -1802,7 +1802,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 
 		if (device != nullptr)
 		{
-			strIds.push_back(device->strIdExpanded());
+			strIds.push_back(device->equipmentId());
 		}
 	}
 
@@ -2233,8 +2233,8 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	qDebug();
 	qDebug() << "EquipmentView::updateDeviceFromPreset"
-			 << ", device: " << device->strId()
-			 << "(" << device->strIdExpanded() << ")"
+			 << ", device: " << device->equipmentIdTemplate()
+			 << "(" << device->equipmentId() << ")"
 			 << ", " << device->caption()
 			 << ", place: " << device->place();
 

@@ -304,11 +304,11 @@ namespace Builder
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceStrID == m_software->strId())
+				if (lmNetProperties.appDataServiceStrID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::App);
-					ds.setLmStrID(lm->strId());
+					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);
@@ -318,11 +318,11 @@ namespace Builder
 					ds.serializeToXml(xml);
 				}
 
-				if (lmNetProperties.diagDataServiceStrID == m_software->strId())
+				if (lmNetProperties.diagDataServiceStrID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::Diag);
-					ds.setLmStrID(lm->strId());
+					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
 					ds.setLmDataEnable(lmNetProperties.diagDataEnable);
@@ -382,11 +382,11 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined,
 							   QString("Can't find child object by suffix '%1' in object '%2'").
-							   arg(suffix).arg(lm->strId()));
+							   arg(suffix).arg(lm->equipmentIdTemplate()));
 			return false;
 		}
 
-		adapterStrID = adapter->strId();
+		adapterStrID = adapter->equipmentIdTemplate();
 
 		bool result = true;
 
