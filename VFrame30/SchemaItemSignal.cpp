@@ -18,7 +18,7 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, StrIDs, true, SchemaItemSignal::signalStrIds, SchemaItemSignal::setSignalStrIds);
+		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalIDs, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
 	}
 
 	SchemaItemSignal::~SchemaItemSignal(void)
@@ -105,13 +105,13 @@ namespace VFrame30
 
 		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
 
-		if (multiChannel() == true && logicSchema != nullptr && signalStrIds().size() >= 1)
+		if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
 		{
-			text = signalStrIds();
+			text = appSignalIds();
 		}
 		else
 		{
-			text = signalStrIds();
+			text = appSignalIds();
 		}
 
 		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
@@ -119,11 +119,11 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemSignal::signalStrIds() const
+	QString SchemaItemSignal::appSignalIds() const
 	{
 		QString result;
 
-		for (QString s : m_signalStrIds)
+		for (QString s : m_appSignalIds)
 		{
 			s = s.trimmed();
 
@@ -138,24 +138,24 @@ namespace VFrame30
 		return result;
 	}
 
-	const QStringList& SchemaItemSignal::signalStrIdList() const
+	const QStringList& SchemaItemSignal::appSignalIdList() const
 	{
-		return m_signalStrIds;
+		return m_appSignalIds;
 	}
 
-	void SchemaItemSignal::setSignalStrIds(const QString& s)
+	void SchemaItemSignal::setAppSignalIds(const QString& s)
 	{
-		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
-	QStringList* SchemaItemSignal::mutable_signalStrIds()
+	QStringList* SchemaItemSignal::mutable_appSignalIds()
 	{
-		return &m_signalStrIds;
+		return &m_appSignalIds;
 	}
 
 	bool SchemaItemSignal::multiChannel() const
 	{
-		return m_signalStrIds.size() > 1;
+		return m_appSignalIds.size() > 1;
 	}
 
 	bool SchemaItemSignal::SaveData(Proto::Envelope* message) const
@@ -173,9 +173,9 @@ namespace VFrame30
 		//
 		Proto::SchemaItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
 
-		for (const QString& strId : m_signalStrIds)
+		for (const QString& strId : m_appSignalIds)
 		{
-			::Proto::wstring* ps = signal->add_signalstrids();
+			::Proto::wstring* ps = signal->add_appsignalids();
 			Proto::Write(ps, strId);
 		}
 
@@ -208,14 +208,14 @@ namespace VFrame30
 
 		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
 
-		m_signalStrIds.clear();
-		m_signalStrIds.reserve(signal.signalstrids_size());
+		m_appSignalIds.clear();
+		m_appSignalIds.reserve(signal.appsignalids_size());
 
-		for (int i = 0; i < signal.signalstrids_size(); i++)
+		for (int i = 0; i < signal.appsignalids_size(); i++)
 		{
 			QString s;
-			Proto::Read(signal.signalstrids().Get(i), &s);
-			m_signalStrIds.push_back(s);
+			Proto::Read(signal.appsignalids().Get(i), &s);
+			m_appSignalIds.push_back(s);
 		}
 
 		return true;
@@ -236,7 +236,7 @@ namespace VFrame30
 		SchemaItemSignal(unit)
 	{
 		addOutput();
-		setSignalStrIds("#IN_STRID");
+		setAppSignalIds("#IN_STRID");
 	}
 
 	SchemaItemInput::~SchemaItemInput(void)
@@ -246,7 +246,7 @@ namespace VFrame30
 
 	QString SchemaItemInput::buildName() const
 	{
-		return QString("Input (%1)").arg(signalStrIds());
+		return QString("Input (%1)").arg(appSignalIds());
 	}
 
 	// Serialization
@@ -315,7 +315,7 @@ namespace VFrame30
 		SchemaItemSignal(unit)
 	{
 		addInput();
-		setSignalStrIds("#OUT_STRID");
+		setAppSignalIds("#OUT_STRID");
 	}
 
 	SchemaItemOutput::~SchemaItemOutput(void)
@@ -325,7 +325,7 @@ namespace VFrame30
 
 	QString SchemaItemOutput::buildName() const
 	{
-		return QString("Output (%1)").arg(signalStrIds());
+		return QString("Output (%1)").arg(appSignalIds());
 	}
 
 	// Serialization

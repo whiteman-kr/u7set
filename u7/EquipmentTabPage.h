@@ -80,7 +80,7 @@ public:
 	enum Columns
 	{
 		ObjectNameColumn,
-		ObjectStrIdColumn,
+		ObjectEquipmentIdColumn,
 		ObjectPlaceColumn,
 		ObjectStateColumn,
 		ObjectUserColumn,

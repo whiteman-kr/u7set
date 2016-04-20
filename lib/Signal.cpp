@@ -63,10 +63,10 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 		}
 	}
 
-	m_strID = QString("#%1").arg(deviceSignal.strId());
-	m_extStrID = deviceSignal.strId();
+	m_strID = QString("#%1").arg(deviceSignal.equipmentIdTemplate());
+	m_extStrID = deviceSignal.equipmentIdTemplate();
 
-	QString deviceSignalStrID = deviceSignal.strId();
+	QString deviceSignalStrID = deviceSignal.equipmentIdTemplate();
 
 	int pos = deviceSignalStrID.lastIndexOf(QChar('_'));
 
@@ -76,7 +76,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 	}
 
 	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
-	m_deviceStrID = deviceSignal.strId();
+	m_deviceStrID = deviceSignal.equipmentIdTemplate();
 
 	if (m_type == E::SignalType::Analog)
 	{
@@ -682,7 +682,7 @@ void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceOb
 				quint32 ip = ha.toIPv4Address();
 				DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
 
-				QString signalPrefix = currentModule->parent()->strId();
+				QString signalPrefix = currentModule->parent()->equipmentIdTemplate();
 				int signalPrefixLength = signalPrefix.length();
 				for (int i = 0; i < signalSet.count(); i++)
 				{

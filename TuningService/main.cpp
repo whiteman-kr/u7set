@@ -1,5 +1,6 @@
 #include <QCoreApplication>
-#include "../include/Service.h"
+#include "TuningService.h"
+
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
 	#include <vld.h>		// Enable Visual Leak Detector
@@ -13,17 +14,15 @@
 #endif
 
 
-class TuningServiceWorker : public ServiceWorker
-{
-public:
-	TuningServiceWorker() : ServiceWorker(ServiceType::TuningService) {}
-	TuningServiceWorker* createInstance() override { return new TuningServiceWorker(); }
-};
-
-
 int main(int argc, char *argv[])
 {
-	ServiceStarter serviceStarter(argc, argv, "RPCT Tuning Service", new TuningServiceWorker());
+	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
+	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
+	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
+
+	TuningServiceWorker* tuningServiceWorker = new TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2);
+
+	ServiceStarter serviceStarter(argc, argv, "RPCT Tuning Service", tuningServiceWorker);
 
 	return serviceStarter.exec();
 }

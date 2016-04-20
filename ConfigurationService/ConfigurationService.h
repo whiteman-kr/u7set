@@ -26,11 +26,15 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 public:
-	ConfigurationServiceWorker(const QString& buildFolder);
+	ConfigurationServiceWorker(const QString& serviceStrID, const QString& buildFolder);
+
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	ServiceWorker* createInstance() override { return new ConfigurationServiceWorker(m_buildFolder); }
+	ServiceWorker* createInstance() override
+	{
+		return new ConfigurationServiceWorker(serviceStrID(), m_buildFolder);
+	}
 
 signals:
 	void ackInformationRequest(UdpRequest request);

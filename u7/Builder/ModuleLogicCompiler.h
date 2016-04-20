@@ -448,7 +448,7 @@ namespace Builder
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;

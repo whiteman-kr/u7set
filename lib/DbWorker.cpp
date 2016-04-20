@@ -58,6 +58,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 42", ":/DatabaseUpgrade/Upgrade0042.sql"},
 	{"Upgrade to version 43", ":/DatabaseUpgrade/Upgrade0043.sql"},
 	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
+    {"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
 };
 
 
@@ -3986,7 +3987,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
 	{
 		QString request = QString("SELECT * FROM delete_signal_by_device_str_id(%1, '%2'')")
-			.arg(currentUser().userId()).arg(deviceSignal->strId());
+			.arg(currentUser().userId()).arg(deviceSignal->equipmentIdTemplate());
 
 		QSqlQuery q(db);
 

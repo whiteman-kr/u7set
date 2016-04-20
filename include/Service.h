@@ -36,7 +36,9 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 
 public:
-	ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+	ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* m_serviceWorker);
+
+	static QString getCommandLineKeyValue(int argc, char ** argv, const QString& key);
 
 	int exec();
 };
@@ -196,6 +198,10 @@ class ServiceWorker : public SimpleThreadWorker
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
 
+	QString m_serviceStrID;
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
+
 	Service* m_service = nullptr;
 
 	void onThreadStarted() final;
@@ -207,10 +213,18 @@ private:
 	Service& service() { assert(m_service != nullptr); return *m_service; }
 
 protected:
+	QString serviceStrID() const { return m_serviceStrID; }
+	QString cfgServiceIP1() const { return m_cfgServiceIP1; }
+	QString cfgServiceIP2() const { return m_cfgServiceIP2; }
+
 	ServiceType serviceType() const { return m_serviceType; }
 
 public:
-	ServiceWorker(ServiceType serviceType);
+	ServiceWorker(ServiceType serviceType,
+				  const QString& serviceStrID,
+				  const QString& cfgServiceIP1,
+				  const QString& cfgServiceIP2);
+
 	virtual ~ServiceWorker();
 
 

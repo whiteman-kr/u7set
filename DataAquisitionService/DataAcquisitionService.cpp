@@ -4,8 +4,20 @@
 #include "DataAcquisitionService.h"
 
 
-// DataServiceMainFunctionWorker class implementation
+// -------------------------------------------------------------------------------
 //
+// DataServiceWorker class implementation
+//
+// -------------------------------------------------------------------------------
+
+DataServiceWorker::DataServiceWorker(const QString& serviceStrID,
+									 const QString& cfgServiceIP1,
+									 const QString& cfgServiceIP2) :
+	ServiceWorker(ServiceType::DataAcquisitionService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
+	m_timer(this)
+{
+}
+
 
 void DataServiceWorker::initDataSources()
 {
@@ -57,7 +69,9 @@ void DataServiceWorker::runFscDataReceivingThreads()
 
 void DataServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
+	m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1,
+											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
+											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 
@@ -304,13 +318,28 @@ void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 }
 
 
-void DataServiceWorker::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray buildFileInfoArray)
+void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	qDebug() << "Configuration Ready!";
 
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;
+	}
+
+	QXmlStreamReader xmlReader(configurationXmlData);
+
+	XmlReadHelper xml(xmlReader);
+
+	bool result = m_settings.readFromXml(xml);
+
+	if (result == true)
+	{
+		qDebug() << "Reading settings - OK";
+	}
+	else
+	{
+		qDebug() << "Settings read ERROR!";
 	}
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
@@ -344,5 +373,3 @@ void DataServiceWorker::onConfigurationReady(const QByteArray /*configurationXml
 		}
 	}
 }
-
-

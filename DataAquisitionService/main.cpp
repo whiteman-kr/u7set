@@ -19,7 +19,13 @@ int main(int argc, char *argv[])
 
 	APP_MSG(logger, "Start");
 
-	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", new DataServiceWorker);
+	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
+	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
+	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
+
+	DataServiceWorker* dataServiceWorker = new DataServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2);
+
+	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", dataServiceWorker);
 
 	return service.exec();
 }

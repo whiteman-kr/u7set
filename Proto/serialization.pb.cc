@@ -398,7 +398,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   Schema_descriptor_ = file->message_type(12);
   static const int Schema_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, strid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, schemaid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, height_),
@@ -421,7 +421,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(Schema));
   LogicSchema_descriptor_ = file->message_type(13);
   static const int LogicSchema_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, hardware_strids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, equipmentids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, counter_),
   };
   LogicSchema_reflection_ =
@@ -668,7 +668,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(FblItemLine));
   SchemaItemSignal_descriptor_ = file->message_type(26);
   static const int SchemaItemSignal_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, signalstrids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, appsignalids_),
   };
   SchemaItemSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -761,7 +761,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   DeviceObject_descriptor_ = file->message_type(32);
   static const int DeviceObject_offsets_[20] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, strid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, childrestriction_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, place_),
@@ -1237,16 +1237,16 @@ void protobuf_AddDesc_serialization_2eproto() {
     "highlimit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opNa"
     "me\030\021 \001(\0132\016.Proto.wstring\022\"\n\004type\030\022 \001(\0162\024"
     ".Proto.FblSignalType\022(\n\ndataFormat\030\023 \001(\016"
-    "2\024.Proto.FblDataFormat\"\273\002\n\006Schema\022\031\n\004uui"
-    "d\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pr"
-    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
-    "ring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004u"
-    "nit\030\006 \002(\0162\021.Proto.SchemaUnit\022\037\n\020excludeF"
-    "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
-    "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
-    "ElementCollection\022)\n\014logic_schema\030\310\001 \001(\013"
-    "2\022.Proto.LogicSchema\"J\n\013LogicSchema\022\'\n\017h"
-    "ardware_strids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007"
+    "2\024.Proto.FblDataFormat\"\276\002\n\006Schema\022\031\n\004uui"
+    "d\030\001 \002(\0132\013.Proto.Uuid\022 \n\010schemaID\030\002 \002(\0132\016"
+    ".Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto."
+    "wstring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037"
+    "\n\004unit\030\006 \002(\0162\021.Proto.SchemaUnit\022\037\n\020exclu"
+    "deFromBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\013"
+    "2\017.Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto."
+    "AfbElementCollection\022)\n\014logic_schema\030\310\001 "
+    "\001(\0132\022.Proto.LogicSchema\"G\n\013LogicSchema\022$"
+    "\n\014equipmentids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007"
     "counter\030\002 \001(\005:\0010\"\224\001\n\013SchemaLayer\022\031\n\004uuid"
     "\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Prot"
     "o.wstring\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010"
@@ -1296,53 +1296,53 @@ void protobuf_AddDesc_serialization_2eproto() {
     "lor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002"
     "(\0132\020.Proto.FontParam\"0\n\013FblItemLine\022\016\n\006w"
     "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"8\n\020Schema"
-    "ItemSignal\022$\n\014signalStrIDs\030\001 \003(\0132\016.Proto"
+    "ItemSignal\022$\n\014appSignalIDs\030\001 \003(\0132\016.Proto"
     ".wstring\"\021\n\017SchemaItemInput\"\022\n\020SchemaIte"
     "mOutput\"\020\n\016SchemaItemLink\"h\n\rSchemaItemA"
     "fb\022\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010a"
     "fbStrid\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecisi"
     "on\030\004 \001(\005:\0012\"d\n\017SchemaItemConst\022\017\n\004type\030\001"
     " \001(\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatVal"
-    "ue\030\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\274\005\n\014De"
-    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n"
-    "\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030"
-    "\003 \002(\0132\016.Proto.wstring\022(\n\020childRestrictio"
-    "n\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\001"
-    "0\022\"\n\032specific_properties_struct\030\006 \001(\t\022#\n"
-    "\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n\006pr"
-    "eset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005f"
-    "alse\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring"
-    "\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uuid\022"
-    "\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Syst"
-    "em\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f "
-    "\001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001(\0132"
-    "\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\0132\023."
-    "Proto.DeviceModule\022+\n\nController\030i \001(\0132\027"
-    ".Proto.DeviceController\022#\n\006Signal\030j \001(\0132"
-    "\023.Proto.DeviceSignal\022\'\n\013Workstation\030k \001("
-    "\0132\022.Proto.Workstation\022!\n\010Software\030l \001(\0132"
-    "\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Device"
-    "System\"\014\n\nDeviceRack\" \n\rDeviceChassis\022\017\n"
-    "\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004type\030\001"
-    " \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014DeviceSi"
-    "gnal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteOrd"
-    "er\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004"
-    " \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013va"
-    "lidityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:"
-    "\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010"
-    "\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstation\022\017\n\004"
-    "type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:"
-    "\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_desc"
-    "ription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Mo"
-    "duleConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7"
-    "\n\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t"
-    "\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002("
-    "\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007Displa"
-    "y\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connect"
-    "ionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\r"
-    "FblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*"
-    ":\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSig"
-    "nedInt\020\001\022\t\n\005Float\020\002", 6059);
+    "ue\030\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\302\005\n\014De"
+    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n"
+    "\013equipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007ca"
+    "ption\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRest"
+    "riction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005"
+    " \001(\005:\0010\022\"\n\032specific_properties_struct\030\006 "
+    "\001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property"
+    "\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! "
+    "\001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.w"
+    "string\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto"
+    ".Uuid\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#"
+    "\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004R"
+    "ack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030"
+    "g \001(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h "
+    "\001(\0132\023.Proto.DeviceModule\022+\n\nController\030i"
+    " \001(\0132\027.Proto.DeviceController\022#\n\006Signal\030"
+    "j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workstatio"
+    "n\030k \001(\0132\022.Proto.Workstation\022!\n\010Software\030"
+    "l \001(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014"
+    "DeviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChas"
+    "sis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004"
+    "type\030\001 \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014De"
+    "viceSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tb"
+    "yteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004"
+    "size\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010"
+    "\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030"
+    "\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t "
+    "\001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstati"
+    "on\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030"
+    "\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struc"
+    "t_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Pr"
+    "oto.ModuleConfigurationValue\022\016\n\004name\030\003 \001"
+    "(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004name"
+    "\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004nam"
+    "e\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007"
+    "Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024C"
+    "onnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output"
+    "\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discr"
+    "ete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022"
+    "\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 6065);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -6095,7 +6095,7 @@ void AfbParam::Swap(AfbParam* other) {
 
 #ifndef _MSC_VER
 const int Schema::kUuidFieldNumber;
-const int Schema::kStrIDFieldNumber;
+const int Schema::kSchemaIDFieldNumber;
 const int Schema::kCaptionFieldNumber;
 const int Schema::kWidthFieldNumber;
 const int Schema::kHeightFieldNumber;
@@ -6113,7 +6113,7 @@ Schema::Schema()
 
 void Schema::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
-  strid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  schemaid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   afbs_ = const_cast< ::Proto::AfbElementCollection*>(&::Proto::AfbElementCollection::default_instance());
   logic_schema_ = const_cast< ::Proto::LogicSchema*>(&::Proto::LogicSchema::default_instance());
@@ -6128,7 +6128,7 @@ Schema::Schema(const Schema& from)
 void Schema::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
-  strid_ = NULL;
+  schemaid_ = NULL;
   caption_ = NULL;
   width_ = 0;
   height_ = 0;
@@ -6146,7 +6146,7 @@ Schema::~Schema() {
 void Schema::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
-    delete strid_;
+    delete schemaid_;
     delete caption_;
     delete afbs_;
     delete logic_schema_;
@@ -6179,8 +6179,8 @@ void Schema::Clear() {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
     }
-    if (has_strid()) {
-      if (strid_ != NULL) strid_->::Proto::wstring::Clear();
+    if (has_schemaid()) {
+      if (schemaid_ != NULL) schemaid_->::Proto::wstring::Clear();
     }
     if (has_caption()) {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
@@ -6218,17 +6218,17 @@ bool Schema::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_strID;
+        if (input->ExpectTag(18)) goto parse_schemaID;
         break;
       }
 
-      // required .Proto.wstring strID = 2;
+      // required .Proto.wstring schemaID = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_strID:
+         parse_schemaID:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_strid()));
+               input, mutable_schemaid()));
         } else {
           goto handle_uninterpreted;
         }
@@ -6386,10 +6386,10 @@ void Schema::SerializeWithCachedSizes(
       1, this->uuid(), output);
   }
 
-  // required .Proto.wstring strID = 2;
-  if (has_strid()) {
+  // required .Proto.wstring schemaID = 2;
+  if (has_schemaid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->strid(), output);
+      2, this->schemaid(), output);
   }
 
   // required .Proto.wstring caption = 3;
@@ -6452,11 +6452,11 @@ void Schema::SerializeWithCachedSizes(
         1, this->uuid(), target);
   }
 
-  // required .Proto.wstring strID = 2;
-  if (has_strid()) {
+  // required .Proto.wstring schemaID = 2;
+  if (has_schemaid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->strid(), target);
+        2, this->schemaid(), target);
   }
 
   // required .Proto.wstring caption = 3;
@@ -6526,11 +6526,11 @@ int Schema::ByteSize() const {
           this->uuid());
     }
 
-    // required .Proto.wstring strID = 2;
-    if (has_strid()) {
+    // required .Proto.wstring schemaID = 2;
+    if (has_schemaid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->strid());
+          this->schemaid());
     }
 
     // required .Proto.wstring caption = 3;
@@ -6616,8 +6616,8 @@ void Schema::MergeFrom(const Schema& from) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
     }
-    if (from.has_strid()) {
-      mutable_strid()->::Proto::wstring::MergeFrom(from.strid());
+    if (from.has_schemaid()) {
+      mutable_schemaid()->::Proto::wstring::MergeFrom(from.schemaid());
     }
     if (from.has_caption()) {
       mutable_caption()->::Proto::wstring::MergeFrom(from.caption());
@@ -6664,8 +6664,8 @@ bool Schema::IsInitialized() const {
   if (has_uuid()) {
     if (!this->uuid().IsInitialized()) return false;
   }
-  if (has_strid()) {
-    if (!this->strid().IsInitialized()) return false;
+  if (has_schemaid()) {
+    if (!this->schemaid().IsInitialized()) return false;
   }
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
@@ -6685,7 +6685,7 @@ bool Schema::IsInitialized() const {
 void Schema::Swap(Schema* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
-    std::swap(strid_, other->strid_);
+    std::swap(schemaid_, other->schemaid_);
     std::swap(caption_, other->caption_);
     std::swap(width_, other->width_);
     std::swap(height_, other->height_);
@@ -6712,7 +6712,7 @@ void Schema::Swap(Schema* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int LogicSchema::kHardwareStridsFieldNumber;
+const int LogicSchema::kEquipmentidsFieldNumber;
 const int LogicSchema::kCounterFieldNumber;
 #endif  // !_MSC_VER
 
@@ -6770,7 +6770,7 @@ void LogicSchema::Clear() {
   if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     counter_ = 0;
   }
-  hardware_strids_.Clear();
+  equipmentids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -6781,17 +6781,17 @@ bool LogicSchema::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.wstring hardware_strids = 1;
+      // repeated .Proto.wstring equipmentids = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_hardware_strids:
+         parse_equipmentids:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_hardware_strids()));
+                input, add_equipmentids()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_hardware_strids;
+        if (input->ExpectTag(10)) goto parse_equipmentids;
         if (input->ExpectTag(16)) goto parse_counter;
         break;
       }
@@ -6830,10 +6830,10 @@ bool LogicSchema::MergePartialFromCodedStream(
 
 void LogicSchema::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.wstring hardware_strids = 1;
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->hardware_strids(i), output);
+      1, this->equipmentids(i), output);
   }
 
   // optional int32 counter = 2 [default = 0];
@@ -6849,11 +6849,11 @@ void LogicSchema::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* LogicSchema::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.wstring hardware_strids = 1;
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->hardware_strids(i), target);
+        1, this->equipmentids(i), target);
   }
 
   // optional int32 counter = 2 [default = 0];
@@ -6880,12 +6880,12 @@ int LogicSchema::ByteSize() const {
     }
 
   }
-  // repeated .Proto.wstring hardware_strids = 1;
-  total_size += 1 * this->hardware_strids_size();
-  for (int i = 0; i < this->hardware_strids_size(); i++) {
+  // repeated .Proto.wstring equipmentids = 1;
+  total_size += 1 * this->equipmentids_size();
+  for (int i = 0; i < this->equipmentids_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->hardware_strids(i));
+        this->equipmentids(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -6913,7 +6913,7 @@ void LogicSchema::MergeFrom(const ::google::protobuf::Message& from) {
 
 void LogicSchema::MergeFrom(const LogicSchema& from) {
   GOOGLE_CHECK_NE(&from, this);
-  hardware_strids_.MergeFrom(from.hardware_strids_);
+  equipmentids_.MergeFrom(from.equipmentids_);
   if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     if (from.has_counter()) {
       set_counter(from.counter());
@@ -6936,15 +6936,15 @@ void LogicSchema::CopyFrom(const LogicSchema& from) {
 
 bool LogicSchema::IsInitialized() const {
 
-  for (int i = 0; i < hardware_strids_size(); i++) {
-    if (!this->hardware_strids(i).IsInitialized()) return false;
+  for (int i = 0; i < equipmentids_size(); i++) {
+    if (!this->equipmentids(i).IsInitialized()) return false;
   }
   return true;
 }
 
 void LogicSchema::Swap(LogicSchema* other) {
   if (other != this) {
-    hardware_strids_.Swap(&other->hardware_strids_);
+    equipmentids_.Swap(&other->equipmentids_);
     std::swap(counter_, other->counter_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
@@ -11693,7 +11693,7 @@ void FblItemLine::Swap(FblItemLine* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemaItemSignal::kSignalStrIDsFieldNumber;
+const int SchemaItemSignal::kAppSignalIDsFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemSignal::SchemaItemSignal()
@@ -11746,7 +11746,7 @@ SchemaItemSignal* SchemaItemSignal::New() const {
 }
 
 void SchemaItemSignal::Clear() {
-  signalstrids_.Clear();
+  appsignalids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -11757,17 +11757,17 @@ bool SchemaItemSignal::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.wstring signalStrIDs = 1;
+      // repeated .Proto.wstring appSignalIDs = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_signalStrIDs:
+         parse_appSignalIDs:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_signalstrids()));
+                input, add_appsignalids()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_signalStrIDs;
+        if (input->ExpectTag(10)) goto parse_appSignalIDs;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -11790,10 +11790,10 @@ bool SchemaItemSignal::MergePartialFromCodedStream(
 
 void SchemaItemSignal::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.wstring signalStrIDs = 1;
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->signalstrids(i), output);
+      1, this->appsignalids(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -11804,11 +11804,11 @@ void SchemaItemSignal::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* SchemaItemSignal::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.wstring signalStrIDs = 1;
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->signalstrids(i), target);
+        1, this->appsignalids(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -11821,12 +11821,12 @@ void SchemaItemSignal::SerializeWithCachedSizes(
 int SchemaItemSignal::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.wstring signalStrIDs = 1;
-  total_size += 1 * this->signalstrids_size();
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  total_size += 1 * this->appsignalids_size();
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->signalstrids(i));
+        this->appsignalids(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -11854,7 +11854,7 @@ void SchemaItemSignal::MergeFrom(const ::google::protobuf::Message& from) {
 
 void SchemaItemSignal::MergeFrom(const SchemaItemSignal& from) {
   GOOGLE_CHECK_NE(&from, this);
-  signalstrids_.MergeFrom(from.signalstrids_);
+  appsignalids_.MergeFrom(from.appsignalids_);
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -11872,15 +11872,15 @@ void SchemaItemSignal::CopyFrom(const SchemaItemSignal& from) {
 
 bool SchemaItemSignal::IsInitialized() const {
 
-  for (int i = 0; i < signalstrids_size(); i++) {
-    if (!this->signalstrids(i).IsInitialized()) return false;
+  for (int i = 0; i < appsignalids_size(); i++) {
+    if (!this->appsignalids(i).IsInitialized()) return false;
   }
   return true;
 }
 
 void SchemaItemSignal::Swap(SchemaItemSignal* other) {
   if (other != this) {
-    signalstrids_.Swap(&other->signalstrids_);
+    appsignalids_.Swap(&other->appsignalids_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -12994,7 +12994,7 @@ void SchemaItemConst::Swap(SchemaItemConst* other) {
 
 #ifndef _MSC_VER
 const int DeviceObject::kUuidFieldNumber;
-const int DeviceObject::kStrIdFieldNumber;
+const int DeviceObject::kEquipmentIdFieldNumber;
 const int DeviceObject::kCaptionFieldNumber;
 const int DeviceObject::kChildRestrictionFieldNumber;
 const int DeviceObject::kPlaceFieldNumber;
@@ -13022,7 +13022,7 @@ DeviceObject::DeviceObject()
 
 void DeviceObject::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
-  strid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  equipmentid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   childrestriction_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   presetname_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
@@ -13047,7 +13047,7 @@ DeviceObject::DeviceObject(const DeviceObject& from)
 void DeviceObject::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
-  strid_ = NULL;
+  equipmentid_ = NULL;
   caption_ = NULL;
   childrestriction_ = NULL;
   place_ = 0;
@@ -13078,7 +13078,7 @@ void DeviceObject::SharedDtor() {
   }
   if (this != default_instance_) {
     delete uuid_;
-    delete strid_;
+    delete equipmentid_;
     delete caption_;
     delete childrestriction_;
     delete presetname_;
@@ -13121,8 +13121,8 @@ void DeviceObject::Clear() {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
     }
-    if (has_strid()) {
-      if (strid_ != NULL) strid_->::Proto::wstring::Clear();
+    if (has_equipmentid()) {
+      if (equipmentid_ != NULL) equipmentid_->::Proto::wstring::Clear();
     }
     if (has_caption()) {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
@@ -13196,17 +13196,17 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_strId;
+        if (input->ExpectTag(18)) goto parse_equipmentId;
         break;
       }
 
-      // required .Proto.wstring strId = 2;
+      // required .Proto.wstring equipmentId = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_strId:
+         parse_equipmentId:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_strid()));
+               input, mutable_equipmentid()));
         } else {
           goto handle_uninterpreted;
         }
@@ -13500,10 +13500,10 @@ void DeviceObject::SerializeWithCachedSizes(
       1, this->uuid(), output);
   }
 
-  // required .Proto.wstring strId = 2;
-  if (has_strid()) {
+  // required .Proto.wstring equipmentId = 2;
+  if (has_equipmentid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->strid(), output);
+      2, this->equipmentid(), output);
   }
 
   // required .Proto.wstring caption = 3;
@@ -13629,11 +13629,11 @@ void DeviceObject::SerializeWithCachedSizes(
         1, this->uuid(), target);
   }
 
-  // required .Proto.wstring strId = 2;
-  if (has_strid()) {
+  // required .Proto.wstring equipmentId = 2;
+  if (has_equipmentid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->strid(), target);
+        2, this->equipmentid(), target);
   }
 
   // required .Proto.wstring caption = 3;
@@ -13777,11 +13777,11 @@ int DeviceObject::ByteSize() const {
           this->uuid());
     }
 
-    // required .Proto.wstring strId = 2;
-    if (has_strid()) {
+    // required .Proto.wstring equipmentId = 2;
+    if (has_equipmentid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->strid());
+          this->equipmentid());
     }
 
     // required .Proto.wstring caption = 3;
@@ -13942,8 +13942,8 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
     }
-    if (from.has_strid()) {
-      mutable_strid()->::Proto::wstring::MergeFrom(from.strid());
+    if (from.has_equipmentid()) {
+      mutable_equipmentid()->::Proto::wstring::MergeFrom(from.equipmentid());
     }
     if (from.has_caption()) {
       mutable_caption()->::Proto::wstring::MergeFrom(from.caption());
@@ -14022,8 +14022,8 @@ bool DeviceObject::IsInitialized() const {
   if (has_uuid()) {
     if (!this->uuid().IsInitialized()) return false;
   }
-  if (has_strid()) {
-    if (!this->strid().IsInitialized()) return false;
+  if (has_equipmentid()) {
+    if (!this->equipmentid().IsInitialized()) return false;
   }
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
@@ -14046,7 +14046,7 @@ bool DeviceObject::IsInitialized() const {
 void DeviceObject::Swap(DeviceObject* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
-    std::swap(strid_, other->strid_);
+    std::swap(equipmentid_, other->equipmentid_);
     std::swap(caption_, other->caption_);
     std::swap(childrestriction_, other->childrestriction_);
     std::swap(place_, other->place_);

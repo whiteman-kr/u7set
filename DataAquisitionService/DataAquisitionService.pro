@@ -88,7 +88,7 @@ SOURCES += main.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
     DataAcquisitionService.cpp \
-    ../lib/ServicesSettings.cpp \
+    ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp
@@ -116,7 +116,7 @@ HEADERS += \
     ../include/BuildInfo.h \
     ../include/SimpleThread.h \
     DataAcquisitionService.h \
-    ../include/ServicesSettings.h \
+    ../include/ServiceSettings.h \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
     ../include/XmlHelper.h
@@ -126,14 +126,14 @@ include(../qtservice/src/qtservice.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-gcc:QMAKE_CXXFLAGS += -std=c++11
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#c++11 support for GCC
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 #protobuf
 #
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf
 
@@ -142,6 +142,7 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

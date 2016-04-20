@@ -266,7 +266,7 @@ enum FblDataFormat
 message Schema
 {
 	required Uuid uuid = 1;
-	required wstring strID = 2;
+	required wstring schemaID = 2;
 	required wstring caption = 3;
 	required double width = 4;
 	required double height = 5;
@@ -289,7 +289,7 @@ message Schema
 //
 message LogicSchema
 {
-	repeated wstring hardware_strids = 1;
+	repeated wstring equipmentids = 1;
 	optional int32 counter = 2 [default = 0];
 }
 
@@ -500,7 +500,7 @@ message FblItemLine
 //
 message SchemaItemSignal
 {
-	repeated wstring signalStrIDs = 1;
+	repeated wstring appSignalIDs = 1;
 }
 
 
@@ -570,7 +570,7 @@ message SchemaItemConst
 message DeviceObject
 {
 	required Uuid uuid = 1;
-	required wstring strId = 2;
+	required wstring equipmentId = 2;
 	required wstring caption = 3;
 	optional wstring childRestriction = 4;
 	optional int32 place = 5 [default = 0];

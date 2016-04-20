@@ -27,11 +27,11 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		QString hardwareStrIds() const;
-		QStringList hardwareStrIdList() const;
-		void setHardwareStrIds(const QString& s);
+		QString equipmentIds() const;
+		QStringList equipmentIdList() const;
+		void setEquipmentIds(const QString& s);
 
-		QStringList* mutable_hardwareStrIds();
+		QStringList* mutable_equipmentIds();
 
 		bool isMultichannelSchema() const;
 		int channelCount() const;
@@ -41,7 +41,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		QStringList m_hardwareStrIds;
+		QStringList m_equipmentIds;
 		int m_counter = 0;					// Count is used to generate new uniques StrIDs for App Siagnals
 	};
 

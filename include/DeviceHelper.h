@@ -2,6 +2,7 @@
 
 #include "../include/DeviceObject.h"
 #include "../include/OutputLog.h"
+#include "../u7/Builder/IssueLogger.h"
 
 
 class DeviceHelper : public QObject
@@ -28,10 +29,16 @@ public:
 
 
 private:
-	static void logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, OutputLog* log);
+	static void logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, Builder::IssueLogger* log);
 
 public:
-	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, OutputLog* log);
-	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, OutputLog* log);
-	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, OutputLog* log);
+	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log);
+	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
+	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
+
+	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
+	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
+
+	static Hardware::DeviceController *getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
+	static Hardware::DeviceController *getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
 };

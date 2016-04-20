@@ -1,4 +1,5 @@
 #include "DASCfgGenerator.h"
+#include "../include/ServiceSettings.h"
 
 
 namespace Builder
@@ -18,6 +19,7 @@ namespace Builder
 	{
 		bool result = true;
 
+		result &= writeSettings();
 		result &= writeAppSignalsXml();
 		result &= writeEquipmentXml();
 		result &= writeDataSourcesXml();
@@ -25,6 +27,26 @@ namespace Builder
 		return result;
 	}
 
+
+	bool DASCfgGenerator::writeSettings()
+	{
+		DASSettings dasSettings;
+
+		bool result = true;
+
+		result = dasSettings.readFromDevice(m_software, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		XmlWriteHelper xml(m_cfgXml->xmlWriter());
+
+		dasSettings.writeToXml(xml);
+
+		return true;
+	}
 
 	bool DASCfgGenerator::writeAppSignalsXml()
 	{
@@ -282,11 +304,11 @@ namespace Builder
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceStrID == m_software->strId())
+				if (lmNetProperties.appDataServiceStrID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::App);
-					ds.setLmStrID(lm->strId());
+					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);
@@ -296,11 +318,11 @@ namespace Builder
 					ds.serializeToXml(xml);
 				}
 
-				if (lmNetProperties.diagDataServiceStrID == m_software->strId())
+				if (lmNetProperties.diagDataServiceStrID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::Diag);
-					ds.setLmStrID(lm->strId());
+					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
 					ds.setLmDataEnable(lmNetProperties.diagDataEnable);
@@ -327,7 +349,7 @@ namespace Builder
 	}
 
 
-	bool DASCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, OutputLog* log)
+	bool DASCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -352,43 +374,19 @@ namespace Builder
 
 		adapterNo = adptrNo;
 
-		QString mask = QString("_ETHERNET0%1").arg(adapterNo);
+		QString suffix = QString("_ETHERNET0%1").arg(adapterNo);
 
-		int childrenCount = lm->childrenCount();
-
-		Hardware::DeviceObject* adapter = nullptr;
-
-		for(int i = 0; i < childrenCount; i++)
-		{
-			Hardware::DeviceObject* object = lm->child(i);
-
-			if (object == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (object->isController() == false)
-			{
-				continue;
-			}
-
-			if (object->strId().endsWith(mask) == true)
-			{
-				adapter = object;
-				break;
-			}
-		}
+		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix);
 
 		if (adapter == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined,
-							   QString("Can't find child object by mask '%1' in object '%2'").
-							   arg(mask).arg(lm->strId()));
+							   QString("Can't find child object by suffix '%1' in object '%2'").
+							   arg(suffix).arg(lm->equipmentIdTemplate()));
 			return false;
 		}
 
-		adapterStrID = adapter->strId();
+		adapterStrID = adapter->equipmentIdTemplate();
 
 		bool result = true;
 

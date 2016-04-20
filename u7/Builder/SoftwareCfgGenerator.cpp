@@ -48,7 +48,7 @@ namespace Builder
 			return false;
 		}
 
-		m_subDir = m_software->strId();
+		m_subDir = m_software->equipmentIdTemplate();
 
 		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(m_subDir);
 
@@ -56,17 +56,17 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Can't create 'configuration.xml' file for software %1")).
-					  arg(m_software->strId()));
+					  arg(m_software->equipmentIdTemplate()));
 			return false;
 		}
 
 		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
-					arg(m_software->strId()));
+					arg(m_software->equipmentIdTemplate()));
 
 		m_cfgXml->xmlWriter().writeStartElement("Software");
 
 		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("StrID", m_software->strId());
+		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->equipmentIdTemplate());
 		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
 
 		m_cfgXml->xmlWriter().writeEndElement();	// </Software>
@@ -206,11 +206,11 @@ namespace Builder
 				continue;
 			}
 
-			qDebug() << "Build: schema " << schema->strID() << " is loaded";
+			qDebug() << "Build: schema " << schema->schemaID() << " is loaded";
 
 			// Add file to build result
 			//
-			result = buildResultWriter->addFile(subDir, schema->strID() + "." + fileExtension, group, file->data());
+			result = buildResultWriter->addFile(subDir, schema->schemaID() + "." + fileExtension, group, file->data());
 			if (result == false)
 			{
 				returnResult = false;
@@ -219,9 +219,9 @@ namespace Builder
 
 			SchemaFile schemaFile;
 
-			schemaFile.id = schema->strID();
+			schemaFile.id = schema->schemaID();
 			schemaFile.subDir = subDir;
-			schemaFile.fileName = schema->strID() + "." + fileExtension;		// File is stored under this name
+			schemaFile.fileName = schema->schemaID() + "." + fileExtension;		// File is stored under this name
 			schemaFile.group = group;
 
 			m_schemaFileList.push_back(schemaFile);

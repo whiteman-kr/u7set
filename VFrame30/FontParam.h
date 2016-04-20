@@ -23,8 +23,14 @@
 	const QString& classname::get##propname##Name() const		{ 	return varname.name();	} \
 	void classname::set##propname##Name(const QString& value)	{	varname.setName(value); } \
 	\
-	double classname::get##propname##Size() const				{	return varname.size(Settings::regionalUnit());	} \
-	void classname::set##propname##Size(double value)			{	varname.setSize(value, Settings::regionalUnit());	} \
+	double classname::get##propname##Size() const \
+	{	\
+		return (itemUnit() == SchemaUnit::Display) ? varname.size(SchemaUnit::Display) : varname.size(Settings::regionalUnit());\
+	}\
+	void classname::set##propname##Size(double value) \
+	{\
+		varname.setSize(value, (itemUnit() == SchemaUnit::Display) ? SchemaUnit::Display : Settings::regionalUnit());\
+	} \
 	\
 	bool classname::get##propname##Bold() const					{	return varname.bold();	} \
 	void classname::set##propname##Bold(bool value)				{	varname.setBold(value); } \

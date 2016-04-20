@@ -10,8 +10,8 @@
 //
 // ------------------------------------------------------------------------------------
 
-ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& buildFolder) :
-	ServiceWorker(ServiceType::ConfigurationService),
+ConfigurationServiceWorker::ConfigurationServiceWorker(const QString &serviceStrID, const QString& buildFolder) :
+	ServiceWorker(ServiceType::ConfigurationService, serviceStrID, "", ""),
 	m_buildFolder(buildFolder)
 {
 }

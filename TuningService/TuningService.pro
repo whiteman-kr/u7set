@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Tcp.cpp \
     ../lib/JsonSerializable.cpp \
-    TuningSocket.cpp
+    TuningSocket.cpp \
+    TuningService.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -47,7 +48,8 @@ HEADERS += \
     ../include/WUtils.h \
     ../include/TcpFileTransfer.h \
     ../include/Tcp.h \
-    TuningSocket.h
+    TuningSocket.h \
+    TuningService.h
 
 include(../qtservice/src/qtservice.pri)
 

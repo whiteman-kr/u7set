@@ -1748,14 +1748,14 @@ class Schema : public ::google::protobuf::Message {
   inline ::Proto::Uuid* release_uuid();
   inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
-  // required .Proto.wstring strID = 2;
-  inline bool has_strid() const;
-  inline void clear_strid();
-  static const int kStrIDFieldNumber = 2;
-  inline const ::Proto::wstring& strid() const;
-  inline ::Proto::wstring* mutable_strid();
-  inline ::Proto::wstring* release_strid();
-  inline void set_allocated_strid(::Proto::wstring* strid);
+  // required .Proto.wstring schemaID = 2;
+  inline bool has_schemaid() const;
+  inline void clear_schemaid();
+  static const int kSchemaIDFieldNumber = 2;
+  inline const ::Proto::wstring& schemaid() const;
+  inline ::Proto::wstring* mutable_schemaid();
+  inline ::Proto::wstring* release_schemaid();
+  inline void set_allocated_schemaid(::Proto::wstring* schemaid);
 
   // required .Proto.wstring caption = 3;
   inline bool has_caption() const;
@@ -1828,8 +1828,8 @@ class Schema : public ::google::protobuf::Message {
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
-  inline void set_has_strid();
-  inline void clear_has_strid();
+  inline void set_has_schemaid();
+  inline void clear_has_schemaid();
   inline void set_has_caption();
   inline void clear_has_caption();
   inline void set_has_width();
@@ -1848,7 +1848,7 @@ class Schema : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
-  ::Proto::wstring* strid_;
+  ::Proto::wstring* schemaid_;
   ::Proto::wstring* caption_;
   double width_;
   double height_;
@@ -1924,17 +1924,17 @@ class LogicSchema : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.wstring hardware_strids = 1;
-  inline int hardware_strids_size() const;
-  inline void clear_hardware_strids();
-  static const int kHardwareStridsFieldNumber = 1;
-  inline const ::Proto::wstring& hardware_strids(int index) const;
-  inline ::Proto::wstring* mutable_hardware_strids(int index);
-  inline ::Proto::wstring* add_hardware_strids();
+  // repeated .Proto.wstring equipmentids = 1;
+  inline int equipmentids_size() const;
+  inline void clear_equipmentids();
+  static const int kEquipmentidsFieldNumber = 1;
+  inline const ::Proto::wstring& equipmentids(int index) const;
+  inline ::Proto::wstring* mutable_equipmentids(int index);
+  inline ::Proto::wstring* add_equipmentids();
   inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-      hardware_strids() const;
+      equipmentids() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-      mutable_hardware_strids();
+      mutable_equipmentids();
 
   // optional int32 counter = 2 [default = 0];
   inline bool has_counter() const;
@@ -1950,7 +1950,7 @@ class LogicSchema : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > hardware_strids_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > equipmentids_;
   ::google::protobuf::int32 counter_;
 
   mutable int _cached_size_;
@@ -3575,24 +3575,24 @@ class SchemaItemSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.wstring signalStrIDs = 1;
-  inline int signalstrids_size() const;
-  inline void clear_signalstrids();
-  static const int kSignalStrIDsFieldNumber = 1;
-  inline const ::Proto::wstring& signalstrids(int index) const;
-  inline ::Proto::wstring* mutable_signalstrids(int index);
-  inline ::Proto::wstring* add_signalstrids();
+  // repeated .Proto.wstring appSignalIDs = 1;
+  inline int appsignalids_size() const;
+  inline void clear_appsignalids();
+  static const int kAppSignalIDsFieldNumber = 1;
+  inline const ::Proto::wstring& appsignalids(int index) const;
+  inline ::Proto::wstring* mutable_appsignalids(int index);
+  inline ::Proto::wstring* add_appsignalids();
   inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-      signalstrids() const;
+      appsignalids() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-      mutable_signalstrids();
+      mutable_appsignalids();
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignal)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > signalstrids_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > appsignalids_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -4104,14 +4104,14 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::Uuid* release_uuid();
   inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
-  // required .Proto.wstring strId = 2;
-  inline bool has_strid() const;
-  inline void clear_strid();
-  static const int kStrIdFieldNumber = 2;
-  inline const ::Proto::wstring& strid() const;
-  inline ::Proto::wstring* mutable_strid();
-  inline ::Proto::wstring* release_strid();
-  inline void set_allocated_strid(::Proto::wstring* strid);
+  // required .Proto.wstring equipmentId = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 2;
+  inline const ::Proto::wstring& equipmentid() const;
+  inline ::Proto::wstring* mutable_equipmentid();
+  inline ::Proto::wstring* release_equipmentid();
+  inline void set_allocated_equipmentid(::Proto::wstring* equipmentid);
 
   // required .Proto.wstring caption = 3;
   inline bool has_caption() const;
@@ -4279,8 +4279,8 @@ class DeviceObject : public ::google::protobuf::Message {
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
-  inline void set_has_strid();
-  inline void clear_has_strid();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
   inline void set_has_caption();
   inline void clear_has_caption();
   inline void set_has_childrestriction();
@@ -4319,7 +4319,7 @@ class DeviceObject : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
-  ::Proto::wstring* strid_;
+  ::Proto::wstring* equipmentid_;
   ::Proto::wstring* caption_;
   ::Proto::wstring* childrestriction_;
   ::std::string* specific_properties_struct_;
@@ -7375,41 +7375,41 @@ inline void Schema::set_allocated_uuid(::Proto::Uuid* uuid) {
   }
 }
 
-// required .Proto.wstring strID = 2;
-inline bool Schema::has_strid() const {
+// required .Proto.wstring schemaID = 2;
+inline bool Schema::has_schemaid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Schema::set_has_strid() {
+inline void Schema::set_has_schemaid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Schema::clear_has_strid() {
+inline void Schema::clear_has_schemaid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Schema::clear_strid() {
-  if (strid_ != NULL) strid_->::Proto::wstring::Clear();
-  clear_has_strid();
+inline void Schema::clear_schemaid() {
+  if (schemaid_ != NULL) schemaid_->::Proto::wstring::Clear();
+  clear_has_schemaid();
 }
-inline const ::Proto::wstring& Schema::strid() const {
-  return strid_ != NULL ? *strid_ : *default_instance_->strid_;
+inline const ::Proto::wstring& Schema::schemaid() const {
+  return schemaid_ != NULL ? *schemaid_ : *default_instance_->schemaid_;
 }
-inline ::Proto::wstring* Schema::mutable_strid() {
-  set_has_strid();
-  if (strid_ == NULL) strid_ = new ::Proto::wstring;
-  return strid_;
+inline ::Proto::wstring* Schema::mutable_schemaid() {
+  set_has_schemaid();
+  if (schemaid_ == NULL) schemaid_ = new ::Proto::wstring;
+  return schemaid_;
 }
-inline ::Proto::wstring* Schema::release_strid() {
-  clear_has_strid();
-  ::Proto::wstring* temp = strid_;
-  strid_ = NULL;
+inline ::Proto::wstring* Schema::release_schemaid() {
+  clear_has_schemaid();
+  ::Proto::wstring* temp = schemaid_;
+  schemaid_ = NULL;
   return temp;
 }
-inline void Schema::set_allocated_strid(::Proto::wstring* strid) {
-  delete strid_;
-  strid_ = strid;
-  if (strid) {
-    set_has_strid();
+inline void Schema::set_allocated_schemaid(::Proto::wstring* schemaid) {
+  delete schemaid_;
+  schemaid_ = schemaid;
+  if (schemaid) {
+    set_has_schemaid();
   } else {
-    clear_has_strid();
+    clear_has_schemaid();
   }
 }
 
@@ -7645,29 +7645,29 @@ inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schem
 
 // LogicSchema
 
-// repeated .Proto.wstring hardware_strids = 1;
-inline int LogicSchema::hardware_strids_size() const {
-  return hardware_strids_.size();
+// repeated .Proto.wstring equipmentids = 1;
+inline int LogicSchema::equipmentids_size() const {
+  return equipmentids_.size();
 }
-inline void LogicSchema::clear_hardware_strids() {
-  hardware_strids_.Clear();
+inline void LogicSchema::clear_equipmentids() {
+  equipmentids_.Clear();
 }
-inline const ::Proto::wstring& LogicSchema::hardware_strids(int index) const {
-  return hardware_strids_.Get(index);
+inline const ::Proto::wstring& LogicSchema::equipmentids(int index) const {
+  return equipmentids_.Get(index);
 }
-inline ::Proto::wstring* LogicSchema::mutable_hardware_strids(int index) {
-  return hardware_strids_.Mutable(index);
+inline ::Proto::wstring* LogicSchema::mutable_equipmentids(int index) {
+  return equipmentids_.Mutable(index);
 }
-inline ::Proto::wstring* LogicSchema::add_hardware_strids() {
-  return hardware_strids_.Add();
+inline ::Proto::wstring* LogicSchema::add_equipmentids() {
+  return equipmentids_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-LogicSchema::hardware_strids() const {
-  return hardware_strids_;
+LogicSchema::equipmentids() const {
+  return equipmentids_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-LogicSchema::mutable_hardware_strids() {
-  return &hardware_strids_;
+LogicSchema::mutable_equipmentids() {
+  return &equipmentids_;
 }
 
 // optional int32 counter = 2 [default = 0];
@@ -9573,29 +9573,29 @@ inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
 
 // SchemaItemSignal
 
-// repeated .Proto.wstring signalStrIDs = 1;
-inline int SchemaItemSignal::signalstrids_size() const {
-  return signalstrids_.size();
+// repeated .Proto.wstring appSignalIDs = 1;
+inline int SchemaItemSignal::appsignalids_size() const {
+  return appsignalids_.size();
 }
-inline void SchemaItemSignal::clear_signalstrids() {
-  signalstrids_.Clear();
+inline void SchemaItemSignal::clear_appsignalids() {
+  appsignalids_.Clear();
 }
-inline const ::Proto::wstring& SchemaItemSignal::signalstrids(int index) const {
-  return signalstrids_.Get(index);
+inline const ::Proto::wstring& SchemaItemSignal::appsignalids(int index) const {
+  return appsignalids_.Get(index);
 }
-inline ::Proto::wstring* SchemaItemSignal::mutable_signalstrids(int index) {
-  return signalstrids_.Mutable(index);
+inline ::Proto::wstring* SchemaItemSignal::mutable_appsignalids(int index) {
+  return appsignalids_.Mutable(index);
 }
-inline ::Proto::wstring* SchemaItemSignal::add_signalstrids() {
-  return signalstrids_.Add();
+inline ::Proto::wstring* SchemaItemSignal::add_appsignalids() {
+  return appsignalids_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-SchemaItemSignal::signalstrids() const {
-  return signalstrids_;
+SchemaItemSignal::appsignalids() const {
+  return appsignalids_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-SchemaItemSignal::mutable_signalstrids() {
-  return &signalstrids_;
+SchemaItemSignal::mutable_appsignalids() {
+  return &appsignalids_;
 }
 
 // -------------------------------------------------------------------
@@ -9833,41 +9833,41 @@ inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
   }
 }
 
-// required .Proto.wstring strId = 2;
-inline bool DeviceObject::has_strid() const {
+// required .Proto.wstring equipmentId = 2;
+inline bool DeviceObject::has_equipmentid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DeviceObject::set_has_strid() {
+inline void DeviceObject::set_has_equipmentid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DeviceObject::clear_has_strid() {
+inline void DeviceObject::clear_has_equipmentid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DeviceObject::clear_strid() {
-  if (strid_ != NULL) strid_->::Proto::wstring::Clear();
-  clear_has_strid();
+inline void DeviceObject::clear_equipmentid() {
+  if (equipmentid_ != NULL) equipmentid_->::Proto::wstring::Clear();
+  clear_has_equipmentid();
 }
-inline const ::Proto::wstring& DeviceObject::strid() const {
-  return strid_ != NULL ? *strid_ : *default_instance_->strid_;
+inline const ::Proto::wstring& DeviceObject::equipmentid() const {
+  return equipmentid_ != NULL ? *equipmentid_ : *default_instance_->equipmentid_;
 }
-inline ::Proto::wstring* DeviceObject::mutable_strid() {
-  set_has_strid();
-  if (strid_ == NULL) strid_ = new ::Proto::wstring;
-  return strid_;
+inline ::Proto::wstring* DeviceObject::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == NULL) equipmentid_ = new ::Proto::wstring;
+  return equipmentid_;
 }
-inline ::Proto::wstring* DeviceObject::release_strid() {
-  clear_has_strid();
-  ::Proto::wstring* temp = strid_;
-  strid_ = NULL;
+inline ::Proto::wstring* DeviceObject::release_equipmentid() {
+  clear_has_equipmentid();
+  ::Proto::wstring* temp = equipmentid_;
+  equipmentid_ = NULL;
   return temp;
 }
-inline void DeviceObject::set_allocated_strid(::Proto::wstring* strid) {
-  delete strid_;
-  strid_ = strid;
-  if (strid) {
-    set_has_strid();
+inline void DeviceObject::set_allocated_equipmentid(::Proto::wstring* equipmentid) {
+  delete equipmentid_;
+  equipmentid_ = equipmentid;
+  if (equipmentid) {
+    set_has_equipmentid();
   } else {
-    clear_has_strid();
+    clear_has_equipmentid();
   }
 }
 

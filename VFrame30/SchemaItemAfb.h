@@ -67,6 +67,8 @@ namespace VFrame30
 		//
 	public:
 		const QString& afbStrID() const;
+        int afbImplementationVersion() const;
+        int afbImplementationOpIndex() const;
 
 		const std::vector<Afb::AfbParam>& params() const;
 
@@ -75,6 +77,8 @@ namespace VFrame30
 
 	private:
 		QString m_afbStrID;
+        int m_afbImplementationVersion = 0;
+        int m_afbImplementationOpIndex = 0;
 		std::vector<Afb::AfbParam> m_params;
 		int m_precision = 2;
 	};

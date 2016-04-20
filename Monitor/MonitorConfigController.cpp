@@ -1,5 +1,29 @@
 #include "MonitorConfigController.h"
 #include "Settings.h"
+#include <QDomElement>
+#include <QDomNodeList>
+
+ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
+	m_equipmentId(EquipmentId),
+	m_ip(ipAddress),
+	m_port(port)
+{
+}
+
+QString ConfigConnection::equipmentId() const
+{
+	return m_equipmentId;
+}
+
+QString ConfigConnection::ip() const
+{
+	return m_ip;
+}
+
+int ConfigConnection::port() const
+{
+	return m_port;
+}
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
@@ -128,119 +152,217 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
-	QString errorMessage;
+	ConfigSettings readSettings;
 
-	QXmlStreamReader xmlReader(configurationXmlData);
+	// Parse XML
+	//
+	QDomDocument xml;
+	QString parsingError;
 
-	while(xmlReader.atEnd() == false)
+	bool result = xml.setContent(configurationXmlData, false, &parsingError);
+
+	if (result == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		readSettings.errorMessage += parsingError + "\n";
+	}
+	else
+	{
+		// Get <Configuration>
+		//
+		QDomElement configElement = xml.documentElement();
+
+		// Software node
+		//
+		QDomNodeList softwareNodes = configElement.elementsByTagName("Software");
+		if (softwareNodes.size() != 1)
 		{
-			continue;
+			readSettings.errorMessage += tr("Parsing Software node error.\n");
+		}
+		else
+		{
+			result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
 		}
 
-		if (xmlReader.name() == "Software")
+		// Settings node
+		//
+		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
+		if (settingsNodes.size() != 1)
 		{
-			bool result = xmlReadSoftwareSection(xmlReader);
-			if (result == false)
-			{
-				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Software.");
-			}
-			continue;
+			readSettings.errorMessage += tr("Parsing Settings node error.\n");
 		}
-
-		if (xmlReader.name() == "Settings")
+		else
 		{
-			bool result = xmlReadSettingsSection(xmlReader);
-			if (result == false)
-			{
-				errorMessage = tr("Wrong file format or parameters, configuration.xml, section Settings.");
-			}
-			continue;
+			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
 		}
 	}
 
-	if (errorMessage.isEmpty() == false)
+	// Error handling
+	//
+	if (result == false ||
+		readSettings.errorMessage.isEmpty() == false)
 	{
-		QMessageBox::critical(nullptr, qApp->applicationName(), errorMessage);
+		QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
+
+		qDebug() << completeErrorMessage;
+		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
 	}
+
+	// Trace received params
+	//
+	qDebug() << "New configuration arrived";
+	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
+	qDebug() << "DAS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
+	qDebug() << "DAS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
 
 	return;
 }
 
-bool MonitorConfigController::xmlReadSoftwareSection(QXmlStreamReader& xmlReader)
+bool MonitorConfigController::xmlReadSoftwareNode(QDomNode& softwareNode, ConfigSettings* outSetting)
 {
-	if (xmlReader.name() != "Software")
+	if (outSetting == nullptr ||
+		softwareNode.nodeName() != "Software")
 	{
-		assert(false);
+		assert(outSetting);
+		assert(softwareNode.nodeName() == "Software");
 		return false;
 	}
 
-	QString appStrId = xmlReader.attributes().value("StrID").toString();
+	QDomElement softwareElement = softwareNode.toElement();
 
-	if (theSettings.instanceStrId() != appStrId)
+	// Read StrID attribute
+	//
+	QString appEquipmentId = softwareElement.attribute("ID");
+
+	if (theSettings.instanceStrId() != appEquipmentId)
 	{
 		// The received file has different StrID then expected
 		//
+		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
 		return false;
 	}
 
-	int softwareType = xmlReader.attributes().value("Type").toInt();
+	// Read Type attribute
+	//
+	int softwareType = softwareElement.attribute("Type").toInt();
 
 	if (softwareType != E::SoftwareType::Monitor)
 	{
 		// The received file has different type then expected,
 		//
+		outSetting->errorMessage += "The received file has different software type then expected.\n";
 		return false;
 	}
 
-	return true;
+	return outSetting->errorMessage.isEmpty();
 }
 
-bool MonitorConfigController::xmlReadSettingsSection(QXmlStreamReader& xmlReader)
+bool MonitorConfigController::xmlReadSettingsNode(QDomNode& settingsNode, ConfigSettings* outSetting)
 {
-	if (xmlReader.name() != "Settings")
+	if (outSetting == nullptr ||
+		settingsNode.nodeName() != "Settings")
 	{
-		assert(false);
+		assert(outSetting);
+		assert(settingsNode.nodeName() == "Settings");
 		return false;
 	}
 
-	while(xmlReader.atEnd() == false)
+	QDomElement settingsElement = settingsNode.toElement();
+
+	// Check if XML contains Error tag
+	//
+	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
+
+	if (errorNodes.isEmpty() == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		for (int i = 0; i < errorNodes.count();  i++)
 		{
-			continue;
+			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
 		}
+		return false;
+	}
 
-		if (xmlReader.name() == "DataAquisitionService")
+	// Get StartSchemaID data
+	//
+	{
+		QDomNodeList startSchemaNodes = settingsElement.elementsByTagName("StartSchemaID");
+
+		if (startSchemaNodes.isEmpty() == true)
 		{
-			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
-			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
-
-			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
-			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
-
-			int dasPort1 = xmlReader.attributes().value("port1").toInt();
-			int dasPort2 = xmlReader.attributes().value("port2").toInt();
-
-			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
-								 .arg(dasStrId1)
-								 .arg(dasIp1)
-								 .arg(dasPort1);
-			qDebug() << logString1;
-
-			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
-								 .arg(dasStrId2)
-								 .arg(dasIp2)
-								 .arg(dasPort2);
-			qDebug() << logString2;
-
-			// Send new settings to DAS thread etc
-			//
-
-			continue;
+			outSetting->errorMessage += tr("Cannot find StartSchemaID tag %1\n");
+			return false;
+		}
+		else
+		{
+			outSetting->startSchemaId = startSchemaNodes.at(0).toElement().text();
 		}
 	}
 
-	return true;
+	// Get DataAquisitionService data
+	//
+	{
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("DataAquisitionService");
+
+		if (dasNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find DataAquisitionService tag %1\n");
+			return false;
+		}
+		else
+		{
+			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+
+			QString dasId1 = dasXmlElement.attribute("DasID1");
+			QString dasIp1 = dasXmlElement.attribute("ip1");
+			int dasPort1 = dasXmlElement.attribute("port1").toInt();
+
+			QString dasId2 = dasXmlElement.attribute("DasID2");
+			QString dasIp2 = dasXmlElement.attribute("ip2");
+			int dasPort2 = dasXmlElement.attribute("port2").toInt();
+
+			outSetting->das1 = ConfigConnection(dasId1, dasIp1, dasPort1);
+			outSetting->das2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+		}
+	}
+
+	return outSetting->errorMessage.isEmpty();
+
+//		if (xmlReader.isStartElement() == true && tagName == "DataAquisitionService")
+//		{
+//			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
+//			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
+
+//			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
+//			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
+
+//			int dasPort1 = xmlReader.attributes().value("port1").toInt();
+//			int dasPort2 = xmlReader.attributes().value("port2").toInt();
+
+//			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
+//								 .arg(dasStrId1)
+//								 .arg(dasIp1)
+//								 .arg(dasPort1);
+
+//			qDebug() << logString1;
+
+//			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
+//								 .arg(dasStrId2)
+//								 .arg(dasIp2)
+//								 .arg(dasPort2);
+
+//			qDebug() << logString2;
+
+//			// Save data
+//			//
+//			outSetting->das1 = ConfigConnection(dasStrId1, dasIp1, dasPort1);
+//			outSetting->das2 = ConfigConnection(dasStrId2, dasIp2, dasPort2);;
+
+//			xmlReader.skipCurrentElement();
+//			continue;
+//		}
+
+//		outSetting->errorMessage += QString("Unknown xml tag %1\n").arg(tagName);
+//		xmlReader.skipCurrentElement();
+//	}
+
+//	return outSetting->errorMessage.isEmpty();
 }

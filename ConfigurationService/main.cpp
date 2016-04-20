@@ -4,7 +4,7 @@
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
-    #include <vld.h>		// Enable Visual Leak Detector
+	#include <vld.h>		// Enable Visual Leak Detector
 	// vld.h includes windows.h wich redefine min/max stl functions
 	#ifdef min
 		#undef min
@@ -17,20 +17,12 @@
 
 int main(int argc, char *argv[])
 {
-    QString buildFolder = "d:/temp/build";
+	QString buildFolder = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
+	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
 
-    for(int i = 0; i < argc; i++)
-    {
-        QString arg = argv[i];
+	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker(serviceStrID, buildFolder);
 
-        if (arg.mid(0, 3) == "-b=")
-        {
-            buildFolder = arg.mid(3);
-            break;
-        }
-    }
-
-    ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", new ConfigurationServiceWorker(buildFolder));
+	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", cfgServiceWorker);
 
 	return serviceStarter.exec();
 }
