@@ -502,7 +502,7 @@ namespace Builder
 			result &= DeviceHelper::getBoolProperty(adapter, "TuningEnable", &tuningEnable, log);
 			result &= DeviceHelper::getStrProperty(adapter, "TuningIP", &tuningIP, log);
 			result &= DeviceHelper::getIntProperty(adapter, "TuningPort", &tuningPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "TuningServiceStrID", &tuningServiceID, log);
+			result &= DeviceHelper::getStrProperty(adapter, "TuningServiceID", &tuningServiceID, log);
 			return result;
 		}
 
@@ -514,12 +514,12 @@ namespace Builder
 			result &= DeviceHelper::getBoolProperty(adapter, "AppDataEnable", &appDataEnable, log);
 			result &= DeviceHelper::getStrProperty(adapter, "AppDataIP", &appDataIP, log);
 			result &= DeviceHelper::getIntProperty(adapter, "AppDataPort", &appDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "AppDataServiceStrID", &appDataServiceID, log);
+			result &= DeviceHelper::getStrProperty(adapter, "AppDataServiceID", &appDataServiceID, log);
 
 			result &= DeviceHelper::getBoolProperty(adapter, "DiagDataEnable", &diagDataEnable, log);
 			result &= DeviceHelper::getStrProperty(adapter, "DiagDataIP", &diagDataIP, log);
 			result &= DeviceHelper::getIntProperty(adapter, "DiagDataPort", &diagDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "DiagDataServiceStrID", &diagDataServiceID, log);
+			result &= DeviceHelper::getStrProperty(adapter, "DiagDataServiceID", &diagDataServiceID, log);
 
 			return result;
 		}
