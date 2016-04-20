@@ -21,7 +21,7 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	QStringList l;
 	l << tr("Caption")
-        << tr("Port StrID")
+        << tr("Port ID")
 		<< tr("Mode")
         << tr("Enabled")
         << tr("Duplex");

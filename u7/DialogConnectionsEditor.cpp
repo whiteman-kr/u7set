@@ -91,8 +91,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     QStringList l;
     l << tr("ID");
     l << tr("Caption");
-    l << tr("Port1 StrID");
-    l << tr("Port2 StrID");
+    l << tr("Port1 ID");
+    l << tr("Port2 ID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
