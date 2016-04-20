@@ -216,7 +216,7 @@ namespace Builder
 
 			// Add file to build result
 			//
-			result = buildResultWriter->addFile(subDir, schema->schemaID() + "." + fileExtension, group, file->data());
+			result = buildResultWriter->addFile(subDir, schema->schemaID() + "." + fileExtension, schema->schemaID(), group, file->data());
 			if (result == false)
 			{
 				returnResult = false;

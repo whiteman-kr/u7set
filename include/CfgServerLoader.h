@@ -141,6 +141,8 @@ private:
 	bool m_fileReady = false;
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
+	QMap<QString, QString> m_fileIDPathMap;
+
 	volatile bool m_enableDownloadConfiguration = false;
 
 	void shutdown();
@@ -168,6 +170,8 @@ private:
 
 	void setFileReady(bool value);
 
+	QString getFilePathNameByID(QString fileID);
+
 signals:
 	void signal_enableDownloadConfiguration();
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -188,6 +192,9 @@ public:
 
 	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
 	bool getFile(QString pathFileName, QByteArray* fileData);
+
+	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileByID(QString fileID, QByteArray* fileData);
 
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
 	QString getLastErrorStr();

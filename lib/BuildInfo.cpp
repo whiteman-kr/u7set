@@ -61,9 +61,10 @@ namespace Builder
 		xmlWriter.writeStartElement("File");
 
 		xmlWriter.writeAttribute("Name", pathFileName);
+		xmlWriter.writeAttribute("ID", ID);
+		xmlWriter.writeAttribute("Tag", tag);
 		xmlWriter.writeAttribute("Size", QString::number(size));
 		xmlWriter.writeAttribute("MD5", md5);
-		xmlWriter.writeAttribute("Group", group);
 
 		xmlWriter.writeEndElement();		// file
 	}
@@ -78,8 +79,9 @@ namespace Builder
 		}
 
 		pathFileName = xmlReader.attributes().value("Name").toString();
+		tag = xmlReader.attributes().value("ID").toString();
+		tag = xmlReader.attributes().value("Tag").toString();
 		size = xmlReader.attributes().value("Size").toInt();
 		md5 = xmlReader.attributes().value("MD5").toString();
-		group = xmlReader.attributes().value("Group").toString();
 	}
 }

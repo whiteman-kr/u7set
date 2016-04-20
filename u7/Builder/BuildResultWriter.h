@@ -34,7 +34,7 @@ namespace Builder
 		static QString removeHeadTailSeparator(const QString& str);
 
 	public:
-		BuildFile(const QString& subDir, const QString& fileName, const QString& group);
+		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
 		bool open(const QString& fullBuildPath, bool textMode, OutputLog* log);
 
@@ -131,10 +131,12 @@ namespace Builder
 
 		HashedVector<QString, MultichannelFile*> m_multichannelFiles;
 
+		QMap<QString, QString> m_buildFileIDMap;
+
 		bool m_runBuild = true;
 
 	private:
-		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& group);
+		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
@@ -156,9 +158,9 @@ namespace Builder
 		bool addFile(const QString& subDir, const QString& fileName, const QString& dataString);
 		bool addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
 
-		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QByteArray& data);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QString& dataString);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& group, const QStringList& stringList);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList);
 
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);

@@ -166,7 +166,7 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 {
 	// execute in context of calling thread
 	//
-	if (fileData == nullptr)
+	if (fileData == nullptr || errorStr == nullptr)
 	{
 		assert(false);
 		return false;
@@ -219,6 +219,53 @@ bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 
 	return true;
 }
+
+
+bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr)
+{
+	if (fileData == nullptr || errorStr == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString pathFileName = getFilePathNameByID(fileID);
+
+	if (pathFileName.isEmpty())
+	{
+		*errorStr = QString(tr("File with ID = '%1' not found.")).arg(fileID);
+		return false;
+	}
+
+	return getFileBlocked(pathFileName, fileData, errorStr);
+}
+
+
+bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
+{
+	QString pathFileName = getFilePathNameByID(fileID);
+
+	return getFile(pathFileName, fileData);
+}
+
+
+
+QString CfgLoader::getFilePathNameByID(QString fileID)
+{
+	QString pathFileName;
+
+	mutex.lock();
+
+	if (m_fileIDPathMap.contains(fileID))
+	{
+		pathFileName = m_fileIDPathMap[fileID];
+	}
+
+	mutex.unlock();
+
+	return pathFileName;
+}
+
 
 
 bool CfgLoader::isFileReady()
@@ -603,7 +650,10 @@ bool CfgLoader::readConfigurationXml()
 		return false;
 	}
 
+	mutex.lock();
+
 	m_cfgFilesInfo.clear();
+	m_fileIDPathMap.clear();
 
 	CfgFileInfo cfi;
 
@@ -643,7 +693,14 @@ bool CfgLoader::readConfigurationXml()
 		cfi.readFromXml(xmlReader);
 
 		m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
+
+		if (cfi.ID.isEmpty() == false)
+		{
+			m_fileIDPathMap.insert(cfi.ID, cfi.pathFileName);
+		}
 	}
+
+	mutex.unlock();
 
 	return true;
 }

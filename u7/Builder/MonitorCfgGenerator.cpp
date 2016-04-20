@@ -129,7 +129,7 @@ namespace Builder
 
 			if (dasObject1 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dasObject1->equipmentIdTemplate());
+				QString errorStr = tr("Object %1 is not found").arg(dacStrID1);
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
@@ -138,7 +138,7 @@ namespace Builder
 
 			if (dasObject2 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dasObject2->equipmentIdTemplate());
+				QString errorStr = tr("Object %1 is not found").arg(dacStrID2);
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
