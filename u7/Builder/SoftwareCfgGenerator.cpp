@@ -7,8 +7,10 @@
 
 namespace Builder
 {
-	QList<Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
+	HashedVector<QString, Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
+	HashedVector<QString, Hardware::Software*> SoftwareCfgGenerator::m_softwareList;
 	QList<SoftwareCfgGenerator::SchemaFile> SoftwareCfgGenerator::m_schemaFileList;
+
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
 		m_dbController(db),
@@ -110,6 +112,10 @@ namespace Builder
 		//
 
 		result &= buildLmList(equipment, log);
+
+		result &= buildSoftwareList(equipment, log);
+
+		result &= checkLmToSoftwareLinks(log);
 
 		// Add Schemas to Build result
 		//
@@ -231,8 +237,6 @@ namespace Builder
 	}
 
 
-
-
 	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
 	{
 		if (equipment == nullptr)
@@ -266,7 +270,7 @@ namespace Builder
 					return;
 				}
 
-				m_lmList.append(module);
+				m_lmList.insert(module->equipmentId(), module);
 			}
 		);
 
@@ -281,6 +285,251 @@ namespace Builder
 
 		return result;
 	}
+
+
+	bool SoftwareCfgGenerator::buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log)
+	{
+		if (equipment == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool result = true;
+
+		m_softwareList.clear();
+
+		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					assert(false);
+					result = false;
+					return;
+				}
+
+				if (currentDevice->isSoftware() == false)
+				{
+					return;
+				}
+
+				Hardware::Software* software = currentDevice->toSoftware();
+
+				if (software == nullptr)
+				{
+					assert(false);
+					result = false;
+					return;
+				}
+
+				m_softwareList.insert(software->equipmentId(), software);
+			}
+		);
+
+		if (result == true)
+		{
+			LOG_MESSAGE(log, QString(tr("Logic Modules list building... OK")));
+		}
+		else
+		{
+			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build Logic Modules list")));
+		}
+
+		return result;
+	}
+
+
+	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(IssueLogger* log)
+	{
+		bool result = true;
+
+		for(Hardware::DeviceModule* lm : m_lmList)
+		{
+			for(int adapter = LM_ETHERNET_ADAPTER1; adapter <= LM_ETHERNET_ADAPTER3; adapter++)
+			{
+				LmEthernetAdapterNetworkProperties adapterProperties;
+				Hardware::Software* software = nullptr;
+
+				result &= adapterProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, log);
+
+				if (result == false)
+				{
+					break;
+				}
+
+				if (adapter ==  LM_ETHERNET_ADAPTER1)
+				{
+					// tuning adapter
+					//
+					if (adapterProperties.tuningServiceID.isEmpty() == true)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.TuningServiceID' is empty")).
+											 arg(adapterProperties.adapterID));
+						continue;
+					}
+
+					if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.TuningServiceID' is linked to undefined softwareID '%2'")).
+											 arg(adapterProperties.adapterID).arg(adapterProperties.tuningServiceID));
+						continue;
+					}
+
+					software = m_softwareList[adapterProperties.tuningServiceID];
+
+					if (software->type() != E::SoftwareType::TuningService)
+					{
+						LOG_ERROR_OBSOLETE(log, IssueType::NotDefined,
+										 QString(tr("Adapter property '%1.TuningServiceID' linked to not suitable software '%2'")).
+										 arg(adapterProperties.adapterID).arg(adapterProperties.tuningServiceID));
+						result = false;
+						continue;
+					}
+				}
+				else
+				{
+					// app and diag data adapter
+
+					// test appDataServiceID property
+					//
+					if (adapterProperties.appDataServiceID.isEmpty() == true)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.AppDataServiceID' is empty")).
+											 arg(adapterProperties.adapterID));
+						continue;
+					}
+
+					if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.AppDataServiceID' is linked to undefined softwareID '%2'")).
+											 arg(adapterProperties.adapterID).arg(adapterProperties.appDataServiceID));
+						continue;
+					}
+
+					software = m_softwareList[adapterProperties.appDataServiceID];
+
+					if (software->type() != E::SoftwareType::DataAcquisitionService)
+					{
+						LOG_ERROR_OBSOLETE(log, IssueType::NotDefined,
+										 QString(tr("Adapter property '%1.AppDataServiceID' linked to not suitable software '%2'")).
+										 arg(adapterProperties.adapterID).arg(adapterProperties.appDataServiceID));
+						result = false;
+						continue;
+					}
+
+					// test diagDataServiceID property
+					//
+					if (adapterProperties.diagDataServiceID.isEmpty() == true)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.DiagDataServiceID' is empty")).
+											 arg(adapterProperties.adapterID));
+						continue;
+					}
+
+					if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
+					{
+						LOG_WARNING_OBSOLETE(log, IssueType::NotDefined,
+											 QString(tr("Adapter property '%1.DiagDataServiceID' is linked to undefined softwareID '%2'")).
+											 arg(adapterProperties.adapterID).arg(adapterProperties.diagDataServiceID));
+						continue;
+					}
+
+					software = m_softwareList[adapterProperties.diagDataServiceID];
+
+					if (software->type() != E::SoftwareType::DataAcquisitionService)
+					{
+						LOG_ERROR_OBSOLETE(log, IssueType::NotDefined,
+										 QString(tr("Adapter property '%1.DiagDataServiceID' linked to not suitable software '%2'")).
+										 arg(adapterProperties.adapterID).arg(adapterProperties.diagDataServiceID));
+						result = false;
+						continue;
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+	bool SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (lm == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			assert(false);
+			return false;
+		}
+
+		if (adptrNo < LM_ETHERNET_ADAPTER1 ||
+			adptrNo > LM_ETHERNET_ADAPTER3)
+		{
+			LOG_INTERNAL_ERROR(log);
+			assert(false);
+			return false;
+		}
+
+		adapterNo = adptrNo;
+
+		QString suffix = QString("_ETHERNET0%1").arg(adapterNo);
+
+		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix, log);
+
+		if (adapter == nullptr)
+		{
+			return false;
+		}
+
+		adapterID = adapter->equipmentIdTemplate();
+
+		bool result = true;
+
+		if (adptrNo == LM_ETHERNET_ADAPTER1)
+		{
+			// tunig adapter
+			//
+			result &= DeviceHelper::getBoolProperty(adapter, "TuningEnable", &tuningEnable, log);
+			result &= DeviceHelper::getStrProperty(adapter, "TuningIP", &tuningIP, log);
+			result &= DeviceHelper::getIntProperty(adapter, "TuningPort", &tuningPort, log);
+			result &= DeviceHelper::getStrProperty(adapter, "TuningServiceID", &tuningServiceID, log);
+			return result;
+		}
+
+		if (adptrNo == LM_ETHERNET_ADAPTER2 ||
+			adptrNo == LM_ETHERNET_ADAPTER3)
+		{
+			// application and diagnostics data adapter
+			//
+			result &= DeviceHelper::getBoolProperty(adapter, "AppDataEnable", &appDataEnable, log);
+			result &= DeviceHelper::getStrProperty(adapter, "AppDataIP", &appDataIP, log);
+			result &= DeviceHelper::getIntProperty(adapter, "AppDataPort", &appDataPort, log);
+			result &= DeviceHelper::getStrProperty(adapter, "AppDataServiceID", &appDataServiceID, log);
+
+			result &= DeviceHelper::getBoolProperty(adapter, "DiagDataEnable", &diagDataEnable, log);
+			result &= DeviceHelper::getStrProperty(adapter, "DiagDataIP", &diagDataIP, log);
+			result &= DeviceHelper::getIntProperty(adapter, "DiagDataPort", &diagDataPort, log);
+			result &= DeviceHelper::getStrProperty(adapter, "DiagDataServiceID", &diagDataServiceID, log);
+
+			return result;
+		}
+
+		assert(false);
+		return false;
+	}
+
+
+
 }
 
 

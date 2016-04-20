@@ -74,11 +74,10 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 
 void DeviceHelper::logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, Builder::IssueLogger *log)
 {
-	if (log == nullptr)
+	if (log != nullptr)
 	{
 		LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 				  QString(tr("Property '%1' is not found in device '%2'")).arg(propertyName).arg(deviceStrID));
-		assert(false);
 		return;
 	}
 }

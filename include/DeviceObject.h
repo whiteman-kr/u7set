@@ -120,10 +120,10 @@ namespace Hardware
 	public:
 		DeviceObject* parent();
 		const DeviceObject* parent() const;
-        Q_INVOKABLE QObject* jsParent() const;
+		Q_INVOKABLE QObject* jsParent() const;
 
 		Q_INVOKABLE int jsPropertyInt(QString name) const;
-        Q_INVOKABLE quint32 jsPropertyIP(QString name) const;
+		Q_INVOKABLE quint32 jsPropertyIP(QString name) const;
 
 		virtual DeviceType deviceType() const;
 		Q_INVOKABLE int jsDeviceType() const;
@@ -150,14 +150,17 @@ namespace Hardware
 		const Hardware::DeviceModule* toModule() const;
 		Hardware::DeviceModule* toModule();
 
-        const Hardware::DeviceController* toController() const;
-        Hardware::DeviceController* toController();
+		const Hardware::DeviceController* toController() const;
+		Hardware::DeviceController* toController();
 
-        const Hardware::DeviceController* getParentController() const;
-        const Hardware::DeviceModule* getParentModule() const;
-        const Hardware::DeviceChassis* getParentChassis() const;
-        const Hardware::DeviceRack* getParentRack() const;
-        const Hardware::DeviceSystem* getParentSystem() const;
+		const Hardware::Software* toSoftware() const;
+		Hardware::Software* toSoftware();
+
+		const Hardware::DeviceController* getParentController() const;
+		const Hardware::DeviceModule* getParentModule() const;
+		const Hardware::DeviceChassis* getParentChassis() const;
+		const Hardware::DeviceRack* getParentRack() const;
+		const Hardware::DeviceSystem* getParentSystem() const;
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
@@ -499,14 +502,14 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
-        Q_INVOKABLE quint32 valueToMantExp1616(double value);
+		Q_INVOKABLE quint32 valueToMantExp1616(double value);
 
 		// Properties
 		//
 	public:
 
 		E::SignalType type() const;
-        Q_INVOKABLE int jsType() const;
+		Q_INVOKABLE int jsType() const;
 		void setType(E::SignalType value);
 
 		DeviceSignal::SignalFunction function() const;

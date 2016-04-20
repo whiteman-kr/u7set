@@ -304,13 +304,13 @@ namespace Builder
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceStrID == m_software->equipmentIdTemplate())
+				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::App);
 					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
-					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
+					ds.setLmAdapterStrID(lmNetProperties.adapterID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);
 					ds.setLmAddressStr(lmNetProperties.appDataIP);
 					ds.setLmPort(lmNetProperties.appDataPort);
@@ -318,13 +318,13 @@ namespace Builder
 					ds.serializeToXml(xml);
 				}
 
-				if (lmNetProperties.diagDataServiceStrID == m_software->equipmentIdTemplate())
+				if (lmNetProperties.diagDataServiceID == m_software->equipmentIdTemplate())
 				{
 					ds.setEthernetChannel(channel);
 					ds.setDataType(DataSource::DataType::Diag);
 					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
-					ds.setLmAdapterStrID(lmNetProperties.adapterStrID);
+					ds.setLmAdapterStrID(lmNetProperties.adapterID);
 					ds.setLmDataEnable(lmNetProperties.diagDataEnable);
 					ds.setLmAddressStr(lmNetProperties.diagDataIP);
 					ds.setLmPort(lmNetProperties.diagDataPort);
@@ -349,79 +349,6 @@ namespace Builder
 	}
 
 
-	bool DASCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
-	{
-		if (log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (lm == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			assert(false);
-			return false;
-		}
-
-		if (adptrNo < LM_ETHERNET_ADAPTER1 ||
-			adptrNo > LM_ETHERNET_ADAPTER3)
-		{
-			LOG_INTERNAL_ERROR(log);
-			assert(false);
-			return false;
-		}
-
-		adapterNo = adptrNo;
-
-		QString suffix = QString("_ETHERNET0%1").arg(adapterNo);
-
-		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix);
-
-		if (adapter == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined,
-							   QString("Can't find child object by suffix '%1' in object '%2'").
-							   arg(suffix).arg(lm->equipmentIdTemplate()));
-			return false;
-		}
-
-		adapterStrID = adapter->equipmentIdTemplate();
-
-		bool result = true;
-
-		if (adptrNo == LM_ETHERNET_ADAPTER1)
-		{
-			// tunig adapter
-			//
-			result &= DeviceHelper::getBoolProperty(adapter, "TuningEnable", &tuningEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, "TuningIP", &tuningIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, "TuningPort", &tuningPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "TuningServiceStrID", &tuningServiceStrID, log);
-			return result;
-		}
-
-		if (adptrNo == LM_ETHERNET_ADAPTER2 ||
-			adptrNo == LM_ETHERNET_ADAPTER3)
-		{
-			// application and diagnostics data adapter
-			//
-			result &= DeviceHelper::getBoolProperty(adapter, "AppDataEnable", &appDataEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, "AppDataIP", &appDataIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, "AppDataPort", &appDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "AppDataServiceStrID", &appDataServiceStrID, log);
-
-			result &= DeviceHelper::getBoolProperty(adapter, "DiagDataEnable", &diagDataEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, "DiagDataIP", &diagDataIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, "DiagDataPort", &diagDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, "DiagDataServiceStrID", &diagDataServiceStrID, log);
-
-			return result;
-		}
-
-		assert(false);
-		return false;
-	}
 
 
 }
