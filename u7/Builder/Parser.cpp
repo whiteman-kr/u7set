@@ -386,7 +386,7 @@ namespace Builder
 					{
 						// AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
 						//
-						log->errALP4007(logicSchema->strID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
+						log->errALP4007(logicSchema->schemaID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
 						return false;
 					}
 				}
@@ -612,13 +612,13 @@ namespace Builder
 			{
 				if (item.m_fblItem->isInputSignalElement())
 				{
-					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->signalStrIds();
+					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->appSignalIds();
 					continue;
 				}
 
 				if (item.m_fblItem->isOutputSignalElement())
 				{
-					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->signalStrIds();
+					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->appSignalIds();
 					continue;
 				}
 
@@ -671,7 +671,7 @@ namespace Builder
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
 				//
-				QString signalStrId = signalElement->signalStrIds();
+				QString signalStrId = signalElement->appSignalIds();
 
 				signalInputItems.insert(signalStrId, li);
 				continue;
@@ -684,7 +684,7 @@ namespace Builder
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
 				//
-				QString signalStrId = signalElement->signalStrIds();
+				QString signalStrId = signalElement->appSignalIds();
 
 				auto duplicateItem = signalOutputItems.find(signalStrId);
 				if (duplicateItem != signalOutputItems.end())
@@ -696,8 +696,8 @@ namespace Builder
 					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
 					log->errALP4009(moduleStrId(),
-									li.m_schema->strID(),
-									duplicateItem->m_schema->strID(),
+									li.m_schema->schemaID(),
+									duplicateItem->m_schema->schemaID(),
 									li.m_fblItem->buildName(),
 									duplicateItem->m_fblItem->buildName(),
 									signalStrId,
@@ -911,7 +911,7 @@ namespace Builder
 
 		// Get module, if it is not in the list, add it
 		//
-		QStringList moduleStrIdList = schema->hardwareStrIdList();
+		QStringList moduleStrIdList = schema->equipmentIdList();
 		bool result = true;
 
 		for (QString moduleStrId : moduleStrIdList)
@@ -1045,13 +1045,13 @@ namespace Builder
 		{
 			for (std::shared_ptr<VFrame30::LogicSchema> schame : schemas)
 			{
-				QStringList deviceStrIds = schame->hardwareStrIdList();
+				QStringList deviceStrIds = schame->equipmentIdList();
 
 				if (deviceStrIds.isEmpty() == true)
 				{
 					// Property DeviceStrIds is not set (LogicSchema '%1')
 					//
-					m_log->wrnALP4001(schame->strID());
+					m_log->wrnALP4001(schame->schemaID());
 					continue;
 				}
 
@@ -1063,7 +1063,7 @@ namespace Builder
 					{
 						// HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2')
 						//
-						m_log->wrnALP4002(schame->strID(), strid);
+						m_log->wrnALP4002(schame->schemaID(), strid);
 						continue;
 					}
 
@@ -1071,7 +1071,7 @@ namespace Builder
 					{
 						// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 						//
-						m_log->wrnALP4003(schame->strID(), strid);
+						m_log->wrnALP4003(schame->schemaID(), strid);
 						continue;
 					}
 					else
@@ -1085,7 +1085,7 @@ namespace Builder
 						{
 							// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 							//
-							m_log->wrnALP4003(schame->strID(), strid);
+							m_log->wrnALP4003(schame->schemaID(), strid);
 							continue;
 						}
 					}
@@ -1209,7 +1209,7 @@ namespace Builder
 			{
 				// Schema is excluded from build (Schema '%1').
 				//
-				m_log->wrnALP4004(ls->strID());
+				m_log->wrnALP4004(ls->schemaID());
 				continue;
 			}
 			else
@@ -1258,7 +1258,7 @@ namespace Builder
 		{
 			// Schema does not have Logic layer (Logic Schema '%1').
 			//
-			m_log->errALP4010(logicSchema->strID());
+			m_log->errALP4010(logicSchema->schemaID());
 			return false;
 		}
 
@@ -1636,7 +1636,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						log()->errALP4006(schema->strID(), fblItem->buildName(), in.caption(), item->guid());
+						log()->errALP4006(schema->schemaID(), fblItem->buildName(), in.caption(), item->guid());
 						result = false;
 						continue;
 					}
@@ -1658,7 +1658,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						log()->errALP4006(schema->strID(), fblItem->buildName(), out.caption(), item->guid());
+						log()->errALP4006(schema->schemaID(), fblItem->buildName(), out.caption(), item->guid());
 
 						result = false;
 						continue;
@@ -1671,7 +1671,7 @@ namespace Builder
 					{
 						// Branch has multiple outputs.
 						//
-						log()->errALP4000(schema->strID(), bushContainer->bushes[branchIndex].getAllUuid());
+						log()->errALP4000(schema->schemaID(), bushContainer->bushes[branchIndex].getAllUuid());
 
 						result = false;
 						continue;
@@ -1804,7 +1804,7 @@ namespace Builder
 		{
 			// Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1')
 			//
-			m_log->wrnALP4005(schema->strID());
+			m_log->wrnALP4005(schema->schemaID());
 			return true;
 		}
 
@@ -1834,7 +1834,7 @@ namespace Builder
 					std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 					issuedItemsUuid.push_back(i->guid());
 
-					m_log->errALP4006(schema->strID(), i->buildName(), inputsStr, issuedItemsUuid);
+					m_log->errALP4006(schema->schemaID(), i->buildName(), inputsStr, issuedItemsUuid);
 				}
 			}
 
@@ -1855,7 +1855,7 @@ namespace Builder
 							std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 							issuedItemsUuid.push_back(item->guid());
 
-							m_log->errALP4006(schema->strID(), item->buildName(), out.caption(), issuedItemsUuid);
+							m_log->errALP4006(schema->schemaID(), item->buildName(), out.caption(), issuedItemsUuid);
 						}
 					}
 				}

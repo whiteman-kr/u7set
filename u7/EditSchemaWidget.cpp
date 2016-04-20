@@ -1523,7 +1523,7 @@ void EditSchemaWidget::createActions()
 
 	// F2 Button Pressed
 	//
-	m_f2Action = new QAction(tr("Edit StrID"), this);
+	m_f2Action = new QAction(tr("Edit AppSignalID(s)"), this);
 	m_f2Action->setEnabled(true);
 	m_f2Action->setMenuRole(QAction::NoRole);
 	m_f2Action->setShortcut(QKeySequence(Qt::Key_F2));
@@ -4112,7 +4112,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 					assert(itemSignal);
 
-					const QStringList& signalStrIdList = itemSignal->signalStrIdList();
+					const QStringList& signalStrIdList = itemSignal->appSignalIdList();
 
 					for (const QString& s : signalStrIdList)
 					{
@@ -4211,14 +4211,14 @@ void EditSchemaWidget::exportToPdf()
 	assert(schema());
 
 	QString fileName = QFileDialog::getSaveFileName(
-		this, "Export schema to PDF", schema()->strID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+		this, "Export schema to PDF", schema()->schemaID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
 
 	if (fileName.isEmpty())
 	{
 		return;
 	}
 
-	qDebug() << "Export schema " << schema()->caption() << " " << schema()->strID() << " to PDF, " << fileName;
+	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaID() << " to PDF, " << fileName;
 
 	editSchemaView()->exportToPdf(fileName);
 
@@ -4255,19 +4255,19 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	QStringList hardwareStrIdList = logicSchema()->hardwareStrIdList();
-	if (hardwareStrIdList.isEmpty() == true)
+	QStringList equipmentIdList = logicSchema()->equipmentIdList();
+	if (equipmentIdList.isEmpty() == true)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property HardwareStrIDs is empty."));
+		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
 		return;
 	}
 
-	qDebug() << hardwareStrIdList;
+	qDebug() << equipmentIdList;
 
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  hardwareStrIdList,
+														  equipmentIdList,
 														  logicSchema()->nextCounterValue(),
-														  schema()->strID(),
+														  schema()->schemaID(),
 														  schema()->caption(),
 														  this);
 
@@ -4281,7 +4281,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 			oneStringIds += s + QChar::LineFeed;
 		}
 
-		m_editEngine->runSetProperty("StrIDs", QVariant(oneStringIds), schemaItem);
+		m_editEngine->runSetProperty("AppSignalIDs", QVariant(oneStringIds), schemaItem);
 	}
 
 	return;
@@ -4326,29 +4326,29 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
-	QString strId = itemSignal->signalStrIds();
+	QString appSignalId = itemSignal->appSignalIds();
 
 	// Show input dialog
 	//
 	QInputDialog inputDialog(this);
 
 	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-	inputDialog.setWindowTitle("Set StrID");
-	inputDialog.setLabelText(tr("StrID:"));
+	inputDialog.setWindowTitle("Set AppSignalID");
+	inputDialog.setLabelText(tr("AppSignalID:"));
 	inputDialog.setTextEchoMode(QLineEdit::Normal);
 	inputDialog.resize(400, inputDialog.height());
-	inputDialog.setTextValue(strId);
+	inputDialog.setTextValue(appSignalId);
 
 	int inputDialogRecult = inputDialog.exec();
 	QString newValue = inputDialog.textValue();
 
 	if (inputDialogRecult == QDialog::Accepted &&
 		newValue.isNull() == false &&
-		strId != newValue)
+		appSignalId != newValue)
 	{
 		// Set value
 		//
-		m_editEngine->runSetProperty("StrIDs", QVariant(newValue), item);
+		m_editEngine->runSetProperty("AppSignalIDs", QVariant(newValue), item);
 
 		editSchemaView()->update();
 	}
@@ -4431,7 +4431,7 @@ void EditSchemaWidget::editPaste()
 	// To DO: Paste schema items
 	//
 
-	// Paste strid to SchemaItemSignal
+	// Paste appSignalID to SchemaItemSignal
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
@@ -4452,7 +4452,7 @@ void EditSchemaWidget::editPaste()
 		mimeData->hasText() == true &&
 		mimeData->text().startsWith('#') == true)
 	{
-		m_editEngine->runSetProperty("StrIDs", QVariant(mimeData->text()), selected);
+		m_editEngine->runSetProperty("AppSignalIDs", QVariant(mimeData->text()), selected);
 	}
 
 	return;
@@ -4555,7 +4555,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// TO DO: if same SchemaItems in the clipboard
 	//
 
-	// if Any SchemaItemSignal is selected and strId is in the clipboard
+	// if Any SchemaItemSignal is selected and AppSignalID is in the clipboard
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 

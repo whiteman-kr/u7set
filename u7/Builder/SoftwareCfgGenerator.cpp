@@ -206,11 +206,11 @@ namespace Builder
 				continue;
 			}
 
-			qDebug() << "Build: schema " << schema->strID() << " is loaded";
+			qDebug() << "Build: schema " << schema->schemaID() << " is loaded";
 
 			// Add file to build result
 			//
-			result = buildResultWriter->addFile(subDir, schema->strID() + "." + fileExtension, group, file->data());
+			result = buildResultWriter->addFile(subDir, schema->schemaID() + "." + fileExtension, group, file->data());
 			if (result == false)
 			{
 				returnResult = false;
@@ -219,9 +219,9 @@ namespace Builder
 
 			SchemaFile schemaFile;
 
-			schemaFile.id = schema->strID();
+			schemaFile.id = schema->schemaID();
 			schemaFile.subDir = subDir;
-			schemaFile.fileName = schema->strID() + "." + fileExtension;		// File is stored under this name
+			schemaFile.fileName = schema->schemaID() + "." + fileExtension;		// File is stored under this name
 			schemaFile.group = group;
 
 			m_schemaFileList.push_back(schemaFile);
