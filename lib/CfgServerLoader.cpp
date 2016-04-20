@@ -843,7 +843,7 @@ bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
 		return false;
 	}
 
-	return m_cfgLoader->getFile(fileID, fileData);
+	return m_cfgLoader->getFileByID(fileID, fileData);
 }
 
 
