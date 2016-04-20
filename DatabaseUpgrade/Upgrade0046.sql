@@ -1,14 +1,14 @@
--- RPCT-694
+-- RPCT-743
 
--- Rename field SignalInstance.Name => SignalInstance.Caption
+-- Rename fields:
+--
+-- SignalInstance.StrID => SignalInstance.AppSignalID
+-- SignalInstance.ExtStrID => SignalInstance.CustomAppSignalID
+-- SignalInstance.DeviceStrID => SignalInstance.EquipmentID
 
-ALTER TABLE SignalInstance RENAME COLUMN Name TO Caption;
-
-
--- Add field EnableTuning to SignalInstance table
-
-ALTER TABLE SignalInstance ADD COLUMN enabletuning boolean;
-ALTER TABLE SignalInstance ALTER COLUMN enabletuning SET DEFAULT false;
+ALTER TABLE SignalInstance RENAME COLUMN StrID TO AppSignalID;
+ALTER TABLE SignalInstance RENAME COLUMN ExtStrID TO CustomAppSignalID;
+ALTER TABLE SignalInstance RENAME COLUMN DeviceStrID TO EquipmentID;
 
 -- Drop all stored procedures dependent from SignalData type
 
@@ -38,8 +38,8 @@ CREATE TYPE signaldata AS
     deleted boolean,
     instancecreated timestamp with time zone,
     action integer,
-    strid text,
-    extstrid text,
+    appsignalid text,
+    customappsignalid text,
     caption text,
     dataformatid integer,
     datasize integer,
@@ -66,7 +66,7 @@ CREATE TYPE signaldata AS
     decimalplaces integer,
     aperture double precision,
     inouttype integer,
-    devicestrid text,
+    equipmentid text,
     outputrangemode integer,
     filteringtime double precision,
     maxdifference double precision,
@@ -88,8 +88,8 @@ DECLARE
 	channel integer;
 	newSignalID integer;
 	newSignalInstanceID integer;
-	strID varchar;
-	extStrID varchar;
+	appSignalID varchar;
+	customAppSignalID varchar;
 	dataSize integer;
 	os objectstate;
 BEGIN
@@ -112,12 +112,12 @@ BEGIN
 		INSERT INTO Signal (SignalGroupID, Channel, Type, Deleted, UserID) VALUES (newGroupID, channel, signal_type, false, user_id) RETURNING SignalID INTO newSignalID;
 		INSERT INTO CheckOut (UserID, SignalID) VALUES (user_id, newSignalID);
 
-		strID = '#SIGNAL' || newSignalID::text;
-		extStrID = 'SIGNAL' || newSignalID::text;
+		appSignalID = '#SIGNAL' || newSignalID::text;
+		customAppSignalID = 'SIGNAL' || newSignalID::text;
 
 		IF channel_count > 1 THEN
-			strID = strID || '_' || chr(64 + channel);
-			extStrID = extStrID || '_' || chr(64 + channel);
+			appSignalID = appSignalID || '_' || chr(64 + channel);
+			customAppSignalID = customAppSignalID || '_' || chr(64 + channel);
 		END IF;
 
 		IF signal_type = 0 THEN
@@ -126,7 +126,7 @@ BEGIN
 			dataSize = 1;		-- discrete signal
 		END IF;
 
-		INSERT INTO SignalInstance (SignalID, StrID, ExtStrID, Caption, DataSize, Action) VALUES (newSignalID, strID,  extStrID, extStrID, dataSize, 1) RETURNING SignalInstanceID INTO newSignalInstanceID;
+		INSERT INTO SignalInstance (SignalID, AppSignalID, CustomAppSignalID, Caption, DataSize, Action) VALUES (newSignalID, appSignalID,  customAppSignalID, customAppSignalID, dataSize, 1) RETURNING SignalInstanceID INTO newSignalInstanceID;
 
 		UPDATE Signal SET CheckedOutInstanceID = newSignalInstanceID WHERE Signal.SignalID = newSignalID;
 
@@ -195,8 +195,8 @@ BEGIN
 		S.Deleted,
 		SI.Created,					-- instancecreated timestamp with time zone,
 		SI.Action,
-		SI.StrId,
-		SI.ExtStrId,
+		SI.AppSignalID,
+		SI.CustomAppSignalID,
 		SI.Caption,
 		SI.DataFormatID,
 		SI.DataSize,
@@ -223,7 +223,7 @@ BEGIN
 		SI.DecimalPlaces,
 		SI.Aperture,
 		SI.InOutType,
-		SI.DeviceStrID,
+		SI.EquipmentID,
 		SI.OutputRangeMode,
 		SI.FilteringTime,
 		SI.MaxDifference,
@@ -266,8 +266,8 @@ BEGIN
 	THEN
 		-- update checked out workcopy
 		UPDATE SignalInstance SET
-			StrId = sd.StrID,
-			ExtStrId = sd.ExtStrId,
+			AppSignalID = sd.AppSignalID,
+			CustomAppSignalID = sd.CustomAppSignalID,
 			Caption = sd.Caption,
 			DataFormatID = sd.DataFormatID,
 			DataSize = sd.DataSize,
@@ -294,7 +294,7 @@ BEGIN
 			DecimalPlaces = sd.DecimalPlaces,
 			Aperture = sd.Aperture,
 			InOutType = sd.InOutType,
-			DeviceStrID = sd.DeviceStrID,
+			EquipmentID = sd.EquipmentID,
 			OutputRangeMode = sd.OutputRangeMode,
 			FilteringTime = sd.FilteringTime,
 			MaxDifference = sd.MaxDifference,
@@ -362,8 +362,8 @@ BEGIN
 		S.Deleted,
 		SI.Created,					-- instancecreated timestamp with time zone,
 		SI.Action,
-		SI.StrId,
-		SI.ExtStrId,
+		SI.AppSignalID,
+		SI.CustomAppSignalID,
 		SI.Caption,
 		SI.DataFormatID,
 		SI.DataSize,
@@ -390,7 +390,7 @@ BEGIN
 		SI.DecimalPlaces,
 		SI.Aperture,
 		SI.InOutType,
-		SI.DeviceStrID,
+		SI.EquipmentID,
 		SI.OutputRangeMode,
 		SI.FilteringTime,
 		SI.MaxDifference,
@@ -458,8 +458,8 @@ BEGIN
 		S.Deleted,
 		SI.Created,					-- instancecreated timestamp with time zone,
 		SI.Action,
-		SI.StrId,
-		SI.ExtStrId,
+		SI.AppSignalID,
+		SI.CustomAppSignalID,
 		SI.Caption,
 		SI.DataFormatID,
 		SI.DataSize,
@@ -486,7 +486,7 @@ BEGIN
 		SI.DecimalPlaces,
 		SI.Aperture,
 		SI.InOutType,
-		SI.DeviceStrID,
+		SI.EquipmentID,
 		SI.OutputRangeMode,
 		SI.FilteringTime,
 		SI.MaxDifference,
@@ -587,8 +587,8 @@ BEGIN
 					SignalInstance (
 						SignalID,
 						Action,
-						StrId,
-						ExtStrId,
+						AppSignalID,
+						CustomAppSignalID,
 						Caption,
 						DataFormatID,
 						DataSize,
@@ -615,7 +615,7 @@ BEGIN
 						DecimalPlaces,
 						Aperture,
 						InOutType,
-						DeviceStrID,
+						EquipmentID,
 						OutputRangeMode,
 						FilteringTime,
 						MaxDifference,
@@ -624,8 +624,8 @@ BEGIN
 					SELECT
 						SI.SignalID,
 						2,							-- Action Edit
-						StrId,
-						ExtStrId,
+						AppSignalID,
+						CustomAppSignalID,
 						Caption,
 						DataFormatID,
 						DataSize,
@@ -652,7 +652,7 @@ BEGIN
 						DecimalPlaces,
 						Aperture,
 						InOutType,
-						DeviceStrID,
+						EquipmentID,
 						OutputRangeMode,
 						FilteringTime,
 						MaxDifference,

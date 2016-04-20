@@ -50,7 +50,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 		const Signal& signal = m_signalSet[m_relatedSignalIndexes.at(index.row())];
 		switch (index.column())
 		{
-			case C_STR_ID: return signal.strID();
+			case C_STR_ID: return signal.appSignalID();
 			case C_DESCRIPTION: return signal.caption();
 			case C_RAW_DATA:
 			{

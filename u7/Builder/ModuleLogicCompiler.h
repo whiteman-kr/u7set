@@ -311,7 +311,7 @@ namespace Builder
 
 		bool isShadowSignal() const { return m_isShadowSignal; }
 
-		QString strID() const { return m_signal->strID(); }
+		QString strID() const { return m_signal->appSignalID(); }
 
 		const Address16& ramAddr() const { return m_signal->ramAddr(); }
 		const Address16& regAddr() const { return m_signal->regAddr(); }
