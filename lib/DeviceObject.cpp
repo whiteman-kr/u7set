@@ -76,8 +76,11 @@ namespace Hardware
 	{
 		ADD_PROPERTY_GETTER(int, FileID, true, DeviceObject::fileId);
 		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
-		ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, DeviceObject::strId, DeviceObject::setStrId);
-		auto strIdExpandedProp = ADD_PROPERTY_GETTER(QString, StrIDExpanded, true, DeviceObject::strIdExpanded);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, EquipmentIDTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
+
+		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, EquipmentID, true, DeviceObject::equipmentId);
+		equipmentIdProp->setReadOnly(true);
 
 		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
@@ -90,8 +93,6 @@ namespace Hardware
 			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 		}
 		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
-
-		strIdExpandedProp->setReadOnly(true);
 
 		captionProp->setUpdateFromPreset(true);
 		childRestrProp->setUpdateFromPreset(true);
@@ -126,7 +127,7 @@ namespace Hardware
 		Proto::DeviceObject* mutableDeviceObject = message->mutable_deviceobject();
 
 		Proto::Write(mutableDeviceObject->mutable_uuid(), m_uuid);
-		Proto::Write(mutableDeviceObject->mutable_strid(), m_strId);
+		Proto::Write(mutableDeviceObject->mutable_equipmentid(), m_equipmentId);
 		Proto::Write(mutableDeviceObject->mutable_caption(), m_caption);
 
 		mutableDeviceObject->set_place(m_place);
@@ -181,7 +182,7 @@ namespace Hardware
 		m_uuid = Proto::Read(deviceobject.uuid());
 		assert(m_uuid.isNull() == false);
 
-		Proto::Read(deviceobject.strid(), &m_strId);
+		Proto::Read(deviceobject.equipmentid(), &m_equipmentId);
 		Proto::Read(deviceobject.caption(), &m_caption);
 		m_place = deviceobject.place();
 
@@ -218,7 +219,7 @@ namespace Hardware
 
 			if (it == specificProps.end())
 			{
-				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in m_strId";
+				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in" << m_equipmentId;
 			}
 			else
 			{
@@ -233,28 +234,6 @@ namespace Hardware
 			}
 
 		}
-
-//		for (const ::Proto::Property& p :  deviceobject.properties())
-//		{
-//			auto it = m_specificProperties.find(p.name().c_str());
-
-//			if (it == m_specificProperties.end())
-//			{
-//				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in m_strId";
-//			}
-//			else
-//			{
-//				bool loadOk = it->loadValue(p);
-
-//				Q_UNUSED(loadOk);
-//				assert(loadOk);
-
-//				m_avoidEventRecursion = true;
-//				this->setPropertyValue((*it).name(), (*it).value());
-//				m_avoidEventRecursion = false;
-//			}
-
-//		}
 
 		// --
 		//
@@ -315,18 +294,18 @@ namespace Hardware
 		return pDeviceObject;
 	}
 
-	void DeviceObject::expandStrId()
+	void DeviceObject::expandEquipmentId()
 	{
 		if (parent() != nullptr)
 		{
-			m_strId.replace(QString("$(PARENT)"), parent()->strId(), Qt::CaseInsensitive);
+			m_equipmentId.replace(QString("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
 		}
 
-		m_strId.replace(QString("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+		m_equipmentId.replace(QString("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
 		for (int i = 0; i < childrenCount(); i++)
 		{
-			child(i)->expandStrId();
+			child(i)->expandEquipmentId();
 		}
 
 		return;
@@ -1209,7 +1188,7 @@ namespace Hardware
 				{
 					if (ref1->m_place == ref2->m_place)
 					{
-						return ref1->m_strId < ref2->m_strId;
+						return ref1->m_equipmentId < ref2->m_equipmentId;
 					}
 					else
 					{
@@ -1221,7 +1200,7 @@ namespace Hardware
 		return;
 	}
 
-	void DeviceObject::sortByStrId(Qt::SortOrder order)
+	void DeviceObject::sortByEquipmentId(Qt::SortOrder order)
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
 			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
@@ -1229,13 +1208,13 @@ namespace Hardware
 				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
 				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-				if (ref1->m_strId < ref2->m_strId)
+				if (ref1->m_equipmentId < ref2->m_equipmentId)
 				{
 					return true;
 				}
 				else
 				{
-					if (ref1->m_strId == ref2->m_strId)
+					if (ref1->m_equipmentId == ref2->m_equipmentId)
 					{
 						return ref1->m_place < ref2->m_place;
 					}
@@ -1293,7 +1272,7 @@ namespace Hardware
 				{
 					if (ref1->m_fileInfo.state() == ref2->m_fileInfo.state())
 					{
-						return ref1->m_strId < ref2->m_strId;
+						return ref1->m_equipmentId < ref2->m_equipmentId;
 					}
 					else
 					{
@@ -1321,7 +1300,7 @@ namespace Hardware
 				{
 					if (ref1->m_fileInfo.userId() == ref2->m_fileInfo.userId())
 					{
-						return ref1->m_strId < ref2->m_strId;
+						return ref1->m_equipmentId < ref2->m_equipmentId;
 					}
 					else
 					{
@@ -1352,7 +1331,7 @@ namespace Hardware
 
 		for (auto c : m_children)
 		{
-			if (CUtils::processDiagSignalMask(mask, c->strId()) == true)
+			if (CUtils::processDiagSignalMask(mask, c->equipmentIdTemplate()) == true)
 			{
 				list.push_back(c.get());
 			}
@@ -1396,49 +1375,49 @@ namespace Hardware
 		}
 	}
 
-	QString DeviceObject::strId() const
+	QString DeviceObject::equipmentIdTemplate() const
 	{
-		return m_strId;
+		return m_equipmentId;
 	}
 
-	void DeviceObject::setStrId(QString value)
+	void DeviceObject::setEquipmentIdTemplate(QString value)
 	{
-		if (m_strId != value)
+		if (m_equipmentId != value)
 		{
-			m_strId = value;
+			m_equipmentId = value;
 		}
 	}
 
-	QString DeviceObject::strIdExpanded() const
+	QString DeviceObject::equipmentId() const
 	{
-		std::list<std::pair<const DeviceObject*, QString>> devices;		// 1st: device, 2nd: it's strid
+		std::list<std::pair<const DeviceObject*, QString>> devices;		// 1st: device, 2nd: it's equipmentId
 
 		const DeviceObject* d = this;
 		while (d != nullptr)
 		{
-			devices.push_front(std::make_pair(d, d->strId()));
+			devices.push_front(std::make_pair(d, d->equipmentIdTemplate()));
 
 			d = d->parent();
 		}
 
-		QString parentStrId = "";
+		QString parentId = "";
 		for (std::pair<const DeviceObject*, QString>& dp : devices)
 		{
 			const DeviceObject* device = dp.first;
-			QString strId = dp.second;
+			QString equipId = dp.second;
 
 			if (device->parent() != nullptr)
 			{
-				strId.replace(QString("$(PARENT)"), parentStrId, Qt::CaseInsensitive);
+				equipId.replace(QString("$(PARENT)"), parentId, Qt::CaseInsensitive);
 			}
 
-			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+			equipId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
-			parentStrId = strId;
+			parentId = equipId;
 		}
 
-		QString thisStrId = parentStrId;
-		return thisStrId;
+		QString thisId = parentId;
+		return thisId;
 	}
 
 	QString DeviceObject::caption() const
@@ -1515,20 +1494,20 @@ namespace Hardware
 		}
 	}
 
-	// JSON short description, uuid, strId, caption, place, etc
+	// JSON short description, uuid, equipmentId, caption, place, etc
 	//
 	QString DeviceObject::details() const
 	{
 		QString json = QString(
 R"DELIM({
 	"Uuid" : "%1",
-	"StrID" : "%2",
+	"EquipmentID" : "%2",
 	"Caption" : "%3",
 	"Place" : %4,
 	"Type" : "%5"
 })DELIM")
 			.arg(uuid().toString())
-			.arg(strId())
+			.arg(equipmentIdTemplate())
 			.arg(caption())
 			.arg(place())
 			.arg(fileExtension());
@@ -2544,20 +2523,20 @@ R"DELIM({
 		//
 		m_deviceTable.clear();
 
-		m_deviceTable.insert(m_root->strId(), m_root);
+		m_deviceTable.insert(m_root->equipmentIdTemplate(), m_root);
 		addDeviceChildrenToHashTable(m_root);
 
 		for (auto it : m_deviceTable)
 		{
-			qDebug() << it->strId();
+			qDebug() << it->equipmentIdTemplate();
 		}
 
 		return;
 	}
 
-	DeviceObject* EquipmentSet::deviceObject(const QString& strId)
+	DeviceObject* EquipmentSet::deviceObject(const QString& equipmentId)
 	{
-		auto it = m_deviceTable.find(strId);
+		auto it = m_deviceTable.find(equipmentId);
 
 		if (it != m_deviceTable.end())
 		{
@@ -2569,9 +2548,9 @@ R"DELIM({
 		}
 	}
 
-	std::shared_ptr<DeviceObject> EquipmentSet::deviceObjectSharedPointer(const QString& strId)
+	std::shared_ptr<DeviceObject> EquipmentSet::deviceObjectSharedPointer(const QString& equipmentId)
 	{
-		auto it = m_deviceTable.find(strId);
+		auto it = m_deviceTable.find(equipmentId);
 
 		if (it != m_deviceTable.end())
 		{
@@ -2598,7 +2577,7 @@ R"DELIM({
 		for (int i = 0; i < parent->childrenCount(); i++)
 		{
 			std::shared_ptr<DeviceObject> child = parent->childSharedPtr(i);
-			m_deviceTable.insert(child->strId(), child);
+			m_deviceTable.insert(child->equipmentIdTemplate(), child);
 
 			addDeviceChildrenToHashTable(child);
 		}

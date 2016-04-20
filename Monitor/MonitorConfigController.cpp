@@ -10,6 +10,20 @@ ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int p
 {
 }
 
+QString ConfigConnection::equipmentId() const
+{
+	return m_equipmentId;
+}
+
+QString ConfigConnection::ip() const
+{
+	return m_ip;
+}
+
+int ConfigConnection::port() const
+{
+	return m_port;
+}
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
@@ -193,6 +207,13 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
 	}
 
+	// Trace received params
+	//
+	qDebug() << "New configuration arrived";
+	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
+	qDebug() << "DAS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
+	qDebug() << "DAS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+
 	return;
 }
 
@@ -210,7 +231,7 @@ bool MonitorConfigController::xmlReadSoftwareNode(QDomNode& softwareNode, Config
 
 	// Read StrID attribute
 	//
-	QString appEquipmentId = softwareElement.attribute("StrID");
+	QString appEquipmentId = softwareElement.attribute("ID");
 
 	if (theSettings.instanceStrId() != appEquipmentId)
 	{
@@ -247,6 +268,8 @@ bool MonitorConfigController::xmlReadSettingsNode(QDomNode& settingsNode, Config
 
 	QDomElement settingsElement = settingsNode.toElement();
 
+	// Check if XML contains Error tag
+	//
 	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
 
 	if (errorNodes.isEmpty() == false)
@@ -255,47 +278,53 @@ bool MonitorConfigController::xmlReadSettingsNode(QDomNode& settingsNode, Config
 		{
 			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
 		}
-
 		return false;
 	}
 
+	// Get StartSchemaID data
+	//
+	{
+		QDomNodeList startSchemaNodes = settingsElement.elementsByTagName("StartSchemaID");
+
+		if (startSchemaNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find StartSchemaID tag %1\n");
+			return false;
+		}
+		else
+		{
+			outSetting->startSchemaId = startSchemaNodes.at(0).toElement().text();
+		}
+	}
+
+	// Get DataAquisitionService data
+	//
+	{
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("DataAquisitionService");
+
+		if (dasNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find DataAquisitionService tag %1\n");
+			return false;
+		}
+		else
+		{
+			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+
+			QString dasId1 = dasXmlElement.attribute("DasID1");
+			QString dasIp1 = dasXmlElement.attribute("ip1");
+			int dasPort1 = dasXmlElement.attribute("port1").toInt();
+
+			QString dasId2 = dasXmlElement.attribute("DasID2");
+			QString dasIp2 = dasXmlElement.attribute("ip2");
+			int dasPort2 = dasXmlElement.attribute("port2").toInt();
+
+			outSetting->das1 = ConfigConnection(dasId1, dasIp1, dasPort1);
+			outSetting->das2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+		}
+	}
 
 	return outSetting->errorMessage.isEmpty();
-//	if (outSetting == nullptr ||
-//		xmlReader.name() != "Settings")
-//	{
-//		assert(outSetting);
-//		//assert(xmlReader.name() == "Settings");
-//		return false;
-//	}
-
-//	// Parse
-//	//
-//	while(xmlReader.atEnd() == false)
-//	{
-//		if (xmlReader.readNextStartElement() == false)
-//		{
-//			//qDebug() << "readNextStartElement() == false: " << xmlReader.name() << ", Text: " << xmlReader.text();
-//			continue;
-//		}
-
-//		QString tagName = xmlReader.name().toString();
-
-//		qDebug() << tagName;
-
-//		if (xmlReader.isStartElement() == true && tagName == "Error")
-//		{
-//			outSetting->errorMessage += xmlReader.readElementText() + "\n";
-//			xmlReader.skipCurrentElement();
-//			continue;
-//		}
-
-//		if (xmlReader.isStartElement() == true && tagName == "StartSchemaID")
-//		{
-//			outSetting->startSchemaId = xmlReader.text().toString();
-//			xmlReader.skipCurrentElement();
-//			continue;
-//		}
 
 //		if (xmlReader.isStartElement() == true && tagName == "DataAquisitionService")
 //		{

@@ -63,10 +63,10 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 		}
 	}
 
-	m_strID = QString("#%1").arg(deviceSignal.strId());
-	m_extStrID = deviceSignal.strId();
+	m_strID = QString("#%1").arg(deviceSignal.equipmentIdTemplate());
+	m_extStrID = deviceSignal.equipmentIdTemplate();
 
-	QString deviceSignalStrID = deviceSignal.strId();
+	QString deviceSignalStrID = deviceSignal.equipmentIdTemplate();
 
 	int pos = deviceSignalStrID.lastIndexOf(QChar('_'));
 
@@ -76,7 +76,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 	}
 
 	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
-	m_deviceStrID = deviceSignal.strId();
+	m_deviceStrID = deviceSignal.equipmentIdTemplate();
 
 	if (m_type == E::SignalType::Analog)
 	{
@@ -162,9 +162,9 @@ void Signal::InitProperties()
 
 	ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, false, Signal::type, Signal::setType);
 
-	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, Signal::strID, Signal::setStrID);
+	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalID, true, Signal::strID, Signal::setStrID);
 	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
-	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
+	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, CustomAppSignalID, true, Signal::extStrID, Signal::setExtStrID);
 	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator("^.+$");
@@ -220,7 +220,7 @@ void Signal::InitProperties()
 	}
 	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
-	ADD_PROPERTY_GETTER_SETTER(QString, DeviceStrID, true, Signal::deviceStrID, Signal::setDeviceStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, EquipmentID, true, Signal::deviceStrID, Signal::setDeviceStrID);
 	ADD_PROPERTY_GETTER_SETTER(bool, EnableTuning, true, Signal::enableTuning, Signal::setEnableTuning);
 }
 
@@ -682,7 +682,7 @@ void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceOb
 				quint32 ip = ha.toIPv4Address();
 				DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
 
-				QString signalPrefix = currentModule->parent()->strId();
+				QString signalPrefix = currentModule->parent()->equipmentIdTemplate();
 				int signalPrefixLength = signalPrefix.length();
 				for (int i = 0; i < signalSet.count(); i++)
 				{

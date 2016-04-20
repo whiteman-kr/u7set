@@ -14,7 +14,7 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 
 	if (val.isValid() == false)
 	{
-		logPropertyNotFoundError(name, device->strId(), log);
+		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
 		return false;
 	}
 
@@ -38,7 +38,7 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 
 	if (val.isValid() == false)
 	{
-		logPropertyNotFoundError(name, device->strId(), log);
+		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
 		return false;
 	}
 
@@ -54,7 +54,7 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 		value == nullptr ||
 		log == nullptr)
 	{
-		logPropertyNotFoundError(name, device->strId(), log);
+		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
 		assert(false);
 		return false;
 	}
@@ -110,7 +110,7 @@ Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardwar
 			continue;
 		}
 
-		if (object->strId().endsWith(suffix) == true)
+		if (object->equipmentIdTemplate().endsWith(suffix) == true)
 		{
 			return  object;
 		}
@@ -120,7 +120,7 @@ Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardwar
 	{
 		LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 						   QString("Can't find child object by suffix '%1' in object '%2'").
-						   arg(suffix).arg(device->strId()));
+						   arg(suffix).arg(device->equipmentIdTemplate()));
 	}
 
 	return nullptr;

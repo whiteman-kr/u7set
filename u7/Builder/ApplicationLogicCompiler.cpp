@@ -382,7 +382,7 @@ namespace Builder
 					}
 					else
 					{
-						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->strId());
+						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate());
 
 						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 

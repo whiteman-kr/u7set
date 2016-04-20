@@ -5,7 +5,7 @@ namespace VFrame30
 {
 	LogicSchema::LogicSchema(void)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, HardwareStrIDs, true, LogicSchema::hardwareStrIds, LogicSchema::setHardwareStrIds)
+		ADD_PROPERTY_GETTER_SETTER(QString, EquipmentIDs, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds)
 
 		setUnit(SchemaUnit::Inch);
 
@@ -41,9 +41,9 @@ namespace VFrame30
 		//
 		Proto::LogicSchema* ls = message->mutable_schema()->mutable_logic_schema();
 
-		for (const QString& strId : m_hardwareStrIds)
+		for (const QString& strId : m_equipmentIds)
 		{
-			::Proto::wstring* hs = ls->add_hardware_strids();
+			::Proto::wstring* hs = ls->add_equipmentids();
 			Proto::Write(hs, strId);
 		}
 
@@ -78,14 +78,14 @@ namespace VFrame30
 
 		const Proto::LogicSchema& ls = message.schema().logic_schema();
 
-		m_hardwareStrIds.clear();
-		m_hardwareStrIds.reserve(ls.hardware_strids_size());
+		m_equipmentIds.clear();
+		m_equipmentIds.reserve(ls.equipmentids_size());
 
-		for (int i = 0; i < ls.hardware_strids_size(); i++)
+		for (int i = 0; i < ls.equipmentids_size(); i++)
 		{
 			QString s;
-			Proto::Read(ls.hardware_strids(i), &s);
-			m_hardwareStrIds.push_back(s);
+			Proto::Read(ls.equipmentids(i), &s);
+			m_equipmentIds.push_back(s);
 		}
 
 		m_counter = ls.counter();
@@ -101,11 +101,11 @@ namespace VFrame30
 		return;
     }
 
-	QString LogicSchema::hardwareStrIds() const
+	QString LogicSchema::equipmentIds() const
 	{
 		QString result;
 
-		for (QString s : m_hardwareStrIds)
+		for (QString s : m_equipmentIds)
 		{
 			s = s.trimmed();
 
@@ -120,29 +120,29 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList LogicSchema::hardwareStrIdList() const
+	QStringList LogicSchema::equipmentIdList() const
 	{
-		return m_hardwareStrIds;
+		return m_equipmentIds;
 	}
 
-	void LogicSchema::setHardwareStrIds(const QString& s)
+	void LogicSchema::setEquipmentIds(const QString& s)
 	{
-		m_hardwareStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		m_equipmentIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
-	QStringList* LogicSchema::mutable_hardwareStrIds()
+	QStringList* LogicSchema::mutable_equipmentIds()
 	{
-		return &m_hardwareStrIds;
+		return &m_equipmentIds;
 	}
 
 	bool LogicSchema::isMultichannelSchema() const
 	{
-		return m_hardwareStrIds.size() > 1;
+		return m_equipmentIds.size() > 1;
 	}
 
 	int LogicSchema::channelCount() const
 	{
-		return m_hardwareStrIds.size();
+		return m_equipmentIds.size();
 	}
 
 	int LogicSchema::nextCounterValue()

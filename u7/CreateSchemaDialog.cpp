@@ -59,7 +59,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Set height and width
 	//
-	ui->strdIdEdit->setText(m_schema->strID());
+	ui->strdIdEdit->setText(m_schema->schemaID());
 	ui->captionEdit->setText(m_schema->caption());
 
 	double w = 0;
@@ -102,7 +102,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		ui->equipmentIdLabel->setVisible(true);
 		ui->equipmentIdEdit->setVisible(true);
 
-		ui->equipmentIdEdit->setText(logicSchema()->hardwareStrIds());
+		ui->equipmentIdEdit->setText(logicSchema()->equipmentIds());
 	}
 	else
 	{
@@ -191,7 +191,7 @@ void CreateSchemaDialog::accept()
 
 	// Assign values to the schema
 	//
-	m_schema->setStrID(strID);
+	m_schema->setSchemaID(strID);
 	m_schema->setCaption(caption);
 
 	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
@@ -219,7 +219,7 @@ void CreateSchemaDialog::accept()
 
 	if (isLogicSchema() == true)
 	{
-		logicSchema()->setHardwareStrIds(equipmnetId);
+		logicSchema()->setEquipmentIds(equipmnetId);
 	}
 
 	QDialog::accept();

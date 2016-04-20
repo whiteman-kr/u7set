@@ -16,10 +16,10 @@ namespace Hardware
 
 	}
 
-	Subsystem::Subsystem(int index, int key, const QString& strId, const QString& caption):
+	Subsystem::Subsystem(int index, int key, const QString& subsystemId, const QString& caption):
 		m_index(index),
 		m_key(key),
-		m_strId(strId),
+		m_subsystemId(subsystemId),
 		m_caption(caption)
 	{
 
@@ -29,7 +29,7 @@ namespace Hardware
 	{
 		writer.writeAttribute("Index", QString::number(index()));
 		writer.writeAttribute("Key", QString::number(key()));
-		writer.writeAttribute("StrID", strId());
+		writer.writeAttribute("SubsystemID", subsystemId());
 		writer.writeAttribute("Caption", caption());
 		return true;
 	}
@@ -47,9 +47,18 @@ namespace Hardware
 			setKey(reader.attributes().value("Key").toInt());
 		}
 
-		if (reader.attributes().hasAttribute("StrID"))
+		if (reader.attributes().hasAttribute("SubsystemID"))
 		{
-			setStrId(reader.attributes().value("StrID").toString());
+			setSubsystemId(reader.attributes().value("SubsystemID").toString());
+		}
+		else
+		{
+			// The old file format, before renaming StrID->SubsytemID (RPCT-744)
+			//
+			if (reader.attributes().hasAttribute("StrID"))
+			{
+				setSubsystemId(reader.attributes().value("StrID").toString());
+			}
 		}
 
 		if (reader.attributes().hasAttribute("Caption"))
@@ -64,14 +73,14 @@ namespace Hardware
 	}
 
 
-	const QString& Subsystem::strId() const
+	const QString& Subsystem::subsystemId() const
 	{
-		return m_strId;
+		return m_subsystemId;
 	}
 
-	void Subsystem::setStrId(const QString& value)
+	void Subsystem::setSubsystemId(const QString& value)
 	{
-		m_strId = value;
+		m_subsystemId = value;
 	}
 
 	const QString& Subsystem::caption() const
@@ -296,7 +305,7 @@ namespace Hardware
 	{
 		for (auto s : m_subsystems)
 		{
-			if (s->strId() == subsysId)
+			if (s->subsystemId() == subsysId)
 			{
 				return s->key();
 			}

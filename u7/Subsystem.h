@@ -15,12 +15,12 @@ namespace Hardware
 		Q_OBJECT
 		Q_PROPERTY(int Index READ index WRITE setIndex)
 		Q_PROPERTY(int Key READ key WRITE setKey)
-		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		Q_PROPERTY(QString SubsystemID READ subsystemId WRITE setSubsystemId)
 		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 
 	public:
 		Subsystem();
-		Subsystem(int index, int key, const QString& strId, const QString& caption);
+		Subsystem(int index, int key, const QString& subsystemId, const QString& caption);
 
 		bool save(QXmlStreamWriter& writer);
 		bool load(QXmlStreamReader& reader);
@@ -28,8 +28,8 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		const QString& strId() const;
-		void setStrId(const QString& value);
+		const QString& subsystemId() const;
+		void setSubsystemId(const QString& value);
 
 		const QString& caption() const;
 		void setCaption(const QString& value);
@@ -43,7 +43,7 @@ namespace Hardware
 	private:
 		int m_index;
 		int m_key;
-		QString m_strId;
+		QString m_subsystemId;
 		QString m_caption;
 
 	};

@@ -31,18 +31,18 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		QString signalStrIds() const;
-		const QStringList& signalStrIdList() const;
+		QString appSignalIds() const;
+		const QStringList& appSignalIdList() const;
 
-		void setSignalStrIds(const QString& s);
-		QStringList* mutable_signalStrIds();
+		void setAppSignalIds(const QString& s);
+		QStringList* mutable_appSignalIds();
 
 		bool multiChannel() const;
 
 		// Data
 		//
 	private:
-		QStringList m_signalStrIds;
+		QStringList m_appSignalIds;
 	};
 
 
