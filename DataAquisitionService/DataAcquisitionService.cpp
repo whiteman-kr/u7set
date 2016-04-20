@@ -4,9 +4,20 @@
 #include "DataAcquisitionService.h"
 
 
-
-// DataServiceMainFunctionWorker class implementation
+// -------------------------------------------------------------------------------
 //
+// DataServiceWorker class implementation
+//
+// -------------------------------------------------------------------------------
+
+DataServiceWorker::DataServiceWorker(const QString& serviceStrID,
+									 const QString& cfgServiceIP1,
+									 const QString& cfgServiceIP2) :
+	ServiceWorker(ServiceType::DataAcquisitionService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
+	m_timer(this)
+{
+}
+
 
 void DataServiceWorker::initDataSources()
 {
@@ -58,7 +69,9 @@ void DataServiceWorker::runFscDataReceivingThreads()
 
 void DataServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread("SYSTEMID_R01_CH01_WS00_ACQSRV", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
+	m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1,
+											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
+											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 

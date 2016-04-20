@@ -74,6 +74,8 @@ bool DASEthernetChannel::writeToXml(XmlWriteHelper& xml, int channel)
 
 bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 {
+	xml.readNextStartElement();
+
 	if (xml.name() != sectionName(channel))
 	{
 		return false;
@@ -89,6 +91,8 @@ bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 
 	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
 	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
+
+	xml.skipCurrentElement();
 
 	return result;
 }
@@ -174,7 +178,7 @@ bool DASSettings::readFromXml(XmlReadHelper& xml)
 
 			for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 			{
-				ethernetChannel[channel].readFromXml(xml, channel);
+				result &= ethernetChannel[channel].readFromXml(xml, channel);
 			}
 
 			break;
