@@ -13,6 +13,10 @@ class ConfigConnection
 public:
 	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
 
+	QString equipmentId() const;
+	QString ip() const;
+	int port() const;
+
 protected:
 	QString m_equipmentId;
 	QString m_ip;
