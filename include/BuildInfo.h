@@ -29,9 +29,10 @@ namespace Builder
 	struct BuildFileInfo
 	{
 		QString pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
+		QString tag;				// file tag
+		QString ID;					// file ID
 		qint64 size = 0;			// size of file
 		QString md5;				// MD5 hash of file
-		QString group;				// file group
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);

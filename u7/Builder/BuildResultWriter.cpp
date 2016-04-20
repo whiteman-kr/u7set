@@ -18,12 +18,13 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString &group)
+	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
 	{
 		m_fileName = removeHeadTailSeparator(fileName);
 
 		m_info.pathFileName = constructPathFileName(subDir, fileName);
-		m_info.group = group;
+		m_info.ID = id;
+		m_info.tag = tag;
 	}
 
 
@@ -524,11 +525,11 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& group)
+	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
 	{
 		assert(fileName.isEmpty() == false);
 
-		BuildFile* buildFile = new BuildFile(subDir, fileName, group);
+		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag);
 
 		QString pathFileName = buildFile->pathFileName();
 
@@ -543,31 +544,47 @@ namespace Builder
 
 		m_buildFiles.insert(pathFileName, buildFile);
 
+
+		if (id.isEmpty() == false)
+		{
+			if (m_buildFileIDMap.contains(id))
+			{
+				QString file1 = m_buildFileIDMap[id];
+
+				LOG_WARNING_OBSOLETE(m_log, IssueType::NotDefined, QString(tr("'%1' and '%2' files have the same ID = '%3'")).
+								   arg(file1).arg(pathFileName).arg(id));
+			}
+			else
+			{
+				m_buildFileIDMap.insert(id, pathFileName);
+			}
+		}
+
 		return buildFile;
 	}
 
 
 	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
 	{
-		return addFile(subDir, fileName, "", data);
+		return addFile(subDir, fileName, "", "", data);
 	}
 
 
 	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
 	{
-		return addFile(subDir, fileName, "", dataString);
+		return addFile(subDir, fileName, "", "", dataString);
 	}
 
 
 	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
 	{
-		return addFile(subDir, fileName, "", stringList);
+		return addFile(subDir, fileName, "", "", stringList);
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& group, const QByteArray& data)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, group);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
@@ -578,9 +595,9 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& group, const QString& dataString)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, group);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
@@ -591,9 +608,9 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& group, const QStringList& stringList)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, group);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
