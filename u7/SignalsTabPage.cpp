@@ -284,10 +284,10 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	{
 		// LineEdit
 		//
-		case SC_STR_ID: if (le) le->setText(s.strID()); break;
-		case SC_EXT_STR_ID: if (le) le->setText(s.extStrID()); break;
+		case SC_STR_ID: if (le) le->setText(s.appSignalID()); break;
+		case SC_EXT_STR_ID: if (le) le->setText(s.customAppSignalID()); break;
 		case SC_NAME: if (le) le->setText(s.caption()); break;
-		case SC_DEVICE_STR_ID: if (le) le->setText(s.deviceStrID()); break;
+		case SC_DEVICE_STR_ID: if (le) le->setText(s.equipmentID()); break;
 
 		case SC_DATA_SIZE: if (le) le->setText(QString::number(s.dataSize())); break;
 		case SC_LOW_ADC: if (le) le->setText(QString::number(s.lowADC())); break;
@@ -345,10 +345,10 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	{
 		// LineEdit
 		//
-		case SC_STR_ID: if (le) s.setStrID(le->text()); break;
-		case SC_EXT_STR_ID: if (le) s.setExtStrID(le->text()); break;
+		case SC_STR_ID: if (le) s.setAppSignalID(le->text()); break;
+		case SC_EXT_STR_ID: if (le) s.setCustomAppSignalID(le->text()); break;
 		case SC_NAME: if (le) s.setCaption(le->text()); break;
-		case SC_DEVICE_STR_ID: if (le) s.setDeviceStrID(le->text()); break;
+		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text()); break;
 
 		case SC_DATA_SIZE: if (le) s.setDataSize(le->text().toInt()); break;
 		case SC_LOW_ADC: if (le) s.setLowADC(le->text().toInt()); break;
@@ -648,8 +648,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			switch (col)
 			{
 				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
-				case SC_STR_ID: return signal.strID();
-				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_STR_ID: return signal.appSignalID();
+				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('A');
@@ -696,7 +696,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
-				case SC_DEVICE_STR_ID: return signal.deviceStrID();
+				case SC_DEVICE_STR_ID: return signal.equipmentID();
 
 				default:
 					assert(false);
@@ -707,8 +707,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			switch (col)
 			{
 				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
-				case SC_STR_ID: return signal.strID();
-				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_STR_ID: return signal.appSignalID();
+				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('D');
@@ -727,7 +727,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
-				case SC_DEVICE_STR_ID: return signal.deviceStrID();
+				case SC_DEVICE_STR_ID: return signal.equipmentID();
 
 				case SC_LOW_ADC:
 				case SC_HIGH_ADC:
@@ -822,8 +822,8 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		switch (index.column())
 		{
-			case SC_STR_ID: signal.setStrID(value.toString()); break;
-			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
+			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
+			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
 			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<E::DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
@@ -855,7 +855,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(static_cast<E::SignalInOutType>(value.toInt())); break;
 			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
-			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
+			case SC_DEVICE_STR_ID: signal.setEquipmentID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:
 			case SC_TYPE:
@@ -1098,7 +1098,7 @@ void SignalsModel::addSignal()
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
-		signal.setDeviceStrID(deviceIdEdit->text());
+		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
 	SignalPropertiesDialog dlg(signal, m_unitInfo, false, nullptr, m_parentWindow);
@@ -1113,7 +1113,7 @@ void SignalsModel::addSignal()
 			for (int i = 0; i < channelCount; i++)
 			{
 				signalVector << signal;
-				QString strID = signal.strID();
+				QString strID = signal.appSignalID();
 				QString name = signal.caption();
 
 				if (!deviceIdEdit->text().isEmpty())
@@ -1132,7 +1132,7 @@ void SignalsModel::addSignal()
 					strID = (strID + "_%1").arg(QChar('A' + i));
 				}
 
-				signalVector[i].setStrID(strID.toUpper());
+				signalVector[i].setAppSignalID(strID.toUpper());
 				signalVector[i].setCaption(name);
 			}
 
@@ -1442,9 +1442,9 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		{
 			newSignal.setDataFormat(E::DataFormat::UnsignedInt);
 		}
-		newSignal.setStrID(newSignalStrId);
-		newSignal.setExtStrID(newSignalExtStrId);
-		newSignal.setDeviceStrID(lmId);
+		newSignal.setAppSignalID(newSignalStrId);
+		newSignal.setCustomAppSignalID(newSignalExtStrId);
+		newSignal.setEquipmentID(lmId);
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
 
@@ -2142,7 +2142,7 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 	{
 		return true;
 	}
-	QString&& deviceStrId = currentSignal.deviceStrID().trimmed();
+	QString&& deviceStrId = currentSignal.equipmentID().trimmed();
 	for (QString id : m_deviceStrIds)
 	{
 		if (deviceStrId.startsWith(id.trimmed()))

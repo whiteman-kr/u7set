@@ -31,7 +31,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 		}
 		for (lastIndexProcessed++; lastIndexProcessed < signalSet.count(); lastIndexProcessed++)
 		{
-			QString currentId = signalSet[lastIndexProcessed].strID();
+			QString currentId = signalSet[lastIndexProcessed].appSignalID();
 			signalIndexMap.insert(currentId, lastIndexProcessed);
 			if (currentId == id)
 			{
@@ -192,9 +192,9 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 		signal = *(dynamic_cast<Signal*>(m_objList[i].get()));
 
-		signal.setStrID(signal.strID().trimmed());
-		signal.setExtStrID(signal.extStrID().trimmed());
-		signal.setDeviceStrID(signal.deviceStrID().trimmed());
+		signal.setAppSignalID(signal.appSignalID().trimmed());
+		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+		signal.setEquipmentID(signal.equipmentID().trimmed());
 	}
 
 	saveLastEditedSignalProperties();

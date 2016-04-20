@@ -1118,7 +1118,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 		
         if (s.jsPlace() == place)
         {
-            signal = signalSet.getSignalByDeviceStrID(eqipmentID);
+            signal = signalSet.getSignalByEquipmentID(eqipmentID);
             if (signal == null)    
             {
 				log.wrnCFG3007(eqipmentID);

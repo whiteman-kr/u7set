@@ -63,8 +63,8 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 		}
 	}
 
-	m_strID = QString("#%1").arg(deviceSignal.equipmentIdTemplate());
-	m_extStrID = deviceSignal.equipmentIdTemplate();
+	m_appSignalID = QString("#%1").arg(deviceSignal.equipmentIdTemplate());
+	m_customAppSignalID = deviceSignal.equipmentIdTemplate();
 
 	QString deviceSignalStrID = deviceSignal.equipmentIdTemplate();
 
@@ -76,7 +76,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 	}
 
 	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
-	m_deviceStrID = deviceSignal.equipmentIdTemplate();
+	m_equipmentID = deviceSignal.equipmentIdTemplate();
 
 	if (m_type == E::SignalType::Analog)
 	{
@@ -108,8 +108,8 @@ Signal& Signal::operator =(const Signal& signal)
 	m_instanceCreated = signal.instanceCreated();
 	m_instanceAction = signal.instanceAction();
 
-	m_strID = signal.strID();
-	m_extStrID = signal.extStrID();
+	m_appSignalID = signal.appSignalID();
+	m_customAppSignalID = signal.customAppSignalID();
 	m_caption = signal.caption();
 	m_dataFormat = signal.dataFormat();
 	m_dataSize = signal.dataSize();
@@ -137,7 +137,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_decimalPlaces = signal.decimalPlaces();
 	m_aperture = signal.aperture();
 	m_inOutType = signal.inOutType();
-	m_deviceStrID = signal.deviceStrID();
+	m_equipmentID = signal.equipmentID();
 	m_filteringTime = signal.filteringTime();
 	m_maxDifference = signal.maxDifference();
 	m_byteOrder = signal.byteOrder();
@@ -162,9 +162,9 @@ void Signal::InitProperties()
 
 	ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, false, Signal::type, Signal::setType);
 
-	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalID, true, Signal::strID, Signal::setStrID);
+	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalID, true, Signal::appSignalID, Signal::setAppSignalID);
 	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
-	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, CustomAppSignalID, true, Signal::extStrID, Signal::setExtStrID);
+	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, CustomAppSignalID, true, Signal::customAppSignalID, Signal::setCustomAppSignalID);
 	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator("^.+$");
@@ -220,7 +220,7 @@ void Signal::InitProperties()
 	}
 	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
-	ADD_PROPERTY_GETTER_SETTER(QString, EquipmentID, true, Signal::deviceStrID, Signal::setDeviceStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, EquipmentID, true, Signal::equipmentID, Signal::setEquipmentID);
 	ADD_PROPERTY_GETTER_SETTER(bool, EnableTuning, true, Signal::enableTuning, Signal::setEnableTuning);
 }
 
@@ -441,8 +441,8 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "SignalInstanceID", &Signal::setSignalInstanceID);
 	serializeField(attr, "Channel", &Signal::setChannel);
 	serializeField(attr, "Type", &Signal::setType);
-	serializeField(attr, "StrID", &Signal::setStrID);
-	serializeField(attr, "ExtStrID", &Signal::setExtStrID);
+	serializeField(attr, "StrID", &Signal::setAppSignalID);
+	serializeField(attr, "ExtStrID", &Signal::setCustomAppSignalID);
 	serializeField(attr, "Name", &Signal::setCaption);
 	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setDataFormat);
 	serializeField(attr, "DataSize", &Signal::setDataSize);
@@ -470,7 +470,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "DecimalPlaces", &Signal::setDecimalPlaces);
 	serializeField(attr, "Aperture", &Signal::setAperture);
 	serializeField(attr, "InOutType", &Signal::setInOutType);
-	serializeField(attr, "DeviceStrID", &Signal::setDeviceStrID);
+	serializeField(attr, "DeviceStrID", &Signal::setEquipmentID);
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
 	serializeField(attr, "MaxDifference", &Signal::setMaxDifference);
 	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
@@ -686,7 +686,7 @@ void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceOb
 				int signalPrefixLength = signalPrefix.length();
 				for (int i = 0; i < signalSet.count(); i++)
 				{
-					if (signalSet[i].deviceStrID().left(signalPrefixLength) == signalPrefix)
+					if (signalSet[i].equipmentID().left(signalPrefixLength) == signalPrefix)
 					{
 						ds.addSignalIndex(i);
 					}

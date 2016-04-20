@@ -24,7 +24,7 @@ namespace Builder
 		}
 	}
 
-	QObject* JsSignalSet::getSignalByDeviceStrID(const QString& deviceStrID)
+	QObject* JsSignalSet::getSignalByEquipmentID(const QString& equpmentID)
 	{
 		if (m_signalSet == nullptr)
 		{
@@ -34,7 +34,7 @@ namespace Builder
 
 		for (int i = 0; i < m_signalSet->count(); i++)
 		{
-			if ((*m_signalSet)[i].deviceStrID() == deviceStrID)
+			if ((*m_signalSet)[i].equipmentID() == equpmentID)
 			{
 				QObject* c = &(*m_signalSet)[i];
 				QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
@@ -50,12 +50,12 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-    ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
-        m_opticModuleStorage(opticModuleStorage),
+		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
 		m_buildWriter(buildWriter),
 		m_changesetId(changesetId),
@@ -67,7 +67,7 @@ namespace Builder
 		assert(m_deviceRoot);
 		assert(m_signalSet);
 		assert(m_subsystems);
-        assert(m_opticModuleStorage);
+		assert(m_opticModuleStorage);
 		assert(m_log);
 		assert(m_buildWriter);
 
@@ -97,40 +97,40 @@ namespace Builder
 		bool ok = false;
 
 		// Check if connections' identifiers (non-empty) exist in the database
-        //
-        /*for (int i = 0; i < m_connections->count(); i++)
-        {
-            std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
+		//
+		/*for (int i = 0; i < m_connections->count(); i++)
+		{
+			std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
 
-            std::vector<Hardware::DeviceObject*> list;
+			std::vector<Hardware::DeviceObject*> list;
 
-            if (connection->port1StrID().length() > 0)
-            {
-                list.clear();
-                m_deviceRoot->findChildObjectsByMask(connection->port1StrID(), list);
-                if (list.empty() == true)
-                {
-                    LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-                              tr("No source port %1 was found for connection %2").arg(connection->port1StrID()).arg(connection->caption()));
-                    return false;
-                }
-            }
+			if (connection->port1StrID().length() > 0)
+			{
+				list.clear();
+				m_deviceRoot->findChildObjectsByMask(connection->port1StrID(), list);
+				if (list.empty() == true)
+				{
+					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+							  tr("No source port %1 was found for connection %2").arg(connection->port1StrID()).arg(connection->caption()));
+					return false;
+				}
+			}
 
-            if (connection->mode() == Hardware::OptoPort::Mode::Optical)
-            {
-                if (connection->port2StrID().length() > 0)
+			if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+			{
+				if (connection->port2StrID().length() > 0)
 				{
 					list.clear();
-                    m_deviceRoot->findChildObjectsByMask(connection->port2StrID(), list);
+					m_deviceRoot->findChildObjectsByMask(connection->port2StrID(), list);
 					if (list.empty() == true)
 					{
 						LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-                                  tr("No target port %1 was found for connection %2").arg(connection->port2StrID()).arg(connection->caption()));
+								  tr("No target port %1 was found for connection %2").arg(connection->port2StrID()).arg(connection->caption()));
 						return false;
 					}
 				}
-            }
-        }*/
+			}
+		}*/
 
 
 		// Get script file from the project databse
@@ -173,11 +173,11 @@ namespace Builder
 
 		QString contents = QString::fromLocal8Bit(scriptFile->data());
 
-        // Attach objects
+		// Attach objects
 		//
 		QJSEngine jsEngine;
 
-        //qmlRegisterType<MySliderItem>("com.mycompany.qmlcomponents", 1, 0, "Slider");
+		//qmlRegisterType<MySliderItem>("com.mycompany.qmlcomponents", 1, 0, "Slider");
 
 
 		JsSignalSet jsSignalSet(m_signalSet);
@@ -199,8 +199,8 @@ namespace Builder
 		QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-        QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
-        QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
+		QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
+		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
@@ -218,7 +218,7 @@ namespace Builder
 		args << jsLog;
 		args << jsSignalSetObject;
 		args << jsSubsystems;
-        args << jsOpticModuleStorage;
+		args << jsOpticModuleStorage;
 
 		QJSValue jsResult = jsEval.call(args);
 
@@ -239,46 +239,46 @@ namespace Builder
 		//
 		std::vector<Hardware::DeviceModule*> lmModules;
 		findLmModules(m_deviceRoot, lmModules);
-        std::sort(lmModules.begin(), lmModules.end(),
-                  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
-                  {
-                      return a->equipmentIdTemplate() < b->equipmentIdTemplate();
-                  });
+		std::sort(lmModules.begin(), lmModules.end(),
+				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+				  {
+					  return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+				  });
 
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
 
 		for (Hardware::DeviceModule* m : lmModules)
 		{
-            if (m->propertyExists("SubsysID") == false)
-            {
-                lmReport << "No SubsysID property found in " + m->equipmentIdTemplate();
-                assert(false);
-                continue;
-            }
+			if (m->propertyExists("SubsysID") == false)
+			{
+				lmReport << "No SubsysID property found in " + m->equipmentIdTemplate();
+				assert(false);
+				continue;
+			}
 
-            if (m->propertyExists("Channel") == false)
-            {
-                lmReport << "No Channel property found in " + m->equipmentIdTemplate();
-                assert(false);
-                continue;
-            }
+			if (m->propertyExists("Channel") == false)
+			{
+				lmReport << "No Channel property found in " + m->equipmentIdTemplate();
+				assert(false);
+				continue;
+			}
 
-            int ssKey = m_subsystems->ssKey(m->propertyValue("SubsysID").toString());
-            int channel = m->propertyValue("Channel").toInt();
+			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsysID").toString());
+			int channel = m->propertyValue("Channel").toInt();
 
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
-            lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();
+			lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();
 			lmReport << "Subsystem code: " + QString::number(ssKey);
-            lmReport << "Channel: " + QString::number(channel);
+			lmReport << "Channel: " + QString::number(channel);
 
 			quint16 jumpers = ssKey << 6;
-            jumpers |= channel;
+			jumpers |= channel;
 
-            quint16 crc4 = Crc::crc4(jumpers);
+			quint16 crc4 = Crc::crc4(jumpers);
 			jumpers |= (crc4 << 12);
 
 			lmReport << "Jumpers configuration (HEX): 0x" + QString::number(jumpers, 16);
@@ -287,7 +287,7 @@ namespace Builder
 			jumpersHex.insert(4, ' ');
 			jumpersHex.insert(9, ' ');
 			jumpersHex.insert(14, ' ');
-            lmReport << "Jumpers configuration (BIN): " + jumpersHex;
+			lmReport << "Jumpers configuration (BIN): " + jumpersHex;
 		}
 
 		QByteArray lmReportData;
@@ -343,12 +343,12 @@ namespace Builder
 					return false;
 				}
 
-                if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
-                {
+				if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
+				{
 					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output log file for") + f.subsysId() + ", " + f.caption() + "!");
-                    return false;
-                }
-            }
+					return false;
+				}
+			}
 		}
 
 		return true;
@@ -387,7 +387,7 @@ namespace Builder
 		return m_db;
 	}
 
-    IssueLogger *ConfigurationBuilder::log() const
+	IssueLogger *ConfigurationBuilder::log() const
 	{
 		return m_log;
 	}

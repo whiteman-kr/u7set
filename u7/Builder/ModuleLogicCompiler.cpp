@@ -954,22 +954,22 @@ namespace Builder
 				if (signal->dataSize() != SIZE_32BIT)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
 					RESULT_FALSE_BREAK
 				}
 
 				if (m_convertUsedInOutAnalogSignalsOnly == true &&
-					m_appSignals.getByStrID(signal->strID()) == nullptr)
+					m_appSignals.getByStrID(signal->appSignalID()) == nullptr)
 				{
 					continue;
 				}
 
-				if (m_inOutSignalsToScalAppFbMap.contains(signal->strID()) == false)
+				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->strID()];
+				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
 
 				if (appFb == nullptr)
 				{
@@ -996,7 +996,7 @@ namespace Builder
 
 				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 								   module.moduleAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
-				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
+				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
 				m_code.append(cmd);
 
 				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
@@ -2461,8 +2461,8 @@ namespace Builder
 
 			xmlWriter.writeStartElement("Signal");
 
-			xmlWriter.writeAttribute("StrID", s->strID());
-			xmlWriter.writeAttribute("ExtStrID", s->extStrID());
+			xmlWriter.writeAttribute("StrID", s->appSignalID());
+			xmlWriter.writeAttribute("ExtStrID", s->customAppSignalID());
 			xmlWriter.writeAttribute("Name", s->caption());
 			xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
 			xmlWriter.writeAttribute("Unit", Signal::m_unitList->valueAt(s->unitID()));
@@ -2526,7 +2526,7 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Undefined RAM address of signal '%1'")).
-								   arg(signal->strID()));
+								   arg(signal->appSignalID()));
 				result = false;
 				continue;
 			}
@@ -2626,7 +2626,7 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Undefined RAM address of signal '%1'")).
-								   arg(signal->strID()));
+								   arg(signal->appSignalID()));
 				result = false;
 				continue;
 			}
@@ -2809,22 +2809,22 @@ namespace Builder
 
 				if (signal->dataSize() != SIZE_32BIT)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
 					RESULT_FALSE_BREAK
 				}
 
 				if (m_convertUsedInOutAnalogSignalsOnly == true &&
-					m_appSignals.getByStrID(signal->strID()) == nullptr)
+					m_appSignals.getByStrID(signal->appSignalID()) == nullptr)
 				{
 					continue;
 				}
 
-				if (m_inOutSignalsToScalAppFbMap.contains(signal->strID()) == false)
+				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->strID()];
+				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
 
 				if (appFb == nullptr)
 				{
@@ -2850,7 +2850,7 @@ namespace Builder
 
 				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 								   signal->ramAddr().offset(), appFb->caption());
-				cmd.setComment(QString(tr("output %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
+				cmd.setComment(QString(tr("output %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
 				m_code.append(cmd);
 
 				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
@@ -3337,22 +3337,22 @@ namespace Builder
 					case E::SignalInOutType::Internal:
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Internal signal %1 can not be connected to device signal. Connect this signal to appropriate LM module or change its type to Input or Output")).
-								  arg(signal->strID()));
+								  arg(signal->appSignalID()));
 						break;
 
 					default:
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Unknown inOutType of signal %1.")).
-								  arg(signal->strID()));
+								  arg(signal->appSignalID()));
 					}
 
 					if (appItem != nullptr)
 					{
 						AppFb* appFb = createAppFb(*appItem);
 
-						m_inOutSignalsToScalAppFbMap.insert(signal->strID(), appFb);
+						m_inOutSignalsToScalAppFbMap.insert(signal->appSignalID(), appFb);
 
-						qDebug() << signal->strID();
+						qDebug() << signal->appSignalID();
 
 						delete appItem;
 					}
@@ -3368,7 +3368,7 @@ namespace Builder
 	{
 		assert(signal.isAnalog());
 		assert(signal.isInput());
-		assert(signal.deviceStrID().isEmpty() == false);
+		assert(signal.equipmentID().isEmpty() == false);
 
 		int x1 = signal.lowADC();
 		int x2 = signal.highADC();
@@ -3376,7 +3376,7 @@ namespace Builder
 		if (x2 - x1 == 0)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+					  QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
 			return nullptr;
 		}
 
@@ -3420,7 +3420,7 @@ namespace Builder
 		default:
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
-					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.dataFormat())));
 		}
 
 		return appItem;
@@ -3431,7 +3431,7 @@ namespace Builder
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
-		assert(signal.deviceStrID().isEmpty() == false);
+		assert(signal.equipmentID().isEmpty() == false);
 
 		double x1 = signal.lowLimit();
 		double x2 = signal.highLimit();
@@ -3439,7 +3439,7 @@ namespace Builder
 		if (x2 - x1 == 0.0)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+					  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
 			return nullptr;
 		}
 
@@ -3483,7 +3483,7 @@ namespace Builder
 		default:
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
-					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.dataFormat())));
 		}
 
 		return appItem;
@@ -3641,19 +3641,19 @@ namespace Builder
 		{
 			Signal* s = &(*m_signals)[i];
 
-			if (m_signalsStrID.contains(s->strID()))
+			if (m_signalsStrID.contains(s->appSignalID()))
 			{
-				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
+				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->appSignalID());
 				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 			}
 			else
 			{
-				m_signalsStrID.insert(s->strID(), s);
+				m_signalsStrID.insert(s->appSignalID(), s);
 			}
 
-			if (!s->deviceStrID().isEmpty())
+			if (!s->equipmentID().isEmpty())
 			{
-				m_deviceBoundSignals.insertMulti(s->deviceStrID(), s);
+				m_deviceBoundSignals.insertMulti(s->equipmentID(), s);
 			}
 		}
 
@@ -3808,7 +3808,7 @@ namespace Builder
 						if (signalOffset >= module.appLogicDataSize)
 						{
 							LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									  QString(tr("Signal %1 offset out of module application data size")).arg(signal->strID()));
+									  QString(tr("Signal %1 offset out of module application data size")).arg(signal->appSignalID()));
 
 							result = false;
 						}
@@ -3859,7 +3859,7 @@ namespace Builder
 
 							// set same ramAddr & regAddr for corresponding signals in m_appSignals map
 							//
-							AppSignal* appSignal = m_appSignals.getByStrID(signal->strID());
+							AppSignal* appSignal = m_appSignals.getByStrID(signal->appSignalID());
 
 							if (appSignal != nullptr)
 							{
@@ -3873,7 +3873,7 @@ namespace Builder
 					else
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()));
+								  QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->appSignalID()));
 
 						result = false;
 					}
@@ -4640,7 +4640,7 @@ namespace Builder
 
 		// construct shadow AppSignal based on OutputPin
 		//
-		m_signal->setStrID(strID);
+		m_signal->setAppSignalID(strID);
 		m_signal->setType(signalType);
 		m_signal->setDataFormat(dataFormat);
 		m_signal->setDataSize(dataSize);

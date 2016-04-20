@@ -97,42 +97,42 @@ namespace Builder
 
 			if (!dataFormatInfo.contains(signal.dataFormatInt()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.unitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.inputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (!unitInfo.contains(signal.outputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (signal.inputSensorID() < 0 || signal.inputSensorID() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (signal.outputSensorID() < 0 || signal.outputSensorID() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 			if (signal.inOutType() < 0 || signal.inOutType() >= IN_OUT_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
@@ -142,7 +142,7 @@ namespace Builder
 				case E::ByteOrder::BigEndian:
 					break;
 				default:
-					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
+					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
 					hasWrongField = true;
 			}
 
@@ -158,8 +158,8 @@ namespace Builder
 			appSignalsXml.writeAttribute("SignalInstanceID", QString::number(signal.signalInstanceID()));
 			appSignalsXml.writeAttribute("Channel", QString::number(signal.channel()));
 			appSignalsXml.writeAttribute("Type", signal.type() == E::SignalType::Analog ? "Analog" : "Discrete");
-			appSignalsXml.writeAttribute("StrID", signal.strID());
-			appSignalsXml.writeAttribute("ExtStrID", signal.extStrID());
+			appSignalsXml.writeAttribute("StrID", signal.appSignalID());
+			appSignalsXml.writeAttribute("ExtStrID", signal.customAppSignalID());
 			appSignalsXml.writeAttribute("Name", signal.caption());
 			appSignalsXml.writeAttribute("DataFormat", dataFormatInfo.value(signal.dataFormatInt()));
 			appSignalsXml.writeAttribute("DataSize", QString::number(signal.dataSize()));
@@ -187,7 +187,7 @@ namespace Builder
 			appSignalsXml.writeAttribute("DecimalPlaces", QString::number(signal.decimalPlaces()));
 			appSignalsXml.writeAttribute("Aperture", QString::number(signal.aperture()));
 			appSignalsXml.writeAttribute("InOutType", InOutTypeStr[signal.inOutType()]);
-			appSignalsXml.writeAttribute("DeviceStrID", signal.deviceStrID());
+			appSignalsXml.writeAttribute("DeviceStrID", signal.equipmentID());
 			appSignalsXml.writeAttribute("FilteringTime", QString::number(signal.filteringTime()));
 			appSignalsXml.writeAttribute("MaxDifference", QString::number(signal.maxDifference()));
 			appSignalsXml.writeAttribute("ByteOrder", E::valueToString<E::ByteOrder>(signal.byteOrderInt()));

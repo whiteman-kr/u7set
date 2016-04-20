@@ -65,7 +65,7 @@ namespace Hardware
 
 		TxSignal txs;
 
-		txs.strID = txSignal->strID();
+		txs.strID = txSignal->appSignalID();
 		txs.sizeBit = txSignal->dataSize();
 
 		if (txSignal->isAnalog())

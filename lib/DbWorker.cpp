@@ -58,7 +58,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 42", ":/DatabaseUpgrade/Upgrade0042.sql"},
 	{"Upgrade to version 43", ":/DatabaseUpgrade/Upgrade0043.sql"},
 	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
-    {"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
+	{"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
+	{"Upgrade to version 46", ":/DatabaseUpgrade/Upgrade0046.sql"},
 };
 
 
@@ -3355,8 +3356,8 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toString());
 	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
-	s.setStrID(q.value(12).toString());
-	s.setExtStrID(q.value(13).toString());
+	s.setAppSignalID(q.value(12).toString());
+	s.setCustomAppSignalID(q.value(13).toString());
 	s.setCaption(q.value(14).toString());
 	s.setDataFormat(static_cast<E::DataFormat>(q.value(15).toInt()));
 	s.setDataSize(q.value(16).toInt());
@@ -3383,7 +3384,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDecimalPlaces(q.value(37).toInt());
 	s.setAperture(q.value(38).toDouble());
 	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
-	s.setDeviceStrID(q.value(40).toString());
+	s.setEquipmentID(q.value(40).toString());
 	s.setOutputRangeMode(static_cast<E::OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
 	s.setMaxDifference(q.value(43).toDouble());										//
@@ -3412,8 +3413,8 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.deleted())
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
 	.arg(s.instanceAction())
-	.arg(toSqlStr(s.strID()))
-	.arg(toSqlStr(s.extStrID()))
+	.arg(toSqlStr(s.appSignalID()))
+	.arg(toSqlStr(s.customAppSignalID()))
 	.arg(toSqlStr(s.caption()))
 	.arg(TO_INT(s.dataFormat()))
 	.arg(s.dataSize())
@@ -3440,7 +3441,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
 	.arg(s.inOutType())
-	.arg(toSqlStr(s.deviceStrID()))
+	.arg(toSqlStr(s.equipmentID()))
 	.arg(s.outputRangeMode())					// since version 35 of database
 	.arg(s.filteringTime())						//
 	.arg(s.maxDifference())						//

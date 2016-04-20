@@ -117,8 +117,8 @@ private:
 	QDateTime m_instanceCreated;
 	E::InstanceAction m_instanceAction = E::InstanceAction::Added;
 
-	QString m_strID;
-	QString m_extStrID;
+	QString m_appSignalID;
+	QString m_customAppSignalID;
 	QString m_caption;
 	E::DataFormat m_dataFormat = E::DataFormat::Float;
 	int m_dataSize = 32;
@@ -146,7 +146,7 @@ private:
 	int m_decimalPlaces = 2;
 	double m_aperture = 0;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
-	QString m_deviceStrID;
+	QString m_equipmentID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
@@ -246,11 +246,11 @@ public:
 
 	void serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList& unitInfo);
 
-	Q_INVOKABLE QString strID() const { return m_strID; }
-	void setStrID(const QString& strID) { m_strID = strID; }
+	Q_INVOKABLE QString appSignalID() const { return m_appSignalID; }
+	void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
-	Q_INVOKABLE QString extStrID() const { return m_extStrID; }
-	void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
+	Q_INVOKABLE QString customAppSignalID() const { return m_customAppSignalID; }
+	void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
 	Q_INVOKABLE QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
@@ -335,8 +335,8 @@ public:
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
-	Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
-	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
+	Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
+	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
 	Q_INVOKABLE double filteringTime() const { return m_filteringTime; }
 	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }

@@ -50,7 +50,7 @@ namespace Builder
             m_nextSignalAddress.add1Bit();
         }
 
-        m_signals.append(SignalAddress16(signal.strID(), signalAddress, signal.sizeW(), signal.isDiscrete()));
+        m_signals.append(SignalAddress16(signal.appSignalID(), signalAddress, signal.sizeW(), signal.isDiscrete()));
 
         m_sizeW = m_nextSignalAddress.offset() - m_startAddress;
 
