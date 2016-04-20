@@ -354,24 +354,24 @@ namespace Hardware
 		/*
 		Example:
 
-        version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
-        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
-        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
+		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
+		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
-        version:            record version
-        name:               property name
-        category:           category name
-        type:               property type, can by one of
-                            qint32  (4 bytes signed integral),
-                            quint32 (4 bytes unsigned integer)
-                            bool (true, false),
-                            double,
-                            string
-        min:                property minimum value (ignored for bool, string)
-        max:                property maximim value (ignored for bool, string)
-        default:            can be any value of the specified type
-        precision:          property precision
-        updateFromPreset:   property will be updated from preset
+		version:            record version
+		name:               property name
+		category:           category name
+		type:               property type, can by one of
+							qint32  (4 bytes signed integral),
+							quint32 (4 bytes unsigned integer)
+							bool (true, false),
+							double,
+							string
+		min:                property minimum value (ignored for bool, string)
+		max:                property maximim value (ignored for bool, string)
+		default:            can be any value of the specified type
+		precision:          property precision
+		updateFromPreset:   property will be updated from preset
 		*/
 
 		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
@@ -385,216 +385,216 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
-            if (columns.count() != 9)
+			if (columns.count() != 9)
 			{
 				qDebug() << Q_FUNC_INFO << " Wrong proprty struct: " << r;
-                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
+				qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
 				continue;
 			}
 
-            QString strVersion(columns[0]);
-            bool ok = false;
-            int version = strVersion.toInt(&ok);
-            if (ok == false || version < 1)
-            {
+			QString strVersion(columns[0]);
+			bool ok = false;
+			int version = strVersion.toInt(&ok);
+			if (ok == false || version < 1)
+			{
 				qDebug() << Q_FUNC_INFO << " SpecificProperties: version should be greater than 0: " << strVersion;
-                continue;
-            }
+				continue;
+			}
 
-            if (version > 1)
-            {
+			if (version > 1)
+			{
 				qDebug() << Q_FUNC_INFO << " SpecificProperties: Unsupported property version: " << version;
-                continue;
-            }
+				continue;
+			}
 
-            if (version == 1)
-            {
-                QString name(columns[1]);
-                QString category(columns[2]);
-                QStringRef type(&columns[3]);
-                QStringRef min(&columns[4]);
-                QStringRef max(&columns[5]);
-                QStringRef defaultValue(&columns[6]);
-                QStringRef strPrecision(&columns[7]);
-                QString strUpdateFromPreset(columns[8]);
+			if (version == 1)
+			{
+				QString name(columns[1]);
+				QString category(columns[2]);
+				QStringRef type(&columns[3]);
+				QStringRef min(&columns[4]);
+				QStringRef max(&columns[5]);
+				QStringRef defaultValue(&columns[6]);
+				QStringRef strPrecision(&columns[7]);
+				QString strUpdateFromPreset(columns[8]);
 
-                int precision = strPrecision.toInt();
+				int precision = strPrecision.toInt();
 
-                bool updateFromPreset = false;
-                if (strUpdateFromPreset.toUpper() == "TRUE")
-                {
-                    updateFromPreset = true;
-                }
+				bool updateFromPreset = false;
+				if (strUpdateFromPreset.toUpper() == "TRUE")
+				{
+					updateFromPreset = true;
+				}
 
-                if (name.isEmpty() || name.size() > 1024)
-                {
+				if (name.isEmpty() || name.size() > 1024)
+				{
 					qDebug() << Q_FUNC_INFO << " SpecificProperties: filed name must have size  from 1 to 1024, name: " << name;
-                    continue;
-                }
+					continue;
+				}
 
-                if (type != "qint32" &&
-                        type != "quint32" &&
-                        type != "bool" &&
-                        type != "double" &&
-                        type != "string")
-                {
+				if (type != "qint32" &&
+						type != "quint32" &&
+						type != "bool" &&
+						type != "double" &&
+						type != "string")
+				{
 					qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
-                    continue;
-                }
+					continue;
+				}
 
 
-                if (type == "qint32")
-                {
-                    // Min
-                    //
-                    bool ok = false;
-                    qint32 minInt = min.toInt(&ok);
-                    if (ok == false)
-                    {
-                        minInt = std::numeric_limits<qint32>::min();
-                    }
+				if (type == "qint32")
+				{
+					// Min
+					//
+					bool ok = false;
+					qint32 minInt = min.toInt(&ok);
+					if (ok == false)
+					{
+						minInt = std::numeric_limits<qint32>::min();
+					}
 
-                    // Max
-                    //
-                    qint32 maxInt = max.toInt(&ok);
-                    if (ok == false)
-                    {
-                        maxInt = std::numeric_limits<qint32>::max();
-                    }
+					// Max
+					//
+					qint32 maxInt = max.toInt(&ok);
+					if (ok == false)
+					{
+						maxInt = std::numeric_limits<qint32>::max();
+					}
 
-                    // Default Value
-                    //
-                    qint32 defaultInt = defaultValue.toInt();
+					// Default Value
+					//
+					qint32 defaultInt = defaultValue.toInt();
 
-                    // Add property with default value, if present old value, it will be set later
-                    //
-                    auto newProperty = addProperty<QVariant>(name, true);
-
-					newProperty->setSpecific(true);
-                    newProperty->setCategory(category);
-                    newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
-                    newProperty->setValue(QVariant(defaultInt));
-                    newProperty->setReadOnly(false);
-                    newProperty->setPrecision(precision);
-                    newProperty->setUpdateFromPreset(updateFromPreset);
-
-                    continue;
-                }
-
-                if (type == "quint32")
-                {
-                    // Min
-                    //
-                    bool ok = false;
-                    quint32 minUInt = min.toUInt(&ok);
-                    if (ok == false)
-                    {
-                        minUInt = std::numeric_limits<quint32>::min();
-                    }
-
-                    // Max
-                    //
-                    quint32 maxUInt = max.toUInt(&ok);
-                    if (ok == false)
-                    {
-                        maxUInt = std::numeric_limits<quint32>::max();
-                    }
-
-                    // Default Value
-                    //
-                    quint32 defaultUInt = defaultValue.toUInt();
-
-                    // Add property with default value, if present old value, it will be set later
-                    //
-                    auto newProperty = addProperty<QVariant>(name, true);
+					// Add property with default value, if present old value, it will be set later
+					//
+					auto newProperty = addProperty<QVariant>(name, true);
 
 					newProperty->setSpecific(true);
-                    newProperty->setCategory(category);
-                    newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
-                    newProperty->setValue(QVariant(defaultUInt));
-                    newProperty->setReadOnly(false);
-                    newProperty->setPrecision(precision);
-                    newProperty->setUpdateFromPreset(updateFromPreset);
+					newProperty->setCategory(category);
+					newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
+					newProperty->setValue(QVariant(defaultInt));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
 
-                    continue;
-                }
+					continue;
+				}
 
-                if (type == "double")
-                {
-                    // Min
-                    //
-                    bool ok = false;
-                    double minDouble = min.toDouble(&ok);
-                    if (ok == false)
-                    {
-                        minDouble = std::numeric_limits<double>::min();
-                    }
+				if (type == "quint32")
+				{
+					// Min
+					//
+					bool ok = false;
+					quint32 minUInt = min.toUInt(&ok);
+					if (ok == false)
+					{
+						minUInt = std::numeric_limits<quint32>::min();
+					}
 
-                    // Max
-                    //
-                    double maxDouble = max.toDouble(&ok);
-                    if (ok == false)
-                    {
-                        maxDouble = std::numeric_limits<double>::max();
-                    }
+					// Max
+					//
+					quint32 maxUInt = max.toUInt(&ok);
+					if (ok == false)
+					{
+						maxUInt = std::numeric_limits<quint32>::max();
+					}
 
-                    // Default Value
-                    //
-                    double defaultDouble = defaultValue.toDouble();
+					// Default Value
+					//
+					quint32 defaultUInt = defaultValue.toUInt();
 
-                    // Add property with default value, if present old value, it will be set later
-                    //
-                    auto newProperty = addProperty<QVariant>(name, true);
-
-					newProperty->setSpecific(true);
-                    newProperty->setCategory(category);
-                    newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
-                    newProperty->setValue(QVariant(defaultDouble));
-                    newProperty->setReadOnly(false);
-                    newProperty->setPrecision(precision);
-                    newProperty->setUpdateFromPreset(updateFromPreset);
-
-                    continue;
-                }
-
-                if (type == "bool")
-                {
-                    // Default Value
-                    //
-                    bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
-
-                    // Add property with default value, if present old value, it will be set later
-                    //
-                    auto newProperty = addProperty<QVariant>(name, true);
+					// Add property with default value, if present old value, it will be set later
+					//
+					auto newProperty = addProperty<QVariant>(name, true);
 
 					newProperty->setSpecific(true);
-                    newProperty->setCategory(category);
-                    newProperty->setValue(QVariant(defaultBool));
-                    newProperty->setReadOnly(false);
-                    newProperty->setPrecision(precision);
-                    newProperty->setUpdateFromPreset(updateFromPreset);
+					newProperty->setCategory(category);
+					newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
+					newProperty->setValue(QVariant(defaultUInt));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
 
-                    continue;
-                }
+					continue;
+				}
 
-                if (type == "string")
-                {
-                    // Add property with default value, if present old value, it will be set later
-                    //
-                    auto newProperty = addProperty<QVariant>(name, true);
+				if (type == "double")
+				{
+					// Min
+					//
+					bool ok = false;
+					double minDouble = min.toDouble(&ok);
+					if (ok == false)
+					{
+						minDouble = std::numeric_limits<double>::min();
+					}
+
+					// Max
+					//
+					double maxDouble = max.toDouble(&ok);
+					if (ok == false)
+					{
+						maxDouble = std::numeric_limits<double>::max();
+					}
+
+					// Default Value
+					//
+					double defaultDouble = defaultValue.toDouble();
+
+					// Add property with default value, if present old value, it will be set later
+					//
+					auto newProperty = addProperty<QVariant>(name, true);
 
 					newProperty->setSpecific(true);
-                    newProperty->setCategory(category);
-                    newProperty->setValue(QVariant(defaultValue.toString()));
-                    newProperty->setReadOnly(false);
-                    newProperty->setPrecision(precision);
-                    newProperty->setUpdateFromPreset(updateFromPreset);
+					newProperty->setCategory(category);
+					newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
+					newProperty->setValue(QVariant(defaultDouble));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
 
-                    continue;
-                }
-            }
+					continue;
+				}
 
-            assert(false);
+				if (type == "bool")
+				{
+					// Default Value
+					//
+					bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+
+					// Add property with default value, if present old value, it will be set later
+					//
+					auto newProperty = addProperty<QVariant>(name, true);
+
+					newProperty->setSpecific(true);
+					newProperty->setCategory(category);
+					newProperty->setValue(QVariant(defaultBool));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
+
+					continue;
+				}
+
+				if (type == "string")
+				{
+					// Add property with default value, if present old value, it will be set later
+					//
+					auto newProperty = addProperty<QVariant>(name, true);
+
+					newProperty->setSpecific(true);
+					newProperty->setCategory(category);
+					newProperty->setValue(QVariant(defaultValue.toString()));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
+
+					continue;
+				}
+			}
+
+			assert(false);
 		}
 
 		// Set to parsed properties old value
@@ -616,9 +616,9 @@ namespace Hardware
 			}
 			else
 			{
-                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
-                continue;
-                // default value already was set
+				qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
+				continue;
+				// default value already was set
 			}
 		}
 
@@ -661,23 +661,23 @@ namespace Hardware
 		return m_parent;
 	}
 
-    QObject* DeviceObject::jsParent() const
-    {
-        QObject* c = m_parent;
-        QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-        return c;
-    }
+	QObject* DeviceObject::jsParent() const
+	{
+		QObject* c = m_parent;
+		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+		return c;
+	}
 
 	int DeviceObject::jsPropertyInt(QString name) const
 	{
-        const std::shared_ptr<Property> p = propertyByCaption(name);
-        if (p == nullptr)
-        {
-            assert(false);
-            return 0;
-        }
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
 
-        QVariant v = p->value();
+		QVariant v = p->value();
 		if (v.isValid() == false)
 		{
 			assert(v.isValid());
@@ -687,51 +687,51 @@ namespace Hardware
 		return v.toInt();
 	}
 
-    quint32 DeviceObject::jsPropertyIP(QString name) const
-    {
-        const std::shared_ptr<Property> p = propertyByCaption(name);
-        if (p == nullptr)
-        {
-            assert(false);
-            return 0;
-        }
+	quint32 DeviceObject::jsPropertyIP(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
 
-        QVariant v = p->value();
-        if (v.isValid() == false)
-        {
-            assert(v.isValid());
-            return 0;
-        }
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return 0;
+		}
 
-        QString s = v.toString();
-        QStringList l = s.split(".");
-        if (l.size() != 4)
-        {
-            return 0;
-        }
+		QString s = v.toString();
+		QStringList l = s.split(".");
+		if (l.size() != 4)
+		{
+			return 0;
+		}
 
-        quint32 result = 0;
-        for (int i = 0; i < 4; i++)
-        {
-            bool ok = false;
-            quint8 b = l[i].toInt(&ok);
+		quint32 result = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			bool ok = false;
+			quint8 b = l[i].toInt(&ok);
 
-            if (ok == false)
-            {
-                return 0;
-            }
+			if (ok == false)
+			{
+				return 0;
+			}
 
-            result |= b;
-            if (i < 3)
-            {
-                result <<= 8;
-            }
-        }
+			result |= b;
+			if (i < 3)
+			{
+				result <<= 8;
+			}
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    DeviceType DeviceObject::deviceType() const
+	DeviceType DeviceObject::deviceType() const
 	{
 		assert(false);
 		return DeviceType::Root;
@@ -851,112 +851,127 @@ namespace Hardware
 		return d;
 	}
 
-    const Hardware::DeviceController* DeviceObject::toController() const
-    {
-        const Hardware::DeviceController* d = dynamic_cast<const Hardware::DeviceController*>(this);
-        assert(d != nullptr);
+	const Hardware::DeviceController* DeviceObject::toController() const
+	{
+		const Hardware::DeviceController* d = dynamic_cast<const Hardware::DeviceController*>(this);
+		assert(d != nullptr);
 
-        return d;
-    }
+		return d;
+	}
 
-    Hardware::DeviceController* DeviceObject::toController()
-    {
-        Hardware::DeviceController* d = dynamic_cast<Hardware::DeviceController*>(this);
-        assert(d != nullptr);
+	Hardware::DeviceController* DeviceObject::toController()
+	{
+		Hardware::DeviceController* d = dynamic_cast<Hardware::DeviceController*>(this);
+		assert(d != nullptr);
 
-        return d;
-    }
+		return d;
+	}
 
+	const Hardware::Software* DeviceObject::toSoftware() const
+	{
+		const Hardware::Software* d = dynamic_cast<const Hardware::Software*>(this);
+		assert(d != nullptr);
 
-    const Hardware::DeviceController* DeviceObject::getParentController() const
-    {
-        const Hardware::DeviceObject* deviceObject = this;
+		return d;
+	}
 
-        do
-        {
-            deviceObject = deviceObject->parent();
+	Hardware::Software* DeviceObject::toSoftware()
+	{
+		Hardware::Software* d = dynamic_cast<Hardware::Software*>(this);
+		assert(d != nullptr);
 
-            if (deviceObject->isController())
-            {
-                return deviceObject->toController();
-            }
-        }
-        while(deviceObject != nullptr);
+		return d;
+	}
 
-        return nullptr;
-    }
+	const Hardware::DeviceController* DeviceObject::getParentController() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
 
-    const Hardware::DeviceModule* DeviceObject::getParentModule() const
-    {
-        const Hardware::DeviceObject* deviceObject = this;
+		do
+		{
+			deviceObject = deviceObject->parent();
 
-        do
-        {
-            deviceObject = deviceObject->parent();
+			if (deviceObject->isController())
+			{
+				return deviceObject->toController();
+			}
+		}
+		while(deviceObject != nullptr);
 
-            if (deviceObject->isModule())
-            {
-                return deviceObject->toModule();
-            }
-        }
-        while(deviceObject != nullptr);
+		return nullptr;
+	}
 
-        return nullptr;
-    }
+	const Hardware::DeviceModule* DeviceObject::getParentModule() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
 
-    const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
-    {
-        const Hardware::DeviceObject* deviceObject = this;
+		do
+		{
+			deviceObject = deviceObject->parent();
 
-        do
-        {
-            deviceObject = deviceObject->parent();
+			if (deviceObject->isModule())
+			{
+				return deviceObject->toModule();
+			}
+		}
+		while(deviceObject != nullptr);
 
-            if (deviceObject->isChassis())
-            {
-                return deviceObject->toChassis();
-            }
-        }
-        while(deviceObject != nullptr);
+		return nullptr;
+	}
 
-        return nullptr;
-    }
+	const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
 
-    const Hardware::DeviceRack* DeviceObject::getParentRack() const
-    {
-        const Hardware::DeviceObject* deviceObject = this;
+		do
+		{
+			deviceObject = deviceObject->parent();
 
-        do
-        {
-            deviceObject = deviceObject->parent();
+			if (deviceObject->isChassis())
+			{
+				return deviceObject->toChassis();
+			}
+		}
+		while(deviceObject != nullptr);
 
-            if (deviceObject->isRack())
-            {
-                return deviceObject->toRack();
-            }
-        }
-        while(deviceObject != nullptr);
+		return nullptr;
+	}
 
-        return nullptr;
-    }
+	const Hardware::DeviceRack* DeviceObject::getParentRack() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
 
-    const Hardware::DeviceSystem* DeviceObject::getParentSystem() const
-    {
-        const Hardware::DeviceObject* deviceObject = this;
+		do
+		{
+			deviceObject = deviceObject->parent();
 
-        do
-        {
-            deviceObject = deviceObject->parent();
+			if (deviceObject->isRack())
+			{
+				return deviceObject->toRack();
+			}
+		}
+		while(deviceObject != nullptr);
 
-            if (deviceObject->isSystem())
-            {
-                return deviceObject->toSystem();
-            }
-        }
-        while(deviceObject != nullptr);
+		return nullptr;
+	}
 
-        return nullptr;
-    }
+	const Hardware::DeviceSystem* DeviceObject::getParentSystem() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
+
+		do
+		{
+			deviceObject = deviceObject->parent();
+
+			if (deviceObject->isSystem())
+			{
+				return deviceObject->toSystem();
+			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
 
 	QString DeviceObject::fileExtension() const
 	{
@@ -1315,19 +1330,19 @@ namespace Hardware
 	std::vector<DeviceObject*> DeviceObject::findChildObjectsByMask(const QString& mask)
 	{
 		std::vector<DeviceObject*> list;
-        if (mask.isEmpty() == false)
-        {
-            findChildObjectsByMask(mask, list);
-        }
+		if (mask.isEmpty() == false)
+		{
+			findChildObjectsByMask(mask, list);
+		}
 		return list;
 	}
 
 	void DeviceObject::findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list)
 	{
-        if (mask.isEmpty() == true)
-        {
-            return;
-        }
+		if (mask.isEmpty() == true)
+		{
+			return;
+		}
 
 		for (auto c : m_children)
 		{
@@ -1341,10 +1356,10 @@ namespace Hardware
 
 	QObject* DeviceObject::jsFindChildObjectByMask(const QString& mask)
 	{
-        if (mask.isEmpty() == true)
-        {
-            return nullptr;
-        }
+		if (mask.isEmpty() == true)
+		{
+			return nullptr;
+		}
 
 		std::vector<DeviceObject*> list = findChildObjectsByMask(mask);
 		if (list.empty() == true)
@@ -2154,64 +2169,64 @@ R"DELIM({
 		return DeviceSignal::m_deviceType;
 	}
 
-    quint32 DeviceSignal::valueToMantExp1616(double value)
-    {
-        if (value == 0)
-            return 0;
+	quint32 DeviceSignal::valueToMantExp1616(double value)
+	{
+		if (value == 0)
+			return 0;
 
-        //value = 2;
+		//value = 2;
 
-        double m = 0;
-        int p = 1;
+		double m = 0;
+		int p = 1;
 
-        m = frexp (value, &p);
+		m = frexp (value, &p);
 
-        p+= 30;
+		p+= 30;
 
-        if (abs((int)m) < 0x3fffffff)
-        {
-            while (abs((int)m) < 0x3fffffff)
-            {
-                m *= 2;
-                p--;
-            }
+		if (abs((int)m) < 0x3fffffff)
+		{
+			while (abs((int)m) < 0x3fffffff)
+			{
+				m *= 2;
+				p--;
+			}
 
-            if ((int)m == -0x40000000)
-            {
-                m *= 2;
-                p--;
-            }
-        }
-        else
-        {
-            while (abs((int)m) > 0x20000000)
-            {
-                m /= 2;
-                p++;
-            }
-        }
+			if ((int)m == -0x40000000)
+			{
+				m *= 2;
+				p--;
+			}
+		}
+		else
+		{
+			while (abs((int)m) > 0x20000000)
+			{
+				m /= 2;
+				p++;
+			}
+		}
 
-        if (p < -256 || p > 255)
-        {
-            return 0;
-        }
+		if (p < -256 || p > 255)
+		{
+			return 0;
+		}
 
-        quint16 _m16 = (int)m >> 16;
-        quint16 _p16 = p;
+		quint16 _m16 = (int)m >> 16;
+		quint16 _p16 = p;
 
-        quint32 result = (_m16 << 16) | _p16;
-        return result;
-    }
+		quint32 result = (_m16 << 16) | _p16;
+		return result;
+	}
 
 	E::SignalType DeviceSignal::type() const
 	{
 		return m_type;
 	}
 
-    int DeviceSignal::jsType() const
-    {
-        return static_cast<int>(type());
-    }
+	int DeviceSignal::jsType() const
+	{
+		return static_cast<int>(type());
+	}
 
 	void DeviceSignal::setType(E::SignalType value)
 	{

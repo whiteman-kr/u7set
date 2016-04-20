@@ -66,8 +66,8 @@ public:
 		Monitor = 9000,
 		ConfigurationService = 9001,
 		DataAcquisitionService = 9002,
-		DataArchivingService = 9003,
-        TuningService = 9004,
+		ArchiveService = 9003,
+		TuningService = 9004,
 	};
 	Q_ENUM(SoftwareType)
 

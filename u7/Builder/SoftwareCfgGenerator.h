@@ -3,7 +3,7 @@
 #include "../include/DbController.h"
 #include "../include/Signal.h"
 #include "../include/DeviceObject.h"
-#include "../Builder/BuildResultWriter.h"
+#include "BuildResultWriter.h"
 #include "IssueLogger.h"
 
 namespace Builder
@@ -22,7 +22,9 @@ namespace Builder
 		ConfigurationXmlFile* m_cfgXml = nullptr;
 		QString m_subDir;
 
-		static QList<Hardware::DeviceModule*> m_lmList;
+		static HashedVector<QString, Hardware::DeviceModule*> m_lmList;
+
+		static HashedVector<QString, Hardware::Software*> m_softwareList;
 
 		struct SchemaFile
 		{
@@ -36,6 +38,41 @@ namespace Builder
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 
 		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
+		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
+		static bool checkLmToSoftwareLinks(IssueLogger* log);
+
+
+		static const int LM_ETHERNET_ADAPTER1 = 1;
+		static const int LM_ETHERNET_ADAPTER2 = 2;
+		static const int LM_ETHERNET_ADAPTER3 = 3;
+
+		struct LmEthernetAdapterNetworkProperties
+		{
+			int adapterNo;		// LM_ETHERNET_ADAPTER* values
+			QString adapterID;
+
+			// only for adapterNo == LM_ETHERNET_ADAPTER1
+			//
+			bool tuningEnable = true;
+			QString tuningIP;
+			int tuningPort = 0;
+			QString tuningServiceID;
+
+			// only for adapterNo == LM_ETHERNET_ADAPTER2 or adapterNo == LM_ETHERNET_ADAPTER3
+			//
+			bool appDataEnable = true;
+			QString appDataIP;
+			int appDataPort = 0;
+			QString appDataServiceID;
+
+			bool diagDataEnable = true;
+			QString diagDataIP;
+			int diagDataPort = 0;
+			QString diagDataServiceID;
+
+			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, IssueLogger* log);
+		};
+
 
 	public:
 		SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);

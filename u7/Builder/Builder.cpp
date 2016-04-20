@@ -12,10 +12,11 @@
 #include "../../VFrame30/SchemaItemLink.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
-#include "../Builder/ApplicationLogicCompiler.h"
-#include "../Builder/SoftwareCfgGenerator.h"
-#include "../Builder/DASCfgGenerator.h"
-#include "../Builder/MonitorCfgGenerator.h"
+#include "ApplicationLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
+#include "DASCfgGenerator.h"
+#include "MonitorCfgGenerator.h"
+#include "TuningServiceCfgGenerator.h"
 
 #include <QBuffer>
 #include <functional>
@@ -738,7 +739,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString(tr("OMS and Tuning software configuration generation...")))
 		LOG_EMPTY_LINE(m_log);
 
-		SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
+		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
 			[this, &db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
@@ -768,9 +769,12 @@ namespace Builder
 					softwareCfgGenerator = new MonitorCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
-				case E::SoftwareType::ConfigurationService:
-				case E::SoftwareType::DataArchivingService:
 				case E::SoftwareType::TuningService:
+					softwareCfgGenerator = new TuningServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::ConfigurationService:
+				case E::SoftwareType::ArchiveService:
 					assert(false);
 					//softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;

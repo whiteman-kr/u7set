@@ -162,7 +162,8 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     Builder/DASCfgGenerator.cpp \
     Builder/MonitorCfgGenerator.cpp \
-    ../lib/ServiceSettings.cpp
+    ../lib/ServiceSettings.cpp \
+    Builder/TuningServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -254,7 +255,8 @@ HEADERS  += \
     ../include/XmlHelper.h \
     Builder/DASCfgGenerator.h \
     Builder/MonitorCfgGenerator.h \
-    ../include/ServiceSettings.h
+    ../include/ServiceSettings.h \
+    Builder/TuningServiceCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \
