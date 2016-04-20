@@ -4325,7 +4325,7 @@ namespace Builder
 				return "";
 			}
 
-			return itemSignal->signalStrIds();
+			return itemSignal->appSignalIds();
 		}
 
 		if (m_appLogicItem.m_fblItem->isFblElement())

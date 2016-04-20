@@ -62,8 +62,8 @@ SC_LAST_CHANGE_USER = 36;
 
 const char* Columns[] =
 {
-	"StrID",
-	"External ID",
+	"AppSignalID",
+	"CustomAppSignalID",
 	"Caption",
 	"Channel",
 	"A/D",
@@ -72,7 +72,7 @@ const char* Columns[] =
 	"Normal\nstate",
 	"Acquire",
 	"Input-output\ntype",
-	"Device ID",
+	"EquipmentID",
 	"Low ADC",
 	"High ADC",
 	"Low limit",
@@ -996,7 +996,7 @@ void SignalsModel::addSignal()
 	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
 	deviceIdEdit->setText("");
 
-	fl->addRow(tr("Device ID"), deviceIdEdit);
+	fl->addRow(tr("EquipmentID"), deviceIdEdit);
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
 	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));

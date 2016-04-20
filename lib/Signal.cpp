@@ -162,9 +162,9 @@ void Signal::InitProperties()
 
 	ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, false, Signal::type, Signal::setType);
 
-	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, Signal::strID, Signal::setStrID);
+	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalID, true, Signal::strID, Signal::setStrID);
 	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
-	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
+	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, CustomAppSignalID, true, Signal::extStrID, Signal::setExtStrID);
 	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator("^.+$");
@@ -220,7 +220,7 @@ void Signal::InitProperties()
 	}
 	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
-	ADD_PROPERTY_GETTER_SETTER(QString, DeviceStrID, true, Signal::deviceStrID, Signal::setDeviceStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, EquipmentID, true, Signal::deviceStrID, Signal::setDeviceStrID);
 	ADD_PROPERTY_GETTER_SETTER(bool, EnableTuning, true, Signal::enableTuning, Signal::setEnableTuning);
 }
 

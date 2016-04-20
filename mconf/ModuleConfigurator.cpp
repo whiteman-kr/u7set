@@ -216,28 +216,19 @@ void ModuleConfigurator::configureClicked()
 				return;
 			}
 
-			if (page->isFirmwareCrc1Valid() == false)
+            if (page->isFirmwareCrcValid() == false)
 			{
 				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid Firmware CRC1."));
+                msgBox.setText(tr("Invalid Firmware CRC."));
 				msgBox.setInformativeText(tr("Enter valid data."));
 				msgBox.exec();
 				return;
 			}
 
-			if (page->isFirmwareCrc2Valid() == false)
-			{
-				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid Firmware CRC2."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-				msgBox.exec();
-				return;
-			}
 
 			uint32_t factoryNo = page->factoryNo();
 			QDate manufactureDate = page->manufactureDate();
-			uint32_t firmwareCrc1 = page->firmwareCrc1();
-			uint32_t firmwareCrc2 = page->firmwareCrc2();
+            uint32_t firmwareCrc = page->firmwareCrc();
 
 			if (factoryNo == 0)
 			{
@@ -258,7 +249,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeDiagData(factoryNo, manufactureDate, firmwareCrc1, firmwareCrc2);
+            emit writeDiagData(factoryNo, manufactureDate, firmwareCrc);
 		}
 
 		// Write diag info, like factory no, crc, etc
@@ -462,8 +453,7 @@ void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vec
 				page->setFactoryNo(serviceDataVersion.factoryNo());
 				page->setManufactureDate(QDate(serviceDataVersion.manufactureYear(), serviceDataVersion.manufactureMonth(), serviceDataVersion.manufactureDay()));
 
-				page->setFirmwareCrc1(serviceDataVersion.firmwareCrc1());
-				page->setFirmwareCrc2(serviceDataVersion.firmwareCrc2());
+                page->setFirmwareCrc(serviceDataVersion.firmwareCrc());
 			}
 			break;
 		default:

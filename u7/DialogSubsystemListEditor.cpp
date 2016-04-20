@@ -44,7 +44,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	QStringList l;
 	l << tr("Index");
 	l << tr("Key");
-	l << tr("SubsysID");
+	l << tr("SubsystemID");
 	l << tr("Caption");
 	ui->m_list->setHeaderLabels(l);
 	ui->m_list->setColumnWidth(0, 50);
@@ -76,7 +76,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(subsystem->index()) <<
 													QString::number(subsystem->key()) <<
-													subsystem->strId() <<
+													subsystem->subsystemId() <<
 													subsystem->caption());
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		item->setData(0, Qt::UserRole, i);
@@ -192,7 +192,7 @@ void DialogSubsystemListEditor::on_m_add_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt() + 1;
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "5" << "StrID" << "Caption");
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "5" << "SubsystemID" << "Caption");
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	ui->m_list->insertTopLevelItem(index, item);
 

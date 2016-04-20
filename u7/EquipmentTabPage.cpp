@@ -1474,7 +1474,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
                 }
                 else
                 {
-                    module->setPropertyValue("SubsysID", QVariant::fromValue(subsystem->strId()));
+                    module->setPropertyValue("SubsysID", QVariant::fromValue(subsystem->subsystemId()));
                 }
 			}
 		}

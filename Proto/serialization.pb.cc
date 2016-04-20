@@ -398,7 +398,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   Schema_descriptor_ = file->message_type(12);
   static const int Schema_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, strid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, schemaid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, height_),
@@ -668,7 +668,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(FblItemLine));
   SchemaItemSignal_descriptor_ = file->message_type(26);
   static const int SchemaItemSignal_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, signalstrids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, appsignalids_),
   };
   SchemaItemSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1237,112 +1237,112 @@ void protobuf_AddDesc_serialization_2eproto() {
     "highlimit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opNa"
     "me\030\021 \001(\0132\016.Proto.wstring\022\"\n\004type\030\022 \001(\0162\024"
     ".Proto.FblSignalType\022(\n\ndataFormat\030\023 \001(\016"
-    "2\024.Proto.FblDataFormat\"\273\002\n\006Schema\022\031\n\004uui"
-    "d\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pr"
-    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
-    "ring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004u"
-    "nit\030\006 \002(\0162\021.Proto.SchemaUnit\022\037\n\020excludeF"
-    "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
-    "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
-    "ElementCollection\022)\n\014logic_schema\030\310\001 \001(\013"
-    "2\022.Proto.LogicSchema\"G\n\013LogicSchema\022$\n\014e"
-    "quipmentids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007cou"
-    "nter\030\002 \001(\005:\0010\"\224\001\n\013SchemaLayer\022\031\n\004uuid\030\001 "
-    "\002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.w"
-    "string\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n"
-    "\005print\030\005 \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Enve"
-    "lope\"\224\006\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Prot"
-    "o.Uuid\022\020\n\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002"
-    "(\010\022#\n\010itemUnit\030\004 \002(\0162\021.Proto.SchemaUnit\022"
-    "\032\n\013acceptClick\030\005 \001(\010:\005false\022#\n\013clickScri"
-    "pt\030\006 \001(\0132\016.Proto.wstring\022\'\n\013PosRectImpl\030"
-    "\n \001(\0132\022.Proto.PosRectImpl\022\'\n\013PosLineImpl"
-    "\030\013 \001(\0132\022.Proto.PosLineImpl\0223\n\021PosConnect"
-    "ionImpl\030\014 \001(\0132\030.Proto.PosConnectionImpl\022"
-    "\037\n\007FblItem\030j \001(\0132\016.Proto.FblItem\022\'\n\013FblI"
-    "temRect\030k \001(\0132\022.Proto.FblItemRect\022\'\n\013Fbl"
-    "ItemLine\030l \001(\0132\022.Proto.FblItemLine\022#\n\004Re"
-    "ct\030t \001(\0132\025.Proto.SchemaItemRect\022#\n\004Line\030"
-    "u \001(\0132\025.Proto.SchemaItemLine\022#\n\004Path\030v \001"
-    "(\0132\025.Proto.SchemaItemPath\022\'\n\006Signal\030| \001("
-    "\0132\027.Proto.SchemaItemSignal\022+\n\013InputSigna"
-    "l\030} \001(\0132\026.Proto.SchemaItemInput\022-\n\014Outpu"
-    "tSignal\030~ \001(\0132\027.Proto.SchemaItemOutput\022#"
-    "\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLink\022\"\n\003A"
-    "fb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n\tConst"
-    "Item\030\201\001 \001(\0132\026.Proto.SchemaItemConst\"[\n\013P"
-    "osRectImpl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocP"
-    "t\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDoc"
-    "Pt\030\004 \002(\001\"]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001"
-    " \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003"
-    " \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n\021PosConnection"
-    "Impl\022\"\n\006points\030\001 \003(\0132\022.Proto.SchemaPoint"
-    "\"\353\001\n\016SchemaItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tl"
-    "ineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004tex"
-    "t\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030\005 \002"
-    "(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fi"
-    "ll\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorz"
-    "Align\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\"3"
-    "\n\016SchemaItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tline"
-    "Color\030\002 \002(\r\"3\n\016SchemaItemPath\022\016\n\006weight\030"
-    "\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\260\001\n\022FblConnecti"
-    "onPoint\022!\n\005point\030\001 \001(\0132\022.Proto.SchemaPoi"
-    "nt\022/\n\ndirrection\030\002 \001(\0162\033.Proto.Connectio"
-    "nDirrection\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uuid\022\030"
-    "\n\014operandIndex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001("
-    "\t:\000\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Proto.F"
-    "blConnectionPoint\"v\n\013FblItemRect\022\016\n\006weig"
-    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor"
-    "\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132"
-    "\020.Proto.FontParam\"0\n\013FblItemLine\022\016\n\006weig"
-    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"8\n\020SchemaIte"
-    "mSignal\022$\n\014signalStrIDs\030\001 \003(\0132\016.Proto.ws"
-    "tring\"\021\n\017SchemaItemInput\"\022\n\020SchemaItemOu"
-    "tput\"\020\n\016SchemaItemLink\"h\n\rSchemaItemAfb\022"
-    "\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010afbS"
-    "trid\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecision\030"
-    "\004 \001(\005:\0012\"d\n\017SchemaItemConst\022\017\n\004type\030\001 \001("
-    "\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030"
-    "\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\302\005\n\014Devic"
-    "eObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013eq"
-    "uipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007capti"
-    "on\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestric"
-    "tion\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001("
-    "\005:\0010\022\"\n\032specific_properties_struct\030\006 \001(\t"
-    "\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n"
-    "\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010"
-    ":\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstr"
-    "ing\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uu"
-    "id\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006S"
-    "ystem\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack"
-    "\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001"
-    "(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\013"
-    "2\023.Proto.DeviceModule\022+\n\nController\030i \001("
-    "\0132\027.Proto.DeviceController\022#\n\006Signal\030j \001"
-    "(\0132\023.Proto.DeviceSignal\022\'\n\013Workstation\030k"
-    " \001(\0132\022.Proto.Workstation\022!\n\010Software\030l \001"
-    "(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Dev"
-    "iceSystem\"\014\n\nDeviceRack\" \n\rDeviceChassis"
-    "\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004typ"
-    "e\030\001 \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014Devic"
-    "eSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyte"
-    "Order\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004siz"
-    "e\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n"
-    "\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001"
-    "(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005"
-    ":\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstation\022"
-    "\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001"
-    "(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_d"
-    "escription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto"
-    ".ModuleConfigurationValue\022\016\n\004name\030\003 \001(\t:"
-    "\000\"7\n\030ModuleConfigurationValue\022\014\n\004name\030\001 "
-    "\002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001"
-    " \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007Dis"
-    "play\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conn"
-    "ectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*"
-    ")\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete"
-    "\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\t"
-    "SignedInt\020\001\022\t\n\005Float\020\002", 6062);
+    "2\024.Proto.FblDataFormat\"\276\002\n\006Schema\022\031\n\004uui"
+    "d\030\001 \002(\0132\013.Proto.Uuid\022 \n\010schemaID\030\002 \002(\0132\016"
+    ".Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto."
+    "wstring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037"
+    "\n\004unit\030\006 \002(\0162\021.Proto.SchemaUnit\022\037\n\020exclu"
+    "deFromBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\013"
+    "2\017.Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto."
+    "AfbElementCollection\022)\n\014logic_schema\030\310\001 "
+    "\001(\0132\022.Proto.LogicSchema\"G\n\013LogicSchema\022$"
+    "\n\014equipmentids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007"
+    "counter\030\002 \001(\005:\0010\"\224\001\n\013SchemaLayer\022\031\n\004uuid"
+    "\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Prot"
+    "o.wstring\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010"
+    "\022\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.E"
+    "nvelope\"\224\006\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.P"
+    "roto.Uuid\022\020\n\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030"
+    "\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021.Proto.SchemaUn"
+    "it\022\032\n\013acceptClick\030\005 \001(\010:\005false\022#\n\013clickS"
+    "cript\030\006 \001(\0132\016.Proto.wstring\022\'\n\013PosRectIm"
+    "pl\030\n \001(\0132\022.Proto.PosRectImpl\022\'\n\013PosLineI"
+    "mpl\030\013 \001(\0132\022.Proto.PosLineImpl\0223\n\021PosConn"
+    "ectionImpl\030\014 \001(\0132\030.Proto.PosConnectionIm"
+    "pl\022\037\n\007FblItem\030j \001(\0132\016.Proto.FblItem\022\'\n\013F"
+    "blItemRect\030k \001(\0132\022.Proto.FblItemRect\022\'\n\013"
+    "FblItemLine\030l \001(\0132\022.Proto.FblItemLine\022#\n"
+    "\004Rect\030t \001(\0132\025.Proto.SchemaItemRect\022#\n\004Li"
+    "ne\030u \001(\0132\025.Proto.SchemaItemLine\022#\n\004Path\030"
+    "v \001(\0132\025.Proto.SchemaItemPath\022\'\n\006Signal\030|"
+    " \001(\0132\027.Proto.SchemaItemSignal\022+\n\013InputSi"
+    "gnal\030} \001(\0132\026.Proto.SchemaItemInput\022-\n\014Ou"
+    "tputSignal\030~ \001(\0132\027.Proto.SchemaItemOutpu"
+    "t\022#\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLink\022\""
+    "\n\003Afb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n\tCo"
+    "nstItem\030\201\001 \001(\0132\026.Proto.SchemaItemConst\"["
+    "\n\013PosRectImpl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topD"
+    "ocPt\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013height"
+    "DocPt\030\004 \002(\001\"]\n\013PosLineImpl\022\023\n\013startXDocP"
+    "t\030\001 \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocP"
+    "t\030\003 \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n\021PosConnect"
+    "ionImpl\022\"\n\006points\030\001 \003(\0132\022.Proto.SchemaPo"
+    "int\"\353\001\n\016SchemaItemRect\022\016\n\006weight\030\001 \002(\001\022\021"
+    "\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004"
+    "text\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030"
+    "\005 \002(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n"
+    "\004fill\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\th"
+    "orzAlign\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\00312"
+    "8\"3\n\016SchemaItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tl"
+    "ineColor\030\002 \002(\r\"3\n\016SchemaItemPath\022\016\n\006weig"
+    "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\260\001\n\022FblConne"
+    "ctionPoint\022!\n\005point\030\001 \001(\0132\022.Proto.Schema"
+    "Point\022/\n\ndirrection\030\002 \001(\0162\033.Proto.Connec"
+    "tionDirrection\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uui"
+    "d\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005"
+    " \001(\t:\000\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Prot"
+    "o.FblConnectionPoint\"v\n\013FblItemRect\022\016\n\006w"
+    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillCo"
+    "lor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002"
+    "(\0132\020.Proto.FontParam\"0\n\013FblItemLine\022\016\n\006w"
+    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"8\n\020Schema"
+    "ItemSignal\022$\n\014appSignalIDs\030\001 \003(\0132\016.Proto"
+    ".wstring\"\021\n\017SchemaItemInput\"\022\n\020SchemaIte"
+    "mOutput\"\020\n\016SchemaItemLink\"h\n\rSchemaItemA"
+    "fb\022\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010a"
+    "fbStrid\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecisi"
+    "on\030\004 \001(\005:\0012\"d\n\017SchemaItemConst\022\017\n\004type\030\001"
+    " \001(\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatVal"
+    "ue\030\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\"\302\005\n\014De"
+    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n"
+    "\013equipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007ca"
+    "ption\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRest"
+    "riction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005"
+    " \001(\005:\0010\022\"\n\032specific_properties_struct\030\006 "
+    "\001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property"
+    "\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! "
+    "\001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.w"
+    "string\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto"
+    ".Uuid\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#"
+    "\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004R"
+    "ack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030"
+    "g \001(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h "
+    "\001(\0132\023.Proto.DeviceModule\022+\n\nController\030i"
+    " \001(\0132\027.Proto.DeviceController\022#\n\006Signal\030"
+    "j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workstatio"
+    "n\030k \001(\0132\022.Proto.Workstation\022!\n\010Software\030"
+    "l \001(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014"
+    "DeviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChas"
+    "sis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004"
+    "type\030\001 \001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014De"
+    "viceSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tb"
+    "yteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004"
+    "size\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010"
+    "\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030"
+    "\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t "
+    "\001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstati"
+    "on\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030"
+    "\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struc"
+    "t_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Pr"
+    "oto.ModuleConfigurationValue\022\016\n\004name\030\003 \001"
+    "(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004name"
+    "\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004nam"
+    "e\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemaUnit\022\013\n\007"
+    "Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024C"
+    "onnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output"
+    "\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discr"
+    "ete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022"
+    "\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 6065);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -6095,7 +6095,7 @@ void AfbParam::Swap(AfbParam* other) {
 
 #ifndef _MSC_VER
 const int Schema::kUuidFieldNumber;
-const int Schema::kStrIDFieldNumber;
+const int Schema::kSchemaIDFieldNumber;
 const int Schema::kCaptionFieldNumber;
 const int Schema::kWidthFieldNumber;
 const int Schema::kHeightFieldNumber;
@@ -6113,7 +6113,7 @@ Schema::Schema()
 
 void Schema::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
-  strid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  schemaid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   afbs_ = const_cast< ::Proto::AfbElementCollection*>(&::Proto::AfbElementCollection::default_instance());
   logic_schema_ = const_cast< ::Proto::LogicSchema*>(&::Proto::LogicSchema::default_instance());
@@ -6128,7 +6128,7 @@ Schema::Schema(const Schema& from)
 void Schema::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
-  strid_ = NULL;
+  schemaid_ = NULL;
   caption_ = NULL;
   width_ = 0;
   height_ = 0;
@@ -6146,7 +6146,7 @@ Schema::~Schema() {
 void Schema::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
-    delete strid_;
+    delete schemaid_;
     delete caption_;
     delete afbs_;
     delete logic_schema_;
@@ -6179,8 +6179,8 @@ void Schema::Clear() {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
     }
-    if (has_strid()) {
-      if (strid_ != NULL) strid_->::Proto::wstring::Clear();
+    if (has_schemaid()) {
+      if (schemaid_ != NULL) schemaid_->::Proto::wstring::Clear();
     }
     if (has_caption()) {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
@@ -6218,17 +6218,17 @@ bool Schema::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_strID;
+        if (input->ExpectTag(18)) goto parse_schemaID;
         break;
       }
 
-      // required .Proto.wstring strID = 2;
+      // required .Proto.wstring schemaID = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_strID:
+         parse_schemaID:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_strid()));
+               input, mutable_schemaid()));
         } else {
           goto handle_uninterpreted;
         }
@@ -6386,10 +6386,10 @@ void Schema::SerializeWithCachedSizes(
       1, this->uuid(), output);
   }
 
-  // required .Proto.wstring strID = 2;
-  if (has_strid()) {
+  // required .Proto.wstring schemaID = 2;
+  if (has_schemaid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->strid(), output);
+      2, this->schemaid(), output);
   }
 
   // required .Proto.wstring caption = 3;
@@ -6452,11 +6452,11 @@ void Schema::SerializeWithCachedSizes(
         1, this->uuid(), target);
   }
 
-  // required .Proto.wstring strID = 2;
-  if (has_strid()) {
+  // required .Proto.wstring schemaID = 2;
+  if (has_schemaid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->strid(), target);
+        2, this->schemaid(), target);
   }
 
   // required .Proto.wstring caption = 3;
@@ -6526,11 +6526,11 @@ int Schema::ByteSize() const {
           this->uuid());
     }
 
-    // required .Proto.wstring strID = 2;
-    if (has_strid()) {
+    // required .Proto.wstring schemaID = 2;
+    if (has_schemaid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->strid());
+          this->schemaid());
     }
 
     // required .Proto.wstring caption = 3;
@@ -6616,8 +6616,8 @@ void Schema::MergeFrom(const Schema& from) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
     }
-    if (from.has_strid()) {
-      mutable_strid()->::Proto::wstring::MergeFrom(from.strid());
+    if (from.has_schemaid()) {
+      mutable_schemaid()->::Proto::wstring::MergeFrom(from.schemaid());
     }
     if (from.has_caption()) {
       mutable_caption()->::Proto::wstring::MergeFrom(from.caption());
@@ -6664,8 +6664,8 @@ bool Schema::IsInitialized() const {
   if (has_uuid()) {
     if (!this->uuid().IsInitialized()) return false;
   }
-  if (has_strid()) {
-    if (!this->strid().IsInitialized()) return false;
+  if (has_schemaid()) {
+    if (!this->schemaid().IsInitialized()) return false;
   }
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
@@ -6685,7 +6685,7 @@ bool Schema::IsInitialized() const {
 void Schema::Swap(Schema* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
-    std::swap(strid_, other->strid_);
+    std::swap(schemaid_, other->schemaid_);
     std::swap(caption_, other->caption_);
     std::swap(width_, other->width_);
     std::swap(height_, other->height_);
@@ -11693,7 +11693,7 @@ void FblItemLine::Swap(FblItemLine* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemaItemSignal::kSignalStrIDsFieldNumber;
+const int SchemaItemSignal::kAppSignalIDsFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemSignal::SchemaItemSignal()
@@ -11746,7 +11746,7 @@ SchemaItemSignal* SchemaItemSignal::New() const {
 }
 
 void SchemaItemSignal::Clear() {
-  signalstrids_.Clear();
+  appsignalids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -11757,17 +11757,17 @@ bool SchemaItemSignal::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.wstring signalStrIDs = 1;
+      // repeated .Proto.wstring appSignalIDs = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_signalStrIDs:
+         parse_appSignalIDs:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_signalstrids()));
+                input, add_appsignalids()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_signalStrIDs;
+        if (input->ExpectTag(10)) goto parse_appSignalIDs;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -11790,10 +11790,10 @@ bool SchemaItemSignal::MergePartialFromCodedStream(
 
 void SchemaItemSignal::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.wstring signalStrIDs = 1;
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->signalstrids(i), output);
+      1, this->appsignalids(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -11804,11 +11804,11 @@ void SchemaItemSignal::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* SchemaItemSignal::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.wstring signalStrIDs = 1;
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->signalstrids(i), target);
+        1, this->appsignalids(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -11821,12 +11821,12 @@ void SchemaItemSignal::SerializeWithCachedSizes(
 int SchemaItemSignal::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.wstring signalStrIDs = 1;
-  total_size += 1 * this->signalstrids_size();
-  for (int i = 0; i < this->signalstrids_size(); i++) {
+  // repeated .Proto.wstring appSignalIDs = 1;
+  total_size += 1 * this->appsignalids_size();
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->signalstrids(i));
+        this->appsignalids(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -11854,7 +11854,7 @@ void SchemaItemSignal::MergeFrom(const ::google::protobuf::Message& from) {
 
 void SchemaItemSignal::MergeFrom(const SchemaItemSignal& from) {
   GOOGLE_CHECK_NE(&from, this);
-  signalstrids_.MergeFrom(from.signalstrids_);
+  appsignalids_.MergeFrom(from.appsignalids_);
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -11872,15 +11872,15 @@ void SchemaItemSignal::CopyFrom(const SchemaItemSignal& from) {
 
 bool SchemaItemSignal::IsInitialized() const {
 
-  for (int i = 0; i < signalstrids_size(); i++) {
-    if (!this->signalstrids(i).IsInitialized()) return false;
+  for (int i = 0; i < appsignalids_size(); i++) {
+    if (!this->appsignalids(i).IsInitialized()) return false;
   }
   return true;
 }
 
 void SchemaItemSignal::Swap(SchemaItemSignal* other) {
   if (other != this) {
-    signalstrids_.Swap(&other->signalstrids_);
+    appsignalids_.Swap(&other->appsignalids_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

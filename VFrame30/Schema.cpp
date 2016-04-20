@@ -42,7 +42,7 @@ namespace VFrame30
 		Proto::Schema* mutableSchema = message->mutable_schema();
 
 		Proto::Write(mutableSchema->mutable_uuid(), m_guid);
-		Proto::Write(mutableSchema->mutable_strid(), m_strID);
+		Proto::Write(mutableSchema->mutable_schemaid(), m_schemaID);
 		Proto::Write(mutableSchema->mutable_caption(), m_caption);
 
 		mutableSchema->set_width(m_width);
@@ -78,7 +78,7 @@ namespace VFrame30
 		const Proto::Schema& schema = message.schema();
 
 		m_guid = Proto::Read(schema.uuid());
-		Proto::Read(schema.strid(), &m_strID);
+		Proto::Read(schema.schemaid(), &m_schemaID);
 		Proto::Read(schema.caption(), &m_caption);
 		m_width = schema.width();
 		m_height = schema.height();
@@ -458,16 +458,16 @@ namespace VFrame30
 		return;
 	}
 
-	// StrID
+	// SchemaID
 	//
-	QString Schema::strID() const
+	QString Schema::schemaID() const
 	{
-		return m_strID;
+		return m_schemaID;
 	}
 
-	void Schema::setStrID(const QString& strID)
+	void Schema::setSchemaID(const QString& id)
 	{
-		m_strID = strID;
+		m_schemaID = id;
 	}
 
 	// Caption

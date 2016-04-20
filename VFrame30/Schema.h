@@ -69,8 +69,8 @@ namespace VFrame30
 		QUuid guid() const;
 		void setGuid(const QUuid& guid);
 
-		QString strID() const;
-		void setStrID(const QString& strID);
+		QString schemaID() const;
+		void setSchemaID(const QString& id);
 
 		QString caption() const;
 		void setCaption(const QString& caption);
@@ -105,7 +105,7 @@ namespace VFrame30
 
 	private:
 		QUuid m_guid;
-		QString m_strID;
+		QString m_schemaID;
 		QString m_caption;
 
 		double m_width;				// pixels or inches, depends on m_unit

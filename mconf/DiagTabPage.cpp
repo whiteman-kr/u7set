@@ -84,14 +84,14 @@ void DiagTabPage::setManufactureDate(QDate value)
 	return;
 }
 
-bool DiagTabPage::isFirmwareCrc1Valid() const
+bool DiagTabPage::isFirmwareCrcValid() const
 {
-	if (ui.m_pFirwareCrc1 == nullptr)
+    if (ui.m_pFirwareCrc == nullptr)
 	{
 		return false;
 	}
 
-	QString text = ui.m_pFirwareCrc1->text();
+    QString text = ui.m_pFirwareCrc->text();
 
 	bool convertResult = false;
 	text.toUInt(&convertResult, 16);
@@ -99,70 +99,31 @@ bool DiagTabPage::isFirmwareCrc1Valid() const
 	return convertResult;
 }
 
-uint32_t DiagTabPage::firmwareCrc1() const
+uint32_t DiagTabPage::firmwareCrc() const
 {
-	if (ui.m_pFirwareCrc1 == nullptr)
+    if (ui.m_pFirwareCrc == nullptr)
 	{
-		assert(ui.m_pFirwareCrc1);
+        assert(ui.m_pFirwareCrc);
 		return 0;
 	}
 		
-	QString text = ui.m_pFirwareCrc1->text();
+    QString text = ui.m_pFirwareCrc->text();
 
 	bool convertResult = false;
 	uint32_t value = text.toUInt(&convertResult, 16);
 
 	return convertResult ? value : 0;
 }
-void DiagTabPage::setFirmwareCrc1(uint32_t value)
+void DiagTabPage::setFirmwareCrc(uint32_t value)
 {
-	if (ui.m_pFirwareCrc1 == nullptr)
+    if (ui.m_pFirwareCrc == nullptr)
 	{
-		assert(ui.m_pFirwareCrc1);
+        assert(ui.m_pFirwareCrc);
 		return;
 	}
 
-	ui.m_pFirwareCrc1->setText(QString().setNum(value, 16));
+    ui.m_pFirwareCrc->setText(QString().setNum(value, 16));
 	return;
 }
 
-bool DiagTabPage::isFirmwareCrc2Valid() const
-{
-	if (ui.m_pFirwareCrc2 == nullptr)
-	{
-		return false;
-	}
 
-	QString text = ui.m_pFirwareCrc2->text();
-
-	bool convertResult = false;
-	text.toUInt(&convertResult, 16);
-
-	return convertResult;
-}
-
-uint32_t DiagTabPage::firmwareCrc2() const
-{
-	if (ui.m_pFirwareCrc2 == nullptr)
-	{
-		assert(ui.m_pFirwareCrc2);
-		return 0;
-	}
-
-	bool convertResult = false;
-	uint32_t value = ui.m_pFirwareCrc2->text().toUInt(&convertResult, 16);
-
-	return convertResult ? value : 0;
-}
-
-void DiagTabPage::setFirmwareCrc2(uint32_t value)
-{
-	if (ui.m_pFirwareCrc2 == nullptr)
-	{
-		assert(ui.m_pFirwareCrc2);
-		return;
-	}
-
-	ui.m_pFirwareCrc2->setText(QString().setNum(value, 16));
-	return;
-}

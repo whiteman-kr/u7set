@@ -23,13 +23,10 @@ public:
 	QDate manufactureDate() const;
 	void setManufactureDate(QDate value);
 
-	bool isFirmwareCrc1Valid() const;
-	uint32_t firmwareCrc1() const;
-	void setFirmwareCrc1(uint32_t value);
+    bool isFirmwareCrcValid() const;
+    uint32_t firmwareCrc() const;
+    void setFirmwareCrc(uint32_t value);
 
-	bool isFirmwareCrc2Valid() const;
-	uint32_t firmwareCrc2() const;
-	void setFirmwareCrc2(uint32_t value);
 
 private:
 	Ui::DiagTabPage ui;
