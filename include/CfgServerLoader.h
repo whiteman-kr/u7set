@@ -230,6 +230,10 @@ public:
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
 	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
+	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileByID(const QString& fileID, QByteArray* fileData);
+
+
 	bool isFileReady();
 
 	QString getLastErrorStr();

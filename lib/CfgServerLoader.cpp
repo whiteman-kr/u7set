@@ -823,6 +823,30 @@ bool CfgLoaderThread::getFile(const QString& pathFileName, QByteArray* fileData)
 }
 
 
+bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr)
+{
+	if (fileData == nullptr || errorStr == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
+}
+
+
+bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
+{
+	if (fileData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	return m_cfgLoader->getFile(fileID, fileData);
+}
+
+
 bool CfgLoaderThread::isFileReady()
 {
 	return m_cfgLoader->isFileReady();
