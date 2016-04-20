@@ -24,7 +24,7 @@ std::shared_ptr<VFrame30::Schema> SchemaManager::schema(QString schemaId)
 		QByteArray data;
 		QString errorString;
 
-		bool result = m_configController->getFileBlocked(schemaId, &data, &errorString);
+		bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
 		if (result == true)
 		{
 			VFrame30::Schema* rawSchema = VFrame30::Schema::Create(data);

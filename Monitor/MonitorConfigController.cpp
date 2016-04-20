@@ -177,6 +177,35 @@ bool MonitorConfigController::getFile(const QString& pathFileName, QByteArray* f
 	return false;
 }
 
+bool MonitorConfigController::getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr)
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread != nullptr);
+		return false;
+	}
+
+	bool result = m_cfgLoaderThread->getFileBlockedByID(id, fileData, errorStr);
+
+	if (result == false)
+	{
+		qDebug() << "MonitorConfigController::getFileBlocked: Can't get file with ID" << id;
+	}
+
+	return result;
+}
+
+bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileData)
+{
+	Q_UNUSED(id);
+	Q_UNUSED(fileData);
+
+	// To do
+	//
+	assert(false);
+	return false;
+}
+
 void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";

@@ -50,6 +50,9 @@ public:
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
+	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
+	bool getFileById(const QString& id, QByteArray* fileData);
+
 	// signals
 	//
 signals:

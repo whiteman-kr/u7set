@@ -79,7 +79,7 @@ namespace Builder
 		}
 
 		pathFileName = xmlReader.attributes().value("Name").toString();
-		tag = xmlReader.attributes().value("ID").toString();
+		ID = xmlReader.attributes().value("ID").toString();
 		tag = xmlReader.attributes().value("Tag").toString();
 		size = xmlReader.attributes().value("Size").toInt();
 		md5 = xmlReader.attributes().value("MD5").toString();
