@@ -114,14 +114,7 @@ bool CONF_HEADER_V1::flagStateSuccess()
 //
 // CONF_SERVICE_DATA_V1
 //
-uint16_t CONF_SERVICE_DATA_V1::diagVersion() const
-{
-	return m_diagVersion;
-}
-void CONF_SERVICE_DATA_V1::setDiagVersion(uint16_t value)
-{
-	m_diagVersion = value;
-}
+
 
 uint32_t CONF_SERVICE_DATA_V1::factoryNo() const
 {
@@ -186,22 +179,13 @@ void CONF_SERVICE_DATA_V1::setConfigureDay(uint16_t value)
 	m_configureDay = qToBigEndian(value);
 }
 
-uint32_t CONF_SERVICE_DATA_V1::firmwareCrc1() const
+uint32_t CONF_SERVICE_DATA_V1::firmwareCrc() const
 {
-	return qFromBigEndian(m_firmwareCrc1);
+    return qFromBigEndian(m_firmwareCrc);
 }
-void CONF_SERVICE_DATA_V1::setFirmwareCrc1(uint32_t value)
+void CONF_SERVICE_DATA_V1::setFirmwareCrc(uint32_t value)
 {
-	m_firmwareCrc1 = qToBigEndian(value);
-}
-
-uint32_t CONF_SERVICE_DATA_V1::firmwareCrc2() const
-{
-	return qFromBigEndian(m_firmwareCrc2);
-}
-void CONF_SERVICE_DATA_V1::setFirmwareCrc2(uint32_t value)
-{
-	m_firmwareCrc2 = qToBigEndian(value);
+    m_firmwareCrc = qToBigEndian(value);
 }
 
 //
@@ -824,7 +808,7 @@ void Configurator::readConfigurationWorker(int /*param*/)
 	return;
 }
 
-void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2)
+void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc)
 {
 	emit communicationStarted();
 
@@ -1013,8 +997,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
                 writeServiceStruct.setConfigureYear(now.year());
                 writeServiceStruct.setConfigureMonth(now.month());
                 writeServiceStruct.setConfigureDay(now.day());
-                writeServiceStruct.setFirmwareCrc1(firmwareCrc1);
-                writeServiceStruct.setFirmwareCrc2(firmwareCrc2);
+                writeServiceStruct.setFirmwareCrc(firmwareCrc);
 
                 std::vector<quint8> writeData;
                 writeData.resize(blockSize, 0);

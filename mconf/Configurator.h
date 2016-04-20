@@ -93,8 +93,8 @@ typedef CONF_HEADER_V1 CONF_HEADER;	// Current version (ProtocolMaxVersion) Head
 #pragma pack(push, 1)
 struct CONF_SERVICE_DATA_V1
 {
-    uint16_t m_moduleId;				// Radiys ID of UART Interface ID Code
-	uint16_t m_diagVersion;					// Diagnostics version (NOT THIS STRUCT VERSION, STRUCT VERSION DEFINED TROUGH CONF_HEADER_V1::version)
+    uint16_t m_reserve0_0;				// Radiys ID of UART Interface ID Code
+    uint16_t m_reserve0_1;					// Diagnostics version (NOT THIS STRUCT VERSION, STRUCT VERSION DEFINED TROUGH CONF_HEADER_V1::version)
 	uint32_t m_factoryNo;				// Factory No
 	uint16_t m_manufactureYear;			// Manufacturing date
 	uint16_t m_manufactureMonth;		// 
@@ -102,11 +102,11 @@ struct CONF_SERVICE_DATA_V1
 	uint16_t m_configureYear;			// Configuration date
 	uint16_t m_configureMonth;			//
 	uint16_t m_configureDay;			//
-	uint16_t m_reserve1;				// Reserve
-	uint16_t m_firmwareVersion1;		// Firmware version 1
-	uint16_t m_firmwareVersion2;		// Firmware version 2
-	uint32_t m_firmwareCrc1;			// Firmware Crc1
-	uint32_t m_firmwareCrc2;			// Firmware Crc2
+    uint16_t m_reserve1_0;				// Reserve
+    uint16_t m_reserve1_1;		// Firmware version 1
+    uint16_t m_reserve1_2;		// Firmware version 2
+    uint32_t m_firmwareCrc;			// Firmware Crc1
+    uint32_t m_reserve2_0;			// Firmware Crc2
 	uint16_t m_reserve3_0;				// Reserve 3 -- size 16bit words
 	uint16_t m_reserve3_1;				//
 	uint16_t m_reserve3_2;				//
@@ -116,8 +116,6 @@ struct CONF_SERVICE_DATA_V1
 
 	// set/get members
 	//
-	uint16_t diagVersion() const;
-	void setDiagVersion(uint16_t value);
 
 	uint32_t factoryNo() const;
 	void setFactoryNo(uint32_t value);
@@ -140,11 +138,8 @@ struct CONF_SERVICE_DATA_V1
 	uint16_t configureDay() const;
 	void setConfigureDay(uint16_t value);
 
-	uint32_t firmwareCrc1() const;
-	void setFirmwareCrc1(uint32_t value);
-
-	uint32_t firmwareCrc2() const;
-	void setFirmwareCrc2(uint32_t value);
+    uint32_t firmwareCrc() const;
+    void setFirmwareCrc(uint32_t value);
 
 	// --
 	//
@@ -216,7 +211,7 @@ public slots:
 	void setSettings(QString device, bool showDebugInfo);
 	void readConfiguration(int param);
 	void readConfigurationWorker(int param);
-	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
+    void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 	void writeConfData(ModuleFirmware* conf);
 	void readFirmware(QString fileName);
 	void eraseFlashMemory(int param);
