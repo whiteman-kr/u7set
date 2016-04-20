@@ -24,7 +24,7 @@ namespace Builder
 		}
 	}
 
-	QObject* JsSignalSet::getSignalByDeviceStrID(const QString& deviceStrID)
+    QObject* JsSignalSet::getSignalByEquipmentID(const QString& deviceID)
 	{
 		if (m_signalSet == nullptr)
 		{
@@ -34,7 +34,7 @@ namespace Builder
 
 		for (int i = 0; i < m_signalSet->count(); i++)
 		{
-			if ((*m_signalSet)[i].deviceStrID() == deviceStrID)
+            if ((*m_signalSet)[i].deviceStrID() == deviceID)
 			{
 				QObject* c = &(*m_signalSet)[i];
 				QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);

@@ -35,7 +35,7 @@ namespace Builder
 
 	public:
 		JsSignalSet(SignalSet* signalSet);
-		Q_INVOKABLE QObject* getSignalByDeviceStrID(const QString& deviceStrID);
+        Q_INVOKABLE QObject* getSignalByEquipmentID(const QString& deviceID);
 	};
 
 
