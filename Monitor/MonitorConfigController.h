@@ -44,8 +44,19 @@ public:
 	MonitorConfigController(HostAddressPort address1, HostAddressPort address2);
 	virtual ~MonitorConfigController();
 
+	// Methods
+	//
 public:
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
+	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
+	// signals
+	//
+signals:
+	void configurationArrived(ConfigSettings configuration);
+
+	// slots
+	//
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 

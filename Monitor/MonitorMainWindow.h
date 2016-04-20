@@ -1,16 +1,17 @@
 #ifndef MONITORMAINWINDOW_H
 #define MONITORMAINWINDOW_H
 
+#include "MonitorConfigController.h"
+#include "SchemaManager.h"
 
 class MonitorCentralWidget;
-
 
 class MonitorMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorMainWindow(QWidget* parent = nullptr);
+	explicit MonitorMainWindow(MonitorConfigController* configController, QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
 	// Events
@@ -56,6 +57,9 @@ protected:
 	// Data
 	//
 private:
+
+	MonitorConfigController* m_configController = nullptr;
+	SchemaManager m_schemaManager;
 
 	// File menu
 	//

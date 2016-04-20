@@ -5,10 +5,14 @@
 #include "MonitorSchemaWidget.h"
 #include "../VFrame30/Schema.h"
 
-MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
-	QMainWindow(parent)
+MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, QWidget *parent) :
+	QMainWindow(parent),
+	m_configController(configController),
+	m_schemaManager(m_configController)
 {
 	qDebug() << Q_FUNC_INFO;
+
+	assert(m_configController);
 
 	// --
 	//

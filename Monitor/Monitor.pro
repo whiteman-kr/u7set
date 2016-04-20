@@ -54,7 +54,8 @@ SOURCES += main.cpp \
     MonitorSchemaView.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
-    MonitorConfigController.cpp
+    MonitorConfigController.cpp \
+    SchemaManager.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -71,7 +72,8 @@ HEADERS  += \
     MonitorSchemaView.h \
     MonitorSchemaWidget.h \
     ../include/Types.h \
-    MonitorConfigController.h
+    MonitorConfigController.h \
+    SchemaManager.h
 
 FORMS    += \
     DialogSettings.ui

@@ -1,9 +1,13 @@
 #include "Stable.h"
 #include "Schema.h"
+#include "LogicSchema.h"
+#include "MonitorSchema.h"
+#include "DiagSchema.h"
 #include "FblItem.h"
 #include "SchemaItemLink.h"
 #include "HorzVertLinks.h"
 #include "../include/ProtoSerialization.h"
+
 
 namespace VFrame30
 {
@@ -699,6 +703,21 @@ namespace VFrame30
 
 		// update schema items
 		//
+	}
+
+	bool Schema::isLogicSchema() const
+	{
+		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
+	}
+
+	bool Schema::isMonitorSchema() const
+	{
+		return dynamic_cast<const VFrame30::MonitorSchema*>(this) != nullptr;
+	}
+
+	bool Schema::isDiagSchema() const
+	{
+		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
 
 

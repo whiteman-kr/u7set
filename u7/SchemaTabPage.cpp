@@ -260,17 +260,45 @@ void SchemaControlTabPage::addFile()
 	//
 	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
 
+	// Set New Guid
+	//
 	schema->setGuid(QUuid::createUuid());
 
-	schema->setSchemaID("#STRID");
+	// Set default ID
+	//
+	QString defaultId = "SCHEMAID";
+
+	if (schema->isLogicSchema() == true)
+	{
+		defaultId = "APPSCHEMAID";
+	}
+
+	if (schema->isMonitorSchema() == true)
+	{
+		defaultId = "MONITORSCHEMAID";
+	}
+
+	if (schema->isDiagSchema() == true)
+	{
+		defaultId = "DIAGSCHEMAID";
+	}
+
+	schema->setSchemaID(defaultId);
+
+	// Set Caption
+	//
 	schema->setCaption("Caption");
 
+	// Set default EqupmnetIDs for LogicSchema
+	//
 	if (dynamic_cast<VFrame30::LogicSchema*>(schema.get()) != nullptr)
 	{
 		VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
 		logicSchema->setEquipmentIds("SYSTEMID_RACKID_CH01_MD00");
 	}
 
+	// Set Width and Height
+	//
 	if (schema->unit() == VFrame30::SchemaUnit::Display)
 	{
 		schema->setDocWidth(1280);
@@ -284,12 +312,16 @@ void SchemaControlTabPage::addFile()
 		schema->setDocHeight(297.0 / 25.4);
 	}
 
+	// Show dialog to edit schema properties
+	//
 	CreateSchemaDialog propertiesDialog(schema, this);
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
+	//  Save file in DB
+	//
 	QByteArray data;
 	schema->Save(data);
 

@@ -148,6 +148,35 @@ MonitorConfigController::~MonitorConfigController()
 	delete m_cfgLoaderThread;
 }
 
+bool MonitorConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread != nullptr);
+		return false;
+	}
+
+	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
+
+	if (result == false)
+	{
+		qDebug() << "MonitorConfigController::getFileBlocked: Can't get file " << pathFileName;
+	}
+
+	return result;
+}
+
+bool MonitorConfigController::getFile(const QString& pathFileName, QByteArray* fileData)
+{
+	Q_UNUSED(pathFileName);
+	Q_UNUSED(fileData);
+
+	// To do
+	//
+	assert(false);
+	return false;
+}
+
 void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
@@ -213,6 +242,10 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
 	qDebug() << "DAS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
 	qDebug() << "DAS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+
+	// Emit signal to inform everybody about new configuration
+	//
+	emit configurationArrived(readSettings);
 
 	return;
 }

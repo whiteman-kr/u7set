@@ -99,6 +99,10 @@ namespace VFrame30
 
 		const Afb::AfbElementCollection& afbCollection() const;
 		void setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements);
+
+		bool isLogicSchema() const;
+		bool isMonitorSchema() const;
+		bool isDiagSchema() const;
 		
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;
