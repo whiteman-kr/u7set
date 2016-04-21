@@ -1063,7 +1063,7 @@ namespace Builder
 					{
 						// HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2')
 						//
-						m_log->wrnALP4002(schame->schemaID(), strid);
+						m_log->errALP4002(schame->schemaID(), strid);
 						continue;
 					}
 
@@ -1071,7 +1071,7 @@ namespace Builder
 					{
 						// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 						//
-						m_log->wrnALP4003(schame->schemaID(), strid);
+						m_log->errALP4003(schame->schemaID(), strid);
 						continue;
 					}
 					else
@@ -1085,7 +1085,7 @@ namespace Builder
 						{
 							// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
 							//
-							m_log->wrnALP4003(schame->schemaID(), strid);
+							m_log->errALP4003(schame->schemaID(), strid);
 							continue;
 						}
 					}

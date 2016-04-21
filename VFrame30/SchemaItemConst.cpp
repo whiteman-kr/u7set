@@ -13,14 +13,18 @@ namespace VFrame30
 	SchemaItemConst::SchemaItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemaItemConst::type, SchemaItemConst::setType);
-		ADD_PROPERTY_GETTER_SETTER(int, ValueIntegral, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
-		ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemaItemConst::type, SchemaItemConst::setType);
+		auto valIntProp = ADD_PROPERTY_GETTER_SETTER(int, ValueInteger, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
+		auto valFloatProp = ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
+
+		typeProp->setCategory("Functional");
+		valIntProp->setCategory("Functional");
+		valFloatProp->setCategory("Functional");
+		precisionProp->setCategory("Functional");
 
 		// --
 		//
-
 		addOutput();
 	}
 
@@ -141,7 +145,7 @@ namespace VFrame30
 
 		switch (type())
 		{
-			case ConstType::IntegralType:
+			case ConstType::IntegerlType:
 				text = QString::number(intValue());
 				break;
 			case ConstType::FloatType:
@@ -172,7 +176,7 @@ namespace VFrame30
 
 	bool SchemaItemConst::isIntegral() const
 	{
-		return m_type == SchemaItemConst::ConstType::IntegralType;
+		return m_type == SchemaItemConst::ConstType::IntegerlType;
 	}
 
 	bool SchemaItemConst::isFloat() const

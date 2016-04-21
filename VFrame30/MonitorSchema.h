@@ -4,7 +4,7 @@
 
 namespace VFrame30
 {
-	// Технологический видеокадр
+	// Schema for Monitor Application
 	//
 	class VFRAME30LIBSHARED_EXPORT MonitorSchema : public Schema
 	{
