@@ -4614,9 +4614,18 @@ void EditSchemaWidget::addFblElement()
 	for (auto& f : files)
 	{
 		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
-		result = afb->loadFromXml(f->data());
 
-		elements.push_back(afb);
+        QString errorMsg;
+        result = afb->loadFromXml(f->data(), errorMsg);
+        if (result == true)
+        {
+            elements.push_back(afb);
+        }
+        else
+        {
+            QMessageBox::critical(this, "Error loading AFB element", errorMsg);
+        }
+
 	}
 
 	schema()->setAfbCollection(elements);

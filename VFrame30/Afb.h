@@ -48,6 +48,8 @@ namespace Afb
             SQRT = 16,
             LIM = 17,
             PID = 18,
+            First = LOGIC,
+            Last = PID,
 		};
 
 		AfbType();
@@ -266,8 +268,8 @@ private:
 		friend Proto::ObjectSerialization<AfbElement>;
 
 	public:
-		bool loadFromXml(const Proto::AfbElementXml& data);
-		bool loadFromXml(const QByteArray& data);
+        bool loadFromXml(const Proto::AfbElementXml& data, QString &errorMsg);
+        bool loadFromXml(const QByteArray& data, QString &errorMsg);
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 
 		bool saveToXml(Proto::AfbElementXml* dst) const;
