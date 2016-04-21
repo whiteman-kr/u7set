@@ -26,6 +26,8 @@ protected:
 	// Methods
 	//
 public:
+	QString schemaId() const;
+	QString caption() const;
 
 	// Signals
 	//

@@ -22,3 +22,23 @@ void MonitorSchemaWidget::createActions()
 {
 
 }
+
+QString MonitorSchemaWidget::schemaId() const
+{
+	if (schema() == nullptr)
+	{
+		return QString();
+	}
+
+	return schema()->schemaID();
+}
+
+QString MonitorSchemaWidget::caption() const
+{
+	if (schema() == nullptr)
+	{
+		return QString();
+	}
+
+	return schema()->caption();
+}
