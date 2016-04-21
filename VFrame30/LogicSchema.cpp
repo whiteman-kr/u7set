@@ -5,6 +5,8 @@ namespace VFrame30
 {
 	LogicSchema::LogicSchema(void)
 	{
+		qDebug() << "LogicSchema::LogicSchema(void)";
+
 		ADD_PROPERTY_GETTER_SETTER(QString, EquipmentIDs, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds)
 
 		setUnit(SchemaUnit::Inch);
@@ -24,6 +26,7 @@ namespace VFrame30
 
 	LogicSchema ::~LogicSchema (void)
 	{
+		qDebug() << "LogicSchema::~LogicSchema(void)";
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const
