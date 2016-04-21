@@ -211,8 +211,8 @@ void MultiThreadSignalTest::run()
 
 		sd.signalId = signalId;
 		sd.signalInstanceId = checkedOutInstanceId;
-		sd.strId = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
-		sd.extStrId = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
+		sd.appSignalID = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
+		sd.customAppSignalID = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
 		sd.caption = "thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId);
 		sd.dataFormatId = 1;
 		sd.dataSize = 2;
@@ -239,7 +239,7 @@ void MultiThreadSignalTest::run()
 		sd.decimalPlaces = 21;
 		sd.aperture = 22;
 		sd.inOutType = 23;
-		sd.deviceStrId = "dviceStrId";
+		sd.equipmentID = "dviceStrId";
 		sd.outputRangeMode = 24;
 		sd.filteringTime = 25;
 		sd.maxDifference = 26;
@@ -261,8 +261,8 @@ void MultiThreadSignalTest::run()
 		arguments.append(QString("'%1', %2, '%3', '%4', '%5', %6, %7, %8, %9, %10, ")
 						 .arg(sd.instanceCreated)
 						 .arg(sd.action)
-						 .arg(sd.strId)
-						 .arg(sd.extStrId)
+						 .arg(sd.appSignalID)
+						 .arg(sd.customAppSignalID)
 						 .arg(sd.caption)
 						 .arg(sd.dataFormatId)
 						 .arg(sd.dataSize)
@@ -295,7 +295,7 @@ void MultiThreadSignalTest::run()
 						 .arg(sd.inOutType));
 
 		arguments.append(QString("'%1', %2, %3, %4, %5, '%6'")
-						 .arg(sd.deviceStrId)
+						 .arg(sd.equipmentID)
 						 .arg(sd.outputRangeMode)
 						 .arg(sd.filteringTime)
 						 .arg(sd.maxDifference)
@@ -361,13 +361,13 @@ void MultiThreadSignalTest::run()
 			error = true;
 		}
 
-		if (query.value("strId") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
+		if (query.value("appSignalID") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
 		{
 			qDebug() << "Error in data read-write: wrong strId\nThread: " << m_threadNumber << "\nSigal: " << signalId;
 			error = true;
 		}
 
-		if (query.value("extStrId") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
+		if (query.value("customAppSignalID") != QString("thread_" + QString::number(m_threadNumber) + " signalId_" + QString::number(signalId)))
 		{
 			qDebug() << "Error in data read-write: wrong extStrId\nThread: " << m_threadNumber << "\nSigal: " << signalId;
 			error = true;

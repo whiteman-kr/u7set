@@ -18,7 +18,7 @@ namespace VFrame30
 	public:
 		enum ConstType
 		{
-			IntegralType,
+			IntegerlType,
 			FloatType
 		};
 		Q_ENUM(ConstType)

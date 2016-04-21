@@ -8,7 +8,7 @@
 MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, QWidget *parent) :
 	QMainWindow(parent),
 	m_configController(configController),
-	m_schemaManager(m_configController)
+	m_schemaManager(configController)
 {
 	qDebug() << Q_FUNC_INFO;
 
@@ -16,7 +16,8 @@ MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, 
 
 	// --
 	//
-	setCentralWidget(new MonitorCentralWidget());
+	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager);
+	setCentralWidget(monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
 	//
@@ -234,11 +235,10 @@ void MonitorMainWindow::debug()
 
 	// Create tab
 	//
-	QTabWidget* tabWidget = monitorCentralWidget();
+//	QTabWidget* tabWidget = monitorCentralWidget();
 
-
-	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
-	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
+//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
+//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
 }

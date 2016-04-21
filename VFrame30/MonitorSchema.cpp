@@ -6,6 +6,8 @@ namespace VFrame30
 
 	MonitorSchema::MonitorSchema(void)
 	{
+		qDebug() << "MonitorSchema::MonitorSchema(void)";
+
 		setUnit(SchemaUnit::Display);
 
 		setGridSize(Settings::defaultGridSize(unit()));
@@ -22,5 +24,6 @@ namespace VFrame30
 	
 	MonitorSchema::~MonitorSchema(void)
 	{
+		qDebug() << "MonitorSchema::~MonitorSchema(void)";
 	}
 }

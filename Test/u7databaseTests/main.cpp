@@ -12,7 +12,7 @@
 #include "ProjectPropertyTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 45;
+const int DatabaseProjectVersion = 46;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";

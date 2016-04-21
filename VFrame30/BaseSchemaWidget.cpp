@@ -10,7 +10,7 @@ namespace VFrame30
 		assert(schema != nullptr);
 		assert(schemaView != nullptr);
 
-		setBackgroundRole(QPalette::Dark);
+		setBackgroundRole(QPalette::Window);
 		setAlignment(Qt::AlignCenter);
 		setMouseTracking(true);
 
