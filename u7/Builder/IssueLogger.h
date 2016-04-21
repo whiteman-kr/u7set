@@ -70,8 +70,8 @@ namespace Builder
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
 		void wrnALP4001(QString schema);
-		void wrnALP4002(QString schema, QString hardwareStrId);
-		void wrnALP4003(QString schema, QString hardwareStrId);
+		void errALP4002(QString schema, QString hardwareStrId);
+		void errALP4003(QString schema, QString hardwareStrId);
 		void wrnALP4004(QString schema);
 		void wrnALP4005(QString schema);	// Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').
 		void errALP4006(QString schema, QString schemaItem, QString pin, QUuid itemUuid);
