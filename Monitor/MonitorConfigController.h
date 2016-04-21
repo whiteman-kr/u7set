@@ -64,8 +64,8 @@ private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	bool xmlReadSoftwareNode(QDomNode& softwareNode, ConfigSettings* outSetting);
-	bool xmlReadSettingsNode(QDomNode& settingsNode, ConfigSettings* outSetting);
+	bool xmlReadSoftwareNode(QDomNode&& softwareNode, ConfigSettings* outSetting);
+	bool xmlReadSettingsNode(QDomNode&& settingsNode, ConfigSettings* outSetting);
 
 	// Data section
 	//

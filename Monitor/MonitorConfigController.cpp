@@ -279,7 +279,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	return;
 }
 
-bool MonitorConfigController::xmlReadSoftwareNode(QDomNode& softwareNode, ConfigSettings* outSetting)
+bool MonitorConfigController::xmlReadSoftwareNode(QDomNode&& softwareNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
 		softwareNode.nodeName() != "Software")
@@ -318,7 +318,7 @@ bool MonitorConfigController::xmlReadSoftwareNode(QDomNode& softwareNode, Config
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool MonitorConfigController::xmlReadSettingsNode(QDomNode& settingsNode, ConfigSettings* outSetting)
+bool MonitorConfigController::xmlReadSettingsNode(QDomNode&& settingsNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
 		settingsNode.nodeName() != "Settings")
