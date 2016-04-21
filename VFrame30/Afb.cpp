@@ -41,7 +41,7 @@ namespace Afb
 #ifdef Q_DEBUG
 		if (toText(opCode) == "UNKNOWN")
 		{
-			assert(false);
+            //assert(false);
 			m_type = Type::UNKNOWN;
 			return;
 		}
@@ -915,17 +915,24 @@ namespace Afb
 		return *this;
 	}
 
-	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data)
+    bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString& errorMsg)
 	{
 		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
-		bool result = loadFromXml(ba);
-		return result;
+        bool result = loadFromXml(ba, errorMsg);
+
+        return result;
 	}
 
-	bool AfbElement::loadFromXml(const QByteArray& data)
+    bool AfbElement::loadFromXml(const QByteArray& data, QString& errorMsg)
 	{
 		QXmlStreamReader reader(data);
 		bool result = loadFromXml(&reader);
+
+        errorMsg.clear();
+        if (result == false)
+        {
+            errorMsg = reader.errorString();
+        }
 		return result;
 	}
 
@@ -1017,6 +1024,12 @@ namespace Afb
                     if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
 						int opCode = xmlReader->readElementText().toInt();
+
+                        if (opCode < Afb::AfbType::First || opCode > Afb::AfbType::Last)
+                        {
+                            xmlReader->raiseError(QObject::tr("AfbElement '%1': wrong opCode (%2), expected %3..%4.").arg(strID()).arg(opCode).arg(Afb::AfbType::First).arg(Afb::AfbType::Last));
+                            return !xmlReader->hasError();
+                        }
 
 						Afb::AfbType type;
 						type.fromOpCode(opCode);
@@ -1625,9 +1638,13 @@ namespace Afb
 		for (int i = 0; i < message.elements_size(); i++)
 		{
 			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
-			e->loadFromXml(message.elements(i));
 
-			m_elements.push_back(e);
+            QString errorMsg;
+            bool result = e->loadFromXml(message.elements(i), errorMsg);
+            if (result == true)
+            {
+                m_elements.push_back(e);
+            }
 		}
 
 		return true;
