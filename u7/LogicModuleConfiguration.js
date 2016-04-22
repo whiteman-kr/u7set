@@ -284,6 +284,9 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     }
     
     var uartId = 0x0102; 
+	
+	var appWordsCount = module.jsPropertyInt("AppDataSize");
+    var diagWordsCount = module.jsPropertyInt("DiagDataSize");
     
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
     if (ssKeyValue == -1)
@@ -536,7 +539,6 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	
 	for (var i = 0; i < 2; i++)
 	{
-		var wordsCount = [0, 0];			//	Take from software!!!
 	
 		var ip = [0, 0];
 		var port = [0, 0];
@@ -598,8 +600,6 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				}
 			}	
 			
-			wordsCount[s] = module.propertyValue(servicesName[s] + "DataSize");
-	
 			ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
 			port[s] = ethernetController.propertyValue(servicesName[s] + "DataPort");
 				
@@ -609,8 +609,8 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			
 		
 		generate_LANConfiguration(confFirmware, log, lanFrame, module, 
-									wordsCount[0], ip[0], port[0], serviceIP[0], servicePort[0], 
-									wordsCount[1], ip[1], port[1], serviceIP[1], servicePort[1]);
+									appWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], 
+									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1]);
 		lanFrame++;
 	}
 	
