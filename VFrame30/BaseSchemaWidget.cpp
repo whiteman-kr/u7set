@@ -176,6 +176,18 @@ namespace VFrame30
 
 		QRect clientRect = geometry();
 
+		if (horizontalScrollBar() != nullptr &&
+			horizontalScrollBar()->isVisible())
+		{
+			clientRect.setHeight(clientRect.height() - horizontalScrollBar()->height());
+		}
+
+		if (verticalScrollBar() != nullptr &&
+			verticalScrollBar()->isVisible())
+		{
+			clientRect.setWidth(clientRect.width() - verticalScrollBar()->width());
+		}
+
 		int startX = 0;
 		int startY = 0;
 
