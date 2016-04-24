@@ -3466,13 +3466,7 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
 }
 
 
-QString DbWorker::toSqlStr(QString& str)
-{
-	return str.replace("'", "''");
-}
-
-
-QString DbWorker::toSqlStr(QString&& str)
+QString DbWorker::toSqlStr(QString str)
 {
 	return str.replace("'", "''");
 }
