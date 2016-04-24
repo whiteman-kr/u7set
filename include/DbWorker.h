@@ -63,8 +63,7 @@ public:
 
     std::vector<DbFileInfo> systemFiles() const;
 
-    static QString toSqlStr(QString& str);
-	static QString toSqlStr(QString&& str);
+	static QString toSqlStr(QString str);
 
     //
     // Operations
