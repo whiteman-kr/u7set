@@ -105,7 +105,7 @@ message Envelope
 {
 	// C++ Class for serizalization
 	//
-		required uint32 classnamehash = 1;			// Hash from classname, the way of getting the hash is always same
+	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always same
 
 	// Possible types for storing
 	//
@@ -117,6 +117,13 @@ message Envelope
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
 
+
+// This message is used for clipboard
+//
+message EnvelopeSet
+{
+	repeated Envelope schemaItems = 1;
+}
 
 //------------------------------------------------------------------------------------------
 //
@@ -337,7 +344,7 @@ message SchemaItem
 
 	// --
 	//
-		optional FblItem FblItem = 106;							//
+	optional FblItem FblItem = 106;							//
 	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
 	
@@ -354,7 +361,6 @@ message SchemaItem
 	optional SchemaItemAfb Afb = 128;						// +FblItemRect
 	optional SchemaItemConst ConstItem = 129;					// +FblItemRect
 }
-
 
 //
 //
