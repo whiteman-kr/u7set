@@ -106,8 +106,8 @@ public:
 		QString deleted;
 		QString instanceCreated;
 		int action = 0;
-		QString strId;
-		QString extStrId;
+		QString appSignalID;
+		QString customAppSignalID;
 		QString caption;
 		int dataFormatId = 0;
 		int dataSize = 0;
@@ -134,7 +134,7 @@ public:
 		int decimalPlaces = 0;
 		int aperture = 0;
 		int inOutType = 0;
-		QString deviceStrId;
+		QString equipmentID;
 		int outputRangeMode = 0;
 		int filteringTime = 0;
 		int maxDifference = 0;

@@ -11,6 +11,12 @@
                   <xs:sequence>
                     <xs:element name="Caption" type="xs:string" />
                     <xs:element name="Version" type="xs:decimal" />
+                    <xs:element name="Implementation">
+                      <xs:complexType>
+                        <xs:attribute name="Version" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="OpIndex" type="xs:unsignedInt" use="required" />
+                      </xs:complexType>
+                    </xs:element>
                     <xs:element name="Description" type="xs:string" />
                     <xs:element name="Category" type="xs:string" />
                     <xs:element name="OpCode" type="xs:unsignedInt" />
