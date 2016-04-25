@@ -1127,6 +1127,7 @@ namespace ExtWidgets
 							connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 						}
 						break;
+						*/
 					case QVariant::Bool:
 						{
 							QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
@@ -1138,7 +1139,6 @@ namespace ExtWidgets
 							connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 						}
 						break;
-*/
 					case QVariant::String:
 					case QVariant::Int:
 					case QVariant::UInt:
