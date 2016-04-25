@@ -53,6 +53,15 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 	};
 
 
+void addSchemaItem(const QByteArray& itemData);
+
+
+
+//
+// SchemaItemsClipboard
+//
+const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
+
 //
 //
 // EditSchemaView
@@ -1449,14 +1458,18 @@ void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>
 	emit selectionChanged();
 }
 
-void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item)
+void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
 {
 	auto fp = std::find(std::begin(m_selectedItems), std::end(m_selectedItems), item);
 
 	if (fp == std::end(m_selectedItems))
 	{
 		m_selectedItems.push_back(item);
-		emit selectionChanged();
+
+		if (emitSectionChanged == true)
+		{
+			emit selectionChanged();
+		}
 	}
 
 	return;
@@ -1473,14 +1486,18 @@ void EditSchemaView::clearSelection()
 	emit selectionChanged();
 }
 
-bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item)
+bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 
 	if (findResult != m_selectedItems.end())
 	{
 		m_selectedItems.erase(findResult);
-		emit selectionChanged();
+
+		if (emitSectionChanged == true)
+		{
+			emit selectionChanged();
+		}
 
 		// Was found and deleted
 		//
@@ -1723,7 +1740,7 @@ void EditSchemaWidget::createActions()
 	m_editCutAction = new QAction(tr("Cut"), this);
 	m_editCutAction->setEnabled(true);
 	m_editCutAction->setShortcut(QKeySequence::Cut);
-	//connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::___);
+	connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::editCut);
 	addAction(m_editCutAction);
 
 	// Edit->Copy
@@ -1731,7 +1748,7 @@ void EditSchemaWidget::createActions()
 	m_editCopyAction = new QAction(tr("Copy"), this);
 	m_editCopyAction->setEnabled(true);
 	m_editCopyAction->setShortcut(QKeySequence::Copy);
-	//connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::___);
+	connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::editCopy);
 	addAction(m_editCopyAction);
 
 	// Edit->Paste
@@ -1741,6 +1758,8 @@ void EditSchemaWidget::createActions()
 	m_editPasteAction->setShortcut(QKeySequence::Paste);
 	connect(m_editPasteAction, &QAction::triggered, this, &EditSchemaWidget::editPaste);
 	addAction(m_editPasteAction);
+
+	clipboardDataChanged();		// Enable m_editPasteAction if somthing in clipborad
 
 	// ------------------------------------
 	//
@@ -2653,13 +2672,15 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 
 			if (findResult != selectedItems().end())
 			{
-				editSchemaView()->removeFromSelection(*item);
+				editSchemaView()->removeFromSelection(*item, false);	// do emit SectionChanged manually, after the loop
 			}
 			else
 			{
-				editSchemaView()->addSelection(*item);
+				editSchemaView()->addSelection(*item, false);			// do emit SectionChanged manually, after the loopB
 			}
 		}
+
+		emit selectionChanged();
 	}
 
 	// --
@@ -4426,10 +4447,153 @@ void EditSchemaWidget::selectAll()
 	return;
 }
 
+void EditSchemaWidget::editCut()
+{
+	// Cut schema item(s) to clipboard
+	//
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+
+	// Save to protobuf message
+	//
+	::Proto::EnvelopeSet message;
+	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
+	{
+		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		si->Save(protoSchemaItem);
+	}
+
+	std::string dataString;
+	bool ok = message.SerializeToString(&dataString);
+
+	if (ok == false)
+	{
+		assert(ok);
+		return;
+	}
+
+	// Delete items, it a cut operation
+	//
+	m_editEngine->runDeleteItem(selected, editSchemaView()->activeLayer());
+
+	// Set data to clipboard
+	//
+	QByteArray ba(dataString.data(), static_cast<int>(dataString.size()));
+
+	if (ba.isEmpty() == false)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+
+		QMimeData* mime = new QMimeData();
+		mime->setData(SchemaItemClipboardData::mimeType, ba);
+
+		clipboard->clear();
+		clipboard->setMimeData(mime);
+	}
+
+	return;
+}
+
+
+void EditSchemaWidget::editCopy()
+{
+	// Copy schema item(s) to clipboard
+	//
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+
+	// Save to protobuf message
+	//
+	::Proto::EnvelopeSet message;
+	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
+	{
+		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		si->Save(protoSchemaItem);
+	}
+
+	std::string dataString;
+	bool ok = message.SerializeToString(&dataString);
+
+	if (ok == false)
+	{
+		assert(ok);
+		return;
+	}
+
+	// Set data to clipboard
+	//
+	QByteArray ba(dataString.data(), static_cast<int>(dataString.size()));
+
+	if (ba.isEmpty() == false)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+
+		QMimeData* mime = new QMimeData();
+		mime->setData(SchemaItemClipboardData::mimeType, ba);
+
+		clipboard->clear();
+		clipboard->setMimeData(mime);
+	}
+
+	return;
+}
+
 void EditSchemaWidget::editPaste()
 {
-	// To DO: Paste schema items
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (mimeData == nullptr)
+	{
+		return;
+	}
+
+	// Paste schema items
 	//
+	if (mimeData->hasFormat(SchemaItemClipboardData::mimeType) == true)
+	{
+		QByteArray cbData = mimeData->data(SchemaItemClipboardData::mimeType);
+
+		::Proto::EnvelopeSet message;
+		bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+
+		if (ok == false)
+		{
+			qDebug() << "CLIPBOARD ERROR!!! Data in the clipbaord are SchemaItems, but they are corrupted or wrong format!!!!";
+			return;
+		}
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
+
+		for (int i = 0; i < message.schemaitems_size(); i++)
+		{
+			const ::Proto::Envelope& schemaItemMessage = message.schemaitems(i);
+
+			VFrame30::SchemaItem* schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
+
+			if (schemaItem != nullptr)
+			{
+				schemaItem->setGuid(QUuid::createUuid());
+				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
+			}
+		}
+
+		if (itemList.empty() == false)
+		{
+			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
+		}
+
+		return;
+	}
+
 
 	// Paste appSignalID to SchemaItemSignal
 	//
@@ -4444,9 +4608,6 @@ void EditSchemaWidget::editPaste()
 			break;
 		}
 	}
-
-	const QClipboard* clipboard = QApplication::clipboard();
-	const QMimeData* mimeData = clipboard->mimeData();
 
 	if (allItemsAreSignals == true &&
 		mimeData->hasText() == true &&
@@ -4552,8 +4713,26 @@ void EditSchemaWidget::clipboardDataChanged()
 {
 	bool paste = false;
 
-	// TO DO: if same SchemaItems in the clipboard
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (mimeData == nullptr)
+	{
+		m_editPasteAction->setEnabled(false);
+		return;
+	}
+
+	// if same SchemaItems in the clipboard
 	//
+	QStringList hasFormats = mimeData->formats();
+	for (auto f : hasFormats)
+	{
+		if (f == SchemaItemClipboardData::mimeType)
+		{
+			m_editPasteAction->setEnabled(true);
+			return;
+		}
+	}
 
 	// if Any SchemaItemSignal is selected and AppSignalID is in the clipboard
 	//
@@ -4568,9 +4747,6 @@ void EditSchemaWidget::clipboardDataChanged()
 			break;
 		}
 	}
-
-	const QClipboard* clipboard = QApplication::clipboard();
-	const QMimeData* mimeData = clipboard->mimeData();
 
 	if (allItemsAreSignals == true &&
 		mimeData->hasText() == true &&

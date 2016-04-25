@@ -18,7 +18,7 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalIDs, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
+		ADD_PROPERTY_GET_SET_CAT(QString, AppSignalIDs, tr("Functional"), true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
 	}
 
 	SchemaItemSignal::~SchemaItemSignal(void)

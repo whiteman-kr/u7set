@@ -60,6 +60,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
 	{"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
 	{"Upgrade to version 46", ":/DatabaseUpgrade/Upgrade0046.sql"},
+    {"Upgrade to version 47", ":/DatabaseUpgrade/Upgrade0047.sql"},
+	{"Upgrade to version 48", ":/DatabaseUpgrade/Upgrade0048.sql"},
 };
 
 
@@ -3465,13 +3467,7 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
 }
 
 
-QString DbWorker::toSqlStr(QString& str)
-{
-	return str.replace("'", "''");
-}
-
-
-QString DbWorker::toSqlStr(QString&& str)
+QString DbWorker::toSqlStr(QString str)
 {
 	return str.replace("'", "''");
 }

@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-	logger.initLog("da.log", 10, 10, "");
+	logger.initLog(10, 10, argv[0]);
 
 	APP_MSG(logger, "Start");
 

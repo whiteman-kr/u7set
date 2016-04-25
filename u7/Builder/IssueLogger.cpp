@@ -418,46 +418,46 @@ namespace Builder
 
 	/// IssueCode: ALP4002
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title: HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2').
+	/// Title: EquipmentID '%1' is not found in the project equipment (Logic Schema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
 	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Schema has property HardwareStrIds but Logic Module with pointed StrID is not found in the project equipment.
+	///		Logic Schema has property EquipmentIDs but Logic Module with pointed StrID is not found in the project equipment.
 	///
-	void IssueLogger::wrnALP4002(QString schema, QString hardwareStrId)
+	void IssueLogger::errALP4002(QString schema, QString equipmentId)
 	{
-		LOG_WARNING(IssueType::AlParsing,
-					4002,
-					tr("HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2').")
-					.arg(hardwareStrId)
-					.arg(schema));
+		LOG_ERROR(IssueType::AlParsing,
+				  4002,
+				  tr("EquipmentID '%1' is not found in the project equipment (Logic Schema '%2').")
+				  .arg(equipmentId)
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4003
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title: HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
+	/// Title: EquipmentID '%1' must be LM family module type (Logic Schema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
 	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Schema has property HardwareStrIds but the equipment object with pointed StrID is not a module or is not LM family type.
+	///		Logic Schema has property EquipmentIDs but the equipment object with pointed StrID is not a module or is not LM family type.
 	///
-	void IssueLogger::wrnALP4003(QString schema, QString hardwareStrId)
+	void IssueLogger::errALP4003(QString schema, QString equipmentId)
 	{
-		LOG_WARNING(IssueType::AlParsing,
-					4003,
-					tr("HardwareStrId '%1' must be LM family module type (Logic Schema '%2').")
-					.arg(hardwareStrId)
-					.arg(schema));
+		LOG_ERROR(IssueType::AlParsing,
+				  4003,
+				  tr("EquipmentID '%1' must be LM family module type (Logic Schema '%2').")
+				  .arg(equipmentId)
+				  .arg(schema));
 	}
 
 	/// IssueCode: ALP4004

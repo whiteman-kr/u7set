@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include <QDebug>
+#include <assert.h>
 
 
 CircularLogger logger;
@@ -54,7 +55,31 @@ CircularLogger::~CircularLogger()
 
 void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
 {
-	m_circularLoggerWorker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, placementPath);
+	if (placementPath.isEmpty())
+	{
+		placementPath = qApp->applicationDirPath();
+	}
+	assert(!placementPath.isEmpty());
+
+	QFileInfo fi(placementPath);
+	QString logPath;
+	if (fi.isRelative())
+	{
+		logPath = qApp->applicationDirPath() + "/" + placementPath;
+	}
+	else
+	{
+		if (fi.isDir())
+		{
+			logPath = fi.absoluteFilePath();
+		}
+		else
+		{
+			logPath = fi.absolutePath();
+		}
+	}
+
+	m_circularLoggerWorker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, logPath);
 	m_thread = new QThread(this);
 	m_thread->start();
 	m_circularLoggerWorker->moveToThread(m_thread);
@@ -66,7 +91,25 @@ void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, Q
 
 void CircularLogger::initLog(int fileCount, int fileSizeInMB, QString placementPath)
 {
-	QFileInfo fi(qApp->applicationFilePath());
+	QString filePath;
+	if (qApp != nullptr && !qApp->applicationFilePath().isEmpty())
+	{
+		filePath = qApp->applicationFilePath();
+	}
+	if (filePath.isEmpty())
+	{
+		assert(!placementPath.isEmpty());
+		filePath = placementPath;
+	}
+
+	QFileInfo fi(filePath);
+
+	if (!fi.isFile())
+	{
+		assert(fi.isFile());
+		return;
+	}
+
 	initLog(fi.baseName(), fileCount, fileSizeInMB, placementPath);
 }
 

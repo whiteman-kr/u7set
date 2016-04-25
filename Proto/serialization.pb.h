@@ -40,6 +40,7 @@ class wstring;
 class FontParam;
 class SchemaPoint;
 class Envelope;
+class EnvelopeSet;
 class Configuration;
 class AfbElementCollection;
 class AfbElementXml;
@@ -813,6 +814,91 @@ class Envelope : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Envelope* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class EnvelopeSet : public ::google::protobuf::Message {
+ public:
+  EnvelopeSet();
+  virtual ~EnvelopeSet();
+
+  EnvelopeSet(const EnvelopeSet& from);
+
+  inline EnvelopeSet& operator=(const EnvelopeSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const EnvelopeSet& default_instance();
+
+  void Swap(EnvelopeSet* other);
+
+  // implements Message ----------------------------------------------
+
+  EnvelopeSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const EnvelopeSet& from);
+  void MergeFrom(const EnvelopeSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.Envelope schemaItems = 1;
+  inline int schemaitems_size() const;
+  inline void clear_schemaitems();
+  static const int kSchemaItemsFieldNumber = 1;
+  inline const ::Proto::Envelope& schemaitems(int index) const;
+  inline ::Proto::Envelope* mutable_schemaitems(int index);
+  inline ::Proto::Envelope* add_schemaitems();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
+      schemaitems() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
+      mutable_schemaitems();
+
+  // @@protoc_insertion_point(class_scope:Proto.EnvelopeSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > schemaitems_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static EnvelopeSet* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -6129,6 +6215,35 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
   } else {
     clear_has_configuration();
   }
+}
+
+// -------------------------------------------------------------------
+
+// EnvelopeSet
+
+// repeated .Proto.Envelope schemaItems = 1;
+inline int EnvelopeSet::schemaitems_size() const {
+  return schemaitems_.size();
+}
+inline void EnvelopeSet::clear_schemaitems() {
+  schemaitems_.Clear();
+}
+inline const ::Proto::Envelope& EnvelopeSet::schemaitems(int index) const {
+  return schemaitems_.Get(index);
+}
+inline ::Proto::Envelope* EnvelopeSet::mutable_schemaitems(int index) {
+  return schemaitems_.Mutable(index);
+}
+inline ::Proto::Envelope* EnvelopeSet::add_schemaitems() {
+  return schemaitems_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
+EnvelopeSet::schemaitems() const {
+  return schemaitems_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
+EnvelopeSet::mutable_schemaitems() {
+  return &schemaitems_;
 }
 
 // -------------------------------------------------------------------

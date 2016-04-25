@@ -362,10 +362,10 @@ namespace ExtWidgets
 	//
 	// ---------MultiLineEdit----------
 	//
-    MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
-		QDialog(parent, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
+	MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text, const QString &caption):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
 	{
-		setWindowTitle("Text Editor");
+		setWindowTitle(caption);
 
 		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
@@ -378,8 +378,13 @@ namespace ExtWidgets
 		QVBoxLayout* vl = new QVBoxLayout();
 
 		m_textEdit = new QTextEdit(this);
-		m_textEdit->setTabChangesFocus(true);
+		m_textEdit->setTabChangesFocus(false);
 		m_textEdit->setPlainText(value);
+
+		m_textEdit->blockSignals(true);
+		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+		m_textEdit->blockSignals(false);
+
 
 		QPushButton* okButton = new QPushButton("OK", this);
 		QPushButton* cancelButton = new QPushButton("Cancel", this);
@@ -388,6 +393,8 @@ namespace ExtWidgets
 
 		connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
 		connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+
+		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
 		QHBoxLayout *hl = new QHBoxLayout();
 		hl->addStretch();
@@ -406,11 +413,13 @@ namespace ExtWidgets
 		return m_text;
 	}
 
-	void MultiLineEdit::closeEvent(QCloseEvent *event)
+	void MultiLineEdit::finished(int result)
 	{
-		Q_UNUSED(event);
+		Q_UNUSED(result);
+
 		theSettings.m_multiLinePropertyEditorWindowPos = pos();
 		theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+
 	}
 
 	void MultiLineEdit::accept()
@@ -430,23 +439,30 @@ namespace ExtWidgets
 	// ---------QtMultiTextEdit----------
 	//
 
-	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent):
-		QWidget(parent)
+	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption):
+		QWidget(parent),
+		m_userType(userType),
+		m_caption(caption)
 	{
 		m_lineEdit = new QLineEdit(parent);
-
-        m_button = new QToolButton(parent);
-        m_button->setText("...");
-
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 
-        connect(m_button, &QToolButton::clicked, this, &QtMultiTextEdit::onButtonPressed);
+		if (userType == QVariant::String)
+		{
+			m_button = new QToolButton(parent);
+			m_button->setText("...");
+
+			connect(m_button, &QToolButton::clicked, this, &QtMultiTextEdit::onButtonPressed);
+		}
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
 		lt->addWidget(m_lineEdit);
-        lt->addWidget(m_button, 0, Qt::AlignRight);
+		if (m_button != nullptr)
+		{
+			lt->addWidget(m_button, 0, Qt::AlignRight);
+		}
 
 		setLayout(lt);
 
@@ -476,7 +492,7 @@ namespace ExtWidgets
 
 	void QtMultiTextEdit::onButtonPressed()
 	{
-		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text());
+		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text(), m_caption);
 		if (multlLineEdit->exec() == QDialog::Accepted)
 		{
             m_lineEdit->blockSignals(true);
@@ -501,27 +517,111 @@ namespace ExtWidgets
 			return;
 		}
 
-        m_oldValue = property->value().toString();
-        m_lineEdit->setText(m_oldValue);
+		switch (m_userType)
+		{
+		case QVariant::String:
+			{
+				m_oldValue = property->value().toString();
+				m_lineEdit->setText(m_oldValue.toString());
+			}
+			break;
+		case QVariant::Int:
+		{
+			m_oldValue = property->value().toInt();
+			m_lineEdit->setText(QString::number(m_oldValue.toInt()));
+		}
+			break;
+		case QVariant::UInt:
+		{
+			m_oldValue = property->value().toUInt();
+			m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
+		}
+			break;
+		case QVariant::Double:
+		{
+			m_oldValue = property->value().toDouble();
+			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), 'f', property->precision()));
+		}
+			break;
+		default:
+			assert(false);
+			return;
+		}
+
+
         m_lineEdit->setReadOnly(property->readOnly());
-        m_button->setEnabled(property->readOnly() == false);
+
+		if (m_button != nullptr)
+		{
+			m_button->setEnabled(property->readOnly() == false);
+		}
 	}
 
 	void QtMultiTextEdit::onEditingFinished()
 	{
-        m_lineEdit->blockSignals(true);
-
-		if (m_escape == false)
+		if (m_escape == true)
 		{
-			if (m_lineEdit->text() != m_oldValue)
+			return;
+		}
+
+		m_lineEdit->blockSignals(true);
+
+/*		if (m_lineEdit->text() != m_oldValue)
+		{
+			   emit valueChanged(m_lineEdit->text());
+		}*/
+		switch (m_userType)
+		{
+		case QVariant::String:
 			{
-                emit valueChanged(m_lineEdit->text());
+				if (m_lineEdit->text() != m_oldValue.toString())
+				{
+					m_oldValue = m_lineEdit->text();
+					emit valueChanged(m_lineEdit->text());
+				}
 			}
+			break;
+		case QVariant::Int:
+			{
+				bool ok = false;
+				int value = m_lineEdit->text().toInt(&ok);
+				if (ok == true && value != m_oldValue.toInt())
+				{
+					m_oldValue = value;
+					emit valueChanged(value);
+				}
+			}
+			break;
+		case QVariant::UInt:
+			{
+				bool ok = false;
+				uint value = m_lineEdit->text().toUInt(&ok);
+				if (ok == true && value != m_oldValue.toUInt())
+				{
+					m_oldValue = value;
+					emit valueChanged(value);
+				}
+			}
+			break;
+		case QVariant::Double:
+			{
+				bool ok = false;
+				double value = m_lineEdit->text().toDouble(&ok);
+				if (ok == true && value != m_oldValue.toDouble())
+				{
+					m_oldValue = value;
+					emit valueChanged(value);
+				}
+			}
+			break;
+		default:
+			assert(false);
+			return;
 		}
 
         m_lineEdit->blockSignals(false);
 	}
-
+/*
 	//
 	// ---------QtMultiDoubleSpinBox----------
 	//
@@ -566,7 +666,7 @@ namespace ExtWidgets
 		return QWidget::eventFilter(watched, event);
 	}
 
-    void QtMultiDoubleSpinBox::setValue(std::shared_ptr<Property> property)
+	void QtMultiDoubleSpinBox::setValue(std::shared_ptr<Property> property)
 	{
 		if (m_spinBox == nullptr)
 		{
@@ -798,7 +898,7 @@ namespace ExtWidgets
             emit valueChanged(value);
 		}
 	}
-
+*/
 	//
 	// ---------QtMultiCheckBox----------
 	//
@@ -1007,7 +1107,7 @@ namespace ExtWidgets
             {
                 switch(p->value().userType())
 				{
-					case QVariant::Int:
+/*					case QVariant::Int:
 						{
 							QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
 							editor = m_editor;
@@ -1037,6 +1137,7 @@ namespace ExtWidgets
 							connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 						}
 						break;
+						*/
 					case QVariant::Bool:
 						{
 							QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
@@ -1048,10 +1149,12 @@ namespace ExtWidgets
 							connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 						}
 						break;
-
 					case QVariant::String:
+					case QVariant::Int:
+					case QVariant::UInt:
+					case QVariant::Double:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption());
 							editor = m_editor;
                             m_editor->setValue(p);
 
@@ -1073,7 +1176,7 @@ namespace ExtWidgets
 
 					case QVariant::Uuid:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption());
 							editor = m_editor;
                             m_editor->setValue(p);
 

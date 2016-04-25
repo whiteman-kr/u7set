@@ -102,7 +102,7 @@
        <item row="4" column="0">
         <widget class="QLabel" name="labelOutputPath">
          <property name="text">
-          <string>Output Path</string>
+          <string>Build Output Path</string>
          </property>
         </widget>
        </item>
