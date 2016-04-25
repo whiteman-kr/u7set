@@ -1311,7 +1311,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
-	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
@@ -1330,6 +1330,22 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	{
 		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
 	}
+
+	m_tableHeadersContextMenuActions = new QActionGroup(this);
+	m_tableHeadersContextMenuActions->setExclusive(false);
+	QAction* columnAction = m_tableHeadersContextMenuActions->addAction("All columns");
+	columnAction->setCheckable(true);
+	columnAction->setChecked(settings.value("SignalsTabPage/ColumnVisibility/All columns", true).toBool());
+	for (int i = 0; i < COLUMNS_COUNT; i++)
+	{
+		columnAction = m_tableHeadersContextMenuActions->addAction(QString(Columns[i]).replace("\n", " "));
+		columnAction->setCheckable(true);
+		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), true).toBool();
+		columnAction->setChecked(checked);
+		m_signalsView->setColumnHidden(i, !checked);
+	}
+	m_signalsView->horizontalHeader()->addActions(m_tableHeadersContextMenuActions->actions());
+	connect(m_tableHeadersContextMenuActions, &QActionGroup::triggered, this, &SignalsTabPage::changeColumnVisibility);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -1374,8 +1390,14 @@ SignalsTabPage::~SignalsTabPage()
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(i));
+		QAction* columnVisibilityAction = m_tableHeadersContextMenuActions->actions()[i + 1];
+		if (columnVisibilityAction->isChecked())
+		{
+			saveColumnWidth(i);
+		}
+		settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), columnVisibilityAction->isChecked());
 	}
+	settings.setValue("SignalsTabPage/ColumnVisibility/All columns", m_tableHeadersContextMenuActions->actions()[0]->isChecked());
 }
 
 QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
@@ -1763,9 +1785,45 @@ void SignalsTabPage::clearSignalIdFilter()
 	m_filterEdit->setText("");
 }
 
+void SignalsTabPage::changeColumnVisibility(QAction* action)
+{
+	int columnIndex = m_tableHeadersContextMenuActions->actions().indexOf(action);
+	if (columnIndex == 0)
+	{
+		for (int i = 0; i < COLUMNS_COUNT; i++)
+		{
+			if (!action->isChecked())
+			{
+				saveColumnWidth(i);
+			}
+			m_signalsView->setColumnHidden(i, !action->isChecked());
+			m_tableHeadersContextMenuActions->actions()[i + 1]->setChecked(action->isChecked());
+		}
+	}
+	else
+	{
+		if (!action->isChecked())
+		{
+			saveColumnWidth(columnIndex - 1);
+		}
+		m_signalsView->setColumnHidden(columnIndex - 1, !action->isChecked());
+	}
+	if (m_signalsView->horizontalHeader()->hiddenSectionCount() == COLUMNS_COUNT)
+	{
+		m_signalsView->showColumn(SC_STR_ID);
+		m_tableHeadersContextMenuActions->actions()[SC_STR_ID + 1]->setChecked(true);
+	}
+}
+
 void SignalsTabPage::showError(QString message)
 {
 	QMessageBox::warning(this, "Error", message);
+}
+
+void SignalsTabPage::saveColumnWidth(int index)
+{
+	QSettings settings;
+	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(index));
 }
 
 
