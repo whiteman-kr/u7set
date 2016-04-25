@@ -170,7 +170,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit QtMultiTextEdit(QWidget* parent);
+		explicit QtMultiTextEdit(QWidget* parent, int userType);
         void setValue(std::shared_ptr<Property> property);
 
 	public slots:
@@ -189,10 +189,12 @@ namespace ExtWidgets
 		QLineEdit* m_lineEdit = nullptr;
         QToolButton* m_button = nullptr;
 		bool m_escape = false;
-		QString m_oldValue;
+		QVariant m_oldValue;
+		int m_userType = 0;
 	};
 
 
+	/*
 	class QtMultiDoubleSpinBox : public QWidget
 	{
 		Q_OBJECT
@@ -257,7 +259,7 @@ namespace ExtWidgets
 	private:
 		QSpinBox* m_spinBox = nullptr;
 		bool m_escape = false;
-	};
+	};*/
 
 
 	class QtMultiVariantPropertyManager : public QtAbstractPropertyManager
