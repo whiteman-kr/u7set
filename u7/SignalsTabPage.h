@@ -20,6 +20,7 @@ class QTimer;
 class QCheckBox;
 class QLineEdit;
 class QCompleter;
+class QActionGroup;
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -257,6 +258,8 @@ public slots:
 	void applySignalIdFilter();
 	void clearSignalIdFilter();
 
+	void changeColumnVisibility(QAction* action);
+
 	void showError(QString message);
 
 	// Data
@@ -268,6 +271,7 @@ private:
 	QComboBox* m_signalTypeFilterCombo = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_completer = nullptr;
+	QActionGroup* m_tableHeadersContextMenuActions = nullptr;
 	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
@@ -275,6 +279,8 @@ private:
 	QList<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
+
+	void saveColumnWidth(int index);
 };
 
 

@@ -2,6 +2,8 @@
 
 #include <QObject>
 #include "../include/SocketIO.h"
+#include "../include/XmlHelper.h"
+#include "../include/DataProtocols.h"
 
 
 enum DataSourceState
@@ -47,6 +49,8 @@ protected:
 };
 
 
+
+
 class DataSource : public QObject
 {
 public:
@@ -55,6 +59,8 @@ public:
 		App,
 		Diag,
 	};
+
+	static const char* const ELEMENT_DATA_SOURCE;
 
 private:
 
@@ -76,24 +82,46 @@ private:
 
 	// XML-serializable members
 	//
-	int m_ethernetChannel = 0;
+	const char* const DATA_TYPE_APP = "App";
+	const char* const DATA_TYPE_DIAG = "Diag";
+
+	const char* const PROP_CHANNEL = "Channel";
+	const char* const PROP_DATA_TYPE = "DataType";
+	const char* const PROP_LM_ID = "LmID";
+	const char* const PROP_LM_CAPTION = "LmCaption";
+	const char* const PROP_LM_ADAPTER_ID = "LmAdapterID";
+	const char* const PROP_LM_DATA_ENABLE = "LmDataEnable";
+	const char* const PROP_LM_DATA_IP = "LmDataIP";
+	const char* const PROP_LM_DATA_PORT = "LmDataPort";
+	const char* const PROP_LM_DATA_ID = "LmDataID";
+
+	int m_channel = 0;
 	DataType m_dataType = DataType::App;
 	QString m_lmStrID;
 	QString m_lmCaption;
 	QString m_lmAdapterStrID;
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
-	quint32 m_lmDataID = 0;
+	ulong m_lmDataID = 0;
+
+	RupFrame* m_rupFrames = nullptr;
+	int m_framesQuantity = 0;
+
+	char* m_framesData = nullptr;
+
+	void allocateMemory();
+	void mergeFrames();
 
 public:
-	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
+	DataSource();
+	~DataSource();
 
-	DataSource() {}
-	DataSource(const DataSource& ds);
-	DataSource& operator = (const DataSource& ds);
+//	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
+//	DataSource(const DataSource& ds);
+//	DataSource& operator = (const DataSource& ds);
 
-	int ethernetChannel() const { return m_ethernetChannel; }
-	void setEthernetChannel(int channel) { m_ethernetChannel = channel; }
+	int channel() const { return m_channel; }
+	void setChannel(int channel) { m_channel = channel; }
 
 	DataType dataType() const { return m_dataType; }
 	void setDataType(DataType dataType) { m_dataType = dataType; }
@@ -111,6 +139,8 @@ public:
 	void setLmDataEnable(bool lmDataEnable) { m_lmDataEnable = lmDataEnable; }
 
 	QString lmAddressStr() const { return m_lmAddressPort.addressStr(); }
+	quint32 lmAddress32() const { return m_lmAddressPort.address32(); }
+
 	void setLmAddressStr(const QString& addressStr) { m_lmAddressPort.setAddress(addressStr); }
 
 	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
@@ -120,8 +150,6 @@ public:
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
-
-
 
 	quint32 ID() const { return m_id; }
 	QHostAddress hostAddress() const { return m_hostAddress; }
@@ -151,12 +179,16 @@ public:
 	void stop();
 	void resume();
 
-	static QString dataTypeToString(DataType dataType);
-	static DataType stringToDataType(const QString& dataTypeStr);
+	QString dataTypeToString(DataType dataType);
+	DataType stringToDataType(const QString& dataTypeStr);
 
-	void serializeToXml(QXmlStreamWriter& xml);
-	void serializeFromXml(QXmlStreamWriter& xml);
+	void writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+
+	void processPacket(quint32 ip, const RupFrame& rupFrame);
 };
+
+
 
 
 

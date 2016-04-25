@@ -388,7 +388,6 @@ public:
 
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
-void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet);
 
 
 

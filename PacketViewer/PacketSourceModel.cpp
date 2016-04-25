@@ -256,7 +256,9 @@ void PacketSourceModel::loadProject(const QString& projectPath)
 		return;
 	}
 	m_dataSources.clear();
-	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+
+	//InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+
 	for (auto listener : m_listeners)
 	{
 		listener->reloadProject();
@@ -396,6 +398,7 @@ int Listener::getSourceIndex(quint32 ip, quint16 port)
 int Listener::addNewSource(quint32 ip, quint16 port)
 {
 	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, m_model->signalSet(), m_model->dataSources(), this));
+
 	connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
 	for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
@@ -448,7 +451,7 @@ void Listener::reloadProject()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource>& dataSources, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource*>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
@@ -607,13 +610,13 @@ void Source::removeDependentWidget(QObject* object)
 void Source::reloadProject()
 {
 	m_signalTableModel->beginReloadProject();
-	QHashIterator<quint32, DataSource> iterator(*m_dataSources);
+	QHashIterator<quint32, DataSource*> iterator(*m_dataSources);
 
 	while (iterator.hasNext())
 	{
 		iterator.next();
 
-		if (iterator.value().hostAddress().toIPv4Address() == ip())
+		if (iterator.value()->hostAddress().toIPv4Address() == ip())
 		{
 			m_signalTableModel->addDataSource(iterator.value());
 		}
@@ -659,3 +662,60 @@ void Source::swapHeader(RupFrameHeader& header)
 	swapBytes(header.TimeStamp.month);
 	swapBytes(header.TimeStamp.year);
 }
+
+/*
+void PacketSourceModel::InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+{
+	dataSources.clear();
+
+	if (deviceRoot == nullptr)
+	{
+		return;
+	}
+
+	Hardware::equipmentWalker(deviceRoot, [&dataSources, &signalSet](Hardware::DeviceObject* currentDevice)
+	{
+		if (currentDevice == nullptr)
+		{
+			return;
+		}
+		if (typeid(*currentDevice) != typeid(Hardware::DeviceModule))
+		{
+			return;
+		}
+		Hardware::DeviceModule* currentModule = dynamic_cast<Hardware::DeviceModule*>(currentDevice);
+		if (currentModule == nullptr)
+		{
+			return;
+		}
+		if (currentModule->moduleFamily() != Hardware::DeviceModule::LM)
+		{
+			return;
+		}
+		QStringList propertyList = QStringList() << "RegIP1" << "RegIP2";
+		for (QString prop : propertyList)
+		{
+			if (currentModule->propertyValue(prop).isValid())
+			{
+				int key = dataSources.count() + 1;
+				QString ipStr = currentModule->propertyValue(prop).toString();
+				QHostAddress ha(ipStr);
+				quint32 ip = ha.toIPv4Address();
+
+				DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+
+				QString signalPrefix = currentModule->parent()->equipmentIdTemplate();
+				int signalPrefixLength = signalPrefix.length();
+				for (int i = 0; i < signalSet.count(); i++)
+				{
+					if (signalSet[i].equipmentID().left(signalPrefixLength) == signalPrefix)
+					{
+						ds.addSignalIndex(i);
+					}
+				}
+
+				dataSources.insert(key, ds);
+			}
+		}
+	});
+}*/
