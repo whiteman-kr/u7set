@@ -41,6 +41,16 @@ void setCaption(QString value);
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
+// Add property which has getter, setter and category
+//
+#define ADD_PROPERTY_GET_SET_CAT(TYPE, NAME, CATEGORY, VISIBLE, GETTER, SETTER) \
+	addProperty<TYPE>(\
+			tr(#NAME), \
+			CATEGORY,\
+			VISIBLE,\
+			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+			std::bind(&SETTER, this, std::placeholders::_1));
+
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
@@ -673,6 +683,45 @@ public:
 		}
 
         return property.get();
+	}
+
+	template <typename TYPE>
+	PropertyValue<TYPE>* addProperty(QString caption,
+									 QString category,
+									 bool visible = false,
+									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
+									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
+	{
+		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
+
+		property->setCaption(caption);
+		property->setCategory(category);
+		property->setVisible(visible);
+		property->setGetter(getter);
+		property->setSetter(setter);
+
+		if (!getter)
+		{
+			property->setValue(QVariant::fromValue(TYPE()));
+		}
+
+		if (!setter)
+		{
+			property->setReadOnly(true);
+		}
+
+		auto alreadyExists = m_properties.find(caption);
+
+		if (alreadyExists == m_properties.end())
+		{
+			m_properties[caption] = property;
+		}
+		else
+		{
+			alreadyExists->second = property;
+		}
+
+		return property.get();
 	}
 
 	PropertyValue<OrderedHash<int, QString>>* addDynamicEnumProperty(
