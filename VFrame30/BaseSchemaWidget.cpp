@@ -137,15 +137,24 @@ namespace VFrame30
 			return;
 		}
 
-		if (event->button() == Qt::LeftButton)
-		{
-			// Check if item under cursor has AcceptClick
-			//
-		}
-
 		// Event was not accepted
 		//
 		event->setAccepted(false);
+		return;
+	}
+
+	void BaseSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
+	{
+		if (event->button() == Qt::MidButton)
+		{
+			// Leave scrolling mode;
+			//
+			unsetCursor();
+			event->accept();
+			return;
+		}
+
+		event->ignore();
 		return;
 	}
 

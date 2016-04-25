@@ -1,9 +1,14 @@
 #include "MonitorSchemaView.h"
+#include "SchemaManager.h"
 
-MonitorSchemaView::MonitorSchemaView(QWidget *parent)
-	: SchemaView(parent)
+MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *parent)
+	: SchemaView(parent),
+	  m_schemaManager(schemaManager)
 {
 	qDebug() << Q_FUNC_INFO;
+	assert(m_schemaManager);
+
+	return;
 }
 
 MonitorSchemaView::~MonitorSchemaView()
@@ -22,10 +27,7 @@ void MonitorSchemaView::runScript(const QString& script, VFrame30::SchemaItem* s
 		return;
 	}
 
-	QJSValue jsSchemaItem = m_jsEngine.newQObject(schemaItem);;
-	QQmlEngine::setObjectOwnership(schemaItem, QQmlEngine::CppOwnership);
-
-	// Run script
+	// Evaluate script
 	//
 	QJSValue jsEval = m_jsEngine.evaluate(script, "VFrame30::SchemaItem::ClickScript");
 	if (jsEval.isError() == true)
@@ -34,9 +36,23 @@ void MonitorSchemaView::runScript(const QString& script, VFrame30::SchemaItem* s
 		return;
 	}
 
-	QJSValueList args;
-	args << jsSchemaItem;
+	// Create JS params
+	//
+	QJSValue jsSchemaItem = m_jsEngine.newQObject(schemaItem);;
+	QQmlEngine::setObjectOwnership(schemaItem, QQmlEngine::CppOwnership);
 
+	QJSValue jsSchemaView = m_jsEngine.newQObject(this);
+	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+	// Set argument list
+	//
+	QJSValueList args;
+
+	args << jsSchemaItem;
+	args << jsSchemaView;
+
+	// Run script
+	//
 	QJSValue jsResult = jsEval.call(args);
 	if (jsResult.isError() == true)
 	{
@@ -54,6 +70,23 @@ void MonitorSchemaView::runScript(const QString& script, VFrame30::SchemaItem* s
 
 	update();		// Repaint screen
 	return;
+}
+
+bool MonitorSchemaView::setSchema(QString schemaId)
+{
+	assert(m_schemaManager);
+
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+
+	if (schema == nullptr)
+	{
+		return false;
+	}
+
+	SchemaView::setSchema(schema, false);
+	setZoom(100.0, true);
+
+	return true;
 }
 
 void MonitorSchemaView::paintEvent(QPaintEvent* pe)
@@ -101,76 +134,13 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 }
 
 
-void MonitorSchemaView::mouseMoveEvent(QMouseEvent* event)
-{
-	if (schema() == nullptr)
-	{
-		// Schema is not loaded
-		//
-		event->ignore();
-		return;
-	}
-
-	if (event->buttons().testFlag(Qt::MidButton) == true)
-	{
-		// It is scrolling by midbutton, let scroll view process it
-		//
-		event->ignore();
-		return;
-	}
-
-	// If the mouse cursor is over SchmeItem with acceptClick then set HandCursor
-	//
-	QPointF docPoint;
-
-	bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
-	if (convertResult == false)
-	{
-		unsetCursor();
-		return;
-	}
-
-	double x = docPoint.x();
-	double y = docPoint.y();
-
-	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
-	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->show() == false)
-		{
-			continue;
-		}
-
-		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
-		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
-
-			if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
-			{
-				setCursor(Qt::PointingHandCursor);
-				event->accept();
-				return;
-			}
-		}
-	}
-
-	// --
-	//
-	unsetCursor();
-	event->ignore();
-	return;
-}
-
 void MonitorSchemaView::mousePressEvent(QMouseEvent* event)
 {
-	qDebug() << "MonitorSchemaView::mousePressEvent";
-
 	if (event->buttons().testFlag(Qt::MidButton) == true)
 	{
 		// It is scrolling by midbutton, let scroll view process it
 		//
-		event->ignore();
+		VFrame30::SchemaView::mousePressEvent(event);
 		return;
 	}
 
@@ -222,7 +192,13 @@ void MonitorSchemaView::mousePressEvent(QMouseEvent* event)
 
 void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 {
-	qDebug() << "MonitorSchemaView::mouseReleaseEvent";
+	if (event->buttons().testFlag(Qt::MidButton) == true)
+	{
+		// It is scrolling by midbutton, let scroll view process it
+		//
+		VFrame30::SchemaView::mouseReleaseEvent(event);
+		return;
+	}
 
 	// Find is there any item under the cursor with AcceptClick
 	//
@@ -264,6 +240,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 
 					// --
 					//
+					unsetCursor();
 					m_leftClickOverItem.reset();
 					event->accept();
 					return;
@@ -276,6 +253,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 
 	// Ignore event
 	//
+	unsetCursor();
 	event->ignore();
 	return;
 }

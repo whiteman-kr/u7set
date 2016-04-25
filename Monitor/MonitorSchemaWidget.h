@@ -3,6 +3,7 @@
 #include "../VFrame30/BaseSchemaWidget.h"
 
 class MonitorSchemaView;
+class SchemaManager;
 
 //
 //
@@ -17,7 +18,7 @@ private:
 	MonitorSchemaWidget() = delete;
 
 public:
-	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema);
+	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaManager* schemaManager);
 	virtual ~MonitorSchemaWidget();
 
 protected:
@@ -48,6 +49,7 @@ public:
 	// Data
 	//
 private:
+	SchemaManager* m_schemaManager = nullptr;
 
 	// Actions
 	//

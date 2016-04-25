@@ -2066,6 +2066,7 @@ void EditSchemaWidget::setCorrespondingContextMenu()
 void EditSchemaWidget::mousePressEvent(QMouseEvent* event)
 {
 	BaseSchemaWidget::mousePressEvent(event);
+
 	if (event->isAccepted() == true)
 	{
 		return;
