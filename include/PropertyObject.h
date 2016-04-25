@@ -837,7 +837,7 @@ public:
 	}
 
     bool setPropertyValue(QString caption, const char* value);
-	bool setPropertyValue(QString caption, const QVariant& value);
+	Q_INVOKABLE bool setPropertyValue(QString caption, const QVariant& value);
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
