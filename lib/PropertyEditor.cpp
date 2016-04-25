@@ -362,10 +362,10 @@ namespace ExtWidgets
 	//
 	// ---------MultiLineEdit----------
 	//
-    MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
-		QDialog(parent, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
+	MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text, const QString &caption):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
 	{
-		setWindowTitle("Text Editor");
+		setWindowTitle(caption);
 
 		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
@@ -378,8 +378,13 @@ namespace ExtWidgets
 		QVBoxLayout* vl = new QVBoxLayout();
 
 		m_textEdit = new QTextEdit(this);
-		m_textEdit->setTabChangesFocus(true);
+		m_textEdit->setTabChangesFocus(false);
 		m_textEdit->setPlainText(value);
+
+		m_textEdit->blockSignals(true);
+		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+		m_textEdit->blockSignals(false);
+
 
 		QPushButton* okButton = new QPushButton("OK", this);
 		QPushButton* cancelButton = new QPushButton("Cancel", this);
@@ -388,6 +393,8 @@ namespace ExtWidgets
 
 		connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
 		connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+
+		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
 		QHBoxLayout *hl = new QHBoxLayout();
 		hl->addStretch();
@@ -406,11 +413,13 @@ namespace ExtWidgets
 		return m_text;
 	}
 
-	void MultiLineEdit::closeEvent(QCloseEvent *event)
+	void MultiLineEdit::finished(int result)
 	{
-		Q_UNUSED(event);
+		Q_UNUSED(result);
+
 		theSettings.m_multiLinePropertyEditorWindowPos = pos();
 		theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+
 	}
 
 	void MultiLineEdit::accept()
@@ -430,9 +439,10 @@ namespace ExtWidgets
 	// ---------QtMultiTextEdit----------
 	//
 
-	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType):
+	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption):
 		QWidget(parent),
-		m_userType(userType)
+		m_userType(userType),
+		m_caption(caption)
 	{
 		m_lineEdit = new QLineEdit(parent);
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
@@ -482,7 +492,7 @@ namespace ExtWidgets
 
 	void QtMultiTextEdit::onButtonPressed()
 	{
-		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text());
+		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text(), m_caption);
 		if (multlLineEdit->exec() == QDialog::Accepted)
 		{
             m_lineEdit->blockSignals(true);
@@ -1144,7 +1154,7 @@ namespace ExtWidgets
 					case QVariant::UInt:
 					case QVariant::Double:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType());
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption());
 							editor = m_editor;
                             m_editor->setValue(p);
 
@@ -1166,7 +1176,7 @@ namespace ExtWidgets
 
 					case QVariant::Uuid:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String);
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption());
 							editor = m_editor;
                             m_editor->setValue(p);
 

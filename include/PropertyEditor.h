@@ -129,16 +129,20 @@ namespace ExtWidgets
 
 	class MultiLineEdit : public QDialog
 	{
+		Q_OBJECT
+
 	public:
-        MultiLineEdit(QWidget* parent, const QString& text);
+		MultiLineEdit(QWidget* parent, const QString& text, const QString& caption);
 		QString text();
+
+	private slots:
+		void finished(int result);
 
 	private:
 		QString m_text;
 		QTextEdit* m_textEdit = nullptr;
 
 		virtual void accept();
-		virtual void closeEvent(QCloseEvent *event);
 	};
 
 
@@ -170,7 +174,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit QtMultiTextEdit(QWidget* parent, int userType);
+		explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption);
         void setValue(std::shared_ptr<Property> property);
 
 	public slots:
@@ -191,6 +195,7 @@ namespace ExtWidgets
 		bool m_escape = false;
 		QVariant m_oldValue;
 		int m_userType = 0;
+		QString m_caption;
 	};
 
 
