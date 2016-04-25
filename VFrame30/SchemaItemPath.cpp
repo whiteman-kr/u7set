@@ -15,8 +15,8 @@ namespace VFrame30
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
-		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemPath::weight, SchemaItemPath::setWeight);
-		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemaItemPath::lineColor, SchemaItemPath::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(double, LineWeight, tr("Appearance"), true, SchemaItemPath::weight, SchemaItemPath::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(QColor, LineColor, tr("Appearance"), true, SchemaItemPath::lineColor, SchemaItemPath::setLineColor);
 
 		// --
 		//
