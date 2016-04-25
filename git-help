@@ -43,7 +43,22 @@ Remote:	       	????
 3.4	Create branch and switch to it (3.2 + 3.3)
 	$ git checkout -b <branch>
 
-4. Stable/release strategy
+4. Stable/release instruction
+
+	1. Switch to master branch
+	$ git checkout master
+	
+	2. Merge changes from develop
+	$ git merge develop
+
+	3. Give a tag
+	$ git tag v0.7.1798
+
+	4. Push changes to remote server
+	$ git push
+
+	5 Switch back to develop
+	$ git checkout develop
 
 4.1
 

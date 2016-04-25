@@ -16,40 +16,27 @@ namespace VFrame30
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
 		m_textColor(qRgb(0x00, 0x00, 0x00))
 	{
-		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(double, LineWeight, tr("Appearance"), true, SchemaItemRect::weight, SchemaItemRect::setWeight);
 
-		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
-		ADD_PROPERTY_GETTER_SETTER(QColor, FillColor, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
+		ADD_PROPERTY_GET_SET_CAT(QColor, LineColor, tr("Appearance"), true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor, FillColor, tr("Appearance"), true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
 
-		ADD_PROPERTY_GETTER_SETTER(bool, Fill, true, SchemaItemRect::fill, SchemaItemRect::setFill);
+		ADD_PROPERTY_GET_SET_CAT(bool, Fill, tr("Appearance"), true, SchemaItemRect::fill, SchemaItemRect::setFill);
+		ADD_PROPERTY_GET_SET_CAT(bool, DrawRect, tr("Appearance"), true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
 
 		// Text Category Properties
 		//
-		auto textColorProp = ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
-		textColorProp->setCategory("Text");
+		ADD_PROPERTY_GET_SET_CAT(QColor, TextColor, tr("Text"), true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
-		auto textProp = ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemaItemRect::text, SchemaItemRect::setText);
-		textProp->setCategory("Text");
+		ADD_PROPERTY_GET_SET_CAT(QString, Text, tr("Text"), true, SchemaItemRect::text, SchemaItemRect::setText);
 
-		auto horzAlignProp = ADD_PROPERTY_GETTER_SETTER(E::HorzAlign, AlignHorz, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
-		horzAlignProp->setCategory("Text");
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, AlignHorz, tr("Text"), true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, AlignVert, tr("Text"), true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
 
-		auto vertAlignProp = ADD_PROPERTY_GETTER_SETTER(E::VertAlign, AlignVert, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
-		vertAlignProp->setCategory("Text");
-
-		ADD_PROPERTY_GETTER_SETTER(bool, DrawRect, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
-
-		auto fontNameProp = ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
-		fontNameProp->setCategory("Text");
-
-		auto fontSizeProp = ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
-		fontSizeProp->setCategory("Text");
-
-		auto fontBoldProp = ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
-		fontBoldProp->setCategory("Text");
-
-		auto fontItalicProp = ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
-		fontItalicProp->setCategory("Text");
+		ADD_PROPERTY_GET_SET_CAT(QString, FontName, tr("Text"), true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
+		ADD_PROPERTY_GET_SET_CAT(double, FontSize, tr("Text"), true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
+		ADD_PROPERTY_GET_SET_CAT(bool, FontBold, tr("Text"), true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
+		ADD_PROPERTY_GET_SET_CAT(bool, FontItalic, tr("Text"), true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
 
 		// --
 		//

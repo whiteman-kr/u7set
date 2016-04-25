@@ -76,6 +76,14 @@ class EditSchemaTabPage;
 
 
 //
+// SchemaItemsClipboard
+//
+struct SchemaItemClipboardData
+{
+	static const char* mimeType;	// = "application/x-schemaitem";
+};
+
+//
 //
 // EditSchemaView
 //
@@ -134,10 +142,10 @@ public:
 	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
 	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items);
 	void setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item);
-	void addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item);
+	void addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged = true);
 
 	void clearSelection();
-	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item);
+	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged = true);
 	bool isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>& item);
 
 	// Data
@@ -396,6 +404,8 @@ protected slots:
 	void modifiedChangedSlot(bool modified);
 
 	void selectAll();
+	void editCut();
+	void editCopy();
 	void editPaste();
 
 	void schemaProperties();

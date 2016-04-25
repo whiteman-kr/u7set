@@ -15,7 +15,8 @@ namespace VFrame30
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
+		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
+		precisionProp->setCategory(tr("Functional"));
 	}
 
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
@@ -25,7 +26,8 @@ namespace VFrame30
         m_afbImplementationOpIndex(fblElement.implementationOpIndex()),
 		m_params(fblElement.params())
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
+		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
+		precisionProp->setCategory(tr("Functional"));
 
 		// Create input output signals in VFrame30::FblEtem
 		//

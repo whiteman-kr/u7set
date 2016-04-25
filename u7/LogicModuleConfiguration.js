@@ -43,7 +43,8 @@ var Mode_Serial = 1;
 var Mode_RS232 = 0;
 var Mode_RS485 = 1;
 
-var configScriptVersion = 1;		// first logged version
+//var configScriptVersion = 1;		// first logged version
+var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
@@ -251,7 +252,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		log.errCFG3000("EquipmentID", "LM-1");
 		return false;
 	}
-	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "TuningDataSize", "AppDataSize", "DiagDataSize"];
+	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "AppDataSize", "DiagDataSize"];
 	for (var cp = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -516,7 +517,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				}
 			}	
 			
-			var tuningWordsCount = module.propertyValue("TuningDataSize");
+			var tuningWordsCount = 716;
 	
 			var tuningIP = ethernetController.jsPropertyIP("TuningIP");
 			var tuningPort = ethernetController.propertyValue("TuningPort");

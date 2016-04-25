@@ -137,6 +137,12 @@ namespace VFrame30
 			return;
 		}
 
+		if (event->button() == Qt::LeftButton)
+		{
+			// Check if item under cursor has AcceptClick
+			//
+		}
+
 		// Event was not accepted
 		//
 		event->setAccepted(false);
@@ -175,6 +181,18 @@ namespace VFrame30
 		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom());
 
 		QRect clientRect = geometry();
+
+		if (horizontalScrollBar() != nullptr &&
+			horizontalScrollBar()->isVisible())
+		{
+			clientRect.setHeight(clientRect.height() - horizontalScrollBar()->height());
+		}
+
+		if (verticalScrollBar() != nullptr &&
+			verticalScrollBar()->isVisible())
+		{
+			clientRect.setWidth(clientRect.width() - verticalScrollBar()->width());
+		}
 
 		int startX = 0;
 		int startY = 0;
