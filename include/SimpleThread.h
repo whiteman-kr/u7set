@@ -13,7 +13,7 @@ private slots:
 	void slot_onThreadStarted();
 	void slot_onThreadFinished();
 
-private:
+protected:
 	virtual void onThreadStarted() {}
 	virtual void onThreadFinished() {}
 

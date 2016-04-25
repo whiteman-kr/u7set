@@ -16,26 +16,21 @@ DataServiceWorker::DataServiceWorker(const QString& serviceStrID,
 	ServiceWorker(ServiceType::DataAcquisitionService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
 	m_timer(this)
 {
+	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		m_appDataChannelThread[channel] = nullptr;
+		m_diagDataChannelThread[channel] = nullptr;
+	}
 }
 
 
-void DataServiceWorker::initDataSources()
-{
-	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
-}
-
-
-void DataServiceWorker::initListeningPorts()
-{
-	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.11.254", 2000));
-	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.12.254", 2000));
-}
 
 void DataServiceWorker::readConfigurationFiles()
 {
 	SerializeEquipmentFromXml("equipment.xml", m_deviceRoot);
 	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 }
+
 
 void DataServiceWorker::runUdpThreads()
 {
@@ -53,17 +48,6 @@ void DataServiceWorker::runUdpThreads()
 void DataServiceWorker::stopUdpThreads()
 {
 	delete m_infoSocketThread;
-}
-
-
-void DataServiceWorker::runFscDataReceivingThreads()
-{
-	for(int i = 0; i < m_fscDataAcquisitionAddressPorts.count(); i++)
-	{
-		FscDataAcquisitionThread* dataAcquisitionThread = new FscDataAcquisitionThread(m_fscDataAcquisitionAddressPorts[i]);
-
-		m_fscDataAcquisitionThreads.append(dataAcquisitionThread);
-	}
 }
 
 
@@ -94,16 +78,6 @@ void DataServiceWorker::stopCfgLoaderThread()
 }
 
 
-void DataServiceWorker::stopFscDataReceivingThreads()
-{
-	for(int i = 0; i < m_fscDataAcquisitionThreads.count(); i++)
-	{
-		delete m_fscDataAcquisitionThreads[i];
-	}
-
-	m_fscDataAcquisitionThreads.clear();
-}
-
 
 void DataServiceWorker::runTimer()
 {
@@ -125,13 +99,7 @@ void DataServiceWorker::initialize()
 	// Service Main Function initialization
 	//
 	runCfgLoaderThread();
-
-	readConfigurationFiles();
-	initDataSources();
-
 	runUdpThreads();
-	runFscDataReceivingThreads();
-
 	runTimer();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
@@ -142,9 +110,11 @@ void DataServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
+	stopDataChannels();
+
 	stopTimer();
 
-	stopFscDataReceivingThreads();
+	//stopFscDataReceivingThreads();
 	stopUdpThreads();
 
 	stopCfgLoaderThread();
@@ -177,7 +147,7 @@ void DataServiceWorker::onInformationRequest(UdpRequest request)
 
 void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 {
-	int dataSourcesCount = m_dataSources.count();
+	/*int dataSourcesCount = m_dataSources.count();
 
 	QVector<quint32> dataSourcesID;
 
@@ -222,7 +192,7 @@ void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 		ack.writeDword(dataSourcesID[i]);
 	}
 
-	emit ackInformationRequest(ack);
+	emit ackInformationRequest(ack);*/
 }
 
 
@@ -242,7 +212,7 @@ void DataServiceWorker::onTimer()
 
 void DataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
 {
-	quint32 count = request.readDword();
+/*	quint32 count = request.readDword();
 
 	QVector<DataSourceInfo> dsInfo;
 
@@ -275,13 +245,13 @@ void DataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
 		ack.writeStruct(&dsInfo[i]);
 	}
 
-	ackInformationRequest(ack);
+	ackInformationRequest(ack);*/
 }
 
 
 void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 {
-	quint32 count = request.readDword();
+/*	quint32 count = request.readDword();
 
 	QVector<DataSourceStatistics> dsStatistics;
 
@@ -314,8 +284,71 @@ void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 		ack.writeStruct(&dsStatistics[i]);
 	}
 
-	ackInformationRequest(ack);
+	ackInformationRequest(ack);*/
 }
+
+
+void DataServiceWorker::stopDataChannels()
+{
+	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_appDataChannelThread[channel] != nullptr)
+		{
+			m_appDataChannelThread[channel]->quitAndWait();
+			delete m_appDataChannelThread[channel];
+			m_appDataChannelThread[channel] = nullptr;
+		}
+
+		if (m_diagDataChannelThread[channel] != nullptr)
+		{
+			m_diagDataChannelThread[channel]->quitAndWait();
+			delete m_diagDataChannelThread[channel];
+			m_diagDataChannelThread[channel] = nullptr;
+		}
+	}
+}
+
+void DataServiceWorker::runDataChannels()
+{
+	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_appDataChannelThread[channel] != nullptr)
+		{
+			m_appDataChannelThread[channel]->start();
+		}
+		else
+		{
+			assert(false);
+		}
+
+		if (m_diagDataChannelThread[channel] != nullptr)
+		{
+			m_diagDataChannelThread[channel]->start();
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+}
+
+
+void DataServiceWorker::initDataChannels()
+{
+	stopDataChannels();
+
+	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		m_appDataChannelThread[channel] = new DataChannelThread(channel,
+																DataSource::DataType::App,
+																m_settings.ethernetChannel[channel].appDataReceivingIP);
+
+		m_diagDataChannelThread[channel] = new DataChannelThread(channel,
+																DataSource::DataType::Diag,
+																m_settings.ethernetChannel[channel].diagDataReceivingIP);
+	}
+}
+
 
 
 void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
@@ -327,9 +360,42 @@ void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlDa
 		return;
 	}
 
-	QXmlStreamReader xmlReader(configurationXmlData);
+	bool result = readConfiguration(configurationXmlData);
 
-	XmlReadHelper xml(xmlReader);
+	if (result == false)
+	{
+		return;
+	}
+
+	initDataChannels();
+
+	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
+
+		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+		if (errStr.isEmpty() == false)
+		{
+			qDebug() << errStr;
+			continue;
+		}
+
+		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+		{
+			readDataSources(fileData);
+			continue;
+		}
+	}
+
+	runDataChannels();
+}
+
+
+bool DataServiceWorker::readConfiguration(const QByteArray& fileData)
+{
+	XmlReadHelper xml(fileData);
 
 	bool result = m_settings.readFromXml(xml);
 
@@ -342,34 +408,77 @@ void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlDa
 		qDebug() << "Settings read ERROR!";
 	}
 
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	return result;
+}
+
+
+bool DataServiceWorker::readDataSources(QByteArray& fileData)
+{
+	XmlReadHelper xml(fileData);
+
+	bool result = true;
+
+	while (1)
 	{
-		QByteArray fileData;
-		QString errStr;
+		bool find = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
 
-/*		bool result = m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
-
-		if (result == true)
+		if (find == false)
 		{
-			qDebug() << "File " << bfi.pathFileName << " download OK";
-		}*/
-
-		bool result = m_cfgLoaderThread->getFile(bfi.pathFileName, &fileData);
-
-		while(m_cfgLoaderThread->isFileReady() == false)
-		{
-			;
+			break;
 		}
 
-		errStr = m_cfgLoaderThread->getLastErrorStr();
+		DataSource* dataSource = new DataSource();
 
-		if (errStr.isEmpty())
+		result &= dataSource->readFromXml(xml);
+
+		if (result == false)
 		{
-			qDebug() << "File " << bfi.pathFileName << " download OK";
+			assert(false);
+			qDebug() << "DataSource error reading from xml";
+			delete dataSource;
+			continue;
+		}
+
+		int channel = dataSource->channel();
+
+		if (channel < 0 || channel >= DASSettings::DATA_CHANNEL_COUNT)
+		{
+			assert(false);
+			qDebug() << "DataSource wrong channel";
+			delete dataSource;
+			continue;
+		}
+
+		if (dataSource->dataType() == DataSource::DataType::App)
+		{
+			if (m_appDataChannelThread[channel] != nullptr)
+			{
+				m_appDataChannelThread[channel]->addDataSource(dataSource);
+			}
+			else
+			{
+				assert(false);
+			}
 		}
 		else
 		{
-			qDebug() << "File loading error - " << errStr;
+			if (dataSource->dataType() == DataSource::DataType::Diag)
+			{
+				if (m_diagDataChannelThread[channel] != nullptr)
+				{
+					m_diagDataChannelThread[channel]->addDataSource(dataSource);
+				}
+				else
+				{
+					assert(false);
+				}
+			}
+			else
+			{
+				assert(false);			// unknown DataType
+			}
 		}
 	}
+
+	return result;
 }

@@ -159,30 +159,20 @@ bool DASSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	while(xml.atEnd() == false)
+	result = xml.findElement(SECTION_NAME);
+
+	if (result == false)
 	{
-		if (xml.readNextStartElement() == false)
-		{
-			continue;
-		}
+		return false;
+	}
 
-		qDebug() << xml.name();
+	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
 
-		if (xml.name() == SECTION_NAME)
-		{
-			result = true;
+	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
-			result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-
-			result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-
-			for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
-			{
-				result &= ethernetChannel[channel].readFromXml(xml, channel);
-			}
-
-			break;
-		}
+	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
+	{
+		result &= ethernetChannel[channel].readFromXml(xml, channel);
 	}
 
 	return result;

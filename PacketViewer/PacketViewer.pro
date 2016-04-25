@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     PacketBufferTableModel.cpp \
     ../lib/PropertyObject.cpp \
     SignalTableModel.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../lib/XmlHelper.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -52,7 +53,8 @@ HEADERS  += SourceListWidget.h \
     ../include/PropertyObject.h \
     SignalTableModel.h \
     ../include/Types.h \
-    ../include/DataProtocols.h
+    ../include/DataProtocols.h \
+    ../include/XmlHelper.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
