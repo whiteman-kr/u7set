@@ -1,4 +1,5 @@
 var RootType = 0;
+var RootType = 0;
 var SystemType = 1;
 var RackType = 2;
 var ChassisType = 3;
@@ -44,7 +45,8 @@ var Mode_RS232 = 0;
 var Mode_RS485 = 1;
 
 //var configScriptVersion = 1;		// first logged version
-var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
+//var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
+var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
@@ -706,12 +708,32 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     {
         // find a signal with Place = i
         //
-        var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
-        
+        //var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
+		var signalStrId = inController.propertyValue("EquipmentID") + "_IN";
+		
+		var entry = Math.floor(i / 2) + 1;
+		if (entry < 10)
+		{
+			signalStrId = signalStrId + "0";
+		}
+		signalStrId = signalStrId + entry;
+		if ((i % 2) == 0)
+		{
+			signalStrId = signalStrId + "A";
+		}		
+		else
+		{
+			signalStrId = signalStrId + "B";
+		}
+		
+		var signal = signalSet.getSignalByEquipmentID(signalStrId);
+         
         if (signal == null)
         {
             // Generate default values, there is no signal on this place
             //
+			log.wrnCFG3007(signalStrId);
+			
 			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
@@ -1040,8 +1062,21 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
         {
             var mode = Mode_05V;    //default
 
-            var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
-            if (signal != null && signal.propertyValue("EquipmentID") != undefined)
+            //var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
+			var signalStrId = outController.propertyValue("EquipmentID") + "_OUT";
+			if ((i + 1) < 10)
+			{
+				signalStrId = signalStrId + "0";
+			}
+			signalStrId = signalStrId + (i + 1);
+		
+			var signal = signalSet.getSignalByEquipmentID(signalStrId);
+
+            if (signal == null || signal.propertyValue("EquipmentID") == undefined)
+			{
+				log.wrnCFG3007(signalStrId);
+			}
+			else
             {
 				var outputRangeMode = signal.jsOutputRangeMode();
                 if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
@@ -1052,6 +1087,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
                 mode = outputRangeMode;
             }
+
             
             place++;
             
@@ -1102,7 +1138,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
 }
 
-function findSignalByPlace(parent, place, type, func, signalSet, log)
+/*function findSignalByPlace(parent, place, type, func, signalSet, log)
 {
     if (parent == null)
     {
@@ -1152,7 +1188,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
     
 	log.wrnCFG3006(place, parent.propertyValue("EquipmentID"));
     return null;
-}
+}*/
 
 // Generate configuration for module OCM
 // module - Hardware::DeviceModule (LM-1)
