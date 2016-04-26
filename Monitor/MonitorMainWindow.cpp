@@ -82,6 +82,7 @@ void MonitorMainWindow::createActions()
 {
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
+	m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
 	m_pExitAction->setShortcut(QKeySequence::Quit);
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
@@ -89,6 +90,7 @@ void MonitorMainWindow::createActions()
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
+	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pSettingsAction->setEnabled(true);
 	connect(m_pSettingsAction, &QAction::triggered, this, &MonitorMainWindow::showSettings);
 
@@ -104,8 +106,50 @@ void MonitorMainWindow::createActions()
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
+	m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &MonitorMainWindow::showAbout);
+
+	m_newTabAction = new QAction(tr("New Tab"), this);
+	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
+	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
+	m_newTabAction->setEnabled(true);
+	QList<QKeySequence> newTabShortcuts;
+	newTabShortcuts << QKeySequence::AddTab;
+	newTabShortcuts << QKeySequence::New;
+	m_newTabAction->setShortcuts(newTabShortcuts);
+	connect(m_newTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_newTab);
+
+	m_closeTabAction = new QAction(tr("Close Tab"), this);
+	m_closeTabAction->setStatusTip(tr("Close current tab page"));
+	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_closeTabAction->setEnabled(true);
+	m_closeTabAction->setShortcuts(QKeySequence::Close);
+	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
+
+	m_zoomInAction = new QAction(tr("ZoomIn"), this);
+	m_zoomInAction->setStatusTip(tr("Zoom In schema view"));
+	m_zoomInAction->setIcon(QIcon(":/Images/Images/ZoomIn.svg"));
+	m_zoomInAction->setEnabled(true);
+	m_zoomInAction->setShortcuts(QKeySequence::ZoomIn);
+
+	m_zoomOutAction = new QAction(tr("ZoomOut"), this);
+	m_zoomOutAction->setStatusTip(tr("Zoom Out schema view"));
+	m_zoomOutAction->setIcon(QIcon(":/Images/Images/ZoomOut.svg"));
+	m_zoomOutAction->setEnabled(true);
+	m_zoomOutAction->setShortcuts(QKeySequence::ZoomOut);
+
+	m_historyBackward = new QAction(tr("Go Back"), this);
+	m_historyBackward->setStatusTip(tr("Click to got back"));
+	m_historyBackward->setIcon(QIcon(":/Images/Images/Backward.svg"));
+	m_historyBackward->setEnabled(true);
+	m_historyBackward->setShortcuts(QKeySequence::Back);
+
+	m_historyForward = new QAction(tr("Go Forward"), this);
+	m_historyForward->setStatusTip(tr("Click to got forward"));
+	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
+	m_historyForward->setEnabled(true);
+	m_historyForward->setShortcuts(QKeySequence::Forward);
 
 	return;
 }
@@ -117,6 +161,25 @@ void MonitorMainWindow::createMenus()
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
 	pFileMenu->addAction(m_pExitAction);
+
+	// Schema
+	//
+	QMenu* schemaMenu = menuBar()->addMenu(tr("&Schema"));
+
+	schemaMenu->addAction(m_newTabAction);
+	schemaMenu->addAction(m_closeTabAction);
+
+	// View
+	//
+	QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+
+	viewMenu->addAction(m_zoomInAction);
+	viewMenu->addAction(m_zoomOutAction);
+	viewMenu->addSeparator();
+
+	viewMenu->addAction(m_historyForward);
+	viewMenu->addAction(m_historyBackward );
+
 
 	// Tools
 	//
@@ -140,6 +203,24 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
+	m_toolBar = new QToolBar(this);
+	m_toolBar->setMovable(false);
+	m_toolBar->setIconSize(QSize(32, 32));
+	m_toolBar->setStyleSheet("QToolBar{spacing:6px;padding:6px;}");
+
+	m_toolBar->addAction(m_newTabAction);
+	m_toolBar->addSeparator();
+
+	m_toolBar->addAction(m_zoomInAction);
+	m_toolBar->addAction(m_zoomOutAction);
+	m_toolBar->addSeparator();
+
+	m_toolBar->addAction(m_historyBackward);
+	m_toolBar->addAction(m_historyForward);
+
+	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
+	return;
 }
 
 void MonitorMainWindow::createStatusBar()

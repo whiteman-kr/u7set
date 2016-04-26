@@ -11,6 +11,7 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	// --
 	//
 	tabBar()->setExpanding(true);
+	setStyleSheet("QTabBar::tab { min-width: 200px; height: 28px;}");
 
 	// On start create an empty MonitorSchema and add a tab with this schema
 	//
@@ -41,8 +42,9 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
 
-	connect(schemaWidget, &MonitorSchemaWidget::signal_newTab, this, &MonitorCentralWidget::slot_newSameTab);
-	connect(schemaWidget, &MonitorSchemaWidget::signal_closeTab, this, &MonitorCentralWidget::slot_closeTab);
+	//connect(schemaWidget, &MonitorSchemaWidget::signal_newTab, this, &MonitorCentralWidget::slot_newSameTab);
+	//connect(schemaWidget, &MonitorSchemaWidget::signal_closeTab, this, &MonitorCentralWidget::slot_closeTab);
+	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
 
 	int index = addTab(schemaWidget, tabSchema->caption());
 
@@ -53,6 +55,34 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 	}
 
 	return index;
+}
+
+void MonitorCentralWidget::slot_newTab()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	slot_newSameTab(curTabWidget);
+	return;
+}
+
+void MonitorCentralWidget::slot_closeCurrentTab()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	slot_closeTab(curTabWidget);
+	return;
 }
 
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
@@ -157,6 +187,26 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 	}
 
 	slot_tabCloseRequested(tabIndex);
+	return;
+}
+
+void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema)
+{
+	if (tabWidget == nullptr ||
+		schema == nullptr)
+	{
+		assert(tabWidget);
+		assert(schema);
+		return;
+	}
+
+	int tabIndex = indexOf(tabWidget);
+
+	if (tabIndex >=0)
+	{
+		setTabText(tabIndex, schema->caption());
+	}
+
 	return;
 }
 

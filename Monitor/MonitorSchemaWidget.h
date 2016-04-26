@@ -34,12 +34,13 @@ public:
 	//
 protected:
 
-
 	// Signals
 	//
 signals:
-	void signal_newTab(MonitorSchemaWidget* tabWidget);			// Command to the owner to duplicate current tab
-	void signal_closeTab(MonitorSchemaWidget* tabWidget);		// Command to the owner to Close current tab
+	//void signal_newTab(MonitorSchemaWidget* tabWidget);			// Command to the owner to duplicate current tab
+	//void signal_closeTab(MonitorSchemaWidget* tabWidget);		// Command to the owner to Close current tab
+
+	void signal_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema);
 
 	// Slots
 	//
