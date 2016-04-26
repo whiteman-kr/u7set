@@ -1064,11 +1064,13 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
             //var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
 			var signalStrId = outController.propertyValue("EquipmentID") + "_OUT";
-			if ((i + 1) < 10)
+			
+			var entry = place + 1;
+			if (entry < 10)
 			{
 				signalStrId = signalStrId + "0";
 			}
-			signalStrId = signalStrId + (i + 1);
+			signalStrId = signalStrId + entry;
 		
 			var signal = signalSet.getSignalByEquipmentID(signalStrId);
 
