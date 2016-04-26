@@ -482,6 +482,8 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					Builder::BuildFileInfo bfi;
 
 					bfi.pathFileName = cfi.pathFileName;
+					bfi.ID = cfi.ID;
+					bfi.tag = cfi.tag;
 					bfi.size = cfi.size;
 					bfi.md5 = cfi.md5;
 

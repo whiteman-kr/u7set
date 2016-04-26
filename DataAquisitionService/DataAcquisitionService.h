@@ -6,7 +6,7 @@
 #include "../include/CfgServerLoader.h"
 #include "../include/ServiceSettings.h"
 
-#include "FscDataAcquisitionThread.h"
+#include "DataChannel.h"
 
 namespace Hardware
 {
@@ -20,11 +20,6 @@ class DataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 private:
-	QHash<quint32, DataSource> m_dataSources;
-	QVector<HostAddressPort> m_fscDataAcquisitionAddressPorts;
-
-	QVector<FscDataAcquisitionThread*> m_fscDataAcquisitionThreads;
-
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
@@ -37,8 +32,9 @@ private:
 
 	DASSettings m_settings;
 
-	void initDataSources();
-	void initListeningPorts();
+	DataChannelThread* m_appDataChannelThread[DASSettings::DATA_CHANNEL_COUNT];
+	DataChannelThread* m_diagDataChannelThread[DASSettings::DATA_CHANNEL_COUNT];
+
 	void readConfigurationFiles();
 
 	void runUdpThreads();
@@ -60,6 +56,14 @@ private:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	void onTimer();
+
+	bool readConfiguration(const QByteArray& fileData);
+	bool readDataSources(QByteArray& fileData);
+
+	void stopDataChannels();
+	void initDataChannels();
+	void runDataChannels();
+
 
 public:
 	DataServiceWorker(const QString& serviceStrID,

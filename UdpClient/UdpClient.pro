@@ -72,7 +72,8 @@ SOURCES += \
     ../lib/ProtoUdp.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/Tcp.cpp \
-    ../lib/JsonSerializable.cpp
+    ../lib/JsonSerializable.cpp \
+    ../lib/XmlHelper.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -87,7 +88,8 @@ HEADERS  += MainWindow.h \
     ../include/ProtoUdp.h \
     ../include/SimpleThread.h \
     ../include/Tcp.h \
-    ../include/JsonSerializable.h
+    ../include/JsonSerializable.h \
+    ../include/XmlHelper.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -1,6 +1,6 @@
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaView.h"
-
+#include "SchemaManager.h"
 
 //
 //
@@ -8,9 +8,12 @@
 //
 //
 
-MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema) :
-	BaseSchemaWidget(schema, new MonitorSchemaView())
+MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaManager* schemaManager) :
+	BaseSchemaWidget(schema, new MonitorSchemaView(schemaManager)),
+	m_schemaManager(schemaManager)
 {
+	assert(m_schemaManager);
+
 	return;
 }
 

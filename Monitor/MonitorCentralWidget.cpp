@@ -41,7 +41,7 @@ void MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 		tabSchema->setCaption("Empty Schema");
 	}
 
-	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema);
+	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
 	addTab(schemaWidget, tabSchema->caption());
 
 	if (count() > 1 && tabsClosable() == false)

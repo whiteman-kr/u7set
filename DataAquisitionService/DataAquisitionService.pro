@@ -74,7 +74,6 @@ SOURCES += main.cpp \
 	../lib/SocketIO.cpp \
 	../lib/CircularLogger.cpp \
     ../lib/DataSource.cpp \
-    FscDataAcquisitionThread.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
@@ -91,7 +90,8 @@ SOURCES += main.cpp \
     ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/XmlHelper.cpp
+    ../lib/XmlHelper.cpp \
+    DataChannel.cpp
 
 HEADERS += \
 	Stable.h \
@@ -100,7 +100,6 @@ HEADERS += \
 	../include/Service.h \
 	../include/CircularLogger.h \
     ../include/DataSource.h \
-    FscDataAcquisitionThread.h \
     version.h \
     ../include/DeviceObject.h \
     ../include/DbStruct.h \
@@ -119,7 +118,9 @@ HEADERS += \
     ../include/ServiceSettings.h \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
-    ../include/XmlHelper.h
+    ../include/XmlHelper.h \
+    DataChannel.h \
+    ../include/DataProtocols.h
 
 include(../qtservice/src/qtservice.pri)
 

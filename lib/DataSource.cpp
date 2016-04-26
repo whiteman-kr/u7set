@@ -1,6 +1,9 @@
 #include "../include/DataSource.h"
 
 
+const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
+
+
 char* DataSourceInfo::serialize(char* buffer, bool write)
 {
 	BEGIN_SERIALIZATION();
@@ -28,22 +31,36 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 }
 
 
+DataSource::DataSource()
+{
+	m_rupFrames = new RupFrame[RUP_MAX_FRAME_COUNT];
+	m_framesData = new char[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
+}
+
+DataSource::~DataSource()
+{
+	delete [] m_rupFrames;
+	delete [] m_framesData;
+}
+
+/*
 DataSource::DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount) :
 	m_id(id),
 	m_hostAddress(hostAddress),
 	m_name(name),
 	m_partCount(partCount)
 {
-}
 
+}*/
 
+/*
 DataSource::DataSource(const DataSource& ds) :
 	QObject()
 {
 	this->operator =(ds);
-}
+}*/
 
-
+/*
 DataSource& DataSource::operator = (const DataSource& ds)
 {
 	m_id = ds.ID();
@@ -58,7 +75,7 @@ DataSource& DataSource::operator = (const DataSource& ds)
 	m_dataReceivingRate = ds.dataReceivingRate();
 
 	return *this;
-}
+}*/
 
 
 void DataSource::stop()
@@ -119,10 +136,10 @@ QString DataSource::dataTypeToString(DataType dataType)
 	switch(dataType)
 	{
 	case DataType::App:
-		return "App";
+		return DATA_TYPE_APP;
 
 	case DataType::Diag:
-		return "Diag";
+		return DATA_TYPE_DIAG;
 
 	default:
 		assert(false);
@@ -134,53 +151,133 @@ QString DataSource::dataTypeToString(DataType dataType)
 
 DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 {
-	if (dataTypeStr == "App")
+	if (dataTypeStr == DATA_TYPE_APP)
 	{
 		return DataType::App;
 	}
 
-	if (dataTypeStr == "Diag")
+	if (dataTypeStr == DATA_TYPE_DIAG)
 	{
 		return DataType::Diag;
 	}
 
 	assert(false);
-	return DataType::App;
+
+	return DataType::Diag;
 }
 
 
-void DataSource::serializeToXml(QXmlStreamWriter& xml)
+void DataSource::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement("DataSource");
+	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
-	xml.writeAttribute("EthernetChannel", QString::number(m_ethernetChannel));
-	xml.writeAttribute("Type", dataTypeToString(m_dataType));
-	xml.writeAttribute("LmStrID", m_lmStrID);
-	xml.writeAttribute("LmCaption", m_lmCaption);
-	xml.writeAttribute("LmAdapterStrID", m_lmAdapterStrID);
-	xml.writeAttribute("LmDataEnable", m_lmDataEnable ? "true" : "false");
-	xml.writeAttribute("LmDataIP", m_lmAddressPort.addressStr());
-	xml.writeAttribute("LmDataPort", QString::number(m_lmAddressPort.port()));
-	xml.writeAttribute("LmDataID", QString::number(m_lmDataID));
+	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
+	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
+	xml.writeStringAttribute(PROP_LM_ID, m_lmStrID);
+	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
+	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterStrID);
+	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
+	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
+	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
+	xml.writeUlongAttribute(PROP_LM_DATA_ID, m_lmDataID, true);
 
 	xml.writeEndElement();	// </DataSource>
 }
 
 
-void DataSource::serializeFromXml(QXmlStreamWriter& xml)
+bool DataSource::readFromXml(XmlReadHelper& xml)
 {
-	Q_UNUSED(xml);
-	/*xml.writeStartElement("DataSource");
+	bool result = true;
 
-	xml.writeAttribute("EthernetChannel", QString::number(m_ethernetChannel));
-	xml.writeAttribute("Type", dataTypeToString(m_dataType));
-	xml.writeAttribute("LmStrID", m_lmStrID);
-	xml.writeAttribute("LmCaption", m_lmCaption());
-	xml.writeAttribute("LmAdapterStrID", m_lmAdapterStrID);
-	xml.writeAttribute("LmDataEnable", m_lmDataEnable ? "true" : "false");
-	xml.writeAttribute("LmDataIP", m_lmAddressPort.addressStr());
-	xml.writeAttribute("LmDataPort", QString::number(m_lmAddressPort.port()));
+	if (xml.name() != ELEMENT_DATA_SOURCE)
+	{
+		assert(false);
+		return false;
+	}
 
-	xml.writeEndElement();	// </DataSource>*/
+	result &= xml.readIntAttribute(PROP_CHANNEL, &m_channel);
+
+	QString str;
+
+	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
+
+	m_dataType = stringToDataType(str);
+
+	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmStrID);
+	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
+	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterStrID);
+	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
+
+	QString ipStr;
+	int port = 0;
+
+	result &= xml.readStringAttribute(PROP_LM_DATA_IP, &ipStr);
+	result &= xml.readIntAttribute(PROP_LM_DATA_PORT, &port);
+
+	m_lmAddressPort.setAddress(ipStr);
+	m_lmAddressPort.setPort(port);
+
+	result &= xml.readUlongAttribute(PROP_LM_DATA_ID, &m_lmDataID);
+
+	return result;
 }
 
+
+void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
+{
+	int framesQuantity = rupFrame.header.framesQuantity;
+
+	if (framesQuantity > RUP_MAX_FRAME_COUNT)
+	{
+		assert(false);
+		return;
+	}
+
+	int frameNo = rupFrame.header.frameNumber;
+
+	if (frameNo >= framesQuantity)
+	{
+		assert(false);
+		return ;
+	}
+
+	memcpy(m_rupFrames + frameNo, &rupFrame, sizeof(RupFrame));
+
+	// check packet
+	//
+	bool dataReady = true;
+
+	if (framesQuantity > 1)
+	{
+		quint16 numerator0 = m_rupFrames[0].header.numerator;
+
+		for(int i = 1; i < framesQuantity; i++)
+		{
+			dataReady &= m_rupFrames[i].header.numerator == numerator0;
+		}
+	}
+
+	if (dataReady == true)
+	{
+		mergeFrames();
+	}
+}
+
+
+void DataSource::mergeFrames()
+{
+	int framesQuantity = m_rupFrames[0].header.framesQuantity;
+
+	for(int i = 0; i < framesQuantity; i++)
+	{
+		memcpy(m_framesData + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
+	}
+
+	parseFramesData();
+}
+
+
+void DataSource::parseFramesData()
+{
+
+}

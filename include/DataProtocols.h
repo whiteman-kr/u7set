@@ -1,7 +1,9 @@
 #pragma once
 
 #include "SocketIO.h"
-#pragma pack(push, 2)
+
+#pragma pack(push, 1)
+
 
 struct RupFrameFlags
 {
@@ -19,10 +21,11 @@ struct RupTimeStamp
 	quint16 second;			// 0..59
 	quint16 millisecond;	// 0..999
 
-	quint16 day;	// 1..31
-	quint16 month;	// 1..12
-	quint16 year;	// 1970..65535
+	quint16 day;			// 1..31
+	quint16 month;			// 1..12
+	quint16 year;			// 1970..65535
 };
+
 
 struct RupFrameHeader
 {

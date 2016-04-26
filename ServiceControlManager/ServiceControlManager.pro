@@ -68,7 +68,8 @@ SOURCES += MainWindow.cpp \
     BaseServiceStateWidget.cpp \
     DataAquisitionServiceWidget.cpp \
     ConfigurationServiceWidget.cpp \
-    ../lib/SimpleThread.cpp
+    ../lib/SimpleThread.cpp \
+    ../lib/XmlHelper.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -81,7 +82,8 @@ HEADERS  += MainWindow.h \
     BaseServiceStateWidget.h \
     DataAquisitionServiceWidget.h \
     ConfigurationServiceWidget.h \
-    ../include/SimpleThread.h
+    ../include/SimpleThread.h \
+    ../include/XmlHelper.h
 
 FORMS    +=
 

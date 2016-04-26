@@ -5,6 +5,8 @@
 #include "../u7/Builder/IssueLogger.h"
 
 
+const char* const CFG_FILE_ID_DATA_SOURCES = "DATA_SOURCES";
+
 class DASEthernetChannel
 {
 private:
@@ -45,9 +47,10 @@ public:
 
 class DASSettings
 {
-private:
-	const int DATA_CHANNEL_COUNT = 2;
+public:
+	static const int DATA_CHANNEL_COUNT = 2;
 
+private:
 	const char* const DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR = "_DATACH0%1";
 	const char* const SECTION_NAME = "Settings";
 	const char* const PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
@@ -58,7 +61,7 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
-	DASEthernetChannel ethernetChannel[2];
+	DASEthernetChannel ethernetChannel[DATA_CHANNEL_COUNT];
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);

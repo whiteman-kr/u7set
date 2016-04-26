@@ -90,7 +90,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     MeasureSignalBase.cpp \
-    ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
     ../lib/PropertyObject.cpp
 
@@ -131,7 +130,6 @@ HEADERS  += \
     Stable.h \
     ObjectVector.h \
     MeasureSignalBase.h \
-    ../include/DataSource.h \
     ../include/SocketIO.h \
     ../include/PropertyObject.h
 

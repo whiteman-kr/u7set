@@ -143,6 +143,21 @@ namespace VFrame30
 		return;
 	}
 
+	void BaseSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
+	{
+		if (event->button() == Qt::MidButton)
+		{
+			// Leave scrolling mode;
+			//
+			unsetCursor();
+			event->accept();
+			return;
+		}
+
+		event->ignore();
+		return;
+	}
+
 	void BaseSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (event->buttons().testFlag(Qt::MidButton) == true)

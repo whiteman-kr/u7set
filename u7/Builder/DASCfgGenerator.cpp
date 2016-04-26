@@ -268,7 +268,9 @@ namespace Builder
 		bool result = true;
 
 		QByteArray data;
-		QXmlStreamWriter xml(&data);
+		QXmlStreamWriter xmlWriter(&data);
+
+		XmlWriteHelper xml(xmlWriter);
 
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
@@ -286,13 +288,13 @@ namespace Builder
 				continue;
 			}
 
-			for(int channel = 1; channel <= 2; channel++)
+			for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
 			{
 				LmEthernetAdapterNetworkProperties lmNetProperties;
 
 				int adapter = LM_ETHERNET_ADAPTER2;
 
-				if (channel == 2)
+				if (channel == 1)
 				{
 					adapter = LM_ETHERNET_ADAPTER3;
 				}
@@ -306,7 +308,7 @@ namespace Builder
 
 				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
 				{
-					ds.setEthernetChannel(channel);
+					ds.setChannel(channel);
 					ds.setDataType(DataSource::DataType::App);
 					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
@@ -315,12 +317,12 @@ namespace Builder
 					ds.setLmAddressStr(lmNetProperties.appDataIP);
 					ds.setLmPort(lmNetProperties.appDataPort);
 
-					ds.serializeToXml(xml);
+					ds.writeToXml(xml);
 				}
 
 				if (lmNetProperties.diagDataServiceID == m_software->equipmentIdTemplate())
 				{
-					ds.setEthernetChannel(channel);
+					ds.setChannel(channel);
 					ds.setDataType(DataSource::DataType::Diag);
 					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
@@ -329,7 +331,7 @@ namespace Builder
 					ds.setLmAddressStr(lmNetProperties.diagDataIP);
 					ds.setLmPort(lmNetProperties.diagDataPort);
 
-					ds.serializeToXml(xml);
+					ds.writeToXml(xml);
 				}
 			}
 
@@ -342,7 +344,7 @@ namespace Builder
 		xml.writeEndElement();	// </DataSources>
 		xml.writeEndDocument();
 
-		m_buildResultWriter->addFile(m_subDir, "dataSources.xml", data);
+		m_buildResultWriter->addFile(m_subDir, "dataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
 		m_cfgXml->addLinkToFile(m_subDir, "dataSources.xml");
 
 		return result;
