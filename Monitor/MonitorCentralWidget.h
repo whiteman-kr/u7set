@@ -15,7 +15,7 @@ public:
 public:
 
 protected:
-	void addSchemaTabPage(QString schemaId);
+	int addSchemaTabPage(QString schemaId);
 
 	// Signals
 signals:
@@ -24,8 +24,10 @@ signals:
 	//
 protected slots:
 	void slot_tabCloseRequested(int index);
-
 	void slot_resetSchema(QString startSchemaId);
+
+	void slot_newSameTab(MonitorSchemaWidget* tabWidget);
+	void slot_closeTab(MonitorSchemaWidget* tabWidget);
 
 	// Data
 	//
