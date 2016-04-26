@@ -50,11 +50,6 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
-		QMetaType::registerConverter<QString, Hardware::DeviceSignal::SignalFunction>([] (QString str){ return Hardware::DeviceSignal::SignalFunction(str.toInt()); });
-
-		QMetaType::registerConverter<Hardware::DeviceSignal::SignalFunction, QString>([] (Hardware::DeviceSignal::SignalFunction type){ return QString::number(int(type)); });
-
-		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);
 	}
 
 	void Shutdwon()

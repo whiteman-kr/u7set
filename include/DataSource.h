@@ -105,12 +105,11 @@ private:
 	ulong m_lmDataID = 0;
 
 	RupFrame* m_rupFrames = nullptr;
-	int m_framesQuantity = 0;
-
 	char* m_framesData = nullptr;
 
 	void allocateMemory();
 	void mergeFrames();
+	void parseFramesData();
 
 public:
 	DataSource();
