@@ -5,7 +5,6 @@
 
 class SchemaManager;
 
-
 class MonitorSchemaView : public VFrame30::SchemaView
 {
 	Q_OBJECT

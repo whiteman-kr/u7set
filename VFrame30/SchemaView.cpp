@@ -38,6 +38,8 @@ namespace VFrame30
 		m_schema = schema;
 
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
+
+		emit signal_schemaChanged(schema.get());
 	}
 
 	void SchemaView::mouseMoveEvent(QMouseEvent* event)

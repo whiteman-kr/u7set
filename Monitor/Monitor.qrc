@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/"/>
+    <qresource prefix="/Images">
+        <file>Images/NewSchema.svg</file>
+        <file>Images/Backward.svg</file>
+        <file>Images/Forward.svg</file>
+        <file>Images/ZoomIn.svg</file>
+        <file>Images/ZoomOut.svg</file>
+        <file>Images/Settings.svg</file>
+        <file>Images/Close.svg</file>
+        <file>Images/About.svg</file>
+    </qresource>
+</RCC>
