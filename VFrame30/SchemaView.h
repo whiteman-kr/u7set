@@ -39,6 +39,11 @@ namespace VFrame30
 	protected:
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 
+		// Signals
+		//
+	signals:
+		void signal_schemaChanged(Schema* schema);
+
 		// Properties
 		//
 	public:

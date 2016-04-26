@@ -75,8 +75,17 @@ private:
 	QAction* m_pLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
+	QAction* m_newTabAction = nullptr;
+	QAction* m_closeTabAction = nullptr;
+
+	QAction* m_zoomInAction = nullptr;
+	QAction* m_zoomOutAction = nullptr;
+	QAction* m_historyForward = nullptr;
+	QAction* m_historyBackward = nullptr;
+
 	// Controls
 	//
+	QToolBar* m_toolBar = nullptr;
 	QLabel* m_pStatusBarInfo = nullptr;
 	QLabel* m_pStatusBarConnectionStatistics = nullptr;
 	QLabel* m_pStatusBarConnectionState = nullptr;

@@ -15,17 +15,25 @@ public:
 public:
 
 protected:
-	void addSchemaTabPage(QString schemaId);
+	int addSchemaTabPage(QString schemaId);
 
 	// Signals
 signals:
 
 	// Slots
 	//
+public slots:
+	void slot_newTab();
+	void slot_closeCurrentTab();
+
 protected slots:
 	void slot_tabCloseRequested(int index);
-
 	void slot_resetSchema(QString startSchemaId);
+
+	void slot_newSameTab(MonitorSchemaWidget* tabWidget);
+	void slot_closeTab(MonitorSchemaWidget* tabWidget);
+
+	void slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema);
 
 	// Data
 	//

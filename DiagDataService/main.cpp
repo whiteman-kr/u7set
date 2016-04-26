@@ -1,8 +1,8 @@
 #include <QCoreApplication>
-#include "DataAcquisitionService.h"
+#include "DiagDataService.h"
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
-	#include <vld.h>		// Enable Visula Leak Detector
+	#include <vld.h>		// Enable Visual Leak Detector
 	// vld.h includes windows.h wich redefine min/max stl functions
 	#ifdef min
 		#undef min
@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
 	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
 	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
 
-	DataServiceWorker* dataServiceWorker = new DataServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2);
+	DiagDataServiceWorker* dataServiceWorker = new DiagDataServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2);
 
-	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", dataServiceWorker);
+	ServiceStarter service(argc, argv, "RPCT Diagnostics Data Service", dataServiceWorker);
 
 	return service.exec();
 }

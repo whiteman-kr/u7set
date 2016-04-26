@@ -1,22 +1,12 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-11-21T11:50:41
-#
-#-------------------------------------------------
-
-QT       += core
-
-QT       -= gui
-
-QT       += network
-
-QT		 += widgets
-
+QT  += core
+QT  -= gui
+QT  += network
+QT  += widgets
 QT  += qml
 
-TARGET = DataSrv
-CONFIG   += console
-CONFIG   -= app_bundle
+TARGET = DiagDataSrv
+CONFIG += console
+CONFIG -= app_bundle
 
 TEMPLATE = app
 
@@ -86,12 +76,12 @@ SOURCES += main.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    DataAcquisitionService.cpp \
     ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
-    DataChannel.cpp
+    DataChannel.cpp \
+    DiagDataService.cpp
 
 HEADERS += \
 	Stable.h \
@@ -114,13 +104,13 @@ HEADERS += \
     ../include/TcpFileTransfer.h \
     ../include/BuildInfo.h \
     ../include/SimpleThread.h \
-    DataAcquisitionService.h \
     ../include/ServiceSettings.h \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
     ../include/XmlHelper.h \
     DataChannel.h \
-    ../include/DataProtocols.h
+    ../include/DataProtocols.h \
+    DiagDataService.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -150,14 +140,14 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 # Visual Leak Detector
 #
 win32 {
-		contains(QMAKE_TARGET.arch, x86_64) {
-				LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-				LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-		} else {
-				LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-				LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-		}
+	    contains(QMAKE_TARGET.arch, x86_64) {
+			    LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
+			    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	    } else {
+			    LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
+			    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
+	    }
 
-		INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-		INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
+	    INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
+	    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network xmlpatterns qml xml
+QT       += core gui widgets network xmlpatterns qml xml svg
 
 TARGET = Monitor
 TEMPLATE = app
@@ -138,3 +138,17 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+RESOURCES += \
+    Monitor.qrc
+
+DISTFILES += \
+    Images/NewSchema.svg \
+    Images/Backward.svg \
+    Images/Forward.svg \
+    Images/ZoomIn.svg \
+    Images/ZoomOut.svg \
+    Images/Settings.svg \
+    Images/Close.svg \
+    Images/About.svg \
+    Images/readme.txt
