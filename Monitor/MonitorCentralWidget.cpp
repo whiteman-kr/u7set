@@ -11,12 +11,11 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	// --
 	//
 	tabBar()->setExpanding(true);
+	setStyleSheet("QTabBar::tab { min-width: 200px; height: 28px;}");
 
 	// On start create an empty MonitorSchema and add a tab with this schema
 	//
 	addSchemaTabPage("EMPTYSCHEMA");
-	addSchemaTabPage("EMPTYSCHEMA2");
-	addSchemaTabPage("EMPTYSCHEMA3");
 
 	// --
 	//
@@ -30,7 +29,7 @@ MonitorCentralWidget::~MonitorCentralWidget()
 	qDebug() << Q_FUNC_INFO;
 }
 
-void MonitorCentralWidget::addSchemaTabPage(QString schemaId)
+int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 {
 	std::shared_ptr<VFrame30::Schema> tabSchema = m_schemaManager->schema(schemaId);
 
@@ -42,7 +41,12 @@ void MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 	}
 
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
-	addTab(schemaWidget, tabSchema->caption());
+
+	//connect(schemaWidget, &MonitorSchemaWidget::signal_newTab, this, &MonitorCentralWidget::slot_newSameTab);
+	//connect(schemaWidget, &MonitorSchemaWidget::signal_closeTab, this, &MonitorCentralWidget::slot_closeTab);
+	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
+
+	int index = addTab(schemaWidget, tabSchema->caption());
 
 	if (count() > 1 && tabsClosable() == false)
 	{
@@ -50,6 +54,34 @@ void MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 		setMovable(true);
 	}
 
+	return index;
+}
+
+void MonitorCentralWidget::slot_newTab()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	slot_newSameTab(curTabWidget);
+	return;
+}
+
+void MonitorCentralWidget::slot_closeCurrentTab()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	slot_closeTab(curTabWidget);
 	return;
 }
 
@@ -112,6 +144,67 @@ void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
 
 		setTabText(i, newSchema->caption());
 		tabPage->setSchema(newSchema);
+	}
+
+	return;
+}
+
+void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
+{
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget);
+		return;
+	}
+
+	QString schemaId = tabWidget->schema()->schemaID();
+	int tabIndex = addSchemaTabPage(schemaId);
+
+	// Switch to the new tab
+	//
+	if (tabIndex != -1)
+	{
+		setCurrentIndex(tabIndex);
+	}
+
+	return;
+}
+
+void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
+{
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget);
+		return;
+	}
+
+	int tabIndex = indexOf(tabWidget);
+
+	if (tabIndex == -1)
+	{
+		assert(tabIndex != -1);
+		return;
+	}
+
+	slot_tabCloseRequested(tabIndex);
+	return;
+}
+
+void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema)
+{
+	if (tabWidget == nullptr ||
+		schema == nullptr)
+	{
+		assert(tabWidget);
+		assert(schema);
+		return;
+	}
+
+	int tabIndex = indexOf(tabWidget);
+
+	if (tabIndex >=0)
+	{
+		setTabText(tabIndex, schema->caption());
 	}
 
 	return;

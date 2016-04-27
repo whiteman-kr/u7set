@@ -2752,12 +2752,6 @@ namespace Builder
 
 		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
 
-		if (moduleSignalsCount != 32)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("AOM module must have 32 output signals")));
-			return false;
-		}
-
 		for(int i = 0; i < moduleSignalsCount - 1; i++)
 		{
 			for(int j = i + 1; j < moduleSignalsCount; j++)

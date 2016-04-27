@@ -15,7 +15,7 @@ namespace Hardware
 
 
 
-class DataServiceWorker : public ServiceWorker
+class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
@@ -66,7 +66,7 @@ private:
 
 
 public:
-	DataServiceWorker(const QString& serviceStrID,
+	AppDataServiceWorker(const QString& serviceStrID,
 					  const QString& cfgServiceIP1,
 					  const QString& cfgServiceIP2);
 
@@ -75,7 +75,7 @@ public:
 
 	ServiceWorker* createInstance() override
 	{
-		return new DataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+		return new AppDataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
 	}
 
 signals:

@@ -1,7 +1,7 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
 #include "../include/DeviceObject.h"
-#include "DataAcquisitionService.h"
+#include "AppDataService.h"
 
 
 // -------------------------------------------------------------------------------
@@ -10,10 +10,10 @@
 //
 // -------------------------------------------------------------------------------
 
-DataServiceWorker::DataServiceWorker(const QString& serviceStrID,
+AppDataServiceWorker::AppDataServiceWorker(const QString& serviceStrID,
 									 const QString& cfgServiceIP1,
 									 const QString& cfgServiceIP2) :
-	ServiceWorker(ServiceType::DataAcquisitionService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
+	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
 	m_timer(this)
 {
 	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
@@ -25,19 +25,19 @@ DataServiceWorker::DataServiceWorker(const QString& serviceStrID,
 
 
 
-void DataServiceWorker::readConfigurationFiles()
+void AppDataServiceWorker::readConfigurationFiles()
 {
 	SerializeEquipmentFromXml("equipment.xml", m_deviceRoot);
 	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 }
 
 
-void DataServiceWorker::runUdpThreads()
+void AppDataServiceWorker::runUdpThreads()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_DATA_AQUISITION_SERVICE_INFO);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_APP_DATA_SERVICE_INFO);
 
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &DataServiceWorker::onInformationRequest);
-	connect(this, &DataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &AppDataServiceWorker::onInformationRequest);
+	connect(this, &AppDataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	m_infoSocketThread = new UdpSocketThread(serverSocket);
 
@@ -45,26 +45,26 @@ void DataServiceWorker::runUdpThreads()
 }
 
 
-void DataServiceWorker::stopUdpThreads()
+void AppDataServiceWorker::stopUdpThreads()
 {
 	delete m_infoSocketThread;
 }
 
 
-void DataServiceWorker::runCfgLoaderThread()
+void AppDataServiceWorker::runCfgLoaderThread()
 {
 	m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1,
 											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
 											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
 
-void DataServiceWorker::stopCfgLoaderThread()
+void AppDataServiceWorker::stopCfgLoaderThread()
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -79,22 +79,22 @@ void DataServiceWorker::stopCfgLoaderThread()
 
 
 
-void DataServiceWorker::runTimer()
+void AppDataServiceWorker::runTimer()
 {
-	connect(&m_timer, &QTimer::timeout, this, &DataServiceWorker::onTimer);
+	connect(&m_timer, &QTimer::timeout, this, &AppDataServiceWorker::onTimer);
 
 	m_timer.setInterval(1000);
 	m_timer.start();
 }
 
 
-void DataServiceWorker::stopTimer()
+void AppDataServiceWorker::stopTimer()
 {
 	m_timer.stop();
 }
 
 
-void DataServiceWorker::initialize()
+void AppDataServiceWorker::initialize()
 {
 	// Service Main Function initialization
 	//
@@ -106,7 +106,7 @@ void DataServiceWorker::initialize()
 }
 
 
-void DataServiceWorker::shutdown()
+void AppDataServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
@@ -123,7 +123,7 @@ void DataServiceWorker::shutdown()
 }
 
 
-void DataServiceWorker::onInformationRequest(UdpRequest request)
+void AppDataServiceWorker::onInformationRequest(UdpRequest request)
 {
 	switch(request.ID())
 	{
@@ -145,7 +145,7 @@ void DataServiceWorker::onInformationRequest(UdpRequest request)
 }
 
 
-void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
+void AppDataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 {
 	/*int dataSourcesCount = m_dataSources.count();
 
@@ -196,7 +196,7 @@ void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 }
 
 
-void DataServiceWorker::onTimer()
+void AppDataServiceWorker::onTimer()
 {
 	static int a = 0;
 
@@ -210,7 +210,7 @@ void DataServiceWorker::onTimer()
 }
 
 
-void DataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
+void AppDataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
 {
 /*	quint32 count = request.readDword();
 
@@ -249,7 +249,7 @@ void DataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
 }
 
 
-void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
+void AppDataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 {
 /*	quint32 count = request.readDword();
 
@@ -288,7 +288,7 @@ void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 }
 
 
-void DataServiceWorker::stopDataChannels()
+void AppDataServiceWorker::stopDataChannels()
 {
 	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
 	{
@@ -308,7 +308,7 @@ void DataServiceWorker::stopDataChannels()
 	}
 }
 
-void DataServiceWorker::runDataChannels()
+void AppDataServiceWorker::runDataChannels()
 {
 	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
 	{
@@ -333,7 +333,7 @@ void DataServiceWorker::runDataChannels()
 }
 
 
-void DataServiceWorker::initDataChannels()
+void AppDataServiceWorker::initDataChannels()
 {
 	stopDataChannels();
 
@@ -351,7 +351,7 @@ void DataServiceWorker::initDataChannels()
 
 
 
-void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	qDebug() << "Configuration Ready!";
 
@@ -393,7 +393,7 @@ void DataServiceWorker::onConfigurationReady(const QByteArray configurationXmlDa
 }
 
 
-bool DataServiceWorker::readConfiguration(const QByteArray& fileData)
+bool AppDataServiceWorker::readConfiguration(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 
@@ -412,7 +412,7 @@ bool DataServiceWorker::readConfiguration(const QByteArray& fileData)
 }
 
 
-bool DataServiceWorker::readDataSources(QByteArray& fileData)
+bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 

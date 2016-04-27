@@ -34,12 +34,13 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 DataSource::DataSource()
 {
 	m_rupFrames = new RupFrame[RUP_MAX_FRAME_COUNT];
-	m_framesData = new char[RUP_BUFFER_SIZE];
+	m_framesData = new char[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 }
 
 DataSource::~DataSource()
 {
-
+	delete [] m_rupFrames;
+	delete [] m_framesData;
 }
 
 /*
@@ -224,9 +225,9 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 {
-	m_framesQuantity = rupFrame.header.framesQuantity;
+	int framesQuantity = rupFrame.header.framesQuantity;
 
-	if (m_framesQuantity > RUP_MAX_FRAME_COUNT)
+	if (framesQuantity > RUP_MAX_FRAME_COUNT)
 	{
 		assert(false);
 		return;
@@ -234,7 +235,7 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 
 	int frameNo = rupFrame.header.frameNumber;
 
-	if (frameNo >= RUP_MAX_FRAME_COUNT)
+	if (frameNo >= framesQuantity)
 	{
 		assert(false);
 		return ;
@@ -246,11 +247,11 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 	//
 	bool dataReady = true;
 
-	if (m_framesQuantity > 1)
+	if (framesQuantity > 1)
 	{
 		quint16 numerator0 = m_rupFrames[0].header.numerator;
 
-		for(int i = 1; i < m_framesQuantity; i++)
+		for(int i = 1; i < framesQuantity; i++)
 		{
 			dataReady &= m_rupFrames[i].header.numerator == numerator0;
 		}
@@ -263,10 +264,20 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 }
 
 
-void DataSource::allocateMemory()
-{
-}
-
 void DataSource::mergeFrames()
 {
+	int framesQuantity = m_rupFrames[0].header.framesQuantity;
+
+	for(int i = 0; i < framesQuantity; i++)
+	{
+		memcpy(m_framesData + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
+	}
+
+	parseFramesData();
+}
+
+
+void DataSource::parseFramesData()
+{
+
 }

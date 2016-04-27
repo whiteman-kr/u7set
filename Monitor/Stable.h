@@ -55,6 +55,7 @@
 #include <QVBoxLayout>
 
 #include <QAction>
+#include <QToolBar>
 #include <QMenu>
 #include <QMenuBar>
 #include <QStatusBar>
