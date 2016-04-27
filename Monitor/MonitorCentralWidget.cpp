@@ -54,6 +54,7 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 		setMovable(true);
 	}
 
+	emit signal_actionCloseTabUpdated(count() > 1);
 	return index;
 }
 
@@ -85,6 +86,48 @@ void MonitorCentralWidget::slot_closeCurrentTab()
 	return;
 }
 
+void MonitorCentralWidget::slot_zoomIn()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	curTabWidget->zoomIn();
+	return;
+}
+
+void MonitorCentralWidget::slot_zoomOut()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	curTabWidget->zoomOut();
+	return;
+}
+
+void MonitorCentralWidget::slot_zoom100()
+{
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	curTabWidget->zoom100();
+	return;
+}
+
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
 {
 	// Close Tab request
@@ -105,6 +148,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 		setMovable(false);
 	}
 
+	emit signal_actionCloseTabUpdated(count() > 1);
 	return;
 }
 

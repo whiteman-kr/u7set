@@ -53,7 +53,6 @@ public:
 	//MonitorSchemaView* schemaView();
 	//const MonitorSchemaView* schemaView() const;
 
-
 	// Data
 	//
 private:

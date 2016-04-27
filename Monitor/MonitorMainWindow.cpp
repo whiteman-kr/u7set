@@ -26,16 +26,22 @@ MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, 
 	createToolBars();
 	createStatusBar();
 
-	// Add main tab pages
-	//
-	//getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
-	//getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
-
 	// --
 	//
 	setMinimumSize(500, 300);
 	restoreWindowState();
 
+	// --
+	//
+	connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
+		[this](bool allowed)
+		{
+			assert(m_closeTabAction);
+			m_closeTabAction->setEnabled(allowed);
+		});
+
+	// --
+	//
 	centralWidget()->show();
 
 	return;
@@ -125,31 +131,40 @@ void MonitorMainWindow::createActions()
 	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
 	m_closeTabAction->setEnabled(true);
 	m_closeTabAction->setShortcuts(QKeySequence::Close);
+	m_closeTabAction->setEnabled(monitorCentralWidget()->count() > 1);
 	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
 
-	m_zoomInAction = new QAction(tr("ZoomIn"), this);
-	m_zoomInAction->setStatusTip(tr("Zoom In schema view"));
+	m_zoomInAction = new QAction(tr("Zoom In"), this);
+	m_zoomInAction->setStatusTip(tr("Zoom in schema view"));
 	m_zoomInAction->setIcon(QIcon(":/Images/Images/ZoomIn.svg"));
 	m_zoomInAction->setEnabled(true);
-	m_zoomInAction->setShortcuts(QKeySequence::ZoomIn);
+	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+	connect(m_zoomInAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomIn);
 
-	m_zoomOutAction = new QAction(tr("ZoomOut"), this);
-	m_zoomOutAction->setStatusTip(tr("Zoom Out schema view"));
+	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+	m_zoomOutAction->setStatusTip(tr("Zoom out schema view"));
 	m_zoomOutAction->setIcon(QIcon(":/Images/Images/ZoomOut.svg"));
 	m_zoomOutAction->setEnabled(true);
-	m_zoomOutAction->setShortcuts(QKeySequence::ZoomOut);
+	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+	connect(m_zoomOutAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomOut);
+
+	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
+	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
+	m_zoom100Action->setEnabled(true);
+	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
 	m_historyBackward = new QAction(tr("Go Back"), this);
 	m_historyBackward->setStatusTip(tr("Click to got back"));
 	m_historyBackward->setIcon(QIcon(":/Images/Images/Backward.svg"));
 	m_historyBackward->setEnabled(true);
-	m_historyBackward->setShortcuts(QKeySequence::Back);
+	m_historyBackward->setShortcut(QKeySequence::Back);
 
 	m_historyForward = new QAction(tr("Go Forward"), this);
 	m_historyForward->setStatusTip(tr("Click to got forward"));
 	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
 	m_historyForward->setEnabled(true);
-	m_historyForward->setShortcuts(QKeySequence::Forward);
+	m_historyForward->setShortcut(QKeySequence::Forward);
 
 	return;
 }
@@ -175,6 +190,7 @@ void MonitorMainWindow::createMenus()
 
 	viewMenu->addAction(m_zoomInAction);
 	viewMenu->addAction(m_zoomOutAction);
+	viewMenu->addAction(m_zoom100Action);
 	viewMenu->addSeparator();
 
 	viewMenu->addAction(m_historyForward);

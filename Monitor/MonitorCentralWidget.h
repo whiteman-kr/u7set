@@ -8,6 +8,8 @@ class SchemaManager;
 
 class MonitorCentralWidget : public QTabWidget
 {
+	Q_OBJECT
+
 public:
 	MonitorCentralWidget(SchemaManager* schemaManager);
 	~MonitorCentralWidget();
@@ -19,12 +21,17 @@ protected:
 
 	// Signals
 signals:
+	void signal_actionCloseTabUpdated(bool allowed);
 
 	// Slots
 	//
 public slots:
 	void slot_newTab();
 	void slot_closeCurrentTab();
+
+	void slot_zoomIn();
+	void slot_zoomOut();
+	void slot_zoom100();
 
 protected slots:
 	void slot_tabCloseRequested(int index);

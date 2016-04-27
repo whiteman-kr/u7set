@@ -30,7 +30,7 @@ namespace VFrame30
 
 		// Slots
 		//
-	protected slots:
+	public slots:
 		void zoomIn();
 		void zoomOut();
 		void zoom100();
@@ -51,9 +51,6 @@ namespace VFrame30
 		// Data
 		//
 	protected:
-		QAction* m_zoomInAction = nullptr;
-		QAction* m_zoomOutAction = nullptr;
-		QAction* m_zoom100Action = nullptr;
 
 	private:
 		SchemaView* m_schemaView = nullptr;

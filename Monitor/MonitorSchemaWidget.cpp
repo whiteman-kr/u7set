@@ -80,7 +80,7 @@ QString MonitorSchemaWidget::caption() const
 	return schema()->caption();
 }
 
-void MonitorSchemaWidget::contextMenu(const QPoint& pos)
+void MonitorSchemaWidget::contextMenu(const QPoint& /*pos*/)
 {
 	// Disable/enable actions
 	//
