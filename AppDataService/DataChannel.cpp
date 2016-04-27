@@ -166,7 +166,6 @@ void DataChannel::onSocketReadyRead()
 	{
 		m_unknownDataSources.insert(ip, ip);
 	}
-
 }
 
 
