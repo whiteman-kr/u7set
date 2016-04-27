@@ -1428,7 +1428,6 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		}
 	}
 
-	QStringList result;
 	int channelNo = 0;
 	for (QString lmId : lmIdList)
 	{
@@ -1470,8 +1469,6 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
 
-		result << newSignalStrId;
-
 		channelNo++;
 	}
 
@@ -1495,6 +1492,12 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	if (dbController->addSignal(type, &signalVector, parent) == false)
 	{
 		return QStringList();
+	}
+
+	QStringList result;
+	for (Signal& signal : signalVector)
+	{
+		result << signal.appSignalID();
 	}
 
 	return result;
