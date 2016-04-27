@@ -1487,7 +1487,12 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	}
 	SignalPropertiesDialog dlg(signalPtrVector, *Signal::m_unitList.get(), false, nullptr, parent);
 
-	if (dlg.exec() != QDialog::Accepted || !dbController->addSignal(type, &signalVector, parent))
+	if (dlg.exec() != QDialog::Accepted )
+	{
+		return QStringList();
+	}
+
+	if (dbController->addSignal(type, &signalVector, parent) == false)
 	{
 		return QStringList();
 	}
