@@ -24,16 +24,6 @@ SELECT * FROM add_or_update_file(1, '$root$/HP', 'lm-1.hmd', 'Update: Adding fil
 
 
 
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 20.04.2016 09:16:24
--- FileName: acqsrv.hsw
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'acqsrv.hsw', 'Update: Adding file acqsrv.hsw', E'\\x30', '{}');
-
 
 
 ---------------------------------------------------------------------------
