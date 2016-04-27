@@ -27,7 +27,7 @@ const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSo
 DataSourcesStateModel::DataSourcesStateModel(QHostAddress ip, QObject* parent) :
 	QAbstractTableModel(parent)
 {
-	m_clientSocket = new UdpClientSocket(ip, PORT_DATA_AQUISITION_SERVICE_INFO);
+	m_clientSocket = new UdpClientSocket(ip, PORT_APP_DATA_SERVICE_INFO);
 
 	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateModel::invalidateData);
 	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateModel::parseData);

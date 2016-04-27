@@ -14,11 +14,12 @@ SUBDIRS += qtservice \
     Metrology \
     ConfigurationService \
     ArchivingService \
-	DataAquisitionService \
 	VFrame30 \
 	u7 \
     Monitor \
     PacketViewer \
     TcpClient \
-    TuningService
+    TuningService \
+    AppDataService \
+    DiagDataService
 
