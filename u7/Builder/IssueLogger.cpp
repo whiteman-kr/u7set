@@ -340,7 +340,7 @@ namespace Builder
     }
 
 
-    /// IssueCode: CFG3101
+	/// IssueCode: CFG3009
     ///
     /// IssueType: Error
     ///
@@ -368,6 +368,40 @@ namespace Builder
                   .arg(maxDifference2)
                   .arg(signalID));
     }
+
+	/// IssueCode: CFG3010
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](module '%6').
+	///
+	/// Parameters:
+	///         %1 Property Name
+	///         %2 Property Value
+	///         %3 Min Value
+	///         %4 Max Value
+	///         %5 Precision
+	///			%6 Module StrID
+	///
+	/// Description:
+	///			Occurs if a property value is out of range
+	///
+	void IssueLogger::errCFG3010(QString name, double value, double min, double max, int precision, QString module)
+	{
+		QString sValue = QString::number(value, 'f', precision);
+		QString sMin = QString::number(min, 'f', precision);
+		QString sMax = QString::number(max, 'f', precision);
+
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3010,
+				  tr("Property '%1'' has wrong value (%2), valid range is %3..%4 (module '%6').")
+				  .arg(name)
+				  .arg(sValue)
+				  .arg(sMin)
+				  .arg(sMax)
+				  .arg(module));
+	}
+
 
 
     // ALP			Application Logic Parsing				4000-4999
