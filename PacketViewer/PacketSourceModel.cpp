@@ -12,11 +12,15 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include "../include/DataProtocols.h"
+#include <QTimer>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
 {
 	Hardware::Init();
+	QTimer* timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, this, &PacketSourceModel::updateSourceStatisticByTimer);
+	timer->start(100);
 }
 
 PacketSourceModel::~PacketSourceModel()
@@ -257,7 +261,7 @@ void PacketSourceModel::loadProject(const QString& projectPath)
 	}
 	m_dataSources.clear();
 
-	//InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
 
 	for (auto listener : m_listeners)
 	{
@@ -324,6 +328,19 @@ void PacketSourceModel::updateSourceStatistic()
 	emit dataChanged(listenerIndex = index(listenerRow, 0, QModelIndex()), index(listenerRow, columnCount() - 1, QModelIndex()));
 	int sourceRow = listener->index(source);
 	emit dataChanged(index(sourceRow, 0, listenerIndex), index(sourceRow, columnCount() - 1, listenerIndex));
+}
+
+void PacketSourceModel::updateSourceStatisticByTimer()
+{
+	QModelIndex listenerIndex;
+	for (int i = 0; i < m_listeners.size(); i++)
+	{
+		emit dataChanged(listenerIndex = index(i, 0, QModelIndex()), index(i, columnCount() - 1, QModelIndex()));
+		for (int j = 0; j < m_listeners[i]->childCount(); j++)
+		{
+			emit dataChanged(index(j, 0, listenerIndex), index(j, columnCount() - 1, listenerIndex));
+		}
+	}
 }
 
 
@@ -399,7 +416,7 @@ int Listener::addNewSource(quint32 ip, quint16 port)
 {
 	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, m_model->signalSet(), m_model->dataSources(), this));
 
-	connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
+	//connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
 	for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		if (m_sources[i]->ip() > ip || (m_sources[i]->ip() == ip && m_sources[i]->port() >= port))
@@ -451,7 +468,7 @@ void Listener::reloadProject()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource*>& dataSources, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
@@ -610,15 +627,15 @@ void Source::removeDependentWidget(QObject* object)
 void Source::reloadProject()
 {
 	m_signalTableModel->beginReloadProject();
-	QHashIterator<quint32, DataSource*> iterator(*m_dataSources);
+	QHashIterator<quint32, std::shared_ptr<DataSource>> iterator(*m_dataSources);
 
 	while (iterator.hasNext())
 	{
 		iterator.next();
 
-		if (iterator.value()->hostAddress().toIPv4Address() == ip())
+		if (iterator.value()->lmAddress32() == ip())
 		{
-			m_signalTableModel->addDataSource(iterator.value());
+			m_signalTableModel->addDataSource(iterator.value().get());
 		}
 	}
 	m_signalTableModel->endReloadProject();
@@ -663,8 +680,7 @@ void Source::swapHeader(RupFrameHeader& header)
 	swapBytes(header.TimeStamp.year);
 }
 
-/*
-void PacketSourceModel::InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
 {
 	dataSources.clear();
 
@@ -702,15 +718,19 @@ void PacketSourceModel::InitDataSources(QHash<quint32, DataSource>& dataSources,
 				QHostAddress ha(ipStr);
 				quint32 ip = ha.toIPv4Address();
 
-				DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+				std::shared_ptr<DataSource> ds = std::make_shared<DataSource>();
+				ds->setID(ip);
+				ds->setLmCaption(QString("Data Source %1").arg(key));
+				ds->setLmAddressStr(ha.toString());
+				ds->partCount(1);
 
-				QString signalPrefix = currentModule->parent()->equipmentIdTemplate();
+				QString signalPrefix = currentModule->parent()->equipmentId();
 				int signalPrefixLength = signalPrefix.length();
 				for (int i = 0; i < signalSet.count(); i++)
 				{
 					if (signalSet[i].equipmentID().left(signalPrefixLength) == signalPrefix)
 					{
-						ds.addSignalIndex(i);
+						ds->addSignalIndex(i);
 					}
 				}
 
@@ -718,4 +738,4 @@ void PacketSourceModel::InitDataSources(QHash<quint32, DataSource>& dataSources,
 			}
 		}
 	});
-}*/
+}

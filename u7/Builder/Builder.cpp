@@ -761,7 +761,7 @@ namespace Builder
 
 				switch(software->type())
 				{
-				case E::SoftwareType::DataAcquisitionService:
+				case E::SoftwareType::AppDataService:
 					softwareCfgGenerator = new DASCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 

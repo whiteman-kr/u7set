@@ -147,7 +147,7 @@ private:
 	double m_aperture = 0;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
-	double m_filteringTime = 0.05;
+	double m_filteringTime = 0.005;
 	double m_maxDifference = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
