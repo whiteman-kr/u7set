@@ -3997,6 +3997,8 @@ namespace Builder
 
 		bool result = true;
 
+		QMap<QString, QString> processedSignalsMap;
+
 		// internal analog registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
@@ -4006,12 +4008,19 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isAnalog())
 			{
 				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -4019,8 +4028,14 @@ namespace Builder
 
 		// internal discrete registered
 		//
+
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isDiscrete())
 			{
 				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(appSignal->constSignal());
@@ -4030,6 +4045,8 @@ namespace Builder
 				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -4039,11 +4056,18 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isAnalog())
 			{
 				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -4053,17 +4077,26 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isDiscrete())
 			{
 				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
 		m_memoryMap.recalculateAddresses();
 
 		m_bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
+
+		processedSignalsMap.clear();
 
 		return result;
 	}
