@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
 	MonitorConfigController configController(theSettings.configuratorAddress1(),
 											 theSettings.configuratorAddress2());
 
-
 	// --
 	//
 	MonitorMainWindow w(&configController);

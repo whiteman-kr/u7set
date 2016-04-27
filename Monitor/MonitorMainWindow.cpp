@@ -154,17 +154,19 @@ void MonitorMainWindow::createActions()
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
-	m_historyBackward = new QAction(tr("Go Back"), this);
-	m_historyBackward->setStatusTip(tr("Click to got back"));
-	m_historyBackward->setIcon(QIcon(":/Images/Images/Backward.svg"));
-	m_historyBackward->setEnabled(true);
-	m_historyBackward->setShortcut(QKeySequence::Back);
+	m_historyBack = new QAction(tr("Go Back"), this);
+	m_historyBack->setStatusTip(tr("Click to got back"));
+	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
+	m_historyBack->setEnabled(false);
+	m_historyBack->setShortcut(QKeySequence::Back);
+	connect(m_historyBack, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyBack);
 
 	m_historyForward = new QAction(tr("Go Forward"), this);
 	m_historyForward->setStatusTip(tr("Click to got forward"));
 	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
-	m_historyForward->setEnabled(true);
+	m_historyForward->setEnabled(false);
 	m_historyForward->setShortcut(QKeySequence::Forward);
+	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
 	return;
 }
@@ -194,7 +196,7 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addSeparator();
 
 	viewMenu->addAction(m_historyForward);
-	viewMenu->addAction(m_historyBackward );
+	viewMenu->addAction(m_historyBack );
 
 
 	// Tools
@@ -231,7 +233,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addSeparator();
 
-	m_toolBar->addAction(m_historyBackward);
+	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
 
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);

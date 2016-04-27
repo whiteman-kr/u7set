@@ -128,6 +128,18 @@ void MonitorCentralWidget::slot_zoom100()
 	return;
 }
 
+void MonitorCentralWidget::slot_historyBack()
+{
+	qDebug() << "MonitorCentralWidget::slot_historyBack";
+	return;
+}
+
+void MonitorCentralWidget::slot_historyForward()
+{
+	qDebug() << "MonitorCentralWidget::slot_historyForward";
+	return;
+}
+
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
 {
 	// Close Tab request

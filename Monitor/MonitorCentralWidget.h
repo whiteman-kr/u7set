@@ -33,6 +33,10 @@ public slots:
 	void slot_zoomOut();
 	void slot_zoom100();
 
+	void slot_historyBack();
+	void slot_historyForward();
+
+
 protected slots:
 	void slot_tabCloseRequested(int index);
 	void slot_resetSchema(QString startSchemaId);
