@@ -366,6 +366,8 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
+	std::vector<std::shared_ptr<Afb::AfbElement> > updateAfbsForSchema();
+
 public:
 	void resetAction();
 	void clearSelection();
@@ -385,7 +387,6 @@ signals:
 	// Slots
 	//
 protected slots:
-
 	void contextMenu(const QPoint& pos);
 
 	void exportToPdf();

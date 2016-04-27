@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml
+QT       += core gui widgets sql network xmlpatterns qml svg
 
 TARGET = u7
 TEMPLATE = app

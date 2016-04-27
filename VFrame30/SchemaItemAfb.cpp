@@ -22,8 +22,6 @@ namespace VFrame30
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
-        m_afbImplementationVersion(fblElement.implementationVersion()),
-        m_afbImplementationOpIndex(fblElement.implementationOpIndex()),
 		m_params(fblElement.params())
 	{
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
@@ -59,15 +57,6 @@ namespace VFrame30
 
 	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
 	{
-		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
-		if (afb.get() == nullptr)
-		{
-			// Such AfbItem was not found
-			//
-			assert(afb.get() != nullptr);
-			return;
-		}
-
 		QPainter* p = drawParam->painter();
 
 		int dpiX = 96;
@@ -114,6 +103,23 @@ namespace VFrame30
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		// --
+		//
+		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
+		if (afb.get() == nullptr)
+		{
+			qDebug() << afbStrID();
+
+			// Such AfbItem was not found
+			//
+			QString text = QString("error\n%1\nnot found").arg(afbStrID());
+
+			p->setPen(Qt::red);
+			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+
+			return;
+		}
 
 		// Draw caption
 		//
@@ -595,17 +601,6 @@ namespace VFrame30
 	{
 		return m_afbStrID;
 	}
-
-    int SchemaItemAfb::afbImplementationVersion() const
-    {
-        return m_afbImplementationVersion;
-    }
-
-    int SchemaItemAfb::afbImplementationOpIndex() const
-    {
-        return m_afbImplementationOpIndex;
-    }
-
 
 	const std::vector<Afb::AfbParam>& SchemaItemAfb::params() const
 	{

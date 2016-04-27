@@ -4040,6 +4040,51 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
+std::vector<std::shared_ptr<Afb::AfbElement>> EditSchemaWidget::updateAfbsForSchema()
+{
+	// Update Afb list, as
+	std::vector<DbFileInfo> fileList;
+
+	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", true, this);
+	if (result == false || fileList.empty() == true)
+	{
+		return std::vector<std::shared_ptr<Afb::AfbElement>>();
+	}
+
+	// Read all Afb's and refresh it in schema
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+	result = db()->getLatestVersion(fileList, &files, this);
+	if (result == false)
+	{
+		return std::vector<std::shared_ptr<Afb::AfbElement>>();
+	}
+
+	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
+	elements.reserve(files.size());
+
+	for (auto& f : files)
+	{
+		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
+
+		QString errorMsg;
+		result = afb->loadFromXml(f->data(), errorMsg);
+		if (result == true)
+		{
+			elements.push_back(afb);
+		}
+		else
+		{
+			QMessageBox::critical(this, "Error loading AFB element", errorMsg);
+		}
+
+	}
+
+	schema()->setAfbCollection(elements);
+
+	return elements;
+}
+
 void EditSchemaWidget::resetAction()
 {
 	setMouseState(MouseState::None);
@@ -4572,6 +4617,7 @@ void EditSchemaWidget::editPaste()
 		}
 
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
+		bool schemaItemAfbIsPresent = false;
 
 		for (int i = 0; i < message.schemaitems_size(); i++)
 		{
@@ -4584,6 +4630,16 @@ void EditSchemaWidget::editPaste()
 				schemaItem->setGuid(QUuid::createUuid());
 				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
 			}
+
+			if (dynamic_cast<VFrame30::SchemaItemAfb*>(schemaItem) != nullptr)
+			{
+				schemaItemAfbIsPresent = true;
+			}
+		}
+
+		if (schemaItemAfbIsPresent == true)
+		{
+			updateAfbsForSchema();
 		}
 
 		if (itemList.empty() == false)
@@ -4764,48 +4820,12 @@ void EditSchemaWidget::clipboardDataChanged()
 
 void EditSchemaWidget::addFblElement()
 {
-
-	// Get available Afb list
+	// Update AFBs
 	//
-	std::vector<DbFileInfo> fileList;
+	auto elements = updateAfbsForSchema();
 
-	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", true, this);
-	if (result == false || fileList.empty() == true)
-	{
-		return;
-	}
-
-	// Read all Afb's and refresh it in schema
+	// --
 	//
-	std::vector<std::shared_ptr<DbFile>> files;
-	result = db()->getLatestVersion(fileList, &files, this);
-	if (result == false)
-	{
-		return;
-	}
-
-	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
-	elements.reserve(files.size());
-
-	for (auto& f : files)
-	{
-		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
-
-        QString errorMsg;
-        result = afb->loadFromXml(f->data(), errorMsg);
-        if (result == true)
-        {
-            elements.push_back(afb);
-        }
-        else
-        {
-            QMessageBox::critical(this, "Error loading AFB element", errorMsg);
-        }
-
-	}
-
-	schema()->setAfbCollection(elements);
-
 	ChooseAfbDialog* dialog = new ChooseAfbDialog(elements, this);
 
 	if (dialog->exec() == QDialog::Accepted)

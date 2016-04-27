@@ -26,9 +26,6 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		// ��������� ��������, ����������� � 100% ��������.
-		// Graphcis ������ ����� �������� ������������ ������� (0, 0 - ����� ������� ����, ���� � ������ - ������������� ����������)
-		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const override;
 
 		// Serialization
@@ -40,7 +37,6 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-
 		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema);
@@ -67,8 +63,6 @@ namespace VFrame30
 		//
 	public:
 		const QString& afbStrID() const;
-        int afbImplementationVersion() const;
-        int afbImplementationOpIndex() const;
 
 		const std::vector<Afb::AfbParam>& params() const;
 
@@ -77,10 +71,7 @@ namespace VFrame30
 
 	private:
 		QString m_afbStrID;
-        int m_afbImplementationVersion = 0;
-        int m_afbImplementationOpIndex = 0;
 		std::vector<Afb::AfbParam> m_params;
 		int m_precision = 2;
 	};
-
 }
