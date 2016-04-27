@@ -93,6 +93,8 @@ namespace Hardware
 		QString linkedPortStrID() const { return m_linkedPortStrID; }
 		void setLinkedPortStrID(const QString& linkedPortStrID) { m_linkedPortStrID = linkedPortStrID; }
 
+		bool isLinked() const { return !m_linkedPortStrID.isEmpty(); }
+
 		Q_INVOKABLE QString connectionCaption() const { return m_connectionCaption; }
 		void setConnectionCaption(const QString& connectionCaption) { m_connectionCaption = connectionCaption; }
 
@@ -205,9 +207,12 @@ namespace Hardware
 		QString lmStrID() const { return m_lmStrID; }
 		const DeviceModule* lmDeviceModule() const { return m_lmDeviceModule; }
 
-		QList<OptoPort*> getRS232Ports();
+		QList<OptoPort*> getSerialPorts();
+		QList<OptoPort*> getOptoPorts();
 
 		QList<OptoPort*> ports();
+
+		bool calculateTxStartAddresses();
 
 		friend class OptoModuleStorage;
 	};
