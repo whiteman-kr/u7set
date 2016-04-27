@@ -4627,7 +4627,7 @@ void EditSchemaWidget::editPaste()
 
 			if (schemaItem != nullptr)
 			{
-				schemaItem->setGuid(QUuid::createUuid());
+				schemaItem->setNewGuid();
 				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
 			}
 
