@@ -46,7 +46,8 @@ var Mode_RS485 = 1;
 
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
-var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
+//var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
+var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
