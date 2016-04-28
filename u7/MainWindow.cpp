@@ -210,10 +210,12 @@ void MainWindow::createActions()
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 
-	m_debugAction = new QAction(tr("Debug..."), this);
-	m_debugAction->setStatusTip(tr("Perform some debug actions, don't run it!"));
+	m_debugAction = new QAction(tr("Debug Mode"), this);
+	m_debugAction->setStatusTip(tr("Set debug mode, some extra messages will be displayed"));
 	m_debugAction->setEnabled(true);
+	m_debugAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_D));
 	connect(m_debugAction, &QAction::triggered, this, &MainWindow::debug);
+	addAction(m_debugAction);
 
 	return;
 }
@@ -251,7 +253,7 @@ void MainWindow::createMenus()
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
 	pHelpMenu->addAction(m_aboutAction);
-	pHelpMenu->addAction(m_debugAction);
+
 
 	return;
 }
@@ -394,45 +396,8 @@ void MainWindow::showAbout()
 
 void MainWindow::debug()
 {
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	// Add file
-	std::shared_ptr<DbFile> f1 = std::make_shared<DbFile>();
-	f1->setFileName("file_1.fcf");
-
-	std::shared_ptr<DbFile> f2 = std::make_shared<DbFile>();
-	f2->setFileName("file_2.fcf");
-
-	QByteArray data1;
-	data1.push_back(1);
-	data1.push_back(2);
-	data1.push_back(3);
-	f1->swapData(data1);
-
-	QByteArray data2;
-	data2.push_back(3);
-	data2.push_back(4);
-	f2->swapData(data2);
-
-	files.push_back(f1);
-	files.push_back(f2);
-
-	dbController()->addFiles(&files, 0, this);
-
-	// Ckeck in file_1
-	std::vector<DbFileInfo>	fiv;
-	fiv.push_back(static_cast<DbFileInfo>(*f1));
-
-	dbController()->checkIn(fiv, "check_in file 1", this);
-
-	// check out file_1
-	dbController()->checkOut(fiv, this);
-
-	// undo all files
-	fiv.clear();
-	fiv.push_back(static_cast<DbFileInfo>(*f1));
-	fiv.push_back(static_cast<DbFileInfo>(*f2));
-	dbController()->undoChanges(fiv, this);
+	theSettings.setDebugMode(!theSettings.isDebugMode());
+	qDebug() << "DebugMode: " << theSettings.isDebugMode();
 }
 
 void MainWindow::projectOpened(DbProject project)
