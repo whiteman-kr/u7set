@@ -277,6 +277,7 @@ private:
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
+		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

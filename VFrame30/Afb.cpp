@@ -1276,6 +1276,25 @@ namespace Afb
 		return nullptr;
 	}
 
+	QObject* AfbElement::getAfbSignalByCaption(QString caption)
+	{
+		for (AfbSignal& s : m_inputSignals)
+		{
+			if (s.caption() == caption)
+			{
+				return &s;
+			}
+		}
+		for (AfbSignal& s : m_outputSignals)
+		{
+			if (s.caption() == caption)
+			{
+				return &s;
+			}
+		}
+		return nullptr;
+	}
+
 	// Serialization
 	//
 	bool AfbElement::SaveData(Proto::Envelope* /*message*/) const
