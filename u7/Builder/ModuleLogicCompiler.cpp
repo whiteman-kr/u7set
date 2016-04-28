@@ -2541,7 +2541,7 @@ namespace Builder
 		xmlWriter.writeEndElement();	// </SerialData>
 		xmlWriter.writeEndDocument();
 
-		m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs232-%1.xml").arg(rs232Port->strID()), xmlData);
+		m_resultWriter->addFile(m_lm->propertyValue("SubsystemID").toString(), QString("rs232-%1.xml").arg(rs232Port->strID()), xmlData);
 
 		return result;
 	}
@@ -3020,21 +3020,21 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeResult()
 	{
-		if (m_lm->propertyExists("SubsysID") == false)
+		if (m_lm->propertyExists("SubsystemID") == false)
 		{
 			assert(false);
 			return false;
 		}
 
-		if (m_lm->propertyExists("Channel") == false)
+		if (m_lm->propertyExists("SubsystemChannel") == false)
 		{
 			assert(false);
 			return false;
 		}
 
-		QString subsysId = m_lm->propertyValue("SubsysID").toString();
+		QString subsysId = m_lm->propertyValue("SubsystemID").toString();
 
-		int channel = m_lm->propertyValue("Channel").toInt();
+		int channel = m_lm->propertyValue("SubsystemChannel").toInt();
 
 		bool result = true;
 
@@ -3207,7 +3207,7 @@ namespace Builder
 				serialDataXml.writeEndElement();	// </SerialData>
 				serialDataXml.writeEndDocument();
 
-				m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->port1StrID()), data);
+				m_resultWriter->addFile(m_lm->propertyValue("SubsystemID").toString(), QString("rs-%1-ocm.xml").arg(connection->port1StrID()), data);
 			}
 		});*/
 

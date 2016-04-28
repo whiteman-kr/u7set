@@ -47,7 +47,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
 //var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
-var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
+//var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
+var configScriptVersion = 5;		// LM-1 properties SubsysID and Channel have been renamed to SubsystemID and SubsystemChannel
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
@@ -185,7 +186,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
         {
             log.writeMessage("Generating statistics for LM-1: " + device.propertyValue("EquipmentID"));
 
-			var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount"];
+            var checkProperties = ["SubsystemID", "SubsystemChannel", "ConfigFrameSize", "ConfigFrameCount"];
 			for (var cp = 0; cp < checkProperties.length; cp++)
 			{
 				if (device.propertyValue(checkProperties[cp]) == undefined)
@@ -199,8 +200,8 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
             //
 			// Variables
 			//
-			var subSysID = device.propertyValue("SubsysID");
-			var channel = device.propertyValue("Channel");
+            var subSysID = device.propertyValue("SubsystemID");
+            var channel = device.propertyValue("SubsystemChannel");
 			
 			var frameSize = device.jsPropertyInt("ConfigFrameSize");
 			var frameCount = device.jsPropertyInt("ConfigFrameCount");			
@@ -255,7 +256,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		log.errCFG3000("EquipmentID", "LM-1");
 		return false;
 	}
-	var checkProperties = ["SubsysID", "Channel", "ConfigFrameSize", "ConfigFrameCount", "AppDataSize", "DiagDataSize"];
+    var checkProperties = ["SubsystemID", "SubsystemChannel", "ConfigFrameSize", "ConfigFrameCount", "AppDataSize", "DiagDataSize"];
 	for (var cp = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -267,8 +268,8 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	// Variables
     //
-    var subSysID = module.propertyValue("SubsysID");
-    var channel = module.propertyValue("Channel");
+    var subSysID = module.propertyValue("SubsystemID");
+    var channel = module.propertyValue("SubsystemChannel");
     
     // Constants
     //

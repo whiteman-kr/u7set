@@ -56,17 +56,17 @@ namespace Builder
         for (Hardware::DeviceModule* m : lmModules)
         {
 
-            if (m->propertyExists("SubsysID") == false)
+			if (m->propertyExists("SubsystemID") == false)
             {
                 assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property SubsysID found in LM %1")).arg(m->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property SubsystemID found in LM %1")).arg(m->caption()));
                 return false;
             }
 
-            if (m->propertyExists("Channel") == false)
+			if (m->propertyExists("SubsystemChannel") == false)
             {
                 assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property Channel found in LM %1")).arg(m->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property SubsystemChannel found in LM %1")).arg(m->caption()));
                 return false;
             }
 
@@ -84,9 +84,9 @@ namespace Builder
                 return false;
             }
 
-            QString subsysStrID = m->propertyValue("SubsysID").toString();
+			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
-            int channel = m->propertyValue("Channel").toInt();
+			int channel = m->propertyValue("SubsystemChannel").toInt();
 
             int frameSize = m->propertyValue("TuningFrameSize").toInt();
 
@@ -386,28 +386,28 @@ namespace Builder
 
     for (Hardware::DeviceModule* m : lmModules)
     {
-        if (m->propertyExists("SubsysID") == false)
+		if (m->propertyExists("SubsystemID") == false)
         {
-            lmReport << "No SubsysID property found in " + m->strId();
+			lmReport << "No SubsystemID property found in " + m->strId();
             assert(false);
             continue;
         }
 
-        if (m->propertyExists("Channel") == false)
+		if (m->propertyExists("SubsystemChannel") == false)
         {
-            lmReport << "No Channel property found in " + m->strId();
+			lmReport << "No SubsystemChannel property found in " + m->strId();
             assert(false);
             continue;
         }
 
-        int ssKey = m_subsystems->ssKey(m->propertyValue("SubsysID").toString());
-        int channel = m->propertyValue("Channel").toInt();
+		int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
+		int channel = m->propertyValue("SubsystemChannel").toInt();
 
         lmReport << "\r\n";
         lmReport << "StrID: " + m->strId();
         lmReport << "Caption: " + m->caption();
         lmReport << "Place: " + QString::number(m->place());
-        lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();
+		lmReport << "Subsystem ID: " + m->propertyValue("SubsystemID").toString();
         lmReport << "Subsystem code: " + QString::number(ssKey);
         lmReport << "Channel: " + QString::number(channel);
 
