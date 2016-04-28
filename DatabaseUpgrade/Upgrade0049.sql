@@ -413,13 +413,3 @@ SELECT * FROM add_or_update_file(1, '$root$/HP/dom.hmd/device-ca32c08e-e8e4-11e4
 
 
 
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 26.04.2016 14:27:39
--- FileName: ModulesConfigurations.descr
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/MC', 'ModulesConfigurations.descr', 'Update: Adding file ModulesConfigurations.descr', E'\\x30', '{}');
-

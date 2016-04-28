@@ -250,28 +250,28 @@ namespace Builder
 
 		for (Hardware::DeviceModule* m : lmModules)
 		{
-			if (m->propertyExists("SubsysID") == false)
+			if (m->propertyExists("SubsystemID") == false)
 			{
-				lmReport << "No SubsysID property found in " + m->equipmentIdTemplate();
+				lmReport << "No SubsystemID property found in " + m->equipmentIdTemplate();
 				assert(false);
 				continue;
 			}
 
-			if (m->propertyExists("Channel") == false)
+			if (m->propertyExists("SubsystemChannel") == false)
 			{
-				lmReport << "No Channel property found in " + m->equipmentIdTemplate();
+				lmReport << "No SubsystemChannel property found in " + m->equipmentIdTemplate();
 				assert(false);
 				continue;
 			}
 
-			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsysID").toString());
-			int channel = m->propertyValue("Channel").toInt();
+			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
+			int channel = m->propertyValue("SubsystemChannel").toInt();
 
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
-			lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();
+			lmReport << "Subsystem ID: " + m->propertyValue("SubsystemID").toString();
 			lmReport << "Subsystem code: " + QString::number(ssKey);
 			lmReport << "Channel: " + QString::number(channel);
 

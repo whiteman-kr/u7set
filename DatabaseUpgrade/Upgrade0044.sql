@@ -1,28 +1,3 @@
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 20.04.2016 16:28:10
--- FileName: ModulesConfigurations.descr
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/MC', 'ModulesConfigurations.descr', 'Update: Adding file ModulesConfigurations.descr', E'\\x30', '{}');
-
-
-
-
-
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 20.04.2016 13:53:10
--- FileName: lm-1.hmd
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'lm-1.hmd', 'Update: Adding file lm-1.hmd', E'\\x30', '{}');
-
-
 
 
 

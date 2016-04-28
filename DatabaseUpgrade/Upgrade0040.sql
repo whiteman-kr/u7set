@@ -626,15 +626,6 @@ SELECT * FROM add_or_update_file(1, '$root$/HP/aim.hmd/device-4c6aa6d6-e4e7-11e4
 SELECT * FROM add_or_update_file(1, '$root$/HP/aim.hmd/device-4c6aa6d6-e4e7-11e4-b3f6-c762f28f4150.hcr', 'device-fee9f616-e741-11e4-b2e5-7f94cf7e261c.hds', 'Update: Adding file device-fee9f616-e741-11e4-b2e5-7f94cf7e261c.hds', E'\\x08aedecdbc0c3a9b010a120a10321419327b56d9479a4706841331a58412220a202400280050004100520045004e00540029005f0049004e0032003600420000001a140a1249006e00700075007400320036004200000028338002018802009202180a164d004f00440055004c0045005f00410049004d0000009a02120a10321419327b56d9479a4706841331a584d20612100118002010283330033837400048005000', '{}');
 
 
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 30.03.2016 11:20:39
--- FileName: aom.hmd
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'aom.hmd', 'Update: Adding file aom.hmd', E'\\x30', '{}');
 
 
 
@@ -1132,28 +1123,6 @@ SELECT * FROM add_or_update_file(1, '$root$/HP/dim.hmd/device-a548e430-e7fc-11e4
 
 SELECT * FROM add_or_update_file(1, '$root$/HP/dim.hmd/device-a548e430-e7fc-11e4-8f63-5f5e75553351.hcr', 'device-ff5ed7fc-e830-11e4-b7e5-47931348f00f.hsw', 'Update: Adding file device-ff5ed7fc-e830-11e4-b7e5-47931348f00f.hsw', E'\\x08aedecdbc0c3aa3010a120a107e6055ed424e9f49885f3b05ea66756212240a222400280050004100520045004e00540029005f0049004e004c0033003200420000001a1a0a1849006e007000750074004c006f0077003300320042000000281f8002018802009202180a164d004f00440055004c0045005f00440049004d0000009a02120a107e6055ed424e9f49885f3b05ea667562d206121000180020012805300f3809400f48015000', '{}');
 
-
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 30.03.2016 11:20:48
--- FileName: dom.hmd
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'dom.hmd', 'Update: Adding file dom.hmd', E'\\x30', '{}');
-
-
-
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 08.04.2016 14:06:32
--- FileName: lm-1.hmd
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'lm-1.hmd', 'Update: Adding file lm-1.hmd', E'\\x30', '{}');
 
 
 
