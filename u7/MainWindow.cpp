@@ -45,25 +45,30 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// Add main tab pages
 	//
-	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
-	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Equipment"));
-	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
-
+	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
+	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
+	m_signalsTab = new SignalsTabPage(dbController(), nullptr);
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
-	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
-	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
 	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(AlFileExtension, dbController(), AlFileName, nullptr);
 	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(MvsFileExtension, dbController(), MvsFileName, nullptr);
+
+	getCentralWidget()->addTabPage(m_projectsTab, tr("&Projects"));
+	getCentralWidget()->addTabPage(m_equipmentTab, tr("&Equipment"));
+	getCentralWidget()->addTabPage(m_signalsTab, tr("Application &Signals"));
+
+	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
+	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
+
 	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
-	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
+	getCentralWidget()->addTabPage(m_logicSchema, tr("Application &Logic"));
+	getCentralWidget()->addTabPage(m_monitorSchema, tr("&Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
+	getCentralWidget()->addTabPage(m_buildTabPage, tr("&Build"));
 
 	// --
 	//
@@ -217,6 +222,20 @@ void MainWindow::createActions()
 	connect(m_debugAction, &QAction::triggered, this, &MainWindow::debug);
 	addAction(m_debugAction);
 
+	m_startBuildAction = new QAction(tr("Build Project"), this);
+	m_startBuildAction->setStatusTip(tr("Build opened project"));
+	m_startBuildAction->setEnabled(false);
+	QList<QKeySequence> bks;
+	bks << QKeySequence(Qt::CTRL + Qt::Key_B);
+	bks << QKeySequence(Qt::Key_F7);
+	m_startBuildAction->setShortcuts(bks);
+	connect(m_startBuildAction, &QAction::triggered, this, &MainWindow::startBuild);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, [this](){m_startBuildAction->setEnabled(false);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
+	addAction(m_startBuildAction);
+
 	return;
 }
 
@@ -234,6 +253,11 @@ void MainWindow::createMenus()
 
 	pAdmMenu->addAction(m_usersAction);
 	pAdmMenu->addAction(m_logAction);
+
+	// Project
+	//
+	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
+	pProjectMenu->addAction(m_startBuildAction);
 
 	// Tools
 	//
@@ -398,6 +422,31 @@ void MainWindow::debug()
 {
 	theSettings.setDebugMode(!theSettings.isDebugMode());
 	qDebug() << "DebugMode: " << theSettings.isDebugMode();
+}
+
+void MainWindow::startBuild()
+{
+	qDebug() << "MainWindow::startBuild";
+
+	if (m_buildTabPage == nullptr)
+	{
+		assert(m_buildTabPage);
+		return;
+	}
+
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	getCentralWidget()->switchToTabPage(m_buildTabPage);
+
+	if (m_buildTabPage->isBuildRunning() == false)
+	{
+		m_buildTabPage->build();
+	}
+
+	return;
 }
 
 void MainWindow::projectOpened(DbProject project)

@@ -3,7 +3,10 @@
 
 class CentralWidget;
 class DbController;
+class ProjectsTabPage;
 class SchemasTabPage;
+class EquipmentTabPage;
+class SignalsTabPage;
 class FilesTabPage;
 class BuildTabPage;
 
@@ -61,6 +64,7 @@ protected slots:
 	void runRS232SignalListEditor();
     void showAbout();
 	void debug();
+	void startBuild();
 
 private slots:
 	void projectOpened(DbProject project);
@@ -88,12 +92,16 @@ private:
 	QAction* m_rs232SignalListEditorAction = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
+	QAction* m_startBuildAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarSchemaZoom = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
 
+	ProjectsTabPage* m_projectsTab = nullptr;
+	EquipmentTabPage* m_equipmentTab = nullptr;
+	SignalsTabPage* m_signalsTab = nullptr;
 	SchemasTabPage* m_logicSchema = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;

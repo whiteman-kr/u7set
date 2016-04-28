@@ -193,9 +193,11 @@ namespace VFrame30
 					assert(false);
 			}
 
+			// Param string LOWERCASED
+			//
 			QString paramStr = QString("%1: %2")
 				.arg(param.caption())
-				.arg(paramValue);
+				.arg(paramValue).toLower();
 
 			if (text.isEmpty() == true)
 			{
