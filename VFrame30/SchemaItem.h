@@ -108,6 +108,10 @@ namespace VFrame30
 		//
 		virtual void DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const;
 
+		// Draw debug info
+		//
+		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const;
+
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;

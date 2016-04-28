@@ -62,7 +62,7 @@ void GlobalMessanger::swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data
 	std::swap(m_buildSchemaIssues, data);
 }
 
-OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid itemId) const
+OutputMessageLevel GlobalMessanger::issueForSchemaItem(QUuid itemId) const
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
@@ -73,6 +73,32 @@ OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid itemId) const
 		// Either Success or did not take part in build
 		//
 		return OutputMessageLevel::Success;
+	}
+
+	return it->second;
+}
+
+void GlobalMessanger::clearSchemaItemRunOrder()
+{
+	QMutexLocker ml(&m_buildResultMutex);
+	m_schemaItemRunOrder.clear();
+}
+
+void GlobalMessanger::swapSchemaItemRunOrder(std::map<QUuid, int>& data)
+{
+	QMutexLocker ml(&m_buildResultMutex);
+	std::swap(m_schemaItemRunOrder, data);
+}
+
+int GlobalMessanger::schemaItemRunOrder(QUuid itemId) const
+{
+	QMutexLocker ml(&m_buildResultMutex);
+
+	auto it = m_schemaItemRunOrder.find(itemId);
+
+	if (it == m_schemaItemRunOrder.end())
+	{
+		return -1;
 	}
 
 	return it->second;

@@ -33,7 +33,11 @@ public:
 
 	void clearBuildSchemaIssues();
 	void swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data);
-	OutputMessageLevel issueForSchemaItem(const QUuid itemId) const;
+	OutputMessageLevel issueForSchemaItem(QUuid itemId) const;
+
+	void clearSchemaItemRunOrder();
+	void swapSchemaItemRunOrder(std::map<QUuid, int>& data);
+	int schemaItemRunOrder(QUuid itemId) const;
 
 	// Select tab
 	//
@@ -61,7 +65,9 @@ private:
 	// --
 	//
 	mutable QMutex m_buildResultMutex;
+
 	std::map<QUuid, OutputMessageLevel> m_buildSchemaIssues;
+	std::map<QUuid, int> m_schemaItemRunOrder;					// Debug information for dispalying on schema in debugMode
 
 	// -- end of data for m_buildResultMutex
 	//

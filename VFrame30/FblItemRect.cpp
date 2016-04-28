@@ -447,6 +447,61 @@ namespace VFrame30
 		return;
 	}
 
+	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const
+	{
+		int dpiX = 96;
+
+		QPainter* p = drawParam->painter();
+		QPaintDevice* pPaintDevice = drawParam->device();
+
+		if (pPaintDevice == nullptr)
+		{
+			assert(pPaintDevice);
+			dpiX = 96;
+		}
+		else
+		{
+			dpiX = pPaintDevice->logicalDpiX();
+		}
+		if (pPaintDevice == nullptr)
+		{
+			assert(pPaintDevice);
+			dpiX = 96;
+		}
+		else
+		{
+			dpiX = pPaintDevice->logicalDpiX();
+		}
+
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		if (inputsCount() > 0)
+		{
+			r.setLeft(r.left() + pinWidth);
+		}
+		if (outputsCount() > 0)
+		{
+			r.setRight(r.right() - pinWidth);
+		}
+		QRectF drawRect(r.right(), r.bottom(),
+				widthDocPt(), m_font.drawSize());
+
+		FontParam font = m_font;
+		font.setDrawSize(m_font.drawSize() * 0.75);
+
+		p->setPen(Qt::red);
+
+		QString str = QString("roi: %1").arg(runOrderIndex);
+
+		DrawHelper::DrawText(p,
+							 font,
+							 itemUnit(),
+							 str,
+							 drawRect,
+							 Qt::TextDontClip | Qt::AlignBottom | Qt::AlignLeft);
+	}
+
 
 	Q_INVOKABLE void FblItemRect::adjustHeight()
 	{

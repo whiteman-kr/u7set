@@ -120,7 +120,7 @@ namespace Builder
 
 	public:
 		AppLogicModule() = delete;
-		AppLogicModule(QString moduleStrId);
+		AppLogicModule(QString moduleEquipmentId);
 
 		bool addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 					   const BushContainer& bushContainer,
@@ -141,14 +141,14 @@ namespace Builder
 			const QUuid& inputGuid);
 
 	public:
-		QString moduleStrId() const;
-		void setModuleStrId(QString value);
+		QString moduleEquipmentId() const;
+		void setModuleEquipmentId(QString value);
 
 		const std::list<AppLogicItem>& items() const;
 		std::list<AppLogicItem>& items();
 
 	private:
-		QString m_moduleStrId;
+		QString m_moduleEquipmentId;
 		std::list<AppLogicItem> m_items;		// Ordered items
 		std::set<AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
 	};
@@ -230,6 +230,8 @@ namespace Builder
 		bool setPinConnections(std::shared_ptr<VFrame30::LogicSchema> schema,
 							   std::shared_ptr<VFrame30::SchemaLayer> layer,
 							   BushContainer* bushContainer);
+
+		void debugInfo();
 
 	private:
 		DbController* db();

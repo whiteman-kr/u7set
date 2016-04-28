@@ -43,6 +43,10 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* layer) const override;
 
+		// Draw debug info
+		//
+		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const override;
+
 		// Вычислить координаты точки
 		//
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
