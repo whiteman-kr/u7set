@@ -500,7 +500,10 @@ namespace VFrame30
 			prop->setReadOnly(false);
 			prop->setSpecific(true);
 			prop->setCategory(tr("Parameters"));
-			prop->setLimits(p.lowLimit(), p.highLimit());
+			if (p.isAnalog())
+			{
+				prop->setLimits(p.lowLimit(), p.highLimit());
+			}
 			prop->setPrecision(precision());
 		}
 	}
@@ -533,8 +536,7 @@ namespace VFrame30
 		QJSValue jsEval = jsEngine.evaluate(exeScript);
 		if (jsEval.isError() == true)
 		{
-			qDebug() << tr("Script evaluation failed: %1").arg(jsEval.toString());
-			assert(false);
+			QMessageBox::critical(nullptr, tr("Error"), tr("Script evaluation failed: %1").arg(jsEval.toString()));
 			return false;
 		}
 
@@ -547,8 +549,7 @@ namespace VFrame30
 
 		if (jsResult.isError() == true)
 		{
-			qDebug() << tr("Script execution failed: %1").arg(jsResult.toString());
-			assert(false);
+			QMessageBox::critical(nullptr, tr("Error"), tr("Script execution failed: %1").arg(jsResult.toString()));
 			return false;
 		}
 
@@ -575,6 +576,27 @@ namespace VFrame30
 			}
 		}
 		return -1;
+	}
+
+	bool SchemaItemAfb::getParamBoolValue(const QString& name)
+	{
+		for (Afb::AfbParam& p : m_params)
+		{
+			if (p.caption() == name)
+			{
+				if (p.isDiscrete() && p.value().isValid() == true)
+				{
+					return p.value().toBool();
+				}
+				else
+				{
+					qDebug()<<"ERROR: SchemaItemAfb::getParamBoolValue, parameter "<<name<<" is not bool or is not valid!";
+					assert(false);
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	void SchemaItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)

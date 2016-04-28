@@ -53,6 +53,7 @@ namespace VFrame30
 		void addSpecificParamProperties();
 		bool executeScript(const QString& script, const Afb::AfbElement& afb);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
+		Q_INVOKABLE bool getParamBoolValue(const QString& name);
 
 		Q_INVOKABLE void addInputSignal(QString caption, int type, int opIndex, int size);
 		Q_INVOKABLE void addOutputSignal(QString caption, int type, int opIndex, int size);
