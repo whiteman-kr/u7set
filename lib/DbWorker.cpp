@@ -60,9 +60,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
 	{"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
 	{"Upgrade to version 46", ":/DatabaseUpgrade/Upgrade0046.sql"},
-    {"Upgrade to version 47", ":/DatabaseUpgrade/Upgrade0047.sql"},
+	{"Upgrade to version 47", ":/DatabaseUpgrade/Upgrade0047.sql"},
 	{"Upgrade to version 48", ":/DatabaseUpgrade/Upgrade0048.sql"},
 	{"Upgrade to version 49", ":/DatabaseUpgrade/Upgrade0049.sql"},
+	{"Upgrade to version 50", ":/DatabaseUpgrade/Upgrade0050.sql"},
 };
 
 
@@ -3399,11 +3400,11 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 QString DbWorker::getSignalDataStr(const Signal& s)
 {
 	QString str = QString(
-			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
+			"(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42,%43,%44,%45,%46)'")
+			"\"%41\",%42,%43,%44,%45,%46)")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -3470,7 +3471,10 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
 
 QString DbWorker::toSqlStr(QString str)
 {
-	return str.replace("'", "''");
+	str = str.replace("'", "''");
+	str = str.replace("\\", "\\\\");
+	str = str.replace("\"", "\\\"");
+	return str;
 }
 
 
@@ -3534,7 +3538,7 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		QString sds = getSignalDataStr(signal);
 
-		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, '%2')")
 			.arg(currentUser().userId()).arg(sds);
 
 		QSqlQuery q2(db);
@@ -3724,7 +3728,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	QString sds = getSignalDataStr(*signal);
 
-	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, '%2')")
 		.arg(currentUser().userId()).arg(sds);
 
 	QSqlQuery q(db);

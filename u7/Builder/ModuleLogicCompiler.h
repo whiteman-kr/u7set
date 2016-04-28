@@ -306,8 +306,7 @@ namespace Builder
 		const AppItem &appItem() const;
 
 		void setComputed() { m_computed = true; }
-		bool isComputed() const { return m_computed; }
-
+		bool isComputed() const;
 
 		bool isShadowSignal() const { return m_isShadowSignal; }
 
@@ -532,7 +531,7 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool buildRS232SignalLists();
-
+		bool buildOptoPortsSignalLists();
 
 		// pass #2 compilation functions
 		//

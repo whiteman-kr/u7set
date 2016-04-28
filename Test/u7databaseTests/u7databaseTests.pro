@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     MultiThreadFileTest.cpp \
     MultiThreadSignalTests.cpp \
     PropertyObjectTests.cpp \
-    ProjectPropertyTests.cpp
+    ProjectPropertyTests.cpp \
+    ../../lib/XmlHelper.cpp
 
 HEADERS += \
     UserTests.h \
@@ -71,7 +72,8 @@ HEADERS += \
     MultiThreadFileTest.h \
     MultiThreadSignalTests.h \
     PropertyObjectTests.h \
-    ProjectPropertyTests.h
+    ProjectPropertyTests.h \
+    ../../include/XmlHelper.h
 
 #c++11 support for GCC
 #

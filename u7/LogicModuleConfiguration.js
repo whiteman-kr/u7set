@@ -46,7 +46,8 @@ var Mode_RS485 = 1;
 
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
-var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
+//var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
+var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
@@ -685,8 +686,10 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var ptr = 0;
     
     var AIMSignalMaxCount = 64;
+	
+	var tsConstant = 100 * 0.000001;
     
-    var defaultTf = valToADC(50, 0, 65535, 0, 0xffff);
+    var defaultTf = valToADC(5000 * 0.000001 / tsConstant, 0, 65535, 0, 0xffff);
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
     var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
@@ -750,8 +753,18 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         }
         else
         {
+		
+			var tf = signal.filteringTime();
+			
+			if (tf < 1 * 100 * 0.000001 || tf > 65535 * 100 * 0.000001)
+			{
+				log.errCFG3010("FilteringTime", tf, 1 * 100 * 0.000001, 65535 * 100 * 0.000001, 6, signalStrId);
+				return false;
+			}
+			
+			tf = tf / tsConstant;
             
-            var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+            var filternigTime = valToADC(tf, 0, 65535, 0, 0xffff);
             var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
 
 			if ((i & 1) == 0)

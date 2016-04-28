@@ -349,9 +349,9 @@ namespace Hardware
 	}
 
 
-	QList<OptoPort*> OptoModule::getRS232Ports()
+	QList<OptoPort*> OptoModule::getSerialPorts()
 	{
-		QList<OptoPort*> rs232PortList;
+		QList<OptoPort*> serialPorts;
 
 		for(OptoPort* port : m_ports)
 		{
@@ -363,11 +363,33 @@ namespace Hardware
 
 			if (port->mode() == OptoPort::Mode::Serial)
 			{
-				rs232PortList.append(port);
+				serialPorts.append(port);
 			}
 		}
 
-		return rs232PortList;
+		return serialPorts;
+	}
+
+
+	QList<OptoPort*> OptoModule::getOptoPorts()
+	{
+		QList<OptoPort*> optoPorts;
+
+		for(OptoPort* port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (port->mode() == OptoPort::Mode::Optical)
+			{
+				optoPorts.append(port);
+			}
+		}
+
+		return optoPorts;
 	}
 
 
@@ -382,6 +404,40 @@ namespace Hardware
 
 		return ports;
 	}
+
+
+	bool OptoModule::calculateTxStartAddresses()
+	{
+		quint16 txStartAddress = 0;
+
+		//qDebug() << QString("TxStartAddresses of  module %1").arg(m_strID);
+
+		for(OptoPort* port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			port->setTxStartAddress(txStartAddress);
+
+			//qDebug() << QString("Port %1 = %2").arg(port->strID()).arg(port->txStartAddress());
+
+			txStartAddress += port->txDataSizeW();
+		}
+
+		if (txStartAddress > m_optoPortAppDataSize)
+		{
+			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("TxDataSize exceeded OptoPortAppDataSize in module '%1'")).
+						  arg(m_strID));
+			return false;
+		}
+
+		return true;
+	}
+
 
 
 	// ------------------------------------------------------------------

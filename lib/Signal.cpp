@@ -215,7 +215,8 @@ void Signal::InitProperties()
 		ADD_PROPERTY_GETTER_SETTER(int, NormalState, true, Signal::normalState, Signal::setNormalState);
 		ADD_PROPERTY_GETTER_SETTER(int, DecimalPlaces, true, Signal::decimalPlaces, Signal::setDecimalPlaces);
 		ADD_PROPERTY_GETTER_SETTER(double, Aperture, true, Signal::aperture, Signal::setAperture);
-		ADD_PROPERTY_GETTER_SETTER(double, FilteringTime, true, Signal::filteringTime, Signal::setFilteringTime);
+		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER(double, FilteringTime, true, Signal::filteringTime, Signal::setFilteringTime);
+		filteringTimePropetry->setPrecision(6);
 		ADD_PROPERTY_GETTER_SETTER(double, MaxDifference, true, Signal::maxDifference, Signal::setMaxDifference);
 	}
 	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);

@@ -72,6 +72,8 @@ namespace Builder
 
 			if (!buildRS232SignalLists()) break;
 
+			if (!buildOptoPortsSignalLists()) break;
+
 			result = true;
 		}
 
@@ -132,7 +134,6 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
-			//if (!generateRS232ConectionCode()) break;
 			if (!copyRS232Signals()) break;
 
 			if (!finishAppLogicCode()) break;
@@ -2111,6 +2112,116 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::buildOptoPortsSignalLists()
+	{
+		if (m_optoModuleStorage == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+
+		if (optoModules.isEmpty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		for(Hardware::OptoModule* optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QList<Hardware::OptoPort*> optoPorts = optoModule->getOptoPorts();
+
+			if (optoPorts.isEmpty())
+			{
+				continue;
+			}
+
+			for(Hardware::OptoPort* port : optoPorts)
+			{
+				if (port->isLinked() == false)
+				{
+					continue;
+				}
+				QStringList txSignalsStrIDList = port->getTxSignalsStrID();
+
+				/*for(const QString& txSignalStrID : txSignalsStrIDList)
+				{
+					if (m_signalsStrID.contains(txSignalStrID) == false)
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
+								  arg(txSignalStrID).arg(port->connectionCaption()));
+
+						result = false;
+						continue;
+					}
+
+					Signal* txSignal = m_signalsStrID[txSignalStrID];
+
+					if (txSignal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					port->addTxSignal(txSignal);
+				}*/
+
+				QString idStr;
+
+
+				if (port->manualSettings() == true)
+				{
+					result &= port->calculateTxSignalsAddresses(m_log);
+
+					idStr.sprintf("0x%X", port->txDataID());
+					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', manual settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+							arg(port->connectionCaption()).
+							arg(port->txAnalogSignalsCount()).
+							arg(port->txDiscreteSignalsCount()).
+							arg(port->txDataSizeW() * 2).
+							arg(idStr)  );
+
+				}
+				else
+				{
+					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
+								  arg(port->connectionCaption()));
+
+					/*
+						idStr.sprintf("0x%X", port->txDataID());
+
+						LOG_MESSAGE(m_log, QString(tr("Opto connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+									arg(port->connectionCaption()).
+									arg(port->txAnalogSignalsCount()).
+									arg(port->txDiscreteSignalsCount()).
+									arg(port->txDataSizeW() * 2).
+									arg(idStr)  );
+					 */
+				}
+			}
+		}
+
+		for(Hardware::OptoModule* optoModule : optoModules)
+		{
+			optoModule->calculateTxStartAddresses();
+		}
+
+		return result;
+	}
+
+
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
 		if (m_optoModuleStorage == nullptr)
@@ -2138,7 +2249,7 @@ namespace Builder
 				continue;
 			}
 
-			QList<Hardware::OptoPort*> rs232Ports = optoModule->getRS232Ports();
+			QList<Hardware::OptoPort*> rs232Ports = optoModule->getSerialPorts();
 
 			if (rs232Ports.isEmpty())
 			{
@@ -2189,6 +2300,7 @@ namespace Builder
 
 		return result;
 	}
+
 
 	bool ModuleLogicCompiler::generateRS232ConectionCode()
 	{
@@ -2340,7 +2452,7 @@ namespace Builder
 
 		for(Hardware::OptoModule* optoModule : optoModules)
 		{
-			QList<Hardware::OptoPort*> rs232Ports = optoModule->getRS232Ports();
+			QList<Hardware::OptoPort*> rs232Ports = optoModule->getSerialPorts();
 
 			if (rs232Ports.isEmpty() == true)
 			{
@@ -2525,7 +2637,7 @@ namespace Builder
 			if (signal->ramAddr().isValid() == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Undefined RAM address of signal '%1'")).
+								   QString(tr("RAM address of signal '%1'")).
 								   arg(signal->appSignalID()));
 				result = false;
 				continue;
@@ -3885,6 +3997,8 @@ namespace Builder
 
 		bool result = true;
 
+		QMap<QString, QString> processedSignalsMap;
+
 		// internal analog registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
@@ -3894,12 +4008,19 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isAnalog())
 			{
 				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -3907,8 +4028,14 @@ namespace Builder
 
 		// internal discrete registered
 		//
+
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isDiscrete())
 			{
 				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(appSignal->constSignal());
@@ -3918,6 +4045,8 @@ namespace Builder
 				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -3927,11 +4056,18 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isAnalog())
 			{
 				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
@@ -3941,17 +4077,26 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
+			if (processedSignalsMap.contains(appSignal->strID()))
+			{
+				continue;
+			}
+
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isDiscrete())
 			{
 				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
+
+				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
 			}
 		}
 
 		m_memoryMap.recalculateAddresses();
 
 		m_bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
+
+		processedSignalsMap.clear();
 
 		return result;
 	}
@@ -4658,6 +4803,14 @@ namespace Builder
 		assert(m_appItem != nullptr);
 
 		return *m_appItem;
+	}
+
+
+	bool AppSignal::isComputed() const
+	{
+		return true;
+
+		// return m_computed;  !!!
 	}
 
 

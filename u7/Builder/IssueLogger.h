@@ -56,7 +56,7 @@ namespace Builder
         Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
         Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
         Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
-        Q_INVOKABLE void errCFG3003(int channel, QString module);
+		Q_INVOKABLE void errCFG3003(int channel, QString module);
         Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
 
         Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);
@@ -65,6 +65,7 @@ namespace Builder
         Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
 
         Q_INVOKABLE void errCFG3009(int place1, double maxDifference1, int place2, double maxDifference2, QString signalID);
+		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString module);
 
         // ALP			Application Logic Parsing				4000-4999
 		//

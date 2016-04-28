@@ -412,7 +412,7 @@ namespace Builder
 
 					software = m_softwareList[adapterProperties.appDataServiceID];
 
-					if (software->type() != E::SoftwareType::DataAcquisitionService)
+					if (software->type() != E::SoftwareType::AppDataService)
 					{
 						LOG_ERROR_OBSOLETE(log, IssueType::NotDefined,
 										 QString(tr("Adapter property '%1.AppDataServiceID' linked to not suitable software '%2'")).
@@ -441,7 +441,7 @@ namespace Builder
 
 					software = m_softwareList[adapterProperties.diagDataServiceID];
 
-					if (software->type() != E::SoftwareType::DataAcquisitionService)
+					if (software->type() != E::SoftwareType::DiagDataService)
 					{
 						LOG_ERROR_OBSOLETE(log, IssueType::NotDefined,
 										 QString(tr("Adapter property '%1.DiagDataServiceID' linked to not suitable software '%2'")).
