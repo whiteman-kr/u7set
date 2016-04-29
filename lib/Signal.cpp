@@ -378,7 +378,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		assert(false);
 		return;
 	}
-	Address16 address;
+	Address16 address(0, 0);
 	address.fromString(strValue.toString());
 	(this->*setter)(address);
 }

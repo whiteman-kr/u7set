@@ -3447,7 +3447,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.normalState())
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
-	.arg(s.inOutType())
+	.arg(TO_INT(s.inOutType()))
 	.arg(toSqlStr(s.equipmentID()))
 	.arg(s.outputRangeMode())					// since version 35 of database
 	.arg(s.filteringTime())						//

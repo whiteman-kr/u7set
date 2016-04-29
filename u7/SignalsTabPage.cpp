@@ -320,7 +320,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(s.calculated()); break;
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
-		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(s.inOutType()); break;
+		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(TO_INT(s.inOutType())); break;
 		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrderInt()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
@@ -694,7 +694,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_APERTURE: return signal.aperture();
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
-				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.equipmentID();
 
@@ -725,7 +725,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
-				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.equipmentID();
 
@@ -1093,7 +1093,7 @@ void SignalsModel::addSignal()
 	signal.setAperture(settings.value("SignalsTabPage/LastEditedSignal/aperture").toDouble());
 	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
 	signal.setMaxDifference(settings.value("SignalsTabPage/LastEditedSignal/maxDifference").toDouble());
-	signal.setInOutType(E::Internal);
+	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())

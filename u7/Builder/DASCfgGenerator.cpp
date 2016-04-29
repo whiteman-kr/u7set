@@ -130,7 +130,7 @@ namespace Builder
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
-			if (signal.inOutType() < 0 || signal.inOutType() >= IN_OUT_TYPE_COUNT)
+			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
 				hasWrongField = true;
@@ -186,7 +186,7 @@ namespace Builder
 			appSignalsXml.writeAttribute("NormalState", QString::number(signal.normalState()));
 			appSignalsXml.writeAttribute("DecimalPlaces", QString::number(signal.decimalPlaces()));
 			appSignalsXml.writeAttribute("Aperture", QString::number(signal.aperture()));
-			appSignalsXml.writeAttribute("InOutType", InOutTypeStr[signal.inOutType()]);
+			appSignalsXml.writeAttribute("InOutType", InOutTypeStr[TO_INT(signal.inOutType())]);
 			appSignalsXml.writeAttribute("DeviceStrID", signal.equipmentID());
 			appSignalsXml.writeAttribute("FilteringTime", QString::number(signal.filteringTime()));
 			appSignalsXml.writeAttribute("MaxDifference", QString::number(signal.maxDifference()));

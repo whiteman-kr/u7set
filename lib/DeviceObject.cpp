@@ -52,6 +52,7 @@ namespace Hardware
 
 	}
 
+
 	void Shutdwon()
 	{
 		qDebug() << "Hardware::Shutdown";
@@ -2019,7 +2020,7 @@ R"DELIM({
 		DeviceObject(preset)
 	{
 		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
-		auto functionProp = ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
+		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
 		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
 		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
 
@@ -2113,27 +2114,27 @@ R"DELIM({
 			{
 				case Obsolete::SignalType::DiagDiscrete:
 					m_type = E::SignalType::Discrete;
-					m_function = SignalFunction::Diagnostics;
+					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::DiagAnalog:
 					m_type = E::SignalType::Analog;
-					m_function = SignalFunction::Diagnostics;
+					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::InputDiscrete:
 					m_type = E::SignalType::Discrete;
-					m_function = SignalFunction::Input;
+					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::InputAnalog:
 					m_type = E::SignalType::Analog;
-					m_function = SignalFunction::Input;
+					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::OutputDiscrete:
 					m_type = E::SignalType::Discrete;
-					m_function = SignalFunction::Output;
+					m_function = E::SignalFunction::Output;
 					break;
 				case Obsolete::SignalType::OutputAnalog:
 					m_type = E::SignalType::Analog;
-					m_function = SignalFunction::Output;
+					m_function = E::SignalFunction::Output;
 					break;
 				default:
 					assert(false);
@@ -2142,7 +2143,7 @@ R"DELIM({
 		else
 		{
 			m_type = static_cast<E::SignalType>(signalMessage.type());
-			m_function = static_cast<SignalFunction>(signalMessage.function());
+			m_function = static_cast<E::SignalFunction>(signalMessage.function());
 		}
 
 		m_byteOrder = static_cast<E::ByteOrder>(signalMessage.byteorder());
@@ -2228,7 +2229,7 @@ R"DELIM({
 		m_type = value;
 	}
 
-	DeviceSignal::SignalFunction DeviceSignal::function() const
+	E::SignalFunction DeviceSignal::function() const
 	{
 		return m_function;
 	}
@@ -2238,7 +2239,7 @@ R"DELIM({
 		return static_cast<int>(function());
 	}
 
-	void DeviceSignal::setFunction(DeviceSignal::SignalFunction value)
+	void DeviceSignal::setFunction(E::SignalFunction value)
 	{
 		m_function = value;
 	}
@@ -2315,22 +2316,22 @@ R"DELIM({
 
 	bool DeviceSignal::isInputSignal() const
 	{
-		return m_function == SignalFunction::Input;
+		return m_function == E::SignalFunction::Input;
 	}
 
 	bool DeviceSignal::isOutputSignal() const
 	{
-		return m_function == SignalFunction::Output;
+		return m_function == E::SignalFunction::Output;
 	}
 
 	bool DeviceSignal::isDiagSignal() const
 	{
-		return m_function == SignalFunction::Diagnostics;
+		return m_function == E::SignalFunction::Diagnostics;
 	}
 
 	bool DeviceSignal::isValiditySignal() const
 	{
-		return m_function == SignalFunction::Validity;
+		return m_function == E::SignalFunction::Validity;
 	}
 
 	bool DeviceSignal::isAnalogSignal() const
@@ -2694,8 +2695,15 @@ R"DELIM({
 							continue;
 						}
 						QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
-						assert(tmp.convert(p->value().userType()));
-						p->setValue(tmp);
+						bool result = tmp.convert(p->value().userType());
+						if (result == false)
+						{
+							assert(tmp.canConvert(p->value().userType()));
+						}
+						else
+						{
+							p->setValue(tmp);
+						}
 					}
 
 					pCurrentDevice->addChild(pDeviceObject);
