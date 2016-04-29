@@ -11,12 +11,12 @@ class XmlWriteHelper
 {
 private:
 	QXmlStreamWriter& m_xmlWriter;
-	QXmlStreamWriter m_xmlLocalWriter;
-	QBuffer m_buffer;
+	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 
 public:
 	XmlWriteHelper(QXmlStreamWriter& xmlWriter);
-	XmlWriteHelper(QByteArray& data);
+	XmlWriteHelper(QByteArray* data);
+	~XmlWriteHelper();
 
 	void setAutoFormatting(bool autoFormatting);
 	void writeStartDocument();
@@ -29,6 +29,7 @@ public:
 	void writeIntAttribute(const QString& name, int value);
 	void writeBoolAttribute(const QString& name, bool value);
 	void writeUlongAttribute(const QString& name, ulong value, bool hex = false);
+	void writeDoubleAttribute(const QString& name, double value);
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
@@ -42,11 +43,12 @@ class XmlReadHelper
 {
 private:
 	QXmlStreamReader& m_xmlReader;
-	QXmlStreamReader m_xmlLocalReader;
+	QXmlStreamReader* m_xmlLocalReader = nullptr;
 
 public:
 	XmlReadHelper(QXmlStreamReader& xmlReader);
 	XmlReadHelper(const QByteArray& data);
+	~XmlReadHelper();
 
 	bool readNextStartElement();
 	void skipCurrentElement();
@@ -57,6 +59,7 @@ public:
 
 	bool readStringAttribute(const QString& name, QString* value);
 	bool readIntAttribute(const QString& name, int* value);
+	bool readDoubleAttribute(const QString& name, double* value);
 	bool readBoolAttribute(const QString& name, bool* value);
 	bool readUlongAttribute(const QString& name, ulong* value);
 

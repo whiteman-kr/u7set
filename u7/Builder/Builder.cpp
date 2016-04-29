@@ -14,7 +14,7 @@
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
-#include "DASCfgGenerator.h"
+#include "AppDataServiceCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 
@@ -552,6 +552,8 @@ namespace Builder
 
 		LOG_SUCCESS(m_log, tr("Ok"));
 
+		signalSet->buildStrID2IndexMap();
+
 		return true;
 	}
 
@@ -762,7 +764,7 @@ namespace Builder
 				switch(software->type())
 				{
 				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new DASCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				case E::SoftwareType::Monitor:

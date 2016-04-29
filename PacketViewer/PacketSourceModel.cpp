@@ -468,7 +468,7 @@ void Listener::reloadProject()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<AppDataSource> > &dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
@@ -627,7 +627,7 @@ void Source::removeDependentWidget(QObject* object)
 void Source::reloadProject()
 {
 	m_signalTableModel->beginReloadProject();
-	QHashIterator<quint32, std::shared_ptr<DataSource>> iterator(*m_dataSources);
+	QHashIterator<quint32, std::shared_ptr<AppDataSource>> iterator(*m_dataSources);
 
 	while (iterator.hasNext())
 	{
@@ -680,7 +680,7 @@ void Source::swapHeader(RupFrameHeader& header)
 	swapBytes(header.TimeStamp.year);
 }
 
-void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<AppDataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
 {
 	dataSources.clear();
 
@@ -718,7 +718,7 @@ void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSourc
 				QHostAddress ha(ipStr);
 				quint32 ip = ha.toIPv4Address();
 
-				std::shared_ptr<DataSource> ds = std::make_shared<DataSource>();
+				std::shared_ptr<AppDataSource> ds = std::make_shared<AppDataSource>();
 				ds->setID(ip);
 				ds->setLmCaption(QString("Data Source %1").arg(key));
 				ds->setLmAddressStr(ha.toString());

@@ -160,10 +160,10 @@ SOURCES +=\
     EditEngine/EditEngineSetOrder.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/XmlHelper.cpp \
-    Builder/DASCfgGenerator.cpp \
     Builder/MonitorCfgGenerator.cpp \
     ../lib/ServiceSettings.cpp \
-    Builder/TuningServiceCfgGenerator.cpp
+    Builder/TuningServiceCfgGenerator.cpp \
+    Builder/AppDataServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -253,10 +253,10 @@ HEADERS  += \
     EditEngine/EditEngineSetOrder.h \
     ../include/DeviceHelper.h \
     ../include/XmlHelper.h \
-    Builder/DASCfgGenerator.h \
     Builder/MonitorCfgGenerator.h \
     ../include/ServiceSettings.h \
-    Builder/TuningServiceCfgGenerator.h
+    Builder/TuningServiceCfgGenerator.h \
+    Builder/AppDataServiceCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \

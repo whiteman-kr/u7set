@@ -644,3 +644,199 @@ void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, Signal
 }
 
 
+void Signal::writeToXml(XmlWriteHelper& xml)
+{
+	xml.writeStartElement("Signal");	// <Signal>
+
+	xml.writeIntAttribute("ID", ID());
+	xml.writeIntAttribute("GroupID", signalGroupID());
+	xml.writeIntAttribute("InstanceID", signalInstanceID());
+	xml.writeIntAttribute("SubsystemChannel", channel());
+	xml.writeIntAttribute("Type", typeInt());
+	xml.writeStringAttribute("AppSignalID", appSignalID());
+	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
+	xml.writeStringAttribute("Caption", caption());
+	xml.writeStringAttribute("EquipmentID", equipmentID());
+	xml.writeIntAttribute("DataFormat", dataFormatInt());
+	xml.writeIntAttribute("DataSize", dataSize());
+	xml.writeIntAttribute("LowADC", lowADC());
+	xml.writeIntAttribute("HighADC", highADC());
+	xml.writeDoubleAttribute("LowLimit", lowLimit());
+	xml.writeDoubleAttribute("HighLimit", highLimit());
+	xml.writeIntAttribute("UnitID", unitID());
+	xml.writeDoubleAttribute("Adjustment", adjustment());
+	xml.writeDoubleAttribute("DropLimit", dropLimit());
+	xml.writeDoubleAttribute("ExcessLimit", excessLimit());
+	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
+	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
+	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
+	xml.writeIntAttribute("InputUnitID", inputUnitID());
+	xml.writeIntAttribute("InputSensorID", inputSensorID());
+	xml.writeDoubleAttribute("OutputLowLimit", outputLowLimit());
+	xml.writeDoubleAttribute("OutputHighLimit", outputHighLimit());
+	xml.writeIntAttribute("OutputUnitID", outputUnitID());
+	xml.writeIntAttribute("OutputRangeMode", outputRangeModeInt());
+	xml.writeIntAttribute("OutputSensorID", outputSensorID());
+	xml.writeBoolAttribute("Acquire", acquire());
+	xml.writeBoolAttribute("Calculated", calculated());
+	xml.writeIntAttribute("NormalState", normalState());
+	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
+	xml.writeDoubleAttribute("Aperture", aperture());
+	xml.writeIntAttribute("InOutType", inOutTypeInt());
+	xml.writeDoubleAttribute("FilteringTime", filteringTime());
+	xml.writeDoubleAttribute("MaxDifference", maxDifference());
+	xml.writeIntAttribute("ByteOrder", byteOrderInt());
+	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
+	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
+	xml.writeIntAttribute("RegAddrOffset", regAddr().offset());
+	xml.writeIntAttribute("RegAddrBit", regAddr().offset());
+
+	xml.writeEndElement();				// </Signal>
+}
+
+
+bool Signal::readFromoXml(XmlReadHelper& xml)
+{
+	bool result = true;
+
+	if (xml.name() != "Signal")
+	{
+		return false;
+	}
+
+	result &= xml.readIntAttribute("ID", &m_ID);
+	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
+	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
+	result &= xml.readIntAttribute("SubsystemChannel", &m_channel);
+
+	QString str;
+
+	result &= xml.readStringAttribute("Type", &str);
+
+	if (str == "Analog")
+	{
+		m_type = E::SignalType::Analog;
+	}
+	else
+	{
+		m_type = E::SignalType::Discrete;
+	}
+
+	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
+	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
+	result &= xml.readStringAttribute("Caption", &m_caption);
+	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
+
+	int intValue = 0;
+
+	result &= xml.readIntAttribute("DataFormat", &intValue);
+	m_dataFormat = static_cast<E::DataFormat>(intValue);
+
+	result &= xml.readIntAttribute("DataSize", &m_dataSize);
+	result &= xml.readIntAttribute("LowADC", &m_lowADC);
+	result &= xml.readIntAttribute("HighADC", &m_highADC);
+	result &= xml.readDoubleAttribute("LowLimit", &m_lowLimit);
+	result &= xml.readDoubleAttribute("HighLimit", &m_highLimit);
+	result &= xml.readIntAttribute("UnitID", &m_unitID);
+	result &= xml.readDoubleAttribute("Adjustment", &m_adjustment);
+	result &= xml.readDoubleAttribute("DropLimit", &m_dropLimit);
+	result &= xml.readDoubleAttribute("ExcessLimit", &m_excessLimit);
+	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
+	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
+	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
+	result &= xml.readIntAttribute("InputUnitID", &m_inputUnitID);
+	result &= xml.readIntAttribute("InputSensorID", &m_inputSensorID);
+	result &= xml.readDoubleAttribute("OutputLowLimit", &m_outputLowLimit);
+	result &= xml.readDoubleAttribute("OutputHighLimit", &m_outputHighLimit);
+	result &= xml.readIntAttribute("OutputUnitID", &m_outputUnitID);
+
+	result &= xml.readIntAttribute("OutputRangeMode", &intValue);
+	m_outputRangeMode = static_cast<E::OutputRangeMode>(intValue);
+
+	result &= xml.readIntAttribute("OutputSensorID", &m_outputSensorID);
+	result &= xml.readBoolAttribute("Acquire", &m_acquire);
+	result &= xml.readBoolAttribute("Calculated", &m_calculated);
+	result &= xml.readIntAttribute("NormalState", &m_normalState);
+	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
+	result &= xml.readDoubleAttribute("Aperture", &m_aperture);
+
+	result &= xml.readIntAttribute("InOutType", &intValue);
+	m_inOutType = static_cast<E::SignalInOutType>(intValue);
+
+	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
+	result &= xml.readDoubleAttribute("MaxDifference", &m_maxDifference);
+
+	result &= xml.readIntAttribute("ByteOrder", &intValue);
+	m_byteOrder = static_cast<E::ByteOrder>(intValue);
+
+	int offset = 0;
+	int bit = 0;
+
+	result &= xml.readIntAttribute("RamAddrOffset", &offset);
+	result &= xml.readIntAttribute("RamAddrBit", &bit);
+
+	m_ramAddr.setOffset(offset);
+	m_ramAddr.setBit(bit);
+
+	offset = bit = 0;
+
+	result &= xml.readIntAttribute("RegAddrOffset", &offset);
+	result &= xml.readIntAttribute("regAddrBit", &bit);
+
+	m_regAddr.setOffset(offset);
+	m_regAddr.setBit(bit);
+
+	return result;
+}
+
+
+void SignalSet::buildStrID2IndexMap()
+{
+	int signalCount = count();
+
+	m_strID2IndexMap.clear();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		const Signal& s = (*this)[i];
+
+		if (m_strID2IndexMap.contains(s.appSignalID()))
+		{
+			qDebug() << "Duplicate signal strID " << s.appSignalID();
+			continue;
+		}
+
+		m_strID2IndexMap.insert(s.appSignalID(), i);
+	}
+}
+
+
+bool SignalSet::contains(const QString& appSignalID)
+{
+	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
+	{
+		assert(false);		//call buildStrID2IndexMap() before
+		return false;
+	}
+
+	return m_strID2IndexMap.contains(appSignalID);
+}
+
+
+Signal* SignalSet::getSignal(const QString& appSignalID)
+{
+	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
+	{
+		assert(false);		//	call buildStrID2IndexMap() before
+		return nullptr;
+	}
+
+	if (m_strID2IndexMap.contains(appSignalID))
+	{
+		return &(*this)[m_strID2IndexMap[appSignalID]];
+	}
+
+	assert(false);			//	appSignalD is not found
+	return nullptr;
+}
+
