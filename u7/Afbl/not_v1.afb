@@ -4,6 +4,7 @@
         <Properties>
             <Caption>not</Caption>
             <Version>1.0</Version>
+            <Implementation Version="103" OpIndex="3"/>
             <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
             <Category>Logic</Category>
             <OpCode>2</OpCode>

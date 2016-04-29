@@ -4,6 +4,7 @@
         <Properties>
             <Caption>tct_vibr</Caption>
             <Version>1.0</Version>
+            <Implementation Version="204" OpIndex="13"/>
             <Description>Time Counter Block with dynamic time value, single vibrator function</Description>
             <Category>Delay</Category>
             <OpCode>3</OpCode>

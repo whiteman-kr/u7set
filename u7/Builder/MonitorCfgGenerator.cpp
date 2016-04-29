@@ -145,10 +145,10 @@ namespace Builder
 				return false;
 			}
 
-			DASSettings dasSettings1;
+			AppDataServiceSettings dasSettings1;
 			dasSettings1.readFromDevice(dasObject1, m_log);
 
-			DASSettings dasSettings2;
+			AppDataServiceSettings dasSettings2;
 			dasSettings2.readFromDevice(dasObject2, m_log);
 
 			// Get ip addresses and ports, write them to configurations

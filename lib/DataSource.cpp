@@ -1,7 +1,8 @@
 #include "../include/DataSource.h"
 
 
-const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
+const char* const AppDataSource::ELEMENT_APP_DATA_SOURCE = "AppDataSource";
+const char* const AppDataSource::ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 
 char* DataSourceInfo::serialize(char* buffer, bool write)
@@ -31,13 +32,13 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 }
 
 
-DataSource::DataSource()
+AppDataSource::AppDataSource()
 {
 	m_rupFrames = new RupFrame[RUP_MAX_FRAME_COUNT];
 	m_framesData = new char[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 }
 
-DataSource::~DataSource()
+AppDataSource::~AppDataSource()
 {
 	delete [] m_rupFrames;
 	delete [] m_framesData;
@@ -78,7 +79,7 @@ DataSource& DataSource::operator = (const DataSource& ds)
 }*/
 
 
-void DataSource::stop()
+void AppDataSource::stop()
 {
 	setState(DataSourceState::stopped);
 	m_dataReceivingRate = 0;
@@ -86,13 +87,13 @@ void DataSource::stop()
 }
 
 
-void DataSource::resume()
+void AppDataSource::resume()
 {
 	setState(DataSourceState::noData);
 }
 
 
-void DataSource::getInfo(DataSourceInfo& dsi)
+void AppDataSource::getInfo(DataSourceInfo& dsi)
 {
 	dsi.ID = m_id;
 	dsi.ip = m_hostAddress.toIPv4Address();
@@ -101,7 +102,7 @@ void DataSource::getInfo(DataSourceInfo& dsi)
 }
 
 
-void DataSource::setInfo(const DataSourceInfo& dsi)
+void AppDataSource::setInfo(const DataSourceInfo& dsi)
 {
 	m_id = dsi.ID;
 	m_hostAddress = QHostAddress(dsi.ip);
@@ -110,7 +111,7 @@ void DataSource::setInfo(const DataSourceInfo& dsi)
 }
 
 
-void DataSource::getStatistics(DataSourceStatistics& dss)
+void AppDataSource::getStatistics(DataSourceStatistics& dss)
 {
 	dss.ID = m_id;
 	dss.state = static_cast<quint32>(m_state);
@@ -120,7 +121,7 @@ void DataSource::getStatistics(DataSourceStatistics& dss)
 }
 
 
-void DataSource::setStatistics(const DataSourceStatistics& dss)
+void AppDataSource::setStatistics(const DataSourceStatistics& dss)
 {
 	Q_ASSERT(dss.ID == m_id);
 
@@ -131,7 +132,7 @@ void DataSource::setStatistics(const DataSourceStatistics& dss)
 }
 
 
-QString DataSource::dataTypeToString(DataType dataType)
+QString AppDataSource::dataTypeToString(DataType dataType)
 {
 	switch(dataType)
 	{
@@ -149,7 +150,7 @@ QString DataSource::dataTypeToString(DataType dataType)
 }
 
 
-DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
+AppDataSource::DataType AppDataSource::stringToDataType(const QString& dataTypeStr)
 {
 	if (dataTypeStr == DATA_TYPE_APP)
 	{
@@ -167,9 +168,9 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 }
 
 
-void DataSource::writeToXml(XmlWriteHelper& xml)
+void AppDataSource::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(ELEMENT_DATA_SOURCE);
+	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE);
 
 	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
 	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
@@ -181,15 +182,26 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
 	xml.writeUlongAttribute(PROP_LM_DATA_ID, m_lmDataID, true);
 
-	xml.writeEndElement();	// </DataSource>
+	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS);
+
+	xml.writeIntAttribute("Count", m_appSignals.count());
+
+	for(const QString& appSignalID : m_appSignals)
+	{
+		xml.writeStringElement("SignalID", appSignalID);
+	}
+
+	xml.writeEndElement();	// </AssociatedSignals>
+
+	xml.writeEndElement();	// </AppDataSource>
 }
 
 
-bool DataSource::readFromXml(XmlReadHelper& xml)
+bool AppDataSource::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	if (xml.name() != ELEMENT_DATA_SOURCE)
+	if (xml.name() != ELEMENT_APP_DATA_SOURCE)
 	{
 		assert(false);
 		return false;
@@ -219,11 +231,44 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readUlongAttribute(PROP_LM_DATA_ID, &m_lmDataID);
 
+	if (xml.findElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
+	{
+		return false;
+	}
+
+	int signalCount = 0;
+
+	result = xml.readIntAttribute("Count", &signalCount);
+
+	m_appSignals.clear();
+
+
+
+	for(int count = 0; count < signalCount; count++)
+	{
+		if (xml.findElement("SignalID") == false)
+		{
+			break;
+		}
+
+		QString signalID;
+
+		xml.readStringElement("SignalID", &signalID);
+
+		m_appSignals.append(signalID);
+	}
+
+	if (signalCount != m_appSignals.count())
+	{
+		assert(false);
+		return false;
+	}
+
 	return result;
 }
 
 
-void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
+void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 {
 	int framesQuantity = rupFrame.header.framesQuantity;
 
@@ -264,7 +309,7 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 }
 
 
-void DataSource::mergeFrames()
+void AppDataSource::mergeFrames()
 {
 	int framesQuantity = m_rupFrames[0].header.framesQuantity;
 
@@ -277,7 +322,7 @@ void DataSource::mergeFrames()
 }
 
 
-void DataSource::parseFramesData()
+void AppDataSource::parseFramesData()
 {
 
 }

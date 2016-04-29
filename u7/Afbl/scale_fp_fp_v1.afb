@@ -4,6 +4,7 @@
         <Properties>
             <Caption>scale_fp_fp</Caption>
             <Version>1.0</Version>
+            <Implementation Version="104" OpIndex="16"/>
             <Description>Scaling Block, single-precision floating-point to single-precision floating-point</Description>
             <Category>Scaling</Category>
             <OpCode>14</OpCode>
@@ -16,6 +17,11 @@
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="Float" OpIndex = "9" Size = "32"/>
+
+            <AfbElementSignal OpName="o_overflow" Caption = "overflow" Type="Discrete" OpIndex = "12" Size = "1"/>
+            <AfbElementSignal OpName="o_underflow" Caption = "underflow" Type="Discrete" OpIndex = "13" Size = "1"/>
+            <AfbElementSignal OpName="o_zero" Caption = "zero" Type="Discrete" OpIndex = "14" Size = "1"/>
+            <AfbElementSignal OpName="o_nan" Caption = "nan" Type="Discrete" OpIndex = "15" Size = "1"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_scal_k1_coef" Caption = "K1" Visible="false" OpIndex="1" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">

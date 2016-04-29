@@ -4,6 +4,7 @@
         <Properties>
             <Caption>maj</Caption>
             <Version>1.0</Version>
+            <Implementation Version="104" OpIndex="21"/>
             <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
             <Category>Logic</Category>
             <OpCode>6</OpCode>

@@ -1691,9 +1691,9 @@ void EquipmentView::addInOutsToSignals()
 				Hardware::DeviceSignal* signal = dynamic_cast<Hardware::DeviceSignal*>(device);
 				assert(signal);
 
-				if (signal->function() == Hardware::DeviceSignal::SignalFunction::Input ||
-					signal->function() == Hardware::DeviceSignal::SignalFunction::Output ||
-					signal->function() == Hardware::DeviceSignal::SignalFunction::Validity)
+				if (signal->function() == E::SignalFunction::Input ||
+					signal->function() == E::SignalFunction::Output ||
+					signal->function() == E::SignalFunction::Validity)
 				{
 					inOuts.push_back(signal);
 				}
