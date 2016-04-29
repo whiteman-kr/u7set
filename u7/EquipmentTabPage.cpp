@@ -8,6 +8,7 @@
 #include "DialogConnectionsEditor.h"
 #include "GlobalMessanger.h"
 
+#include <QPalette>
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
 #include <QtStringPropertyManager>
@@ -1081,6 +1082,25 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	setIndentation(10);
 
 	sortByColumn(EquipmentModel::Columns::ObjectPlaceColumn, Qt::SortOrder::AscendingOrder);
+
+
+	// RPCT-633, somehow in this widow selectiop background was white, set it to something default
+	// And the same situation was seen in QtCreator, I think it's some kind of bug, so, just set come colors
+	// for selection
+	//
+	auto p = qApp->palette("QListView");
+
+	QColor highlight = p.highlight().color();
+	QColor highlightText = p.highlightedText().color();
+
+	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
+							 .arg(highlight.name())
+							 .arg(highlightText.name());
+
+	setStyleSheet(selectionColor);
+
+	// end of RPCT-633
+	//
 
 	return;
 }

@@ -1623,7 +1623,7 @@ void EditSchemaWidget::createActions()
 	m_fileSaveAction = new QAction(tr("Save"), this);
 	m_fileSaveAction->setStatusTip(tr("Save current changes..."));
 	m_fileSaveAction->setEnabled(false);
-	m_fileSaveAction->setShortcut(QKeySequence::Save);
+	m_fileSaveAction->setShortcuts(QKeySequence::Save);
 	connect(m_fileSaveAction, &QAction::triggered, this, &EditSchemaWidget::saveWorkcopy);
 	addAction(m_fileSaveAction);
 
@@ -1660,7 +1660,7 @@ void EditSchemaWidget::createActions()
 	m_fileCloseAction = new QAction(tr("Close"), this);
 	m_fileCloseAction->setStatusTip(tr("Close file"));
 	m_fileCloseAction->setEnabled(true);
-	m_fileCloseAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+	m_fileCloseAction->setShortcuts(QKeySequence::Close);
 	connect(m_fileCloseAction, &QAction::triggered, [this](bool) { emit closeTab(this); });
 	addAction(m_fileCloseAction);
 
@@ -1753,7 +1753,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_undoAction = new QAction(tr("Undo"), this);
 	m_undoAction->setEnabled(false);
-	m_undoAction->setShortcut(QKeySequence::Undo);
+	m_undoAction->setShortcuts(QKeySequence::Undo);
 	connect(m_undoAction, &QAction::triggered, this, &EditSchemaWidget::undo);
 	addAction(m_undoAction);
 
@@ -1761,7 +1761,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_redoAction = new QAction(tr("Redo"), this);
 	m_redoAction->setEnabled(false);
-	m_redoAction->setShortcut(QKeySequence::Redo);
+	m_redoAction->setShortcuts(QKeySequence::Redo);
 	connect(m_redoAction, &QAction::triggered, this, &EditSchemaWidget::redo);
 	addAction(m_redoAction);
 
@@ -1774,7 +1774,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_selectAllAction = new QAction(tr("Select All"), this);
 	m_selectAllAction->setEnabled(true);
-	m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+	m_selectAllAction->setShortcuts(QKeySequence::SelectAll);
 	connect(m_selectAllAction, &QAction::triggered, this, &EditSchemaWidget::selectAll);
 	addAction(m_selectAllAction);
 
@@ -1787,7 +1787,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_editCutAction = new QAction(tr("Cut"), this);
 	m_editCutAction->setEnabled(true);
-	m_editCutAction->setShortcut(QKeySequence::Cut);
+	m_editCutAction->setShortcuts(QKeySequence::Cut);
 	connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::editCut);
 	addAction(m_editCutAction);
 
@@ -1795,7 +1795,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_editCopyAction = new QAction(tr("Copy"), this);
 	m_editCopyAction->setEnabled(true);
-	m_editCopyAction->setShortcut(QKeySequence::Copy);
+	m_editCopyAction->setShortcuts(QKeySequence::Copy);
 	connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::editCopy);
 	addAction(m_editCopyAction);
 
@@ -1803,7 +1803,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_editPasteAction = new QAction(tr("Paste"), this);
 	m_editPasteAction->setEnabled(false);
-	m_editPasteAction->setShortcut(QKeySequence::Paste);
+	m_editPasteAction->setShortcuts(QKeySequence::Paste);
 	connect(m_editPasteAction, &QAction::triggered, this, &EditSchemaWidget::editPaste);
 	addAction(m_editPasteAction);
 

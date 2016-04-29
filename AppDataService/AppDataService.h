@@ -5,6 +5,7 @@
 #include "../include/Signal.h"
 #include "../include/CfgServerLoader.h"
 #include "../include/ServiceSettings.h"
+#include "AppSignalState.h"
 
 #include "DataChannel.h"
 
@@ -29,6 +30,9 @@ private:
 	UnitList m_unitInfo;
 
 	QVector<Signal> m_appSignals;
+	QHash<QString, int> m_appSignalID2IndexMap;
+
+	AppSignalState* m_signalStates = nullptr;
 
 	QTimer m_timer;
 
@@ -61,6 +65,9 @@ private:
 	bool readConfiguration(const QByteArray& fileData);
 	bool readDataSources(QByteArray& fileData);
 	bool readAppSignals(QByteArray& fileData);
+
+	void buildAppSignalID2IndexMap(bool signalsLoadResult);
+	void createAndInitSignalStates();
 
 	void stopDataChannels();
 	void initDataChannels();

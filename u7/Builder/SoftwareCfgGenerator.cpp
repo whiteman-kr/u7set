@@ -190,6 +190,12 @@ namespace Builder
 		//
 		for (const DbFileInfo& f : fileList)
 		{
+			if (f.action() == VcsItemAction::Deleted)		// File is deleted, it can be in Debug build
+			{
+				qDebug() << "Skip file " << f.fileId() << ", " << f.fileName() << ", it was marked as deleted";
+				continue;
+			}
+
 			std::shared_ptr<DbFile> file;
 
 			result = db->getLatestVersion(f, &file, nullptr);

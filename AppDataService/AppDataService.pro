@@ -81,7 +81,8 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
     DataChannel.cpp \
-    AppDataService.cpp
+    AppDataService.cpp \
+    AppSignalState.cpp
 
 HEADERS += \
 	Stable.h \
@@ -110,7 +111,8 @@ HEADERS += \
     ../include/XmlHelper.h \
     DataChannel.h \
     ../include/DataProtocols.h \
-    AppDataService.h
+    AppDataService.h \
+    AppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 
