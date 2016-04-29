@@ -781,7 +781,7 @@ bool Signal::readFromoXml(XmlReadHelper& xml)
 	offset = bit = 0;
 
 	result &= xml.readIntAttribute("RegAddrOffset", &offset);
-	result &= xml.readIntAttribute("regAddrBit", &bit);
+	result &= xml.readIntAttribute("RegAddrBit", &bit);
 
 	m_regAddr.setOffset(offset);
 	m_regAddr.setBit(bit);

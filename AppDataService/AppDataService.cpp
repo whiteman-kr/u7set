@@ -25,6 +25,10 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceStrID,
 
 AppDataServiceWorker::~AppDataServiceWorker()
 {
+	if (m_signalStates != nullptr)
+	{
+		delete [] m_signalStates;
+	}
 }
 
 
@@ -366,13 +370,35 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
 		{
-			readDataSources(fileData);
-			continue;
+			result &= readDataSources(fileData);
+
+			if (result == true)
+			{
+				qDebug() << "ReadDataSources - OK";
+				continue;
+			}
+			else
+			{
+				qDebug() << "ReadDataSources - Error";
+				break;
+			}
 		}
 
-		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+		if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
 		{
-			readAppSignals(fileData);
+			result &= readAppSignals(fileData);
+
+			if (result == true)
+			{
+				qDebug() << "ReadAppSignals - OK";
+				continue;
+			}
+			else
+			{
+				qDebug() << "ReadAppSignals - Error";
+				break;
+			}
+
 			continue;
 		}
 	}
@@ -462,6 +488,13 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
+	m_unitInfo.clear();
+	m_appSignals.clear();
+	m_appSignalID2IndexMap.clear();
+
+	delete [] m_signalStates;
+	m_signalStates = nullptr;
+
 	bool result = true;
 
 	XmlReadHelper xml(fileData);
@@ -475,10 +508,14 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 
 	result &= xml.readIntAttribute("Count", &unitCount);
 
-	m_unitInfo.clear();
-
-	while(xml.findElement("Unit") == true)
+	for(int count = 0; count < unitCount; count++)
 	{
+		if(xml.findElement("Unit") == false)
+		{
+			result = false;
+			break;
+		}
+
 		int unitID = 0;
 		QString unitCaption;
 
@@ -495,13 +532,6 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 		return false;
 	}
 
-	if (xml.findElement("Units") == false)
-	{
-		return false;
-	}
-
-	m_appSignals.clear();
-
 	if (xml.findElement("Signals") == false)
 	{
 		return false;
@@ -513,22 +543,73 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 
 	m_appSignals.resize(signalCount);
 
-	int count = 0;
-
-	while(xml.findElement("Signal") == true)
+	for(int count = 0; count < signalCount; count++)
 	{
-		if (count < signalCount)
+		if (xml.findElement("Signal") == false)
 		{
-			result &= m_appSignals[count].readFromoXml(xml);
-
-			count++;
-		}
-		else
-		{
-			assert(false);
+			result = false;
 			break;
 		}
+
+		result &= m_appSignals[count].readFromoXml(xml);
 	}
 
+	buildAppSignalID2IndexMap(result);
+
+	createAndInitSignalStates();
+
 	return result;
+}
+
+
+void AppDataServiceWorker::buildAppSignalID2IndexMap(bool signalsLoadResult)
+{
+	m_appSignalID2IndexMap.clear();
+
+	if (signalsLoadResult == false)
+	{
+		return;
+	}
+
+	int index = 0;
+
+	for(Signal& signal : m_appSignals)
+	{
+		m_appSignalID2IndexMap.insert(signal.appSignalID(), index);
+
+		index++;
+	}
+}
+
+
+void AppDataServiceWorker::createAndInitSignalStates()
+{
+	if (m_signalStates != nullptr)
+	{
+		assert(false);
+
+		delete [] m_signalStates;
+		m_signalStates = nullptr;
+	}
+
+	if (m_appSignals.isEmpty())
+	{
+		return;
+	}
+
+	int signalCount = m_appSignals.count();
+
+	m_signalStates = new AppSignalState[signalCount];
+
+	int index = 0;
+
+	for(Signal& signal : m_appSignals)
+	{
+		AppSignalState& signalState = m_signalStates[index];
+
+		signalState.signal = &signal;
+		signalState.index = index;
+
+		index++;
+	}
 }
