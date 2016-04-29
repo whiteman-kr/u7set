@@ -15,6 +15,7 @@
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
+#include "DiagDataServiceCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 
@@ -765,6 +766,10 @@ namespace Builder
 				{
 				case E::SoftwareType::AppDataService:
 					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::DiagDataService:
+					softwareCfgGenerator = new DiagDataServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				case E::SoftwareType::Monitor:

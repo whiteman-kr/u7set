@@ -163,7 +163,8 @@ SOURCES +=\
     Builder/MonitorCfgGenerator.cpp \
     ../lib/ServiceSettings.cpp \
     Builder/TuningServiceCfgGenerator.cpp \
-    Builder/AppDataServiceCfgGenerator.cpp
+    Builder/AppDataServiceCfgGenerator.cpp \
+    Builder/DiagDataServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -256,7 +257,8 @@ HEADERS  += \
     Builder/MonitorCfgGenerator.h \
     ../include/ServiceSettings.h \
     Builder/TuningServiceCfgGenerator.h \
-    Builder/AppDataServiceCfgGenerator.h
+    Builder/AppDataServiceCfgGenerator.h \
+    Builder/DiagDataServiceCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \
