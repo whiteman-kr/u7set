@@ -4,6 +4,7 @@
         <Properties>
             <Caption>add_si</Caption>
             <Version>1.0</Version>
+            <Implementation Version="103" OpIndex="14"/>
             <Description>Adder Block with signed int data format</Description>
             <Category>Math</Category>
             <OpCode>13</OpCode>
@@ -12,13 +13,19 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_1_oprd" Caption = "in 1" Type="Analog" DataFormat="SignedInt" OpIndex = "1" Size = "32"/>
-            <AfbElementSignal OpName="i_2_oprd" Caption = "in 2" Type="Analog" DataFormat="SignedInt" OpIndex = "3" Size = "32"/>
+            <AfbElementSignal OpName="i_1_oprd" Caption = "in_1" Type="Analog" DataFormat="SignedInt" OpIndex = "1" Size = "32"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption = "in_2" Type="Analog" DataFormat="SignedInt" OpIndex = "3" Size = "32"/>
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="SignedInt" OpIndex = "6" Size = "32"/>
+            <AfbElementSignal OpName="o_mat_edi" Caption = "mat_edi" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="o_overflow" Caption = "overflow" Type="Discrete" OpIndex = "9" Size = "1"/>
+            <AfbElementSignal OpName="o_underflow" Caption = "underflow" Type="Discrete" OpIndex = "10" Size = "1"/>
+            <AfbElementSignal OpName="o_zero" Caption = "zero" Type="Discrete" OpIndex = "11" Size = "1"/>
+            <AfbElementSignal OpName="o_nan" Caption = "nan" Type="Discrete" OpIndex = "12" Size = "1"/>
+            <AfbElementSignal OpName="o_div_by_zero" Caption = "div_by_zero" Type="Discrete" OpIndex = "13" Size = "1"/>
         </OutputSignals>
-        <Params>
+        <Params>            
             <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>

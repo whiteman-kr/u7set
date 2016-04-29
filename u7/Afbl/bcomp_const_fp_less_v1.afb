@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#comp_const_fp_ne_v1">
+    <AfbElement StrId="#bcomp_const_fp_less_v1">
         <Properties>
-            <Caption>comp_const_fp_ne</Caption>
+            <Caption>bcomp_const_fp_less</Caption>
             <Version>1.0</Version>
-            <Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
+            <Implementation Version="108" OpIndex="12"/>
+            <Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
             <Category>Compare</Category>
             <OpCode>10</OpCode>
             <HasRam>true</HasRam>
@@ -18,7 +19,7 @@
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "9" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp_s" Caption = "Setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+           <AfbElementParam OpName="i_sp_s" Caption = "Setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -46,8 +47,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>8</Value>
-                <Default>8</Default>
+                <Value>7</Value>
+                <Default>7</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>8</HighLimit>
                 <Script>
