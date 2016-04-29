@@ -67,6 +67,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 51", ":/DatabaseUpgrade/Upgrade0051.sql"},
 	{"Upgrade to version 52", ":/DatabaseUpgrade/Upgrade0052.sql"},
 	{"Upgrade to version 53", ":/DatabaseUpgrade/Upgrade0053.sql"},
+	{"Upgrade to version 54", ":/DatabaseUpgrade/Upgrade0054.sql"},
 };
 
 
@@ -3447,7 +3448,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.normalState())
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
-	.arg(s.inOutType())
+	.arg(TO_INT(s.inOutType()))
 	.arg(toSqlStr(s.equipmentID()))
 	.arg(s.outputRangeMode())					// since version 35 of database
 	.arg(s.filteringTime())						//

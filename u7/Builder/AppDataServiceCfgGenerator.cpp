@@ -139,7 +139,7 @@ namespace Builder
 				hasWrongField = true;
 			}
 
-			if (signal.inOutType() < 0 || signal.inOutType() >= IN_OUT_TYPE_COUNT)
+			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
 				hasWrongField = true;

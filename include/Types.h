@@ -42,6 +42,14 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	enum class SignalFunction
+	{
+		Input,					// physical input, application logic signal
+		Output,					// physical output, application logic signal
+		Validity,				// input/output validity, application logic signal
+		Diagnostics				// Diagnostics signal
+	};
+	Q_ENUM(SignalFunction)
 
 	enum ByteOrder
 	{
@@ -90,7 +98,7 @@ public:
 	};
 	Q_ENUM(OutputRangeMode)
 
-	enum SignalInOutType
+	enum class SignalInOutType
 	{
 		Input = 0,
 		Output = 1,

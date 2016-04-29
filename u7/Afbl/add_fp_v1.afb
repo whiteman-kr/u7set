@@ -18,7 +18,7 @@
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="Float" OpIndex = "6" Size = "32"/>
-            <AfbElementSignal OpName="o_mat_edi" Caption = "mat_edi" Type="Discrete" OpIndex = "8" Size = "1"/>
+            
             <AfbElementSignal OpName="o_overflow" Caption = "overflow" Type="Discrete" OpIndex = "9" Size = "1"/>
             <AfbElementSignal OpName="o_underflow" Caption = "underflow" Type="Discrete" OpIndex = "10" Size = "1"/>
             <AfbElementSignal OpName="o_zero" Caption = "zero" Type="Discrete" OpIndex = "11" Size = "1"/>
@@ -34,19 +34,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutMatEdi" Caption = "OutMatEdi" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>
+            </AfbElementParam>            
             <AfbElementParam OpName="OutOverflow" Caption = "OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">1
                 <Value>0</Value>
                 <Default>0</Default>
@@ -143,8 +131,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	{
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
-
-	createOutput(videoItemFblElement, afbElement, "OutMatEdi", "mat_edi");
+	
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");

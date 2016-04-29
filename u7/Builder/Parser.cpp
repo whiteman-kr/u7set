@@ -1162,6 +1162,22 @@ namespace Builder
 		else
 		{
 			ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", true, nullptr);
+
+			std::vector<DbFileInfo> markedAsDeletedRemoved;
+			markedAsDeletedRemoved.reserve(applicationLogicFileList.size());
+
+			for (DbFileInfo& fi : applicationLogicFileList)
+			{
+				if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+				{
+					qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
+					continue;
+				}
+
+				markedAsDeletedRemoved.push_back(fi);
+			}
+
+			std::swap(markedAsDeletedRemoved, applicationLogicFileList);
 		}
 
 		if (ok == false)

@@ -289,6 +289,8 @@ namespace Builder
         ok = db()->getFileList(&fileList, db()->mcFileId(), "ModulesConfigurations.descr", true, nullptr);
     }
 
+	FILTER filList here for ActionDeleted (have a look at getEquipment)
+
     if (ok == false || fileList.size() != 1)
     {
         LOG_ERROR(m_log, tr("Can't get file list and find Module Configuration description file"));
