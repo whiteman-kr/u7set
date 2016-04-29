@@ -136,6 +136,13 @@ void EditSchemaView::paintEvent(QPaintEvent* pe)
 	//
 	drawBuildIssues(&drawParam, clipRect);
 
+	// Draw run order
+	//
+	if (theSettings.isDebugMode() == true)
+	{
+		drawRunOrder(&drawParam, clipRect);
+	}
+
 	// Draw selection
 	//
 	if (m_selectedItems.empty() == false)
@@ -212,6 +219,47 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 				// Draw item issue
 				//
 				item->DrawIssue(drawParam, issue);
+			}
+		}
+	}
+
+	return;
+}
+
+void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect)
+{
+	if (drawParam == nullptr)
+	{
+		assert(drawParam != nullptr);
+		return;
+	}
+
+	// Draw items by layers which has Show flag
+	//
+	double clipX = static_cast<double>(clipRect.left());
+	double clipY = static_cast<double>(clipRect.top());
+	double clipWidth = static_cast<double>(clipRect.width());
+	double clipHeight = static_cast<double>(clipRect.height());
+
+	// Find compile layer
+	//
+	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	{
+		const VFrame30::SchemaLayer* pLayer = layer->get();
+
+		if (pLayer->compile() == false || pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+
+			if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			{
+				int orderIndex = GlobalMessanger::instance()->schemaItemRunOrder(item->guid());
+				item->DrawDebugInfo(drawParam, orderIndex);
 			}
 		}
 	}
@@ -4840,7 +4888,13 @@ void EditSchemaWidget::addFblElement()
 
 		std::shared_ptr<Afb::AfbElement> afb = elements[index];
 
-		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get())));
+		QString errorMsg;
+		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), errorMsg));
+
+		if (errorMsg.isEmpty() == false)
+		{
+			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		}
 	}
 
 	return;

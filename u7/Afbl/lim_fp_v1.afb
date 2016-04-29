@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#lim_fp_v1">
+        <Properties>
+            <Caption>lim_fp</Caption>
+            <Version>1.0</Version>
+            <Implementation Version="3" OpIndex="12"/>
+            <Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
+            <Category>Math</Category>
+            <OpCode>23</OpCode>
+            <HasRam>true</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex = "5" Size = "32"/>            
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="Float" OpIndex = "8" Size = "32"/>            
+        </OutputSignals>
+        <Params>
+             <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>2</Value>
+                <Default>2</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>2</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_lim_max" Caption = "lim_max" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_lim_min" Caption = "lim_min" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>                        
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

@@ -229,3 +229,19 @@ bool Settings::freezeBuildPath() const
 	return m_freezeBuildPath;
 }
 
+void Settings::setDebugMode(bool value)
+{
+	m_debugMode = value;
+}
+
+bool Settings::debugMode() const
+{
+	return m_debugMode;
+}
+
+bool Settings::isDebugMode() const
+{
+	return debugMode();
+}
+
+

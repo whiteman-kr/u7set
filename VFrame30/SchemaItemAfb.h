@@ -19,7 +19,7 @@ namespace VFrame30
 		SchemaItemAfb(void);
 	public:
 		explicit SchemaItemAfb(SchemaUnit unit);
-		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement);
+		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString &errorMsg);
 
 		virtual ~SchemaItemAfb(void);
 
@@ -39,7 +39,7 @@ namespace VFrame30
 	public:
 		virtual QString buildName() const override;
 
-		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema);
+		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString &errorMsg);
 		bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		// Set Afb element parameters
@@ -51,8 +51,9 @@ namespace VFrame30
 
 	protected:
 		void addSpecificParamProperties();
-		bool executeScript(const QString& script, const Afb::AfbElement& afb);
+		bool executeScript(const QString& script, const Afb::AfbElement& afb, QString &errorMsg);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
+		Q_INVOKABLE bool getParamBoolValue(const QString& name);
 
 		Q_INVOKABLE void addInputSignal(QString caption, int type, int opIndex, int size);
 		Q_INVOKABLE void addOutputSignal(QString caption, int type, int opIndex, int size);

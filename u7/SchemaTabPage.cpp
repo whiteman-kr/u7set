@@ -164,6 +164,7 @@ void SchemasTabPage::projectOpened()
 void SchemasTabPage::projectClosed()
 {
 	GlobalMessanger::instance()->clearBuildSchemaIssues();
+	GlobalMessanger::instance()->clearSchemaItemRunOrder();
 
 	// Close all opened documents
 	//

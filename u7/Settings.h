@@ -45,6 +45,10 @@ public:
 
 	bool freezeBuildPath() const;
 
+	void setDebugMode(bool value);
+	bool debugMode() const;
+	bool isDebugMode() const;
+
 	// Data
 	//
 public:
@@ -121,6 +125,8 @@ private:
 	QStringList m_loginCompleter;
 
 	bool m_freezeBuildPath = false;
+
+	bool m_debugMode = false;
 };
 
 extern Settings theSettings;

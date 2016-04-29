@@ -193,6 +193,10 @@ namespace VFrame30
 		assert(false);
 	}
 
+	void SchemaItem::DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const
+	{
+	}
+
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
 	void SchemaItem::DrawSelection(CDrawParam*, bool) const

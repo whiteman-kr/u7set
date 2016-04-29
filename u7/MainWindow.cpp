@@ -45,25 +45,30 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// Add main tab pages
 	//
-	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
-	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Equipment"));
-	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
-
+	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
+	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
+	m_signalsTab = new SignalsTabPage(dbController(), nullptr);
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
-	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
-	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
 	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(AlFileExtension, dbController(), AlFileName, nullptr);
 	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(MvsFileExtension, dbController(), MvsFileName, nullptr);
+
+	getCentralWidget()->addTabPage(m_projectsTab, tr("&Projects"));
+	getCentralWidget()->addTabPage(m_equipmentTab, tr("&Equipment"));
+	getCentralWidget()->addTabPage(m_signalsTab, tr("Application &Signals"));
+
+	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
+	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
+
 	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
-	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
+	getCentralWidget()->addTabPage(m_logicSchema, tr("Application &Logic"));
+	getCentralWidget()->addTabPage(m_monitorSchema, tr("&Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
+	getCentralWidget()->addTabPage(m_buildTabPage, tr("&Build"));
 
 	// --
 	//
@@ -210,10 +215,26 @@ void MainWindow::createActions()
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 
-	m_debugAction = new QAction(tr("Debug..."), this);
-	m_debugAction->setStatusTip(tr("Perform some debug actions, don't run it!"));
+	m_debugAction = new QAction(tr("Debug Mode"), this);
+	m_debugAction->setStatusTip(tr("Set debug mode, some extra messages will be displayed"));
 	m_debugAction->setEnabled(true);
+	m_debugAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_D));
 	connect(m_debugAction, &QAction::triggered, this, &MainWindow::debug);
+	addAction(m_debugAction);
+
+	m_startBuildAction = new QAction(tr("Build Project"), this);
+	m_startBuildAction->setStatusTip(tr("Build opened project"));
+	m_startBuildAction->setEnabled(false);
+	QList<QKeySequence> bks;
+	bks << QKeySequence(Qt::CTRL + Qt::Key_B);
+	bks << QKeySequence(Qt::Key_F7);
+	m_startBuildAction->setShortcuts(bks);
+	connect(m_startBuildAction, &QAction::triggered, this, &MainWindow::startBuild);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, [this](){m_startBuildAction->setEnabled(false);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
+	addAction(m_startBuildAction);
 
 	return;
 }
@@ -233,6 +254,11 @@ void MainWindow::createMenus()
 	pAdmMenu->addAction(m_usersAction);
 	pAdmMenu->addAction(m_logAction);
 
+	// Project
+	//
+	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
+	pProjectMenu->addAction(m_startBuildAction);
+
 	// Tools
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
@@ -251,7 +277,7 @@ void MainWindow::createMenus()
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
 	pHelpMenu->addAction(m_aboutAction);
-	pHelpMenu->addAction(m_debugAction);
+
 
 	return;
 }
@@ -394,45 +420,33 @@ void MainWindow::showAbout()
 
 void MainWindow::debug()
 {
-	std::vector<std::shared_ptr<DbFile>> files;
+	theSettings.setDebugMode(!theSettings.isDebugMode());
+	qDebug() << "DebugMode: " << theSettings.isDebugMode();
+}
 
-	// Add file
-	std::shared_ptr<DbFile> f1 = std::make_shared<DbFile>();
-	f1->setFileName("file_1.fcf");
+void MainWindow::startBuild()
+{
+	qDebug() << "MainWindow::startBuild";
 
-	std::shared_ptr<DbFile> f2 = std::make_shared<DbFile>();
-	f2->setFileName("file_2.fcf");
+	if (m_buildTabPage == nullptr)
+	{
+		assert(m_buildTabPage);
+		return;
+	}
 
-	QByteArray data1;
-	data1.push_back(1);
-	data1.push_back(2);
-	data1.push_back(3);
-	f1->swapData(data1);
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
 
-	QByteArray data2;
-	data2.push_back(3);
-	data2.push_back(4);
-	f2->swapData(data2);
+	getCentralWidget()->switchToTabPage(m_buildTabPage);
 
-	files.push_back(f1);
-	files.push_back(f2);
+	if (m_buildTabPage->isBuildRunning() == false)
+	{
+		m_buildTabPage->build();
+	}
 
-	dbController()->addFiles(&files, 0, this);
-
-	// Ckeck in file_1
-	std::vector<DbFileInfo>	fiv;
-	fiv.push_back(static_cast<DbFileInfo>(*f1));
-
-	dbController()->checkIn(fiv, "check_in file 1", this);
-
-	// check out file_1
-	dbController()->checkOut(fiv, this);
-
-	// undo all files
-	fiv.clear();
-	fiv.push_back(static_cast<DbFileInfo>(*f1));
-	fiv.push_back(static_cast<DbFileInfo>(*f2));
-	dbController()->undoChanges(fiv, this);
+	return;
 }
 
 void MainWindow::projectOpened(DbProject project)

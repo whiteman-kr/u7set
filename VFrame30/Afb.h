@@ -33,23 +33,33 @@ namespace Afb
             LOGIC = 1,
             NOT = 2,
             TCT = 3,
-            SR_RS = 4,
+			FLIP_FLOP = 4,
             CTUD = 5,
             MAJ = 6,
             SRSST = 7,
             BCOD = 8,
             BDEC = 9,
-			COMP = 10,
-            LAG = 11,
-            MID = 12,
+			BCOMP = 10,
+			DAMPER = 11,
+			MEM = 12,
             MATH = 13,
 			SCALE = 14,
-            LINFUN = 15,
-            SQRT = 16,
-            LIM = 17,
-            PID = 18,
+			SCALE_P = 15,
+			FUNC = 16,
+			INT = 17,
+			COMP = 18,
+			MATH_FP = 19,
+			DPCOMP = 20,
+			MUX = 21,
+			LATCH = 22,
+			LIM = 23,
+			DEAD_ZONE = 24,
+			ADEL = 25,
+			DDEL = 26,
+			POL = 27,
+			DER = 28,
             First = LOGIC,
-            Last = PID,
+			Last = DER,
 		};
 
 		AfbType();
@@ -277,6 +287,7 @@ private:
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
+		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

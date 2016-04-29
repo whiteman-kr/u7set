@@ -26,6 +26,8 @@ public:
 public:
 	//static BuildTabPage* instance();
 
+	bool isBuildRunning() const;
+
 	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
 	void cancelBuild();
 
@@ -46,10 +48,10 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
-protected slots:
 	void build();
 	void cancel();
 
+protected slots:
 	void buildWasStarted();
 	void buildWasFinished();
 

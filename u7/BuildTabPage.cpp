@@ -120,6 +120,11 @@ BuildTabPage::~BuildTabPage()
 	theSettings.writeUserScope();
 }
 
+bool BuildTabPage::isBuildRunning() const
+{
+	return m_builder.isRunning();
+}
+
 const std::map<QUuid, OutputMessageLevel>* BuildTabPage::itemsIssues() const
 {
 	return &m_itemsIssues;

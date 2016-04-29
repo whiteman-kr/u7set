@@ -1,6 +1,7 @@
 #include "Parser.h"
 
 #include "IssueLogger.h"
+#include "GlobalMessanger.h"
 
 #include "../../include/DbController.h"
 #include "../../include/DeviceObject.h"
@@ -335,7 +336,7 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 	AppLogicModule::AppLogicModule(QString moduleStrId) :
-		m_moduleStrId(moduleStrId)
+		m_moduleEquipmentId(moduleStrId)
 	{
 	}
 
@@ -471,7 +472,7 @@ namespace Builder
 			// Imposible set exucution order for module, there is no first item,
 			// firts item can be item without inputs
 			//
-			log->errALP4008(moduleStrId());
+			log->errALP4008(moduleEquipmentId());
 
 			result = false;
 			return result;
@@ -605,7 +606,7 @@ namespace Builder
 		{
 			// -- debug
 			qDebug() << "";
-			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleStrId;
+			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleEquipmentId;
 			qDebug() << "";
 
 			for (const AppLogicItem& item : orderedList)
@@ -695,7 +696,7 @@ namespace Builder
 					itemsUuids.push_back(li.m_fblItem->guid());
 					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
-					log->errALP4009(moduleStrId(),
+					log->errALP4009(moduleEquipmentId(),
 									li.m_schema->schemaID(),
 									duplicateItem->m_schema->schemaID(),
 									li.m_fblItem->buildName(),
@@ -832,14 +833,14 @@ namespace Builder
 //	}
 
 
-	QString AppLogicModule::moduleStrId() const
+	QString AppLogicModule::moduleEquipmentId() const
 	{
-		return m_moduleStrId;
+		return m_moduleEquipmentId;
 	}
 
-	void AppLogicModule::setModuleStrId(QString value)
+	void AppLogicModule::setModuleEquipmentId(QString value)
 	{
-		m_moduleStrId = value;
+		m_moduleEquipmentId = value;
 	}
 
 	const std::list<AppLogicItem>& AppLogicModule::items() const
@@ -867,7 +868,7 @@ namespace Builder
 	{
 		for(std::shared_ptr<AppLogicModule> modulePtr : m_modules)
 		{
-			if (modulePtr->moduleStrId() == moduleStrID)
+			if (modulePtr->moduleEquipmentId() == moduleStrID)
 			{
 				return modulePtr;
 			}
@@ -921,7 +922,7 @@ namespace Builder
 			auto moduleIt = std::find_if(m_modules.begin(), m_modules.end(),
 										 [&moduleStrId](const std::shared_ptr<AppLogicModule>& m)
 			{
-				return m->moduleStrId() == moduleStrId;
+				return m->moduleEquipmentId() == moduleStrId;
 			});
 
 			if (moduleIt == m_modules.end())
@@ -960,7 +961,7 @@ namespace Builder
 
 		for (std::shared_ptr<AppLogicModule> m : m_modules)
 		{
-			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleStrId()));
+			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleEquipmentId()));
 
 			ok = m->orderItems(log);
 
@@ -968,6 +969,9 @@ namespace Builder
 			{
 				result = false;
 			}
+
+			QString str = QString("%1 functional item(s) parsed").arg(m->items().size());
+			LOG_MESSAGE(log, str);
 		}
 
 		return result;
@@ -1122,6 +1126,14 @@ namespace Builder
 		if (ok == false)
 		{
 			result = false;
+		}
+
+		// In debug mode save item order for displaying on schemas
+		//
+		if (theSettings.debugMode() == true &&
+			applicationData() != nullptr)
+		{
+			debugInfo();
 		}
 
 		return result;
@@ -1863,6 +1875,36 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	void Parser::debugInfo()
+	{
+		LOG_MESSAGE(m_log, "Debug Info:");
+
+		// Set Schema Ityem Run Order for drawing on schemas
+		//
+		std::map<QUuid, int> schemaItemRunOrder;
+
+		const AppLogicData* appLogicData = applicationData();
+		const auto& logicModules = appLogicData->modules();
+
+		for (std::shared_ptr<AppLogicModule> lm : logicModules)
+		{
+			const std::list<AppLogicItem>& items = lm->items();
+
+			int index = 0;
+			for (const AppLogicItem& it : items)
+			{
+				assert(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
+
+				schemaItemRunOrder[it.m_fblItem->guid()] = index;
+				index ++;
+			}
+		}
+
+		GlobalMessanger::instance()->swapSchemaItemRunOrder(schemaItemRunOrder);
+
+		return;
 	}
 
 

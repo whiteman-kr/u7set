@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#mem_si_v1">
+        <Properties>
+            <Caption>mem_si</Caption>
+            <Version>1.0</Version>
+	  <Implementation Version="0" OpIndex="44"/>
+            <Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
+            <Category>Logic</Category>
+            <OpCode>12</OpCode>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_1_oprd" Caption="in_1" Type="Analog" DataFormat = "SignedInt" OpIndex = "10" Size = "32"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption="in_2" Type="Analog" DataFormat = "SignedInt" OpIndex = "12" Size = "32"/>
+            <AfbElementSignal OpName="i_3_oprd" Caption="in_3" Type="Analog" DataFormat = "SignedInt" OpIndex = "14" Size = "32"/>
+            <AfbElementSignal OpName="i_4_oprd" Caption="in_4" Type="Analog" DataFormat = "SignedInt" OpIndex = "16" Size = "32"/>
+            <AfbElementSignal OpName="i_5_oprd" Caption="in_5" Type="Analog" DataFormat = "SignedInt" OpIndex = "18" Size = "32"/>
+            <AfbElementSignal OpName="i_6_oprd" Caption="in_6" Type="Analog" DataFormat = "SignedInt" OpIndex = "20" Size = "32"/>
+            <AfbElementSignal OpName="i_7_oprd" Caption="in_7" Type="Analog" DataFormat = "SignedInt" OpIndex = "22" Size = "32"/>
+            <AfbElementSignal OpName="i_8_oprd" Caption="in_8" Type="Analog" DataFormat = "SignedInt" OpIndex = "24" Size = "32"/>
+
+            <AfbElementSignal OpName="i_1_en" Caption="in_1_en" Type="Discrete" OpIndex = "2" Size = "1"/>
+            <AfbElementSignal OpName="i_2_en" Caption="in_2_en" Type="Discrete" OpIndex = "3" Size = "1"/>
+            <AfbElementSignal OpName="i_3_en" Caption="in_3_en" Type="Discrete" OpIndex = "4" Size = "1"/>
+            <AfbElementSignal OpName="i_4_en" Caption="in_4_en" Type="Discrete" OpIndex = "5" Size = "1"/>
+            <AfbElementSignal OpName="i_5_en" Caption="in_5_en" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="i_6_en" Caption="in_6_en" Type="Discrete" OpIndex = "7" Size = "1"/>
+            <AfbElementSignal OpName="i_7_en" Caption="in_7_en" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="i_8_en" Caption="in_8_en" Type="Discrete" OpIndex = "9" Size = "1"/>            
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_med" Caption="med" Type="Analog" DataFormat = "SignedInt" OpIndex = "28" Size = "32"/>
+            <AfbElementSignal OpName="o_max" Caption="max" Type="Analog" DataFormat = "SignedInt" OpIndex = "30" Size = "32"/>
+            <AfbElementSignal OpName="o_min" Caption="min" Type="Analog" DataFormat = "SignedInt" OpIndex = "32" Size = "32"/>
+
+            <AfbElementSignal OpName="o_med_in" Caption="med_in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "34" Size = "5"/>
+            <AfbElementSignal OpName="o_max_in" Caption="max_in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "35" Size = "5"/>
+            <AfbElementSignal OpName="o_min_in" Caption="min_in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "36" Size = "5"/>
+
+            <AfbElementSignal OpName="o_overflow" Caption = "overflow" Type="Discrete" OpIndex = "37" Size = "1"/>
+            <AfbElementSignal OpName="o_underflow" Caption = "underflow" Type="Discrete" OpIndex = "38" Size = "1"/>
+            <AfbElementSignal OpName="o_zero" Caption = "zero" Type="Discrete" OpIndex = "39" Size = "1"/>
+            <AfbElementSignal OpName="o_nan" Caption = "nan" Type="Discrete" OpIndex = "40" Size = "1"/>
+            <AfbElementSignal OpName="o_div_by_zero" Caption = "div_by_zero" Type="Discrete" OpIndex = "41" Size = "1"/>
+            <AfbElementSignal OpName="o_unordered" Caption = "unordered" Type="Discrete" OpIndex = "42" Size = "1"/>
+            <AfbElementSignal OpName="o_mem_edi" Caption = "mem_edi" Type="Discrete" OpIndex = "43" Size = "1"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_conf" Caption = "OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>3</Value>
+                <Default>3</Default>
+                <LowLimit>3</LowLimit>
+                <HighLimit>8</HighLimit>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>            
+            <AfbElementParam OpName="i_si_fp" Caption = "Config" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutOverflow" Caption = "OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutUnderflow" Caption = "OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutZero" Caption = "OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutNaN" Caption = "OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutDivByZero" Caption = "OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>     
+            <AfbElementParam OpName="OutUnordered" Caption = "OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>     
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 3)
+	{
+		count = 3;
+	}
+	if (count &gt; 8)
+	{
+		count = 8;
+	}
+
+	var opIndex = 10;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex+=2;
+	}
+
+	opIndex = 2;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+
+function createOutputUnconditional(videoItemFblElement, afbElement, signalCaption)
+{
+	var s = afbElement.getAfbSignalByCaption(signalCaption);
+	if (s != null)
+	{
+		videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+	}
+}
+
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	createOutputUnconditional(videoItemFblElement, afbElement, "med");
+	createOutputUnconditional(videoItemFblElement, afbElement, "max");
+	createOutputUnconditional(videoItemFblElement, afbElement, "min");
+	createOutputUnconditional(videoItemFblElement, afbElement, "med_in");
+	createOutputUnconditional(videoItemFblElement, afbElement, "max_in");
+	createOutputUnconditional(videoItemFblElement, afbElement, "min_in");
+	
+	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
+        createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+	</Library>
+            <AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	createInputSignals(videoItemFblElement, afbElement);
+	createOutputSignals(videoItemFblElement, afbElement);
+	return;
+}
+	</AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

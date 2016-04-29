@@ -77,8 +77,8 @@ namespace Afb
 				return "NOT";
 			case Type::TCT:
 				return "TCT";
-			case Type::SR_RS:
-				return "SR_RS";
+			case Type::FLIP_FLOP:
+				return "FLIP_FLOP";
 			case Type::CTUD:
 				return "CTUD";
 			case Type::MAJ:
@@ -89,24 +89,44 @@ namespace Afb
 				return "BCOD";
 			case Type::BDEC:
 				return "BDEC";
-			case Type::COMP:
-				return "COMP";
-			case Type::LAG:
-				return "LAG";
-            case Type::MID:
-                return "MID";
+			case Type::BCOMP:
+				return "BCOMP";
+			case Type::DAMPER:
+				return "DAMPER";
+			case Type::MEM:
+				return "MEM";
             case Type::MATH:
                 return "MATH";
 			case Type::SCALE:
 				return "SCALE";
-			case Type::LINFUN:
-				return "LINFUN";
-			case Type::SQRT:
-				return "SQRT";
-            case Type::LIM:
-                return "LIM";
-            case Type::PID:
-                return "PID";
+			case Type::SCALE_P:
+				return "SCALE_P";
+			case Type::FUNC:
+				return "FUNC";
+			case Type::INT:
+				return "INT";
+			case Type::COMP:
+				return "COMP";
+			case Type::MATH_FP:
+				return "MATH_FP";
+			case Type::DPCOMP:
+				return "DPCOMP";
+			case Type::MUX:
+				return "MUX";
+			case Type::LATCH:
+				return "LATCH";
+			case Type::LIM:
+				return "LIM";
+			case Type::DEAD_ZONE:
+				return "DEAD_ZONE";
+			case Type::ADEL:
+				return "ADEL";
+			case Type::DDEL:
+				return "DDEL";
+			case Type::POL:
+				return "POL";
+			case Type::DER:
+				return "DER";
 			default:
 				assert(false);
 				return "UNKNOWN";
@@ -1269,6 +1289,25 @@ namespace Afb
 		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.operandIndex() == opIndex)
+			{
+				return &s;
+			}
+		}
+		return nullptr;
+	}
+
+	QObject* AfbElement::getAfbSignalByCaption(QString caption)
+	{
+		for (AfbSignal& s : m_inputSignals)
+		{
+			if (s.caption() == caption)
+			{
+				return &s;
+			}
+		}
+		for (AfbSignal& s : m_outputSignals)
+		{
+			if (s.caption() == caption)
 			{
 				return &s;
 			}

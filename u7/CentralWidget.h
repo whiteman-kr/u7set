@@ -16,5 +16,5 @@ public:
 signals:
 	
 public slots:
-	
+	void switchToTabPage(QWidget* w);
 };
