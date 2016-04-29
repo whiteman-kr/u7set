@@ -479,15 +479,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-	public:
-		enum SignalFunction
-		{
-			Input,					// physical input, application logic signal
-			Output,					// physical output, application logic signal
-			Validity,				// input/output validity, application logic signal
-			Diagnostics				// Diagnostics signal
-		};
-		Q_ENUM(SignalFunction)
 
 	public:
 		explicit DeviceSignal(bool preset = false);
@@ -512,9 +503,9 @@ namespace Hardware
 		Q_INVOKABLE int jsType() const;
 		void setType(E::SignalType value);
 
-		DeviceSignal::SignalFunction function() const;
+		E::SignalFunction function() const;
 		Q_INVOKABLE int jsFunction() const;
-		void setFunction(DeviceSignal::SignalFunction value);
+		void setFunction(E::SignalFunction value);
 
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
@@ -551,7 +542,7 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::Signal;
 
 		E::SignalType m_type = E::SignalType::Discrete;
-		SignalFunction m_function = SignalFunction::Input;
+		E::SignalFunction m_function = E::SignalFunction::Input;
 
 		E::ByteOrder m_byteOrder = E::ByteOrder::LittleEndian;
 		E::DataFormat m_format = E::DataFormat::UnsignedInt;

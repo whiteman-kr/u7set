@@ -3020,23 +3020,18 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeResult()
 	{
-		if (m_lm->propertyExists("SubsystemID") == false)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (m_lm->propertyExists("SubsystemChannel") == false)
-		{
-			assert(false);
-			return false;
-		}
-
-		QString subsysId = m_lm->propertyValue("SubsystemID").toString();
-
-		int channel = m_lm->propertyValue("SubsystemChannel").toInt();
-
 		bool result = true;
+
+		QString subsysId;
+		int channel = 0;
+
+		result &= DeviceHelper::getStrProperty(m_lm, "SubsystemID", &subsysId, m_log);
+		result &= DeviceHelper::getIntProperty(m_lm, "SubsystemChannel", &channel, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		m_code.generateBinCode();
 

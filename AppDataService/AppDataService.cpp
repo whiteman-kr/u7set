@@ -16,13 +16,16 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceStrID,
 	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
 	m_timer(this)
 {
-	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		m_appDataChannelThread[channel] = nullptr;
-		m_diagDataChannelThread[channel] = nullptr;
 	}
 }
 
+
+AppDataServiceWorker::~AppDataServiceWorker()
+{
+}
 
 
 void AppDataServiceWorker::readConfigurationFiles()
@@ -290,7 +293,7 @@ void AppDataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 
 void AppDataServiceWorker::stopDataChannels()
 {
-	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		if (m_appDataChannelThread[channel] != nullptr)
 		{
@@ -298,32 +301,16 @@ void AppDataServiceWorker::stopDataChannels()
 			delete m_appDataChannelThread[channel];
 			m_appDataChannelThread[channel] = nullptr;
 		}
-
-		if (m_diagDataChannelThread[channel] != nullptr)
-		{
-			m_diagDataChannelThread[channel]->quitAndWait();
-			delete m_diagDataChannelThread[channel];
-			m_diagDataChannelThread[channel] = nullptr;
-		}
 	}
 }
 
 void AppDataServiceWorker::runDataChannels()
 {
-	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		if (m_appDataChannelThread[channel] != nullptr)
 		{
 			m_appDataChannelThread[channel]->start();
-		}
-		else
-		{
-			assert(false);
-		}
-
-		if (m_diagDataChannelThread[channel] != nullptr)
-		{
-			m_diagDataChannelThread[channel]->start();
 		}
 		else
 		{
@@ -337,18 +324,13 @@ void AppDataServiceWorker::initDataChannels()
 {
 	stopDataChannels();
 
-	for(int channel = 0; channel < DASSettings::DATA_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		m_appDataChannelThread[channel] = new DataChannelThread(channel,
-																DataSource::DataType::App,
+																AppDataSource::DataType::App,
 																m_settings.ethernetChannel[channel].appDataReceivingIP);
-
-		m_diagDataChannelThread[channel] = new DataChannelThread(channel,
-																DataSource::DataType::Diag,
-																m_settings.ethernetChannel[channel].diagDataReceivingIP);
 	}
 }
-
 
 
 void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
@@ -387,6 +369,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			readDataSources(fileData);
 			continue;
 		}
+
+		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+		{
+			readAppSignals(fileData);
+			continue;
+		}
 	}
 
 	runDataChannels();
@@ -420,14 +408,14 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 	while (1)
 	{
-		bool find = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
+		bool find = xml.findElement(AppDataSource::ELEMENT_APP_DATA_SOURCE);
 
 		if (find == false)
 		{
 			break;
 		}
 
-		DataSource* dataSource = new DataSource();
+		AppDataSource* dataSource = new AppDataSource();
 
 		result &= dataSource->readFromXml(xml);
 
@@ -441,7 +429,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 		int channel = dataSource->channel();
 
-		if (channel < 0 || channel >= DASSettings::DATA_CHANNEL_COUNT)
+		if (channel < 0 || channel >= AppDataServiceSettings::DATA_CHANNEL_COUNT)
 		{
 			assert(false);
 			qDebug() << "DataSource wrong channel";
@@ -449,7 +437,9 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			continue;
 		}
 
-		if (dataSource->dataType() == DataSource::DataType::App)
+		qDebug() << "DataSource: " << dataSource->lmStrID() << "channel " << dataSource->channel();
+
+		if (dataSource->dataType() == AppDataSource::DataType::App)
 		{
 			if (m_appDataChannelThread[channel] != nullptr)
 			{
@@ -462,21 +452,81 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 		}
 		else
 		{
-			if (dataSource->dataType() == DataSource::DataType::Diag)
-			{
-				if (m_diagDataChannelThread[channel] != nullptr)
-				{
-					m_diagDataChannelThread[channel]->addDataSource(dataSource);
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-			else
-			{
-				assert(false);			// unknown DataType
-			}
+			assert(false);
+		}
+	}
+
+	return result;
+}
+
+
+bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
+{
+	bool result = true;
+
+	XmlReadHelper xml(fileData);
+
+	if (xml.findElement("Units") == false)
+	{
+		return false;
+	}
+
+	int unitCount = 0;
+
+	result &= xml.readIntAttribute("Count", &unitCount);
+
+	m_unitInfo.clear();
+
+	while(xml.findElement("Unit") == true)
+	{
+		int unitID = 0;
+		QString unitCaption;
+
+		result &= xml.readIntAttribute("ID", &unitID);
+		result &= xml.readStringAttribute("Caption", &unitCaption);
+
+		m_unitInfo.append(unitID, unitCaption);
+	}
+
+	if (m_unitInfo.count() != unitCount)
+	{
+		qDebug() << "Units loading error";
+		assert(false);
+		return false;
+	}
+
+	if (xml.findElement("Units") == false)
+	{
+		return false;
+	}
+
+	m_appSignals.clear();
+
+	if (xml.findElement("Signals") == false)
+	{
+		return false;
+	}
+
+	int signalCount = 0;
+
+	result &= xml.readIntAttribute("Count", &signalCount);
+
+	m_appSignals.resize(signalCount);
+
+	int count = 0;
+
+	while(xml.findElement("Signal") == true)
+	{
+		if (count < signalCount)
+		{
+			result &= m_appSignals[count].readFromoXml(xml);
+
+			count++;
+		}
+		else
+		{
+			assert(false);
+			break;
 		}
 	}
 

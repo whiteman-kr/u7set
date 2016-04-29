@@ -9,7 +9,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
+bool AppDataChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -21,14 +21,6 @@ bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, 
 	result &= DeviceHelper::getStrProperty(controller, PROP_APP_DATA_RECEIVING_IP, &appDataReceivingIPStr, log);
 	result &= DeviceHelper::getIntProperty(controller, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingPort, log);
 
-	QString diagDataNetmaskStr;
-	QString diagDataReceivingIPStr;
-	int diagDataReceivingPort = 0;
-
-	result &= DeviceHelper::getStrProperty(controller, PROP_DIAG_DATA_NETMASK, &diagDataNetmaskStr, log);
-	result &= DeviceHelper::getStrProperty(controller, PROP_DIAG_DATA_RECEIVING_IP, &diagDataReceivingIPStr, log);
-	result &= DeviceHelper::getIntProperty(controller, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataReceivingPort, log);
-
 	result &= DeviceHelper::getStrProperty(controller, PROP_ARCH_SERVICE_ID, &archServiceStrID, log);
 
 	result &= DeviceHelper::getStrProperty(controller, PROP_CFG_SERVICE_ID, &cfgServiceStrID, log);
@@ -37,30 +29,24 @@ bool DASEthernetChannel::readFromDevice(Hardware::DeviceController* controller, 
 	{
 		appDataNetmask.setAddress(appDataNetmaskStr);
 		appDataReceivingIP = HostAddressPort(appDataReceivingIPStr, appDataReceivingPort);
-
-		diagDataNetmask.setAddress(diagDataNetmaskStr);
-		diagDataReceivingIP = HostAddressPort(diagDataReceivingIPStr, diagDataReceivingPort);
 	}
 
 	return result;
 }
 
 
-QString DASEthernetChannel::sectionName(int channel)
+QString AppDataChannel::sectionName(int channel)
 {
 	return QString(SECTION_FORMAT_STR).arg(channel + 1);
 }
 
 
-bool DASEthernetChannel::writeToXml(XmlWriteHelper& xml, int channel)
+bool AppDataChannel::writeToXml(XmlWriteHelper& xml, int channel)
 {
 	xml.writeStartElement(sectionName(channel));
 
 	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
 	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
-
-	xml.writeHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
-	xml.writeHostAddress(PROP_DIAG_DATA_NETMASK, diagDataNetmask);
 
 	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceStrID);
 
@@ -72,7 +58,7 @@ bool DASEthernetChannel::writeToXml(XmlWriteHelper& xml, int channel)
 }
 
 
-bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
+bool AppDataChannel::readFromXml(XmlReadHelper& xml, int channel)
 {
 	xml.readNextStartElement();
 
@@ -85,9 +71,6 @@ bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 
 	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
 	result &= xml.readHostAddress(PROP_APP_DATA_NETMASK, &appDataNetmask);
-
-	result &= xml.readHostAddressPort(PROP_DIAG_DATA_RECEIVING_IP, PROP_DIAG_DATA_RECEIVING_PORT, &diagDataReceivingIP);
-	result &= xml.readHostAddress(PROP_DIAG_DATA_NETMASK, &diagDataNetmask);
 
 	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
 	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
@@ -104,7 +87,7 @@ bool DASEthernetChannel::readFromXml(XmlReadHelper& xml, int channel)
 //
 // -------------------------------------------------------------------------------------
 
-bool DASSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
+bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -135,7 +118,7 @@ bool DASSettings::readFromDevice(Hardware::Software* software, Builder::IssueLog
 }
 
 
-bool DASSettings::writeToXml(XmlWriteHelper& xml)
+bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
 
@@ -155,7 +138,7 @@ bool DASSettings::writeToXml(XmlWriteHelper& xml)
 }
 
 
-bool DASSettings::readFromXml(XmlReadHelper& xml)
+bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 

@@ -13,11 +13,18 @@ XmlWriteHelper::XmlWriteHelper(QXmlStreamWriter& xmlWriter) :
 }
 
 
-XmlWriteHelper::XmlWriteHelper(QByteArray& data) :
-	m_xmlWriter(m_xmlLocalWriter)
+XmlWriteHelper::XmlWriteHelper(QByteArray* data) :
+	m_xmlWriter(*(m_xmlLocalWriter = new QXmlStreamWriter(data)))
 {
-	m_buffer.setBuffer(&data);
-	m_xmlLocalWriter.setDevice(&m_buffer);
+}
+
+
+XmlWriteHelper::~XmlWriteHelper()
+{
+	if (m_xmlLocalWriter != nullptr)
+	{
+		delete m_xmlLocalWriter;
+	}
 }
 
 
@@ -86,6 +93,12 @@ void XmlWriteHelper::writeUlongAttribute(const QString& name, ulong value, bool 
 }
 
 
+void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value)
+{
+	writeStringAttribute(name, QString::number(value));
+}
+
+
 void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
 {
 	m_xmlWriter.writeTextElement(name, value);
@@ -124,9 +137,17 @@ XmlReadHelper::XmlReadHelper(QXmlStreamReader& xmlReader) :
 
 
 XmlReadHelper::XmlReadHelper(const QByteArray& data) :
-	m_xmlReader(m_xmlLocalReader)
+	m_xmlReader(*(m_xmlLocalReader = new QXmlStreamReader(data)))
 {
-	m_xmlLocalReader.addData(data);
+}
+
+
+XmlReadHelper::~XmlReadHelper()
+{
+	if (m_xmlLocalReader != nullptr)
+	{
+		delete m_xmlLocalReader;
+	}
 }
 
 
@@ -168,6 +189,25 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 	}
 
 	*value = m_xmlReader.attributes().value(name).toInt();
+
+	return true;
+}
+
+
+bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	{
+		return false;
+	}
+
+	*value = m_xmlReader.attributes().value(name).toDouble();
 
 	return true;
 }

@@ -91,7 +91,8 @@ SOURCES += \
     ../lib/Signal.cpp \
     MeasureSignalBase.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/PropertyObject.cpp
+    ../lib/PropertyObject.cpp \
+    ../lib/XmlHelper.cpp
 
 
 HEADERS  += \
@@ -131,7 +132,8 @@ HEADERS  += \
     ObjectVector.h \
     MeasureSignalBase.h \
     ../include/SocketIO.h \
-    ../include/PropertyObject.h
+    ../include/PropertyObject.h \
+    ../include/XmlHelper.h
 
 
 FORMS    +=

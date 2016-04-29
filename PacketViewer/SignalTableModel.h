@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 
 class SignalSet;
-class DataSource;
+class AppDataSource;
 class Signal;
 
 class SignalTableModel : public QAbstractTableModel
@@ -20,7 +20,7 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 	void updateFrame(int frameNo);
-	void addDataSource(const DataSource *dataSource);
+	void addDataSource(const AppDataSource *dataSource);
 	void beginReloadProject();
 	void endReloadProject();
 
