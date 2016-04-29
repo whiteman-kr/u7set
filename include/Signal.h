@@ -310,6 +310,7 @@ public:
 	Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
+	int outputRangeModeInt() const { return TO_INT(m_outputRangeMode); }
 	E::OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
 	Q_INVOKABLE int jsOutputRangeMode() const { return static_cast<int>(outputRangeMode());}
 	void setOutputRangeMode(E::OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
@@ -332,6 +333,7 @@ public:
 	Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
+	int inOutTypeInt() const { return m_inOutType; }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
@@ -356,6 +358,9 @@ public:
 	void setReadOnly(bool value);
 	static std::shared_ptr<UnitList> m_unitList;
 
+	void writeToXml(XmlWriteHelper& xml);
+	bool readFromoXml(XmlReadHelper& xml);
+
 	friend class DbWorker;
 };
 
@@ -367,6 +372,7 @@ class SignalSet : public SignalPtrOrderedHash
 {
 private:
 	QMultiHash<int, int> m_groupSignals;
+	QHash<QString, int> m_strID2IndexMap;
 
 public:
 	SignalSet();
@@ -380,6 +386,12 @@ public:
 
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
+
+	void buildStrID2IndexMap();
+
+	bool contains(const QString& appSignalID);
+
+	Signal* getSignal(const QString& appSignalID);
 
 	void reserve(int n);
 

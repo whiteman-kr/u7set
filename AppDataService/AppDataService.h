@@ -28,12 +28,13 @@ private:
 	SignalSet m_signalSet;
 	UnitList m_unitInfo;
 
+	QVector<Signal> m_appSignals;
+
 	QTimer m_timer;
 
-	DASSettings m_settings;
+	AppDataServiceSettings m_settings;
 
-	DataChannelThread* m_appDataChannelThread[DASSettings::DATA_CHANNEL_COUNT];
-	DataChannelThread* m_diagDataChannelThread[DASSettings::DATA_CHANNEL_COUNT];
+	DataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	void readConfigurationFiles();
 
@@ -59,6 +60,7 @@ private:
 
 	bool readConfiguration(const QByteArray& fileData);
 	bool readDataSources(QByteArray& fileData);
+	bool readAppSignals(QByteArray& fileData);
 
 	void stopDataChannels();
 	void initDataChannels();
@@ -69,6 +71,7 @@ public:
 	AppDataServiceWorker(const QString& serviceStrID,
 					  const QString& cfgServiceIP1,
 					  const QString& cfgServiceIP2);
+	~AppDataServiceWorker();
 
 	virtual void initialize() override;
 	virtual void shutdown() override;

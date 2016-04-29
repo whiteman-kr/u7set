@@ -7,7 +7,7 @@
 //
 // -------------------------------------------------------------------------------
 
-DataChannel::DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP) :
+DataReceivingChannel::DataReceivingChannel(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataReceivingIP) :
 	m_channel(channel),
 	m_dataType(dataType),
 	m_dataReceivingIP(dataReceivingIP),
@@ -16,15 +16,15 @@ DataChannel::DataChannel(int channel, DataSource::DataType dataType, const HostA
 }
 
 
-DataChannel::~DataChannel()
+DataReceivingChannel::~DataReceivingChannel()
 {
 	clear();
 }
 
 
-void DataChannel::clear()
+void DataReceivingChannel::clear()
 {
-	for(DataSource* dataSource : m_dataSources)
+	for(AppDataSource* dataSource : m_dataSources)
 	{
 		delete dataSource;
 	}
@@ -33,7 +33,7 @@ void DataChannel::clear()
 }
 
 
-void DataChannel::addDataSource(DataSource* dataSource)
+void DataReceivingChannel::addDataSource(AppDataSource* dataSource)
 {
 	if (dataSource == nullptr)
 	{
@@ -58,23 +58,23 @@ void DataChannel::addDataSource(DataSource* dataSource)
 }
 
 
-void DataChannel::onThreadStarted()
+void DataReceivingChannel::onThreadStarted()
 {
-	connect(&m_timer, &QTimer::timeout, this, &DataChannel::onTimer);
+	connect(&m_timer, &QTimer::timeout, this, &DataReceivingChannel::onTimer);
 
 	m_timer.setInterval(1000);
 	m_timer.start();
 
 }
 
-void DataChannel::onThreadFinished()
+void DataReceivingChannel::onThreadFinished()
 {
 	m_timer.stop();
 	closeSocket();
 }
 
 
-void DataChannel::closeSocket()
+void DataReceivingChannel::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
@@ -87,13 +87,13 @@ void DataChannel::closeSocket()
 }
 
 
-void DataChannel::onTimer()
+void DataReceivingChannel::onTimer()
 {
 	createAndBindSocket();
 }
 
 
-void DataChannel::createAndBindSocket()
+void DataReceivingChannel::createAndBindSocket()
 {
 	if (m_socket == nullptr)
 	{
@@ -101,7 +101,7 @@ void DataChannel::createAndBindSocket()
 
 		qDebug() << "DataChannel: listening socket created";
 
-		connect(m_socket, &QUdpSocket::readyRead, this, &DataChannel::onSocketReadyRead);
+		connect(m_socket, &QUdpSocket::readyRead, this, &DataReceivingChannel::onSocketReadyRead);
 	}
 
 	if (m_socketBound == false)
@@ -117,7 +117,7 @@ void DataChannel::createAndBindSocket()
 }
 
 
-void DataChannel::onSocketReadyRead()
+void DataReceivingChannel::onSocketReadyRead()
 {
 	if (m_socket == nullptr)
 	{
@@ -151,7 +151,7 @@ void DataChannel::onSocketReadyRead()
 
 	if (m_dataSources.contains(ip))
 	{
-		DataSource* dataSource = m_dataSources[ip];
+		AppDataSource* dataSource = m_dataSources[ip];
 
 		if (dataSource != nullptr)
 		{
@@ -177,22 +177,11 @@ void DataChannel::onSocketReadyRead()
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannel::AppDataChannel(int channel, const HostAddressPort& dataReceivingIP) :
-	DataChannel(channel, DataSource::DataType::App, dataReceivingIP)
+AppDataReceivingChannel::AppDataReceivingChannel(int channel, const HostAddressPort& dataReceivingIP) :
+	DataReceivingChannel(channel, AppDataSource::DataType::App, dataReceivingIP)
 {
 }
 
-
-// -------------------------------------------------------------------------------
-//
-// DiagDataChannel class implementation
-//
-// -------------------------------------------------------------------------------
-
-DiagDataChannel::DiagDataChannel(int channel, const HostAddressPort& dataReceivingIP) :
-	DataChannel(channel, DataSource::DataType::Diag, dataReceivingIP)
-{
-}
 
 
 // -------------------------------------------------------------------------------
@@ -201,16 +190,16 @@ DiagDataChannel::DiagDataChannel(int channel, const HostAddressPort& dataReceivi
 //
 // -------------------------------------------------------------------------------
 
-DataChannelThread::DataChannelThread(int channel, DataSource::DataType dataType, const HostAddressPort& dataRecievingIP)
+DataChannelThread::DataChannelThread(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataRecievingIP)
 {
 	switch (dataType)
 	{
-	case DataSource::DataType::App:
-		m_dataChannel = new AppDataChannel(channel, dataRecievingIP);
+	case AppDataSource::DataType::App:
+		m_dataChannel = new AppDataReceivingChannel(channel, dataRecievingIP);
 		break;
 
-	case DataSource::DataType::Diag:
-		m_dataChannel = new DiagDataChannel(channel, dataRecievingIP);
+	case AppDataSource::DataType::Diag:
+	//	m_dataChannel = new DiagDataChannel(channel, dataRecievingIP);
 		break;
 
 	default:
@@ -225,7 +214,7 @@ DataChannelThread::DataChannelThread(int channel, DataSource::DataType dataType,
 }
 
 
-void DataChannelThread::addDataSource(DataSource* dataSource)
+void DataChannelThread::addDataSource(AppDataSource* dataSource)
 {
 	if (m_dataChannel != nullptr)
 	{

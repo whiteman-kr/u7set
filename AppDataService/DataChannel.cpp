@@ -7,7 +7,7 @@
 //
 // -------------------------------------------------------------------------------
 
-DataChannel::DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP) :
+DataChannel::DataChannel(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataReceivingIP) :
 	m_channel(channel),
 	m_dataType(dataType),
 	m_dataReceivingIP(dataReceivingIP),
@@ -24,7 +24,7 @@ DataChannel::~DataChannel()
 
 void DataChannel::clear()
 {
-	for(DataSource* dataSource : m_dataSources)
+	for(AppDataSource* dataSource : m_dataSources)
 	{
 		delete dataSource;
 	}
@@ -33,7 +33,7 @@ void DataChannel::clear()
 }
 
 
-void DataChannel::addDataSource(DataSource* dataSource)
+void DataChannel::addDataSource(AppDataSource* dataSource)
 {
 	if (dataSource == nullptr)
 	{
@@ -151,7 +151,7 @@ void DataChannel::onSocketReadyRead()
 
 	if (m_dataSources.contains(ip))
 	{
-		DataSource* dataSource = m_dataSources[ip];
+		AppDataSource* dataSource = m_dataSources[ip];
 
 		if (dataSource != nullptr)
 		{
@@ -172,24 +172,12 @@ void DataChannel::onSocketReadyRead()
 
 // -------------------------------------------------------------------------------
 //
-// AppDataChannel class implementation
+// AppDataServiceChannel class implementation
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannel::AppDataChannel(int channel, const HostAddressPort& dataReceivingIP) :
-	DataChannel(channel, DataSource::DataType::App, dataReceivingIP)
-{
-}
-
-
-// -------------------------------------------------------------------------------
-//
-// DiagDataChannel class implementation
-//
-// -------------------------------------------------------------------------------
-
-DiagDataChannel::DiagDataChannel(int channel, const HostAddressPort& dataReceivingIP) :
-	DataChannel(channel, DataSource::DataType::Diag, dataReceivingIP)
+AppDataServiceChannel::AppDataServiceChannel(int channel, const HostAddressPort& dataReceivingIP) :
+	DataChannel(channel, AppDataSource::DataType::App, dataReceivingIP)
 {
 }
 
@@ -200,16 +188,16 @@ DiagDataChannel::DiagDataChannel(int channel, const HostAddressPort& dataReceivi
 //
 // -------------------------------------------------------------------------------
 
-DataChannelThread::DataChannelThread(int channel, DataSource::DataType dataType, const HostAddressPort& dataRecievingIP)
+DataChannelThread::DataChannelThread(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataRecievingIP)
 {
 	switch (dataType)
 	{
-	case DataSource::DataType::App:
-		m_dataChannel = new AppDataChannel(channel, dataRecievingIP);
+	case AppDataSource::DataType::App:
+		m_dataChannel = new AppDataServiceChannel(channel, dataRecievingIP);
 		break;
 
-	case DataSource::DataType::Diag:
-		m_dataChannel = new DiagDataChannel(channel, dataRecievingIP);
+	case AppDataSource::DataType::Diag:
+		//m_dataChannel = new DiagDataChannel(channel, dataRecievingIP);
 		break;
 
 	default:
@@ -224,7 +212,7 @@ DataChannelThread::DataChannelThread(int channel, DataSource::DataType dataType,
 }
 
 
-void DataChannelThread::addDataSource(DataSource* dataSource)
+void DataChannelThread::addDataSource(AppDataSource* dataSource)
 {
 	if (m_dataChannel != nullptr)
 	{

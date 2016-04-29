@@ -83,7 +83,7 @@ class Source : public Statistic
 	Q_OBJECT
 public:
 	Source() : Statistic(nullptr) {}
-	Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<DataSource>> &dataSources, Statistic* parent);
+	Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<AppDataSource>> &dataSources, Statistic* parent);
 
 	~Source();
 
@@ -103,7 +103,7 @@ private:
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;
 	SignalTableModel* m_signalTableModel;
-	const QHash<quint32, std::shared_ptr<DataSource>>* m_dataSources;
+	const QHash<quint32, std::shared_ptr<AppDataSource>>* m_dataSources;
 
 	void swapHeader(RpPacketHeader& header);
 	void swapHeader(RupFrameHeader& header);
@@ -172,7 +172,7 @@ public:
 	void saveListenerList();
 
 	const SignalSet& signalSet() { return m_signalSet; }
-	const QHash<quint32, std::shared_ptr<DataSource>>& dataSources() { return m_dataSources; }
+	const QHash<quint32, std::shared_ptr<AppDataSource>>& dataSources() { return m_dataSources; }
 
 signals:
 	void contentChanged(int column);
@@ -190,7 +190,7 @@ public slots:
 	void updateSourceStatisticByTimer();
 
 private:
-	void InitDataSources(QHash<quint32, std::shared_ptr<DataSource>>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet);
+	void InitDataSources(QHash<quint32, std::shared_ptr<AppDataSource>>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet);
 
 	std::vector<std::shared_ptr<Listener>> m_listeners;
 
@@ -198,7 +198,7 @@ private:
 	SignalSet m_signalSet;
 	UnitList m_unitInfo;
 
-	QHash<quint32, std::shared_ptr<DataSource>> m_dataSources;
+	QHash<quint32, std::shared_ptr<AppDataSource>> m_dataSources;
 };
 
 #endif // PACKETSOURCEMODEL_H

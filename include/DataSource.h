@@ -51,7 +51,7 @@ protected:
 
 
 
-class DataSource : public QObject
+class AppDataSource : public QObject
 {
 public:
 	enum class DataType
@@ -60,7 +60,8 @@ public:
 		Diag,
 	};
 
-	static const char* const ELEMENT_DATA_SOURCE;
+	static const char* const ELEMENT_APP_DATA_SOURCE;
+	static const char* const ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS;
 
 private:
 
@@ -103,17 +104,21 @@ private:
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	ulong m_lmDataID = 0;
+	QStringList m_appSignals;
+
+	//
 
 	RupFrame* m_rupFrames = nullptr;
 	char* m_framesData = nullptr;
+
 
 	void allocateMemory();
 	void mergeFrames();
 	void parseFramesData();
 
 public:
-	DataSource();
-	~DataSource();
+	AppDataSource();
+	~AppDataSource();
 
 //	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
 //	DataSource(const DataSource& ds);
@@ -185,6 +190,11 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 
 	void processPacket(quint32 ip, const RupFrame& rupFrame);
+
+	void addAppSignal(const QString& appSignalID) { m_appSignals.append(appSignalID); }
+	void clearAppSignals() { m_appSignals.clear(); }
+
+	const QStringList& appSignals() const { return m_appSignals; }
 };
 
 
