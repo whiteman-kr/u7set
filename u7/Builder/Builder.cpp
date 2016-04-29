@@ -374,8 +374,14 @@ namespace Builder
 
 		parent->deleteAllChildren();
 
-		for (auto& fi : files)
+		for (DbFileInfo& fi : files)
 		{
+			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+			{
+				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
+				continue;
+			}
+
 			std::shared_ptr<DbFile> file;
 
 			if (release() == true)
@@ -584,6 +590,12 @@ namespace Builder
 
 		for (DbFileInfo& fi : files)
 		{
+			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+			{
+				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
+				continue;
+			}
+
 			std::shared_ptr<DbFile> f;
 
 			if (db->getLatestVersion(fi, &f, nullptr) == false)
