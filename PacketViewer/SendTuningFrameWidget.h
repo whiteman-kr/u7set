@@ -1,22 +1,23 @@
 #pragma once
 
-#include <QWidget>
+#include <QDialog>
 
 class QLineEdit;
 class QComboBox;
 class QUdpSocket;
+class PacketSourceModel;
 
-class SendTuningFrameWidget : public QWidget
+class SendTuningFrameWidget : public QDialog
 {
 	Q_OBJECT
 
 public:
-	SendTuningFrameWidget(QWidget *parent = 0);
+	SendTuningFrameWidget(PacketSourceModel* packetSourceModel, QWidget *parent = 0);
 	~SendTuningFrameWidget();
 
 public slots:
 	void sendPacket();
-	void rebindSocket();
+	bool checkSocket();
 
 private:
 	QComboBox* m_sourceAddressCombo;
@@ -39,7 +40,8 @@ private:
 	QLineEdit* m_romFrameSize;
 	QComboBox* m_dataType;
 
-	QUdpSocket* m_socket;
+	std::shared_ptr<QUdpSocket> m_socket;
+	PacketSourceModel* m_packetSourceModel;
 
 	int numerator;
 };

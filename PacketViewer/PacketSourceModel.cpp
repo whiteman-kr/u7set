@@ -234,6 +234,18 @@ void PacketSourceModel::saveListenerList()
 	settings.endArray();
 }
 
+std::shared_ptr<QUdpSocket> PacketSourceModel::getSocket(const QString& address, int port)
+{
+	for (auto listener : m_listeners)
+	{
+		if (listener->isListening(address, port))
+		{
+			return listener->getSocket();
+		}
+	}
+	return std::shared_ptr<QUdpSocket>();
+}
+
 void PacketSourceModel::loadProject(const QString& projectPath)
 {
 	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
@@ -442,6 +454,11 @@ void Listener::updateSourceMap()
 	{
 		m_sourcesMap.insert(m_sources[i]->ip(), i);
 	}
+}
+
+bool Listener::isListening(const QString& address, int port)
+{
+	return m_socket->localAddress().toString() == address && m_socket->localPort() == port;
 }
 
 void Listener::readPendingDatagrams()

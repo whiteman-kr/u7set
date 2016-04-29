@@ -11,6 +11,7 @@
 
 #include "../include/DataProtocols.h"
 #include "SendTuningFrameWidget.h"
+#include "PacketSourceModel.h"
 
 
 const int dataTypes[] =
@@ -20,8 +21,8 @@ const int dataTypes[] =
 	1700
 };
 
-SendTuningFrameWidget::SendTuningFrameWidget(QWidget *parent)
-	: QWidget(parent),
+SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceModel, QWidget *parent)
+	: QDialog(parent),
 	  m_sourceAddressCombo(new QComboBox(this)),
 	  m_sourcePortEdit(new QLineEdit(this)),
 	  m_destinationAddressEdit(new QLineEdit(this)),
@@ -37,13 +38,11 @@ SendTuningFrameWidget::SendTuningFrameWidget(QWidget *parent)
 	  m_romSize(new QLineEdit(this)),
 	  m_romFrameSize(new QLineEdit(this)),
 	  m_dataType(new QComboBox(this)),
-	  m_socket(new QUdpSocket(this)),
+	  m_packetSourceModel(packetSourceModel),
 	  numerator(0)
 {
 	QSettings settings;
-	numerator = settings.value("numerator", numerator).toInt();
-
-	connect(m_sourceAddressCombo, &QComboBox::currentTextChanged, this, &SendTuningFrameWidget::rebindSocket);
+	numerator = settings.value("PacketSourceModel/SendTuningFrameWidget/numerator", numerator).toInt();
 
 	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
 	for (int i = 0; i < interfaceList.count(); i++)
@@ -69,26 +68,24 @@ SendTuningFrameWidget::SendTuningFrameWidget(QWidget *parent)
 		}
 	}
 
-	m_sourceAddressCombo->setCurrentText(settings.value("sourceAddress", "").toString());
-	rebindSocket();
+	m_sourceAddressCombo->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/sourceAddress", "").toString());
 
 	QIntValidator* portValidator = new QIntValidator(2000, 65535, this);
 	m_sourcePortEdit->setValidator(portValidator);
-	m_sourcePortEdit->setText(settings.value("sourcePort", "2000").toString());
-	connect(m_sourcePortEdit, &QLineEdit::textChanged, this, &SendTuningFrameWidget::rebindSocket);
+	m_sourcePortEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/sourcePort", "2000").toString());
 
 	QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
 	QRegExpValidator* ipValidator = new QRegExpValidator(re, this);
 	m_destinationAddressEdit->setValidator(ipValidator);
-	m_destinationAddressEdit->setText(settings.value("destinationAddress", m_sourceAddressCombo->currentText().split("/")[0]).toString());
+	m_destinationAddressEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/destinationAddress", m_sourceAddressCombo->currentText().split("/")[0]).toString());
 
 	m_destinationPortEdit->setValidator(portValidator);
-	m_destinationPortEdit->setText(settings.value("destinationPort", "2000").toString());
+	m_destinationPortEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/destinationPort", "2000").toString());
 
 	QIntValidator* i16Validator = new QIntValidator(0, 0xffff, this);
 	QIntValidator* i32Validator = new QIntValidator(0, 0x7fffffff, this);
 	m_moduleIdEdit->setValidator(i16Validator);
-	m_moduleIdEdit->setText(settings.value("moduleId", "4352").toString());
+	m_moduleIdEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/moduleId", "4352").toString());
 
 	m_operationCode->addItem("Read command");
 	m_operationCode->addItem("Write command");
@@ -105,6 +102,17 @@ SendTuningFrameWidget::SendTuningFrameWidget(QWidget *parent)
 	m_fotipFrameSize->setValidator(i16Validator);
 	m_romSize->setValidator(i32Validator);
 	m_romFrameSize->setValidator(i16Validator);
+
+	m_uniqueId->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/uniqueId", "0").toString());
+	m_channelNumber->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/channelNumber", "0").toString());
+	m_subsystemCode->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/subsystemCode", "0").toString());
+	m_operationCode->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/operationCode", "Read command").toString());
+	m_flags->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/flags", "0").toString());
+	m_startAddress->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/startAddress", "0").toString());
+	m_fotipFrameSize->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/fotipFrameSize", "0").toString());
+	m_romSize->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/romSize", "0").toString());
+	m_romFrameSize->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/romFrameSize", "0").toString());
+	m_dataType->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/dataType", "Signed integer").toString());
 
 	QPushButton* sendButton = new QPushButton("Send RUP packet", this);
 	connect(sendButton, &QPushButton::clicked, this, &SendTuningFrameWidget::sendPacket);
@@ -151,20 +159,31 @@ SendTuningFrameWidget::SendTuningFrameWidget(QWidget *parent)
 SendTuningFrameWidget::~SendTuningFrameWidget()
 {
 	QSettings settings;
-	settings.setValue("sourceAddress", m_sourceAddressCombo->currentText());
-	settings.setValue("sourcePort", m_sourcePortEdit->text());
-	settings.setValue("destinationAddress", m_destinationAddressEdit->text());
-	settings.setValue("destinationPort", m_destinationPortEdit->text());
-	settings.setValue("moduleId", m_moduleIdEdit->text());
-	settings.setValue("numerator", numerator);
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/sourceAddress", m_sourceAddressCombo->currentText());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/sourcePort", m_sourcePortEdit->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/destinationAddress", m_destinationAddressEdit->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/destinationPort", m_destinationPortEdit->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/moduleId", m_moduleIdEdit->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/numerator", numerator);
+
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/uniqueId", m_uniqueId->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/channelNumber", m_channelNumber->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/subsystemCode", m_subsystemCode->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/operationCode", m_operationCode->currentText());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/flags", m_flags->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/startAddress", m_startAddress->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/fotipFrameSize", m_fotipFrameSize->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/romSize", m_romSize->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/romFrameSize", m_romFrameSize->text());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/dataType", m_dataType->currentText());
 }
 
 void SendTuningFrameWidget::sendPacket()
 {
 	static_assert(sizeof(FotipHeader) == 128, "fotip header size check failed");
-	if (m_socket->state() != QUdpSocket::BoundState)
+	if (!checkSocket())
 	{
-		rebindSocket();
+		return;
 	}
 	RupFrame frame;
 	memset(&frame, 0, sizeof(RupFrame));
@@ -204,14 +223,33 @@ void SendTuningFrameWidget::sendPacket()
 	m_socket->writeDatagram(reinterpret_cast<char*>(&frame), sizeof(RupFrame), QHostAddress(m_destinationAddressEdit->text()), m_destinationPortEdit->text().toUInt());
 }
 
-void SendTuningFrameWidget::rebindSocket()
+bool SendTuningFrameWidget::checkSocket()
 {
 	bool ok;
 	int port = m_sourcePortEdit->text().toUInt(&ok);
 	if (!ok)
 	{
-		return;
+		return false;
 	}
-	QString address = m_sourceAddressCombo->currentText().split("/")[0];
-	m_socket->bind(QHostAddress(address), port);
+
+	QString address = m_sourceAddressCombo->currentText();
+	if (address.contains('/'))
+	{
+		address = address.split('/')[0];
+	}
+	if (address.isEmpty())
+	{
+		return false;
+	}
+
+	if (m_socket != nullptr && m_socket->localAddress().toString() == address && m_socket->localPort() == port)
+	{
+		return true;
+	}
+	auto socket = m_packetSourceModel->getSocket(address, port);
+	if (!socket)
+	{
+		return m_socket->bind(QHostAddress(address), port);
+	}
+	return true;
 }

@@ -22,6 +22,8 @@ public slots:
 	void reloadFiles();
 	void loadProjectList();
 
+	void sendTuningFrame();
+
 private:
 	QComboBox* m_netListCombo;
 	QComboBox* m_projectListCombo;
