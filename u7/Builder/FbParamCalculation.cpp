@@ -46,7 +46,7 @@ namespace Builder
 			result = calculate_NOT_paramValues();
 			break;
 
-		case Afb::AfbType::SR_RS:
+		case Afb::AfbType::FLIP_FLOP:
 			result = calculate_SR_RS_paramValues();
 			break;
 
@@ -78,11 +78,11 @@ namespace Builder
 			result = calculate_TCT_paramValues();
 			break;
 
-		case Afb::AfbType::COMP:
+		case Afb::AfbType::BCOMP:
 			result = calculate_BCOMP_paramValues();
 			break;
 
-		case Afb::AfbType::LAG:
+		case Afb::AfbType::DAMPER:
 			result = calculate_LAG_paramValues();			// dempfer
 			break;
 
