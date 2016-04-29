@@ -1,6 +1,7 @@
 #include "EditEngineSetProperty.h"
 #include "EditSchemaWidget.h"
 #include "../../VFrame30/SchemaItemAfb.h"
+#include <QMessageBox>
 
 namespace EditEngine
 {
@@ -63,7 +64,11 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.newValue, m_schema);
+				QString errorMsg;
+				if (fblElement->setAfbParam(r.propertyName, r.newValue, m_schema, errorMsg) == false)
+				{
+					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+				}
 			}
 		}
 
@@ -96,7 +101,11 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema);
+				QString errorMsg;
+				if (fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema, errorMsg) == false)
+				{
+					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+				}
 			}
 		}
 

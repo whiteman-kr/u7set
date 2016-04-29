@@ -19,7 +19,7 @@ namespace VFrame30
 		precisionProp->setCategory(tr("Functional"));
 	}
 
-	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement) :
+	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString& errorMsg) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
@@ -46,7 +46,7 @@ namespace VFrame30
 		QString afterCreationScript = fblElement.afterCreationScript();
 		if (afterCreationScript.isEmpty() == false)
 		{
-			executeScript(afterCreationScript, fblElement);
+			executeScript(afterCreationScript, fblElement, errorMsg);
 		}
 
 	}
@@ -307,7 +307,7 @@ namespace VFrame30
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema)
+	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString& errorMsg)
 	{
 		if (name.isEmpty() == true || schema == nullptr)
 		{
@@ -348,7 +348,11 @@ namespace VFrame30
 			QString changedScript = found->changedScript();
 			if (changedScript.isEmpty() == false)
 			{
-				executeScript(changedScript, *afb);
+				bool result = executeScript(changedScript, *afb, errorMsg);
+				if (result == false)
+				{
+					return false;
+				}
 			}
 		}
 
@@ -510,8 +514,9 @@ namespace VFrame30
 		}
 	}
 
-	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb)
+	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb, QString& errorMsg)
 	{
+		errorMsg.clear();
 		if (script.isEmpty() == true)
 		{
 			return true;
@@ -538,7 +543,7 @@ namespace VFrame30
 		QJSValue jsEval = jsEngine.evaluate(exeScript);
 		if (jsEval.isError() == true)
 		{
-			QMessageBox::critical(nullptr, tr("Error"), tr("Script evaluation failed: %1").arg(jsEval.toString()));
+			errorMsg = tr("Script evaluation failed in AFB element '%1': %2").arg(afb.caption()).arg(jsEval.toString());
 			return false;
 		}
 
@@ -551,7 +556,7 @@ namespace VFrame30
 
 		if (jsResult.isError() == true)
 		{
-			QMessageBox::critical(nullptr, tr("Error"), tr("Script execution failed: %1").arg(jsResult.toString()));
+			errorMsg = tr("Script evaluation failed in AFB element '%1': %2").arg(afb.caption()).arg(jsResult.toString());
 			return false;
 		}
 
