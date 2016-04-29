@@ -114,7 +114,7 @@ namespace Builder
 	public:
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
-		AppItem(std::shared_ptr<Afb::AfbElement> afbElement);
+		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }

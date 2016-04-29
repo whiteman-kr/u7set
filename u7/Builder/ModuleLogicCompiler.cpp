@@ -3491,6 +3491,8 @@ namespace Builder
 
 		AppItem* appItem = nullptr;
 
+		QString errorMsg;
+
 		switch(signal.dataFormat())
 		{
 		case E::DataFormat::Float:
@@ -3503,7 +3505,12 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
 
-				appItem = new AppItem(fb.pointer);
+				appItem = new AppItem(fb.pointer, errorMsg);
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+
+				}
 			}
 
 			break;
@@ -3518,7 +3525,12 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				appItem = new AppItem(fb.pointer);
+				appItem = new AppItem(fb.pointer, errorMsg);
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+
+				}
 			}
 
 			break;
@@ -3554,6 +3566,8 @@ namespace Builder
 
 		AppItem* appItem = nullptr;
 
+		QString errorMsg;
+
 		switch(signal.dataFormat())
 		{
 		case E::DataFormat::Float:
@@ -3566,7 +3580,12 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				appItem = new AppItem(fb.pointer);
+				appItem = new AppItem(fb.pointer, errorMsg);
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+
+				}
 			}
 
 			break;
@@ -3581,7 +3600,12 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				appItem = new AppItem(fb.pointer);
+				appItem = new AppItem(fb.pointer, errorMsg);
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+
+				}
 			}
 
 			break;
@@ -4437,11 +4461,11 @@ namespace Builder
 	}
 
 
-	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement)
+	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
 	{
 		m_appLogicItem.m_afbElement = *afbElement.get();
 		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
-					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get()));
+					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get(), errorMsg));
 
 		// copy parameters
 		//

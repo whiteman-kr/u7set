@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#comp_si_great_v1">
+    <AfbElement StrId="#bcomp_si_ne_v1">
         <Properties>
-            <Caption>comp_si_great</Caption>
+            <Caption>bcomp_si_ne</Caption>
             <Version>1.0</Version>
-            <Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
+            <Implementation Version="108" OpIndex="12"/>
+            <Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
             <Category>Compare</Category>
             <OpCode>10</OpCode>
             <HasRam>true</HasRam>
@@ -38,8 +39,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>2</Value>
-                <Default>2</Default>
+                <Value>4</Value>
+                <Default>4</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>4</HighLimit>
                 <Script>

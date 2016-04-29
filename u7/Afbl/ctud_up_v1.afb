@@ -4,6 +4,7 @@
         <Properties>
             <Caption>ctud_up</Caption>
             <Version>1.0</Version>
+            <Implementation Version="106" OpIndex="11"/>
             <Description>Up Counter Block performs the function of an Up Counter in accordance with control signal and received configuration.</Description>
             <Category>Counter</Category>
             <OpCode>5</OpCode>

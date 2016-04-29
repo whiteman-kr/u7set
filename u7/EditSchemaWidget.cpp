@@ -4888,7 +4888,13 @@ void EditSchemaWidget::addFblElement()
 
 		std::shared_ptr<Afb::AfbElement> afb = elements[index];
 
-		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get())));
+		QString errorMsg;
+		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), errorMsg));
+
+		if (errorMsg.isEmpty() == false)
+		{
+			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		}
 	}
 
 	return;
