@@ -359,6 +359,7 @@ public:
 	QPointF widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const;
 	QPointF snapToGrid(QPointF pt) const;
 
+	bool updateAfbsForSchema();
 
 protected:
 	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
@@ -367,7 +368,7 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	std::vector<std::shared_ptr<Afb::AfbElement> > updateAfbsForSchema();
+	bool getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 
 public:
 	void resetAction();

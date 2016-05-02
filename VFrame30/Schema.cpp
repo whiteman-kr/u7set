@@ -4,6 +4,7 @@
 #include "MonitorSchema.h"
 #include "DiagSchema.h"
 #include "FblItem.h"
+#include "SchemaItemAfb.h"
 #include "SchemaItemLink.h"
 #include "HorzVertLinks.h"
 #include "../include/ProtoSerialization.h"
@@ -65,9 +66,10 @@ namespace VFrame30
 			saveLayersResult &= layer->get()->Save(pLayerMessage);
 		}
 
-		// Save Afb Collection
+		// Save fake empty Afb Collection, keep for compatibility
 		//
-		m_afbCollection.SaveData(mutableSchema->mutable_afbs());
+		Afb::AfbElementCollection fakeAfbCollection;
+		fakeAfbCollection.SaveData(mutableSchema->mutable_afbs());
 
 		return saveLayersResult;
 	}
@@ -114,9 +116,9 @@ namespace VFrame30
 			return false;
 		}
 
-		// Load Afb Collection
+		// Load fake empty Afb Collection,
 		//
-		m_afbCollection.LoadData(schema.afbs());
+		//m_afbCollection.LoadData(schema.afbs());
 
 		return true;
 	}
@@ -447,6 +449,67 @@ namespace VFrame30
 		return;
 	}
 
+	bool Schema::updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage)
+	{
+		if (updatedItemCount == nullptr ||
+			errorMessage == nullptr)
+		{
+			assert(updatedItemCount);
+			assert(errorMessage);
+			return false;
+		}
+
+		*updatedItemCount = 0;
+
+		// Find all VFrame30::SchemaItemAfb items
+		//
+		std::list<std::shared_ptr<VFrame30::SchemaItemAfb>> schemaAfbItems;
+
+		for (std::shared_ptr<SchemaLayer> l : Layers)
+		{
+			for (std::shared_ptr<SchemaItem> si : l->Items)
+			{
+				std::shared_ptr<VFrame30::SchemaItemAfb> schemaAfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(si);
+
+				if (schemaAfbItem != nullptr)
+				{
+					schemaAfbItems.push_back(schemaAfbItem);
+				}
+			}
+		}
+
+		// Update found items
+		//
+		for (std::shared_ptr<VFrame30::SchemaItemAfb> si : schemaAfbItems)
+		{
+			auto foundIt = std::find_if(afbs.begin(), afbs.end(),
+				[&si](std::shared_ptr<Afb::AfbElement> afb)
+				{
+					return si->afbStrID() == afb->strID();
+				});
+
+			if (foundIt == afbs.end())
+			{
+				*errorMessage += tr("Cant find AFB description file for %1.\n").arg(si->afbStrID());
+				continue;
+			}
+
+			const Afb::AfbElement& afb = *foundIt->get();
+
+			if (si->afbElement().version() != afb.version())
+			{
+				bool ok = si->updateAfbElement(afb, errorMessage);
+
+				if (ok == true)
+				{
+					(*updatedItemCount) ++;
+				}
+			}
+		}
+
+		return errorMessage->isEmpty();
+	}
+
 	// Properties and Data
 	//
 
@@ -689,21 +752,6 @@ namespace VFrame30
 	void Schema::setExcludeFromBuild(bool value)
 	{
 		m_excludeFromBuild = value;
-	}
-
-	const Afb::AfbElementCollection& Schema::afbCollection() const
-	{
-		return m_afbCollection;
-	}
-
-	void Schema::setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements)
-	{
-		// set new collection
-		//
-		m_afbCollection.setElements(elements);
-
-		// update schema items
-		//
 	}
 
 	bool Schema::isLogicSchema() const

@@ -3990,21 +3990,33 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 precision() const;
   inline void set_precision(::google::protobuf::int32 value);
 
+  // optional .Proto.AfbElementXml afbelement = 5;
+  inline bool has_afbelement() const;
+  inline void clear_afbelement();
+  static const int kAfbelementFieldNumber = 5;
+  inline const ::Proto::AfbElementXml& afbelement() const;
+  inline ::Proto::AfbElementXml* mutable_afbelement();
+  inline ::Proto::AfbElementXml* release_afbelement();
+  inline void set_allocated_afbelement(::Proto::AfbElementXml* afbelement);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemAfb)
  private:
   inline void set_has_afbstrid();
   inline void clear_has_afbstrid();
   inline void set_has_precision();
   inline void clear_has_precision();
+  inline void set_has_afbelement();
+  inline void clear_has_afbelement();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
+  ::Proto::AfbElementXml* afbelement_;
   ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9812,6 +9824,44 @@ inline ::google::protobuf::int32 SchemaItemAfb::precision() const {
 inline void SchemaItemAfb::set_precision(::google::protobuf::int32 value) {
   set_has_precision();
   precision_ = value;
+}
+
+// optional .Proto.AfbElementXml afbelement = 5;
+inline bool SchemaItemAfb::has_afbelement() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemAfb::set_has_afbelement() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemAfb::clear_has_afbelement() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemAfb::clear_afbelement() {
+  if (afbelement_ != NULL) afbelement_->::Proto::AfbElementXml::Clear();
+  clear_has_afbelement();
+}
+inline const ::Proto::AfbElementXml& SchemaItemAfb::afbelement() const {
+  return afbelement_ != NULL ? *afbelement_ : *default_instance_->afbelement_;
+}
+inline ::Proto::AfbElementXml* SchemaItemAfb::mutable_afbelement() {
+  set_has_afbelement();
+  if (afbelement_ == NULL) afbelement_ = new ::Proto::AfbElementXml;
+  return afbelement_;
+}
+inline ::Proto::AfbElementXml* SchemaItemAfb::release_afbelement() {
+  clear_has_afbelement();
+  ::Proto::AfbElementXml* temp = afbelement_;
+  afbelement_ = NULL;
+  return temp;
+}
+inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbelement) {
+  delete afbelement_;
+  afbelement_ = afbelement;
+  if (afbelement) {
+    set_has_afbelement();
+  } else {
+    clear_has_afbelement();
+  }
 }
 
 // -------------------------------------------------------------------

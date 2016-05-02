@@ -689,6 +689,11 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
+	// Update AFBs after creating tab page, so it will be possible to set new (modified) caption
+	// to the tab page title
+	//
+	editTabPage->updateAfbSchemaItems();
+
 	return;
 }
 
@@ -869,7 +874,15 @@ EditSchemaTabPage::~EditSchemaTabPage()
 
 void EditSchemaTabPage::setPageTitle()
 {
-	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	QWidget* thisParent = parentWidget();
+	if (thisParent == nullptr)
+	{
+		// This widget has not been created yet?
+		//
+		return;
+	}
+
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(thisParent->parentWidget());
 	if (tabWidget == nullptr)
 	{
 		assert(tabWidget != nullptr);
@@ -914,6 +927,19 @@ void EditSchemaTabPage::setPageTitle()
 			return;
 		}
 	}
+}
+
+void EditSchemaTabPage::updateAfbSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
+
+	m_schemaWidget->updateAfbsForSchema();
+
+	return;
 }
 
 void EditSchemaTabPage::CreateActions()

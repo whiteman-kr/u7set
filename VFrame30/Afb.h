@@ -359,6 +359,8 @@ private:
 		void setParams(const std::vector<AfbParam>& params);
 
 	private:
+		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
+		//
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
@@ -378,6 +380,9 @@ private:
 		std::vector<AfbSignal> m_outputSignals;
 
 		std::vector<AfbParam> m_params;
+
+		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
+		//
 	};
 
 	//

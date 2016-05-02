@@ -238,7 +238,6 @@ message AfbParam
 }
 
 
-
 //
 //
 // FblSignalType
@@ -281,7 +280,7 @@ message Schema
 	optional bool excludeFromBuild = 7 [default = false];
 
 	repeated Envelope layers = 100;				// Layer list
-	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
+	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability
 
 	// Derived from Schema
 	//
@@ -547,9 +546,10 @@ message SchemaItemLink
 //
 message SchemaItemAfb
 {
-	repeated AfbParam params = 2;
-	optional wstring afbStrid = 3;
+	repeated AfbParam params = 2;					// NOT USED anymore, keep it for a while, RPCT-812
+	optional wstring afbStrid = 3;					// NOT USED anymore, keep it for a while, RPCT-812
 	optional int32 precision = 4 [default = 2];
+	optional AfbElementXml afbelement = 5;			// RPCT-812
 }
 
 //

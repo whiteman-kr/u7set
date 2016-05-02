@@ -3859,6 +3859,42 @@ QPointF EditSchemaWidget::snapToGrid(QPointF pt) const
 	return result;
 }
 
+bool EditSchemaWidget::updateAfbsForSchema()
+{
+	// Update Afb list
+	//
+	std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
+
+	bool ok = getAfbsDescriptions(&afbs);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	QString errorMessage;
+	int updatedItemCount = 0;
+	ok = schema()->updateAllSchemaItemFbs(afbs, &updatedItemCount, &errorMessage);
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("Update AFB schema items error: ") + errorMessage);
+		return false;
+	}
+
+	if (updatedItemCount != 0)
+	{
+		setModified();
+
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("%1 AFB(s) are updated according to the latest AFB description.").arg(updatedItemCount));
+		msgBox.setInformativeText("Please, check iput/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.exec();
+	}
+
+	return true;
+}
+
 void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 {
 	if (newItem == nullptr)
@@ -4088,15 +4124,25 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-std::vector<std::shared_ptr<Afb::AfbElement>> EditSchemaWidget::updateAfbsForSchema()
+bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
 {
-	// Update Afb list, as
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
 	std::vector<DbFileInfo> fileList;
 
 	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", true, this);
-	if (result == false || fileList.empty() == true)
+	if (result == false)
 	{
-		return std::vector<std::shared_ptr<Afb::AfbElement>>();
+		return false;
+	}
+
+	if (fileList.empty() == true)
+	{
+		return true;
 	}
 
 	// Read all Afb's and refresh it in schema
@@ -4105,13 +4151,13 @@ std::vector<std::shared_ptr<Afb::AfbElement>> EditSchemaWidget::updateAfbsForSch
 	result = db()->getLatestVersion(fileList, &files, this);
 	if (result == false)
 	{
-		return std::vector<std::shared_ptr<Afb::AfbElement>>();
+		return false;
 	}
 
 	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
 	elements.reserve(files.size());
 
-	for (auto& f : files)
+	for (std::shared_ptr<DbFile> f : files)
 	{
 		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
 
@@ -4123,14 +4169,15 @@ std::vector<std::shared_ptr<Afb::AfbElement>> EditSchemaWidget::updateAfbsForSch
 		}
 		else
 		{
-			QMessageBox::critical(this, "Error loading AFB element", errorMsg);
+			QString errorMsg = tr("Error parsing AFB %1 description. These items will not be updated.").arg(f->fileName());
+			QMessageBox::critical(this, qApp->applicationName(), errorMsg);
+			continue;
 		}
-
 	}
 
-	schema()->setAfbCollection(elements);
+	std::swap(*out, elements);
 
-	return elements;
+	return true;
 }
 
 void EditSchemaWidget::resetAction()
@@ -4868,28 +4915,34 @@ void EditSchemaWidget::clipboardDataChanged()
 
 void EditSchemaWidget::addFblElement()
 {
-	// Update AFBs
+	// Get Afb descriptions
 	//
-	auto elements = updateAfbsForSchema();
+	std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
+	bool ok = getAfbsDescriptions(&afbs);
+
+	if (ok == false)
+	{
+		return;
+	}
 
 	// --
 	//
-	ChooseAfbDialog* dialog = new ChooseAfbDialog(elements, this);
+	ChooseAfbDialog* dialog = new ChooseAfbDialog(afbs, this);
 
 	if (dialog->exec() == QDialog::Accepted)
 	{
 		int index = dialog->index();
 
-		if (index < 0 || static_cast<size_t>(index) >= elements.size())
+		if (index < 0 || static_cast<size_t>(index) >= afbs.size())
 		{
 			assert(false);
 			return;
 		}
 
-		std::shared_ptr<Afb::AfbElement> afb = elements[index];
+		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
 
 		QString errorMsg;
-		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), errorMsg));
+		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
 
 		if (errorMsg.isEmpty() == false)
 		{

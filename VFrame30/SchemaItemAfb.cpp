@@ -19,36 +19,38 @@ namespace VFrame30
 		precisionProp->setCategory(tr("Functional"));
 	}
 
-	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString& errorMsg) :
+	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg) :
 		FblItemRect(unit),
-		m_afbStrID(fblElement.strID()),
-		m_params(fblElement.params())
+		m_afbElement(fblElement)
 	{
+		assert(errorMsg);
+
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(tr("Functional"));
 
 		// Create input output signals in VFrame30::FblEtem
 		//
-		const std::vector<Afb::AfbSignal>& inputSignals = fblElement.inputSignals();
-		for (const Afb::AfbSignal& s : inputSignals)
-		{
-			addInput(s);
-		}
+		updateAfbElement(fblElement, errorMsg);
 
-		const std::vector<Afb::AfbSignal>& outputSignals = fblElement.outputSignals();
-		for (const Afb::AfbSignal& s : outputSignals)
-		{
-			addOutput(s);
-		}
+//		const std::vector<Afb::AfbSignal>& inputSignals = fblElement.inputSignals();
+//		for (const Afb::AfbSignal& s : inputSignals)
+//		{
+//			addInput(s);
+//		}
+
+//		const std::vector<Afb::AfbSignal>& outputSignals = fblElement.outputSignals();
+//		for (const Afb::AfbSignal& s : outputSignals)
+//		{
+//			addOutput(s);
+//		}
 
 		addSpecificParamProperties();
 
-		QString afterCreationScript = fblElement.afterCreationScript();
-		if (afterCreationScript.isEmpty() == false)
-		{
-			executeScript(afterCreationScript, fblElement, errorMsg);
-		}
-
+//		QString afterCreationScript = fblElement.afterCreationScript();
+//		if (afterCreationScript.isEmpty() == false)
+//		{
+//			executeScript(afterCreationScript, fblElement, errorMsg);
+//		}
 	}
 
 	SchemaItemAfb::~SchemaItemAfb(void)
@@ -104,26 +106,9 @@ namespace VFrame30
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
-		// --
-		//
-		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
-		if (afb.get() == nullptr)
-		{
-			qDebug() << afbStrID();
-
-			// Such AfbItem was not found
-			//
-			QString text = QString("error\n%1\nnot found").arg(afbStrID());
-
-			p->setPen(Qt::red);
-			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
-
-			return;
-		}
-
 		// Draw caption
 		//
-		QString text = afb->caption();
+		QString text = m_afbElement.caption();
 
 		p->setPen(textColor());
 		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
@@ -134,7 +119,7 @@ namespace VFrame30
 		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
 		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
 
-		const std::vector<Afb::AfbParam>& params = afb->params();
+		const std::vector<Afb::AfbParam>& params = m_afbElement.params();
 
 		for (size_t i = 0; i < params.size(); i++)
 		{
@@ -241,15 +226,8 @@ namespace VFrame30
 		//
 		Proto::SchemaItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
 
-		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
-
-		for (const Afb::AfbParam& p : m_params)
-		{
-			::Proto::AfbParam* protoParam = vifble->mutable_params()->Add();
-			p.SaveData(protoParam);
-		}
-
 		vifble->set_precision(m_precision);
+		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
 		return true;
 	}
@@ -280,26 +258,16 @@ namespace VFrame30
 		
 		const Proto::SchemaItemAfb& vifble = message.schemaitem().afb();
 		
-		Proto::Read(vifble.afbstrid(), &m_afbStrID);
-
-		m_params.clear();
-		m_params.reserve(vifble.params_size());
-
-		for (int i = 0; i < vifble.params_size(); i++)
-		{
-			Afb::AfbParam p;
-			p.LoadData(vifble.params(i));
-
-			m_params.push_back(p);
-		}
-
 		m_precision = vifble.precision();
+
+		QString errorMsg;
+		bool ok = m_afbElement.loadFromXml(vifble.afbelement(), errorMsg);
 
 		// Add afb properties to class meta object
 		//
 		addSpecificParamProperties();
 
-		return true;
+		return ok;
 	}
 
 	QString SchemaItemAfb::buildName() const
@@ -307,23 +275,26 @@ namespace VFrame30
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString& errorMsg)
+	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString* errorMsg)
 	{
-		if (name.isEmpty() == true || schema == nullptr)
+		if (name.isEmpty() == true ||
+			schema == nullptr ||
+			errorMsg == nullptr)
 		{
 			assert(name.isEmpty() != true);
 			assert(schema != nullptr);
+			assert(errorMsg);
 			return false;
 		}
 
-		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afb::AfbParam& p)
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&name](const Afb::AfbParam& p)
 			{
 				return p.caption() == name;
 			});
 
-		if (found == m_params.end())
+		if (found == m_afbElement.params().end())
 		{
-			assert(found != m_params.end());
+			assert(found != m_afbElement.params().end());
 			return false;
 		}
 
@@ -338,17 +309,10 @@ namespace VFrame30
 
 			// Call script here
 			//
-			std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
-			if (afb == nullptr)
-			{
-				assert(afb != nullptr);
-				return false;
-			}
-
 			QString changedScript = found->changedScript();
 			if (changedScript.isEmpty() == false)
 			{
-				bool result = executeScript(changedScript, *afb, errorMsg);
+				bool result = executeScript(changedScript, m_afbElement, errorMsg);
 				if (result == false)
 				{
 					return false;
@@ -367,14 +331,14 @@ namespace VFrame30
 			return false;
 		}
 
-		auto found = std::find_if(m_params.begin(), m_params.end(), [&opName](const Afb::AfbParam& p)
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
 			{
 				return p.opName() == opName;
 			});
 
-		if (found == m_params.end())
+		if (found == m_afbElement.params().end())
 		{
-			assert(found != m_params.end());
+			assert(found != m_afbElement.params().end());
 			return false;
 		}
 
@@ -415,6 +379,93 @@ namespace VFrame30
 		return true;
 	}
 
+	bool SchemaItemAfb::updateAfbElement(const Afb::AfbElement& sourceAfb, QString* errorMessage)
+	{
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
+
+		if (m_afbElement.strID() != sourceAfb.strID())
+		{
+			assert(m_afbElement.strID() == sourceAfb.strID());
+			return false;
+		}
+
+		// Update params, m_afbElement contains old parameters
+		//
+		std::vector<Afb::AfbParam> newParams = sourceAfb.params();
+		const std::vector<Afb::AfbParam>& currentParams = m_afbElement.params();
+
+		for (Afb::AfbParam& p : newParams)
+		{
+			if (p.user() == false)
+			{
+				continue;
+			}
+
+			auto foundExistingParam = std::find_if(currentParams.begin(), currentParams.end(),
+					[&p](const Afb::AfbParam& mp)
+					{
+						return p.caption() == mp.caption();		// Don't use opIndex, it can be same (-1)
+					});
+
+			if (foundExistingParam != currentParams.end())
+			{
+				// Try to set old value to the param
+				//
+				const Afb::AfbParam& currentParam = *foundExistingParam;
+
+				if (p.value().type() == currentParam.value().type())
+				{
+					p.setValue(currentParam.value());
+
+					qDebug() << "Param: " << currentParam.caption() << ", value: " << p.value();
+				}
+			}
+		}
+
+		// Update description
+		//
+		m_afbElement = sourceAfb;
+
+		std::swap(params(), newParams);		// The prev assignemnt (m_afbElement = sourceAfb) just reseted all paramas
+											// Set them to the actual values
+
+		// Update in/out pins
+		//
+		removeAllInputs();
+		removeAllOutputs();
+
+		const std::vector<Afb::AfbSignal>& inputSignals = m_afbElement.inputSignals();
+		for (const Afb::AfbSignal& s : inputSignals)
+		{
+			addInput(s);
+		}
+
+		const std::vector<Afb::AfbSignal>& outputSignals = m_afbElement.outputSignals();
+		for (const Afb::AfbSignal& s : outputSignals)
+		{
+			addOutput(s);
+		}
+
+		// Run afterCreationScript, lets assume we create allmost new itesm, as we deleted all inputs/outs and updated params
+		//
+		QString afterCreationScript = m_afbElement.afterCreationScript();
+
+		if (afterCreationScript.isEmpty() == false)
+		{
+			executeScript(afterCreationScript, m_afbElement, errorMessage);
+		}
+
+		// Here is remove all props and add new from m_params
+		//
+		addSpecificParamProperties();
+
+		return true;
+	}
+
 	double SchemaItemAfb::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
@@ -434,7 +485,7 @@ namespace VFrame30
 		// N param count
 		//
 		int textLineCount = 1;
-		for (const Afb::AfbParam& p : m_params)
+		for (const Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.visible() == true)
 			{
@@ -491,7 +542,7 @@ namespace VFrame30
 
 		// Set new Param Propereties
 		//
-		for (Afb::AfbParam& p : m_params)
+		for (Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.user() == false)
 			{
@@ -514,9 +565,14 @@ namespace VFrame30
 		}
 	}
 
-	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb, QString& errorMsg)
+	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb, QString* errorMessage)
 	{
-		errorMsg.clear();
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
+
 		if (script.isEmpty() == true)
 		{
 			return true;
@@ -543,7 +599,7 @@ namespace VFrame30
 		QJSValue jsEval = jsEngine.evaluate(exeScript);
 		if (jsEval.isError() == true)
 		{
-			errorMsg = tr("Script evaluation failed in AFB element '%1': %2").arg(afb.caption()).arg(jsEval.toString());
+			*errorMessage += tr("Script evaluation failed in AFB element '%1': %2\n").arg(afb.caption()).arg(jsEval.toString());
 			return false;
 		}
 
@@ -556,7 +612,7 @@ namespace VFrame30
 
 		if (jsResult.isError() == true)
 		{
-			errorMsg = tr("Script evaluation failed in AFB element '%1': %2").arg(afb.caption()).arg(jsResult.toString());
+			*errorMessage += tr("Script evaluation failed in AFB element '%1': %2\n").arg(afb.caption()).arg(jsResult.toString());
 			return false;
 		}
 
@@ -566,7 +622,7 @@ namespace VFrame30
 
 	int SchemaItemAfb::getParamIntValue(const QString& name)
 	{
-		for (Afb::AfbParam& p : m_params)
+		for (Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.caption() == name)
 			{
@@ -587,7 +643,7 @@ namespace VFrame30
 
 	bool SchemaItemAfb::getParamBoolValue(const QString& name)
 	{
-		for (Afb::AfbParam& p : m_params)
+		for (Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.caption() == name)
 			{
@@ -628,12 +684,22 @@ namespace VFrame30
 
 	const QString& SchemaItemAfb::afbStrID() const
 	{
-		return m_afbStrID;
+		return m_afbElement.strID();
+	}
+
+	const Afb::AfbElement& SchemaItemAfb::afbElement() const
+	{
+		return m_afbElement;
+	}
+
+	std::vector<Afb::AfbParam>& SchemaItemAfb::params()
+	{
+		return m_afbElement.params();
 	}
 
 	const std::vector<Afb::AfbParam>& SchemaItemAfb::params() const
 	{
-		return m_params;
+		return m_afbElement.params();
 	}
 
 	int SchemaItemAfb::precision() const
@@ -657,7 +723,7 @@ namespace VFrame30
 
 		// Set new precsion to all dynamic properties
 		//
-		for (Afb::AfbParam& p : m_params)
+		for (Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.user() == false)
 			{
