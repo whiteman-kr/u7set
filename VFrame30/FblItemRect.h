@@ -79,7 +79,7 @@ namespace VFrame30
 		bool isOutputSignalElement() const;
 		bool isSignalElement() const;
 		bool isConstElement() const;
-		bool isFblElement() const;
+		bool isAfbElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -93,8 +93,8 @@ namespace VFrame30
 		VFrame30::SchemaItemConst* toSchemaItemConst();
 		const VFrame30::SchemaItemConst* toSchemaItemConst() const;
 
-		SchemaItemAfb* toFblElement();
-		const VFrame30::SchemaItemAfb* toFblElement() const;
+		SchemaItemAfb* toAfbElement();
+		const VFrame30::SchemaItemAfb* toAfbElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

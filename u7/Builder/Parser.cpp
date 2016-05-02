@@ -228,26 +228,16 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-							   std::shared_ptr<VFrame30::LogicSchema> schema,
-							   std::shared_ptr<Afb::AfbElement> afbElement) :
+							   std::shared_ptr<VFrame30::LogicSchema> schema) :
 		m_fblItem(fblItem),
 		m_schema(schema)
 	{
 		assert(m_fblItem);
 		assert(m_schema);
 
-		if (m_fblItem->isFblElement() == true)
+		if (m_fblItem->isAfbElement() == true)
 		{
-			if (afbElement != nullptr)
-			{
-				m_afbElement = (*afbElement.get());
-
-				m_fblItem->toFblElement()->setAfbElementParams(&m_afbElement);
-			}
-			else
-			{
-				assert(afbElement != nullptr);
-			}
+			m_afbElement = m_fblItem->toAfbElement()->afbElement();
 		}
 
 		return;
@@ -342,23 +332,19 @@ namespace Builder
 
 	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 			const BushContainer& bushContainer,
-			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log)
 	{
 		if (logicSchema == nullptr ||
-			log == nullptr ||
-			afbCollection == nullptr)
+			log == nullptr)
 		{
 			assert(logicSchema);
-			assert(afbCollection);
 			assert(log);
 
 			if (log != nullptr)
 			{
-				log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %2, afbCollection %3")
+				log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %2.")
 								.arg(reinterpret_cast<size_t>(logicSchema.get()))
-								.arg(reinterpret_cast<size_t>(log))
-								.arg(reinterpret_cast<size_t>(afbCollection)));
+								.arg(reinterpret_cast<size_t>(log)));
 			}
 
 			return false;
@@ -377,22 +363,7 @@ namespace Builder
 		{
 			for (const std::shared_ptr<VFrame30::FblItemRect>& f : bush.fblItems)
 			{
-				std::shared_ptr<Afb::AfbElement> afbElement;
-
-				if (f->isFblElement())
-				{
-					afbElement = afbCollection->get(f->toFblElement()->afbStrID());
-
-					if (afbElement == nullptr)
-					{
-						// AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
-						//
-						log->errALP4007(logicSchema->schemaID(), f->buildName(), f->toFblElement()->afbStrID(), f->guid());
-						return false;
-					}
-				}
-
-				AppLogicItem li{f, logicSchema, afbElement};
+				AppLogicItem li{f, logicSchema};
 
 				m_fblItemsAcc.insert(li);
 			}
@@ -472,7 +443,7 @@ namespace Builder
 			// Imposible set exucution order for module, there is no first item,
 			// firts item can be item without inputs
 			//
-			log->errALP4008(moduleEquipmentId());
+			log->errALP4020(moduleEquipmentId());
 
 			result = false;
 			return result;
@@ -630,7 +601,7 @@ namespace Builder
 				}
 
 
-				if (item.m_fblItem->isFblElement())
+				if (item.m_fblItem->isAfbElement())
 				{
 					qDebug() << "Fbl " << item.m_afbElement.caption();
 					continue;
@@ -696,7 +667,7 @@ namespace Builder
 					itemsUuids.push_back(li.m_fblItem->guid());
 					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
-					log->errALP4009(moduleEquipmentId(),
+					log->errALP4021(moduleEquipmentId(),
 									li.m_schema->schemaID(),
 									duplicateItem->m_schema->schemaID(),
 									li.m_fblItem->buildName(),
@@ -882,7 +853,6 @@ namespace Builder
 	bool AppLogicData::addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicSchema> schema,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
-			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log)
 	{
 		if (bushContainer.bushes.empty() == true)
@@ -894,19 +864,16 @@ namespace Builder
 
 		if (schema == nullptr ||
 			layer == nullptr ||
-			log == nullptr ||
-			afbCollection == nullptr)
+			log == nullptr)
 		{
 			assert(schema);
 			assert(layer);
 			assert(log);
-			assert(afbCollection);
 
-			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, log %3, afbCollection %4")
+			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, log %3")
 							.arg(reinterpret_cast<size_t>(schema.get()))
 							.arg(reinterpret_cast<size_t>(layer.get()))
-							.arg(reinterpret_cast<size_t>(log))
-							.arg(reinterpret_cast<size_t>(afbCollection)));
+							.arg(reinterpret_cast<size_t>(log)));
 			return false;
 		}
 
@@ -941,7 +908,7 @@ namespace Builder
 
 			// add new branch to module
 			//
-			result &= module->addBranch(schema, bushContainer, afbCollection, log);
+			result &= module->addBranch(schema, bushContainer, log);
 		}
 
 		return result;
@@ -1041,62 +1008,19 @@ namespace Builder
 			return true;
 		}
 
-		// Check schemas hardwareSetrIds
+		// Check schemas EquipmentIDs
 		//
-		assert(m_equipmentSet);
-
-		if (m_equipmentSet != nullptr)
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			for (std::shared_ptr<VFrame30::LogicSchema> schame : schemas)
-			{
-				QStringList deviceStrIds = schame->equipmentIdList();
-
-				if (deviceStrIds.isEmpty() == true)
-				{
-					// Property DeviceStrIds is not set (LogicSchema '%1')
-					//
-					m_log->wrnALP4001(schame->schemaID());
-					continue;
-				}
-
-				for (QString strid : deviceStrIds)
-				{
-					Hardware::DeviceObject* device = m_equipmentSet->deviceObject(strid);
-
-					if (device == nullptr)
-					{
-						// HardwareStrId '%1' is not found in the project equipment (Logic Schema '%2')
-						//
-						m_log->errALP4002(schame->schemaID(), strid);
-						continue;
-					}
-
-					if (device->isModule() == false)
-					{
-						// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
-						//
-						m_log->errALP4003(schame->schemaID(), strid);
-						continue;
-					}
-					else
-					{
-						// Is module, check if it is LM family
-						//
-						Hardware::DeviceModule* module = device->toModule();
-						assert(module);
-
-						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
-						{
-							// HardwareStrId '%1' must be LM family module type (Logic Schema '%2').
-							//
-							m_log->errALP4003(schame->schemaID(), strid);
-							continue;
-						}
-					}
-				}
-			}
+			checkEquipmentIds(schema.get());
 		}
 
+		// Check SchemaItemAfb.afbElement versions
+		//
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
+		{
+			checkAfbItemsVersion(schema.get());
+		}
 
 		// Compile application logic
 		//
@@ -1251,6 +1175,138 @@ namespace Builder
 		return true;
 	}
 
+	bool Parser::checkEquipmentIds(VFrame30::LogicSchema* logicSchema)
+	{
+		if (logicSchema == nullptr ||
+			m_equipmentSet == nullptr)
+		{
+			assert(logicSchema);
+			assert(m_equipmentSet);
+
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2")
+							  .arg(reinterpret_cast<size_t>(logicSchema))
+							  .arg(reinterpret_cast<size_t>(m_equipmentSet)));
+			return false;
+		}
+
+		QStringList equipmentIds = logicSchema->equipmentIdList();
+
+		if (equipmentIds.isEmpty() == true)
+		{
+			// Property EquipmentIds is not set (LogicSchema '%1')
+			//
+			m_log->errALP4001(logicSchema->schemaID());
+			return false;
+		}
+
+		bool ok = true;
+
+		for (QString eqid : equipmentIds)
+		{
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid);
+
+			if (device == nullptr)
+			{
+				// EquipmentID '%1' is not found in the project equipment (Logic Schema '%2')
+				//
+				m_log->errALP4002(logicSchema->schemaID(), eqid);
+
+				ok = false;
+				continue;
+			}
+
+			if (device->isModule() == false)
+			{
+				// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
+				//
+				m_log->errALP4003(logicSchema->schemaID(), eqid);
+
+				ok = false;
+				continue;
+			}
+			else
+			{
+				// Is module, check if it is LM family
+				//
+				Hardware::DeviceModule* module = device->toModule();
+				assert(module);
+
+				if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
+				{
+					// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
+					//
+					m_log->errALP4003(logicSchema->schemaID(), eqid);
+
+					ok = false;
+					continue;
+				}
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkAfbItemsVersion(VFrame30::LogicSchema* logicSchema)
+	{
+		if (logicSchema == nullptr ||
+			m_afbCollection == nullptr)
+		{
+			assert(logicSchema);
+			assert(m_afbCollection);
+
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_afbCollection %2")
+							  .arg(reinterpret_cast<size_t>(logicSchema))
+							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
+			return false;
+		}
+
+		bool ok = true;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
+		{
+			if (l->compile() == true)
+			{
+				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				{
+					if (dynamic_cast<VFrame30::SchemaItemAfb*>(si.get()) != nullptr)
+					{
+						VFrame30::SchemaItemAfb* afbItem = dynamic_cast<VFrame30::SchemaItemAfb*>(si.get());
+
+						std::shared_ptr<Afb::AfbElement> afbDescription = m_afbCollection->get(afbItem->afbStrID());
+
+						if (afbDescription.get() == nullptr)
+						{
+							// AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
+							//
+							m_log->errALP4007(logicSchema->schemaID(), afbItem->buildName(), afbItem->afbStrID(), si->guid());
+
+							ok = false;
+							continue;
+						}
+
+						if (afbDescription->version() != afbItem->afbElement().version())
+						{
+							m_log->errALP4008(logicSchema->schemaID(),
+											  afbItem->buildName(),
+											  afbItem->afbElement().version(),
+											  afbDescription->version(),
+											  si->guid());
+
+							ok = false;
+							continue;
+						}
+					}
+				}
+
+				// We can parse only one layer
+				//
+				break;
+			}
+		}
+
+		return ok;
+	}
+
 	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema)
 	{
 		if (logicSchema.get() == nullptr)
@@ -1286,7 +1342,7 @@ namespace Builder
 		{
 			// Schema does not have Logic layer (Logic Schema '%1').
 			//
-			m_log->errALP4010(logicSchema->schemaID());
+			m_log->errALP4022(logicSchema->schemaID());
 			return false;
 		}
 
@@ -1333,7 +1389,7 @@ namespace Builder
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData()->addData(bushContainer, logicSchema, layer, m_afbCollection, m_log);
+		result = applicationData()->addData(bushContainer, logicSchema, layer, m_log);
 
 		if (result == false)
 		{

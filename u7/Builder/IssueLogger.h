@@ -70,7 +70,7 @@ namespace Builder
         // ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
-		void wrnALP4001(QString schema);
+		void errALP4001(QString schema);
 		void errALP4002(QString schema, QString hardwareStrId);
 		void errALP4003(QString schema, QString hardwareStrId);
 		void wrnALP4004(QString schema);
@@ -78,9 +78,10 @@ namespace Builder
 		void errALP4006(QString schema, QString schemaItem, QString pin, QUuid itemUuid);
 		void errALP4006(QString schema, QString schemaItem, QString pin, const std::vector<QUuid>& itemsUuids);
 		void errALP4007(QString schema, QString schemaItem, QString afbElement, QUuid itemUuid);
-		void errALP4008(QString logicModule);
-		void errALP4009(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
-		void errALP4010(QString schema);
+		void errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid);
+		void errALP4020(QString logicModule);
+		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
+		void errALP4022(QString schema);
 
 		// ALC			Application logic compiler				5000-5999
 		//

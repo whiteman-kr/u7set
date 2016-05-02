@@ -694,7 +694,7 @@ namespace Builder
 		}
 
 		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, tr("Application Logic parsing"));
+		LOG_MESSAGE(m_log, tr("Application Logic parsing..."));
 
 		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, changesetId, debug()};
 

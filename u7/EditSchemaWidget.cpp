@@ -4707,7 +4707,7 @@ void EditSchemaWidget::editPaste()
 
 		if (ok == false)
 		{
-			qDebug() << "CLIPBOARD ERROR!!! Data in the clipbaord are SchemaItems, but they are corrupted or wrong format!!!!";
+			QMessageBox::critical(this, qApp->applicationName(),  tr("Clipboard has Schema Items, but it seems that data corrupted or data has incompatible format."));
 			return;
 		}
 
@@ -4732,14 +4732,17 @@ void EditSchemaWidget::editPaste()
 			}
 		}
 
-		if (schemaItemAfbIsPresent == true)
-		{
-			updateAfbsForSchema();
-		}
-
 		if (itemList.empty() == false)
 		{
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
+		}
+
+		// If new itesm has differeten afb description version
+		// then they will be updated to the current version
+		//
+		if (schemaItemAfbIsPresent == true)
+		{
+			updateAfbsForSchema();
 		}
 
 		return;

@@ -122,7 +122,7 @@ namespace Builder
 		QString strID() const;
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
-		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
+		bool isFb() const { return m_appLogicItem.m_fblItem->isAfbElement(); }
 		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
 
 		bool hasRam() const { return afb().hasRam(); }
@@ -131,7 +131,7 @@ namespace Builder
 		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_afbElement.params(); }
 
-		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
+		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
