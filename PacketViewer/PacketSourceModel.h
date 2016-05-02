@@ -78,6 +78,10 @@ private:
 };
 
 
+void swapHeader(RpPacketHeader& header);
+void swapHeader(RupFrameHeader& header);
+
+
 class Source : public Statistic
 {
 	Q_OBJECT
@@ -104,9 +108,6 @@ private:
 	PacketBufferTableModel* m_packetBufferModel;
 	SignalTableModel* m_signalTableModel;
 	const QHash<quint32, std::shared_ptr<AppDataSource>>* m_dataSources;
-
-	void swapHeader(RpPacketHeader& header);
-	void swapHeader(RupFrameHeader& header);
 };
 
 

@@ -40,6 +40,8 @@ private:
 	QLineEdit* m_romFrameSize;
 	QComboBox* m_dataType;
 
+	QComboBox* m_fillFotipDataMethod;
+
 	std::shared_ptr<QUdpSocket> m_socket;
 	PacketSourceModel* m_packetSourceModel;
 

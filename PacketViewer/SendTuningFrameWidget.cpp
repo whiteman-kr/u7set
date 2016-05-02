@@ -8,11 +8,17 @@
 #include <QNetworkInterface>
 #include <QSettings>
 #include <QUdpSocket>
+#include <QtEndian>
 
 #include "../include/DataProtocols.h"
 #include "SendTuningFrameWidget.h"
 #include "PacketSourceModel.h"
 
+template <typename D, typename S>
+inline void writeBigEndian(D& destination, S source)
+{
+	destination = qToBigEndian<D>(source);
+}
 
 const int dataTypes[] =
 {
@@ -38,9 +44,12 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	  m_romSize(new QLineEdit(this)),
 	  m_romFrameSize(new QLineEdit(this)),
 	  m_dataType(new QComboBox(this)),
+	  m_fillFotipDataMethod(new QComboBox(this)),
 	  m_packetSourceModel(packetSourceModel),
 	  numerator(0)
 {
+	qsrand(static_cast<uint>(QTime::currentTime().msec()));
+
 	QSettings settings;
 	numerator = settings.value("PacketSourceModel/SendTuningFrameWidget/numerator", numerator).toInt();
 
@@ -94,6 +103,10 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	m_dataType->addItem("Float pointing");
 	m_dataType->addItem("Immitation/interlock");
 
+	m_fillFotipDataMethod->addItem("Fill by zero");
+	m_fillFotipDataMethod->addItem("Fill by random");
+	m_fillFotipDataMethod->addItem("Fill by address progression");
+
 	m_uniqueId->setValidator(i16Validator);
 	m_channelNumber->setValidator(i16Validator);
 	m_subsystemCode->setValidator(i16Validator);
@@ -113,6 +126,7 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	m_romSize->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/romSize", "0").toString());
 	m_romFrameSize->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/romFrameSize", "0").toString());
 	m_dataType->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/dataType", "Signed integer").toString());
+	m_fillFotipDataMethod->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/fillFotipDataMethod", "Fill by zero").toString());
 
 	QPushButton* sendButton = new QPushButton("Send RUP packet", this);
 	connect(sendButton, &QPushButton::clicked, this, &SendTuningFrameWidget::sendPacket);
@@ -147,6 +161,7 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	fl->addRow("Rom size", m_romSize);
 	fl->addRow("Rom frame size", m_romFrameSize);
 	fl->addRow("Data type", m_dataType);
+	fl->addRow("Fill FOTIP Data method", m_fillFotipDataMethod);
 
 	gb->setLayout(fl);
 	vl->addWidget(gb);
@@ -176,6 +191,7 @@ SendTuningFrameWidget::~SendTuningFrameWidget()
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/romSize", m_romSize->text());
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/romFrameSize", m_romFrameSize->text());
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/dataType", m_dataType->currentText());
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/fillFotipDataMethod", m_fillFotipDataMethod->currentText());
 }
 
 void SendTuningFrameWidget::sendPacket()
@@ -189,36 +205,78 @@ void SendTuningFrameWidget::sendPacket()
 	memset(&frame, 0, sizeof(RupFrame));
 
 	RupFrameHeader& header = frame.header;
-	header.frameSize = ENTIRE_UDP_SIZE;
-	header.protocolVersion = 4;
+	writeBigEndian(header.frameSize, ENTIRE_UDP_SIZE);
+	writeBigEndian(header.protocolVersion, 4);
 	header.flags.tuningData = 1;
-	header.moduleType = m_moduleIdEdit->text().toUInt();
-	header.numerator = numerator++;
-	header.framesQuantity = 1;
-	header.frameNumber = 0;
+	writeBigEndian(header.flagsWord, header.flagsWord);
+	writeBigEndian(header.moduleType, m_moduleIdEdit->text().toUInt());
+	writeBigEndian(header.numerator, numerator++);
+	writeBigEndian(header.framesQuantity, 1);
+	writeBigEndian(header.frameNumber, 0);
 
 	QDateTime&& time = QDateTime::currentDateTime();
 	RupTimeStamp& timeStamp = header.TimeStamp;
-	timeStamp.year = time.date().year();
-	timeStamp.month = time.date().month();
-	timeStamp.day = time.date().day();
+	writeBigEndian(timeStamp.year, time.date().year());
+	writeBigEndian(timeStamp.month, time.date().month());
+	writeBigEndian(timeStamp.day, time.date().day());
 
-	timeStamp.hour = time.time().hour();
-	timeStamp.minute = time.time().minute();
-	timeStamp.second = time.time().second();
-	timeStamp.millisecond = time.time().msec();
+	writeBigEndian(timeStamp.hour, time.time().hour());
+	writeBigEndian(timeStamp.minute, time.time().minute());
+	writeBigEndian(timeStamp.second, time.time().second());
+	writeBigEndian(timeStamp.millisecond, time.time().msec());
 
 	FotipHeader& fotip = *reinterpret_cast<FotipHeader*>(frame.data);
-	fotip.protocolVersion = 1;
-	fotip.uniqueId = m_uniqueId->text().toUInt();
-	fotip.subsystemKey = 0x6141;	//Temporary
-	fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;
-	fotip.flagsWord = m_flags->text().toUInt();
-	fotip.startAddress = m_startAddress->text().toUInt();
-	fotip.fotipFrameSize = m_fotipFrameSize->text().toUInt();
-	fotip.romSize = m_romSize->text().toUInt();
-	fotip.romFrameSize = m_romFrameSize->text().toUInt();
-	fotip.dataType = dataTypes[m_dataType->currentIndex()];
+	writeBigEndian(fotip.protocolVersion, 1);
+	writeBigEndian(fotip.uniqueId, m_uniqueId->text().toUInt());
+
+	fotip.subsystemKey.channelNumber = m_channelNumber->text().toUInt();
+	fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
+	quint16 data = fotip.subsystemKey.subsystemCode;	// second
+	data <<= 6;
+	data += fotip.subsystemKey.channelNumber;	// first
+	fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
+	writeBigEndian(fotip.subsystemKeyWord, fotip.subsystemKeyWord);
+
+	writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
+	writeBigEndian(fotip.flagsWord, m_flags->text().toUInt());
+	writeBigEndian(fotip.startAddress, m_startAddress->text().toUInt());
+	writeBigEndian(fotip.fotipFrameSize, m_fotipFrameSize->text().toUInt());
+	writeBigEndian(fotip.romSize, m_romSize->text().toUInt());
+	writeBigEndian(fotip.romFrameSize, m_romFrameSize->text().toUInt());
+	writeBigEndian(fotip.dataType, dataTypes[m_dataType->currentIndex()]);
+
+	switch (m_fillFotipDataMethod->currentIndex())
+	{
+		case 0:
+			break;
+		case 1:
+		{
+			quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipHeader));
+			for (int i = 0; i < FOTIP_TX_RX_DATA_SIZE / 2; i++)
+			{
+				writeBigEndian(fotipData[i], qrand() % 0x10000);
+			}
+			break;
+		}
+		case 2:
+		{
+			quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipHeader));
+			for (int i = 0; i < FOTIP_TX_RX_DATA_SIZE / 2; i++)
+			{
+				if (i % 2 == 0)
+				{
+					fotipData[i] = 0;
+				}
+				else
+				{
+					writeBigEndian(fotipData[i], m_startAddress->text().toUInt() + i);
+				}
+			}
+			break;
+		}
+		default:
+			assert(false);
+	}
 
 	m_socket->writeDatagram(reinterpret_cast<char*>(&frame), sizeof(RupFrame), QHostAddress(m_destinationAddressEdit->text()), m_destinationPortEdit->text().toUInt());
 }
@@ -249,7 +307,16 @@ bool SendTuningFrameWidget::checkSocket()
 	auto socket = m_packetSourceModel->getSocket(address, port);
 	if (!socket)
 	{
+		// Packet source doesn't listening this address:port, socket must be created and initialized
+		if (!m_socket)
+		{
+			m_socket = std::make_shared<QUdpSocket>(this);
+		}
 		return m_socket->bind(QHostAddress(address), port);
+	}
+	else
+	{
+		m_socket.swap(socket);
 	}
 	return true;
 }

@@ -658,7 +658,7 @@ void Source::reloadProject()
 	m_signalTableModel->endReloadProject();
 }
 
-void Source::swapHeader(RpPacketHeader &header)
+void swapHeader(RpPacketHeader &header)
 {
 	swapBytes(header.packetSize);
 	swapBytes(header.protocolVersion);
@@ -678,7 +678,7 @@ void Source::swapHeader(RpPacketHeader &header)
 	swapBytes(header.TimeStamp.year);
 }
 
-void Source::swapHeader(RupFrameHeader& header)
+void swapHeader(RupFrameHeader& header)
 {
 	swapBytes(header.frameSize);
 	swapBytes(header.protocolVersion);

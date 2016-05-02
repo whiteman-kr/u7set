@@ -32,7 +32,11 @@ struct RupFrameHeader
 	quint16 frameSize;			// frame size including header, bytes
 	quint16 protocolVersion;
 
-	RupFrameFlags flags;
+	union
+	{
+		RupFrameFlags flags;
+		quint16 flagsWord;
+	};
 
 	quint32 dataId;
 	quint16 moduleType;			// module ID
@@ -95,13 +99,18 @@ const int FOTIP_DATA_TYPE_SIGNED_INTEGER = 1300,
 
 
 const int FOTIP_HEADER_RESERVE_SIZE = 98;
+const int FOTIP_TX_RX_DATA_SIZE = 1016;
 
 
 struct FotipHeader
 {
 	quint16 protocolVersion;
 	quint64 uniqueId;
-	quint16 subsystemKey;
+	union
+	{
+		FotipSubsystemKey subsystemKey;
+		quint16 subsystemKeyWord;
+	};
 	quint16 operationCode;
 	union
 	{
