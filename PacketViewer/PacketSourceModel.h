@@ -78,6 +78,10 @@ private:
 };
 
 
+void swapHeader(RpPacketHeader& header);
+void swapHeader(RupFrameHeader& header);
+
+
 class Source : public Statistic
 {
 	Q_OBJECT
@@ -104,9 +108,6 @@ private:
 	PacketBufferTableModel* m_packetBufferModel;
 	SignalTableModel* m_signalTableModel;
 	const QHash<quint32, std::shared_ptr<AppDataSource>>* m_dataSources;
-
-	void swapHeader(RpPacketHeader& header);
-	void swapHeader(RupFrameHeader& header);
 };
 
 
@@ -125,6 +126,9 @@ public:
 	int getSourceIndex(quint32 ip, quint16 port);
 	int addNewSource(quint32 ip, quint16 port);	// returns index of new source
 	void updateSourceMap();
+
+	bool isListening(const QString& address, int port);
+	std::shared_ptr<QUdpSocket> getSocket() { return m_socket; }
 
 signals:
 	void beginAddSource(int row);
@@ -170,6 +174,7 @@ public:
 	void addListener(QString ip, int port, bool saveList = true);
 	int index(Listener* listener);
 	void saveListenerList();
+	std::shared_ptr<QUdpSocket> getSocket(const QString& address, int port);
 
 	const SignalSet& signalSet() { return m_signalSet; }
 	const QHash<quint32, std::shared_ptr<AppDataSource>>& dataSources() { return m_dataSources; }

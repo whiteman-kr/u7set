@@ -32,7 +32,11 @@ struct RupFrameHeader
 	quint16 frameSize;			// frame size including header, bytes
 	quint16 protocolVersion;
 
-	RupFrameFlags flags;
+	union
+	{
+		RupFrameFlags flags;
+		quint16 flagsWord;
+	};
 
 	quint32 dataId;
 	quint16 moduleType;			// module ID
@@ -58,6 +62,67 @@ struct RupFrame
 	RupFrameData data;
 
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+};
+
+
+struct FotipHeaderFlags
+{
+	quint16 successfulCheck : 1;
+	quint16 successfulWrite : 1;
+	quint16 dataTypeError : 1;
+	quint16 operationCodeError : 1;
+	quint16 startAddressError : 1;
+	quint16 romSizeError : 1;
+	quint16 romFrameSizeError : 1;
+	quint16 frameSizeError : 1;
+	quint16 versionError : 1;
+	quint16 subsystemKeyError : 1;
+	quint16 idError : 1;
+};
+
+
+struct FotipSubsystemKey
+{
+	quint16 channelNumber : 6;
+	quint16 subsystemCode : 6;
+
+	quint16 crc : 4;	// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
+};
+
+
+const int FOTIP_OPERATION_READ = 1200,
+		  FOTIP_OPERATION_WRITE = 1400;
+
+const int FOTIP_DATA_TYPE_SIGNED_INTEGER = 1300,
+		  FOTIP_DATA_TYPE_FLOAT = 1500,
+		  FOTIP_DATA_TYPE_IMMITATION_INTERLOCK = 1700;
+
+
+const int FOTIP_HEADER_RESERVE_SIZE = 98;
+const int FOTIP_TX_RX_DATA_SIZE = 1016;
+
+
+struct FotipHeader
+{
+	quint16 protocolVersion;
+	quint64 uniqueId;
+	union
+	{
+		FotipSubsystemKey subsystemKey;
+		quint16 subsystemKeyWord;
+	};
+	quint16 operationCode;
+	union
+	{
+		FotipHeaderFlags flags;
+		quint16 flagsWord;
+	};
+	quint32 startAddress;
+	quint16 fotipFrameSize;
+	quint32 romSize;
+	quint16 romFrameSize;
+	quint16 dataType;
+	quint8 Reserve[FOTIP_HEADER_RESERVE_SIZE];
 };
 
 #pragma pack(pop)

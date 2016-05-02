@@ -10,6 +10,7 @@
 #include <QDirIterator>
 #include <QSettings>
 #include <QTimer>
+#include "SendTuningFrameWidget.h"
 
 SourceListWidget::SourceListWidget(QWidget *parent)
 	: QWidget(parent)
@@ -67,6 +68,10 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 
 	QPushButton* button = new QPushButton("Reload", this);
 	connect(button, &QPushButton::pressed, this, &SourceListWidget::reloadFiles);
+	hl->addWidget(button);
+
+	button = new QPushButton("Send tuning frame", this);
+	connect(button, &QPushButton::pressed, this, &SourceListWidget::sendTuningFrame);
 	hl->addWidget(button);
 
 	hl->addStretch();
@@ -142,4 +147,10 @@ void SourceListWidget::loadProjectList()
 	}
 	QSettings s;
 	m_projectListCombo->setCurrentText(s.value("Selected project", m_projectListCombo->itemText(m_projectListCombo->count() - 1)).toString());
+}
+
+void SourceListWidget::sendTuningFrame()
+{
+	SendTuningFrameWidget senderWidget(m_listenerModel);
+	senderWidget.exec();
 }

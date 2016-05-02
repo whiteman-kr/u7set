@@ -234,6 +234,18 @@ void PacketSourceModel::saveListenerList()
 	settings.endArray();
 }
 
+std::shared_ptr<QUdpSocket> PacketSourceModel::getSocket(const QString& address, int port)
+{
+	for (auto listener : m_listeners)
+	{
+		if (listener->isListening(address, port))
+		{
+			return listener->getSocket();
+		}
+	}
+	return std::shared_ptr<QUdpSocket>();
+}
+
 void PacketSourceModel::loadProject(const QString& projectPath)
 {
 	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
@@ -444,6 +456,11 @@ void Listener::updateSourceMap()
 	}
 }
 
+bool Listener::isListening(const QString& address, int port)
+{
+	return m_socket->localAddress().toString() == address && m_socket->localPort() == port;
+}
+
 void Listener::readPendingDatagrams()
 {
 	while (m_socket->hasPendingDatagrams())
@@ -641,7 +658,7 @@ void Source::reloadProject()
 	m_signalTableModel->endReloadProject();
 }
 
-void Source::swapHeader(RpPacketHeader &header)
+void swapHeader(RpPacketHeader &header)
 {
 	swapBytes(header.packetSize);
 	swapBytes(header.protocolVersion);
@@ -661,7 +678,7 @@ void Source::swapHeader(RpPacketHeader &header)
 	swapBytes(header.TimeStamp.year);
 }
 
-void Source::swapHeader(RupFrameHeader& header)
+void swapHeader(RupFrameHeader& header)
 {
 	swapBytes(header.frameSize);
 	swapBytes(header.protocolVersion);
