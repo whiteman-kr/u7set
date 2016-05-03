@@ -367,6 +367,24 @@ void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 		return;
 	}
 
+	// Ask user to confirm operation
+	//
+	QMessageBox mb(this);
+	mb.setWindowTitle(qApp->applicationName());
+	mb.setText(tr("Are you sure you want to delete selected file(s)"));
+	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	int mbResult = mb.exec();
+
+	if (mbResult == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// --
+	//
 	std::vector<std::shared_ptr<DbFileInfo>> deleteFiles;
 
 	for(const DbFileInfo& f : files)

@@ -172,12 +172,21 @@ void DbProject::setVersion(int value)
 //
 DbUser::DbUser()
 {
+	m_username = "";		// it makes qstring not null, null is bad for database
+	m_firstName = "";
+	m_lastName = "";
+	m_password = "";
+	m_newPassword = "";
 }
 
 DbUser::DbUser(int userId) :
 	m_userId(userId)
 {
-
+	m_username = "";		// it makes qstring not null, null is bad for database
+	m_firstName = "";
+	m_lastName = "";
+	m_password = "";
+	m_newPassword = "";
 }
 
 bool DbUser::operator== (const DbUser& u) const

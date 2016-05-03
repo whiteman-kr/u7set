@@ -137,12 +137,15 @@ signals:
 public slots:
 	void readPendingDatagrams();
 	void reloadProject();
+	void checkListeningState();
 
 private:
 	std::vector<std::shared_ptr<Source>> m_sources;
 	QHash<quint32, int> m_sourcesMap;
 	std::shared_ptr<QUdpSocket> m_socket;
 	PacketSourceModel* m_model;
+	QString m_localAddress;
+	quint16 m_localPort;
 };
 
 
