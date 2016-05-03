@@ -5,16 +5,16 @@
 #include "../include/Signal.h"
 #include "../include/CfgServerLoader.h"
 #include "../include/ServiceSettings.h"
+#include "../include/Queue.h"
+#include "../include/DataChannel.h"
+
 #include "AppSignalState.h"
 
-#include "DataChannel.h"
 
 namespace Hardware
 {
 	class DeviceRoot;
 }
-
-
 
 class AppDataServiceWorker : public ServiceWorker
 {
@@ -33,6 +33,7 @@ private:
 	QHash<QString, int> m_appSignalID2IndexMap;
 
 	AppSignalState* m_signalStates = nullptr;
+	QMutex m_signalStatesMutex;
 
 	QTimer m_timer;
 

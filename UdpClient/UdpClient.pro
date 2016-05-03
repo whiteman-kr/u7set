@@ -73,7 +73,8 @@ SOURCES += \
     ../lib/SimpleThread.cpp \
     ../lib/Tcp.cpp \
     ../lib/JsonSerializable.cpp \
-    ../lib/XmlHelper.cpp
+    ../lib/XmlHelper.cpp \
+    ../lib/Queue.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -89,7 +90,8 @@ HEADERS  += MainWindow.h \
     ../include/SimpleThread.h \
     ../include/Tcp.h \
     ../include/JsonSerializable.h \
-    ../include/XmlHelper.h
+    ../include/XmlHelper.h \
+    ../include/Queue.h
 
 include(../qtservice/src/qtservice.pri)
 

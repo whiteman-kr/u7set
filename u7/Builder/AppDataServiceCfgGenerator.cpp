@@ -80,8 +80,6 @@ namespace Builder
 
 		xml.writeEndElement();
 
-		bool result = true;
-
 		QVector<Signal*> signalsToWrite;
 
 		int signalCount = m_signalSet->count();
