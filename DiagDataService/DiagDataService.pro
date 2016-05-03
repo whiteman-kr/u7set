@@ -80,8 +80,9 @@ SOURCES += main.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
-    DataChannel.cpp \
-    DiagDataService.cpp
+    DiagDataService.cpp \
+    ../lib/DataChannel.cpp \
+    ../lib/Queue.cpp
 
 HEADERS += \
 	Stable.h \
@@ -108,9 +109,10 @@ HEADERS += \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
     ../include/XmlHelper.h \
-    DataChannel.h \
     ../include/DataProtocols.h \
-    DiagDataService.h
+    DiagDataService.h \
+    ../include/DataChannel.h \
+    ../include/Queue.h
 
 include(../qtservice/src/qtservice.pri)
 

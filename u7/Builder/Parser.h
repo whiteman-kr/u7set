@@ -97,8 +97,7 @@ namespace Builder
 		AppLogicItem() = default;
 		AppLogicItem(const AppLogicItem&) = default;
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-				  std::shared_ptr<VFrame30::LogicSchema> schema,
-				  std::shared_ptr<Afb::AfbElement> afbElement);
+				  std::shared_ptr<VFrame30::LogicSchema> schema);
 
 
 		// Items can be kept in set, it is just comparing m_fblItem pointres
@@ -124,7 +123,6 @@ namespace Builder
 
 		bool addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 					   const BushContainer& bushContainer,
-					   Afb::AfbElementCollection* afbCollection,
 					   IssueLogger* log);
 
 		bool orderItems(IssueLogger* log);
@@ -172,7 +170,6 @@ namespace Builder
 		bool addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicSchema> schema,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
-			Afb::AfbElementCollection* afbCollection,
 			IssueLogger* log);
 
 		bool orderItems(IssueLogger* log);
@@ -213,6 +210,9 @@ namespace Builder
 
 	protected:
 		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out);
+
+		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
+		bool checkAfbItemsVersion(VFrame30::LogicSchema* logicSchema);
 
 		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema);
 

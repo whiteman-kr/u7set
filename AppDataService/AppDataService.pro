@@ -80,9 +80,10 @@ SOURCES += main.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
-    DataChannel.cpp \
     AppDataService.cpp \
-    AppSignalState.cpp
+    AppSignalState.cpp \
+    ../lib/Queue.cpp \
+    ../lib/DataChannel.cpp
 
 HEADERS += \
 	Stable.h \
@@ -109,10 +110,13 @@ HEADERS += \
     ../include/DeviceHelper.h \
     ../include/OutputLog.h \
     ../include/XmlHelper.h \
-    DataChannel.h \
     ../include/DataProtocols.h \
     AppDataService.h \
-    AppSignalState.h
+    AppSignalState.h \
+    ../include/Queue.h \
+    ../include/WUtils.h \
+    ../include/Utils.h \
+    ../include/DataChannel.h
 
 include(../qtservice/src/qtservice.pri)
 

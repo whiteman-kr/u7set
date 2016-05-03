@@ -1,4 +1,4 @@
-#include "DataChannel.h"
+#include "../include/DataChannel.h"
 
 
 // -------------------------------------------------------------------------------
@@ -11,7 +11,8 @@ DataChannel::DataChannel(int channel, AppDataSource::DataType dataType, const Ho
 	m_channel(channel),
 	m_dataType(dataType),
 	m_dataReceivingIP(dataReceivingIP),
-	m_timer(this)
+	m_timer(this),
+	m_rupDataQueue(500)
 {
 }
 
@@ -155,7 +156,7 @@ void DataChannel::onSocketReadyRead()
 
 		if (dataSource != nullptr)
 		{
-			dataSource->processPacket(ip, m_rupFrame);
+			dataSource->processPacket(ip, m_rupFrame, m_rupDataQueue);
 		}
 		else
 		{

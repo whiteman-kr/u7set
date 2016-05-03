@@ -19,7 +19,7 @@ namespace VFrame30
 		SchemaItemAfb(void);
 	public:
 		explicit SchemaItemAfb(SchemaUnit unit);
-		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString &errorMsg);
+		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg);
 
 		virtual ~SchemaItemAfb(void);
 
@@ -39,19 +39,21 @@ namespace VFrame30
 	public:
 		virtual QString buildName() const override;
 
-		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString &errorMsg);
+		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);
 		bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		// Set Afb element parameters
 		//
 		bool setAfbElementParams(Afb::AfbElement* afbElement) const;
 
+		bool updateAfbElement(const Afb::AfbElement& sourceAfb, QString* errorMessage);
+
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 	protected:
 		void addSpecificParamProperties();
-		bool executeScript(const QString& script, const Afb::AfbElement& afb, QString &errorMsg);
+		bool executeScript(const QString& script, const Afb::AfbElement& afb, QString* errorMessage);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
 		Q_INVOKABLE bool getParamBoolValue(const QString& name);
 
@@ -64,15 +66,16 @@ namespace VFrame30
 		//
 	public:
 		const QString& afbStrID() const;
+		const Afb::AfbElement& afbElement() const;
 
+		std::vector<Afb::AfbParam>& params();
 		const std::vector<Afb::AfbParam>& params() const;
 
 		int precision() const;
 		void setPrecision(int value);
 
 	private:
-		QString m_afbStrID;
-		std::vector<Afb::AfbParam> m_params;
 		int m_precision = 2;
+		Afb::AfbElement m_afbElement;
 	};
 }

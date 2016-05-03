@@ -431,22 +431,22 @@ namespace Builder
 
 	/// IssueCode: ALP4001
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title: Property DeviceStrIds for Logic Schema is not set (LogicSchema '%1').
+	/// Title: Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///		Property DeviceStrIds for an application logic schema is empty. To bind a schema to a Logic Module this field must be set
-	///		to the Logic Module StrID. (Note that expanded StrID must be used).
+	///		Property EquipmentIDs for an application logic schema is empty. To bind a schema to a Logic Module this field must be set
+	///		to the Logic Module EquipmentID.
 	///
-	void IssueLogger::wrnALP4001(QString schema)
+	void IssueLogger::errALP4001(QString schema)
 	{
-		LOG_WARNING(IssueType::AlParsing,
+		LOG_ERROR(IssueType::AlParsing,
 				  4001,
-				  tr("Property DeviceStrIds for Logic Schema is not set (LogicSchema '%1').")
+				  tr("Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').")
 				  .arg(schema));
 	}
 
@@ -454,7 +454,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID '%1' is not found in the project equipment (Logic Schema '%2').
+	/// Title: EquipmentID '%1' is not found in the project equipment (LogicSchema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
@@ -467,7 +467,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlParsing,
 				  4002,
-				  tr("EquipmentID '%1' is not found in the project equipment (Logic Schema '%2').")
+				  tr("EquipmentID '%1' is not found in the project equipment (LogicSchema '%2').")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}
@@ -476,20 +476,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID '%1' must be LM family module type (Logic Schema '%2').
+	/// Title: EquipmentID '%1' must be LM family module type (LogicSchema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
 	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Schema has property EquipmentIDs but the equipment object with pointed StrID is not a module or is not LM family type.
+	///		Logic Schema has property EquipmentIDs but the equipment object with pointed ID is not a module or is not LM family type.
 	///
 	void IssueLogger::errALP4003(QString schema, QString equipmentId)
 	{
 		LOG_ERROR(IssueType::AlParsing,
 				  4003,
-				  tr("EquipmentID '%1' must be LM family module type (Logic Schema '%2').")
+				  tr("EquipmentID '%1' must be LM family module type (LogicSchema '%2').")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}
@@ -599,6 +599,33 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
+	/// Title: SchemaItem '%1' has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema '%4').
+	///
+	/// Parameters:
+	///		%1 Application functional block StrID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
+	///
+	/// Description:
+	///		To proccess logic block it is required AFB description which in not found.
+	///
+	void IssueLogger::errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4008,
+				  tr("SchemaItem '%1' has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema '%4').")
+				  .arg(schemaItem)
+				  .arg(schemaItemAfbVersion)
+				  .arg(latesAfbVersion)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4020
+	///
+	/// IssueType: Error
+	///
 	/// Title: There is no any input element in applictaion logic for Logic Module '%1'.
 	///
 	/// Parameters:
@@ -607,15 +634,15 @@ namespace Builder
 	/// Description:
 	///		Imposible to set execution order for logic items in logic module as there is no any input element.
 	///
-	void IssueLogger::errALP4008(QString logicModule)
+	void IssueLogger::errALP4020(QString logicModule)
 	{
 		LOG_ERROR(IssueType::AlParsing,
-				  4008,
+				  4020,
 				  tr("There is no any input element in applictaion logic for Logic Module '%1'.")
 				  .arg(logicModule));
 	}
 
-	/// IssueCode: ALP4009
+	/// IssueCode: ALP4021
 	///
 	/// IssueType: Error
 	///
@@ -629,12 +656,12 @@ namespace Builder
 	///		Error may occur if there are two or more outputs have the same logic signal StrID.
 	/// Note, outputs can be on different logic schemas for the same logic module.
 	///
-	void IssueLogger::errALP4009(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4009,
+				  4021,
 				  tr("Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').")
 				  .arg(signalStrID)
 				  .arg(schemaItem1)
@@ -645,7 +672,7 @@ namespace Builder
 				  );
 	}
 
-	/// IssueCode: ALP4010
+	/// IssueCode: ALP4022
 	///
 	/// IssueType: Error
 	///
@@ -657,10 +684,10 @@ namespace Builder
 	/// Description:
 	///		Each logic schema has several layers (Logic, Frame and Notes), but the Logic layer is not found.
 	///
-	void IssueLogger::errALP4010(QString schema)
+	void IssueLogger::errALP4022(QString schema)
 	{
 		LOG_ERROR(IssueType::AlParsing,
-				  4010,
+				  4022,
 				  tr("Schema does not have Logic layer (Logic Schema '%1').").arg(schema));
 	}
 

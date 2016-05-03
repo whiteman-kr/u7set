@@ -4460,13 +4460,13 @@ namespace Builder
 	{
 		m_appLogicItem.m_afbElement = *afbElement.get();
 		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
-					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get(), errorMsg));
+					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get(), &errorMsg));
 
 		// copy parameters
 		//
 		for(Afb::AfbParam& param : afbElement->params())
 		{
-			m_appLogicItem.m_fblItem->toFblElement()->setAfbParamByOpName(param.opName(), param.value());
+			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.value());
 		}
 	}
 
@@ -4486,9 +4486,9 @@ namespace Builder
 			return itemSignal->appSignalIds();
 		}
 
-		if (m_appLogicItem.m_fblItem->isFblElement())
+		if (m_appLogicItem.m_fblItem->isAfbElement())
 		{
-			VFrame30::SchemaItemAfb* itemFb= m_appLogicItem.m_fblItem->toFblElement();
+			VFrame30::SchemaItemAfb* itemFb= m_appLogicItem.m_fblItem->toAfbElement();
 
 			if (itemFb == nullptr)
 			{

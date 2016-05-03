@@ -65,7 +65,9 @@ namespace EditEngine
 				}
 
 				QString errorMsg;
-				if (fblElement->setAfbParam(r.propertyName, r.newValue, m_schema, errorMsg) == false)
+				bool ok = fblElement->setAfbParam(r.propertyName, r.newValue, m_schema, &errorMsg);
+
+				if (ok == false)
 				{
 					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
 				}
@@ -102,7 +104,9 @@ namespace EditEngine
 				}
 
 				QString errorMsg;
-				if (fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema, errorMsg) == false)
+				bool ok = fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema, &errorMsg);
+
+				if (ok == false)
 				{
 					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
 				}

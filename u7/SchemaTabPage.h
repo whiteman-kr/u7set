@@ -170,8 +170,10 @@ public:
 	virtual ~EditSchemaTabPage();
 
 	// Public methods
+	//
 public:
 	void setPageTitle();
+	void updateAfbSchemaItems();
 
 protected:
 	void CreateActions();

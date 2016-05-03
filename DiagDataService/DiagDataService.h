@@ -5,8 +5,7 @@
 #include "../include/Signal.h"
 #include "../include/CfgServerLoader.h"
 #include "../include/ServiceSettings.h"
-
-#include "DataChannel.h"
+#include "../include/DataChannel.h"
 
 namespace Hardware
 {

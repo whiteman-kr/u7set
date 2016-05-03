@@ -63,6 +63,8 @@ namespace VFrame30
 		//
 		void BuildFblConnectionMap() const;
 
+		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
+
 		// Properties and Datas
 		//
 	public:
@@ -97,9 +99,6 @@ namespace VFrame30
 		bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool value);
 
-		const Afb::AfbElementCollection& afbCollection() const;
-		void setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements);
-
 		bool isLogicSchema() const;
 		bool isMonitorSchema() const;
 		bool isDiagSchema() const;
@@ -121,8 +120,6 @@ namespace VFrame30
 		int m_pinGridStep = 2;		// Grid multiplier to determine vertical distance between pins
 
 		bool m_excludeFromBuild = false;	// Exclude Schema from build or any other processing
-
-		Afb::AfbElementCollection m_afbCollection;
 	};
 
 

@@ -44,41 +44,6 @@ AppDataSource::~AppDataSource()
 	delete [] m_framesData;
 }
 
-/*
-DataSource::DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount) :
-	m_id(id),
-	m_hostAddress(hostAddress),
-	m_name(name),
-	m_partCount(partCount)
-{
-
-}*/
-
-/*
-DataSource::DataSource(const DataSource& ds) :
-	QObject()
-{
-	this->operator =(ds);
-}*/
-
-/*
-DataSource& DataSource::operator = (const DataSource& ds)
-{
-	m_id = ds.ID();
-	m_hostAddress = ds.hostAddress();
-	m_name = ds.name();
-	m_partCount = ds.partCount();
-	m_relatedSignalIndexes = ds.m_relatedSignalIndexes;
-
-	m_state = ds.state();
-	m_uptime = ds.uptime();
-	m_receivedDataSize = ds.receivedDataSize();
-	m_dataReceivingRate = ds.dataReceivingRate();
-
-	return *this;
-}*/
-
-
 void AppDataSource::stop()
 {
 	setState(DataSourceState::stopped);
@@ -268,7 +233,7 @@ bool AppDataSource::readFromXml(XmlReadHelper& xml)
 }
 
 
-void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
+void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
 {
 	int framesQuantity = rupFrame.header.framesQuantity;
 
@@ -304,25 +269,20 @@ void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame)
 
 	if (dataReady == true)
 	{
-		mergeFrames();
+		// merge frames data into rupDataQueue's buffer
+		//
+		int framesQuantity = m_rupFrames[0].header.framesQuantity;
+
+		RupData* rupData = rupDataQueue.beginPush();
+
+		rupData->sourceIP = ip;
+		rupData->dataSize = framesQuantity * RUP_FRAME_DATA_SIZE;
+
+		for(int i = 0; i < framesQuantity; i++)
+		{
+			memcpy(rupData->data + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
+		}
+
+		rupDataQueue.completePush();
 	}
-}
-
-
-void AppDataSource::mergeFrames()
-{
-	int framesQuantity = m_rupFrames[0].header.framesQuantity;
-
-	for(int i = 0; i < framesQuantity; i++)
-	{
-		memcpy(m_framesData + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
-	}
-
-	parseFramesData();
-}
-
-
-void AppDataSource::parseFramesData()
-{
-
 }

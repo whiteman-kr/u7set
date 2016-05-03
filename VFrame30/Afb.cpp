@@ -439,48 +439,54 @@ namespace Afb
 		return;
 	}
 
-	bool AfbParam::SaveData(Proto::AfbParam* message) const
+	bool AfbParam::SaveData(Proto::AfbParam* /*message*/) const
 	{
-		Proto::Write(message->mutable_opname(), m_opName);
-		Proto::Write(message->mutable_caption(), m_caption);
-		message->set_visible(visible());
-        message->set_type(static_cast<Proto::FblSignalType>(m_type));
-        message->set_dataformat(static_cast<Proto::FblDataFormat>(m_dataFormat));
+		assert(false);	// Use XML version
+		return false;
 
-		Proto::Write(message->mutable_value(), m_value);
-		Proto::Write(message->mutable_defaultvalue(), m_defaultValue);
-		Proto::Write(message->mutable_lowlimit(), m_lowLimit);
-		Proto::Write(message->mutable_highlimit(), m_highLimit);
+//		Proto::Write(message->mutable_opname(), m_opName);
+//		Proto::Write(message->mutable_caption(), m_caption);
+//		message->set_visible(visible());
+//        message->set_type(static_cast<Proto::FblSignalType>(m_type));
+//        message->set_dataformat(static_cast<Proto::FblDataFormat>(m_dataFormat));
 
-		message->set_operandindex(operandIndex());
-        message->set_size(size());
-		message->set_instantiator(instantiator());
-		message->set_user(user());
-		Proto::Write(message->mutable_changedscript(), m_changedScript);
+//		Proto::Write(message->mutable_value(), m_value);
+//		Proto::Write(message->mutable_defaultvalue(), m_defaultValue);
+//		Proto::Write(message->mutable_lowlimit(), m_lowLimit);
+//		Proto::Write(message->mutable_highlimit(), m_highLimit);
 
-		return true;
+//		message->set_operandindex(operandIndex());
+//        message->set_size(size());
+//		message->set_instantiator(instantiator());
+//		message->set_user(user());
+//		Proto::Write(message->mutable_changedscript(), m_changedScript);
+
+//		return true;
 	}
 
-	bool AfbParam::LoadData(const Proto::AfbParam& message)
+	bool AfbParam::LoadData(const Proto::AfbParam& /*message*/)
 	{
-		Proto::Read(message.opname(), &m_opName);
-		Proto::Read(message.caption(), &m_caption);
-        m_type = static_cast<AfbSignalType>(message.type());
-        m_dataFormat = static_cast<AfbDataFormat>(message.dataformat());
-        m_visible = message.visible();
+		assert(false);	// Use XML version
+		return false;
 
-		m_value = Proto::Read(message.value());
-		m_defaultValue = Proto::Read(message.defaultvalue());
-		m_lowLimit = Proto::Read(message.lowlimit());
-		m_highLimit = Proto::Read(message.highlimit());
+//		Proto::Read(message.opname(), &m_opName);
+//		Proto::Read(message.caption(), &m_caption);
+//        m_type = static_cast<AfbSignalType>(message.type());
+//        m_dataFormat = static_cast<AfbDataFormat>(message.dataformat());
+//        m_visible = message.visible();
 
-		m_operandIndex = message.operandindex();
-		m_size = message.size();
-		m_instantiator = message.instantiator();
-		m_user = message.user();
-		Proto::Read(message.changedscript(), &m_changedScript);
+//		m_value = Proto::Read(message.value());
+//		m_defaultValue = Proto::Read(message.defaultvalue());
+//		m_lowLimit = Proto::Read(message.lowlimit());
+//		m_highLimit = Proto::Read(message.highlimit());
 
-		return true;
+//		m_operandIndex = message.operandindex();
+//		m_size = message.size();
+//		m_instantiator = message.instantiator();
+//		m_user = message.user();
+//		Proto::Read(message.changedscript(), &m_changedScript);
+
+//		return true;
 	}
 
 	bool AfbParam::loadFromXml(QXmlStreamReader* xmlReader)

@@ -610,7 +610,7 @@ namespace VFrame30
 		return ptr != nullptr;
 	}
 
-	bool FblItemRect::isFblElement() const
+	bool FblItemRect::isAfbElement() const
 	{
 		const VFrame30::SchemaItemAfb* ptr = dynamic_cast<const VFrame30::SchemaItemAfb*>(this);
 		return ptr != nullptr;
@@ -661,12 +661,12 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemConst*>(this);
 	}
 
-	VFrame30::SchemaItemAfb* FblItemRect::toFblElement()
+	VFrame30::SchemaItemAfb* FblItemRect::toAfbElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemAfb*>(this);
 	}
 
-	const VFrame30::SchemaItemAfb* FblItemRect::toFblElement() const
+	const VFrame30::SchemaItemAfb* FblItemRect::toAfbElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemAfb*>(this);
 	}
