@@ -1114,17 +1114,10 @@ void SignalsModel::addSignal()
 			{
 				signalVector << signal;
 				QString strID = signal.appSignalID();
-				QString name = signal.caption();
-
-				if (!deviceIdEdit->text().isEmpty())
-				{
-					name += " Device " + deviceIdEdit->text();
-				}
 
 				if (signalCount > 1)
 				{
 					strID = (strID + "_sig%1").arg(s);
-					name = (name + " Signal %1").arg(s);
 				}
 
 				if (channelCount > 1)
@@ -1133,7 +1126,6 @@ void SignalsModel::addSignal()
 				}
 
 				signalVector[i].setAppSignalID(strID.toUpper());
-				signalVector[i].setCaption(name);
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
@@ -1320,6 +1312,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	horizontalHeader->setDefaultSectionSize(150);
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
+	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
@@ -1509,23 +1502,6 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/plus.png"), tr("Create signal"), this);
-	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
-	m_signalsView->addAction(action);
-	toolBar->addAction(action);
-
-	action = new QAction(QIcon(":/Images/Images/pencil.png"), tr("Edit signal"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
-	m_signalsView->addAction(action);
-	toolBar->addAction(action);
-
-	action = new QAction(QIcon(":/Images/Images/cross.png"), tr("Delete signal"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
-	m_signalsView->addAction(action);
-	toolBar->addAction(action);
-
 	action = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignalChanges);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
@@ -1535,6 +1511,23 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("Show pending changes..."), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::showPendingChanges);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/plus.png"), tr("Create signal"), this);
+	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/cross.png"), tr("Delete signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/pencil.png"), tr("Properties"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1581,7 +1574,7 @@ void SignalsTabPage::editSignal()
 	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
 	for (int i = 0; i < selectedSignalId.count(); i++)
 	{
-		m_signalsView->selectRow(m_signalsModel->keyIndex(selectedSignalId[i]));
+		m_signalsView->selectRow(m_signalsProxyModel->mapFromSource(m_signalsModel->index(m_signalsModel->keyIndex(selectedSignalId[i]), 0)).row());
 	}
 	m_signalsView->setSelectionMode(selectionMode);
 }
