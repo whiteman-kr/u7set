@@ -10,7 +10,7 @@
 class XmlWriteHelper
 {
 private:
-	QXmlStreamWriter& m_xmlWriter;
+	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 
 public:
@@ -42,7 +42,7 @@ public:
 class XmlReadHelper
 {
 private:
-	QXmlStreamReader& m_xmlReader;
+	QXmlStreamReader* m_xmlReader = nullptr;
 	QXmlStreamReader* m_xmlLocalReader = nullptr;
 
 public:

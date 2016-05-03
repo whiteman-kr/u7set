@@ -156,7 +156,6 @@ void DataChannel::onSocketReadyRead()
 
 		if (dataSource != nullptr)
 		{
-			m_rupFrame.header.toHostFormat();
 			dataSource->processPacket(ip, m_rupFrame, m_rupDataQueue);
 		}
 		else

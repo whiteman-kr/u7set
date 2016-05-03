@@ -57,7 +57,7 @@ public slots:
 
 class DataChannelThread : public SimpleThread
 {
-private:
+protected:
 	DataChannel* m_dataChannel = nullptr;
 
 public:

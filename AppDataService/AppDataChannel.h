@@ -19,9 +19,6 @@ public slots:
 
 class AppDataChannelThread : public DataChannelThread
 {
-private:
-	DataChannel* m_dataChannel = nullptr;
-
 public:
 	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP);
 
