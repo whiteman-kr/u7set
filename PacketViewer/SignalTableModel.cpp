@@ -145,7 +145,7 @@ void SignalTableModel::updateFrame(int frameNo)
 	}
 }
 
-void SignalTableModel::addDataSource(const AppDataSource* dataSource)
+void SignalTableModel::addDataSource(const DataSource* dataSource)
 {
 	m_relatedSignalIndexes += dataSource->signalIndexes();
 	std::sort(m_relatedSignalIndexes.begin(), m_relatedSignalIndexes.end(),

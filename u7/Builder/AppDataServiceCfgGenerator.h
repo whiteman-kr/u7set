@@ -20,7 +20,7 @@ namespace Builder
 		bool writeEquipmentXml();
 		bool writeAppDataSourcesXml();
 
-		bool findAppDataSourceAssociatedSignals(AppDataSource& appDataSource);
+		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	public:
 		AppDataServiceCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);

@@ -39,7 +39,7 @@ private:
 	bool m_active = false;
 	int m_currentDataRequestType = RQID_GET_DATA_SOURCES_IDS;
 	int m_currentDataSourceIndex = -1;
-	PtrOrderedHash<int, AppDataSource> m_dataSource;
+	PtrOrderedHash<int, DataSource> m_dataSource;
 	QTimer* m_periodicTimer;
 
 	void sendDataRequest(int requestType);

@@ -83,7 +83,10 @@ SOURCES += main.cpp \
     AppDataService.cpp \
     AppSignalState.cpp \
     ../lib/Queue.cpp \
-    ../lib/DataChannel.cpp
+    ../lib/DataChannel.cpp \
+    ../lib/DataProtocols.cpp \
+    AppDataChannel.cpp \
+    AppDataSource.cpp
 
 HEADERS += \
 	Stable.h \
@@ -116,7 +119,9 @@ HEADERS += \
     ../include/Queue.h \
     ../include/WUtils.h \
     ../include/Utils.h \
-    ../include/DataChannel.h
+    ../include/DataChannel.h \
+    AppDataChannel.h \
+    AppDataSource.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -8,16 +8,17 @@
 #include "../include/OrderedHash.h"
 #include "../include/SimpleThread.h"
 #include "../include/Queue.h"
+#include "../include/Signal.h"
 
 
 class DataChannel : public SimpleThreadWorker
 {
 private:
-	AppDataSource::DataType m_dataType;
+	DataSource::DataType m_dataType;
 	int m_channel = 0;
 	HostAddressPort m_dataReceivingIP;
 
-	HashedVector<quint32, AppDataSource*> m_dataSources;
+	HashedVector<quint32, DataSource*> m_dataSources;
 
 	HashedVector<quint32, quint32> m_unknownDataSources;
 
@@ -34,36 +35,24 @@ private:
 	virtual void onThreadFinished();
 
 	virtual void onTimer();
-	//virtual void onSocklet
 
 	void createAndBindSocket();
 	void closeSocket();
 	void onSocketReadyRead();
 
 public:
-	explicit DataChannel(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataReceivingIP);
+	explicit DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP);
 	virtual ~DataChannel();
 
 	void clear();
 
-	void addDataSource(AppDataSource* dataSource);
+	void addDataSource(DataSource* dataSource);
 
 signals:
 
 public slots:
 };
 
-
-class AppDataServiceChannel : public DataChannel
-{
-	Q_OBJECT
-public:
-	AppDataServiceChannel(int channel, const HostAddressPort& dataReceivingIP);
-
-signals:
-
-public slots:
-};
 
 
 class DataChannelThread : public SimpleThread
@@ -72,9 +61,9 @@ private:
 	DataChannel* m_dataChannel = nullptr;
 
 public:
-	DataChannelThread(int channel, AppDataSource::DataType dataType, const HostAddressPort& dataRecievingIP);
+	DataChannelThread();
 
-	void addDataSource(AppDataSource* dataSource);
+	void addDataSource(DataSource* dataSource);
 };
 
 

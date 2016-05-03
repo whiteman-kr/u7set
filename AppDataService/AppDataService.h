@@ -8,6 +8,7 @@
 #include "../include/Queue.h"
 #include "../include/DataChannel.h"
 
+#include "AppDataChannel.h"
 #include "AppSignalState.h"
 
 
@@ -39,7 +40,7 @@ private:
 
 	AppDataServiceSettings m_settings;
 
-	DataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	void readConfigurationFiles();
 

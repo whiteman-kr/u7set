@@ -284,10 +284,10 @@ namespace Builder
 
 				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
 				{
-					AppDataSource ds;
+					DataSource ds;
 
 					ds.setChannel(channel);
-					ds.setDataType(AppDataSource::DataType::App);
+					ds.setDataType(DataSource::DataType::App);
 					ds.setLmStrID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterStrID(lmNetProperties.adapterID);
@@ -317,7 +317,7 @@ namespace Builder
 	}
 
 
-	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(AppDataSource& appDataSource)
+	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
 	{
 		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmStrID());
 

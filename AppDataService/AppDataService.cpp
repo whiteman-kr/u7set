@@ -312,6 +312,8 @@ void AppDataServiceWorker::runDataChannels()
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
+		m_appDataChannelThread[channel]->prepare(m_appSignals, m_appSignalID2IndexMap, m_signalStates);
+
 		if (m_appDataChannelThread[channel] != nullptr)
 		{
 			m_appDataChannelThread[channel]->start();
@@ -330,9 +332,8 @@ void AppDataServiceWorker::initDataChannels()
 
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
-		m_appDataChannelThread[channel] = new DataChannelThread(channel,
-																AppDataSource::DataType::App,
-																m_settings.ethernetChannel[channel].appDataReceivingIP);
+		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
+						m_settings.appDataServiceChannel[channel].appDataReceivingIP);
 	}
 }
 
@@ -434,14 +435,14 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 	while (1)
 	{
-		bool find = xml.findElement(AppDataSource::ELEMENT_APP_DATA_SOURCE);
+		bool find = xml.findElement(DataSource::ELEMENT_APP_DATA_SOURCE);
 
 		if (find == false)
 		{
 			break;
 		}
 
-		AppDataSource* dataSource = new AppDataSource();
+		DataSource* dataSource = new DataSource();
 
 		result &= dataSource->readFromXml(xml);
 
@@ -465,7 +466,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 		qDebug() << "DataSource: " << dataSource->lmStrID() << "channel " << dataSource->channel();
 
-		if (dataSource->dataType() == AppDataSource::DataType::App)
+		if (dataSource->dataType() == DataSource::DataType::App)
 		{
 			if (m_appDataChannelThread[channel] != nullptr)
 			{

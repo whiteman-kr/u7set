@@ -8,7 +8,7 @@
 const char* const CFG_FILE_ID_DATA_SOURCES = "APP_DATA_SOURCES";
 const char* const CFG_FILE_ID_APP_SIGNALS = "APP_SIGNALS";
 
-class AppDataChannel
+class AppDataServiceChannel
 {
 private:
 	const char* const PROP_APP_DATA_NETMASK = "AppDataNetmask";
@@ -55,7 +55,7 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
-	AppDataChannel ethernetChannel[DATA_CHANNEL_COUNT];
+	AppDataServiceChannel appDataServiceChannel[DATA_CHANNEL_COUNT];
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);

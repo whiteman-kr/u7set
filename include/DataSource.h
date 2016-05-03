@@ -60,7 +60,7 @@ protected:
 
 
 
-class AppDataSource : public QObject
+class DataSource : public QObject
 {
 public:
 	enum class DataType
@@ -87,6 +87,8 @@ private:
 	DataSourceState m_state = DataSourceState::noData;
 	quint64 m_uptime = 0;
 	quint64 m_receivedDataSize = 0;
+	quint64 m_receivedFramesCount = 0;
+	quint64 m_receivedPacketCount = 0;
 	double m_dataReceivingRate = 0;
 
 	// XML-serializable members
@@ -125,8 +127,8 @@ private:
 	void parseFramesData();
 
 public:
-	AppDataSource();
-	~AppDataSource();
+	DataSource();
+	~DataSource();
 
 //	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
 //	DataSource(const DataSource& ds);
