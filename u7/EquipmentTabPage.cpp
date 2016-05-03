@@ -3219,6 +3219,15 @@ void EquipmentTabPage::setProperties()
 
 void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	// Refresh property "EquipmentID", as it depends on "EquipmentIDTemplate"
+	//
+	if (m_propertyEditor != nullptr)
+	{
+		m_propertyEditor->updateProperty("EquipmentID");
+	}
+
+	// --
+	//
 	std::vector<std::shared_ptr<DbFile>> files;
 
 	for (auto& o : objects)
