@@ -345,7 +345,7 @@ void PacketSourceModel::updateSourceStatistic()
 void PacketSourceModel::updateSourceStatisticByTimer()
 {
 	QModelIndex listenerIndex;
-	for (int i = 0; i < m_listeners.size(); i++)
+	for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 	{
 		emit dataChanged(listenerIndex = index(i, 0, QModelIndex()), index(i, columnCount() - 1, QModelIndex()));
 		for (int j = 0; j < m_listeners[i]->childCount(); j++)
@@ -379,11 +379,18 @@ Listener::Listener() :
 Listener::Listener(PacketSourceModel* model, QString address, int port) :
 	Statistic(address, port, nullptr),
 	m_socket(new QUdpSocket(this)),
-	m_model(model)
+	m_model(model),
+	m_localAddress(address),
+	m_localPort(port)
 {
 	assert(!address.isEmpty());
 	connect(m_socket.get(), &QUdpSocket::readyRead, this, &Listener::readPendingDatagrams);
-	m_socket->bind(QHostAddress(address), port);
+
+	QTimer* reconnectTimer = new QTimer(this);
+	connect(reconnectTimer, &QTimer::timeout, this, &Listener::checkListeningState);
+	reconnectTimer->start(10 * 1000);
+
+	checkListeningState();
 }
 
 int Listener::index(Source* source) const
@@ -458,7 +465,8 @@ void Listener::updateSourceMap()
 
 bool Listener::isListening(const QString& address, int port)
 {
-	return m_socket->localAddress().toString() == address && m_socket->localPort() == port;
+	checkListeningState();
+	return m_localAddress == address && m_localPort == port;
 }
 
 void Listener::readPendingDatagrams()
@@ -481,6 +489,14 @@ void Listener::reloadProject()
 	for (auto source : m_sources)
 	{
 		source->reloadProject();
+	}
+}
+
+void Listener::checkListeningState()
+{
+	if (m_socket->state() != QAbstractSocket::BoundState && !m_socket->bind(QHostAddress(m_localAddress), m_localPort))
+	{
+		QMessageBox::warning(nullptr, QString("Could not start listening %1:%2").arg(m_localAddress).arg(m_localPort), "Error: " + m_socket->errorString());
 	}
 }
 
