@@ -186,6 +186,20 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 void SignalPropertiesDialog::checkAndSaveSignal()
 {
+	// Check
+	//
+	for (auto object : m_objList)
+	{
+		auto signal = dynamic_cast<Signal*>(object.get());
+		if (signal->appSignalID().trimmed().isEmpty())
+		{
+			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
+			return;
+		}
+	}
+
+	// Save
+	//
 	for (int i = m_signalVector.count() - 1; i >= 0; i--)
 	{
 		Signal& signal = *m_signalVector[i];
@@ -193,8 +207,23 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		signal = *(dynamic_cast<Signal*>(m_objList[i].get()));
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
+		if (signal.appSignalID()[0] != '#')
+		{
+			signal.setAppSignalID("#" + signal.appSignalID());
+		}
+
 		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+		if (signal.customAppSignalID().isEmpty())
+		{
+			signal.setCustomAppSignalID(signal.appSignalID().mid(1));
+		}
+
 		signal.setEquipmentID(signal.equipmentID().trimmed());
+
+		if (signal.caption().isEmpty())
+		{
+			signal.setCaption("Signal " + signal.customAppSignalID());
+		}
 	}
 
 	saveLastEditedSignalProperties();

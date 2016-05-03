@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include "../include/SocketIO.h"
+#include "../include/Queue.h"
 #include "../include/XmlHelper.h"
 #include "../include/DataProtocols.h"
 
@@ -11,6 +12,14 @@ enum DataSourceState
 	noData = 0,
 	receiveData = 1,
 	stopped = 2
+};
+
+
+struct RupData
+{
+	quint32 sourceIP;
+	int dataSize;
+	char data[RUP_FRAME_DATA_SIZE * RUP_MAX_FRAME_COUNT];
 };
 
 
@@ -72,7 +81,6 @@ private:
 	QString m_name;
 	quint32 m_partCount = 1;
 	QVector<int> m_relatedSignalIndexes;
-
 
 	// dynamic information
 	//
@@ -189,7 +197,7 @@ public:
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
-	void processPacket(quint32 ip, const RupFrame& rupFrame);
+	void processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
 
 	void addAppSignal(const QString& appSignalID) { m_appSignals.append(appSignalID); }
 	void clearAppSignals() { m_appSignals.clear(); }

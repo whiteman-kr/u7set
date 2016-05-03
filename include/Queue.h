@@ -1,0 +1,90 @@
+#pragma once
+#include <QtCore>
+
+
+class QueueBase : public QObject
+{
+	Q_OBJECT
+
+	class QueueIndex
+	{
+	private:
+		int m_index = 0;
+		int m_maxValue = 0;
+
+	public:
+		QueueIndex(int maxValue) :
+			m_maxValue(maxValue) {}
+
+		int operator ++ (int)
+		{
+			m_index++;
+
+			if (m_index == m_maxValue)
+			{
+				m_index = 0;
+			}
+
+			return m_index;
+		}
+
+		int operator () () const { return m_index; }
+
+		void reset() { m_index = 0; }
+	};
+
+signals:
+	void queueNotEmpty();
+	void queueFull();
+	void queueEmpty();
+
+protected:
+	QMutex m_mutex;
+	char* m_buffer = nullptr;
+
+	int m_itemSize = 0;
+	int m_queueSize = 0;
+
+	int m_size = 0;								// current queue size
+
+	QueueIndex m_writeIndex;
+	QueueIndex m_readIndex;
+
+	int m_lostCount = 0;
+
+public:
+	QueueBase(int itemSize, int queueSize);
+	virtual ~QueueBase();
+
+	int getSize() { return m_size; }
+
+	bool isEmpty() { return m_size == 0; }
+
+	bool isNotEmpty() { return m_size > 0; }
+
+	bool push(const char* item);
+	bool pop(char* item);
+
+	void clear();
+
+	void lock() { m_mutex.lock(); }
+	void unlock() { m_mutex.unlock(); }
+
+	char* beginPush();
+	bool completePush();
+};
+
+
+template <typename TYPE>
+class Queue : public QueueBase
+{
+public:
+	Queue(int queueSize) :
+		QueueBase(sizeof(TYPE), queueSize) 	{}
+
+	virtual bool push(TYPE* ptr) { return QueueBase::push(reinterpret_cast<char*>(ptr)); }
+	virtual bool pop(TYPE* ptr) { return QueueBase::pop(reinterpret_cast<char*>(ptr)); }
+
+	TYPE* beginPush() { return reinterpret_cast<TYPE*>(QueueBase::beginPush()); }
+};
+

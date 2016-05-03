@@ -7,6 +7,7 @@
 #include "../include/DataProtocols.h"
 #include "../include/OrderedHash.h"
 #include "../include/SimpleThread.h"
+#include "../include/Queue.h"
 
 
 class DataChannel : public SimpleThreadWorker
@@ -26,6 +27,8 @@ private:
 	bool m_socketBound = false;
 
 	RupFrame m_rupFrame;
+
+	Queue<RupData> m_rupDataQueue;
 
 	virtual void onThreadStarted();
 	virtual void onThreadFinished();
