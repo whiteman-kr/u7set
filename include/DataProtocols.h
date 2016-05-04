@@ -45,6 +45,8 @@ struct RupFrameHeader
 	quint16 frameNumber;		// 0..(frameQuantity-1)
 
 	RupTimeStamp TimeStamp;
+
+	void toHostFormat();
 };
 
 

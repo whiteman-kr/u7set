@@ -1,8 +1,8 @@
 #include "../include/DataSource.h"
 
 
-const char* const AppDataSource::ELEMENT_APP_DATA_SOURCE = "AppDataSource";
-const char* const AppDataSource::ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
+const char* const DataSource::ELEMENT_APP_DATA_SOURCE = "AppDataSource";
+const char* const DataSource::ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 
 char* DataSourceInfo::serialize(char* buffer, bool write)
@@ -32,19 +32,19 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 }
 
 
-AppDataSource::AppDataSource()
+DataSource::DataSource()
 {
 	m_rupFrames = new RupFrame[RUP_MAX_FRAME_COUNT];
 	m_framesData = new char[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 }
 
-AppDataSource::~AppDataSource()
+DataSource::~DataSource()
 {
 	delete [] m_rupFrames;
 	delete [] m_framesData;
 }
 
-void AppDataSource::stop()
+void DataSource::stop()
 {
 	setState(DataSourceState::stopped);
 	m_dataReceivingRate = 0;
@@ -52,13 +52,13 @@ void AppDataSource::stop()
 }
 
 
-void AppDataSource::resume()
+void DataSource::resume()
 {
 	setState(DataSourceState::noData);
 }
 
 
-void AppDataSource::getInfo(DataSourceInfo& dsi)
+void DataSource::getInfo(DataSourceInfo& dsi)
 {
 	dsi.ID = m_id;
 	dsi.ip = m_hostAddress.toIPv4Address();
@@ -67,7 +67,7 @@ void AppDataSource::getInfo(DataSourceInfo& dsi)
 }
 
 
-void AppDataSource::setInfo(const DataSourceInfo& dsi)
+void DataSource::setInfo(const DataSourceInfo& dsi)
 {
 	m_id = dsi.ID;
 	m_hostAddress = QHostAddress(dsi.ip);
@@ -76,7 +76,7 @@ void AppDataSource::setInfo(const DataSourceInfo& dsi)
 }
 
 
-void AppDataSource::getStatistics(DataSourceStatistics& dss)
+void DataSource::getStatistics(DataSourceStatistics& dss)
 {
 	dss.ID = m_id;
 	dss.state = static_cast<quint32>(m_state);
@@ -86,7 +86,7 @@ void AppDataSource::getStatistics(DataSourceStatistics& dss)
 }
 
 
-void AppDataSource::setStatistics(const DataSourceStatistics& dss)
+void DataSource::setStatistics(const DataSourceStatistics& dss)
 {
 	Q_ASSERT(dss.ID == m_id);
 
@@ -97,7 +97,7 @@ void AppDataSource::setStatistics(const DataSourceStatistics& dss)
 }
 
 
-QString AppDataSource::dataTypeToString(DataType dataType)
+QString DataSource::dataTypeToString(DataType dataType)
 {
 	switch(dataType)
 	{
@@ -115,7 +115,7 @@ QString AppDataSource::dataTypeToString(DataType dataType)
 }
 
 
-AppDataSource::DataType AppDataSource::stringToDataType(const QString& dataTypeStr)
+DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 {
 	if (dataTypeStr == DATA_TYPE_APP)
 	{
@@ -133,7 +133,7 @@ AppDataSource::DataType AppDataSource::stringToDataType(const QString& dataTypeS
 }
 
 
-void AppDataSource::writeToXml(XmlWriteHelper& xml)
+void DataSource::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE);
 
@@ -162,7 +162,7 @@ void AppDataSource::writeToXml(XmlWriteHelper& xml)
 }
 
 
-bool AppDataSource::readFromXml(XmlReadHelper& xml)
+bool DataSource::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
@@ -233,8 +233,11 @@ bool AppDataSource::readFromXml(XmlReadHelper& xml)
 }
 
 
-void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
+void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
 {
+	m_receivedFramesCount++;
+	m_receivedDataSize += sizeof(rupFrame);
+
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)
@@ -269,6 +272,8 @@ void AppDataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<Ru
 
 	if (dataReady == true)
 	{
+		m_receivedPacketCount++;
+
 		// merge frames data into rupDataQueue's buffer
 		//
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;

@@ -9,7 +9,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-bool AppDataChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
+bool AppDataServiceChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -35,13 +35,13 @@ bool AppDataChannel::readFromDevice(Hardware::DeviceController* controller, Buil
 }
 
 
-QString AppDataChannel::sectionName(int channel)
+QString AppDataServiceChannel::sectionName(int channel)
 {
 	return QString(SECTION_FORMAT_STR).arg(channel + 1);
 }
 
 
-bool AppDataChannel::writeToXml(XmlWriteHelper& xml, int channel)
+bool AppDataServiceChannel::writeToXml(XmlWriteHelper& xml, int channel)
 {
 	xml.writeStartElement(sectionName(channel));
 
@@ -58,7 +58,7 @@ bool AppDataChannel::writeToXml(XmlWriteHelper& xml, int channel)
 }
 
 
-bool AppDataChannel::readFromXml(XmlReadHelper& xml, int channel)
+bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
 {
 	xml.readNextStartElement();
 
@@ -110,7 +110,7 @@ bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builde
 
 		if (ethernet != nullptr)
 		{
-			result &= ethernetChannel[channel].readFromDevice(ethernet, log);
+			result &= appDataServiceChannel[channel].readFromDevice(ethernet, log);
 		}
 	}
 
@@ -129,7 +129,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
-		ethernetChannel[channel].writeToXml(xml, channel);
+		appDataServiceChannel[channel].writeToXml(xml, channel);
 	}
 
 	xml.writeEndElement();	// </Settings>
@@ -155,7 +155,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
-		result &= ethernetChannel[channel].readFromXml(xml, channel);
+		result &= appDataServiceChannel[channel].readFromXml(xml, channel);
 	}
 
 	return result;

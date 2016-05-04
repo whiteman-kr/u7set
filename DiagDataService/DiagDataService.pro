@@ -82,7 +82,8 @@ SOURCES += main.cpp \
     ../lib/XmlHelper.cpp \
     DiagDataService.cpp \
     ../lib/DataChannel.cpp \
-    ../lib/Queue.cpp
+    ../lib/Queue.cpp \
+    ../lib/DataProtocols.cpp
 
 HEADERS += \
 	Stable.h \

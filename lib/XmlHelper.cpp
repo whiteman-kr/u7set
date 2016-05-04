@@ -8,14 +8,15 @@
 // -------------------------------------------------------------------------------------
 
 XmlWriteHelper::XmlWriteHelper(QXmlStreamWriter& xmlWriter) :
-	m_xmlWriter(xmlWriter)
+	m_xmlWriter(&xmlWriter)
 {
 }
 
 
-XmlWriteHelper::XmlWriteHelper(QByteArray* data) :
-	m_xmlWriter(*(m_xmlLocalWriter = new QXmlStreamWriter(data)))
+XmlWriteHelper::XmlWriteHelper(QByteArray* data)
 {
+	m_xmlLocalWriter = new QXmlStreamWriter(data);
+	m_xmlWriter = m_xmlLocalWriter;
 }
 
 
@@ -30,43 +31,43 @@ XmlWriteHelper::~XmlWriteHelper()
 
 void XmlWriteHelper::setAutoFormatting(bool autoFormatting)
 {
-	m_xmlWriter.setAutoFormatting(autoFormatting);
+	m_xmlWriter->setAutoFormatting(autoFormatting);
 }
 
 
 void XmlWriteHelper::writeStartDocument()
 {
-	m_xmlWriter.writeStartDocument();
+	m_xmlWriter->writeStartDocument();
 }
 
 
 void XmlWriteHelper::writeEndDocument()
 {
-	m_xmlWriter.writeEndDocument();
+	m_xmlWriter->writeEndDocument();
 }
 
 
 void XmlWriteHelper::writeStartElement(const QString& name)
 {
-	m_xmlWriter.writeStartElement(name);
+	m_xmlWriter->writeStartElement(name);
 }
 
 
 void XmlWriteHelper::writeEndElement()
 {
-	m_xmlWriter.writeEndElement();
+	m_xmlWriter->writeEndElement();
 }
 
 
 void XmlWriteHelper::writeStringAttribute(const QString& name, const QString& value)
 {
-	m_xmlWriter.writeAttribute(name, value);
+	m_xmlWriter->writeAttribute(name, value);
 }
 
 
 void XmlWriteHelper::writeIntAttribute(const QString& name, int value)
 {
-	m_xmlWriter.writeAttribute(name, QString::number(value));
+	m_xmlWriter->writeAttribute(name, QString::number(value));
 }
 
 
@@ -88,7 +89,7 @@ void XmlWriteHelper::writeUlongAttribute(const QString& name, ulong value, bool 
 	}
 	else
 	{
-		m_xmlWriter.writeAttribute(name, QString::number(value));
+		m_xmlWriter->writeAttribute(name, QString::number(value));
 	}
 }
 
@@ -101,13 +102,13 @@ void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value)
 
 void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
 {
-	m_xmlWriter.writeTextElement(name, value);
+	m_xmlWriter->writeTextElement(name, value);
 }
 
 
 void XmlWriteHelper::writeIntElement(const QString& name, int value)
 {
-	m_xmlWriter.writeTextElement(name, QString::number(value));
+	m_xmlWriter->writeTextElement(name, QString::number(value));
 }
 
 
@@ -131,14 +132,15 @@ void XmlWriteHelper::writeHostAddress(const QString& nameIP, QHostAddress& hostA
 // -------------------------------------------------------------------------------------
 
 XmlReadHelper::XmlReadHelper(QXmlStreamReader& xmlReader) :
-	m_xmlReader(xmlReader)
+	m_xmlReader(&xmlReader)
 {
 }
 
 
-XmlReadHelper::XmlReadHelper(const QByteArray& data) :
-	m_xmlReader(*(m_xmlLocalReader = new QXmlStreamReader(data)))
+XmlReadHelper::XmlReadHelper(const QByteArray& data)
 {
+	m_xmlLocalReader = new QXmlStreamReader(data);
+	m_xmlReader = m_xmlLocalReader;
 }
 
 
@@ -153,25 +155,25 @@ XmlReadHelper::~XmlReadHelper()
 
 bool XmlReadHelper::readNextStartElement()
 {
-	return m_xmlReader.readNextStartElement();
+	return m_xmlReader->readNextStartElement();
 }
 
 
 void XmlReadHelper::skipCurrentElement()
 {
-	m_xmlReader.skipCurrentElement();
+	m_xmlReader->skipCurrentElement();
 }
 
 
 QString XmlReadHelper::name()
 {
-	return m_xmlReader.name().toString();
+	return m_xmlReader->name().toString();
 }
 
 
 bool XmlReadHelper::atEnd()
 {
-	return m_xmlReader.atEnd();
+	return m_xmlReader->atEnd();
 }
 
 
@@ -183,12 +185,12 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 		return false;
 	}
 
-	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = m_xmlReader.attributes().value(name).toInt();
+	*value = m_xmlReader->attributes().value(name).toInt();
 
 	return true;
 }
@@ -202,12 +204,12 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 		return false;
 	}
 
-	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = m_xmlReader.attributes().value(name).toDouble();
+	*value = m_xmlReader->attributes().value(name).toDouble();
 
 	return true;
 }
@@ -221,7 +223,7 @@ bool XmlReadHelper::readUlongAttribute(const QString& name, ulong* value)
 		return false;
 	}
 
-	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
 	{
 		return false;
 	}
@@ -230,7 +232,7 @@ bool XmlReadHelper::readUlongAttribute(const QString& name, ulong* value)
 
 	bool result = true;
 
-	str = m_xmlReader.attributes().value(name).toString();
+	str = m_xmlReader->attributes().value(name).toString();
 
 	*value = str.toULong(&result, 0);
 
@@ -285,12 +287,12 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 		return false;
 	}
 
-	if (m_xmlReader.attributes().hasAttribute(name) == false)
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = m_xmlReader.attributes().value(name).toString();
+	*value = m_xmlReader->attributes().value(name).toString();
 
 	return true;
 }
@@ -311,7 +313,7 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 		return false;
 	}
 
-	QString str = m_xmlReader.readElementText();
+	QString str = m_xmlReader->readElementText();
 
 	*value = str;
 
@@ -334,7 +336,7 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 		return false;
 	}
 
-	QString str = m_xmlReader.readElementText();
+	QString str = m_xmlReader->readElementText();
 
 	*value = str.toInt();
 
@@ -391,9 +393,9 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAdd
 
 bool XmlReadHelper::findElement(const QString& elementName)
 {
-	while(m_xmlReader.atEnd() == false)
+	while(m_xmlReader->atEnd() == false)
 	{
-		if (m_xmlReader.readNextStartElement() == false)
+		if (m_xmlReader->readNextStartElement() == false)
 		{
 			continue;
 		}

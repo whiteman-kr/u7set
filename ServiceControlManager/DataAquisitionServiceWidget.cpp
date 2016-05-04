@@ -68,7 +68,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 	}
 	if (role == Qt::DisplayRole)
 	{
-		const AppDataSource& d = m_dataSource[row];
+		const DataSource& d = m_dataSource[row];
 		switch (index.column())
 		{
 		case DSC_NAME: return d.name();
@@ -154,7 +154,7 @@ void DataSourcesStateModel::parseData(UdpRequest udpRequest)
 			{
 				quint32 sourceID = udpRequest.readDword();
 
-				AppDataSource* dataSource = new AppDataSource;
+				DataSource* dataSource = new DataSource;
 				dataSource->setID(sourceID);
 				m_dataSource.append(static_cast<int>(sourceID), dataSource);
 			}
