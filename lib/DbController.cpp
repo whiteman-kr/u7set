@@ -12,8 +12,8 @@ DbController::DbController() :
 
 	connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);		// delete m_worker on thread termination
 
-	connect(&m_thread, &QThread::started, [](){qDebug() << "Database communication thread has been started";});
-	connect(&m_thread, &QThread::finished, [](){qDebug() << "Database communication thread has been finished";});
+	//connect(&m_thread, &QThread::started, [](){qDebug() << "Database communication thread has been started";});
+	//connect(&m_thread, &QThread::finished, [](){qDebug() << "Database communication thread has been finished";});
 
 	// Notifications
 	//

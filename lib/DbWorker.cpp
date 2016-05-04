@@ -1055,7 +1055,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
-			qDebug() << "SetCompleted()";
+			//qDebug() << "SetCompleted()";
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
@@ -1210,7 +1210,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				{
 					if (result == true)
 					{
-						qDebug() << "Upgrade: Commit changes.";
+						//qDebug() << "Upgrade: Commit changes.";
 						db.commit();
 					}
 					else
@@ -1271,7 +1271,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
-				qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+				//qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
 
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -1315,7 +1315,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 					}
 				}
 
-				qDebug() << "End upgrade item";
+				//qDebug() << "End upgrade item";
 			}
 
 			// The table FileInstance has details field which is JSONB, details for some files
@@ -1338,7 +1338,7 @@ WHERE
 	FI.Details = '{}';
 )";
 
-				qDebug() << "Update file details";
+				//qDebug() << "Update file details";
 
 				QSqlQuery euipmentListQuery(db);
 				result = euipmentListQuery.exec(reqEquipmentList);
@@ -1355,7 +1355,7 @@ WHERE
 					int fileId = euipmentListQuery.value(1).toInt();
 					QString fileName = euipmentListQuery.value(2).toString();
 
-					qDebug() << "FileName: " << fileName << ", FileID: " << fileId << ", FileInstanceID: " << fileInstanceId.toString();
+					//qDebug() << "FileName: " << fileName << ", FileID: " << fileId << ", FileInstanceID: " << fileInstanceId.toString();
 
 					// Get file instance, read it to DeviceObject
 					//
@@ -3166,7 +3166,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	quint64 finish = QDateTime::currentMSecsSinceEpoch();
 
-	qDebug() << (finish - start);
+	//qDebug() << (finish - start);
 
 	m_progress->setValue(100);
 
@@ -3328,7 +3328,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(TO_INT(s.byteOrder()))					//
 	.arg(s.enableTuning() ? "TRUE" : "FALSE");	// since version 42 of database
 
-	qDebug() << str;
+	//qDebug() << str;
 
 	return str;
 }
