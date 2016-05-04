@@ -10,9 +10,10 @@
 #include "MultiThreadFileTest.h"
 #include "MultiThreadSignalTests.h"
 #include "ProjectPropertyTests.h"
+#include "DbControllerProjectManagementTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 50;
+const int DatabaseProjectVersion = 54;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
 	{
 		// Block is to release QSqlDatabase
 		//
-		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
+		QSqlDatabase db = QSqlDatabase::database();
 
 		db.setHostName(DatabaseHost);
 		db.setUserName(DatabaseUser);
@@ -165,6 +166,7 @@ int main(int argc, char *argv[])
 		SignalTests signalTests;
 		ProjectPropertyTests projectPropertyTests;
 		PropertyObjectTests propertyObjectTests;
+		DbControllerProjectTests dbControllerProjectTests;
 
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
@@ -216,6 +218,14 @@ int main(int argc, char *argv[])
 		}
 
 		db.close();
+
+		testResult = QTest::qExec(&dbControllerProjectTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
 
 		// Multi-thread testing
 		//

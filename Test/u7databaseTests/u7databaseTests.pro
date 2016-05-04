@@ -49,7 +49,9 @@ SOURCES += main.cpp \
     MultiThreadSignalTests.cpp \
     PropertyObjectTests.cpp \
     ProjectPropertyTests.cpp \
-    ../../lib/XmlHelper.cpp
+    ../../lib/XmlHelper.cpp \
+    DbControllerProjectManagementTests.cpp \
+    ../../lib/Queue.cpp
 
 HEADERS += \
     UserTests.h \
@@ -73,7 +75,9 @@ HEADERS += \
     MultiThreadSignalTests.h \
     PropertyObjectTests.h \
     ProjectPropertyTests.h \
-    ../../include/XmlHelper.h
+    ../../include/XmlHelper.h \
+    DbControllerProjectManagementTests.h \
+    ../../include/Queue.h
 
 #c++11 support for GCC
 #
