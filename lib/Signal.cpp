@@ -702,10 +702,10 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
-	xml.writeIntAttribute("RegValueAddOffset", regValueAddr().offset());
-	xml.writeIntAttribute("RegValueAddrBit", regValueAddr().bit());
-	xml.writeIntAttribute("RegValidityAddOffset", regValidityAddr().offset());
-	xml.writeIntAttribute("RegValidityAddrBit", regValidityAddr().bit());
+	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
+	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
+	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
+	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
 
 	xml.writeEndElement();				// </Signal>
 }
@@ -796,14 +796,14 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 
 	offset = bit = 0;
 
-	result &= xml.readIntAttribute("RegValueAddrOffset", &offset);
-	result &= xml.readIntAttribute("RegValueAddrBit", &bit);
+	result &= xml.readIntAttribute("ValueOffset", &offset);
+	result &= xml.readIntAttribute("ValueBit", &bit);
 
 	m_regValueAddr.setOffset(offset);
 	m_regValueAddr.setBit(bit);
 
-	result &= xml.readIntAttribute("RegValidityAddrOffset", &offset);
-	result &= xml.readIntAttribute("RegValidityAddrBit", &bit);
+	result &= xml.readIntAttribute("ValidityOffset", &offset);
+	result &= xml.readIntAttribute("ValidityBit", &bit);
 
 	m_regValidityAddr.setOffset(offset);
 	m_regValidityAddr.setBit(bit);

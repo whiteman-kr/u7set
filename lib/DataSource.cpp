@@ -236,6 +236,15 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	m_receivedFramesCount++;
 	m_receivedDataSize += sizeof(rupFrame);
 
+	if (rupFrame.header.protocolVersion != 4)
+	{
+		// if version == 3
+		//
+		const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
+		assert(false);
+		return;
+	}
+
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)
@@ -245,6 +254,10 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	}
 
 	int frameNo = rupFrame.header.frameNumber;
+
+	qDebug() << "Frame No " << frameNo;
+
+	return;
 
 	if (frameNo >= framesQuantity)
 	{
