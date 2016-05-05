@@ -2,26 +2,40 @@
 
 #include "../include/DataChannel.h"
 #include "AppSignalState.h"
+#include "AppDataServiceTypes.h"
+#include "AppDataProcessingThread.h"
 
 
 class AppDataChannel : public DataChannel
 {
-	Q_OBJECT
+	SourceParseInfoMap m_sourceParseInfoMap;		// source ip => QVector<SignalParseInfo> map
+
+	AppSignalStates* m_signalStates = nullptr;		// allocated and freed in AppDataService
+
+	AppDataProcessingThreadsPool m_processingThreadsPool;
+
+protected:
+	virtual void clear() override;
+
 public:
 	AppDataChannel(int channel, const HostAddressPort& dataReceivingIP);
+	virtual ~AppDataChannel();
 
-signals:
-
-public slots:
+	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
 };
 
 
-
-class AppDataChannelThread : public DataChannelThread
+// This thread need to read UDP datagramms (inside DataChannel) and push it to the m_rupDataQueue
+//
+class AppDataChannelThread : public SimpleThread
 {
+private:
+	AppDataChannel* m_appDataChannel = nullptr;
+
 public:
 	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP);
 
-	void prepare(QVector<Signal>& appSignals, QHash<QString, int> appSignalID2IndexMap, AppSignalState* signalStates);
+	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
+	void addDataSource(DataSource* dataSource);
 };
 

@@ -355,7 +355,7 @@ namespace Builder
 
 			if (chassis == dataSourceChassis)
 			{
-				appDataSource.addAppSignal(appSignal.appSignalID());
+				appDataSource.addAssociatedSignal(appSignal.appSignalID());
 
 				m_associatedAppSignals.insert(appSignal.appSignalID(), true);
 			}

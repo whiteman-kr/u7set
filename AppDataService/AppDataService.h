@@ -17,6 +17,11 @@ namespace Hardware
 	class DeviceRoot;
 }
 
+
+
+
+//typedef HashedVector<quint32, DataSource*> AppSignals;
+
 class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
@@ -26,15 +31,14 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
-	SignalSet m_signalSet;
+//	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
+	//SignalSet m_signalSet;
 	UnitList m_unitInfo;
 
-	QVector<Signal> m_appSignals;
-	QHash<QString, int> m_appSignalID2IndexMap;
+	AppSignals m_appSignals;
+	AppDataSources m_appDataSources;
 
-	AppSignalState* m_signalStates = nullptr;
-	QMutex m_signalStatesMutex;
+	AppSignalStates m_signalStates;
 
 	QTimer m_timer;
 
@@ -75,6 +79,7 @@ private:
 	void initDataChannels();
 	void runDataChannels();
 
+	void clearConfiguration();
 
 public:
 	AppDataServiceWorker(const QString& serviceStrID,

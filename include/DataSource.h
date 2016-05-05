@@ -58,8 +58,6 @@ protected:
 };
 
 
-
-
 class DataSource : public QObject
 {
 public:
@@ -114,7 +112,7 @@ private:
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	ulong m_lmDataID = 0;
-	QStringList m_appSignals;
+	QStringList m_associatedSignals;
 
 	//
 
@@ -201,13 +199,8 @@ public:
 
 	void processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
 
-	void addAppSignal(const QString& appSignalID) { m_appSignals.append(appSignalID); }
-	void clearAppSignals() { m_appSignals.clear(); }
+	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
+	void clearAssociatedSignals() { m_associatedSignals.clear(); }
 
-	const QStringList& appSignals() const { return m_appSignals; }
+	const QStringList& associatedSignals() const { return m_associatedSignals; }
 };
-
-
-
-
-

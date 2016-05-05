@@ -432,7 +432,6 @@ namespace Builder
 			int outputSignalIndex = -1;
 		};
 
-
 		// input parameters
 		//
 
@@ -573,6 +572,7 @@ namespace Builder
 		bool copyDiscreteSignalsToRegBuf();
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
+		bool setLmAppDataSize();
 
 		bool generateRS232ConectionCode();
 		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);

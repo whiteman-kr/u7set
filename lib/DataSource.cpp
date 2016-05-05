@@ -149,9 +149,9 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
-	xml.writeIntAttribute("Count", m_appSignals.count());
+	xml.writeIntAttribute("Count", m_associatedSignals.count());
 
-	for(const QString& appSignalID : m_appSignals)
+	for(const QString& appSignalID : m_associatedSignals)
 	{
 		xml.writeStringElement("SignalID", appSignalID);
 	}
@@ -205,9 +205,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result = xml.readIntAttribute("Count", &signalCount);
 
-	m_appSignals.clear();
-
-
+	m_associatedSignals.clear();
 
 	for(int count = 0; count < signalCount; count++)
 	{
@@ -220,10 +218,10 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 		xml.readStringElement("SignalID", &signalID);
 
-		m_appSignals.append(signalID);
+		m_associatedSignals.append(signalID);
 	}
 
-	if (signalCount != m_appSignals.count())
+	if (signalCount != m_associatedSignals.count())
 	{
 		assert(false);
 		return false;
@@ -291,3 +289,5 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 		rupDataQueue.completePush();
 	}
 }
+
+
