@@ -11,11 +11,13 @@
 //
 // ----------------------------------------------------------------------------------------
 
+const int BAD_ADDRESS = -1;
+
 class Address16
 {
 private:
-	int m_offset = -1;
-	int m_bit = -1;
+	int m_offset = BAD_ADDRESS;
+	int m_bit = BAD_ADDRESS;
 
 public:
 	Address16() {}
@@ -76,9 +78,9 @@ public:
 		return m_bit;
 	}
 
-	void reset() { 	m_offset = -1; m_bit = -1; }
+	void reset() { 	m_offset = BAD_ADDRESS; m_bit = BAD_ADDRESS; }
 
-	bool isValid() const { return m_offset != -1 && m_bit != -1; }
+	bool isValid() const { return m_offset != BAD_ADDRESS && m_bit != BAD_ADDRESS; }
 
 	QString toString() const
 	{

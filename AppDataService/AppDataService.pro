@@ -86,7 +86,9 @@ SOURCES += main.cpp \
     ../lib/DataChannel.cpp \
     ../lib/DataProtocols.cpp \
     AppDataChannel.cpp \
-    AppDataSource.cpp
+    AppDataSource.cpp \
+    AppDataServiceTypes.cpp \
+    AppDataProcessingThread.cpp
 
 HEADERS += \
 	Stable.h \
@@ -121,7 +123,10 @@ HEADERS += \
     ../include/Utils.h \
     ../include/DataChannel.h \
     AppDataChannel.h \
-    AppDataSource.h
+    AppDataSource.h \
+    ../include/OrderedHash.h \
+    AppDataServiceTypes.h \
+    AppDataProcessingThread.h
 
 include(../qtservice/src/qtservice.pri)
 

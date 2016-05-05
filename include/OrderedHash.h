@@ -538,6 +538,16 @@ public:
 	VALUE& operator[](const KEY& key) { return (*this)[m_map.value(key)]; }
 	const VALUE& operator[](const KEY& key) const {  return (*this)[m_map[key]]; }
 
+	int indexOf(const KEY& key)
+	{
+		if (m_map.contains(key))
+		{
+			return m_map[key];
+		}
+
+		return -1;
+	}
+
 	void clear() { m_map.clear(); QVector<VALUE>::clear(); }
 
 	bool isEmpty() const { return QVector<VALUE>::isEmpty(); }

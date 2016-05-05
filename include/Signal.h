@@ -7,8 +7,8 @@
 #include "../include/DbStruct.h"
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
-#include "../include/DataSource.h"
 #include "../include/Address16.h"
+#include "../include/DataSource.h"
 #include "../VFrame30/Afb.h"
 
 
@@ -333,7 +333,7 @@ public:
 	Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
-        int inOutTypeInt() const { return TO_INT(m_inOutType); }
+		int inOutTypeInt() const { return TO_INT(m_inOutType); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 

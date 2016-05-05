@@ -134,6 +134,8 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
+			if (!setLmAppDataSize()) break;
+
 			if (!copyRS232Signals()) break;
 
 			if (!finishAppLogicCode()) break;
@@ -2106,6 +2108,41 @@ namespace Builder
 
 				result = false;
 			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::setLmAppDataSize()
+	{
+		if (m_lm == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (m_lm->propertyExists("AppDataSize") == false)
+		{
+			assert(false);
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Property 'AppDataSize' is not exists in LM '%1'")).
+						  arg(m_lm->equipmentId()));
+			return false;
+		}
+
+		unsigned int appDataSize = static_cast<unsigned int>(m_memoryMap.getAppDataSize());
+
+		QVariant v(appDataSize);
+
+		bool result = const_cast<Hardware::DeviceModule*>(m_lm)->setPropertyValue("AppDataSize", v);
+
+		if (result == false)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Set property 'AppDataSize' value error in LM '%1'")).
+						  arg(m_lm->equipmentId()));
 		}
 
 		return result;

@@ -306,8 +306,6 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 		return false;
 	}
 
-	readNextStartElement();
-
 	if (name() != elementName)
 	{
 		return false;
@@ -316,6 +314,8 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 	QString str = m_xmlReader->readElementText();
 
 	*value = str;
+
+	skipCurrentElement();
 
 	return true;
 }
@@ -329,9 +329,7 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 		return false;
 	}
 
-	readNextStartElement();
-
-	if (name() != elementName)
+		if (name() != elementName)
 	{
 		return false;
 	}
@@ -339,6 +337,8 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 	QString str = m_xmlReader->readElementText();
 
 	*value = str.toInt();
+
+	skipCurrentElement();
 
 	return true;
 }

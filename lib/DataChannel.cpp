@@ -25,12 +25,6 @@ DataChannel::~DataChannel()
 
 void DataChannel::clear()
 {
-	for(DataSource* dataSource : m_dataSources)
-	{
-		delete dataSource;
-	}
-
-	m_dataSources.clear();
 }
 
 
@@ -171,29 +165,4 @@ void DataChannel::onSocketReadyRead()
 		}
 	}
 }
-
-
-// -------------------------------------------------------------------------------
-//
-// DataChannelThread class implementation
-//
-// -------------------------------------------------------------------------------
-
-DataChannelThread::DataChannelThread()
-{
-}
-
-
-void DataChannelThread::addDataSource(DataSource* dataSource)
-{
-	if (m_dataChannel != nullptr)
-	{
-		m_dataChannel->addDataSource(dataSource);
-	}
-	else
-	{
-		assert(false);
-	}
-}
-
 

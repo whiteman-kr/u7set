@@ -21,3 +21,23 @@ public:
 	int index = 0;
 };
 
+
+class AppSignalStates
+{
+	QMutex m_allMutex;
+
+	AppSignalState* m_appSignalState = nullptr;
+	int m_size = 0;
+
+public:
+	~AppSignalStates();
+
+	void clear();
+
+	void setSize(int size);
+
+	int size() const { return m_size; }
+
+	AppSignalState* operator [] (int index);
+};
+

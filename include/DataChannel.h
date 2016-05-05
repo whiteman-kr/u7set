@@ -11,14 +11,17 @@
 #include "../include/Signal.h"
 
 
+typedef Queue<RupData> RupDataQueue;
+
+
 class DataChannel : public SimpleThreadWorker
 {
-private:
+protected:
 	DataSource::DataType m_dataType;
 	int m_channel = 0;
 	HostAddressPort m_dataReceivingIP;
 
-	HashedVector<quint32, DataSource*> m_dataSources;
+	HashedVector<quint32, DataSource*> m_dataSources;			// allocated and freed in AppDataService
 
 	HashedVector<quint32, quint32> m_unknownDataSources;
 
@@ -29,7 +32,7 @@ private:
 
 	RupFrame m_rupFrame;
 
-	Queue<RupData> m_rupDataQueue;
+	RupDataQueue m_rupDataQueue;
 
 	virtual void onThreadStarted();
 	virtual void onThreadFinished();
@@ -40,11 +43,11 @@ private:
 	void closeSocket();
 	void onSocketReadyRead();
 
-public:
-	explicit DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP);
-	virtual ~DataChannel();
+	virtual void clear();
 
-	void clear();
+public:
+	DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP);
+	virtual ~DataChannel();
 
 	void addDataSource(DataSource* dataSource);
 
@@ -57,9 +60,6 @@ public slots:
 
 class DataChannelThread : public SimpleThread
 {
-protected:
-	DataChannel* m_dataChannel = nullptr;
-
 public:
 	DataChannelThread();
 

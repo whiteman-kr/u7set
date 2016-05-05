@@ -25,17 +25,7 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceStrID,
 
 AppDataServiceWorker::~AppDataServiceWorker()
 {
-	if (m_signalStates != nullptr)
-	{
-		delete [] m_signalStates;
-	}
-}
-
-
-void AppDataServiceWorker::readConfigurationFiles()
-{
-	SerializeEquipmentFromXml("equipment.xml", m_deviceRoot);
-	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
+	clearConfiguration();
 }
 
 
@@ -295,24 +285,21 @@ void AppDataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 }
 
 
-void AppDataServiceWorker::stopDataChannels()
+void AppDataServiceWorker::initDataChannels()
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
-		if (m_appDataChannelThread[channel] != nullptr)
-		{
-			m_appDataChannelThread[channel]->quitAndWait();
-			delete m_appDataChannelThread[channel];
-			m_appDataChannelThread[channel] = nullptr;
-		}
+		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
+						m_settings.appDataServiceChannel[channel].appDataReceivingIP);
 	}
 }
+
 
 void AppDataServiceWorker::runDataChannels()
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
-		m_appDataChannelThread[channel]->prepare(m_appSignals, m_appSignalID2IndexMap, m_signalStates);
+		m_appDataChannelThread[channel]->prepare(m_appSignals, &m_signalStates);
 
 		if (m_appDataChannelThread[channel] != nullptr)
 		{
@@ -326,14 +313,16 @@ void AppDataServiceWorker::runDataChannels()
 }
 
 
-void AppDataServiceWorker::initDataChannels()
+void AppDataServiceWorker::stopDataChannels()
 {
-	stopDataChannels();
-
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
-		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
-						m_settings.appDataServiceChannel[channel].appDataReceivingIP);
+		if (m_appDataChannelThread[channel] != nullptr)
+		{
+			m_appDataChannelThread[channel]->quitAndWait();
+			delete m_appDataChannelThread[channel];
+			m_appDataChannelThread[channel] = nullptr;
+		}
 	}
 }
 
@@ -346,6 +335,8 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	{
 		return;
 	}
+
+	clearConfiguration();
 
 	bool result = readConfiguration(configurationXmlData);
 
@@ -369,38 +360,26 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			continue;
 		}
 
+		result = true;
+
 		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
 		{
 			result &= readDataSources(fileData);
-
-			if (result == true)
-			{
-				qDebug() << "ReadDataSources - OK";
-				continue;
-			}
-			else
-			{
-				qDebug() << "ReadDataSources - Error";
-				break;
-			}
 		}
 
 		if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
 		{
 			result &= readAppSignals(fileData);
+		}
 
-			if (result == true)
-			{
-				qDebug() << "ReadAppSignals - OK";
-				continue;
-			}
-			else
-			{
-				qDebug() << "ReadAppSignals - Error";
-				break;
-			}
-
-			continue;
+		if (result == true)
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " OK";
+		}
+		else
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+			break;
 		}
 	}
 
@@ -433,6 +412,8 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 	bool result = true;
 
+	m_appDataSources.clear();
+
 	while (1)
 	{
 		bool find = xml.findElement(DataSource::ELEMENT_APP_DATA_SOURCE);
@@ -442,7 +423,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			break;
 		}
 
-		DataSource* dataSource = new DataSource();
+		AppDataSource* dataSource = new AppDataSource();
 
 		result &= dataSource->readFromXml(xml);
 
@@ -463,6 +444,8 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			delete dataSource;
 			continue;
 		}
+
+		m_appDataSources.insert(dataSource->lmAddress32(), dataSource);
 
 		qDebug() << "DataSource: " << dataSource->lmStrID() << "channel " << dataSource->channel();
 
@@ -489,12 +472,6 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
-	m_unitInfo.clear();
-	m_appSignals.clear();
-	m_appSignalID2IndexMap.clear();
-
-	delete [] m_signalStates;
-	m_signalStates = nullptr;
 
 	bool result = true;
 
@@ -542,8 +519,6 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 
 	result &= xml.readIntAttribute("Count", &signalCount);
 
-	m_appSignals.resize(signalCount);
-
 	for(int count = 0; count < signalCount; count++)
 	{
 		if (xml.findElement("Signal") == false)
@@ -552,10 +527,29 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 			break;
 		}
 
-		result &= m_appSignals[count].readFromoXml(xml);
-	}
+		Signal* signal = new Signal();
 
-	buildAppSignalID2IndexMap(result);
+		bool res = signal->readFromoXml(xml);
+
+		if (res == true)
+		{
+			if (m_appSignals.contains(signal->appSignalID()) == false)
+			{
+				m_appSignals.insert(signal->appSignalID(), signal);
+			}
+			else
+			{
+				res = false;
+			}
+		}
+
+		if (res == false)
+		{
+			delete signal;
+		}
+
+		result &= res;
+	}
 
 	createAndInitSignalStates();
 
@@ -563,35 +557,9 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 }
 
 
-void AppDataServiceWorker::buildAppSignalID2IndexMap(bool signalsLoadResult)
-{
-	m_appSignalID2IndexMap.clear();
-
-	if (signalsLoadResult == false)
-	{
-		return;
-	}
-
-	int index = 0;
-
-	for(Signal& signal : m_appSignals)
-	{
-		m_appSignalID2IndexMap.insert(signal.appSignalID(), index);
-
-		index++;
-	}
-}
-
-
 void AppDataServiceWorker::createAndInitSignalStates()
 {
-	if (m_signalStates != nullptr)
-	{
-		assert(false);
-
-		delete [] m_signalStates;
-		m_signalStates = nullptr;
-	}
+	m_signalStates.clear();
 
 	if (m_appSignals.isEmpty())
 	{
@@ -600,17 +568,37 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	int signalCount = m_appSignals.count();
 
-	m_signalStates = new AppSignalState[signalCount];
+	m_signalStates.setSize(signalCount);
 
 	int index = 0;
 
-	for(Signal& signal : m_appSignals)
+	for(Signal* signal : m_appSignals)
 	{
-		AppSignalState& signalState = m_signalStates[index];
+		AppSignalState* signalState = m_signalStates[index];
 
-		signalState.signal = &signal;
-		signalState.index = index;
+		if (signalState == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		signalState->signal = signal;
+		signalState->index = index;
 
 		index++;
 	}
+}
+
+
+void AppDataServiceWorker::clearConfiguration()
+{
+	// free all resources allocated in onConfigurationReady
+	//
+	stopDataChannels();
+
+	m_unitInfo.clear();
+
+	m_appSignals.clear();
+	m_appDataSources.clear();
+	m_signalStates.clear();
 }
