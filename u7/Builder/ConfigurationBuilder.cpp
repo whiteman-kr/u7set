@@ -257,15 +257,15 @@ namespace Builder
 				continue;
 			}
 
-			if (m->propertyExists("SubsystemChannel") == false)
+			if (m->propertyExists("LMNumber") == false)
 			{
-				lmReport << "No SubsystemChannel property found in " + m->equipmentIdTemplate();
+				lmReport << "No LMNumber property found in " + m->equipmentIdTemplate();
 				assert(false);
 				continue;
 			}
 
 			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
-			int channel = m->propertyValue("SubsystemChannel").toInt();
+			int channel = m->propertyValue("LMNumber").toInt();
 
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->equipmentIdTemplate();

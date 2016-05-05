@@ -665,7 +665,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ID", ID());
 	xml.writeIntAttribute("GroupID", signalGroupID());
 	xml.writeIntAttribute("InstanceID", signalInstanceID());
-	xml.writeIntAttribute("SubsystemChannel", channel());
+	xml.writeIntAttribute("LMNumber", channel());
 	xml.writeIntAttribute("Type", typeInt());
 	xml.writeStringAttribute("AppSignalID", appSignalID());
 	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
@@ -723,7 +723,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("ID", &m_ID);
 	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
 	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
-	result &= xml.readIntAttribute("SubsystemChannel", &m_channel);
+	result &= xml.readIntAttribute("LMNumber", &m_channel);
 
 	QString str;
 

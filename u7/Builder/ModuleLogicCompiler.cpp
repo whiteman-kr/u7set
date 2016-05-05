@@ -3063,7 +3063,7 @@ namespace Builder
 		int channel = 0;
 
 		result &= DeviceHelper::getStrProperty(m_lm, "SubsystemID", &subsysId, m_log);
-		result &= DeviceHelper::getIntProperty(m_lm, "SubsystemChannel", &channel, m_log);
+		result &= DeviceHelper::getIntProperty(m_lm, "LMNumber", &channel, m_log);
 
 		if (result == false)
 		{

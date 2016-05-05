@@ -59,6 +59,14 @@ bool Property::loadValue(const ::Proto::Property& protoProperty)
 	QString sv(protoProperty.value().c_str());
 	QVariant value = this->value();
 
+/*	if (isEnum() == true)
+	{
+		//qint32 i = sv.toInt(&ok);
+		//value = QVariant(i);
+		setEnumValue(protoProperty.value().c_str());
+		return true;
+	}*/
+
 	switch (value.type())
 	{
 		case QVariant::Bool:
