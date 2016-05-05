@@ -1190,15 +1190,5 @@ SELECT * FROM add_or_update_file(1, '$root$/HP', 'workstation.hws', 'Update: Add
 
 
 
----------------------------------------------------------------------------
--- Empty file
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: admin, Date: 08.04.2016 14:15:43
--- FileName: tunsrv.hsw
---
----------------------------------------------------------------------------
-
-SELECT * FROM add_or_update_file(1, '$root$/HP', 'tunsrv.hsw', 'Update: Adding file tunsrv.hsw', E'\\x30', '{}');
-
 
 

@@ -362,6 +362,7 @@ namespace Hardware
 							quint32 (4 bytes unsigned integer)
 							bool (true, false),
 							double,
+							E::Channel,
 							string
 		min:                property minimum value (ignored for bool, string)
 		max:                property maximim value (ignored for bool, string)
@@ -432,6 +433,7 @@ namespace Hardware
 						type != "quint32" &&
 						type != "bool" &&
 						type != "double" &&
+						type != "E::Channel" &&
 						type != "string")
 				{
 					qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
@@ -571,6 +573,27 @@ namespace Hardware
 					newProperty->setUpdateFromPreset(updateFromPreset);
 
 					continue;
+				}
+
+				if (type == "E::Channel")
+				{
+					// Default Value
+					//
+					//HBE::Channel defaultE = E::Channel::A;
+					//QVariant v = QVariant::fromValue(defaultE);
+
+					// Add property with default value, if present old value, it will be set later
+					//
+					/*auto newProperty = addProperty<E::Channel>(name, true);
+
+					newProperty->setSpecific(true);
+					newProperty->setCategory(category);
+					newProperty->setValue(QVariant::fromValue(E::Channel::A));
+					newProperty->setReadOnly(false);
+					newProperty->setPrecision(precision);
+					newProperty->setUpdateFromPreset(updateFromPreset);
+
+					continue;*/
 				}
 
 				if (type == "string")

@@ -106,6 +106,15 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
+	enum class Channel
+	{
+		A = 0,
+		B = 1,
+		C = 2,
+		D = 3
+	};
+	Q_ENUM(Channel)
+
 public:
 	// Convert enum value (not index) to QString
 	//
@@ -167,6 +176,7 @@ const char* const DataFormatStr[] =
 	"Float",
 };
 
+Q_DECLARE_METATYPE(E::Channel)
 
 enum class UartID
 {
