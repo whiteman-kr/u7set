@@ -272,20 +272,39 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	{
 		m_receivedPacketCount++;
 
-		// merge frames data into rupDataQueue's buffer
-		//
-		int framesQuantity = m_rupFrames[0].header.framesQuantity;
+		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
+		QDateTime plantTime;
+		RupTimeStamp timeStamp = m_rupFrames[0].header.TimeStamp;
+
+		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
+		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
+
+		QDateTime currentTime = QDateTime::currentDateTimeUtc();
+
+		// get rupData pointer and lock rupDataQueue
+		//
 		RupData* rupData = rupDataQueue.beginPush();
 
+		// fill rupData header
+		//
 		rupData->sourceIP = ip;
+
+		rupData->time.plant = plantTime.toMSecsSinceEpoch();
+		rupData->time.system = currentTime.toMSecsSinceEpoch();
+		rupData->time.local = currentTime.toLocalTime().toMSecsSinceEpoch();
+
 		rupData->dataSize = framesQuantity * RUP_FRAME_DATA_SIZE;
 
+		// merge frames data into rupDataQueue's buffer
+		//
 		for(int i = 0; i < framesQuantity; i++)
 		{
 			memcpy(rupData->data + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
 		}
 
+		// push rupData and unlock rupDataQueue
+		//
 		rupDataQueue.completePush();
 	}
 }

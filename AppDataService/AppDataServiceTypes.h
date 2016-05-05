@@ -33,6 +33,8 @@ struct SignalParseInfo
 
 	E::SignalType type = E::SignalType::Discrete;
 	E::DataFormat dataFormat = E::DataFormat::UnsignedInt;
+	E::ByteOrder byteOrder = E::ByteOrder::BigEndian;
+
 
 	int dataSize = 1;
 

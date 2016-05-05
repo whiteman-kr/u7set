@@ -15,9 +15,20 @@ enum DataSourceState
 };
 
 
+struct Times
+{
+	qint64	system = 0;
+	qint64	local = 0;
+	qint64	plant = 0;
+};
+
+
 struct RupData
 {
 	quint32 sourceIP;
+
+	Times time;
+
 	int dataSize;
 	char data[RUP_FRAME_DATA_SIZE * RUP_MAX_FRAME_COUNT];
 };
@@ -118,11 +129,6 @@ private:
 
 	RupFrame* m_rupFrames = nullptr;
 	char* m_framesData = nullptr;
-
-
-	void allocateMemory();
-	void mergeFrames();
-	void parseFramesData();
 
 public:
 	DataSource();
