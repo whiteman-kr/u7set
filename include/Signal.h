@@ -176,6 +176,7 @@ private:
 	void setInstanceAction(E::InstanceAction action) { m_instanceAction = action; }
 
 public:
+	Signal(bool initProperties);
 	Signal();
 
 	Signal(const Signal& signal) :
@@ -359,7 +360,7 @@ public:
 	static std::shared_ptr<UnitList> m_unitList;
 
 	void writeToXml(XmlWriteHelper& xml);
-	bool readFromoXml(XmlReadHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
 
 	friend class DbWorker;
 };

@@ -20,7 +20,7 @@ AppDataChannel::~AppDataChannel()
 
 void AppDataChannel::clear()
 {
-	m_processingThreadsPool.stopAndClear();
+	m_processingThreadsPool.stopAndClearProcessingThreads();
 	m_sourceParseInfoMap.clear();
 
 	DataChannel::clear();
@@ -82,9 +82,25 @@ void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStat
 
 		m_sourceParseInfoMap.insert(dataSourceIP, sourceParseInfo);
 	}
-
-	m_processingThreadsPool.start(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
 }
+
+
+void AppDataChannel::onThreadStarted()
+{
+	DataChannel::onThreadStarted();
+
+	m_processingThreadsPool.createProcessingThreads(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
+	m_processingThreadsPool.startProcessingThreads();
+}
+
+
+void AppDataChannel::onThreadFinished()
+{
+	m_processingThreadsPool.stopAndClearProcessingThreads();
+
+	DataChannel::onThreadFinished();
+}
+
 
 // -------------------------------------------------------------------------------
 //

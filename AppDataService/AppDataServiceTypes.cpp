@@ -58,7 +58,7 @@ void SignalParseInfo::setSignalParams(int i, const Signal& s)
 {
 	index = i;
 
-	regAddr = s.regAddr();
+	valueAddr = s.regAddr();
 	type = s.type();
 	dataFormat = s.dataFormat();
 	dataSize = s.dataSize();

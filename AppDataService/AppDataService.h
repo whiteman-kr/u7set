@@ -75,9 +75,9 @@ private:
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
 	void createAndInitSignalStates();
 
-	void stopDataChannels();
-	void initDataChannels();
-	void runDataChannels();
+	void stopDataChannelThreads();
+	void initDataChannelThreads();
+	void runDataChannelThreads();
 
 	void clearConfiguration();
 

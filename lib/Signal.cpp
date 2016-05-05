@@ -16,6 +16,20 @@ DataFormatList::DataFormatList()
 std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
 
 
+Signal::Signal(bool initProperties) :
+	PropertyObject()
+{
+	if (initProperties == true)
+	{
+		InitProperties();		// same as Signal::Signal()
+	}
+	else
+	{
+		//	InitProperties();	// no init properties fot faster construction
+	}
+}
+
+
 Signal::Signal() :
 	PropertyObject()
 {
@@ -695,7 +709,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 }
 
 
-bool Signal::readFromoXml(XmlReadHelper& xml)
+bool Signal::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 

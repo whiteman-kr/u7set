@@ -60,9 +60,7 @@ bool AppDataServiceChannel::writeToXml(XmlWriteHelper& xml, int channel)
 
 bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
 {
-	xml.readNextStartElement();
-
-	if (xml.name() != sectionName(channel))
+	if (xml.findElement(sectionName(channel)) == false)
 	{
 		return false;
 	}
@@ -72,10 +70,19 @@ bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
 	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
 	result &= xml.readHostAddress(PROP_APP_DATA_NETMASK, &appDataNetmask);
 
-	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
-	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
+	if (xml.findElement(PROP_ARCH_SERVICE_ID) == false)
+	{
+		return false;
+	}
 
-	xml.skipCurrentElement();
+	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
+
+	if (xml.findElement(PROP_CFG_SERVICE_ID) == false)
+	{
+		return false;
+	}
+
+	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
 
 	return result;
 }
