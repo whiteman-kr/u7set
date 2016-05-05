@@ -70,6 +70,7 @@
 #include <QListWidget>
 #include <QTableWidget>
 #include <QTabWidget>
+#include <QStackedWidget>
 #include <QTreeWidget>
 
 #include <QHeaderView>
