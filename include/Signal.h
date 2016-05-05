@@ -156,7 +156,8 @@ private:
 										// signal address in i/o modules buffers
 
 	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_regAddr;				// signal address in FSC data packet (registration address)
+	Address16 m_regValueAddr;				// signal Value address in FSC data packet (registration address)
+	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet (registration address)
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -221,16 +222,20 @@ public:
 
 	Address16& iobufferAddr() { return m_iobufferAddr; }
 	Address16& ramAddr() { return m_ramAddr; }
-	Address16& regAddr() { return m_regAddr; }
+	Address16& regValueAddr() { return m_regValueAddr; }
+	Address16& regValidityAddr() { return m_regValidityAddr; }
 
 	const Address16& iobufferAddr() const { return m_iobufferAddr; }
 	const Address16& ramAddr() const { return m_ramAddr; }
-	const Address16& regAddr() const { return m_regAddr; }
 
-	void resetAddresses() { m_ramAddr.reset(); m_regAddr.reset(); }
+	const Address16& regValueAddr() const { return m_regValueAddr; }
+	const Address16& regValidityAddr() const { return m_regValidityAddr; }
+
+	void resetAddresses() { m_ramAddr.reset(); m_regValueAddr.reset(); m_regValidityAddr.reset(); }
 
 	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
-	void setRegAddr(const Address16& regAddr) { m_regAddr = regAddr; }
+	void setRegValueAddr(const Address16& regValueAddr) { m_regValueAddr = regValueAddr; }
+	void setRegValidityAddr(const Address16& regValidityAddr) { m_regValidityAddr = regValidityAddr; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));

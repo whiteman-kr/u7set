@@ -3959,15 +3959,15 @@ namespace Builder
 						continue;
 					}
 
-					int signalOffset = ERR_VALUE;
-					int bit = ERR_VALUE;
+					int valueOffset = ERR_VALUE;
+					int valueBit = ERR_VALUE;
 
-					DeviceHelper::getIntProperty(deviceSignal.get(), QString("ValueOffset"), &signalOffset, m_log);
-					DeviceHelper::getIntProperty(deviceSignal.get(), QString("ValueBit"), &bit, m_log);
+					DeviceHelper::getIntProperty(deviceSignal.get(), QString("ValueOffset"), &valueOffset, m_log);
+					DeviceHelper::getIntProperty(deviceSignal.get(), QString("ValueBit"), &valueBit, m_log);
 
-					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
+					if (valueOffset != ERR_VALUE && valueBit != ERR_VALUE)
 					{
-						if (signalOffset >= module.appLogicDataSize)
+						if (valueOffset >= module.appLogicDataSize)
 						{
 							LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 									  QString(tr("Signal %1 offset out of module application data size")).arg(signal->appSignalID()));
@@ -3980,26 +3980,26 @@ namespace Builder
 							{
 							case Hardware::DeviceModule::FamilyType::AIM:
 								{
-									int signalGroup = signalOffset / 17;
-									int signalNo = signalOffset % 17;
+									int signalGroup = valueOffset / 17;
+									int signalNo = valueOffset % 17;
 
 									if (signalNo == 0)
 									{
 										// this is discrete validity signal
 										//
-										signalOffset = signalGroup * 33;
+										valueOffset = signalGroup * 33;
 									}
 									else
 									{
 										// this is analog input signal
 										//
-										signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
+										valueOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
 									}
 								}
 								break;
 
 							case Hardware::DeviceModule::FamilyType::AOM:
-								signalOffset *= 2;
+								valueOffset *= 2;
 								break;
 
 							case Hardware::DeviceModule::FamilyType::DIM:
@@ -4013,11 +4013,11 @@ namespace Builder
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramAddr(module.appLogicRegDataOffset + signalOffset, bit);
-							Address16 regAddr(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), bit);
+							Address16 ramAddr(module.appLogicRegDataOffset + valueOffset, valueBit);
+							Address16 regAddr(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), valueBit);
 
 							signal->ramAddr() = ramAddr;
-							signal->regAddr() = regAddr;
+							signal->regValueAddr() = regAddr;
 
 							// set same ramAddr & regAddr for corresponding signals in m_appSignals map
 							//
