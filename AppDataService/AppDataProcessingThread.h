@@ -8,21 +8,35 @@
 class AppDataProcessingWorker : public SimpleThreadWorker
 {
 private:
+	int m_number = 0;
 	RupDataQueue& m_rupDataQueue;
 	const SourceParseInfoMap& m_sourceParseInfoMap;
 	AppSignalStates& m_signalStates;
 
+	RupData m_rupData;					// parsing buffer
+
+	quint64 m_parsedRupDataCount = 0;
+	quint64 m_notFoundIPCount = 0;
+
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
+
+	void parseRupData();
+
 public:
-	AppDataProcessingWorker(RupDataQueue& rupDataQueue,
+	AppDataProcessingWorker(int number, RupDataQueue& rupDataQueue,
 							const SourceParseInfoMap& sourceParseInfoMap,
 							AppSignalStates& signalStates);
+
+public slots:
+	void slot_rupDataQueueIsNotEmpty();
 };
 
 
 class AppDataProcessingThread : public SimpleThread
 {
 public:
- AppDataProcessingThread(RupDataQueue& rupDataQueue,
+ AppDataProcessingThread(int number, RupDataQueue& rupDataQueue,
 							const SourceParseInfoMap& sourceParseInfoMap,
 							AppSignalStates& signalStates);
 };
@@ -31,10 +45,12 @@ public:
 class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
 {
 public:
-	void start(int poolSize, RupDataQueue& rupDataQueue,
+	void createProcessingThreads(int poolSize, RupDataQueue& rupDataQueue,
 				const SourceParseInfoMap& sourceParseInfoMap,
 				AppSignalStates& signalStates);
 
-	void stopAndClear();
+	void startProcessingThreads();
+
+	void stopAndClearProcessingThreads();
 };
 

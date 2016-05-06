@@ -15,9 +15,8 @@
 
 int main(int argc, char *argv[])
 {
-	logger.initLog(10, 10, argv[0]);
-
-	APP_MSG(logger, "Start");
+	//logger.initLog(10, 10, argv[0]);
+	//APP_MSG(logger, "Start");
 
 	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
 	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
@@ -27,5 +26,9 @@ int main(int argc, char *argv[])
 
 	ServiceStarter service(argc, argv, "RPCT Application Data Service", dataServiceWorker);
 
-	return service.exec();
+	int result = service.exec();
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	return result;
 }

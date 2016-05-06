@@ -352,6 +352,8 @@ namespace ExtWidgets
         void setObjects(QList<std::shared_ptr<PropertyObject>>& objects);
 		void clearProperties();
 
+		void setExpertMode(bool expertMode);
+
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
@@ -381,6 +383,9 @@ namespace ExtWidgets
 	private:
         void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty *, std::pair<QVariant, bool> > &values);
         QtProperty* createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
+
+	private:
+		bool m_expertMode = false;
 	};
 
 }

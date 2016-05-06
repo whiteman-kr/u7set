@@ -12,6 +12,7 @@ void AppSignalStates::clear()
 	if (m_appSignalState != nullptr)
 	{
 		delete [] m_appSignalState;
+		m_appSignalState = nullptr;
 	}
 
 	m_size = 0;

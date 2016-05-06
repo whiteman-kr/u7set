@@ -34,8 +34,8 @@ protected:
 
 	RupDataQueue m_rupDataQueue;
 
-	virtual void onThreadStarted();
-	virtual void onThreadFinished();
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
 
 	virtual void onTimer();
 

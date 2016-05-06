@@ -28,7 +28,8 @@ const int	NO_INDEX = -1;
 
 struct SignalParseInfo
 {
-	Address16 regAddr;
+	Address16 valueAddr;
+	Address16 validityAddr;
 
 	E::SignalType type = E::SignalType::Discrete;
 	E::DataFormat dataFormat = E::DataFormat::UnsignedInt;
