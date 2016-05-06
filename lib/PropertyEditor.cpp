@@ -1714,6 +1714,11 @@ namespace ExtWidgets
                     continue;
                 }
 
+				if (p->expert() && m_expertMode == false)
+				{
+					continue;
+				}
+
                 propertyItems.insertMulti(p->caption(), p);
 
                 if (propertyNames.indexOf(p->caption()) == -1)
@@ -1806,7 +1811,7 @@ namespace ExtWidgets
                 description = QString("[ReadOnly] ") + description;
             }
 
-            if (p->value().userType() == QVariant::Double)
+			if (description.isEmpty() && p->value().userType() == QVariant::Double)
             {
                 bool ok1 = false;
                 bool ok2 = false;
@@ -1819,7 +1824,7 @@ namespace ExtWidgets
                 }
             }
 
-            if (p->value().userType() == QVariant::Int)
+			if (description.isEmpty() && p->value().userType() == QVariant::Int)
             {
                 bool ok1 = false;
                 bool ok2 = false;
@@ -1832,7 +1837,7 @@ namespace ExtWidgets
                 }
             }
 
-            if (p->value().userType() == QVariant::UInt)
+			if (description.isEmpty() && p->value().userType() == QVariant::UInt)
             {
                 bool ok1 = false;
                 bool ok2 = false;
@@ -1997,6 +2002,11 @@ namespace ExtWidgets
 		m_propertyGroupManager->clear();
 		clear();
         m_objects.clear();
+	}
+
+	void PropertyEditor::setExpertMode(bool expertMode)
+	{
+		m_expertMode = expertMode;
 	}
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)

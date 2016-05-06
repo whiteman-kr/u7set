@@ -101,6 +101,9 @@ public:
 	bool visible() const;
 	void setVisible(bool value);
 
+	bool expert() const;
+	void setExpert(bool value);
+
 	int precision() const;
 	void setPrecision(int value);
 
@@ -136,6 +139,7 @@ private:
 	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
 	bool m_specific = false;				// Specific property, used in DeviceObject
 	bool m_visible = false;
+	bool m_expert = false;
 	int m_precision = 2;
 };
 

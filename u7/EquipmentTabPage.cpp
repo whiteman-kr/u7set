@@ -3201,6 +3201,8 @@ void EquipmentTabPage::setProperties()
 		}
 	}
 
+	m_propertyEditor->setExpertMode(isPresetMode() || theSettings.isExpertMode());
+
 	// Set objects to the PropertyEditor
 	//
 	if (checkedOutList.isEmpty() == false)

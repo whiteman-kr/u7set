@@ -34,6 +34,7 @@ void DialogSettings::setSettings(const Settings& value)
 	ui->editUsername->setText(m_settings.serverUsername());
 	ui->editPassword->setText(m_settings.serverPassword());
 	ui->editOutputPath->setText(m_settings.buildOutputPath());
+	ui->checkExpertMode->setChecked(m_settings.isExpertMode());
 
 	return;
 }
@@ -89,6 +90,7 @@ void DialogSettings::on_ok_clicked()
 	m_settings.setServerUsername(serverUsername);
 	m_settings.setServerPassword(serverPassword);
 	m_settings.setBuildOutputPath(buildOutputPath);
+	m_settings.setExpertMode(ui->checkExpertMode->checkState() == Qt::CheckState::Checked);
 
 	accept();
 	return;

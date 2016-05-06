@@ -10,7 +10,8 @@ Settings::Settings() :
 	m_serverPort(0),
 	m_serverUsername("u7"),
 	m_serverPassword("P2ssw0rd"),
-	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation)))
+	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
+	m_expertMode(false)
 
 {
 }
@@ -71,6 +72,8 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
 
 	s.setValue("m_freezeBuildPath", m_freezeBuildPath);
+
+	s.setValue("Main/m_expertMode", m_expertMode);
 
 	return;
 }
@@ -138,6 +141,8 @@ void Settings::loadUserScope()
 	}
 
 	m_freezeBuildPath = s.value("m_freezeBuildPath", false).toBool();
+
+	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
     return;
 }
@@ -244,4 +249,13 @@ bool Settings::isDebugMode() const
 	return debugMode();
 }
 
+bool Settings::isExpertMode() const
+{
+	return m_expertMode;
+}
+
+void Settings::setExpertMode(bool value)
+{
+	m_expertMode = value;
+}
 

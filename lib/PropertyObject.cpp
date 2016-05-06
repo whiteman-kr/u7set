@@ -196,6 +196,16 @@ void Property::setVisible(bool value)
 	m_visible = value;
 }
 
+bool Property::expert() const
+{
+	return m_expert;
+}
+
+void Property::setExpert(bool value)
+{
+	m_expert = value;
+}
+
 int Property::precision() const
 {
 	return m_precision;

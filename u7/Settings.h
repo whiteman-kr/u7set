@@ -49,6 +49,9 @@ public:
 	bool debugMode() const;
 	bool isDebugMode() const;
 
+	bool isExpertMode() const;
+	void setExpertMode(bool value);
+
 	// Data
 	//
 public:
@@ -121,6 +124,7 @@ private:
 	QString m_serverUsername;
 	QString m_serverPassword;
 	QString m_buildOutputPath;
+	bool m_expertMode;
 
 	QStringList m_loginCompleter;
 
