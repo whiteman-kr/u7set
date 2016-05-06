@@ -28,22 +28,22 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
-void AppDataServiceWorker::runUdpThreads()
+void AppDataServiceWorker::runServiceInfoThread()
 {
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_APP_DATA_SERVICE_INFO);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &AppDataServiceWorker::onInformationRequest);
 	connect(this, &AppDataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
-	m_infoSocketThread = new UdpSocketThread(serverSocket);
-	m_infoSocketThread->start();
+	m_serviceInfoThread = new UdpSocketThread(serverSocket);
+	m_serviceInfoThread->start();
 }
 
 
-void AppDataServiceWorker::stopUdpThreads()
+void AppDataServiceWorker::stopServiceInfoThread()
 {
-	m_infoSocketThread->quitAndWait();
-	delete m_infoSocketThread;
+	m_serviceInfoThread->quitAndWait();
+	delete m_serviceInfoThread;
 }
 
 
@@ -95,7 +95,7 @@ void AppDataServiceWorker::initialize()
 	// Service Main Function initialization
 	//
 	runCfgLoaderThread();
-	runUdpThreads();
+	runServiceInfoThread();
 	runTimer();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
@@ -109,7 +109,7 @@ void AppDataServiceWorker::shutdown()
 	clearConfiguration();
 
 	stopTimer();
-	stopUdpThreads();
+	stopServiceInfoThread();
 	stopCfgLoaderThread();
 
 	qDebug() << "DataServiceWorker stoped";
@@ -191,15 +191,7 @@ void AppDataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 
 void AppDataServiceWorker::onTimer()
 {
-	static int a = 0;
-
-	a++;
-
-	if (a == 10)
-	{
-		m_cfgLoaderThread->enableDownloadConfiguration();
-	}
-
+	//m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
 
@@ -378,7 +370,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 	while (1)
 	{
-		bool find = xml.findElement(DataSource::ELEMENT_APP_DATA_SOURCE);
+		bool find = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
 
 		if (find == false)
 		{

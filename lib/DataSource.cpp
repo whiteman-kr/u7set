@@ -1,8 +1,8 @@
 #include "../include/DataSource.h"
 
 
-const char* const DataSource::ELEMENT_APP_DATA_SOURCE = "AppDataSource";
-const char* const DataSource::ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
+const char* const DataSource::ELEMENT_DATA_SOURCE = "AppDataSource";
+const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 
 char* DataSourceInfo::serialize(char* buffer, bool write)
@@ -107,6 +107,9 @@ QString DataSource::dataTypeToString(DataType dataType)
 	case DataType::Diag:
 		return DATA_TYPE_DIAG;
 
+	case DataType::Tuning:
+		return DATA_TYPE_TUNING;
+
 	default:
 		assert(false);
 	}
@@ -127,6 +130,11 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 		return DataType::Diag;
 	}
 
+	if (dataTypeStr == DATA_TYPE_TUNING)
+	{
+		return DataType::Tuning;
+	}
+
 	assert(false);
 
 	return DataType::Diag;
@@ -135,7 +143,7 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 
 void DataSource::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE);
+	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
 	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
 	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
@@ -147,7 +155,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
 	xml.writeUlongAttribute(PROP_LM_DATA_ID, m_lmDataID, true);
 
-	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS);
+	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
 	xml.writeIntAttribute("Count", m_associatedSignals.count());
 
@@ -166,7 +174,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	if (xml.name() != ELEMENT_APP_DATA_SOURCE)
+	if (xml.name() != ELEMENT_DATA_SOURCE)
 	{
 		assert(false);
 		return false;
@@ -196,7 +204,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readUlongAttribute(PROP_LM_DATA_ID, &m_lmDataID);
 
-	if (xml.findElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
+	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
 		return false;
 	}

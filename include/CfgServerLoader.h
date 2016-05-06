@@ -184,7 +184,11 @@ private slots:
 	void slot_getFile(QString fileName, QByteArray *fileData);
 
 public:
-	CfgLoader(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	CfgLoader(	const QString& appStrID,
+				int appInstance,
+				const HostAddressPort& serverAddressPort1,
+				const HostAddressPort& serverAddressPort2,
+				bool enableDownloadCfg);
 
 	virtual void onClientThreadStarted() override;
 
@@ -223,7 +227,11 @@ signals:
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-	CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	CfgLoaderThread(const QString& appStrID,
+					int appInstance,
+					const HostAddressPort& serverAddressPort1,
+					const HostAddressPort& serverAddressPort2,
+					bool enableDownloadCfg = false);
 
 	void enableDownloadConfiguration();
 

@@ -165,7 +165,8 @@ SOURCES +=\
     Builder/TuningServiceCfgGenerator.cpp \
     Builder/AppDataServiceCfgGenerator.cpp \
     Builder/DiagDataServiceCfgGenerator.cpp \
-    ../lib/Queue.cpp
+    ../lib/Queue.cpp \
+    ../lib/ProtobufHelper.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -260,7 +261,8 @@ HEADERS  += \
     Builder/TuningServiceCfgGenerator.h \
     Builder/AppDataServiceCfgGenerator.h \
     Builder/DiagDataServiceCfgGenerator.h \
-    ../include/Queue.h
+    ../include/Queue.h \
+    ../include/ProtobufHelper.h
 
 FORMS    += \
     ChangesetDialog.ui \

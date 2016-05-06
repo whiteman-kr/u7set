@@ -118,9 +118,14 @@ void CfgServer::readBuildXml()
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoader::CfgLoader(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
+CfgLoader::CfgLoader(	const QString& appStrID,
+						int appInstance,
+						const HostAddressPort& serverAddressPort1,
+						const HostAddressPort& serverAddressPort2,
+						bool enableDownloadCfg) :
 	Tcp::FileClient("", serverAddressPort1, serverAddressPort2),
-	m_timer(this)
+	m_timer(this),
+	m_enableDownloadConfiguration(enableDownloadCfg)
 {
 	changeApp(appStrID, appInstance);
 }
@@ -785,9 +790,13 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoaderThread::CfgLoaderThread(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
+CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
+									int appInstance,
+									const HostAddressPort& serverAddressPort1,
+									const HostAddressPort& serverAddressPort2,
+									bool enableDownloadCfg)
 {
-	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2);		// it will be deleted during SimpleThread destruction
+	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2, enableDownloadCfg);		// it will be deleted during SimpleThread destruction
 
 	addWorker(m_cfgLoader);
 

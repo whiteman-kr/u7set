@@ -10,6 +10,7 @@
 #include "../include/Address16.h"
 #include "../include/DataSource.h"
 #include "../VFrame30/Afb.h"
+#include "../include/ProtobufHelper.h"
 
 
 class QXmlStreamAttributes;
@@ -406,7 +407,6 @@ public:
 
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
-
 
 
 #endif // SIGNAL_H

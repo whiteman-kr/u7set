@@ -5,9 +5,20 @@
 
 // -------------------------------------------------------------------------------------
 //
-// DASEthernetChannel class implementation
+// AppDataServiceChannel class implementation
 //
 // -------------------------------------------------------------------------------------
+
+const char* AppDataServiceChannel::PROP_APP_DATA_NETMASK = "AppDataNetmask";
+const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_IP = "AppDataReceivingIP";
+const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_PORT = "AppDataReceivingPort";
+
+const char* AppDataServiceChannel::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
+
+const char* AppDataServiceChannel::PROP_CFG_SERVICE_ID = "ConfigurationServiceID";
+
+const char* AppDataServiceChannel::SECTION_FORMAT_STR = "DataChannel%1";
+
 
 bool AppDataServiceChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
 {
@@ -90,9 +101,16 @@ bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
 
 // -------------------------------------------------------------------------------------
 //
-// DASSettings class implementation
+// AppDataServiceSettings class implementation
 //
 // -------------------------------------------------------------------------------------
+
+const char* AppDataServiceSettings::DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR = "_DATACH0%1";
+const char* AppDataServiceSettings::SECTION_NAME = "Settings";
+const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+
 
 bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -100,14 +118,14 @@ bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builde
 
 	QString clientRequestIPStr;
 	int clientRequestPort = 0;
-	QString clientRequestNetmaskStr;
+	QString clientNetmaskStr;
 
 	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
 	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
 
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
-	clientRequestNetmask.setAddress(clientRequestNetmaskStr);
+	clientRequestNetmask.setAddress(clientNetmaskStr);
 
 	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
@@ -167,5 +185,78 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	return result;
 }
+
+
+// -------------------------------------------------------------------------------------
+//
+// TuningServiceSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+const char* TuningServiceSettings::SECTION_NAME = "Settings";
+const char* TuningServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* TuningServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+const char* TuningServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+const char* TuningServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
+const char* TuningServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
+
+
+bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	QString clientRequestIPStr;
+	int clientRequestPort = 0;
+	QString clientNetmaskStr;
+	QString tuningDataIPStr;
+	int tuningDataPort = 0;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_TUNING_DATA_IP, &tuningDataIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_DATA_PORT, &tuningDataPort, log);
+
+	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
+	clientRequestNetmask.setAddress(clientNetmaskStr);
+
+	tuningDataIP = HostAddressPort(tuningDataIPStr, tuningDataPort);
+
+	return result;
+}
+
+
+bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
+{
+	xml.writeStartElement(SECTION_NAME);
+
+	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, tuningDataIP);
+
+	xml.writeEndElement();	// </Settings>
+
+	return true;
+}
+
+
+bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = false;
+
+	result = xml.findElement(SECTION_NAME);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
+	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
+
+	return result;
+}
+
 
 

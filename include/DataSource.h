@@ -76,10 +76,11 @@ public:
 	{
 		App,
 		Diag,
+		Tuning,
 	};
 
-	static const char* const ELEMENT_APP_DATA_SOURCE;
-	static const char* const ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS;
+	static const char* const ELEMENT_DATA_SOURCE;
+	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
 
 private:
 
@@ -104,9 +105,10 @@ private:
 	//
 	const char* const DATA_TYPE_APP = "App";
 	const char* const DATA_TYPE_DIAG = "Diag";
+	const char* const DATA_TYPE_TUNING = "Tuning";
 
-	const char* const PROP_CHANNEL = "Channel";
 	const char* const PROP_DATA_TYPE = "DataType";
+	const char* const PROP_CHANNEL = "Channel";
 	const char* const PROP_LM_ID = "LmID";
 	const char* const PROP_LM_CAPTION = "LmCaption";
 	const char* const PROP_LM_ADAPTER_ID = "LmAdapterID";
