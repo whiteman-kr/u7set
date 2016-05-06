@@ -101,6 +101,9 @@ public:
 	bool visible() const;
 	void setVisible(bool value);
 
+	bool expert() const;
+	void setExpert(bool value);
+
 	int precision() const;
 	void setPrecision(int value);
 
@@ -136,6 +139,7 @@ private:
 	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
 	bool m_specific = false;				// Specific property, used in DeviceObject
 	bool m_visible = false;
+	bool m_expert = false;
 	int m_precision = 2;
 };
 
@@ -160,8 +164,46 @@ public:
 public:
 	virtual bool isEnum() const override
 	{
-		return std::is_enum<TYPE>::value;
+		if (std::is_enum<TYPE>::value)
+		{
+			return true;
+		}
+
+		// Enum can be inside QVariant
+		//
+		if (m_value.isValid() == true)
+		{
+			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+			if (mo == nullptr)
+			{
+				return false;
+			}
+
+			const char* typeName = m_value.typeName();
+			QString typeStr(typeName);
+			QStringRef typeNameRef(&typeStr);
+
+			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+			if (doubleColumnIndex != -1)
+			{
+				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
+			}
+
+			int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
+
+			if (enumIndex == -1)
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
+
 
 	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
 	// Example is in question:
@@ -189,9 +231,52 @@ private:
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override
 	{
-		assert(std::is_enum<TYPE>::value == true);
-
 		std::list<std::pair<int, QString>> result;
+
+		if (std::is_enum<TYPE>::value == false &&
+			m_value.isValid() == true)
+		{
+			// Enum can be inside QVariant
+			//
+			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+			if (mo == nullptr)
+			{
+				assert(mo);
+				return result;
+			}
+
+			const char* typeName = m_value.typeName();
+			QString typeStr(typeName);
+			QStringRef typeNameRef(&typeStr);
+
+			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+			if (doubleColumnIndex != -1)
+			{
+				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
+			}
+
+			int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
+			if (enumIndex != -1)
+			{
+				QMetaEnum me = mo->enumerator(enumIndex);
+
+				if (me.isValid() == false)
+				{
+					assert(me.isValid() == true);
+					return result;
+				}
+
+				int keyCount = me.keyCount();
+				for (int i = 0; i < keyCount; i++)
+				{
+					result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+				}
+			}
+
+			return result;
+		}
+
+		assert(std::is_enum<TYPE>::value == true);
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
@@ -247,12 +332,47 @@ public:
 		}
 		else
 		{
-			if (m_value.isValid() == true)			// if m_value is not valid then it is initialization
+			if (m_value.isValid() == false)
 			{
-				assert(m_value.type() == value.type());
+				// It is initialization
+				//
+				m_value = value;
+				return;
 			}
 
-			m_value = value;
+			if (value.canConvert<TYPE>() == true)
+			{
+				m_value.setValue(value.value<TYPE>());
+				checkLimits();
+				return;
+			}
+
+			if (value.canConvert(m_value.type()) == true)
+			{
+				QVariant v(value);
+
+				bool ok = v.convert(m_value.type());
+				assert(ok);
+
+				m_value.setValue(v);
+				checkLimits();
+				return;
+			}
+
+			if (value.canConvert(m_value.userType()) == true)
+			{
+				QVariant v(value);
+
+				bool ok = v.convert(m_value.userType());
+				assert(ok);
+
+				m_value.setValue(v);
+				checkLimits();
+				return;
+			}
+
+			assert(m_value.type() == value.type());
+			m_value.setValue(value.value<TYPE>());
 		}
 
 		checkLimits();

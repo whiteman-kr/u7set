@@ -176,8 +176,6 @@ const char* const DataFormatStr[] =
 	"Float",
 };
 
-Q_DECLARE_METATYPE(E::Channel)
-
 enum class UartID
 {
 	LmAppLogicUart = 0x101,
