@@ -8,11 +8,15 @@
 
 class AppDataChannel : public DataChannel
 {
+private:
 	SourceParseInfoMap m_sourceParseInfoMap;		// source ip => QVector<SignalParseInfo> map
 
 	AppSignalStates* m_signalStates = nullptr;		// allocated and freed in AppDataService
 
 	AppDataProcessingThreadsPool m_processingThreadsPool;
+
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
 
 protected:
 	virtual void clear() override;

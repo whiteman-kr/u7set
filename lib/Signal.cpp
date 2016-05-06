@@ -16,6 +16,20 @@ DataFormatList::DataFormatList()
 std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
 
 
+Signal::Signal(bool initProperties) :
+	PropertyObject()
+{
+	if (initProperties == true)
+	{
+		InitProperties();		// same as Signal::Signal()
+	}
+	else
+	{
+		//	InitProperties();	// no init properties fot faster construction
+	}
+}
+
+
 Signal::Signal() :
 	PropertyObject()
 {
@@ -476,7 +490,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "MaxDifference", &Signal::setMaxDifference);
 	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
 	serializeField(attr, "RamAddr", &Signal::setRamAddr);
-	serializeField(attr, "RegAddr", &Signal::setRegAddr);
+	serializeField(attr, "RegAddr", &Signal::setRegValueAddr);
 }
 
 
@@ -688,14 +702,16 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
-	xml.writeIntAttribute("RegAddrOffset", regAddr().offset());
-	xml.writeIntAttribute("RegAddrBit", regAddr().offset());
+	xml.writeIntAttribute("RegValueAddOffset", regValueAddr().offset());
+	xml.writeIntAttribute("RegValueAddrBit", regValueAddr().bit());
+	xml.writeIntAttribute("RegValidityAddOffset", regValidityAddr().offset());
+	xml.writeIntAttribute("RegValidityAddrBit", regValidityAddr().bit());
 
 	xml.writeEndElement();				// </Signal>
 }
 
 
-bool Signal::readFromoXml(XmlReadHelper& xml)
+bool Signal::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
@@ -780,11 +796,17 @@ bool Signal::readFromoXml(XmlReadHelper& xml)
 
 	offset = bit = 0;
 
-	result &= xml.readIntAttribute("RegAddrOffset", &offset);
-	result &= xml.readIntAttribute("RegAddrBit", &bit);
+	result &= xml.readIntAttribute("RegValueAddrOffset", &offset);
+	result &= xml.readIntAttribute("RegValueAddrBit", &bit);
 
-	m_regAddr.setOffset(offset);
-	m_regAddr.setBit(bit);
+	m_regValueAddr.setOffset(offset);
+	m_regValueAddr.setBit(bit);
+
+	result &= xml.readIntAttribute("RegValidityAddrOffset", &offset);
+	result &= xml.readIntAttribute("RegValidityAddrBit", &bit);
+
+	m_regValidityAddr.setOffset(offset);
+	m_regValidityAddr.setBit(bit);
 
 	return result;
 }

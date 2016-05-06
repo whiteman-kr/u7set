@@ -315,7 +315,7 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 
 	*value = str;
 
-	skipCurrentElement();
+	//skipCurrentElement();
 
 	return true;
 }
@@ -338,7 +338,7 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 
 	*value = str.toInt();
 
-	skipCurrentElement();
+	//skipCurrentElement();
 
 	return true;
 }
@@ -357,7 +357,18 @@ bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& na
 
 	bool result = true;
 
+	if (findElement(nameIP) == false)
+	{
+		return false;
+	}
+
 	result &= readStringElement(nameIP, &addressStr);
+
+	if (findElement(namePort) == false)
+	{
+		return false;
+	}
+
 	result &= readIntElement(namePort, &port);
 
 	if (result == true)
@@ -379,6 +390,11 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAdd
 	}
 
 	QString addressStr;
+
+	if (findElement(nameIP) == false)
+	{
+		return false;
+	}
 
 	bool result = readStringElement(nameIP, &addressStr);
 

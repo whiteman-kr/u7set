@@ -11,8 +11,9 @@ struct AppSignalStateFlags
 struct AppSignalState
 {
 public:
-	qint64	serverTime = 0;
-	qint64	pantTime = 0;
+	qint64	systemTime = 0;
+	qint64	localTime = 0;
+	qint64	plantTime = 0;
 
 	AppSignalStateFlags flags;
 	double value = 0;
@@ -24,6 +25,7 @@ public:
 
 class AppSignalStates
 {
+private:
 	QMutex m_allMutex;
 
 	AppSignalState* m_appSignalState = nullptr;

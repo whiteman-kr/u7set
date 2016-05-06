@@ -313,10 +313,10 @@ namespace Builder
 		QString strID() const { return m_signal->appSignalID(); }
 
 		const Address16& ramAddr() const { return m_signal->ramAddr(); }
-		const Address16& regAddr() const { return m_signal->regAddr(); }
+		const Address16& regAddr() const { return m_signal->regValueAddr(); }
 
 		Address16& ramAddr() { return m_signal->ramAddr(); }
-		Address16& regAddr() { return m_signal->regAddr(); }
+		Address16& regAddr() { return m_signal->regValueAddr(); }
 
 
 		E::SignalType type() const { return m_signal->type(); }

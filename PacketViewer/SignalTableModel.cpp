@@ -54,7 +54,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 			case C_DESCRIPTION: return signal.caption();
 			case C_RAW_DATA:
 			{
-				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
+				if (!signal.regValueAddr().isValid() || (signal.regValueAddr().offset() + (signal.regValueAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
 				{
 					return "???";
 				}
@@ -69,7 +69,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 			}
 			case C_VALUE:
 			{
-				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
+				if (!signal.regValueAddr().isValid() || (signal.regValueAddr().offset() + (signal.regValueAddr().bit() + signal.dataSize()) / 8 > RUP_BUFFER_SIZE))
 				{
 					return "???";
 				}
@@ -107,7 +107,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 					}
 				}
 			}
-			case C_REG_ADDR: return signal.regAddr().toString();
+			case C_REG_ADDR: return signal.regValueAddr().toString();
 			case C_DATA_SIZE: return signal.dataSize();
 			default: return QVariant();
 		}
@@ -151,9 +151,9 @@ void SignalTableModel::addDataSource(const DataSource* dataSource)
 	std::sort(m_relatedSignalIndexes.begin(), m_relatedSignalIndexes.end(),
 			  [this](int index1, int index2)
 	{
-		return m_signalSet[index1].regAddr().offset() < m_signalSet[index2].regAddr().offset() ||
-				(m_signalSet[index1].regAddr().offset() == m_signalSet[index2].regAddr().offset() &&
-				 m_signalSet[index1].regAddr().bit() < m_signalSet[index2].regAddr().bit());
+		return m_signalSet[index1].regValueAddr().offset() < m_signalSet[index2].regValueAddr().offset() ||
+				(m_signalSet[index1].regValueAddr().offset() == m_signalSet[index2].regValueAddr().offset() &&
+				 m_signalSet[index1].regValueAddr().bit() < m_signalSet[index2].regValueAddr().bit());
 	});
 	for (int i = 0; i < m_relatedSignalIndexes.size() - 1; i++)
 	{
@@ -171,9 +171,9 @@ void SignalTableModel::addDataSource(const DataSource* dataSource)
 		bool firstTime = true;
 		for (int j = 0; j < m_relatedSignalIndexes.size(); j++)
 		{
-			if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() >= int(RUP_FRAME_DATA_SIZE * i / sizeof(m_buffer[0])))
+			if (m_signalSet[m_relatedSignalIndexes[j]].regValueAddr().offset() >= int(RUP_FRAME_DATA_SIZE * i / sizeof(m_buffer[0])))
 			{
-				if (m_signalSet[m_relatedSignalIndexes[j]].regAddr().offset() < int((RUP_FRAME_DATA_SIZE * (i + 1) / sizeof(m_buffer[0]) + 1)))
+				if (m_signalSet[m_relatedSignalIndexes[j]].regValueAddr().offset() < int((RUP_FRAME_DATA_SIZE * (i + 1) / sizeof(m_buffer[0]) + 1)))
 				{
 					if (firstTime)
 					{
@@ -225,8 +225,8 @@ TYPE SignalTableModel::getAdc(const Signal& signal) const
 	{
 		return 0;
 	}
-	int offset = signal.regAddr().offset();
-	int bit = signal.regAddr().bit();
+	int offset = signal.regValueAddr().offset();
+	int bit = signal.regValueAddr().bit();
 	if ((offset < 0) || (offset + (bit + size) / 8 >= RUP_BUFFER_SIZE))
 	{
 		return 0;
