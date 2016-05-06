@@ -55,6 +55,7 @@
         <file>Upgrade0053.sql</file>
         <file>Upgrade0054.sql</file>
         <file>Upgrade0055.sql</file>
+        <file>Upgrade0056.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -23,8 +23,14 @@ void Property::saveValue(::Proto::Property* protoProperty) const
 
 	QVariant value = this->value();
 
-	switch (value.type())
+	if (isEnum() == true)
 	{
+		valueStr = value.toString();
+	}
+	else
+	{
+		switch (value.type())
+		{
 		case QVariant::Bool:
 			valueStr = value.toBool() ? "t" : "f";
 			break;
@@ -42,6 +48,7 @@ void Property::saveValue(::Proto::Property* protoProperty) const
 			break;
 		default:
 			assert(false);
+		}
 	}
 
 	protoProperty->set_value(valueStr.toLocal8Bit());
@@ -59,13 +66,11 @@ bool Property::loadValue(const ::Proto::Property& protoProperty)
 	QString sv(protoProperty.value().c_str());
 	QVariant value = this->value();
 
-/*	if (isEnum() == true)
+	if (isEnum() == true)
 	{
-		//qint32 i = sv.toInt(&ok);
-		//value = QVariant(i);
-		setEnumValue(protoProperty.value().c_str());
+		setValue(protoProperty.value().c_str());
 		return true;
-	}*/
+	}
 
 	switch (value.type())
 	{

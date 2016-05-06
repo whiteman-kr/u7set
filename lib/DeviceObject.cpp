@@ -579,21 +579,21 @@ namespace Hardware
 				{
 					// Default Value
 					//
-					//HBE::Channel defaultE = E::Channel::A;
-					//QVariant v = QVariant::fromValue(defaultE);
+					QString defaultString = defaultValue.toString();
 
 					// Add property with default value, if present old value, it will be set later
 					//
-					/*auto newProperty = addProperty<E::Channel>(name, true);
+					auto newProperty = addProperty<QVariant>(name, true);
+					newProperty->setValue(QVariant::fromValue(E::Channel::A));
 
 					newProperty->setSpecific(true);
 					newProperty->setCategory(category);
-					newProperty->setValue(QVariant::fromValue(E::Channel::A));
+					newProperty->setValue(defaultString.toStdString().c_str());
 					newProperty->setReadOnly(false);
 					newProperty->setPrecision(precision);
 					newProperty->setUpdateFromPreset(updateFromPreset);
 
-					continue;*/
+					continue;
 				}
 
 				if (type == "string")
