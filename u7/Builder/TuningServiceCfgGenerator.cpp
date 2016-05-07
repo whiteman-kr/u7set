@@ -24,6 +24,9 @@ namespace Builder
 		bool result = true;
 
 		result &= writeSettings();
+
+		result &= findTuningSignals();
+
 		result &= writeTuningLMs();
 		result &= writeTuningSignals();
 
