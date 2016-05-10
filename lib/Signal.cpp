@@ -168,7 +168,7 @@ void Signal::InitProperties()
 	ADD_PROPERTY_GETTER(int, ChangesetID, false, Signal::changesetID);
 	ADD_PROPERTY_GETTER(bool, CheckedOut, false, Signal::checkedOut);
 	ADD_PROPERTY_GETTER(int, UserID, false, Signal::userID);
-	ADD_PROPERTY_GETTER(int, Channel, false, Signal::channel);
+	ADD_PROPERTY_GETTER(E::Channel, Channel, false, Signal::channel);
 	ADD_PROPERTY_GETTER(QDateTime, Created, false, Signal::created);
 	ADD_PROPERTY_GETTER(bool, Deleted, false, Signal::deleted);
 	ADD_PROPERTY_GETTER(QDateTime, InstanceCreated, false, Signal::instanceCreated);
@@ -454,7 +454,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "ID", &Signal::setID);
 	serializeField(attr, "SignalGroupID", &Signal::setSignalGroupID);
 	serializeField(attr, "SignalInstanceID", &Signal::setSignalInstanceID);
-	serializeField(attr, "Channel", &Signal::setChannel);
+//	serializeField(attr, "Channel", &Signal::setChannel);
 	serializeField(attr, "Type", &Signal::setType);
 	serializeField(attr, "StrID", &Signal::setAppSignalID);
 	serializeField(attr, "ExtStrID", &Signal::setCustomAppSignalID);
@@ -665,7 +665,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ID", ID());
 	xml.writeIntAttribute("GroupID", signalGroupID());
 	xml.writeIntAttribute("InstanceID", signalInstanceID());
-	xml.writeIntAttribute("LMNumber", channel());
+	xml.writeIntAttribute("Channel", channelInt());
 	xml.writeIntAttribute("Type", typeInt());
 	xml.writeStringAttribute("AppSignalID", appSignalID());
 	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
@@ -700,6 +700,9 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
 	xml.writeDoubleAttribute("MaxDifference", maxDifference());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
+	xml.writeBoolAttribute("EnableTuning", enableTuning());
+	xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+
 	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
 	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
@@ -723,7 +726,11 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("ID", &m_ID);
 	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
 	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
-	result &= xml.readIntAttribute("LMNumber", &m_channel);
+
+	int intValue = 0;
+
+	result &= xml.readIntAttribute("Channel", &intValue);
+	m_channel = static_cast<E::Channel>(intValue);
 
 	QString str;
 
@@ -742,8 +749,6 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
 	result &= xml.readStringAttribute("Caption", &m_caption);
 	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
-
-	int intValue = 0;
 
 	result &= xml.readIntAttribute("DataFormat", &intValue);
 	m_dataFormat = static_cast<E::DataFormat>(intValue);
@@ -784,6 +789,9 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readIntAttribute("ByteOrder", &intValue);
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);
+
+	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+	result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
 
 	int offset = 0;
 	int bit = 0;
