@@ -249,6 +249,7 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 		// if version == 3
 		//
 		const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
+		Q_UNUSED(oldHeader);
 		assert(false);
 		return;
 	}

@@ -83,7 +83,7 @@ void XmlWriteHelper::writeUlongAttribute(const QString& name, ulong value, bool 
 	{
 		QString str;
 
-		str.sprintf("0x%08X", value);
+		str.sprintf("0x%08lX", value);
 
 		writeStringAttribute(name, str);
 	}

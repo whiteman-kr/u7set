@@ -11,7 +11,7 @@ private:
 	TuningServiceSettings m_tuningSettings;
 	TuningDataSources m_dataSources;
 
-	bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml);
+	bool readTuningDataSources(XmlReadHelper& xml);
 
 public:
 	TuningServiceWorker(const QString& serviceStrID,

@@ -72,7 +72,14 @@ private:
 	bool m_nativeBuffer = false;
 
 	inline bool haveEnouthSpace(ProtobufMessage* message) { return haveEnouthSpace(message->ByteSize()); }
-	inline bool haveEnouthSpace(int messageSize);
+	inline bool haveEnouthSpace(int messageSize)
+	{
+		int requiredSize =	sizeof(int) +	/* message size	 */
+							messageSize +	/* message bytes */
+							sizeof(int);	/* final 0		 */
+
+		return	m_writeIndex + requiredSize <= m_bufferSize;
+	}
 
 	bool serializeMessage(int messageSize, ProtobufMessage* message);
 

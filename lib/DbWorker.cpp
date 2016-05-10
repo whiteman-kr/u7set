@@ -3138,6 +3138,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 
 	quint64 start = QDateTime::currentMSecsSinceEpoch();
+	Q_UNUSED(start);
 
 	result = q.exec(request);
 
@@ -3170,6 +3171,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	}
 
 	quint64 finish = QDateTime::currentMSecsSinceEpoch();
+	Q_UNUSED(finish);
 
 	//qDebug() << (finish - start);
 

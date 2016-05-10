@@ -8,8 +8,8 @@
 // -------------------------------------------------------------------------------
 
 DataChannel::DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP) :
-	m_channel(channel),
 	m_dataType(dataType),
+	m_channel(channel),
 	m_dataReceivingIP(dataReceivingIP),
 	m_timer(this),
 	m_rupDataQueue(500)

@@ -36,16 +36,6 @@ ProtobufWriter::~ProtobufWriter()
 }
 
 
-inline bool ProtobufWriter::haveEnouthSpace(int messageSize)
-{
-	int requiredSize =	sizeof(int) +	/* message size	 */
-						messageSize +	/* message bytes */
-						sizeof(int);	/* final 0		 */
-
-	return	m_writeIndex + requiredSize <= m_bufferSize;
-}
-
-
 bool ProtobufWriter::reallocateBuffer(int messageSize)
 {
 	if (m_nativeBuffer == false)
