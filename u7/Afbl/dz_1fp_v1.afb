@@ -6,26 +6,26 @@
             <Version>1.0</Version>
             <Implementation Version="1" OpIndex="14"/>
             <Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
-            <Category>Math</Category>
+            <Category>Other</Category>
             <OpCode>24</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex = "3" Size = "32"/>           
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="3" Size="32"/>           
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="Float" OpIndex = "6" Size = "32"/>            
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="6" Size="32"/>            
 
-            <AfbElementSignal OpName="o_overflow" Caption = "overflow" Type="Discrete" OpIndex = "9" Size = "1"/>
-            <AfbElementSignal OpName="o_underflow" Caption = "underflow" Type="Discrete" OpIndex = "10" Size = "1"/>
-            <AfbElementSignal OpName="o_zero" Caption = "zero" Type="Discrete" OpIndex = "11" Size = "1"/>
-            <AfbElementSignal OpName="o_nan" Caption = "nan" Type="Discrete" OpIndex = "12" Size = "1"/>
-            <AfbElementSignal OpName="o_unordered" Caption = "unordered" Type="Discrete" OpIndex = "13" Size = "1"/>
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="9" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="10" Size="1"/>
+            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="11" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="12" Size="1"/>
+            <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="13" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>3</Value>
                 <Default>3</Default>
                 <LowLimit>1</LowLimit>
@@ -34,7 +34,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_data_x" Caption = "data_x" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_data_x" Caption="DataX" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>0</LowLimit>
@@ -43,7 +43,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>                   
-            <AfbElementParam OpName="OutOverflow" Caption = "OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -55,7 +55,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutUnderflow" Caption = "OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -67,7 +67,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutZero" Caption = "OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -79,7 +79,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutNaN" Caption = "OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -101,7 +101,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutUnordered" Caption = "OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
