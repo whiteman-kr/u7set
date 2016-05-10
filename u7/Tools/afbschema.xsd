@@ -100,7 +100,7 @@
                         <xs:attribute name="Instantiator" type="xs:boolean" use="required" />
                         <xs:attribute name="User" type="xs:boolean" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
-                        <xs:attribute name="DataFormat" type="xs:string" use="required" />
+                        <xs:attribute name="DataFormat" type="xs:string" use="optional" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>

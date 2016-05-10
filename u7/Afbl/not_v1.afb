@@ -13,10 +13,10 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_oprd" Caption = "in" Type="Discrete" OpIndex = "0" Size = "1"/>
+            <AfbElementSignal OpName="i_oprd" Caption="in" Type="Discrete" OpIndex="0" Size="1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "2" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="2" Size="1"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">

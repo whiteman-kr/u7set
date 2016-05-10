@@ -13,14 +13,14 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex = "6" Size = "1"/>
-            <AfbElementSignal OpName="i_counter" Caption="time" Type="Analog" OpIndex = "1" Size = "32" DataFormat="SignedInt"/>
+            <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex="6" Size="1"/>
+            <AfbElementSignal OpName="i_counter" Caption="time" Type="Analog" OpIndex="1" Size="32" DataFormat="SignedInt"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="8" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>1</LowLimit>
