@@ -13,15 +13,15 @@ namespace VFrame30
 	SchemaItemConst::SchemaItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemaItemConst::type, SchemaItemConst::setType);
-		auto valIntProp = ADD_PROPERTY_GETTER_SETTER(int, ValueInteger, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
-		auto valFloatProp = ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
-		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(ConstType, PropertyNames::type, true, SchemaItemConst::type, SchemaItemConst::setType);
+		auto valIntProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueInteger, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
+		auto valFloatProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::valueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
 
-		typeProp->setCategory("Functional");
-		valIntProp->setCategory("Functional");
-		valFloatProp->setCategory("Functional");
-		precisionProp->setCategory("Functional");
+		typeProp->setCategory(PropertyNames::functionalCategory);
+		valIntProp->setCategory(PropertyNames::functionalCategory);
+		valFloatProp->setCategory(PropertyNames::functionalCategory);
+		precisionProp->setCategory(PropertyNames::functionalCategory);
 
 		// --
 		//

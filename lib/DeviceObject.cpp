@@ -70,39 +70,49 @@ namespace Hardware
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
-		ADD_PROPERTY_GETTER(int, FileID, true, DeviceObject::fileId);
+static const QString fileIdCaption("FileID");								// Perfomance optimization
+static const QString uuidCaption("Uuid");
+static const QString equipmentIdTemplateCaption("EquipmentIDTemplate");
+static const QString equipmentIdCaption("EquipmentID");
+static const QString captionCaption("Caption");
+static const QString childRestrictionCaption("ChildRestriction");
+static const QString placeCaption("Place");
+static const QString specPropCaption("SpecificProperties");
+static const QString presetCaption("Preset");
+static const QString presetRootCaption("PresetRoot");
+static const QString presetNameCaption("PresetName");
+static const QString presetObjectUuidCaption("PresetObjectUuid");
 
-		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
+		ADD_PROPERTY_GETTER(int, fileIdCaption, true, DeviceObject::fileId);
+		ADD_PROPERTY_GETTER(QUuid, uuidCaption, true, DeviceObject::uuid);
+		ADD_PROPERTY_GETTER_SETTER(QString, equipmentIdTemplateCaption, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, EquipmentIDTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
-
-
-		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, EquipmentID, true, DeviceObject::equipmentId);
+		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, equipmentIdCaption, true, DeviceObject::equipmentId);
 		equipmentIdProp->setReadOnly(true);
 
-		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
+		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, captionCaption, true, DeviceObject::caption, DeviceObject::setCaption);
 
-		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, childRestrictionCaption, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		childRestrProp->setExpert(true);
 
-		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
+		ADD_PROPERTY_GETTER_SETTER(int, placeCaption, true, DeviceObject::place, DeviceObject::setPlace);
 
-		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, SpecificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
+		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, specPropCaption, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
 		specificProp->setExpert(true);
 
-		auto presetProp = ADD_PROPERTY_GETTER(bool, Preset, true, DeviceObject::preset);
+		auto presetProp = ADD_PROPERTY_GETTER(bool, presetCaption, true, DeviceObject::preset);
 		presetProp->setExpert(true);
 
-		auto presetRootProp = ADD_PROPERTY_GETTER(bool, PresetRoot, true, DeviceObject::presetRoot);
+		auto presetRootProp = ADD_PROPERTY_GETTER(bool, presetRootCaption, true, DeviceObject::presetRoot);
 		presetRootProp->setExpert(true);
 
 		if (preset == true)
 		{
-			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, presetNameCaption, true, DeviceObject::presetName, DeviceObject::setPresetName);
 			presetNameProp->setExpert(true);
 		}
 
-		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
+		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, presetObjectUuidCaption, true, DeviceObject::presetObjectUuid);
 		presetObjectUuidProp->setExpert(true);
 
 		captionProp->setUpdateFromPreset(true);
@@ -255,7 +265,8 @@ namespace Hardware
 
 			if (m_preset == true && propertyExists("PresetName") == false)
 			{
-				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+static const QString presetNameCaption("PresetName");	// Optimization
+				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, presetNameCaption, true, DeviceObject::presetName, DeviceObject::setPresetName);
 				presetNameProp->setExpert(true);
 			}
 
@@ -2022,7 +2033,7 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType)
 		typeProp->setUpdateFromPreset(true);
 	}
 
@@ -2101,10 +2112,10 @@ R"DELIM({
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
 		familyTypeProp->setExpert(true);
 
-		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
 		moduleVersionProp->setExpert(true);
 
 		familyTypeProp->setUpdateFromPreset(true);
@@ -2306,17 +2317,27 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
-		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
-		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
+static const QString typeCaption("Type");				// Optimization
+static const QString functionCaption("Function");
+static const QString byteOrderCaption("ByteOrder");
+static const QString formatCaption("Format");
+static const QString sizeCaption("Size");
+static const QString validityOffsetCaption("ValidityOffset");
+static const QString validityBitCaption("ValidityBit");
+static const QString valueOffsetCaption("ValueOffset");
+static const QString valueBitCaption("ValueBit");
 
-		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
-		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
-		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, DeviceSignal::type, DeviceSignal::setType)
+		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, functionCaption, true, DeviceSignal::function, DeviceSignal::setFunction)
+		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, formatCaption, true, DeviceSignal::format, DeviceSignal::setFormat)
 
-		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, sizeCaption, true, DeviceSignal::size, DeviceSignal::setSize)
+		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, validityOffsetCaption, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
+		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, validityBitCaption, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+
+		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, valueOffsetCaption, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, valueBitCaption, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(preset);
@@ -2712,7 +2733,7 @@ R"DELIM({
 	Workstation::Workstation(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
 
 		typeProp->setUpdateFromPreset(true);
 	}
@@ -2795,7 +2816,7 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, Type, true, Software::type, Software::setType);
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, "Type", true, Software::type, Software::setType);
 
 		typeProp->setUpdateFromPreset(true);
 	}
