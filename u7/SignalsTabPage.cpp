@@ -651,7 +651,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_STR_ID: return signal.appSignalID();
 				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
-				case SC_CHANNEL: return signal.channel();
+				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('A');
 				case SC_DATA_FORMAT:
 					if (m_dataFormatInfo.contains(signal.dataFormatInt()))
@@ -710,7 +710,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_STR_ID: return signal.appSignalID();
 				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
-				case SC_CHANNEL: return signal.channel();
+				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('D');
 				case SC_DATA_FORMAT:
 					if (m_dataFormatInfo.contains(signal.dataFormatInt()))
