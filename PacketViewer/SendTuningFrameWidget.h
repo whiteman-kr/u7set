@@ -20,6 +20,7 @@ public slots:
 	bool checkSocket();
 
 private:
+	QComboBox* m_endiansCombo;
 	QComboBox* m_sourceAddressCombo;
 	QLineEdit* m_sourcePortEdit;
 	QLineEdit* m_destinationAddressEdit;

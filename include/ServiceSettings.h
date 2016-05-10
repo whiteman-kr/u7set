@@ -75,11 +75,24 @@ private:
 	static const char* PROP_TUNING_DATA_IP;
 	static const char* PROP_TUNING_DATA_PORT;
 
+	static const char* TUNING_MEMORY_SETTINGS_ELEMENT;
+	static const char* PROP_TUNING_DATA_OFFSET;
+	static const char* PROP_TUNING_DATA_SIZE;
+	static const char* PROP_TUNING_ROM_FRAME_COUNT;
+	static const char* PROP_TUNING_ROM_FRAME_SIZE;
+	static const char* PROP_TUNING_ROM_SIZE;
+
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
 	HostAddressPort tuningDataIP;
+
+	int tuningDataOffsetW = 0;
+	int tuningDataSizeW = 0;
+	int tuningRomFrameCount = 0;
+	int tuningRomFrameSizeW = 0;
+	int tuningRomSizeW = 0;
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);

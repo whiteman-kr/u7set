@@ -1,14 +1,28 @@
 #pragma once
 
 #include "../include/Service.h"
+#include "../include/ServiceSettings.h"
+#include "TuningDataSource.h"
+
 
 class TuningServiceWorker : public ServiceWorker
 {
+private:
+	TuningServiceSettings m_tuningSettings;
+	TuningDataSources m_dataSources;
+
+	bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml);
+
 public:
 	TuningServiceWorker(const QString& serviceStrID,
 						const QString& cfgServiceIP1,
 						const QString& cfgServiceIP2);
 
 	TuningServiceWorker* createInstance() override;
+
+	bool loadConfigurationFromFile(const QString& fileName);
+
+	virtual void initialize() override;
+	virtual void shutdown() override;
 };
 

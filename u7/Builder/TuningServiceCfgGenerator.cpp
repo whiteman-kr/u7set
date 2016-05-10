@@ -60,6 +60,8 @@ namespace Builder
 
 		xml.writeStartElement("TuningLMs");
 
+		QList<Hardware::DeviceModule*> tuningLMs;
+
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
 			if (lm == nullptr)
@@ -81,21 +83,32 @@ namespace Builder
 
 			if (lmNetProperties.tuningServiceID == m_software->equipmentIdTemplate())
 			{
-				DataSource ds;
-
-				ds.setChannel(0);
-				ds.setDataType(DataSource::DataType::Tuning);
-				ds.setLmStrID(lm->equipmentIdTemplate());
-				ds.setLmCaption(lm->caption());
-				ds.setLmAdapterStrID(lmNetProperties.adapterID);
-				ds.setLmDataEnable(lmNetProperties.tuningEnable);
-				ds.setLmAddressStr(lmNetProperties.tuningIP);
-				ds.setLmPort(lmNetProperties.tuningPort);
-
-				result &= findAssociatedTuningSignals(ds);
-
-				ds.writeToXml(xml);
+				tuningLMs.append(lm);
 			}
+		}
+
+		xml.writeIntAttribute("Count", tuningLMs.count());
+
+		for(Hardware::DeviceModule* lm : tuningLMs)
+		{
+			LmEthernetAdapterNetworkProperties lmNetProperties;
+
+			result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, LM_ETHERNET_ADAPTER1, m_log);
+
+			DataSource ds;
+
+			ds.setChannel(0);
+			ds.setDataType(DataSource::DataType::Tuning);
+			ds.setLmStrID(lm->equipmentIdTemplate());
+			ds.setLmCaption(lm->caption());
+			ds.setLmAdapterStrID(lmNetProperties.adapterID);
+			ds.setLmDataEnable(lmNetProperties.tuningEnable);
+			ds.setLmAddressStr(lmNetProperties.tuningIP);
+			ds.setLmPort(lmNetProperties.tuningPort);
+
+			result &= findAssociatedTuningSignals(ds);
+
+			ds.writeToXml(xml);
 		}
 
 		xml.writeEndElement();				//	</TuningLMs>

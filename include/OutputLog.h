@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QDateTime>
+#include <QMutex>
 #include "Types.h"
 
 #define LOG_STRING(PARAM) #PARAM
