@@ -3695,7 +3695,6 @@ namespace Builder
 			}
 
 			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
-
 		}
 
 		return result;

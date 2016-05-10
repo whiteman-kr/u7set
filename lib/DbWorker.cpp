@@ -73,6 +73,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 57", ":/DatabaseUpgrade/Upgrade0057.sql"},
 	{"Upgrade to version 58", ":/DatabaseUpgrade/Upgrade0058.sql"},
 	{"Upgrade to version 59", ":/DatabaseUpgrade/Upgrade0059.sql"},
+	{"Upgrade to version 60", ":/DatabaseUpgrade/Upgrade0060.sql"},
 };
 
 
