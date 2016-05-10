@@ -74,6 +74,8 @@ namespace Builder
 
 			if (!buildOptoPortsSignalLists()) break;
 
+			if (!buildTuningSignalsLists()) break;
+
 			result = true;
 		}
 
@@ -436,6 +438,8 @@ namespace Builder
 
 		do
 		{
+			if (!getLmAssociatedSignals()) break;
+
 			if (!buildServiceMaps()) break;
 
 			if (!createDeviceBoundSignalsMap()) break;
@@ -2259,6 +2263,21 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::buildTuningSignalsLists()
+	{
+		bool result = true;
+
+		m_tuningAnalogFloat.clear();
+		m_tuningAnalogInt.clear();
+		m_tuningDiscrete.clear();
+
+		//for()
+
+
+		return result;
+	}
+
+
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
 		if (m_optoModuleStorage == nullptr)
@@ -3649,6 +3668,37 @@ namespace Builder
 		}
 
 		return appItem;
+	}
+
+
+	bool ModuleLogicCompiler::getLmAssociatedSignals()
+	{
+		bool result = true;
+
+		int signalCount = m_signals->count();
+
+		m_lmAssociatedSignals.clear();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& signal = (*m_signals)[i];
+
+			if (signal.equipmentID().isEmpty() == true)
+			{
+				continue;
+			}
+
+			if (signal.equipmentID() == m_lm->equipmentId())
+			{
+				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
+				continue;
+			}
+
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
+
+		}
+
+		return result;
 	}
 
 
