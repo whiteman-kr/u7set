@@ -246,10 +246,12 @@ namespace Builder
 				break;
 			}
 
+			TuningDataStorage tuningDataStorage;
+
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &buildWriter);
+			compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &tuningDataStorage, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -721,12 +723,13 @@ namespace Builder
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
+													TuningDataStorage* tuningDataStorage,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, tuningDataStorage, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 

@@ -167,7 +167,8 @@ SOURCES +=\
     Builder/DiagDataServiceCfgGenerator.cpp \
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
-    UploadTabPage.cpp
+    UploadTabPage.cpp \
+    Builder/TuningDataStorage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -264,7 +265,8 @@ HEADERS  += \
     Builder/DiagDataServiceCfgGenerator.h \
     ../include/Queue.h \
     ../include/ProtobufHelper.h \
-    UploadTabPage.h
+    UploadTabPage.h \
+    Builder/TuningDataStorage.h
 
 FORMS    += \
     ChangesetDialog.ui \

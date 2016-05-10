@@ -26,6 +26,7 @@ namespace Builder
 		m_lm = lm;
 		m_connections = appLogicCompiler.m_connections;
 		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
+		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -139,6 +140,8 @@ namespace Builder
 			if (!setLmAppDataSize()) break;
 
 			if (!copyRS232Signals()) break;
+
+			if (!buildTuningData()) break;
 
 			if (!finishAppLogicCode()) break;
 
@@ -2271,8 +2274,39 @@ namespace Builder
 		m_tuningAnalogInt.clear();
 		m_tuningDiscrete.clear();
 
-		//for()
+		for(Signal* signal : m_lmAssociatedSignals)
+		{
+			if (signal->enableTuning() == false)
+			{
+				continue;
+			}
 
+			if (signal->isAnalog())
+			{
+				if (signal->dataFormat() == E::DataFormat::Float)
+				{
+					m_tuningAnalogFloat.append(signal);
+				}
+				else
+				{
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
+					{
+						m_tuningAnalogInt.append(signal);
+					}
+					else
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Signal '%1' for tuning must have Float or Signed Int data format")).
+							  arg(signal->appSignalID()));
+						result = false;
+					}
+				}
+			}
+			else
+			{
+				m_tuningDiscrete.append(signal);
+			}
+		}
 
 		return result;
 	}
@@ -2853,6 +2887,81 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::buildTuningData()
+	{
+		bool result = true;
+
+		int tuningFrameSizeB = 0;
+
+		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeB);
+
+		if (result == false)
+		{
+			return false;
+		}
+/*
+		TuningData* tuningData = new TuningData();
+
+		char* analogFloatValues[3];
+		char* analogIntValues[3];
+		char* discreteValues[3];
+
+		for(int i = 0; i < 3; i++)
+		{
+			// analog float values
+			//
+			int framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningAnalogFloat.count(), sizeof(float) * 8);
+			int sizeToAllocate = framesCount * tuningFrameSizeB;
+
+			analogFloatValues[i] = new char [sizeToAllocate];
+			memset(analogFloatValues[i], sizeToAllocate, 0);
+
+			// analog int values
+			//
+			framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningAnalogInt.count(), sizeof(qint32) * 8);
+			sizeToAllocate = framesCount * tuningFrameSizeB;
+
+			analogIntValues[i] = new char [sizeToAllocate];
+			memset(analogIntValues[i], sizeToAllocate, 0);
+
+			// discrete values
+			//
+			framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningDiscrete.count(), 1);
+			sizeToAllocate = framesCount * tuningFrameSizeB;
+
+			discreteValues[i] = new char [sizeToAllocate];
+			memset(discreteValues[i], sizeToAllocate, 0);
+		}
+
+		for(Signal* signal : m_tuningAnalogFloat)
+		{
+			analogFloatValues[0].append(static_cast<float>(signal->tuningDefaultValue()));
+			analogFloatValues[1].append(static_cast<float>(signal->lowLimit()));
+			analogFloatValues[2].append(static_cast<float>(signal->highLimit()));
+		}
+
+		QVector<qint32> analogIntValues[3];
+
+		for(Signal* signal : m_tuningAnalogInt)
+		{
+			analogIntValues[0].append(static_cast<qint32>(signal->tuningDefaultValue()));
+			analogIntValues[1].append(static_cast<qint32>(signal->lowLimit()));
+			analogIntValues[2].append(static_cast<qint32>(signal->highLimit()));
+		}
+
+		QVector<quint32> discreteValues[3];
+
+		for(Signal* signal : m_tuningDiscrete)
+		{
+			discreteValues[0].append(static_cast<quint32>(signal->tuningDefaultValue()) == 0 ? 0 : 1) ;
+			discreteValues[1].append(0);
+			discreteValues[2].append(1);
+		}
+
+		m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);*/
+
+		return result;
+	}
 
 
 	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
@@ -3695,6 +3804,23 @@ namespace Builder
 			}
 
 			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
+
+			if (device == nullptr)
+			{
+				continue;
+			}
+
+			const Hardware::DeviceChassis* chassis = device->getParentChassis();
+
+			if (chassis == nullptr)
+			{
+				continue;
+			}
+
+			if (chassis == m_chassis)
+			{
+				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
+			}
 		}
 
 		return result;
