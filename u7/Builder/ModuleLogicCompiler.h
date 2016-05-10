@@ -442,6 +442,8 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 
+		HashedVector<QString, Signal*> m_lmAssociatedSignals;
+
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
@@ -450,6 +452,10 @@ namespace Builder
 
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;
+
+		QList<Signal*> m_tuningAnalogFloat;
+		QList<Signal*> m_tuningAnalogInt;
+		QList<Signal*> m_tuningDiscrete;
 
 		// compiler settings
 		//
@@ -525,12 +531,16 @@ namespace Builder
 		bool loadModulesSettings();
 
 		bool prepareAppLogicGeneration();
+
+		bool getLmAssociatedSignals();
 		bool buildServiceMaps();
 		bool createDeviceBoundSignalsMap();
 		bool createAppSignalsMap();
 
 		bool buildRS232SignalLists();
 		bool buildOptoPortsSignalLists();
+
+		bool buildTuningSignalsLists();
 
 		// pass #2 compilation functions
 		//
@@ -595,10 +605,8 @@ namespace Builder
 		AppItem* createFbForAnalogInputSignalConversion(const Signal &signal);
 		AppItem* createFbForAnalogOutputSignalConversion(const Signal &signal);
 
-
 		bool createAppFbsMap();
 		AppFb* createAppFb(const AppItem& appItem);
-
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
 
