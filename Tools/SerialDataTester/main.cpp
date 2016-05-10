@@ -1,4 +1,4 @@
-#include "serialdatatester.h"
+#include "SerialDataTester.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])

@@ -3,6 +3,7 @@
 
 #include "SettingsDialog.h"
 #include "PortReceiver.h"
+#include "SerialDataParser.h"
 #include <QMainWindow>
 #include <QXmlReader>
 #include <QPixmap>
@@ -31,7 +32,7 @@ private slots:
 	void setBits(QAction* newBits);
 	void setStopBits(QAction* newStopBits);
 	void portError(QString error);
-	void dataReceived(QByteArray data);
+	void dataReceived (QByteArray receivedValues);
 	void signalTimeout();
 	void erasePacketData();
 	void loadLastUsedSettings();
@@ -51,6 +52,7 @@ private:
 
 	SettingsDialog* m_applicationSettingsDialog = nullptr;
 	PortReceiver* m_portReceiver = nullptr;
+	SerialDataParser* m_parser = nullptr;
 
 	QMenu* m_file = nullptr;
 	QAction* m_reloadCfg = nullptr;
@@ -97,7 +99,6 @@ private:
 	};
 
 	QVector<SignalData> m_signalsFromXml;
-	quint64 m_crc_table[256];
 	const quint32 m_signature = 0x424D4C47;
 	int m_dataSize = 0;
 };
