@@ -237,6 +237,7 @@ void Signal::InitProperties()
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
 	ADD_PROPERTY_GETTER_SETTER(QString, EquipmentID, true, Signal::equipmentID, Signal::setEquipmentID);
 	ADD_PROPERTY_GETTER_SETTER(bool, EnableTuning, true, Signal::enableTuning, Signal::setEnableTuning);
+	ADD_PROPERTY_GETTER_SETTER(double, TuningDefaultValue, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))

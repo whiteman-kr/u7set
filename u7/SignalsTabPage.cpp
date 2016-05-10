@@ -57,7 +57,8 @@ SC_FILTERING_TIME = 32,
 SC_MAX_DIFFERENCE = 33,
 SC_BYTE_ORDER = 34,
 SC_ENABLE_TUNING = 35,
-SC_LAST_CHANGE_USER = 36;
+SC_TUNING_DEFAULT_VALUE = 36,
+SC_LAST_CHANGE_USER = 37;
 
 
 const char* Columns[] =
@@ -98,6 +99,7 @@ const char* Columns[] =
 	"Max difference",
 	"Byte order",
 	"Enable\ntuning",
+	"Tuning\ndefault value",
 	"Last change user",
 };
 
@@ -185,6 +187,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
 		case SC_MAX_DIFFERENCE:
+		case SC_TUNING_DEFAULT_VALUE:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			le->setValidator(new QDoubleValidator(le));
@@ -308,6 +311,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.aperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
 		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(s.maxDifference())); break;
+		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.dataFormatInt())); break;
@@ -369,6 +373,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
+		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
@@ -689,13 +694,17 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 				case SC_CALCULATED: return signal.calculated() ? tr("True") : tr("False");
 				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
+
 				case SC_NORMAL_STATE: return signal.normalState();
 				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 				case SC_APERTURE: return signal.aperture();
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
+				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
+
 				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
+
 				case SC_DEVICE_STR_ID: return signal.equipmentID();
 
 				default:
@@ -725,6 +734,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
+				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
 				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
 				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.equipmentID();
@@ -853,6 +863,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
+			case SC_TUNING_DEFAULT_VALUE: signal.setTuningDefaultValue(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(static_cast<E::SignalInOutType>(value.toInt())); break;
 			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setEquipmentID(value.toString()); break;

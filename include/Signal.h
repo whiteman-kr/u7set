@@ -364,7 +364,7 @@ public:
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(bool value) { m_tuningDefaultValue = value; }
+	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
