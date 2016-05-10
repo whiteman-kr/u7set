@@ -166,7 +166,8 @@ SOURCES +=\
     Builder/AppDataServiceCfgGenerator.cpp \
     Builder/DiagDataServiceCfgGenerator.cpp \
     ../lib/Queue.cpp \
-    ../lib/ProtobufHelper.cpp
+    ../lib/ProtobufHelper.cpp \
+    UploadTabPage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -262,7 +263,8 @@ HEADERS  += \
     Builder/AppDataServiceCfgGenerator.h \
     Builder/DiagDataServiceCfgGenerator.h \
     ../include/Queue.h \
-    ../include/ProtobufHelper.h
+    ../include/ProtobufHelper.h \
+    UploadTabPage.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -290,8 +292,8 @@ RESOURCES += \
 OTHER_FILES += \
 	../Proto/proto_compile.bat \
 	../Proto/serialization.proto \
-        Tools/afbschema.xsd \
-        ../Proto/proto_compile.sh \
+	Tools/afbschema.xsd \
+	../Proto/proto_compile.sh \
 	month-report.txt \
     DatabaseUpgrade/Upgrade0039.txt
 

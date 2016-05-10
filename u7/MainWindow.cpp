@@ -16,6 +16,7 @@
 #include "DialogConnectionsEditor.h"
 #include "Rs232SignalListEditor.h"
 #include "BuildTabPage.h"
+#include "UploadTabPage.h"
 #include "GlobalMessanger.h"
 
 #include "../VFrame30/VFrame30.h"
@@ -69,6 +70,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("&Build"));
+
+	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
 
 	// --
 	//

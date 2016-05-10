@@ -495,10 +495,15 @@ namespace VFrame30
 
 		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 
-		textLineCount = std::max(pinCount, textLineCount);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(textLineCount), gridSize);
+		double minPinHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double minTextHeight = CUtils::snapToGrid(m_font.drawSize() * static_cast<double>(textLineCount), gridSize);
 
-		return minHeight;
+		if (minTextHeight < minPinHeight)
+		{
+			return minPinHeight;
+		}
+
+		return minTextHeight;
 	}
 
 	double SchemaItemAfb::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
