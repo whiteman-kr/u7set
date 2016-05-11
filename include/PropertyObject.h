@@ -871,7 +871,7 @@ public:
 
 		if (!setter)
 		{
-			property->m_readOnly = true;
+			property->setReadOnly(true);
 		}
 
 		m_properties[hash] = property;
