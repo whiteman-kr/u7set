@@ -17,6 +17,7 @@ class DbController;
 namespace Hardware
 {
 	extern const wchar_t* DeviceObjectExtensions[];
+	extern const wchar_t* DeviceTypeNames[];
 
 	void Init();
 	void Shutdwon();
@@ -52,8 +53,6 @@ namespace Hardware
 
 		DeviceTypeCount
 	};
-
-
 
 	// Forward declarations
 	//

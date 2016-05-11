@@ -135,6 +135,8 @@ public slots:
 	void addWorkstation();
 	void addSoftware();
 
+	void addPreset();
+
 	void addPresetRack();
 	void addPresetChassis();
 	void addPresetModule();
@@ -220,7 +222,7 @@ public slots:
 
 protected slots:
 	void addObjectTriggered();
-	void addPresetTriggered();
+	void addNewPresetTriggered();
 
 	void pendingChanges();
 
@@ -239,14 +241,19 @@ private:
 		QAction* m_addSoftwareAction = nullptr;
 
 	//----------------------------------
+	QAction* m_addFromPresetAction = nullptr;
+
+	//----------------------------------
 	QMenu* m_addPresetMenu = nullptr;
-	QAction* m_addPresetAction = nullptr;
+	QAction* m_addNewPresetAction = nullptr;
 		QAction* m_addPresetRackAction = nullptr;
 		QAction* m_addPresetChassisAction = nullptr;
 		QAction* m_addPresetModuleAction = nullptr;
 		QAction* m_addPresetControllerAction = nullptr;
 		QAction* m_addPresetWorkstationAction = nullptr;
 		QAction* m_addPresetSoftwareAction = nullptr;
+
+	QAction* m_SeparatorActionA = nullptr;
 
 	//----------------------------------
 	QAction* m_SeparatorAction0 = nullptr;

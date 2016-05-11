@@ -168,6 +168,7 @@ SOURCES +=\
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
+    DialogChoosePreset.cpp \
     Builder/TuningDataStorage.cpp
 
 HEADERS  += \
@@ -266,6 +267,7 @@ HEADERS  += \
     ../include/Queue.h \
     ../include/ProtobufHelper.h \
     UploadTabPage.h \
+    DialogChoosePreset.h \
     Builder/TuningDataStorage.h
 
 FORMS    += \
@@ -285,7 +287,8 @@ FORMS    += \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
     SchemaPropertiesDialog.ui \
-    SchemaItemPropertiesDialog.ui
+    SchemaItemPropertiesDialog.ui \
+    DialogChoosePreset.ui
 
 RESOURCES += \
 	Resources.qrc \

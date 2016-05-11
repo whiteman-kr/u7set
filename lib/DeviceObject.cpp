@@ -27,6 +27,19 @@ namespace Hardware
 			L".hds",		// Signal
 		};
 
+	const wchar_t* DeviceTypeNames[] =
+		{
+			L"Root",		// Root
+			L"System",		// System
+			L"Rack",		// Rack
+			L"Chassis",		// Chassis
+			L"Module",		// Module
+			L"Workstation",	// Workstation
+			L"Software",	// Software
+			L"Controller",	// Controller
+			L"Signal",		// Signal
+		};
+
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 	void Init()

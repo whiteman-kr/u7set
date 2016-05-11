@@ -126,7 +126,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	QSettings settings;
 
 	QVBoxLayout* vl = new QVBoxLayout;
-    ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+	ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
 
 	connect(pe, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::checkoutSignal);
 
@@ -136,13 +136,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 		signal->setReadOnly(readOnly);
 		if (signal->isDiscrete())
 		{
+			signal->setDataFormat(E::UnsignedInt);
 			signal->setDataSize(1);
+			signal->propertyByCaption("DataFormat")->setReadOnly(true);
 			signal->propertyByCaption("DataSize")->setReadOnly(true);
 		}
 		m_objList.push_back(signal);
 	}
 	pe->setObjects(m_objList);
-    pe->resizeColumnToContents(0);
+	pe->resizeColumnToContents(0);
 	vl->addWidget(pe);
 
 	if (!readOnly)
@@ -194,6 +196,11 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		if (signal->appSignalID().trimmed().isEmpty())
 		{
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
+			return;
+		}
+		if (signal->isDiscrete() && signal->dataFormat() != E::UnsignedInt)
+		{
+			QMessageBox::critical(this, "Could not save signal", "Error: Discrete signal has not UnsignedInt DataFormat");
 			return;
 		}
 	}
@@ -264,8 +271,6 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
 	QSettings settings;
 	Signal& signal = *m_signalVector[0];
-	settings.setValue("SignalsTabPage/LastEditedSignal/dataFormat", signal.dataFormat());
-	settings.setValue("SignalsTabPage/LastEditedSignal/dataSize", signal.dataSize());
 	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
 	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());
 	settings.setValue("SignalsTabPage/LastEditedSignal/lowLimit", signal.lowLimit());

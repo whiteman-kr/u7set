@@ -49,7 +49,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
 //var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
 //var configScriptVersion = 5;		// LM-1 properties SubsysID and Channel have been renamed to SubsystemID and SubsystemChannel
-var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
+//var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
+var configScriptVersion = 7;		// MAC address calculation changed
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -1458,11 +1459,14 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 	var h0 = hashList.jsAt(0);
 	var h1 = hashList.jsAt(1);
 	
-	var m1 = h0 & 0x7fff;
-	var m2 = (h0 >> 16) & 0x7fff;
-	var m3 = h1 & 0x7fff;
+	//var m1 = h0 & 0x7fff;
+	//var m2 = (h0 >> 16) & 0x7fff;
+	//var m3 = h1 & 0x7fff;
+	var m1 = 0x4200;
+	var m2 = h0 & 0x7fff;
+	var m3 = (h0 >> 16) & 0x7fff;
 	
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + m1 + ":" + m2 + ":" + m3 + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
 	setData16(confFirmware, log, frame, ptr, m1); 
 	ptr += 2;
 	setData16(confFirmware, log, frame, ptr, m2); 
