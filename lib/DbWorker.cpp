@@ -1631,19 +1631,19 @@ void DbWorker::slot_updateUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	query.prepare("SELECT * FROM update_user(:userid, :username, :firstname, :lastname, :password, :newpassword, :isadmin, :isreadonly, :isdisabled);");
+	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8, %9);")
+						 .arg(currentUser().userId())
+						 .arg(DbWorker::toSqlStr(user.username()))
+						 .arg(DbWorker::toSqlStr(user.firstName()))
+						 .arg(DbWorker::toSqlStr(user.lastName()))
+						 .arg(DbWorker::toSqlStr(user.password()))
+						 .arg(user.newPassword().isEmpty() ? QString::null : DbWorker::toSqlStr(user.newPassword()))
+						 .arg(user.isAdminstrator() ? "TRUE" : "FALSE")
+						 .arg(user.isReadonly() ? "TRUE" : "FALSE")
+						 .arg(user.isDisabled() ? "TRUE" : "FALSE");
 
-	query.bindValue(":userid", currentUser().userId());
-	query.bindValue(":username", user.username());
-	query.bindValue(":firstname", user.firstName());
-	query.bindValue(":lastname", user.lastName());
-	query.bindValue(":password", user.password());
-	query.bindValue(":newpassword", user.newPassword().isEmpty() ? QString::null : user.newPassword());
-	query.bindValue(":isadmin", user.isAdminstrator());
-	query.bindValue(":isreadonly", user.isReadonly());
-	query.bindValue(":isdisabled", user.isDisabled());
 
-	bool result = query.exec();
+	bool result = query.exec(requestStr);
 
 	if (result == false)
 	{
