@@ -15,33 +15,33 @@ namespace Hardware
     //
     Connection::Connection()
     {
-        ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
-        ADD_PROPERTY_GETTER_SETTER(QString, Port1StrID, true, Connection::port1StrID, Connection::setPort1StrID);
-        ADD_PROPERTY_GETTER_SETTER(QString, Port2StrID, true, Connection::port2StrID, Connection::setPort2StrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Connection::caption, Connection::setCaption);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Port1StrID", true, Connection::port1StrID, Connection::setPort1StrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Port2StrID", true, Connection::port2StrID, Connection::setPort2StrID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port1TxWordsQuantity, true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Port1RxWordsQuantity, true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port1TxRxOptoID, false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRxOptoDataUID, false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRxOptoID", false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
+		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRxOptoDataUID", false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port1TxRsID, false, Connection::port1TxRsID, Connection::setPort1TxRsID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Port1TxRsDataUID, false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRsID", false, Connection::port1TxRsID, Connection::setPort1TxRsID);
+		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRsDataUID", false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port2TxWordsQuantity, true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, Port2RxWordsQuantity, true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port2TxRxOptoID, false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Port2TxRxOptoDataUID, false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRxOptoID", false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
+		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRxOptoDataUID", false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
+		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRsID", false, Connection::port2TxRsID, Connection::setPort2TxRsID);
+		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRsDataUID", false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, Mode, false, Connection::mode, Connection::setMode);
-        ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, SerialMode, false, Connection::serialMode, Connection::setSerialMode);
-        ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
-        ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
-        ADD_PROPERTY_GETTER_SETTER(bool, ManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
+		ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", false, Connection::mode, Connection::setMode);
+		ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", false, Connection::serialMode, Connection::setSerialMode);
+		ADD_PROPERTY_GETTER_SETTER(bool, "Enable", false, Connection::enable, Connection::setEnable);
+		ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", false, Connection::enableDuplex, Connection::setEnableDuplex);
+		ADD_PROPERTY_GETTER_SETTER(bool, "ManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
     }
 
     Connection::Connection(const Connection& that):Connection()

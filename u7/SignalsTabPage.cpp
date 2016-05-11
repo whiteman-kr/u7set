@@ -1055,14 +1055,15 @@ void SignalsModel::addSignal()
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
 		signal.setDataFormat(E::DataFormat::Float);
+		signal.setDataSize(32);
 		signal.setType(E::SignalType::Analog);
 	}
 	else
 	{
-		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(settings.value("SignalsTabPage/LastEditedSignal/dataFormat").toInt())));
+		signal.setDataFormat(E::DataFormat::UnsignedInt);
+		signal.setDataSize(1);
 		signal.setType(E::SignalType::Discrete);
 	}
-	signal.setDataSize(settings.value("SignalsTabPage/LastEditedSignal/dataSize").toInt());
 	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
 	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
 	signal.setLowLimit(settings.value("SignalsTabPage/LastEditedSignal/lowLimit").toDouble());
