@@ -10,8 +10,6 @@ DbControllerProjectTests::DbControllerProjectTests()
 	m_databaseName = "dbcontrollertesting";
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
-
-	m_currentVersion = 54;
 }
 
 void DbControllerProjectTests::initTestCase()
@@ -109,4 +107,9 @@ void DbControllerProjectTests::getProjectListTest()
 	}
 
 	db.close();
+}
+
+void DbControllerProjectTests::cleanupTestCase()
+{
+	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
 }

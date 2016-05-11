@@ -15,13 +15,22 @@ private:
 
 	RupData m_rupData;					// parsing buffer
 
+	// parsing statistics
+	//
 	quint64 m_parsedRupDataCount = 0;
 	quint64 m_notFoundIPCount = 0;
+	quint64 m_valueParsingErrorCount = 0;
+	quint64 m_validityParsingErrorCount = 0;
+	quint64 m_badSignalStateIndexCount = 0;
+
+	//
 
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
 
 	void parseRupData();
+	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
+	bool getValidity(const SignalParseInfo& parseInfo, AppSignalStateFlags& flags);
 
 public:
 	AppDataProcessingWorker(int number, RupDataQueue& rupDataQueue,

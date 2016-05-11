@@ -17,6 +17,7 @@ namespace Builder
 
 		bool writeSettings();
 		bool writeAppSignalsXml();
+		bool writeAppSignalsProtofile();
 		bool writeEquipmentXml();
 		bool writeAppDataSourcesXml();
 

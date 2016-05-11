@@ -138,8 +138,8 @@ message Configuration
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required wstring variables = 4;
-	required wstring globals = 5; 
-	
+	required wstring globals = 5;
+
 	repeated Uuid schemasIDs = 100;
 	repeated Envelope schemas = 101;
 }
@@ -256,9 +256,9 @@ enum FblSignalType
 //
 enum FblDataFormat
 {
-	UnsignedInt = 0;		
-	SignedInt = 1;			
-	Float = 2;			
+	UnsignedInt = 0;
+	SignedInt = 1;
+	Float = 2;
 }
 
 
@@ -346,13 +346,13 @@ message SchemaItem
 	optional FblItem FblItem = 106;							//
 	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
-	
+
 	// Inherited from PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
 	optional SchemaItemRect Rect = 116;						// +PosRectImpl
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
-	
+
 	optional SchemaItemSignal Signal = 124;						// +FblItemRect
 	optional SchemaItemInput InputSignal = 125;					// +Signal
 	optional SchemaItemOutput OutputSignal = 126;                                   // +Signal
@@ -454,7 +454,7 @@ message FblConnectionPoint
 	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];             // -1 is not used, for links etc...
 	optional string caption = 5 [default = ""];
-	
+
 	//optional Uuid signalUuid = 10;
 	//optional wstring signalStrID = 11;
 }
@@ -682,3 +682,77 @@ message Property
 //
 //
 //------------------------------------------------------------------------------------------
+
+
+
+//------------------------------------------------------------------------------------------
+//
+//  WhiteMan's serialization
+//
+//------------------------------------------------------------------------------------------
+
+
+message Address16
+{
+    required int32 offset = 1 [default = -1];
+    required int32 bit = 2 [default = -1];
+}
+
+
+message Signal
+{
+    optional int32 ID = 1;
+    optional int32 signalGroupID = 2;
+    optional int32 signalInstanceID = 3;
+    optional int32 changesetID = 4;
+    optional bool checkedOut = 5;
+    optional int32 userID = 6;
+    required int32 subsystemChannel = 7;
+    required int32 type = 8;			   // analog or discrete
+    optional int64 created = 9;
+    optional bool deleted = 10;
+    optional int64 instanceCreated = 11;
+    optional int32 instanceAction = 12;
+    required wstring appSignalID = 13;
+    required wstring customAppSignalID = 14;
+    required wstring caption = 15;
+    required int32 dataFormat = 16;
+    required int32 dataSize = 17;
+    optional int32 lowADC = 18;
+    optional int32 highADC = 19;
+    optional double lowLimit = 20;
+    optional double highLimit = 21;
+    required int32 unitID = 22;
+    optional double adjustment = 23;
+    optional double dropLimit = 24;
+    optional double excessLimit = 25;
+    optional double unbalanceLimit = 26;
+    optional double inputLowLimit = 27;
+    optional double inputHighLimit = 28;
+    optional int32 inputUnitID = 29;
+    optional int32 inputSensorID = 30;
+    optional double outputLowLimit = 31;
+    optional double outputHighLimit = 32;
+    optional int32 outputUnitID = 33;
+    optional int32 outputRangeMode = 34;
+    optional int32 outputSensorID = 35;
+    required bool acquire = 36;
+    optional bool calculated = 37;
+    optional int32 normalState = 38;
+    optional int32 decimalPlaces = 39;
+    optional double aperture = 40;
+    required int32 inOutType = 41;
+    required wstring equipmentID = 42;
+    optional double filteringTime = 43;
+    optional double maxDifference = 44;
+    required int32 byteOrder = 45;
+    required bool enableTuning = 46;
+
+    required Address16 valueAddr = 47;
+
+    optional Address16 validityAddr = 50;
+    optional Address16 iobufferAddr = 48;
+    optional Address16 ramAddr = 49;
+}
+
+

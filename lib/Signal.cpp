@@ -162,59 +162,59 @@ Signal& Signal::operator =(const Signal& signal)
 
 void Signal::InitProperties()
 {
+	static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
+	static const QString signalGroupIDCaption("SignalGroupID");
+	static const QString signalInstanceIDCaption("SignalInstanceID");
+	static const QString changesetIDCaption("ChangesetID");
+	static const QString checkedOutCaption("CheckedOut");
+	static const QString userIdCaption("UserID");
+	static const QString channelCaption("Channel");
+	static const QString createdCaption("Created");
+	static const QString deletedCaption("Deleted");
+	static const QString instanceCreatedCaption("InstanceCreated");
+	static const QString instanceActionCaption("InstanceAction");
+	static const QString typeCaption("Type");
+	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
+	static const QString cacheValidator2("^[A-Za-z][A-Za-z\\d_]*$");
+	static const QString appSignalIDCaption("AppSignalID");
+	static const QString customSignalIDCaption("CustomAppSignalID");
+	static const QString captionCaption("Caption");
+	static const QString captionValidator("^.+$");
+	static const QString dataFormatCaption("DataFormat");
+	static const QString dataSizeCaption("DataSize");
+	static const QString lowADCCaption("LowADC");
+	static const QString highADCCaption("HighADC");
+	static const QString lowLimitCaption("LowLimit");
+	static const QString highLimitCaption("HighLimit");
+	static const QString unitCaption("Unit");
+	static const QString adjustmentCaption("Adjustment");
+	static const QString dropLimitCaption("DropLimit");
+	static const QString excessLimitCaption("ExcessLimit");
+	static const QString unbalanceLimitCaption("UnbalanceLimit");
+	static const QString inputLowLimitCaption("InputLowLimit");
+	static const QString inputHighLimitCaption("InputHighLimit");
+	static const QString inputUnitCaption("InputUnit");
+	static const QString inputSensorCaption("InputSensor");
+	static const QString outputLowLimitCaption("OutputLowLimit");
+	static const QString outputHighLimitCaption("OutputHighLimit");
+	static const QString outputUnitCaption("OutputUnit");
+	static const QString outputRangeModeCaption("OutputRangeMode");
+	static const QString outputSensorCaption("OutputSensor");
+	static const QString acquireCaption("Acquire");
+	static const QString calculatedCaption("Calculated");
+	static const QString normalStateCaption("NormalState");
+	static const QString decimalPlacesCaption("DecimalPlaces");
+	static const QString apertureCaption("Aperture");
+	static const QString filteringTimeCaption("FilteringTime");
+	static const QString maxDifferenceCaption("MaxDifference");
+	static const QString inOutTypeCaption("InOutType");
+	static const QString byteOrderCaption("ByteOrder");
+	static const QString equipmentIDCaption("EquipmentID");
+	static const QString enableTuningCaption("EnableTuning");
+	static const QString tuningDefaultValueCaption("TuningDefaultValue");
 
-static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
-static const QString signalGroupIDCaption("SignalGroupID");
-static const QString signalInstanceIDCaption("SignalInstanceID");
-static const QString changesetIDCaption("ChangesetID");
-static const QString checkedOutCaption("CheckedOut");
-static const QString userIdCaption("UserID");
-static const QString channelCaption("Channel");
-static const QString createdCaption("Created");
-static const QString deletedCaption("Deleted");
-static const QString instanceCreatedCaption("InstanceCreated");
-static const QString instanceActionCaption("InstanceAction");
-static const QString typeCaption("Type");
-static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
-static const QString cacheValidator2("^[A-Za-z][A-Za-z\\d_]*$");
-static const QString appSignalIDCaption("AppSignalID");
-static const QString customSignalIDCaption("CustomAppSignalID");
-static const QString captionCaption("Caption");
-static const QString captionValidator("^.+$");
-static const QString dataFormatCaption("DataFormat");
-static const QString dataSizeCaption("DataSize");
-static const QString lowADCCaption("LowADC");
-static const QString highADCCaption("HighADC");
-static const QString lowLimitCaption("LowLimit");
-static const QString highLimitCaption("HighLimit");
-static const QString unitCaption("Unit");
-static const QString adjustmentCaption("Adjustment");
-static const QString dropLimitCaption("DropLimit");
-static const QString excessLimitCaption("ExcessLimit");
-static const QString unbalanceLimitCaption("UnbalanceLimit");
-static const QString inputLowLimitCaption("InputLowLimit");
-static const QString inputHighLimitCaption("InputHighLimit");
-static const QString inputUnitCaption("InputUnit");
-static const QString inputSensorCaption("InputSensor");
-static const QString outputLowLimitCaption("OutputLowLimit");
-static const QString outputHighLimitCaption("OutputHighLimit");
-static const QString outputUnitCaption("OutputUnit");
-static const QString outputRangeModeCaption("OutputRangeMode");
-static const QString outputSensorCaption("OutputSensor");
-static const QString acquireCaption("Acquire");
-static const QString calculatedCaption("Calculated");
-static const QString normalStateCaption("NormalState");
-static const QString decimalPlacesCaption("DecimalPlaces");
-static const QString apertureCaption("Aperture");
-static const QString filteringTimeCaption("FilteringTime");
-static const QString maxDifferenceCaption("MaxDifference");
-static const QString inOutTypeCaption("InOutType");
-static const QString byteOrderCaption("ByteOrder");
-static const QString equipmentIDCaption("EquipmentID");
-static const QString enableTuningCaption("EnableTuning");
-
-static const QString inputSensorCategory("Input sensor");
-static const QString outputSensorCategory("Output sensor");
+	static const QString inputSensorCategory("Input sensor");
+	static const QString outputSensorCategory("Output sensor");
 
 	ADD_PROPERTY_GETTER(int, idCaption, false, Signal::ID);
 	ADD_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID);
@@ -222,27 +222,24 @@ static const QString outputSensorCategory("Output sensor");
 	ADD_PROPERTY_GETTER(int, changesetIDCaption, false, Signal::changesetID);
 	ADD_PROPERTY_GETTER(bool, checkedOutCaption, false, Signal::checkedOut);
 	ADD_PROPERTY_GETTER(int, userIdCaption, false, Signal::userID);
-	ADD_PROPERTY_GETTER(int, channelCaption, false, Signal::channel);
+	ADD_PROPERTY_GETTER(E::Channel, channelCaption, false, Signal::channel);
 	ADD_PROPERTY_GETTER(QDateTime, createdCaption, false, Signal::created);
 	ADD_PROPERTY_GETTER(bool, deletedCaption, false, Signal::deleted);
 	ADD_PROPERTY_GETTER(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated);
-	ADD_PROPERTY_GETTER(E::InstanceAction, channelCaption, false, Signal::instanceAction);
+	ADD_PROPERTY_GETTER(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction);
 
 	ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, false, Signal::type, Signal::setType);
 
 	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID);
 	strIdProperty->setValidator(cacheValidator1);
-
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID);
 	extStrIdProperty->setValidator(cacheValidator2);
-
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, captionCaption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator(captionValidator);
-
 	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat);
 	ADD_PROPERTY_GETTER_SETTER(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize);
 
-	if (isAnalog() == true)
+	if (isAnalog())
 	{
 		static std::shared_ptr<OrderedHash<int, QString>> sensorList = std::make_shared<OrderedHash<int, QString>>();
 
@@ -311,6 +308,8 @@ static const QString outputSensorCategory("Output sensor");
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder);
 	ADD_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID);
 	ADD_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning);
+	ADD_PROPERTY_GETTER_SETTER(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
+
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
@@ -528,7 +527,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "ID", &Signal::setID);
 	serializeField(attr, "SignalGroupID", &Signal::setSignalGroupID);
 	serializeField(attr, "SignalInstanceID", &Signal::setSignalInstanceID);
-	serializeField(attr, "Channel", &Signal::setChannel);
+//	serializeField(attr, "Channel", &Signal::setChannel);
 	serializeField(attr, "Type", &Signal::setType);
 	serializeField(attr, "StrID", &Signal::setAppSignalID);
 	serializeField(attr, "ExtStrID", &Signal::setCustomAppSignalID);
@@ -739,7 +738,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ID", ID());
 	xml.writeIntAttribute("GroupID", signalGroupID());
 	xml.writeIntAttribute("InstanceID", signalInstanceID());
-	xml.writeIntAttribute("LMNumber", channel());
+	xml.writeIntAttribute("Channel", channelInt());
 	xml.writeIntAttribute("Type", typeInt());
 	xml.writeStringAttribute("AppSignalID", appSignalID());
 	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
@@ -774,12 +773,18 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
 	xml.writeDoubleAttribute("MaxDifference", maxDifference());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
+	xml.writeBoolAttribute("EnableTuning", enableTuning());
+	xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+
 	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
-	xml.writeIntAttribute("RegValueAddOffset", regValueAddr().offset());
-	xml.writeIntAttribute("RegValueAddrBit", regValueAddr().bit());
-	xml.writeIntAttribute("RegValidityAddOffset", regValidityAddr().offset());
-	xml.writeIntAttribute("RegValidityAddrBit", regValidityAddr().bit());
+	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
+	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
+	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
+	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
+
+	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
+	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
 
 	xml.writeEndElement();				// </Signal>
 }
@@ -797,7 +802,11 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("ID", &m_ID);
 	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
 	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
-	result &= xml.readIntAttribute("LMNumber", &m_channel);
+
+	int intValue = 0;
+
+	result &= xml.readIntAttribute("Channel", &intValue);
+	m_channel = static_cast<E::Channel>(intValue);
 
 	QString str;
 
@@ -816,8 +825,6 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
 	result &= xml.readStringAttribute("Caption", &m_caption);
 	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
-
-	int intValue = 0;
 
 	result &= xml.readIntAttribute("DataFormat", &intValue);
 	m_dataFormat = static_cast<E::DataFormat>(intValue);
@@ -859,6 +866,9 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("ByteOrder", &intValue);
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);
 
+	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+	result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+
 	int offset = 0;
 	int bit = 0;
 
@@ -870,17 +880,23 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 
 	offset = bit = 0;
 
-	result &= xml.readIntAttribute("RegValueAddrOffset", &offset);
-	result &= xml.readIntAttribute("RegValueAddrBit", &bit);
+	result &= xml.readIntAttribute("ValueOffset", &offset);
+	result &= xml.readIntAttribute("ValueBit", &bit);
 
 	m_regValueAddr.setOffset(offset);
 	m_regValueAddr.setBit(bit);
 
-	result &= xml.readIntAttribute("RegValidityAddrOffset", &offset);
-	result &= xml.readIntAttribute("RegValidityAddrBit", &bit);
+	result &= xml.readIntAttribute("ValidityOffset", &offset);
+	result &= xml.readIntAttribute("ValidityBit", &bit);
 
 	m_regValidityAddr.setOffset(offset);
 	m_regValidityAddr.setBit(bit);
+
+	result &= xml.readIntAttribute("TuningOffset", &offset);
+	result &= xml.readIntAttribute("TuningBit", &bit);
+
+	m_tuningAddr.setOffset(offset);
+	m_tuningAddr.setBit(bit);
 
 	return result;
 }
@@ -935,4 +951,3 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 	assert(false);			//	appSignalD is not found
 	return nullptr;
 }
-

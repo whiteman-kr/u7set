@@ -1,5 +1,6 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "../include/ServiceSettings.h"
+#include "../include/ProtobufHelper.h"
 
 
 namespace Builder
@@ -182,6 +183,114 @@ namespace Builder
 		m_cfgXml->addLinkToFile(m_subDir, "appSignals.xml");
 
 		return true;
+	}
+
+
+	bool AppDataServiceCfgGenerator::writeAppSignalsProtofile()
+	{
+		DataFormatList dataFormatInfo;
+
+		UnitList unitInfo;
+		m_dbController->getUnits(&unitInfo, nullptr);
+
+		QVector<Signal*> signalsToWrite;
+
+		int signalCount = m_signalSet->count();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& signal = (*m_signalSet)[i];
+
+			if (m_associatedAppSignals.contains(signal.appSignalID()) == false)
+			{
+				continue;
+			}
+
+			bool hasWrongField = false;
+
+			if (!dataFormatInfo.contains(signal.dataFormatInt()))
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (!unitInfo.contains(signal.unitID()))
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (!unitInfo.contains(signal.inputUnitID()))
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (!unitInfo.contains(signal.outputUnitID()))
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (signal.inputSensorID() < 0 || signal.inputSensorID() >= SENSOR_TYPE_COUNT)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (signal.outputSensorID() < 0 || signal.outputSensorID() >= SENSOR_TYPE_COUNT)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
+				hasWrongField = true;
+			}
+
+			switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
+			{
+				case E::ByteOrder::LittleEndian:
+				case E::ByteOrder::BigEndian:
+					break;
+				default:
+					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
+					hasWrongField = true;
+			}
+
+			if (hasWrongField)
+			{
+				continue;
+			}
+
+			signalsToWrite.append(&signal);
+		}
+
+		ProtobufWriter proto;
+
+		for(Signal* signal : signalsToWrite)
+		{
+			ProtobufSerializator<Signal, Proto::Signal> protoSignal(*signal);
+
+			//protoSignal.setProtobufMessageAllFields();
+
+			//signal->writeToXml(xml);
+		}
+
+/*		m_buildResultWriter->addFile(m_subDir, "appSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+
+		m_cfgXml->addLinkToFile(m_subDir, "appSignals.xml");*/
+
+		return true;
+
 	}
 
 

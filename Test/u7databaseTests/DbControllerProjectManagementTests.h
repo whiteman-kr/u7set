@@ -13,10 +13,10 @@ private slots:
 	void initTestCase();
 	void createOpenUpgradeCloseDeleteProject();
 	void getProjectListTest();
+	void cleanupTestCase();
 
 private:
 	DbController *m_dbController;
-	int m_currentVersion = -1;
 	QString m_databaseHost;
 	QString m_databaseName;
 	QString m_databaseUser;

@@ -26,6 +26,7 @@ namespace Builder
 		m_lm = lm;
 		m_connections = appLogicCompiler.m_connections;
 		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
+		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -137,6 +138,8 @@ namespace Builder
 			if (!setLmAppDataSize()) break;
 
 			if (!copyRS232Signals()) break;
+
+			if (!buildTuningData()) break;
 
 			if (!finishAppLogicCode()) break;
 
@@ -436,6 +439,8 @@ namespace Builder
 
 		do
 		{
+			if (!getLmAssociatedSignals()) break;
+
 			if (!buildServiceMaps()) break;
 
 			if (!createDeviceBoundSignalsMap()) break;
@@ -2834,6 +2839,51 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::buildTuningData()
+	{
+		bool result = true;
+
+		int tuningFrameSizeBytes = 0;
+		int tuningFrameCount = 0;
+
+		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeBytes);
+		result &= getLMIntProperty("TuningFrameCount", &tuningFrameCount);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		TuningData* tuningData = new TuningData(m_lm->equipmentId(),
+												tuningFrameSizeBytes,
+												tuningFrameCount);
+
+		if (tuningData->totalFramesCount() > tuningFrameCount)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+							   arg(m_lm->equipmentId()).
+							   arg(tuningFrameCount));
+			result = false;
+			delete tuningData;
+		}
+		else
+		{
+			result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
+			result &= tuningData->buildTuningData();
+
+			if (result == false)
+			{
+				delete tuningData;
+			}
+			else
+			{
+				m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);
+			}
+		}
+
+		return result;
+	}
 
 
 	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
@@ -3649,6 +3699,53 @@ namespace Builder
 		}
 
 		return appItem;
+	}
+
+
+	bool ModuleLogicCompiler::getLmAssociatedSignals()
+	{
+		bool result = true;
+
+		int signalCount = m_signals->count();
+
+		m_lmAssociatedSignals.clear();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& signal = (*m_signals)[i];
+
+			if (signal.equipmentID().isEmpty() == true)
+			{
+				continue;
+			}
+
+			if (signal.equipmentID() == m_lm->equipmentId())
+			{
+				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
+				continue;
+			}
+
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
+
+			if (device == nullptr)
+			{
+				continue;
+			}
+
+			const Hardware::DeviceChassis* chassis = device->getParentChassis();
+
+			if (chassis == nullptr)
+			{
+				continue;
+			}
+
+			if (chassis == m_chassis)
+			{
+				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
+			}
+		}
+
+		return result;
 	}
 
 

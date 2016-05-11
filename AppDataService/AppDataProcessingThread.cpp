@@ -68,29 +68,133 @@ void AppDataProcessingWorker::parseRupData()
 
 	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
 	{
-		int valueOffset = parseInfo.valueAddr.offset();
-		int valueBit = parseInfo.valueAddr.bit();
-
-		int validityOffset = parseInfo.validityAddr.offset();
-		int validityBit = parseInfo.validityAddr.bit();
-
-		bool validity = true;
 		double value = 0;
 
-		switch (parseInfo.dataFormat)
+		bool result = getDoubleValue(parseInfo, value);
+
+		if (result == false)
 		{
-		case E::DataFormat::Float:
-			break;
-
-		case E::DataFormat::SignedInt:
-			break;
-
-		case E::DataFormat::UnsignedInt:
-			break;
+			m_valueParsingErrorCount++;
+			continue;
 		}
+
+		AppSignalStateFlags flags;
+
+		flags.reset();
+
+		result = getValidity(parseInfo, flags);
+
+		if (result == false)
+		{
+			m_validityParsingErrorCount++;
+		}
+
+		AppSignalState* signalState = m_signalStates[parseInfo.index];
+
+		if (signalState == nullptr)
+		{
+			m_badSignalStateIndexCount++;
+			continue;
+		}
+
+		signalState->setState(m_rupData.time, flags, value);
 	}
 }
 
+
+bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, double& value)
+{
+	// get double signal value from m_rupData.data buffer using parseInfo
+	//
+	int valueOffset = parseInfo.valueAddr.offset() * 2;		// offset in Words => offset in Bytes
+
+	if (valueOffset >= m_rupData.dataSize)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (parseInfo.dataSize == 1)
+	{
+		quint16 rawValue = *reinterpret_cast<quint16*>(m_rupData.data + valueOffset);
+
+		if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
+		{
+			rawValue = qFromBigEndian<quint16>(rawValue);
+		}
+
+		value = (rawValue >> parseInfo.valueAddr.bit()) & 0x0001;
+	}
+	else
+	{
+		if (parseInfo.dataSize == 32)
+		{
+			assert(parseInfo.valueAddr.bit() == 0);
+
+			quint32 rawValue = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
+
+			if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
+			{
+				rawValue = qFromBigEndian<quint32>(rawValue);
+			}
+
+			switch (parseInfo.dataFormat)
+			{
+			case E::DataFormat::Float:
+				value = *reinterpret_cast<float*>(&rawValue);
+				break;
+
+			case E::DataFormat::SignedInt:
+				value = *reinterpret_cast<qint32*>(&rawValue);
+				break;
+
+			case E::DataFormat::UnsignedInt:
+				value = rawValue;
+				break;
+			}
+		}
+		else
+		{
+			assert(false);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, AppSignalStateFlags& flags)
+{
+	// get signal validity from m_rupData.data buffer using parseInfo
+	//
+	int validityOffset = parseInfo.validityAddr.offset();
+
+	if (validityOffset == BAD_ADDRESS)
+	{
+		flags.valid = 1;				// no validity flags in reg buffer
+		return true;
+	}
+
+	validityOffset *= 2;				// offset in Words => offset in Bytes
+
+	if (validityOffset >= m_rupData.dataSize)
+	{
+		assert(false);
+		return false;
+	}
+
+	quint16 rawValue = *reinterpret_cast<quint16*>(m_rupData.data + validityOffset);
+
+	if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
+	{
+		rawValue = qFromBigEndian<quint16>(rawValue);
+	}
+
+	flags.valid = (rawValue >> parseInfo.validityAddr.bit()) & 0x0001;
+
+	return true;
+}
 
 // -------------------------------------------------------------------------------
 //

@@ -1,7 +1,7 @@
-#include "serialdatatester.h"
+#include "SerialDataTester.h"
 #include "SettingsDialog.h"
 #include "PortReceiver.h"
-#include "ui_serialdatatester.h"
+#include "ui_SerialDataTester.h"
 #include <QMessageBox>
 #include <QXmlStreamReader>
 #include <QSettings>
@@ -171,7 +171,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// Calculate crc-64 table
 	//
 
-	const quint64 polynom = 0xd800000000000000ULL;	// CRC-64-ISO
+	/*const quint64 polynom = 0xd800000000000000ULL;	// CRC-64-ISO
 	quint64 tempValue;
 	for (int i=0; i<256; i++)
 	{
@@ -184,7 +184,9 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 				tempValue >>= 1;
 		}
 		m_crc_table[i] = tempValue;
-	}
+	}*/
+
+	m_parser = new SerialDataParser();
 
 	connect(m_reloadCfg, &QAction::triggered, this, &SerialDataTester::reloadConfig);
 	connect(m_changeSignalSettingsFile, &QAction::triggered, this, &SerialDataTester::selectNewSignalsFile);
@@ -198,7 +200,8 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(this, &SerialDataTester::baudChanged, m_portReceiver, &PortReceiver::setBaud);
 	connect(this, &SerialDataTester::bitsChanged, m_portReceiver, &PortReceiver::setDataBits);
 	connect(this, &SerialDataTester::stopBitsChanged, m_portReceiver, &PortReceiver::setStopBits);
-	connect(m_portReceiver, &PortReceiver::dataFromPort, this, &SerialDataTester::dataReceived);
+	connect(m_portReceiver, &PortReceiver::dataFromPort, m_parser, &SerialDataParser::parse);
+	connect(m_parser, &SerialDataParser::packetProcessed, this, &SerialDataTester::dataReceived);
 	connect(receiveTimeout, &QTimer::timeout, this, &SerialDataTester::signalTimeout);
 	connect(m_erasePacketData, &QAction::triggered, this, &SerialDataTester::erasePacketData);
 	connect(m_loadDefaultSettings, &QAction::triggered, this, &SerialDataTester::loadLastUsedSettings);
@@ -243,6 +246,7 @@ SerialDataTester::~SerialDataTester()
 	delete m_portReceiver;
 	delete ui;
 	delete m_PortThread;
+	delete m_parser;
 }
 
 void SerialDataTester::parseFile()
@@ -658,7 +662,7 @@ void SerialDataTester::portError(QString error)
 	ui->portName->setText("Error");
 }
 
-void SerialDataTester::dataReceived(QByteArray data)
+void SerialDataTester::dataReceived(QByteArray receivedValues)
 {
 	// Reset timer
 	//
@@ -666,7 +670,27 @@ void SerialDataTester::dataReceived(QByteArray data)
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
 
-	QDataStream packet(&data, QIODevice::ReadOnly);
+	qDebug() << "Received data: " << receivedValues;
+
+	/*qDebug() << data.size();
+
+	quint32 signature;
+
+	for (int currentByte = 0; currentByte < data.size()-3; currentByte++)
+	{
+		QDataStream str(&data, QIODevice::ReadOnly);
+
+		str.skipRawData(currentByte);
+
+		str >> signature;
+
+		if (signature == m_signature)
+		{
+			qDebug() << "OK!";
+		}
+	}*/
+
+	/*QDataStream packet(&data, QIODevice::ReadOnly);
 
 	// Read packet "head" and check signature with crc
 	//
@@ -745,7 +769,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 			ui->statusBar->showMessage("Unknown signature");
 		}
 		else
-		{
+		{*/
 
 			// If signature and crc ok - start processing received packet
 			// First of all, transform byteArray to bitArray. We need it to read signal
@@ -783,7 +807,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 
 				signalValueBits.resize(signal.dataSize*8);
 				QString valueString;
-				for (int pos = signal.offset*16 + signal.bit; pos < signal.offset + signal.bit + signal.dataSize*8; pos ++)
+				for (int pos = signal.offset*8 + signal.bit; pos < signal.offset + signal.bit + signal.dataSize*8; pos ++)
 				{
 					switch (dataArray.at(pos))
 					{
@@ -793,7 +817,8 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 
 				std::reverse(valueString.begin(), valueString.end());
-				qint64 result = valueString.toInt(false, 2);
+				bool falseValue = false;
+				qint64 result = valueString.toInt(&falseValue, 2);
 				QString resultString;
 				if (signal.dataFormat == "UnsignedInt")
 				{
@@ -843,11 +868,11 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 				ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
 				rowNumber++;
-			}
-		}
+			//}
+		//}
 	}
 
-	if (packageCorrupted)
+	/*if (packageCorrupted)
 	{
 		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
 	}
@@ -856,7 +881,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 		ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
 	}
 
-	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
+	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));*/
 }
 
 void SerialDataTester::signalTimeout()

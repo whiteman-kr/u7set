@@ -2,24 +2,52 @@
 
 #include "../include/Signal.h"
 
-struct AppSignalStateFlags
+#pragma pack(push, 1)
+
+union AppSignalStateFlags
 {
-	quint32	valid : 1;
+	struct
+	{
+		quint32	valid : 1;
+		quint32	overflow : 1;
+		quint32	underflow : 1;
+	};
+
+	quint32 allFlags;
+
+	inline void reset() { allFlags = 0; }
 };
+
+#pragma pack(pop)
 
 
 struct AppSignalState
 {
+private:
+	// signal state
+	//
+	Times m_time;
+
+	AppSignalStateFlags m_flags;
+	double m_value = 0;
+
+	// paramters needed to update state
+	//
+	bool m_initialized = false;
+	bool m_isDiscreteSignal = false;
+	double m_aperture = 0;
+	double m_lowLimit = 0;
+	double m_highLimit = 0;
+	double m_absAperture = 0;
+
+	Signal* m_signal = nullptr;
+	int m_index = 0;
+
 public:
-	qint64	systemTime = 0;
-	qint64	localTime = 0;
-	qint64	plantTime = 0;
+	AppSignalState();
 
-	AppSignalStateFlags flags;
-	double value = 0;
-
-	Signal* signal = nullptr;
-	int index = 0;
+	void setSignalParams(int index, Signal* signal);
+	void setState(Times time, AppSignalStateFlags flags, double value);
 };
 
 

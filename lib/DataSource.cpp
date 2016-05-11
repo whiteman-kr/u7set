@@ -1,8 +1,8 @@
 #include "../include/DataSource.h"
 
 
-const char* const DataSource::ELEMENT_APP_DATA_SOURCE = "AppDataSource";
-const char* const DataSource::ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
+const char* const DataSource::ELEMENT_DATA_SOURCE = "AppDataSource";
+const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 
 char* DataSourceInfo::serialize(char* buffer, bool write)
@@ -107,6 +107,9 @@ QString DataSource::dataTypeToString(DataType dataType)
 	case DataType::Diag:
 		return DATA_TYPE_DIAG;
 
+	case DataType::Tuning:
+		return DATA_TYPE_TUNING;
+
 	default:
 		assert(false);
 	}
@@ -127,6 +130,11 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 		return DataType::Diag;
 	}
 
+	if (dataTypeStr == DATA_TYPE_TUNING)
+	{
+		return DataType::Tuning;
+	}
+
 	assert(false);
 
 	return DataType::Diag;
@@ -135,7 +143,7 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 
 void DataSource::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE);
+	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
 	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
 	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
@@ -147,7 +155,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
 	xml.writeUlongAttribute(PROP_LM_DATA_ID, m_lmDataID, true);
 
-	xml.writeStartElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS);
+	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
 	xml.writeIntAttribute("Count", m_associatedSignals.count());
 
@@ -166,7 +174,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
-	if (xml.name() != ELEMENT_APP_DATA_SOURCE)
+	if (xml.name() != ELEMENT_DATA_SOURCE)
 	{
 		assert(false);
 		return false;
@@ -196,7 +204,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readUlongAttribute(PROP_LM_DATA_ID, &m_lmDataID);
 
-	if (xml.findElement(ELEMENT_APP_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
+	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
 		return false;
 	}
@@ -236,6 +244,16 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	m_receivedFramesCount++;
 	m_receivedDataSize += sizeof(rupFrame);
 
+	if (rupFrame.header.protocolVersion != 4)
+	{
+		// if version == 3
+		//
+		const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
+		Q_UNUSED(oldHeader);
+		assert(false);
+		return;
+	}
+
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)
@@ -245,6 +263,10 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	}
 
 	int frameNo = rupFrame.header.frameNumber;
+
+	qDebug() << "Frame No " << frameNo;
+
+	return;
 
 	if (frameNo >= framesQuantity)
 	{
@@ -272,20 +294,39 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	{
 		m_receivedPacketCount++;
 
-		// merge frames data into rupDataQueue's buffer
-		//
-		int framesQuantity = m_rupFrames[0].header.framesQuantity;
+		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
+		QDateTime plantTime;
+		RupTimeStamp timeStamp = m_rupFrames[0].header.TimeStamp;
+
+		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
+		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
+
+		QDateTime currentTime = QDateTime::currentDateTimeUtc();
+
+		// get rupData pointer and lock rupDataQueue
+		//
 		RupData* rupData = rupDataQueue.beginPush();
 
+		// fill rupData header
+		//
 		rupData->sourceIP = ip;
+
+		rupData->time.plant = plantTime.toMSecsSinceEpoch();
+		rupData->time.system = currentTime.toMSecsSinceEpoch();
+		rupData->time.local = currentTime.toLocalTime().toMSecsSinceEpoch();
+
 		rupData->dataSize = framesQuantity * RUP_FRAME_DATA_SIZE;
 
+		// merge frames data into rupDataQueue's buffer
+		//
 		for(int i = 0; i < framesQuantity; i++)
 		{
 			memcpy(rupData->data + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
 		}
 
+		// push rupData and unlock rupDataQueue
+		//
 		rupDataQueue.completePush();
 	}
 }

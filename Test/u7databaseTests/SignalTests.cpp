@@ -68,11 +68,6 @@ void SignalTests::add_signalTest()
 		QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("Error: error code %1").arg(query.value("errCode").toInt())));
 		QVERIFY2(query.value("userId").toInt() == userId, qPrintable("Error: wrong user"));
 
-		// Set right channel number for every signal (actually - number of the signal)
-		//
-
-		channelNumber += 1;
-
 		// Select all signal data from table "checkOut" and check it
 		//
 
@@ -104,9 +99,9 @@ void SignalTests::add_signalTest()
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 
-		QVERIFY2(tempQuery.value("AppSignalID").toString() == QString("#SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value AppSignalID in table signalInstance not match"));
-		QVERIFY2(tempQuery.value("CustomAppSignalID").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value CustomAppSignalID in table signalInstance not match"));
-		QVERIFY2(tempQuery.value("caption").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(64 + channelNumber)), qPrintable("Error: value name in table signalInstance not match"));
+		QVERIFY2(tempQuery.value("AppSignalID").toString() == QString("#SIGNAL" + query.value("id").toString() + "_" + char(int('A') + channelNumber)), qPrintable("Error: value AppSignalID in table signalInstance not match. " + QString("\n%1:::%2").arg(tempQuery.value("AppSignalID").toString()).arg(QString("#SIGNAL" + query.value("id").toString() + "_" + char(int('A') + channelNumber)))));
+		QVERIFY2(tempQuery.value("CustomAppSignalID").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(int('A') + channelNumber)), qPrintable("Error: value CustomAppSignalID in table signalInstance not match"));
+		QVERIFY2(tempQuery.value("caption").toString() == QString("SIGNAL" + query.value("id").toString() + "_" + char(int('A') + channelNumber)), qPrintable("Error: value name in table signalInstance not match"));
 
 		// Check data size to be correct
 		//
@@ -117,12 +112,17 @@ void SignalTests::add_signalTest()
 			QVERIFY2(tempQuery.value("dataSize").toInt() == 0, qPrintable("Error: wrong dataSize in table signalInstance"));
 		QVERIFY2(tempQuery.value("action").toInt() == 1, qPrintable("Error: value action in table signalInstance not match"));
 		QVERIFY2(tempQuery.value("signalInstanceId").toInt() == checkOutInstanceId, qPrintable("Error: wrong checkedOutInstanceId"));
+
+		// Set right channel number for every signal (actually - number of the signal)
+		//
+
+		channelNumber += 1;
 	}
 
 	// Check count of channels must be equal channel count
 	//
 
-	QVERIFY2(channelNumber == channelCount, qPrintable("Error: number of channels is not similar to channelCount value"));
+	QVERIFY2(channelNumber == channelCount, qPrintable(QString("Error: number of channels is not similar to channelCount value. Actual: %1\tExpected: %2").arg(channelCount).arg(channelNumber)));
 
 	// Check function with no admin user, different signal Type and different channel Count
 	//
@@ -138,7 +138,7 @@ void SignalTests::add_signalTest()
 	// Check single-channel signals must be in group 0
 	//
 
-	channelNumber = 1;
+	channelNumber = 0;
 	signalGroupId = 0;
 
 	QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("Error: error code %1").arg(query.value("errCode").toInt())));
@@ -566,6 +566,7 @@ void SignalTests::checkout_signalsTest()
 	sd.maxDifference = query.value("maxDifference").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
+	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
 
 	// Match second element as deleted to test error #3: ERR_SIGNAL_DELETED
 	//
@@ -664,7 +665,7 @@ void SignalTests::checkout_signalsTest()
 				QVERIFY2(tempQuery.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-
+				QVERIFY2(tempQuery.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 			} break;
 		}
 
@@ -895,6 +896,7 @@ void SignalTests::get_latest_signalTest()
 	sd.maxDifference = query.value("maxDifference").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
+	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
 
 	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_firstUserForTest).arg(signalId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -937,6 +939,7 @@ void SignalTests::get_latest_signalTest()
 	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 
 	ok = tempQuery.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -1288,6 +1291,7 @@ void SignalTests::get_latest_signalsTest()
 	sd.maxDifference = query.value("maxDifference").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
+	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
 
 	ok = query.exec(QString("SELECT * FROM get_latest_signals(%1, '{%2}')").arg(m_firstUserForTest).arg(sd.signalId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1330,6 +1334,7 @@ void SignalTests::get_latest_signalsTest()
 	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 
 }
 
@@ -1462,6 +1467,7 @@ void SignalTests::get_latest_signals_allTest()
 	sd.maxDifference = query.value("maxDifference").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
+	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
 
 	ok = query.exec("SELECT * FROM get_latest_signals_all(1) ORDER BY signalId DESC");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1505,6 +1511,7 @@ void SignalTests::get_latest_signals_allTest()
 	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 }
 
 void SignalTests::undo_signal_changesTest()
@@ -1724,6 +1731,7 @@ void SignalTests::set_signal_workcopyTest()
 	sd.maxDifference = 26;
 	sd.byteOrder = 27;
 	sd.enableTuning = "true";
+	sd.tuningDefaultValue = 89.234;
 
 	QString arguments = QString("%1, %2, %3, %4, %5, %6, %7, %8, '%9', %10, ")
 			.arg(sd.signalId)
@@ -1773,13 +1781,14 @@ void SignalTests::set_signal_workcopyTest()
 					 .arg(sd.aperture)
 					 .arg(sd.inOutType));
 
-	arguments.append(QString("'%1', %2, %3, %4, %5, '%6'")
+	arguments.append(QString("'%1', %2, %3, %4, %5, '%6', %7")
 					 .arg(sd.equipmentID)
 					 .arg(sd.outputRangeMode)
 					 .arg(sd.filteringTime)
 					 .arg(sd.maxDifference)
 					 .arg(sd.byteOrder)
-					 .arg(sd.enableTuning));
+					 .arg(sd.enableTuning)
+					 .arg(sd.tuningDefaultValue));
 
 	// Start function
 	//
@@ -1835,6 +1844,7 @@ void SignalTests::set_signal_workcopyTest()
 	QVERIFY2(query.value("maxDifference").toInt() == sd.maxDifference, qPrintable(QString("Error: value maxDifference is not match (Actual: %1, Expected: %2)").arg(query.value("maxDifference").toInt()).arg(sd.maxDifference)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: value byteOrder is not match (Actual: %1, Expected: %2)").arg(query.value("byteOrder").toInt()).arg(sd.byteOrder)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: value enableTuning is not match (Actual: %1, Expected: %2)").arg(query.value("enableTuning").toString()).arg(sd.enableTuning)));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: value tuningDefaultValue is not match (Actual: %1, Expected: %2)").arg(query.value("tuningDefaultValue").toDouble()).arg(sd.tuningDefaultValue)));
 
 	// Call checked out by another user error
 	//

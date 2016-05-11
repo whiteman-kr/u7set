@@ -30,7 +30,7 @@ struct RupTimeStamp
 struct RupFrameHeader
 {
 	quint16 frameSize;			// frame size including header, bytes
-	quint16 protocolVersion;
+	quint16 protocolVersion;	// must be 4!
 
 	union
 	{

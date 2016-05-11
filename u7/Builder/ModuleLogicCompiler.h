@@ -11,7 +11,9 @@
 #include "../Builder/ApplicationLogicCode.h"
 #include "../Builder/OptoModule.h"
 #include "../Builder/LmMemoryMap.h"
-#include "../Builder/ModuleLogicCompiler.h"
+//#include "../Builder/ModuleLogicCompiler.h"
+#include "../Builder/TuningDataStorage.h"
+
 
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -441,6 +443,9 @@ namespace Builder
 		Hardware::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
+		TuningDataStorage* m_tuningDataStorage = nullptr;
+
+		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
@@ -525,6 +530,8 @@ namespace Builder
 		bool loadModulesSettings();
 
 		bool prepareAppLogicGeneration();
+
+		bool getLmAssociatedSignals();
 		bool buildServiceMaps();
 		bool createDeviceBoundSignalsMap();
 		bool createAppSignalsMap();
@@ -583,8 +590,12 @@ namespace Builder
 		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
 		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals);
 
+		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
+
 		bool copyDomDataToModuleMemory(const Module& module);
 		bool copyAomDataToModuleMemory(const Module& module);
+
+		bool buildTuningData();
 
 		bool calculateCodeRunTime();
 
@@ -595,10 +606,8 @@ namespace Builder
 		AppItem* createFbForAnalogInputSignalConversion(const Signal &signal);
 		AppItem* createFbForAnalogOutputSignalConversion(const Signal &signal);
 
-
 		bool createAppFbsMap();
 		AppFb* createAppFb(const AppItem& appItem);
-
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
 

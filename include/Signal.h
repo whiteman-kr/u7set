@@ -10,6 +10,7 @@
 #include "../include/Address16.h"
 #include "../include/DataSource.h"
 #include "../VFrame30/Afb.h"
+#include "../include/ProtobufHelper.h"
 
 
 class QXmlStreamAttributes;
@@ -110,7 +111,7 @@ private:
 	int m_changesetID = 0;
 	bool m_checkedOut = false;
 	int m_userID = 0;
-	int m_channel = 1;
+	E::Channel m_channel = E::Channel::A;
 	E::SignalType m_type = E::SignalType::Analog;
 	QDateTime m_created;
 	bool m_deleted = false;
@@ -151,13 +152,16 @@ private:
 	double m_maxDifference = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
+	double m_tuningDefaultValue = 0;
 
 	Address16 m_iobufferAddr;			// only for modules input/output signals
 										// signal address in i/o modules buffers
 
 	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_regValueAddr;				// signal Value address in FSC data packet (registration address)
-	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet (registration address)
+	Address16 m_regValueAddr;			// signal Value address in FSC data packet (registration address)
+	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet (registration address)
+
+	Address16 m_tuningAddr;
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -168,7 +172,7 @@ private:
 	void setChangesetID(int changesetID) { m_changesetID = changesetID; }
 	void setCheckedOut(int checkedOut) { m_checkedOut = checkedOut; }
 	void setUserID(int userID) { m_userID = userID; }
-	void setChannel(int channel) { m_channel = channel; }
+	void setChannel(E::Channel channel) { m_channel = channel; }
 	void setCreated(const QDateTime& created) { m_created = created; }
 	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, DATE_TIME_FORMAT_STR); }
 	void setDeleted(bool deleted) { m_deleted = deleted; }
@@ -198,7 +202,9 @@ public:
 	int changesetID() const { return m_changesetID; }
 	bool checkedOut() const { return m_checkedOut; }
 	int userID() const { return m_userID; }
-	int channel() const { return m_channel; }
+
+	E::Channel channel() const { return m_channel; }
+	int channelInt() const { return TO_INT(m_channel); }
 
 	int typeInt() const { return TO_INT(m_type); }
 	E::SignalType type() const { return m_type; }
@@ -236,6 +242,9 @@ public:
 	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
 	void setRegValueAddr(const Address16& regValueAddr) { m_regValueAddr = regValueAddr; }
 	void setRegValidityAddr(const Address16& regValidityAddr) { m_regValidityAddr = regValidityAddr; }
+
+	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
+	const Address16& tuningAddr() const { return m_tuningAddr; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
@@ -339,7 +348,7 @@ public:
 	Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
-		int inOutTypeInt() const { return TO_INT(m_inOutType); }
+	int inOutTypeInt() const { return TO_INT(m_inOutType); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
@@ -358,6 +367,9 @@ public:
 
 	Q_INVOKABLE bool enableTuning() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
+
+	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
+	void setTuningDefaultValue(bool value) { m_tuningDefaultValue = value; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
@@ -406,7 +418,6 @@ public:
 
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
-
 
 
 #endif // SIGNAL_H

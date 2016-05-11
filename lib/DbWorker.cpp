@@ -71,6 +71,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 55", ":/DatabaseUpgrade/Upgrade0055.sql"},
 	{"Upgrade to version 56", ":/DatabaseUpgrade/Upgrade0056.sql"},
 	{"Upgrade to version 57", ":/DatabaseUpgrade/Upgrade0057.sql"},
+	{"Upgrade to version 58", ":/DatabaseUpgrade/Upgrade0058.sql"},
+	{"Upgrade to version 59", ":/DatabaseUpgrade/Upgrade0059.sql"},
+	{"Upgrade to version 60", ":/DatabaseUpgrade/Upgrade0060.sql"},
 };
 
 
@@ -3136,6 +3139,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 
 	quint64 start = QDateTime::currentMSecsSinceEpoch();
+	Q_UNUSED(start);
 
 	result = q.exec(request);
 
@@ -3168,6 +3172,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	}
 
 	quint64 finish = QDateTime::currentMSecsSinceEpoch();
+	Q_UNUSED(finish);
 
 	//qDebug() << (finish - start);
 
@@ -3233,7 +3238,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setChangesetID(q.value(3).toInt());
 	s.setCheckedOut(q.value(4).toBool());
 	s.setUserID(q.value(5).toInt());
-	s.setChannel(q.value(6).toInt());
+	s.setChannel(static_cast<E::Channel>(q.value(6).toInt()));
 	s.setType(static_cast<E::SignalType>(q.value(7).toInt()));
 	s.setCreated(q.value(8).toString());
 	s.setDeleted(q.value(9).toBool());
@@ -3273,6 +3278,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setMaxDifference(q.value(43).toDouble());										//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
+	s.setTuningDefaultValue(q.value(46).toDouble());								// since version 58 of database
 }
 
 
@@ -3283,14 +3289,14 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42,%43,%44,%45,%46)")
+			"\"%41\",%42,%43,%44,%45,%46,%47)")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
 	.arg(s.changesetID())
 	.arg(s.checkedOut())
 	.arg(s.userID())
-	.arg(s.channel())
+	.arg(TO_INT(s.channel()))
 	.arg(TO_INT(s.type()))
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
 	.arg(s.deleted())
@@ -3329,7 +3335,8 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.filteringTime())						//
 	.arg(s.maxDifference())						//
 	.arg(TO_INT(s.byteOrder()))					//
-	.arg(s.enableTuning() ? "TRUE" : "FALSE");	// since version 42 of database
+	.arg(s.enableTuning() ? "TRUE" : "FALSE")	// since version 42 of database
+	.arg(s.tuningDefaultValue());				// since version 58 of database
 
 	//qDebug() << str;
 

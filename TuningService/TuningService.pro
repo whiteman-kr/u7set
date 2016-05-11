@@ -34,7 +34,19 @@ SOURCES += main.cpp \
     ../lib/Tcp.cpp \
     ../lib/JsonSerializable.cpp \
     TuningSocket.cpp \
-    TuningService.cpp
+    TuningService.cpp \
+    ../lib/DataSource.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/ServiceSettings.cpp \
+    TuningDataSource.cpp \
+    ../lib/Queue.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/OutputLog.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Types.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -49,7 +61,19 @@ HEADERS += \
     ../include/TcpFileTransfer.h \
     ../include/Tcp.h \
     TuningSocket.h \
-    TuningService.h
+    TuningService.h \
+    ../include/DataSource.h \
+    ../include/XmlHelper.h \
+    ../include/ServiceSettings.h \
+    TuningDataSource.h \
+    ../include/Queue.h \
+    ../include/DeviceHelper.h \
+    ../include/DeviceObject.h \
+    ../include/PropertyObject.h \
+    ../include/DbStruct.h \
+    ../include/OutputLog.h \
+    ../include/ProtoSerialization.h \
+    ../include/Types.h
 
 include(../qtservice/src/qtservice.pri)
 

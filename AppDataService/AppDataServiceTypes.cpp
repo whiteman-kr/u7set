@@ -63,6 +63,7 @@ void SignalParseInfo::setSignalParams(int i, const Signal& s)
 
 	type = s.type();
 	dataFormat = s.dataFormat();
+	byteOrder = s.byteOrder();
 	dataSize = s.dataSize();
 }
 
