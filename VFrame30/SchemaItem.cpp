@@ -21,11 +21,11 @@ namespace VFrame30
 	{	
 		m_guid = QUuid::createUuid();
 
-		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, AcceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
-		acceptClickProp->setCategory(tr("Behaviour"));
+		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
+		acceptClickProp->setCategory(PropertyNames::behaviourCategory);
 
-		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, ClickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
-		clickScriptProp->setCategory(tr("Behaviour"));
+		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
+		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
 	}
 
 	SchemaItem::~SchemaItem()
@@ -193,7 +193,7 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const
+	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, int /*runOrderIndex*/) const
 	{
 	}
 

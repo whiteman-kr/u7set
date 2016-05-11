@@ -8,12 +8,12 @@ namespace Builder
     //
     // ------------------------------------------------------------------------
 
-    TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, TuningDataStorage *tuningDataStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
         m_db(db),
         m_deviceRoot(deviceRoot),
         m_signalSet(signalSet),
         m_subsystems(subsystems),
-        m_opticModuleStorage(opticModuleStorage),
+		m_tuningDataStorage(tuningDataStorage),
         m_log(log),
         m_buildWriter(buildWriter),
         m_changesetId(changesetId),
@@ -25,7 +25,7 @@ namespace Builder
         assert(m_deviceRoot);
         assert(m_signalSet);
         assert(m_subsystems);
-        assert(m_opticModuleStorage);
+		assert(m_tuningDataStorage);
         assert(m_log);
         assert(m_buildWriter);
 
@@ -107,7 +107,25 @@ namespace Builder
                 return false;
             }
 
-            QByteArray data(100, 1);    //sample data
+			QByteArray data;
+
+			TuningDataStorage::iterator it = m_tuningDataStorage->find(m->equipmentId());
+			if (it == m_tuningDataStorage->end())
+			{
+				data.fill(0, 100);
+			}
+			else
+			{
+				TuningData *tuningData = it.value();
+				if (tuningData == nullptr)
+				{
+					assert(tuningData);
+					return false;
+				}
+
+				tuningData->getTuningData(&data);
+				qDebug()<<data.size();
+			}
 
 
             if (firmware->setChannelData(channel, frameSize, frameCount, data, &errorString) == false)

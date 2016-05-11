@@ -16,27 +16,27 @@ namespace VFrame30
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
 		m_textColor(qRgb(0x00, 0x00, 0x00))
 	{
-		ADD_PROPERTY_GET_SET_CAT(double, LineWeight, tr("Appearance"), true, SchemaItemRect::weight, SchemaItemRect::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, LineColor, tr("Appearance"), true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, FillColor, tr("Appearance"), true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor)
 
-		ADD_PROPERTY_GET_SET_CAT(bool, Fill, tr("Appearance"), true, SchemaItemRect::fill, SchemaItemRect::setFill);
-		ADD_PROPERTY_GET_SET_CAT(bool, DrawRect, tr("Appearance"), true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemRect::fill, SchemaItemRect::setFill);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
 
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(QColor, TextColor, tr("Text"), true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, Text, tr("Text"), true, SchemaItemRect::text, SchemaItemRect::setText);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemRect::text, SchemaItemRect::setText);
 
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, AlignHorz, tr("Text"), true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, AlignVert, tr("Text"), true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, FontName, tr("Text"), true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, FontSize, tr("Text"), true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, FontBold, tr("Text"), true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, FontItalic, tr("Text"), true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
 
 		// --
 		//

@@ -20,10 +20,10 @@ namespace VFrame30
 		m_fillColor(qRgb(0xF0, 0xF0, 0xF0)),
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, FontName, tr("Appearance"), true, FblItemRect::getFontName, FblItemRect::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, FontSize, tr("Appearance"), true, FblItemRect::getFontSize, FblItemRect::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, FontBold, tr("Appearance"), true, FblItemRect::getFontBold, FblItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, FontItalic, tr("Appearance"), true, FblItemRect::getFontItalic, FblItemRect::setFontItalic);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::appearanceCategory, true, FblItemRect::getFontName, FblItemRect::setFontName);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::appearanceCategory, true, FblItemRect::getFontSize, FblItemRect::setFontSize);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::appearanceCategory, true, FblItemRect::getFontBold, FblItemRect::setFontBold);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::appearanceCategory, true, FblItemRect::getFontItalic, FblItemRect::setFontItalic);
 
 		// --
 		//
