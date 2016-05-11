@@ -46,7 +46,9 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../u7/Builder/TuningDataStorage.cpp \
+    ../lib/Signal.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -73,7 +75,9 @@ HEADERS += \
     ../include/DbStruct.h \
     ../include/OutputLog.h \
     ../include/ProtoSerialization.h \
-    ../include/Types.h
+    ../include/Types.h \
+    ../u7/Builder/TuningDataStorage.h \
+    ../include/Signal.h
 
 include(../qtservice/src/qtservice.pri)
 

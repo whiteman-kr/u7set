@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "TuningDataStorage.h"
+#include "../TuningService/TuningDataSource.h"
 
 namespace Builder
 {
@@ -8,15 +10,12 @@ namespace Builder
 	class TuningServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	private:
+		TuningDataStorage* m_tuningDataStorage = nullptr;
+
 		HashedVector<QString, Hardware::DeviceModule*> m_tuningLMs;
 		QVector<Signal*> m_tuningSignals;
 
-		bool findTuningSignals();			// builds m_tuningSignals
-
-		bool findAssociatedTuningSignals(DataSource& tuningSource);
-
 		bool writeSettings();
-		bool writeTuningSignals();
 		bool writeTuningLMs();
 
 	public:
@@ -24,6 +23,7 @@ namespace Builder
 									Hardware::Software* software,
 									SignalSet* signalSet,
 									Hardware::EquipmentSet* equipment,
+									TuningDataStorage* tuningDataStorage,
 									BuildResultWriter* buildResultWriter);
 
 		~TuningServiceCfgGenerator();

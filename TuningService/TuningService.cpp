@@ -9,6 +9,17 @@ TuningServiceWorker::TuningServiceWorker(const QString& serviceStrID,
 }
 
 
+TuningServiceWorker::~TuningServiceWorker()
+{
+	clear();
+}
+
+
+void TuningServiceWorker::clear()
+{
+}
+
+
 TuningServiceWorker* TuningServiceWorker::createInstance()
 {
 	return new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());

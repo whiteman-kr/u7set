@@ -13,10 +13,14 @@ private:
 
 	bool readTuningDataSources(XmlReadHelper& xml);
 
+	void clear();
+
 public:
 	TuningServiceWorker(const QString& serviceStrID,
 						const QString& cfgServiceIP1,
 						const QString& cfgServiceIP2);
+
+	~TuningServiceWorker();
 
 	TuningServiceWorker* createInstance() override;
 

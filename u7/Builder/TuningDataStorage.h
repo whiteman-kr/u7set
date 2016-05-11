@@ -68,11 +68,26 @@ private:
 	QList<Signal*> m_tuningAnalogInt;
 	QList<Signal*> m_tuningDiscrete;
 
+	bool m_deleteSignals = false;
+
+	// XML serialization constants
+	//
+	static const char* TUNING_DATA_ELEMENT;
+	static const char* LM_ID;
+	static const char* TUNING_FRAME_SIZE_BYTES;
+	static const char* TUNING_FRAMES_COUNT;
+	static const char* TUNING_ALL_SIGNALS_COUNT;
+	static const char* TUNING_ANALOG_FLOAT_SIGNALS;
+	static const char* TUNING_ANALOG_INT_SIGNALS;
+	static const char* TUNING_DISCRETE_SIGNALS;
+	static const char* TUNING_SIGNALS_COUNT;
 
 public:
+	TuningData();
 	TuningData(	QString lmID,
 				int tuningFrameSizeBytes,
 				int tuningFramesCount);
+
 	~TuningData();
 
 	bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
@@ -82,6 +97,9 @@ public:
 	void getTuningData(QByteArray* tuningData) const;
 
 	int totalFramesCount() const;
+
+	void writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
 };
 
 

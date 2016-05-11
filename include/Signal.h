@@ -42,7 +42,7 @@ const char* const SensorTypeStr[] =
 	"TSM-23",
 	"Rheochord",
 
-	"ТХА(K)",
+	"TXA(K)",
 	"TXK(L) 84",
 	"TXK(L) 94",
 	"TNN(N)",

@@ -168,7 +168,8 @@ SOURCES +=\
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
-    Builder/TuningDataStorage.cpp
+    Builder/TuningDataStorage.cpp \
+    ../TuningService/TuningDataSource.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -266,7 +267,8 @@ HEADERS  += \
     ../include/Queue.h \
     ../include/ProtobufHelper.h \
     UploadTabPage.h \
-    Builder/TuningDataStorage.h
+    Builder/TuningDataStorage.h \
+    ../TuningService/TuningDataSource.h
 
 FORMS    += \
     ChangesetDialog.ui \

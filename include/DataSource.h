@@ -205,6 +205,9 @@ public:
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
+	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
+	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
+
 	void processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
 
 	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
