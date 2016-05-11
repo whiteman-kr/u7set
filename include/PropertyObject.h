@@ -949,9 +949,10 @@ public:
     Q_INVOKABLE QVariant propertyValue(QString caption) const;
 
 	template <typename TYPE>
-	bool setPropertyValue(QString caption, const TYPE& value)
+	bool setPropertyValue(const QString& caption, const TYPE& value)
 	{
-		auto it = m_properties.find(caption);
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
 
 		if (it == m_properties.end())
 		{
