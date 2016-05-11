@@ -20,6 +20,7 @@ namespace Builder
 													   SignalSet* signalSet,
 													   Afb::AfbElementCollection *afblSet,
 													   AppLogicData* appLogicData,
+													   TuningDataStorage* tuningDataStorage,
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),
@@ -28,6 +29,7 @@ namespace Builder
 		m_signals(signalSet),
 		m_afbl(afblSet),
 		m_appLogicData(appLogicData),
+		m_tuningDataStorage(tuningDataStorage),
 		m_resultWriter(buildResultWriter),
 		m_connections(connections)
 	{
@@ -81,6 +83,7 @@ namespace Builder
 			m_signals == nullptr ||
 			m_afbl == nullptr ||
 			m_appLogicData == nullptr ||
+			m_tuningDataStorage == nullptr ||
 			m_resultWriter == nullptr ||
 			m_connections == nullptr)
 		{
