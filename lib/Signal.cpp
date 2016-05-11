@@ -156,6 +156,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_maxDifference = signal.maxDifference();
 	m_byteOrder = signal.byteOrder();
 	m_enableTuning = signal.enableTuning();
+	m_tuningDefaultValue = signal.tuningDefaultValue();
 
 	return *this;
 }
