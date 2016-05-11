@@ -6,6 +6,7 @@
 #include "Subsystem.h"
 #include "EquipmentVcsDialog.h"
 #include "DialogConnectionsEditor.h"
+#include "DialogChoosePreset.h"
 #include "GlobalMessanger.h"
 
 #include <QPalette>
@@ -1234,6 +1235,39 @@ void EquipmentView::addSoftware()
 
 	emit updateState();
 	return;
+}
+
+void EquipmentView::addPreset()
+{
+	if (isConfigurationMode() == false)
+	{
+		assert(isConfigurationMode() == true);
+		return;
+	}
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() == 1)
+	{
+		QModelIndex singleSelectedIndex = selectedIndexList[0];
+
+		Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
+		if (selectedObject == nullptr)
+		{
+			assert(selectedObject != nullptr);
+			return;
+		}
+
+		DialogChoosePreset d(this, db(), selectedObject->deviceType());
+		if (d.exec() == QDialog::Accepted && d.selectedPreset != nullptr)
+		{
+			addPresetToConfiguration(d.selectedPreset->fileInfo());
+			emit updateState();
+		}
+	}
+
+	return;
+
 }
 
 
@@ -2483,8 +2517,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addObjectMenu->addAction(m_addWorkstationAction);
 		m_addObjectMenu->addAction(m_addSoftwareAction);
 
+	// -----------------
+	m_equipmentView->addAction(m_addFromPresetAction);
 
-	m_equipmentView->addAction(m_addPresetAction);
+	// -----------------
+	m_equipmentView->addAction(m_addNewPresetAction);
 
 		m_addPresetMenu->addAction(m_addPresetRackAction);
 		m_addPresetMenu->addAction(m_addPresetChassisAction);
@@ -2542,9 +2579,13 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_toolBar = new QToolBar(this);
 	m_toolBar->addAction(m_addObjectAction);
-	m_toolBar->addAction(m_addPresetAction);
+	m_toolBar->addAction(m_addFromPresetAction);
+	m_toolBar->addAction(m_addNewPresetAction);
 
-	m_toolBar->addSeparator();
+	m_SeparatorActionA = new QAction(tr("Preset"), this);
+	m_SeparatorActionA->setSeparator(true);
+
+	m_toolBar->addAction(m_SeparatorActionA);
 	m_toolBar->addAction(m_refreshAction);
 
 	m_toolBar->addSeparator();
@@ -2640,12 +2681,18 @@ void EquipmentTabPage::CreateActions()
 
 
 	//----------------------------------
+	m_addFromPresetAction = new QAction(tr("Add From Preset..."), this);
+	m_addFromPresetAction->setStatusTip(tr("Add preset to the configuration..."));
+	m_addFromPresetAction->setEnabled(true);
+	connect(m_addFromPresetAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPreset);
+
+	//----------------------------------
 	m_addPresetMenu = new QMenu(this);
 
-	m_addPresetAction = new QAction(tr("Add From Preset"), this);
-	m_addPresetAction->setEnabled(true);
-	m_addPresetAction->setMenu(m_addPresetMenu);
-	connect(m_addPresetAction, &QAction::triggered, this, &EquipmentTabPage::addPresetTriggered);
+	m_addNewPresetAction = new QAction(tr("Add New Preset"), this);
+	m_addNewPresetAction->setEnabled(true);
+	m_addNewPresetAction->setMenu(m_addPresetMenu);
+	connect(m_addNewPresetAction, &QAction::triggered, this, &EquipmentTabPage::addNewPresetTriggered);
 
 		m_addPresetRackAction = new QAction(tr("Preset Rack"), this);
 		m_addPresetRackAction->setStatusTip(tr("Add rack to the preset..."));
@@ -2807,6 +2854,8 @@ void EquipmentTabPage::setActionState()
 {
 	qDebug() << "EquipmentTabPage::setActionState()";
 
+	assert(m_addFromPresetAction);
+	assert(m_addNewPresetAction);
 	assert(m_addSystemAction);
 	assert(m_addSystemAction);
 	assert(m_addChassisAction);
@@ -2835,6 +2884,17 @@ void EquipmentTabPage::setActionState()
 	//
 	m_checkInAction->setEnabled(true);
 	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always
+
+	if (isPresetMode() == true)
+	{
+		m_addNewPresetAction->setVisible(true);
+		m_addFromPresetAction->setVisible(false);
+	}
+	else
+	{
+		m_addNewPresetAction->setVisible(false);
+		m_addFromPresetAction->setVisible(true);
+	}
 
 	// Disable all
 	//
@@ -2872,6 +2932,8 @@ void EquipmentTabPage::setActionState()
 	}
 
 	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+	m_addFromPresetAction->setEnabled(selectedIndexList.size() == 1);
 
 	// Refresh
 	//
@@ -3103,14 +3165,12 @@ void EquipmentTabPage::modeSwitched()
 	if (m_equipmentModel->isPresetMode() == true)
 	{
 		m_switchModeAction->setText(tr("Switch to Configuration"));
-		m_addPresetAction->setText(tr("Add New Preset"));
 
 		m_updateFromPresetAction->setEnabled(false);
 	}
 	else
 	{
 		m_switchModeAction->setText(tr("Switch to Preset"));
-		m_addPresetAction->setText(tr("Add From Preset"));
 
 		m_updateFromPresetAction->setEnabled(true);
 	}
@@ -3299,7 +3359,7 @@ void EquipmentTabPage::addObjectTriggered()
 	return;
 }
 
-void EquipmentTabPage::addPresetTriggered()
+void EquipmentTabPage::addNewPresetTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
@@ -3307,7 +3367,7 @@ void EquipmentTabPage::addPresetTriggered()
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_addPresetAction);
+	QWidget* w = m_toolBar->widgetForAction(m_addNewPresetAction);
 
 	if (w == nullptr)
 	{

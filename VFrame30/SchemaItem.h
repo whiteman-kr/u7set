@@ -2,6 +2,7 @@
 
 #include "SchemaPoint.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
 #include "../include/PropertyObject.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/DebugInstCounter.h"

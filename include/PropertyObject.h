@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <functional>
 #include <map>
+#include <unordered_map>
 #include <list>
 #include <vector>
 #include <utility>
@@ -14,6 +15,9 @@
 #include <QString>
 #include <QVariant>
 #include <QMetaEnum>
+#include <QHash>
+#include <QTime>
+#include <QTimer>
 
 #include "../include/OrderedHash.h"
 
@@ -22,22 +26,24 @@ namespace Proto
 	class Property;
 }
 
+class PropertyObject;
+
 // Add property which is stored in QVariant and does not have getter or setter
 //
 #define ADD_PROPERTY_QVARIANT(TYPE, NAME, VISIBLE) \
-	addProperty<TYPE>(tr(#NAME), VISIBLE);
+	addProperty<TYPE>(NAME, VISIBLE);
 
 // Add property which has getter	QString caption() const;
 void setCaption(QString value);
 //
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
-	addProperty<TYPE>(tr(#NAME), VISIBLE, \
+	addProperty<TYPE>(NAME, VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
-	addProperty<TYPE>(tr(#NAME), VISIBLE, \
+	addProperty<TYPE>(NAME, VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
@@ -45,7 +51,7 @@ void setCaption(QString value);
 //
 #define ADD_PROPERTY_GET_SET_CAT(TYPE, NAME, CATEGORY, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(\
-			tr(#NAME), \
+			NAME, \
 			CATEGORY,\
 			VISIBLE,\
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
@@ -54,7 +60,7 @@ void setCaption(QString value);
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
-	addDynamicEnumProperty(tr(#NAME), ENUMVALUES, VISIBLE, \
+	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
 			(std::function<int(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
@@ -77,32 +83,86 @@ public:
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
 
 public:
-	QString caption() const;
-	void setCaption(QString value);
+	inline QString caption() const
+	{
+		return m_caption;
+	}
+	inline void setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
 
-	QString description() const;
-	void setDescription(QString value);
+	inline QString description() const
+	{
+		return m_description;
+	}
+	inline void setDescription(const QString& value)
+	{
+		m_description = value;
+	}
 
-	QString category() const;
-	void setCategory(QString value);
+	inline QString category() const
+	{
+		return m_category;
+	}
+	inline void setCategory(const QString& value)
+	{
+		m_category = value;
+	}
 
-	QString validator() const;
-	void setValidator(QString value);
+	inline QString validator() const
+	{
+		return m_validator;
+	}
+	inline void setValidator(const QString& value)
+	{
+		m_validator = value;
+	}
 
-	bool readOnly() const;
-	void setReadOnly(bool value);
+	inline bool readOnly() const
+	{
+		return m_readOnly;
+	}
+	inline void setReadOnly(bool value)
+	{
+		m_readOnly = value;
+	}
 
-	bool updateFromPreset() const;
-	void setUpdateFromPreset(bool value);
+	inline bool updateFromPreset() const
+	{
+		return m_updateFromPreset;
+	}
+	inline void setUpdateFromPreset(bool value)
+	{
+		m_updateFromPreset = value;
+	}
 
-	bool specific() const;
-	void setSpecific(bool value);
+	inline bool specific() const
+	{
+		return m_specific;
+	}
+	inline void setSpecific(bool value)
+	{
+		m_specific = value;
+	}
 
-	bool visible() const;
-	void setVisible(bool value);
+	inline bool visible() const
+	{
+		return m_visible;
+	}
+	inline void setVisible(bool value)
+	{
+		m_visible = value;
+	}
 
-	bool expert() const;
-	void setExpert(bool value);
+	inline bool expert() const
+	{
+		return m_expert;
+	}
+	inline void setExpert(bool value)
+	{
+		m_expert = value;
+	}
 
 	int precision() const;
 	void setPrecision(int value);
@@ -119,9 +179,6 @@ public:
     virtual const QVariant& highLimit() const = 0;
     virtual void setHighLimit(const QVariant& value) = 0;
 
-    virtual const QVariant& step() const = 0;
-    virtual void setStep(const QVariant& value) = 0;
-
 	virtual bool isTheSameType(Property* property) = 0;
 	virtual void updateFromPreset(Property* presetProperty, bool updateValue) = 0;
 
@@ -135,20 +192,28 @@ private:
 	QString m_description;
 	QString m_category;
 	QString m_validator;
-	bool m_readOnly = false;
-	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
-	bool m_specific = false;				// Specific property, used in DeviceObject
-	bool m_visible = false;
-	bool m_expert = false;
+
+	union
+	{
+		struct
+		{
+			bool m_readOnly : 1;
+			bool m_updateFromPreset : 1;		// Update this property from preset, used in DeviceObject
+			bool m_specific : 1;				// Specific property, used in DeviceObject
+			bool m_visible : 1;
+			bool m_expert : 1;
+		};
+		uint32_t m_flags;
+	};
+
 	int m_precision = 2;
 };
 
 //
 //
-//			Class Property
+//			Class PropertyValue
 //
 //
-
 template <typename TYPE>
 class PropertyValue : public Property
 {
@@ -353,6 +418,7 @@ public:
 
 				bool ok = v.convert(m_value.type());
 				assert(ok);
+				Q_UNUSED(ok);
 
 				m_value.setValue(v);
 				checkLimits();
@@ -365,6 +431,7 @@ public:
 
 				bool ok = v.convert(m_value.userType());
 				assert(ok);
+				Q_UNUSED(ok);
 
 				m_value.setValue(v);
 				checkLimits();
@@ -497,20 +564,11 @@ public:
 		m_highLimit = value;
 	}
 
-	const QVariant& step() const
-	{
-		return m_step;
-	}
-	void setStep(const QVariant& value)
-	{
-		m_step = value;
-	}
-
-	void setGetter(std::function<TYPE(void)> getter)
+	void setGetter(const std::function<TYPE(void)>& getter)
 	{
 		m_getter = getter;
 	}
-	void setSetter(std::function<void(TYPE)> setter)
+	void setSetter(const std::function<void(TYPE)>& setter)
 	{
 		m_setter = setter;
 	}
@@ -547,7 +605,6 @@ public:
 
 		m_lowLimit = source->m_lowLimit;
 		m_highLimit = source->m_highLimit;
-		m_step = source->m_step;
 
 		// Do not copy m_getter/m_setter, because the yare binded to own object instances
 		//
@@ -560,11 +617,11 @@ private:
 	QVariant m_value;
 	QVariant m_lowLimit;
 	QVariant m_highLimit;
-	QVariant m_step;
 
 	std::function<TYPE(void)> m_getter;
 	std::function<void(TYPE)> m_setter;
 };
+
 
 //
 //			Dynamic Enum Property
@@ -680,7 +737,8 @@ public:
 
 	const QVariant& lowLimit() const
 	{
-		return m_interanalUse;
+static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
 	}
 	void setLowLimit(const QVariant& value)
 	{
@@ -689,18 +747,10 @@ public:
 
 	const QVariant& highLimit() const
 	{
-		return m_interanalUse;
+static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
 	}
 	void setHighLimit(const QVariant& value)
-	{
-		Q_UNUSED(value);
-	}
-
-	const QVariant& step() const
-	{
-		return m_interanalUse;
-	}
-	void setStep(const QVariant& value)
 	{
 		Q_UNUSED(value);
 	}
@@ -739,7 +789,6 @@ private:
 	std::shared_ptr<OrderedHash<int, QString>> m_enumValues;
 
 	int m_value = 0;
-	QVariant m_interanalUse;	//	for return from lowLimt, hughLimt, step
 
 	std::function<int(void)> m_getter;
 	std::function<void(int)> m_setter;
@@ -769,12 +818,14 @@ public:
 	//		ADD_PROPERTY_GETTER_SETTER(int, varintgs, TestProp::someProp, TestProp::setSomeProp);
 	//
 	template <typename TYPE>
-	PropertyValue<TYPE>* addProperty(QString caption,
+	PropertyValue<TYPE>* addProperty(const QString& caption,
 									 bool visible = false,
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
-        std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
+		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
+
+		uint hash = qHash(caption);
 
 		property->setCaption(caption);
 		property->setVisible(visible);
@@ -791,28 +842,21 @@ public:
 			property->setReadOnly(true);
 		}
 
-		auto alreadyExists = m_properties.find(caption);
+		m_properties[hash] = property;
 
-		if (alreadyExists == m_properties.end())
-		{
-			m_properties[caption] = property;
-		}
-		else
-		{
-			alreadyExists->second = property;
-		}
-
-        return property.get();
+		return property.get();
 	}
 
 	template <typename TYPE>
-	PropertyValue<TYPE>* addProperty(QString caption,
+	PropertyValue<TYPE>* addProperty(const QString& caption,
 									 QString category,
 									 bool visible = false,
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
+
+		uint hash = qHash(caption);
 
 		property->setCaption(caption);
 		property->setCategory(category);
@@ -827,25 +871,16 @@ public:
 
 		if (!setter)
 		{
-			property->setReadOnly(true);
+			property->m_readOnly = true;
 		}
 
-		auto alreadyExists = m_properties.find(caption);
-
-		if (alreadyExists == m_properties.end())
-		{
-			m_properties[caption] = property;
-		}
-		else
-		{
-			alreadyExists->second = property;
-		}
+		m_properties[hash] = property;
 
 		return property.get();
 	}
 
 	PropertyValue<OrderedHash<int, QString>>* addDynamicEnumProperty(
-			QString caption,
+			const QString& caption,
 			std::shared_ptr<OrderedHash<int, QString>> enumValues,
 			bool visible = false,
 			std::function<int(void)> getter = std::function<int(void)>(),
@@ -856,6 +891,8 @@ public:
 			assert(enumValues);
 			return nullptr;
 		}
+
+		uint hash = qHash(caption);
 
 		std::shared_ptr<PropertyValue<OrderedHash<int, QString>>> property = std::make_shared<PropertyValue<OrderedHash<int, QString>>>(enumValues);
 
@@ -874,16 +911,7 @@ public:
 			property->setReadOnly(true);
 		}
 
-		auto alreadyExists = m_properties.find(caption);
-
-		if (alreadyExists == m_properties.end())
-		{
-			m_properties[caption] = property;
-		}
-		else
-		{
-			alreadyExists->second = property;
-		}
+		m_properties[hash] = property;
 
 		return property.get();
 	}
@@ -961,7 +989,7 @@ public:
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
-    std::map<QString, std::shared_ptr<Property>> m_properties;
+	std::map<uint, std::shared_ptr<Property>> m_properties;
 };
 
 
@@ -980,81 +1008,210 @@ public:
 
 };
 
-class TestProp : public PropertyObject
-{
-	Q_OBJECT
+//class TestProp : public PropertyObject
+//{
+//	Q_OBJECT
 
-public:
-	TestProp()
-	{
-		ADD_PROPERTY_QVARIANT(int, varint, true);
-		ADD_PROPERTY_GETTER(int, varintgetter, true, TestProp::someProp);
-		ADD_PROPERTY_GETTER_SETTER(int, varintgs, true, TestProp::someProp, TestProp::setSomeProp);
+//public:
+//	TestProp()
+//	{
+//		static QString BoolProp0_Caption("BoolProp0");
+//		static QString BoolProp1_Caption("BoolProp1");
+//		static QString BoolProp2_Caption("BoolProp2");
+//		static QString BoolProp3_Caption("BoolProp3");
+//		static QString BoolProp4_Caption("BoolProp4");
+//		static QString BoolProp5_Caption("BoolProp5");
+//		static QString BoolProp6_Caption("BoolProp6");
+//		static QString BoolProp7_Caption("BoolProp7");
+//		static QString BoolProp8_Caption("BoolProp8");
+//		static QString BoolProp9_Caption("BoolProp9");
 
-		PropertyValue<int>* pi = addProperty<int>(
-					tr("SomeProp"),
-					true,
-					(std::function<int(void)>)std::bind(&TestProp::someProp, this),
-					std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-		pi->setLowLimit(-100);
+//		static QString IntProp0_Caption("IntProp0");
+//		static QString IntProp1_Caption("IntProp1");
+//		static QString IntProp2_Caption("IntProp2");
+//		static QString IntProp3_Caption("IntProp3");
+//		static QString IntProp4_Caption("IntProp4");
+//		static QString IntProp5_Caption("IntProp5");
+//		static QString IntProp6_Caption("IntProp6");
+//		static QString IntProp7_Caption("IntProp7");
+//		static QString IntProp8_Caption("IntProp8");
+//		static QString IntProp9_Caption("IntProp9");
 
-		PropertyValue<int>* pdi = addProperty<int>(tr("SomeDynProp"));
-		pdi->setLowLimit(-200);
+//		static QString StringProp0_Caption("StringProp0");
+//		static QString StringProp1_Caption("StringProp1");
+//		static QString StringProp2_Caption("StringProp2");
+//		static QString StringProp3_Caption("StringProp3");
+//		static QString StringProp4_Caption("StringProp4");
+//		static QString StringProp5_Caption("StringProp5");
+//		static QString StringProp6_Caption("StringProp6");
+//		static QString StringProp7_Caption("StringProp7");
+//		static QString StringProp8_Caption("StringProp8");
+//		static QString StringProp9_Caption("StringProp9");
 
-		addProperty<bool>(tr("SomeBool"),
-						  true,
-						  (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-						  std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp0_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp1_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp2_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp3_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp4_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp5_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp6_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp7_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp8_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+//		addProperty<bool>(BoolProp9_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
 
-		addProperty<QString>(tr("SomeString"),
-							 true,
-							 std::bind(&TestProp::someString, this),
-							 std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<int>(IntProp0_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp1_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp2_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp3_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp4_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp5_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp6_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp7_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp8_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+//		addProperty<int>(IntProp9_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
+//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
 
-		addProperty<TestEnum::Priority>(tr("Priority"),
-										true,
-										std::bind(&TestProp::priority, this),
-										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp0_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp1_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp2_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp3_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp4_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp5_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp6_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp7_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp8_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+//		addProperty<QString>(StringProp9_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
+//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
 
-		std::shared_ptr<OrderedHash<int, QString>> enumValues = std::make_shared<OrderedHash<int, QString>>();
-		enumValues->append(0, "Zero");
-		enumValues->append(1, "One");
-		enumValues->append(10, "Ten");
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp0, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp1, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp2, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp3, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp4, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp5, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp6, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp7, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp8, true, TestProp::someBool, TestProp::setSomeBool);
+////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp9, true, TestProp::someBool, TestProp::setSomeBool);
 
-		PropertyValue<OrderedHash<int, QString>>* pu = addDynamicEnumProperty(
-					tr("Units"),
-					enumValues,
-					true,
-					(std::function<int(void)>)std::bind(&TestProp::units, this),
-					std::bind(&TestProp::setUnits, this, std::placeholders::_1));
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp1, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp2, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp0, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp3, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp4, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp5, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp6, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp7, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp8, true, TestProp::someProp, TestProp::setSomeProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, IntProp9, true, TestProp::someProp, TestProp::setSomeProp);
 
-		pu->setValue(2);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp0, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp1, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp2, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp3, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp4, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp5, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp6, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp7, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp8, true, TestProp::someString, TestProp::setSomeString);
+////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp9, true, TestProp::someString, TestProp::setSomeString);
 
-		ADD_PROPERTY_DYNAMIC_ENUM(Units2, true, enumValues, TestProp::units, TestProp::setUnits);
-	}
+////		ADD_PROPERTY_QVARIANT(int, varint, true);
+////		ADD_PROPERTY_GETTER(int, varintgetter, true, TestProp::someProp);
+////		ADD_PROPERTY_GETTER_SETTER(int, varintgs, true, TestProp::someProp, TestProp::setSomeProp);
 
-	int someProp() const				{		return m_someProp;		}
-	void setSomeProp(int value)			{		m_someProp = value;		}
+////		PropertyValue<int>* pi = addProperty<int>(
+////					tr("SomeProp"),
+////					true,
+////					(std::function<int(void)>)std::bind(&TestProp::someProp, this),
+////					std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
+////		pi->setLowLimit(-100);
 
-	int units() const					{		return m_units;		}
-	void setUnits(int value)			{		m_units = value;		}
+////		PropertyValue<int>* pdi = addProperty<int>(tr("SomeDynProp"));
+////		pdi->setLowLimit(-200);
 
-	bool someBool() const				{		return m_someBool;		}
-	void setSomeBool(bool value)		{		m_someBool = value;		}
+////		addProperty<bool>(tr("SomeBool"),
+////						  true,
+////						  (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+////						  std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
 
-	QString someString() const			{		return m_someString;	}
-	void setSomeString(QString value)	{		m_someString = value;	}
+////		addProperty<QString>(tr("SomeString"),
+////							 true,
+////							 std::bind(&TestProp::someString, this),
+////							 std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
 
-	void setPriority(TestEnum::Priority priority)	{	m_priority = priority;	}
-	TestEnum::Priority priority() const				{	return m_priority;		}
+////		addProperty<TestEnum::Priority>(tr("Priority"),
+////										true,
+////										std::bind(&TestProp::priority, this),
+////										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
 
-private:
-	int m_someProp = -1;
-	int m_units = 0;
-	bool m_someBool = false;
-	QString m_someString;
-	TestEnum::Priority m_priority = TestEnum::Priority::Low;
-};
+////		std::shared_ptr<OrderedHash<int, QString>> enumValues = std::make_shared<OrderedHash<int, QString>>();
+////		enumValues->append(0, "Zero");
+////		enumValues->append(1, "One");
+////		enumValues->append(10, "Ten");
+
+////		PropertyValue<OrderedHash<int, QString>>* pu = addDynamicEnumProperty(
+////					tr("Units"),
+////					enumValues,
+////					true,
+////					(std::function<int(void)>)std::bind(&TestProp::units, this),
+////					std::bind(&TestProp::setUnits, this, std::placeholders::_1));
+
+////		pu->setValue(2);
+
+////		ADD_PROPERTY_DYNAMIC_ENUM(Units2, true, enumValues, TestProp::units, TestProp::setUnits);
+//	}
+
+//	int someProp() const				{		return m_someProp;		}
+//	void setSomeProp(int value)			{		m_someProp = value;		}
+
+//	int units() const					{		return m_units;		}
+//	void setUnits(int value)			{		m_units = value;		}
+
+//	bool someBool() const				{		return m_someBool;		}
+//	void setSomeBool(bool value)		{		m_someBool = value;		}
+
+//	QString someString() const			{		return m_someString;	}
+//	void setSomeString(QString value)	{		m_someString = value;	}
+
+//	void setPriority(TestEnum::Priority priority)	{	m_priority = priority;	}
+//	TestEnum::Priority priority() const				{	return m_priority;		}
+
+//private:
+//	int m_someProp = -1;
+//	int m_units = 0;
+//	bool m_someBool = false;
+//	QString m_someString;
+//	TestEnum::Priority m_priority = TestEnum::Priority::Low;
+//};
 
 
 #endif // PROPERTYOBJECT

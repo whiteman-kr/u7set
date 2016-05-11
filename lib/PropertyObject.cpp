@@ -2,12 +2,14 @@
 #include <QDebug>
 #include "../Proto/serialization.pb.h"
 
+
 //
 //
 //			Class Property
 //
 //
-Property::Property()
+Property::Property() :
+	m_flags(0)
 {
 }
 
@@ -17,7 +19,7 @@ Property::~Property()
 
 void Property::saveValue(::Proto::Property* protoProperty) const
 {
-	protoProperty->set_name(m_caption.toLocal8Bit());
+	protoProperty->set_name(m_caption.toStdString());
 
 	QString valueStr;
 
@@ -116,96 +118,6 @@ bool Property::loadValue(const ::Proto::Property& protoProperty)
 	return ok;
 }
 
-QString Property::caption() const
-{
-	return m_caption;
-}
-
-void Property::setCaption(QString value)
-{
-	m_caption = value;
-}
-
-QString Property::description() const
-{
-	return m_description;
-}
-
-void Property::setDescription(QString value)
-{
-	m_description = value;
-}
-
-QString Property::category() const
-{
-    return m_category;
-}
-
-void Property::setCategory(QString value)
-{
-	m_category = value;
-}
-
-QString Property::validator() const
-{
-	return m_validator;
-}
-
-void Property::setValidator(QString value)
-{
-	m_validator = value;
-}
-
-bool Property::readOnly() const
-{
-	return m_readOnly;
-}
-
-void Property::setReadOnly(bool value)
-{
-	m_readOnly = value;
-}
-
-bool Property::updateFromPreset() const
-{
-	return m_updateFromPreset;
-}
-
-void Property::setUpdateFromPreset(bool value)
-{
-	m_updateFromPreset = value;
-}
-
-bool Property::specific() const
-{
-	return m_specific;
-}
-
-void Property::setSpecific(bool value)
-{
-	m_specific = value;
-}
-
-bool Property::visible() const
-{
-	return m_visible;
-}
-
-void Property::setVisible(bool value)
-{
-	m_visible = value;
-}
-
-bool Property::expert() const
-{
-	return m_expert;
-}
-
-void Property::setExpert(bool value)
-{
-	m_expert = value;
-}
-
 int Property::precision() const
 {
 	return m_precision;
@@ -234,10 +146,8 @@ void Property::copy(const Property* source)
 	m_caption = source->m_caption;
 	m_description = source->m_description;
 	m_category = source->m_category;
-	m_readOnly = source->m_readOnly;
-	m_updateFromPreset = source->m_updateFromPreset;
-	m_specific = source->m_specific;
-	m_visible = source->m_visible;
+	m_validator = source->m_validator;
+	m_flags = source->m_flags;
 	m_precision = source->m_precision;
 
 	return;
@@ -264,7 +174,7 @@ std::vector<std::shared_ptr<Property>> PropertyObject::properties() const
     std::vector<std::shared_ptr<Property>> result;
 	result.reserve(m_properties.size());
 
-    for (std::pair<QString, std::shared_ptr<Property>> p : m_properties)
+	for (const std::pair<uint, std::shared_ptr<Property>>& p : m_properties)
 	{
 		result.push_back(p.second);
 	}
@@ -281,7 +191,8 @@ void PropertyObject::addProperties(std::vector<std::shared_ptr<Property>> proper
 {
 	for (auto p : properties)
 	{
-		m_properties[p->caption()] = p;
+		uint hash = qHash(p->caption());
+		m_properties[hash] = p;
 	}
 }
 
@@ -302,7 +213,8 @@ void PropertyObject::removeSpecificProperties()
 
 bool PropertyObject::propertyExists(QString caption) const
 {
-    auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
     return it != m_properties.end();
 }
 
@@ -310,7 +222,8 @@ std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption)
 {
     std::shared_ptr<Property> result = nullptr;
 
-	auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
 
 	if (it != m_properties.end())
 	{
@@ -324,7 +237,8 @@ const std::shared_ptr<Property> PropertyObject::propertyByCaption(QString captio
 {
     std::shared_ptr<Property> result = nullptr;
 
-	auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
 
 	if (it != m_properties.end())
 	{
@@ -336,7 +250,8 @@ const std::shared_ptr<Property> PropertyObject::propertyByCaption(QString captio
 
 QVariant PropertyObject::propertyValue(QString caption) const
 {
-	auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
 
 	if (it != m_properties.end())
 	{
@@ -352,7 +267,8 @@ QVariant PropertyObject::propertyValue(QString caption) const
 
 bool PropertyObject::setPropertyValue(QString caption, const char* value)
 {
-	auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
 
 	if (it == m_properties.end())
 	{
@@ -386,7 +302,8 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 
 bool PropertyObject::setPropertyValue(QString caption, const QVariant& value)
 {
-	auto it = m_properties.find(caption);
+	uint hash = qHash(caption);
+	auto it = m_properties.find(hash);
 
 	if (it == m_properties.end())
 	{
@@ -402,7 +319,8 @@ std::list<std::pair<int, QString>> PropertyObject::enumValues(QString property)
 {
 	std::list<std::pair<int, QString>> result;
 
-	auto it = m_properties.find(property);
+	uint hash = qHash(property);
+	auto it = m_properties.find(hash);
 
 	if (it != m_properties.end())
 	{

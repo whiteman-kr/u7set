@@ -169,7 +169,8 @@ SOURCES +=\
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
     Builder/TuningDataStorage.cpp \
-    ../TuningService/TuningDataSource.cpp
+    ../TuningService/TuningDataSource.cpp \
+    DialogChoosePreset.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -268,7 +269,8 @@ HEADERS  += \
     ../include/ProtobufHelper.h \
     UploadTabPage.h \
     Builder/TuningDataStorage.h \
-    ../TuningService/TuningDataSource.h
+    ../TuningService/TuningDataSource.h \
+    DialogChoosePreset.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -287,7 +289,8 @@ FORMS    += \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
     SchemaPropertiesDialog.ui \
-    SchemaItemPropertiesDialog.ui
+    SchemaItemPropertiesDialog.ui \
+    DialogChoosePreset.ui
 
 RESOURCES += \
 	Resources.qrc \

@@ -83,7 +83,7 @@ namespace Builder
 
 		// Generate Tuning configuration
 		//
-		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
+		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
