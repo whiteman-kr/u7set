@@ -42,7 +42,7 @@ const char* const SensorTypeStr[] =
 	"TSM-23",
 	"Rheochord",
 
-	"ТХА(K)",
+	"TXA(K)",
 	"TXK(L) 84",
 	"TXK(L) 94",
 	"TNN(N)",
@@ -369,7 +369,7 @@ public:
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(bool value) { m_tuningDefaultValue = value; }
+	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 

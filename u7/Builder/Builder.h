@@ -83,7 +83,7 @@ namespace Builder
 
 		// Generate Tuning configuration
 		//
-		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
+		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
@@ -103,7 +103,11 @@ namespace Builder
 
 		// Generate SCADA software configurations
 		//
-		bool generateSoftwareConfiguration(DbController* db, Hardware::EquipmentSet* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
+		bool generateSoftwareConfiguration(	DbController* db,
+											Hardware::EquipmentSet* equipment,
+											SignalSet* signalSet,
+											TuningDataStorage* tuningDataStorage,
+											BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//

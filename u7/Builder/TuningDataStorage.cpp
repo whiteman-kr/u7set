@@ -230,6 +230,22 @@ void TuningSignalsData::converToBigEndian()
 //
 // -------------------------------------------------------------------------------------
 
+const char* TuningData::TUNING_DATA_ELEMENT = "TuningData";
+const char* TuningData::LM_ID = "LmID";
+const char* TuningData::TUNING_FRAME_SIZE_BYTES = "FrameSizeBytes";
+const char* TuningData::TUNING_FRAMES_COUNT = "FramesCount";
+const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
+const char* TuningData::TUNING_ANALOG_FLOAT_SIGNALS = "AnalogFloatSignals";
+const char* TuningData::TUNING_ANALOG_INT_SIGNALS = "AnalogIntSignals";
+const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
+const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
+
+
+TuningData::TuningData()
+{
+}
+
+
 TuningData::TuningData(QString lmID,
 						int tuningFrameSizeBytes,
 						int tuningFramesCount) :
@@ -242,6 +258,25 @@ TuningData::TuningData(QString lmID,
 
 TuningData::~TuningData()
 {
+	if (m_deleteSignals == false)
+	{
+		return;
+	}
+
+	for(Signal* signal : m_tuningAnalogFloat)
+	{
+		delete signal;
+	}
+
+	for(Signal* signal : m_tuningAnalogInt)
+	{
+		delete signal;
+	}
+
+	for(Signal* signal : m_tuningDiscrete)
+	{
+		delete signal;
+	}
 }
 
 
@@ -368,6 +403,144 @@ int TuningData::totalFramesCount() const
 	}
 
 	return framesCount;
+}
+
+
+void TuningData::writeToXml(XmlWriteHelper& xml)
+{
+	xml.writeStartElement(TUNING_DATA_ELEMENT);
+
+	xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
+	xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFrameSizeBytes);
+	xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
+	xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, m_tuningAnalogFloat.count() +
+													m_tuningAnalogInt.count() +
+													m_tuningDiscrete.count());
+
+	xml.writeStartElement(TUNING_ANALOG_FLOAT_SIGNALS);
+	xml.writeIntAttribute(TUNING_SIGNALS_COUNT, m_tuningAnalogFloat.count());
+
+	for(Signal* signal : m_tuningAnalogFloat)
+	{
+		signal->writeToXml(xml);
+	}
+
+	xml.writeEndElement();		//	</TUNING_ANALOG_FLOAT_SIGNALS>
+
+
+	xml.writeStartElement(TUNING_ANALOG_INT_SIGNALS);
+	xml.writeIntAttribute(TUNING_SIGNALS_COUNT, m_tuningAnalogInt.count());
+
+	for(Signal* signal : m_tuningAnalogInt)
+	{
+		signal->writeToXml(xml);
+	}
+
+	xml.writeEndElement();		//	</TUNING_ANALOG_INT_SIGNALS>
+
+	xml.writeStartElement(TUNING_DISCRETE_SIGNALS);
+	xml.writeIntAttribute(TUNING_SIGNALS_COUNT, m_tuningDiscrete.count());
+
+	for(Signal* signal : m_tuningDiscrete)
+	{
+		signal->writeToXml(xml);
+	}
+
+	xml.writeEndElement();		//	</TUNING_DISCRETE_SIGNALS>
+
+	xml.writeEndElement();		//	</TUNING_DATA_ELEMENT>
+}
+
+
+bool TuningData::readFromXml(XmlReadHelper& xml)
+{
+	bool result = true;
+
+	if (xml.findElement(TUNING_DATA_ELEMENT) == false)
+	{
+		return false;
+	}
+
+	result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
+	result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFrameSizeBytes);
+	result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
+
+	int totalSignalsCount = 0;
+
+	result &= xml.readIntAttribute(TUNING_ALL_SIGNALS_COUNT, &totalSignalsCount);
+
+	m_deleteSignals = true;		// !
+
+	//
+
+	if (xml.findElement(TUNING_ANALOG_FLOAT_SIGNALS) == false)
+	{
+		return false;
+	}
+
+	int count = 0;
+
+	result &= xml.readIntAttribute(TUNING_SIGNALS_COUNT, &count);
+
+	for(int i = 0; i < count; i++)
+	{
+		if (xml.findElement("Signal") == false)
+		{
+			result = false;
+			break;
+		}
+		Signal* signal = new Signal(false);
+		result &= signal->readFromXml(xml);
+		m_tuningAnalogFloat.append(signal);
+	}
+
+	//
+
+	if (xml.findElement(TUNING_ANALOG_INT_SIGNALS) == false)
+	{
+		return false;
+	}
+
+	count = 0;
+
+	result &= xml.readIntAttribute(TUNING_SIGNALS_COUNT, &count);
+
+	for(int i = 0; i < count; i++)
+	{
+		if (xml.findElement("Signal") == false)
+		{
+			result = false;
+			break;
+		}
+		Signal* signal = new Signal(false);
+		result &= signal->readFromXml(xml);
+		m_tuningAnalogInt.append(signal);
+	}
+
+	//
+
+	if (xml.findElement(TUNING_DISCRETE_SIGNALS) == false)
+	{
+		return false;
+	}
+
+	count = 0;
+
+	result &= xml.readIntAttribute(TUNING_SIGNALS_COUNT, &count);
+
+	for(int i = 0; i < count; i++)
+	{
+		if (xml.findElement("Signal") == false)
+		{
+			result = false;
+			break;
+		}
+		Signal* signal = new Signal(false);
+		result &= signal->readFromXml(xml);
+		m_tuningDiscrete.append(signal);
+	}
+
+	return result;
 }
 
 

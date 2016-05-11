@@ -6,6 +6,8 @@ DbControllerProjectTests::DbControllerProjectTests()
 {
 	m_dbController = new DbController();
 
+	m_databaseVersion = 61;
+
 	m_databaseHost = "127.0.0.1";
 	m_databaseName = "dbcontrollertesting";
 	m_databaseUser = "u7";
@@ -107,6 +109,11 @@ void DbControllerProjectTests::getProjectListTest()
 	}
 
 	db.close();
+}
+
+void DbControllerProjectTests::getDatabaseVersion()
+{
+	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
 }
 
 void DbControllerProjectTests::cleanupTestCase()

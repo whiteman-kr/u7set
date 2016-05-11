@@ -166,6 +166,8 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeEndElement();	// </AssociatedSignals>
 
+	writeAdditionalSectionsToXml(xml);
+
 	xml.writeEndElement();	// </AppDataSource>
 }
 
@@ -235,7 +237,20 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
+	readAdditionalSectionsFromXml(xml);
+
 	return result;
+}
+
+
+void DataSource::writeAdditionalSectionsToXml(XmlWriteHelper&)
+{
+}
+
+
+bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
+{
+	return true;
 }
 
 

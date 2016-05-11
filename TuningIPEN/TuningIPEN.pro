@@ -36,7 +36,9 @@ SOURCES +=\
     ../lib/CircularLogger.cpp \
     ../lib/Queue.cpp \
     ../lib/JsonSerializable.cpp \
-    MainIPEN.cpp
+    MainIPEN.cpp \
+    ../u7/Builder/TuningDataStorage.cpp \
+    ../lib/Signal.cpp
 
 HEADERS  += TuningMainWindow.h \
     ../include/ServiceSettings.h \
@@ -59,7 +61,9 @@ HEADERS  += TuningMainWindow.h \
     ../include/UdpSocket.h \
     ../include/CircularLogger.h \
     ../include/Queue.h \
-    ../include/JsonSerializable.h
+    ../include/JsonSerializable.h \
+    ../u7/Builder/TuningDataStorage.h \
+    ../include/Signal.h
 
 FORMS    += TuningMainWindow.ui
 
