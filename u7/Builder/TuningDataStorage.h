@@ -3,49 +3,85 @@
 #include <QtCore>
 #include <QList>
 #include "../include/Signal.h"
+#include "IssueLogger.h"
 
 
-class TuningData
+class TuningSignalsData
 {
+public:
+	static const int BITS_8 = 8;
+	static const int FRAMES_3 = 3;
+
 private:
-	class FrameTriple
-	{
+	int m_firstFrameNo = 0;
+	int m_tuningFrameSizeBytes = 0;
+	int m_tuningFrameSizeBits = 0;
 
-	};
+	int m_signalSizeBits = 0;
+	int m_signalCount = 0;
+
+	//
+
+	int m_tripleFramesCount = 0;
+	int m_totalFramesCount = 0;
+
+	char* m_framesData = nullptr;
+
+	void setFramesDataBit(int offset, int bit, int value);
+
+public:
+	TuningSignalsData();
+	virtual ~TuningSignalsData();
+
+	void init(int firstFrameNo, int tuningFrameSizeBytes, int signalSizeBits, int signalCount);
+
+	void copySignalsData(QList<Signal*> signalsList);
+
+	int totalFramesCount() const { return m_totalFramesCount; }
+	int framesDataSize() const { return m_totalFramesCount * m_tuningFrameSizeBytes; }
+
+	const char* framesData() const { return m_framesData; }
+
+	void converToBigEndian();
+};
 
 
+class TuningData : public QObject
+{
+	Q_OBJECT
+
+private:
 	QString m_lmEquipmentID;
 
 	int m_tuningFrameSizeBytes = 0;
 	int m_tuningFramesCount = 0;
 
-/*	static const int ANALOG_FLOAT = 0;
-	static const int ANALOG_INT = 1;
-	static const int DISCRETE = 2;
+	static const int TYPE_ANALOG_FLOAT = 0;
+	static const int TYPE_ANALOG_INT = 1;
+	static const int TYPE_DISCRETE = 2;
 
 	static const int TYPES_COUNT = 3;			// analog float, analog int, discrete
 
-	static const int typeSizeBit[TYPES_COUNT];
+	TuningSignalsData m_tuningSignalsData[TYPES_COUNT];
 
-	static const int VALUES_COUNT = 3;			// default value, low bound, high bound
+	QList<Signal*> m_tuningAnalogFloat;
+	QList<Signal*> m_tuningAnalogInt;
+	QList<Signal*> m_tuningDiscrete;
 
-	int	m_framesCount[TYPES_COUNT];
-
-	int getNededTuningFramesCount(int signalsCount, int signalValueSizeBits);*/
-
-	char* m_tuningData = nullptr;
-	int m_tuningDataSize = 0;
 
 public:
 	TuningData(	QString lmID,
-				int tuningFrameSizeB,
-				int tuningFramesCount,
-				QList<Signal*>& analogFloatSignals,
-				QList<Signal*>& analogIntSignals,
-				QList<Signal*>& discreteSignals);
+				int tuningFrameSizeBytes,
+				int tuningFramesCount);
 	~TuningData();
 
-	QByteArray tuningData() const;
+	bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
+
+	bool buildTuningData();
+
+	void getTuningData(QByteArray* tuningData) const;
+
+	int totalFramesCount() const;
 };
 
 

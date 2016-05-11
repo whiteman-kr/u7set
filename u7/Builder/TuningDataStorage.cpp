@@ -1,59 +1,381 @@
 #include "TuningDataStorage.h"
+#include <QtEndian>
 
 
-//const int TuningData::typeSizeBit[TYPES_COUNT] = { sizeof(float)*8, sizeof(qint32)*8, 1 };
+// -------------------------------------------------------------------------------------
+//
+// TuningSignalsData class implementation
+//
+// -------------------------------------------------------------------------------------
 
-
-TuningData::TuningData(	QString lmID,
-						int tuningFrameSizeB,
-						int tuningFramesCount,
-						QList<Signal*>& analogFloatSignals,
-						QList<Signal*>& analogIntSignals,
-						QList<Signal*>& discreteSignals) :
-	m_lmEquipmentID(lmID),
-	m_tuningFrameSizeBytes(tuningFrameSizeB),
-	m_tuningFramesCount(tuningFramesCount)
+TuningSignalsData::TuningSignalsData()
 {
-/*	m_analogFloatFramesCount = getNededTuningFramesCount(analogFloatSignals.count(), sizeof(float) * 8);
-	m_analogIntFramesCount = getNededTuningFramesCount(analogIntSignals.count(), sizeof(qint32) * 8);
-	m_discreteFramesCount = getNededTuningFramesCount(discreteSignals.count(), 1);
-
-	int allocSize = (m_analogFloatFramesCount + m_analogIntFramesCount + m_discreteFramesCount) * 3 * m_tuningFrameSizeBytes;
-
-	m_tuningdata = new char[allocSize];
-
-	m_analogFloatData = reinterpret_cast<float*>(m_tuningData);
-	m_analogIntData = reinterpret_cast<qint32*>(m_tuningData + (m_analogFloatFramesCount * 3 * m_tuningFrameSizeBytes);
-	m_discreteData = reinterpret_cast<quint16*>(m_tuningData + ((m_analogFloatFramesCount + m_analogIntFramesCount) * 3 * m_tuningFrameSizeBytes);*/
 }
 
-TuningData::~TuningData()
+
+TuningSignalsData::~TuningSignalsData()
 {
-	if (m_tuningData != nullptr)
+	if (m_framesData != nullptr)
 	{
-		delete [] m_tuningData;
+		delete [] m_framesData;
 	}
 }
 
 
-QByteArray TuningData::tuningData() const
+void TuningSignalsData::init(int firstFrameNo, int tuningFrameSizeBytes, int signalSizeBits, int signalCount)
 {
-	return QByteArray(m_tuningData, m_tuningDataSize);
+	m_firstFrameNo = firstFrameNo;
+	m_tuningFrameSizeBytes = tuningFrameSizeBytes;
+	m_tuningFrameSizeBits = m_tuningFrameSizeBytes * BITS_8;
+	m_signalSizeBits = signalSizeBits;
+	m_signalCount = signalCount;
+
+	// allocate framesData memory
+	//
+	int neededSize = m_signalSizeBits * m_signalCount;
+
+	m_tripleFramesCount = neededSize / m_tuningFrameSizeBits + (neededSize % m_tuningFrameSizeBits ? 1 : 0);
+
+	m_totalFramesCount = m_tripleFramesCount * FRAMES_3;
+
+	m_framesData = new char [m_totalFramesCount * m_tuningFrameSizeBytes];
+	memset(m_framesData, 0, m_totalFramesCount * m_tuningFrameSizeBytes);
 }
 
-/*
-int TuningData::getNededTuningFramesCount(int signalsCount, int signalValueSizeBits)
+
+void TuningSignalsData::setFramesDataBit(int offset, int bit, int value)
 {
-	int nededSizeBits = signalsCount * signalValueSizeBits;
-	return nededSizeBits / m_tuningFrameSizeBits + (nededSizeBits % tuningFrameSizeBits ? 1 : 0);
+	if (m_framesData == nullptr)
+	{
+		assert(false);		// call TuningSignalsData::init first
+		return;
+	}
+
+	if (offset >= framesDataSize())
+	{
+		assert(false);		// offset out of range
+		return;
+	}
+
+	if (bit < 0 || bit > 15)
+	{
+		assert(false);		// bit out of range
+		return;
+	}
+
+	quint16* ptr = reinterpret_cast<quint16*>(m_framesData + offset);
+
+	if (value == 0)
+	{
+		quint16 v = ~0x0001;
+
+		v <<= bit;
+
+		*ptr &= v;
+	}
+	else
+	{
+		quint16 v = 0x0001;
+
+		v <<= bit;
+
+		*ptr |= v;
+	}
 }
 
 
-int TuningData::getFrameNo(int signalIndex, int signalValueSizeBits)
+void TuningSignalsData::copySignalsData(QList<Signal*> signalsList)
 {
-	return nededSizeBits / m_tuningFrameSizeBits + (nededSizeBits % tuningFrameSizeBits ? 1 : 0);
-}*/
+	if (signalsList.count() != m_signalCount )
+	{
+		assert(false);
+		return;
+	}
 
+	if (m_framesData == nullptr)
+	{
+		assert(false);		// call TuningSignalsData::init first
+		return;
+	}
+
+	int writeOffsetBytes = 0;
+	int bit = 0;
+
+	for(Signal* signal : signalsList)
+	{
+		if (signal == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (signal->dataSize() != m_signalSizeBits)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (signal->isAnalog())
+		{
+			if (signal->dataFormat() == E::DataFormat::Float)
+			{
+				float* defaultValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes);
+				*defaultValuePtr = static_cast<float>(signal->tuningDefaultValue());
+
+				float* lowBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
+				*lowBoundValuePtr = static_cast<float>(signal->lowLimit());
+
+				float* highBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
+				*highBoundValuePtr = static_cast<float>(signal->highLimit());
+			}
+			else
+			{
+				assert(signal->dataFormat() == E::DataFormat::SignedInt);
+
+				qint32* defaultValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes);
+				*defaultValuePtr = static_cast<qint32>(signal->tuningDefaultValue());
+
+				qint32* lowBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
+				*lowBoundValuePtr = static_cast<qint32>(signal->lowLimit());
+
+				qint32* highBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
+				*highBoundValuePtr = static_cast<qint32>(signal->highLimit());
+			}
+
+			Address16 tuningAddr;
+
+			tuningAddr.setOffset((m_firstFrameNo * m_tuningFrameSizeBytes + writeOffsetBytes) / 2);	// offset in words!!!
+			tuningAddr.setBit(0);
+
+			signal->setTuningAddr(tuningAddr);
+
+			writeOffsetBytes += m_signalSizeBits / BITS_8;
+
+			if ((writeOffsetBytes % m_tuningFrameSizeBytes) == 0)
+			{
+				writeOffsetBytes += m_tuningFrameSizeBytes * 2;
+			}
+		}
+		else
+		{
+			setFramesDataBit(writeOffsetBytes, bit, signal->tuningDefaultValue() == 0.0 ? 0 : 1);
+			setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes, bit, 0);					// low bound
+			setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes * 2, bit, 1);				// high bound
+
+			Address16 tuningAddr;
+
+			tuningAddr.setOffset((m_firstFrameNo * m_tuningFrameSizeBytes + writeOffsetBytes) / 2);	// offset in words!!!
+			tuningAddr.setBit(bit);
+
+			signal->setTuningAddr(tuningAddr);
+
+			bit++;
+
+			if (bit == 16)
+			{
+				writeOffsetBytes += sizeof(quint16);
+				bit = 0;
+			}
+
+			if ((writeOffsetBytes % m_tuningFrameSizeBytes) == 0 && bit == 0)
+			{
+				writeOffsetBytes += m_tuningFrameSizeBytes * 2;
+			}
+		}
+	}
+}
+
+
+void TuningSignalsData::converToBigEndian()
+{
+	if (m_framesData == nullptr)
+	{
+		assert(false);		// call TuningSignalsData::init first
+		return;
+	}
+
+	int size = m_totalFramesCount * m_tuningFrameSizeBytes;
+
+	if (m_signalSizeBits == 32)
+	{
+		for(int offset = 0; offset < size; offset += (32 / BITS_8))
+		{
+			qint32* ptr = reinterpret_cast<qint32*>(m_framesData + offset);
+
+			*ptr = qToBigEndian<qint32>(*ptr);
+		}
+	}
+	else
+	{
+		if (m_signalSizeBits == 1)
+		{
+			for(int offset = 0; offset < size; offset += (16 / BITS_8))
+			{
+				qint16* ptr = reinterpret_cast<qint16*>(m_framesData + offset);
+
+				*ptr = qToBigEndian<qint16>(*ptr);
+			}
+		}
+		else
+		{
+			assert(false);	// unknown size !!!
+		}
+	}
+}
+
+
+// -------------------------------------------------------------------------------------
+//
+// TuningData class implementation
+//
+// -------------------------------------------------------------------------------------
+
+TuningData::TuningData(QString lmID,
+						int tuningFrameSizeBytes,
+						int tuningFramesCount) :
+	m_lmEquipmentID(lmID),
+	m_tuningFrameSizeBytes(tuningFrameSizeBytes),
+	m_tuningFramesCount(tuningFramesCount)
+{
+}
+
+
+TuningData::~TuningData()
+{
+}
+
+
+bool TuningData::buildTuningSignalsLists(HashedVector<QString, Signal *> lmAssociatedSignals, Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	m_tuningAnalogFloat.clear();
+	m_tuningAnalogInt.clear();
+	m_tuningDiscrete.clear();
+
+	for(Signal* signal : lmAssociatedSignals)
+	{
+		if (signal->enableTuning() == false)
+		{
+			continue;
+		}
+
+		if (signal->isAnalog())
+		{
+			if (signal->dataSize() != 32)
+			{
+				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+					  QString(tr("Signal '%1' for tuning must have 32-bit dataSize")).
+					  arg(signal->appSignalID()));
+				result = false;
+			}
+			else
+			{
+				if (signal->dataFormat() == E::DataFormat::Float)
+				{
+					m_tuningAnalogFloat.append(signal);
+				}
+				else
+				{
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
+					{
+						m_tuningAnalogInt.append(signal);
+					}
+					else
+					{
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+							  QString(tr("Signal '%1' for tuning must have Float or Signed Int data format")).
+							  arg(signal->appSignalID()));
+						result = false;
+					}
+				}
+			}
+		}
+		else
+		{
+			if (signal->dataSize() != 1)
+			{
+				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+					  QString(tr("Signal '%1' for tuning must have 1-bit dataSize")).
+					  arg(signal->appSignalID()));
+				result = false;
+				continue;
+			}
+			else
+			{
+				m_tuningDiscrete.append(signal);
+			}
+		}
+	}
+
+	return result;
+}
+
+
+
+bool TuningData::buildTuningData()
+{
+	TuningSignalsData& analogFloatSignalsData = m_tuningSignalsData[TYPE_ANALOG_FLOAT];
+
+	int firstFrame = 0;
+
+	analogFloatSignalsData.init(firstFrame, m_tuningFrameSizeBytes, sizeof(float) * TuningSignalsData::BITS_8, m_tuningAnalogFloat.count());
+	analogFloatSignalsData.copySignalsData(m_tuningAnalogFloat);
+	analogFloatSignalsData.converToBigEndian();
+
+	firstFrame += analogFloatSignalsData.totalFramesCount();
+
+	TuningSignalsData& analogIntSignalsData = m_tuningSignalsData[TYPE_ANALOG_INT];
+
+	analogIntSignalsData.init(firstFrame, m_tuningFrameSizeBytes, sizeof(qint32) * TuningSignalsData::BITS_8, m_tuningAnalogInt.count());
+	analogIntSignalsData.copySignalsData(m_tuningAnalogInt);
+	analogIntSignalsData.converToBigEndian();
+
+	firstFrame += analogIntSignalsData.totalFramesCount();
+
+	TuningSignalsData& discreteSignalsData = m_tuningSignalsData[TYPE_DISCRETE];
+
+	discreteSignalsData.init(firstFrame, m_tuningFrameSizeBytes, 1, m_tuningDiscrete.count());
+	discreteSignalsData.copySignalsData(m_tuningDiscrete);
+	discreteSignalsData.converToBigEndian();
+
+	return true;
+}
+
+
+void TuningData::getTuningData(QByteArray* tuningData) const
+{
+	if (tuningData == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	for(int i = 0; i < TYPES_COUNT; i++)
+	{
+		tuningData->append(m_tuningSignalsData[i].framesData(), m_tuningSignalsData[i].framesDataSize());
+	}
+}
+
+
+int TuningData::totalFramesCount() const
+{
+	int framesCount = 0;
+
+	for(int i = 0; i < TYPES_COUNT; i++)
+	{
+		framesCount += m_tuningSignalsData[i].totalFramesCount();
+	}
+
+	return framesCount;
+}
+
+
+// -------------------------------------------------------------------------------------
+//
+// TuningDataStorage class implementation
+//
+// -------------------------------------------------------------------------------------
 
 TuningDataStorage::~TuningDataStorage()
 {

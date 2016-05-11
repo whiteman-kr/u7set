@@ -75,8 +75,6 @@ namespace Builder
 
 			if (!buildOptoPortsSignalLists()) break;
 
-			if (!buildTuningSignalsLists()) break;
-
 			result = true;
 		}
 
@@ -2266,52 +2264,6 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::buildTuningSignalsLists()
-	{
-		bool result = true;
-
-		m_tuningAnalogFloat.clear();
-		m_tuningAnalogInt.clear();
-		m_tuningDiscrete.clear();
-
-		for(Signal* signal : m_lmAssociatedSignals)
-		{
-			if (signal->enableTuning() == false)
-			{
-				continue;
-			}
-
-			if (signal->isAnalog())
-			{
-				if (signal->dataFormat() == E::DataFormat::Float)
-				{
-					m_tuningAnalogFloat.append(signal);
-				}
-				else
-				{
-					if (signal->dataFormat() == E::DataFormat::SignedInt)
-					{
-						m_tuningAnalogInt.append(signal);
-					}
-					else
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal '%1' for tuning must have Float or Signed Int data format")).
-							  arg(signal->appSignalID()));
-						result = false;
-					}
-				}
-			}
-			else
-			{
-				m_tuningDiscrete.append(signal);
-			}
-		}
-
-		return result;
-	}
-
-
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
 		if (m_optoModuleStorage == nullptr)
@@ -2891,74 +2843,44 @@ namespace Builder
 	{
 		bool result = true;
 
-		int tuningFrameSizeB = 0;
+		int tuningFrameSizeBytes = 0;
+		int tuningFrameCount = 0;
 
-		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeB);
+		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeBytes);
+		result &= getLMIntProperty("TuningFrameCount", &tuningFrameCount);
 
 		if (result == false)
 		{
 			return false;
 		}
-/*
-		TuningData* tuningData = new TuningData();
 
-		char* analogFloatValues[3];
-		char* analogIntValues[3];
-		char* discreteValues[3];
+		TuningData* tuningData = new TuningData(m_lm->equipmentId(),
+												tuningFrameSizeBytes,
+												tuningFrameCount);
 
-		for(int i = 0; i < 3; i++)
+		if (tuningData->totalFramesCount() > tuningFrameCount)
 		{
-			// analog float values
-			//
-			int framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningAnalogFloat.count(), sizeof(float) * 8);
-			int sizeToAllocate = framesCount * tuningFrameSizeB;
-
-			analogFloatValues[i] = new char [sizeToAllocate];
-			memset(analogFloatValues[i], sizeToAllocate, 0);
-
-			// analog int values
-			//
-			framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningAnalogInt.count(), sizeof(qint32) * 8);
-			sizeToAllocate = framesCount * tuningFrameSizeB;
-
-			analogIntValues[i] = new char [sizeToAllocate];
-			memset(analogIntValues[i], sizeToAllocate, 0);
-
-			// discrete values
-			//
-			framesCount = getNededTuningFramesCount(tuningFrameSizeB, m_tuningDiscrete.count(), 1);
-			sizeToAllocate = framesCount * tuningFrameSizeB;
-
-			discreteValues[i] = new char [sizeToAllocate];
-			memset(discreteValues[i], sizeToAllocate, 0);
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+							   arg(m_lm->equipmentId()).
+							   arg(tuningFrameCount));
+			result = false;
+			delete tuningData;
 		}
-
-		for(Signal* signal : m_tuningAnalogFloat)
+		else
 		{
-			analogFloatValues[0].append(static_cast<float>(signal->tuningDefaultValue()));
-			analogFloatValues[1].append(static_cast<float>(signal->lowLimit()));
-			analogFloatValues[2].append(static_cast<float>(signal->highLimit()));
+			result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
+			result &= tuningData->buildTuningData();
+
+			if (result == false)
+			{
+				delete tuningData;
+			}
+			else
+			{
+				m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);
+			}
 		}
-
-		QVector<qint32> analogIntValues[3];
-
-		for(Signal* signal : m_tuningAnalogInt)
-		{
-			analogIntValues[0].append(static_cast<qint32>(signal->tuningDefaultValue()));
-			analogIntValues[1].append(static_cast<qint32>(signal->lowLimit()));
-			analogIntValues[2].append(static_cast<qint32>(signal->highLimit()));
-		}
-
-		QVector<quint32> discreteValues[3];
-
-		for(Signal* signal : m_tuningDiscrete)
-		{
-			discreteValues[0].append(static_cast<quint32>(signal->tuningDefaultValue()) == 0 ? 0 : 1) ;
-			discreteValues[1].append(0);
-			discreteValues[2].append(1);
-		}
-
-		m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);*/
 
 		return result;
 	}

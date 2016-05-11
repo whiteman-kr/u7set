@@ -456,10 +456,6 @@ namespace Builder
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;
 
-		QList<Signal*> m_tuningAnalogFloat;
-		QList<Signal*> m_tuningAnalogInt;
-		QList<Signal*> m_tuningDiscrete;
-
 		// compiler settings
 		//
 
@@ -543,8 +539,6 @@ namespace Builder
 		bool buildRS232SignalLists();
 		bool buildOptoPortsSignalLists();
 
-		bool buildTuningSignalsLists();
-
 		// pass #2 compilation functions
 		//
 
@@ -596,11 +590,12 @@ namespace Builder
 		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
 		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals);
 
-		bool buildTuningData();
 		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
 
 		bool copyDomDataToModuleMemory(const Module& module);
 		bool copyAomDataToModuleMemory(const Module& module);
+
+		bool buildTuningData();
 
 		bool calculateCodeRunTime();
 
