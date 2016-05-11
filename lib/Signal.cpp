@@ -711,6 +711,9 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
 	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
 
+	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
+	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
+
 	xml.writeEndElement();				// </Signal>
 }
 
@@ -816,6 +819,12 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 
 	m_regValidityAddr.setOffset(offset);
 	m_regValidityAddr.setBit(bit);
+
+	result &= xml.readIntAttribute("TuningOffset", &offset);
+	result &= xml.readIntAttribute("TuningBit", &bit);
+
+	m_tuningAddr.setOffset(offset);
+	m_tuningAddr.setBit(bit);
 
 	return result;
 }

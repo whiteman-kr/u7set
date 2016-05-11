@@ -167,7 +167,9 @@ SOURCES +=\
     Builder/DiagDataServiceCfgGenerator.cpp \
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
-    UploadTabPage.cpp
+    UploadTabPage.cpp \
+    DialogChoosePreset.cpp \
+    Builder/TuningDataStorage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -264,7 +266,9 @@ HEADERS  += \
     Builder/DiagDataServiceCfgGenerator.h \
     ../include/Queue.h \
     ../include/ProtobufHelper.h \
-    UploadTabPage.h
+    UploadTabPage.h \
+    DialogChoosePreset.h \
+    Builder/TuningDataStorage.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -283,7 +287,8 @@ FORMS    += \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
     SchemaPropertiesDialog.ui \
-    SchemaItemPropertiesDialog.ui
+    SchemaItemPropertiesDialog.ui \
+    DialogChoosePreset.ui
 
 RESOURCES += \
 	Resources.qrc \

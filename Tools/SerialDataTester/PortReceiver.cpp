@@ -1,4 +1,5 @@
 #include "PortReceiver.h"
+#include "SerialDataParser.h"
 #include <QSettings>
 #include <QDir>
 #include <QSerialPortInfo>
@@ -72,8 +73,8 @@ void PortReceiver::closePort()
 
 void PortReceiver::dataReceived()
 {
-	QByteArray receivedData;
-	receivedData = m_serialPort->readAll();
+	//receivedData = m_serialPort->readAll();
+	QByteArray receivedData = m_serialPort->read(SerialParserBufferSize);
 
 	emit dataFromPort(receivedData);
 }

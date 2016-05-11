@@ -2,17 +2,18 @@
 #include <QTest>
 #include "../../include/DbController.h"
 
-class DbControllerProjectTests : public QObject
+class DbControllerUserTests : public QObject
 {
 	Q_OBJECT
 
 public:
-	DbControllerProjectTests();
+	DbControllerUserTests();
 
 private slots:
 	void initTestCase();
-	void createOpenUpgradeCloseDeleteProject();
-	void getProjectListTest();
+	void createUserTest();
+	void updateUserTest();
+	void getUserListTest();
 	void cleanupTestCase();
 
 private:

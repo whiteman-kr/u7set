@@ -5,6 +5,7 @@
 #include "Subsystem.h"
 #include "Connection.h"
 #include "../Builder/BuildResultWriter.h"
+#include "../Builder/TuningDataStorage.h"
 #include "../Builder/IssueLogger.h"
 
 // Forware declarations
@@ -78,19 +79,27 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-        bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
+		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
 
-        // Generate Tuning configuration
-        //
-        bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
+		// Generate Tuning configuration
+		//
+		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
 
-        // Build Application Logic
+		// Build Application Logic
 		//
 		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipment, int changesetId);
 
 		// Compile Application Logic
 		//
-        bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::EquipmentSet *equipmentSet, Hardware::OptoModuleStorage *optoModuleStorage, Hardware::ConnectionStorage *connections, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, AppLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
+										Hardware::EquipmentSet*equipmentSet,
+										Hardware::OptoModuleStorage* optoModuleStorage,
+										Hardware::ConnectionStorage* connections,
+										SignalSet* signalSet,
+										Afb::AfbElementCollection* afbCollection,
+										AppLogicData* appLogicData,
+										TuningDataStorage* tuningDataStorage,
+										BuildResultWriter* buildResultWriter);
 
 		// Generate SCADA software configurations
 		//

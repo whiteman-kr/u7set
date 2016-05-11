@@ -11,9 +11,10 @@
 #include "MultiThreadSignalTests.h"
 #include "ProjectPropertyTests.h"
 #include "DbControllerProjectManagementTests.h"
+#include "DbControllerUserManagementTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 54;
+const int DatabaseProjectVersion = 60;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -167,6 +168,7 @@ int main(int argc, char *argv[])
 		ProjectPropertyTests projectPropertyTests;
 		PropertyObjectTests propertyObjectTests;
 		DbControllerProjectTests dbControllerProjectTests;
+		DbControllerUserTests dbControllerUserTests;
 
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
@@ -223,6 +225,14 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&dbControllerUserTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
 			db.close();
 			throw testResult;
 		}

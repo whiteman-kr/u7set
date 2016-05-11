@@ -158,8 +158,10 @@ private:
 										// signal address in i/o modules buffers
 
 	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_regValueAddr;				// signal Value address in FSC data packet (registration address)
-	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet (registration address)
+	Address16 m_regValueAddr;			// signal Value address in FSC data packet (registration address)
+	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet (registration address)
+
+	Address16 m_tuningAddr;
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -240,6 +242,9 @@ public:
 	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
 	void setRegValueAddr(const Address16& regValueAddr) { m_regValueAddr = regValueAddr; }
 	void setRegValidityAddr(const Address16& regValidityAddr) { m_regValidityAddr = regValidityAddr; }
+
+	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
+	const Address16& tuningAddr() const { return m_tuningAddr; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
@@ -364,7 +369,7 @@ public:
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
+	void setTuningDefaultValue(bool value) { m_tuningDefaultValue = value; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
