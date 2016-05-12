@@ -397,9 +397,9 @@ namespace Builder
 
 					ds.setChannel(channel);
 					ds.setDataType(DataSource::DataType::App);
-					ds.setLmStrID(lm->equipmentIdTemplate());
+					ds.setLmEquipmentID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
-					ds.setLmAdapterStrID(lmNetProperties.adapterID);
+					ds.setLmAdapterID(lmNetProperties.adapterID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);
 					ds.setLmAddressStr(lmNetProperties.appDataIP);
 					ds.setLmPort(lmNetProperties.appDataPort);
@@ -428,11 +428,11 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
 	{
-		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmStrID());
+		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID());
 
 		if (lm == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Not found LM with ID '%1'").arg(appDataSource.lmStrID()));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Not found LM with ID '%1'").arg(appDataSource.lmEquipmentID()));
 			return false;
 		}
 

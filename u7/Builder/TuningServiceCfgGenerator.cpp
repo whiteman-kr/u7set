@@ -107,9 +107,9 @@ namespace Builder
 
 			ds.setChannel(0);
 			ds.setDataType(DataSource::DataType::Tuning);
-			ds.setLmStrID(lm->equipmentId());
+			ds.setLmEquipmentID(lm->equipmentId());
 			ds.setLmCaption(lm->caption());
-			ds.setLmAdapterStrID(lmNetProperties.adapterID);
+			ds.setLmAdapterID(lmNetProperties.adapterID);
 			ds.setLmDataEnable(lmNetProperties.tuningEnable);
 			ds.setLmAddressStr(lmNetProperties.tuningIP);
 			ds.setLmPort(lmNetProperties.tuningPort);

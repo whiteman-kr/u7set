@@ -38,7 +38,10 @@ SOURCES +=\
     ../lib/JsonSerializable.cpp \
     MainIPEN.cpp \
     ../u7/Builder/TuningDataStorage.cpp \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    SafetyChannelSignalsModel.cpp \
+    ../AppDataService/AppSignalState.cpp
+    ../AppDataService/AppSignalState.cpp
 
 HEADERS  += TuningMainWindow.h \
     ../include/ServiceSettings.h \
@@ -63,7 +66,10 @@ HEADERS  += TuningMainWindow.h \
     ../include/Queue.h \
     ../include/JsonSerializable.h \
     ../u7/Builder/TuningDataStorage.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    SafetyChannelSignalsModel.h \
+    ../AppDataService/AppSignalState.h
+    ../AppDataService/AppSignalState.h
 
 FORMS    += TuningMainWindow.ui
 

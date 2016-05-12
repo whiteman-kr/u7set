@@ -5,15 +5,6 @@
 #include "AppDataSource.h"
 
 
-class AppSignals : public HashedVector<QString, Signal*>
-{
-public:
-	~AppSignals();
-
-	void clear();
-};
-
-
 class AppDataSources : public HashedVector<quint32, AppDataSource*>
 {
 public:

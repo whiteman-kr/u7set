@@ -1,7 +1,7 @@
 #include "../include/DataSource.h"
 
 
-const char* const DataSource::ELEMENT_DATA_SOURCE = "AppDataSource";
+const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
 const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 
@@ -30,6 +30,23 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 
 	END_SERIALIZATION();
 }
+
+
+const char* DataSource::DATA_TYPE_APP = "App";
+const char* DataSource::DATA_TYPE_DIAG = "Diag";
+const char* DataSource::DATA_TYPE_TUNING = "Tuning";
+
+const char* DataSource::PROP_DATA_TYPE = "DataType";
+const char* DataSource::PROP_CHANNEL = "Channel";
+const char* DataSource::PROP_LM_ID = "LmEquipmentID";
+const char* DataSource::PROP_LM_CAPTION = "LmCaption";
+const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
+const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
+const char* DataSource::PROP_LM_DATA_IP = "LmDataIP";
+const char* DataSource::PROP_LM_DATA_PORT = "LmDataPort";
+const char* DataSource::PROP_LM_DATA_ID = "LmDataID";
+const char* DataSource::PROP_COUNT = "Count";
+const char* DataSource::SIGNAL_ID_ELEMENT = "SignalID";
 
 
 DataSource::DataSource()
@@ -147,9 +164,9 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
 	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
-	xml.writeStringAttribute(PROP_LM_ID, m_lmStrID);
+	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
-	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterStrID);
+	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
@@ -157,11 +174,11 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
-	xml.writeIntAttribute("Count", m_associatedSignals.count());
+	xml.writeIntAttribute(PROP_COUNT, m_associatedSignals.count());
 
 	for(const QString& appSignalID : m_associatedSignals)
 	{
-		xml.writeStringElement("SignalID", appSignalID);
+		xml.writeStringElement(SIGNAL_ID_ELEMENT, appSignalID);
 	}
 
 	xml.writeEndElement();	// </AssociatedSignals>
@@ -190,9 +207,9 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	m_dataType = stringToDataType(str);
 
-	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmStrID);
+	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
-	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterStrID);
+	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
 	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
 
 	QString ipStr;
@@ -213,20 +230,21 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	int signalCount = 0;
 
-	result = xml.readIntAttribute("Count", &signalCount);
+	result &= xml.readIntAttribute(PROP_COUNT, &signalCount);
 
 	m_associatedSignals.clear();
 
 	for(int count = 0; count < signalCount; count++)
 	{
-		if (xml.findElement("SignalID") == false)
+		if (xml.findElement(SIGNAL_ID_ELEMENT) == false)
 		{
+			result = false;
 			break;
 		}
 
 		QString signalID;
 
-		xml.readStringElement("SignalID", &signalID);
+		result &= xml.readStringElement(SIGNAL_ID_ELEMENT, &signalID);
 
 		m_associatedSignals.append(signalID);
 	}

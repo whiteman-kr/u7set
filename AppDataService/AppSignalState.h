@@ -71,3 +71,13 @@ public:
 	AppSignalState* operator [] (int index);
 };
 
+
+class AppSignals : public HashedVector<QString, Signal*>
+{
+public:
+	~AppSignals();
+
+	void clear();
+};
+
+

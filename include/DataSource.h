@@ -82,7 +82,7 @@ public:
 	static const char* const ELEMENT_DATA_SOURCE;
 	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
 
-private:
+protected:
 
 	// static information
 	//
@@ -103,25 +103,27 @@ private:
 
 	// XML-serializable members
 	//
-	const char* const DATA_TYPE_APP = "App";
-	const char* const DATA_TYPE_DIAG = "Diag";
-	const char* const DATA_TYPE_TUNING = "Tuning";
+	static const char* DATA_TYPE_APP;
+	static const char* DATA_TYPE_DIAG;
+	static const char* DATA_TYPE_TUNING;
 
-	const char* const PROP_DATA_TYPE = "DataType";
-	const char* const PROP_CHANNEL = "Channel";
-	const char* const PROP_LM_ID = "LmID";
-	const char* const PROP_LM_CAPTION = "LmCaption";
-	const char* const PROP_LM_ADAPTER_ID = "LmAdapterID";
-	const char* const PROP_LM_DATA_ENABLE = "LmDataEnable";
-	const char* const PROP_LM_DATA_IP = "LmDataIP";
-	const char* const PROP_LM_DATA_PORT = "LmDataPort";
-	const char* const PROP_LM_DATA_ID = "LmDataID";
+	static const char* PROP_DATA_TYPE;
+	static const char* PROP_CHANNEL;
+	static const char* PROP_LM_ID;
+	static const char* PROP_LM_CAPTION;
+	static const char* PROP_LM_ADAPTER_ID;
+	static const char* PROP_LM_DATA_ENABLE;
+	static const char* PROP_LM_DATA_IP;
+	static const char* PROP_LM_DATA_PORT;
+	static const char* PROP_LM_DATA_ID;
+	static const char* PROP_COUNT;
+	static const char* SIGNAL_ID_ELEMENT;
 
 	int m_channel = 0;
 	DataType m_dataType = DataType::App;
-	QString m_lmStrID;
+	QString m_lmEquipmentID;
 	QString m_lmCaption;
-	QString m_lmAdapterStrID;
+	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	ulong m_lmDataID = 0;
@@ -146,14 +148,14 @@ public:
 	DataType dataType() const { return m_dataType; }
 	void setDataType(DataType dataType) { m_dataType = dataType; }
 
-	QString lmStrID() const { return m_lmStrID; }
-	void setLmStrID(const QString& lmStrID) { m_lmStrID = lmStrID; }
+	QString lmEquipmentID() const { return m_lmEquipmentID; }
+	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
 
-	QString lmAdapterStrID() const { return m_lmAdapterStrID; }
-	void setLmAdapterStrID(const QString& lmAdapterStrID) { m_lmAdapterStrID = lmAdapterStrID; }
+	QString lmAdapterID() const { return m_lmAdapterID; }
+	void setLmAdapterID(const QString& lmAdapterID) { m_lmAdapterID = lmAdapterID; }
 
 	bool lmDataEnable() const { return m_lmDataEnable; }
 	void setLmDataEnable(bool lmDataEnable) { m_lmDataEnable = lmDataEnable; }

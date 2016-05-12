@@ -544,6 +544,15 @@ bool TuningData::readFromXml(XmlReadHelper& xml)
 }
 
 
+void TuningData::getSignals(QList<Signal*>& signalList)
+{
+	signalList.clear();
+
+	signalList.append(m_tuningAnalogFloat);
+	signalList.append(m_tuningAnalogInt);
+	signalList.append(m_tuningDiscrete);
+}
+
 // -------------------------------------------------------------------------------------
 //
 // TuningDataStorage class implementation

@@ -200,7 +200,7 @@ struct ServiceSettings
 };
 
 
-enum ServiceType
+enum class ServiceType
 {
 	BaseService,
 	ConfigurationService,
@@ -318,10 +318,6 @@ public:
 	QString buildFolder() { return m_buildFolder; }
 	void setBuildFolder(const QString& buildFolder) { m_buildFolder = buildFolder; }
 };
-
-
-
-
 
 
 // Serialization framework
