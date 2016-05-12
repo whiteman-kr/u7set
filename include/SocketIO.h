@@ -200,7 +200,7 @@ struct ServiceSettings
 };
 
 
-enum ServiceType
+enum class ServiceType
 {
 	BaseService,
 	ConfigurationService,

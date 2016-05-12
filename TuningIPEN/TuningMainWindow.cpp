@@ -27,13 +27,11 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	//
 	TuningServiceWorker* worker = new TuningServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
 
-	m_service = new Service(worker);
-	m_service->start();
+	m_service = new TuningService(worker);
 
-	// wait while m_service started ?!
-	//
-	QVector<TuningDataSourceInfo> info;
-	worker->getTuningDataSourcesInfo(info);
+	connect(m_service, &TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
+
+	m_service->start();
 }
 
 
@@ -46,3 +44,9 @@ TuningMainWindow::~TuningMainWindow()
 }
 
 
+void TuningMainWindow::onTuningServiceReady()
+{
+	QVector<TuningDataSourceInfo> info;
+
+	m_service->getTuningDataSourcesInfo(info);
+}

@@ -1,6 +1,12 @@
 #include "TuningService.h"
 
 
+// -------------------------------------------------------------------------------------
+//
+// TuningServiceWorker class implementation
+//
+// -------------------------------------------------------------------------------------
+
 TuningServiceWorker::TuningServiceWorker(const QString& serviceStrID,
 										 const QString& cfgServiceIP1,
 										 const QString& cfgServiceIP2,
@@ -24,7 +30,13 @@ void TuningServiceWorker::clear()
 
 TuningServiceWorker* TuningServiceWorker::createInstance()
 {
-	return new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2(), m_cfgFileName);
+	TuningServiceWorker* worker = new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2(), m_cfgFileName);
+
+	worker->setTuningService(m_tuningService);
+
+	m_tuningService->setTuningServiceWorker(worker);
+
+	return worker;
 }
 
 
@@ -106,6 +118,13 @@ void TuningServiceWorker::initialize()
 {
 	loadConfigurationFromFile(m_cfgFileName);
 	allocateSignalsAndStates();
+
+	if (m_tuningService != nullptr)
+	{
+		connect(this, &TuningServiceWorker::tuningServiceReady, m_tuningService, &TuningService::tuningServiceReady);
+	}
+
+	emit tuningServiceReady();
 }
 
 void TuningServiceWorker::shutdown()
@@ -157,3 +176,40 @@ void TuningServiceWorker::allocateSignalsAndStates()
 		appSignalState->setSignalParams(i, appSignal);
 	}
 }
+
+
+// -------------------------------------------------------------------------------------
+//
+// TuningService class implementation
+//
+// -------------------------------------------------------------------------------------
+
+TuningService::TuningService(TuningServiceWorker* worker) :
+	Service(worker)
+{
+	worker->setTuningService(this);
+}
+
+
+void TuningService::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
+{
+	if (m_tuningServiceWorker == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_tuningServiceWorker->getTuningDataSourcesInfo(info);
+}
+
+
+void TuningService::setSignalState(QString appSignalID, double value)
+{
+	emit signal_setSignalState(appSignalID, value);
+}
+
+void TuningService::getSignalState(QString appSignalID)
+{
+	emit signal_getSignalState(appSignalID);
+}
+

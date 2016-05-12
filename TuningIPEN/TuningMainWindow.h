@@ -19,7 +19,7 @@ class TuningMainWindow : public QMainWindow
 private:
 	QString m_cfgPath;
 
-	Service* m_service = nullptr;
+	TuningService* m_service = nullptr;
 
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
@@ -27,6 +27,8 @@ private:
 public:
 	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
 	~TuningMainWindow();
+
+	void onTuningServiceReady();
 
 private:
 	Ui::TuningMainWindow *ui;

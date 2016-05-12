@@ -9,6 +9,7 @@
 #include <QBuffer>
 #include "DataAquisitionServiceWidget.h"
 #include "ConfigurationServiceWidget.h"
+#include "../include/Types.h"
 
 
 ServiceData::ServiceData() :
@@ -453,7 +454,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	ServiceData& serviceData = m_hostsInfo[index.row()].servicesData[index.column()];
 	if (serviceData.statusWidget == nullptr)
 	{
-		quint32 serviceType = serviceData.information.type;
+		quint32 serviceType = TO_INT(serviceData.information.type);
 		if (serviceType >= SERVICE_TYPE_COUNT)
 		{
 			serviceType = index.column();
