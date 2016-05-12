@@ -9,7 +9,9 @@
 
 TuningDataSource::TuningDataSource()
 {
+	m_dataType = DataSource::DataType::Tuning;
 }
+
 
 TuningDataSource::~TuningDataSource()
 {
@@ -36,7 +38,7 @@ void TuningDataSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
 {
 	if (m_tuningData == nullptr)
 	{
-		TuningData td(lmStrID(), 0, 0);
+		TuningData td(lmEquipmentID(), 0, 0);
 		td.writeToXml(xml);
 		return;
 	}
@@ -59,6 +61,47 @@ bool TuningDataSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
 }
 
 
+void TuningDataSource::getTuningDataSourceInfo(TuningDataSourceInfo& info)
+{
+	info.channel = m_channel;
+	info.dataType = m_dataType;
+	info.lmEquipmentID = m_lmEquipmentID;
+	info.lmCaption = m_lmCaption;
+	info.lmAdapterID = m_lmAdapterID;
+	info.lmDataEnable = m_lmDataEnable;
+	info.lmAddressPort = m_lmAddressPort;
+	info.lmDataID = m_lmDataID;
+
+	info.tuningSignals.clear();
+
+	if (m_tuningData == nullptr)
+	{
+		return;
+	}
+
+	QList<Signal*> signalList;
+
+	m_tuningData->getSignals(signalList);
+
+	info.tuningSignals.resize(signalList.count());
+
+	int index = 0;
+
+	for(Signal* signal : signalList)
+	{
+		if (index >= info.tuningSignals.count())
+		{
+			assert(false);
+			break;
+		}
+
+		info.tuningSignals[index] = *signal;
+
+		index++;
+	}
+}
+
+
 // -------------------------------------------------------------------------------
 //
 // TuningDataSources class implementation
@@ -78,5 +121,34 @@ void TuningDataSources::clear()
 		delete ds;
 	}
 
-	QHash<quint32, TuningDataSource*>::clear();
+	QHash<QString, TuningDataSource*>::clear();
+}
+
+
+void TuningDataSources::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
+{
+	info.clear();
+
+	info.resize(count());
+
+	int index = 0;
+
+	for(TuningDataSource* source : (*this))
+	{
+		if (source == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (index >= info.count())
+		{
+			assert(false);
+			break;
+		}
+
+		source->getTuningDataSourceInfo(info[index]);
+
+		index++;
+	}
 }

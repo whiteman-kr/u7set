@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../u7/Builder/TuningDataStorage.cpp \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    ../AppDataService/AppSignalState.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -77,7 +78,8 @@ HEADERS += \
     ../include/ProtoSerialization.h \
     ../include/Types.h \
     ../u7/Builder/TuningDataStorage.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    ../AppDataService/AppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 
