@@ -13,7 +13,9 @@ CREATE UNIQUE INDEX username_unique_idx on users (LOWER(username));
 CREATE OR REPLACE FUNCTION get_user_id (IN user_name text, IN user_password text) RETURNS integer AS
 $BODY$
 	SELECT Users.UserID FROM Users
-		WHERE Users.Username ILIKE user_name AND Users.Password = user_password;
+		WHERE 
+			Users.Username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~' AND 
+			Users.Password = user_password;
 $BODY$
 LANGUAGE sql;
 
@@ -26,7 +28,9 @@ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION check_user_password(IN user_name text, IN user_password text) RETURNS boolean AS
 $BODY$
 	SELECT COUNT(Users.UserID) > 0 FROM Users
-		WHERE Users.Username ILIKE user_name AND Users.Password = user_password;
+		WHERE 
+			Users.Username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~' AND 
+			Users.Password = user_password;
 $BODY$
 LANGUAGE sql;
 
@@ -56,7 +60,7 @@ BEGIN
 		RAISE 'User % has no right to add another user.', current_user_id;
 	END IF;
 
-	IF (SELECT count(*) FROM Users WHERE Username ILIKE user_name) > 0 THEN
+	IF (SELECT count(*) FROM Users WHERE Username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~') > 0 THEN
 		RAISE 'User % already exists.', user_name;
 	END IF;
 
@@ -93,7 +97,7 @@ $BODY$
 DECLARE
 	user_id integer;
 BEGIN
-	user_id := (SELECT userid FROM users WHERE username ILIKE user_name);
+	user_id := (SELECT userid FROM users WHERE username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~');
 
 	IF (user_id IS NULL) THEN
 		RAISE 'User % is not exists.', user_name;
