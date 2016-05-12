@@ -27,4 +27,7 @@ QVariant SafetyChannelSignalsModel::headerData(int section, Qt::Orientation orie
 	{
 
 	}
+
+	return QVariant();		// !!!!
+
 }
