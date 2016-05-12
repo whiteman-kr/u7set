@@ -96,10 +96,10 @@ void PropertyObjectTests::testDynamicProperties()
 //
 PropertyClass::PropertyClass()
 {
-	auto boolProp = ADD_PROPERTY_GETTER_SETTER(bool, BoolStatProp, true, PropertyClass::boolStatProp, PropertyClass::setBoolStatProp)
-	auto intProp = ADD_PROPERTY_GETTER_SETTER(int, IntStatProp, true, PropertyClass::intStatProp, PropertyClass::setIntStatProp)
-	auto qstringProp = ADD_PROPERTY_GETTER_SETTER(QString, QStringStatProp, true, PropertyClass::qstringStatProp, PropertyClass::setQStringStatProp)
-	auto priorityProp = ADD_PROPERTY_GETTER_SETTER(Priority, PriorityStatProp, true, PropertyClass::priorityStatProp, PropertyClass::setPriorityStatProp)
+	auto boolProp = ADD_PROPERTY_GETTER_SETTER(bool, "BoolStatProp", true, PropertyClass::boolStatProp, PropertyClass::setBoolStatProp)
+	auto intProp = ADD_PROPERTY_GETTER_SETTER(int, "IntStatProp", true, PropertyClass::intStatProp, PropertyClass::setIntStatProp)
+	auto qstringProp = ADD_PROPERTY_GETTER_SETTER(QString, "QStringStatProp", true, PropertyClass::qstringStatProp, PropertyClass::setQStringStatProp)
+	auto priorityProp = ADD_PROPERTY_GETTER_SETTER(Priority, "PriorityStatProp", true, PropertyClass::priorityStatProp, PropertyClass::setPriorityStatProp)
 
 	Q_UNUSED(qstringProp);
 	Q_UNUSED(priorityProp);
