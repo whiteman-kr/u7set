@@ -27,6 +27,8 @@ private:
 
 	bool m_deleteTuningData = false;
 
+	quint16 m_numerator = 0;
+
 public:
 	TuningDataSource();
 	~TuningDataSource();
@@ -37,6 +39,9 @@ public:
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
 	void getTuningDataSourceInfo(TuningDataSourceInfo& info);
+
+	quint16 numerator() const { return m_numerator; }
+	void incNumerator() { m_numerator++; }
 };
 
 

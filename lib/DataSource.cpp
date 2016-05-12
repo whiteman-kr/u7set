@@ -39,6 +39,10 @@ const char* DataSource::DATA_TYPE_TUNING = "Tuning";
 const char* DataSource::PROP_DATA_TYPE = "DataType";
 const char* DataSource::PROP_CHANNEL = "Channel";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
+const char* DataSource::PROP_LM_NUMBER = "LmNumber";
+const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
+const char* DataSource::PROP_LM_SUBSYSTEM = "LmSubsystem";
+const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
 const char* DataSource::PROP_LM_CAPTION = "LmCaption";
 const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
 const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
@@ -162,9 +166,15 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
-	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
 	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
+
+	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
+	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
+	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
+	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
+	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
+
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
 	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
@@ -199,8 +209,6 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readIntAttribute(PROP_CHANNEL, &m_channel);
-
 	QString str;
 
 	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
@@ -208,6 +216,13 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_dataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
+
+	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
+	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
+	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
+	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
+	result &= xml.readIntAttribute(PROP_CHANNEL, &m_channel);
+
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
 	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
@@ -330,7 +345,7 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
 		QDateTime plantTime;
-		RupTimeStamp timeStamp = m_rupFrames[0].header.TimeStamp;
+		RupTimeStamp timeStamp = m_rupFrames[0].header.timeStamp;
 
 		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));

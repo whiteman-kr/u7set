@@ -103,11 +103,21 @@ namespace Builder
 
 			result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, LM_ETHERNET_ADAPTER1, m_log);
 
+			int lmNumber = 0;
+
+			result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
+
+			if (result == false)
+			{
+				continue;
+			}
+
 			TuningDataSource ds;
 
 			ds.setChannel(0);
 			ds.setDataType(DataSource::DataType::Tuning);
 			ds.setLmEquipmentID(lm->equipmentId());
+			ds.setLmNumber(lmNumber);
 			ds.setLmCaption(lm->caption());
 			ds.setLmAdapterID(lmNetProperties.adapterID);
 			ds.setLmDataEnable(lmNetProperties.tuningEnable);

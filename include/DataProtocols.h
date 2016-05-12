@@ -44,7 +44,7 @@ struct RupFrameHeader
 	quint16 framesQuantity;		// >=1
 	quint16 frameNumber;		// 0..(frameQuantity-1)
 
-	RupTimeStamp TimeStamp;
+	RupTimeStamp timeStamp;
 
 	void toHostFormat();
 };
@@ -124,7 +124,23 @@ struct FotipHeader
 	quint32 romSize;
 	quint16 romFrameSize;
 	quint16 dataType;
-	quint8 Reserve[FOTIP_HEADER_RESERVE_SIZE];
+	quint8 reserve[FOTIP_HEADER_RESERVE_SIZE];
+};
+
+
+struct RupFotipFrame
+{
+	RupFrameHeader rupHeader;
+
+	FotipHeader fotipHeader;
+
+	char fotipData[FOTIP_TX_RX_DATA_SIZE];
+
+	char comparisonResult[64];
+
+	char reserv[224];
+
+	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 };
 
 #pragma pack(pop)

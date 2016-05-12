@@ -531,7 +531,7 @@ void V4toV3Header(RpPacketHeader& v3header, const RupFrameHeader& v4header) // c
 	v3header.packetNo = v4header.numerator;
 	v3header.partCount = v4header.framesQuantity;
 	v3header.partNo = v4header.frameNumber;
-	memcpy(&v3header.TimeStamp, &v4header.TimeStamp, sizeof(RpTimeStamp));
+	memcpy(&v3header.TimeStamp, &v4header.timeStamp, sizeof(RpTimeStamp));
 }
 
 void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
@@ -704,13 +704,13 @@ void swapHeader(RupFrameHeader& header)
 	swapBytes(header.numerator);
 	swapBytes(header.framesQuantity);
 	swapBytes(header.frameNumber);
-	swapBytes(header.TimeStamp.hour);
-	swapBytes(header.TimeStamp.minute);
-	swapBytes(header.TimeStamp.second);
-	swapBytes(header.TimeStamp.millisecond);
-	swapBytes(header.TimeStamp.day);
-	swapBytes(header.TimeStamp.month);
-	swapBytes(header.TimeStamp.year);
+	swapBytes(header.timeStamp.hour);
+	swapBytes(header.timeStamp.minute);
+	swapBytes(header.timeStamp.second);
+	swapBytes(header.timeStamp.millisecond);
+	swapBytes(header.timeStamp.day);
+	swapBytes(header.timeStamp.month);
+	swapBytes(header.timeStamp.year);
 }
 
 void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)

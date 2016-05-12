@@ -2,8 +2,9 @@
 
 #include "../include/Service.h"
 #include "../include/ServiceSettings.h"
-#include "TuningDataSource.h"
 #include "../AppDataService/AppSignalState.h"
+#include "../TuningService/TuningSocket.h"
+#include "TuningDataSource.h"
 
 
 class TuningService;
@@ -20,14 +21,29 @@ private:
 	TuningServiceSettings m_tuningSettings;
 	TuningDataSources m_dataSources;
 
+	QHash<QString, QString> m_signal2Source;
+
 	AppSignals m_appSignals;
 	AppSignalStates m_appSignalStates;
+
+	Tuning::TuningSocketWorker* m_tuningSocket = nullptr;
+	SimpleThread* m_tuningSocketThread = nullptr;
+
+	QTimer m_timer;
 
 	bool readTuningDataSources(XmlReadHelper& xml);
 
 	void clear();
 
 	void allocateSignalsAndStates();
+
+	void runTuningSocket();
+	void stopTuningSocket();
+
+	void sendPeriodicReadRequests();
+
+private slots:
+	void onTimer();
 
 public:
 	TuningServiceWorker(const QString& serviceStrID,

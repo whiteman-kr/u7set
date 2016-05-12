@@ -236,7 +236,7 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(header.frameNumber, 0);
 
 		QDateTime&& time = QDateTime::currentDateTime();
-		RupTimeStamp& timeStamp = header.TimeStamp;
+		RupTimeStamp& timeStamp = header.timeStamp;
 		writeBigEndian(timeStamp.year, time.date().year());
 		writeBigEndian(timeStamp.month, time.date().month());
 		writeBigEndian(timeStamp.day, time.date().day());
@@ -313,7 +313,7 @@ void SendTuningFrameWidget::sendPacket()
 		header.frameNumber = 0;
 
 		QDateTime&& time = QDateTime::currentDateTime();
-		RupTimeStamp& timeStamp = header.TimeStamp;
+		RupTimeStamp& timeStamp = header.timeStamp;
 		timeStamp.year = time.date().year();
 		timeStamp.month = time.date().month();
 		timeStamp.day = time.date().day();

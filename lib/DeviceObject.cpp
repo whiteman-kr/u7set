@@ -2223,6 +2223,11 @@ R"DELIM({
 		m_type = (m_type & 0xFF00) | tmp;
 	}
 
+	int DeviceModule::moduleType() const
+	{
+		return m_type;
+	}
+
 	bool DeviceModule::isIOModule() const
 	{
 		return isInputModule() || isOutputModule();

@@ -110,6 +110,10 @@ protected:
 	static const char* PROP_DATA_TYPE;
 	static const char* PROP_CHANNEL;
 	static const char* PROP_LM_ID;
+	static const char* PROP_LM_NUMBER;
+	static const char* PROP_LM_SUBSYSTEM_ID;
+	static const char* PROP_LM_SUBSYSTEM;
+	static const char* PROP_LM_MODULE_TYPE;
 	static const char* PROP_LM_CAPTION;
 	static const char* PROP_LM_ADAPTER_ID;
 	static const char* PROP_LM_DATA_ENABLE;
@@ -122,6 +126,10 @@ protected:
 	int m_channel = 0;
 	DataType m_dataType = DataType::App;
 	QString m_lmEquipmentID;
+	int m_lmNumber = 0;
+	int m_lmModuleType = 0;
+	int m_lmSubsystemID = 0;
+	QString m_lmSubsystem;
 	QString m_lmCaption;
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
@@ -150,6 +158,21 @@ public:
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
 	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
+	int lmNumber() const { return m_lmNumber; }
+	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
+
+	int lmSsubsystemID() const { return m_lmSubsystemID; }
+	void setLmSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
+
+	int lmModuleType() const { return m_lmModuleType; }
+	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
+
+	int subsystemID() const { return m_lmSubsystemID; }
+	void setSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
+
+	QString lmSubsystem() const { return m_lmSubsystem; }
+	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystem = lmSubsystem; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }

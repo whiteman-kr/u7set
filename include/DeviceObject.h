@@ -432,6 +432,8 @@ namespace Hardware
 		int moduleVersion() const;
 		void setModuleVersion(int value);
 
+		int moduleType() const;
+
 		bool isIOModule() const;
 		bool isInputModule() const;
 		bool isOutputModule() const;
