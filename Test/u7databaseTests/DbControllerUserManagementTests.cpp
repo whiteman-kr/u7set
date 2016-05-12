@@ -248,16 +248,13 @@ void DbControllerUserTests::updateUserTest()
 	{
 		if (query.value("username").toString() == newUser.username())
 		{
-			QVERIFY2 (query.value("username").toString() == userName, qPrintable(QString("Wrong userName after createUser() function of dbController Actual: %1\nExpected: %2").arg(query.value("username").toString()).arg(userName)));
-			/*qDebug() << query.value("firstname").toString() << "\n"
-					 << query.value("lastname").toString() << "\n"
-					 << query.value("password").toString() << "\n";*/
-			QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable(QString("Wrong firstName after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("firstname").toString()).arg(firstName)));
-			QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable(QString("Wrong lastName after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("lastname").toString()).arg(lastName)));
-			QVERIFY2 (query.value("password").toString() == password, qPrintable(QString("Wrong password after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("password").toString()).arg(password)));
-			QVERIFY2 (query.value("administrator").toBool() == true, qPrintable(QString("Wrong administrator flag after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("administrator").toBool()).arg("true")));
-			QVERIFY2 (query.value("readonly").toBool() == true, qPrintable(QString("Wrong readOnly flag after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("readonly").toBool()).arg("true")));
-			QVERIFY2 (query.value("disabled").toBool() == true, qPrintable(QString("Wrong disabled flag after createUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("disabled").toBool()).arg("true")));
+			QVERIFY2 (query.value("username").toString() == userName, qPrintable(QString("Wrong userName after updateUser() function of dbController Actual: %1\nExpected: %2").arg(query.value("username").toString()).arg(userName)));
+			QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable(QString("Wrong firstName after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("firstname").toString()).arg(firstName)));
+			QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable(QString("Wrong lastName after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("lastname").toString()).arg(lastName)));
+			QVERIFY2 (query.value("password").toString() == password, qPrintable(QString("Wrong password after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("password").toString()).arg(password)));
+			QVERIFY2 (query.value("administrator").toBool() == true, qPrintable(QString("Wrong administrator flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("administrator").toBool()).arg("true")));
+			QVERIFY2 (query.value("readonly").toBool() == true, qPrintable(QString("Wrong readOnly flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("readonly").toBool()).arg("true")));
+			QVERIFY2 (query.value("disabled").toBool() == true, qPrintable(QString("Wrong disabled flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("disabled").toBool()).arg("true")));
 			userUpdated = true;
 			continue;
 		}
