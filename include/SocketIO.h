@@ -320,10 +320,6 @@ public:
 };
 
 
-
-
-
-
 // Serialization framework
 //
 #define BEGIN_SERIALIZATION() char* _ptr = buffer;

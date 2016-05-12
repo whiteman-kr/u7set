@@ -1,6 +1,12 @@
 #include "AppSignalState.h"
 
 
+// -------------------------------------------------------------------------------
+//
+// AppSignalState class implementation
+//
+// -------------------------------------------------------------------------------
+
 AppSignalState::AppSignalState()
 {
 	m_flags.reset();
@@ -139,4 +145,27 @@ AppSignalState* AppSignalStates::operator [] (int index)
 #endif
 
 	return m_appSignalState + index;
+}
+
+
+// -------------------------------------------------------------------------------
+//
+// AppSignals class implementation
+//
+// -------------------------------------------------------------------------------
+
+AppSignals::~AppSignals()
+{
+	clear();
+}
+
+
+void AppSignals::clear()
+{
+	for(Signal* signal : *this)
+	{
+		delete signal;
+	}
+
+	HashedVector<QString, Signal*>::clear();
 }

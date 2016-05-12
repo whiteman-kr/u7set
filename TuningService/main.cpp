@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
 	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
 	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
 	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
+	QString buildPath = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
 
-	TuningServiceWorker* tuningServiceWorker = new TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2);
+	TuningServiceWorker* tuningServiceWorker = new TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath + "/configuration.xml");
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Tuning Service", tuningServiceWorker);
 

@@ -100,6 +100,8 @@ public:
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
+
+	void getSignals(QList<Signal *>& signalList);
 };
 
 

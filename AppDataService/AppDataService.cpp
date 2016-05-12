@@ -401,7 +401,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 		m_appDataSources.insert(dataSource->lmAddress32(), dataSource);
 
-		qDebug() << "DataSource: " << dataSource->lmStrID() << "channel " << dataSource->channel();
+		qDebug() << "DataSource: " << dataSource->lmEquipmentID() << "channel " << dataSource->channel();
 	}
 
 	return result;

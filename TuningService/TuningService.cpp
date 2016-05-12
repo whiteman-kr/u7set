@@ -3,8 +3,10 @@
 
 TuningServiceWorker::TuningServiceWorker(const QString& serviceStrID,
 										 const QString& cfgServiceIP1,
-										 const QString& cfgServiceIP2) :
-	ServiceWorker(ServiceType::TuningService, serviceStrID, cfgServiceIP1, cfgServiceIP2)
+										 const QString& cfgServiceIP2,
+										 const QString& cfgFileName) :
+	ServiceWorker(ServiceType::TuningService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
+	m_cfgFileName(cfgFileName)
 {
 }
 
@@ -22,7 +24,7 @@ void TuningServiceWorker::clear()
 
 TuningServiceWorker* TuningServiceWorker::createInstance()
 {
-	return new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+	return new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2(), m_cfgFileName);
 }
 
 
@@ -48,6 +50,13 @@ bool TuningServiceWorker::loadConfigurationFromFile(const QString& fileName)
 
 	return result;
 }
+
+
+void TuningServiceWorker::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
+{
+	m_dataSources.getTuningDataSourcesInfo(info);
+}
+
 
 
 bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml)
@@ -86,7 +95,7 @@ bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml)
 			break;
 		}
 
-		m_dataSources.insert(ds->lmAddress32(), ds);
+		m_dataSources.insert(ds->lmEquipmentID(), ds);
 	}
 
 	return result;
@@ -95,10 +104,56 @@ bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml)
 
 void TuningServiceWorker::initialize()
 {
-	int a = 0;
+	loadConfigurationFromFile(m_cfgFileName);
+	allocateSignalsAndStates();
 }
 
 void TuningServiceWorker::shutdown()
 {
 }
 
+
+void TuningServiceWorker::setSignalValue(QString appSignalID, double value)
+{
+
+}
+
+
+void TuningServiceWorker::allocateSignalsAndStates()
+{
+	QVector<TuningDataSourceInfo> info;
+
+	getTuningDataSourcesInfo(info);
+
+	// allocate Signals
+	//
+	m_appSignals.clear();
+
+	for(const TuningDataSourceInfo& source : info)
+	{
+		for(const Signal& signal : source.tuningSignals)
+		{
+			Signal* appSignal = new Signal(false);
+
+			*appSignal = signal;
+
+			m_appSignals.insert(appSignal->appSignalID(), appSignal);
+		}
+	}
+
+	int signalCount = m_appSignals.count();
+
+	// allocate Signal states
+	//
+	m_appSignalStates.clear();
+
+	m_appSignalStates.setSize(signalCount);
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		Signal* appSignal = m_appSignals[i];
+		AppSignalState* appSignalState = m_appSignalStates[i];
+
+		appSignalState->setSignalParams(i, appSignal);
+	}
+}
