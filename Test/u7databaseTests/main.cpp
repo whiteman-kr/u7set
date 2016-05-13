@@ -12,6 +12,7 @@
 #include "ProjectPropertyTests.h"
 #include "DbControllerProjectManagementTests.h"
 #include "DbControllerUserManagementTests.h"
+#include "DbControllerFileManagementTests.h"
 #include "../../include/DbController.h"
 
 const int DatabaseProjectVersion = 61;
@@ -169,6 +170,7 @@ int main(int argc, char *argv[])
 		PropertyObjectTests propertyObjectTests;
 		DbControllerProjectTests dbControllerProjectTests;
 		DbControllerUserTests dbControllerUserTests;
+		DbControllerFileTests dbControllerFileTests;
 
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
@@ -233,6 +235,14 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&dbControllerFileTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " dbControllerFile test(s) has been interrupted by error(s)";
 			db.close();
 			throw testResult;
 		}

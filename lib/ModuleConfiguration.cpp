@@ -444,7 +444,7 @@ namespace Hardware
 		{
 			if (errorMsg != nullptr)
 			{
-				*errorMsg = QString("ModuleFirmware::setChannelData error - channel ") + QString::number(channel) + QString(" wrong frameSize!");
+				*errorMsg = QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize());
 			}
 			else
 			{
@@ -457,7 +457,7 @@ namespace Hardware
 		{
 			if(errorMsg != nullptr)
 			{
-				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " wrong frameCount!";
+				*errorMsg = QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize());
 			}
 			else
 			{
@@ -471,7 +471,7 @@ namespace Hardware
 		{
 			if (errorMsg != nullptr)
 			{
-				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " already exists!";
+				*errorMsg = QString("ModuleFirmware::setChannelData error: LM number %1 already exists.").arg(channel);
 			}
 			else
 			{
@@ -497,13 +497,16 @@ namespace Hardware
 		const int storageConfigFrame = 1;
 		const int startDataFrame = 2;
 
+		const int LMNumber_Min = 1;
+		const int LMNumber_Max = 4;
+
         quint16 ssKeyValue = m_ssKey << 6;
 
 		if (frameCount() < 3)
 		{
 			if (errorMsg != nullptr)
 			{
-				*errorMsg = QString("ModuleFirmware::storeChannelData failed: At least 3 frames needed.");
+				*errorMsg = QString("ModuleFirmware::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId());
 			}
 			else
 			{
@@ -549,8 +552,7 @@ namespace Hardware
 			{
 				if (errorMsg != nullptr)
 				{
-					*errorMsg = QString("ModuleFirmware::storeChannelData failed: data is too big. Channel = ") +
-							QString::number(channel) + ", frame = " + QString::number(frame);
+					*errorMsg = QString("ModuleFirmware::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount());
 				}
 				else
 				{
@@ -637,15 +639,15 @@ namespace Hardware
         for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
 		{
             int channel = channelNumbersAndSize[i].first;
-            if (channel < 1 || channel > 4)
+			if (channel < LMNumber_Min || channel > LMNumber_Max)
             {
 				if (errorMsg != nullptr)
 				{
-					*errorMsg = QString("ModuleFirmware::storeChannelData error - wrong channel number: ") + QString::number(channel);
+					*errorMsg = QString("ModuleFirmware::storeChannelData error, LM number %1: Wrong channel number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max);
 				}
 				else
 				{
-					assert(channel >= 1 && channel <= 4);
+					assert(channel >= LMNumber_Min && channel <= LMNumber_Max);
 				}
                 return false;
             }

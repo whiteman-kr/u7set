@@ -52,7 +52,8 @@ SOURCES += main.cpp \
     ../../lib/XmlHelper.cpp \
     DbControllerProjectManagementTests.cpp \
     ../../lib/Queue.cpp \
-    DbControllerUserManagementTests.cpp
+    DbControllerUserManagementTests.cpp \
+    DbControllerFileManagementTests.cpp
 
 HEADERS += \
     UserTests.h \
@@ -79,7 +80,8 @@ HEADERS += \
     ../../include/XmlHelper.h \
     DbControllerProjectManagementTests.h \
     ../../include/Queue.h \
-    DbControllerUserManagementTests.h
+    DbControllerUserManagementTests.h \
+    DbControllerFileManagementTests.h
 
 #c++11 support for GCC
 #
