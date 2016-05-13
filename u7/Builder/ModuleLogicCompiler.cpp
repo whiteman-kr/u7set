@@ -2878,6 +2878,8 @@ namespace Builder
 			}
 			else
 			{
+				tuningData->generateUniqueID(m_lm->equipmentId());
+
 				m_tuningData = tuningData;
 				m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);
 			}

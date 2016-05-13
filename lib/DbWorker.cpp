@@ -248,8 +248,8 @@ std::vector<DbFileInfo> DbWorker::systemFiles() const
 QString DbWorker::toSqlStr(QString str)
 {
 	str = str.replace("'", "''");
-	str = str.replace("\\", "\\\\");
-	str = str.replace("\"", "\\\"");
+	//str = str.replace("\\", "\\\\");
+	//str = str.replace("\"", "\\\"");
 	return str;
 }
 
@@ -1641,7 +1641,6 @@ void DbWorker::slot_updateUser(DbUser user)
 						 .arg(user.isAdminstrator() ? "TRUE" : "FALSE")
 						 .arg(user.isReadonly() ? "TRUE" : "FALSE")
 						 .arg(user.isDisabled() ? "TRUE" : "FALSE");
-
 
 	bool result = query.exec(requestStr);
 

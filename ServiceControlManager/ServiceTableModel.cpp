@@ -459,7 +459,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		{
 			serviceType = index.column();
 		}
-		switch (serviceType)
+		switch (static_cast<ServiceType>(serviceType))
 		{
 			case ServiceType::AppDataService:
 				serviceData.statusWidget = new DataAquisitionServiceWidget(m_hostsInfo[index.row()].ip, index.column());

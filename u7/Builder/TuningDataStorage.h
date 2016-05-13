@@ -40,6 +40,8 @@ public:
 	int totalFramesCount() const { return m_totalFramesCount; }
 	int framesDataSize() const { return m_totalFramesCount * m_tuningFrameSizeBytes; }
 
+	quint64 generateUniqueID(const QString& lmEquipmentID);
+
 	const char* framesData() const { return m_framesData; }
 
 	void converToBigEndian();
@@ -55,7 +57,7 @@ private:
 
 	int m_tuningFrameSizeBytes = 0;
 	int m_tuningFramesCount = 0;
-	quint64 m_uninqueID = 0;
+	quint64 m_uniqueID = 0;
 
 	static const int TYPE_ANALOG_FLOAT = 0;
 	static const int TYPE_ANALOG_INT = 1;
@@ -75,6 +77,7 @@ private:
 	//
 	static const char* TUNING_DATA_ELEMENT;
 	static const char* LM_ID;
+	static const char* UNIQUE_ID;
 	static const char* TUNING_FRAME_SIZE_BYTES;
 	static const char* TUNING_FRAMES_COUNT;
 	static const char* TUNING_ALL_SIGNALS_COUNT;
@@ -95,7 +98,9 @@ public:
 
 	bool buildTuningData();
 
-	quint64 uniqueID() const { return m_uninqueID; }
+	quint64 generateUniqueID(const QString& lmEquipmentID);
+
+	quint64 uniqueID() const { return m_uniqueID; }
 	void getTuningData(QByteArray* tuningData) const;
 
 	int totalFramesCount() const;

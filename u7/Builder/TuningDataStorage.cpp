@@ -1,5 +1,6 @@
 #include "TuningDataStorage.h"
 #include <QtEndian>
+#include "../include/Crc.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -232,6 +233,7 @@ void TuningSignalsData::converToBigEndian()
 
 const char* TuningData::TUNING_DATA_ELEMENT = "TuningData";
 const char* TuningData::LM_ID = "LmID";
+const char* TuningData::UNIQUE_ID = "UniqueID";
 const char* TuningData::TUNING_FRAME_SIZE_BYTES = "FrameSizeBytes";
 const char* TuningData::TUNING_FRAMES_COUNT = "FramesCount";
 const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
@@ -378,6 +380,45 @@ bool TuningData::buildTuningData()
 }
 
 
+quint64 TuningData::generateUniqueID(const QString& lmEquipmentID)
+{
+	Crc64 crc;
+
+	crc.add(lmEquipmentID);
+
+	for (Signal* signal : m_tuningAnalogFloat)
+	{
+		crc.add(signal->appSignalID());
+		crc.add(signal->equipmentID());
+		crc.add(signal->tuningDefaultValue());
+		crc.add(signal->lowLimit());
+		crc.add(signal->highLimit());
+	}
+
+	for(Signal* signal : m_tuningAnalogInt)
+	{
+		crc.add(signal->appSignalID());
+		crc.add(signal->equipmentID());
+		crc.add(signal->tuningDefaultValue());
+		crc.add(signal->lowLimit());
+		crc.add(signal->highLimit());
+	}
+
+	for(Signal* signal : m_tuningDiscrete)
+	{
+		crc.add(signal->appSignalID());
+		crc.add(signal->equipmentID());
+		crc.add(signal->tuningDefaultValue());
+		crc.add(signal->lowLimit());
+		crc.add(signal->highLimit());
+	}
+
+	m_uniqueID = crc.result();
+
+	return m_uniqueID;
+}
+
+
 void TuningData::getTuningData(QByteArray* tuningData) const
 {
 	if (tuningData == nullptr)
@@ -411,6 +452,7 @@ void TuningData::writeToXml(XmlWriteHelper& xml)
 	xml.writeStartElement(TUNING_DATA_ELEMENT);
 
 	xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
+	xml.writeUlongAttribute(UNIQUE_ID, m_uniqueID);
 	xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFrameSizeBytes);
 	xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
 	xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, m_tuningAnalogFloat.count() +
@@ -462,6 +504,13 @@ bool TuningData::readFromXml(XmlReadHelper& xml)
 	}
 
 	result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
+
+	ulong v = 0;
+
+	result &= xml.readUlongAttribute(UNIQUE_ID, &v);
+
+	m_uniqueID = v;
+
 	result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFrameSizeBytes);
 	result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
 

@@ -49,7 +49,8 @@ SOURCES += main.cpp \
     ../lib/Types.cpp \
     ../u7/Builder/TuningDataStorage.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalState.cpp
+    ../AppDataService/AppSignalState.cpp \
+    ../lib/Crc.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -79,7 +80,8 @@ HEADERS += \
     ../include/Types.h \
     ../u7/Builder/TuningDataStorage.h \
     ../include/Signal.h \
-    ../AppDataService/AppSignalState.h
+    ../AppDataService/AppSignalState.h \
+    ../include/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -14,7 +14,7 @@ TEMPLATE = app
 
 
 SOURCES +=\
-        TuningMainWindow.cpp \
+	TuningMainWindow.cpp \
     ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/XmlHelper.cpp \
@@ -41,8 +41,8 @@ SOURCES +=\
     ../lib/Signal.cpp \
     SafetyChannelSignalsModel.cpp \
     ../AppDataService/AppSignalState.cpp \
-    ../TuningService/TuningSocket.cpp
-    ../AppDataService/AppSignalState.cpp
+    ../TuningService/TuningSocket.cpp \
+    ../lib/Crc.cpp
 
 HEADERS  += TuningMainWindow.h \
     ../include/ServiceSettings.h \
@@ -70,10 +70,8 @@ HEADERS  += TuningMainWindow.h \
     ../include/Signal.h \
     SafetyChannelSignalsModel.h \
     ../AppDataService/AppSignalState.h \
-    ../TuningService/TuningSocket.h
-    ../AppDataService/AppSignalState.h
-
-FORMS    += TuningMainWindow.ui
+    ../TuningService/TuningSocket.h \
+    ../include/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 
