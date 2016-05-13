@@ -452,7 +452,7 @@ void TuningData::writeToXml(XmlWriteHelper& xml)
 	xml.writeStartElement(TUNING_DATA_ELEMENT);
 
 	xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
-	xml.writeUlongAttribute(UNIQUE_ID, m_uniqueID);
+	xml.writeUInt64Attribute(UNIQUE_ID, m_uniqueID, true);
 	xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFrameSizeBytes);
 	xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
 	xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, m_tuningAnalogFloat.count() +
@@ -504,13 +504,7 @@ bool TuningData::readFromXml(XmlReadHelper& xml)
 	}
 
 	result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
-
-	ulong v = 0;
-
-	result &= xml.readUlongAttribute(UNIQUE_ID, &v);
-
-	m_uniqueID = v;
-
+	result &= xml.readUInt64Attribute(UNIQUE_ID, &m_uniqueID);
 	result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFrameSizeBytes);
 	result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
 

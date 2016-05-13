@@ -28,7 +28,7 @@ public:
 	void writeStringAttribute(const QString& name, const QString& value);
 	void writeIntAttribute(const QString& name, int value);
 	void writeBoolAttribute(const QString& name, bool value);
-	void writeUlongAttribute(const QString& name, ulong value, bool hex = false);
+	void writeUInt64Attribute(const QString& name, qulonglong value, bool hex = false);
 	void writeDoubleAttribute(const QString& name, double value);
 
 	void writeStringElement(const QString& name, const QString& value);
@@ -61,7 +61,7 @@ public:
 	bool readIntAttribute(const QString& name, int* value);
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readBoolAttribute(const QString& name, bool* value);
-	bool readUlongAttribute(const QString& name, ulong* value);
+	bool readUInt64Attribute(const QString& name, qulonglong* value);
 
 	bool readStringElement(const QString& elementName, QString* value);
 	bool readIntElement(const QString& elementName, int* value);

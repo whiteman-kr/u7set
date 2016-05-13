@@ -77,19 +77,20 @@ void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
 }
 
 
-void XmlWriteHelper::writeUlongAttribute(const QString& name, ulong value, bool hex)
+void XmlWriteHelper::writeUInt64Attribute(const QString& name, qulonglong value, bool hex)
 {
 	if (hex == true)
 	{
 		QString str;
 
-		str.sprintf("0x%08lX", value);
+		str.sprintf("0x%016llX", value);
 
 		writeStringAttribute(name, str);
 	}
 	else
 	{
-		m_xmlWriter->writeAttribute(name, QString::number(value));
+		QString valueStr = QString::number(value);
+		m_xmlWriter->writeAttribute(name, valueStr);
 	}
 }
 
@@ -215,7 +216,7 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 }
 
 
-bool XmlReadHelper::readUlongAttribute(const QString& name, ulong* value)
+bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
 {
 	if(value == nullptr)
 	{
@@ -234,7 +235,7 @@ bool XmlReadHelper::readUlongAttribute(const QString& name, ulong* value)
 
 	str = m_xmlReader->attributes().value(name).toString();
 
-	*value = str.toULong(&result, 0);
+	*value = str.toULongLong(&result, 0);
 
 	return result;
 }

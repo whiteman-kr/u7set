@@ -137,7 +137,7 @@ protected:
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
-	ulong m_lmDataID = 0;
+	quint64 m_lmDataID = 0;
 
 	QStringList m_associatedSignals;
 

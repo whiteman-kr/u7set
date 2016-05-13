@@ -22,7 +22,7 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/CircularLogger.cpp \
@@ -50,7 +50,8 @@ SOURCES += main.cpp \
     ../u7/Builder/TuningDataStorage.cpp \
     ../lib/Signal.cpp \
     ../AppDataService/AppSignalState.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    TuningMain.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
