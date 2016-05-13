@@ -41,7 +41,6 @@ SOURCES +=\
     ../lib/Signal.cpp \
     SafetyChannelSignalsModel.cpp \
     ../AppDataService/AppSignalState.cpp
-    ../AppDataService/AppSignalState.cpp
 
 HEADERS  += TuningMainWindow.h \
     ../include/ServiceSettings.h \
@@ -69,9 +68,6 @@ HEADERS  += TuningMainWindow.h \
     ../include/Signal.h \
     SafetyChannelSignalsModel.h \
     ../AppDataService/AppSignalState.h
-    ../AppDataService/AppSignalState.h
-
-FORMS    += TuningMainWindow.ui
 
 include(../qtservice/src/qtservice.pri)
 

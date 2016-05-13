@@ -8,18 +8,17 @@
 #include "../TuningService/TuningService.h"
 #include "../TuningService/TuningDataSource.h"
 
-
-namespace Ui {
-class TuningMainWindow;
-}
+class QTabWidget;
 
 class TuningMainWindow : public QMainWindow
 {
 	Q_OBJECT
 private:
 	QString m_cfgPath;
+	QTabWidget* m_setOfSignalsScram;
 
 	TuningService* m_service = nullptr;
+	QVector<TuningDataSourceInfo> m_info;
 
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
@@ -29,9 +28,6 @@ public:
 	~TuningMainWindow();
 
 	void onTuningServiceReady();
-
-private:
-	Ui::TuningMainWindow *ui;
 };
 
 #endif // TUNINGMAINWINDOW_H

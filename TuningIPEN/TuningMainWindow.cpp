@@ -1,9 +1,11 @@
 #include "TuningMainWindow.h"
+#include "SafetyChannelSignalsModel.h"
 #include <QSettings>
 #include <QFile>
 #include <QGroupBox>
 #include <QTableView>
 #include <QMenuBar>
+#include <QHBoxLayout>
 
 
 TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
@@ -11,7 +13,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 {
 	QSettings settings("Radiy", "TuningIPEN");
 
-	//UI
+	//Window geometry
 	//
 	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
 	QPoint center = desktopRect.center();
@@ -33,14 +35,20 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	QTabWidget* tabs = new QTabWidget(this);
 	setCentralWidget(tabs);
 
-	QTabWidget* setOfSignalsScram = new QTabWidget;
-	tabs->addTab(setOfSignalsScram, "Set of signals SCRAM");
-	for (int i = 0; i < 3; i++)
-	{
-		setOfSignalsScram->addTab(new QTableView, QString("Safety channel %1").arg(i + 1));
-	}
+	/*QWidget* widget = new QWidget;
+	QHBoxLayout* hl = new QHBoxLayout;
+	widget->setLayout(hl);
+	hl->addWidget(new QGroupBox(this));
 
+	hl->addWidget(new QGroupBox(this));*/
 	tabs->addTab(new QWidget, "Automatic Power Regulator (APR)");
+
+	m_setOfSignalsScram = new QTabWidget(this);
+	widget = new QWidget;
+	hl = new QHBoxLayout;
+	widget->setLayout(hl);
+	hl->addWidget(m_setOfSignalsScram);
+	tabs->addTab(widget, "Set of signals SCRAM");
 
 	menuBar()->addAction("Settings");
 
@@ -72,14 +80,31 @@ TuningMainWindow::~TuningMainWindow()
 {
 	m_service->stop();
 	delete m_service;
-
-	//delete ui;
 }
 
 
 void TuningMainWindow::onTuningServiceReady()
 {
-	QVector<TuningDataSourceInfo> info;
+	m_service->getTuningDataSourcesInfo(m_info);
 
-	m_service->getTuningDataSourcesInfo(info);
+	for (TuningDataSourceInfo& sourceInfo : m_info)
+	{
+		int place = 0;
+		for (; place < m_setOfSignalsScram->count(); place++)
+		{
+			if (sourceInfo.lmCaption < m_setOfSignalsScram->tabText(place))
+			{
+				break;
+			}
+		}
+		QTableView* view = new QTableView;
+		m_setOfSignalsScram->insertTab(place, view, sourceInfo.lmCaption);
+
+		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, this);
+		view->setModel(model);
+
+		connect(m_service, &TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState, Qt::QueuedConnection);
+
+		view->resizeColumnsToContents();
+	}
 }
