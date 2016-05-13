@@ -166,14 +166,11 @@ public:
 	int lmNumber() const { return m_lmNumber; }
 	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
 
-	int lmSsubsystemID() const { return m_lmSubsystemID; }
+	int lmSubsystemID() const { return m_lmSubsystemID; }
 	void setLmSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
 
 	int lmModuleType() const { return m_lmModuleType; }
 	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
-
-	int subsystemID() const { return m_lmSubsystemID; }
-	void setSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
 
 	QString lmSubsystem() const { return m_lmSubsystem; }
 	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystem = lmSubsystem; }

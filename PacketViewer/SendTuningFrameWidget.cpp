@@ -259,7 +259,7 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(fotip.subsystemKeyWord, fotip.subsystemKeyWord);
 
 		writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
-		writeBigEndian(fotip.flagsWord, m_flags->text().toUInt());
+		writeBigEndian(fotip.flags.all, m_flags->text().toUInt());
 		writeBigEndian(fotip.startAddress, m_startAddress->text().toUInt());
 		writeBigEndian(fotip.fotipFrameSize, m_fotipFrameSize->text().toUInt());
 		writeBigEndian(fotip.romSize, m_romSize->text().toUInt());
@@ -335,7 +335,7 @@ void SendTuningFrameWidget::sendPacket()
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
 		fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;
-		fotip.flagsWord =  m_flags->text().toUInt();
+		fotip.flags.all =  m_flags->text().toUInt();
 		fotip.startAddress = m_startAddress->text().toUInt();
 		fotip.fotipFrameSize = m_fotipFrameSize->text().toUInt();
 		fotip.romSize = m_romSize->text().toUInt();

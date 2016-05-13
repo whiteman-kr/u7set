@@ -37,10 +37,10 @@ void TuningSignalsData::init(int firstFrameNo, int tuningFrameSizeBytes, int sig
 
 	m_tripleFramesCount = neededSize / m_tuningFrameSizeBits + (neededSize % m_tuningFrameSizeBits ? 1 : 0);
 
-	m_totalFramesCount = m_tripleFramesCount * FRAMES_3;
+	m_usedFramesCount = m_tripleFramesCount * FRAMES_3;
 
-	m_framesData = new char [m_totalFramesCount * m_tuningFrameSizeBytes];
-	memset(m_framesData, 0, m_totalFramesCount * m_tuningFrameSizeBytes);
+	m_framesData = new char [m_usedFramesCount * m_tuningFrameSizeBytes];
+	memset(m_framesData, 0, m_usedFramesCount * m_tuningFrameSizeBytes);
 }
 
 
@@ -195,7 +195,7 @@ void TuningSignalsData::converToBigEndian()
 		return;
 	}
 
-	int size = m_totalFramesCount * m_tuningFrameSizeBytes;
+	int size = m_usedFramesCount * m_tuningFrameSizeBytes;
 
 	if (m_signalSizeBits == 32)
 	{
@@ -225,6 +225,23 @@ void TuningSignalsData::converToBigEndian()
 }
 
 
+void TuningSignalsData::setFrameData(int frameNo, const char* fotipData)
+{
+	if (frameNo < 0 || frameNo >= m_usedFramesCount)
+	{
+		assert(false);
+		return;
+	}
+
+	if (m_framesData == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	memcpy(m_framesData + frameNo * FOTIP_TX_RX_DATA_SIZE, fotipData, FOTIP_TX_RX_DATA_SIZE);
+}
+
 // -------------------------------------------------------------------------------------
 //
 // TuningData class implementation
@@ -236,6 +253,7 @@ const char* TuningData::LM_ID = "LmID";
 const char* TuningData::UNIQUE_ID = "UniqueID";
 const char* TuningData::TUNING_FRAME_SIZE_BYTES = "FrameSizeBytes";
 const char* TuningData::TUNING_FRAMES_COUNT = "FramesCount";
+const char* TuningData::TUNING_USED_FRAMES_COUNT = "UsedFramesCount";
 const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
 const char* TuningData::TUNING_ANALOG_FLOAT_SIGNALS = "AnalogFloatSignals";
 const char* TuningData::TUNING_ANALOG_INT_SIGNALS = "AnalogIntSignals";
@@ -360,7 +378,7 @@ bool TuningData::buildTuningData()
 	analogFloatSignalsData.copySignalsData(m_tuningAnalogFloat);
 	analogFloatSignalsData.converToBigEndian();
 
-	firstFrame += analogFloatSignalsData.totalFramesCount();
+	firstFrame += analogFloatSignalsData.usedFramesCount();
 
 	TuningSignalsData& analogIntSignalsData = m_tuningSignalsData[TYPE_ANALOG_INT];
 
@@ -368,7 +386,7 @@ bool TuningData::buildTuningData()
 	analogIntSignalsData.copySignalsData(m_tuningAnalogInt);
 	analogIntSignalsData.converToBigEndian();
 
-	firstFrame += analogIntSignalsData.totalFramesCount();
+	firstFrame += analogIntSignalsData.usedFramesCount();
 
 	TuningSignalsData& discreteSignalsData = m_tuningSignalsData[TYPE_DISCRETE];
 
@@ -376,8 +394,47 @@ bool TuningData::buildTuningData()
 	discreteSignalsData.copySignalsData(m_tuningDiscrete);
 	discreteSignalsData.converToBigEndian();
 
+	m_usedFramesCount = 0;
+
+	for(int i = 0; i < TYPES_COUNT; i++)
+	{
+		m_usedFramesCount += m_tuningSignalsData[i].usedFramesCount();
+	}
+
 	return true;
 }
+
+
+bool TuningData::initTuningData()
+{
+	TuningSignalsData& analogFloatSignalsData = m_tuningSignalsData[TYPE_ANALOG_FLOAT];
+
+	int firstFrame = 0;
+
+	analogFloatSignalsData.init(firstFrame, m_tuningFrameSizeBytes, sizeof(float) * TuningSignalsData::BITS_8, m_tuningAnalogFloat.count());
+
+	firstFrame += analogFloatSignalsData.usedFramesCount();
+
+	TuningSignalsData& analogIntSignalsData = m_tuningSignalsData[TYPE_ANALOG_INT];
+
+	analogIntSignalsData.init(firstFrame, m_tuningFrameSizeBytes, sizeof(qint32) * TuningSignalsData::BITS_8, m_tuningAnalogInt.count());
+
+	firstFrame += analogIntSignalsData.usedFramesCount();
+
+	TuningSignalsData& discreteSignalsData = m_tuningSignalsData[TYPE_DISCRETE];
+
+	discreteSignalsData.init(firstFrame, m_tuningFrameSizeBytes, 1, m_tuningDiscrete.count());
+
+	firstFrame += discreteSignalsData.usedFramesCount();
+
+	if (firstFrame != m_usedFramesCount)
+	{
+		assert(false);
+	}
+
+	return true;
+}
+
 
 
 quint64 TuningData::generateUniqueID(const QString& lmEquipmentID)
@@ -434,19 +491,6 @@ void TuningData::getTuningData(QByteArray* tuningData) const
 }
 
 
-int TuningData::totalFramesCount() const
-{
-	int framesCount = 0;
-
-	for(int i = 0; i < TYPES_COUNT; i++)
-	{
-		framesCount += m_tuningSignalsData[i].totalFramesCount();
-	}
-
-	return framesCount;
-}
-
-
 void TuningData::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(TUNING_DATA_ELEMENT);
@@ -455,6 +499,7 @@ void TuningData::writeToXml(XmlWriteHelper& xml)
 	xml.writeUInt64Attribute(UNIQUE_ID, m_uniqueID, true);
 	xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFrameSizeBytes);
 	xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
+	xml.writeIntAttribute(TUNING_USED_FRAMES_COUNT, m_usedFramesCount);
 	xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, m_tuningAnalogFloat.count() +
 													m_tuningAnalogInt.count() +
 													m_tuningDiscrete.count());
@@ -507,6 +552,7 @@ bool TuningData::readFromXml(XmlReadHelper& xml)
 	result &= xml.readUInt64Attribute(UNIQUE_ID, &m_uniqueID);
 	result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFrameSizeBytes);
 	result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
+	result &= xml.readIntAttribute(TUNING_USED_FRAMES_COUNT, &m_usedFramesCount);
 
 	int totalSignalsCount = 0;
 
@@ -594,6 +640,24 @@ void TuningData::getSignals(QList<Signal*>& signalList)
 	signalList.append(m_tuningAnalogFloat);
 	signalList.append(m_tuningAnalogInt);
 	signalList.append(m_tuningDiscrete);
+}
+
+
+void TuningData::setFrameData(int frameNo, const char* fotipData)
+{
+	for(int i = 0; i < TYPES_COUNT; i++ )
+	{
+		int firstFrameNo = m_tuningSignalsData[i].firstFrameNo();
+		int usedFramesCount = m_tuningSignalsData[i].usedFramesCount();
+
+		if (frameNo >= firstFrameNo + usedFramesCount)
+		{
+			continue;
+		}
+
+		m_tuningSignalsData[i].setFrameData(frameNo - firstFrameNo, fotipData);
+		break;
+	}
 }
 
 // -------------------------------------------------------------------------------------

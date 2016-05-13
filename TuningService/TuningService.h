@@ -41,9 +41,11 @@ private:
 	void stopTuningSocket();
 
 	void sendPeriodicReadRequests();
+	void sendFrameRequest(TuningDataSource* source);
 
 private slots:
 	void onTimer();
+	void onReplyReady();
 
 public:
 	TuningServiceWorker(const QString& serviceStrID,

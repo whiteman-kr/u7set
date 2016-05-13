@@ -67,19 +67,24 @@ struct RupFrame
 };
 
 
-struct FotipHeaderFlags
+union FotipHeaderFlags
 {
-	quint16 successfulCheck : 1;
-	quint16 successfulWrite : 1;
-	quint16 dataTypeError : 1;
-	quint16 operationCodeError : 1;
-	quint16 startAddressError : 1;
-	quint16 romSizeError : 1;
-	quint16 romFrameSizeError : 1;
-	quint16 frameSizeError : 1;
-	quint16 versionError : 1;
-	quint16 subsystemKeyError : 1;
-	quint16 idError : 1;
+	struct
+	{
+		quint16 successfulCheck : 1;
+		quint16 successfulWrite : 1;
+		quint16 dataTypeError : 1;
+		quint16 operationCodeError : 1;
+		quint16 startAddressError : 1;
+		quint16 romSizeError : 1;
+		quint16 romFrameSizeError : 1;
+		quint16 frameSizeError : 1;
+		quint16 versionError : 1;
+		quint16 subsystemKeyError : 1;
+		quint16 idError : 1;
+	};
+
+	quint16 all;
 };
 
 
@@ -101,8 +106,6 @@ const int FOTIP_DATA_TYPE_SIGNED_INTEGER = 1300,
 
 
 const int FOTIP_HEADER_RESERVE_SIZE = 98;
-const int FOTIP_TX_RX_DATA_SIZE = 1016;
-
 
 struct FotipHeader
 {
@@ -114,11 +117,9 @@ struct FotipHeader
 		quint16 subsystemKeyWord;
 	};
 	quint16 operationCode;
-	union
-	{
-		FotipHeaderFlags flags;
-		quint16 flagsWord;
-	};
+
+	FotipHeaderFlags flags;
+
 	quint32 startAddress;
 	quint16 fotipFrameSize;
 	quint32 romSize;
@@ -128,17 +129,27 @@ struct FotipHeader
 };
 
 
+const int FOTIP_TX_RX_DATA_SIZE = 1016;
+const int FOTIP_COMPARISON_RESULT_SIZE = 64;
+const int FOTIP_DATA_RESERV_SIZE = 224;
+
+struct FotipFrame
+{
+	FotipHeader header;
+
+	char data[FOTIP_TX_RX_DATA_SIZE];
+
+	char comparisonResult[FOTIP_COMPARISON_RESULT_SIZE];
+
+	char reserv[FOTIP_DATA_RESERV_SIZE];
+};
+
+
 struct RupFotipFrame
 {
 	RupFrameHeader rupHeader;
 
-	FotipHeader fotipHeader;
-
-	char fotipData[FOTIP_TX_RX_DATA_SIZE];
-
-	char comparisonResult[64];
-
-	char reserv[224];
+	FotipFrame fotip;
 
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 };
