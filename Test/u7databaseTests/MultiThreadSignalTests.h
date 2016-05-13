@@ -140,5 +140,6 @@ public:
 		int maxDifference = 0;
 		int byteOrder = 0;
 		QString enableTuning;
+		double tuningDefaultValue = 0;
 	};
 };

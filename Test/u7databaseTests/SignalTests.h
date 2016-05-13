@@ -75,6 +75,6 @@ public:
 		double maxDifference = 0;
 		int byteOrder = 0;
 		QString enableTuning;
-		double tuningDefaultValue;
+		double tuningDefaultValue = 0;
 	};
 };
