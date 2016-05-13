@@ -7,14 +7,14 @@ DbControllerFileTests::DbControllerFileTests()
 	m_dbController = new DbController();
 
 	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollerFileTesting";
+	m_databaseName = "dbcontrollerfiletesting";
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
 }
 
 void DbControllerFileTests::initTestCase()
 {
-	QSqlDatabase db = QSqlDatabase::database();
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
@@ -34,6 +34,15 @@ void DbControllerFileTests::initTestCase()
 	}
 
 	db.close();
+
+	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_dbController->lastError()));
+
+	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
 }
 
 void DbControllerFileTests::getFileListTest()
@@ -54,7 +63,7 @@ void DbControllerFileTests::getFileListTest()
 
 	QSqlQuery query;
 
-	ok = query.exec("SELECT * from file");
+	ok = query.exec("SELECT * from get_file_list(1, 1, '%');");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	QVector<QString> filesForCheck;
@@ -63,6 +72,8 @@ void DbControllerFileTests::getFileListTest()
 	{
 		filesForCheck.push_back(query.value("name").toString());
 	}
+
+	db.close();
 
 	QVERIFY2 (filesForCheck.size() == files.size(), qPrintable("Error: getFileList() function returned wrong amount of files!"));
 
