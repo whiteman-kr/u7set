@@ -108,8 +108,10 @@ namespace Builder
             }
 
 			QByteArray data;
+			quint64 uniqueID = 0;
 
 			TuningDataStorage::iterator it = m_tuningDataStorage->find(m->equipmentId());
+
 			if (it == m_tuningDataStorage->end())
 			{
 				data.fill(0, 100);
@@ -124,11 +126,12 @@ namespace Builder
 				}
 
 				tuningData->getTuningData(&data);
-				qDebug()<<data.size();
+				uniqueID = tuningData->uniqueID();
+
 			}
 
 
-            if (firmware->setChannelData(channel, frameSize, frameCount, data, &errorString) == false)
+			if (firmware->setChannelData(channel, frameSize, frameCount, uniqueID, data, &errorString) == false)
             {
 				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("%1, LM %2")).arg(errorString).arg(m->caption()));
                 return false;
@@ -139,12 +142,6 @@ namespace Builder
         for (auto it = firmwares.begin(); it != firmwares.end(); it++)
         {
             Hardware::ModuleFirmware& f = it->second;
-
-            if (f.storeChannelData(&errorString) == false)
-            {
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("%1, LM %2")).arg(errorString).arg(f.caption()));
-                return false;
-            }
 
             QByteArray data;
 

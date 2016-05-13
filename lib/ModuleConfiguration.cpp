@@ -438,7 +438,7 @@ namespace Hardware
         return m_frames[frameIndex];
     }
 
-	bool ModuleFirmware::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg)
+	bool ModuleFirmware::setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, QString* errorMsg)
 	{
 		if (this->frameSize() != frameSize)
 		{
@@ -480,14 +480,18 @@ namespace Hardware
 			return false;
 		}
 
-		m_channelData[channel] = data;
+		ModuleFirmwareData channelData;
+		channelData.data = data;
+		channelData.uniqueID = uniqueID;
+
+		m_channelData[channel] = channelData;
 
 		return true;
 	}
 
 	bool ModuleFirmware::storeChannelData(QString* errorMsg)
 	{
-        if (m_channelData.size() == 0)
+		if (m_channelData.size() == 0)
         {
             // no channel data supplied
             //
@@ -521,7 +525,10 @@ namespace Hardware
 		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
 			int channel = it->first;
-            double fSize = (double)it->second.size() / frameSize();
+
+			ModuleFirmwareData& cd = it->second;
+
+			double fSize = (double)cd.data.size() / frameSize();
             fSize = ceil(fSize);
             int size = (int)fSize;
 
@@ -563,6 +570,10 @@ namespace Hardware
 
 			channelStartFrame.push_back(frame);
 
+			// channel data
+			//
+			ModuleFirmwareData& cd = m_channelData[channel];
+
 			// channel service information
 			//
 			quint8* ptr = m_frames[frame].data();
@@ -573,25 +584,28 @@ namespace Hardware
 			*(quint16*)ptr = qToBigEndian((quint16)uartId());	//Data type (configuration)
 			ptr += sizeof(quint16);
 
-			QByteArray bytes = subsysId().toUtf8();
+			if (cd.uniqueID == 0)
+			{
+				QByteArray bytes = subsysId().toUtf8();
 
-			*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
-			ptr += sizeof(quint64);
+				*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
+				ptr += sizeof(quint64);
+			}
+			else
+			{
+				*(quint64*)ptr = qToBigEndian(cd.uniqueID);
+				ptr += sizeof(quint64);
+			}
 
             *(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
             ptr += sizeof(quint16);
 
 			frame++;
 
-			// channel data
-			//
-
-			QByteArray& data = m_channelData[channel];
-
 			// store channel data in frames
 			//
 			int index = 0;
-			for (int i = 0; i < data.size(); i++)
+			for (int i = 0; i < cd.data.size(); i++)
 			{
 				if (index >= frameSize())
 				{
@@ -601,7 +615,7 @@ namespace Hardware
 					index = 0;
 				}
 
-				m_frames[frame][index++] = data[i];
+				m_frames[frame][index++] = cd.data[i];
 			}
 
 			//switch to the next frame
