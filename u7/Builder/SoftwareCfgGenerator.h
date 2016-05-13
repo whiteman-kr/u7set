@@ -5,6 +5,7 @@
 #include "../include/DeviceObject.h"
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
+#include "Subsystem.h"
 
 namespace Builder
 {
@@ -75,7 +76,11 @@ namespace Builder
 
 
 	public:
-		SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		SoftwareCfgGenerator(	DbController* db,
+								Hardware::Software* software,
+								SignalSet* signalSet,
+								Hardware::EquipmentSet* equipment,
+								BuildResultWriter* buildResultWriter);
 
 		bool run();
 

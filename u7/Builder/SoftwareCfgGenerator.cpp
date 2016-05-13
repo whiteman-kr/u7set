@@ -12,7 +12,11 @@ namespace Builder
 	QList<SoftwareCfgGenerator::SchemaFile> SoftwareCfgGenerator::m_schemaFileList;
 
 
-	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
+	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db,
+												Hardware::Software* software,
+												SignalSet* signalSet,
+												Hardware::EquipmentSet* equipment,
+												BuildResultWriter* buildResultWriter) :
 		m_dbController(db),
 		m_software(software),
 		m_signalSet(signalSet),

@@ -261,13 +261,12 @@ namespace Builder
 			//
 			// Generate SCADA software configurations
 			//
-			generateSoftwareConfiguration(&db, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
+			generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
-
 
 			//
 			// Compile Module configuration
@@ -749,7 +748,8 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::generateSoftwareConfiguration(	DbController *db,
+	bool BuildWorkerThread::generateSoftwareConfiguration(DbController *db,
+															Hardware::SubsystemStorage* subsystems,
 															Hardware::EquipmentSet* equipment,
 															SignalSet* signalSet,
 															TuningDataStorage* tuningDataStorage,
@@ -764,7 +764,7 @@ namespace Builder
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
-			[this, &db, &signalSet, &buildResultWriter, equipment, tuningDataStorage, &result](Hardware::DeviceObject* currentDevice)
+			[this, &db, &subsystems, &signalSet, &buildResultWriter, &equipment, &tuningDataStorage, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -796,7 +796,7 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(db, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
+					softwareCfgGenerator = new TuningServiceCfgGenerator(db, subsystems, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
 					break;
 
 				case E::SoftwareType::ConfigurationService:

@@ -104,6 +104,7 @@ namespace Builder
 		// Generate SCADA software configurations
 		//
 		bool generateSoftwareConfiguration(	DbController* db,
+											Hardware::SubsystemStorage* subsystems,
 											Hardware::EquipmentSet* equipment,
 											SignalSet* signalSet,
 											TuningDataStorage* tuningDataStorage,

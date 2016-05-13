@@ -395,8 +395,8 @@ namespace Builder
 				{
 					DataSource ds;
 
-					ds.setChannel(channel);
-					ds.setDataType(DataSource::DataType::App);
+					ds.setLmChannel(channel);
+					ds.setLmDataType(DataSource::DataType::App);
 					ds.setLmEquipmentID(lm->equipmentIdTemplate());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterID(lmNetProperties.adapterID);

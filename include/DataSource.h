@@ -5,6 +5,7 @@
 #include "../include/Queue.h"
 #include "../include/XmlHelper.h"
 #include "../include/DataProtocols.h"
+#include "../include/DeviceObject.h"
 
 
 enum DataSourceState
@@ -123,8 +124,10 @@ protected:
 	static const char* PROP_COUNT;
 	static const char* SIGNAL_ID_ELEMENT;
 
-	int m_channel = 0;
-	DataType m_dataType = DataType::App;
+	// Properties from LM
+	//
+	int m_lmChannel = 0;
+	DataType m_lmDataType = DataType::App;
 	QString m_lmEquipmentID;
 	int m_lmNumber = 0;
 	int m_lmModuleType = 0;
@@ -135,6 +138,7 @@ protected:
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	ulong m_lmDataID = 0;
+
 	QStringList m_associatedSignals;
 
 	//
@@ -150,11 +154,11 @@ public:
 //	DataSource(const DataSource& ds);
 //	DataSource& operator = (const DataSource& ds);
 
-	int channel() const { return m_channel; }
-	void setChannel(int channel) { m_channel = channel; }
+	int lmChannel() const { return m_lmChannel; }
+	void setLmChannel(int channel) { m_lmChannel = channel; }
 
-	DataType dataType() const { return m_dataType; }
-	void setDataType(DataType dataType) { m_dataType = dataType; }
+	DataType lmDataType() const { return m_lmDataType; }
+	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
 	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
@@ -224,7 +228,7 @@ public:
 	void stop();
 	void resume();
 
-	QString dataTypeToString(DataType dataType);
+	QString dataTypeToString(DataType lmDataType);
 	DataType stringToDataType(const QString& dataTypeStr);
 
 	void writeToXml(XmlWriteHelper& xml);

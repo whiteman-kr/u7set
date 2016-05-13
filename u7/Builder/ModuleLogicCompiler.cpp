@@ -2878,12 +2878,15 @@ namespace Builder
 			}
 			else
 			{
+				m_tuningData = tuningData;
 				m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);
 			}
 		}
 
 		return result;
 	}
+
+
 
 
 	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
@@ -3110,10 +3113,10 @@ namespace Builder
 		bool result = true;
 
 		QString subsysId;
-		int channel = 0;
+		int lmNumber = 0;
 
 		result &= DeviceHelper::getStrProperty(m_lm, "SubsystemID", &subsysId, m_log);
-		result &= DeviceHelper::getIntProperty(m_lm, "LMNumber", &channel, m_log);
+		result &= DeviceHelper::getIntProperty(m_lm, "LMNumber", &lmNumber, m_log);
 
 		if (result == false)
 		{
@@ -3126,28 +3129,31 @@ namespace Builder
 
 		m_code.getBinCode(binCode);
 
-		m_appLogicCompiler.writeBinCodeForLm(subsysId, m_lm->caption(), channel,
+		m_appLogicCompiler.writeBinCodeForLm(subsysId, m_lm->caption(), lmNumber,
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
 
-		result &= m_resultWriter->addFile(subsysId, QString("%1-%2ch.mif").
-										  arg(m_lm->caption()).arg(channel), mifCode);
+		result &= m_resultWriter->addFile(subsysId, QString("%1-%2.mif").
+										  arg(m_lm->caption()).arg(lmNumber), mifCode);
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
-		result = m_resultWriter->addFile(subsysId, QString("%1-%2ch.asm").
-										 arg(m_lm->caption()).arg(channel), asmCode);
+		result = m_resultWriter->addFile(subsysId, QString("%1-%2.asm").
+										 arg(m_lm->caption()).arg(lmNumber), asmCode);
 
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile);
 
-		result = m_resultWriter->addFile(subsysId, QString("%1-%2ch.mem").
-										 arg(m_lm->caption()).arg(channel), memFile);
+		result = m_resultWriter->addFile(subsysId, QString("%1-%2.mem").
+										 arg(m_lm->caption()).arg(lmNumber), memFile);
+
+		writeTuningInfoFile(subsysId, lmNumber);
+
 		//
 
 		writeLMCodeTestFile();
@@ -3156,6 +3162,128 @@ namespace Builder
 
 		return result;
 	}
+
+
+	bool ModuleLogicCompiler::writeTuningInfoFile(QString subsystemID, int lmNumber)
+	{
+		if (m_tuningData == nullptr)
+		{
+			return true;
+		}
+
+		QStringList file;
+		QString line = QString("------------------------------------------------------------------------------------------");
+
+		file.append(QString("Tuning information file\n").arg(m_lm->equipmentId()));
+		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentId()));
+		file.append(QString("LM caption: %1").arg(m_lm->caption()));
+		file.append(QString("LM number: %1\n").arg(lmNumber));
+		file.append(QString("Frames used total: %1").arg(m_tuningData->totalFramesCount()));
+
+		QString s;
+
+		quint64 uniqueID = m_tuningData->uniqueID();
+
+		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
+
+		QList<Signal*> analogFloatSignals = m_tuningData->tuningAnalogFloatSignals();
+
+		if (analogFloatSignals.count() > 0)
+		{
+			file.append(QString("\nAnalog signals, type Float (32 bits)"));
+			file.append(line);
+			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(Signal* signal : analogFloatSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				QString str;
+
+				str.sprintf("%05d:%02d\t%-24s\t%f\t%f\t%f",
+								signal->tuningAddr().offset(),
+								signal->tuningAddr().bit(),
+								C_STR(signal->appSignalID()),
+								signal->tuningDefaultValue(),
+								signal->lowLimit(),
+								signal->highLimit());
+				file.append(str);
+			}
+		}
+
+		QList<Signal*> analogIntSignals = m_tuningData->tuningAnalogIntSignals();
+
+		if (analogIntSignals.count() > 0)
+		{
+			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
+			file.append(line);
+			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(Signal* signal : analogFloatSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				QString str;
+
+				str.sprintf("%05d:%02d\t%-24s\t%d\t%d\t%d",
+								signal->tuningAddr().offset(),
+								signal->tuningAddr().bit(),
+								C_STR(signal->appSignalID()),
+								static_cast<qint32>(signal->tuningDefaultValue()),
+								static_cast<qint32>(signal->lowLimit()),
+								static_cast<qint32>(signal->highLimit()));
+				file.append(str);
+			}
+		}
+
+		QList<Signal*> discreteSignals = m_tuningData->tuningDiscreteSignals();
+
+		if (discreteSignals.count() > 0)
+		{
+			file.append(QString("\nDiscrete signals (1 bit)"));
+			file.append(line);
+			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(Signal* signal : discreteSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				QString str;
+
+				int defaultValue = (static_cast<int>(signal->tuningDefaultValue()) == 0) ? 0 : 1;
+
+				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+								signal->tuningAddr().offset(),
+								signal->tuningAddr().bit(),
+								C_STR(signal->appSignalID()),
+								defaultValue,
+								0,
+								1);
+				file.append(str);
+			}
+		}
+
+		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
+										 arg(m_lm->caption()).arg(lmNumber), file);
+
+		return result;
+	}
+
 
 
 	void ModuleLogicCompiler::writeLMCodeTestFile()

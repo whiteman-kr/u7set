@@ -389,7 +389,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			continue;
 		}
 
-		int channel = dataSource->channel();
+		int channel = dataSource->lmChannel();
 
 		if (channel < 0 || channel >= AppDataServiceSettings::DATA_CHANNEL_COUNT)
 		{
@@ -401,7 +401,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 		m_appDataSources.insert(dataSource->lmAddress32(), dataSource);
 
-		qDebug() << "DataSource: " << dataSource->lmEquipmentID() << "channel " << dataSource->channel();
+		qDebug() << "DataSource: " << dataSource->lmEquipmentID() << "channel " << dataSource->lmChannel();
 	}
 
 	return result;
@@ -557,8 +557,8 @@ void AppDataServiceWorker::initDataChannelThreads()
 		//
 		for(DataSource* dataSource : m_appDataSources)
 		{
-			if (dataSource->dataType() == DataSource::DataType::App &&
-				dataSource->channel() == channel)
+			if (dataSource->lmDataType() == DataSource::DataType::App &&
+				dataSource->lmChannel() == channel)
 			{
 				m_appDataChannelThread[channel]->addDataSource(dataSource);
 			}

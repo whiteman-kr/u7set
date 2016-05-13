@@ -515,6 +515,8 @@ namespace Builder
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
+		TuningData* m_tuningData = nullptr;
+
 	private:
 
 		bool getLMIntProperty(const QString& name, int* value);
@@ -596,6 +598,7 @@ namespace Builder
 		bool copyAomDataToModuleMemory(const Module& module);
 
 		bool buildTuningData();
+		bool writeTuningInfoFile(QString subsystemID, int lmNumber);
 
 		bool calculateCodeRunTime();
 

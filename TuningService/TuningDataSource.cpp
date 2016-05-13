@@ -9,7 +9,7 @@
 
 TuningDataSource::TuningDataSource()
 {
-	m_dataType = DataSource::DataType::Tuning;
+	m_lmDataType = DataSource::DataType::Tuning;
 }
 
 
@@ -63,8 +63,8 @@ bool TuningDataSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
 
 void TuningDataSource::getTuningDataSourceInfo(TuningDataSourceInfo& info)
 {
-	info.channel = m_channel;
-	info.dataType = m_dataType;
+	info.channel = m_lmChannel;
+	info.dataType = m_lmDataType;
 	info.lmEquipmentID = m_lmEquipmentID;
 	info.lmCaption = m_lmCaption;
 	info.lmAdapterID = m_lmAdapterID;

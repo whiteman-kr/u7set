@@ -36,8 +36,8 @@ void DataChannel::addDataSource(DataSource* dataSource)
 		return;
 	}
 
-	if (dataSource->dataType() != m_dataType ||
-		dataSource->channel() != m_channel)
+	if (dataSource->lmDataType() != m_dataType ||
+		dataSource->lmChannel() != m_channel)
 	{
 		assert(false);
 		return;

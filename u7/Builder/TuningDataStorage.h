@@ -55,6 +55,7 @@ private:
 
 	int m_tuningFrameSizeBytes = 0;
 	int m_tuningFramesCount = 0;
+	quint64 m_uninqueID = 0;
 
 	static const int TYPE_ANALOG_FLOAT = 0;
 	static const int TYPE_ANALOG_INT = 1;
@@ -94,6 +95,7 @@ public:
 
 	bool buildTuningData();
 
+	quint64 uniqueID() const { return m_uninqueID; }
 	void getTuningData(QByteArray* tuningData) const;
 
 	int totalFramesCount() const;
@@ -102,6 +104,10 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 
 	void getSignals(QList<Signal *>& signalList);
+
+	QList<Signal*> tuningAnalogFloatSignals() const { return m_tuningAnalogFloat; }
+	QList<Signal*> tuningAnalogIntSignals() const { return m_tuningAnalogInt; }
+	QList<Signal*> tuningDiscreteSignals() const { return m_tuningDiscrete; }
 };
 
 

@@ -36,8 +36,8 @@ const char* DataSource::DATA_TYPE_APP = "App";
 const char* DataSource::DATA_TYPE_DIAG = "Diag";
 const char* DataSource::DATA_TYPE_TUNING = "Tuning";
 
-const char* DataSource::PROP_DATA_TYPE = "DataType";
-const char* DataSource::PROP_CHANNEL = "Channel";
+const char* DataSource::PROP_DATA_TYPE = "LmDataType";
+const char* DataSource::PROP_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
 const char* DataSource::PROP_LM_NUMBER = "LmNumber";
 const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
@@ -64,6 +64,7 @@ DataSource::~DataSource()
 	delete [] m_rupFrames;
 	delete [] m_framesData;
 }
+
 
 void DataSource::stop()
 {
@@ -166,14 +167,14 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
-	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
+	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
 
 	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
-	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
+	xml.writeIntAttribute(PROP_CHANNEL, m_lmChannel);
 
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
 	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
@@ -213,7 +214,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
 
-	m_dataType = stringToDataType(str);
+	m_lmDataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
 
@@ -221,7 +222,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
 	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
 	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
-	result &= xml.readIntAttribute(PROP_CHANNEL, &m_channel);
+	result &= xml.readIntAttribute(PROP_CHANNEL, &m_lmChannel);
 
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
