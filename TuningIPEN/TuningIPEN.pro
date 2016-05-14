@@ -43,7 +43,8 @@ SOURCES +=\
 	../AppDataService/AppSignalState.cpp \
 	../TuningService/TuningSocket.cpp \
 	../lib/Crc.cpp \
-	AnalogSignalSetter.cpp
+	AnalogSignalSetter.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../include/ServiceSettings.h \
@@ -73,7 +74,9 @@ HEADERS  += TuningMainWindow.h \
 	../AppDataService/AppSignalState.h \
 	../TuningService/TuningSocket.h \
 	../include/Crc.h \
-	AnalogSignalSetter.h
+	AnalogSignalSetter.h \
+    ../include/Utils.h \
+    ../include/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

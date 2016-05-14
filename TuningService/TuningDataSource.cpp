@@ -226,3 +226,26 @@ bool TuningDataSource::getSignalState(const QString& appSignalID, TuningSignalSt
 
 	return m_tuningData->getSignalState(appSignalID, tss);
 }
+
+
+bool TuningDataSource::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
+{
+	if (m_tuningData == nullptr)
+	{
+		return false;
+	}
+
+	return m_tuningData->setSignalState(appSignalID, value, sr);
+}
+
+
+quint64 TuningDataSource::uniqueID()
+{
+	if (m_tuningData == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	return m_tuningData->uniqueID();
+}

@@ -3280,6 +3280,52 @@ namespace Builder
 			}
 		}
 
+		QByteArray data;
+
+		m_tuningData->getTuningData(&data);
+
+		int size = data.count();
+
+		int frameCount = size / FOTIP_TX_RX_DATA_SIZE;
+
+		assert((size % FOTIP_TX_RX_DATA_SIZE) == 0);
+
+		file.append(QString("\n"));
+
+		for(int f = 0; f < frameCount; f++)
+		{
+			QString s;
+
+			file.append(QString("\nFrame: %1\n").arg(f));
+
+			for(int i = 0; i < FOTIP_TX_RX_DATA_SIZE; i++)
+			{
+				quint8 byte = data[f * FOTIP_TX_RX_DATA_SIZE + i];
+
+				QString sv;
+
+				sv.sprintf("%02X ", static_cast<unsigned int>(byte));
+
+				s += sv;
+
+				if ((i % 8) == 7)
+				{
+					s += " ";
+				}
+
+				if ((i % 16) == 15)
+				{
+					file.append(s);
+					s.clear();
+				}
+			}
+
+			if (s.isEmpty() == false)
+			{
+				file.append(s);
+			}
+		}
+
 		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
 										 arg(m_lm->caption()).arg(lmNumber), file);
 

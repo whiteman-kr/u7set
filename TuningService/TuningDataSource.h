@@ -69,6 +69,9 @@ public:
 	void processReply(const Tuning::SocketReply& reply);
 
 	bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
+	bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
+
+	quint64 uniqueID();
 };
 
 

@@ -48,6 +48,9 @@ private slots:
 	void onReplyReady();
 	void onGetSignalState(QString appSignalID);
 
+public slots:
+	void onSetSignalState(QString appSignalID, double value);
+
 public:
 	TuningServiceWorker(const QString& serviceStrID,
 						const QString& cfgServiceIP1,
@@ -69,9 +72,6 @@ public:
 signals:
 	void tuningServiceReady();
 	void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-
-public slots:
-	void setSignalValue(QString appSignalID, double value);
 };
 
 
