@@ -8,20 +8,25 @@ const int	SIGNAL_ID_COLUMN = 0,
 			SIGNAL_DESCRIPTION_COLUMN = 1,
 			NEW_VALUE_COLUMN = 2,
 			CURRENT_VALUE_COLUMN = 3,
-			LOW_LIMIT_COLUMN = 4,
-			HIGH_LIMIT_COLUMN = 5,
-			COLUMN_COUNT = 6;
+			ORIGINAL_LOW_LIMIT_COLUMN = 4,
+			ORIGINAL_HIGH_LIMIT_COLUMN = 5,
+			RECEIVED_LOW_LIMIT_COLUMN = 6,
+			RECEIVED_HIGH_LIMIT_COLUMN = 7,
+			COLUMN_COUNT = 8;
 
 SafetyChannelSignalsModel::SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)
 {
-	m_values.resize(m_sourceInfo.tuningSignals.count());
-	for (auto& pair : m_values)
+	m_states.resize(m_sourceInfo.tuningSignals.count());
+	for (auto& state : m_states)
 	{
-		pair.first = qQNaN();
-		pair.second = qQNaN();
+		state.currentValue = qQNaN();
+		state.newValue = qQNaN();
+		state.lowLimit = qQNaN();
+		state.highLimit = qQNaN();
+		state.validity = false;
 	}
 
 	for (int i = 0; i < m_sourceInfo.tuningSignals.count(); i++)
@@ -51,13 +56,14 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 	if (role == Qt::DisplayRole)
 	{
 		Signal& signal = m_sourceInfo.tuningSignals[index.row()];
+		auto state = m_states[index.row()];
 		switch (index.column())
 		{
 			case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
 			case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
 			case NEW_VALUE_COLUMN:
 			{
-				double value = m_values[index.row()].second;
+				double value = state.newValue;
 				if (qIsNaN(value))
 				{
 					return "";
@@ -77,13 +83,17 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 			break;
 			case CURRENT_VALUE_COLUMN:
 			{
-				double value = m_values[index.row()].first;
+				double value = state.currentValue;
 				if (qIsNaN(value))
 				{
 					return "";
 				}
 				else
 				{
+					if (state.validity == false)
+					{
+						return "???";
+					}
 					if (signal.isAnalog())
 					{
 						return value;
@@ -95,8 +105,55 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 				}
 			}
 			break;
-			case LOW_LIMIT_COLUMN: return signal.lowLimit();
-			case HIGH_LIMIT_COLUMN: return signal.highLimit();
+			case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowLimit();
+			case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highLimit();
+			case RECEIVED_LOW_LIMIT_COLUMN:
+			{
+				double value = state.lowLimit;
+				if (qIsNaN(value))
+				{
+					return "";
+				}
+				else
+				{
+					if (state.validity == false)
+					{
+						return "???";
+					}
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return "";
+					}
+				}
+			}
+			break;
+			case RECEIVED_HIGH_LIMIT_COLUMN:{
+				double value = state.highLimit;
+				if (qIsNaN(value))
+				{
+					return "";
+				}
+				else
+				{
+					if (state.validity == false)
+					{
+						return "???";
+					}
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return "";
+					}
+				}
+			}
+			break;
 		}
 	}
 	return QVariant();
@@ -116,10 +173,14 @@ QVariant SafetyChannelSignalsModel::headerData(int section, Qt::Orientation orie
 				return "New value";
 			case CURRENT_VALUE_COLUMN:
 				return "Current value";
-			case LOW_LIMIT_COLUMN:
-				return "Low limit";
-			case HIGH_LIMIT_COLUMN:
-				return "High limit";
+			case ORIGINAL_LOW_LIMIT_COLUMN:
+				return "Original Low limit";
+			case ORIGINAL_HIGH_LIMIT_COLUMN:
+				return "Original High limit";
+			case RECEIVED_LOW_LIMIT_COLUMN:
+				return "Received Low limit";
+			case RECEIVED_HIGH_LIMIT_COLUMN:
+				return "Received High limit";
 		}
 	}
 
@@ -175,7 +236,7 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 		return false;
 	}
 
-	m_values[index.row()].second = value.toDouble();
+	m_states[index.row()].newValue = newValue;
 	emit dataChanged(index, index);
 
 	m_service->setSignalState(signal.appSignalID(), newValue);
@@ -199,18 +260,27 @@ void SafetyChannelSignalsModel::updateSignalStates()
 	}
 }
 
-void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double value)
+void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity)
 {
+	QVector<int> roles;
+	roles << Qt::DisplayRole;
+
 	if (signalIdMap.contains(appSignalID))
 	{
 		int signalIndex = signalIdMap[appSignalID];
-		m_values[signalIndex].first = value;
-		if (m_values[signalIndex].second == value)
+
+		m_states[signalIndex].currentValue = value;
+		m_states[signalIndex].lowLimit = lowLimit;
+		m_states[signalIndex].highLimit = highLimit;
+		m_states[signalIndex].validity = validity;
+
+		if (m_states[signalIndex].newValue == value)
 		{
-			m_values[signalIndex].second = qQNaN();
+			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
 		}
 
 		emit dataChanged(index(signalIndex, CURRENT_VALUE_COLUMN), index(signalIndex, CURRENT_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
+		emit dataChanged(index(signalIndex, RECEIVED_LOW_LIMIT_COLUMN), index(signalIndex, RECEIVED_HIGH_LIMIT_COLUMN), QVector<int>() << Qt::DisplayRole);
 	}
 }
