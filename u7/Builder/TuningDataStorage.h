@@ -4,10 +4,10 @@
 #include <QList>
 #include "../include/Signal.h"
 #include "IssueLogger.h"
+#include "../TuningService/TuningSocket.h"
 
 
 struct TuningSignalState;
-
 
 class TuningFramesData
 {
@@ -54,6 +54,7 @@ public:
 	void setFrameData(int frameNo, const char* fotipData);
 
 	bool getSignalState(const Signal* signal, TuningSignalState* tss);
+	bool setSignalState(const Signal* signal, double value, Tuning::SocketRequest* sr);
 };
 
 
@@ -135,6 +136,7 @@ public:
 	void setFrameData(int frameNo, const char* fotipData);
 
 	bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
+	bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
 };
 
 

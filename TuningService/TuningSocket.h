@@ -28,6 +28,7 @@ namespace Tuning
 		int lmPort;
 		int lmNumber;
 		int lmSubsystemID;
+		quint64 uniqueID;
 		quint16 numerator;
 		OperationCode operation;
 		int startAddressW;
@@ -35,7 +36,7 @@ namespace Tuning
 		DataType dataType;
 		int romSizeW;
 
-		char frameData[1024];
+		char frameData[FOTIP_TX_RX_DATA_SIZE];
 	};
 
 

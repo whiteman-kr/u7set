@@ -149,8 +149,6 @@ namespace Tuning
 			return;
 		}
 
-		int sv = sizeof(RupFotipFrame);
-
 		RupFrameHeader& rh = m_reqFrame.rupHeader;
 
 		rh.frameSize = ENTIRE_UDP_SIZE;
@@ -195,7 +193,7 @@ namespace Tuning
 		fh.romSize = sr.romSizeW * 2;					// words => bytes
 		fh.romFrameSize = sr.frameSizeW * 2;			// words => bytes
 		fh.dataType = sr.dataType;
-		fh.uniqueId = 0;
+		fh.uniqueId = sr.uniqueID;
 
 		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);
 		memset(m_reqFrame.fotip.reserv, 0, FOTIP_DATA_RESERV_SIZE);
@@ -231,36 +229,5 @@ namespace Tuning
 	{
 		return m_replies.pop(reply);
 	}
-
-
-	/*void TuningSocketWorker::readTunigData()
-	{
-
-	}*/
-
-
-	// -------------------------------------------------------------------------
-	//
-	//	TuningSocketWorker::Request class implementaton
-	//
-	// -------------------------------------------------------------------------
-
-
-	/*void TuningSocketWorker::Request::initToRead(const TuningSettings& settings, quint64 tuningID, int frameNo)
-	{
-		Q_UNUSED(settings);
-		Q_UNUSED(frameNo);
-		header.version = 1;
-		header.tuningID = tuningID;
-//		header.subsystemKey = subsystemKey;
-//		header.operationCode = TO_INT(OperationCode::Read);
-		header.flags = 0;
-//		header.startAddressW = 0;			//
-		header.requestSizeB;			// UDP frame size = 1432 bytes
-		header.romSizeB;				// = ROM_SIZE_B
-		header.romFrameSizeB;			// = ROM_FRAME_SIZE_B
-		header.dataType;				// DataType enum values
-	}*/
-
 
 }

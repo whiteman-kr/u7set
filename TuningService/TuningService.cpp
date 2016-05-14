@@ -1,3 +1,4 @@
+#include "../include/WUtils.h"
 #include "TuningService.h"
 
 
@@ -129,6 +130,8 @@ void TuningServiceWorker::initialize()
 		connect(this, &TuningServiceWorker::tuningServiceReady, m_tuningService, &TuningService::tuningServiceReady);
 
 		connect(m_tuningService, &TuningService::signal_getSignalState, this, &TuningServiceWorker::onGetSignalState);
+		connect(m_tuningService, &TuningService::signal_setSignalState, this, &TuningServiceWorker::onSetSignalState);
+
 		connect(this, &TuningServiceWorker::signalStateReady, m_tuningService, &TuningService::signalStateReady);
 	}
 
@@ -167,8 +170,83 @@ void TuningServiceWorker::stopTuningSocket()
 }
 
 
-void TuningServiceWorker::setSignalValue(QString appSignalID, double value)
+void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 {
+	if (m_signal2Source.contains(appSignalID) == false)
+	{
+		return;
+	}
+
+	QString sourceID = m_signal2Source[appSignalID];
+
+	if (m_dataSources.contains(sourceID) == false)
+	{
+		return;
+	}
+
+	TuningDataSource* source = m_dataSources[sourceID];
+
+	if (source == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	quint16 updateFrameStartAddressW = 0;
+
+	Tuning::SocketRequest sr;
+
+	bool result = source->setSignalState(appSignalID, value, &sr);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	// send request
+	//
+	//	allready filled inside source->setSignalState(appSignalID, value, &sr):
+	//
+	//	sr.dataType
+	//	sr.startAddressW - offset of frame!
+	//	sr.frameData
+	//
+
+	sr.lmIP = source->lmAddress32();
+	sr.lmPort = source->lmPort();
+	sr.lmNumber = source->lmNumber();
+	sr.lmSubsystemID = source->lmSubsystemID();
+	sr.uniqueID = source->uniqueID();
+	sr.numerator = source->numerator();
+	sr.operation = Tuning::OperationCode::Write;
+	sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
+	sr.romSizeW = m_tuningSettings.tuningRomSizeW;
+
+	sr.startAddressW += m_tuningSettings.tuningDataOffsetW;		// !!!
+
+	// For IPEN only!!!
+
+	sr.dataType = Tuning::DataType::Discrete;		// turn off limits control!
+
+	quint16* ptr = reinterpret_cast<quint16*>(sr.frameData);
+
+	for(int i = 0; i < FOTIP_TX_RX_DATA_SIZE / sizeof(quint16); i++)
+	{
+		*ptr = reverseBytes<quint16>(*ptr);
+
+		ptr++;
+	}
+
+	// For IPEN only!!!
+
+	source->incNumerator();
+	source->setWaitReply();
+
+	if (m_tuningSocket != nullptr)
+	{
+		m_tuningSocket->sendRequest(sr);
+	}
+
 
 }
 
@@ -247,6 +325,7 @@ void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
 	sr.lmPort = source->lmPort();
 	sr.lmNumber = source->lmNumber();
 	sr.lmSubsystemID = source->lmSubsystemID();
+	sr.uniqueID = source->uniqueID();
 	sr.numerator = source->numerator();
 	sr.operation = Tuning::OperationCode::Read;
 	sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
@@ -262,7 +341,6 @@ void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
 	{
 		m_tuningSocket->sendRequest(sr);
 	}
-
 }
 
 

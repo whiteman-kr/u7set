@@ -170,7 +170,8 @@ SOURCES +=\
     UploadTabPage.cpp \
     Builder/TuningDataStorage.cpp \
     ../TuningService/TuningDataSource.cpp \
-    DialogChoosePreset.cpp
+    DialogChoosePreset.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS  += \
     CentralWidget.h \

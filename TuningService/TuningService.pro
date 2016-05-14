@@ -51,7 +51,8 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../AppDataService/AppSignalState.cpp \
     ../lib/Crc.cpp \
-    TuningMain.cpp
+    TuningMain.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
