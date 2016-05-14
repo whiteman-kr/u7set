@@ -1,15 +1,22 @@
 #include "TuningMainWindow.h"
 #include "SafetyChannelSignalsModel.h"
+#include "AnalogSignalSetter.h"
 #include <QSettings>
 #include <QFile>
 #include <QGroupBox>
 #include <QTableView>
 #include <QMenuBar>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QMessageBox>
 
 
 TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
-	QMainWindow(parent)//,
+	QMainWindow(parent),
+	m_updateTimer(new QTimer(this))
 {
 	QSettings settings("Radiy", "TuningIPEN");
 
@@ -31,24 +38,6 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	setGeometry(windowRect);
 
 	setWindowTitle("Tuning IPEN");
-
-	QTabWidget* tabs = new QTabWidget(this);
-	setCentralWidget(tabs);
-
-	/*QWidget* widget = new QWidget;
-	QHBoxLayout* hl = new QHBoxLayout;
-	widget->setLayout(hl);
-	hl->addWidget(new QGroupBox(this));
-
-	hl->addWidget(new QGroupBox(this));*/
-	tabs->addTab(new QWidget, "Automatic Power Regulator (APR)");
-
-	m_setOfSignalsScram = new QTabWidget(this);
-	QWidget* widget = new QWidget;
-	QHBoxLayout* hl = new QHBoxLayout;
-	widget->setLayout(hl);
-	hl->addWidget(m_setOfSignalsScram);
-	tabs->addTab(widget, "Set of signals SCRAM");
 
 	menuBar()->addAction("Settings");
 
@@ -73,13 +62,126 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	connect(m_service, &TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 
 	m_service->start();
+
+	connect(m_updateTimer, &QTimer::timeout, this, &TuningMainWindow::updateSignalStates);
+	m_updateTimer->start(200);
+
+	//Init tabs
+	//
+	QTabWidget* tabs = new QTabWidget(this);
+	setCentralWidget(tabs);
+
+	QWidget* widget = new QWidget;
+	QHBoxLayout* hl = new QHBoxLayout;
+	widget->setLayout(hl);
+
+	QGroupBox* groupBox = new QGroupBox("Power control", this);
+	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QFormLayout* fl = new QFormLayout;
+	groupBox->setLayout(fl);
+	addAnalogSetter(fl, "Power demand control", "#HP01LC01A_01MAT", 110);
+
+	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
+	m_scrollBar->setMinimum(0);
+	m_scrollBar->setMaximum(1100);
+	m_scrollBar->setPageStep(1);
+	m_scrollBar->setTracking(false);
+	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
+
+	fl->addRow("#HP01LC01DC_01PPC", m_scrollBar);
+
+	m_automaticMode = new QPushButton("Automatic mode", this);
+	m_automaticMode->setCheckable(true);
+	connect(m_automaticMode, &QPushButton::toggled, this, &TuningMainWindow::applyNewAutomaticMode);
+
+	fl->addRow("#HP01LC02RAM_01PPC", m_automaticMode);
+	hl->addWidget(groupBox);
+
+	groupBox = new QGroupBox("Setting coeficients", this);
+	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	fl = new QFormLayout;
+	groupBox->setLayout(fl);
+	addAnalogSetter(fl, "Limiter range command \"UP\"", "#HP01LC01RLR_01PPC", 100);
+	addAnalogSetter(fl, "Limiter range command \"DOWN\"", "#HP01LC01RLR_02PPC", 100);
+	addAnalogSetter(fl, "Scaling coefficient", "#HP01LC02RCC_01PPC", 100);
+	addAnalogSetter(fl, "Driving coefficient", "#HP01LC02RDC_01PPC", 100);
+	hl->addWidget(groupBox);
+
+	tabs->addTab(widget, "Automatic Power Regulator (APR)");
+
+	m_setOfSignalsScram = new QTabWidget(this);
+	widget = new QWidget;
+	hl = new QHBoxLayout;
+	widget->setLayout(hl);
+	hl->addWidget(m_setOfSignalsScram);
+	tabs->addTab(widget, "Set of signals SCRAM");
 }
 
 
 TuningMainWindow::~TuningMainWindow()
 {
+	m_updateTimer->stop();
 	m_service->stop();
 	delete m_service;
+}
+
+
+void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QString label, QString id, double highLimit)
+{
+	auto setter = new AnalogSignalSetter(id, highLimit, m_service, this);
+	fl->addRow(label + "\n" + id, setter);
+	connect(m_updateTimer, &QTimer::timeout, setter, &AnalogSignalSetter::updateValue);
+	connect(m_service, &TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
+}
+
+
+void TuningMainWindow::updateSignalStates()
+{
+	m_service->getSignalState("#HP01LC01DC_01PPC");
+	m_service->getSignalState("#HP01LC02RAM_01PPC");
+}
+
+
+void TuningMainWindow::updateSignalState(QString appSignalID, double value)
+{
+	if (appSignalID == "#HP01LC01DC_01PPC")
+	{
+		m_scrollBar->setValue(value * 10);
+	}
+	if (appSignalID == "#HP01LC02RAM_01PPC")
+	{
+		m_automaticMode->setChecked(value != 0);
+	}
+}
+
+
+void TuningMainWindow::applyNewScrollBarValue()
+{
+	double newValue = m_scrollBar->value() / 10.0;
+
+	/*auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC01DC_01PPC</b> signal value to <b>%1</b>?")
+									   .arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}*/
+
+	m_service->setSignalState("#HP01LC02RAM_01PPC", newValue);
+}
+
+
+void TuningMainWindow::applyNewAutomaticMode(bool enabled)
+{
+	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
+									   .arg(enabled ? 0 : 1), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}
+
+	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 0 : 1);
 }
 
 
