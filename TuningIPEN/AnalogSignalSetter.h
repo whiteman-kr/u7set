@@ -10,7 +10,7 @@ class AnalogSignalSetter : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit AnalogSignalSetter(QString signalId, double highLimit, TuningService* service, QWidget *parent = 0);
+	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningService* service, QWidget *parent = 0);
 
 signals:
 
@@ -21,6 +21,7 @@ public slots:
 
 private:
 	QString m_signalId;
+	double m_lowLimit;
 	double m_highLimit;
 	bool m_validity = false;
 	TuningService* m_service;

@@ -12,6 +12,7 @@ class QTabWidget;
 class QFormLayout;
 class QPushButton;
 class QScrollBar;
+class AnalogSignalSetter;
 
 class TuningMainWindow : public QMainWindow
 {
@@ -19,6 +20,7 @@ class TuningMainWindow : public QMainWindow
 private:
 	QString m_cfgPath;
 	QTabWidget* m_setOfSignalsScram;
+	QWidget* m_automaticPowerRegulatorWidget;
 
 	TuningService* m_service = nullptr;
 	QVector<TuningDataSourceInfo> m_info;
@@ -27,7 +29,7 @@ private:
 	QScrollBar* m_scrollBar;
 	QTimer* m_updateTimer;
 
-	void addAnalogSetter(QFormLayout* fl, QString label, QString id, double highLimit);
+	void addAnalogSetter(QFormLayout* fl, QVector<TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
 
