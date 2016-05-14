@@ -7,9 +7,10 @@
 #include <QDoubleValidator>
 #include <QMessageBox>
 
-AnalogSignalSetter::AnalogSignalSetter(QString signalId, double highLimit, TuningService* service, QWidget *parent) :
+AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningService* service, QWidget *parent) :
 	QWidget(parent),
 	m_signalId(signalId),
+	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
 	m_service(service),
 	m_input(new QLineEdit(this)),
