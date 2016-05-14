@@ -24,6 +24,8 @@ public:
 class TuningDataSourceState
 {
 public:
+	QString lmEquipmentID;
+
 	bool hasConnection;
 	int sentRequestCount;
 	int receivedReplyCount;

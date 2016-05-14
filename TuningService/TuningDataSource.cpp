@@ -281,6 +281,7 @@ TuningDataSourceState TuningDataSource::getState()
 {
 	TuningDataSourceState state;
 
+	state.lmEquipmentID = m_lmEquipmentID;
 	state.hasConnection = m_hasConnection;
 	state.receivedReplyCount = m_receivedRepyCount;
 	state.sentRequestCount = m_sentRequestCount;
