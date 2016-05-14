@@ -6,6 +6,15 @@
 class TuningDataSourceInfo;
 class TuningService;
 
+struct SignalState
+{
+	double currentValue;
+	double newValue;
+	double lowLimit;
+	double highLimit;
+	bool validity;
+};
+
 class SafetyChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
@@ -22,11 +31,11 @@ public:
 
 public slots:
 	void updateSignalStates();
-	void updateSignalState(QString appSignalID, double value);
+	void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
 
 private:
 	TuningDataSourceInfo& m_sourceInfo;
-	QVector<QPair<double, double>> m_values;
+	QVector<SignalState> m_states;
 	TuningService* m_service;
 	QHash<QString, int> signalIdMap;
 };

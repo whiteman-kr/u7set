@@ -86,7 +86,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	m_scrollBar->setMaximum(1100);
 	m_scrollBar->setPageStep(1);
 	m_scrollBar->setTracking(false);
-	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
+	connect(m_scrollBar, &QScrollBar::sliderMoved, this, &TuningMainWindow::applyNewScrollBarValue);
 
 	fl->addRow("#HP01LC01DC_01PPC", m_scrollBar);
 
