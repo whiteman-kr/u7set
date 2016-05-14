@@ -37,11 +37,20 @@ void AnalogSignalSetter::updateValue()
 	m_service->getSignalState(m_signalId);
 }
 
-void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value)
+void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool validity)
 {
 	if (appSignalID == m_signalId)
 	{
-		m_currentValue->setText(QString::number(value));
+		m_validity = validity;
+		if (m_validity == false)
+		{
+			m_currentValue->setText("???");
+		}
+		else
+		{
+			m_currentValue->setText(QString::number(value));
+		}
+
 		if (m_currentValue->text() == m_input->text())
 		{
 			m_input->clear();
@@ -56,6 +65,12 @@ void AnalogSignalSetter::setNewValue()
 	if (!ok)
 	{
 		QMessageBox::critical(nullptr, "Not valid input", "Please, enter valid float pointing number");
+		return;
+	}
+
+	if (newValue < 0 || newValue > m_highLimit)
+	{
+		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between 0 and %1").arg(m_highLimit));
 		return;
 	}
 

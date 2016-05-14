@@ -174,14 +174,14 @@ void TuningMainWindow::applyNewScrollBarValue()
 void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 {
 	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
-									   .arg(enabled ? 0 : 1), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+									   .arg(enabled ? 1 : 0), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
 	{
 		return;
 	}
 
-	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 0 : 1);
+	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 1 : 0);
 }
 
 
