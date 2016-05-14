@@ -2,6 +2,7 @@
 #include "../TuningService/TuningDataSource.h"
 #include "../TuningService/TuningService.h"
 #include <cmath>
+#include <QMessageBox>
 
 const int	SIGNAL_ID_COLUMN = 0,
 			SIGNAL_DESCRIPTION_COLUMN = 1,
@@ -49,10 +50,11 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 {
 	if (role == Qt::DisplayRole)
 	{
+		Signal& signal = m_sourceInfo.tuningSignals[index.row()];
 		switch (index.column())
 		{
-			case SIGNAL_ID_COLUMN: return m_sourceInfo.tuningSignals[index.row()].customAppSignalID();
-			case SIGNAL_DESCRIPTION_COLUMN: return m_sourceInfo.tuningSignals[index.row()].caption();
+			case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
+			case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
 			case NEW_VALUE_COLUMN:
 			{
 				double value = m_values[index.row()].second;
@@ -62,7 +64,14 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 				}
 				else
 				{
-					return value;
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return value == 0 ? "No" : "Yes";
+					}
 				}
 			}
 			break;
@@ -75,12 +84,19 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 				}
 				else
 				{
-					return value;
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return value == 0 ? "No" : "Yes";
+					}
 				}
 			}
 			break;
-			case LOW_LIMIT_COLUMN: return m_sourceInfo.tuningSignals[index.row()].lowLimit();
-			case HIGH_LIMIT_COLUMN: return m_sourceInfo.tuningSignals[index.row()].highLimit();
+			case LOW_LIMIT_COLUMN: return signal.lowLimit();
+			case HIGH_LIMIT_COLUMN: return signal.highLimit();
 		}
 	}
 	return QVariant();
@@ -117,11 +133,44 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 		return QAbstractTableModel::setData(index, value, role);
 	}
 
-	double newValue = value.toDouble();
-
 	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
 
+	bool ok = false;
+	double newValue = value.toDouble(&ok);
+	if (!ok)
+	{
+		if (signal.isDiscrete())
+		{
+			switch (value.toString().trimmed()[0].toLower().toLatin1())
+			{
+				case 'y':
+					newValue = 1;
+					break;
+				case 'n':
+					newValue = 0;
+					break;
+				default:
+					QMessageBox::critical(nullptr, "Not valid input", "Please, enter 0 or 1");
+					return false;
+			}
+		}
+		else
+		{
+			QMessageBox::critical(nullptr, "Not valid input", "Please, enter valid float pointing number");
+			return false;
+		}
+	}
+
 	if (newValue < signal.lowLimit() || newValue > signal.highLimit())
+	{
+		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowLimit()).arg(signal.highLimit()));
+		return false;
+	}
+
+	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
+									   .arg(signal.customAppSignalID()).arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+	if (reply == QMessageBox::No)
 	{
 		return false;
 	}
@@ -156,6 +205,11 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 	{
 		int signalIndex = signalIdMap[appSignalID];
 		m_values[signalIndex].first = value;
+		if (m_values[signalIndex].second == value)
+		{
+			m_values[signalIndex].second = qQNaN();
+			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
+		}
 
 		emit dataChanged(index(signalIndex, CURRENT_VALUE_COLUMN), index(signalIndex, CURRENT_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
 	}
