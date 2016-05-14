@@ -46,6 +46,7 @@ private:
 private slots:
 	void onTimer();
 	void onReplyReady();
+	void onGetSignalState(QString appSignalID);
 
 public:
 	TuningServiceWorker(const QString& serviceStrID,
@@ -67,6 +68,7 @@ public:
 
 signals:
 	void tuningServiceReady();
+	void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
 
 public slots:
 	void setSignalValue(QString appSignalID, double value);
@@ -95,7 +97,7 @@ public:
 
 signals:
 	void tuningServiceReady();
-	void signalStateReady(QString appSignalID, double value);
+	void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
 
 	// for internal use only
 	//

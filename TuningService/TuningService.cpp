@@ -127,6 +127,9 @@ void TuningServiceWorker::initialize()
 	if (m_tuningService != nullptr)
 	{
 		connect(this, &TuningServiceWorker::tuningServiceReady, m_tuningService, &TuningService::tuningServiceReady);
+
+		connect(m_tuningService, &TuningService::signal_getSignalState, this, &TuningServiceWorker::onGetSignalState);
+		connect(this, &TuningServiceWorker::signalStateReady, m_tuningService, &TuningService::signalStateReady);
 	}
 
 	connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
@@ -304,6 +307,45 @@ void TuningServiceWorker::onReplyReady()
 
 		count++;
 	}
+}
+
+
+void TuningServiceWorker::onGetSignalState(QString appSignalID)
+{
+	if (m_signal2Source.contains(appSignalID) == false)
+	{
+		emit signalStateReady(appSignalID, 0, 0, 0, false);
+		return;
+	}
+
+	QString sourceID = m_signal2Source[appSignalID];
+
+	if (m_dataSources.contains(sourceID) == false)
+	{
+		emit signalStateReady(appSignalID, 0, 0, 0, false);
+		return;
+	}
+
+	TuningDataSource* source = m_dataSources[sourceID];
+
+	if (source == nullptr)
+	{
+		assert(false);
+		emit signalStateReady(appSignalID, 0, 0, 0, false);
+		return;
+	}
+
+	TuningSignalState tss;
+
+	bool result = source->getSignalState(appSignalID, &tss);
+
+	if (result == false)
+	{
+		emit signalStateReady(appSignalID, 0, 0, 0, false);
+		return;
+	}
+
+	emit signalStateReady(appSignalID, tss.currentValue, tss.lowLimit, tss.highLimit, tss.valid);
 }
 
 

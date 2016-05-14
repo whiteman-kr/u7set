@@ -6,7 +6,10 @@
 #include "IssueLogger.h"
 
 
-class TuningSignalsData
+struct TuningSignalState;
+
+
+class TuningFramesData
 {
 public:
 	static const int BITS_8 = 8;
@@ -30,8 +33,8 @@ private:
 	void setFramesDataBit(int offset, int bit, int value);
 
 public:
-	TuningSignalsData();
-	virtual ~TuningSignalsData();
+	TuningFramesData();
+	virtual ~TuningFramesData();
 
 	void init(int firstFrameNo, int tuningFrameSizeBytes, int signalSizeBits, int signalCount);
 
@@ -49,6 +52,8 @@ public:
 	void converToBigEndian();
 
 	void setFrameData(int frameNo, const char* fotipData);
+
+	bool getSignalState(const Signal* signal, TuningSignalState* tss);
 };
 
 
@@ -70,11 +75,15 @@ private:
 
 	static const int TYPES_COUNT = 3;			// analog float, analog int, discrete
 
-	TuningSignalsData m_tuningSignalsData[TYPES_COUNT];
+	TuningFramesData m_tuningFramesData[TYPES_COUNT];
 
-	QList<Signal*> m_tuningAnalogFloat;
+	QList<Signal*> m_tuningSignals[TYPES_COUNT];
+
+/*	QList<Signal*> m_tuningAnalogFloat;
 	QList<Signal*> m_tuningAnalogInt;
-	QList<Signal*> m_tuningDiscrete;
+	QList<Signal*> m_tuningDiscrete;*/
+
+	QHash<QString, Signal*> m_id2SignalMap;
 
 	bool m_deleteSignals = false;
 
@@ -92,6 +101,9 @@ private:
 	static const char* TUNING_DISCRETE_SIGNALS;
 	static const char* TUNING_SIGNALS_COUNT;
 
+	int signalValueSizeBits(int type);
+	int getSignalType(const Signal* signal);
+
 public:
 	TuningData();
 	TuningData(	QString lmID,
@@ -101,11 +113,10 @@ public:
 	~TuningData();
 
 	bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
-
 	bool buildTuningData();
-	bool initTuningData();
-
 	quint64 generateUniqueID(const QString& lmEquipmentID);
+
+	bool initTuningData();
 
 	quint64 uniqueID() const { return m_uniqueID; }
 	void getTuningData(QByteArray* tuningData) const;
@@ -117,11 +128,13 @@ public:
 
 	void getSignals(QList<Signal *>& signalList);
 
-	QList<Signal*> tuningAnalogFloatSignals() const { return m_tuningAnalogFloat; }
-	QList<Signal*> tuningAnalogIntSignals() const { return m_tuningAnalogInt; }
-	QList<Signal*> tuningDiscreteSignals() const { return m_tuningDiscrete; }
+	QList<Signal*> tuningAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
+	QList<Signal*> tuningAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
+	QList<Signal*> tuningDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
 
 	void setFrameData(int frameNo, const char* fotipData);
+
+	bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 };
 
 

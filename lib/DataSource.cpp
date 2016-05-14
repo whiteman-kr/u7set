@@ -271,7 +271,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	readAdditionalSectionsFromXml(xml);
+	result &= readAdditionalSectionsFromXml(xml);
 
 	return result;
 }

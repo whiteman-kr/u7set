@@ -21,6 +21,16 @@ public:
 };
 
 
+struct TuningSignalState
+{
+	double currentValue;
+	double lowLimit;
+	double highLimit;
+
+	bool valid;
+};
+
+
 class TuningDataSource : public DataSource
 {
 private:
@@ -57,6 +67,8 @@ public:
 	void resetWaitReply() { m_waiReply = false; }
 
 	void processReply(const Tuning::SocketReply& reply);
+
+	bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 };
 
 
@@ -74,5 +86,4 @@ public:
 	void buildIP2DataSourceMap();
 
 	TuningDataSource* getDataSourceByIP(quint32 ip);
-
 };

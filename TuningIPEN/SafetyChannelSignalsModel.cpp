@@ -144,7 +144,7 @@ Qt::ItemFlags SafetyChannelSignalsModel::flags(const QModelIndex& index) const
 
 void SafetyChannelSignalsModel::updateSignalStates()
 {
-	for (auto signal : m_sourceInfo.tuningSignals)
+	for (Signal& signal : m_sourceInfo.tuningSignals)
 	{
 		m_service->getSignalState(signal.appSignalID());
 	}

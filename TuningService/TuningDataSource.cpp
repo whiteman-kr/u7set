@@ -210,3 +210,19 @@ void TuningDataSource::processReply(const Tuning::SocketReply& reply)
 	m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
 }
 
+
+bool TuningDataSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
+{
+	if (tss == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_tuningData == nullptr)
+	{
+		return false;
+	}
+
+	return m_tuningData->getSignalState(appSignalID, tss);
+}

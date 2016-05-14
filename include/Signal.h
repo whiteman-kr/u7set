@@ -183,6 +183,7 @@ private:
 public:
 	Signal(bool initProperties);
 	Signal();
+	virtual ~Signal();
 
 	Signal(const Signal& signal) :
 		PropertyObject()
