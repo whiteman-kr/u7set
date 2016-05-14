@@ -10,8 +10,10 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QPushButton>
-#include <QScrollBar>
+//#include <QScrollBar>
 #include <QMessageBox>
+#include <QStatusBar>
+#include <QLabel>
 
 
 void setFontRecursive(QWidget* parentWidget, const QFont& font)
@@ -152,31 +154,56 @@ void TuningMainWindow::updateSignalStates()
 
 void TuningMainWindow::updateSignalState(QString appSignalID, double value)
 {
-	if (appSignalID == "#HP01LC01DC_01PPC")
+	/*if (appSignalID == "#HP01LC01DC_01PPC")
 	{
 		m_scrollBar->setValue(value * 10);
-	}
+	}*/
 	if (appSignalID == "#HP01LC02RAM_01PPC")
 	{
 		m_automaticMode->setChecked(value != 0);
 	}
 }
 
+void TuningMainWindow::updateDataSourceStatus(TuningDataSourceState state)
+{
+	if (m_statusLabelMap.contains(state.lmEquipmentID))
+	{
+		QLabel* label = m_statusLabelMap.value(state.lmEquipmentID, nullptr);
+		assert(label != nullptr);
 
-void TuningMainWindow::applyNewScrollBarValue()
+		if (!state.hasConnection)
+		{
+			label->setStyleSheet("QLabel { background-color : #FF3333; }");	//red
+		}
+		else
+		{
+			if (state.flags.successfulCheck == 0)
+			{
+				label->setStyleSheet("QLabel { background-color : #FFCC33; }");	//yellow
+			}
+			else
+			{
+				label->setStyleSheet("QLabel { background-color : #009933; }");	//green
+			}
+		}
+	}
+}
+
+
+/*void TuningMainWindow::applyNewScrollBarValue()
 {
 	double newValue = m_scrollBar->value() / 10.0;
 
-	/*auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC01DC_01PPC</b> signal value to <b>%1</b>?")
+	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC01DC_01PPC</b> signal value to <b>%1</b>?")
 									   .arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
 	{
 		return;
-	}*/
+	}
 
 	m_service->setSignalState("#HP01LC02RAM_01PPC", newValue);
-}
+}*/
 
 
 void TuningMainWindow::applyNewAutomaticMode(bool enabled)
@@ -197,8 +224,11 @@ void TuningMainWindow::onTuningServiceReady()
 {
 	m_service->getTuningDataSourcesInfo(m_info);
 
-	for (TuningDataSourceInfo& sourceInfo : m_info)
+	QVector<int> sourceIndexes;
+
+	for (int index = 0; index < m_info.count(); index++)
 	{
+		TuningDataSourceInfo& sourceInfo = m_info[index];
 		int place = 0;
 		for (; place < m_setOfSignalsScram->count(); place++)
 		{
@@ -209,6 +239,7 @@ void TuningMainWindow::onTuningServiceReady()
 		}
 		QTableView* view = new QTableView;
 		m_setOfSignalsScram->insertTab(place, view, sourceInfo.lmCaption);
+		sourceIndexes.insert(place, index);
 
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, this);
 		view->setModel(model);
@@ -217,6 +248,17 @@ void TuningMainWindow::onTuningServiceReady()
 
 		view->resizeColumnsToContents();
 	}
+
+	for (int i = 0; i < sourceIndexes.count(); i++)
+	{
+		TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
+		QLabel* newLabel = new QLabel(sourceInfo.lmCaption + ": " + sourceInfo.lmAddressPort.addressStr(), this);
+		statusBar()->addWidget(newLabel);
+
+		m_statusLabelMap.insert(sourceInfo.lmEquipmentID, newLabel);
+	}
+
+	connect(m_service, &TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
 
 	QHBoxLayout* hl = new QHBoxLayout;
 	m_automaticPowerRegulatorWidget->setLayout(hl);

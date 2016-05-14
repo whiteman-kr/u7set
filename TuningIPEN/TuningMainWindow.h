@@ -12,6 +12,7 @@ class QTabWidget;
 class QFormLayout;
 class QPushButton;
 class QScrollBar;
+class QLabel;
 class AnalogSignalSetter;
 
 class TuningMainWindow : public QMainWindow
@@ -24,6 +25,7 @@ private:
 
 	TuningService* m_service = nullptr;
 	QVector<TuningDataSourceInfo> m_info;
+	QMap<QString, QLabel*> m_statusLabelMap;
 
 	QPushButton* m_automaticMode;
 	QScrollBar* m_scrollBar;
@@ -35,8 +37,11 @@ private:
 
 public slots:
 	void updateSignalStates();
+
 	void updateSignalState(QString appSignalID, double value);
-	void applyNewScrollBarValue();
+	void updateDataSourceStatus(TuningDataSourceState state);
+
+	//void applyNewScrollBarValue();
 	void applyNewAutomaticMode(bool enabled);
 
 public:
