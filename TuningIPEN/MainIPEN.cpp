@@ -1,5 +1,6 @@
 #include "TuningMainWindow.h"
 #include <QApplication>
+#include "../TuningService/TuningDataSource.h"
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
@@ -27,6 +28,8 @@ int main(int argc, char *argv[])
 			cfgPath = arg.mid(3);
 		}
 	}
+
+	qRegisterMetaType<TuningDataSourceState>("TuningDataSourceState");
 
 	QApplication a(argc, argv);
 	TuningMainWindow w(cfgPath);

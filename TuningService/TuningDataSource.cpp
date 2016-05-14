@@ -10,6 +10,8 @@
 TuningDataSource::TuningDataSource()
 {
 	m_lmDataType = DataSource::DataType::Tuning;
+
+	m_fotipFlags.all = 0;
 }
 
 
@@ -194,6 +196,14 @@ TuningDataSource* TuningDataSources::getDataSourceByIP(quint32 ip)
 
 void TuningDataSource::processReply(const Tuning::SocketReply& reply)
 {
+	m_receivedRepyCount++;
+
+	m_hasConnection = true;
+
+	m_fotipFlags = reply.fotipHeader.flags;
+
+	m_lastReplyTime = QDateTime::currentMSecsSinceEpoch();
+
 	if (m_tuningData == nullptr)
 	{
 		assert(false);
@@ -211,6 +221,15 @@ void TuningDataSource::processReply(const Tuning::SocketReply& reply)
 }
 
 
+void TuningDataSource::testConnection(qint64 nowTime)
+{
+	if (nowTime - m_lastReplyTime > 1000)
+	{
+		m_hasConnection = false;
+	}
+}
+
+
 bool TuningDataSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
 {
 	if (tss == nullptr)
@@ -218,6 +237,13 @@ bool TuningDataSource::getSignalState(const QString& appSignalID, TuningSignalSt
 		assert(false);
 		return false;
 	}
+
+	if (m_hasConnection == false)
+	{
+		tss->valid = false;
+		return true;
+	}
+
 
 	if (m_tuningData == nullptr)
 	{
@@ -248,4 +274,16 @@ quint64 TuningDataSource::uniqueID()
 	}
 
 	return m_tuningData->uniqueID();
+}
+
+
+TuningDataSourceState TuningDataSource::getState()
+{
+	TuningDataSourceState state;
+
+	state.hasConnection = m_hasConnection;
+	state.receivedReplyCount = m_receivedRepyCount;
+	state.sentRequestCount = m_sentRequestCount;
+
+	return state;
 }

@@ -42,6 +42,8 @@ private:
 
 	void sendPeriodicReadRequests();
 	void sendFrameRequest(TuningDataSource* source);
+	void testConnections();
+	void emitTuningDataSourcesStates();
 
 private slots:
 	void onTimer();
@@ -72,6 +74,7 @@ public:
 signals:
 	void tuningServiceReady();
 	void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
+	void tuningDataSourceStateUpdate(TuningDataSourceState state);
 };
 
 
@@ -98,6 +101,7 @@ public:
 signals:
 	void tuningServiceReady();
 	void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
+	void tuningDataSourceStateUpdate(TuningDataSourceState state);
 
 	// for internal use only
 	//

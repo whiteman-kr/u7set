@@ -21,13 +21,24 @@ public:
 };
 
 
+class TuningDataSourceState
+{
+public:
+	bool hasConnection;
+	int sentRequestCount;
+	int receivedReplyCount;
+
+	FotipHeaderFlags flags;
+};
+
+
 struct TuningSignalState
 {
-	double currentValue;
-	double lowLimit;
-	double highLimit;
+	double currentValue = 0;
+	double lowLimit = 0;
+	double highLimit = 0;
 
-	bool valid;
+	bool valid = false;
 };
 
 
@@ -44,6 +55,12 @@ private:
 
 	int m_frameToRequest = 0;		//	0 .. m_tuningData->totalFtamesCount - 1
 
+	// state fields
+	//
+	qint64 m_lastReplyTime = 0;
+	bool m_hasConnection = false;
+	int m_sentRequestCount = 0;
+	int m_receivedRepyCount = 0;
 	FotipHeaderFlags m_fotipFlags;
 
 public:
@@ -72,6 +89,12 @@ public:
 	bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
 
 	quint64 uniqueID();
+
+	TuningDataSourceState getState();
+
+	void incSentRequestCount() { m_sentRequestCount++; }
+
+	void testConnection(qint64 nowTime);
 };
 
 

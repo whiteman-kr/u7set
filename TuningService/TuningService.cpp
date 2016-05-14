@@ -128,11 +128,11 @@ void TuningServiceWorker::initialize()
 	if (m_tuningService != nullptr)
 	{
 		connect(this, &TuningServiceWorker::tuningServiceReady, m_tuningService, &TuningService::tuningServiceReady);
+		connect(this, &TuningServiceWorker::signalStateReady, m_tuningService, &TuningService::signalStateReady);
+		connect(this, &TuningServiceWorker::tuningDataSourceStateUpdate, m_tuningService, &TuningService::tuningDataSourceStateUpdate);
 
 		connect(m_tuningService, &TuningService::signal_getSignalState, this, &TuningServiceWorker::onGetSignalState);
 		connect(m_tuningService, &TuningService::signal_setSignalState, this, &TuningServiceWorker::onSetSignalState);
-
-		connect(this, &TuningServiceWorker::signalStateReady, m_tuningService, &TuningService::signalStateReady);
 	}
 
 	connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
@@ -172,6 +172,12 @@ void TuningServiceWorker::stopTuningSocket()
 
 void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 {
+	if (m_tuningSocket == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
 	if (m_signal2Source.contains(appSignalID) == false)
 	{
 		return;
@@ -224,7 +230,7 @@ void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 
 	sr.startAddressW += m_tuningSettings.tuningDataOffsetW;		// !!!
 
-	// For IPEN only!!!
+	// For IPEN only!!! --- begin
 
 	sr.dataType = Tuning::DataType::Discrete;		// turn off limits control!
 
@@ -237,17 +243,13 @@ void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 		ptr++;
 	}
 
-	// For IPEN only!!!
+	// For IPEN only!!! --- end
 
 	source->incNumerator();
 	source->setWaitReply();
+	source->incSentRequestCount();
 
-	if (m_tuningSocket != nullptr)
-	{
-		m_tuningSocket->sendRequest(sr);
-	}
-
-
+	m_tuningSocket->sendRequest(sr);
 }
 
 
@@ -305,6 +307,10 @@ void TuningServiceWorker::allocateSignalsAndStates()
 void TuningServiceWorker::onTimer()
 {
 	sendPeriodicReadRequests();
+
+	testConnections();
+
+	emitTuningDataSourcesStates();
 }
 
 
@@ -317,8 +323,30 @@ void TuningServiceWorker::sendPeriodicReadRequests()
 }
 
 
+void TuningServiceWorker::testConnections()
+{
+	qint64 nowTime = QDateTime::currentMSecsSinceEpoch();
+
+	for(TuningDataSource* source : m_dataSources)
+	{
+		if (source == nullptr)
+		{
+			continue;
+		}
+
+		source->testConnection(nowTime);
+	}
+}
+
+
 void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
 {
+	if (m_tuningSocket == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
 	Tuning::SocketRequest sr;
 
 	sr.lmIP = source->lmAddress32();
@@ -336,11 +364,9 @@ void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
 	source->incNumerator();
 	source->setWaitReply();
 	source->nextFrameToRequest();
+	source->incSentRequestCount();
 
-	if (m_tuningSocket != nullptr)
-	{
-		m_tuningSocket->sendRequest(sr);
-	}
+	m_tuningSocket->sendRequest(sr);
 }
 
 
@@ -424,6 +450,20 @@ void TuningServiceWorker::onGetSignalState(QString appSignalID)
 	}
 
 	emit signalStateReady(appSignalID, tss.currentValue, tss.lowLimit, tss.highLimit, tss.valid);
+}
+
+
+void TuningServiceWorker::emitTuningDataSourcesStates()
+{
+	for(TuningDataSource* source : m_dataSources)
+	{
+		if (source == nullptr)
+		{
+			continue;
+		}
+
+		emit tuningDataSourceStateUpdate(source->getState());
+	}
 }
 
 
