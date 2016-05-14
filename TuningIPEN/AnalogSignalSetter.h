@@ -16,12 +16,13 @@ signals:
 
 public slots:
 	void updateValue();
-	void setCurrentValue(QString appSignalID, double value);
+	void setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
 	void setNewValue();
 
 private:
 	QString m_signalId;
 	double m_highLimit;
+	bool m_validity = false;
 	TuningService* m_service;
 	QLineEdit* m_input;
 	QLineEdit* m_currentValue;

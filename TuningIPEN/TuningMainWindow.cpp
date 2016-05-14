@@ -14,6 +14,20 @@
 #include <QMessageBox>
 
 
+void setFontRecursive(QWidget* parentWidget, const QFont& font)
+{
+	parentWidget->setFont(font);
+	for (auto object : parentWidget->children())
+	{
+		QWidget* childWidget = qobject_cast<QWidget*>(object);
+		if (childWidget != nullptr)
+		{
+			setFontRecursive(childWidget, font);
+		}
+	}
+}
+
+
 TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	QMainWindow(parent),
 	m_updateTimer(new QTimer(this))
@@ -109,6 +123,10 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	tabs->addTab(widget, "Automatic Power Regulator (APR)");
 
+	QFont font = widget->font();
+	font.setPointSize(font.pointSize() * 1.4);
+	setFontRecursive(widget, font);
+
 	m_setOfSignalsScram = new QTabWidget(this);
 	widget = new QWidget;
 	hl = new QHBoxLayout;
@@ -174,14 +192,14 @@ void TuningMainWindow::applyNewScrollBarValue()
 void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 {
 	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
-									   .arg(enabled ? 0 : 1), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+									   .arg(enabled ? 1 : 0), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
 	{
 		return;
 	}
 
-	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 0 : 1);
+	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 1 : 0);
 }
 
 
