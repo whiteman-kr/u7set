@@ -2858,7 +2858,7 @@ namespace Builder
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 
-		if (tuningData->totalFramesCount() > tuningFrameCount)
+		if (tuningData->usedFramesCount() > tuningFrameCount)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
@@ -3180,7 +3180,7 @@ namespace Builder
 		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentId()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
 		file.append(QString("LM number: %1\n").arg(lmNumber));
-		file.append(QString("Frames used total: %1").arg(m_tuningData->totalFramesCount()));
+		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
 
 		QString s;
 

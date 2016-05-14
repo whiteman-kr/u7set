@@ -297,7 +297,7 @@ namespace Builder
 	{
 		QString errorMsg;
 
-		if (m_moduleFirmware.setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg) == false)
+		if (m_moduleFirmware.setChannelData(channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, &errorMsg) == false)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, errorMsg);
 			return false;

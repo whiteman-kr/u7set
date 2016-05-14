@@ -29,6 +29,12 @@ public:
 namespace Hardware
 {
 
+	class ModuleFirmwareData
+	{
+	public:
+		quint64 uniqueID = 0;
+		QByteArray data;
+	};
 
 	class ModuleFirmware : public QObject
 	{
@@ -68,7 +74,9 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
-		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg);
+		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, QString* errorMsg);
+
+	private:
 		bool storeChannelData(QString *errorMsg);
 
 		// Properties
@@ -98,7 +106,7 @@ namespace Hardware
 
         std::vector<std::vector<quint8>> m_frames;
 
-		std::map<int, QByteArray> m_channelData;
+		std::map<int, ModuleFirmwareData> m_channelData;
 
         QByteArray m_log;
     };

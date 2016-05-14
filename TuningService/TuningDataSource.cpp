@@ -56,6 +56,7 @@ bool TuningDataSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
 	m_deleteTuningData = true;
 
 	m_tuningData->readFromXml(xml);
+	m_tuningData->initTuningData();
 
 	return true;
 }
@@ -102,6 +103,22 @@ void TuningDataSource::getTuningDataSourceInfo(TuningDataSourceInfo& info)
 }
 
 
+int TuningDataSource::nextFrameToRequest()
+{
+	if (m_tuningData != nullptr)
+	{
+		m_frameToRequest++;
+
+		if (m_frameToRequest >= m_tuningData->usedFramesCount())
+		{
+			m_frameToRequest = 0;
+		}
+	}
+
+	return m_frameToRequest;
+}
+
+
 // -------------------------------------------------------------------------------
 //
 // TuningDataSources class implementation
@@ -122,6 +139,7 @@ void TuningDataSources::clear()
 	}
 
 	QHash<QString, TuningDataSource*>::clear();
+	m_ip2DataSource.clear();
 }
 
 
@@ -152,3 +170,43 @@ void TuningDataSources::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& 
 		index++;
 	}
 }
+
+
+void TuningDataSources::buildIP2DataSourceMap()
+{
+	for(TuningDataSource* source : *this)
+	{
+		m_ip2DataSource.insert(source->lmAddress32(), source);
+	}
+}
+
+
+TuningDataSource* TuningDataSources::getDataSourceByIP(quint32 ip)
+{
+	if (m_ip2DataSource.contains(ip))
+	{
+		return m_ip2DataSource[ip];
+	}
+
+	return nullptr;
+}
+
+
+void TuningDataSource::processReply(const Tuning::SocketReply& reply)
+{
+	if (m_tuningData == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_fotipFlags = reply.fotipHeader.flags;
+
+	if (reply.fotipHeader.flags.all != 0)
+	{
+		return;
+	}
+
+	m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
+}
+

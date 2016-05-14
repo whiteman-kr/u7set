@@ -61,6 +61,8 @@ bool TuningServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	result &= m_tuningSettings.readFromXml(xml);
 	result &= readTuningDataSources(xml);
 
+	m_dataSources.buildIP2DataSourceMap();
+
 	return result;
 }
 
@@ -148,6 +150,8 @@ void TuningServiceWorker::runTuningSocket()
 {
 	m_tuningSocket = new Tuning::TuningSocketWorker(m_tuningSettings.tuningDataIP);
 
+	connect(m_tuningSocket, &Tuning::TuningSocketWorker::replyReady, this, &TuningServiceWorker::onReplyReady);
+
 	m_tuningSocketThread = new SimpleThread(m_tuningSocket);
 	m_tuningSocketThread->start();
 }
@@ -227,24 +231,78 @@ void TuningServiceWorker::sendPeriodicReadRequests()
 {
 	for(TuningDataSource* source : m_dataSources)
 	{
-		Tuning::SocketRequest sr;
+		sendFrameRequest(source);
+	}
+}
 
-		sr.lmIP = source->lmAddress32();
-		sr.lmPort = source->lmPort();
-		sr.lmNumber = source->lmNumber();
-		sr.numerator = source->numerator();
-		sr.operation = Tuning::OperationCode::Read;
-		sr.startAddressW = m_tuningSettings.tuningDataOffsetW;			// read first frame
-		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
-		sr.dataType = Tuning::DataType::Discrete;						//
-		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
 
-		source->incNumerator();
+void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
+{
+	Tuning::SocketRequest sr;
 
-		if (m_tuningSocket != nullptr)
+	sr.lmIP = source->lmAddress32();
+	sr.lmPort = source->lmPort();
+	sr.lmNumber = source->lmNumber();
+	sr.lmSubsystemID = source->lmSubsystemID();
+	sr.numerator = source->numerator();
+	sr.operation = Tuning::OperationCode::Read;
+	sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
+	sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
+	sr.dataType = Tuning::DataType::Discrete;						//
+	sr.romSizeW = m_tuningSettings.tuningRomSizeW;
+
+	source->incNumerator();
+	source->setWaitReply();
+	source->nextFrameToRequest();
+
+	if (m_tuningSocket != nullptr)
+	{
+		m_tuningSocket->sendRequest(sr);
+	}
+
+}
+
+
+void TuningServiceWorker::onReplyReady()
+{
+	if (m_tuningSocket == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	Tuning::SocketReply sr;
+
+	int count = 0;
+
+	while(count < 10)
+	{
+		bool result = m_tuningSocket->getReply(&sr);
+
+		if (result == false)
 		{
-			m_tuningSocket->sendRequest(sr);
+			break;
 		}
+
+		TuningDataSource* source = m_dataSources.getDataSourceByIP(sr.lmIP);
+
+		if (source == nullptr)
+		{
+			assert(false);
+		}
+		else
+		{
+			sr.frameNo = (sr.fotipHeader.startAddress - m_tuningSettings.tuningDataOffsetW) / m_tuningSettings.tuningRomFrameSizeW;
+
+			source->processReply(sr);
+
+			if (source->frameToRequest() != 0)
+			{
+				sendFrameRequest(source);
+			}
+		}
+
+		count++;
 	}
 }
 

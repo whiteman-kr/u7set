@@ -24,6 +24,7 @@ namespace Tuning
 	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP) :
 		m_tuningIP(tuningIP),
 		m_requests(50),
+		m_replies(50),
 		m_timer(this)
 	{
 	}
@@ -37,7 +38,9 @@ namespace Tuning
 	void TuningSocketWorker::onThreadStarted()
 	{
 		connect(&m_timer, &QTimer::timeout, this, &TuningSocketWorker::onTimer);
+
 		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningSocketWorker::onSocketRequest);
+		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningSocketWorker::replyReady);
 
 		m_timer.setInterval(1000);
 		m_timer.start();
@@ -110,7 +113,7 @@ namespace Tuning
 		{
 			assert(false);
 			m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
-			qDebug() << "DataChannel: datagram too big";
+			qDebug() << "TuningSocketWorker: datagram too big";
 			return;
 		}
 
@@ -119,8 +122,19 @@ namespace Tuning
 		if (result == -1)
 		{
 			closeSocket();
-			qDebug() << "DataChannel: read socket error";
+			qDebug() << "TuningSocketWorker: read socket error";
+			return;
 		}
+
+		SocketReply* sr = m_replies.beginPush();
+
+		sr->lmIP = from.toIPv4Address();
+
+		memcpy(&sr->fotipHeader, &m_ackFrame.fotip.header, sizeof(FotipHeader));
+		memcpy(sr->fotipData, m_ackFrame.fotip.data, FOTIP_TX_RX_DATA_SIZE);
+		memcpy(sr->fotipComparisonResult, m_ackFrame.fotip.comparisonResult, FOTIP_COMPARISON_RESULT_SIZE);
+
+		m_replies.completePush();
 	}
 
 
@@ -161,13 +175,13 @@ namespace Tuning
 		rh.timeStamp.second = t.time().second();
 		rh.timeStamp.millisecond = t.time().msec();
 
-		FotipHeader& fh = m_reqFrame.fotipHeader;
+		FotipHeader& fh = m_reqFrame.fotip.header;
 
 		fh.protocolVersion = 1;
 		fh.subsystemKeyWord = 0;
 
-		fh.subsystemKey.channelNumber = 1; //sr.channel;
-		fh.subsystemKey.subsystemCode = 5;
+		fh.subsystemKey.channelNumber = sr.lmNumber;
+		fh.subsystemKey.subsystemCode = sr.lmSubsystemID;
 
 		quint16 data = fh.subsystemKey.subsystemCode;	// second
 		data <<= 6;
@@ -175,7 +189,7 @@ namespace Tuning
 		fh.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
 		fh.operationCode = TO_INT(sr.operation);
-		fh.flagsWord = 0;
+		fh.flags.all = 0;
 		fh.startAddress = sr.startAddressW;
 		fh.fotipFrameSize = 1432;
 		fh.romSize = sr.romSizeW * 2;					// words => bytes
@@ -184,17 +198,16 @@ namespace Tuning
 		fh.uniqueId = 0;
 
 		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);
-		memset(m_reqFrame.reserv, 0, sizeof(m_reqFrame.reserv));
-
-
+		memset(m_reqFrame.fotip.reserv, 0, FOTIP_DATA_RESERV_SIZE);
+		memset(m_reqFrame.fotip.comparisonResult, 0, FOTIP_COMPARISON_RESULT_SIZE);
 
 		if (sr.operation == Tuning::OperationCode::Write)
 		{
-			memcpy(m_reqFrame.fotipData, sr.frameData, fh.romFrameSize);
+			memcpy(m_reqFrame.fotip.data, sr.frameData, FOTIP_TX_RX_DATA_SIZE);
 		}
 		else
 		{
-			memset(m_reqFrame.fotipData, 0, sizeof(m_reqFrame.fotipData));
+			memset(m_reqFrame.fotip.data, 0, FOTIP_TX_RX_DATA_SIZE);
 		}
 
 		int size = sizeof(m_reqFrame);
@@ -207,11 +220,17 @@ namespace Tuning
 		}
 	}
 
+
 	void TuningSocketWorker::sendRequest(const SocketRequest& socketRequest)
 	{
 		m_requests.push(&socketRequest);
 	}
 
+
+	bool TuningSocketWorker::getReply(SocketReply* reply)
+	{
+		return m_replies.pop(reply);
+	}
 
 
 	/*void TuningSocketWorker::readTunigData()

@@ -27,6 +27,7 @@ namespace Tuning
 		quint32 lmIP;
 		int lmPort;
 		int lmNumber;
+		int lmSubsystemID;
 		quint16 numerator;
 		OperationCode operation;
 		int startAddressW;
@@ -35,6 +36,19 @@ namespace Tuning
 		int romSizeW;
 
 		char frameData[1024];
+	};
+
+
+	struct SocketReply
+	{
+		quint32 lmIP;
+
+		FotipHeader fotipHeader;
+
+		char fotipData[FOTIP_TX_RX_DATA_SIZE];
+		char fotipComparisonResult[FOTIP_COMPARISON_RESULT_SIZE];
+
+		int frameNo;
 	};
 
 
@@ -54,35 +68,9 @@ namespace Tuning
 
 	class TuningSocketWorker : public SimpleThreadWorker
 	{
+		Q_OBJECT
+
 	private:
-/*
-
-static const int ROM_FRAME_SIZE_B = 1016;
-	static const int ROM_FRAME_SIZE_W = ROM_FRAME_SIZE_B / 2;
-
-	#pragma pack(push, 1)
-
-
-
-		struct Request
-		{
-			RequestHeader header;
-
-			char reserv[98];
-
-			char data[ROM_FRAME_SIZE_B];
-
-			char cmpResult[64];
-
-			char reserv2[224];
-
-			void initToRead(const TuningSettings& settings, quint64 tuningID, int frameNo);
-		};
-
-	#pragma pack(pop)
-
-		TuningSettings m_settings;*/
-
 		HostAddressPort m_tuningIP;
 
 		QTimer m_timer;
@@ -105,14 +93,20 @@ static const int ROM_FRAME_SIZE_B = 1016;
 		void clear();
 
 		Queue<SocketRequest> m_requests;
+		Queue<SocketReply> m_replies;
 
 	private slots:
 		void onSocketRequest();
+
+	signals:
+		void replyReady();
 
 	public:
 		TuningSocketWorker(const HostAddressPort& tuningIP);
 
 		void sendRequest(const SocketRequest& socketRequest);
+
+		bool getReply(SocketReply* reply);
 	};
 
 

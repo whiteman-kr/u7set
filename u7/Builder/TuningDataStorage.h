@@ -23,7 +23,7 @@ private:
 	//
 
 	int m_tripleFramesCount = 0;
-	int m_totalFramesCount = 0;
+	int m_usedFramesCount = 0;
 
 	char* m_framesData = nullptr;
 
@@ -35,16 +35,20 @@ public:
 
 	void init(int firstFrameNo, int tuningFrameSizeBytes, int signalSizeBits, int signalCount);
 
+	int firstFrameNo() const { return m_firstFrameNo; }
+
 	void copySignalsData(QList<Signal*> signalsList);
 
-	int totalFramesCount() const { return m_totalFramesCount; }
-	int framesDataSize() const { return m_totalFramesCount * m_tuningFrameSizeBytes; }
+	int usedFramesCount() const { return m_usedFramesCount; }
+	int framesDataSize() const { return m_usedFramesCount * m_tuningFrameSizeBytes; }
 
 	quint64 generateUniqueID(const QString& lmEquipmentID);
 
 	const char* framesData() const { return m_framesData; }
 
 	void converToBigEndian();
+
+	void setFrameData(int frameNo, const char* fotipData);
 };
 
 
@@ -58,6 +62,7 @@ private:
 	int m_tuningFrameSizeBytes = 0;
 	int m_tuningFramesCount = 0;
 	quint64 m_uniqueID = 0;
+	int m_usedFramesCount = 0;
 
 	static const int TYPE_ANALOG_FLOAT = 0;
 	static const int TYPE_ANALOG_INT = 1;
@@ -80,6 +85,7 @@ private:
 	static const char* UNIQUE_ID;
 	static const char* TUNING_FRAME_SIZE_BYTES;
 	static const char* TUNING_FRAMES_COUNT;
+	static const char* TUNING_USED_FRAMES_COUNT;
 	static const char* TUNING_ALL_SIGNALS_COUNT;
 	static const char* TUNING_ANALOG_FLOAT_SIGNALS;
 	static const char* TUNING_ANALOG_INT_SIGNALS;
@@ -97,13 +103,14 @@ public:
 	bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
 
 	bool buildTuningData();
+	bool initTuningData();
 
 	quint64 generateUniqueID(const QString& lmEquipmentID);
 
 	quint64 uniqueID() const { return m_uniqueID; }
 	void getTuningData(QByteArray* tuningData) const;
 
-	int totalFramesCount() const;
+	int usedFramesCount() const { return m_usedFramesCount; }
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -113,6 +120,8 @@ public:
 	QList<Signal*> tuningAnalogFloatSignals() const { return m_tuningAnalogFloat; }
 	QList<Signal*> tuningAnalogIntSignals() const { return m_tuningAnalogInt; }
 	QList<Signal*> tuningDiscreteSignals() const { return m_tuningDiscrete; }
+
+	void setFrameData(int frameNo, const char* fotipData);
 };
 
 
