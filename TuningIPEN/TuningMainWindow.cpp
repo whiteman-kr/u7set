@@ -14,6 +14,20 @@
 #include <QMessageBox>
 
 
+void setFontRecursive(QWidget* parentWidget, const QFont& font)
+{
+	parentWidget->setFont(font);
+	for (auto object : parentWidget->children())
+	{
+		QWidget* childWidget = qobject_cast<QWidget*>(object);
+		if (childWidget != nullptr)
+		{
+			setFontRecursive(childWidget, font);
+		}
+	}
+}
+
+
 TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	QMainWindow(parent),
 	m_updateTimer(new QTimer(this))
@@ -108,6 +122,10 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	hl->addWidget(groupBox);
 
 	tabs->addTab(widget, "Automatic Power Regulator (APR)");
+
+	QFont font = widget->font();
+	font.setPointSize(font.pointSize() * 1.4);
+	setFontRecursive(widget, font);
 
 	m_setOfSignalsScram = new QTabWidget(this);
 	widget = new QWidget;
