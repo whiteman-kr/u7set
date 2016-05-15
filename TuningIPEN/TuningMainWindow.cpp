@@ -212,12 +212,13 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 
 void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 {
+	m_automaticMode->setChecked(!enabled);
+
 	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
 									   .arg(enabled ? 1 : 0), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
 	{
-		m_automaticMode->setChecked(!enabled);
 		return;
 	}
 
@@ -252,7 +253,7 @@ void TuningMainWindow::onTuningServiceReady()
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
 		view->setItemDelegate(delegate);
 
-		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState, Qt::QueuedConnection);
+		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState);
 
 		QFont font = view->font();
 		font.setPointSize(font.pointSize() * 1.2);
@@ -271,6 +272,7 @@ void TuningMainWindow::onTuningServiceReady()
 	}
 
 	connect(m_service, &Tuning::TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
+	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TuningMainWindow::updateSignalState);
 
 	QHBoxLayout* hl = new QHBoxLayout;
 	m_automaticPowerRegulatorWidget->setLayout(hl);

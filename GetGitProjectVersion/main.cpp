@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstring>
+#include <algorithm>
 #include <sys/stat.h>
 #include <git2/errors.h>
 #include <git2/version.h>
