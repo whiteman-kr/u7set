@@ -152,15 +152,17 @@ void TuningMainWindow::updateSignalStates()
 }
 
 
-void TuningMainWindow::updateSignalState(QString appSignalID, double value)
+void TuningMainWindow::updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid)
 {
+	Q_UNUSED(lowLimit);
+	Q_UNUSED(highLimit);
 	/*if (appSignalID == "#HP01LC01DC_01PPC")
 	{
 		m_scrollBar->setValue(value * 10);
 	}*/
 	if (appSignalID == "#HP01LC02RAM_01PPC")
 	{
-		m_automaticMode->setChecked(value != 0);
+		m_automaticMode->setChecked(currentValue != 0 && valid != 0);
 	}
 }
 

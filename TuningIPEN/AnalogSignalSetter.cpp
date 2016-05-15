@@ -52,7 +52,13 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 			m_currentValue->setText(QString::number(value));
 		}
 
-		if (m_currentValue->text() == m_input->text())
+		bool currentOk = false;
+		double currentValue = m_currentValue->text().toDouble(&currentOk);
+
+		bool inputOk = false;
+		double inputValue = m_input->text().toDouble(&inputOk);
+
+		if (currentOk && inputOk && qAbs(currentValue - inputValue) < 0.000001)
 		{
 			m_input->clear();
 		}
