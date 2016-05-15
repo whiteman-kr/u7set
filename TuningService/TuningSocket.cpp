@@ -1,5 +1,6 @@
 #include "TuningSocket.h"
 #include "../include/Types.h"
+#include "TuningService.h"
 
 namespace Tuning
 {
@@ -9,10 +10,10 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocket::TuningSocket(const HostAddressPort& tuningIP) :
+	/*TuningSocket::TuningSocket(const HostAddressPort& tuningIP) :
 		SimpleThread(new TuningSocketWorker(tuningIP))
 	{
-	}
+	}*/
 
 
 	// -------------------------------------------------------------------------
@@ -21,8 +22,9 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP) :
+	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP, TuningService* tuningService) :
 		m_tuningIP(tuningIP),
+		m_tuningService(tuningService),
 		m_requests(50),
 		m_replies(50),
 		m_timer(this)
@@ -41,6 +43,12 @@ namespace Tuning
 
 		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningSocketWorker::onSocketRequest);
 		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningSocketWorker::replyReady);
+
+		if (m_tuningService != nullptr)
+		{
+			connect(this, &TuningSocketWorker::userRequest, m_tuningService, &TuningService::userRequest);
+			connect(this, &TuningSocketWorker::replyWithNoZeroFlags, m_tuningService, &TuningService::replyWithNoZeroFlags);
+		}
 
 		m_timer.setInterval(1000);
 		m_timer.start();
@@ -133,6 +141,13 @@ namespace Tuning
 		memcpy(&sr->fotipHeader, &m_ackFrame.fotip.header, sizeof(FotipHeader));
 		memcpy(sr->fotipData, m_ackFrame.fotip.data, FOTIP_TX_RX_DATA_SIZE);
 		memcpy(sr->fotipComparisonResult, m_ackFrame.fotip.comparisonResult, FOTIP_COMPARISON_RESULT_SIZE);
+
+		if (m_ackFrame.fotip.header.flags.all != 0)
+		{
+			emit replyWithNoZeroFlags(m_ackFrame.fotip);
+
+			qDebug() << QString("FOTIP Flags == 0x%1").arg(QString::number(m_ackFrame.fotip.header.flags.all, 16));
+		}
 
 		m_replies.completePush();
 	}
@@ -228,6 +243,11 @@ namespace Tuning
 		else
 		{
 			memset(m_reqFrame.fotip.data, 0, FOTIP_TX_RX_DATA_SIZE);
+		}
+
+		if (sr.userRequest == true)
+		{
+			emit userRequest(m_reqFrame.fotip);
 		}
 
 		int size = sizeof(m_reqFrame);

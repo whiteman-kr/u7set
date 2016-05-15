@@ -10,7 +10,7 @@ namespace Builder
 															Hardware::Software* software,
 															SignalSet* signalSet,
 															Hardware::EquipmentSet* equipment,
-															TuningDataStorage *tuningDataStorage,
+															Tuning::TuningDataStorage *tuningDataStorage,
 															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
 		m_tuningDataStorage(tuningDataStorage),
@@ -131,7 +131,7 @@ namespace Builder
 				}
 			}
 
-			TuningDataSource ds;
+			Tuning::TuningDataSource ds;
 
 			ds.setLmChannel(lmChannel);
 			ds.setLmDataType(DataSource::DataType::Tuning);
@@ -151,7 +151,7 @@ namespace Builder
 
 			if (m_tuningDataStorage->contains(lm->equipmentId()) == true)
 			{
-				TuningData* tuningData = (*m_tuningDataStorage)[lm->equipmentId()];
+				Tuning::TuningData* tuningData = (*m_tuningDataStorage)[lm->equipmentId()];
 
 				if(tuningData != nullptr)
 				{

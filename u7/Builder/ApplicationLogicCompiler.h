@@ -24,7 +24,7 @@ namespace Builder
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
-		TuningDataStorage* m_tuningDataStorage = nullptr;
+		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
 
@@ -57,7 +57,7 @@ namespace Builder
 								 SignalSet* signalSet,
 								 Afb::AfbElementCollection* afblSet,
 								 AppLogicData* appLogicData,
-								 TuningDataStorage* tuningDataStorage,
+								 Tuning::TuningDataStorage* tuningDataStorage,
 								 BuildResultWriter* buildResultWriter,
 								 IssueLogger* log);
 

@@ -246,7 +246,7 @@ namespace Builder
 				break;
 			}
 
-			TuningDataStorage tuningDataStorage;
+			Tuning::TuningDataStorage tuningDataStorage;
 
 			//
 			// Compile application logic
@@ -657,7 +657,7 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Tuning::TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
@@ -722,7 +722,7 @@ namespace Builder
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
-													TuningDataStorage* tuningDataStorage,
+													Tuning::TuningDataStorage* tuningDataStorage,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
@@ -752,7 +752,7 @@ namespace Builder
 															Hardware::SubsystemStorage* subsystems,
 															Hardware::EquipmentSet* equipment,
 															SignalSet* signalSet,
-															TuningDataStorage* tuningDataStorage,
+															Tuning::TuningDataStorage* tuningDataStorage,
 															BuildResultWriter* buildResultWriter)
 	{
 		bool result = true;

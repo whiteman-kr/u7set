@@ -20,7 +20,7 @@ namespace Builder
 													   SignalSet* signalSet,
 													   Afb::AfbElementCollection *afblSet,
 													   AppLogicData* appLogicData,
-													   TuningDataStorage* tuningDataStorage,
+													   Tuning::TuningDataStorage* tuningDataStorage,
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),

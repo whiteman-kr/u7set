@@ -14,7 +14,7 @@ const int	SIGNAL_ID_COLUMN = 0,
 			RECEIVED_HIGH_LIMIT_COLUMN = 7,
 			COLUMN_COUNT = 8;
 
-SafetyChannelSignalsModel::SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject* parent) :
+SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)
@@ -272,3 +272,4 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		emit dataChanged(index(signalIndex, RECEIVED_LOW_LIMIT_COLUMN), index(signalIndex, RECEIVED_HIGH_LIMIT_COLUMN), QVector<int>() << Qt::DisplayRole);
 	}
 }
+

@@ -30,7 +30,7 @@ void setFontRecursive(QWidget* parentWidget, const QFont& font)
 }
 
 
-Signal* findSignal(const QString& id, QVector<TuningDataSourceInfo>& sourceInfoVector)
+Signal* findSignal(const QString& id, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector)
 {
 	for (auto& sourceInfo : sourceInfoVector)
 	{
@@ -87,11 +87,11 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	// run Tuning Service
 	//
-	TuningIPENServiceWorker* worker = new TuningIPENServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
+	Tuning::TuningIPENServiceWorker* worker = new Tuning::TuningIPENServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
 
-	m_service = new TuningService(worker);
+	m_service = new Tuning::TuningService(worker);
 
-	connect(m_service, &TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
+	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 
 	m_service->start();
 
@@ -124,7 +124,7 @@ TuningMainWindow::~TuningMainWindow()
 }
 
 
-void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
+void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
 {
 	double lowLimit = 0;
 
@@ -141,7 +141,7 @@ void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<TuningDataSource
 	fl->addRow(label + ((label.isEmpty() || id.isEmpty()) ? "" : "\n") + id, setter);
 
 	connect(m_updateTimer, &QTimer::timeout, setter, &AnalogSignalSetter::updateValue);
-	connect(m_service, &TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
+	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
 }
 
 
@@ -166,7 +166,7 @@ void TuningMainWindow::updateSignalState(QString appSignalID, double currentValu
 	}
 }
 
-void TuningMainWindow::updateDataSourceStatus(TuningDataSourceState state)
+void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState state)
 {
 	if (m_statusLabelMap.contains(state.lmEquipmentID))
 	{
@@ -230,7 +230,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	for (int index = 0; index < m_info.count(); index++)
 	{
-		TuningDataSourceInfo& sourceInfo = m_info[index];
+		Tuning::TuningDataSourceInfo& sourceInfo = m_info[index];
 		int place = 0;
 		for (; place < m_setOfSignalsScram->count(); place++)
 		{
@@ -246,21 +246,21 @@ void TuningMainWindow::onTuningServiceReady()
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, this);
 		view->setModel(model);
 
-		connect(m_service, &TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState, Qt::QueuedConnection);
+		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState, Qt::QueuedConnection);
 
 		view->resizeColumnsToContents();
 	}
 
 	for (int i = 0; i < sourceIndexes.count(); i++)
 	{
-		TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
+		Tuning::TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
 		QLabel* newLabel = new QLabel(sourceInfo.lmCaption + ": " + sourceInfo.lmAddressPort.addressStr(), this);
 		statusBar()->addWidget(newLabel);
 
 		m_statusLabelMap.insert(sourceInfo.lmEquipmentID, newLabel);
 	}
 
-	connect(m_service, &TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
+	connect(m_service, &Tuning::TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
 
 	QHBoxLayout* hl = new QHBoxLayout;
 	m_automaticPowerRegulatorWidget->setLayout(hl);

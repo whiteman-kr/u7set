@@ -1,16 +1,17 @@
-#ifndef ANALOGSIGNALSETTER_H
-#define ANALOGSIGNALSETTER_H
+#pragma once
 
 #include <QWidget>
 
-class TuningService;
+#include "../TuningService/TuningService.h"
+
+
 class QLineEdit;
 
 class AnalogSignalSetter : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningService* service, QWidget *parent = 0);
+	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, Tuning::TuningService* service, QWidget *parent = 0);
 
 signals:
 
@@ -24,9 +25,8 @@ private:
 	double m_lowLimit;
 	double m_highLimit;
 	bool m_validity = false;
-	TuningService* m_service;
+	Tuning::TuningService* m_service;
 	QLineEdit* m_input;
 	QLineEdit* m_currentValue;
 };
 
-#endif // ANALOGSIGNALSETTER_H

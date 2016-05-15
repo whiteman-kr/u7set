@@ -35,6 +35,7 @@ namespace Tuning
 		int frameSizeW;
 		DataType dataType;
 		int romSizeW;
+		bool userRequest;			// true - user request, false - atomatic periodic request
 
 		char fotipData[FOTIP_TX_RX_DATA_SIZE];
 	};
@@ -67,12 +68,17 @@ namespace Tuning
 		quint16 dataType;				// DataType enum values
 	};
 
+
+	class TuningService;
+
+
 	class TuningSocketWorker : public SimpleThreadWorker
 	{
 		Q_OBJECT
 
 	private:
 		HostAddressPort m_tuningIP;
+		TuningService* m_tuningService = nullptr;
 
 		QTimer m_timer;
 
@@ -102,8 +108,11 @@ namespace Tuning
 	signals:
 		void replyReady();
 
+		void userRequest(FotipFrame fotipFrame);
+		void replyWithNoZeroFlags(FotipFrame fotipFrame);
+
 	public:
-		TuningSocketWorker(const HostAddressPort& tuningIP);
+		TuningSocketWorker(const HostAddressPort& tuningIP, TuningService* tuningService);
 
 		void sendRequest(const SocketRequest& socketRequest);
 
@@ -111,10 +120,10 @@ namespace Tuning
 	};
 
 
-	class TuningSocket : public SimpleThread
+/*	class TuningSocket : public SimpleThread
 	{
 	public:
 		TuningSocket(const HostAddressPort& tuningIP);
-	};
+	};*/
 
 }

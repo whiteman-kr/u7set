@@ -2,9 +2,7 @@
 
 #include <QAbstractTableModel>
 #include <QHash>
-
-class TuningDataSourceInfo;
-class TuningService;
+#include "../TuningService/TuningService.h"
 
 struct SignalState
 {
@@ -19,7 +17,7 @@ class SafetyChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject *parent = 0);
+	explicit SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject *parent = 0);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -34,8 +32,8 @@ public slots:
 	void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
 
 private:
-	TuningDataSourceInfo& m_sourceInfo;
+	Tuning::TuningDataSourceInfo& m_sourceInfo;
 	QVector<SignalState> m_states;
-	TuningService* m_service;
+	Tuning::TuningService* m_service;
 	QHash<QString, int> signalIdMap;
 };

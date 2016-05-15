@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	qRegisterMetaType<TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<Tuning::TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
 	TuningMainWindow w(cfgPath);
