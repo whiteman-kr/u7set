@@ -14,6 +14,25 @@ const int	SIGNAL_ID_COLUMN = 0,
 			RECEIVED_HIGH_LIMIT_COLUMN = 7,
 			COLUMN_COUNT = 8;
 
+bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(model);
+	if (signalsModel == nullptr)
+	{
+		return false;
+	}
+	if (signalsModel->signal(index).isAnalog())
+	{
+		return false;
+	}
+	if (event->type() == QEvent::MouseButtonDblClick)
+	{
+		emit aboutToChangeDiscreteSignal(index);
+		return true;
+	}
+	return false;
+}
+
 SafetyChannelSignalsModel::SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
@@ -156,17 +175,17 @@ QVariant SafetyChannelSignalsModel::headerData(int section, Qt::Orientation orie
 			case SIGNAL_DESCRIPTION_COLUMN:
 				return "Signal description";
 			case NEW_VALUE_COLUMN:
-				return "New value";
+				return "New\nvalue";
 			case CURRENT_VALUE_COLUMN:
-				return "Current value";
+				return "Current\nvalue";
 			case ORIGINAL_LOW_LIMIT_COLUMN:
-				return "Original Low limit";
+				return "Original\nLow limit";
 			case ORIGINAL_HIGH_LIMIT_COLUMN:
-				return "Original High limit";
+				return "Original\nHigh limit";
 			case RECEIVED_LOW_LIMIT_COLUMN:
-				return "Received Low limit";
+				return "Received\nLow limit";
 			case RECEIVED_HIGH_LIMIT_COLUMN:
-				return "Received High limit";
+				return "Received\nHigh limit";
 		}
 	}
 
@@ -240,6 +259,11 @@ Qt::ItemFlags SafetyChannelSignalsModel::flags(const QModelIndex& index) const
 	return QAbstractTableModel::flags(index);
 }
 
+Signal& SafetyChannelSignalsModel::signal(const QModelIndex& index)
+{
+	return m_sourceInfo.tuningSignals[index.row()];
+}
+
 void SafetyChannelSignalsModel::updateSignalStates()
 {
 	for (Signal& signal : m_sourceInfo.tuningSignals)
@@ -262,7 +286,7 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		if (qAbs(m_states[signalIndex].newValue - value) < 0.000001)
+		if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<double>::epsilon())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
@@ -272,3 +296,30 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		emit dataChanged(index(signalIndex, RECEIVED_LOW_LIMIT_COLUMN), index(signalIndex, RECEIVED_HIGH_LIMIT_COLUMN), QVector<int>() << Qt::DisplayRole);
 	}
 }
+
+void SafetyChannelSignalsModel::changeDiscreteSignal(const QModelIndex& index)
+{
+	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
+
+	if (signal.isAnalog())
+	{
+		assert(false);
+		return;
+	}
+
+	double newValue = m_states[index.row()].currentValue == 0 ? 1 : 0;
+
+	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
+									   .arg(signal.customAppSignalID()).arg(newValue == 1 ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}
+
+	m_states[index.row()].newValue = newValue;
+	emit dataChanged(index, index);
+
+	m_service->setSignalState(signal.appSignalID(), newValue);
+}
+

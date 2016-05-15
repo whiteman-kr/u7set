@@ -1,10 +1,12 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <QStyledItemDelegate>
 #include <QHash>
 
 class TuningDataSourceInfo;
 class TuningService;
+class Signal;
 
 struct SignalState
 {
@@ -13,6 +15,17 @@ struct SignalState
 	double lowLimit;
 	double highLimit;
 	bool validity;
+};
+
+class SafetyChannelSignalsDelegate : public QStyledItemDelegate
+{
+	Q_OBJECT
+
+signals:
+	void aboutToChangeDiscreteSignal(const QModelIndex& index);
+
+protected:
+	bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
 };
 
 class SafetyChannelSignalsModel : public QAbstractTableModel
@@ -29,9 +42,12 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
+	Signal& signal(const QModelIndex &index);
+
 public slots:
 	void updateSignalStates();
 	void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
+	void changeDiscreteSignal(const QModelIndex& index);
 
 private:
 	TuningDataSourceInfo& m_sourceInfo;
