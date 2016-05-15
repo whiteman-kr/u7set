@@ -178,13 +178,35 @@ namespace Tuning
 		fh.protocolVersion = 1;
 		fh.subsystemKeyWord = 0;
 
-		fh.subsystemKey.channelNumber = sr.lmNumber;
+		fh.subsystemKey.lmNumber = sr.lmNumber;
 		fh.subsystemKey.subsystemCode = sr.lmSubsystemID;
 
 		quint16 data = fh.subsystemKey.subsystemCode;	// second
 		data <<= 6;
-		data += fh.subsystemKey.channelNumber;			// first
+		data += fh.subsystemKey.lmNumber;			// first
+
 		fh.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
+
+		// For IPEN only !!!! begin
+
+		if (sr.lmNumber >= 1 && sr.lmNumber <= 4)
+		{
+			const quint16 subsystemKeyIPEN[4] =
+			{
+				0x6141,
+				0x3142,
+				0x0143,
+				0x9144
+			};
+
+			fh.subsystemKey.wordVaue = subsystemKeyIPEN[sr.lmNumber - 1];
+		}
+		else
+		{
+			assert(false);
+		}
+
+		// For IPEN only !!!! end
 
 		fh.operationCode = TO_INT(sr.operation);
 		fh.flags.all = 0;
@@ -201,7 +223,7 @@ namespace Tuning
 
 		if (sr.operation == Tuning::OperationCode::Write)
 		{
-			memcpy(m_reqFrame.fotip.data, sr.frameData, FOTIP_TX_RX_DATA_SIZE);
+			memcpy(m_reqFrame.fotip.data, sr.fotipData, FOTIP_TX_RX_DATA_SIZE);
 		}
 		else
 		{

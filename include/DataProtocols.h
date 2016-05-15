@@ -88,12 +88,17 @@ union FotipHeaderFlags
 };
 
 
-struct FotipSubsystemKey
+union FotipSubsystemKey
 {
-	quint16 channelNumber : 6;
-	quint16 subsystemCode : 6;
+	struct
+	{
+		quint16 lmNumber : 6;
+		quint16 subsystemCode : 6;
 
-	quint16 crc : 4;	// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
+		quint16 crc : 4;	// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
+	};
+
+	quint16 wordVaue;
 };
 
 

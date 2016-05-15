@@ -87,7 +87,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	// run Tuning Service
 	//
-	TuningServiceWorker* worker = new TuningServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
+	TuningIPENServiceWorker* worker = new TuningIPENServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
 
 	m_service = new TuningService(worker);
 

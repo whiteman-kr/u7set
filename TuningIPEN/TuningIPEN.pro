@@ -44,7 +44,8 @@ SOURCES +=\
 	../TuningService/TuningSocket.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    TuningIPENService.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../include/ServiceSettings.h \
@@ -76,7 +77,8 @@ HEADERS  += TuningMainWindow.h \
 	../include/Crc.h \
 	AnalogSignalSetter.h \
     ../include/Utils.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    TuningIPENService.h
 
 include(../qtservice/src/qtservice.pri)
 

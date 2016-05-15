@@ -247,19 +247,6 @@ void TuningFramesData::setFrameData(int frameNo, const char* fotipData)
 	}
 
 	memcpy(m_framesData + frameNo * FOTIP_TX_RX_DATA_SIZE, fotipData, FOTIP_TX_RX_DATA_SIZE);
-
-	// !!!!!!  for IPEN project only !!!!
-
-	quint16* ptr = reinterpret_cast<quint16*>(m_framesData + frameNo * FOTIP_TX_RX_DATA_SIZE);
-
-	for(int i = 0; i < FOTIP_TX_RX_DATA_SIZE / sizeof(quint16); i++)
-	{
-		*ptr = reverseBytes<quint16>(*ptr);
-
-		ptr++;
-	}
-
-	// !!!!!!
 }
 
 
@@ -348,11 +335,11 @@ bool TuningFramesData::setSignalState(const Signal* signal, double value, Tuning
 
 	sr->startAddressW = (frameNo * m_tuningFrameSizeBytes )/ sizeof(quint16);
 
-	memcpy(sr->frameData, m_framesData + (frameNo - m_firstFrameNo) * m_tuningFrameSizeBytes, m_tuningFrameSizeBytes);
+	memcpy(sr->fotipData, m_framesData + (frameNo - m_firstFrameNo) * m_tuningFrameSizeBytes, m_tuningFrameSizeBytes);
 
 	int inFrameOffset = signalOffsetBytes - frameNo * m_tuningFrameSizeBytes;
 
-	char* valuePointer = sr->frameData + inFrameOffset;
+	char* valuePointer = sr->fotipData + inFrameOffset;
 
 	// Data in m_framesData is in Big Endian format!
 	//
@@ -761,10 +748,6 @@ void TuningData::getSignals(QList<Signal*>& signalList)
 
 void TuningData::setFrameData(int frameNo, const char* fotipData)
 {
-	// ------ DEBUG ---------------
-	//return;
-	// ------ DEBUG ---------------
-
 	for(int i = 0; i < TYPES_COUNT; i++ )
 	{
 		int firstFrameNo = m_tuningFramesData[i].firstFrameNo();

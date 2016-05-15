@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 		if (arg.startsWith("-b="))
 		{
 			cfgPath = arg.mid(3);
+			continue;
 		}
 	}
 

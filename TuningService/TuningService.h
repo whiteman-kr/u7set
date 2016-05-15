@@ -14,7 +14,7 @@ class TuningServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
-private:
+protected:
 	QString m_cfgFileName;
 	TuningService* m_tuningService = nullptr;
 
@@ -45,6 +45,9 @@ private:
 	void testConnections();
 	void emitTuningDataSourcesStates();
 
+	virtual void initialize() override;
+	virtual void shutdown() override;
+
 private slots:
 	void onTimer();
 	void onReplyReady();
@@ -63,13 +66,13 @@ public:
 
 	~TuningServiceWorker();
 
-	TuningServiceWorker* createInstance() override;
+	virtual TuningServiceWorker* createInstance() override;
 
 	bool loadConfigurationFromFile(const QString& fileName);
 	void getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info);
 
-	virtual void initialize() override;
-	virtual void shutdown() override;
+	virtual void requestPreprocessing(Tuning::SocketRequest& sr);
+	virtual void replyPreprocessing(Tuning::SocketReply& sr);
 
 signals:
 	void tuningServiceReady();
@@ -86,10 +89,10 @@ class TuningService : public Service
 private:
 	TuningServiceWorker* m_tuningServiceWorker = nullptr;
 
-	void setTuningServiceWorker(TuningServiceWorker* tuningServiceWorker) { m_tuningServiceWorker = tuningServiceWorker; }
-
 public:
 	TuningService(TuningServiceWorker* worker);
+
+	void setTuningServiceWorker(TuningServiceWorker* tuningServiceWorker) { m_tuningServiceWorker = tuningServiceWorker; }
 
 	void getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info);
 

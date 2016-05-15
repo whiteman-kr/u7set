@@ -36,7 +36,7 @@ namespace Tuning
 		DataType dataType;
 		int romSizeW;
 
-		char frameData[FOTIP_TX_RX_DATA_SIZE];
+		char fotipData[FOTIP_TX_RX_DATA_SIZE];
 	};
 
 

@@ -250,11 +250,11 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(fotip.protocolVersion, 1);
 		writeBigEndian(fotip.uniqueId, m_uniqueId->text().toUInt());
 
-		fotip.subsystemKey.channelNumber = m_channelNumber->text().toUInt();
+		fotip.subsystemKey.lmNumber = m_channelNumber->text().toUInt();
 		fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
 		quint16 data = fotip.subsystemKey.subsystemCode;	// second
 		data <<= 6;
-		data += fotip.subsystemKey.channelNumber;	// first
+		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 		writeBigEndian(fotip.subsystemKeyWord, fotip.subsystemKeyWord);
 
@@ -327,11 +327,11 @@ void SendTuningFrameWidget::sendPacket()
 		fotip.protocolVersion = 1;
 		fotip.uniqueId = m_uniqueId->text().toUInt();
 
-		fotip.subsystemKey.channelNumber = m_channelNumber->text().toUInt();
+		fotip.subsystemKey.lmNumber = m_channelNumber->text().toUInt();
 		fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
 		quint16 data = fotip.subsystemKey.subsystemCode;	// second
 		data <<= 6;
-		data += fotip.subsystemKey.channelNumber;	// first
+		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
 		fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;

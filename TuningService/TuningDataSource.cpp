@@ -223,7 +223,7 @@ void TuningDataSource::processReply(const Tuning::SocketReply& reply)
 
 void TuningDataSource::testConnection(qint64 nowTime)
 {
-	if (nowTime - m_lastReplyTime > 1000)
+	if (nowTime - m_lastReplyTime > 2000)		// connection timeout == 2 seconds
 	{
 		m_hasConnection = false;
 	}

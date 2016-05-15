@@ -137,7 +137,7 @@ void TuningServiceWorker::initialize()
 
 	connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
 
-	m_timer.setInterval(500);
+	m_timer.setInterval(333);
 	m_timer.start();
 
 	emit tuningServiceReady();
@@ -230,24 +230,11 @@ void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 
 	sr.startAddressW += m_tuningSettings.tuningDataOffsetW;		// !!!
 
-	// For IPEN only!!! --- begin
-
-	sr.dataType = Tuning::DataType::Discrete;		// turn off limits control!
-
-	quint16* ptr = reinterpret_cast<quint16*>(sr.frameData);
-
-	for(int i = 0; i < FOTIP_TX_RX_DATA_SIZE / sizeof(quint16); i++)
-	{
-		*ptr = reverseBytes<quint16>(*ptr);
-
-		ptr++;
-	}
-
-	// For IPEN only!!! --- end
-
 	source->incNumerator();
 	source->setWaitReply();
 	source->incSentRequestCount();
+
+	requestPreprocessing(sr);
 
 	m_tuningSocket->sendRequest(sr);
 }
@@ -366,6 +353,8 @@ void TuningServiceWorker::sendFrameRequest(TuningDataSource* source)
 	source->nextFrameToRequest();
 	source->incSentRequestCount();
 
+	requestPreprocessing(sr);
+
 	m_tuningSocket->sendRequest(sr);
 }
 
@@ -390,6 +379,8 @@ void TuningServiceWorker::onReplyReady()
 		{
 			break;
 		}
+
+		replyPreprocessing(sr);
 
 		TuningDataSource* source = m_dataSources.getDataSourceByIP(sr.lmIP);
 
@@ -464,6 +455,16 @@ void TuningServiceWorker::emitTuningDataSourcesStates()
 
 		emit tuningDataSourceStateUpdate(source->getState());
 	}
+}
+
+
+void TuningServiceWorker::requestPreprocessing(Tuning::SocketRequest& sr)
+{
+}
+
+
+void TuningServiceWorker::replyPreprocessing(Tuning::SocketReply& sr)
+{
 }
 
 

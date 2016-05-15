@@ -1,12 +1,12 @@
-#ifndef TUNINGMAINWINDOW_H
-#define TUNINGMAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include "../include/ServiceSettings.h"
 #include "../include/DataSource.h"
 #include "../include/Service.h"
-#include "../TuningService/TuningService.h"
 #include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningService.h"
+#include "TuningIPENService.h"
 
 class QTabWidget;
 class QFormLayout;
@@ -51,4 +51,3 @@ public:
 	void onTuningServiceReady();
 };
 
-#endif // TUNINGMAINWINDOW_H
