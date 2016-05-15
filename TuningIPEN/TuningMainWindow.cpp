@@ -247,8 +247,15 @@ void TuningMainWindow::onTuningServiceReady()
 
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, this);
 		view->setModel(model);
+		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate;
+		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
+		view->setItemDelegate(delegate);
 
 		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState, Qt::QueuedConnection);
+
+		QFont font = view->font();
+		font.setPointSize(font.pointSize() * 1.2);
+		view->setFont(font);
 
 		view->resizeColumnsToContents();
 	}
@@ -272,8 +279,8 @@ void TuningMainWindow::onTuningServiceReady()
 	QFormLayout* fl = new QFormLayout;
 	fl->setVerticalSpacing(20);
 	groupBox->setLayout(fl);
-	addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01A_01MAT", 110);
-	addAnalogSetter(fl, m_info, "", "#HP01LC01DC_01PPC", 110);
+
+	addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
 
 	/*m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
