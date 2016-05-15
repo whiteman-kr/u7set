@@ -1,5 +1,4 @@
 #include "AnalogSignalSetter.h"
-#include "../TuningService/TuningService.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -7,7 +6,8 @@
 #include <QDoubleValidator>
 #include <QMessageBox>
 
-AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningService* service, QWidget *parent) :
+
+AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, Tuning::TuningService* service, QWidget *parent) :
 	QWidget(parent),
 	m_signalId(signalId),
 	m_lowLimit(lowLimit),
@@ -91,3 +91,4 @@ void AnalogSignalSetter::setNewValue()
 
 	m_service->setSignalState(m_signalId, newValue);
 }
+

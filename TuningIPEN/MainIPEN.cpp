@@ -26,10 +26,12 @@ int main(int argc, char *argv[])
 		if (arg.startsWith("-b="))
 		{
 			cfgPath = arg.mid(3);
+			continue;
 		}
 	}
 
-	qRegisterMetaType<TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<Tuning::TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
 	TuningMainWindow w(cfgPath);

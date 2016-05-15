@@ -33,7 +33,7 @@ bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	return false;
 }
 
-SafetyChannelSignalsModel::SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject* parent) :
+SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)
@@ -322,4 +322,3 @@ void SafetyChannelSignalsModel::changeDiscreteSignal(const QModelIndex& index)
 
 	m_service->setSignalState(signal.appSignalID(), newValue);
 }
-

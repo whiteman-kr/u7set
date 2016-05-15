@@ -2854,7 +2854,7 @@ namespace Builder
 			return false;
 		}
 
-		TuningData* tuningData = new TuningData(m_lm->equipmentId(),
+		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentId(),
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 
@@ -3188,7 +3188,7 @@ namespace Builder
 
 		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
 
-		QList<Signal*> analogFloatSignals = m_tuningData->tuningAnalogFloatSignals();
+		QList<Signal*> analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
 		if (analogFloatSignals.count() > 0)
 		{
@@ -3218,7 +3218,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> analogIntSignals = m_tuningData->tuningAnalogIntSignals();
+		QList<Signal*> analogIntSignals = m_tuningData->getAnalogIntSignals();
 
 		if (analogIntSignals.count() > 0)
 		{
@@ -3248,7 +3248,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> discreteSignals = m_tuningData->tuningDiscreteSignals();
+		QList<Signal*> discreteSignals = m_tuningData->getDiscreteSignals();
 
 		if (discreteSignals.count() > 0)
 		{

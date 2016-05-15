@@ -47,12 +47,12 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
-    ../u7/Builder/TuningDataStorage.cpp \
     ../lib/Signal.cpp \
     ../AppDataService/AppSignalState.cpp \
     ../lib/Crc.cpp \
     TuningMain.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    TuningDataStorage.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -80,10 +80,10 @@ HEADERS += \
     ../include/OutputLog.h \
     ../include/ProtoSerialization.h \
     ../include/Types.h \
-    ../u7/Builder/TuningDataStorage.h \
     ../include/Signal.h \
     ../AppDataService/AppSignalState.h \
-    ../include/Crc.h
+    ../include/Crc.h \
+    TuningDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 

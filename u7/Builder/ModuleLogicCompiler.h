@@ -12,7 +12,7 @@
 #include "../Builder/OptoModule.h"
 #include "../Builder/LmMemoryMap.h"
 //#include "../Builder/ModuleLogicCompiler.h"
-#include "../Builder/TuningDataStorage.h"
+#include "../TuningService/TuningDataStorage.h"
 
 
 #include "../VFrame30/FblItemRect.h"
@@ -443,7 +443,7 @@ namespace Builder
 		Hardware::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
-		TuningDataStorage* m_tuningDataStorage = nullptr;
+		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 
 		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 
@@ -515,7 +515,7 @@ namespace Builder
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
-		TuningData* m_tuningData = nullptr;
+		Tuning::TuningData* m_tuningData = nullptr;
 
 	private:
 

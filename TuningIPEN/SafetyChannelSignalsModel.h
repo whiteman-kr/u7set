@@ -3,10 +3,14 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QHash>
+/*<<<<<<< HEAD
 
 class TuningDataSourceInfo;
 class TuningService;
 class Signal;
+=======*/
+#include "../TuningService/TuningService.h"
+//>>>>>>> f604605454aed8c615d8c9096c4216c91d30e089
 
 struct SignalState
 {
@@ -32,7 +36,7 @@ class SafetyChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SafetyChannelSignalsModel(TuningDataSourceInfo& sourceInfo, TuningService* service, QObject *parent = 0);
+	explicit SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject *parent = 0);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -50,8 +54,8 @@ public slots:
 	void changeDiscreteSignal(const QModelIndex& index);
 
 private:
-	TuningDataSourceInfo& m_sourceInfo;
+	Tuning::TuningDataSourceInfo& m_sourceInfo;
 	QVector<SignalState> m_states;
-	TuningService* m_service;
+	Tuning::TuningService* m_service;
 	QHash<QString, int> signalIdMap;
 };

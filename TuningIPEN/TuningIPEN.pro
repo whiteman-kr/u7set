@@ -37,14 +37,15 @@ SOURCES +=\
 	../lib/Queue.cpp \
 	../lib/JsonSerializable.cpp \
 	MainIPEN.cpp \
-	../u7/Builder/TuningDataStorage.cpp \
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
 	../AppDataService/AppSignalState.cpp \
 	../TuningService/TuningSocket.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    TuningIPENService.cpp \
+    ../TuningService/TuningDataStorage.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../include/ServiceSettings.h \
@@ -68,7 +69,6 @@ HEADERS  += TuningMainWindow.h \
 	../include/CircularLogger.h \
 	../include/Queue.h \
 	../include/JsonSerializable.h \
-	../u7/Builder/TuningDataStorage.h \
 	../include/Signal.h \
 	SafetyChannelSignalsModel.h \
 	../AppDataService/AppSignalState.h \
@@ -76,7 +76,9 @@ HEADERS  += TuningMainWindow.h \
 	../include/Crc.h \
 	AnalogSignalSetter.h \
     ../include/Utils.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    TuningIPENService.h \
+    ../TuningService/TuningDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 
