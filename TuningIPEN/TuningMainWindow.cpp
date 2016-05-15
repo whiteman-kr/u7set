@@ -129,16 +129,16 @@ void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDa
 	double lowLimit = 0;
 
 	Signal* signal = findSignal(id, sourceInfoVector);
+	label = label + "\n" + id;
 	if (signal != nullptr)
 	{
-		id = signal->customAppSignalID().trimmed();
-		label = signal->caption().trimmed();
+		label = signal->caption().trimmed() + "\n" + signal->customAppSignalID().trimmed();
 		lowLimit = signal->lowLimit();
 		highLimit = signal->highLimit();
 	}
 
 	auto setter = new AnalogSignalSetter(id, lowLimit, highLimit, m_service, this);
-	fl->addRow(label + ((label.isEmpty() || id.isEmpty()) ? "" : "\n") + id, setter);
+	fl->addRow(label, setter);
 
 	connect(m_updateTimer, &QTimer::timeout, setter, &AnalogSignalSetter::updateValue);
 	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
@@ -215,6 +215,7 @@ void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 
 	if (reply == QMessageBox::No)
 	{
+		m_automaticMode->setChecked(!enabled);
 		return;
 	}
 
@@ -291,7 +292,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	m_automaticMode = new QPushButton("Automatic mode", this);
 	m_automaticMode->setCheckable(true);
-	connect(m_automaticMode, &QPushButton::toggled, this, &TuningMainWindow::applyNewAutomaticMode);
+	connect(m_automaticMode, &QPushButton::clicked, this, &TuningMainWindow::applyNewAutomaticMode);
 
 	QString automaticModeId = "#HP01LC02RAM_01PPC";
 	Signal* signal = findSignal(automaticModeId, m_info);

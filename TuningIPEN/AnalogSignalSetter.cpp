@@ -38,7 +38,7 @@ void AnalogSignalSetter::updateValue()
 	m_service->getSignalState(m_signalId);
 }
 
-void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool validity)
+void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, double, double, bool validity)
 {
 	if (appSignalID == m_signalId)
 	{
