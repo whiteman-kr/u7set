@@ -120,14 +120,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 					{
 						return "???";
 					}
-					if (signal.isAnalog())
-					{
-						return value;
-					}
-					else
-					{
-						return "";
-					}
+					return value;
 				}
 			}
 			break;
@@ -143,14 +136,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 					{
 						return "???";
 					}
-					if (signal.isAnalog())
-					{
-						return value;
-					}
-					else
-					{
-						return "";
-					}
+					return value;
 				}
 			}
 			break;
@@ -194,10 +180,12 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 		return QAbstractTableModel::setData(index, value, role);
 	}
 
+	QString valueStr = value.toString().replace(',', '.');
+
 	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
 
 	bool ok = false;
-	double newValue = value.toDouble(&ok);
+	double newValue = valueStr.toDouble(&ok);
 	if (!ok)
 	{
 		if (signal.isDiscrete())
@@ -274,7 +262,7 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		if (m_states[signalIndex].newValue == value)
+		if (qAbs(m_states[signalIndex].newValue - value) < 0.000001)
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);

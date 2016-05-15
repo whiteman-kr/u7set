@@ -38,7 +38,7 @@ private:
 public slots:
 	void updateSignalStates();
 
-	void updateSignalState(QString appSignalID, double value);
+	void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
 	void updateDataSourceStatus(TuningDataSourceState state);
 
 	//void applyNewScrollBarValue();
