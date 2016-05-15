@@ -288,6 +288,7 @@ namespace Tuning
 		state.hasConnection = m_hasConnection;
 		state.receivedReplyCount = m_receivedRepyCount;
 		state.sentRequestCount = m_sentRequestCount;
+		state.flags = m_fotipFlags;
 
 		return state;
 	}

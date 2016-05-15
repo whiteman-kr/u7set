@@ -44,6 +44,9 @@ public slots:
 	//void applyNewScrollBarValue();
 	void applyNewAutomaticMode(bool enabled);
 
+	void onUserRequest(FotipFrame fotipFrame);
+	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
+
 public:
 	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
 	~TuningMainWindow();
