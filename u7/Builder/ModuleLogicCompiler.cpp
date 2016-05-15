@@ -3127,34 +3127,36 @@ namespace Builder
 
 		m_code.generateBinCode();
 
+		QString lmCaption = "LM-1";
+
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
 
-		m_appLogicCompiler.writeBinCodeForLm(subsysId, m_lm->caption(), lmNumber,
+		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmCaption, lmNumber,
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
 
 		result &= m_resultWriter->addFile(subsysId, QString("%1-%2.mif").
-										  arg(m_lm->caption()).arg(lmNumber), mifCode);
+										  arg(lmCaption).arg(lmNumber), mifCode);
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
 		result = m_resultWriter->addFile(subsysId, QString("%1-%2.asm").
-										 arg(m_lm->caption()).arg(lmNumber), asmCode);
+										 arg(lmCaption).arg(lmNumber), asmCode);
 
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile);
 
 		result = m_resultWriter->addFile(subsysId, QString("%1-%2.mem").
-										 arg(m_lm->caption()).arg(lmNumber), memFile);
+										 arg(lmCaption).arg(lmNumber), memFile);
 
-		writeTuningInfoFile(subsysId, lmNumber);
+		writeTuningInfoFile(lmCaption, subsysId, lmNumber);
 
 		//
 
@@ -3166,7 +3168,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeTuningInfoFile(QString subsystemID, int lmNumber)
+	bool ModuleLogicCompiler::writeTuningInfoFile(const QString& lmCaption, const QString& subsystemID, int lmNumber)
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -3327,7 +3329,7 @@ namespace Builder
 		}
 
 		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
-										 arg(m_lm->caption()).arg(lmNumber), file);
+										 arg(lmCaption).arg(lmNumber), file);
 
 		return result;
 	}

@@ -530,19 +530,6 @@ namespace  Tuning
 
 	bool TuningData::initTuningData()
 	{
-		// ------ DEBUG ---------------
-	/*	buildTuningData();
-
-		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
-		{
-			for(Signal* signal : m_tuningSignals[type])
-			{
-				m_id2SignalMap.insert(signal->appSignalID(), signal);
-			}
-		}
-
-		return true;*/
-		// ------ DEBUG ---------------
 		int firstFrame = 0;
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
