@@ -92,6 +92,8 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	m_service = new Tuning::TuningService(worker);
 
 	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
+	connect(m_service, &Tuning::TuningService::userRequest, this, &TuningMainWindow::onUserRequest);
+	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, this, &TuningMainWindow::onReplyWithNoZeroFlags);
 
 	m_service->start();
 
@@ -179,7 +181,7 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 		}
 		else
 		{
-			if (state.flags.successfulCheck == 0)
+			if (state.flags.all != 0)
 			{
 				label->setStyleSheet("QLabel { background-color : #FFCC33; }");	//yellow
 			}
@@ -319,4 +321,14 @@ void TuningMainWindow::onTuningServiceReady()
 	QFont font = m_automaticPowerRegulatorWidget->font();
 	font.setPointSize(font.pointSize() * 1.4);
 	setFontRecursive(m_automaticPowerRegulatorWidget, font);
+}
+
+
+void TuningMainWindow::onUserRequest(FotipFrame fotipFrame)
+{
+}
+
+
+void TuningMainWindow::onReplyWithNoZeroFlags(FotipFrame fotipFrame)
+{
 }

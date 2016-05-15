@@ -598,7 +598,7 @@ namespace Builder
 		bool copyAomDataToModuleMemory(const Module& module);
 
 		bool buildTuningData();
-		bool writeTuningInfoFile(QString subsystemID, int lmNumber);
+		bool writeTuningInfoFile(const QString& lmCaption, const QString& subsystemID, int lmNumber);
 
 		bool calculateCodeRunTime();
 
