@@ -5,14 +5,6 @@
 #include "AppDataSource.h"
 
 
-class AppDataSources : public HashedVector<quint32, AppDataSource*>
-{
-public:
-	~AppDataSources();
-
-	void clear();
-};
-
 
 const int	NO_INDEX = -1;
 

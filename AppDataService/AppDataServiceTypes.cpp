@@ -1,28 +1,6 @@
 #include "AppDataServiceTypes.h"
 
 
-// -------------------------------------------------------------------------------
-//
-// AppDataSources class implementation
-//
-// -------------------------------------------------------------------------------
-
-AppDataSources::~AppDataSources()
-{
-	clear();
-}
-
-
-void AppDataSources::clear()
-{
-	for(AppDataSource* dataSource : *this)
-	{
-		delete dataSource;
-	}
-
-	HashedVector<quint32, AppDataSource*>::clear();
-}
-
 
 // -------------------------------------------------------------------------------
 //
