@@ -10,3 +10,13 @@ public:
 	AppDataSource();
 };
 
+
+
+class AppDataSources : public HashedVector<quint32, AppDataSource*>
+{
+public:
+	~AppDataSources();
+
+	void clear();
+};
+

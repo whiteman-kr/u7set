@@ -1128,10 +1128,10 @@ namespace Builder
 
 		bool result = true;
 
-		if (appSignal->isComputed())
+		/*if (appSignal->isComputed())
 		{
 			return true;				// signal already computed
-		}
+		}*/
 
 		int inPinsCount = 1;
 

@@ -35,7 +35,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">1
+            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
