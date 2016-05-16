@@ -60,7 +60,6 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 	hl->addWidget(m_projectListCombo);
 
 	loadProjectList();
-	m_listenerModel->loadProject(m_rootPath + '/' + m_projectListCombo->currentText());
 
 	QTimer* updateProjectListTimer = new QTimer(this);
 	connect(updateProjectListTimer, &QTimer::timeout, this, &SourceListWidget::loadProjectList);
