@@ -124,7 +124,7 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 			rawValue = reverseUint16(rawValue);
 		}
 
-		value = (rawValue >> parseInfo.valueAddr.bit()) & 0x0001;
+		value = static_cast<double>((rawValue >> parseInfo.valueAddr.bit()) & 0x0001);
 	}
 	else
 	{
@@ -148,11 +148,11 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 				break;
 
 			case E::DataFormat::SignedInt:
-				value = *reinterpret_cast<qint32*>(&rawValue);
+				value = static_cast<double>(*reinterpret_cast<qint32*>(&rawValue));
 				break;
 
 			case E::DataFormat::UnsignedInt:
-				value = rawValue;
+				value = static_cast<double>(rawValue);
 				break;
 			}
 		}
