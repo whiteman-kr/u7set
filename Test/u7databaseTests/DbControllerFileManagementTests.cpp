@@ -87,7 +87,7 @@ void DbControllerFileTests::getFileListTest()
 void DbControllerFileTests::addFileTest()
 {
 	QString details = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
-	QString name = "FileForAddFilesTest";
+	QString name = "\'\"\\FileForAddFilesTest%\'\"\\";
 
 	std::shared_ptr<DbFile> file(new DbFile);
 	file.get()->setUserId(1);
@@ -123,7 +123,9 @@ void DbControllerFileTests::addFileTest()
 	db.setDatabaseName("u7_" + m_databaseName);
 
 	QSqlQuery query;
-	ok = query.exec(QString("SELECT * FROM file WHERE name = \'%1\'").arg(name));
+	QString nameForDb = name;
+	nameForDb.replace("\'","\'\'");
+	ok = query.exec(QString("SELECT * FROM file WHERE name = \'%1\'").arg(nameForDb));
 	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
 
 	ok = query.first();
@@ -142,37 +144,6 @@ void DbControllerFileTests::addFileTest()
 	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
 
 	QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
-
-	// Try add file which name contains special symbols
-	//
-
-	name.append("\\\"\'");
-
-	file.get()->readFromDisk(name);
-
-	ok = m_dbController->addFile(file, 1, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
-
-	ok = query.exec(QString("SELECT * FROM file WHERE name = \'%1\'").arg(name));
-	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
-
-	ok = query.first();
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-
-	QVERIFY2 (query.value("name").toString() == name, qPrintable("Error: file created by function addFile from DbController has wrong name"));
-	QVERIFY2 (query.value("parentId").toInt() == 1, qPrintable("Error: file created by function addFile from DbController has wrong parentId"));
-	QVERIFY2 (query.value("Deleted").toBool() == false, qPrintable("Error: file created by function addFile from DbController has wrong deleted flag"));
-
-	fileInstanceId = query.value("checkedOutInstanceId").toString();
-
-	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = \'%1\'").arg(fileInstanceId));
-	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
-
-	ok = query.first();
-	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
-
-	QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
-
 	db.close();
 }
 
