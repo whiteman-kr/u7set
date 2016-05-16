@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtGlobal>
 
 #define ASSERT_RESULT_FALSE_BREAK	assert(false); \
 									result = false; \
@@ -30,3 +31,8 @@ TYPE reverseBytes(TYPE value)
 
 	return dest;
 }
+
+
+inline quint16 reverseUint16(quint16 val) { return reverseBytes<quint16>(val); }
+inline quint32 reverseUint32(quint32 val) { return reverseBytes<quint32>(val); }
+inline quint64 reverseUint64(quint64 val) { return reverseBytes<quint64>(val); }

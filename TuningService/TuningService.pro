@@ -52,7 +52,8 @@ SOURCES += \
     ../lib/Crc.cpp \
     TuningMain.cpp \
     ../lib/WUtils.cpp \
-    TuningDataStorage.cpp
+    TuningDataStorage.cpp \
+    ../lib/DataProtocols.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \

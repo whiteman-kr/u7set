@@ -5,12 +5,17 @@
 #pragma pack(push, 1)
 
 
-struct RupFrameFlags
+union RupFrameFlags
 {
-	quint16 appData : 1;
-	quint16 diagData : 1;
-	quint16 tuningData : 1;
-	quint16 test : 1;
+	struct
+	{
+		quint16 appData : 1;
+		quint16 diagData : 1;
+		quint16 tuningData : 1;
+		quint16 test : 1;
+	};
+
+	quint16 all;
 };
 
 
@@ -24,19 +29,17 @@ struct RupTimeStamp
 	quint16 day;			// 1..31
 	quint16 month;			// 1..12
 	quint16 year;			// 1970..65535
+
+	void reverseBytes();
 };
 
 
 struct RupFrameHeader
 {
 	quint16 frameSize;			// frame size including header, bytes
-	quint16 protocolVersion;	// must be 4!
+	quint16 protocolVersion;
 
-	union
-	{
-		RupFrameFlags flags;
-		quint16 flagsWord;
-	};
+	RupFrameFlags flags;
 
 	quint32 dataId;
 	quint16 moduleType;			// module ID
@@ -46,7 +49,7 @@ struct RupFrameHeader
 
 	RupTimeStamp timeStamp;
 
-	void toHostFormat();
+	void reverseBytes();
 };
 
 

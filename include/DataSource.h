@@ -32,6 +32,8 @@ struct RupData
 
 	int dataSize;
 	char data[RUP_FRAME_DATA_SIZE * RUP_MAX_FRAME_COUNT];
+
+	void dump();
 };
 
 
@@ -234,7 +236,7 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	void processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
+	void processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
 
 	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
 	void clearAssociatedSignals() { m_associatedSignals.clear(); }

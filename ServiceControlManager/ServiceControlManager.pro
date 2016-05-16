@@ -70,7 +70,9 @@ SOURCES += MainWindow.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp
+    ../lib/Queue.cpp \
+    ../lib/DataProtocols.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -85,7 +87,9 @@ HEADERS  += MainWindow.h \
     ConfigurationServiceWidget.h \
     ../include/SimpleThread.h \
     ../include/XmlHelper.h \
-    ../include/Queue.h
+    ../include/Queue.h \
+    ../include/DataProtocols.h \
+    ../include/WUtils.h
 
 FORMS    +=
 
