@@ -34,6 +34,7 @@ private:
 	void addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
+	void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
 
 public slots:
 	void updateSignalStates();

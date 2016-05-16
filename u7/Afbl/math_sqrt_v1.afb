@@ -1,88 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#scale_si_fp_v1">
+    <AfbElement StrId="#math_sqrt_v1">
         <Properties>
-            <Caption>scale_si_fp</Caption>
+            <Caption>math_sqrt</Caption>
             <Version>1.0</Version>
-            <Implementation Version="104" OpIndex="16"/>
-            <Description>Scaling Block, 32-bit signed integer to single-precision floating-point</Description>
-            <Category>Scaling</Category>
-            <OpCode>14</OpCode>
-            <HasRam>false</HasRam>
+            <Implementation Version="0" OpIndex="13"/>
+            <Description>Function Block outputs the square root calculation result</Description>
+            <Category>Math</Category>
+            <OpCode>16</OpCode>
+            <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="6" Size="32"/>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="1" Size="32"/>           
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="9" Size="32"/>
-
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="12" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="13" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="14" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="15" Size="1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
+            
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="7" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="8" Size="1"/>
+            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="9" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="10" Size="1"/>
+            <AfbElementSignal OpName="o_div_by_zero" Caption="div by zero" Type="Discrete" OpIndex="11" Size="1"/>
         </OutputSignals>
-        <Params>
-            <AfbElementParam OpName="i_scal_k1_coef" Caption="K1" Visible="false" OpIndex="1" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
+        <Params>            
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="i_scal_k2_coef" Caption="K2" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-                <Value>0</Value>
-                <Default>0</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="input_low" Caption="InputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-                <Value>0</Value>
-                <Default>0</Default>
-                <LowLimit>-2147483648</LowLimit>
-                <HighLimit>2147483647</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="input_high" Caption="InputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-                <Value>100</Value>
-                <Default>100</Default>
-                <LowLimit>-2147483648</LowLimit>
-                <HighLimit>2147483647</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="output_low" Caption="OutputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-                <Value>0</Value>
-                <Default>0</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="output_high" Caption="OutputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-                <Value>100</Value>
-                <Default>100</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>5</Value>
-                <Default>1</Default>
                 <LowLimit>1</LowLimit>
-                <HighLimit>9</HighLimit>
+                <HighLimit>8</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
@@ -135,6 +82,18 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
+            <AfbElementParam OpName="OutDivByZero" Caption="OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>0</Value>
+                <Default>0</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -148,7 +107,7 @@ function(videoItemFblElement, afbElement)
         </Params>
         <CommonScript>
             <Library>
-            function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
 {
 	var show = videoItemFblElement.getParamBoolValue(paramName);
 	if (show == true)
@@ -175,6 +134,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div by zero");
 
 	videoItemFblElement.adjustHeight();
 
