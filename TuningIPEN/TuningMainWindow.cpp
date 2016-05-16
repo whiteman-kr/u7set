@@ -177,7 +177,7 @@ void writeBuffer(QTextStream& out, QString caption, quint8* buffer, int size)
 void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 {
 	QFile file("TuningIPEN.log");
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Append))
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
 	{
 		return;
 	}
@@ -185,6 +185,7 @@ void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 	QTextStream out(&file);
 
 	out << QString("------------------------------ Frame info of %1").arg(caption) << endl;
+	out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << endl;
 	out << QString("-------------------- Header (hex, bin, dec)") << endl;
 	auto& header = fotipFrame.header;
 
