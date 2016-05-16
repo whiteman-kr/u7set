@@ -50,7 +50,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 4;		// AIM filteringTime calculation algorithm has been changed
 //var configScriptVersion = 5;		// LM-1 properties SubsysID and Channel have been renamed to SubsystemID and SubsystemChannel
 //var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
-var configScriptVersion = 7;		// MAC address calculation changed
+//var configScriptVersion = 7;		// MAC address calculation changed
+var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -503,9 +504,21 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	}
 	confFirmware.writeLog("    Ethernet Controller "  + lmID + ethernetcontrollerID + "\r\n");
 	
-	var serviceID = ethernetController.propertyValue("TuningServiceID");
+	// Controller
 	
-	if (ethernetController.propertyValue("TuningEnable") == true && serviceID != "")
+	var tuningWordsCount = 716;
+
+	var tuningIP = ethernetController.jsPropertyIP("TuningIP");
+	var tuningPort = ethernetController.propertyValue("TuningPort");
+	
+	// Service
+		
+	var tuningServiceIP = 0;
+	var tuningServicePort = 0;
+
+	var serviceID = ethernetController.propertyValue("TuningServiceID");
+
+	if (ethernetController.propertyValue("TuningEnable") == true)
 	{
 		var service = root.jsFindChildObjectByMask(serviceID);
 		if (service == null)
@@ -524,20 +537,14 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				}
 			}	
 			
-			var tuningWordsCount = 716;
-	
-			var tuningIP = ethernetController.jsPropertyIP("TuningIP");
-			var tuningPort = ethernetController.propertyValue("TuningPort");
-			
-			var tuningServiceIP = service.jsPropertyIP("TuningDataIP");
-			var tuningServicePort = service.propertyValue("TuningDataPort");
-			
-		
-			generate_LANConfiguration(confFirmware, log, lanFrame, module, 
-										tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, 
-										0, 0, 0, 0, 0);	//Subnet2 is not used
+			tuningServiceIP = service.jsPropertyIP("TuningDataIP");
+			tuningServicePort = service.propertyValue("TuningDataPort");
 		}
 	}
+
+	generate_LANConfiguration(confFirmware, log, lanFrame, module, 
+								tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, 
+								0, 0, 0, 0, 0);	//Subnet2 is not used
 	lanFrame++;
 								
 	// REG / DIAG
@@ -577,42 +584,45 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		
 		for (var s = 0; s < 2; s++)
 		{
-			var serviceID = ethernetController.propertyValue(servicesName[s] + "DataServiceID");
-
-			if (ethernetController.propertyValue(servicesName[s] + "DataEnable") == false || serviceID == "")
-			{
-				continue;
-			}
+			// Controller
 		
-			var service = root.jsFindChildObjectByMask(serviceID);
-			if (service == null)
-			{
-				log.wrnCFG3008(serviceID, module.propertyValue("EquipmentID"));
-				continue;
-			}
-				
-			var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
-			if (serviceDataChannel == null)
-			{
-				log.errCFG3004(serviceID + "_DATACH01", lmID);
-				return false;
-			}
-
-			var checkProperties = ["DataReceivingIP", "DataReceivingPort"];
-			for (var cp = 0; cp < checkProperties.length; cp++)
-			{
-				if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined)
-				{
-					log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.propertyValue("EquipmentID"));
-					return false;
-				}
-			}	
-			
 			ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
 			port[s] = ethernetController.propertyValue(servicesName[s] + "DataPort");
+			
+			// Service
+			var serviceID = ethernetController.propertyValue(servicesName[s] + "DataServiceID");
+
+			if (ethernetController.propertyValue(servicesName[s] + "DataEnable") == true)
+			{
 				
-			serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-			servicePort[s] = serviceDataChannel.propertyValue(servicesName[s] + "DataReceivingPort");
+				var service = root.jsFindChildObjectByMask(serviceID);
+				if (service == null)
+				{
+					log.wrnCFG3008(serviceID, module.propertyValue("EquipmentID"));
+				}
+				else
+				{
+					var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
+					if (serviceDataChannel == null)
+					{
+						log.errCFG3004(serviceID + "_DATACH01", lmID);
+						return false;
+					}
+	
+					var checkProperties = ["DataReceivingIP", "DataReceivingPort"];
+					for (var cp = 0; cp < checkProperties.length; cp++)
+					{
+						if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined)
+						{
+							log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.propertyValue("EquipmentID"));
+							return false;
+						}
+					}	
+					
+					serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+					servicePort[s] = serviceDataChannel.propertyValue(servicesName[s] + "DataReceivingPort");
+				}
+			}
 		}
 			
 		
