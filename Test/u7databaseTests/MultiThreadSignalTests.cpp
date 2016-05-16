@@ -245,6 +245,7 @@ void MultiThreadSignalTest::run()
 		sd.maxDifference = 26;
 		sd.byteOrder = 27;
 		sd.enableTuning = "true";
+		sd.tuningDefaultValue = 28;
 
 		QString arguments = QString("%1, %2, %3, %4, %5, %6, %7, %8, '%9', %10, ")
 				.arg(sd.signalId)
@@ -294,13 +295,14 @@ void MultiThreadSignalTest::run()
 						 .arg(sd.aperture)
 						 .arg(sd.inOutType));
 
-		arguments.append(QString("'%1', %2, %3, %4, %5, '%6'")
+		arguments.append(QString("'%1', %2, %3, %4, %5, '%6', %7")
 						 .arg(sd.equipmentID)
 						 .arg(sd.outputRangeMode)
 						 .arg(sd.filteringTime)
 						 .arg(sd.maxDifference)
 						 .arg(sd.byteOrder)
-						 .arg(sd.enableTuning));
+						 .arg(sd.enableTuning)
+						 .arg(sd.tuningDefaultValue));
 
 		// Start function
 		//

@@ -246,7 +246,7 @@ namespace Builder
 				break;
 			}
 
-			TuningDataStorage tuningDataStorage;
+			Tuning::TuningDataStorage tuningDataStorage;
 
 			//
 			// Compile application logic
@@ -261,13 +261,12 @@ namespace Builder
 			//
 			// Generate SCADA software configurations
 			//
-			generateSoftwareConfiguration(&db, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
+			generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
-
 
 			//
 			// Compile Module configuration
@@ -658,7 +657,7 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Tuning::TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
@@ -723,7 +722,7 @@ namespace Builder
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
-													TuningDataStorage* tuningDataStorage,
+													Tuning::TuningDataStorage* tuningDataStorage,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
@@ -749,10 +748,11 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::generateSoftwareConfiguration(	DbController *db,
+	bool BuildWorkerThread::generateSoftwareConfiguration(DbController *db,
+															Hardware::SubsystemStorage* subsystems,
 															Hardware::EquipmentSet* equipment,
 															SignalSet* signalSet,
-															TuningDataStorage* tuningDataStorage,
+															Tuning::TuningDataStorage* tuningDataStorage,
 															BuildResultWriter* buildResultWriter)
 	{
 		bool result = true;
@@ -764,7 +764,7 @@ namespace Builder
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
-			[this, &db, &signalSet, &buildResultWriter, equipment, tuningDataStorage, &result](Hardware::DeviceObject* currentDevice)
+			[this, &db, &subsystems, &signalSet, &buildResultWriter, &equipment, &tuningDataStorage, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -796,7 +796,7 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(db, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
+					softwareCfgGenerator = new TuningServiceCfgGenerator(db, subsystems, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
 					break;
 
 				case E::SoftwareType::ConfigurationService:

@@ -82,7 +82,7 @@ public:
 	Queue(int queueSize) :
 		QueueBase(sizeof(TYPE), queueSize) 	{}
 
-	virtual bool push(TYPE* ptr) { return QueueBase::push(reinterpret_cast<char*>(ptr)); }
+	virtual bool push(const TYPE* ptr) { return QueueBase::push(reinterpret_cast<const char*>(ptr)); }
 	virtual bool pop(TYPE* ptr) { return QueueBase::pop(reinterpret_cast<char*>(ptr)); }
 
 	TYPE* beginPush() { return reinterpret_cast<TYPE*>(QueueBase::beginPush()); }

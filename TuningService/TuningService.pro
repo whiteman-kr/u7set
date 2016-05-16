@@ -22,7 +22,7 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/CircularLogger.cpp \
@@ -47,9 +47,12 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
-    ../u7/Builder/TuningDataStorage.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalState.cpp
+    ../AppDataService/AppSignalState.cpp \
+    ../lib/Crc.cpp \
+    TuningMain.cpp \
+    ../lib/WUtils.cpp \
+    TuningDataStorage.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -77,9 +80,10 @@ HEADERS += \
     ../include/OutputLog.h \
     ../include/ProtoSerialization.h \
     ../include/Types.h \
-    ../u7/Builder/TuningDataStorage.h \
     ../include/Signal.h \
-    ../AppDataService/AppSignalState.h
+    ../AppDataService/AppSignalState.h \
+    ../include/Crc.h \
+    TuningDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 

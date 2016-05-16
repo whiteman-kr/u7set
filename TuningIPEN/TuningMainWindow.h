@@ -1,37 +1,56 @@
-#ifndef TUNINGMAINWINDOW_H
-#define TUNINGMAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include "../include/ServiceSettings.h"
 #include "../include/DataSource.h"
 #include "../include/Service.h"
-#include "../TuningService/TuningService.h"
 #include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningService.h"
+#include "TuningIPENService.h"
 
-
-namespace Ui {
-class TuningMainWindow;
-}
+class QTabWidget;
+class QFormLayout;
+class QPushButton;
+class QScrollBar;
+class QLabel;
+class AnalogSignalSetter;
 
 class TuningMainWindow : public QMainWindow
 {
 	Q_OBJECT
 private:
 	QString m_cfgPath;
+	QTabWidget* m_setOfSignalsScram;
+	QWidget* m_automaticPowerRegulatorWidget;
 
-	TuningService* m_service = nullptr;
+	Tuning::TuningService* m_service = nullptr;
+	QVector<Tuning::TuningDataSourceInfo> m_info;
+	QMap<QString, QLabel*> m_statusLabelMap;
 
+	QPushButton* m_automaticMode;
+	QScrollBar* m_scrollBar;
+	QTimer* m_updateTimer;
+
+	void addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
+
+public slots:
+	void updateSignalStates();
+
+	void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
+	void updateDataSourceStatus(Tuning::TuningDataSourceState state);
+
+	//void applyNewScrollBarValue();
+	void applyNewAutomaticMode(bool enabled);
+
+	void onUserRequest(FotipFrame fotipFrame);
+	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
 
 public:
 	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
 	~TuningMainWindow();
 
 	void onTuningServiceReady();
-
-private:
-	Ui::TuningMainWindow *ui;
 };
 
-#endif // TUNINGMAINWINDOW_H

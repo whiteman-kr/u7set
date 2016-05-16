@@ -5,7 +5,7 @@
 #include "Subsystem.h"
 #include "Connection.h"
 #include "../Builder/BuildResultWriter.h"
-#include "../Builder/TuningDataStorage.h"
+#include "../TuningService/TuningDataStorage.h"
 #include "../Builder/IssueLogger.h"
 
 // Forware declarations
@@ -83,7 +83,7 @@ namespace Builder
 
 		// Generate Tuning configuration
 		//
-		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter);
+		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Tuning::TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
@@ -98,15 +98,16 @@ namespace Builder
 										SignalSet* signalSet,
 										Afb::AfbElementCollection* afbCollection,
 										AppLogicData* appLogicData,
-										TuningDataStorage* tuningDataStorage,
+										Tuning::TuningDataStorage* tuningDataStorage,
 										BuildResultWriter* buildResultWriter);
 
 		// Generate SCADA software configurations
 		//
 		bool generateSoftwareConfiguration(	DbController* db,
+											Hardware::SubsystemStorage* subsystems,
 											Hardware::EquipmentSet* equipment,
 											SignalSet* signalSet,
-											TuningDataStorage* tuningDataStorage,
+											Tuning::TuningDataStorage* tuningDataStorage,
 											BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?

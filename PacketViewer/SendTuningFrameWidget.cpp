@@ -236,7 +236,7 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(header.frameNumber, 0);
 
 		QDateTime&& time = QDateTime::currentDateTime();
-		RupTimeStamp& timeStamp = header.TimeStamp;
+		RupTimeStamp& timeStamp = header.timeStamp;
 		writeBigEndian(timeStamp.year, time.date().year());
 		writeBigEndian(timeStamp.month, time.date().month());
 		writeBigEndian(timeStamp.day, time.date().day());
@@ -250,16 +250,16 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(fotip.protocolVersion, 1);
 		writeBigEndian(fotip.uniqueId, m_uniqueId->text().toUInt());
 
-		fotip.subsystemKey.channelNumber = m_channelNumber->text().toUInt();
+		fotip.subsystemKey.lmNumber = m_channelNumber->text().toUInt();
 		fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
 		quint16 data = fotip.subsystemKey.subsystemCode;	// second
 		data <<= 6;
-		data += fotip.subsystemKey.channelNumber;	// first
+		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 		writeBigEndian(fotip.subsystemKeyWord, fotip.subsystemKeyWord);
 
 		writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
-		writeBigEndian(fotip.flagsWord, m_flags->text().toUInt());
+		writeBigEndian(fotip.flags.all, m_flags->text().toUInt());
 		writeBigEndian(fotip.startAddress, m_startAddress->text().toUInt());
 		writeBigEndian(fotip.fotipFrameSize, m_fotipFrameSize->text().toUInt());
 		writeBigEndian(fotip.romSize, m_romSize->text().toUInt());
@@ -313,7 +313,7 @@ void SendTuningFrameWidget::sendPacket()
 		header.frameNumber = 0;
 
 		QDateTime&& time = QDateTime::currentDateTime();
-		RupTimeStamp& timeStamp = header.TimeStamp;
+		RupTimeStamp& timeStamp = header.timeStamp;
 		timeStamp.year = time.date().year();
 		timeStamp.month = time.date().month();
 		timeStamp.day = time.date().day();
@@ -327,15 +327,15 @@ void SendTuningFrameWidget::sendPacket()
 		fotip.protocolVersion = 1;
 		fotip.uniqueId = m_uniqueId->text().toUInt();
 
-		fotip.subsystemKey.channelNumber = m_channelNumber->text().toUInt();
+		fotip.subsystemKey.lmNumber = m_channelNumber->text().toUInt();
 		fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
 		quint16 data = fotip.subsystemKey.subsystemCode;	// second
 		data <<= 6;
-		data += fotip.subsystemKey.channelNumber;	// first
+		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
 		fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;
-		fotip.flagsWord =  m_flags->text().toUInt();
+		fotip.flags.all =  m_flags->text().toUInt();
 		fotip.startAddress = m_startAddress->text().toUInt();
 		fotip.fotipFrameSize = m_fotipFrameSize->text().toUInt();
 		fotip.romSize = m_romSize->text().toUInt();

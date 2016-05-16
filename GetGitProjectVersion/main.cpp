@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstring>
+#include <algorithm>
 #include <sys/stat.h>
 #include <git2/errors.h>
 #include <git2/version.h>
@@ -254,7 +255,7 @@ int main(int argc, char *argv[])
 	//
 
 	unsigned int commit_index = 0;
-	for (; commit_index < min(branch_history.size(), head_history.size()); commit_index++)
+	for (; commit_index < std::min(branch_history.size(), head_history.size()); commit_index++)
 	{
 		if (memcmp(branch_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
 		{

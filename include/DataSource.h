@@ -5,6 +5,7 @@
 #include "../include/Queue.h"
 #include "../include/XmlHelper.h"
 #include "../include/DataProtocols.h"
+#include "../include/DeviceObject.h"
 
 
 enum DataSourceState
@@ -110,6 +111,10 @@ protected:
 	static const char* PROP_DATA_TYPE;
 	static const char* PROP_CHANNEL;
 	static const char* PROP_LM_ID;
+	static const char* PROP_LM_NUMBER;
+	static const char* PROP_LM_SUBSYSTEM_ID;
+	static const char* PROP_LM_SUBSYSTEM;
+	static const char* PROP_LM_MODULE_TYPE;
 	static const char* PROP_LM_CAPTION;
 	static const char* PROP_LM_ADAPTER_ID;
 	static const char* PROP_LM_DATA_ENABLE;
@@ -119,14 +124,21 @@ protected:
 	static const char* PROP_COUNT;
 	static const char* SIGNAL_ID_ELEMENT;
 
-	int m_channel = 0;
-	DataType m_dataType = DataType::App;
+	// Properties from LM
+	//
+	int m_lmChannel = 0;
+	DataType m_lmDataType = DataType::App;
 	QString m_lmEquipmentID;
+	int m_lmNumber = 0;
+	int m_lmModuleType = 0;
+	int m_lmSubsystemID = 0;
+	QString m_lmSubsystem;
 	QString m_lmCaption;
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
-	ulong m_lmDataID = 0;
+	quint64 m_lmDataID = 0;
+
 	QStringList m_associatedSignals;
 
 	//
@@ -142,14 +154,26 @@ public:
 //	DataSource(const DataSource& ds);
 //	DataSource& operator = (const DataSource& ds);
 
-	int channel() const { return m_channel; }
-	void setChannel(int channel) { m_channel = channel; }
+	int lmChannel() const { return m_lmChannel; }
+	void setLmChannel(int channel) { m_lmChannel = channel; }
 
-	DataType dataType() const { return m_dataType; }
-	void setDataType(DataType dataType) { m_dataType = dataType; }
+	DataType lmDataType() const { return m_lmDataType; }
+	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
 	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
+	int lmNumber() const { return m_lmNumber; }
+	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
+
+	int lmSubsystemID() const { return m_lmSubsystemID; }
+	void setLmSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
+
+	int lmModuleType() const { return m_lmModuleType; }
+	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
+
+	QString lmSubsystem() const { return m_lmSubsystem; }
+	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystem = lmSubsystem; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
@@ -201,7 +225,7 @@ public:
 	void stop();
 	void resume();
 
-	QString dataTypeToString(DataType dataType);
+	QString dataTypeToString(DataType lmDataType);
 	DataType stringToDataType(const QString& dataTypeStr);
 
 	void writeToXml(XmlWriteHelper& xml);

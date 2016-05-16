@@ -1,5 +1,6 @@
 #include "TuningMainWindow.h"
 #include <QApplication>
+#include "../TuningService/TuningDataSource.h"
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
@@ -25,8 +26,12 @@ int main(int argc, char *argv[])
 		if (arg.startsWith("-b="))
 		{
 			cfgPath = arg.mid(3);
+			continue;
 		}
 	}
+
+	qRegisterMetaType<Tuning::TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
 	TuningMainWindow w(cfgPath);

@@ -12,6 +12,8 @@ CONFIG += staticlib
 
 win32 {
 	CONFIG += warn_off
+}
+msvc {
 	QMAKE_CXXFLAGS += /wd4996
 }
 
@@ -105,4 +107,9 @@ HEADERS += \
 	google/protobuf/io/zero_copy_stream.h \
 	google/protobuf/io/zero_copy_stream_impl.h \
 	google/protobuf/io/zero_copy_stream_impl_lite.h
+
+gcc {
+	SOURCES += google/protobuf/stubs/atomicops_internals_x86_gcc.cc
+	HEADERS += google/protobuf/stubs/atomicops_internals_x86_gcc.h
+}
 

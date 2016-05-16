@@ -1,17 +1,20 @@
 #include "../include/ServiceSettings.h"
+#include "../u7/Subsystem.h"
 #include "TuningServiceCfgGenerator.h"
 
 
 namespace Builder
 {
-	TuningServiceCfgGenerator::TuningServiceCfgGenerator(DbController* db,
-														 Hardware::Software* software,
-														 SignalSet* signalSet,
-														 Hardware::EquipmentSet* equipment,
-														 TuningDataStorage *tuningDataStorage,
-														 BuildResultWriter* buildResultWriter) :
+	TuningServiceCfgGenerator::TuningServiceCfgGenerator(	DbController* db,
+															Hardware::SubsystemStorage *subsystems,
+															Hardware::Software* software,
+															SignalSet* signalSet,
+															Hardware::EquipmentSet* equipment,
+															Tuning::TuningDataStorage *tuningDataStorage,
+															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
-		m_tuningDataStorage(tuningDataStorage)
+		m_tuningDataStorage(tuningDataStorage),
+		m_subsystems(subsystems)
 	{
 	}
 
@@ -23,7 +26,8 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::generateConfiguration()
 	{
-		if (m_tuningDataStorage == nullptr)
+		if (m_tuningDataStorage == nullptr ||
+			m_subsystems == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
@@ -32,11 +36,7 @@ namespace Builder
 		bool result = true;
 
 		result &= writeSettings();
-
-//		result &= findTuningSignals();
-
 		result &= writeTuningLMs();
-//		result &= writeTuningSignals();
 
 		return result;
 	}
@@ -103,20 +103,55 @@ namespace Builder
 
 			result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, LM_ETHERNET_ADAPTER1, m_log);
 
-			TuningDataSource ds;
+			int lmNumber = 0;
+			int lmChannel = 0;
+			QString lmSubsystem;
 
-			ds.setChannel(0);
-			ds.setDataType(DataSource::DataType::Tuning);
+			result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
+			result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
+			result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
+
+			if (result == false)
+			{
+				continue;
+			}
+
+			int lmSubsystemID = 0;
+
+			int subsystemsCount = m_subsystems->count();
+
+			for(int i = 0; i < subsystemsCount; i++)
+			{
+				std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+
+				if (subsystem->subsystemId() == lmSubsystem)
+				{
+					lmSubsystemID = subsystem->key();
+					break;
+				}
+			}
+
+			Tuning::TuningDataSource ds;
+
+			ds.setLmChannel(lmChannel);
+			ds.setLmDataType(DataSource::DataType::Tuning);
 			ds.setLmEquipmentID(lm->equipmentId());
+			ds.setLmNumber(lmNumber);
+			ds.setLmModuleType(lm->moduleType());
+			ds.setLmSubsystemID(lmSubsystemID);
+			ds.setLmSubsystem(lmSubsystem);
+
 			ds.setLmCaption(lm->caption());
 			ds.setLmAdapterID(lmNetProperties.adapterID);
 			ds.setLmDataEnable(lmNetProperties.tuningEnable);
 			ds.setLmAddressStr(lmNetProperties.tuningIP);
 			ds.setLmPort(lmNetProperties.tuningPort);
 
+			ds.setLmDataID(0);			// !!! ???
+
 			if (m_tuningDataStorage->contains(lm->equipmentId()) == true)
 			{
-				TuningData* tuningData = (*m_tuningDataStorage)[lm->equipmentId()];
+				Tuning::TuningData* tuningData = (*m_tuningDataStorage)[lm->equipmentId()];
 
 				if(tuningData != nullptr)
 				{

@@ -37,6 +37,11 @@ Signal::Signal() :
 }
 
 
+Signal::~Signal()
+{
+}
+
+
 Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 {
 	if (deviceSignal.isDiagSignal())
@@ -809,18 +814,10 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("Channel", &intValue);
 	m_channel = static_cast<E::Channel>(intValue);
 
-	QString str;
+	int type = 0;
 
-	result &= xml.readStringAttribute("Type", &str);
-
-	if (str == "Analog")
-	{
-		m_type = E::SignalType::Analog;
-	}
-	else
-	{
-		m_type = E::SignalType::Discrete;
-	}
+	result &= xml.readIntAttribute("Type", &type);
+	m_type = static_cast<E::SignalType>(type);
 
 	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
 	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);

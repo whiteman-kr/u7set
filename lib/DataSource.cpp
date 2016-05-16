@@ -36,9 +36,13 @@ const char* DataSource::DATA_TYPE_APP = "App";
 const char* DataSource::DATA_TYPE_DIAG = "Diag";
 const char* DataSource::DATA_TYPE_TUNING = "Tuning";
 
-const char* DataSource::PROP_DATA_TYPE = "DataType";
-const char* DataSource::PROP_CHANNEL = "Channel";
+const char* DataSource::PROP_DATA_TYPE = "LmDataType";
+const char* DataSource::PROP_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
+const char* DataSource::PROP_LM_NUMBER = "LmNumber";
+const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
+const char* DataSource::PROP_LM_SUBSYSTEM = "LmSubsystem";
+const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
 const char* DataSource::PROP_LM_CAPTION = "LmCaption";
 const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
 const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
@@ -60,6 +64,7 @@ DataSource::~DataSource()
 	delete [] m_rupFrames;
 	delete [] m_framesData;
 }
+
 
 void DataSource::stop()
 {
@@ -162,15 +167,21 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
-	xml.writeIntAttribute(PROP_CHANNEL, m_channel);
-	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_dataType));
+	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
+
+	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
+	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
+	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
+	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
+	xml.writeIntAttribute(PROP_CHANNEL, m_lmChannel);
+
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
 	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
-	xml.writeUlongAttribute(PROP_LM_DATA_ID, m_lmDataID, true);
+	xml.writeUInt64Attribute(PROP_LM_DATA_ID, m_lmDataID, true);
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
@@ -199,15 +210,20 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	result &= xml.readIntAttribute(PROP_CHANNEL, &m_channel);
-
 	QString str;
 
 	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
 
-	m_dataType = stringToDataType(str);
+	m_lmDataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
+
+	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
+	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
+	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
+	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
+	result &= xml.readIntAttribute(PROP_CHANNEL, &m_lmChannel);
+
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
 	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
@@ -221,7 +237,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmAddressPort.setAddress(ipStr);
 	m_lmAddressPort.setPort(port);
 
-	result &= xml.readUlongAttribute(PROP_LM_DATA_ID, &m_lmDataID);
+	result &= xml.readUInt64Attribute(PROP_LM_DATA_ID, &m_lmDataID);
 
 	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
@@ -255,7 +271,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
-	readAdditionalSectionsFromXml(xml);
+	result &= readAdditionalSectionsFromXml(xml);
 
 	return result;
 }
@@ -330,7 +346,7 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
 		QDateTime plantTime;
-		RupTimeStamp timeStamp = m_rupFrames[0].header.TimeStamp;
+		RupTimeStamp timeStamp = m_rupFrames[0].header.timeStamp;
 
 		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));

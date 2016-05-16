@@ -41,27 +41,15 @@ protected:
 
 	void createAndBindSocket();
 	void closeSocket();
-	void onSocketReadyRead();
 
 	virtual void clear();
+
+private slots:
+	void onSocketReadyRead();
 
 public:
 	DataChannel(int channel, DataSource::DataType dataType, const HostAddressPort& dataReceivingIP);
 	virtual ~DataChannel();
-
-	void addDataSource(DataSource* dataSource);
-
-signals:
-
-public slots:
-};
-
-
-
-class DataChannelThread : public SimpleThread
-{
-public:
-	DataChannelThread();
 
 	void addDataSource(DataSource* dataSource);
 };
