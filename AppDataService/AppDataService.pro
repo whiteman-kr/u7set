@@ -88,7 +88,8 @@ SOURCES += main.cpp \
     AppDataChannel.cpp \
     AppDataSource.cpp \
     AppDataServiceTypes.cpp \
-    AppDataProcessingThread.cpp
+    AppDataProcessingThread.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS += \
 	Stable.h \

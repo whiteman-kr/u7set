@@ -74,7 +74,9 @@ SOURCES += \
     ../lib/Tcp.cpp \
     ../lib/JsonSerializable.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp
+    ../lib/Queue.cpp \
+    ../lib/DataProtocols.cpp \
+    ../lib/WUtils.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -91,7 +93,9 @@ HEADERS  += MainWindow.h \
     ../include/Tcp.h \
     ../include/JsonSerializable.h \
     ../include/XmlHelper.h \
-    ../include/Queue.h
+    ../include/Queue.h \
+    ../include/DataProtocols.h \
+    ../include/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

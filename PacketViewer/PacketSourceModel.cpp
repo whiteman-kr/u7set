@@ -560,6 +560,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 			header = packet.Header;
 			break;
 		case 4:
+		case 5:
 		{
 			RupFrameHeader& v4Header = *reinterpret_cast<RupFrameHeader*>(buffer);
 			if (needSwap)
@@ -606,6 +607,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 			memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
 			break;
 		case 4:
+		case 5:
 			if (m_lastHeader.packetSize != 0 && header.packetNo > m_lastHeader.packetNo && header.packetNo - m_lastHeader.packetNo > 1)
 			{
 				incrementPacketLostCount(header.packetNo - m_lastHeader.packetNo - 1);

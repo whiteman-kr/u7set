@@ -229,7 +229,7 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian(header.frameSize, ENTIRE_UDP_SIZE);
 		writeBigEndian(header.protocolVersion, 4);
 		header.flags.tuningData = 1;
-		writeBigEndian(header.flagsWord, header.flagsWord);
+		writeBigEndian(header.flags.all, header.flags.all);
 		writeBigEndian(header.moduleType, m_moduleIdEdit->text().toUInt());
 		writeBigEndian(header.numerator, numerator++);
 		writeBigEndian(header.framesQuantity, 1);

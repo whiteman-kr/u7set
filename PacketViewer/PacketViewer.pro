@@ -39,7 +39,9 @@ SOURCES += main.cpp\
     ../lib/Types.cpp \
     ../lib/XmlHelper.cpp \
     SendTuningFrameWidget.cpp \
-    ../lib/Queue.cpp
+    ../lib/Queue.cpp \
+    ../lib/DataProtocols.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -58,7 +60,8 @@ HEADERS  += SourceListWidget.h \
     ../include/DataProtocols.h \
     ../include/XmlHelper.h \
     SendTuningFrameWidget.h \
-    ../include/Queue.h
+    ../include/Queue.h \
+    ../include/WUtils.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
