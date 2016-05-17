@@ -13,6 +13,7 @@ private slots:
 	void initTestCase();
 	void getFileListTest();
 	void addFileTest();
+	void addFilesTest();
 	void cleanupTestCase();
 
 private:

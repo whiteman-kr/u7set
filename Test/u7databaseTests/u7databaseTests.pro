@@ -53,7 +53,9 @@ SOURCES += main.cpp \
     DbControllerProjectManagementTests.cpp \
     ../../lib/Queue.cpp \
     DbControllerUserManagementTests.cpp \
-    DbControllerFileManagementTests.cpp
+    DbControllerFileManagementTests.cpp \
+    ../../lib/WUtils.cpp \
+    ../../lib/DataProtocols.cpp
 
 HEADERS += \
     UserTests.h \
@@ -81,7 +83,9 @@ HEADERS += \
     DbControllerProjectManagementTests.h \
     ../../include/Queue.h \
     DbControllerUserManagementTests.h \
-    DbControllerFileManagementTests.h
+    DbControllerFileManagementTests.h \
+    ../../include/WUtils.h \
+    ../../include/DataProtocols.h
 
 #c++11 support for GCC
 #
