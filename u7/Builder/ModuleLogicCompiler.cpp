@@ -1343,6 +1343,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
 	{
+		if (appSignal.strID() == srcSignal.strID())
+		{
+			return true;
+		}
+
 		if (appSignal.isAnalog())
 		{
 			if (!srcSignal.isAnalog())
@@ -2026,7 +2031,10 @@ namespace Builder
 					break;
 
 				default:
-					assert(false);
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Signal %1 has wrong data size - %2 bit(s)")).
+									   arg(appSignal->strID()).
+									   arg(appSignal->dataSize()));
 					return false;
 				}
 			}
@@ -4051,6 +4059,9 @@ namespace Builder
 		if (appFb->calculateFbParamValues(this) == false)
 		{
 			delete appFb;
+
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("FB '%1' parameters calculation error")).arg(appItem.caption()));
 			return nullptr;
 		}
 
@@ -4061,6 +4072,8 @@ namespace Builder
 		if (result == false)
 		{
 			delete appFb;
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("FB '%1' instantiation error")).arg(appItem.caption()));
 			return nullptr;
 		}
 

@@ -11,4 +11,3 @@ void swapBytes(const char* src, char* dest, int size)
 	}
 }
 
-

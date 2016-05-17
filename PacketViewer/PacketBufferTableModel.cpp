@@ -89,6 +89,7 @@ void PacketBufferTableModel::updateFrame(int frameNo, int version)
 			newFrameDataSize = RP_PACKET_DATA_SIZE;
 			break;
 		case 4:
+		case 5:
 			newFrameDataSize = RUP_FRAME_DATA_SIZE;
 			break;
 		default:

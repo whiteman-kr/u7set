@@ -83,7 +83,8 @@ SOURCES += main.cpp \
     DiagDataService.cpp \
     ../lib/DataChannel.cpp \
     ../lib/Queue.cpp \
-    ../lib/DataProtocols.cpp
+    ../lib/DataProtocols.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS += \
 	Stable.h \
@@ -113,7 +114,8 @@ HEADERS += \
     ../include/DataProtocols.h \
     DiagDataService.h \
     ../include/DataChannel.h \
-    ../include/Queue.h
+    ../include/Queue.h \
+    ../include/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

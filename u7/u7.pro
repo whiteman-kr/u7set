@@ -171,7 +171,8 @@ SOURCES +=\
     ../TuningService/TuningDataSource.cpp \
     DialogChoosePreset.cpp \
     ../lib/WUtils.cpp \
-    ../TuningService/TuningDataStorage.cpp
+    ../TuningService/TuningDataStorage.cpp \
+    ../lib/DataProtocols.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -271,7 +272,8 @@ HEADERS  += \
     UploadTabPage.h \
     ../TuningService/TuningDataSource.h \
     DialogChoosePreset.h \
-    ../TuningService/TuningDataStorage.h
+    ../TuningService/TuningDataStorage.h \
+    ../include/DataProtocols.h
 
 FORMS    += \
     ChangesetDialog.ui \

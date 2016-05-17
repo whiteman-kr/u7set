@@ -822,6 +822,14 @@ namespace Tcp
 	}
 
 
+	void Client::onAck(quint32 requestID, const char* replyData, quint32 replyDataSize)
+	{
+		Q_UNUSED(requestID);
+		Q_UNUSED(replyData);
+		Q_UNUSED(replyDataSize);
+	}
+
+
 	void Client::onHeaderAndDataReady()
 	{
 		if (m_clientState != ClientState::WaitingForReply)
@@ -844,7 +852,7 @@ namespace Tcp
 		case Header::Type::Ack:
 			restartReplyTimeoutTimer();
 
-			onAck();
+			onAck(m_header.id, m_dataBuffer, m_header.dataSize);
 
 			m_readState = ReadState::WaitingForHeader;
 

@@ -1,4 +1,5 @@
 #include "AppDataProcessingThread.h"
+#include "../include/WUtils.h"
 
 
 // -------------------------------------------------------------------------------
@@ -120,10 +121,10 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 
 		if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
 		{
-			rawValue = qFromBigEndian<quint16>(rawValue);
+			rawValue = reverseUint16(rawValue);
 		}
 
-		value = (rawValue >> parseInfo.valueAddr.bit()) & 0x0001;
+		value = static_cast<double>((rawValue >> parseInfo.valueAddr.bit()) & 0x0001);
 	}
 	else
 	{
@@ -131,25 +132,27 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		{
 			assert(parseInfo.valueAddr.bit() == 0);
 
+			float vf = 123.456;
+
 			quint32 rawValue = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
 
 			if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
 			{
-				rawValue = qFromBigEndian<quint32>(rawValue);
+				rawValue = reverseUint32(rawValue);
 			}
 
 			switch (parseInfo.dataFormat)
 			{
 			case E::DataFormat::Float:
-				value = *reinterpret_cast<float*>(&rawValue);
+				value = static_cast<double>(*reinterpret_cast<float*>(&rawValue));
 				break;
 
 			case E::DataFormat::SignedInt:
-				value = *reinterpret_cast<qint32*>(&rawValue);
+				value = static_cast<double>(*reinterpret_cast<qint32*>(&rawValue));
 				break;
 
 			case E::DataFormat::UnsignedInt:
-				value = rawValue;
+				value = static_cast<double>(rawValue);
 				break;
 			}
 		}

@@ -1,8 +1,39 @@
 #include "../include/DataSource.h"
+#include "../include/WUtils.h"
 
 
-const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
-const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
+
+void RupData::dump()
+{
+	QString s;
+
+	for(quint16 i = 0; i < dataSize; i++)
+	{
+		QString v;
+
+		if ((i % 16) == 0)
+		{
+			v.sprintf("%04X  ", static_cast<unsigned int>(i));
+			s += v;
+		}
+
+		v.sprintf("%02X ", static_cast<unsigned int>(data[i]));
+
+		s += v;
+
+		if (i > 0 && (i % 7) == 0)
+		{
+			s += " ";
+		}
+
+		if (i > 0 && (i % 15) == 0)
+		{
+			qDebug() << s;
+
+			s.clear();
+		}
+	}
+}
 
 
 char* DataSourceInfo::serialize(char* buffer, bool write)
@@ -31,6 +62,9 @@ char* DataSourceStatistics::serialize(char* buffer, bool write)
 	END_SERIALIZATION();
 }
 
+
+const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
+const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
 const char* DataSource::DATA_TYPE_APP = "App";
 const char* DataSource::DATA_TYPE_DIAG = "Diag";
@@ -288,19 +322,33 @@ bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
 }
 
 
-void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
+void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
 {
 	m_receivedFramesCount++;
 	m_receivedDataSize += sizeof(rupFrame);
 
 	if (rupFrame.header.protocolVersion != 4)
 	{
-		// if version == 3
+		if (rupFrame.header.protocolVersion == 3)
+		{
+			// if version == 3
+			//
+			const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
+			Q_UNUSED(oldHeader);
+			assert(false);
+			return;
+		}
+
+		if (rupFrame.header.protocolVersion != reverseUint16(5))
+		{
+			assert(false);
+			return;
+		}
+
+		// protocol version 5
+		// all data in rupFrame in Big Endian format
 		//
-		const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
-		Q_UNUSED(oldHeader);
-		assert(false);
-		return;
+		rupFrame.header.reverseBytes();
 	}
 
 	int framesQuantity = rupFrame.header.framesQuantity;
@@ -312,10 +360,6 @@ void DataSource::processPacket(quint32 ip, const RupFrame& rupFrame, Queue<RupDa
 	}
 
 	int frameNo = rupFrame.header.frameNumber;
-
-	qDebug() << "Frame No " << frameNo;
-
-	return;
 
 	if (frameNo >= framesQuantity)
 	{

@@ -168,7 +168,7 @@ namespace Tuning
 
 		rh.frameSize = ENTIRE_UDP_SIZE;
 		rh.protocolVersion = 4;
-		rh.flagsWord = 0;
+		rh.flags.all = 0;
 		rh.flags.tuningData = 1;
 		rh.dataId = 0;
 		rh.moduleType = 4352;			// !!!!???

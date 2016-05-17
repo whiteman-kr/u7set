@@ -120,6 +120,7 @@ namespace Builder
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
+		QString caption() const { return m_appLogicItem.m_afbElement.caption(); }
 
 		QString strID() const;
 
@@ -220,7 +221,7 @@ namespace Builder
 
 		bool calculate_LOGIC_paramValues();
 		bool calculate_NOT_paramValues();
-		bool calculate_SR_RS_paramValues();
+		bool calculate_FLIP_FLOP_paramValues();
 		bool calculate_CTUD_paramValues();
 		bool calculate_MAJ_paramValues();
 		bool calculate_SRSST_paramValues();
@@ -230,7 +231,9 @@ namespace Builder
 		bool calculate_TCT_paramValues();
 		bool calculate_BCOMP_paramValues();
 		bool calculate_SCALE_paramValues();
-		bool calculate_LAG_paramValues();
+		bool calculate_DAMPER_paramValues();
+		bool calculate_MEM_paramValues();
+		bool calculate_FUNC_paramValues();
 
 		//
 
