@@ -94,9 +94,9 @@ namespace Builder
 			result = calculate_SCALE_paramValues();
 			break;
 
-/*		case Afb::AfbType::SCALE_P:			// opcode 15
-			result = calculate_SCALE_paramValues();
-			break; */
+		case Afb::AfbType::SCALE_P:			// opcode 15
+			result = calculate_SCALE_P_paramValues();
+			break;
 
 		case Afb::AfbType::FUNC:			// opcode 16
 			result = calculate_FUNC_paramValues();
@@ -588,6 +588,243 @@ namespace Builder
 		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
 
+		return false;
+	}
+
+
+	bool AppFb::calculate_SCALE_P_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_scal_k1_coef");
+		requiredParams.append("i_scal_k2_coef");
+		requiredParams.append("input_low");
+		requiredParams.append("input_high");
+		requiredParams.append("output_low");
+		requiredParams.append("output_high");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams)
+
+		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
+		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
+		AppFbParamValue& x1Param = m_paramValuesArray["input_low"];
+		AppFbParamValue& x2Param = m_paramValuesArray["input_high"];
+		AppFbParamValue& y1Param = m_paramValuesArray["output_low"];
+		AppFbParamValue& y2Param = m_paramValuesArray["output_high"];
+
+		CHECK_UNSIGNED_INT(iConfParam)
+
+	/*	int iConf = iConfParam.unsignedIntValue();
+
+		m_runTime = 0;
+
+		switch(iConf)
+		{
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			m_runTime = 2;
+			break;
+
+		case 5:
+		case 7:
+		case 8:
+		case 9:
+			m_runTime = 18;
+			break;
+
+		case 6:
+			m_runTime = 11;
+			break;
+
+		default:
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
+			return false;
+		}
+
+		const int	SCALE_16UI_16UI = 1,
+					SCALE_16UI_SI = 2,
+					SCALE_SI_16UI = 3,
+					SCALE_SI_SI = 4,
+					SCALE_SI_FP = 5,
+					SCALE_FP_FP = 6,
+					SCALE_FP_16UI = 7,
+					SCALE_FP_SI = 8,
+					SCALE_16UI_FP = 9;
+
+		if (iConf == SCALE_16UI_16UI || iConf == SCALE_16UI_SI ||
+			iConf == SCALE_SI_16UI || iConf == SCALE_SI_SI)
+		{
+			// k1 & k2 are Signed Integer
+			//
+			CHECK_SIGNED_INT32(k1Param)
+			CHECK_SIGNED_INT32(k2Param);
+
+			int x1 = 0;
+			int x2 = 0;
+
+			int y1 = 0;
+			int y2 = 0;
+
+			switch(iConf)
+			{
+			case SCALE_16UI_16UI:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_UNSIGNED_INT16(y1Param)
+				CHECK_UNSIGNED_INT16(y2Param)
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_16UI_SI:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_SIGNED_INT32(y1Param);
+				CHECK_SIGNED_INT32(y2Param);
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			case SCALE_SI_16UI:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_UNSIGNED_INT16(y1Param)
+				CHECK_UNSIGNED_INT16(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_SI_SI:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_SIGNED_INT32(y1Param)
+				CHECK_SIGNED_INT32(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			default:
+				assert(false);
+			}
+
+			const int MULTIPLIER = 32768;
+
+			int k1 = ((y2 - y1) * MULTIPLIER) / (x2 - x1);
+
+			k1Param.setSignedIntValue(k1);
+			k2Param.setSignedIntValue(y1 - (k1 * x1) / MULTIPLIER);
+
+			return true;
+		}
+
+		if (iConf == SCALE_SI_FP || iConf == SCALE_FP_FP || iConf == SCALE_FP_16UI ||
+			iConf == SCALE_FP_SI || iConf == SCALE_16UI_FP)
+		{
+			// k1 & k2 are Floating Point
+			//
+			CHECK_FLOAT32(k1Param);
+			CHECK_FLOAT32(k2Param);
+
+			double x1 = 0;
+			double x2 = 0;
+
+			double y1 = 0;
+			double y2 = 0;
+
+			switch(iConf)
+			{
+			case SCALE_SI_FP:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			case SCALE_FP_FP:
+				CHECK_FLOAT32(x1Param)
+				CHECK_FLOAT32(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			case SCALE_FP_16UI:
+				CHECK_FLOAT32(x1Param);
+				CHECK_FLOAT32(x2Param);
+				CHECK_UNSIGNED_INT16(y1Param);
+				CHECK_UNSIGNED_INT16(y2Param);
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_FP_SI:
+				CHECK_FLOAT32(x1Param)
+				CHECK_FLOAT32(x2Param)
+				CHECK_SIGNED_INT32(y1Param)
+				CHECK_SIGNED_INT32(y2Param)
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			case SCALE_16UI_FP:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			default:
+				assert(false);
+			}
+
+			double k1 = (y2 - y1) / (x2 - x1);
+
+			k1Param.setFloatValue(k1);
+			k2Param.setFloatValue(y1 - k1 * x1);
+
+			return true;
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
+*/
 		return false;
 	}
 

@@ -231,6 +231,7 @@ namespace Builder
 		bool calculate_TCT_paramValues();
 		bool calculate_BCOMP_paramValues();
 		bool calculate_SCALE_paramValues();
+		bool calculate_SCALE_P_paramValues();
 		bool calculate_DAMPER_paramValues();
 		bool calculate_MEM_paramValues();
 		bool calculate_FUNC_paramValues();
