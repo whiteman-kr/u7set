@@ -357,7 +357,7 @@ namespace Tcp
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
-		virtual void onAck() {}
+		virtual void onAck(quint32 requestID, const char* replyData, quint32 replyDataSize);
 		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }
 
 		bool isClearToSendRequest() const;

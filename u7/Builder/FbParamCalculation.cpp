@@ -38,57 +38,71 @@ namespace Builder
 
 		switch(afb().type().toOpCode())
 		{
-		case Afb::AfbType::LOGIC:
+		case Afb::AfbType::LOGIC:			// opcode 1
 			result = calculate_LOGIC_paramValues();
 			break;
 
-		case Afb::AfbType::NOT:
+		case Afb::AfbType::NOT:				// opcode 2
 			result = calculate_NOT_paramValues();
 			break;
 
-		case Afb::AfbType::FLIP_FLOP:
-			result = calculate_SR_RS_paramValues();
-			break;
-
-		case Afb::AfbType::CTUD:
-			result = calculate_CTUD_paramValues();
-			break;
-
-		case Afb::AfbType::MAJ:
-			result = calculate_MAJ_paramValues();
-			break;
-
-		case Afb::AfbType::SRSST:
-			result = calculate_SRSST_paramValues();
-			break;
-
-		case Afb::AfbType::BCOD:
-			result = calculate_BCOD_paramValues();
-			break;
-
-		case Afb::AfbType::BDEC:
-			result = calculate_BDEC_paramValues();
-			break;
-
-		case Afb::AfbType::MATH:
-			result = calculate_MATH_paramValues();
-			break;
-
-		case Afb::AfbType::TCT:
+		case Afb::AfbType::TCT:				// opcode 3
 			result = calculate_TCT_paramValues();
 			break;
 
-		case Afb::AfbType::BCOMP:
+		case Afb::AfbType::FLIP_FLOP:		// opcode 4
+			result = calculate_FLIP_FLOP_paramValues();
+			break;
+
+		case Afb::AfbType::CTUD:			// opcode 5
+			result = calculate_CTUD_paramValues();
+			break;
+
+		case Afb::AfbType::MAJ:				// opcode 6
+			result = calculate_MAJ_paramValues();
+			break;
+
+		case Afb::AfbType::SRSST:			// opcode 7
+			result = calculate_SRSST_paramValues();
+			break;
+
+		case Afb::AfbType::BCOD:			// opcode 8
+			result = calculate_BCOD_paramValues();
+			break;
+
+		case Afb::AfbType::BDEC:			// opcode 9
+			result = calculate_BDEC_paramValues();
+			break;
+
+		case Afb::AfbType::BCOMP:			// opcode 10
 			result = calculate_BCOMP_paramValues();
 			break;
 
-		case Afb::AfbType::DAMPER:
-			result = calculate_LAG_paramValues();			// dempfer
+		case Afb::AfbType::DAMPER:			// opcode 11
+			result = calculate_DAMPER_paramValues();
 			break;
 
-		case Afb::AfbType::SCALE:
+		case Afb::AfbType::MEM:				// opcode 12
+			result = calculate_MEM_paramValues();
+			break;
+
+		case Afb::AfbType::MATH:			// opcode 13
+			result = calculate_MATH_paramValues();
+			break;
+
+		case Afb::AfbType::SCALE:			// opcode 14
 			result = calculate_SCALE_paramValues();
 			break;
+
+/*		case Afb::AfbType::SCALE_P:			// opcode 15
+			result = calculate_SCALE_paramValues();
+			break; */
+
+		case Afb::AfbType::FUNC:			// opcode 16
+			result = calculate_FUNC_paramValues();
+			break;
+
+
 
 		default:
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
@@ -115,7 +129,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_SR_RS_paramValues()
+	bool AppFb::calculate_FLIP_FLOP_paramValues()
 	{
 		m_runTime = 2;
 		return true;
@@ -205,7 +219,7 @@ namespace Builder
 	{
 		m_runTime = 2;
 
-		QStringList requiredParams;
+		/*QStringList requiredParams;
 
 		requiredParams.append("i_counter");
 
@@ -215,7 +229,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_counter)
 
-		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());
+		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());*/
 
 		return true;
 	}
@@ -252,8 +266,10 @@ namespace Builder
 					BCOMP_32FP_LESS = 7,
 					BCOMP_32FP_NOT_EQU = 8;
 
-		if (iConf == BCOMP_32SI_EQU || iConf == BCOMP_32SI_GREAT ||
-			iConf == BCOMP_32SI_LESS || iConf == BCOMP_32SI_NOT_EQU)
+		if (iConf == BCOMP_32SI_EQU ||
+			iConf == BCOMP_32SI_GREAT ||
+			iConf == BCOMP_32SI_LESS ||
+			iConf == BCOMP_32SI_NOT_EQU)
 		{
 			// comparison of signed int values
 			//
@@ -291,8 +307,10 @@ namespace Builder
 			return true;
 		}
 
-		if (iConf == BCOMP_32FP_EQU || iConf == BCOMP_32FP_GREAT ||
-			iConf == BCOMP_32FP_LESS || iConf == BCOMP_32FP_NOT_EQU)
+		if (iConf == BCOMP_32FP_EQU ||
+			iConf == BCOMP_32FP_GREAT ||
+			iConf == BCOMP_32FP_LESS ||
+			iConf == BCOMP_32FP_NOT_EQU)
 		{
 			// comparison of floating point values
 			//
@@ -574,7 +592,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_LAG_paramValues()
+	bool AppFb::calculate_DAMPER_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -621,6 +639,91 @@ namespace Builder
 		}
 
 		iDel.setUnsignedIntValue(v);
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MEM_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_si_fp");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& iSiFp = m_paramValuesArray["i_si_fp"];
+
+		CHECK_UNSIGNED_INT(iSiFp)
+
+		m_runTime = 0;
+
+		switch(iSiFp.unsignedIntValue())
+		{
+		case 1:
+			m_runTime = 9;		// for signed int input
+			break;
+
+		case 2:
+			m_runTime = 16;		// for float input
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_FUNC_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& iConf = m_paramValuesArray["i_conf"];
+
+		CHECK_UNSIGNED_INT(iConf)
+
+		m_runTime = 0;
+
+		switch(iConf.unsignedIntValue())
+		{
+		case 1:
+			m_runTime = 17;		// sqrt
+			break;
+
+		case 2:					// abs fp
+		case 8:					// abs si
+			m_runTime = 2;
+			break;
+
+		case 3:
+			m_runTime = 37;		// sin
+			break;
+
+		case 4:
+			m_runTime = 36;		// cos
+			break;
+
+		case 5:
+			m_runTime = 22;		// log
+			break;
+
+		case 6:
+			m_runTime = 18;		// exp
+			break;
+
+		case 7:
+			m_runTime = 21;		// inv
+			break;
+
+		default:
+			assert(false);
+		}
 
 		return true;
 	}
