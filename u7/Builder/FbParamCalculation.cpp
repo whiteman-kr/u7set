@@ -219,7 +219,7 @@ namespace Builder
 	{
 		m_runTime = 2;
 
-		/*QStringList requiredParams;
+		QStringList requiredParams;
 
 		requiredParams.append("i_counter");
 
@@ -229,7 +229,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_counter)
 
-		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());*/
+		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());
 
 		return true;
 	}

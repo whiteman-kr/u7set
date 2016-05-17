@@ -824,7 +824,9 @@ namespace Tcp
 
 	void Client::onAck(quint32 requestID, const char* replyData, quint32 replyDataSize)
 	{
-
+		Q_UNUSED(requestID);
+		Q_UNUSED(replyData);
+		Q_UNUSED(replyDataSize);
 	}
 
 
