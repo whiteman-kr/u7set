@@ -4653,6 +4653,7 @@ void EditSchemaWidget::editCopy()
 	// Save to protobuf message
 	//
 	::Proto::EnvelopeSet message;
+	message.mutable_schemaitems()->Reserve(static_cast<int>(selected.size()));
 	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
 	{
 		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();

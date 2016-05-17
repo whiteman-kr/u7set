@@ -151,4 +151,5 @@ DISTFILES += \
     Images/Settings.svg \
     Images/Close.svg \
     Images/About.svg \
-    Images/readme.txt
+    Images/readme.txt \
+    ../Proto/network.proto

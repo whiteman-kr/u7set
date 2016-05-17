@@ -1,0 +1,52 @@
+package Network;
+
+// --
+//
+message GetItemsStartRequest
+{
+}
+
+message GetItemsStartReply
+{
+	optional int32 totalItemCount = 0;
+	optional int32 partCount = 1;
+	optional int32 itemsPerPart = 2;
+}
+
+// --
+//
+message GetItemsNextRequest
+{
+	optional int32 part = 0;
+}
+
+message GetItemsNextReply
+{
+	optional int32 part = 0;
+
+	oneof data
+	{
+		GetSignalListNextReply appSignalId = 0;
+		GetSignalStatesNextReply states = 1;
+	}
+}
+
+message GetSignalListNextReply
+{
+	//optional GetItemsNextReply = 0;
+	repeated string appSignalId = 1;
+}
+
+message GetSignalStatesNextReply
+{
+	//optional GetItemsNextReply = 0;
+	repeated AppSignalState states = 1;
+}
+
+
+
+// Data structs
+//
+message AppSignalState
+{
+}
