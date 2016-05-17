@@ -148,44 +148,45 @@ void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDa
 
 
 template<typename T>
-void writeField(QDataStream& out, QString caption, T field)
+void writeField(QTextStream& out, QString caption, T field)
 {
 	caption += ':';
 	while (caption.length() < 20)
 	{
 		caption += ' ';
 	}
-	out << QString("%1 0x%2 = 0b%3 = %4\n").arg(caption).arg(field, sizeof(field) * 2, 16, QChar('0')).arg(field, sizeof(field) * 8, 2, QChar('0')).arg(field);
+	out << QString("%1 0x%2 = 0b%3 = %4").arg(caption).arg(field, sizeof(field) * 2, 16, QChar('0')).arg(field, sizeof(field) * 8, 2, QChar('0')).arg(field) << endl;
 }
 
 
-template<typename T>
-void writeBuffer(QDataStream& out, QString caption, T* buffer, int size)
+void writeBuffer(QTextStream& out, QString caption, quint8* buffer, int size)
 {
 	out << caption << " (hex)";
 	for (int i = 0; i < size; i++)
 	{
 		if (i % 16 == 0)
 		{
-			out << QString("\n%1: ").arg(i, 3, 16, QChar('0'));
+			out << endl << QString("%1: ").arg(i, 3, 16, QChar('0'));
 		}
 		out << QString("%1 ").arg(buffer[i], sizeof(*buffer) * 2, 16, QChar('0'));
 	}
+	out << endl;
 }
 
 
 void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 {
 	QFile file("TuningIPEN.log");
-	if (!file.open(QIODevice::WriteOnly))
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
 	{
 		return;
 	}
 
-	QDataStream out(&file);
+	QTextStream out(&file);
 
-	out << QString("------------------------------ Frame info of %1\n").arg(caption);
-	out << QString("-------------------- Header (hex, bin, dec)\n");
+	out << QString("------------------------------ Frame info of %1").arg(caption) << endl;
+	out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << endl;
+	out << QString("-------------------- Header (hex, bin, dec)") << endl;
 	auto& header = fotipFrame.header;
 
 	writeField(out, "Protocol version", header.protocolVersion);
@@ -201,9 +202,13 @@ void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 
 	writeBuffer(out, "---------- Header reserve", header.reserve, FOTIP_HEADER_RESERVE_SIZE);
 
-	writeBuffer(out, "------------------------------ Data", fotipFrame.data, FOTIP_TX_RX_DATA_SIZE);
-	writeBuffer(out, "------------------------------ Comparison result", fotipFrame.comparisonResult, FOTIP_COMPARISON_RESULT_SIZE);
-	writeBuffer(out, "------------------------------ Data reserv", fotipFrame.reserv, FOTIP_DATA_RESERV_SIZE);
+	writeBuffer(out, "------------------------------ Data", reinterpret_cast<quint8*>(fotipFrame.data), FOTIP_TX_RX_DATA_SIZE);
+	writeBuffer(out, "------------------------------ Comparison result", reinterpret_cast<quint8*>(fotipFrame.comparisonResult), FOTIP_COMPARISON_RESULT_SIZE);
+	writeBuffer(out, "------------------------------ Data reserv", reinterpret_cast<quint8*>(fotipFrame.reserv), FOTIP_DATA_RESERV_SIZE);
+
+	out << endl << endl;
+
+	file.close();
 }
 
 
