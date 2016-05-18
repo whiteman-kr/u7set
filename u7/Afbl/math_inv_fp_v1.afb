@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#math_abs_v1">
+    <AfbElement StrId="#math_inv_fp_v1">
         <Properties>
-            <Caption>math_abs</Caption>
+            <Caption>math_inv_fp</Caption>
             <Version>1.0</Version>
             <Implementation Version="0" OpIndex="13"/>
-            <Description>Function Block outputs the absolute value of the input signal</Description>
+            <Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
             <Category>Math</Category>
             <OpCode>16</OpCode>
             <HasRam>true</HasRam>
@@ -22,12 +22,12 @@
             <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="8" Size="1"/>
             <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="9" Size="1"/>
             <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="10" Size="1"/>
-            <AfbElementSignal OpName="o_div_by_zero" Caption="div by zero" Type="Discrete" OpIndex="11" Size="1"/>
+            <AfbElementSignal OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" OpIndex="11" Size="1"/>
         </OutputSignals>
         <Params>            
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>2</Value>
-                <Default>2</Default>
+                <Value>7</Value>
+                <Default>7</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>8</HighLimit>
                 <Script>
@@ -35,8 +35,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -47,8 +47,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -59,8 +59,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -71,8 +71,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -83,8 +83,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutDivByZero" Caption="OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -134,7 +134,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div by zero");
+	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
 
 	videoItemFblElement.adjustHeight();
 

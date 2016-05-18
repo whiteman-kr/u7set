@@ -8,7 +8,7 @@
             <Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
             <Category>Other</Category>
             <OpCode>24</OpCode>
-            <HasRam>true</HasRam>
+            <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
             <InternalUse>false</InternalUse>
         </Properties>
@@ -44,8 +44,8 @@
                 </Script>
             </AfbElementParam>                   
             <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -56,8 +56,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -68,8 +68,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -80,8 +80,8 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -91,6 +91,18 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
+            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam> 
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -100,19 +112,7 @@ function(videoItemFblElement, afbElement)
                     <Changed>
 		</Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>     
+            </AfbElementParam>    
         </Params>
         <CommonScript>
             <Library>

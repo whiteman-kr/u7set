@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#math_abs_si_v1">
+    <AfbElement StrId="#func_cos_fp_v1">
         <Properties>
-            <Caption>math_abs_si</Caption>
+            <Caption>math_cos_fp</Caption>
             <Version>1.0</Version>
             <Implementation Version="0" OpIndex="13"/>
-            <Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
+            <Description>mathtion Block outputs the cosine calculation result</Description>
             <Category>Math</Category>
             <OpCode>16</OpCode>
             <HasRam>true</HasRam>
@@ -13,21 +13,21 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="1" Size="32"/>           
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="1" Size="32"/>           
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
         </OutputSignals>
         <Params>            
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>8</Value>
-                <Default>8</Default>
+                <Value>4</Value>
+                <Default>4</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>8</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>           
+            </AfbElementParam>            
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
