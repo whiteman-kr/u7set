@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#integrator_v1">
+    <AfbElement StrId="#poly_v1">
         <Properties>
-            <Caption>integrator</Caption>
+            <Caption>poly</Caption>
             <Version>1.0</Version>
-            <Implementation Version="1" OpIndex="29"/>
-            <Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
-            <Category>Other</Category>
-            <OpCode>17</OpCode>
-            <HasRam>true</HasRam>
+            <Implementation Version="1" OpIndex="31"/>
+            <Description>Polynomial function Block performs evaluation of polynomial coefficients on input values in accordance with control signal.</Description>
+            <Category>Math</Category>
+            <OpCode>25</OpCode>
+            <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_x" Caption="in" Type="Analog" DataFormat="Float" OpIndex="14" Size="32"/>
-            <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="16" Size="1"/>
-            <AfbElementSignal OpName="i_pause" Caption="pause" Type="Discrete" OpIndex="17" Size="1"/>
-            <AfbElementSignal OpName="i_track" Caption="track" Type="Discrete" OpIndex="18" Size="1"/>
+            <AfbElementSignal OpName="i_data" Caption="x" Type="Analog" DataFormat="Float" OpIndex="21" Size="32"/>            
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="20" Size="32"/>
-            <AfbElementSignal OpName="o_max" Caption="max" Type="Discrete" OpIndex="22" Size="1"/>
-            <AfbElementSignal OpName="o_min" Caption="min" Type="Discrete" OpIndex="23" Size="1"/>
-
-            <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="24" Size="1"/>
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="25" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="26" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="27" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="28" Size="1"/>
+            <AfbElementSignal OpName="o_result" Caption="y" Type="Analog" DataFormat="Float" OpIndex="24" Size="32"/>
+            
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="27" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="28" Size="1"/>
+            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="29" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="30" Size="1"/>            
         </OutputSignals>
-        <Params>
-            <AfbElementParam OpName="i_ki" Caption="KI" Visible="true" OpIndex="0" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+        <Params>           
+            <AfbElementParam OpName="i_1_oprd" Caption="C0" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -39,7 +33,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_ti" Caption="TI" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_2_oprd" Caption="C1" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -48,7 +42,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_3_oprd" Caption="C2" Visible="true" OpIndex="5" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -57,7 +51,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_min" Caption="Min" Visible="true" OpIndex="6" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_4_oprd" Caption="C3" Visible="true" OpIndex="7" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -66,7 +60,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_ri_const" Caption="RIConst" Visible="true" OpIndex="8" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_5_oprd" Caption="C4" Visible="true" OpIndex="9" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -75,7 +69,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_x_tr" Caption="XTr" Visible="true" OpIndex="10" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_6_oprd" Caption="C5" Visible="true" OpIndex="11" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -83,19 +77,53 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>                   
-            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>1</Value>
-                <Default>1</Default>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_7_oprd" Caption="C6" Visible="true" OpIndex="13" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_8_oprd" Caption="C7" Visible="true" OpIndex="15" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_9_oprd" Caption="C8" Visible="true" OpIndex="17" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_10_oprd" Caption="C9" Visible="true" OpIndex="19" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_conf" Caption="CoefCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>2</Value>
+                <Default>2</Default>
+                <LowLimit>2</LowLimit>
+                <HighLimit>10</HighLimit>
                 <Script>
                     <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
+                    </Changed>
                 </Script>
-            </AfbElementParam>            
+            </AfbElementParam>
             <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -143,17 +171,7 @@ function(videoItemFblElement, afbElement)
 }
 		</Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-                <Value>1</Value>
-                <Default>1</Default>
-                <LowLimit>0</LowLimit>
-                <HighLimit>65535</HighLimit>
-                <Script>
-                    <Changed>
-		</Changed>
-                </Script>
-            </AfbElementParam>
+            </AfbElementParam>          
         </Params>
         <CommonScript>
             <Library>
@@ -175,13 +193,12 @@ function createOutputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeOutputSignals();
 	
-	var out = afbElement.getAfbSignalByCaption("out");
+	var out = afbElement.getAfbSignalByCaption("y");
 	if (out != null)
 	{
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
-
-	createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
+	
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");

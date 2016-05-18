@@ -402,7 +402,60 @@ namespace Builder
 				  .arg(module));
 	}
 
+	/// IssueCode: CFG3011
+	///
+	/// IssueType: Error
+	///
+	/// Title: IP address in property '%1' has undefined value (%2) in controller '%3'.
+	///
+	/// Parameters:
+	///         %1 Address Property Name
+	///         %2 Address Property Value
+	///         %3 Controller ID
+	///
+	/// Description:
+	///			Occurs if IP address in an Ethernet controller has undefined value
+	///
+	void IssueLogger::errCFG3011(QString addressProperty, uint address, QString controller)
+	{
+		quint8 a1 = (address >> 24) & 0xff;
+		quint8 a2 = (address >> 16) & 0xff;
+		quint8 a3 = (address >> 8) & 0xff;
+		quint8 a4 = address & 0xff;
 
+		QString str = QString("%1.%2.%3.%4").arg(a1).arg(a2).arg(a3).arg(a4);
+
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3011,
+				  tr("IP address in property '%1' has undefined value (%2) in controller '%3'.")
+				  .arg(addressProperty)
+				  .arg(str)
+				  .arg(controller));
+	}
+
+	/// IssueCode: CFG3012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Port in property '%1' has undefined value (%2) in controller '%3'.
+	///
+	/// Parameters:
+	///         %1 Port Property Name
+	///         %2 Port Property Value
+	///         %3 Controller ID
+	///
+	/// Description:
+	///			Occurs if port in an Ethernet controller has undefined value
+	///
+	void IssueLogger::errCFG3012(QString portProperty, uint port, QString controller)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3012,
+				  tr("Port in property '%1' has undefined value (%2) in controller '%3'.")
+				  .arg(portProperty)
+				  .arg(port)
+				  .arg(controller));
+	}
 
     // ALP			Application Logic Parsing				4000-4999
 	//
