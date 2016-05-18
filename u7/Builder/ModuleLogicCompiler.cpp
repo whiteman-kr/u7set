@@ -725,35 +725,45 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
+		m_code.newLine();
+
+		Comment comment;
+
+		comment.setComment("Copy LM diagnostics data to RegBuf");
+
+		m_code.append(comment);
+		m_code.newLine();
+
 		Command cmd;
 
 		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsSizeW());
 
-		cmd.setComment("copy LM diagnostics data to RegBuf");
-
 		m_code.append(cmd);
+		m_code.newLine();
 
-		//
+		comment.setComment("Copy LM's' input signals to RegBuf");
+
+		m_code.append(comment);
+		m_code.newLine();
 
 		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
 				   m_memoryMap.lmInOutsAddress(),
 				   m_memoryMap.lmInOutsSizeW());
 
-		cmd.setComment("copy LM's' input signals to RegBuf");
-
-		m_code.append(cmd);
-
-		//
-
-		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
-
-		cmd.setComment("init to 0 LM's output signals");
-
 		m_code.append(cmd);
 		m_code.newLine();
 
+		comment.setComment("Init to 0 LM's output signals");
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
+
+		m_code.append(cmd);
+		m_code.newLine();
 
 		return true;
 	}
@@ -5513,5 +5523,54 @@ namespace Builder
 
 		return str;
 	}
+
+
+	quint32 AppFbParamValue::unsignedIntValue() const
+	{
+		assert(isUnsignedInt() == true);
+
+		return m_unsignedIntValue;
+	}
+
+
+	void AppFbParamValue::setUnsignedIntValue(quint32 value)
+	{
+		assert(isUnsignedInt() == true);
+
+		m_unsignedIntValue = value;
+	}
+
+
+	qint32 AppFbParamValue::signedIntValue() const
+	{
+		assert(isSignedInt32() == true);
+
+		return m_signedIntValue;
+	}
+
+
+	void AppFbParamValue::setSignedIntValue(qint32 value)
+	{
+		assert(isSignedInt32() == true);
+
+		m_signedIntValue = value;
+	}
+
+
+	double AppFbParamValue::floatValue() const
+	{
+		assert(isFloat32() == true);
+
+		return m_floatValue;
+	}
+
+
+	void AppFbParamValue::setFloatValue(double value)
+	{
+		assert(isFloat32() == true);
+
+		m_floatValue = value;
+	}
+
 
 }

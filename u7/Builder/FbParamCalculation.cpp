@@ -102,7 +102,33 @@ namespace Builder
 			result = calculate_FUNC_paramValues();
 			break;
 
+		case Afb::AfbType::INT:				// opcode 17
+			result = calculate_INT_paramValues();
+			break;
 
+		case Afb::AfbType::DPCOMP:			// opcode 20
+			result = calculate_DPCOMP_paramValues();
+			break;
+
+		case Afb::AfbType::MUX:				// opcode 21
+			result = calculate_MUX_paramValues();
+			break;
+
+		case Afb::AfbType::LATCH:			// opcode 22
+			result = calculate_LATCH_paramValues();
+			break;
+
+		case Afb::AfbType::LIM:				// opcode 23
+			result = calculate_LIM_paramValues();
+			break;
+
+		case Afb::AfbType::DEAD_ZONE:		// opcode 24
+			result = calculate_DEAD_ZONE_paramValues();
+			break;
+
+		case Afb::AfbType::POL:				// opcode 27
+			result = calculate_POL_paramValues();
+			break;
 
 		default:
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
@@ -594,58 +620,94 @@ namespace Builder
 
 	bool AppFb::calculate_SCALE_P_paramValues()
 	{
+		return false;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
-		requiredParams.append("i_scal_k1_coef");
-		requiredParams.append("i_scal_k2_coef");
-		requiredParams.append("input_low");
-		requiredParams.append("input_high");
-		requiredParams.append("output_low");
-		requiredParams.append("output_high");
+
+		QString x_data_str = "i_x%1_data";
+
+		for(int i = 1; i <= 4; i++)
+		{
+			requiredParams.append(x_data_str.arg(i));
+		}
+
+		QString scal_k1_str = "i_scal_k1_x%1_coef";
+		QString scal_k2_str = "i_scal_k2_x%1_coef";
+
+		for(int i = 1; i <= 5; i++)
+		{
+			requiredParams.append(scal_k1_str.arg(i));
+			requiredParams.append(scal_k2_str.arg(i));
+		}
+
+		QString x_str = "x%1";
+		QString y_str = "y%1";
+
+		for(int i = 0; i <= 5; i++)
+		{
+			requiredParams.append(x_str.arg(i));
+			requiredParams.append(y_str.arg(i));
+		}
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
-		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
-		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
-		AppFbParamValue& x1Param = m_paramValuesArray["input_low"];
-		AppFbParamValue& x2Param = m_paramValuesArray["input_high"];
-		AppFbParamValue& y1Param = m_paramValuesArray["output_low"];
-		AppFbParamValue& y2Param = m_paramValuesArray["output_high"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT(iConfParam)
+		CHECK_UNSIGNED_INT(i_conf)
 
-	/*	int iConf = iConfParam.unsignedIntValue();
+		int iConf = i_conf.unsignedIntValue();
 
 		m_runTime = 0;
 
-		switch(iConf)
+		if (iConf == 1)
 		{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
+			// signed int scale
+			//
 			m_runTime = 2;
-			break;
 
-		case 5:
-		case 7:
-		case 8:
-		case 9:
-			m_runTime = 18;
-			break;
+			AppFbParamValue* x_data[4];
 
-		case 6:
-			m_runTime = 11;
-			break;
+			for(int i = 1; i <= 4; i++)
+			{
+				x_data[i - 1] = &m_paramValuesArray[x_data_str.arg(i)];
 
-		default:
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
-			return false;
+				CHECK_SIGNED_INT32(*x_data[i - 1]);
+			}
+
+			AppFbParamValue* scal_k1[5];
+			AppFbParamValue* scal_k2[5];
+
+			for(int i = 1; i <= 5; i++)
+			{
+				scal_k1[i - 1] = &m_paramValuesArray[scal_k1_str.arg(i)];
+				scal_k2[i - 1] = &m_paramValuesArray[scal_k1_str.arg(i)];
+
+				CHECK_SIGNED_INT32(*x_data[i]);
+			}
+
 		}
 
+		if (iConf == 2)
+		{
+			// float scale
+			//
+			m_runTime = 18;
+
+
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+
+
+
+/*
 		const int	SCALE_16UI_16UI = 1,
 					SCALE_16UI_SI = 2,
 					SCALE_SI_16UI = 3,
@@ -964,4 +1026,193 @@ namespace Builder
 
 		return true;
 	}
+
+
+	bool AppFb::calculate_INT_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_ti");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
+
+		CHECK_FLOAT32(i_ti);
+
+		i_ti.setFloatValue((i_ti.floatValue() * 1000) / m_compiler->lmCycleDuration());
+
+		m_runTime = 24;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_DPCOMP_paramValues()
+	{
+		m_runTime = 2;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MUX_paramValues()
+	{
+		m_runTime = 2;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_LATCH_paramValues()
+	{
+		m_runTime = 2;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_LIM_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_lim_max");
+		requiredParams.append("i_lim_min");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+		AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		m_runTime = 2;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:								// signed int limiter
+			CHECK_SIGNED_INT32(i_lim_max);
+			CHECK_SIGNED_INT32(i_lim_min);
+
+			if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
+			{
+				// swap values
+				//
+				qint32 tmp = i_lim_min.signedIntValue();
+
+				i_lim_min.setSignedIntValue(i_lim_max.signedIntValue());
+
+				i_lim_max.setSignedIntValue(tmp);
+
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+			}
+			return true;
+
+		case 2:								// float limiter
+			CHECK_FLOAT32(i_lim_max);
+			CHECK_FLOAT32(i_lim_min);
+
+			if (i_lim_min.floatValue() > i_lim_max.floatValue())
+			{
+				// swap values
+				//
+				float tmp = i_lim_min.floatValue();
+
+				i_lim_min.setFloatValue(i_lim_max.floatValue());
+
+				i_lim_max.setFloatValue(tmp);
+
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+			}
+
+			return true;
+
+		default:
+			assert(false);
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+	}
+
+
+	bool AppFb::calculate_DEAD_ZONE_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_data_x");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_data_x = m_paramValuesArray["i_data_x"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		m_runTime = 3;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:								// signed int dead zone
+		case 2:
+			CHECK_SIGNED_INT32(i_data_x);
+
+			if (i_data_x.signedIntValue() >= 0)
+			{
+				return true;
+			}
+
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
+							   arg(i_data_x.opName()).
+							   arg(caption()));
+			return false;
+
+		case 3:								// float dead zone
+		case 4:
+			CHECK_FLOAT32(i_data_x);
+
+			if (i_data_x.floatValue() >= 0)
+			{
+				return true;
+			}
+
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
+							   arg(i_data_x.opName()).
+							   arg(caption()));
+			return false;
+
+		default:
+			assert(false);
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+	}
+
+
+	bool AppFb::calculate_POL_paramValues()
+	{
+		m_runTime = 22;
+
+		LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Unknown runtime of FB POLY")));
+
+		return true;
+	}
+
 }

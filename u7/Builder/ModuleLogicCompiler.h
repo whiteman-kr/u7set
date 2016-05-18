@@ -148,8 +148,6 @@ namespace Builder
 		static const int NOT_FB_OPERAND_INDEX = -1;
 
 	private:
-
-
 		E::SignalType m_type = E::SignalType::Discrete;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		bool m_instantiator = false;
@@ -180,14 +178,14 @@ namespace Builder
 		int operandIndex() const { return m_operandIndex; }
 		const QString& opName() const { return m_opName; }
 
-		quint32 unsignedIntValue() const { return m_unsignedIntValue; }
-		void setUnsignedIntValue(quint32 value) { m_unsignedIntValue = value; }
+		quint32 unsignedIntValue() const;
+		void setUnsignedIntValue(quint32 value);
 
-		qint32 signedIntValue() const { return m_signedIntValue; }
-		void setSignedIntValue(qint32 value) { m_signedIntValue = value; }
+		qint32 signedIntValue() const;
+		void setSignedIntValue(qint32 value);
 
-		double floatValue() const { return m_floatValue; }
-		void setFloatValue(double value) { m_floatValue = value; }
+		double floatValue() const;
+		void setFloatValue(double value);
 
 		QString toString() const;
 	};
@@ -235,6 +233,13 @@ namespace Builder
 		bool calculate_DAMPER_paramValues();
 		bool calculate_MEM_paramValues();
 		bool calculate_FUNC_paramValues();
+		bool calculate_INT_paramValues();
+		bool calculate_DPCOMP_paramValues();
+		bool calculate_MUX_paramValues();
+		bool calculate_LATCH_paramValues();
+		bool calculate_LIM_paramValues();
+		bool calculate_DEAD_ZONE_paramValues();
+		bool calculate_POL_paramValues();
 
 		//
 
