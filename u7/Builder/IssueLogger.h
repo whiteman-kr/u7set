@@ -67,6 +67,9 @@ namespace Builder
         Q_INVOKABLE void errCFG3009(int place1, double maxDifference1, int place2, double maxDifference2, QString signalID);
 		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString module);
 
+		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);
+		Q_INVOKABLE void errCFG3012(QString portProperty, uint port, QString controller);
+
         // ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

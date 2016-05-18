@@ -51,7 +51,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 5;		// LM-1 properties SubsysID and Channel have been renamed to SubsystemID and SubsystemChannel
 //var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
 //var configScriptVersion = 7;		// MAC address calculation changed
-var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
+//var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
+var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -511,6 +512,17 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	var tuningIP = ethernetController.jsPropertyIP("TuningIP");
 	var tuningPort = ethernetController.propertyValue("TuningPort");
 	
+	if (tuningIP == 0)
+	{
+		log.errCFG3011("TuningIP", tuningIP, ethernetController.propertyValue("EquipmentID"));
+		return false;
+	}
+	if (tuningPort == 0)
+	{
+		log.errCFG3012("TuningPort", tuningPort, ethernetController.propertyValue("EquipmentID"));
+		return false;
+	}
+	
 	// Service
 		
 	var tuningServiceIP = 0;
@@ -588,6 +600,17 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		
 			ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
 			port[s] = ethernetController.propertyValue(servicesName[s] + "DataPort");
+			
+			if (ip[s] == 0)
+			{
+				log.errCFG3011(servicesName[s] + "DataIP", ip[s], ethernetController.propertyValue("EquipmentID"));
+				return false;
+			}
+			if (port[s] == 0)
+			{
+				log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.propertyValue("EquipmentID"));
+				return false;
+	}
 			
 			// Service
 			var serviceID = ethernetController.propertyValue(servicesName[s] + "DataServiceID");
