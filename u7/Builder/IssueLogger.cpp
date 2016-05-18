@@ -344,27 +344,27 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-	/// Title: Different MaxDifference values (signal %1: %2; signal %3: %4) for module '%5'.
+	/// Title: Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.
     ///
     /// Parameters:
 	///         %1 Signal 1 StrID
-	///			%2 MaxDifference 1
+	///			%2 SpredTolerance 1
 	///         %3 Signal 2 StrID
-	///			%4 MaxDifference 2
+	///			%4 SpredTolerance 2
 	///         %5 Module StrID
 	///
     /// Description:
-	///			MaxDifference values should be equal in one channel in AIM module.
+	///			SpredTolerance values should be equal in one channel in AIM module.
     ///
-	void IssueLogger::errCFG3009(QString signalID1, double maxDifference1, QString signalID2, double maxDifference2, QString module)
+	void IssueLogger::errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module)
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3009,
-				  tr("Different MaxDifference values (signal %1: %2; signal %3: %4) for module '%5'.")
+				  tr("Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.")
 				  .arg(signalID1)
-                  .arg(maxDifference1)
+				  .arg(spredTolerance1)
 				  .arg(signalID2)
-                  .arg(maxDifference2)
+				  .arg(spredTolerance2)
 				  .arg(module));
     }
 

@@ -730,7 +730,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultTf = valToADC(5000 * 0.000001 / tsConstant, 0, 65535, 0, 0xffff);
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
-    var defaultMaxDiff = Math.round((0xffff - 0) * 0.05);		// 2%
+    var defaultMaxDiff = Math.round((0xffff - 0) * 0.005);		// 2%
     
     var inController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLIN");
     if (inController == null)
@@ -779,7 +779,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
+			"; [" + frame + ":" + (ptr + 6) + "] SpredTolerance = " + defaultMaxDiff + "\r\n");
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -885,7 +885,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + lowValidRangeADC +
 			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + highValidRangeADC +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
+			"; [" + frame + ":" + (ptr + 6) + "] SpredTolerance = " + maxDifference + "\r\n");
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
