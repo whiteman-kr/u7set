@@ -147,6 +147,108 @@ void DbControllerFileTests::addFileTest()
 	db.close();
 }
 
+void DbControllerFileTests::addFilesTest()
+{
+	QString details = "{}";
+	QString nameFirst = "\'\"\\FirstFileForAddFilesTest%\'\"\\";
+	QString nameSecond = "\'\"\\SuddenlySecondFileAddFilesTest%\'\"\\";
+
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	std::shared_ptr<DbFile> file1(new DbFile);
+	std::shared_ptr<DbFile> file2(new DbFile);
+
+	QFile firstFileFromDisk(nameFirst);
+	QFile secondFileFromDisk(nameSecond);
+
+
+	// Create and read data from first file
+	//
+
+	file1.get()->setUserId(1);
+	file1.get()->setParentId(1);
+	file1.get()->setDetails(details);
+
+	if (firstFileFromDisk.exists())
+	{
+		QVERIFY2 (firstFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
+	}
+
+	if (firstFileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (firstFileFromDisk.write("Testing data"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
+		firstFileFromDisk.close();
+	}
+
+	QVERIFY2 (file1.get()->readFromDisk(nameFirst), qPrintable("Can not read file (first)"));
+
+	QVERIFY2 (firstFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
+
+	files.push_back(file1);
+
+	// Create and read data from second file
+	//
+
+	file2.get()->setUserId(1);
+	file2.get()->setParentId(1);
+	file2.get()->setDetails(details);
+	file2.get()->setFileName(nameSecond);
+
+	if (secondFileFromDisk.exists())
+	{
+		QVERIFY2 (secondFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(secondFileFromDisk.errorString())));
+	}
+
+	if (secondFileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (secondFileFromDisk.write("Testing data 2"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(secondFileFromDisk.errorString())));
+		secondFileFromDisk.close();
+	}
+
+	QVERIFY2 (file2.get()->readFromDisk(nameSecond), qPrintable("Can not read file (second)"));
+
+	QVERIFY2 (secondFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(secondFileFromDisk.errorString())));
+
+	files.push_back(file2);
+
+	bool ok = m_dbController->addFiles(&files, 1, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QSqlQuery query;
+	QString nameForDb;
+	for (std::shared_ptr<DbFile> buff : files)
+	{
+		nameForDb = buff.get()->fileName();
+		nameForDb.replace("\'","\'\'");
+		ok = query.exec(QString("SELECT * FROM file WHERE name = \'%1\'").arg(nameForDb));
+		QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
+
+		ok = query.first();
+		QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2 (query.value("name").toString() == buff.get()->fileName(), qPrintable("Error: file created by function addFile from DbController has wrong name"));
+		QVERIFY2 (query.value("parentId").toInt() == 1, qPrintable("Error: file created by function addFile from DbController has wrong parentId"));
+		QVERIFY2 (query.value("Deleted").toBool() == false, qPrintable("Error: file created by function addFile from DbController has wrong deleted flag"));
+
+		QString fileInstanceId = query.value("checkedOutInstanceId").toString();
+
+		ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = \'%1\'").arg(fileInstanceId));
+		QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
+
+		ok = query.first();
+		QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
+	}
+	db.close();
+}
+
 
 
 void DbControllerFileTests::cleanupTestCase()
