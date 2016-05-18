@@ -71,7 +71,7 @@ DECLARE
 BEGIN
 	SELECT count(*) INTO exists FROM File WHERE Name = file_name AND ParentID = parent_id AND Deleted = false;
 	IF (exists > 0) THEN
-		RAISE 'Duplicate file name: %', filename USING ERRCODE = 'unique_violation';
+		RAISE 'File % already exists', file_name USING ERRCODE = 'unique_violation';
 	END IF;
 
 	INSERT INTO File (Name, ParentID, Deleted)
