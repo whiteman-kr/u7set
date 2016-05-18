@@ -125,12 +125,11 @@ private:
 	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
-	double m_lowLimit = 0;
-	double m_highLimit = 100;
+	double m_lowEngeneeringUnits = 0;
+	double m_highEngeneeringUnits = 100;
 	int m_unitID = NO_UNIT_ID;
-	double m_adjustment = 0;
-	double m_dropLimit = 0;
-	double m_excessLimit = 0;
+	double m_lowValidRange = 0;
+	double m_highValidRange = 0;
 	double m_unbalanceLimit = 0;
 	double m_inputLowLimit = 0;
 	double m_inputHighLimit = 0;
@@ -139,7 +138,7 @@ private:
 	double m_outputLowLimit = 0;
 	double m_outputHighLimit = 0;
 	int m_outputUnitID = NO_UNIT_ID;
-	E::OutputRangeMode m_outputRangeMode = E::OutputRangeMode::Plus0_Plus5_V;
+	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;
 	int m_outputSensorID = 0;
 	bool m_acquire = true;
 	bool m_calculated = false;
@@ -149,7 +148,7 @@ private:
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
 	double m_filteringTime = 0.005;
-	double m_maxDifference = 0.5;
+	double m_spredTolerance = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
 	double m_tuningDefaultValue = 0;
@@ -252,7 +251,7 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputRangeMode));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
@@ -284,23 +283,20 @@ public:
 	Q_INVOKABLE int highADC() const { return m_highADC; }
 	void setHighADC(int highADC) { m_highADC = highADC;}
 
-	Q_INVOKABLE double lowLimit() const { return m_lowLimit; }
-	void setLowLimit(double lowLimit) { m_lowLimit = lowLimit; }
+	Q_INVOKABLE double lowEngeneeringUnits() const { return m_lowEngeneeringUnits; }
+	void setLowEngeneeringUnits(double lowEngeneeringUnits) { m_lowEngeneeringUnits = lowEngeneeringUnits; }
 
-	Q_INVOKABLE double highLimit() const { return m_highLimit; }
-	void setHighLimit(double highLimit) { m_highLimit = highLimit; }
+	Q_INVOKABLE double highEngeneeringUnits() const { return m_highEngeneeringUnits; }
+	void setHighEngeneeringUnits(double highEngeneeringUnits) { m_highEngeneeringUnits = highEngeneeringUnits; }
 
 	Q_INVOKABLE int unitID() const { return m_unitID; }
 	void setUnitID(int unitID) { m_unitID = unitID; }
 
-	Q_INVOKABLE double adjustment() const { return m_adjustment; }
-	void setAdjustment(double adjustment) { m_adjustment = adjustment; }
+	Q_INVOKABLE double lowValidRange() const { return m_lowValidRange; }
+	void setLowValidRange(double lowValidRange) { m_lowValidRange = lowValidRange; }
 
-	Q_INVOKABLE double dropLimit() const { return m_dropLimit; }
-	void setDropLimit(double dropLimit) { m_dropLimit = dropLimit; }
-
-	Q_INVOKABLE double excessLimit() const { return m_excessLimit; }
-	void setExcessLimit(double excessLimit) { m_excessLimit = excessLimit; }
+	Q_INVOKABLE double highValidRange() const { return m_highValidRange; }
+	void setHighValidRange(double highValidRange) { m_highValidRange = highValidRange; }
 
 	Q_INVOKABLE double unbalanceLimit() const { return m_unbalanceLimit; }
 	void setUnbalanceLimit(double unbalanceLimit) { m_unbalanceLimit = unbalanceLimit; }
@@ -326,10 +322,10 @@ public:
 	Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
-	int outputRangeModeInt() const { return TO_INT(m_outputRangeMode); }
-	E::OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
-	Q_INVOKABLE int jsOutputRangeMode() const { return static_cast<int>(outputRangeMode());}
-	void setOutputRangeMode(E::OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
+	int outputModeInt() const { return TO_INT(m_outputMode); }
+	E::OutputMode outputMode() const { return m_outputMode; }
+	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(outputMode());}
+	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
 
 	Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
 	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }
@@ -359,8 +355,8 @@ public:
 	Q_INVOKABLE double filteringTime() const { return m_filteringTime; }
 	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }
 
-	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
-	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
+	Q_INVOKABLE double spredTolerance() const { return m_spredTolerance; }
+	void setSpredTolerance(double spredTolerance) { m_spredTolerance = spredTolerance; }
 
 	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_byteOrder; }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }

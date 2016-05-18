@@ -135,8 +135,8 @@ void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDa
 	if (signal != nullptr)
 	{
 		label = signal->caption().trimmed() + "\n" + signal->customAppSignalID().trimmed();
-		lowLimit = signal->lowLimit();
-		highLimit = signal->highLimit();
+		lowLimit = signal->lowEngeneeringUnits();
+		highLimit = signal->highEngeneeringUnits();
 	}
 
 	auto setter = new AnalogSignalSetter(id, lowLimit, highLimit, m_service, this);
@@ -198,7 +198,7 @@ void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 	writeField(out, "Fotip frame size", header.fotipFrameSize);
 	writeField(out, "Rom size", header.romSize);
 	writeField(out, "Rom frame size", header.romFrameSize);
-	writeField(out, "Fotip frame size", header.dataType);
+	writeField(out, "Data type", header.dataType);
 
 	writeBuffer(out, "---------- Header reserve", header.reserve, FOTIP_HEADER_RESERVE_SIZE);
 

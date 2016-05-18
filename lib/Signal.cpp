@@ -134,12 +134,11 @@ Signal& Signal::operator =(const Signal& signal)
 	m_dataSize = signal.dataSize();
 	m_lowADC = signal.lowADC();
 	m_highADC = signal.highADC();
-	m_lowLimit = signal.lowLimit();
-	m_highLimit = signal.highLimit();
+	m_lowEngeneeringUnits = signal.lowEngeneeringUnits();
+	m_highEngeneeringUnits = signal.highEngeneeringUnits();
 	m_unitID = signal.unitID();
-	m_adjustment = signal.adjustment();
-	m_dropLimit = signal.dropLimit();
-	m_excessLimit = signal.excessLimit();
+	m_lowValidRange = signal.lowValidRange();
+	m_highValidRange = signal.highValidRange();
 	m_unbalanceLimit = signal.unbalanceLimit();
 	m_inputLowLimit = signal.inputLowLimit();
 	m_inputHighLimit = signal.inputHighLimit();
@@ -148,7 +147,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_outputLowLimit = signal.outputLowLimit();
 	m_outputHighLimit = signal.outputHighLimit();
 	m_outputUnitID = signal.outputUnitID();
-	m_outputRangeMode = signal.outputRangeMode();
+	m_outputMode = signal.outputMode();
 	m_outputSensorID = signal.outputSensorID();
 	m_acquire = signal.acquire();
 	m_calculated = signal.calculated();
@@ -158,7 +157,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_inOutType = signal.inOutType();
 	m_equipmentID = signal.equipmentID();
 	m_filteringTime = signal.filteringTime();
-	m_maxDifference = signal.maxDifference();
+	m_spredTolerance = signal.spredTolerance();
 	m_byteOrder = signal.byteOrder();
 	m_enableTuning = signal.enableTuning();
 	m_tuningDefaultValue = signal.tuningDefaultValue();
@@ -190,14 +189,13 @@ void Signal::InitProperties()
 	static const QString dataSizeCaption("DataSize");
 	static const QString lowADCCaption("LowADC");
 	static const QString highADCCaption("HighADC");
-	static const QString lowLimitCaption("LowLimit");
-	static const QString highLimitCaption("HighLimit");
+	static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
+	static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
 	static const QString unitCaption("Unit");
-	static const QString adjustmentCaption("Adjustment");
-	static const QString dropLimitCaption("DropLimit");
-	static const QString excessLimitCaption("ExcessLimit");
+	static const QString lowValidRangeCaption("LowValidRange");
+	static const QString highValidRangeCaption("HighValidRange");
 	static const QString unbalanceLimitCaption("UnbalanceLimit");
-	static const QString inputLowLimitCaption("InputLowLimit");
+	/*static const QString inputLowLimitCaption("InputLowLimit");
 	static const QString inputHighLimitCaption("InputHighLimit");
 	static const QString inputUnitCaption("InputUnit");
 	static const QString inputSensorCaption("InputSensor");
@@ -205,22 +203,26 @@ void Signal::InitProperties()
 	static const QString outputHighLimitCaption("OutputHighLimit");
 	static const QString outputUnitCaption("OutputUnit");
 	static const QString outputRangeModeCaption("OutputRangeMode");
-	static const QString outputSensorCaption("OutputSensor");
+	static const QString outputSensorCaption("OutputSensor");*/
 	static const QString acquireCaption("Acquire");
-	static const QString calculatedCaption("Calculated");
+	/*static const QString calculatedCaption("Calculated");*/
 	static const QString normalStateCaption("NormalState");
 	static const QString decimalPlacesCaption("DecimalPlaces");
 	static const QString apertureCaption("Aperture");
 	static const QString filteringTimeCaption("FilteringTime");
 	static const QString maxDifferenceCaption("MaxDifference");
-	static const QString inOutTypeCaption("InOutType");
 	static const QString byteOrderCaption("ByteOrder");
 	static const QString equipmentIDCaption("EquipmentID");
 	static const QString enableTuningCaption("EnableTuning");
 	static const QString tuningDefaultValueCaption("TuningDefaultValue");
 
-	static const QString inputSensorCategory("Input sensor");
-	static const QString outputSensorCategory("Output sensor");
+	/*static const QString inputSensorCategory("Input sensor");
+	static const QString outputSensorCategory("Output sensor");*/
+	static const QString identificationCategory("Identification");
+	static const QString tuningCategory("Tuning");
+	static const QString onlineMonitoringSystemCategory("Online Monitoring System");
+	static const QString signalProcessingCategory("Signal processing");
+	static const QString dataFormatCategory("DataFormat");
 
 	ADD_PROPERTY_GETTER(int, idCaption, false, Signal::ID);
 	ADD_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID);
@@ -238,10 +240,21 @@ void Signal::InitProperties()
 
 	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID);
 	strIdProperty->setValidator(cacheValidator1);
+	strIdProperty->setCategory(identificationCategory);
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID);
 	extStrIdProperty->setValidator(cacheValidator2);
+	extStrIdProperty->setCategory(identificationCategory);
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, captionCaption, true, Signal::caption, Signal::setCaption);
 	nameProperty->setValidator(captionValidator);
+	nameProperty->setCategory(identificationCategory);
+	auto equipmentProperty = ADD_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID);
+	equipmentProperty->setCategory(identificationCategory);
+
+	auto enableTuningProperty = ADD_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning);
+	enableTuningProperty->setCategory(tuningCategory);
+	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
+	tuningDefaultValueProperty->setCategory(tuningCategory);
+
 	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat);
 	ADD_PROPERTY_GETTER_SETTER(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize);
 
@@ -257,25 +270,31 @@ void Signal::InitProperties()
 			}
 		}
 
-		ADD_PROPERTY_GETTER_SETTER(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC);
-		ADD_PROPERTY_GETTER_SETTER(int, highADCCaption, true, Signal::highADC, Signal::setHighADC);
+		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC);
+		lowADCProperty->setCategory(signalProcessingCategory);
+		auto highADCProperty = ADD_PROPERTY_GETTER_SETTER(int, highADCCaption, true, Signal::highADC, Signal::setHighADC);
+		highADCProperty->setCategory(signalProcessingCategory);
 
-		ADD_PROPERTY_GETTER_SETTER(double, lowLimitCaption, true, Signal::lowLimit, Signal::setLowLimit);
-		ADD_PROPERTY_GETTER_SETTER(double, highLimitCaption, true, Signal::highLimit, Signal::setHighLimit);
+		auto lowEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER(double, lowEngeneeringUnitsCaption, true, Signal::lowEngeneeringUnits, Signal::setLowEngeneeringUnits);
+		lowEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
+		auto highEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER(double, highEngeneeringUnitsCaption, true, Signal::highEngeneeringUnits, Signal::setHighEngeneeringUnits);
+		highEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
+
+		auto lowValidRangeProperty = ADD_PROPERTY_GETTER_SETTER(double, lowValidRangeCaption, true, Signal::lowValidRange, Signal::setLowValidRange);
+		lowValidRangeProperty->setCategory(signalProcessingCategory);
+		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange);
+		highValidRangeProperty->setCategory(signalProcessingCategory);
 
 		ADD_PROPERTY_DYNAMIC_ENUM(unitCaption, true, m_unitList, Signal::unitID, Signal::setUnitID);
-		ADD_PROPERTY_GETTER_SETTER(double, adjustmentCaption, true, Signal::adjustment, Signal::setAdjustment);
-		ADD_PROPERTY_GETTER_SETTER(double, dropLimitCaption, true, Signal::dropLimit, Signal::setDropLimit);
-		ADD_PROPERTY_GETTER_SETTER(double, excessLimitCaption, true, Signal::excessLimit, Signal::setExcessLimit);
 		ADD_PROPERTY_GETTER_SETTER(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit);
 
-		auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputLowLimitCaption, true, Signal::inputLowLimit, Signal::setInputLowLimit);
+		/*auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputLowLimitCaption, true, Signal::inputLowLimit, Signal::setInputLowLimit);
 		inputLowLimitPropetry->setCategory(inputSensorCategory);
 
 		auto inputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputHighLimitCaption, true, Signal::inputHighLimit, Signal::setInputHighLimit);
 		inputHighLimitPropetry->setCategory(inputSensorCategory);
 
-		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputUnitCaption, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);/*ADD_PROPERTY_GETTER_SETTER(int, InputUnitID, true, Signal::inputUnitID, Signal::setInputUnitID);*/
+		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputUnitCaption, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);
 		inputUnitIDPropetry->setCategory(inputSensorCategory);
 
 		auto inputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputSensorCaption, true, sensorList, Signal::inputSensorID, Signal::setInputSensorID);
@@ -287,35 +306,39 @@ void Signal::InitProperties()
 		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, outputHighLimitCaption, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
 		outputHighLimitPropetry->setCategory(outputSensorCategory);
 
-		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputUnitCaption, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);/*ADD_PROPERTY_GETTER_SETTER(int, OutputUnitID, true, Signal::outputUnitID, Signal::setOutputUnitID);*/
+		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputUnitCaption, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);
 		outputUnitIDPropetry->setCategory(outputSensorCategory);
 
 		auto outputRangeModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputRangeMode, outputRangeModeCaption, true, Signal::outputRangeMode, Signal::setOutputRangeMode);
 		outputRangeModePropetry->setCategory(outputSensorCategory);
 
 		auto outputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputSensorCaption, true, sensorList, Signal::outputSensorID, Signal::setOutputSensorID);
-		outputSensorPropetry->setCategory(outputSensorCategory);
+		outputSensorPropetry->setCategory(outputSensorCategory);*/
 	}
 
-	ADD_PROPERTY_GETTER_SETTER(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire);
+	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire);
+	acquireProperty->setCategory(onlineMonitoringSystemCategory);
 
 	if (isAnalog() == true)
 	{
-		ADD_PROPERTY_GETTER_SETTER(bool, calculatedCaption, true, Signal::calculated, Signal::setCalculated);
-		ADD_PROPERTY_GETTER_SETTER(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState);
-		ADD_PROPERTY_GETTER_SETTER(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces);
-		ADD_PROPERTY_GETTER_SETTER(double, apertureCaption, true, Signal::aperture, Signal::setAperture);
+		//ADD_PROPERTY_GETTER_SETTER(bool, calculatedCaption, true, Signal::calculated, Signal::setCalculated);
+
+		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces);
+		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
+		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER(double, apertureCaption, true, Signal::aperture, Signal::setAperture);
+		apertureProperty->setCategory(onlineMonitoringSystemCategory);
+
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime);
 		filteringTimePropetry->setPrecision(6);
-		ADD_PROPERTY_GETTER_SETTER(double, maxDifferenceCaption, true, Signal::maxDifference, Signal::setMaxDifference);
+		ADD_PROPERTY_GETTER_SETTER(double, maxDifferenceCaption, true, Signal::spredTolerance, Signal::setSpredTolerance);
+	}
+	else
+	{
+		auto normalStateProperty = ADD_PROPERTY_GETTER_SETTER(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState);
+		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
 	}
 
-	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType);
 	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder);
-	ADD_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID);
-	ADD_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning);
-	ADD_PROPERTY_GETTER_SETTER(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
-
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
@@ -402,7 +425,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputRangeMode))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -414,7 +437,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == OutputRangeModeStr[i])
 		{
-			(this->*setter)(static_cast<E::OutputRangeMode>(i));
+			(this->*setter)(static_cast<E::OutputMode>(i));
 			return;
 		}
 	}
@@ -542,12 +565,12 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "DataSize", &Signal::setDataSize);
 	serializeField(attr, "LowADC", &Signal::setLowADC);
 	serializeField(attr, "HighADC", &Signal::setHighADC);
-	serializeField(attr, "LowLimit", &Signal::setLowLimit);
-	serializeField(attr, "HighLimit", &Signal::setHighLimit);
+	serializeField(attr, "LowLimit", &Signal::setLowEngeneeringUnits);
+	serializeField(attr, "HighLimit", &Signal::setHighEngeneeringUnits);
 	serializeField(attr, "UnitID", unitInfo, &Signal::setUnitID);
-	serializeField(attr, "Adjustment", &Signal::setAdjustment);
-	serializeField(attr, "DropLimit", &Signal::setDropLimit);
-	serializeField(attr, "ExcessLimit", &Signal::setExcessLimit);
+	//serializeField(attr, "Adjustment", &Signal::setAdjustment);
+	serializeField(attr, "DropLimit", &Signal::setLowValidRange);
+	serializeField(attr, "ExcessLimit", &Signal::setHighValidRange);
 	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
 	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
 	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
@@ -556,7 +579,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
 	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
 	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
-	serializeField(attr, "OutputRangeMode", &Signal::setOutputRangeMode);
+	serializeField(attr, "OutputRangeMode", &Signal::setOutputMode);
 	serializeSensorField(attr, "OutputSensorID", &Signal::setOutputSensorID);
 	serializeField(attr, "Acquire", &Signal::setAcquire);
 	serializeField(attr, "Calculated", &Signal::setCalculated);
@@ -566,7 +589,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "InOutType", &Signal::setInOutType);
 	serializeField(attr, "DeviceStrID", &Signal::setEquipmentID);
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
-	serializeField(attr, "MaxDifference", &Signal::setMaxDifference);
+	serializeField(attr, "MaxDifference", &Signal::setSpredTolerance);
 	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
 	serializeField(attr, "RamAddr", &Signal::setRamAddr);
 	serializeField(attr, "RegAddr", &Signal::setRegValueAddr);
@@ -754,12 +777,11 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("DataSize", dataSize());
 	xml.writeIntAttribute("LowADC", lowADC());
 	xml.writeIntAttribute("HighADC", highADC());
-	xml.writeDoubleAttribute("LowLimit", lowLimit());
-	xml.writeDoubleAttribute("HighLimit", highLimit());
+	xml.writeDoubleAttribute("LowLimit", lowEngeneeringUnits());
+	xml.writeDoubleAttribute("HighLimit", highEngeneeringUnits());
 	xml.writeIntAttribute("UnitID", unitID());
-	xml.writeDoubleAttribute("Adjustment", adjustment());
-	xml.writeDoubleAttribute("DropLimit", dropLimit());
-	xml.writeDoubleAttribute("ExcessLimit", excessLimit());
+	xml.writeDoubleAttribute("DropLimit", lowValidRange());
+	xml.writeDoubleAttribute("ExcessLimit", highValidRange());
 	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
 	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
 	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
@@ -768,7 +790,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("OutputLowLimit", outputLowLimit());
 	xml.writeDoubleAttribute("OutputHighLimit", outputHighLimit());
 	xml.writeIntAttribute("OutputUnitID", outputUnitID());
-	xml.writeIntAttribute("OutputRangeMode", outputRangeModeInt());
+	xml.writeIntAttribute("OutputRangeMode", outputModeInt());
 	xml.writeIntAttribute("OutputSensorID", outputSensorID());
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", calculated());
@@ -777,7 +799,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("Aperture", aperture());
 	xml.writeIntAttribute("InOutType", inOutTypeInt());
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
-	xml.writeDoubleAttribute("MaxDifference", maxDifference());
+	xml.writeDoubleAttribute("MaxDifference", spredTolerance());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 	xml.writeBoolAttribute("EnableTuning", enableTuning());
 	xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
@@ -830,12 +852,11 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("DataSize", &m_dataSize);
 	result &= xml.readIntAttribute("LowADC", &m_lowADC);
 	result &= xml.readIntAttribute("HighADC", &m_highADC);
-	result &= xml.readDoubleAttribute("LowLimit", &m_lowLimit);
-	result &= xml.readDoubleAttribute("HighLimit", &m_highLimit);
+	result &= xml.readDoubleAttribute("LowLimit", &m_lowEngeneeringUnits);
+	result &= xml.readDoubleAttribute("HighLimit", &m_highEngeneeringUnits);
 	result &= xml.readIntAttribute("UnitID", &m_unitID);
-	result &= xml.readDoubleAttribute("Adjustment", &m_adjustment);
-	result &= xml.readDoubleAttribute("DropLimit", &m_dropLimit);
-	result &= xml.readDoubleAttribute("ExcessLimit", &m_excessLimit);
+	result &= xml.readDoubleAttribute("DropLimit", &m_lowValidRange);
+	result &= xml.readDoubleAttribute("ExcessLimit", &m_highValidRange);
 	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
 	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
 	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
@@ -846,7 +867,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("OutputUnitID", &m_outputUnitID);
 
 	result &= xml.readIntAttribute("OutputRangeMode", &intValue);
-	m_outputRangeMode = static_cast<E::OutputRangeMode>(intValue);
+	m_outputMode = static_cast<E::OutputMode>(intValue);
 
 	result &= xml.readIntAttribute("OutputSensorID", &m_outputSensorID);
 	result &= xml.readBoolAttribute("Acquire", &m_acquire);
@@ -859,7 +880,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	m_inOutType = static_cast<E::SignalInOutType>(intValue);
 
 	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
-	result &= xml.readDoubleAttribute("MaxDifference", &m_maxDifference);
+	result &= xml.readDoubleAttribute("MaxDifference", &m_spredTolerance);
 
 	result &= xml.readIntAttribute("ByteOrder", &intValue);
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);

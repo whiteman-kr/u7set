@@ -129,10 +129,10 @@ namespace  Tuning
 					*defaultValuePtr = static_cast<float>(signal->tuningDefaultValue());
 
 					float* lowBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
-					*lowBoundValuePtr = static_cast<float>(signal->lowLimit());
+					*lowBoundValuePtr = static_cast<float>(signal->lowEngeneeringUnits());
 
 					float* highBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
-					*highBoundValuePtr = static_cast<float>(signal->highLimit());
+					*highBoundValuePtr = static_cast<float>(signal->highEngeneeringUnits());
 				}
 				else
 				{
@@ -142,10 +142,10 @@ namespace  Tuning
 					*defaultValuePtr = static_cast<qint32>(signal->tuningDefaultValue());
 
 					qint32* lowBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
-					*lowBoundValuePtr = static_cast<qint32>(signal->lowLimit());
+					*lowBoundValuePtr = static_cast<qint32>(signal->lowEngeneeringUnits());
 
 					qint32* highBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
-					*highBoundValuePtr = static_cast<qint32>(signal->highLimit());
+					*highBoundValuePtr = static_cast<qint32>(signal->highEngeneeringUnits());
 				}
 
 				Address16 tuningAddr;
@@ -590,8 +590,8 @@ namespace  Tuning
 				crc.add(signal->appSignalID());
 				crc.add(signal->equipmentID());
 				crc.add(signal->tuningDefaultValue());
-				crc.add(signal->lowLimit());
-				crc.add(signal->highLimit());
+				crc.add(signal->lowEngeneeringUnits());
+				crc.add(signal->highEngeneeringUnits());
 			}
 		}
 
