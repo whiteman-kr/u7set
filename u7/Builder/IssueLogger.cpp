@@ -344,7 +344,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-	/// Title: Different MaxDifference values (signal %1: %2; place %3: %4) for module '%5'.
+	/// Title: Different MaxDifference values (signal %1: %2; signal %3: %4) for module '%5'.
     ///
     /// Parameters:
 	///         %1 Signal 1 StrID
@@ -360,7 +360,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3009,
-				  tr("Different MaxDifference values (signal %1: %2; place %3: %4) for module '%5'.")
+				  tr("Different MaxDifference values (signal %1: %2; signal %3: %4) for module '%5'.")
 				  .arg(signalID1)
                   .arg(maxDifference1)
 				  .arg(signalID2)
@@ -473,7 +473,7 @@ namespace Builder
 	/// Description:
 	///			Occurs if a property value is out of range
 	///
-	void IssueLogger::errCFG3013(QString name1, double value1, IssueCompareMode compareMode, QString name2, double value2, int precision, QString signalID)
+	void IssueLogger::errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID)
 	{
 		QString sValue1 = QString::number(value1, 'f', precision);
 		QString sValue2 = QString::number(value2, 'f', precision);

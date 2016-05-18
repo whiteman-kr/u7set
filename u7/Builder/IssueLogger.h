@@ -77,7 +77,7 @@ namespace Builder
 			More = 2
 		};
 
-		Q_INVOKABLE void errCFG3013(QString name1, double value1, IssueCompareMode compareMode, QString name2, double value2, int precision, QString signalID);
+		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
 
         // ALP			Application Logic Parsing				4000-4999
 		//
