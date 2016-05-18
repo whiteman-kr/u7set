@@ -344,36 +344,35 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Different MaxDifference ADC values (place %1: %2; place %3: %4) in application signal '%5'.
+	/// Title: Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.
     ///
     /// Parameters:
-    ///			%1 Place 1
-    ///			%2 MaxDifference 1
-    ///			%3 Place 2
-    ///			%4 MaxDifference 2
-    ///         %5 Signal StrID
-    ///
+	///         %1 Signal 1 StrID
+	///			%2 SpredTolerance 1
+	///         %3 Signal 2 StrID
+	///			%4 SpredTolerance 2
+	///         %5 Module StrID
+	///
     /// Description:
-    ///			MaxDifference ADC values should be equal in one channel in AIM module. Check if physical range,
-    ///         ADC range and MaxDifference value are equal for AIM inputs A and B in Applicatiion Signals.
+	///			SpredTolerance values should be equal in one channel in AIM module.
     ///
-    void IssueLogger::errCFG3009(int place1, double maxDifference1, int place2, double maxDifference2, QString signalID)
+	void IssueLogger::errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module)
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3009,
-                  tr("Different MaxDifference ADC values (place %1: %2; place %3: %4) in application signal '%5'.")
-                  .arg(place1)
-                  .arg(maxDifference1)
-                  .arg(place2)
-                  .arg(maxDifference2)
-                  .arg(signalID));
+				  tr("Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.")
+				  .arg(signalID1)
+				  .arg(spredTolerance1)
+				  .arg(signalID2)
+				  .arg(spredTolerance2)
+				  .arg(module));
     }
 
 	/// IssueCode: CFG3010
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](module '%6').
+	/// Title: Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](signal '%6').
 	///
 	/// Parameters:
 	///         %1 Property Name
@@ -381,12 +380,12 @@ namespace Builder
 	///         %3 Min Value
 	///         %4 Max Value
 	///         %5 Precision
-	///			%6 Module StrID
+	///			%6 Signal StrID
 	///
 	/// Description:
 	///			Occurs if a property value is out of range
 	///
-	void IssueLogger::errCFG3010(QString name, double value, double min, double max, int precision, QString module)
+	void IssueLogger::errCFG3010(QString name, double value, double min, double max, int precision, QString signalID)
 	{
 		QString sValue = QString::number(value, 'f', precision);
 		QString sMin = QString::number(min, 'f', precision);
@@ -394,12 +393,12 @@ namespace Builder
 
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3010,
-				  tr("Property '%1'' has wrong value (%2), valid range is %3..%4 (module '%6').")
+				  tr("Property '%1'' has wrong value (%2), valid range is %3..%4 (signal '%6').")
 				  .arg(name)
 				  .arg(sValue)
 				  .arg(sMin)
 				  .arg(sMax)
-				  .arg(module));
+				  .arg(signalID));
 	}
 
 	/// IssueCode: CFG3011
@@ -457,7 +456,51 @@ namespace Builder
 				  .arg(controller));
 	}
 
-    // ALP			Application Logic Parsing				4000-4999
+	/// IssueCode: CFG3013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'.
+	///
+	/// Parameters:
+	///         %1 Property 1 Name
+	///         %2 Property 2 Value
+	///         %3 Compare Mode (IssueCompareMode)
+	///         %4 Property 1 Name
+	///         %5 Property 2 Value
+	///			%6 Signal StrID
+	///
+	/// Description:
+	///			Occurs if a property value is out of range
+	///
+	void IssueLogger::errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID)
+	{
+		QString sValue1 = QString::number(value1, 'f', precision);
+		QString sValue2 = QString::number(value2, 'f', precision);
+
+		QString mode = "equal to";
+		switch (compareMode)
+		{
+			case IssueCompareMode::Less:
+				mode = "less than";
+				break;
+			case IssueCompareMode::More:
+				mode = "more than";
+				break;
+		}
+
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3013,
+				  tr("Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'")
+				  .arg(name1)
+				  .arg(sValue1)
+				  .arg(mode)
+				  .arg(name2)
+				  .arg(sValue2)
+				  .arg(signalID));
+	}
+
+	// ALP			Application Logic Parsing				4000-4999
 	//
 
 	/// IssueCode: ALP4000

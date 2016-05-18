@@ -52,7 +52,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
 //var configScriptVersion = 7;		// MAC address calculation changed
 //var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
-var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
+//var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
+var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -729,7 +730,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultTf = valToADC(5000 * 0.000001 / tsConstant, 0, 65535, 0, 0xffff);
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
-    var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
+    var defaultMaxDiff = Math.round((0xffff - 0) * 0.005);		// 2%
     
     var inController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLIN");
     if (inController == null)
@@ -743,6 +744,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 
 	var channelAPlace = 0;
 	var channelAMaxDifference = 0;
+	var channelAStrID = "";
 
     for (var i = 0; i < AIMSignalMaxCount; i++)
     {
@@ -777,7 +779,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
+			"; [" + frame + ":" + (ptr + 6) + "] SpredTolerance = " + defaultMaxDiff + "\r\n");
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -800,15 +802,72 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			}
 			
 			tf = tf / tsConstant;
+			
+			var compareEqual = 0;
+			var compareLess = 1;
+			var compareMore = 2;
             
             var filternigTime = valToADC(tf, 0, 65535, 0, 0xffff);
-            var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+            
+			if (signal.highADC() < signal.lowADC())
+			{
+				// error
+				log.errCFG3013("HighADC", signal.highADC(), compareLess, "LowADC", signal.lowADC(), 0, signalStrId);
+				return false;
+			}
+			if (signal.highADC() == signal.lowADC())
+			{
+				// error
+				log.errCFG3013("HighADC", signal.highADC(), compareEqual, "LowADC", signal.lowADC(), 0, signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() == signal.lowEngeneeringUnits())
+			{
+				// error
+				log.errCFG3013("HighEngeneeringUnits", signal.highEngeneeringUnits(), compareEqual, "LowEngeneeringUnits", signal.lowEngeneeringUnits(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highValidRange() == signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareEqual, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() > signal.lowEngeneeringUnits() && signal.highValidRange() < signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareLess, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() < signal.lowEngeneeringUnits() && signal.highValidRange() > signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareMore, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			
+			var highValidRangeADC = valToADC(signal.highValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
+			var lowValidRangeADC = valToADC(signal.lowValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
+			
+			if (lowValidRangeADC < 0)
+			{
+				log.errCFG3010("calculated_lowValidRangeADC", lowValidRangeADC, 0, 65535, 0, signalStrId);
+				return false;
+			}
+			if (highValidRangeADC > 65535)
+			{
+				log.errCFG3010("calculated_highValidRangeADC", highValidRangeADC, 0, 65535, 0, signalStrId);
+				return false;
+			}
+
+			var maxDifference = Math.round((signal.spredTolerance() * 0.01) * (highValidRangeADC - lowValidRangeADC));
 
 			if ((i & 1) == 0)
 			{
 				// this is A input
 				channelAPlace = i;
 				channelAMaxDifference = maxDifference;
+				channelAStrID = signal.propertyValue("EquipmentID");
 			}
 			else
 			{
@@ -817,22 +876,22 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 					// this is B input, next to saved A
 					if (maxDifference != channelAMaxDifference)
 					{
-						log.errCFG3009(channelAPlace, channelAMaxDifference, i, maxDifference, signal.propertyValue("EquipmentID"));
+						log.errCFG3009(channelAStrID, channelAMaxDifference, signal.propertyValue("EquipmentID"), maxDifference, module.propertyValue("EquipmentID"));
 						return false;
 					}
 				}
 			}
 
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
-			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + signal.lowADC() +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
+			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + lowValidRangeADC +
+			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + highValidRangeADC +
+			"; [" + frame + ":" + (ptr + 6) + "] SpredTolerance = " + maxDifference + "\r\n");
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+            setData16(confFirmware, log, frame, ptr, highValidRangeADC);         // InA High bound
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+            setData16(confFirmware, log, frame, ptr, lowValidRangeADC);          // InA Low Bound
             ptr += 2;
             setData16(confFirmware, log, frame, ptr, maxDifference);      // InA MaxDiff
             ptr += 2;
