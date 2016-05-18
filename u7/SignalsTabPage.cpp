@@ -40,24 +40,24 @@ SC_UNIT = 15,
 SC_DROP_LIMIT = 16,
 SC_EXCESS_LIMIT = 17,
 SC_UNBALANCE_LIMIT = 18,
-SC_INPUT_LOW_LIMIT = 19,
+/*SC_INPUT_LOW_LIMIT = 19,
 SC_INPUT_HIGH_LIMIT = 20,
 SC_INPUT_UNIT = 21,
 SC_INPUT_SENSOR = 22,
 SC_OUTPUT_LOW_LIMIT = 23,
 SC_OUTPUT_HIGH_LIMIT = 24,
 SC_OUTPUT_UNIT = 25,
-SC_OUTPUT_RANGE_MODE = 26,
-SC_OUTPUT_SENSOR = 27,
+SC_OUTPUT_SENSOR = 27,*/
 //SC_CALCULATED = 28,
-SC_DECIMAL_PLACES = 28,
-SC_APERTURE = 29,
-SC_FILTERING_TIME = 30,
-SC_MAX_DIFFERENCE = 31,
-SC_BYTE_ORDER = 32,
-SC_ENABLE_TUNING = 33,
-SC_TUNING_DEFAULT_VALUE = 34,
-SC_LAST_CHANGE_USER = 35;
+SC_OUTPUT_MODE = 19,
+SC_DECIMAL_PLACES = 20,
+SC_APERTURE = 21,
+SC_FILTERING_TIME = 22,
+SC_SPRED_TOLERANCE = 23,
+SC_BYTE_ORDER = 24,
+SC_ENABLE_TUNING = 25,
+SC_TUNING_DEFAULT_VALUE = 26,
+SC_LAST_CHANGE_USER = 27;
 
 
 const char* Columns[] =
@@ -75,27 +75,26 @@ const char* Columns[] =
 	"EquipmentID",
 	"Low ADC",
 	"High ADC",
-	"Low limit",
-	"High limit",
+	"Low\nEngeneering Units",
+	"High\nEngeneering Units",
 	"Unit",
-	"Adjustment",
-	"Drop limit",
-	"Excess limit",
+	"Low\nValid Range",
+	"High\nValid Range",
 	"Unbalance limit",
-	"Input\nLow limit",
+	/*"Input\nLow limit",
 	"Input\nHigh limit",
 	"Input\nunit",
 	"Input\nsensor",
 	"Output\nlow Limit",
 	"Output\nhigh Limit",
 	"Output\nunit",
-	"Output\nrange mode",
-	"Output\nsensor",
-	"Calculated",
+	"Output\nsensor",*/
+	//"Calculated",
+	"Output\nmode",
 	"Decimal\nplaces",
 	"Aperture",
 	"Filtering time",
-	"Max difference",
+	"Spred Tolerance",
 	"Byte order",
 	"Enable\ntuning",
 	"Tuning\ndefault value",
@@ -178,13 +177,13 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_DROP_LIMIT:
 		case SC_EXCESS_LIMIT:
 		case SC_UNBALANCE_LIMIT:
-		case SC_INPUT_LOW_LIMIT:
+		/*case SC_INPUT_LOW_LIMIT:
 		case SC_INPUT_HIGH_LIMIT:
 		case SC_OUTPUT_LOW_LIMIT:
-		case SC_OUTPUT_HIGH_LIMIT:
+		case SC_OUTPUT_HIGH_LIMIT:*/
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
-		case SC_MAX_DIFFERENCE:
+		case SC_SPRED_TOLERANCE:
 		case SC_TUNING_DEFAULT_VALUE:
 		{
 			QLineEdit* le = new QLineEdit(parent);
@@ -205,7 +204,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			return cb;
 		}
 		case SC_UNIT:
-		case SC_INPUT_UNIT:
+		/*case SC_INPUT_UNIT:
 		case SC_OUTPUT_UNIT:
 		{
 			QComboBox* cb = new QComboBox(parent);
@@ -221,13 +220,13 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 				cb->addItem(SensorTypeStr[i]);
 			}
 			return cb;
-		}
-		case SC_OUTPUT_RANGE_MODE:
+		}*/
+		case SC_OUTPUT_MODE:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+			for (int i = 0; i < OUTPUT_MODE_COUNT; i++)
 			{
-				cb->addItem(OutputRangeModeStr[i]);
+				cb->addItem(OutputModeStr[i]);
 			}
 			return cb;
 		}
@@ -301,23 +300,23 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.lowValidRange())); break;
 		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.highValidRange())); break;
 		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
-		case SC_INPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.inputLowLimit())); break;
+		/*case SC_INPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.inputLowLimit())); break;
 		case SC_INPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.inputHighLimit())); break;
 		case SC_OUTPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.outputLowLimit())); break;
-		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.outputHighLimit())); break;
+		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.outputHighLimit())); break;*/
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.aperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
-		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(s.spredTolerance())); break;
+		case SC_SPRED_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spredTolerance())); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.dataFormatInt())); break;
 		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.unitID())); break;
-		case SC_INPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.inputUnitID())); break;
+		/*case SC_INPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.inputUnitID())); break;
 		case SC_OUTPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.outputUnitID())); break;
 		case SC_INPUT_SENSOR: if (cb) cb->setCurrentIndex(s.inputSensorID()); break;
-		case SC_OUTPUT_SENSOR: if (cb) cb->setCurrentIndex(s.outputSensorID()); break;
-		case SC_OUTPUT_RANGE_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
+		case SC_OUTPUT_SENSOR: if (cb) cb->setCurrentIndex(s.outputSensorID()); break;*/
+		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		//case SC_CALCULATED: if (cb) cb->setCurrentIndex(s.calculated()); break;
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
@@ -363,23 +362,23 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
 		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
-		case SC_INPUT_LOW_LIMIT: if (le) s.setInputLowLimit(le->text().toDouble()); break;
+		/*case SC_INPUT_LOW_LIMIT: if (le) s.setInputLowLimit(le->text().toDouble()); break;
 		case SC_INPUT_HIGH_LIMIT: if (le) s.setInputHighLimit(le->text().toDouble()); break;
 		case SC_OUTPUT_LOW_LIMIT: if (le) s.setOutputLowLimit(le->text().toDouble()); break;
-		case SC_OUTPUT_HIGH_LIMIT: if (le) s.setOutputHighLimit(le->text().toDouble()); break;
+		case SC_OUTPUT_HIGH_LIMIT: if (le) s.setOutputHighLimit(le->text().toDouble()); break;*/
 		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
-		case SC_MAX_DIFFERENCE: if (le) s.setSpredTolerance(le->text().toDouble()); break;
+		case SC_SPRED_TOLERANCE: if (le) s.setSpredTolerance(le->text().toDouble()); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
-		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
+		/*case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_INPUT_SENSOR: if (cb) s.setInputSensorID(cb->currentIndex()); break;
-		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;
-		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
+		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;*/
+		case SC_OUTPUT_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		//case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
 		case SC_ENABLE_TUNING: if (cb) s.setEnableTuning(cb->currentIndex() == 0 ? false : true); break;
@@ -462,15 +461,15 @@ QString SignalsModel::getSensorStr(int sensorID) const
 	}
 }
 
-QString SignalsModel::getOutputRangeModeStr(int outputRangeMode) const
+QString SignalsModel::getOutputModeStr(int outputMode) const
 {
-	if (outputRangeMode >= 0 && outputRangeMode < OUTPUT_RANGE_MODE_COUNT)
+	if (outputMode >= 0 && outputMode < OUTPUT_MODE_COUNT)
 	{
-		return OutputRangeModeStr[outputRangeMode];
+		return OutputModeStr[outputMode];
 	}
 	else
 	{
-		return tr("Unknown output range mode");
+		return tr("Unknown output mode");
 	}
 }
 
@@ -675,7 +674,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_EXCESS_LIMIT: return signal.highValidRange();
 				case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
-				case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
+				/*case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
 				case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
 				case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
 				case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
@@ -683,8 +682,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
 				case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
 				case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
-				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
-				case SC_OUTPUT_RANGE_MODE: return getOutputRangeModeStr(signal.outputMode());
+				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());*/
+				case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 				//case SC_CALCULATED: return signal.calculated() ? tr("True") : tr("False");
@@ -694,7 +693,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 				case SC_APERTURE: return signal.aperture();
 				case SC_FILTERING_TIME: return signal.filteringTime();
-				case SC_MAX_DIFFERENCE: return signal.spredTolerance();
+				case SC_SPRED_TOLERANCE: return signal.spredTolerance();
 				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
 
 				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
@@ -744,7 +743,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_EXCESS_LIMIT:
 				case SC_UNBALANCE_LIMIT:
 
-				case SC_INPUT_LOW_LIMIT:
+				/*case SC_INPUT_LOW_LIMIT:
 				case SC_INPUT_HIGH_LIMIT:
 				case SC_INPUT_UNIT:
 				case SC_INPUT_SENSOR:
@@ -752,15 +751,15 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_OUTPUT_LOW_LIMIT:
 				case SC_OUTPUT_HIGH_LIMIT:
 				case SC_OUTPUT_UNIT:
-				case SC_OUTPUT_SENSOR:
-				case SC_OUTPUT_RANGE_MODE:
+				case SC_OUTPUT_SENSOR:*/
+				case SC_OUTPUT_MODE:
 
 				//case SC_CALCULATED:
 				case SC_NORMAL_STATE:
 				case SC_DECIMAL_PLACES:
 				case SC_APERTURE:
 				case SC_FILTERING_TIME:
-				case SC_MAX_DIFFERENCE:
+				case SC_SPRED_TOLERANCE:
 					return QVariant();
 
 				default:
@@ -840,15 +839,15 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DROP_LIMIT: signal.setLowValidRange(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setHighValidRange(value.toDouble()); break;
 			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
-			case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
+			/*case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
 			case SC_INPUT_HIGH_LIMIT: signal.setInputHighLimit(value.toDouble()); break;
 			case SC_INPUT_UNIT: signal.setInputUnitID(value.toInt()); break;
 			case SC_INPUT_SENSOR: signal.setInputSensorID(value.toInt()); break;
 			case SC_OUTPUT_LOW_LIMIT: signal.setOutputLowLimit(value.toDouble()); break;
 			case SC_OUTPUT_HIGH_LIMIT: signal.setOutputHighLimit(value.toDouble()); break;
 			case SC_OUTPUT_UNIT: signal.setOutputUnitID(value.toInt()); break;
-			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;
-			case SC_OUTPUT_RANGE_MODE: signal.setOutputMode(static_cast<E::OutputMode>(value.toInt())); break;
+			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;*/
+			case SC_OUTPUT_MODE: signal.setOutputMode(static_cast<E::OutputMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			//case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
 			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
@@ -856,7 +855,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
-			case SC_MAX_DIFFERENCE: signal.setSpredTolerance(value.toDouble()); break;
+			case SC_SPRED_TOLERANCE: signal.setSpredTolerance(value.toDouble()); break;
 			case SC_TUNING_DEFAULT_VALUE: signal.setTuningDefaultValue(value.toDouble()); break;
 			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setEquipmentID(value.toString()); break;
@@ -1059,15 +1058,15 @@ void SignalsModel::addSignal()
 	}
 	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
 	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
-	signal.setLowEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/lowLimit").toDouble());
-	signal.setHighEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/highLimit").toDouble());
+	signal.setLowEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits").toDouble());
+	signal.setHighEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/highEngeneeringUnits").toDouble());
 	int unit = settings.value("SignalsTabPage/LastEditedSignal/unitID").toInt();
 	if (unit != -1)
 	{
 		signal.setUnitID(m_unitInfo.keyAt(unit));
 	}
-	signal.setLowValidRange(settings.value("SignalsTabPage/LastEditedSignal/dropLimit").toDouble());
-	signal.setHighValidRange(settings.value("SignalsTabPage/LastEditedSignal/excessLimit").toDouble());
+	signal.setLowValidRange(settings.value("SignalsTabPage/LastEditedSignal/lowValidRange").toDouble());
+	signal.setHighValidRange(settings.value("SignalsTabPage/LastEditedSignal/highValidRange").toDouble());
 	signal.setUnbalanceLimit(settings.value("SignalsTabPage/LastEditedSignal/unbalanceLimit").toDouble());
 
 	signal.setInputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/inputLowLimit").toDouble());
@@ -1088,7 +1087,7 @@ void SignalsModel::addSignal()
 	}
 	signal.setOutputSensorID(settings.value("SignalsTabPage/LastEditedSignal/outputSensorID").toInt());
 
-	signal.setOutputMode(static_cast<E::OutputMode>(settings.value("SignalsTabPage/LastEditedSignal/outputRangeMode").toInt()));
+	signal.setOutputMode(static_cast<E::OutputMode>(settings.value("SignalsTabPage/LastEditedSignal/outputMode").toInt()));
 
 	signal.setAcquire(settings.value("SignalsTabPage/LastEditedSignal/acquire").toBool());
 	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());
@@ -1096,7 +1095,7 @@ void SignalsModel::addSignal()
 	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
 	signal.setAperture(settings.value("SignalsTabPage/LastEditedSignal/aperture").toDouble());
 	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
-	signal.setSpredTolerance(settings.value("SignalsTabPage/LastEditedSignal/maxDifference").toDouble());
+	signal.setSpredTolerance(settings.value("SignalsTabPage/LastEditedSignal/spredTolerance").toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
 

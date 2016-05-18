@@ -53,7 +53,7 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
-const char* const OutputRangeModeStr[] =
+const char* const OutputModeStr[] =
 {
 	"0..5 V",
 	"4..20 mA",
@@ -61,7 +61,7 @@ const char* const OutputRangeModeStr[] =
 	"0..5 mA",
 };
 
-const int OUTPUT_RANGE_MODE_COUNT = sizeof(OutputRangeModeStr) / sizeof(OutputRangeModeStr[0]);
+const int OUTPUT_MODE_COUNT = sizeof(OutputModeStr) / sizeof(OutputModeStr[0]);
 
 
 const int NO_UNIT_ID = 1;
