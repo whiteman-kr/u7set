@@ -6,7 +6,7 @@ DbControllerProjectTests::DbControllerProjectTests()
 {
 	m_dbController = new DbController();
 
-	m_databaseVersion = 63;
+	m_databaseVersion = 64;
 
 	m_databaseHost = "127.0.0.1";
 	m_databaseName = "dbcontrollertesting";
