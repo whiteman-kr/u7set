@@ -148,7 +148,7 @@ private:
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
 	double m_filteringTime = 0.005;
-	double m_spredTolerance = 0.5;
+	double m_spreadTolerance = 0.5;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
 	double m_tuningDefaultValue = 0;
@@ -355,8 +355,8 @@ public:
 	Q_INVOKABLE double filteringTime() const { return m_filteringTime; }
 	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }
 
-	Q_INVOKABLE double spredTolerance() const { return m_spredTolerance; }
-	void setSpredTolerance(double spredTolerance) { m_spredTolerance = spredTolerance; }
+	Q_INVOKABLE double spreadTolerance() const { return m_spreadTolerance; }
+	void setSpreadTolerance(double spreadTolerance) { m_spreadTolerance = spreadTolerance; }
 
 	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_byteOrder; }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }

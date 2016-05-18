@@ -141,8 +141,18 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 			signal->propertyByCaption("DataFormat")->setReadOnly(true);
 			signal->propertyByCaption("DataSize")->setReadOnly(true);
 		}
+		if (!signal->isInternal())
+		{
+			signal->propertyByCaption("EnableTuning")->setVisible(false);
+			signal->propertyByCaption("TuningDefaultValue")->setVisible(false);
+		}
+		if (signal->isAnalog() && !signal->isOutput())
+		{
+			signal->propertyByCaption("OutputMode")->setVisible(false);
+		}
 		m_objList.push_back(signal);
 	}
+
 	pe->setObjects(m_objList);
 	pe->resizeColumnToContents(0);
 	vl->addWidget(pe);
@@ -294,6 +304,6 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
 	settings.setValue("SignalsTabPage/LastEditedSignal/aperture", signal.aperture());
 	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
-	settings.setValue("SignalsTabPage/LastEditedSignal/spredTolerance", signal.spredTolerance());
+	settings.setValue("SignalsTabPage/LastEditedSignal/spreadTolerance", signal.spreadTolerance());
 	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());
 }
