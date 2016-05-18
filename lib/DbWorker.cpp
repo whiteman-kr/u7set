@@ -3258,7 +3258,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setLowEngeneeringUnits(q.value(19).toDouble());
 	s.setHighEngeneeringUnits(q.value(20).toDouble());
 	s.setUnitID(q.value(21).toInt());
-	//s.setAdjustment(q.value(22).toDouble());
+	double tempAdjustment = q.value(22).toDouble();
 	s.setLowValidRange(q.value(23).toDouble());
 	s.setHighValidRange(q.value(24).toDouble());
 	s.setUnbalanceLimit(q.value(25).toDouble());
@@ -3316,6 +3316,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.lowEngeneeringUnits())
 	.arg(s.highEngeneeringUnits())
 	.arg(s.unitID())
+	.arg(0.0)	// was Adjustment
 	.arg(s.lowValidRange())
 	.arg(s.highValidRange())
 	.arg(s.unbalanceLimit())

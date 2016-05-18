@@ -202,15 +202,15 @@ void Signal::InitProperties()
 	static const QString outputLowLimitCaption("OutputLowLimit");
 	static const QString outputHighLimitCaption("OutputHighLimit");
 	static const QString outputUnitCaption("OutputUnit");
-	static const QString outputRangeModeCaption("OutputRangeMode");
 	static const QString outputSensorCaption("OutputSensor");*/
+	static const QString outputModeCaption("OutputMode");
 	static const QString acquireCaption("Acquire");
 	/*static const QString calculatedCaption("Calculated");*/
 	static const QString normalStateCaption("NormalState");
 	static const QString decimalPlacesCaption("DecimalPlaces");
 	static const QString apertureCaption("Aperture");
 	static const QString filteringTimeCaption("FilteringTime");
-	static const QString maxDifferenceCaption("MaxDifference");
+	static const QString spredToleranceCaption("SpredTolerance");
 	static const QString byteOrderCaption("ByteOrder");
 	static const QString equipmentIDCaption("EquipmentID");
 	static const QString enableTuningCaption("EnableTuning");
@@ -218,11 +218,11 @@ void Signal::InitProperties()
 
 	/*static const QString inputSensorCategory("Input sensor");
 	static const QString outputSensorCategory("Output sensor");*/
-	static const QString identificationCategory("Identification");
-	static const QString tuningCategory("Tuning");
-	static const QString onlineMonitoringSystemCategory("Online Monitoring System");
-	static const QString signalProcessingCategory("Signal processing");
-	static const QString dataFormatCategory("DataFormat");
+	static const QString identificationCategory("1 Identification");
+	static const QString dataFormatCategory("2 DataFormat");
+	static const QString signalProcessingCategory("3 Signal processing");
+	static const QString onlineMonitoringSystemCategory("4 Online Monitoring System");
+	static const QString tuningCategory("5 Tuning");
 
 	ADD_PROPERTY_GETTER(int, idCaption, false, Signal::ID);
 	ADD_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID);
@@ -255,8 +255,10 @@ void Signal::InitProperties()
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
 
-	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat);
-	ADD_PROPERTY_GETTER_SETTER(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize);
+	auto dataFormatProperty = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat);
+	dataFormatProperty->setCategory(dataFormatCategory);
+	auto dataSizeProperty = ADD_PROPERTY_GETTER_SETTER(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize);
+	dataSizeProperty->setCategory(dataFormatCategory);
 
 	if (isAnalog())
 	{
@@ -285,8 +287,14 @@ void Signal::InitProperties()
 		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange);
 		highValidRangeProperty->setCategory(signalProcessingCategory);
 
-		ADD_PROPERTY_DYNAMIC_ENUM(unitCaption, true, m_unitList, Signal::unitID, Signal::setUnitID);
-		ADD_PROPERTY_GETTER_SETTER(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit);
+		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode);
+		outputModePropetry->setCategory(signalProcessingCategory);
+
+		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM(unitCaption, true, m_unitList, Signal::unitID, Signal::setUnitID);
+		unitProperty->setCategory(dataFormatCategory);
+
+		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit);
+		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);
 
 		/*auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputLowLimitCaption, true, Signal::inputLowLimit, Signal::setInputLowLimit);
 		inputLowLimitPropetry->setCategory(inputSensorCategory);
@@ -309,9 +317,6 @@ void Signal::InitProperties()
 		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputUnitCaption, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);
 		outputUnitIDPropetry->setCategory(outputSensorCategory);
 
-		auto outputRangeModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputRangeMode, outputRangeModeCaption, true, Signal::outputRangeMode, Signal::setOutputRangeMode);
-		outputRangeModePropetry->setCategory(outputSensorCategory);
-
 		auto outputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputSensorCaption, true, sensorList, Signal::outputSensorID, Signal::setOutputSensorID);
 		outputSensorPropetry->setCategory(outputSensorCategory);*/
 	}
@@ -328,9 +333,11 @@ void Signal::InitProperties()
 		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER(double, apertureCaption, true, Signal::aperture, Signal::setAperture);
 		apertureProperty->setCategory(onlineMonitoringSystemCategory);
 
+		auto spredToleranceProperty = ADD_PROPERTY_GETTER_SETTER(double, spredToleranceCaption, true, Signal::spredTolerance, Signal::setSpredTolerance);
+		spredToleranceProperty->setCategory(signalProcessingCategory);
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime);
 		filteringTimePropetry->setPrecision(6);
-		ADD_PROPERTY_GETTER_SETTER(double, maxDifferenceCaption, true, Signal::spredTolerance, Signal::setSpredTolerance);
+		filteringTimePropetry->setCategory(signalProcessingCategory);
 	}
 	else
 	{
@@ -338,7 +345,8 @@ void Signal::InitProperties()
 		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
 	}
 
-	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder);
+	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder);
+	byteOrderProperty->setCategory(dataFormatCategory);
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
@@ -433,9 +441,9 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		assert(false);
 		return;
 	}
-	for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+	for (int i = 0; i < OUTPUT_MODE_COUNT; i++)
 	{
-		if (strValue == OutputRangeModeStr[i])
+		if (strValue == OutputModeStr[i])
 		{
 			(this->*setter)(static_cast<E::OutputMode>(i));
 			return;

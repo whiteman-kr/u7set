@@ -273,11 +273,11 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	Signal& signal = *m_signalVector[0];
 	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
 	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowLimit", signal.lowEngeneeringUnits());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highLimit", signal.highEngeneeringUnits());
+	settings.setValue("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits", signal.lowEngeneeringUnits());
+	settings.setValue("SignalsTabPage/LastEditedSignal/highEngeneeringUnits", signal.highEngeneeringUnits());
 	settings.setValue("SignalsTabPage/LastEditedSignal/unitID", signal.unitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/dropLimit", signal.lowValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/excessLimit", signal.highValidRange());
+	settings.setValue("SignalsTabPage/LastEditedSignal/lowValidRange", signal.lowValidRange());
+	settings.setValue("SignalsTabPage/LastEditedSignal/highValidRange", signal.highValidRange());
 	settings.setValue("SignalsTabPage/LastEditedSignal/unbalanceLimit", signal.unbalanceLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
@@ -287,13 +287,13 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputHighLimit", signal.outputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputUnitID", signal.outputUnitID());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputRangeMode", signal.outputMode());
+	settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
 	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
 	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
 	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());
 	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
 	settings.setValue("SignalsTabPage/LastEditedSignal/aperture", signal.aperture());
 	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
-	settings.setValue("SignalsTabPage/LastEditedSignal/maxDifference", signal.spredTolerance());
+	settings.setValue("SignalsTabPage/LastEditedSignal/spredTolerance", signal.spredTolerance());
 	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());
 }
