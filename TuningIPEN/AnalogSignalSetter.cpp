@@ -12,6 +12,7 @@ AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double
 	m_signalId(signalId),
 	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
+	m_lastSentValue(qQNaN()),
 	m_service(service),
 	m_input(new QLineEdit(this)),
 	m_currentValue(new QLineEdit(this))
@@ -52,15 +53,10 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 			m_currentValue->setText(QString::number(value));
 		}
 
-		bool currentOk = false;
-		double currentValue = m_currentValue->text().toDouble(&currentOk);
-
-		bool inputOk = false;
-		double inputValue = m_input->text().toDouble(&inputOk);
-
-		if (currentOk && inputOk && qAbs(currentValue - inputValue) < 0.000001)
+		if (validity == true && qAbs(value - m_lastSentValue) < std::numeric_limits<double>::epsilon())
 		{
 			m_input->clear();
+			m_lastSentValue = qQNaN();
 		}
 	}
 }
@@ -68,7 +64,7 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 void AnalogSignalSetter::setNewValue()
 {
 	bool ok = false;
-	double newValue = m_input->text().toDouble(&ok);
+	double newValue = m_input->text().replace(',', '.').toDouble(&ok);
 	if (!ok)
 	{
 		QMessageBox::critical(nullptr, "Not valid input", "Please, enter valid float pointing number");
@@ -90,5 +86,6 @@ void AnalogSignalSetter::setNewValue()
 	}
 
 	m_service->setSignalState(m_signalId, newValue);
+	m_lastSentValue = newValue;
 }
 

@@ -24,6 +24,7 @@ private:
 	QString m_signalId;
 	double m_lowLimit;
 	double m_highLimit;
+	double m_lastSentValue;
 	bool m_validity = false;
 	Tuning::TuningService* m_service;
 	QLineEdit* m_input;
