@@ -25,8 +25,8 @@ void AppSignalState::setSignalParams(int index, Signal* signal)
 	m_signal = signal;
 
 	m_aperture = signal->aperture();
-	m_lowLimit = signal->lowLimit();
-	m_highLimit = signal->highLimit();
+	m_lowLimit = signal->lowEngeneeringUnits();
+	m_highLimit = signal->highEngeneeringUnits();
 
 	m_absAperture = fabs(m_highLimit - m_lowLimit) * (m_aperture / 100.0);
 }

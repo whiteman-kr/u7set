@@ -58,8 +58,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)

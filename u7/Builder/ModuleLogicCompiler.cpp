@@ -3232,8 +3232,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue(),
-								signal->lowLimit(),
-								signal->highLimit());
+								signal->lowEngeneeringUnits(),
+								signal->highEngeneeringUnits());
 				file.append(str);
 			}
 		}
@@ -3262,8 +3262,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								static_cast<qint32>(signal->tuningDefaultValue()),
-								static_cast<qint32>(signal->lowLimit()),
-								static_cast<qint32>(signal->highLimit()));
+								static_cast<qint32>(signal->lowEngeneeringUnits()),
+								static_cast<qint32>(signal->highEngeneeringUnits()));
 				file.append(str);
 			}
 		}
@@ -3764,8 +3764,8 @@ namespace Builder
 			return nullptr;
 		}
 
-		double y1 = signal.lowLimit();
-		double y2 = signal.highLimit();
+		double y1 = signal.lowEngeneeringUnits();
+		double y2 = signal.highEngeneeringUnits();
 
 		AppItem* appItem = nullptr;
 
@@ -3829,8 +3829,8 @@ namespace Builder
 		assert(signal.isOutput());
 		assert(signal.equipmentID().isEmpty() == false);
 
-		double x1 = signal.lowLimit();
-		double x2 = signal.highLimit();
+		double x1 = signal.lowEngeneeringUnits();
+		double x2 = signal.highEngeneeringUnits();
 
 		if (x2 - x1 == 0.0)
 		{
