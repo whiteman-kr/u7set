@@ -479,3 +479,25 @@ const quint32 ADS_GET_APP_SIGNAL_PARAM = 0x1301;
 const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1302;
 
 
+// Limiters and other constants
+//
+const int ADS_GET_APP_SIGNAL_PARAM_MAX = 500;
+const int ADS_GET_APP_SIGNAL_STATE_MAX = 2000;
+
+enum class NetworkError
+{
+	Success,
+	WrongPartNo,
+	RequestParamExceed,
+	RequestStateExceed,
+};
+
+//int operator= (NetworkError e)
+//{
+//	return static_cast<int>(e);
+//}
+
+//NetworkError operator = (int e)
+//{
+//	return static_cast<NetworkError>(e);
+//}
