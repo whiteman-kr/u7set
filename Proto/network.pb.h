@@ -375,17 +375,21 @@ class GetSignalListNextReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 part() const;
   inline void set_part(::google::protobuf::int32 value);
 
-  // optional string appSignalId = 3;
-  inline bool has_appsignalid() const;
-  inline void clear_appsignalid();
-  static const int kAppSignalIdFieldNumber = 3;
-  inline const ::std::string& appsignalid() const;
-  inline void set_appsignalid(const ::std::string& value);
-  inline void set_appsignalid(const char* value);
-  inline void set_appsignalid(const char* value, size_t size);
-  inline ::std::string* mutable_appsignalid();
-  inline ::std::string* release_appsignalid();
-  inline void set_allocated_appsignalid(::std::string* appsignalid);
+  // repeated string appSignalIds = 3;
+  inline int appsignalids_size() const;
+  inline void clear_appsignalids();
+  static const int kAppSignalIdsFieldNumber = 3;
+  inline const ::std::string& appsignalids(int index) const;
+  inline ::std::string* mutable_appsignalids(int index);
+  inline void set_appsignalids(int index, const ::std::string& value);
+  inline void set_appsignalids(int index, const char* value);
+  inline void set_appsignalids(int index, const char* value, size_t size);
+  inline ::std::string* add_appsignalids();
+  inline void add_appsignalids(const ::std::string& value);
+  inline void add_appsignalids(const char* value);
+  inline void add_appsignalids(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& appsignalids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_appsignalids();
 
   // @@protoc_insertion_point(class_scope:Network.GetSignalListNextReply)
  private:
@@ -393,14 +397,12 @@ class GetSignalListNextReply : public ::google::protobuf::Message {
   inline void clear_has_error();
   inline void set_has_part();
   inline void clear_has_part();
-  inline void set_has_appsignalid();
-  inline void clear_has_appsignalid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 error_;
   ::google::protobuf::int32 part_;
-  ::std::string* appsignalid_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> appsignalids_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
@@ -717,74 +719,48 @@ inline void GetSignalListNextReply::set_part(::google::protobuf::int32 value) {
   part_ = value;
 }
 
-// optional string appSignalId = 3;
-inline bool GetSignalListNextReply::has_appsignalid() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+// repeated string appSignalIds = 3;
+inline int GetSignalListNextReply::appsignalids_size() const {
+  return appsignalids_.size();
 }
-inline void GetSignalListNextReply::set_has_appsignalid() {
-  _has_bits_[0] |= 0x00000004u;
+inline void GetSignalListNextReply::clear_appsignalids() {
+  appsignalids_.Clear();
 }
-inline void GetSignalListNextReply::clear_has_appsignalid() {
-  _has_bits_[0] &= ~0x00000004u;
+inline const ::std::string& GetSignalListNextReply::appsignalids(int index) const {
+  return appsignalids_.Get(index);
 }
-inline void GetSignalListNextReply::clear_appsignalid() {
-  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-    appsignalid_->clear();
-  }
-  clear_has_appsignalid();
+inline ::std::string* GetSignalListNextReply::mutable_appsignalids(int index) {
+  return appsignalids_.Mutable(index);
 }
-inline const ::std::string& GetSignalListNextReply::appsignalid() const {
-  return *appsignalid_;
+inline void GetSignalListNextReply::set_appsignalids(int index, const ::std::string& value) {
+  appsignalids_.Mutable(index)->assign(value);
 }
-inline void GetSignalListNextReply::set_appsignalid(const ::std::string& value) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
-  }
-  appsignalid_->assign(value);
+inline void GetSignalListNextReply::set_appsignalids(int index, const char* value) {
+  appsignalids_.Mutable(index)->assign(value);
 }
-inline void GetSignalListNextReply::set_appsignalid(const char* value) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
-  }
-  appsignalid_->assign(value);
+inline void GetSignalListNextReply::set_appsignalids(int index, const char* value, size_t size) {
+  appsignalids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
 }
-inline void GetSignalListNextReply::set_appsignalid(const char* value, size_t size) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
-  }
-  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+inline ::std::string* GetSignalListNextReply::add_appsignalids() {
+  return appsignalids_.Add();
 }
-inline ::std::string* GetSignalListNextReply::mutable_appsignalid() {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
-  }
-  return appsignalid_;
+inline void GetSignalListNextReply::add_appsignalids(const ::std::string& value) {
+  appsignalids_.Add()->assign(value);
 }
-inline ::std::string* GetSignalListNextReply::release_appsignalid() {
-  clear_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = appsignalid_;
-    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
+inline void GetSignalListNextReply::add_appsignalids(const char* value) {
+  appsignalids_.Add()->assign(value);
 }
-inline void GetSignalListNextReply::set_allocated_appsignalid(::std::string* appsignalid) {
-  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-    delete appsignalid_;
-  }
-  if (appsignalid) {
-    set_has_appsignalid();
-    appsignalid_ = appsignalid;
-  } else {
-    clear_has_appsignalid();
-    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
+inline void GetSignalListNextReply::add_appsignalids(const char* value, size_t size) {
+  appsignalids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+GetSignalListNextReply::appsignalids() const {
+  return appsignalids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+GetSignalListNextReply::mutable_appsignalids() {
+  return &appsignalids_;
 }
 
 // -------------------------------------------------------------------

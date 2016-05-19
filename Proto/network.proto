@@ -25,7 +25,7 @@ message GetSignalListNextReply
 {
 	optional int32 error = 1 [default = 0];
 	optional int32 part = 2;
-	optional string appSignalId = 3;
+	repeated string appSignalIds = 3;
 }
 
 
