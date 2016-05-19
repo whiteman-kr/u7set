@@ -53,7 +53,7 @@ SC_OUTPUT_MODE = 19,
 SC_DECIMAL_PLACES = 20,
 SC_APERTURE = 21,
 SC_FILTERING_TIME = 22,
-SC_SPRED_TOLERANCE = 23,
+SC_SPREAD_TOLERANCE = 23,
 SC_BYTE_ORDER = 24,
 SC_ENABLE_TUNING = 25,
 SC_TUNING_DEFAULT_VALUE = 26,
@@ -183,7 +183,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_OUTPUT_HIGH_LIMIT:*/
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
-		case SC_SPRED_TOLERANCE:
+		case SC_SPREAD_TOLERANCE:
 		case SC_TUNING_DEFAULT_VALUE:
 		{
 			QLineEdit* le = new QLineEdit(parent);
@@ -306,7 +306,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.outputHighLimit())); break;*/
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.aperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
-		case SC_SPRED_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spredTolerance())); break;
+		case SC_SPREAD_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spreadTolerance())); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
@@ -368,7 +368,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_OUTPUT_HIGH_LIMIT: if (le) s.setOutputHighLimit(le->text().toDouble()); break;*/
 		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
-		case SC_SPRED_TOLERANCE: if (le) s.setSpredTolerance(le->text().toDouble()); break;
+		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
@@ -693,7 +693,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 				case SC_APERTURE: return signal.aperture();
 				case SC_FILTERING_TIME: return signal.filteringTime();
-				case SC_SPRED_TOLERANCE: return signal.spredTolerance();
+				case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
 				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
 
 				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
@@ -759,7 +759,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DECIMAL_PLACES:
 				case SC_APERTURE:
 				case SC_FILTERING_TIME:
-				case SC_SPRED_TOLERANCE:
+				case SC_SPREAD_TOLERANCE:
 					return QVariant();
 
 				default:
@@ -855,7 +855,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
-			case SC_SPRED_TOLERANCE: signal.setSpredTolerance(value.toDouble()); break;
+			case SC_SPREAD_TOLERANCE: signal.setSpreadTolerance(value.toDouble()); break;
 			case SC_TUNING_DEFAULT_VALUE: signal.setTuningDefaultValue(value.toDouble()); break;
 			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setEquipmentID(value.toString()); break;
@@ -1095,7 +1095,7 @@ void SignalsModel::addSignal()
 	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
 	signal.setAperture(settings.value("SignalsTabPage/LastEditedSignal/aperture").toDouble());
 	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
-	signal.setSpredTolerance(settings.value("SignalsTabPage/LastEditedSignal/spredTolerance").toDouble());
+	signal.setSpreadTolerance(settings.value("SignalsTabPage/LastEditedSignal/spreadTolerance").toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
 

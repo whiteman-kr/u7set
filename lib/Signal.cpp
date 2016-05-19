@@ -157,7 +157,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_inOutType = signal.inOutType();
 	m_equipmentID = signal.equipmentID();
 	m_filteringTime = signal.filteringTime();
-	m_spredTolerance = signal.spredTolerance();
+	m_spreadTolerance = signal.spreadTolerance();
 	m_byteOrder = signal.byteOrder();
 	m_enableTuning = signal.enableTuning();
 	m_tuningDefaultValue = signal.tuningDefaultValue();
@@ -210,7 +210,7 @@ void Signal::InitProperties()
 	static const QString decimalPlacesCaption("DecimalPlaces");
 	static const QString apertureCaption("Aperture");
 	static const QString filteringTimeCaption("FilteringTime");
-	static const QString spredToleranceCaption("SpredTolerance");
+	static const QString spreadToleranceCaption("SpreadTolerance");
 	static const QString byteOrderCaption("ByteOrder");
 	static const QString equipmentIDCaption("EquipmentID");
 	static const QString enableTuningCaption("EnableTuning");
@@ -219,7 +219,7 @@ void Signal::InitProperties()
 	/*static const QString inputSensorCategory("Input sensor");
 	static const QString outputSensorCategory("Output sensor");*/
 	static const QString identificationCategory("1 Identification");
-	static const QString dataFormatCategory("2 DataFormat");
+	static const QString dataFormatCategory("2 Data Format");
 	static const QString signalProcessingCategory("3 Signal processing");
 	static const QString onlineMonitoringSystemCategory("4 Online Monitoring System");
 	static const QString tuningCategory("5 Tuning");
@@ -333,8 +333,8 @@ void Signal::InitProperties()
 		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER(double, apertureCaption, true, Signal::aperture, Signal::setAperture);
 		apertureProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto spredToleranceProperty = ADD_PROPERTY_GETTER_SETTER(double, spredToleranceCaption, true, Signal::spredTolerance, Signal::setSpredTolerance);
-		spredToleranceProperty->setCategory(signalProcessingCategory);
+		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance);
+		spreadToleranceProperty->setCategory(signalProcessingCategory);
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime);
 		filteringTimePropetry->setPrecision(6);
 		filteringTimePropetry->setCategory(signalProcessingCategory);
@@ -573,12 +573,12 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "DataSize", &Signal::setDataSize);
 	serializeField(attr, "LowADC", &Signal::setLowADC);
 	serializeField(attr, "HighADC", &Signal::setHighADC);
-	serializeField(attr, "LowLimit", &Signal::setLowEngeneeringUnits);
-	serializeField(attr, "HighLimit", &Signal::setHighEngeneeringUnits);
+	serializeField(attr, "LowEngeneeringUnits", &Signal::setLowEngeneeringUnits);
+	serializeField(attr, "HighEngeneeringUnits", &Signal::setHighEngeneeringUnits);
 	serializeField(attr, "UnitID", unitInfo, &Signal::setUnitID);
 	//serializeField(attr, "Adjustment", &Signal::setAdjustment);
-	serializeField(attr, "DropLimit", &Signal::setLowValidRange);
-	serializeField(attr, "ExcessLimit", &Signal::setHighValidRange);
+	serializeField(attr, "LowValidRange", &Signal::setLowValidRange);
+	serializeField(attr, "HighValidRange", &Signal::setHighValidRange);
 	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
 	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
 	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
@@ -587,7 +587,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
 	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
 	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
-	serializeField(attr, "OutputRangeMode", &Signal::setOutputMode);
+	serializeField(attr, "OutputMode", &Signal::setOutputMode);
 	serializeSensorField(attr, "OutputSensorID", &Signal::setOutputSensorID);
 	serializeField(attr, "Acquire", &Signal::setAcquire);
 	serializeField(attr, "Calculated", &Signal::setCalculated);
@@ -597,7 +597,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "InOutType", &Signal::setInOutType);
 	serializeField(attr, "DeviceStrID", &Signal::setEquipmentID);
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
-	serializeField(attr, "MaxDifference", &Signal::setSpredTolerance);
+	serializeField(attr, "SpreadTolerance", &Signal::setSpreadTolerance);
 	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
 	serializeField(attr, "RamAddr", &Signal::setRamAddr);
 	serializeField(attr, "RegAddr", &Signal::setRegValueAddr);
@@ -785,11 +785,11 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("DataSize", dataSize());
 	xml.writeIntAttribute("LowADC", lowADC());
 	xml.writeIntAttribute("HighADC", highADC());
-	xml.writeDoubleAttribute("LowLimit", lowEngeneeringUnits());
-	xml.writeDoubleAttribute("HighLimit", highEngeneeringUnits());
+	xml.writeDoubleAttribute("LowEngeneeringUnits", lowEngeneeringUnits());
+	xml.writeDoubleAttribute("HighEngeneeringUnits", highEngeneeringUnits());
 	xml.writeIntAttribute("UnitID", unitID());
-	xml.writeDoubleAttribute("DropLimit", lowValidRange());
-	xml.writeDoubleAttribute("ExcessLimit", highValidRange());
+	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
+	xml.writeDoubleAttribute("HighValidRange", highValidRange());
 	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
 	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
 	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
@@ -798,7 +798,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("OutputLowLimit", outputLowLimit());
 	xml.writeDoubleAttribute("OutputHighLimit", outputHighLimit());
 	xml.writeIntAttribute("OutputUnitID", outputUnitID());
-	xml.writeIntAttribute("OutputRangeMode", outputModeInt());
+	xml.writeIntAttribute("OutputMode", outputModeInt());
 	xml.writeIntAttribute("OutputSensorID", outputSensorID());
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", calculated());
@@ -807,7 +807,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("Aperture", aperture());
 	xml.writeIntAttribute("InOutType", inOutTypeInt());
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
-	xml.writeDoubleAttribute("MaxDifference", spredTolerance());
+	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 	xml.writeBoolAttribute("EnableTuning", enableTuning());
 	xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
@@ -860,11 +860,11 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("DataSize", &m_dataSize);
 	result &= xml.readIntAttribute("LowADC", &m_lowADC);
 	result &= xml.readIntAttribute("HighADC", &m_highADC);
-	result &= xml.readDoubleAttribute("LowLimit", &m_lowEngeneeringUnits);
-	result &= xml.readDoubleAttribute("HighLimit", &m_highEngeneeringUnits);
+	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
+	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
 	result &= xml.readIntAttribute("UnitID", &m_unitID);
-	result &= xml.readDoubleAttribute("DropLimit", &m_lowValidRange);
-	result &= xml.readDoubleAttribute("ExcessLimit", &m_highValidRange);
+	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
+	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
 	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
 	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
 	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
@@ -874,7 +874,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readDoubleAttribute("OutputHighLimit", &m_outputHighLimit);
 	result &= xml.readIntAttribute("OutputUnitID", &m_outputUnitID);
 
-	result &= xml.readIntAttribute("OutputRangeMode", &intValue);
+	result &= xml.readIntAttribute("OutputMode", &intValue);
 	m_outputMode = static_cast<E::OutputMode>(intValue);
 
 	result &= xml.readIntAttribute("OutputSensorID", &m_outputSensorID);
@@ -888,7 +888,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	m_inOutType = static_cast<E::SignalInOutType>(intValue);
 
 	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
-	result &= xml.readDoubleAttribute("MaxDifference", &m_spredTolerance);
+	result &= xml.readDoubleAttribute("SpreadTolerance", &m_spreadTolerance);
 
 	result &= xml.readIntAttribute("ByteOrder", &intValue);
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);

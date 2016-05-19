@@ -79,6 +79,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 63", ":/DatabaseUpgrade/Upgrade0063.sql"},
 	{"Upgrade to version 64", ":/DatabaseUpgrade/Upgrade0064.sql"},
 	{"Upgrade to version 65", ":/DatabaseUpgrade/Upgrade0065.sql"},
+	{"Upgrade to version 66", ":/DatabaseUpgrade/Upgrade0066.sql"},
+	{"Upgrade to version 67", ":/DatabaseUpgrade/Upgrade0067.sql"},
 };
 
 
@@ -3279,7 +3281,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setEquipmentID(q.value(40).toString());
 	s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
-	s.setSpredTolerance(q.value(43).toDouble());										//
+	s.setSpreadTolerance(q.value(43).toDouble());										//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
 	s.setTuningDefaultValue(q.value(46).toDouble());								// since version 58 of database
@@ -3337,7 +3339,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(toSqlStr(s.equipmentID()))
 	.arg(s.outputMode())					// since version 35 of database
 	.arg(s.filteringTime())						//
-	.arg(s.spredTolerance())						//
+	.arg(s.spreadTolerance())						//
 	.arg(TO_INT(s.byteOrder()))					//
 	.arg(s.enableTuning() ? "TRUE" : "FALSE")	// since version 42 of database
 	.arg(s.tuningDefaultValue());				// since version 58 of database

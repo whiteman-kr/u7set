@@ -67,11 +67,20 @@ namespace Builder
         Q_INVOKABLE void wrnCFG3007(QString signalID);
         Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
 
-        Q_INVOKABLE void errCFG3009(int place1, double maxDifference1, int place2, double maxDifference2, QString signalID);
-		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString module);
+		Q_INVOKABLE void errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module);
+		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);
 
 		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);
 		Q_INVOKABLE void errCFG3012(QString portProperty, uint port, QString controller);
+
+		enum IssueCompareMode
+		{
+			Equal = 0,
+			Less = 1,
+			More = 2
+		};
+
+		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
 
         // ALP			Application Logic Parsing				4000-4999
 		//
