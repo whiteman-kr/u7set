@@ -27,6 +27,12 @@ public:
 protected:
 	void reset();
 
+	void requestSignalListStart();
+	void processSignalListStart(const QByteArray& data);
+
+	void requestSignalListNext();
+	void replySignalListNext();
+
 private:
 	enum class State
 	{

@@ -473,3 +473,9 @@ quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc
 
 quint32 CRC32(const char* buffer, int len);
 
+// AppSignal Param/State Communication, Port PORT_APP_DATA_SERVICE_CLIENT_REQUEST
+//
+const quint32 ADS_GET_SIGNAL_LIST_START = 0x1200;
+const quint32 ADS_GET_SIGNAL_LIST_NEXT = 0x1201;
+
+
