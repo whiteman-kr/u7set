@@ -172,6 +172,8 @@ int main(int argc, char *argv[])
 		DbControllerUserTests dbControllerUserTests;
 		DbControllerFileTests dbControllerFileTests;
 
+		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
+
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
 		if (testResult != 0)
