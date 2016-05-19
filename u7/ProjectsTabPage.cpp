@@ -233,7 +233,7 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project version is higher than the programm version, please update software."));
+		mb.setInformativeText(tr("The project database version is higher than the programm version. Please update software."));
 		mb.exec();
 		return;
 	}
@@ -243,7 +243,7 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project version is lower than the programm version, upgrade the project to the appropriate version?"));
+		mb.setInformativeText(tr("The project database version is lower than the programm version. Do you want to upgrade the project to the appropriate version?"));
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		mb.setDefaultButton(QMessageBox::Ok);
 

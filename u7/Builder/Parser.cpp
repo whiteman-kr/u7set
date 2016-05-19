@@ -1052,13 +1052,9 @@ namespace Builder
 			result = false;
 		}
 
-		// In debug mode save item order for displaying on schemas
+		//  In debug mode save/show item order for displaying on schemas
 		//
-		if (theSettings.debugMode() == true &&
-			applicationData() != nullptr)
-		{
-			debugInfo();
-		}
+		debugInfo();
 
 		return result;
 	}
@@ -1951,7 +1947,7 @@ namespace Builder
 
 	void Parser::debugInfo()
 	{
-		LOG_MESSAGE(m_log, "Debug Info:");
+		//LOG_MESSAGE(m_log, "Debug Info:");
 
 		// Set Schema Ityem Run Order for drawing on schemas
 		//

@@ -55,7 +55,9 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
-    SchemaManager.cpp
+    SchemaManager.cpp \
+    ../Proto/network.pb.cc \
+    TcpSignalClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -73,7 +75,9 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     ../include/Types.h \
     MonitorConfigController.h \
-    SchemaManager.h
+    SchemaManager.h \
+    ../Proto/network.pb.h \
+    TcpSignalClient.h
 
 FORMS    += \
     DialogSettings.ui
@@ -151,4 +155,5 @@ DISTFILES += \
     Images/Settings.svg \
     Images/Close.svg \
     Images/About.svg \
-    Images/readme.txt
+    Images/readme.txt \
+    ../Proto/network.proto

@@ -44,6 +44,9 @@ public:
 	int configuratorPort2() const;
 	void setConfiguratorPort2(int configuratorPort);
 
+	int requestTimeInterval() const;
+	void setRequestTimeInterval(int value);
+
 	// Data	-- DO NOT FORGET TO ADD NEW MEMBERS TO ASSIGN OPERATOR
 	//
 public:
@@ -66,6 +69,8 @@ private:
 
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
+
+	int m_requestTimeInterval = 20;	// 20 ms
 };
 
 extern Settings theSettings;

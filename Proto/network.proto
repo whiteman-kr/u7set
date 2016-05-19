@@ -1,0 +1,42 @@
+package Network;
+
+// Get signal list
+// 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
+// 2. Request GetSignalListStartReply.partCount times GetSignalListNextRequest (and get GetSignalListNextReply in reply)
+//
+message GetSignalListStartRequest
+{
+}
+
+message GetSignalListStartReply
+{
+	optional int32 error = 1 [default = 0];
+	optional int32 totalItemCount = 2;
+	optional int32 partCount = 3;
+	optional int32 itemsPerPart = 4;
+}
+
+message GetSignalListNextRequest
+{
+	optional int32 part = 1;
+}
+
+message GetSignalListNextReply
+{
+	optional int32 error = 1 [default = 0];
+	optional int32 part = 2;
+	repeated string appSignalIds = 3;
+}
+
+
+// Data structs
+//
+message AppSignalState
+{
+	optional uint64 hash = 1;
+	optional double value = 2;
+	optional uint32 flags = 3;
+	optional sint64 systemTime = 4;
+	optional sint64 localTime = 5;
+	optional sint64 plantTime = 6;
+}
