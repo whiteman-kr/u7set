@@ -71,8 +71,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("&Build"));
 
-	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
+	//m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
+	//getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
 
 	// --
 	//

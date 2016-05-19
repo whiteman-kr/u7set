@@ -1071,9 +1071,9 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, byteorder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, enabletuning_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, valueaddr_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, m_iobufferaddr_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, m_ramaddr_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, validityaddr_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, iobufferaddr_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Signal, ramaddr_),
   };
   Signal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1458,7 +1458,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ionValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n"
     "\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0"
     "\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002"
-    " \002(\005:\002-1\"\233\t\n\006Signal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsigna"
+    " \002(\005:\002-1\"\227\t\n\006Signal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsigna"
     "lGroupID\030\002 \001(\005\022\030\n\020signalInstanceID\030\003 \001(\005"
     "\022\023\n\013changesetID\030\004 \001(\005\022\022\n\ncheckedOut\030\005 \001("
     "\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemChannel\030\007 "
@@ -1484,15 +1484,15 @@ void protobuf_AddDesc_serialization_2eproto() {
     "entID\030* \002(\0132\016.Proto.wstring\022\025\n\rfiltering"
     "Time\030+ \001(\001\022\025\n\rmaxDifference\030, \001(\001\022\021\n\tbyt"
     "eOrder\030- \002(\005\022\024\n\014enableTuning\030. \002(\010\022#\n\tva"
-    "lueAddr\030/ \002(\0132\020.Proto.Address16\022(\n\016m_iob"
-    "ufferAddr\0300 \001(\0132\020.Proto.Address16\022#\n\tm_r"
-    "amAddr\0301 \001(\0132\020.Proto.Address16\022&\n\014validi"
-    "tyAddr\0302 \001(\0132\020.Proto.Address16*3\n\nSchema"
-    "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
-    "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
-    "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
-    "\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsign"
-    "edInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 7393);
+    "lueAddr\030/ \002(\0132\020.Proto.Address16\022&\n\014valid"
+    "ityAddr\0302 \001(\0132\020.Proto.Address16\022&\n\014iobuf"
+    "ferAddr\0300 \001(\0132\020.Proto.Address16\022!\n\007ramAd"
+    "dr\0301 \001(\0132\020.Proto.Address16*3\n\nSchemaUnit"
+    "\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*"
+    "-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Ou"
+    "tput\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010D"
+    "iscrete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedIn"
+    "t\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 7389);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -17710,9 +17710,9 @@ const int Signal::kMaxDifferenceFieldNumber;
 const int Signal::kByteOrderFieldNumber;
 const int Signal::kEnableTuningFieldNumber;
 const int Signal::kValueAddrFieldNumber;
-const int Signal::kMIobufferAddrFieldNumber;
-const int Signal::kMRamAddrFieldNumber;
 const int Signal::kValidityAddrFieldNumber;
+const int Signal::kIobufferAddrFieldNumber;
+const int Signal::kRamAddrFieldNumber;
 #endif  // !_MSC_VER
 
 Signal::Signal()
@@ -17726,9 +17726,9 @@ void Signal::InitAsDefaultInstance() {
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   equipmentid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   valueaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
-  m_iobufferaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
-  m_ramaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
   validityaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
+  iobufferaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
+  ramaddr_ = const_cast< ::Proto::Address16*>(&::Proto::Address16::default_instance());
 }
 
 Signal::Signal(const Signal& from)
@@ -17786,9 +17786,9 @@ void Signal::SharedCtor() {
   byteorder_ = 0;
   enabletuning_ = false;
   valueaddr_ = NULL;
-  m_iobufferaddr_ = NULL;
-  m_ramaddr_ = NULL;
   validityaddr_ = NULL;
+  iobufferaddr_ = NULL;
+  ramaddr_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -17803,9 +17803,9 @@ void Signal::SharedDtor() {
     delete caption_;
     delete equipmentid_;
     delete valueaddr_;
-    delete m_iobufferaddr_;
-    delete m_ramaddr_;
     delete validityaddr_;
+    delete iobufferaddr_;
+    delete ramaddr_;
   }
 }
 
@@ -17899,16 +17899,16 @@ void Signal::Clear() {
     if (has_valueaddr()) {
       if (valueaddr_ != NULL) valueaddr_->::Proto::Address16::Clear();
     }
-    if (has_m_iobufferaddr()) {
-      if (m_iobufferaddr_ != NULL) m_iobufferaddr_->::Proto::Address16::Clear();
+    if (has_validityaddr()) {
+      if (validityaddr_ != NULL) validityaddr_->::Proto::Address16::Clear();
     }
   }
   if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
-    if (has_m_ramaddr()) {
-      if (m_ramaddr_ != NULL) m_ramaddr_->::Proto::Address16::Clear();
+    if (has_iobufferaddr()) {
+      if (iobufferaddr_ != NULL) iobufferaddr_->::Proto::Address16::Clear();
     }
-    if (has_validityaddr()) {
-      if (validityaddr_ != NULL) validityaddr_->::Proto::Address16::Clear();
+    if (has_ramaddr()) {
+      if (ramaddr_ != NULL) ramaddr_->::Proto::Address16::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -18658,31 +18658,31 @@ bool Signal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(386)) goto parse_m_iobufferAddr;
+        if (input->ExpectTag(386)) goto parse_iobufferAddr;
         break;
       }
 
-      // optional .Proto.Address16 m_iobufferAddr = 48;
+      // optional .Proto.Address16 iobufferAddr = 48;
       case 48: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_m_iobufferAddr:
+         parse_iobufferAddr:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_m_iobufferaddr()));
+               input, mutable_iobufferaddr()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(394)) goto parse_m_ramAddr;
+        if (input->ExpectTag(394)) goto parse_ramAddr;
         break;
       }
 
-      // optional .Proto.Address16 m_ramAddr = 49;
+      // optional .Proto.Address16 ramAddr = 49;
       case 49: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_m_ramAddr:
+         parse_ramAddr:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_m_ramaddr()));
+               input, mutable_ramaddr()));
         } else {
           goto handle_uninterpreted;
         }
@@ -18962,16 +18962,16 @@ void Signal::SerializeWithCachedSizes(
       47, this->valueaddr(), output);
   }
 
-  // optional .Proto.Address16 m_iobufferAddr = 48;
-  if (has_m_iobufferaddr()) {
+  // optional .Proto.Address16 iobufferAddr = 48;
+  if (has_iobufferaddr()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      48, this->m_iobufferaddr(), output);
+      48, this->iobufferaddr(), output);
   }
 
-  // optional .Proto.Address16 m_ramAddr = 49;
-  if (has_m_ramaddr()) {
+  // optional .Proto.Address16 ramAddr = 49;
+  if (has_ramaddr()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      49, this->m_ramaddr(), output);
+      49, this->ramaddr(), output);
   }
 
   // optional .Proto.Address16 validityAddr = 50;
@@ -19233,18 +19233,18 @@ void Signal::SerializeWithCachedSizes(
         47, this->valueaddr(), target);
   }
 
-  // optional .Proto.Address16 m_iobufferAddr = 48;
-  if (has_m_iobufferaddr()) {
+  // optional .Proto.Address16 iobufferAddr = 48;
+  if (has_iobufferaddr()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        48, this->m_iobufferaddr(), target);
+        48, this->iobufferaddr(), target);
   }
 
-  // optional .Proto.Address16 m_ramAddr = 49;
-  if (has_m_ramaddr()) {
+  // optional .Proto.Address16 ramAddr = 49;
+  if (has_ramaddr()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        49, this->m_ramaddr(), target);
+        49, this->ramaddr(), target);
   }
 
   // optional .Proto.Address16 validityAddr = 50;
@@ -19568,27 +19568,27 @@ int Signal::ByteSize() const {
           this->valueaddr());
     }
 
-    // optional .Proto.Address16 m_iobufferAddr = 48;
-    if (has_m_iobufferaddr()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->m_iobufferaddr());
-    }
-
-  }
-  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
-    // optional .Proto.Address16 m_ramAddr = 49;
-    if (has_m_ramaddr()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->m_ramaddr());
-    }
-
     // optional .Proto.Address16 validityAddr = 50;
     if (has_validityaddr()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->validityaddr());
+    }
+
+  }
+  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    // optional .Proto.Address16 iobufferAddr = 48;
+    if (has_iobufferaddr()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->iobufferaddr());
+    }
+
+    // optional .Proto.Address16 ramAddr = 49;
+    if (has_ramaddr()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->ramaddr());
     }
 
   }
@@ -19769,16 +19769,16 @@ void Signal::MergeFrom(const Signal& from) {
     if (from.has_valueaddr()) {
       mutable_valueaddr()->::Proto::Address16::MergeFrom(from.valueaddr());
     }
-    if (from.has_m_iobufferaddr()) {
-      mutable_m_iobufferaddr()->::Proto::Address16::MergeFrom(from.m_iobufferaddr());
+    if (from.has_validityaddr()) {
+      mutable_validityaddr()->::Proto::Address16::MergeFrom(from.validityaddr());
     }
   }
   if (from._has_bits_[48 / 32] & (0xffu << (48 % 32))) {
-    if (from.has_m_ramaddr()) {
-      mutable_m_ramaddr()->::Proto::Address16::MergeFrom(from.m_ramaddr());
+    if (from.has_iobufferaddr()) {
+      mutable_iobufferaddr()->::Proto::Address16::MergeFrom(from.iobufferaddr());
     }
-    if (from.has_validityaddr()) {
-      mutable_validityaddr()->::Proto::Address16::MergeFrom(from.validityaddr());
+    if (from.has_ramaddr()) {
+      mutable_ramaddr()->::Proto::Address16::MergeFrom(from.ramaddr());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -19815,14 +19815,14 @@ bool Signal::IsInitialized() const {
   if (has_valueaddr()) {
     if (!this->valueaddr().IsInitialized()) return false;
   }
-  if (has_m_iobufferaddr()) {
-    if (!this->m_iobufferaddr().IsInitialized()) return false;
-  }
-  if (has_m_ramaddr()) {
-    if (!this->m_ramaddr().IsInitialized()) return false;
-  }
   if (has_validityaddr()) {
     if (!this->validityaddr().IsInitialized()) return false;
+  }
+  if (has_iobufferaddr()) {
+    if (!this->iobufferaddr().IsInitialized()) return false;
+  }
+  if (has_ramaddr()) {
+    if (!this->ramaddr().IsInitialized()) return false;
   }
   return true;
 }
@@ -19876,9 +19876,9 @@ void Signal::Swap(Signal* other) {
     std::swap(byteorder_, other->byteorder_);
     std::swap(enabletuning_, other->enabletuning_);
     std::swap(valueaddr_, other->valueaddr_);
-    std::swap(m_iobufferaddr_, other->m_iobufferaddr_);
-    std::swap(m_ramaddr_, other->m_ramaddr_);
     std::swap(validityaddr_, other->validityaddr_);
+    std::swap(iobufferaddr_, other->iobufferaddr_);
+    std::swap(ramaddr_, other->ramaddr_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_has_bits_[1], other->_has_bits_[1]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
