@@ -96,7 +96,7 @@ void protobuf_AssignDesc_network_2eproto() {
   static const int GetSignalListNextReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalListNextReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalListNextReply, part_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalListNextReply, appsignalid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalListNextReply, appsignalids_),
   };
   GetSignalListNextReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -180,12 +180,12 @@ void protobuf_AddDesc_network_2eproto() {
     "\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\016totalItemCount\030\002 \001"
     "(\005\022\021\n\tpartCount\030\003 \001(\005\022\024\n\014itemsPerPart\030\004 "
     "\001(\005\"(\n\030GetSignalListNextRequest\022\014\n\004part\030"
-    "\001 \001(\005\"M\n\026GetSignalListNextReply\022\020\n\005error"
-    "\030\001 \001(\005:\0010\022\014\n\004part\030\002 \001(\005\022\023\n\013appSignalId\030\003"
-    " \001(\t\"v\n\016AppSignalState\022\014\n\004hash\030\001 \001(\004\022\r\n\005"
-    "value\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022\022\n\nsystemTime"
-    "\030\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021\n\tplantTime\030\006"
-    " \001(\022", 404);
+    "\001 \001(\005\"N\n\026GetSignalListNextReply\022\020\n\005error"
+    "\030\001 \001(\005:\0010\022\014\n\004part\030\002 \001(\005\022\024\n\014appSignalIds\030"
+    "\003 \003(\t\"v\n\016AppSignalState\022\014\n\004hash\030\001 \001(\004\022\r\n"
+    "\005value\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022\022\n\nsystemTim"
+    "e\030\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021\n\tplantTime\030"
+    "\006 \001(\022", 405);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -905,7 +905,7 @@ void GetSignalListNextRequest::Swap(GetSignalListNextRequest* other) {
 #ifndef _MSC_VER
 const int GetSignalListNextReply::kErrorFieldNumber;
 const int GetSignalListNextReply::kPartFieldNumber;
-const int GetSignalListNextReply::kAppSignalIdFieldNumber;
+const int GetSignalListNextReply::kAppSignalIdsFieldNumber;
 #endif  // !_MSC_VER
 
 GetSignalListNextReply::GetSignalListNextReply()
@@ -926,7 +926,6 @@ void GetSignalListNextReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
   part_ = 0;
-  appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -935,9 +934,6 @@ GetSignalListNextReply::~GetSignalListNextReply() {
 }
 
 void GetSignalListNextReply::SharedDtor() {
-  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-    delete appsignalid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -967,12 +963,8 @@ void GetSignalListNextReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
     part_ = 0;
-    if (has_appsignalid()) {
-      if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-        appsignalid_->clear();
-      }
-    }
   }
+  appsignalids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -1010,23 +1002,25 @@ bool GetSignalListNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_appSignalId;
+        if (input->ExpectTag(26)) goto parse_appSignalIds;
         break;
       }
 
-      // optional string appSignalId = 3;
+      // repeated string appSignalIds = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_appSignalId:
+         parse_appSignalIds:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_appsignalid()));
+                input, this->add_appsignalids()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->appsignalid().data(), this->appsignalid().length(),
+            this->appsignalids(this->appsignalids_size() - 1).data(),
+            this->appsignalids(this->appsignalids_size() - 1).length(),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(26)) goto parse_appSignalIds;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1059,13 +1053,13 @@ void GetSignalListNextReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->part(), output);
   }
 
-  // optional string appSignalId = 3;
-  if (has_appsignalid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->appsignalid().data(), this->appsignalid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+  // repeated string appSignalIds = 3;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
+  ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    this->appsignalids(i).data(), this->appsignalids(i).length(),
+    ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->appsignalid(), output);
+      3, this->appsignalids(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1086,14 +1080,13 @@ void GetSignalListNextReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->part(), target);
   }
 
-  // optional string appSignalId = 3;
-  if (has_appsignalid()) {
+  // repeated string appSignalIds = 3;
+  for (int i = 0; i < this->appsignalids_size(); i++) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->appsignalid().data(), this->appsignalid().length(),
+      this->appsignalids(i).data(), this->appsignalids(i).length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->appsignalid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteStringToArray(3, this->appsignalids(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1121,14 +1114,14 @@ int GetSignalListNextReply::ByteSize() const {
           this->part());
     }
 
-    // optional string appSignalId = 3;
-    if (has_appsignalid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->appsignalid());
-    }
-
   }
+  // repeated string appSignalIds = 3;
+  total_size += 1 * this->appsignalids_size();
+  for (int i = 0; i < this->appsignalids_size(); i++) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+      this->appsignalids(i));
+  }
+
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -1154,15 +1147,13 @@ void GetSignalListNextReply::MergeFrom(const ::google::protobuf::Message& from) 
 
 void GetSignalListNextReply::MergeFrom(const GetSignalListNextReply& from) {
   GOOGLE_CHECK_NE(&from, this);
+  appsignalids_.MergeFrom(from.appsignalids_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_error()) {
       set_error(from.error());
     }
     if (from.has_part()) {
       set_part(from.part());
-    }
-    if (from.has_appsignalid()) {
-      set_appsignalid(from.appsignalid());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1189,7 +1180,7 @@ void GetSignalListNextReply::Swap(GetSignalListNextReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
     std::swap(part_, other->part_);
-    std::swap(appsignalid_, other->appsignalid_);
+    appsignalids_.Swap(&other->appsignalids_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
