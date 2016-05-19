@@ -367,7 +367,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	auto setter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
 	connect(this, &TuningMainWindow::scrollBarMoved, setter, &AnalogSignalSetter::changeNewValue);
-	connect(this, &TuningMainWindow::automaticModeChanged, setter, &AnalogSignalSetter::setEnabled);
+	connect(this, &TuningMainWindow::automaticModeChanged, setter, &AnalogSignalSetter::setDisabled);
 
 	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
@@ -375,7 +375,7 @@ void TuningMainWindow::onTuningServiceReady()
 	m_scrollBar->setPageStep(1);
 	m_scrollBar->setTracking(false);
 	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
-	connect(this, &TuningMainWindow::automaticModeChanged, m_scrollBar, &QScrollBar::setEnabled);
+	connect(this, &TuningMainWindow::automaticModeChanged, m_scrollBar, &QScrollBar::setDisabled);
 
 	fl->addRow("", m_scrollBar);
 
