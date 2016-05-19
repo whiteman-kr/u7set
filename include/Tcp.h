@@ -117,7 +117,7 @@ namespace Tcp
 
 	public:
 		SocketWorker();
-		~SocketWorker();
+		virtual ~SocketWorker();
 
 		bool isConnected() const;
 		bool isUnconnected() const;
@@ -161,6 +161,8 @@ namespace Tcp
 
 		QTimer m_autoAckTimer;
 
+		char* m_protobufBuffer = nullptr;
+
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		virtual void onThreadStarted() final;
@@ -183,7 +185,7 @@ namespace Tcp
 												// { return new ServerDerivedClass(); }
 	public:
 		Server();
-		~Server();
+		virtual ~Server();
 
 		int id() const { return m_id; }
 
@@ -198,9 +200,10 @@ namespace Tcp
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
 
 		void sendAck();
-		void sendReply();
-		void sendReply(const QByteArray& replyData);
-		void sendReply(const char* replyData, quint32 replyDatsSize);
+		bool sendReply();
+		bool sendReply(const QByteArray& replyData);
+		bool sendReply(google::protobuf::Message& protobufMessage);
+		bool sendReply(const char* replyData, quint32 replyDataSize);
 	};
 
 

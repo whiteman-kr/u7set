@@ -367,6 +367,7 @@ protected:
 	quint16 addSize(quint16 size) { return (m_structureSize += size); }
 };
 
+#pragma pack(pop)
 
 
 // --------------------------- Data structs used for parsing "Radiy" platform packets ------------------------
@@ -459,10 +460,6 @@ struct RpDiagMsgHeader
 
 
 const quint16 NO_ACK_BLOCK_TYPE = 0;		// block type value if block didn't ack
-
-#pragma pack(pop)
-
-
 
 #pragma pack(pop)
 

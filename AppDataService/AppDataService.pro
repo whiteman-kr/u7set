@@ -90,7 +90,8 @@ SOURCES += main.cpp \
     AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
-    TcpAppDataServer.cpp
+    TcpAppDataServer.cpp \
+    ../Proto/network.pb.cc
 
 HEADERS += \
 	Stable.h \
@@ -129,7 +130,8 @@ HEADERS += \
     ../include/OrderedHash.h \
     AppDataServiceTypes.h \
     AppDataProcessingThread.h \
-    TcpAppDataServer.h
+    TcpAppDataServer.h \
+    ../Proto/network.pb.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -170,3 +172,6 @@ win32 {
 	    INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto

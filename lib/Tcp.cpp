@@ -348,6 +348,10 @@ namespace Tcp
 
 	Server::~Server()
 	{
+		if (m_protobufBuffer != nullptr)
+		{
+			delete [] m_protobufBuffer;
+		}
 	}
 
 
@@ -479,32 +483,54 @@ namespace Tcp
 	}
 
 
-	void Server::sendReply()
+	bool Server::sendReply()
 	{
-		sendReply(nullptr, 0);
+		return sendReply(nullptr, 0);
 	}
 
 
-	void Server::sendReply(const QByteArray& replyData)
+	bool Server::sendReply(const QByteArray& replyData)
 	{
-		sendReply(replyData.constData(), replyData.size());
+		return sendReply(replyData.constData(), replyData.size());
 	}
 
 
-	void Server::sendReply(const char* replyData, quint32 replyDatsSize)
+	bool Server::sendReply(google::protobuf::Message& protobufMessage)
+	{
+		int messageSize = protobufMessage.ByteSize();
+
+		if (messageSize > TCP_MAX_DATA_SIZE)
+		{
+			return false;
+		}
+
+		if (m_protobufBuffer == nullptr)
+		{
+			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
+
+			assert(m_protobufBuffer != nullptr);
+		}
+
+		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
+
+		return sendReply(m_protobufBuffer, messageSize);
+	}
+
+
+	bool Server::sendReply(const char* replyData, quint32 replyDataSize)
 	{
 		m_autoAckTimer.stop();
 
 		if (m_tcpSocket == nullptr)
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		if (m_serverState != ServerState::RequestProcessing)
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		SocketWorker::Header header;
@@ -512,7 +538,7 @@ namespace Tcp
 		header.type = SocketWorker::Header::Type::Reply;
 		header.id = m_header.id;
 		header.numerator = m_header.numerator;
-		header.dataSize = replyDatsSize;
+		header.dataSize = replyDataSize;
 		header.requestProcessingPorgress = 100;
 		header.calcCRC();
 
@@ -521,33 +547,35 @@ namespace Tcp
 		if (written == -1)
 		{
 			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
-			return;
+			return false;
 		}
 
 		if (written < static_cast<qint64>(sizeof(header)))
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
-		if (replyDatsSize > 0)
+		if (replyDataSize > 0)
 		{
-			written = socketWrite(replyData, replyDatsSize);
+			written = socketWrite(replyData, replyDataSize);
 
 			if (written == -1)
 			{
 				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
-				return;
+				return false;
 			}
 
-			if (written < replyDatsSize)
+			if (written < replyDataSize)
 			{
 				assert(false);
-				return;
+				return false;
 			}
 		}
 
 		initReadStatusVariables();
+
+		return true;
 	}
 
 

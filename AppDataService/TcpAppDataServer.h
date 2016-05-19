@@ -18,7 +18,27 @@ class TcpAppDataServer : public Tcp::Server
 private:
 	TcpAppDataServerThread* m_thread = nullptr;
 
-	virtual Server* getNewInstance() { return new TcpAppDataServer(); }
+	// precalculated variables
+	//
+	int m_signalCount = 0;
+	int m_signalListPartCount = 0;
+
+	virtual Server* getNewInstance();
+
+	// Request processing functions
+	//
+	static const int GET_SIGNAL_LIST_ITEMS_PER_PART = 10;		// 5000
+	static const int ERROR_OK = 0;
+	static const int ERROR_BAD_PART_NO = 1;
+
+	void onGetSignalListStartRequest();
+	void onGetSignalListNextRequest(const char* requestData, quint32 requestDataSize);
+
+	// helper functions
+	//
+	int getSignalListPartCount(int signalCount);
+
+	const QVector<QString>& appSignalIDs();
 
 public:
 	TcpAppDataServer();
@@ -56,5 +76,6 @@ public:
 							const AppSignals& appSignals);
 
 	const QVector<QString>& appSignalIDs() { return m_appSignalIDs; }
+	int appSignalIDsCount() { return m_appSignalIDs.count(); }
 };
 
