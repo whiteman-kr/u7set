@@ -89,7 +89,8 @@ SOURCES += main.cpp \
     AppDataSource.cpp \
     AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    TcpAppDataServer.cpp
 
 HEADERS += \
 	Stable.h \
@@ -127,7 +128,8 @@ HEADERS += \
     AppDataSource.h \
     ../include/OrderedHash.h \
     AppDataServiceTypes.h \
-    AppDataProcessingThread.h
+    AppDataProcessingThread.h \
+    TcpAppDataServer.h
 
 include(../qtservice/src/qtservice.pri)
 
