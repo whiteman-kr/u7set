@@ -106,7 +106,7 @@ private:
 	SchemasTabPage* m_logicSchema = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;
-	UploadTabPage* m_uploadTabPage = nullptr;
+	//UploadTabPage* m_uploadTabPage = nullptr;
 	//SchemasTabPage* m_diagSchema = nullptr;
 
 	DbController* m_dbController = nullptr;

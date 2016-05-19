@@ -182,3 +182,15 @@ void Settings::setConfiguratorPort2(int configuratorPort)
 	QMutexLocker l(&m_mutex);
 	m_configuratorPort2 = configuratorPort;
 }
+
+int Settings::requestTimeInterval() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_requestTimeInterval;
+}
+
+void Settings::setRequestTimeInterval(int value)
+{
+	QMutexLocker l(&m_mutex);
+	m_requestTimeInterval = value;
+}

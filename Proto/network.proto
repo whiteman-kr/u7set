@@ -1,0 +1,60 @@
+package Network;
+
+import "serialization.proto";
+
+// Get signal list
+// 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
+// 2. Request GetSignalListStartReply.partCount times GetSignalListNextRequest (and get GetSignalListNextReply in reply)
+//
+message GetSignalListStartRequest
+{
+}
+
+message GetSignalListStartReply
+{
+	optional int32 error = 1 [default = 0];
+	optional int32 totalItemCount = 2;
+	optional int32 partCount = 3;
+	optional int32 itemsPerPart = 4;
+}
+
+message GetSignalListNextRequest
+{
+	optional int32 part = 1;
+}
+
+message GetSignalListNextReply
+{
+	optional int32 error = 1 [default = 0];
+	optional int32 part = 2;
+	repeated string appSignalIds = 3;
+}
+
+// Geetting application signal params
+//
+message GetAppSignalParamRequest
+{
+	repeated uint64 signalHashes = 1;						// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+}
+
+message GetAppSignalParamReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignal appSignalParams = 2;			// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+}
+
+
+// Geetting application signal states
+//
+message GetAppSignalStateRequest
+{
+	repeated uint64 signalHashes = 1;						// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+message GetAppSignalStateReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+

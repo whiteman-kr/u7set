@@ -8,6 +8,7 @@ class DbControllerProjectTests : public QObject
 
 public:
 	DbControllerProjectTests();
+	void setProjectVersion(int version);
 
 private slots:
 	void initTestCase();
@@ -18,7 +19,7 @@ private slots:
 
 private:
 	DbController *m_dbController;
-	int m_databaseVersion;
+	int m_databaseVersion = -1;
 	QString m_databaseHost;
 	QString m_databaseName;
 	QString m_databaseUser;

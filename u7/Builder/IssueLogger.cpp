@@ -35,6 +35,70 @@ namespace Builder
 				  .arg(fileName));
 	}
 
+
+	/// IssueCode: CMN0011
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't create directory '%1'.
+	///
+	/// Parameters:
+	///		%1 Directory name
+	///
+	/// Description:
+	///		Program can't create directory. Check path accessibility.
+	///
+	void IssueLogger::errCMN0011(QString directory)
+	{
+		LOG_ERROR(IssueType::Common,
+				  11,
+				  tr("Can't create directory '%1'.")
+				  .arg(directory));
+	}
+
+
+	/// IssueCode: CMN0012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't create file '%1'.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't create file. Check path accessibility.
+	///
+	void IssueLogger::errCMN0012(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  12,
+				  tr("Can't create file '%1'.")
+				  .arg(fileName));
+	}
+
+
+	/// IssueCode: CMN0013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Write error of file '%1'.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't write to file. Probably the file is opened by another application.
+	///
+	void IssueLogger::errCMN0013(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  13,
+				  tr("Write error of file '%1'.")
+				  .arg(fileName));
+	}
+
+
 	// INT			Internal issues							1000-1999
 	//
 

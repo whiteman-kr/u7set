@@ -11,7 +11,7 @@
 #include "../include/SocketIO.h"
 #include "../include/SimpleThread.h"
 #include "../include/Utils.h"
-
+#include "../Proto/serialization.pb.h"
 
 namespace Tcp
 {
@@ -193,9 +193,9 @@ namespace Tcp
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
-		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
-
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
+
+		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
 
 		void sendAck();
 		void sendReply();
@@ -314,6 +314,8 @@ namespace Tcp
 
 		ClientState m_clientState = ClientState::ClearToSendRequest;
 
+		char* m_protobufBuffer = nullptr;
+
 	private:
 		void autoSwitchServer();
 		void selectServer(int serverIndex, bool reconnect);
@@ -340,7 +342,7 @@ namespace Tcp
 		Client(const HostAddressPort &serverAddressPort);
 		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
-		~Client();
+		virtual ~Client();
 
 		void setServer(const HostAddressPort& serverAddressPort, bool reconnect);
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
@@ -362,9 +364,10 @@ namespace Tcp
 
 		bool isClearToSendRequest() const;
 
-		void sendRequest(quint32 requestID);
-		void sendRequest(quint32 requestID, const QByteArray& requestData);
-		void sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+		bool sendRequest(quint32 requestID);
+		bool sendRequest(quint32 requestID, const QByteArray& requestData);
+		bool sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 	};

@@ -80,6 +80,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 64", ":/DatabaseUpgrade/Upgrade0064.sql"},
 	{"Upgrade to version 65", ":/DatabaseUpgrade/Upgrade0065.sql"},
 	{"Upgrade to version 66", ":/DatabaseUpgrade/Upgrade0066.sql"},
+	{"Upgrade to version 67", ":/DatabaseUpgrade/Upgrade0067.sql"},
+	{"Upgrade to version 68", ":/DatabaseUpgrade/Upgrade0068.sql"},
 };
 
 
@@ -752,7 +754,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (user.isDisabled() == true)
 	{
-		emitError(tr("User %1 is not allowed to open the project. User is disabled by Administrator.").arg(username));
+		emitError(tr("User %1 is not allowed to open the project. User is disabled, contact project administartor.").arg(username));
 
 		query.clear();
 		db.close();
