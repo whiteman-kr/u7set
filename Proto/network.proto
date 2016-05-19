@@ -1,5 +1,7 @@
 package Network;
 
+import "serialization.proto";
+
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
 // 2. Request GetSignalListStartReply.partCount times GetSignalListNextRequest (and get GetSignalListNextReply in reply)
@@ -26,6 +28,19 @@ message GetSignalListNextReply
 	optional int32 error = 1 [default = 0];
 	optional int32 part = 2;
 	repeated string appSignalIds = 3;
+}
+
+// Geetting signal params
+//
+message GetSignalParamRequest
+{
+	repeated uint64 signalHashes = 1;			// Limited to 500
+}
+
+message GetSignalParamReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.Signal signalParams = 2;			// Limited to 500
 }
 
 

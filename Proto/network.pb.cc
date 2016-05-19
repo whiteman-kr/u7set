@@ -32,6 +32,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetSignalListNextReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetSignalListNextReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* GetSignalParamRequest_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  GetSignalParamRequest_reflection_ = NULL;
+const ::google::protobuf::Descriptor* GetSignalParamReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  GetSignalParamReply_reflection_ = NULL;
 const ::google::protobuf::Descriptor* AppSignalState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AppSignalState_reflection_ = NULL;
@@ -109,7 +115,38 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetSignalListNextReply));
-  AppSignalState_descriptor_ = file->message_type(4);
+  GetSignalParamRequest_descriptor_ = file->message_type(4);
+  static const int GetSignalParamRequest_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamRequest, signalhashes_),
+  };
+  GetSignalParamRequest_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      GetSignalParamRequest_descriptor_,
+      GetSignalParamRequest::default_instance_,
+      GetSignalParamRequest_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamRequest, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamRequest, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(GetSignalParamRequest));
+  GetSignalParamReply_descriptor_ = file->message_type(5);
+  static const int GetSignalParamReply_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamReply, signalparams_),
+  };
+  GetSignalParamReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      GetSignalParamReply_descriptor_,
+      GetSignalParamReply::default_instance_,
+      GetSignalParamReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSignalParamReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(GetSignalParamReply));
+  AppSignalState_descriptor_ = file->message_type(6);
   static const int AppSignalState_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -150,6 +187,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetSignalListNextReply_descriptor_, &GetSignalListNextReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    GetSignalParamRequest_descriptor_, &GetSignalParamRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    GetSignalParamReply_descriptor_, &GetSignalParamReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignalState_descriptor_, &AppSignalState::default_instance());
 }
 
@@ -164,6 +205,10 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete GetSignalListNextRequest_reflection_;
   delete GetSignalListNextReply::default_instance_;
   delete GetSignalListNextReply_reflection_;
+  delete GetSignalParamRequest::default_instance_;
+  delete GetSignalParamRequest_reflection_;
+  delete GetSignalParamReply::default_instance_;
+  delete GetSignalParamReply_reflection_;
   delete AppSignalState::default_instance_;
   delete AppSignalState_reflection_;
 }
@@ -174,29 +219,37 @@ void protobuf_AddDesc_network_2eproto() {
   already_here = true;
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
+  ::Proto::protobuf_AddDesc_serialization_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\rnetwork.proto\022\007Network\"\033\n\031GetSignalLis"
-    "tStartRequest\"l\n\027GetSignalListStartReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\016totalItemCount\030\002 \001"
-    "(\005\022\021\n\tpartCount\030\003 \001(\005\022\024\n\014itemsPerPart\030\004 "
-    "\001(\005\"(\n\030GetSignalListNextRequest\022\014\n\004part\030"
-    "\001 \001(\005\"N\n\026GetSignalListNextReply\022\020\n\005error"
-    "\030\001 \001(\005:\0010\022\014\n\004part\030\002 \001(\005\022\024\n\014appSignalIds\030"
-    "\003 \003(\t\"v\n\016AppSignalState\022\014\n\004hash\030\001 \001(\004\022\r\n"
-    "\005value\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022\022\n\nsystemTim"
-    "e\030\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021\n\tplantTime\030"
-    "\006 \001(\022", 405);
+    "\n\rnetwork.proto\022\007Network\032\023serialization."
+    "proto\"\033\n\031GetSignalListStartRequest\"l\n\027Ge"
+    "tSignalListStartReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+    "\026\n\016totalItemCount\030\002 \001(\005\022\021\n\tpartCount\030\003 \001"
+    "(\005\022\024\n\014itemsPerPart\030\004 \001(\005\"(\n\030GetSignalLis"
+    "tNextRequest\022\014\n\004part\030\001 \001(\005\"N\n\026GetSignalL"
+    "istNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\014\n\004part\030\002"
+    " \001(\005\022\024\n\014appSignalIds\030\003 \003(\t\"-\n\025GetSignalP"
+    "aramRequest\022\024\n\014signalHashes\030\001 \003(\004\"L\n\023Get"
+    "SignalParamReply\022\020\n\005error\030\001 \001(\005:\0010\022#\n\014si"
+    "gnalParams\030\002 \003(\0132\r.Proto.Signal\"v\n\016AppSi"
+    "gnalState\022\014\n\004hash\030\001 \001(\004\022\r\n\005value\030\002 \001(\001\022\r"
+    "\n\005flags\030\003 \001(\r\022\022\n\nsystemTime\030\004 \001(\022\022\021\n\tloc"
+    "alTime\030\005 \001(\022\022\021\n\tplantTime\030\006 \001(\022", 551);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
   GetSignalListStartReply::default_instance_ = new GetSignalListStartReply();
   GetSignalListNextRequest::default_instance_ = new GetSignalListNextRequest();
   GetSignalListNextReply::default_instance_ = new GetSignalListNextReply();
+  GetSignalParamRequest::default_instance_ = new GetSignalParamRequest();
+  GetSignalParamReply::default_instance_ = new GetSignalParamReply();
   AppSignalState::default_instance_ = new AppSignalState();
   GetSignalListStartRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListStartReply::default_instance_->InitAsDefaultInstance();
   GetSignalListNextRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListNextReply::default_instance_->InitAsDefaultInstance();
+  GetSignalParamRequest::default_instance_->InitAsDefaultInstance();
+  GetSignalParamReply::default_instance_->InitAsDefaultInstance();
   AppSignalState::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_network_2eproto);
 }
@@ -1192,6 +1245,468 @@ void GetSignalListNextReply::Swap(GetSignalListNextReply* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = GetSignalListNextReply_descriptor_;
   metadata.reflection = GetSignalListNextReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int GetSignalParamRequest::kSignalHashesFieldNumber;
+#endif  // !_MSC_VER
+
+GetSignalParamRequest::GetSignalParamRequest()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void GetSignalParamRequest::InitAsDefaultInstance() {
+}
+
+GetSignalParamRequest::GetSignalParamRequest(const GetSignalParamRequest& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void GetSignalParamRequest::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GetSignalParamRequest::~GetSignalParamRequest() {
+  SharedDtor();
+}
+
+void GetSignalParamRequest::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void GetSignalParamRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* GetSignalParamRequest::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return GetSignalParamRequest_descriptor_;
+}
+
+const GetSignalParamRequest& GetSignalParamRequest::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+GetSignalParamRequest* GetSignalParamRequest::default_instance_ = NULL;
+
+GetSignalParamRequest* GetSignalParamRequest::New() const {
+  return new GetSignalParamRequest;
+}
+
+void GetSignalParamRequest::Clear() {
+  signalhashes_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool GetSignalParamRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated uint64 signalHashes = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_signalHashes:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 1, 8, input, this->mutable_signalhashes())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, this->mutable_signalhashes())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(8)) goto parse_signalHashes;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void GetSignalParamRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated uint64 signalHashes = 1;
+  for (int i = 0; i < this->signalhashes_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(
+      1, this->signalhashes(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* GetSignalParamRequest::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated uint64 signalHashes = 1;
+  for (int i = 0; i < this->signalhashes_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteUInt64ToArray(1, this->signalhashes(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int GetSignalParamRequest::ByteSize() const {
+  int total_size = 0;
+
+  // repeated uint64 signalHashes = 1;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->signalhashes_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt64Size(this->signalhashes(i));
+    }
+    total_size += 1 * this->signalhashes_size() + data_size;
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GetSignalParamRequest::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const GetSignalParamRequest* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GetSignalParamRequest*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void GetSignalParamRequest::MergeFrom(const GetSignalParamRequest& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  signalhashes_.MergeFrom(from.signalhashes_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void GetSignalParamRequest::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetSignalParamRequest::CopyFrom(const GetSignalParamRequest& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetSignalParamRequest::IsInitialized() const {
+
+  return true;
+}
+
+void GetSignalParamRequest::Swap(GetSignalParamRequest* other) {
+  if (other != this) {
+    signalhashes_.Swap(&other->signalhashes_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata GetSignalParamRequest::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = GetSignalParamRequest_descriptor_;
+  metadata.reflection = GetSignalParamRequest_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int GetSignalParamReply::kErrorFieldNumber;
+const int GetSignalParamReply::kSignalParamsFieldNumber;
+#endif  // !_MSC_VER
+
+GetSignalParamReply::GetSignalParamReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void GetSignalParamReply::InitAsDefaultInstance() {
+}
+
+GetSignalParamReply::GetSignalParamReply(const GetSignalParamReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void GetSignalParamReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GetSignalParamReply::~GetSignalParamReply() {
+  SharedDtor();
+}
+
+void GetSignalParamReply::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void GetSignalParamReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* GetSignalParamReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return GetSignalParamReply_descriptor_;
+}
+
+const GetSignalParamReply& GetSignalParamReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+GetSignalParamReply* GetSignalParamReply::default_instance_ = NULL;
+
+GetSignalParamReply* GetSignalParamReply::New() const {
+  return new GetSignalParamReply;
+}
+
+void GetSignalParamReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+  }
+  signalparams_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool GetSignalParamReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_signalParams;
+        break;
+      }
+
+      // repeated .Proto.Signal signalParams = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_signalParams:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_signalparams()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_signalParams;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void GetSignalParamReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  // repeated .Proto.Signal signalParams = 2;
+  for (int i = 0; i < this->signalparams_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->signalparams(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* GetSignalParamReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  // repeated .Proto.Signal signalParams = 2;
+  for (int i = 0; i < this->signalparams_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->signalparams(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int GetSignalParamReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+  }
+  // repeated .Proto.Signal signalParams = 2;
+  total_size += 1 * this->signalparams_size();
+  for (int i = 0; i < this->signalparams_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->signalparams(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GetSignalParamReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const GetSignalParamReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GetSignalParamReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void GetSignalParamReply::MergeFrom(const GetSignalParamReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  signalparams_.MergeFrom(from.signalparams_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void GetSignalParamReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetSignalParamReply::CopyFrom(const GetSignalParamReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetSignalParamReply::IsInitialized() const {
+
+  for (int i = 0; i < signalparams_size(); i++) {
+    if (!this->signalparams(i).IsInitialized()) return false;
+  }
+  return true;
+}
+
+void GetSignalParamReply::Swap(GetSignalParamReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    signalparams_.Swap(&other->signalparams_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata GetSignalParamReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = GetSignalParamReply_descriptor_;
+  metadata.reflection = GetSignalParamReply_reflection_;
   return metadata;
 }
 

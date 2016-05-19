@@ -24,6 +24,7 @@
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
 #include <google/protobuf/unknown_field_set.h>
+#include "serialization.pb.h"
 // @@protoc_insertion_point(includes)
 
 namespace Network {
@@ -37,6 +38,8 @@ class GetSignalListStartRequest;
 class GetSignalListStartReply;
 class GetSignalListNextRequest;
 class GetSignalListNextReply;
+class GetSignalParamRequest;
+class GetSignalParamReply;
 class AppSignalState;
 
 // ===================================================================
@@ -416,6 +419,186 @@ class GetSignalListNextReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class GetSignalParamRequest : public ::google::protobuf::Message {
+ public:
+  GetSignalParamRequest();
+  virtual ~GetSignalParamRequest();
+
+  GetSignalParamRequest(const GetSignalParamRequest& from);
+
+  inline GetSignalParamRequest& operator=(const GetSignalParamRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetSignalParamRequest& default_instance();
+
+  void Swap(GetSignalParamRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetSignalParamRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetSignalParamRequest& from);
+  void MergeFrom(const GetSignalParamRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated uint64 signalHashes = 1;
+  inline int signalhashes_size() const;
+  inline void clear_signalhashes();
+  static const int kSignalHashesFieldNumber = 1;
+  inline ::google::protobuf::uint64 signalhashes(int index) const;
+  inline void set_signalhashes(int index, ::google::protobuf::uint64 value);
+  inline void add_signalhashes(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      signalhashes() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_signalhashes();
+
+  // @@protoc_insertion_point(class_scope:Network.GetSignalParamRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhashes_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetSignalParamRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetSignalParamReply : public ::google::protobuf::Message {
+ public:
+  GetSignalParamReply();
+  virtual ~GetSignalParamReply();
+
+  GetSignalParamReply(const GetSignalParamReply& from);
+
+  inline GetSignalParamReply& operator=(const GetSignalParamReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetSignalParamReply& default_instance();
+
+  void Swap(GetSignalParamReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetSignalParamReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetSignalParamReply& from);
+  void MergeFrom(const GetSignalParamReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Proto.Signal signalParams = 2;
+  inline int signalparams_size() const;
+  inline void clear_signalparams();
+  static const int kSignalParamsFieldNumber = 2;
+  inline const ::Proto::Signal& signalparams(int index) const;
+  inline ::Proto::Signal* mutable_signalparams(int index);
+  inline ::Proto::Signal* add_signalparams();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Signal >&
+      signalparams() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Signal >*
+      mutable_signalparams();
+
+  // @@protoc_insertion_point(class_scope:Network.GetSignalParamReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::Signal > signalparams_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetSignalParamReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class AppSignalState : public ::google::protobuf::Message {
  public:
   AppSignalState();
@@ -761,6 +944,86 @@ GetSignalListNextReply::appsignalids() const {
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 GetSignalListNextReply::mutable_appsignalids() {
   return &appsignalids_;
+}
+
+// -------------------------------------------------------------------
+
+// GetSignalParamRequest
+
+// repeated uint64 signalHashes = 1;
+inline int GetSignalParamRequest::signalhashes_size() const {
+  return signalhashes_.size();
+}
+inline void GetSignalParamRequest::clear_signalhashes() {
+  signalhashes_.Clear();
+}
+inline ::google::protobuf::uint64 GetSignalParamRequest::signalhashes(int index) const {
+  return signalhashes_.Get(index);
+}
+inline void GetSignalParamRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
+  signalhashes_.Set(index, value);
+}
+inline void GetSignalParamRequest::add_signalhashes(::google::protobuf::uint64 value) {
+  signalhashes_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+GetSignalParamRequest::signalhashes() const {
+  return signalhashes_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+GetSignalParamRequest::mutable_signalhashes() {
+  return &signalhashes_;
+}
+
+// -------------------------------------------------------------------
+
+// GetSignalParamReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetSignalParamReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetSignalParamReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetSignalParamReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetSignalParamReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetSignalParamReply::error() const {
+  return error_;
+}
+inline void GetSignalParamReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// repeated .Proto.Signal signalParams = 2;
+inline int GetSignalParamReply::signalparams_size() const {
+  return signalparams_.size();
+}
+inline void GetSignalParamReply::clear_signalparams() {
+  signalparams_.Clear();
+}
+inline const ::Proto::Signal& GetSignalParamReply::signalparams(int index) const {
+  return signalparams_.Get(index);
+}
+inline ::Proto::Signal* GetSignalParamReply::mutable_signalparams(int index) {
+  return signalparams_.Mutable(index);
+}
+inline ::Proto::Signal* GetSignalParamReply::add_signalparams() {
+  return signalparams_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Signal >&
+GetSignalParamReply::signalparams() const {
+  return signalparams_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Signal >*
+GetSignalParamReply::mutable_signalparams() {
+  return &signalparams_;
 }
 
 // -------------------------------------------------------------------
