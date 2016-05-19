@@ -57,7 +57,8 @@ SOURCES += main.cpp \
     MonitorConfigController.cpp \
     SchemaManager.cpp \
     ../Proto/network.pb.cc \
-    TcpSignalClient.cpp
+    TcpSignalClient.cpp \
+    SignalManager.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -77,7 +78,9 @@ HEADERS  += \
     MonitorConfigController.h \
     SchemaManager.h \
     ../Proto/network.pb.h \
-    TcpSignalClient.h
+    TcpSignalClient.h \
+    SignalManager.h \
+    ../include/Hash.h
 
 FORMS    += \
     DialogSettings.ui

@@ -1,7 +1,10 @@
 #ifndef TCPSIGNALCLIENT_H
 #define TCPSIGNALCLIENT_H
 
+#include <QStringList>
 #include "../include/Tcp.h"
+#include "../include/Hash.h"
+#include "../Proto/network.pb.h"
 
 
 class TcpSignalClient : public Tcp::Client
@@ -25,26 +28,27 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 protected:
-	void reset();
+	void resetToGetSignalList();
+	void resetToGetState();
 
 	void requestSignalListStart();
 	void processSignalListStart(const QByteArray& data);
 
-	void requestSignalListNext();
-	void replySignalListNext();
+	void requestSignalListNext(int part);
+	void processSignalListNext(const QByteArray& data);
 
 private:
-	enum class State
-	{
-		Start,
-		GetSignalList,
-		GetSignalStates,
-		GetStateChanges,
-	};
-
-	State m_state = State::Start;
 	int m_startStateTimerId = -1;
 
+private:
+	// Cache protobug messages
+	//
+	::Network::GetSignalListStartReply m_getSignalListStartReply;
+
+	::Network::GetSignalListNextRequest m_getSignalListNextRequest;
+	::Network::GetSignalListNextReply m_getSignalListNextReply;
+
+	QStringList m_signalList;
 };
 
 #endif // TCPSIGNALCLIENT_H

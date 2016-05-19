@@ -15,7 +15,7 @@
 #include "DbControllerFileManagementTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 65;
+const int DatabaseProjectVersion = 68;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -171,6 +171,8 @@ int main(int argc, char *argv[])
 		DbControllerProjectTests dbControllerProjectTests;
 		DbControllerUserTests dbControllerUserTests;
 		DbControllerFileTests dbControllerFileTests;
+
+		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
 
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);

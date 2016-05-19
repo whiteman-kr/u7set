@@ -1,6 +1,7 @@
 #include "CreateProjectDialog.h"
 #include "ui_CreateProjectDialog.h"
 #include "PasswordService.h"
+#include <QMessageBox>
 
 CreateProjectDialog::CreateProjectDialog(QWidget *parent) :
 	QDialog(parent),
@@ -28,9 +29,14 @@ void CreateProjectDialog::on_okButton_clicked()
 	const QString& confirmedPassword = ui->confirmPasswordEdit->text();
 
 	bool result = PasswordService::checkPassword(adminstratorPassword, confirmedPassword, true, this);
-
 	if (result == false)
 	{
+		return;
+	}
+
+	if (projectName.size() > 40)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("The project name is limited to 40 characters."));
 		return;
 	}
 

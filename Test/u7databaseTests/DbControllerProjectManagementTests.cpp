@@ -6,12 +6,15 @@ DbControllerProjectTests::DbControllerProjectTests()
 {
 	m_dbController = new DbController();
 
-	m_databaseVersion = 65;
-
 	m_databaseHost = "127.0.0.1";
 	m_databaseName = "dbcontrollertesting";
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
+}
+
+void DbControllerProjectTests::setProjectVersion(int version)
+{
+	m_databaseVersion = version;
 }
 
 void DbControllerProjectTests::initTestCase()

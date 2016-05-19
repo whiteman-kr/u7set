@@ -370,6 +370,46 @@ void DbControllerFileTests::deleteFileTest()
 	db.close();
 }
 
+void DbControllerFileTests::getFileInfo()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	QString fileOne = "firstFile";
+
+	QSqlQuery query;
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	DbFileInfo fileInfo;
+
+	ok = m_dbController->getFileInfo(fileId, &fileInfo, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_file_info(1, '{%1}')").arg(fileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(fileInfo.fileId() == query.value("fileId").toInt(), qPrintable("Wrong fileId returned by dbController function()"));
+	QVERIFY2(fileInfo.deleted() == query.value("deleted").toBool(), qPrintable("Wrong deleted flag returned by dbController function()"));
+	QVERIFY2(fileInfo.fileName() == query.value("name").toString(), qPrintable("Wrong name returned by dbController function()"));
+	QVERIFY2(fileInfo.parentId() == query.value("parentId").toInt(), qPrintable("Wrong parentId returned by dbController function()"));
+	QVERIFY2(fileInfo.changeset() == query.value("changesetId").toInt(), qPrintable("Wrong changeset returned by dbController function()"));
+	QVERIFY2(fileInfo.size() == query.value("size").toInt(), qPrintable("Wrong size returned by dbController function()"));
+	QVERIFY2(fileInfo.userId() == query.value("userId").toInt(), qPrintable("Wrong userId returned by dbController function()"));
+	QVERIFY2(fileInfo.action().toInt() == query.value("action").toInt(), qPrintable("Wrong action returned by dbController function()"));
+	QVERIFY2(fileInfo.details() == query.value("details").toString(), qPrintable("Wrong details returned by dbController function()"));
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
