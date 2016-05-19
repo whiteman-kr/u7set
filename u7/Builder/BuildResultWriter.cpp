@@ -79,7 +79,7 @@ namespace Builder
 	}
 
 
-	bool BuildFile::open(const QString& fullBuildPath, bool textMode, OutputLog* log)
+	bool BuildFile::open(const QString& fullBuildPath, bool textMode, IssueLogger* log)
 	{
 		QString fullPathFileName = fullBuildPath + m_info.pathFileName;
 
@@ -91,7 +91,7 @@ namespace Builder
 
 		if (dir.mkpath(fullPath) == false)
 		{
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined, QString(tr("Can't create directory: %1")).arg(fullPath));
+			log->errCMN0011(fullPath);
 			return false;
 		}
 
@@ -110,8 +110,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't create file: %1")).arg(fullPathFileName));
-
+			log->errCMN0012(fullPathFileName);
 			return false;
 		}
 
@@ -137,7 +136,7 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QByteArray& data, OutputLog* log)
+	bool BuildFile::write(const QString& fullBuildPath, const QByteArray& data, IssueLogger* log)
 	{
 		if (open(fullBuildPath, false, log) == false)
 		{
@@ -150,7 +149,7 @@ namespace Builder
 
 		if (written == -1)
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Write error of file: ")).arg(m_info.pathFileName));
+			log->errCMN0013(m_info.pathFileName);
 			result = false;
 		}
 
@@ -164,7 +163,7 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QString& dataString, OutputLog* log)
+	bool BuildFile::write(const QString& fullBuildPath, const QString& dataString, IssueLogger* log)
 	{
 		if (open(fullBuildPath, true, log) == false)
 		{
@@ -185,7 +184,7 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QStringList& stringList, OutputLog* log)
+	bool BuildFile::write(const QString& fullBuildPath, const QStringList& stringList, IssueLogger* log)
 	{
 		if (open(fullBuildPath, true, log) == false)
 		{
@@ -482,7 +481,7 @@ namespace Builder
 
 		if (QDir().mkpath(m_buildFullPath) == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("Can't create build directory: %1")).arg(m_buildFullPath));
+			m_log->errCMN0011(m_buildFullPath);
 			m_runBuild = false;
 			return false;
 		}

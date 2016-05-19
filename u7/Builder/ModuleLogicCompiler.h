@@ -153,6 +153,7 @@ namespace Builder
 		bool m_instantiator = false;
 		int m_dataSize = 1;
 		QString m_opName;
+		QString m_caption;
 		int m_operandIndex = NOT_FB_OPERAND_INDEX;
 
 		quint32 m_unsignedIntValue = 0;
@@ -176,7 +177,8 @@ namespace Builder
 		int dataSize() const { return m_dataSize; }
 
 		int operandIndex() const { return m_operandIndex; }
-		const QString& opName() const { return m_opName; }
+		QString opName() const { return m_opName; }
+		QString caption() const { return m_caption; }
 
 		quint32 unsignedIntValue() const;
 		void setUnsignedIntValue(quint32 value);
@@ -258,7 +260,7 @@ namespace Builder
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().type().toOpCode(); }		// return FB type
-		QString caption() const { return afb().caption().toUpper(); }
+		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().type().text(); }
 		int number() const { return m_number; }
 
