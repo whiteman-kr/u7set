@@ -78,7 +78,11 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAddDataServerThread == nullptr);
 
-	m_tcpAddDataServerThread = new Tcp::ServerThread(m_settings.clientRequestIP, new TcpAppDataServer());
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
+
+	m_tcpAddDataServerThread = new TcpAppDataServerThread(m_settings.clientRequestIP, tcpAppDataSever);
+
+
 	m_tcpAddDataServerThread->start();
 }
 
@@ -355,13 +359,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	if (result == true)
 	{
-		createAndInitSignalStates();
-
-		initDataChannelThreads();
-
-		runDataChannelThreads();
-
-		runTcpAppDataServer();
+		applyNewConfiguration();
 	}
 }
 
@@ -567,6 +565,18 @@ void AppDataServiceWorker::clearConfiguration()
 	m_appSignals.clear();
 	m_appDataSources.clear();
 	m_signalStates.clear();
+}
+
+
+void AppDataServiceWorker::applyNewConfiguration()
+{
+	createAndInitSignalStates();
+
+	initDataChannelThreads();
+
+	runDataChannelThreads();
+
+	runTcpAppDataServer();
 }
 
 

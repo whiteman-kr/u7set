@@ -10,6 +10,7 @@
 
 #include "AppDataChannel.h"
 #include "AppSignalState.h"
+#include "TcpAppDataServer.h"
 
 
 namespace Hardware
@@ -37,7 +38,7 @@ private:
 
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
-	Tcp::ServerThread* m_tcpAddDataServerThread = nullptr;
+	TcpAppDataServerThread* m_tcpAddDataServerThread = nullptr;
 
 	QTimer m_timer;
 
@@ -80,6 +81,7 @@ private:
 	void runDataChannelThreads();
 
 	void clearConfiguration();
+	void applyNewConfiguration();
 
 public:
 	AppDataServiceWorker(const QString& serviceStrID,
