@@ -19,14 +19,6 @@ TcpSignalClient::~TcpSignalClient()
 void TcpSignalClient::timerEvent(QTimerEvent* event)
 {
 	assert(event);
-
-	if (event->timerId() == m_startStateTimerId)
-	{
-		if (isClearToSendRequest() == false)
-		{
-		}
-	}
-
 	return;
 }
 
@@ -43,6 +35,12 @@ void TcpSignalClient::onClientThreadFinished()
 void TcpSignalClient::onConnection()
 {
 	qDebug() << "TcpSignalClient::onConnection()";
+
+	assert(isClearToSendRequest() == true);
+
+	requestSignalListStart();
+
+	return;
 }
 
 void TcpSignalClient::onDisconnection()
@@ -63,8 +61,14 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		return;
 	}
 
+	QByteArray data = QByteArray::fromRawData(replyData, replyDataSize);
+
 	switch (requestID)
 	{
+	case ADS_GET_SIGNAL_LIST_START:
+		processSignalListStart(data);
+		break;
+
 	default:
 		assert(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
@@ -78,4 +82,24 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 void TcpSignalClient::reset()
 {
 	m_state = State::Start;
+}
+
+void TcpSignalClient::requestSignalListStart()
+{
+	sendRequest(ADS_GET_SIGNAL_LIST_START);
+}
+
+void TcpSignalClient::processSignalListStart(const QByteArray& data)
+{
+	qDebug() << data.size();
+}
+
+void TcpSignalClient::requestSignalListNext()
+{
+
+}
+
+void TcpSignalClient::replySignalListNext()
+{
+
 }
