@@ -6043,24 +6043,6 @@ class Signal : public ::google::protobuf::Message {
   inline ::Proto::Address16* release_valueaddr();
   inline void set_allocated_valueaddr(::Proto::Address16* valueaddr);
 
-  // optional .Proto.Address16 m_iobufferAddr = 48;
-  inline bool has_m_iobufferaddr() const;
-  inline void clear_m_iobufferaddr();
-  static const int kMIobufferAddrFieldNumber = 48;
-  inline const ::Proto::Address16& m_iobufferaddr() const;
-  inline ::Proto::Address16* mutable_m_iobufferaddr();
-  inline ::Proto::Address16* release_m_iobufferaddr();
-  inline void set_allocated_m_iobufferaddr(::Proto::Address16* m_iobufferaddr);
-
-  // optional .Proto.Address16 m_ramAddr = 49;
-  inline bool has_m_ramaddr() const;
-  inline void clear_m_ramaddr();
-  static const int kMRamAddrFieldNumber = 49;
-  inline const ::Proto::Address16& m_ramaddr() const;
-  inline ::Proto::Address16* mutable_m_ramaddr();
-  inline ::Proto::Address16* release_m_ramaddr();
-  inline void set_allocated_m_ramaddr(::Proto::Address16* m_ramaddr);
-
   // optional .Proto.Address16 validityAddr = 50;
   inline bool has_validityaddr() const;
   inline void clear_validityaddr();
@@ -6069,6 +6051,24 @@ class Signal : public ::google::protobuf::Message {
   inline ::Proto::Address16* mutable_validityaddr();
   inline ::Proto::Address16* release_validityaddr();
   inline void set_allocated_validityaddr(::Proto::Address16* validityaddr);
+
+  // optional .Proto.Address16 iobufferAddr = 48;
+  inline bool has_iobufferaddr() const;
+  inline void clear_iobufferaddr();
+  static const int kIobufferAddrFieldNumber = 48;
+  inline const ::Proto::Address16& iobufferaddr() const;
+  inline ::Proto::Address16* mutable_iobufferaddr();
+  inline ::Proto::Address16* release_iobufferaddr();
+  inline void set_allocated_iobufferaddr(::Proto::Address16* iobufferaddr);
+
+  // optional .Proto.Address16 ramAddr = 49;
+  inline bool has_ramaddr() const;
+  inline void clear_ramaddr();
+  static const int kRamAddrFieldNumber = 49;
+  inline const ::Proto::Address16& ramaddr() const;
+  inline ::Proto::Address16* mutable_ramaddr();
+  inline ::Proto::Address16* release_ramaddr();
+  inline void set_allocated_ramaddr(::Proto::Address16* ramaddr);
 
   // @@protoc_insertion_point(class_scope:Proto.Signal)
  private:
@@ -6166,12 +6166,12 @@ class Signal : public ::google::protobuf::Message {
   inline void clear_has_enabletuning();
   inline void set_has_valueaddr();
   inline void clear_has_valueaddr();
-  inline void set_has_m_iobufferaddr();
-  inline void clear_has_m_iobufferaddr();
-  inline void set_has_m_ramaddr();
-  inline void clear_has_m_ramaddr();
   inline void set_has_validityaddr();
   inline void clear_has_validityaddr();
+  inline void set_has_iobufferaddr();
+  inline void clear_has_iobufferaddr();
+  inline void set_has_ramaddr();
+  inline void clear_has_ramaddr();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6222,9 +6222,9 @@ class Signal : public ::google::protobuf::Message {
   ::google::protobuf::int32 byteorder_;
   bool enabletuning_;
   ::Proto::Address16* valueaddr_;
-  ::Proto::Address16* m_iobufferaddr_;
-  ::Proto::Address16* m_ramaddr_;
   ::Proto::Address16* validityaddr_;
+  ::Proto::Address16* iobufferaddr_;
+  ::Proto::Address16* ramaddr_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(50 + 31) / 32];
@@ -13340,91 +13340,15 @@ inline void Signal::set_allocated_valueaddr(::Proto::Address16* valueaddr) {
   }
 }
 
-// optional .Proto.Address16 m_iobufferAddr = 48;
-inline bool Signal::has_m_iobufferaddr() const {
-  return (_has_bits_[1] & 0x00008000u) != 0;
-}
-inline void Signal::set_has_m_iobufferaddr() {
-  _has_bits_[1] |= 0x00008000u;
-}
-inline void Signal::clear_has_m_iobufferaddr() {
-  _has_bits_[1] &= ~0x00008000u;
-}
-inline void Signal::clear_m_iobufferaddr() {
-  if (m_iobufferaddr_ != NULL) m_iobufferaddr_->::Proto::Address16::Clear();
-  clear_has_m_iobufferaddr();
-}
-inline const ::Proto::Address16& Signal::m_iobufferaddr() const {
-  return m_iobufferaddr_ != NULL ? *m_iobufferaddr_ : *default_instance_->m_iobufferaddr_;
-}
-inline ::Proto::Address16* Signal::mutable_m_iobufferaddr() {
-  set_has_m_iobufferaddr();
-  if (m_iobufferaddr_ == NULL) m_iobufferaddr_ = new ::Proto::Address16;
-  return m_iobufferaddr_;
-}
-inline ::Proto::Address16* Signal::release_m_iobufferaddr() {
-  clear_has_m_iobufferaddr();
-  ::Proto::Address16* temp = m_iobufferaddr_;
-  m_iobufferaddr_ = NULL;
-  return temp;
-}
-inline void Signal::set_allocated_m_iobufferaddr(::Proto::Address16* m_iobufferaddr) {
-  delete m_iobufferaddr_;
-  m_iobufferaddr_ = m_iobufferaddr;
-  if (m_iobufferaddr) {
-    set_has_m_iobufferaddr();
-  } else {
-    clear_has_m_iobufferaddr();
-  }
-}
-
-// optional .Proto.Address16 m_ramAddr = 49;
-inline bool Signal::has_m_ramaddr() const {
-  return (_has_bits_[1] & 0x00010000u) != 0;
-}
-inline void Signal::set_has_m_ramaddr() {
-  _has_bits_[1] |= 0x00010000u;
-}
-inline void Signal::clear_has_m_ramaddr() {
-  _has_bits_[1] &= ~0x00010000u;
-}
-inline void Signal::clear_m_ramaddr() {
-  if (m_ramaddr_ != NULL) m_ramaddr_->::Proto::Address16::Clear();
-  clear_has_m_ramaddr();
-}
-inline const ::Proto::Address16& Signal::m_ramaddr() const {
-  return m_ramaddr_ != NULL ? *m_ramaddr_ : *default_instance_->m_ramaddr_;
-}
-inline ::Proto::Address16* Signal::mutable_m_ramaddr() {
-  set_has_m_ramaddr();
-  if (m_ramaddr_ == NULL) m_ramaddr_ = new ::Proto::Address16;
-  return m_ramaddr_;
-}
-inline ::Proto::Address16* Signal::release_m_ramaddr() {
-  clear_has_m_ramaddr();
-  ::Proto::Address16* temp = m_ramaddr_;
-  m_ramaddr_ = NULL;
-  return temp;
-}
-inline void Signal::set_allocated_m_ramaddr(::Proto::Address16* m_ramaddr) {
-  delete m_ramaddr_;
-  m_ramaddr_ = m_ramaddr;
-  if (m_ramaddr) {
-    set_has_m_ramaddr();
-  } else {
-    clear_has_m_ramaddr();
-  }
-}
-
 // optional .Proto.Address16 validityAddr = 50;
 inline bool Signal::has_validityaddr() const {
-  return (_has_bits_[1] & 0x00020000u) != 0;
+  return (_has_bits_[1] & 0x00008000u) != 0;
 }
 inline void Signal::set_has_validityaddr() {
-  _has_bits_[1] |= 0x00020000u;
+  _has_bits_[1] |= 0x00008000u;
 }
 inline void Signal::clear_has_validityaddr() {
-  _has_bits_[1] &= ~0x00020000u;
+  _has_bits_[1] &= ~0x00008000u;
 }
 inline void Signal::clear_validityaddr() {
   if (validityaddr_ != NULL) validityaddr_->::Proto::Address16::Clear();
@@ -13451,6 +13375,82 @@ inline void Signal::set_allocated_validityaddr(::Proto::Address16* validityaddr)
     set_has_validityaddr();
   } else {
     clear_has_validityaddr();
+  }
+}
+
+// optional .Proto.Address16 iobufferAddr = 48;
+inline bool Signal::has_iobufferaddr() const {
+  return (_has_bits_[1] & 0x00010000u) != 0;
+}
+inline void Signal::set_has_iobufferaddr() {
+  _has_bits_[1] |= 0x00010000u;
+}
+inline void Signal::clear_has_iobufferaddr() {
+  _has_bits_[1] &= ~0x00010000u;
+}
+inline void Signal::clear_iobufferaddr() {
+  if (iobufferaddr_ != NULL) iobufferaddr_->::Proto::Address16::Clear();
+  clear_has_iobufferaddr();
+}
+inline const ::Proto::Address16& Signal::iobufferaddr() const {
+  return iobufferaddr_ != NULL ? *iobufferaddr_ : *default_instance_->iobufferaddr_;
+}
+inline ::Proto::Address16* Signal::mutable_iobufferaddr() {
+  set_has_iobufferaddr();
+  if (iobufferaddr_ == NULL) iobufferaddr_ = new ::Proto::Address16;
+  return iobufferaddr_;
+}
+inline ::Proto::Address16* Signal::release_iobufferaddr() {
+  clear_has_iobufferaddr();
+  ::Proto::Address16* temp = iobufferaddr_;
+  iobufferaddr_ = NULL;
+  return temp;
+}
+inline void Signal::set_allocated_iobufferaddr(::Proto::Address16* iobufferaddr) {
+  delete iobufferaddr_;
+  iobufferaddr_ = iobufferaddr;
+  if (iobufferaddr) {
+    set_has_iobufferaddr();
+  } else {
+    clear_has_iobufferaddr();
+  }
+}
+
+// optional .Proto.Address16 ramAddr = 49;
+inline bool Signal::has_ramaddr() const {
+  return (_has_bits_[1] & 0x00020000u) != 0;
+}
+inline void Signal::set_has_ramaddr() {
+  _has_bits_[1] |= 0x00020000u;
+}
+inline void Signal::clear_has_ramaddr() {
+  _has_bits_[1] &= ~0x00020000u;
+}
+inline void Signal::clear_ramaddr() {
+  if (ramaddr_ != NULL) ramaddr_->::Proto::Address16::Clear();
+  clear_has_ramaddr();
+}
+inline const ::Proto::Address16& Signal::ramaddr() const {
+  return ramaddr_ != NULL ? *ramaddr_ : *default_instance_->ramaddr_;
+}
+inline ::Proto::Address16* Signal::mutable_ramaddr() {
+  set_has_ramaddr();
+  if (ramaddr_ == NULL) ramaddr_ = new ::Proto::Address16;
+  return ramaddr_;
+}
+inline ::Proto::Address16* Signal::release_ramaddr() {
+  clear_has_ramaddr();
+  ::Proto::Address16* temp = ramaddr_;
+  ramaddr_ = NULL;
+  return temp;
+}
+inline void Signal::set_allocated_ramaddr(::Proto::Address16* ramaddr) {
+  delete ramaddr_;
+  ramaddr_ = ramaddr;
+  if (ramaddr) {
+    set_has_ramaddr();
+  } else {
+    clear_has_ramaddr();
   }
 }
 

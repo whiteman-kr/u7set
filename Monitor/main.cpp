@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include "../VFrame30/VFrame30Library.h"
 #include "MonitorConfigController.h"
+#include "../include/SimpleThread.h"
+#include "TcpSignalClient.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +35,12 @@ int main(int argc, char *argv[])
 	MonitorConfigController configController(theSettings.configuratorAddress1(),
 											 theSettings.configuratorAddress2());
 
+	//
+	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(theSettings.configuratorAddress1(),
+																		 theSettings.configuratorAddress2()));
+
+	tcpClientThread->start();
+
 	// --
 	//
 	MonitorMainWindow w(&configController);
@@ -44,6 +52,9 @@ int main(int argc, char *argv[])
 
 	// Shutting down
 	//
+	tcpClientThread->quitAndWait(10000);
+	delete tcpClientThread;
+
 	VFrame30::VFrame30Library::Shutdown();
 	//Hardware::Shutdwon();
 	//google::protobuf::ShutdownProtobufLibrary();
