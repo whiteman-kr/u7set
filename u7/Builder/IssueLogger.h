@@ -40,6 +40,9 @@ namespace Builder
 		// CMN			Common issues							0000-0999
 		//
 		void errCMN0010(QString fileName);
+		void errCMN0011(QString directory);
+		void errCMN0012(QString fileName);
+		void errCMN0013(QString fileName);
 
 		// INT			Internal issues							1000-1999
 		//

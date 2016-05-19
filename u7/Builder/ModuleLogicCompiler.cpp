@@ -4070,8 +4070,8 @@ namespace Builder
 		{
 			delete appFb;
 
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("FB '%1' parameters calculation error")).arg(appItem.caption()));
+			/*LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("FB '%1' parameters calculation error")).arg(appItem.caption()));*/
 			return nullptr;
 		}
 
@@ -5458,6 +5458,7 @@ namespace Builder
 		QVariant qv = afbParam.value();
 
 		m_opName = afbParam.opName();
+		m_caption = afbParam.caption();
 		m_operandIndex = afbParam.operandIndex();
 		m_instantiator = afbParam.instantiator();
 
