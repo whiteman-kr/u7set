@@ -94,15 +94,41 @@ namespace Builder
 			result = calculate_SCALE_paramValues();
 			break;
 
-/*		case Afb::AfbType::SCALE_P:			// opcode 15
-			result = calculate_SCALE_paramValues();
-			break; */
+		case Afb::AfbType::SCALE_P:			// opcode 15
+			result = calculate_SCALE_P_paramValues();
+			break;
 
 		case Afb::AfbType::FUNC:			// opcode 16
 			result = calculate_FUNC_paramValues();
 			break;
 
+		case Afb::AfbType::INT:				// opcode 17
+			result = calculate_INT_paramValues();
+			break;
 
+		case Afb::AfbType::DPCOMP:			// opcode 20
+			result = calculate_DPCOMP_paramValues();
+			break;
+
+		case Afb::AfbType::MUX:				// opcode 21
+			result = calculate_MUX_paramValues();
+			break;
+
+		case Afb::AfbType::LATCH:			// opcode 22
+			result = calculate_LATCH_paramValues();
+			break;
+
+		case Afb::AfbType::LIM:				// opcode 23
+			result = calculate_LIM_paramValues();
+			break;
+
+		case Afb::AfbType::DEAD_ZONE:		// opcode 24
+			result = calculate_DEAD_ZONE_paramValues();
+			break;
+
+		case Afb::AfbType::POL:				// opcode 27
+			result = calculate_POL_paramValues();
+			break;
 
 		default:
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
@@ -278,7 +304,15 @@ namespace Builder
 			CHECK_SIGNED_INT32(hysteresisParam)
 
 			int sSetting = sSettingParam.signedIntValue();
-			int hysteresis = abs(hysteresisParam.signedIntValue());
+			int hysteresis = hysteresisParam.signedIntValue();
+
+			if (hysteresis < 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
+								   arg(caption()).arg(hysteresisParam.caption()));
+				return false;
+			}
 
 			switch(iConf)
 			{
@@ -319,7 +353,15 @@ namespace Builder
 			CHECK_FLOAT32(hysteresisParam)
 
 			double sSetting = sSettingParam.floatValue();
-			double hysteresis = abs(hysteresisParam.floatValue());
+			double hysteresis = hysteresisParam.floatValue();
+
+			if (hysteresis < 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
+								   arg(caption()).arg(hysteresisParam.caption()));
+				return false;
+			}
 
 			switch(iConf)
 			{
@@ -592,6 +634,284 @@ namespace Builder
 	}
 
 
+	bool AppFb::calculate_SCALE_P_paramValues()
+	{
+		const int XY_POINT_COUNT = 6;
+		const int RANGE_COUNT = XY_POINT_COUNT - 1;				// 5
+		const int CHECK_POINT_COUNT = XY_POINT_COUNT - 2;		// 4
+
+		// fill requiredParams array
+		//
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		QString x_data_str = "i_x%1_data";
+
+		for(int i = 0; i < CHECK_POINT_COUNT; i++)
+		{
+			requiredParams.append(x_data_str.arg(i + 1));
+		}
+
+		QString scal_k1_str = "i_scal_k1_x%1_coef";
+		QString scal_k2_str = "i_scal_k2_x%1_coef";
+
+		for(int i = 0; i < RANGE_COUNT; i++)
+		{
+			requiredParams.append(scal_k1_str.arg(i + 1));
+			requiredParams.append(scal_k2_str.arg(i + 1));
+		}
+
+		QString x_str = "x%1";		// x0 ... x5
+		QString y_str = "y%1";		// y0 ... y5
+
+		for(int i = 0; i < XY_POINT_COUNT; i++)
+		{
+			requiredParams.append(x_str.arg(i));
+			requiredParams.append(y_str.arg(i));
+		}
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams)
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		int iConf = i_conf.unsignedIntValue();
+
+		m_runTime = 0;
+
+		if (iConf == 1)
+		{
+			// signed int scale
+			//
+			m_runTime = 2;
+
+			// get parameters that defined by user
+			//
+			AppFbParamValue* x[XY_POINT_COUNT];
+			AppFbParamValue* y[XY_POINT_COUNT];
+
+			for(int i = 0; i < XY_POINT_COUNT; i++)
+			{
+				x[i] = &m_paramValuesArray[x_str.arg(i)];
+
+				CHECK_SIGNED_INT32(*x[i]);
+
+				y[i] = &m_paramValuesArray[y_str.arg(i)];
+
+				CHECK_SIGNED_INT32(*y[i]);
+			}
+
+			// sort XY points by ascending of X
+			//
+			bool autoSortPerformed = false;
+
+			for(int i = 0; i < XY_POINT_COUNT - 1; i++)
+			{
+				for(int k = i + 1; k < XY_POINT_COUNT; k++)
+				{
+					int Xi = x[i]->signedIntValue();
+					int Xk = x[k]->signedIntValue();
+
+					if (Xi > Xk)
+					{
+						int Yi = y[i]->signedIntValue();
+						int Yk = y[k]->signedIntValue();
+
+						// swap XiYi <=> XkYk
+						//
+						x[i]->setSignedIntValue(Xk);
+						x[k]->setSignedIntValue(Xi);
+
+						y[i]->setSignedIntValue(Yk);
+						y[k]->setSignedIntValue(Yi);
+
+						autoSortPerformed = true;
+					}
+				}
+			}
+
+			if (autoSortPerformed == true)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Automatic sorting of XY points of FB '%1' has been performed")).
+									 arg(caption()));
+			}
+
+			// get FB's parameters
+			//
+			AppFbParamValue* x_data[CHECK_POINT_COUNT];
+
+			for(int i = 0; i < CHECK_POINT_COUNT; i++)
+			{
+				x_data[i] = &m_paramValuesArray[x_data_str.arg(i + 1)];
+
+				CHECK_SIGNED_INT32(*x_data[i]);
+			}
+
+			AppFbParamValue* scal_k1[RANGE_COUNT];
+			AppFbParamValue* scal_k2[RANGE_COUNT];
+
+			for(int i = 0; i < RANGE_COUNT; i++)
+			{
+				scal_k1[i] = &m_paramValuesArray[scal_k1_str.arg(i + 1)];
+
+				CHECK_SIGNED_INT32(*scal_k1[i]);
+
+				scal_k2[i] = &m_paramValuesArray[scal_k2_str.arg(i + 1)];
+
+				CHECK_SIGNED_INT32(*scal_k2[i]);
+			}
+
+			// calculate FB's parameters based on user-defined paramters
+			//
+			for(int i = 0; i < CHECK_POINT_COUNT; i++ )
+			{
+				x_data[i]->setSignedIntValue(x[i + 1]->signedIntValue());
+			}
+
+			for(int i = 0; i < RANGE_COUNT; i++)
+			{
+				int n = i + 1;
+
+				int Xi = x[i]->signedIntValue();
+				int Xn = x[n]->signedIntValue();
+
+				int Yi = y[i]->signedIntValue();
+				int Yn = y[n]->signedIntValue();
+
+				int k1 = ((Yn - Yi) * 32768) / (Xn - Xi);
+				int k2 = Yi - (Xi * k1) / 32768;
+
+				scal_k1[i]->setSignedIntValue(k1);
+				scal_k2[i]->setSignedIntValue(k2);
+			}
+
+			return true;
+		}
+
+		// --------------------------------------------------------------------------
+
+		if (iConf == 2)
+		{
+			// float scale
+			//
+			m_runTime = 18;
+
+			// get parameters that defined by user
+			//
+			AppFbParamValue* x[XY_POINT_COUNT];
+			AppFbParamValue* y[XY_POINT_COUNT];
+
+			for(int i = 0; i < XY_POINT_COUNT; i++)
+			{
+				x[i] = &m_paramValuesArray[x_str.arg(i)];
+
+				CHECK_FLOAT32(*x[i]);
+
+				y[i] = &m_paramValuesArray[y_str.arg(i)];
+
+				CHECK_FLOAT32(*y[i]);
+			}
+
+			// sort XY points by ascending of X
+			//
+			bool autoSortPerformed = false;
+
+			for(int i = 0; i < XY_POINT_COUNT - 1; i++)
+			{
+				for(int k = i + 1; k < XY_POINT_COUNT; k++)
+				{
+					float Xi = x[i]->floatValue();
+					float Xk = x[k]->floatValue();
+
+					if (Xi > Xk)
+					{
+						float Yi = y[i]->floatValue();
+						float Yk = y[k]->floatValue();
+
+						// swap XiYi <=> XkYk
+						//
+						x[i]->setFloatValue(Xk);
+						x[k]->setFloatValue(Xi);
+
+						y[i]->setFloatValue(Yk);
+						y[k]->setFloatValue(Yi);
+
+						autoSortPerformed = true;
+					}
+				}
+			}
+
+			if (autoSortPerformed == true)
+			{
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Automatic sorting of XY points of FB '%1' has been performed")).
+									 arg(caption()));
+			}
+
+			// get FB's parameters
+			//
+			AppFbParamValue* x_data[CHECK_POINT_COUNT];
+
+			for(int i = 0; i < CHECK_POINT_COUNT; i++)
+			{
+				x_data[i] = &m_paramValuesArray[x_data_str.arg(i + 1)];
+
+				CHECK_FLOAT32(*x_data[i]);
+			}
+
+			AppFbParamValue* scal_k1[RANGE_COUNT];
+			AppFbParamValue* scal_k2[RANGE_COUNT];
+
+			for(int i = 0; i < RANGE_COUNT; i++)
+			{
+				scal_k1[i] = &m_paramValuesArray[scal_k1_str.arg(i + 1)];
+
+				CHECK_FLOAT32(*scal_k1[i]);
+
+				scal_k2[i] = &m_paramValuesArray[scal_k2_str.arg(i + 1)];
+
+				CHECK_FLOAT32(*scal_k2[i]);
+			}
+
+			// calculate FB's parameters based on user-defined paramters
+			//
+			for(int i = 0; i < CHECK_POINT_COUNT; i++ )
+			{
+				x_data[i]->setFloatValue(x[i + 1]->floatValue());
+			}
+
+			for(int i = 0; i < RANGE_COUNT; i++)
+			{
+				int n = i + 1;
+
+				float Xi = x[i]->floatValue();
+				float Xn = x[n]->floatValue();
+
+				float Yi = y[i]->floatValue();
+				float Yn = y[n]->floatValue();
+
+				float k1 = (Yn - Yi) / (Xn - Xi);
+				float k2 = Yi - (Xi * k1);
+
+				scal_k1[i]->setFloatValue(k1);
+				scal_k2[i]->setFloatValue(k2);
+			}
+
+			return true;
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+	}
+
+
 	bool AppFb::calculate_DAMPER_paramValues()
 	{
 		QStringList requiredParams;
@@ -727,4 +1047,294 @@ namespace Builder
 
 		return true;
 	}
+
+
+	bool AppFb::calculate_INT_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_ti");
+		requiredParams.append("i_max");
+		requiredParams.append("i_min");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
+		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
+		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
+
+		CHECK_FLOAT32(i_ti);
+		CHECK_FLOAT32(i_max);
+		CHECK_FLOAT32(i_min);
+
+		float i_ti_value = i_ti.floatValue();
+
+		if (i_ti_value < m_compiler->lmCycleDuration() / 1000)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Value of parameter '%1.%2' must be greate or equal of %3")).
+					  arg(caption()).arg(i_ti.caption()).arg(m_compiler->lmCycleDuration()/ 1000));
+
+			return false;
+		}
+
+		float i_max_value = i_max.floatValue();
+		float i_min_value = i_min.floatValue();
+
+		if (i_max_value <= i_min_value)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%3.%4'")).
+					  arg(caption()).arg(i_max.caption()).
+					  arg(caption()).arg(i_min.caption()));
+
+			return false;
+		}
+
+		i_ti.setFloatValue((i_ti.floatValue() * 1000) / m_compiler->lmCycleDuration());
+
+		m_runTime = 24;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_DPCOMP_paramValues()
+	{
+		m_runTime = 2;
+
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("hysteresis");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams)
+
+		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
+
+		CHECK_UNSIGNED_INT(iConfParam)
+
+		int iConf = iConfParam.unsignedIntValue();
+
+		const int	CMP_32SI_EQU = 1,
+					CMP_32SI_GREAT = 2,
+					CMP_32SI_LESS = 3,
+					CMP_32SI_NOT_EQU = 4,
+					CMP_32FP_EQU = 5,
+					CMP_32FP_GREAT = 6,
+					CMP_32FP_LESS = 7,
+					CMP_32FP_NOT_EQU = 8;
+
+		if (iConf == CMP_32SI_EQU ||
+			iConf == CMP_32SI_GREAT ||
+			iConf == CMP_32SI_LESS ||
+			iConf == CMP_32SI_NOT_EQU)
+		{
+			// comparison of signed int values
+			//
+			CHECK_SIGNED_INT32(hysteresisParam)
+
+			int hysteresis = hysteresisParam.signedIntValue();
+
+			if (hysteresis < 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
+								   arg(caption()).arg(hysteresisParam.caption()));
+				return false;
+			}
+
+			return true;
+		}
+
+		if (iConf == CMP_32FP_EQU ||
+			iConf == CMP_32FP_GREAT ||
+			iConf == CMP_32FP_LESS ||
+			iConf == CMP_32FP_NOT_EQU)
+		{
+			// comparison of floating point values
+			//
+			CHECK_FLOAT32(hysteresisParam)
+
+			float hysteresis = hysteresisParam.floatValue();
+
+			if (hysteresis < 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
+								   arg(caption()).arg(hysteresisParam.caption()));
+				return false;
+			}
+
+			return true;
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2.%3' is incorrect")).
+						   arg(iConf).arg(caption()).arg(iConfParam.caption()));
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MUX_paramValues()
+	{
+		m_runTime = 2;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_LATCH_paramValues()
+	{
+		m_runTime = 2;
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_LIM_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_lim_max");
+		requiredParams.append("i_lim_min");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+		AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		m_runTime = 2;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:								// signed int limiter
+			CHECK_SIGNED_INT32(i_lim_max);
+			CHECK_SIGNED_INT32(i_lim_min);
+
+			if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
+			{
+				// swap values
+				//
+				qint32 tmp = i_lim_min.signedIntValue();
+
+				i_lim_min.setSignedIntValue(i_lim_max.signedIntValue());
+
+				i_lim_max.setSignedIntValue(tmp);
+
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+			}
+			return true;
+
+		case 2:								// float limiter
+			CHECK_FLOAT32(i_lim_max);
+			CHECK_FLOAT32(i_lim_min);
+
+			if (i_lim_min.floatValue() > i_lim_max.floatValue())
+			{
+				// swap values
+				//
+				float tmp = i_lim_min.floatValue();
+
+				i_lim_min.setFloatValue(i_lim_max.floatValue());
+
+				i_lim_max.setFloatValue(tmp);
+
+				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+			}
+
+			return true;
+
+		default:
+			assert(false);
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+	}
+
+
+	bool AppFb::calculate_DEAD_ZONE_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_data_x");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_data_x = m_paramValuesArray["i_data_x"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		m_runTime = 3;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:								// signed int dead zone
+		case 2:
+			CHECK_SIGNED_INT32(i_data_x);
+
+			if (i_data_x.signedIntValue() >= 0)
+			{
+				return true;
+			}
+
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
+							   arg(i_data_x.opName()).
+							   arg(caption()));
+			return false;
+
+		case 3:								// float dead zone
+		case 4:
+			CHECK_FLOAT32(i_data_x);
+
+			if (i_data_x.floatValue() >= 0)
+			{
+				return true;
+			}
+
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
+							   arg(i_data_x.opName()).
+							   arg(caption()));
+			return false;
+
+		default:
+			assert(false);
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
+						   arg(i_conf.unsignedIntValue()).
+						   arg(i_conf.opName()).
+						   arg(caption()));
+		return false;
+	}
+
+
+	bool AppFb::calculate_POL_paramValues()
+	{
+		m_runTime = 22;
+
+		LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				  QString(tr("Unknown runtime of FB POLY")));
+
+		return true;
+	}
+
 }

@@ -13,42 +13,35 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_1_oprd" Caption="in 1" Type="Analog" DataFormat="SignedInt" OpIndex="10" Size="32"/>
-            <AfbElementSignal OpName="i_2_oprd" Caption="in 2" Type="Analog" DataFormat="SignedInt" OpIndex="12" Size="32"/>
-            <AfbElementSignal OpName="i_3_oprd" Caption="in 3" Type="Analog" DataFormat="SignedInt" OpIndex="14" Size="32"/>
-            <AfbElementSignal OpName="i_4_oprd" Caption="in 4" Type="Analog" DataFormat="SignedInt" OpIndex="16" Size="32"/>
-            <AfbElementSignal OpName="i_5_oprd" Caption="in 5" Type="Analog" DataFormat="SignedInt" OpIndex="18" Size="32"/>
-            <AfbElementSignal OpName="i_6_oprd" Caption="in 6" Type="Analog" DataFormat="SignedInt" OpIndex="20" Size="32"/>
-            <AfbElementSignal OpName="i_7_oprd" Caption="in 7" Type="Analog" DataFormat="SignedInt" OpIndex="22" Size="32"/>
-            <AfbElementSignal OpName="i_8_oprd" Caption="in 8" Type="Analog" DataFormat="SignedInt" OpIndex="24" Size="32"/>
+            <AfbElementSignal OpName="i_1_oprd" Caption="in_1" Type="Analog" DataFormat="SignedInt" OpIndex="10" Size="32"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption="in_2" Type="Analog" DataFormat="SignedInt" OpIndex="12" Size="32"/>
+            <AfbElementSignal OpName="i_3_oprd" Caption="in_3" Type="Analog" DataFormat="SignedInt" OpIndex="14" Size="32"/>
+            <AfbElementSignal OpName="i_4_oprd" Caption="in_4" Type="Analog" DataFormat="SignedInt" OpIndex="16" Size="32"/>
+            <AfbElementSignal OpName="i_5_oprd" Caption="in_5" Type="Analog" DataFormat="SignedInt" OpIndex="18" Size="32"/>
+            <AfbElementSignal OpName="i_6_oprd" Caption="in_6" Type="Analog" DataFormat="SignedInt" OpIndex="20" Size="32"/>
+            <AfbElementSignal OpName="i_7_oprd" Caption="in_7" Type="Analog" DataFormat="SignedInt" OpIndex="22" Size="32"/>
+            <AfbElementSignal OpName="i_8_oprd" Caption="in_8" Type="Analog" DataFormat="SignedInt" OpIndex="24" Size="32"/>
 
-            <AfbElementSignal OpName="i_1_en" Caption="in 1 en" Type="Discrete" OpIndex="2" Size="1"/>
-            <AfbElementSignal OpName="i_2_en" Caption="in 2 en" Type="Discrete" OpIndex="3" Size="1"/>
-            <AfbElementSignal OpName="i_3_en" Caption="in 3 en" Type="Discrete" OpIndex="4" Size="1"/>
-            <AfbElementSignal OpName="i_4_en" Caption="in 4 en" Type="Discrete" OpIndex="5" Size="1"/>
-            <AfbElementSignal OpName="i_5_en" Caption="in 5 en" Type="Discrete" OpIndex="6" Size="1"/>
-            <AfbElementSignal OpName="i_6_en" Caption="in 6 en" Type="Discrete" OpIndex="7" Size="1"/>
-            <AfbElementSignal OpName="i_7_en" Caption="in 7 en" Type="Discrete" OpIndex="8" Size="1"/>
-            <AfbElementSignal OpName="i_8_en" Caption="in 8 en" Type="Discrete" OpIndex="9" Size="1"/>            
+            <AfbElementSignal OpName="i_1_en" Caption="in_1_en" Type="Discrete" OpIndex="2" Size="1"/>
+            <AfbElementSignal OpName="i_2_en" Caption="in_2_en" Type="Discrete" OpIndex="3" Size="1"/>
+            <AfbElementSignal OpName="i_3_en" Caption="in_3_en" Type="Discrete" OpIndex="4" Size="1"/>
+            <AfbElementSignal OpName="i_4_en" Caption="in_4_en" Type="Discrete" OpIndex="5" Size="1"/>
+            <AfbElementSignal OpName="i_5_en" Caption="in_5_en" Type="Discrete" OpIndex="6" Size="1"/>
+            <AfbElementSignal OpName="i_6_en" Caption="in_6_en" Type="Discrete" OpIndex="7" Size="1"/>
+            <AfbElementSignal OpName="i_7_en" Caption="in_7_en" Type="Discrete" OpIndex="8" Size="1"/>
+            <AfbElementSignal OpName="i_8_en" Caption="in_8_en" Type="Discrete" OpIndex="9" Size="1"/>            
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_med" Caption="med" Type="Analog" DataFormat="SignedInt" OpIndex="28" Size="32"/>
             <AfbElementSignal OpName="o_max" Caption="max" Type="Analog" DataFormat="SignedInt" OpIndex="30" Size="32"/>
             <AfbElementSignal OpName="o_min" Caption="min" Type="Analog" DataFormat="SignedInt" OpIndex="32" Size="32"/>
 
-            <AfbElementSignal OpName="o_med_in" Caption="med in" Type="Analog" DataFormat="UnsignedInt" OpIndex="34" Size="5"/>
-            <AfbElementSignal OpName="o_max_in" Caption="max in" Type="Analog" DataFormat="UnsignedInt" OpIndex="35" Size="5"/>
-            <AfbElementSignal OpName="o_min_in" Caption="min in" Type="Analog" DataFormat="UnsignedInt" OpIndex="36" Size="5"/>
-
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="37" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="38" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="39" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="40" Size="1"/>
-            <AfbElementSignal OpName="o_div_by_zero" Caption="div by zero" Type="Discrete" OpIndex="41" Size="1"/>
-            <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="42" Size="1"/>           
+            <AfbElementSignal OpName="o_med_in" Caption="med_in" Type="Analog" DataFormat="UnsignedInt" OpIndex="34" Size="5"/>
+            <AfbElementSignal OpName="o_max_in" Caption="max_in" Type="Analog" DataFormat="UnsignedInt" OpIndex="35" Size="5"/>
+            <AfbElementSignal OpName="o_min_in" Caption="min_in" Type="Analog" DataFormat="UnsignedInt" OpIndex="36" Size="5"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_conf" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>3</Value>
                 <Default>3</Default>
                 <LowLimit>3</LowLimit>
@@ -62,13 +55,13 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>            
-            <AfbElementParam OpName="i_si_fp" Caption="Config" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -80,7 +73,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -92,7 +85,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutMedIn" Caption="OutMedIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -104,7 +97,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutMaxIn" Caption="OutMaxIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -116,7 +109,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutDivByZero" Caption="OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutMinIn" Caption="OutMinIn" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>0</Value>
                 <Default>0</Default>
                 <Script>
@@ -127,19 +120,7 @@ function(videoItemFblElement, afbElement)
 }
 		</Changed>
                 </Script>
-            </AfbElementParam>     
-            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>     
+            </AfbElementParam>            
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -232,19 +213,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeOutputSignals();
 	
-	createOutputUnconditional(videoItemFblElement, afbElement, "med");
-	createOutputUnconditional(videoItemFblElement, afbElement, "max");
-	createOutputUnconditional(videoItemFblElement, afbElement, "min");
-	createOutputUnconditional(videoItemFblElement, afbElement, "med in");
-	createOutputUnconditional(videoItemFblElement, afbElement, "max in");
-	createOutputUnconditional(videoItemFblElement, afbElement, "min in");
+	createOutputUnconditional(videoItemFblElement, afbElement, "med");	
 	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div by zero");
-        createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
+	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
+	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");
 
 	videoItemFblElement.adjustHeight();
 
@@ -258,7 +233,8 @@ function(videoItemFblElement, afbElement)
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
 }
-	</AfterCreation>
+
+	 </AfterCreation>
         </CommonScript>
     </AfbElement>
 </ApplicationFunctionalBlocks>

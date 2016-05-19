@@ -738,6 +738,10 @@ namespace Tcp
 
 	Client::~Client()
 	{
+		if (m_protobufBuffer != nullptr)
+		{
+			delete [] m_protobufBuffer;
+		}
 	}
 
 
@@ -972,30 +976,30 @@ namespace Tcp
 	}
 
 
-	void Client::sendRequest(quint32 requestID)
+	bool Client::sendRequest(quint32 requestID)
 	{
-		sendRequest(requestID, nullptr, 0);
+		return sendRequest(requestID, nullptr, 0);
 	}
 
 
-	void Client::sendRequest(quint32 requestID, const QByteArray& requestData)
+	bool Client::sendRequest(quint32 requestID, const QByteArray& requestData)
 	{
-		sendRequest(requestID, requestData.constData(), requestData.size());
+		return sendRequest(requestID, requestData.constData(), requestData.size());
 	}
 
 
-	void Client::sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+	bool Client::sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
 		if (!isClearToSendRequest())
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		if (m_tcpSocket == nullptr)
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		m_sentRequestHeader.type = Header::Type::Request;
@@ -1011,13 +1015,13 @@ namespace Tcp
 		if (written == -1)
 		{
 			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
-			return;
+			return false;
 		}
 
 		if (written < static_cast<qint64>(sizeof(m_sentRequestHeader)))
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		if (requestDataSize > 0)
@@ -1025,7 +1029,7 @@ namespace Tcp
 			if (requestData == nullptr)
 			{
 				assert(false);
-				return;
+				return false;
 			}
 
 			written = socketWrite(requestData, requestDataSize);
@@ -1033,13 +1037,13 @@ namespace Tcp
 			if (written == -1)
 			{
 				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
-				return;
+				return false;
 			}
 
 			if (written < requestDataSize)
 			{
 				assert(false);
-				return;
+				return false;
 			}
 		}
 
@@ -1047,6 +1051,30 @@ namespace Tcp
 
 		m_clientState = ClientState::WaitingForReply;
 		m_readState = ReadState::WaitingForHeader;
+
+		return true;
+	}
+
+
+	bool Client::sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage)
+	{
+		int messageSize = protobufMessage.ByteSize();
+
+		if (messageSize > TCP_MAX_DATA_SIZE)
+		{
+			return false;
+		}
+
+		if (m_protobufBuffer == nullptr)
+		{
+			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
+
+			assert(m_protobufBuffer != nullptr);
+		}
+
+		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
+
+		return sendRequest(requestID, m_protobufBuffer, messageSize);
 	}
 
 }

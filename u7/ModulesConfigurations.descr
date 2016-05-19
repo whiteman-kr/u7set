@@ -51,7 +51,9 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 5;		// LM-1 properties SubsysID and Channel have been renamed to SubsystemID and SubsystemChannel
 //var configScriptVersion = 6;		// SubsystemChannel renamed to LMNumber
 //var configScriptVersion = 7;		// MAC address calculation changed
-var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
+//var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
+//var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
+var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -511,6 +513,17 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	var tuningIP = ethernetController.jsPropertyIP("TuningIP");
 	var tuningPort = ethernetController.propertyValue("TuningPort");
 	
+	if (tuningIP == 0)
+	{
+		log.errCFG3011("TuningIP", tuningIP, ethernetController.propertyValue("EquipmentID"));
+		return false;
+	}
+	if (tuningPort == 0)
+	{
+		log.errCFG3012("TuningPort", tuningPort, ethernetController.propertyValue("EquipmentID"));
+		return false;
+	}
+	
 	// Service
 		
 	var tuningServiceIP = 0;
@@ -588,6 +601,17 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		
 			ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
 			port[s] = ethernetController.propertyValue(servicesName[s] + "DataPort");
+			
+			if (ip[s] == 0)
+			{
+				log.errCFG3011(servicesName[s] + "DataIP", ip[s], ethernetController.propertyValue("EquipmentID"));
+				return false;
+			}
+			if (port[s] == 0)
+			{
+				log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.propertyValue("EquipmentID"));
+				return false;
+	}
 			
 			// Service
 			var serviceID = ethernetController.propertyValue(servicesName[s] + "DataServiceID");
@@ -706,7 +730,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultTf = valToADC(5000 * 0.000001 / tsConstant, 0, 65535, 0, 0xffff);
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
-    var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
+    var defaultSpreadTolerance = Math.round((0xffff - 0) * 0.005);		// 2%
     
     var inController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLIN");
     if (inController == null)
@@ -719,7 +743,8 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     //
 
 	var channelAPlace = 0;
-	var channelAMaxDifference = 0;
+	var channelASpreadTolerance = 0;
+	var channelAStrID = "";
 
     for (var i = 0; i < AIMSignalMaxCount; i++)
     {
@@ -754,7 +779,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
+			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + defaultSpreadTolerance + "\r\n");
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -762,7 +787,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             ptr += 2;
             setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            setData16(confFirmware, log, frame, ptr, defaultSpreadTolerance);      // InA SpreadTolerance
             ptr += 2;
         }
         else
@@ -777,41 +802,98 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			}
 			
 			tf = tf / tsConstant;
+			
+			var compareEqual = 0;
+			var compareLess = 1;
+			var compareMore = 2;
             
             var filternigTime = valToADC(tf, 0, 65535, 0, 0xffff);
-            var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+            
+			if (signal.highADC() < signal.lowADC())
+			{
+				// error
+				log.errCFG3013("HighADC", signal.highADC(), compareLess, "LowADC", signal.lowADC(), 0, signalStrId);
+				return false;
+			}
+			if (signal.highADC() == signal.lowADC())
+			{
+				// error
+				log.errCFG3013("HighADC", signal.highADC(), compareEqual, "LowADC", signal.lowADC(), 0, signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() == signal.lowEngeneeringUnits())
+			{
+				// error
+				log.errCFG3013("HighEngeneeringUnits", signal.highEngeneeringUnits(), compareEqual, "LowEngeneeringUnits", signal.lowEngeneeringUnits(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highValidRange() == signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareEqual, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() > signal.lowEngeneeringUnits() && signal.highValidRange() < signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareLess, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			if (signal.highEngeneeringUnits() < signal.lowEngeneeringUnits() && signal.highValidRange() > signal.lowValidRange())
+			{
+				// error
+				log.errCFG3013("HighValidRange", signal.highValidRange(), compareMore, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+				return false;
+			}
+			
+			var highValidRangeADC = valToADC(signal.highValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
+			var lowValidRangeADC = valToADC(signal.lowValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
+			
+			if (lowValidRangeADC < 0)
+			{
+				log.errCFG3010("calculated_lowValidRangeADC", lowValidRangeADC, 0, 65535, 0, signalStrId);
+				return false;
+			}
+			if (highValidRangeADC > 65535)
+			{
+				log.errCFG3010("calculated_highValidRangeADC", highValidRangeADC, 0, 65535, 0, signalStrId);
+				return false;
+			}
+
+			var spreadTolerance = Math.round((signal.spreadTolerance() * 0.01) * (highValidRangeADC - lowValidRangeADC));
 
 			if ((i & 1) == 0)
 			{
 				// this is A input
 				channelAPlace = i;
-				channelAMaxDifference = maxDifference;
+				channelASpreadTolerance = spreadTolerance;
+				channelAStrID = signal.propertyValue("EquipmentID");
 			}
 			else
 			{
 				if (i == channelAPlace + 1)
 				{
 					// this is B input, next to saved A
-					if (maxDifference != channelAMaxDifference)
+					if (spreadTolerance != channelASpreadTolerance)
 					{
-						log.errCFG3009(channelAPlace, channelAMaxDifference, i, maxDifference, signal.propertyValue("EquipmentID"));
+						log.errCFG3009(channelAStrID, channelASpreadTolerance, signal.propertyValue("EquipmentID"), spreadTolerance, module.propertyValue("EquipmentID"));
 						return false;
 					}
 				}
 			}
 
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
-			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + signal.lowADC() +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
+			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + lowValidRangeADC +
+			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + highValidRangeADC +
+			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + spreadTolerance + "\r\n");
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+            setData16(confFirmware, log, frame, ptr, highValidRangeADC);         // InA High bound
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+            setData16(confFirmware, log, frame, ptr, lowValidRangeADC);          // InA Low Bound
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, maxDifference);      // InA MaxDiff
+            setData16(confFirmware, log, frame, ptr, spreadTolerance);      // InA SpreadTolerance
             ptr += 2;
         }
     }
@@ -1107,14 +1189,14 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 			}
 			else
             {
-				var outputRangeMode = signal.jsOutputRangeMode();
-                if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
+				var outputMode = signal.jsOutputMode();
+                if (outputMode < 0 || outputMode > Mode_05mA)
                 {
-					log.errCFG3002("Signal/OutputRangeMode", outputRangeMode, 0, Mode_05mA, signal.propertyValue("EquipmentID"));
+					log.errCFG3002("Signal/OutputMode", outputMode, 0, Mode_05mA, signal.propertyValue("EquipmentID"));
 					return false;
                 }
 
-                mode = outputRangeMode;
+                mode = outputMode;
             }
 
             

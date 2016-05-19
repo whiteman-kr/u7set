@@ -89,14 +89,14 @@ public:
 	};
 	Q_ENUM(InstanceAction)
 
-	enum OutputRangeMode
+	enum OutputMode
 	{
 		Plus0_Plus5_V = 0,
 		Plus4_Plus20_mA = 1,
 		Minus10_Plus10_V = 2,
 		Plus0_Plus5_mA = 3,
 	};
-	Q_ENUM(OutputRangeMode)
+	Q_ENUM(OutputMode)
 
 	enum class SignalInOutType
 	{

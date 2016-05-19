@@ -249,7 +249,126 @@ void DbControllerFileTests::addFilesTest()
 	db.close();
 }
 
+void DbControllerFileTests::deleteFileTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
 
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	QString fileOne = "firstFile";
+	QString fileTwo = "secondFile";
+
+	QSqlQuery query;
+	QSqlQuery instanceQuery;
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwo));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	std::vector<DbFileInfo> files;
+	DbFile buffFile;
+
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileOne));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	buffFile.setFileName(fileOne);
+	buffFile.setSize(instanceQuery.value("Size").toInt());
+	buffFile.setUserId(1);
+	buffFile.setParentId(1);
+	buffFile.setDetails(instanceQuery.value("details").toString());
+	buffFile.setFileId(query.value("fileId").toInt());
+
+	files.push_back(buffFile);
+
+	buffFile.clearData();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwo));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	buffFile.setFileName(fileTwo);
+	buffFile.setSize(instanceQuery.value("Size").toInt());
+	buffFile.setUserId(1);
+	buffFile.setParentId(1);
+	buffFile.setDetails(instanceQuery.value("details").toString());
+	buffFile.setFileId(query.value("fileId").toInt());
+
+	files.push_back(buffFile);
+
+	buffFile.clearData();
+
+	ok = m_dbController->deleteFiles(&files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	// Test another overloaded function
+	//
+
+	std::vector<std::shared_ptr<DbFileInfo>> filesAnotherFunction;
+
+	std::shared_ptr<DbFileInfo> file1(new DbFile);
+	std::shared_ptr<DbFileInfo> file2(new DbFile);
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwo));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileOne));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file1.get()->setFileName(fileOne);
+	file1.get()->setSize(instanceQuery.value("Size").toInt());
+	file1.get()->setUserId(1);
+	file1.get()->setParentId(1);
+	file1.get()->setDetails(instanceQuery.value("details").toString());
+	file1.get()->setFileId(query.value("fileId").toInt());
+
+	filesAnotherFunction.push_back(file1);
+
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwo));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file2.get()->setFileName(fileTwo);
+	file2.get()->setSize(instanceQuery.value("Size").toInt());
+	file2.get()->setUserId(1);
+	file2.get()->setParentId(1);
+	file2.get()->setDetails(instanceQuery.value("details").toString());
+	file2.get()->setFileId(query.value("fileId").toInt());
+
+	filesAnotherFunction.push_back(file2);
+
+	ok = m_dbController->deleteFiles(&filesAnotherFunction, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	db.close();
+}
 
 void DbControllerFileTests::cleanupTestCase()
 {

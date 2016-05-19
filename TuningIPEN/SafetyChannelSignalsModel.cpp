@@ -124,8 +124,8 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 				}
 			}
 			break;
-			case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowLimit();
-			case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highLimit();
+			case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
+			case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
 			case RECEIVED_LOW_LIMIT_COLUMN:
 			{
 				double value = state.lowLimit;
@@ -229,9 +229,9 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 		}
 	}
 
-	if (newValue < signal.lowLimit() || newValue > signal.highLimit())
+	if (newValue < signal.lowEngeneeringUnits() || newValue > signal.highEngeneeringUnits())
 	{
-		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowLimit()).arg(signal.highLimit()));
+		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngeneeringUnits()).arg(signal.highEngeneeringUnits()));
 		return false;
 	}
 

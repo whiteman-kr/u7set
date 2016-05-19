@@ -17,11 +17,8 @@
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="12" Size="32"/>
-
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="14" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="15" Size="1"/>
+                    
             <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="16" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="17" Size="1"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_del" Caption="Value" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
@@ -41,46 +38,10 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>
+            </AfbElementParam>           
             <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>0</Value>
-                <Default>0</Default>
+                <Value>1</Value>
+                <Default>1</Default>
                 <Script>
                     <Changed>
 function(videoItemFblElement, afbElement)
@@ -131,10 +92,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutputUnconditional(videoItemFblElement, afbElement, "out");	
 	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
 

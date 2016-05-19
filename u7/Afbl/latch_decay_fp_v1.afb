@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#latch_decay_fp_v1">
+        <Properties>
+            <Caption>latch_decay_fp</Caption>
+            <Version>1.0</Version>
+            <Implementation Version="2" OpIndex="13"/>
+            <Description>Latch Block performs a latching of the input(floating-point) value by decay and outputs result in accordance with control signal.</Description>
+            <Category>Other</Category>
+            <OpCode>22</OpCode>
+            <HasRam>true</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>
+            <AfbElementSignal OpName="i_set" Caption="set" Type="Discrete" OpIndex="6" Size="1"/>
+            <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="7" Size="1"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="10" Size="32"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>2</Value>
+                <Default>2</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>3</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

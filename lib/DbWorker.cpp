@@ -77,6 +77,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 61", ":/DatabaseUpgrade/Upgrade0061.sql"},
 	{"Upgrade to version 62", ":/DatabaseUpgrade/Upgrade0062.sql"},
 	{"Upgrade to version 63", ":/DatabaseUpgrade/Upgrade0063.sql"},
+	{"Upgrade to version 64", ":/DatabaseUpgrade/Upgrade0064.sql"},
+	{"Upgrade to version 65", ":/DatabaseUpgrade/Upgrade0065.sql"},
+	{"Upgrade to version 66", ":/DatabaseUpgrade/Upgrade0066.sql"},
+	{"Upgrade to version 67", ":/DatabaseUpgrade/Upgrade0067.sql"},
 };
 
 
@@ -3253,12 +3257,12 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDataSize(q.value(16).toInt());
 	s.setLowADC(q.value(17).toInt());
 	s.setHighADC(q.value(18).toInt());
-	s.setLowLimit(q.value(19).toDouble());
-	s.setHighLimit(q.value(20).toDouble());
+	s.setLowEngeneeringUnits(q.value(19).toDouble());
+	s.setHighEngeneeringUnits(q.value(20).toDouble());
 	s.setUnitID(q.value(21).toInt());
-	s.setAdjustment(q.value(22).toDouble());
-	s.setDropLimit(q.value(23).toDouble());
-	s.setExcessLimit(q.value(24).toDouble());
+	double tempAdjustment = q.value(22).toDouble();
+	s.setLowValidRange(q.value(23).toDouble());
+	s.setHighValidRange(q.value(24).toDouble());
 	s.setUnbalanceLimit(q.value(25).toDouble());
 	s.setInputLowLimit(q.value(26).toDouble());
 	s.setInputHighLimit(q.value(27).toDouble());
@@ -3275,9 +3279,9 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setAperture(q.value(38).toDouble());
 	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
 	s.setEquipmentID(q.value(40).toString());
-	s.setOutputRangeMode(static_cast<E::OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
+	s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
-	s.setMaxDifference(q.value(43).toDouble());										//
+	s.setSpreadTolerance(q.value(43).toDouble());										//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
 	s.setTuningDefaultValue(q.value(46).toDouble());								// since version 58 of database
@@ -3311,12 +3315,12 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.dataSize())
 	.arg(s.lowADC())
 	.arg(s.highADC())
-	.arg(s.lowLimit())
-	.arg(s.highLimit())
+	.arg(s.lowEngeneeringUnits())
+	.arg(s.highEngeneeringUnits())
 	.arg(s.unitID())
-	.arg(s.adjustment())
-	.arg(s.dropLimit())
-	.arg(s.excessLimit())
+	.arg(0.0)	// was Adjustment
+	.arg(s.lowValidRange())
+	.arg(s.highValidRange())
 	.arg(s.unbalanceLimit())
 	.arg(s.inputLowLimit())
 	.arg(s.inputHighLimit())
@@ -3333,9 +3337,9 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.aperture())
 	.arg(TO_INT(s.inOutType()))
 	.arg(toSqlStr(s.equipmentID()))
-	.arg(s.outputRangeMode())					// since version 35 of database
+	.arg(s.outputMode())					// since version 35 of database
 	.arg(s.filteringTime())						//
-	.arg(s.maxDifference())						//
+	.arg(s.spreadTolerance())						//
 	.arg(TO_INT(s.byteOrder()))					//
 	.arg(s.enableTuning() ? "TRUE" : "FALSE")	// since version 42 of database
 	.arg(s.tuningDefaultValue());				// since version 58 of database

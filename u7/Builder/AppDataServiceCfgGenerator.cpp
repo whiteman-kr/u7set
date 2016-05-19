@@ -132,7 +132,7 @@ namespace Builder
 				hasWrongField = true;
 			}
 
-			if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
+			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
@@ -244,7 +244,7 @@ namespace Builder
 				hasWrongField = true;
 			}
 
-			if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
+			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;

@@ -36,11 +36,11 @@ namespace Builder
 	public:
 		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
-		bool open(const QString& fullBuildPath, bool textMode, OutputLog* log);
+		bool open(const QString& fullBuildPath, bool textMode, IssueLogger* log);
 
-		bool write(const QString& fullBuildPath, const QByteArray& data, OutputLog* log);
-		bool write(const QString& fullBuildPath, const QString& dataString, OutputLog* log);
-		bool write(const QString& fullBuildPath, const QStringList& stringList, OutputLog* log);
+		bool write(const QString& fullBuildPath, const QByteArray& data, IssueLogger* log);
+		bool write(const QString& fullBuildPath, const QString& dataString, IssueLogger* log);
+		bool write(const QString& fullBuildPath, const QStringList& stringList, IssueLogger* log);
 
 		QString fileName() const { return m_fileName; }
 		QString pathFileName() const { return m_info.pathFileName; }

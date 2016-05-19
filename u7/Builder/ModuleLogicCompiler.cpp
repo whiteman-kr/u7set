@@ -725,35 +725,45 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
+		m_code.newLine();
+
+		Comment comment;
+
+		comment.setComment("Copy LM diagnostics data to RegBuf");
+
+		m_code.append(comment);
+		m_code.newLine();
+
 		Command cmd;
 
 		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsSizeW());
 
-		cmd.setComment("copy LM diagnostics data to RegBuf");
-
 		m_code.append(cmd);
+		m_code.newLine();
 
-		//
+		comment.setComment("Copy LM's' input signals to RegBuf");
+
+		m_code.append(comment);
+		m_code.newLine();
 
 		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
 				   m_memoryMap.lmInOutsAddress(),
 				   m_memoryMap.lmInOutsSizeW());
 
-		cmd.setComment("copy LM's' input signals to RegBuf");
-
-		m_code.append(cmd);
-
-		//
-
-		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
-
-		cmd.setComment("init to 0 LM's output signals");
-
 		m_code.append(cmd);
 		m_code.newLine();
 
+		comment.setComment("Init to 0 LM's output signals");
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
+
+		m_code.append(cmd);
+		m_code.newLine();
 
 		return true;
 	}
@@ -3222,8 +3232,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue(),
-								signal->lowLimit(),
-								signal->highLimit());
+								signal->lowEngeneeringUnits(),
+								signal->highEngeneeringUnits());
 				file.append(str);
 			}
 		}
@@ -3252,8 +3262,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								static_cast<qint32>(signal->tuningDefaultValue()),
-								static_cast<qint32>(signal->lowLimit()),
-								static_cast<qint32>(signal->highLimit()));
+								static_cast<qint32>(signal->lowEngeneeringUnits()),
+								static_cast<qint32>(signal->highEngeneeringUnits()));
 				file.append(str);
 			}
 		}
@@ -3754,8 +3764,8 @@ namespace Builder
 			return nullptr;
 		}
 
-		double y1 = signal.lowLimit();
-		double y2 = signal.highLimit();
+		double y1 = signal.lowEngeneeringUnits();
+		double y2 = signal.highEngeneeringUnits();
 
 		AppItem* appItem = nullptr;
 
@@ -3819,8 +3829,8 @@ namespace Builder
 		assert(signal.isOutput());
 		assert(signal.equipmentID().isEmpty() == false);
 
-		double x1 = signal.lowLimit();
-		double x2 = signal.highLimit();
+		double x1 = signal.lowEngeneeringUnits();
+		double x2 = signal.highEngeneeringUnits();
 
 		if (x2 - x1 == 0.0)
 		{
@@ -4060,8 +4070,8 @@ namespace Builder
 		{
 			delete appFb;
 
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("FB '%1' parameters calculation error")).arg(appItem.caption()));
+			/*LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("FB '%1' parameters calculation error")).arg(appItem.caption()));*/
 			return nullptr;
 		}
 
@@ -5448,6 +5458,7 @@ namespace Builder
 		QVariant qv = afbParam.value();
 
 		m_opName = afbParam.opName();
+		m_caption = afbParam.caption();
 		m_operandIndex = afbParam.operandIndex();
 		m_instantiator = afbParam.instantiator();
 
@@ -5513,5 +5524,54 @@ namespace Builder
 
 		return str;
 	}
+
+
+	quint32 AppFbParamValue::unsignedIntValue() const
+	{
+		assert(isUnsignedInt() == true);
+
+		return m_unsignedIntValue;
+	}
+
+
+	void AppFbParamValue::setUnsignedIntValue(quint32 value)
+	{
+		assert(isUnsignedInt() == true);
+
+		m_unsignedIntValue = value;
+	}
+
+
+	qint32 AppFbParamValue::signedIntValue() const
+	{
+		assert(isSignedInt32() == true);
+
+		return m_signedIntValue;
+	}
+
+
+	void AppFbParamValue::setSignedIntValue(qint32 value)
+	{
+		assert(isSignedInt32() == true);
+
+		m_signedIntValue = value;
+	}
+
+
+	double AppFbParamValue::floatValue() const
+	{
+		assert(isFloat32() == true);
+
+		return m_floatValue;
+	}
+
+
+	void AppFbParamValue::setFloatValue(double value)
+	{
+		assert(isFloat32() == true);
+
+		m_floatValue = value;
+	}
+
 
 }
