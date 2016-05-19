@@ -35,9 +35,11 @@ int main(int argc, char *argv[])
 	MonitorConfigController configController(theSettings.configuratorAddress1(),
 											 theSettings.configuratorAddress2());
 
-	//
-	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(theSettings.configuratorAddress1(),
-																		 theSettings.configuratorAddress2()));
+	HostAddressPort aaa("192.168.1.1", 13323);
+	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(aaa, aaa));
+
+//	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(theSettings.configuratorAddress1(),
+//																		 theSettings.configuratorAddress2()));
 
 	tcpClientThread->start();
 

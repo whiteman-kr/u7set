@@ -1,14 +1,33 @@
 #include "TcpSignalClient.h"
+#include "Settings.h"
 
 TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(serverAddressPort1, serverAddressPort2)
 {
 	qDebug() << "TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)";
+
+	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
+
+	reset();
 }
 
 TcpSignalClient::~TcpSignalClient()
 {
 	qDebug() << "TcpSignalClient::~TcpSignalClient()";
+}
+
+void TcpSignalClient::timerEvent(QTimerEvent* event)
+{
+	assert(event);
+
+	if (event->timerId() == m_startStateTimerId)
+	{
+		if (isClearToSendRequest() == false)
+		{
+		}
+	}
+
+	return;
 }
 
 void TcpSignalClient::onClientThreadStarted()
@@ -49,7 +68,14 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 	default:
 		assert(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
+
+		reset();
 	}
 
 	return;
+}
+
+void TcpSignalClient::reset()
+{
+	m_state = State::Start;
 }
