@@ -38,9 +38,10 @@ class GetSignalListStartRequest;
 class GetSignalListStartReply;
 class GetSignalListNextRequest;
 class GetSignalListNextReply;
-class GetSignalParamRequest;
-class GetSignalParamReply;
-class AppSignalState;
+class GetAppSignalParamRequest;
+class GetAppSignalParamReply;
+class GetAppSignalStateRequest;
+class GetAppSignalStateReply;
 
 // ===================================================================
 
@@ -419,14 +420,14 @@ class GetSignalListNextReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class GetSignalParamRequest : public ::google::protobuf::Message {
+class GetAppSignalParamRequest : public ::google::protobuf::Message {
  public:
-  GetSignalParamRequest();
-  virtual ~GetSignalParamRequest();
+  GetAppSignalParamRequest();
+  virtual ~GetAppSignalParamRequest();
 
-  GetSignalParamRequest(const GetSignalParamRequest& from);
+  GetAppSignalParamRequest(const GetAppSignalParamRequest& from);
 
-  inline GetSignalParamRequest& operator=(const GetSignalParamRequest& from) {
+  inline GetAppSignalParamRequest& operator=(const GetAppSignalParamRequest& from) {
     CopyFrom(from);
     return *this;
   }
@@ -440,17 +441,17 @@ class GetSignalParamRequest : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetSignalParamRequest& default_instance();
+  static const GetAppSignalParamRequest& default_instance();
 
-  void Swap(GetSignalParamRequest* other);
+  void Swap(GetAppSignalParamRequest* other);
 
   // implements Message ----------------------------------------------
 
-  GetSignalParamRequest* New() const;
+  GetAppSignalParamRequest* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetSignalParamRequest& from);
-  void MergeFrom(const GetSignalParamRequest& from);
+  void CopyFrom(const GetAppSignalParamRequest& from);
+  void MergeFrom(const GetAppSignalParamRequest& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -485,7 +486,7 @@ class GetSignalParamRequest : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
       mutable_signalhashes();
 
-  // @@protoc_insertion_point(class_scope:Network.GetSignalParamRequest)
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalParamRequest)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -500,18 +501,18 @@ class GetSignalParamRequest : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetSignalParamRequest* default_instance_;
+  static GetAppSignalParamRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class GetSignalParamReply : public ::google::protobuf::Message {
+class GetAppSignalParamReply : public ::google::protobuf::Message {
  public:
-  GetSignalParamReply();
-  virtual ~GetSignalParamReply();
+  GetAppSignalParamReply();
+  virtual ~GetAppSignalParamReply();
 
-  GetSignalParamReply(const GetSignalParamReply& from);
+  GetAppSignalParamReply(const GetAppSignalParamReply& from);
 
-  inline GetSignalParamReply& operator=(const GetSignalParamReply& from) {
+  inline GetAppSignalParamReply& operator=(const GetAppSignalParamReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -525,17 +526,17 @@ class GetSignalParamReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetSignalParamReply& default_instance();
+  static const GetAppSignalParamReply& default_instance();
 
-  void Swap(GetSignalParamReply* other);
+  void Swap(GetAppSignalParamReply* other);
 
   // implements Message ----------------------------------------------
 
-  GetSignalParamReply* New() const;
+  GetAppSignalParamReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetSignalParamReply& from);
-  void MergeFrom(const GetSignalParamReply& from);
+  void CopyFrom(const GetAppSignalParamReply& from);
+  void MergeFrom(const GetAppSignalParamReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -565,26 +566,26 @@ class GetSignalParamReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Proto.Signal signalParams = 2;
-  inline int signalparams_size() const;
-  inline void clear_signalparams();
-  static const int kSignalParamsFieldNumber = 2;
-  inline const ::Proto::Signal& signalparams(int index) const;
-  inline ::Proto::Signal* mutable_signalparams(int index);
-  inline ::Proto::Signal* add_signalparams();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Signal >&
-      signalparams() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::Signal >*
-      mutable_signalparams();
+  // repeated .Proto.AppSignal appSignalParams = 2;
+  inline int appsignalparams_size() const;
+  inline void clear_appsignalparams();
+  static const int kAppSignalParamsFieldNumber = 2;
+  inline const ::Proto::AppSignal& appsignalparams(int index) const;
+  inline ::Proto::AppSignal* mutable_appsignalparams(int index);
+  inline ::Proto::AppSignal* add_appsignalparams();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >&
+      appsignalparams() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >*
+      mutable_appsignalparams();
 
-  // @@protoc_insertion_point(class_scope:Network.GetSignalParamReply)
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalParamReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::Signal > signalparams_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal > appsignalparams_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
@@ -595,18 +596,18 @@ class GetSignalParamReply : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetSignalParamReply* default_instance_;
+  static GetAppSignalParamReply* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class AppSignalState : public ::google::protobuf::Message {
+class GetAppSignalStateRequest : public ::google::protobuf::Message {
  public:
-  AppSignalState();
-  virtual ~AppSignalState();
+  GetAppSignalStateRequest();
+  virtual ~GetAppSignalStateRequest();
 
-  AppSignalState(const AppSignalState& from);
+  GetAppSignalStateRequest(const GetAppSignalStateRequest& from);
 
-  inline AppSignalState& operator=(const AppSignalState& from) {
+  inline GetAppSignalStateRequest& operator=(const GetAppSignalStateRequest& from) {
     CopyFrom(from);
     return *this;
   }
@@ -620,17 +621,17 @@ class AppSignalState : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const AppSignalState& default_instance();
+  static const GetAppSignalStateRequest& default_instance();
 
-  void Swap(AppSignalState* other);
+  void Swap(GetAppSignalStateRequest* other);
 
   // implements Message ----------------------------------------------
 
-  AppSignalState* New() const;
+  GetAppSignalStateRequest* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const AppSignalState& from);
-  void MergeFrom(const AppSignalState& from);
+  void CopyFrom(const GetAppSignalStateRequest& from);
+  void MergeFrom(const GetAppSignalStateRequest& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -653,81 +654,129 @@ class AppSignalState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 hash = 1;
-  inline bool has_hash() const;
-  inline void clear_hash();
-  static const int kHashFieldNumber = 1;
-  inline ::google::protobuf::uint64 hash() const;
-  inline void set_hash(::google::protobuf::uint64 value);
+  // repeated uint64 signalHashes = 1;
+  inline int signalhashes_size() const;
+  inline void clear_signalhashes();
+  static const int kSignalHashesFieldNumber = 1;
+  inline ::google::protobuf::uint64 signalhashes(int index) const;
+  inline void set_signalhashes(int index, ::google::protobuf::uint64 value);
+  inline void add_signalhashes(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      signalhashes() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_signalhashes();
 
-  // optional double value = 2;
-  inline bool has_value() const;
-  inline void clear_value();
-  static const int kValueFieldNumber = 2;
-  inline double value() const;
-  inline void set_value(double value);
-
-  // optional uint32 flags = 3;
-  inline bool has_flags() const;
-  inline void clear_flags();
-  static const int kFlagsFieldNumber = 3;
-  inline ::google::protobuf::uint32 flags() const;
-  inline void set_flags(::google::protobuf::uint32 value);
-
-  // optional sint64 systemTime = 4;
-  inline bool has_systemtime() const;
-  inline void clear_systemtime();
-  static const int kSystemTimeFieldNumber = 4;
-  inline ::google::protobuf::int64 systemtime() const;
-  inline void set_systemtime(::google::protobuf::int64 value);
-
-  // optional sint64 localTime = 5;
-  inline bool has_localtime() const;
-  inline void clear_localtime();
-  static const int kLocalTimeFieldNumber = 5;
-  inline ::google::protobuf::int64 localtime() const;
-  inline void set_localtime(::google::protobuf::int64 value);
-
-  // optional sint64 plantTime = 6;
-  inline bool has_planttime() const;
-  inline void clear_planttime();
-  static const int kPlantTimeFieldNumber = 6;
-  inline ::google::protobuf::int64 planttime() const;
-  inline void set_planttime(::google::protobuf::int64 value);
-
-  // @@protoc_insertion_point(class_scope:Network.AppSignalState)
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateRequest)
  private:
-  inline void set_has_hash();
-  inline void clear_has_hash();
-  inline void set_has_value();
-  inline void clear_has_value();
-  inline void set_has_flags();
-  inline void clear_has_flags();
-  inline void set_has_systemtime();
-  inline void clear_has_systemtime();
-  inline void set_has_localtime();
-  inline void clear_has_localtime();
-  inline void set_has_planttime();
-  inline void clear_has_planttime();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::uint64 hash_;
-  double value_;
-  ::google::protobuf::int64 systemtime_;
-  ::google::protobuf::int64 localtime_;
-  ::google::protobuf::int64 planttime_;
-  ::google::protobuf::uint32 flags_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhashes_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static AppSignalState* default_instance_;
+  static GetAppSignalStateRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStateReply : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStateReply();
+  virtual ~GetAppSignalStateReply();
+
+  GetAppSignalStateReply(const GetAppSignalStateReply& from);
+
+  inline GetAppSignalStateReply& operator=(const GetAppSignalStateReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStateReply& default_instance();
+
+  void Swap(GetAppSignalStateReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStateReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStateReply& from);
+  void MergeFrom(const GetAppSignalStateReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Proto.AppSignalState appSignalStates = 2;
+  inline int appsignalstates_size() const;
+  inline void clear_appsignalstates();
+  static const int kAppSignalStatesFieldNumber = 2;
+  inline const ::Proto::AppSignalState& appsignalstates(int index) const;
+  inline ::Proto::AppSignalState* mutable_appsignalstates(int index);
+  inline ::Proto::AppSignalState* add_appsignalstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+      appsignalstates() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+      mutable_appsignalstates();
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStateReply* default_instance_;
 };
 // ===================================================================
 
@@ -948,218 +997,162 @@ GetSignalListNextReply::mutable_appsignalids() {
 
 // -------------------------------------------------------------------
 
-// GetSignalParamRequest
+// GetAppSignalParamRequest
 
 // repeated uint64 signalHashes = 1;
-inline int GetSignalParamRequest::signalhashes_size() const {
+inline int GetAppSignalParamRequest::signalhashes_size() const {
   return signalhashes_.size();
 }
-inline void GetSignalParamRequest::clear_signalhashes() {
+inline void GetAppSignalParamRequest::clear_signalhashes() {
   signalhashes_.Clear();
 }
-inline ::google::protobuf::uint64 GetSignalParamRequest::signalhashes(int index) const {
+inline ::google::protobuf::uint64 GetAppSignalParamRequest::signalhashes(int index) const {
   return signalhashes_.Get(index);
 }
-inline void GetSignalParamRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
+inline void GetAppSignalParamRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
   signalhashes_.Set(index, value);
 }
-inline void GetSignalParamRequest::add_signalhashes(::google::protobuf::uint64 value) {
+inline void GetAppSignalParamRequest::add_signalhashes(::google::protobuf::uint64 value) {
   signalhashes_.Add(value);
 }
 inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
-GetSignalParamRequest::signalhashes() const {
+GetAppSignalParamRequest::signalhashes() const {
   return signalhashes_;
 }
 inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
-GetSignalParamRequest::mutable_signalhashes() {
+GetAppSignalParamRequest::mutable_signalhashes() {
   return &signalhashes_;
 }
 
 // -------------------------------------------------------------------
 
-// GetSignalParamReply
+// GetAppSignalParamReply
 
 // optional int32 error = 1 [default = 0];
-inline bool GetSignalParamReply::has_error() const {
+inline bool GetAppSignalParamReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetSignalParamReply::set_has_error() {
+inline void GetAppSignalParamReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetSignalParamReply::clear_has_error() {
+inline void GetAppSignalParamReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetSignalParamReply::clear_error() {
+inline void GetAppSignalParamReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 GetSignalParamReply::error() const {
+inline ::google::protobuf::int32 GetAppSignalParamReply::error() const {
   return error_;
 }
-inline void GetSignalParamReply::set_error(::google::protobuf::int32 value) {
+inline void GetAppSignalParamReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
 
-// repeated .Proto.Signal signalParams = 2;
-inline int GetSignalParamReply::signalparams_size() const {
-  return signalparams_.size();
+// repeated .Proto.AppSignal appSignalParams = 2;
+inline int GetAppSignalParamReply::appsignalparams_size() const {
+  return appsignalparams_.size();
 }
-inline void GetSignalParamReply::clear_signalparams() {
-  signalparams_.Clear();
+inline void GetAppSignalParamReply::clear_appsignalparams() {
+  appsignalparams_.Clear();
 }
-inline const ::Proto::Signal& GetSignalParamReply::signalparams(int index) const {
-  return signalparams_.Get(index);
+inline const ::Proto::AppSignal& GetAppSignalParamReply::appsignalparams(int index) const {
+  return appsignalparams_.Get(index);
 }
-inline ::Proto::Signal* GetSignalParamReply::mutable_signalparams(int index) {
-  return signalparams_.Mutable(index);
+inline ::Proto::AppSignal* GetAppSignalParamReply::mutable_appsignalparams(int index) {
+  return appsignalparams_.Mutable(index);
 }
-inline ::Proto::Signal* GetSignalParamReply::add_signalparams() {
-  return signalparams_.Add();
+inline ::Proto::AppSignal* GetAppSignalParamReply::add_appsignalparams() {
+  return appsignalparams_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::Signal >&
-GetSignalParamReply::signalparams() const {
-  return signalparams_;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >&
+GetAppSignalParamReply::appsignalparams() const {
+  return appsignalparams_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::Signal >*
-GetSignalParamReply::mutable_signalparams() {
-  return &signalparams_;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >*
+GetAppSignalParamReply::mutable_appsignalparams() {
+  return &appsignalparams_;
 }
 
 // -------------------------------------------------------------------
 
-// AppSignalState
+// GetAppSignalStateRequest
 
-// optional uint64 hash = 1;
-inline bool AppSignalState::has_hash() const {
+// repeated uint64 signalHashes = 1;
+inline int GetAppSignalStateRequest::signalhashes_size() const {
+  return signalhashes_.size();
+}
+inline void GetAppSignalStateRequest::clear_signalhashes() {
+  signalhashes_.Clear();
+}
+inline ::google::protobuf::uint64 GetAppSignalStateRequest::signalhashes(int index) const {
+  return signalhashes_.Get(index);
+}
+inline void GetAppSignalStateRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
+  signalhashes_.Set(index, value);
+}
+inline void GetAppSignalStateRequest::add_signalhashes(::google::protobuf::uint64 value) {
+  signalhashes_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+GetAppSignalStateRequest::signalhashes() const {
+  return signalhashes_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+GetAppSignalStateRequest::mutable_signalhashes() {
+  return &signalhashes_;
+}
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStateReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetAppSignalStateReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void AppSignalState::set_has_hash() {
+inline void GetAppSignalStateReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void AppSignalState::clear_has_hash() {
+inline void GetAppSignalStateReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void AppSignalState::clear_hash() {
-  hash_ = GOOGLE_ULONGLONG(0);
-  clear_has_hash();
+inline void GetAppSignalStateReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
 }
-inline ::google::protobuf::uint64 AppSignalState::hash() const {
-  return hash_;
+inline ::google::protobuf::int32 GetAppSignalStateReply::error() const {
+  return error_;
 }
-inline void AppSignalState::set_hash(::google::protobuf::uint64 value) {
-  set_has_hash();
-  hash_ = value;
-}
-
-// optional double value = 2;
-inline bool AppSignalState::has_value() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void AppSignalState::set_has_value() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void AppSignalState::clear_has_value() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void AppSignalState::clear_value() {
-  value_ = 0;
-  clear_has_value();
-}
-inline double AppSignalState::value() const {
-  return value_;
-}
-inline void AppSignalState::set_value(double value) {
-  set_has_value();
-  value_ = value;
+inline void GetAppSignalStateReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
 }
 
-// optional uint32 flags = 3;
-inline bool AppSignalState::has_flags() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+// repeated .Proto.AppSignalState appSignalStates = 2;
+inline int GetAppSignalStateReply::appsignalstates_size() const {
+  return appsignalstates_.size();
 }
-inline void AppSignalState::set_has_flags() {
-  _has_bits_[0] |= 0x00000004u;
+inline void GetAppSignalStateReply::clear_appsignalstates() {
+  appsignalstates_.Clear();
 }
-inline void AppSignalState::clear_has_flags() {
-  _has_bits_[0] &= ~0x00000004u;
+inline const ::Proto::AppSignalState& GetAppSignalStateReply::appsignalstates(int index) const {
+  return appsignalstates_.Get(index);
 }
-inline void AppSignalState::clear_flags() {
-  flags_ = 0u;
-  clear_has_flags();
+inline ::Proto::AppSignalState* GetAppSignalStateReply::mutable_appsignalstates(int index) {
+  return appsignalstates_.Mutable(index);
 }
-inline ::google::protobuf::uint32 AppSignalState::flags() const {
-  return flags_;
+inline ::Proto::AppSignalState* GetAppSignalStateReply::add_appsignalstates() {
+  return appsignalstates_.Add();
 }
-inline void AppSignalState::set_flags(::google::protobuf::uint32 value) {
-  set_has_flags();
-  flags_ = value;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+GetAppSignalStateReply::appsignalstates() const {
+  return appsignalstates_;
 }
-
-// optional sint64 systemTime = 4;
-inline bool AppSignalState::has_systemtime() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void AppSignalState::set_has_systemtime() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void AppSignalState::clear_has_systemtime() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void AppSignalState::clear_systemtime() {
-  systemtime_ = GOOGLE_LONGLONG(0);
-  clear_has_systemtime();
-}
-inline ::google::protobuf::int64 AppSignalState::systemtime() const {
-  return systemtime_;
-}
-inline void AppSignalState::set_systemtime(::google::protobuf::int64 value) {
-  set_has_systemtime();
-  systemtime_ = value;
-}
-
-// optional sint64 localTime = 5;
-inline bool AppSignalState::has_localtime() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void AppSignalState::set_has_localtime() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void AppSignalState::clear_has_localtime() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void AppSignalState::clear_localtime() {
-  localtime_ = GOOGLE_LONGLONG(0);
-  clear_has_localtime();
-}
-inline ::google::protobuf::int64 AppSignalState::localtime() const {
-  return localtime_;
-}
-inline void AppSignalState::set_localtime(::google::protobuf::int64 value) {
-  set_has_localtime();
-  localtime_ = value;
-}
-
-// optional sint64 plantTime = 6;
-inline bool AppSignalState::has_planttime() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void AppSignalState::set_has_planttime() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void AppSignalState::clear_has_planttime() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void AppSignalState::clear_planttime() {
-  planttime_ = GOOGLE_LONGLONG(0);
-  clear_has_planttime();
-}
-inline ::google::protobuf::int64 AppSignalState::planttime() const {
-  return planttime_;
-}
-inline void AppSignalState::set_planttime(::google::protobuf::int64 value) {
-  set_has_planttime();
-  planttime_ = value;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+GetAppSignalStateReply::mutable_appsignalstates() {
+  return &appsignalstates_;
 }
 
 

@@ -30,28 +30,31 @@ message GetSignalListNextReply
 	repeated string appSignalIds = 3;
 }
 
-// Geetting signal params
+// Geetting application signal params
 //
-message GetSignalParamRequest
+message GetAppSignalParamRequest
 {
-	repeated uint64 signalHashes = 1;			// Limited to 500
+	repeated uint64 signalHashes = 1;						// Limited to 500
 }
 
-message GetSignalParamReply
+message GetAppSignalParamReply
 {
 	optional int32 error = 1 [default = 0];
-	repeated Proto.Signal signalParams = 2;			// Limited to 500
+	repeated Proto.AppSignal appSignalParams = 2;			// Limited to 500
 }
 
 
-// Data structs
+// Geetting application signal states
 //
-message AppSignalState
+message GetAppSignalStateRequest
 {
-	optional uint64 hash = 1;
-	optional double value = 2;
-	optional uint32 flags = 3;
-	optional sint64 systemTime = 4;
-	optional sint64 localTime = 5;
-	optional sint64 plantTime = 6;
+	repeated uint64 signalHashes = 1;						// Limited to 2000
 }
+
+message GetAppSignalStateReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to 2000
+}
+
+

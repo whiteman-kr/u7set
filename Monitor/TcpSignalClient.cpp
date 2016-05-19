@@ -65,11 +65,11 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 
 	switch (requestID)
 	{
-	case ADS_GET_SIGNAL_LIST_START:
+	case ADS_GET_APP_SIGNAL_LIST_START:
 		processSignalListStart(data);
 		break;
 
-	case ADS_GET_SIGNAL_LIST_NEXT:
+	case ADS_GET_APP_SIGNAL_LIST_NEXT:
 		processSignalListNext(data);
 		break;
 
@@ -103,7 +103,7 @@ void TcpSignalClient::resetToGetState()
 void TcpSignalClient::requestSignalListStart()
 {
 	assert(isClearToSendRequest());
-	sendRequest(ADS_GET_SIGNAL_LIST_START);
+	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 }
 
 void TcpSignalClient::processSignalListStart(const QByteArray& data)
@@ -161,6 +161,13 @@ void TcpSignalClient::requestSignalListNext(int part)
 	{
 		// Request Params?
 		//
+		if (m_signalList.size() != m_getSignalListStartReply.totalitemcount())
+		{
+			//
+			//
+			assert(m_signalList.size() != m_getSignalListStartReply.totalitemcount());
+		}
+
 		assert(false);
 		return;
 	}
@@ -169,7 +176,7 @@ void TcpSignalClient::requestSignalListNext(int part)
 	//
 	m_getSignalListNextRequest.set_part(part);
 
-	sendRequest(ADS_GET_SIGNAL_LIST_NEXT, m_getSignalListNextRequest);
+	sendRequest(ADS_GET_APP_SIGNAL_LIST_NEXT, m_getSignalListNextRequest);
 	return;
 }
 

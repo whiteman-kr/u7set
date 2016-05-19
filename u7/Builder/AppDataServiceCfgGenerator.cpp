@@ -278,7 +278,7 @@ namespace Builder
 
 		for(Signal* signal : signalsToWrite)
 		{
-			ProtobufSerializator<Signal, Proto::Signal> protoSignal(*signal);
+			ProtobufSerializator<Signal, Proto::AppSignal> protoSignal(*signal);
 
 			//protoSignal.setProtobufMessageAllFields();
 
