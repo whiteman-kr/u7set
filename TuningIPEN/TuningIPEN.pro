@@ -142,3 +142,6 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+RESOURCES += \
+    TuningIPEN.qrc

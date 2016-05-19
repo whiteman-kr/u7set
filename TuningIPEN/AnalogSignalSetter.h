@@ -13,12 +13,11 @@ class AnalogSignalSetter : public QWidget
 public:
 	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, Tuning::TuningService* service, QWidget *parent = 0);
 
-signals:
-
 public slots:
 	void updateValue();
 	void setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
 	void setNewValue();
+	void changeNewValue(double newValue);
 
 private:
 	QString m_signalId;

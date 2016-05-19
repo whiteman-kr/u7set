@@ -10,10 +10,11 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QPushButton>
-//#include <QScrollBar>
+#include <QScrollBar>
 #include <QMessageBox>
 #include <QStatusBar>
 #include <QLabel>
+#include <QPixmap>
 
 
 void setFontRecursive(QWidget* parentWidget, const QFont& font)
@@ -71,7 +72,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	setWindowTitle("Tuning IPEN");
 
-	menuBar()->addAction("Settings");
+	//menuBar()->addAction("Settings");
 
 	statusBar();
 
@@ -103,7 +104,27 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	//Init tabs
 	//
 	QTabWidget* tabs = new QTabWidget(this);
-	setCentralWidget(tabs);
+
+	QLabel* image = new QLabel(this);
+	image->setPixmap(QPixmap(":/Images/u7/Images/logo.png"));
+
+	QLabel* title = new QLabel("Safety Systems Control Consol for IEA-R1", this);
+	QFont font = title->font();
+	font.setPointSize(font.pointSize() * 2);
+	title->setFont(font);
+
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addWidget(image);
+	hl->addStretch();
+	hl->addWidget(title);
+
+	QVBoxLayout* vl = new QVBoxLayout;
+	vl->addLayout(hl);
+	vl->addWidget(tabs);
+
+	QWidget* container = new QWidget(this);
+	container->setLayout(vl);
+	setCentralWidget(container);
 
 	m_automaticPowerRegulatorWidget = new QWidget;
 
@@ -111,7 +132,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	m_setOfSignalsScram = new QTabWidget(this);
 	QWidget* widget = new QWidget;
-	QHBoxLayout* hl = new QHBoxLayout;
+	hl = new QHBoxLayout;
 	widget->setLayout(hl);
 	hl->addWidget(m_setOfSignalsScram);
 	tabs->addTab(widget, "Set of signals SCRAM");
@@ -126,7 +147,7 @@ TuningMainWindow::~TuningMainWindow()
 }
 
 
-void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
+AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
 {
 	double lowLimit = 0;
 
@@ -144,6 +165,8 @@ void TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDa
 
 	connect(m_updateTimer, &QTimer::timeout, setter, &AnalogSignalSetter::updateValue);
 	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
+
+	return setter;
 }
 
 
@@ -214,7 +237,7 @@ void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 
 void TuningMainWindow::updateSignalStates()
 {
-	m_service->getSignalState("#HP01LC01DC_01PPC");
+	//m_service->getSignalState("#HP01LC01DC_01PPC");
 	m_service->getSignalState("#HP01LC02RAM_01PPC");
 }
 
@@ -230,6 +253,10 @@ void TuningMainWindow::updateSignalState(QString appSignalID, double currentValu
 	if (appSignalID == "#HP01LC02RAM_01PPC")
 	{
 		m_automaticMode->setChecked(currentValue != 0 && valid != 0);
+		if (valid)
+		{
+			emit automaticModeChanged(currentValue != 0);
+		}
 	}
 }
 
@@ -259,20 +286,10 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 }
 
 
-/*void TuningMainWindow::applyNewScrollBarValue()
+void TuningMainWindow::applyNewScrollBarValue()
 {
-	double newValue = m_scrollBar->value() / 10.0;
-
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>#HP01LC01DC_01PPC</b> signal value to <b>%1</b>?")
-									   .arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-	if (reply == QMessageBox::No)
-	{
-		return;
-	}
-
-	m_service->setSignalState("#HP01LC02RAM_01PPC", newValue);
-}*/
+	emit scrollBarMoved(m_scrollBar->value() * 10);
+}
 
 
 void TuningMainWindow::applyNewAutomaticMode(bool enabled)
@@ -348,16 +365,19 @@ void TuningMainWindow::onTuningServiceReady()
 	fl->setVerticalSpacing(20);
 	groupBox->setLayout(fl);
 
-	addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
+	auto setter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
+	connect(this, &TuningMainWindow::scrollBarMoved, setter, &AnalogSignalSetter::changeNewValue);
+	connect(this, &TuningMainWindow::automaticModeChanged, setter, &AnalogSignalSetter::setEnabled);
 
-	/*m_scrollBar = new QScrollBar(Qt::Horizontal, this);
+	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
-	m_scrollBar->setMaximum(1100);
+	m_scrollBar->setMaximum(11);
 	m_scrollBar->setPageStep(1);
 	m_scrollBar->setTracking(false);
-	connect(m_scrollBar, &QScrollBar::sliderMoved, this, &TuningMainWindow::applyNewScrollBarValue);
+	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
+	connect(this, &TuningMainWindow::automaticModeChanged, m_scrollBar, &QScrollBar::setEnabled);
 
-	fl->addRow("#HP01LC01DC_01PPC", m_scrollBar);*/
+	fl->addRow("", m_scrollBar);
 
 	m_automaticMode = new QPushButton("Automatic mode", this);
 	m_automaticMode->setCheckable(true);
@@ -380,8 +400,7 @@ void TuningMainWindow::onTuningServiceReady()
 	fl = new QFormLayout;
 	fl->setVerticalSpacing(20);
 	groupBox->setLayout(fl);
-	addAnalogSetter(fl, m_info, "Limiter range command \"UP\"", "#HP01LC01RLR_01PPC", 100);
-	addAnalogSetter(fl, m_info, "Limiter range command \"DOWN\"", "#HP01LC01RLR_02PPC", 100);
+	addAnalogSetter(fl, m_info, "Limit for power error", "#HP01LC01RLR_01PPC", 100);
 	addAnalogSetter(fl, m_info, "Scaling coefficient", "#HP01LC02RCC_01PPC", 100);
 	addAnalogSetter(fl, m_info, "Driving coefficient", "#HP01LC02RDC_01PPC", 100);
 	hl->addWidget(groupBox);
