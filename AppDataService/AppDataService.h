@@ -37,6 +37,8 @@ private:
 
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
+	Tcp::ServerThread* m_tcpAddDataServerThread = nullptr;
+
 	QTimer m_timer;
 
 	//
@@ -51,6 +53,9 @@ private:
 
 	void runFscDataReceivingThreads();
 	void stopFscDataReceivingThreads();
+
+	void runTcpAppDataServer();
+	void stopTcpAppDataServer();
 
 	void runTimer();
 	void stopTimer();

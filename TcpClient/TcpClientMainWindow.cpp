@@ -8,13 +8,12 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	/*m_testClient = new TestClient(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST),
-								  HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
+	m_testClient = new TestClient(HostAddressPort("192.168.1.1", 13323), HostAddressPort("192.168.1.1", 13323));
 	m_tcpThread = new Tcp::Thread(m_testClient);
 
-	connect(m_testClient, &TestClient::signal_changeCount, this, &TcpClientMainWindow::slot_changeCount);
+//	connect(m_testClient, &TestClient::signal_changeCount, this, &TcpClientMainWindow::slot_changeCount);
 
-	m_tcpThread->start();*/
+	m_tcpThread->start();
 
 	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), true);
 	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
@@ -38,8 +37,8 @@ TcpClientMainWindow::~TcpClientMainWindow()
 {
 	m_fileClientThread->quit();
 	delete m_fileClientThread;
-//	m_tcpThread->quit();
-//	delete m_tcpThread;
+	m_tcpThread->quit();
+	delete m_tcpThread;
 	delete ui;
 }
 
@@ -70,7 +69,7 @@ void TestClient::onConnection()
 		return;
 	}
 
-	sendRandomRequest();
+	//sendRandomRequest();
 }
 
 

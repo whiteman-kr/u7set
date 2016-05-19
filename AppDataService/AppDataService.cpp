@@ -2,7 +2,7 @@
 #include <QMetaProperty>
 #include "../include/DeviceObject.h"
 #include "AppDataService.h"
-
+#include "TcpAppDataServer.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -74,6 +74,26 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 }
 
 
+void AppDataServiceWorker::runTcpAppDataServer()
+{
+	assert(m_tcpAddDataServerThread == nullptr);
+
+	m_tcpAddDataServerThread = new Tcp::ServerThread(m_settings.clientRequestIP, new TcpAppDataServer());
+	m_tcpAddDataServerThread->start();
+}
+
+
+void AppDataServiceWorker::stopTcpAppDataServer()
+{
+	if (m_tcpAddDataServerThread != nullptr)
+	{
+		m_tcpAddDataServerThread->quitAndWait(10000);
+		delete m_tcpAddDataServerThread;
+
+		m_tcpAddDataServerThread = nullptr;
+	}
+}
+
 
 void AppDataServiceWorker::runTimer()
 {
@@ -96,6 +116,7 @@ void AppDataServiceWorker::initialize()
 	//
 	runCfgLoaderThread();
 	runServiceInfoThread();
+
 	runTimer();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
@@ -109,6 +130,8 @@ void AppDataServiceWorker::shutdown()
 	clearConfiguration();
 
 	stopTimer();
+
+	stopTcpAppDataServer();
 	stopServiceInfoThread();
 	stopCfgLoaderThread();
 
@@ -337,6 +360,8 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		initDataChannelThreads();
 
 		runDataChannelThreads();
+
+		runTcpAppDataServer();
 	}
 }
 
@@ -534,6 +559,7 @@ void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
+	stopTcpAppDataServer();
 	stopDataChannelThreads();
 
 	m_unitInfo.clear();
