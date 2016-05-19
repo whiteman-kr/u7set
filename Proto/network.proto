@@ -1,5 +1,7 @@
 package Network;
 
+import "serialization.proto";
+
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
 // 2. Request GetSignalListStartReply.partCount times GetSignalListNextRequest (and get GetSignalListNextReply in reply)
@@ -28,15 +30,31 @@ message GetSignalListNextReply
 	repeated string appSignalIds = 3;
 }
 
-
-// Data structs
+// Geetting application signal params
 //
-message AppSignalState
+message GetAppSignalParamRequest
 {
-	optional uint64 hash = 1;
-	optional double value = 2;
-	optional uint32 flags = 3;
-	optional sint64 systemTime = 4;
-	optional sint64 localTime = 5;
-	optional sint64 plantTime = 6;
+	repeated uint64 signalHashes = 1;						// Limited to 500
 }
+
+message GetAppSignalParamReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignal appSignalParams = 2;			// Limited to 500
+}
+
+
+// Geetting application signal states
+//
+message GetAppSignalStateRequest
+{
+	repeated uint64 signalHashes = 1;						// Limited to 2000
+}
+
+message GetAppSignalStateReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to 2000
+}
+
+

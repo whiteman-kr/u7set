@@ -58,7 +58,8 @@ SOURCES += main.cpp \
     SchemaManager.cpp \
     ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
-    SignalManager.cpp
+    SignalManager.cpp \
+    ../Proto/serialization.pb.cc
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -80,7 +81,8 @@ HEADERS  += \
     ../Proto/network.pb.h \
     TcpSignalClient.h \
     SignalManager.h \
-    ../include/Hash.h
+    ../include/Hash.h \
+    ../Proto/serialization.pb.h
 
 FORMS    += \
     DialogSettings.ui
@@ -159,4 +161,5 @@ DISTFILES += \
     Images/Close.svg \
     Images/About.svg \
     Images/readme.txt \
-    ../Proto/network.proto
+    ../Proto/network.proto \
+    ../Proto/serialization.proto
