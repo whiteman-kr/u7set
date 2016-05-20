@@ -179,6 +179,7 @@ void Signal::InitProperties()
 	static const QString instanceCreatedCaption("InstanceCreated");
 	static const QString instanceActionCaption("InstanceAction");
 	static const QString typeCaption("Type");
+	static const QString inOutTypeCaption("InOutType");
 	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
 	static const QString cacheValidator2("^[A-Za-z][A-Za-z\\d_]*$");
 	static const QString appSignalIDCaption("AppSignalID");
@@ -219,10 +220,11 @@ void Signal::InitProperties()
 	/*static const QString inputSensorCategory("Input sensor");
 	static const QString outputSensorCategory("Output sensor");*/
 	static const QString identificationCategory("1 Identification");
-	static const QString dataFormatCategory("2 Data Format");
-	static const QString signalProcessingCategory("3 Signal processing");
-	static const QString onlineMonitoringSystemCategory("4 Online Monitoring System");
-	static const QString tuningCategory("5 Tuning");
+	static const QString signalTypeCategory("2 Signal type");
+	static const QString dataFormatCategory("3 Data Format");
+	static const QString signalProcessingCategory("4 Signal processing");
+	static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
+	static const QString tuningCategory("6 Tuning");
 
 	ADD_PROPERTY_GETTER(int, idCaption, false, Signal::ID);
 	ADD_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID);
@@ -236,7 +238,10 @@ void Signal::InitProperties()
 	ADD_PROPERTY_GETTER(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated);
 	ADD_PROPERTY_GETTER(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction);
 
-	ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, false, Signal::type, Signal::setType);
+	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, Signal::type, Signal::setType);
+	signalTypeProperty->setCategory(signalTypeCategory);
+	auto signalInOutTypeProperty = ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType);
+	signalInOutTypeProperty->setCategory(signalTypeCategory);
 
 	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID);
 	strIdProperty->setValidator(cacheValidator1);
