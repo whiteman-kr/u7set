@@ -6,6 +6,7 @@
 #include "../include/XmlHelper.h"
 #include "../include/DataProtocols.h"
 #include "../include/DeviceObject.h"
+#include "../include/AppSignalState.h"
 
 
 enum DataSourceState
@@ -13,14 +14,6 @@ enum DataSourceState
 	noData = 0,
 	receiveData = 1,
 	stopped = 2
-};
-
-
-struct Times
-{
-	qint64	system = 0;
-	qint64	local = 0;
-	qint64	plant = 0;
 };
 
 

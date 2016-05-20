@@ -48,7 +48,7 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalState.cpp \
+    ../AppDataService/AppSignalStateEx.cpp \
     ../lib/Crc.cpp \
     TuningMain.cpp \
     ../lib/WUtils.cpp \
@@ -82,7 +82,7 @@ HEADERS += \
     ../include/ProtoSerialization.h \
     ../include/Types.h \
     ../include/Signal.h \
-    ../AppDataService/AppSignalState.h \
+    ../AppDataService/AppSignalStateEx.h \
     ../include/Crc.h \
     TuningDataStorage.h \
     ../include/Hash.h

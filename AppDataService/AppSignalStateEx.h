@@ -2,35 +2,13 @@
 
 #include "../include/Hash.h"
 #include "../include/Signal.h"
-
-#pragma pack(push, 1)
-
-union AppSignalStateFlags
-{
-	struct
-	{
-		quint32	valid : 1;
-		quint32	overflow : 1;
-		quint32	underflow : 1;
-	};
-
-	quint32 allFlags;
-
-	inline void reset() { allFlags = 0; }
-};
-
-#pragma pack(pop)
+#include "../include/AppSignalState.h"
 
 
-struct AppSignalState
+struct AppSignalStateEx
 {
 private:
-	// signal state
-	//
-	Times m_time;
-
-	AppSignalStateFlags m_flags;
-	double m_value = 0;
+	AppSignalState m_state;
 
 	// paramters needed to update state
 	//
@@ -45,10 +23,12 @@ private:
 	int m_index = 0;
 
 public:
-	AppSignalState();
+	AppSignalStateEx();
 
 	void setSignalParams(int index, Signal* signal);
 	void setState(Times time, AppSignalStateFlags flags, double value);
+
+	friend class AppSignalStates;
 };
 
 
@@ -57,8 +37,10 @@ class AppSignalStates
 private:
 	QMutex m_allMutex;
 
-	AppSignalState* m_appSignalState = nullptr;
+	AppSignalStateEx* m_appSignalState = nullptr;
 	int m_size = 0;
+
+	QHash<Hash, const AppSignalState*> m_hash2State;
 
 public:
 	~AppSignalStates();
@@ -69,7 +51,11 @@ public:
 
 	int size() const { return m_size; }
 
-	AppSignalState* operator [] (int index);
+	AppSignalStateEx* operator [] (int index);
+
+	void buidlHash2State();
+
+	bool getState(Hash hash, AppSignalState& state) const;
 };
 
 

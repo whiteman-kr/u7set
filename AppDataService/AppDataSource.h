@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include/DataSource.h"
-#include "AppSignalState.h"
+#include "AppSignalStateEx.h"
 
 
 class AppDataSource : public DataSource
