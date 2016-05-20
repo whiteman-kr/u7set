@@ -81,7 +81,7 @@ void AppDataProcessingWorker::parseRupData()
 
 		AppSignalStateFlags flags;
 
-		flags.reset();
+		flags.all = 0;
 
 		result = getValidity(parseInfo, flags);
 
@@ -90,7 +90,7 @@ void AppDataProcessingWorker::parseRupData()
 			m_validityParsingErrorCount++;
 		}
 
-		AppSignalState* signalState = m_signalStates[parseInfo.index];
+		AppSignalStateEx* signalState = m_signalStates[parseInfo.index];
 
 		if (signalState == nullptr)
 		{

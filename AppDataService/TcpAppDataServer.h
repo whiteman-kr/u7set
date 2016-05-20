@@ -3,7 +3,7 @@
 #include "../include/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
-#include "AppSignalState.h"
+#include "AppSignalStateEx.h"
 
 
 class TcpAppDataServerThread;
@@ -53,6 +53,8 @@ private:
 	const QVector<QString>& appSignalIDs() const;
 	const AppSignals& appSignals() const;
 
+	bool getState(Hash hash, AppSignalState& state);
+
 public:
 	TcpAppDataServer();
 	virtual ~TcpAppDataServer();
@@ -80,16 +82,21 @@ class TcpAppDataServerThread : public Tcp::ServerThread
 private:
 	QVector<QString> m_appSignalIDs;
 	const AppSignals& m_appSignals;
+	const AppSignalStates& m_appSignalStates;
 
 	void buildAppSignalIDs();
 
 public:
 	TcpAppDataServerThread(	const HostAddressPort& listenAddressPort,
 							TcpAppDataServer* server,
-							const AppSignals& appSignals);
+							const AppSignals& appSignals,
+							const AppSignalStates& appSignalStates);
 
 	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
 	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
+
 	const AppSignals& appSignals() const { return m_appSignals; }
+
+	bool getState(Hash hash, AppSignalState& state);
 };
 

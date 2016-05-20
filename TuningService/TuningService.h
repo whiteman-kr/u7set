@@ -2,7 +2,7 @@
 
 #include "../include/Service.h"
 #include "../include/ServiceSettings.h"
-#include "../AppDataService/AppSignalState.h"
+#include "../AppDataService/AppSignalStateEx.h"
 #include "../TuningService/TuningSocket.h"
 #include "TuningDataSource.h"
 

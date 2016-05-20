@@ -771,11 +771,11 @@ message AppSignal
 //
 message AppSignalState
 {
-    optional uint64 hash = 1;
-    optional double value = 2;
-    optional uint32 flags = 3;
-    optional sint64 systemTime = 4;
-    optional sint64 localTime = 5;
-    optional sint64 plantTime = 6;
+    optional uint64 hash = 1 [default = 0];
+    optional double value = 2 [default = 0];
+    optional uint32 flags = 3 [default = 0];
+    optional sint64 systemTime = 4 [default = 0];
+    optional sint64 localTime = 5 [default = 0];
+    optional sint64 plantTime = 6 [default = 0];
 }
 

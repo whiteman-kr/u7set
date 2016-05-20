@@ -39,7 +39,7 @@ SOURCES +=\
 	MainIPEN.cpp \
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
-	../AppDataService/AppSignalState.cpp \
+	../AppDataService/AppSignalStateEx.cpp \
 	../TuningService/TuningSocket.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
@@ -71,7 +71,7 @@ HEADERS  += TuningMainWindow.h \
 	../include/JsonSerializable.h \
 	../include/Signal.h \
 	SafetyChannelSignalsModel.h \
-	../AppDataService/AppSignalState.h \
+	../AppDataService/AppSignalStateEx.h \
 	../TuningService/TuningSocket.h \
 	../include/Crc.h \
 	AnalogSignalSetter.h \

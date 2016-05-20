@@ -81,7 +81,6 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
     AppDataService.cpp \
-    AppSignalState.cpp \
     ../lib/Queue.cpp \
     ../lib/DataChannel.cpp \
     ../lib/DataProtocols.cpp \
@@ -92,7 +91,9 @@ SOURCES += main.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
     ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc
+    ../Proto/serialization.pb.cc \
+    AppSignalStateEx.cpp \
+    ../lib/AppSignalState.cpp
 
 HEADERS += \
 	Stable.h \
@@ -121,7 +122,6 @@ HEADERS += \
     ../include/XmlHelper.h \
     ../include/DataProtocols.h \
     AppDataService.h \
-    AppSignalState.h \
     ../include/Queue.h \
     ../include/WUtils.h \
     ../include/Utils.h \
@@ -134,7 +134,9 @@ HEADERS += \
     TcpAppDataServer.h \
     ../Proto/network.pb.h \
     ../include/Hash.h \
-    ../Proto/serialization.pb.h
+    ../Proto/serialization.pb.h \
+    ../include/AppSignalState.h \
+    AppSignalStateEx.h
 
 include(../qtservice/src/qtservice.pri)
 
