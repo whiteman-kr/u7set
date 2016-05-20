@@ -3,6 +3,7 @@
 
 #include <QMutex>
 #include <unordered_map>
+#include "../include/Hash.h"
 #include "../include/Signal.h"
 
 typedef quint64 SignalHash;
@@ -13,13 +14,18 @@ public:
 	SignalManager();
 	virtual ~SignalManager();
 
+public:
+	void reset();
+
 private:
 	QMutex m_paramMutex;
-	//std::unordered_map<SignalHash, Signal> m_signals;
+	//std::unordered_map<Hash, Signal> m_signals;
 
 	QMutex m_stateMutex;
-	//std::unordered_map<SignalHash, Signal> m_states;
+	//std::unordered_map<Hash, uint> m_states;
 
 };
+
+extern SignalManager theSignals;
 
 #endif // SIGNALSET_H
