@@ -984,6 +984,8 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_enabletuning(m_enableTuning);
 	s->set_tuningdefaultvalue(m_tuningDefaultValue);
 
+	s->set_hash(calcHash(m_appSignalID));
+
 	s->set_regvalueaddroffset(m_regValueAddr.offset());
 	s->set_regvalueaddrbit(m_regValueAddr.bit());
 
@@ -1234,6 +1236,11 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 	if (s->has_tuningdefaultvalue())
 	{
 		m_tuningDefaultValue = s->tuningdefaultvalue();
+	}
+
+	if (s->has_hash())
+	{
+		m_hash = s->hash();
 	}
 
 	if (s->has_regvalueaddroffset())

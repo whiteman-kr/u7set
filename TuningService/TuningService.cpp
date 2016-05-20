@@ -467,11 +467,13 @@ namespace Tuning
 
 	void TuningServiceWorker::requestPreprocessing(Tuning::SocketRequest& sr)
 	{
+		Q_UNUSED(sr);
 	}
 
 
 	void TuningServiceWorker::replyPreprocessing(Tuning::SocketReply& sr)
 	{
+		Q_UNUSED(sr);
 	}
 
 

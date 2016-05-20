@@ -1026,7 +1026,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
   AppSignal_descriptor_ = file->message_type(47);
-  static const int AppSignal_offsets_[55] = {
+  static const int AppSignal_offsets_[56] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signalgroupid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signalinstanceid_),
@@ -1074,6 +1074,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, byteorder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, enabletuning_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuningdefaultvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalueaddroffset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalueaddrbit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalidityaddroffset_),
@@ -1490,7 +1491,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ionValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n"
     "\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0"
     "\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002"
-    " \002(\005:\002-1\"\320\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsi"
+    " \002(\005:\002-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsi"
     "gnalGroupID\030\002 \001(\005\022\030\n\020signalInstanceID\030\003 "
     "\001(\005\022\023\n\013changesetID\030\004 \001(\005\022\022\n\ncheckedOut\030\005"
     " \001(\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemChannel"
@@ -1515,21 +1516,21 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ype\030) \001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\rfilter"
     "ingTime\030+ \001(\001\022\027\n\017spreadTolerance\030, \001(\001\022\021"
     "\n\tbyteOrder\030- \001(\005\022\024\n\014enableTuning\030. \001(\010\022"
-    "\032\n\022tuningDefaultValue\030/ \001(\001\022\033\n\022regValueA"
-    "ddrOffset\030\310\001 \001(\005\022\030\n\017regValueAddrBit\030\311\001 \001"
-    "(\005\022\036\n\025regValidityAddrOffset\030\312\001 \001(\005\022\033\n\022re"
-    "gValidityAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrO"
-    "ffset\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026"
-    "\n\rramAddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 "
-    "\001(\005\"v\n\016AppSignalState\022\014\n\004hash\030\001 \001(\004\022\r\n\005v"
-    "alue\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022\022\n\nsystemTime\030"
-    "\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021\n\tplantTime\030\006 "
-    "\001(\022*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillim"
-    "eter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection"
-    "\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType"
-    "\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFor"
-    "mat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005F"
-    "loat\020\002", 7566);
+    "\032\n\022tuningDefaultValue\030/ \001(\001\022\014\n\004hash\0300 \001("
+    "\004\022\033\n\022regValueAddrOffset\030\310\001 \001(\005\022\030\n\017regVal"
+    "ueAddrBit\030\311\001 \001(\005\022\036\n\025regValidityAddrOffse"
+    "t\030\312\001 \001(\005\022\033\n\022regValidityAddrBit\030\313\001 \001(\005\022\033\n"
+    "\022ioBufferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBufferAd"
+    "drBit\030\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001(\005\022\023\n\n"
+    "ramAddrBit\030\317\001 \001(\005\"v\n\016AppSignalState\022\014\n\004h"
+    "ash\030\001 \001(\004\022\r\n\005value\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022"
+    "\022\n\nsystemTime\030\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021"
+    "\n\tplantTime\030\006 \001(\022*3\n\nSchemaUnit\022\013\n\007Displ"
+    "ay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connec"
+    "tionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n"
+    "\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001"
+    "*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSi"
+    "gnedInt\020\001\022\t\n\005Float\020\002", 7580);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -17749,6 +17750,7 @@ const int AppSignal::kSpreadToleranceFieldNumber;
 const int AppSignal::kByteOrderFieldNumber;
 const int AppSignal::kEnableTuningFieldNumber;
 const int AppSignal::kTuningDefaultValueFieldNumber;
+const int AppSignal::kHashFieldNumber;
 const int AppSignal::kRegValueAddrOffsetFieldNumber;
 const int AppSignal::kRegValueAddrBitFieldNumber;
 const int AppSignal::kRegValidityAddrOffsetFieldNumber;
@@ -17822,6 +17824,7 @@ void AppSignal::SharedCtor() {
   byteorder_ = 0;
   enabletuning_ = false;
   tuningdefaultvalue_ = 0;
+  hash_ = GOOGLE_ULONGLONG(0);
   regvalueaddroffset_ = 0;
   regvalueaddrbit_ = 0;
   regvalidityaddroffset_ = 0;
@@ -17950,9 +17953,10 @@ void AppSignal::Clear() {
     byteorder_ = 0;
     enabletuning_ = false;
     tuningdefaultvalue_ = 0;
-    regvalueaddroffset_ = 0;
+    hash_ = GOOGLE_ULONGLONG(0);
   }
   if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    regvalueaddroffset_ = 0;
     regvalueaddrbit_ = 0;
     regvalidityaddroffset_ = 0;
     regvalidityaddrbit_ = 0;
@@ -18722,6 +18726,22 @@ bool AppSignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(384)) goto parse_hash;
+        break;
+      }
+
+      // optional uint64 hash = 48;
+      case 48: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_hash:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &hash_)));
+          set_has_hash();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectTag(1600)) goto parse_regValueAddrOffset;
         break;
       }
@@ -19123,6 +19143,11 @@ void AppSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(47, this->tuningdefaultvalue(), output);
   }
 
+  // optional uint64 hash = 48;
+  if (has_hash()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(48, this->hash(), output);
+  }
+
   // optional int32 regValueAddrOffset = 200;
   if (has_regvalueaddroffset()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(200, this->regvalueaddroffset(), output);
@@ -19424,6 +19449,11 @@ void AppSignal::SerializeWithCachedSizes(
   // optional double tuningDefaultValue = 47;
   if (has_tuningdefaultvalue()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(47, this->tuningdefaultvalue(), target);
+  }
+
+  // optional uint64 hash = 48;
+  if (has_hash()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(48, this->hash(), target);
   }
 
   // optional int32 regValueAddrOffset = 200;
@@ -19778,6 +19808,15 @@ int AppSignal::ByteSize() const {
       total_size += 2 + 8;
     }
 
+    // optional uint64 hash = 48;
+    if (has_hash()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->hash());
+    }
+
+  }
+  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
     // optional int32 regValueAddrOffset = 200;
     if (has_regvalueaddroffset()) {
       total_size += 2 +
@@ -19785,8 +19824,6 @@ int AppSignal::ByteSize() const {
           this->regvalueaddroffset());
     }
 
-  }
-  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
     // optional int32 regValueAddrBit = 201;
     if (has_regvalueaddrbit()) {
       total_size += 2 +
@@ -20014,11 +20051,14 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_tuningdefaultvalue()) {
       set_tuningdefaultvalue(from.tuningdefaultvalue());
     }
-    if (from.has_regvalueaddroffset()) {
-      set_regvalueaddroffset(from.regvalueaddroffset());
+    if (from.has_hash()) {
+      set_hash(from.hash());
     }
   }
   if (from._has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    if (from.has_regvalueaddroffset()) {
+      set_regvalueaddroffset(from.regvalueaddroffset());
+    }
     if (from.has_regvalueaddrbit()) {
       set_regvalueaddrbit(from.regvalueaddrbit());
     }
@@ -20110,6 +20150,7 @@ void AppSignal::Swap(AppSignal* other) {
     std::swap(byteorder_, other->byteorder_);
     std::swap(enabletuning_, other->enabletuning_);
     std::swap(tuningdefaultvalue_, other->tuningdefaultvalue_);
+    std::swap(hash_, other->hash_);
     std::swap(regvalueaddroffset_, other->regvalueaddroffset_);
     std::swap(regvalueaddrbit_, other->regvalueaddrbit_);
     std::swap(regvalidityaddroffset_, other->regvalidityaddroffset_);

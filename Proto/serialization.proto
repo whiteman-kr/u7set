@@ -749,6 +749,8 @@ message AppSignal
     optional bool enableTuning = 46;
     optional double tuningDefaultValue = 47;
 
+    optional uint64 hash = 48;
+
     optional int32 regValueAddrOffset = 200;
     optional int32 regValueAddrBit = 201;
 
@@ -760,6 +762,8 @@ message AppSignal
 
     optional int32 ramAddrOffset = 206;
     optional int32 ramAddrBit = 207;
+
+
 }
 
 
