@@ -93,8 +93,13 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	m_service = new Tuning::TuningService(worker);
 
 	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
-	connect(m_service, &Tuning::TuningService::userRequest, this, &TuningMainWindow::onUserRequest);
-	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, this, &TuningMainWindow::onReplyWithNoZeroFlags);
+
+	LogWriter* logWriter = new LogWriter;
+	m_logThread = new QThread(this);
+	logWriter->moveToThread(m_logThread);
+	connect(m_service, &Tuning::TuningService::userRequest, logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
+	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
+	connect(m_logThread, &QThread::finished, logWriter, &QObject::deleteLater);
 
 	m_service->start();
 
@@ -141,6 +146,10 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 TuningMainWindow::~TuningMainWindow()
 {
+	m_logThread->quit();
+	m_logThread->wait();
+	delete m_logThread;
+
 	m_updateTimer->stop();
 	m_service->stop();
 	delete m_service;
@@ -194,44 +203,6 @@ void writeBuffer(QTextStream& out, QString caption, quint8* buffer, int size)
 		out << QString("%1 ").arg(buffer[i], sizeof(*buffer) * 2, 16, QChar('0'));
 	}
 	out << endl;
-}
-
-
-void TuningMainWindow::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
-{
-	QFile file("TuningIPEN.log");
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-	{
-		return;
-	}
-
-	QTextStream out(&file);
-
-	out << QString("------------------------------ Frame info of %1").arg(caption) << endl;
-	out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << endl;
-	out << QString("-------------------- Header (hex, bin, dec)") << endl;
-	auto& header = fotipFrame.header;
-
-	writeField(out, "Protocol version", header.protocolVersion);
-	writeField(out, "Unique ID", header.uniqueId);
-	writeField(out, "Subsystem key", header.subsystemKeyWord);
-	writeField(out, "Operation code", header.operationCode);
-	writeField(out, "Flags", header.flags.all);
-	writeField(out, "Start address", header.startAddress);
-	writeField(out, "Fotip frame size", header.fotipFrameSize);
-	writeField(out, "Rom size", header.romSize);
-	writeField(out, "Rom frame size", header.romFrameSize);
-	writeField(out, "Data type", header.dataType);
-
-	writeBuffer(out, "---------- Header reserve", header.reserve, FOTIP_HEADER_RESERVE_SIZE);
-
-	writeBuffer(out, "------------------------------ Data", reinterpret_cast<quint8*>(fotipFrame.data), FOTIP_TX_RX_DATA_SIZE);
-	writeBuffer(out, "------------------------------ Comparison result", reinterpret_cast<quint8*>(fotipFrame.comparisonResult), FOTIP_COMPARISON_RESULT_SIZE);
-	writeBuffer(out, "------------------------------ Data reserv", reinterpret_cast<quint8*>(fotipFrame.reserv), FOTIP_DATA_RESERV_SIZE);
-
-	out << endl << endl;
-
-	file.close();
 }
 
 
@@ -411,13 +382,51 @@ void TuningMainWindow::onTuningServiceReady()
 }
 
 
-void TuningMainWindow::onUserRequest(FotipFrame fotipFrame)
+void LogWriter::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
+{
+	QFile file("TuningIPEN.log");
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+	{
+		return;
+	}
+
+	QTextStream out(&file);
+
+	out << QString("------------------------------ Frame info of %1").arg(caption) << endl;
+	out << QString("At ") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz") << endl;
+	out << QString("-------------------- Header (hex, bin, dec)") << endl;
+	auto& header = fotipFrame.header;
+
+	writeField(out, "Protocol version", header.protocolVersion);
+	writeField(out, "Unique ID", header.uniqueId);
+	writeField(out, "Subsystem key", header.subsystemKeyWord);
+	writeField(out, "Operation code", header.operationCode);
+	writeField(out, "Flags", header.flags.all);
+	writeField(out, "Start address", header.startAddress);
+	writeField(out, "Fotip frame size", header.fotipFrameSize);
+	writeField(out, "Rom size", header.romSize);
+	writeField(out, "Rom frame size", header.romFrameSize);
+	writeField(out, "Data type", header.dataType);
+
+	writeBuffer(out, "---------- Header reserve", header.reserve, FOTIP_HEADER_RESERVE_SIZE);
+
+	writeBuffer(out, "------------------------------ Data", reinterpret_cast<quint8*>(fotipFrame.data), FOTIP_TX_RX_DATA_SIZE);
+	writeBuffer(out, "------------------------------ Comparison result", reinterpret_cast<quint8*>(fotipFrame.comparisonResult), FOTIP_COMPARISON_RESULT_SIZE);
+	writeBuffer(out, "------------------------------ Data reserv", reinterpret_cast<quint8*>(fotipFrame.reserv), FOTIP_DATA_RESERV_SIZE);
+
+	out << endl << endl;
+
+	file.close();
+}
+
+
+void LogWriter::onUserRequest(FotipFrame fotipFrame)
 {
 	writeFrameToLog("User request", fotipFrame);
 }
 
 
-void TuningMainWindow::onReplyWithNoZeroFlags(FotipFrame fotipFrame)
+void LogWriter::onReplyWithNoZeroFlags(FotipFrame fotipFrame)
 {
 	writeFrameToLog("Reply with no zero flags", fotipFrame);
 }
