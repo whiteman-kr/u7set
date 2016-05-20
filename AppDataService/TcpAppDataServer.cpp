@@ -71,6 +71,9 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetSignalParamRequest(requestData, requestDataSize);
 		break;
 
+	case ADS_GET_APP_SIGNAL_STATE_MAX:
+		break;
+
 	default:
 		assert(false);
 		break;

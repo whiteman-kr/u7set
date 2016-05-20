@@ -11,6 +11,7 @@
 #include "../include/DataSource.h"
 #include "../VFrame30/Afb.h"
 #include "../include/ProtobufHelper.h"
+#include "../include/Hash.h"
 
 
 class QXmlStreamAttributes;
@@ -153,6 +154,8 @@ private:
 	bool m_enableTuning = false;
 	double m_tuningDefaultValue = 0;
 
+	Hash m_hash = 0;					// hash of AppSignalID
+
 	Address16 m_ioBufferAddr;			// only for modules input/output signals
 										// signal address in i/o modules buffers
 
@@ -245,6 +248,8 @@ public:
 
 	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
 	const Address16& tuningAddr() const { return m_tuningAddr; }
+
+	Hash hash() const { return m_hash; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
