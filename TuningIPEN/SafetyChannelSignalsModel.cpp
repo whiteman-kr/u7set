@@ -8,11 +8,12 @@ const int	SIGNAL_ID_COLUMN = 0,
 			SIGNAL_DESCRIPTION_COLUMN = 1,
 			NEW_VALUE_COLUMN = 2,
 			CURRENT_VALUE_COLUMN = 3,
-			ORIGINAL_LOW_LIMIT_COLUMN = 4,
-			ORIGINAL_HIGH_LIMIT_COLUMN = 5,
-			RECEIVED_LOW_LIMIT_COLUMN = 6,
-			RECEIVED_HIGH_LIMIT_COLUMN = 7,
-			COLUMN_COUNT = 8;
+			DEFAULT_VALUE_COLUMN = 4,
+			ORIGINAL_LOW_LIMIT_COLUMN = 5,
+			ORIGINAL_HIGH_LIMIT_COLUMN = 6,
+			RECEIVED_LOW_LIMIT_COLUMN = 7,
+			RECEIVED_HIGH_LIMIT_COLUMN = 8,
+			COLUMN_COUNT = 9;
 
 bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem&, const QModelIndex& index)
 {
@@ -72,94 +73,116 @@ int SafetyChannelSignalsModel::columnCount(const QModelIndex& parent) const
 
 QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) const
 {
-	if (role == Qt::DisplayRole)
+	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
+	auto state = m_states[index.row()];
+	switch (role)
 	{
-		Signal& signal = m_sourceInfo.tuningSignals[index.row()];
-		auto state = m_states[index.row()];
-		switch (index.column())
+		case Qt::DisplayRole:
 		{
-			case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
-			case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
-			case NEW_VALUE_COLUMN:
+			switch (index.column())
 			{
-				double value = state.newValue;
-				if (qIsNaN(value))
+				case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
+				case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
+				case NEW_VALUE_COLUMN:
 				{
-					return "";
-				}
-				else
-				{
-					if (signal.isAnalog())
+					double value = state.newValue;
+					if (qIsNaN(value))
 					{
-						return value;
+						return "";
 					}
 					else
 					{
-						return value == 0 ? "No" : "Yes";
+						if (signal.isAnalog())
+						{
+							return value;
+						}
+						else
+						{
+							return value == 0 ? "No" : "Yes";
+						}
 					}
 				}
-			}
-			break;
-			case CURRENT_VALUE_COLUMN:
-			{
-				double value = state.currentValue;
-				if (qIsNaN(value))
+				break;
+				case CURRENT_VALUE_COLUMN:
 				{
-					return "";
-				}
-				else
-				{
-					if (state.validity == false)
+					double value = state.currentValue;
+					if (qIsNaN(value))
 					{
-						return "???";
-					}
-					if (signal.isAnalog())
-					{
-						return value;
+						return "";
 					}
 					else
 					{
-						return value == 0 ? "No" : "Yes";
+						if (state.validity == false)
+						{
+							return "???";
+						}
+						if (signal.isAnalog())
+						{
+							return value;
+						}
+						else
+						{
+							return value == 0 ? "No" : "Yes";
+						}
 					}
 				}
-			}
-			break;
-			case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
-			case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
-			case RECEIVED_LOW_LIMIT_COLUMN:
-			{
-				double value = state.lowLimit;
-				if (qIsNaN(value))
+				break;
+				case DEFAULT_VALUE_COLUMN: return signal.tuningDefaultValue();
+				case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
+				case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
+				case RECEIVED_LOW_LIMIT_COLUMN:
 				{
-					return "";
-				}
-				else
-				{
-					if (state.validity == false)
+					double value = state.lowLimit;
+					if (qIsNaN(value))
 					{
-						return "???";
+						return "";
 					}
-					return value;
-				}
-			}
-			break;
-			case RECEIVED_HIGH_LIMIT_COLUMN:{
-				double value = state.highLimit;
-				if (qIsNaN(value))
-				{
-					return "";
-				}
-				else
-				{
-					if (state.validity == false)
+					else
 					{
-						return "???";
+						if (state.validity == false)
+						{
+							return "???";
+						}
+						return value;
 					}
-					return value;
 				}
+				break;
+				case RECEIVED_HIGH_LIMIT_COLUMN:{
+					double value = state.highLimit;
+					if (qIsNaN(value))
+					{
+						return "";
+					}
+					else
+					{
+						if (state.validity == false)
+						{
+							return "???";
+						}
+						return value;
+					}
+				}
+				break;
 			}
-			break;
 		}
+		break;
+		case Qt::BackgroundColorRole:
+		{
+			if (index.column() != CURRENT_VALUE_COLUMN)
+			{
+				return QVariant();
+			}
+			if (state.validity == false)
+			{
+				return QColor(Qt::red);
+			}
+			if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<double>::epsilon())
+			{
+				return QColor(Qt::yellow);
+			}
+			return QVariant();
+		}
+		break;
 	}
 	return QVariant();
 }
@@ -178,6 +201,8 @@ QVariant SafetyChannelSignalsModel::headerData(int section, Qt::Orientation orie
 				return "New\nvalue";
 			case CURRENT_VALUE_COLUMN:
 				return "Current\nvalue";
+			case DEFAULT_VALUE_COLUMN:
+				return "Default\nvalue";
 			case ORIGINAL_LOW_LIMIT_COLUMN:
 				return "Original\nLow limit";
 			case ORIGINAL_HIGH_LIMIT_COLUMN:
