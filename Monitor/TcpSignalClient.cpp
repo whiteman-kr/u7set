@@ -87,6 +87,7 @@ void TcpSignalClient::resetToGetSignalList()
 {
 	QThread::msleep(theSettings.requestTimeInterval());
 
+	theSignals.reset();
 	m_signalList.clear();
 
 	requestSignalListStart();
@@ -140,7 +141,7 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 
 		// request params
 		//
-		assert(false);
+		requestSignalParam(0);
 	}
 
 	m_signalList.clear();
@@ -159,16 +160,14 @@ void TcpSignalClient::requestSignalListNext(int part)
 	//
 	if (part >= m_getSignalListStartReply.partcount())
 	{
-		// Request Params?
-		//
 		if (m_signalList.size() != m_getSignalListStartReply.totalitemcount())
 		{
-			//
-			//
 			assert(m_signalList.size() != m_getSignalListStartReply.totalitemcount());
 		}
 
-		assert(false);
+		// Request params
+		//
+		requestSignalParam(0);
 		return;
 	}
 
@@ -215,12 +214,84 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 
 	for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
 	{
-		m_signalList << QString::fromStdString(m_getSignalListNextReply.appsignalids(i));
+		m_signalList.push_back(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
 	}
 
 	// Next request
 	//
 	requestSignalListNext(m_getSignalListNextReply.part() + 1);
+
+	return;
+}
+
+void TcpSignalClient::requestSignalParam(int startIndex)
+{
+	assert(isClearToSendRequest());
+
+	if (startIndex == 0)
+	{
+		theSignals.reset();
+	}
+
+	if (startIndex >= m_signalList.size())
+	{
+		resetToGetState();
+		return;
+	}
+
+	m_getSignalParamRequest.mutable_signalhashes()->Clear();
+	m_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
+
+	for (int i = startIndex;
+		 i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX &&
+		 i < m_signalList.size();
+		 i++)
+	{
+		Hash signalHash = calcHash(m_signalList[i]);
+		m_getSignalParamRequest.add_signalhashes(signalHash);
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalParamRequest);
+	return;
+}
+
+void TcpSignalClient::processSignalParam(const QByteArray& data)
+{
+	bool ok = m_getSignalParamReply.ParseFromArray(data.constData(), data.size());
+
+	if (ok == false)
+	{
+		assert(ok);
+		resetToGetSignalList();
+		return;
+	}
+
+	if (m_getSignalParamReply.error() != 0)
+	{
+		qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
+		assert(m_getSignalParamReply.error() != 0);
+
+		resetToGetSignalList();
+		return;
+	}
+
+	for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
+	{
+		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignalparams(i);
+
+		//Signal s(false)
+
+		//read isgnal!!!!
+	}
+
+//	for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
+//	{
+//		m_signalList.push_back(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
+//	}
+
+//	// Next request
+//	//
+//	requestSignalListNext(m_getSignalListNextReply.part() + 1);
 
 	return;
 }

@@ -89,3 +89,8 @@ void AnalogSignalSetter::setNewValue()
 	m_lastSentValue = newValue;
 }
 
+void AnalogSignalSetter::changeNewValue(double newValue)
+{
+	m_input->setText(QString::number(newValue));
+}
+

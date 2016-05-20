@@ -14,7 +14,7 @@ const int	SIGNAL_ID_COLUMN = 0,
 			RECEIVED_HIGH_LIMIT_COLUMN = 7,
 			COLUMN_COUNT = 8;
 
-bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem&, const QModelIndex& index)
 {
 	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(model);
 	if (signalsModel == nullptr)
