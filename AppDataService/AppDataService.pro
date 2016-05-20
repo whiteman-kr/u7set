@@ -91,7 +91,8 @@ SOURCES += main.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
-    ../Proto/network.pb.cc
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS += \
 	Stable.h \
@@ -131,7 +132,9 @@ HEADERS += \
     AppDataServiceTypes.h \
     AppDataProcessingThread.h \
     TcpAppDataServer.h \
-    ../Proto/network.pb.h
+    ../Proto/network.pb.h \
+    ../include/Hash.h \
+    ../Proto/serialization.pb.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -174,4 +177,5 @@ win32 {
 }
 
 DISTFILES += \
-    ../Proto/network.proto
+    ../Proto/network.proto \
+    ../Proto/serialization.proto

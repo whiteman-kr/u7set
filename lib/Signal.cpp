@@ -929,6 +929,355 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 }
 
 
+void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
+{
+	if (s == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	s->set_id(m_ID);
+	s->set_signalgroupid(m_signalGroupID);
+	s->set_signalinstanceid(m_signalInstanceID);
+	s->set_changesetid(m_changesetID);
+	s->set_checkedout(m_checkedOut);
+	s->set_userid(m_userID);
+	s->set_subsystemchannel(TO_INT(m_channel));
+	s->set_type(m_type);
+	s->set_created(m_created.toMSecsSinceEpoch());
+	s->set_deleted(m_deleted);
+	s->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
+	s->set_instanceaction(m_instanceAction);
+	s->set_appsignalid(m_appSignalID.toStdString());
+	s->set_customappsignalid(m_customAppSignalID.toStdString());
+	s->set_caption(m_caption.toStdString());
+	s->set_dataformat(m_dataFormat);
+	s->set_datasize(m_dataSize);
+	s->set_lowadc(m_lowADC);
+	s->set_highadc(m_highADC);
+	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
+	s->set_highengeneeringunits(m_highEngeneeringUnits);
+	s->set_unitid(m_unitID);
+	s->set_lowvalidrange(m_lowValidRange);
+	s->set_highvalidrange(m_highValidRange);
+	s->set_unbalancelimit(m_unbalanceLimit);
+	s->set_inputlowlimit(m_inputLowLimit);
+	s->set_inputhighlimit(m_inputHighLimit);
+	s->set_inputunitid(m_inputUnitID);
+	s->set_inputsensorid(m_inputSensorID);
+	s->set_outputlowlimit(m_outputLowLimit);
+	s->set_outputhighlimit(m_outputHighLimit);
+	s->set_outputunitid(m_outputUnitID);
+	s->set_outputmode(m_outputMode);
+	s->set_outputsensorid(m_outputSensorID);
+	s->set_acquire(m_acquire);
+	s->set_calculated(m_calculated);
+	s->set_normalstate(m_normalState);
+	s->set_decimalplaces(m_decimalPlaces);
+	s->set_aperture(m_aperture);
+	s->set_inouttype(TO_INT(m_inOutType));
+	s->set_equipmentid(m_equipmentID.toStdString());
+	s->set_filteringtime(m_filteringTime);
+	s->set_spreadtolerance(m_spreadTolerance);
+	s->set_byteorder(TO_INT(m_byteOrder));
+	s->set_enabletuning(m_enableTuning);
+	s->set_tuningdefaultvalue(m_tuningDefaultValue);
+
+	s->set_regvalueaddroffset(m_regValueAddr.offset());
+	s->set_regvalueaddrbit(m_regValueAddr.bit());
+
+	s->set_regvalidityaddroffset(m_regValidityAddr.offset());
+	s->set_regvalidityaddrbit(m_regValidityAddr.bit());
+
+	s->set_iobufferaddroffset(m_ioBufferAddr.offset());
+	s->set_iobufferaddrbit(m_ioBufferAddr.bit());
+
+	s->set_ramaddroffset(m_ramAddr.offset());
+	s->set_ramaddrbit(m_ramAddr.bit());
+}
+
+
+void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
+{
+	if (s == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (s->has_id())
+	{
+		m_ID = s->id();
+	}
+
+	if (s->has_signalgroupid())
+	{
+		m_signalGroupID = s->signalgroupid();
+	}
+
+	if (s->has_signalinstanceid())
+	{
+		m_signalInstanceID = s->signalinstanceid();
+	}
+
+	if (s->has_changesetid())
+	{
+		m_changesetID = s->changesetid();
+	}
+
+	if (s->has_checkedout())
+	{
+		m_checkedOut = s->checkedout();
+	}
+
+	if (s->has_userid())
+	{
+		m_userID = s->userid();
+	}
+
+	if (s->has_subsystemchannel())
+	{
+		m_channel = static_cast<E::Channel>(s->subsystemchannel());
+	}
+
+	if (s->has_type())
+	{
+		m_type = static_cast<E::SignalType>(s->type());
+	}
+
+	if (s->has_created())
+	{
+		m_created.setMSecsSinceEpoch(s->created());
+	}
+
+	if (s->has_deleted())
+	{
+		m_deleted = s->deleted();
+	}
+
+	if (s->has_instancecreated())
+	{
+		m_instanceCreated.setMSecsSinceEpoch(s->instancecreated());
+	}
+
+	if (s->has_instanceaction())
+	{
+		m_instanceAction = static_cast<E::InstanceAction>(s->instanceaction());
+	}
+
+	if (s->has_appsignalid())
+	{
+		m_appSignalID.fromStdString(s->appsignalid());
+	}
+
+	if (s->has_customappsignalid())
+	{
+		m_customAppSignalID.fromStdString(s->customappsignalid());
+	}
+
+	if (s->has_caption())
+	{
+		m_caption.fromStdString(s->caption());
+	}
+
+	if(s->has_dataformat())
+	{
+		m_dataFormat = static_cast<E::DataFormat>(s->dataformat());
+	}
+
+	if (s->has_datasize())
+	{
+		m_dataSize = s->datasize();
+	}
+
+	if (s->has_lowadc())
+	{
+		m_lowADC = s->lowadc();
+	}
+
+	if (s->has_highadc())
+	{
+		m_highADC = s->highadc();
+	}
+
+	if (s->has_lowengeneeringunits())
+	{
+		m_lowEngeneeringUnits = s->lowengeneeringunits();
+	}
+
+	if (s->has_highengeneeringunits())
+	{
+		m_highEngeneeringUnits = s->highengeneeringunits();
+	}
+
+	if (s->has_unitid())
+	{
+		m_unitID = s->unitid();
+	}
+
+	if (s->has_lowvalidrange())
+	{
+		m_lowValidRange = s->lowvalidrange();
+	}
+
+	if (s->has_highvalidrange())
+	{
+		m_highValidRange = s->highvalidrange();
+	}
+
+	if (s->has_unbalancelimit())
+	{
+		m_unbalanceLimit = s->unbalancelimit();
+	}
+
+	if (s->has_inputlowlimit())
+	{
+		m_inputLowLimit = s->inputlowlimit();
+	}
+
+	if (s->has_inputhighlimit())
+	{
+		m_inputHighLimit = s->inputhighlimit();
+	}
+
+	if (s->has_inputunitid())
+	{
+		m_inputUnitID = s->inputunitid();
+	}
+
+	if (s->has_inputsensorid())
+	{
+		m_inputSensorID = s->inputsensorid();
+	}
+
+	if (s->has_outputlowlimit())
+	{
+		m_outputLowLimit = s->outputlowlimit();
+	}
+
+	if (s->has_outputhighlimit())
+	{
+		m_outputHighLimit = s->outputhighlimit();
+	}
+
+	if (s->has_outputunitid())
+	{
+		m_outputUnitID = s->outputunitid();
+	}
+
+	if (s->has_outputmode())
+	{
+		m_outputMode = static_cast<E::OutputMode>(s->outputmode());
+	}
+
+	if (s->has_outputsensorid())
+	{
+		m_outputSensorID = s->outputsensorid();
+	}
+
+	if (s->has_acquire())
+	{
+		m_acquire = s->acquire();
+	}
+
+	if (s->has_calculated())
+	{
+		m_calculated = s->calculated();
+	}
+
+	if (s->has_normalstate())
+	{
+		m_normalState = s->normalstate();
+	}
+
+	if (s->has_decimalplaces())
+	{
+		m_decimalPlaces = s->decimalplaces();
+	}
+
+	if (s->has_aperture())
+	{
+		m_aperture = s->aperture();
+	}
+
+	if (s->has_inouttype())
+	{
+		m_inOutType = static_cast<E::SignalInOutType>(s->inouttype());
+	}
+
+	if (s->has_equipmentid())
+	{
+		m_equipmentID.fromStdString(s->equipmentid());
+	}
+
+	if (s->has_filteringtime())
+	{
+		m_filteringTime = s->filteringtime();
+	}
+
+	if (s->has_spreadtolerance())
+	{
+		m_spreadTolerance = s->spreadtolerance();
+	}
+
+	if (s->has_byteorder())
+	{
+		m_byteOrder = static_cast<E::ByteOrder>(s->byteorder());
+	}
+
+	if (s->has_enabletuning())
+	{
+		m_enableTuning = s->enabletuning();
+	}
+
+	if (s->has_tuningdefaultvalue())
+	{
+		m_tuningDefaultValue = s->tuningdefaultvalue();
+	}
+
+	if (s->has_regvalueaddroffset())
+	{
+		m_regValueAddr.setOffset(s->regvalueaddroffset());
+	}
+
+	if (s->has_regvalueaddrbit())
+	{
+		m_regValueAddr.setBit(s->regvalueaddrbit());
+	}
+
+	if (s->has_regvalidityaddroffset())
+	{
+		m_regValidityAddr.setOffset(s->regvalidityaddroffset());
+	}
+
+	if (s->has_regvalidityaddrbit())
+	{
+		m_regValidityAddr.setBit(s->regvalidityaddrbit());
+	}
+
+	if (s->has_iobufferaddroffset())
+	{
+		m_ioBufferAddr.setOffset(s->iobufferaddroffset());
+	}
+
+	if (s->has_iobufferaddrbit())
+	{
+		m_ioBufferAddr.setBit(s->iobufferaddrbit());
+	}
+
+	if (s->has_ramaddroffset())
+	{
+		m_ramAddr.setOffset(s->ramaddroffset());
+	}
+
+	if (s->has_ramaddrbit())
+	{
+		m_ramAddr.setBit(s->ramaddrbit());
+	}
+}
+
+
 void SignalSet::buildStrID2IndexMap()
 {
 	int signalCount = count();

@@ -433,7 +433,6 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
-
 	bool result = true;
 
 	XmlReadHelper xml(fileData);
@@ -480,7 +479,7 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 
 	result &= xml.readIntAttribute("Count", &signalCount);
 
-	quint64 time1 = QDateTime::currentMSecsSinceEpoch();
+	//quint64 time1 = QDateTime::currentMSecsSinceEpoch();
 
 	for(int count = 0; count < signalCount; count++)
 	{
@@ -514,8 +513,10 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 		result &= res;
 	}
 
-	quint64 time2 = QDateTime::currentMSecsSinceEpoch();
-	qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
+	//quint64 time2 = QDateTime::currentMSecsSinceEpoch();
+	//qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
+
+	m_appSignals.buildHash2Signal();
 
 	return result;
 }

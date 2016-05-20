@@ -1,5 +1,5 @@
 #include "TcpAppDataServer.h"
-#include "../Proto/network.pb.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -59,12 +59,16 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch(requestID)
 	{
-	case ADS_GET_SIGNAL_LIST_START:
+	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetSignalListStartRequest();
 		break;
 
-	case ADS_GET_SIGNAL_LIST_NEXT:
+	case ADS_GET_APP_SIGNAL_LIST_NEXT:
 		onGetSignalListNextRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_PARAM:
+		onGetSignalParamRequest(requestData, requestDataSize);
 		break;
 
 	default:
@@ -76,77 +80,124 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 void TcpAppDataServer::onGetSignalListStartRequest()
 {
-	Network::GetSignalListStartReply reply;
+	m_getSignalListStartReply.set_totalitemcount(m_signalCount);
 
-	reply.set_totalitemcount(m_signalCount);
+	m_getSignalListStartReply.set_partcount(m_signalListPartCount);
 
-	reply.set_partcount(m_signalListPartCount);
+	m_getSignalListStartReply.set_itemsperpart(ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART);
 
-	reply.set_itemsperpart(GET_SIGNAL_LIST_ITEMS_PER_PART);
+	m_getSignalListStartReply.set_error(TO_INT(NetworkError::Success));
 
-	reply.set_error(ERROR_OK);
-
-	sendReply(reply);
+	sendReply(m_getSignalListStartReply);
 }
 
 
 void TcpAppDataServer::onGetSignalListNextRequest(const char* requestData, quint32 requestDataSize)
 {
-	Network::GetSignalListNextRequest request;
+	bool result = m_getSignalListNextRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
 
-	bool result = request.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	m_getSignalListNextReply.Clear();
 
 	if (result == false)
 	{
-		qDebug() << "Error parse Network::GetSignalListNextRequest";
+		m_getSignalListNextReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_getSignalListNextReply);
 		return;
 	}
 
-	int requestPartNo = request.part();
-
-	Network::GetSignalListNextReply reply;
+	int requestPartNo = m_getSignalListNextRequest.part();
 
 	if (requestPartNo < 0 ||  requestPartNo >= m_signalListPartCount)
 	{
-		reply.set_error(ERROR_BAD_PART_NO);			// bad part number
-		sendReply(reply);
+		m_getSignalListNextReply.set_error(TO_INT(NetworkError::WrongPartNo));
+		sendReply(m_getSignalListNextReply);
 		return;
 	}
 
-	int itemsInPart = m_signalCount - requestPartNo * GET_SIGNAL_LIST_ITEMS_PER_PART;
+	int itemsInPart = m_signalCount - requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART;
 
-	if (itemsInPart > GET_SIGNAL_LIST_ITEMS_PER_PART)
+	if (itemsInPart > ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART)
 	{
-		itemsInPart = GET_SIGNAL_LIST_ITEMS_PER_PART;
+		itemsInPart = ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART;
 	}
 
-	reply.set_part(requestPartNo);
+	m_getSignalListNextReply.set_part(requestPartNo);
 
 	const QVector<QString>& IDs = appSignalIDs();
 
-	int endIndex = requestPartNo * GET_SIGNAL_LIST_ITEMS_PER_PART + itemsInPart;
+	int endIndex = requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART + itemsInPart;
 
-	for(int i = requestPartNo * GET_SIGNAL_LIST_ITEMS_PER_PART; i < endIndex; i++ )
+	for(int i = requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART; i < endIndex; i++ )
 	{
-		reply.add_appsignalids(IDs[i].toStdString());
+		m_getSignalListNextReply.add_appsignalids(IDs[i].toStdString());
 	}
 
-	reply.set_error(ERROR_OK);
+	m_getSignalListNextReply.set_error(TO_INT(NetworkError::Success));
 
-	sendReply(reply);
+	sendReply(m_getSignalListNextReply);
+}
+
+
+void TcpAppDataServer::onGetSignalParamRequest(const char* requestData, quint32 requestDataSize)
+{
+	bool result = m_getAppSignalParamRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+
+	m_getAppSignalParamReply.Clear();
+
+	if (result == false)
+	{
+		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_getAppSignalParamReply);
+		return;
+	}
+
+	int hashesCount = m_getAppSignalParamRequest.signalhashes_size();
+
+	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+	{
+		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		sendReply(m_getAppSignalParamReply);
+		return;
+	}
+
+	for(int i = 0; i < hashesCount; i++)
+	{
+		int hash = m_getAppSignalParamRequest.signalhashes(i);
+
+		const Signal* signal = appSignals().getSignal(hash);
+
+		if (signal == nullptr)
+		{
+			continue;
+		}
+
+		//	m_protoAppSignal.Clear();
+
+		Proto::AppSignal* appSignal = m_getAppSignalParamReply.add_appsignalparams();
+
+		signal->serializeToProtoAppSignal(appSignal);
+	}
+
+	sendReply(m_getAppSignalParamReply);
 }
 
 
 int TcpAppDataServer::getSignalListPartCount(int signalCount)
 {
-	return signalCount / GET_SIGNAL_LIST_ITEMS_PER_PART +
-			((signalCount % GET_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
+	return signalCount / ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART +
+			((signalCount % ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
 }
 
 
-const QVector<QString>& TcpAppDataServer::appSignalIDs()
+const QVector<QString>& TcpAppDataServer::appSignalIDs() const
 {
 	return m_thread->appSignalIDs();
+}
+
+
+const AppSignals& TcpAppDataServer::appSignals() const
+{
+	return m_thread->appSignals();
 }
 
 

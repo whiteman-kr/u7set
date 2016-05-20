@@ -1,11 +1,12 @@
 #pragma once
 
 #include "../include/Tcp.h"
-
+#include "../Proto/network.pb.h"
+#include "../Proto/serialization.pb.h"
 #include "AppSignalState.h"
 
-class TcpAppDataServerThread;
 
+class TcpAppDataServerThread;
 
 // -------------------------------------------------------------------------------
 //
@@ -27,18 +28,26 @@ private:
 
 	// Request processing functions
 	//
-	static const int GET_SIGNAL_LIST_ITEMS_PER_PART = 10;		// 5000
-	static const int ERROR_OK = 0;
-	static const int ERROR_BAD_PART_NO = 1;
-
 	void onGetSignalListStartRequest();
 	void onGetSignalListNextRequest(const char* requestData, quint32 requestDataSize);
+	void onGetSignalParamRequest(const char* requestData, quint32 requestDataSize);
+
+	// reused protobuf messages
+	//
+	Network::GetSignalListStartReply m_getSignalListStartReply;
+
+	Network::GetSignalListNextRequest m_getSignalListNextRequest;
+	Network::GetSignalListNextReply m_getSignalListNextReply;
+
+	Network::GetAppSignalParamRequest m_getAppSignalParamRequest;
+	Network::GetAppSignalParamReply m_getAppSignalParamReply;
 
 	// helper functions
 	//
 	int getSignalListPartCount(int signalCount);
 
-	const QVector<QString>& appSignalIDs();
+	const QVector<QString>& appSignalIDs() const;
+	const AppSignals& appSignals() const;
 
 public:
 	TcpAppDataServer();
@@ -75,7 +84,8 @@ public:
 							TcpAppDataServer* server,
 							const AppSignals& appSignals);
 
-	const QVector<QString>& appSignalIDs() { return m_appSignalIDs; }
-	int appSignalIDsCount() { return m_appSignalIDs.count(); }
+	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
+	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
+	const AppSignals& appSignals() const { return m_appSignals; }
 };
 

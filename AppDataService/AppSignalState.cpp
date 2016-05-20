@@ -162,10 +162,48 @@ AppSignals::~AppSignals()
 
 void AppSignals::clear()
 {
+	m_hash2Signal.clear();
+
 	for(Signal* signal : *this)
 	{
 		delete signal;
 	}
 
 	HashedVector<QString, Signal*>::clear();
+}
+
+
+void AppSignals::buildHash2Signal()
+{
+	m_hash2Signal.clear();
+
+	m_hash2Signal.reserve(count() * 1.3);
+
+	for(Signal* signal : *this)
+	{
+		Hash hash = calcHash(signal->appSignalID());
+
+		if (m_hash2Signal.contains(hash))
+		{
+			Signal* s = m_hash2Signal[hash];
+
+			qDebug() << "AppSignals::buildHash2Signal() hash collision" << QString::number(hash, 16) << signal->appSignalID() << "and" << s->appSignalID();
+
+			assert(false);
+			continue;
+		}
+
+		m_hash2Signal.insert(hash, signal);
+	}
+}
+
+
+const Signal* AppSignals::getSignal(Hash hash) const
+{
+	if (m_hash2Signal.contains(hash))
+	{
+		return m_hash2Signal[hash];
+	}
+
+	return nullptr;
 }

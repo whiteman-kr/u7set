@@ -481,6 +481,7 @@ const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1302;
 
 // Limiters and other constants
 //
+const int ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART = 1000;
 const int ADS_GET_APP_SIGNAL_PARAM_MAX = 500;
 const int ADS_GET_APP_SIGNAL_STATE_MAX = 2000;
 
@@ -490,6 +491,7 @@ enum class NetworkError
 	WrongPartNo,
 	RequestParamExceed,
 	RequestStateExceed,
+	ParseRequestError,
 };
 
 //int operator= (NetworkError e)

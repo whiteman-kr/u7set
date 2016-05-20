@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../include/Hash.h"
 #include "../include/Signal.h"
 
 #pragma pack(push, 1)
@@ -74,10 +75,16 @@ public:
 
 class AppSignals : public HashedVector<QString, Signal*>
 {
+private:
+	QHash<Hash, Signal*> m_hash2Signal;
+
 public:
 	~AppSignals();
 
 	void clear();
+	void buildHash2Signal();
+
+	const Signal* getSignal(Hash hash) const;
 };
 
 

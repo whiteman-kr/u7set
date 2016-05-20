@@ -2,10 +2,9 @@
 #include <assert.h>
 #include <type_traits>
 #include <QString>
+#include <QtGlobal>
 
-typedef uint64_t Hash;
-
-const Hash UNDEFINED_HASH = 0x0000000000000000l;
+typedef quint64 Hash;
 
 inline Hash calcHash(const QString& str)
 {
