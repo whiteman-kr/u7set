@@ -31,7 +31,7 @@ private:
 	QScrollBar* m_scrollBar;
 	QTimer* m_updateTimer;
 
-	void addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
+	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
 	void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
@@ -42,11 +42,15 @@ public slots:
 	void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
 	void updateDataSourceStatus(Tuning::TuningDataSourceState state);
 
-	//void applyNewScrollBarValue();
+	void applyNewScrollBarValue();
 	void applyNewAutomaticMode(bool enabled);
 
 	void onUserRequest(FotipFrame fotipFrame);
 	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
+
+signals:
+	void scrollBarMoved(double newValue);
+	void automaticModeChanged(bool newValue);
 
 public:
 	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
