@@ -3,7 +3,7 @@
     <AfbElement StrId="#ff_sr_v1">
         <Properties>
             <Caption>ff_sr</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="106" OpIndex="9"/>
             <Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
             <Category>FlipFlop</Category>

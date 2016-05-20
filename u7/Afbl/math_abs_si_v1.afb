@@ -3,7 +3,7 @@
     <AfbElement StrId="#math_abs_si_v1">
         <Properties>
             <Caption>math_abs_si</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="0" OpIndex="13"/>
             <Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
             <Category>Math</Category>
