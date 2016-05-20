@@ -15,6 +15,18 @@ class QScrollBar;
 class QLabel;
 class AnalogSignalSetter;
 
+class LogWriter : public QObject
+{
+	Q_OBJECT
+
+private:
+	void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
+
+public slots:
+	void onUserRequest(FotipFrame fotipFrame);
+	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
+};
+
 class TuningMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -30,11 +42,11 @@ private:
 	QPushButton* m_automaticMode;
 	QScrollBar* m_scrollBar;
 	QTimer* m_updateTimer;
+	QThread* m_logThread;
 
 	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
-	void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
 
 public slots:
 	void updateSignalStates();
@@ -44,9 +56,6 @@ public slots:
 
 	void applyNewScrollBarValue();
 	void applyNewAutomaticMode(bool enabled);
-
-	void onUserRequest(FotipFrame fotipFrame);
-	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
 
 signals:
 	void scrollBarMoved(double newValue);

@@ -28,9 +28,10 @@ private:
 
 	// Request processing functions
 	//
-	void onGetSignalListStartRequest();
-	void onGetSignalListNextRequest(const char* requestData, quint32 requestDataSize);
-	void onGetSignalParamRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalListStartRequest();
+	void onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
 	// reused protobuf messages
 	//
@@ -41,6 +42,9 @@ private:
 
 	Network::GetAppSignalParamRequest m_getAppSignalParamRequest;
 	Network::GetAppSignalParamReply m_getAppSignalParamReply;
+
+	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
+	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
 	// helper functions
 	//

@@ -1070,17 +1070,17 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_appsignalid())
 	{
-		m_appSignalID.fromStdString(s->appsignalid());
+		m_appSignalID = QString::fromStdString(s->appsignalid());
 	}
 
 	if (s->has_customappsignalid())
 	{
-		m_customAppSignalID.fromStdString(s->customappsignalid());
+		m_customAppSignalID = QString::fromStdString(s->customappsignalid());
 	}
 
 	if (s->has_caption())
 	{
-		m_caption.fromStdString(s->caption());
+		m_caption = QString::fromStdString(s->caption());
 	}
 
 	if(s->has_dataformat())
@@ -1210,7 +1210,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_equipmentid())
 	{
-		m_equipmentID.fromStdString(s->equipmentid());
+		m_equipmentID = QString::fromStdString(s->equipmentid());
 	}
 
 	if (s->has_filteringtime())
