@@ -154,6 +154,8 @@ void AppSignalStates::buidlHash2State()
 {
 	m_hash2State.clear();
 
+	m_hash2State.reserve(m_size * 1.3);
+
 	for(int i = 0; i < m_size; i++)
 	{
 		AppSignalStateEx& state = m_appSignalState[i];
