@@ -3,7 +3,7 @@
     <AfbElement StrId="#latch_state_fp_v1">
         <Properties>
             <Caption>latch_state_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="2" OpIndex="13"/>
             <Description>Latch Block performs a latching of the input(floating-point) value by state and outputs result in accordance with control signal.</Description>
             <Category>Other</Category>

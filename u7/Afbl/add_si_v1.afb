@@ -3,7 +3,7 @@
     <AfbElement StrId="#add_si_v1">
         <Properties>
             <Caption>add_si</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="103" OpIndex="14"/>
             <Description>Adder Block with signed int data format</Description>
             <Category>Math</Category>

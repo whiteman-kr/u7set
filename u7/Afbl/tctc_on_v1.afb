@@ -3,7 +3,7 @@
     <AfbElement StrId="#tctc_on_v1">
         <Properties>
             <Caption>tctc_on</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="204" OpIndex="13"/>
             <Description>Time Counter Block with constant time value, turn on delay function</Description>
             <Category>Delay</Category>

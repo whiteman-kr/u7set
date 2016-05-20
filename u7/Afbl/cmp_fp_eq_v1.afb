@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmp_fp_eq_v1">
         <Properties>
             <Caption>cmp_fp_eq</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="2" OpIndex="16"/>
             <Description>Comparator Block, equal single-precision floating-point comparison</Description>
             <Category>Compare</Category>
@@ -26,7 +26,7 @@
             <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="14" Size="1"/>
         </OutputSignals>
         <Params>            
-            <AfbElementParam OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>

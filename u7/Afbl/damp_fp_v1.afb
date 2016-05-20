@@ -3,7 +3,7 @@
     <AfbElement StrId="#damp_fp_v1">
         <Properties>
             <Caption>damp_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="104" OpIndex="19"/>
             <Description>Damper Block with float data format</Description>
             <Category>Damper</Category>

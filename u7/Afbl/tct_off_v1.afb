@@ -3,7 +3,7 @@
     <AfbElement StrId="#tct_off_v1">
         <Properties>
             <Caption>tct_off</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="204" OpIndex="13"/>
             <Description>Time Counter Block with dynamic time value, turn off delay function</Description>
             <Category>Delay</Category>

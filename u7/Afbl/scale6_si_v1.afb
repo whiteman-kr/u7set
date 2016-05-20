@@ -3,7 +3,7 @@
     <AfbElement StrId="#scale6_si_v1">
         <Properties>
             <Caption>scale6_si</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="2" OpIndex="16"/>
             <Description>Scaling for 6 points Block performs signed integer input data scaling and outputs signed integer result in accordance with control signals.</Description>
             <Category>Scaling</Category>

@@ -3,7 +3,7 @@
     <AfbElement StrId="#dec_v1">
         <Properties>
             <Caption>dec</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="102" OpIndex="19"/>
             <Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
             <Category>Logic</Category>
