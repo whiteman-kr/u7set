@@ -17,12 +17,14 @@ public:
 public:
 	void reset();
 
+	void addSignal(const Signal& signal);
+
 private:
 	QMutex m_paramMutex;
-	//std::unordered_map<Hash, Signal> m_signals;
+	std::unordered_map<Hash, Signal> m_signals;
 
 	QMutex m_stateMutex;
-	//std::unordered_map<Hash, uint> m_states;
+	std::unordered_map<Hash, uint> m_states;
 
 };
 

@@ -53,6 +53,7 @@ private:
 
 	::Network::GetAppSignalParamRequest m_getSignalParamRequest;
 	::Network::GetAppSignalParamReply m_getSignalParamReply;
+	int m_lastSignalParamStartIndex = 0;
 
 	std::vector<QString> m_signalList;
 };

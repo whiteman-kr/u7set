@@ -227,6 +227,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 void TcpSignalClient::requestSignalParam(int startIndex)
 {
 	assert(isClearToSendRequest());
+	m_lastSignalParamStartIndex = startIndex;
 
 	if (startIndex == 0)
 	{
@@ -279,10 +280,19 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	{
 		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignalparams(i);
 
-		//Signal s(false)
+		Signal s(false);
+		s.serializeFromProtoAppSignal(&protoSignal);
 
-		//read isgnal!!!!
+		assert(s.hash() != 0);
+		assert(s.appSignalID().isEmpty() == false);
+
+		if (s.hash() != 0 && s.appSignalID().isEmpty() == false)
+		{
+			theSignals.addSignal(s);
+		}
 	}
+
+	requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 
 //	for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
 //	{
