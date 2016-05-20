@@ -134,6 +134,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	{
 		std::shared_ptr<Signal> signal = std::make_shared<Signal>(*signalVector[i]);
 		signal->setReadOnly(readOnly);
+
+		signal->propertyByCaption("Type")->setReadOnly(true);
+		signal->propertyByCaption("InOutType")->setReadOnly(true);
+
 		if (signal->isDiscrete())
 		{
 			signal->setDataFormat(E::UnsignedInt);
@@ -141,11 +145,27 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 			signal->propertyByCaption("DataFormat")->setReadOnly(true);
 			signal->propertyByCaption("DataSize")->setReadOnly(true);
 		}
+
 		if (!signal->isInternal())
 		{
 			signal->propertyByCaption("EnableTuning")->setVisible(false);
 			signal->propertyByCaption("TuningDefaultValue")->setVisible(false);
 		}
+
+		if (signal->isAnalog() && !signal->isInput())
+		{
+			signal->propertyByCaption("FilteringTime")->setVisible(false);
+			signal->propertyByCaption("SpreadTolerance")->setVisible(false);
+		}
+
+		if (signal->isAnalog() && signal->isInternal())
+		{
+			signal->propertyByCaption("LowADC")->setVisible(false);
+			signal->propertyByCaption("HighADC")->setVisible(false);
+			signal->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
+			signal->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
+		}
+
 		if (signal->isAnalog() && !signal->isOutput())
 		{
 			signal->propertyByCaption("OutputMode")->setVisible(false);
