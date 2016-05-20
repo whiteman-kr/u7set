@@ -60,18 +60,19 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 	switch(requestID)
 	{
 	case ADS_GET_APP_SIGNAL_LIST_START:
-		onGetSignalListStartRequest();
+		onGetAppSignalListStartRequest();
 		break;
 
 	case ADS_GET_APP_SIGNAL_LIST_NEXT:
-		onGetSignalListNextRequest(requestData, requestDataSize);
+		onGetAppSignalListNextRequest(requestData, requestDataSize);
 		break;
 
 	case ADS_GET_APP_SIGNAL_PARAM:
-		onGetSignalParamRequest(requestData, requestDataSize);
+		onGetAppSignalParamRequest(requestData, requestDataSize);
 		break;
 
-	case ADS_GET_APP_SIGNAL_STATE_MAX:
+	case ADS_GET_APP_SIGNAL_STATE:
+		onGetAppSignalStateRequest(requestData, requestDataSize);
 		break;
 
 	default:
@@ -81,7 +82,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 }
 
 
-void TcpAppDataServer::onGetSignalListStartRequest()
+void TcpAppDataServer::onGetAppSignalListStartRequest()
 {
 	m_getSignalListStartReply.set_totalitemcount(m_signalCount);
 
@@ -95,7 +96,7 @@ void TcpAppDataServer::onGetSignalListStartRequest()
 }
 
 
-void TcpAppDataServer::onGetSignalListNextRequest(const char* requestData, quint32 requestDataSize)
+void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize)
 {
 	bool result = m_getSignalListNextRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
 
@@ -141,7 +142,7 @@ void TcpAppDataServer::onGetSignalListNextRequest(const char* requestData, quint
 }
 
 
-void TcpAppDataServer::onGetSignalParamRequest(const char* requestData, quint32 requestDataSize)
+void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize)
 {
 	bool result = m_getAppSignalParamRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
 
@@ -165,7 +166,7 @@ void TcpAppDataServer::onGetSignalParamRequest(const char* requestData, quint32 
 
 	for(int i = 0; i < hashesCount; i++)
 	{
-		int hash = m_getAppSignalParamRequest.signalhashes(i);
+		Hash hash = m_getAppSignalParamRequest.signalhashes(i);
 
 		const Signal* signal = appSignals().getSignal(hash);
 
@@ -182,6 +183,14 @@ void TcpAppDataServer::onGetSignalParamRequest(const char* requestData, quint32 
 	}
 
 	sendReply(m_getAppSignalParamReply);
+}
+
+
+void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
+{
+	/*Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
+	Network::GetAppSignalStateReply m_getAppSignalStateReply;*/
+
 }
 
 
