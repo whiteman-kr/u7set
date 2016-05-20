@@ -2,7 +2,7 @@
 #include <QMetaProperty>
 #include "../include/DeviceObject.h"
 #include "AppDataService.h"
-
+#include "TcpAppDataServer.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -74,6 +74,30 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 }
 
 
+void AppDataServiceWorker::runTcpAppDataServer()
+{
+	assert(m_tcpAddDataServerThread == nullptr);
+
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
+
+	m_tcpAddDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
+															tcpAppDataSever,
+															m_appSignals);
+	m_tcpAddDataServerThread->start();
+}
+
+
+void AppDataServiceWorker::stopTcpAppDataServer()
+{
+	if (m_tcpAddDataServerThread != nullptr)
+	{
+		m_tcpAddDataServerThread->quitAndWait(10000);
+		delete m_tcpAddDataServerThread;
+
+		m_tcpAddDataServerThread = nullptr;
+	}
+}
+
 
 void AppDataServiceWorker::runTimer()
 {
@@ -96,6 +120,7 @@ void AppDataServiceWorker::initialize()
 	//
 	runCfgLoaderThread();
 	runServiceInfoThread();
+
 	runTimer();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
@@ -109,6 +134,8 @@ void AppDataServiceWorker::shutdown()
 	clearConfiguration();
 
 	stopTimer();
+
+	stopTcpAppDataServer();
 	stopServiceInfoThread();
 	stopCfgLoaderThread();
 
@@ -332,11 +359,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	if (result == true)
 	{
-		createAndInitSignalStates();
-
-		initDataChannelThreads();
-
-		runDataChannelThreads();
+		applyNewConfiguration();
 	}
 }
 
@@ -410,7 +433,6 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
-
 	bool result = true;
 
 	XmlReadHelper xml(fileData);
@@ -457,7 +479,7 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 
 	result &= xml.readIntAttribute("Count", &signalCount);
 
-	quint64 time1 = QDateTime::currentMSecsSinceEpoch();
+	//quint64 time1 = QDateTime::currentMSecsSinceEpoch();
 
 	for(int count = 0; count < signalCount; count++)
 	{
@@ -491,8 +513,10 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 		result &= res;
 	}
 
-	quint64 time2 = QDateTime::currentMSecsSinceEpoch();
-	qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
+	//quint64 time2 = QDateTime::currentMSecsSinceEpoch();
+	//qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
+
+	m_appSignals.buildHash2Signal();
 
 	return result;
 }
@@ -534,6 +558,7 @@ void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
+	stopTcpAppDataServer();
 	stopDataChannelThreads();
 
 	m_unitInfo.clear();
@@ -541,6 +566,18 @@ void AppDataServiceWorker::clearConfiguration()
 	m_appSignals.clear();
 	m_appDataSources.clear();
 	m_signalStates.clear();
+}
+
+
+void AppDataServiceWorker::applyNewConfiguration()
+{
+	createAndInitSignalStates();
+
+	initDataChannelThreads();
+
+	runDataChannelThreads();
+
+	runTcpAppDataServer();
 }
 
 

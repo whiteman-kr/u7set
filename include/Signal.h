@@ -11,6 +11,7 @@
 #include "../include/DataSource.h"
 #include "../VFrame30/Afb.h"
 #include "../include/ProtobufHelper.h"
+#include "../include/Hash.h"
 
 
 class QXmlStreamAttributes;
@@ -153,7 +154,9 @@ private:
 	bool m_enableTuning = false;
 	double m_tuningDefaultValue = 0;
 
-	Address16 m_iobufferAddr;			// only for modules input/output signals
+	Hash m_hash = 0;					// hash of AppSignalID
+
+	Address16 m_ioBufferAddr;			// only for modules input/output signals
 										// signal address in i/o modules buffers
 
 	Address16 m_ramAddr;				// signal address in LM RAM
@@ -226,12 +229,12 @@ public:
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	E::InstanceAction instanceAction() const { return m_instanceAction; }
 
-	Address16& iobufferAddr() { return m_iobufferAddr; }
+	Address16& iobufferAddr() { return m_ioBufferAddr; }
 	Address16& ramAddr() { return m_ramAddr; }
 	Address16& regValueAddr() { return m_regValueAddr; }
 	Address16& regValidityAddr() { return m_regValidityAddr; }
 
-	const Address16& iobufferAddr() const { return m_iobufferAddr; }
+	const Address16& iobufferAddr() const { return m_ioBufferAddr; }
 	const Address16& ramAddr() const { return m_ramAddr; }
 
 	const Address16& regValueAddr() const { return m_regValueAddr; }
@@ -245,6 +248,8 @@ public:
 
 	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
 	const Address16& tuningAddr() const { return m_tuningAddr; }
+
+	Hash hash() const { return m_hash; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
@@ -375,6 +380,9 @@ public:
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
+
+	void serializeToProtoAppSignal(Proto::AppSignal* s) const;
+	void serializeFromProtoAppSignal(const Proto::AppSignal* s);
 
 	friend class DbWorker;
 };

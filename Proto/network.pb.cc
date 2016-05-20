@@ -1707,9 +1707,6 @@ void GetAppSignalParamReply::CopyFrom(const GetAppSignalParamReply& from) {
 
 bool GetAppSignalParamReply::IsInitialized() const {
 
-  for (int i = 0; i < appsignalparams_size(); i++) {
-    if (!this->appsignalparams(i).IsInitialized()) return false;
-  }
   return true;
 }
 

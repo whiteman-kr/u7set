@@ -5853,19 +5853,19 @@ class AppSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 highadc() const;
   inline void set_highadc(::google::protobuf::int32 value);
 
-  // optional double lowLimit = 20;
-  inline bool has_lowlimit() const;
-  inline void clear_lowlimit();
-  static const int kLowLimitFieldNumber = 20;
-  inline double lowlimit() const;
-  inline void set_lowlimit(double value);
+  // optional double lowEngeneeringUnits = 20;
+  inline bool has_lowengeneeringunits() const;
+  inline void clear_lowengeneeringunits();
+  static const int kLowEngeneeringUnitsFieldNumber = 20;
+  inline double lowengeneeringunits() const;
+  inline void set_lowengeneeringunits(double value);
 
-  // optional double highLimit = 21;
-  inline bool has_highlimit() const;
-  inline void clear_highlimit();
-  static const int kHighLimitFieldNumber = 21;
-  inline double highlimit() const;
-  inline void set_highlimit(double value);
+  // optional double highEngeneeringUnits = 21;
+  inline bool has_highengeneeringunits() const;
+  inline void clear_highengeneeringunits();
+  static const int kHighEngeneeringUnitsFieldNumber = 21;
+  inline double highengeneeringunits() const;
+  inline void set_highengeneeringunits(double value);
 
   // optional int32 unitID = 22;
   inline bool has_unitid() const;
@@ -5881,19 +5881,19 @@ class AppSignal : public ::google::protobuf::Message {
   inline double adjustment() const;
   inline void set_adjustment(double value);
 
-  // optional double dropLimit = 24;
-  inline bool has_droplimit() const;
-  inline void clear_droplimit();
-  static const int kDropLimitFieldNumber = 24;
-  inline double droplimit() const;
-  inline void set_droplimit(double value);
+  // optional double lowValidRange = 24;
+  inline bool has_lowvalidrange() const;
+  inline void clear_lowvalidrange();
+  static const int kLowValidRangeFieldNumber = 24;
+  inline double lowvalidrange() const;
+  inline void set_lowvalidrange(double value);
 
-  // optional double excessLimit = 25;
-  inline bool has_excesslimit() const;
-  inline void clear_excesslimit();
-  static const int kExcessLimitFieldNumber = 25;
-  inline double excesslimit() const;
-  inline void set_excesslimit(double value);
+  // optional double highValidRange = 25;
+  inline bool has_highvalidrange() const;
+  inline void clear_highvalidrange();
+  static const int kHighValidRangeFieldNumber = 25;
+  inline double highvalidrange() const;
+  inline void set_highvalidrange(double value);
 
   // optional double unbalanceLimit = 26;
   inline bool has_unbalancelimit() const;
@@ -5951,12 +5951,12 @@ class AppSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 outputunitid() const;
   inline void set_outputunitid(::google::protobuf::int32 value);
 
-  // optional int32 outputRangeMode = 34;
-  inline bool has_outputrangemode() const;
-  inline void clear_outputrangemode();
-  static const int kOutputRangeModeFieldNumber = 34;
-  inline ::google::protobuf::int32 outputrangemode() const;
-  inline void set_outputrangemode(::google::protobuf::int32 value);
+  // optional int32 outputMode = 34;
+  inline bool has_outputmode() const;
+  inline void clear_outputmode();
+  static const int kOutputModeFieldNumber = 34;
+  inline ::google::protobuf::int32 outputmode() const;
+  inline void set_outputmode(::google::protobuf::int32 value);
 
   // optional int32 outputSensorID = 35;
   inline bool has_outputsensorid() const;
@@ -6026,12 +6026,12 @@ class AppSignal : public ::google::protobuf::Message {
   inline double filteringtime() const;
   inline void set_filteringtime(double value);
 
-  // optional double maxDifference = 44;
-  inline bool has_maxdifference() const;
-  inline void clear_maxdifference();
-  static const int kMaxDifferenceFieldNumber = 44;
-  inline double maxdifference() const;
-  inline void set_maxdifference(double value);
+  // optional double spreadTolerance = 44;
+  inline bool has_spreadtolerance() const;
+  inline void clear_spreadtolerance();
+  static const int kSpreadToleranceFieldNumber = 44;
+  inline double spreadtolerance() const;
+  inline void set_spreadtolerance(double value);
 
   // optional int32 byteOrder = 45;
   inline bool has_byteorder() const;
@@ -6047,41 +6047,75 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool enabletuning() const;
   inline void set_enabletuning(bool value);
 
-  // optional .Proto.Address16 valueAddr = 47;
-  inline bool has_valueaddr() const;
-  inline void clear_valueaddr();
-  static const int kValueAddrFieldNumber = 47;
-  inline const ::Proto::Address16& valueaddr() const;
-  inline ::Proto::Address16* mutable_valueaddr();
-  inline ::Proto::Address16* release_valueaddr();
-  inline void set_allocated_valueaddr(::Proto::Address16* valueaddr);
+  // optional double tuningDefaultValue = 47;
+  inline bool has_tuningdefaultvalue() const;
+  inline void clear_tuningdefaultvalue();
+  static const int kTuningDefaultValueFieldNumber = 47;
+  inline double tuningdefaultvalue() const;
+  inline void set_tuningdefaultvalue(double value);
 
-  // optional .Proto.Address16 validityAddr = 50;
-  inline bool has_validityaddr() const;
-  inline void clear_validityaddr();
-  static const int kValidityAddrFieldNumber = 50;
-  inline const ::Proto::Address16& validityaddr() const;
-  inline ::Proto::Address16* mutable_validityaddr();
-  inline ::Proto::Address16* release_validityaddr();
-  inline void set_allocated_validityaddr(::Proto::Address16* validityaddr);
+  // optional uint64 hash = 48;
+  inline bool has_hash() const;
+  inline void clear_hash();
+  static const int kHashFieldNumber = 48;
+  inline ::google::protobuf::uint64 hash() const;
+  inline void set_hash(::google::protobuf::uint64 value);
 
-  // optional .Proto.Address16 iobufferAddr = 48;
-  inline bool has_iobufferaddr() const;
-  inline void clear_iobufferaddr();
-  static const int kIobufferAddrFieldNumber = 48;
-  inline const ::Proto::Address16& iobufferaddr() const;
-  inline ::Proto::Address16* mutable_iobufferaddr();
-  inline ::Proto::Address16* release_iobufferaddr();
-  inline void set_allocated_iobufferaddr(::Proto::Address16* iobufferaddr);
+  // optional int32 regValueAddrOffset = 200;
+  inline bool has_regvalueaddroffset() const;
+  inline void clear_regvalueaddroffset();
+  static const int kRegValueAddrOffsetFieldNumber = 200;
+  inline ::google::protobuf::int32 regvalueaddroffset() const;
+  inline void set_regvalueaddroffset(::google::protobuf::int32 value);
 
-  // optional .Proto.Address16 ramAddr = 49;
-  inline bool has_ramaddr() const;
-  inline void clear_ramaddr();
-  static const int kRamAddrFieldNumber = 49;
-  inline const ::Proto::Address16& ramaddr() const;
-  inline ::Proto::Address16* mutable_ramaddr();
-  inline ::Proto::Address16* release_ramaddr();
-  inline void set_allocated_ramaddr(::Proto::Address16* ramaddr);
+  // optional int32 regValueAddrBit = 201;
+  inline bool has_regvalueaddrbit() const;
+  inline void clear_regvalueaddrbit();
+  static const int kRegValueAddrBitFieldNumber = 201;
+  inline ::google::protobuf::int32 regvalueaddrbit() const;
+  inline void set_regvalueaddrbit(::google::protobuf::int32 value);
+
+  // optional int32 regValidityAddrOffset = 202;
+  inline bool has_regvalidityaddroffset() const;
+  inline void clear_regvalidityaddroffset();
+  static const int kRegValidityAddrOffsetFieldNumber = 202;
+  inline ::google::protobuf::int32 regvalidityaddroffset() const;
+  inline void set_regvalidityaddroffset(::google::protobuf::int32 value);
+
+  // optional int32 regValidityAddrBit = 203;
+  inline bool has_regvalidityaddrbit() const;
+  inline void clear_regvalidityaddrbit();
+  static const int kRegValidityAddrBitFieldNumber = 203;
+  inline ::google::protobuf::int32 regvalidityaddrbit() const;
+  inline void set_regvalidityaddrbit(::google::protobuf::int32 value);
+
+  // optional int32 ioBufferAddrOffset = 204;
+  inline bool has_iobufferaddroffset() const;
+  inline void clear_iobufferaddroffset();
+  static const int kIoBufferAddrOffsetFieldNumber = 204;
+  inline ::google::protobuf::int32 iobufferaddroffset() const;
+  inline void set_iobufferaddroffset(::google::protobuf::int32 value);
+
+  // optional int32 ioBufferAddrBit = 205;
+  inline bool has_iobufferaddrbit() const;
+  inline void clear_iobufferaddrbit();
+  static const int kIoBufferAddrBitFieldNumber = 205;
+  inline ::google::protobuf::int32 iobufferaddrbit() const;
+  inline void set_iobufferaddrbit(::google::protobuf::int32 value);
+
+  // optional int32 ramAddrOffset = 206;
+  inline bool has_ramaddroffset() const;
+  inline void clear_ramaddroffset();
+  static const int kRamAddrOffsetFieldNumber = 206;
+  inline ::google::protobuf::int32 ramaddroffset() const;
+  inline void set_ramaddroffset(::google::protobuf::int32 value);
+
+  // optional int32 ramAddrBit = 207;
+  inline bool has_ramaddrbit() const;
+  inline void clear_ramaddrbit();
+  static const int kRamAddrBitFieldNumber = 207;
+  inline ::google::protobuf::int32 ramaddrbit() const;
+  inline void set_ramaddrbit(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:Proto.AppSignal)
  private:
@@ -6123,18 +6157,18 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_lowadc();
   inline void set_has_highadc();
   inline void clear_has_highadc();
-  inline void set_has_lowlimit();
-  inline void clear_has_lowlimit();
-  inline void set_has_highlimit();
-  inline void clear_has_highlimit();
+  inline void set_has_lowengeneeringunits();
+  inline void clear_has_lowengeneeringunits();
+  inline void set_has_highengeneeringunits();
+  inline void clear_has_highengeneeringunits();
   inline void set_has_unitid();
   inline void clear_has_unitid();
   inline void set_has_adjustment();
   inline void clear_has_adjustment();
-  inline void set_has_droplimit();
-  inline void clear_has_droplimit();
-  inline void set_has_excesslimit();
-  inline void clear_has_excesslimit();
+  inline void set_has_lowvalidrange();
+  inline void clear_has_lowvalidrange();
+  inline void set_has_highvalidrange();
+  inline void clear_has_highvalidrange();
   inline void set_has_unbalancelimit();
   inline void clear_has_unbalancelimit();
   inline void set_has_inputlowlimit();
@@ -6151,8 +6185,8 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_outputhighlimit();
   inline void set_has_outputunitid();
   inline void clear_has_outputunitid();
-  inline void set_has_outputrangemode();
-  inline void clear_has_outputrangemode();
+  inline void set_has_outputmode();
+  inline void clear_has_outputmode();
   inline void set_has_outputsensorid();
   inline void clear_has_outputsensorid();
   inline void set_has_acquire();
@@ -6171,20 +6205,32 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_equipmentid();
   inline void set_has_filteringtime();
   inline void clear_has_filteringtime();
-  inline void set_has_maxdifference();
-  inline void clear_has_maxdifference();
+  inline void set_has_spreadtolerance();
+  inline void clear_has_spreadtolerance();
   inline void set_has_byteorder();
   inline void clear_has_byteorder();
   inline void set_has_enabletuning();
   inline void clear_has_enabletuning();
-  inline void set_has_valueaddr();
-  inline void clear_has_valueaddr();
-  inline void set_has_validityaddr();
-  inline void clear_has_validityaddr();
-  inline void set_has_iobufferaddr();
-  inline void clear_has_iobufferaddr();
-  inline void set_has_ramaddr();
-  inline void clear_has_ramaddr();
+  inline void set_has_tuningdefaultvalue();
+  inline void clear_has_tuningdefaultvalue();
+  inline void set_has_hash();
+  inline void clear_has_hash();
+  inline void set_has_regvalueaddroffset();
+  inline void clear_has_regvalueaddroffset();
+  inline void set_has_regvalueaddrbit();
+  inline void clear_has_regvalueaddrbit();
+  inline void set_has_regvalidityaddroffset();
+  inline void clear_has_regvalidityaddroffset();
+  inline void set_has_regvalidityaddrbit();
+  inline void clear_has_regvalidityaddrbit();
+  inline void set_has_iobufferaddroffset();
+  inline void clear_has_iobufferaddroffset();
+  inline void set_has_iobufferaddrbit();
+  inline void clear_has_iobufferaddrbit();
+  inline void set_has_ramaddroffset();
+  inline void clear_has_ramaddroffset();
+  inline void set_has_ramaddrbit();
+  inline void clear_has_ramaddrbit();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6205,16 +6251,16 @@ class AppSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 datasize_;
   ::google::protobuf::int32 lowadc_;
   ::google::protobuf::int32 highadc_;
-  double lowlimit_;
-  double highlimit_;
-  ::google::protobuf::int32 unitid_;
+  double lowengeneeringunits_;
+  double highengeneeringunits_;
   bool checkedout_;
   bool deleted_;
   bool acquire_;
   bool calculated_;
+  ::google::protobuf::int32 unitid_;
   double adjustment_;
-  double droplimit_;
-  double excesslimit_;
+  double lowvalidrange_;
+  double highvalidrange_;
   double unbalancelimit_;
   double inputlowlimit_;
   double inputhighlimit_;
@@ -6223,24 +6269,30 @@ class AppSignal : public ::google::protobuf::Message {
   double outputlowlimit_;
   double outputhighlimit_;
   ::google::protobuf::int32 outputunitid_;
-  ::google::protobuf::int32 outputrangemode_;
+  ::google::protobuf::int32 outputmode_;
   ::google::protobuf::int32 outputsensorid_;
   ::google::protobuf::int32 normalstate_;
+  double aperture_;
   ::google::protobuf::int32 decimalplaces_;
   ::google::protobuf::int32 inouttype_;
-  double aperture_;
   ::std::string* equipmentid_;
   double filteringtime_;
-  double maxdifference_;
+  double spreadtolerance_;
   ::google::protobuf::int32 byteorder_;
   bool enabletuning_;
-  ::Proto::Address16* valueaddr_;
-  ::Proto::Address16* validityaddr_;
-  ::Proto::Address16* iobufferaddr_;
-  ::Proto::Address16* ramaddr_;
+  double tuningdefaultvalue_;
+  ::google::protobuf::uint64 hash_;
+  ::google::protobuf::int32 regvalueaddroffset_;
+  ::google::protobuf::int32 regvalueaddrbit_;
+  ::google::protobuf::int32 regvalidityaddroffset_;
+  ::google::protobuf::int32 regvalidityaddrbit_;
+  ::google::protobuf::int32 iobufferaddroffset_;
+  ::google::protobuf::int32 iobufferaddrbit_;
+  ::google::protobuf::int32 ramaddroffset_;
+  ::google::protobuf::int32 ramaddrbit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(50 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(56 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -12933,48 +12985,48 @@ inline void AppSignal::set_highadc(::google::protobuf::int32 value) {
   highadc_ = value;
 }
 
-// optional double lowLimit = 20;
-inline bool AppSignal::has_lowlimit() const {
+// optional double lowEngeneeringUnits = 20;
+inline bool AppSignal::has_lowengeneeringunits() const {
   return (_has_bits_[0] & 0x00080000u) != 0;
 }
-inline void AppSignal::set_has_lowlimit() {
+inline void AppSignal::set_has_lowengeneeringunits() {
   _has_bits_[0] |= 0x00080000u;
 }
-inline void AppSignal::clear_has_lowlimit() {
+inline void AppSignal::clear_has_lowengeneeringunits() {
   _has_bits_[0] &= ~0x00080000u;
 }
-inline void AppSignal::clear_lowlimit() {
-  lowlimit_ = 0;
-  clear_has_lowlimit();
+inline void AppSignal::clear_lowengeneeringunits() {
+  lowengeneeringunits_ = 0;
+  clear_has_lowengeneeringunits();
 }
-inline double AppSignal::lowlimit() const {
-  return lowlimit_;
+inline double AppSignal::lowengeneeringunits() const {
+  return lowengeneeringunits_;
 }
-inline void AppSignal::set_lowlimit(double value) {
-  set_has_lowlimit();
-  lowlimit_ = value;
+inline void AppSignal::set_lowengeneeringunits(double value) {
+  set_has_lowengeneeringunits();
+  lowengeneeringunits_ = value;
 }
 
-// optional double highLimit = 21;
-inline bool AppSignal::has_highlimit() const {
+// optional double highEngeneeringUnits = 21;
+inline bool AppSignal::has_highengeneeringunits() const {
   return (_has_bits_[0] & 0x00100000u) != 0;
 }
-inline void AppSignal::set_has_highlimit() {
+inline void AppSignal::set_has_highengeneeringunits() {
   _has_bits_[0] |= 0x00100000u;
 }
-inline void AppSignal::clear_has_highlimit() {
+inline void AppSignal::clear_has_highengeneeringunits() {
   _has_bits_[0] &= ~0x00100000u;
 }
-inline void AppSignal::clear_highlimit() {
-  highlimit_ = 0;
-  clear_has_highlimit();
+inline void AppSignal::clear_highengeneeringunits() {
+  highengeneeringunits_ = 0;
+  clear_has_highengeneeringunits();
 }
-inline double AppSignal::highlimit() const {
-  return highlimit_;
+inline double AppSignal::highengeneeringunits() const {
+  return highengeneeringunits_;
 }
-inline void AppSignal::set_highlimit(double value) {
-  set_has_highlimit();
-  highlimit_ = value;
+inline void AppSignal::set_highengeneeringunits(double value) {
+  set_has_highengeneeringunits();
+  highengeneeringunits_ = value;
 }
 
 // optional int32 unitID = 22;
@@ -13021,48 +13073,48 @@ inline void AppSignal::set_adjustment(double value) {
   adjustment_ = value;
 }
 
-// optional double dropLimit = 24;
-inline bool AppSignal::has_droplimit() const {
+// optional double lowValidRange = 24;
+inline bool AppSignal::has_lowvalidrange() const {
   return (_has_bits_[0] & 0x00800000u) != 0;
 }
-inline void AppSignal::set_has_droplimit() {
+inline void AppSignal::set_has_lowvalidrange() {
   _has_bits_[0] |= 0x00800000u;
 }
-inline void AppSignal::clear_has_droplimit() {
+inline void AppSignal::clear_has_lowvalidrange() {
   _has_bits_[0] &= ~0x00800000u;
 }
-inline void AppSignal::clear_droplimit() {
-  droplimit_ = 0;
-  clear_has_droplimit();
+inline void AppSignal::clear_lowvalidrange() {
+  lowvalidrange_ = 0;
+  clear_has_lowvalidrange();
 }
-inline double AppSignal::droplimit() const {
-  return droplimit_;
+inline double AppSignal::lowvalidrange() const {
+  return lowvalidrange_;
 }
-inline void AppSignal::set_droplimit(double value) {
-  set_has_droplimit();
-  droplimit_ = value;
+inline void AppSignal::set_lowvalidrange(double value) {
+  set_has_lowvalidrange();
+  lowvalidrange_ = value;
 }
 
-// optional double excessLimit = 25;
-inline bool AppSignal::has_excesslimit() const {
+// optional double highValidRange = 25;
+inline bool AppSignal::has_highvalidrange() const {
   return (_has_bits_[0] & 0x01000000u) != 0;
 }
-inline void AppSignal::set_has_excesslimit() {
+inline void AppSignal::set_has_highvalidrange() {
   _has_bits_[0] |= 0x01000000u;
 }
-inline void AppSignal::clear_has_excesslimit() {
+inline void AppSignal::clear_has_highvalidrange() {
   _has_bits_[0] &= ~0x01000000u;
 }
-inline void AppSignal::clear_excesslimit() {
-  excesslimit_ = 0;
-  clear_has_excesslimit();
+inline void AppSignal::clear_highvalidrange() {
+  highvalidrange_ = 0;
+  clear_has_highvalidrange();
 }
-inline double AppSignal::excesslimit() const {
-  return excesslimit_;
+inline double AppSignal::highvalidrange() const {
+  return highvalidrange_;
 }
-inline void AppSignal::set_excesslimit(double value) {
-  set_has_excesslimit();
-  excesslimit_ = value;
+inline void AppSignal::set_highvalidrange(double value) {
+  set_has_highvalidrange();
+  highvalidrange_ = value;
 }
 
 // optional double unbalanceLimit = 26;
@@ -13241,26 +13293,26 @@ inline void AppSignal::set_outputunitid(::google::protobuf::int32 value) {
   outputunitid_ = value;
 }
 
-// optional int32 outputRangeMode = 34;
-inline bool AppSignal::has_outputrangemode() const {
+// optional int32 outputMode = 34;
+inline bool AppSignal::has_outputmode() const {
   return (_has_bits_[1] & 0x00000002u) != 0;
 }
-inline void AppSignal::set_has_outputrangemode() {
+inline void AppSignal::set_has_outputmode() {
   _has_bits_[1] |= 0x00000002u;
 }
-inline void AppSignal::clear_has_outputrangemode() {
+inline void AppSignal::clear_has_outputmode() {
   _has_bits_[1] &= ~0x00000002u;
 }
-inline void AppSignal::clear_outputrangemode() {
-  outputrangemode_ = 0;
-  clear_has_outputrangemode();
+inline void AppSignal::clear_outputmode() {
+  outputmode_ = 0;
+  clear_has_outputmode();
 }
-inline ::google::protobuf::int32 AppSignal::outputrangemode() const {
-  return outputrangemode_;
+inline ::google::protobuf::int32 AppSignal::outputmode() const {
+  return outputmode_;
 }
-inline void AppSignal::set_outputrangemode(::google::protobuf::int32 value) {
-  set_has_outputrangemode();
-  outputrangemode_ = value;
+inline void AppSignal::set_outputmode(::google::protobuf::int32 value) {
+  set_has_outputmode();
+  outputmode_ = value;
 }
 
 // optional int32 outputSensorID = 35;
@@ -13509,26 +13561,26 @@ inline void AppSignal::set_filteringtime(double value) {
   filteringtime_ = value;
 }
 
-// optional double maxDifference = 44;
-inline bool AppSignal::has_maxdifference() const {
+// optional double spreadTolerance = 44;
+inline bool AppSignal::has_spreadtolerance() const {
   return (_has_bits_[1] & 0x00000800u) != 0;
 }
-inline void AppSignal::set_has_maxdifference() {
+inline void AppSignal::set_has_spreadtolerance() {
   _has_bits_[1] |= 0x00000800u;
 }
-inline void AppSignal::clear_has_maxdifference() {
+inline void AppSignal::clear_has_spreadtolerance() {
   _has_bits_[1] &= ~0x00000800u;
 }
-inline void AppSignal::clear_maxdifference() {
-  maxdifference_ = 0;
-  clear_has_maxdifference();
+inline void AppSignal::clear_spreadtolerance() {
+  spreadtolerance_ = 0;
+  clear_has_spreadtolerance();
 }
-inline double AppSignal::maxdifference() const {
-  return maxdifference_;
+inline double AppSignal::spreadtolerance() const {
+  return spreadtolerance_;
 }
-inline void AppSignal::set_maxdifference(double value) {
-  set_has_maxdifference();
-  maxdifference_ = value;
+inline void AppSignal::set_spreadtolerance(double value) {
+  set_has_spreadtolerance();
+  spreadtolerance_ = value;
 }
 
 // optional int32 byteOrder = 45;
@@ -13575,156 +13627,224 @@ inline void AppSignal::set_enabletuning(bool value) {
   enabletuning_ = value;
 }
 
-// optional .Proto.Address16 valueAddr = 47;
-inline bool AppSignal::has_valueaddr() const {
+// optional double tuningDefaultValue = 47;
+inline bool AppSignal::has_tuningdefaultvalue() const {
   return (_has_bits_[1] & 0x00004000u) != 0;
 }
-inline void AppSignal::set_has_valueaddr() {
+inline void AppSignal::set_has_tuningdefaultvalue() {
   _has_bits_[1] |= 0x00004000u;
 }
-inline void AppSignal::clear_has_valueaddr() {
+inline void AppSignal::clear_has_tuningdefaultvalue() {
   _has_bits_[1] &= ~0x00004000u;
 }
-inline void AppSignal::clear_valueaddr() {
-  if (valueaddr_ != NULL) valueaddr_->::Proto::Address16::Clear();
-  clear_has_valueaddr();
+inline void AppSignal::clear_tuningdefaultvalue() {
+  tuningdefaultvalue_ = 0;
+  clear_has_tuningdefaultvalue();
 }
-inline const ::Proto::Address16& AppSignal::valueaddr() const {
-  return valueaddr_ != NULL ? *valueaddr_ : *default_instance_->valueaddr_;
+inline double AppSignal::tuningdefaultvalue() const {
+  return tuningdefaultvalue_;
 }
-inline ::Proto::Address16* AppSignal::mutable_valueaddr() {
-  set_has_valueaddr();
-  if (valueaddr_ == NULL) valueaddr_ = new ::Proto::Address16;
-  return valueaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_valueaddr() {
-  clear_has_valueaddr();
-  ::Proto::Address16* temp = valueaddr_;
-  valueaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_valueaddr(::Proto::Address16* valueaddr) {
-  delete valueaddr_;
-  valueaddr_ = valueaddr;
-  if (valueaddr) {
-    set_has_valueaddr();
-  } else {
-    clear_has_valueaddr();
-  }
+inline void AppSignal::set_tuningdefaultvalue(double value) {
+  set_has_tuningdefaultvalue();
+  tuningdefaultvalue_ = value;
 }
 
-// optional .Proto.Address16 validityAddr = 50;
-inline bool AppSignal::has_validityaddr() const {
+// optional uint64 hash = 48;
+inline bool AppSignal::has_hash() const {
   return (_has_bits_[1] & 0x00008000u) != 0;
 }
-inline void AppSignal::set_has_validityaddr() {
+inline void AppSignal::set_has_hash() {
   _has_bits_[1] |= 0x00008000u;
 }
-inline void AppSignal::clear_has_validityaddr() {
+inline void AppSignal::clear_has_hash() {
   _has_bits_[1] &= ~0x00008000u;
 }
-inline void AppSignal::clear_validityaddr() {
-  if (validityaddr_ != NULL) validityaddr_->::Proto::Address16::Clear();
-  clear_has_validityaddr();
+inline void AppSignal::clear_hash() {
+  hash_ = GOOGLE_ULONGLONG(0);
+  clear_has_hash();
 }
-inline const ::Proto::Address16& AppSignal::validityaddr() const {
-  return validityaddr_ != NULL ? *validityaddr_ : *default_instance_->validityaddr_;
+inline ::google::protobuf::uint64 AppSignal::hash() const {
+  return hash_;
 }
-inline ::Proto::Address16* AppSignal::mutable_validityaddr() {
-  set_has_validityaddr();
-  if (validityaddr_ == NULL) validityaddr_ = new ::Proto::Address16;
-  return validityaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_validityaddr() {
-  clear_has_validityaddr();
-  ::Proto::Address16* temp = validityaddr_;
-  validityaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_validityaddr(::Proto::Address16* validityaddr) {
-  delete validityaddr_;
-  validityaddr_ = validityaddr;
-  if (validityaddr) {
-    set_has_validityaddr();
-  } else {
-    clear_has_validityaddr();
-  }
+inline void AppSignal::set_hash(::google::protobuf::uint64 value) {
+  set_has_hash();
+  hash_ = value;
 }
 
-// optional .Proto.Address16 iobufferAddr = 48;
-inline bool AppSignal::has_iobufferaddr() const {
+// optional int32 regValueAddrOffset = 200;
+inline bool AppSignal::has_regvalueaddroffset() const {
   return (_has_bits_[1] & 0x00010000u) != 0;
 }
-inline void AppSignal::set_has_iobufferaddr() {
+inline void AppSignal::set_has_regvalueaddroffset() {
   _has_bits_[1] |= 0x00010000u;
 }
-inline void AppSignal::clear_has_iobufferaddr() {
+inline void AppSignal::clear_has_regvalueaddroffset() {
   _has_bits_[1] &= ~0x00010000u;
 }
-inline void AppSignal::clear_iobufferaddr() {
-  if (iobufferaddr_ != NULL) iobufferaddr_->::Proto::Address16::Clear();
-  clear_has_iobufferaddr();
+inline void AppSignal::clear_regvalueaddroffset() {
+  regvalueaddroffset_ = 0;
+  clear_has_regvalueaddroffset();
 }
-inline const ::Proto::Address16& AppSignal::iobufferaddr() const {
-  return iobufferaddr_ != NULL ? *iobufferaddr_ : *default_instance_->iobufferaddr_;
+inline ::google::protobuf::int32 AppSignal::regvalueaddroffset() const {
+  return regvalueaddroffset_;
 }
-inline ::Proto::Address16* AppSignal::mutable_iobufferaddr() {
-  set_has_iobufferaddr();
-  if (iobufferaddr_ == NULL) iobufferaddr_ = new ::Proto::Address16;
-  return iobufferaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_iobufferaddr() {
-  clear_has_iobufferaddr();
-  ::Proto::Address16* temp = iobufferaddr_;
-  iobufferaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_iobufferaddr(::Proto::Address16* iobufferaddr) {
-  delete iobufferaddr_;
-  iobufferaddr_ = iobufferaddr;
-  if (iobufferaddr) {
-    set_has_iobufferaddr();
-  } else {
-    clear_has_iobufferaddr();
-  }
+inline void AppSignal::set_regvalueaddroffset(::google::protobuf::int32 value) {
+  set_has_regvalueaddroffset();
+  regvalueaddroffset_ = value;
 }
 
-// optional .Proto.Address16 ramAddr = 49;
-inline bool AppSignal::has_ramaddr() const {
+// optional int32 regValueAddrBit = 201;
+inline bool AppSignal::has_regvalueaddrbit() const {
   return (_has_bits_[1] & 0x00020000u) != 0;
 }
-inline void AppSignal::set_has_ramaddr() {
+inline void AppSignal::set_has_regvalueaddrbit() {
   _has_bits_[1] |= 0x00020000u;
 }
-inline void AppSignal::clear_has_ramaddr() {
+inline void AppSignal::clear_has_regvalueaddrbit() {
   _has_bits_[1] &= ~0x00020000u;
 }
-inline void AppSignal::clear_ramaddr() {
-  if (ramaddr_ != NULL) ramaddr_->::Proto::Address16::Clear();
-  clear_has_ramaddr();
+inline void AppSignal::clear_regvalueaddrbit() {
+  regvalueaddrbit_ = 0;
+  clear_has_regvalueaddrbit();
 }
-inline const ::Proto::Address16& AppSignal::ramaddr() const {
-  return ramaddr_ != NULL ? *ramaddr_ : *default_instance_->ramaddr_;
+inline ::google::protobuf::int32 AppSignal::regvalueaddrbit() const {
+  return regvalueaddrbit_;
 }
-inline ::Proto::Address16* AppSignal::mutable_ramaddr() {
-  set_has_ramaddr();
-  if (ramaddr_ == NULL) ramaddr_ = new ::Proto::Address16;
-  return ramaddr_;
+inline void AppSignal::set_regvalueaddrbit(::google::protobuf::int32 value) {
+  set_has_regvalueaddrbit();
+  regvalueaddrbit_ = value;
 }
-inline ::Proto::Address16* AppSignal::release_ramaddr() {
-  clear_has_ramaddr();
-  ::Proto::Address16* temp = ramaddr_;
-  ramaddr_ = NULL;
-  return temp;
+
+// optional int32 regValidityAddrOffset = 202;
+inline bool AppSignal::has_regvalidityaddroffset() const {
+  return (_has_bits_[1] & 0x00040000u) != 0;
 }
-inline void AppSignal::set_allocated_ramaddr(::Proto::Address16* ramaddr) {
-  delete ramaddr_;
-  ramaddr_ = ramaddr;
-  if (ramaddr) {
-    set_has_ramaddr();
-  } else {
-    clear_has_ramaddr();
-  }
+inline void AppSignal::set_has_regvalidityaddroffset() {
+  _has_bits_[1] |= 0x00040000u;
+}
+inline void AppSignal::clear_has_regvalidityaddroffset() {
+  _has_bits_[1] &= ~0x00040000u;
+}
+inline void AppSignal::clear_regvalidityaddroffset() {
+  regvalidityaddroffset_ = 0;
+  clear_has_regvalidityaddroffset();
+}
+inline ::google::protobuf::int32 AppSignal::regvalidityaddroffset() const {
+  return regvalidityaddroffset_;
+}
+inline void AppSignal::set_regvalidityaddroffset(::google::protobuf::int32 value) {
+  set_has_regvalidityaddroffset();
+  regvalidityaddroffset_ = value;
+}
+
+// optional int32 regValidityAddrBit = 203;
+inline bool AppSignal::has_regvalidityaddrbit() const {
+  return (_has_bits_[1] & 0x00080000u) != 0;
+}
+inline void AppSignal::set_has_regvalidityaddrbit() {
+  _has_bits_[1] |= 0x00080000u;
+}
+inline void AppSignal::clear_has_regvalidityaddrbit() {
+  _has_bits_[1] &= ~0x00080000u;
+}
+inline void AppSignal::clear_regvalidityaddrbit() {
+  regvalidityaddrbit_ = 0;
+  clear_has_regvalidityaddrbit();
+}
+inline ::google::protobuf::int32 AppSignal::regvalidityaddrbit() const {
+  return regvalidityaddrbit_;
+}
+inline void AppSignal::set_regvalidityaddrbit(::google::protobuf::int32 value) {
+  set_has_regvalidityaddrbit();
+  regvalidityaddrbit_ = value;
+}
+
+// optional int32 ioBufferAddrOffset = 204;
+inline bool AppSignal::has_iobufferaddroffset() const {
+  return (_has_bits_[1] & 0x00100000u) != 0;
+}
+inline void AppSignal::set_has_iobufferaddroffset() {
+  _has_bits_[1] |= 0x00100000u;
+}
+inline void AppSignal::clear_has_iobufferaddroffset() {
+  _has_bits_[1] &= ~0x00100000u;
+}
+inline void AppSignal::clear_iobufferaddroffset() {
+  iobufferaddroffset_ = 0;
+  clear_has_iobufferaddroffset();
+}
+inline ::google::protobuf::int32 AppSignal::iobufferaddroffset() const {
+  return iobufferaddroffset_;
+}
+inline void AppSignal::set_iobufferaddroffset(::google::protobuf::int32 value) {
+  set_has_iobufferaddroffset();
+  iobufferaddroffset_ = value;
+}
+
+// optional int32 ioBufferAddrBit = 205;
+inline bool AppSignal::has_iobufferaddrbit() const {
+  return (_has_bits_[1] & 0x00200000u) != 0;
+}
+inline void AppSignal::set_has_iobufferaddrbit() {
+  _has_bits_[1] |= 0x00200000u;
+}
+inline void AppSignal::clear_has_iobufferaddrbit() {
+  _has_bits_[1] &= ~0x00200000u;
+}
+inline void AppSignal::clear_iobufferaddrbit() {
+  iobufferaddrbit_ = 0;
+  clear_has_iobufferaddrbit();
+}
+inline ::google::protobuf::int32 AppSignal::iobufferaddrbit() const {
+  return iobufferaddrbit_;
+}
+inline void AppSignal::set_iobufferaddrbit(::google::protobuf::int32 value) {
+  set_has_iobufferaddrbit();
+  iobufferaddrbit_ = value;
+}
+
+// optional int32 ramAddrOffset = 206;
+inline bool AppSignal::has_ramaddroffset() const {
+  return (_has_bits_[1] & 0x00400000u) != 0;
+}
+inline void AppSignal::set_has_ramaddroffset() {
+  _has_bits_[1] |= 0x00400000u;
+}
+inline void AppSignal::clear_has_ramaddroffset() {
+  _has_bits_[1] &= ~0x00400000u;
+}
+inline void AppSignal::clear_ramaddroffset() {
+  ramaddroffset_ = 0;
+  clear_has_ramaddroffset();
+}
+inline ::google::protobuf::int32 AppSignal::ramaddroffset() const {
+  return ramaddroffset_;
+}
+inline void AppSignal::set_ramaddroffset(::google::protobuf::int32 value) {
+  set_has_ramaddroffset();
+  ramaddroffset_ = value;
+}
+
+// optional int32 ramAddrBit = 207;
+inline bool AppSignal::has_ramaddrbit() const {
+  return (_has_bits_[1] & 0x00800000u) != 0;
+}
+inline void AppSignal::set_has_ramaddrbit() {
+  _has_bits_[1] |= 0x00800000u;
+}
+inline void AppSignal::clear_has_ramaddrbit() {
+  _has_bits_[1] &= ~0x00800000u;
+}
+inline void AppSignal::clear_ramaddrbit() {
+  ramaddrbit_ = 0;
+  clear_has_ramaddrbit();
+}
+inline ::google::protobuf::int32 AppSignal::ramaddrbit() const {
+  return ramaddrbit_;
+}
+inline void AppSignal::set_ramaddrbit(::google::protobuf::int32 value) {
+  set_has_ramaddrbit();
+  ramaddrbit_ = value;
 }
 
 // -------------------------------------------------------------------

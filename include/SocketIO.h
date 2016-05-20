@@ -367,6 +367,7 @@ protected:
 	quint16 addSize(quint16 size) { return (m_structureSize += size); }
 };
 
+#pragma pack(pop)
 
 
 // --------------------------- Data structs used for parsing "Radiy" platform packets ------------------------
@@ -463,10 +464,6 @@ const quint16 NO_ACK_BLOCK_TYPE = 0;		// block type value if block didn't ack
 #pragma pack(pop)
 
 
-
-#pragma pack(pop)
-
-
 const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
 
 quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc);
@@ -484,6 +481,7 @@ const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1302;
 
 // Limiters and other constants
 //
+const int ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART = 1000;
 const int ADS_GET_APP_SIGNAL_PARAM_MAX = 500;
 const int ADS_GET_APP_SIGNAL_STATE_MAX = 2000;
 
@@ -493,6 +491,7 @@ enum class NetworkError
 	WrongPartNo,
 	RequestParamExceed,
 	RequestStateExceed,
+	ParseRequestError,
 };
 
 //int operator= (NetworkError e)

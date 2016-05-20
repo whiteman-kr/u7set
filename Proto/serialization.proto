@@ -707,52 +707,63 @@ message AppSignal
     optional int32 changesetID = 4;
     optional bool checkedOut = 5;
     optional int32 userID = 6;
-	optional int32 subsystemChannel = 7;
-	optional int32 type = 8;			   // analog or discrete
+    optional int32 subsystemChannel = 7;
+    optional int32 type = 8;			   // analog or discrete
     optional int64 created = 9;
     optional bool deleted = 10;
     optional int64 instanceCreated = 11;
     optional int32 instanceAction = 12;
-	optional string appSignalID = 13;
-	optional string customAppSignalID = 14;
-	optional string caption = 15;
-	optional int32 dataFormat = 16;
-	optional int32 dataSize = 17;
-	optional int32 lowADC = 18;
-	optional int32 highADC = 19;
-	optional double lowLimit = 20;
-	optional double highLimit = 21;
-	optional int32 unitID = 22;
-	optional double adjustment = 23;
-	optional double dropLimit = 24;
-	optional double excessLimit = 25;
-	optional double unbalanceLimit = 26;
-	optional double inputLowLimit = 27;
-	optional double inputHighLimit = 28;
-	optional int32 inputUnitID = 29;
-	optional int32 inputSensorID = 30;
-	optional double outputLowLimit = 31;
-	optional double outputHighLimit = 32;
-	optional int32 outputUnitID = 33;
-	optional int32 outputRangeMode = 34;
-	optional int32 outputSensorID = 35;
-	optional bool acquire = 36;
-	optional bool calculated = 37;
-	optional int32 normalState = 38;
-	optional int32 decimalPlaces = 39;
-	optional double aperture = 40;
-	optional int32 inOutType = 41;
-	optional string equipmentID = 42;
-	optional double filteringTime = 43;
-	optional double maxDifference = 44;
-	optional int32 byteOrder = 45;
-	optional bool enableTuning = 46;
+    optional string appSignalID = 13;
+    optional string customAppSignalID = 14;
+    optional string caption = 15;
+    optional int32 dataFormat = 16;
+    optional int32 dataSize = 17;
+    optional int32 lowADC = 18;
+    optional int32 highADC = 19;
+    optional double lowEngeneeringUnits = 20;
+    optional double highEngeneeringUnits = 21;
+    optional int32 unitID = 22;
+    optional double adjustment = 23;
+    optional double lowValidRange = 24;
+    optional double highValidRange = 25;
+    optional double unbalanceLimit = 26;
+    optional double inputLowLimit = 27;
+    optional double inputHighLimit = 28;
+    optional int32 inputUnitID = 29;
+    optional int32 inputSensorID = 30;
+    optional double outputLowLimit = 31;
+    optional double outputHighLimit = 32;
+    optional int32 outputUnitID = 33;
+    optional int32 outputMode = 34;
+    optional int32 outputSensorID = 35;
+    optional bool acquire = 36;
+    optional bool calculated = 37;
+    optional int32 normalState = 38;
+    optional int32 decimalPlaces = 39;
+    optional double aperture = 40;
+    optional int32 inOutType = 41;
+    optional string equipmentID = 42;
+    optional double filteringTime = 43;
+    optional double spreadTolerance = 44;
+    optional int32 byteOrder = 45;
+    optional bool enableTuning = 46;
+    optional double tuningDefaultValue = 47;
 
-	optional Address16 valueAddr = 47;
+    optional uint64 hash = 48;
 
-	optional Address16 validityAddr = 50;
-	optional Address16 iobufferAddr = 48;
-	optional Address16 ramAddr = 49;
+    optional int32 regValueAddrOffset = 200;
+    optional int32 regValueAddrBit = 201;
+
+    optional int32 regValidityAddrOffset = 202;
+    optional int32 regValidityAddrBit = 203;
+
+    optional int32 ioBufferAddrOffset = 204;
+    optional int32 ioBufferAddrBit = 205;
+
+    optional int32 ramAddrOffset = 206;
+    optional int32 ramAddrBit = 207;
+
+
 }
 
 
@@ -760,11 +771,11 @@ message AppSignal
 //
 message AppSignalState
 {
-	optional uint64 hash = 1;
-	optional double value = 2;
-	optional uint32 flags = 3;
-	optional sint64 systemTime = 4;
-	optional sint64 localTime = 5;
-	optional sint64 plantTime = 6;
+    optional uint64 hash = 1;
+    optional double value = 2;
+    optional uint32 flags = 3;
+    optional sint64 systemTime = 4;
+    optional sint64 localTime = 5;
+    optional sint64 plantTime = 6;
 }
 

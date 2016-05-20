@@ -84,7 +84,8 @@ HEADERS += \
     ../include/Signal.h \
     ../AppDataService/AppSignalState.h \
     ../include/Crc.h \
-    TuningDataStorage.h
+    TuningDataStorage.h \
+    ../include/Hash.h
 
 include(../qtservice/src/qtservice.pri)
 
