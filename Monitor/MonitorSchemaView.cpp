@@ -1,5 +1,6 @@
 #include "MonitorSchemaView.h"
 #include "SchemaManager.h"
+#include "../include/AppSignalManager.h"
 
 MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *parent)
 	: SchemaView(parent),
@@ -101,6 +102,10 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 	p.save();
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+
+	drawParam.setEditMode(false);
+	drawParam.setAppSignalManager(&theSignals);
+
 
 	// Calc size
 	//
