@@ -5,7 +5,7 @@
 #include "../include/Tcp.h"
 #include "../include/Hash.h"
 #include "../Proto/network.pb.h"
-#include "SignalManager.h"
+#include "../include/AppSignalManager.h"
 
 class TcpSignalClient : public Tcp::Client
 {
@@ -40,6 +40,9 @@ protected:
 	void requestSignalParam(int startIndex);
 	void processSignalParam(const QByteArray& data);
 
+	void requestSignalState(int startIndex);
+	void processSignalState(const QByteArray& data);
+
 private:
 	int m_startStateTimerId = -1;
 
@@ -50,12 +53,16 @@ private:
 
 	::Network::GetSignalListNextRequest m_getSignalListNextRequest;
 	::Network::GetSignalListNextReply m_getSignalListNextReply;
+	std::vector<QString> m_signalList;
 
 	::Network::GetAppSignalParamRequest m_getSignalParamRequest;
 	::Network::GetAppSignalParamReply m_getSignalParamReply;
 	int m_lastSignalParamStartIndex = 0;
 
-	std::vector<QString> m_signalList;
+	::Network::GetAppSignalStateRequest m_getSignalStateRequest;
+	::Network::GetAppSignalStateReply m_getSignalStateReply;
+	int m_lastSignalStateStartIndex = 0;
+
 };
 
 #endif // TCPSIGNALCLIENT_H

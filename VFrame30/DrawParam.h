@@ -15,6 +15,7 @@
 class QPainter;
 class QPaintDevice;
 class QPixmap;
+class AppSignalManager;
 
 namespace VFrame30
 {
@@ -54,13 +55,24 @@ namespace VFrame30
 		int pinGridStep() const;
 		void setPinGridStep(int value);
 
+		bool isEditMode() const;
+		void setEditMode(bool value);
+
+		bool isMonitorMode() const;
+		void setMonitorMode(bool value);
+
+		AppSignalManager* appSignalManager();
+		void setAppSignalManager(AppSignalManager* value);
+
 	private:
 		QPainter* m_painter = nullptr;
 		Schema* m_schema = nullptr;
+		AppSignalManager* m_appSignalmanager = nullptr;
 
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;
 		int m_pinGridStep = 0;
+		bool m_isEditMode = true;
 	};
 
 	class VFRAME30LIBSHARED_EXPORT DrawHelper

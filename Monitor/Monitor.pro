@@ -58,9 +58,16 @@ SOURCES += main.cpp \
     SchemaManager.cpp \
     ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
-    SignalManager.cpp \
     ../Proto/serialization.pb.cc \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtobufHelper.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/AppSignalState.cpp \
+    ../lib/AppSignalManager.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -81,10 +88,17 @@ HEADERS  += \
     SchemaManager.h \
     ../Proto/network.pb.h \
     TcpSignalClient.h \
-    SignalManager.h \
     ../include/Hash.h \
     ../Proto/serialization.pb.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    ../include/PropertyObject.h \
+    ../include/XmlHelper.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h \
+    ../include/ProtobufHelper.h \
+    ../include/ProtoSerialization.h \
+    ../include/AppSignalState.h \
+    ../include/AppSignalManager.h
 
 FORMS    += \
     DialogSettings.ui

@@ -414,7 +414,7 @@ void MainWindow::runRS232SignalListEditor()
 
 void MainWindow::showAbout()
 {
-	QMessageBox aboutDialog;
+	QMessageBox aboutDialog(this);
 	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
 	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2>");
 	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");

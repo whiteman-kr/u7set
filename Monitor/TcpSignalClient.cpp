@@ -7,8 +7,6 @@ TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, cons
 	qDebug() << "TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)";
 
 	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
-
-	resetToGetState();
 }
 
 TcpSignalClient::~TcpSignalClient()
@@ -73,6 +71,10 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		processSignalListNext(data);
 		break;
 
+	case ADS_GET_APP_SIGNAL_PARAM:
+		processSignalParam(data);
+		break;
+
 	default:
 		assert(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
@@ -97,8 +99,9 @@ void TcpSignalClient::resetToGetSignalList()
 void TcpSignalClient::resetToGetState()
 {
 	QThread::msleep(theSettings.requestTimeInterval());
-	// requestSignalState....
-	//
+
+	requestSignalState(0);
+	return;
 }
 
 void TcpSignalClient::requestSignalListStart()
@@ -224,6 +227,8 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	return;
 }
 
+// AppSignalParam
+//
 void TcpSignalClient::requestSignalParam(int startIndex)
 {
 	assert(isClearToSendRequest());
@@ -272,7 +277,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
 		assert(m_getSignalParamReply.error() != 0);
 
-		resetToGetSignalList();
+		resetToGetState();
 		return;
 	}
 
@@ -294,14 +299,75 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 
 	requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 
-//	for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
-//	{
-//		m_signalList.push_back(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
-//	}
+	return;
+}
 
-//	// Next request
-//	//
-//	requestSignalListNext(m_getSignalListNextReply.part() + 1);
+// AppSignalState
+//
+void TcpSignalClient::requestSignalState(int startIndex)
+{
+	assert(isClearToSendRequest());
+	m_lastSignalStateStartIndex = startIndex;
+
+	if (startIndex >= m_signalList.size())
+	{
+		resetToGetState();
+		return;
+	}
+
+	m_getSignalStateRequest.mutable_signalhashes()->Clear();
+	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX );
+
+	for (int i = startIndex;
+		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX &&
+		 i < m_signalList.size();
+		 i++)
+	{
+		Hash signalHash = calcHash(m_signalList[i]);
+		m_getSignalStateRequest.add_signalhashes(signalHash);
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+	return;
+}
+
+void TcpSignalClient::processSignalState(const QByteArray& data)
+{
+	bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), data.size());
+
+	if (ok == false)
+	{
+		assert(ok);
+		resetToGetState();
+		return;
+	}
+
+	if (m_getSignalStateReply.error() != 0)
+	{
+		qDebug() << "TcpSignalClient::processSignalState, error received: " << m_getSignalStateReply.error();
+		assert(m_getSignalStateReply.error() != 0);
+
+		resetToGetState();
+		return;
+	}
+
+	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
+	{
+		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
+
+		if (protoState.hash() == 0)
+		{
+			assert(protoState.hash() != 0);
+			continue;
+		}
+
+		AppSignalState state;
+		state.getProtoAppSignalState(&protoState);
+
+		theSignals.setState(protoState.hash(), state);
+	}
+
+	requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	return;
 }
