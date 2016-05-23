@@ -3,7 +3,7 @@
     <AfbElement StrId="#simlock_v1">
         <Properties>
             <Caption>simlock</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="104" OpIndex="5"/>
             <Description>Locking and simulation module</Description>
             <Category>Logic</Category>

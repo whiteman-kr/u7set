@@ -3,7 +3,7 @@
     <AfbElement StrId="#cnt_dn_v1">
         <Properties>
             <Caption>cnt_dn</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="106" OpIndex="11"/>
             <Description>Down Counter Block performs the function of an Down Counter in accordance with control signal and received configuration.</Description>
             <Category>Counter</Category>

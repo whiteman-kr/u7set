@@ -3,7 +3,7 @@
     <AfbElement StrId="#ff_d_decay_v1">
         <Properties>
             <Caption>ff_d_decay</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="106" OpIndex="9"/>
             <Description>The D Flip-Flop Block captures the value of the D-input at a decay portion of the clock cycle.</Description>
             <Category>FlipFlop</Category>

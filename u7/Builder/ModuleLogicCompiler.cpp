@@ -3519,10 +3519,10 @@ namespace Builder
 		/*const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
 		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";*/
 
-		const char* const FB_SCALE_X1_OPNAME = "input_low";
-		const char* const FB_SCALE_X2_OPNAME = "input_high";
-		const char* const FB_SCALE_Y1_OPNAME = "output_low";
-		const char* const FB_SCALE_Y2_OPNAME = "output_high";
+		const char* const FB_SCALE_X1_OPNAME = "x1";
+		const char* const FB_SCALE_X2_OPNAME = "x2";
+		const char* const FB_SCALE_Y1_OPNAME = "y1";
+		const char* const FB_SCALE_Y2_OPNAME = "y2";
 
 		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
 		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";

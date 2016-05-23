@@ -3,7 +3,7 @@
     <AfbElement StrId="#ff_d_front_v1">
         <Properties>
             <Caption>ff_d_front</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="106" OpIndex="9"/>
             <Description>The D Flip-Flop Block captures the value of the D-input at a front portion of the clock cycle.</Description>
             <Category>FlipFlop</Category>

@@ -3,7 +3,7 @@
     <AfbElement StrId="#scale6_fp_v1">
         <Properties>
             <Caption>scale6_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="2" OpIndex="16"/>
             <Description>Scaling for 6 points Block performs floating-point input data scaling and outputs floating-point result in accordance with control signals.</Description>
             <Category>Scaling</Category>
@@ -259,8 +259,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>1</Value>
-                <Default>1</Default>
+                <Value>2</Value>
+                <Default>2</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>2</HighLimit>
                 <Script>

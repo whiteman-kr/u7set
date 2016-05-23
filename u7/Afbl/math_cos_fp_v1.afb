@@ -3,7 +3,7 @@
     <AfbElement StrId="#func_cos_fp_v1">
         <Properties>
             <Caption>math_cos_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="0" OpIndex="13"/>
             <Description>mathtion Block outputs the cosine calculation result</Description>
             <Category>Math</Category>

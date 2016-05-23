@@ -3,7 +3,7 @@
     <AfbElement StrId="#mux_si_v1">
         <Properties>
             <Caption>mux_si_v1</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="0" OpIndex="8"/>
             <Description>Multiplexor Block selects one of two signed integer input signals and output result in accordance with control signal.</Description>
             <Category>Other</Category>

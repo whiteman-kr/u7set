@@ -404,20 +404,20 @@ namespace Builder
 		requiredParams.append("i_conf");
 		requiredParams.append("i_scal_k1_coef");
 		requiredParams.append("i_scal_k2_coef");
-		requiredParams.append("input_low");
-		requiredParams.append("input_high");
-		requiredParams.append("output_low");
-		requiredParams.append("output_high");
+		requiredParams.append("x1");
+		requiredParams.append("x2");
+		requiredParams.append("y1");
+		requiredParams.append("y2");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
 		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
 		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
-		AppFbParamValue& x1Param = m_paramValuesArray["input_low"];
-		AppFbParamValue& x2Param = m_paramValuesArray["input_high"];
-		AppFbParamValue& y1Param = m_paramValuesArray["output_low"];
-		AppFbParamValue& y2Param = m_paramValuesArray["output_high"];
+		AppFbParamValue& x1Param = m_paramValuesArray["x1"];
+		AppFbParamValue& x2Param = m_paramValuesArray["x2"];
+		AppFbParamValue& y1Param = m_paramValuesArray["y1"];
+		AppFbParamValue& y2Param = m_paramValuesArray["y2"];
 
 		CHECK_UNSIGNED_INT(iConfParam)
 
@@ -968,11 +968,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_si_fp");
+		requiredParams.append("i_conf");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& iSiFp = m_paramValuesArray["i_si_fp"];
+		AppFbParamValue& iSiFp = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(iSiFp)
 

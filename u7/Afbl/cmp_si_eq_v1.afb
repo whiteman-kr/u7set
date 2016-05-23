@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmp_si_eq_v1">
         <Properties>
             <Caption>cmp_si_eq</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="2" OpIndex="16"/>
             <Description>Comparator Block, equal 32-bit signed int comparison</Description>
             <Category>Compare</Category>
@@ -20,7 +20,7 @@
             <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="9" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-2147483648</LowLimit>

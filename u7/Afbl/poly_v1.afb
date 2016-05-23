@@ -3,7 +3,7 @@
     <AfbElement StrId="#poly_v1">
         <Properties>
             <Caption>poly</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="1" OpIndex="31"/>
             <Description>Polynomial function Block performs evaluation of polynomial coefficients on input values in accordance with control signal.</Description>
             <Category>Math</Category>

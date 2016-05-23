@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmpc_si_ne_v1">
         <Properties>
             <Caption>cmpc_si_ne</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="108" OpIndex="12"/>
             <Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
             <Category>Compare</Category>
@@ -19,7 +19,7 @@
             <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="9" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp_s" Caption="Setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-2147483648</LowLimit>
@@ -37,7 +37,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-2147483648</LowLimit>
