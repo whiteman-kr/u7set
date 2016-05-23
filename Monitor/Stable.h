@@ -135,5 +135,10 @@
 #endif
 
 
+#include "../include/AppSignalManager.h"
+
+extern AppSignalManager theSignals;
+
+
 #endif // MONITOR_STABLE_H
 

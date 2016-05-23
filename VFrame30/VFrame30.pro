@@ -122,7 +122,12 @@ HEADERS += VFrame30Lib_global.h \
     BaseSchemaWidget.h \
     SchemaPoint.h \
     ../include/Types.h \
-    PropertyNames.h
+    PropertyNames.h \
+    ../include/AppSignalState.h \
+    ../include/AppSignalManager.h \
+    ../include/Signal.h \
+    ../include/XmlHelper.h \
+    ../include/DeviceObject.h
 
 SOURCES += \
     Settings.cpp \
@@ -163,7 +168,12 @@ SOURCES += \
     BaseSchemaWidget.cpp \
     SchemaPoint.cpp \
     ../lib/Types.cpp \
-    PropertyNames.cpp
+    PropertyNames.cpp \
+    ../lib/AppSignalState.cpp \
+    ../lib/AppSignalManager.cpp \
+    ../lib/Signal.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/DeviceObject.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
