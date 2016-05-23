@@ -3,7 +3,7 @@
     <AfbElement StrId="#math_inv_fp_v1">
         <Properties>
             <Caption>math_inv_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="0" OpIndex="13"/>
             <Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
             <Category>Math</Category>

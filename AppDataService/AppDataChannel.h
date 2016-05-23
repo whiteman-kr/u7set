@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include/DataChannel.h"
-#include "AppSignalState.h"
+#include "AppSignalStateEx.h"
 #include "AppDataServiceTypes.h"
 #include "AppDataProcessingThread.h"
 

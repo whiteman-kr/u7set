@@ -86,7 +86,6 @@ private:
 	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 
-	QAction* m_configuratorAction = nullptr;
 	QAction* m_afblEditorAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;

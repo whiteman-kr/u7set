@@ -189,11 +189,6 @@ void MainWindow::createActions()
 	m_settingsAction->setEnabled(true);
 	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_configuratorAction = new QAction(tr("Module Configurator..."), this);
-	m_configuratorAction->setStatusTip(tr("Run module configurator"));
-	//m_pConfiguratorAction->setEnabled(true);
-	connect(m_configuratorAction, &QAction::triggered, this, &MainWindow::runConfigurator);
-
 	m_afblEditorAction = new QAction(tr("AFBL Editor..."), this);
 	m_afblEditorAction->setStatusTip(tr("Run AFBL Editor"));
 	m_afblEditorAction->setEnabled(false);
@@ -267,7 +262,6 @@ void MainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_configuratorAction);
 	pToolsMenu->addAction(m_afblEditorAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
     pToolsMenu->addAction(m_connectionsEditorAction);
@@ -414,7 +408,7 @@ void MainWindow::runRS232SignalListEditor()
 
 void MainWindow::showAbout()
 {
-	QMessageBox aboutDialog;
+	QMessageBox aboutDialog(this);
 	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
 	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2>");
 	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");

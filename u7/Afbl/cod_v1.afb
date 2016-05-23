@@ -3,7 +3,7 @@
     <AfbElement StrId="#cod_v1">
         <Properties>
             <Caption>cod</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="102" OpIndex="20"/>
             <Description>Binary Coder Block analyses input signals state strictly inorder in 16 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
             <Category>Logic</Category>

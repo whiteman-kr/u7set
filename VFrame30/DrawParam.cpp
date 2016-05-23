@@ -63,6 +63,35 @@ namespace VFrame30
 		m_pinGridStep = value;
 	}
 
+	bool CDrawParam::isEditMode() const
+	{
+		return m_isEditMode;
+	}
+
+	void CDrawParam::setEditMode(bool value)
+	{
+		m_isEditMode = value;
+	}
+
+	bool CDrawParam::isMonitorMode() const
+	{
+		return !isEditMode();
+	}
+
+	void CDrawParam::setMonitorMode(bool value)
+	{
+		setEditMode(!value);
+	}
+
+	AppSignalManager* CDrawParam::appSignalManager()
+	{
+		return m_appSignalmanager;
+	}
+
+	void CDrawParam::setAppSignalManager(AppSignalManager* value)
+	{
+		m_appSignalmanager = value;
+	}
 
 	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags)
 	{

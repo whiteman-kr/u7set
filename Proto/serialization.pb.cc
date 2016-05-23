@@ -907,7 +907,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceController));
   DeviceSignal_descriptor_ = file->message_type(40);
-  static const int DeviceSignal_offsets_[10] = {
+  static const int DeviceSignal_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, obsoletetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, byteorder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, format_),
@@ -918,6 +918,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, valuebit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, function_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, memoryarea_),
   };
   DeviceSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1477,60 +1478,61 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRa"
     "ck\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014"
     "DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\"\022\n\020DeviceC"
-    "ontroller\"\347\001\n\014DeviceSignal\022\027\n\014obsoletety"
+    "ontroller\"\376\001\n\014DeviceSignal\022\027\n\014obsoletety"
     "pe\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006for"
     "mat\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validit"
     "yOffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010"
     "\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001"
     "(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005"
-    ":\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010S"
-    "oftware\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfig"
-    "uration\022\032\n\022struct_description\030\001 \001(\t\022/\n\006v"
-    "alues\030\002 \003(\0132\037.Proto.ModuleConfigurationV"
-    "alue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurat"
-    "ionValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n"
-    "\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0"
-    "\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002"
-    " \002(\005:\002-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsi"
-    "gnalGroupID\030\002 \001(\005\022\030\n\020signalInstanceID\030\003 "
-    "\001(\005\022\023\n\013changesetID\030\004 \001(\005\022\022\n\ncheckedOut\030\005"
-    " \001(\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemChannel"
-    "\030\007 \001(\005\022\014\n\004type\030\010 \001(\005\022\017\n\007created\030\t \001(\003\022\017\n"
-    "\007deleted\030\n \001(\010\022\027\n\017instanceCreated\030\013 \001(\003\022"
-    "\026\n\016instanceAction\030\014 \001(\005\022\023\n\013appSignalID\030\r"
-    " \001(\t\022\031\n\021customAppSignalID\030\016 \001(\t\022\017\n\007capti"
-    "on\030\017 \001(\t\022\022\n\ndataFormat\030\020 \001(\005\022\020\n\010dataSize"
-    "\030\021 \001(\005\022\016\n\006lowADC\030\022 \001(\005\022\017\n\007highADC\030\023 \001(\005\022"
-    "\033\n\023lowEngeneeringUnits\030\024 \001(\001\022\034\n\024highEnge"
-    "neeringUnits\030\025 \001(\001\022\016\n\006unitID\030\026 \001(\005\022\022\n\nad"
-    "justment\030\027 \001(\001\022\025\n\rlowValidRange\030\030 \001(\001\022\026\n"
-    "\016highValidRange\030\031 \001(\001\022\026\n\016unbalanceLimit\030"
-    "\032 \001(\001\022\025\n\rinputLowLimit\030\033 \001(\001\022\026\n\016inputHig"
-    "hLimit\030\034 \001(\001\022\023\n\013inputUnitID\030\035 \001(\005\022\025\n\rinp"
-    "utSensorID\030\036 \001(\005\022\026\n\016outputLowLimit\030\037 \001(\001"
-    "\022\027\n\017outputHighLimit\030  \001(\001\022\024\n\014outputUnitI"
-    "D\030! \001(\005\022\022\n\noutputMode\030\" \001(\005\022\026\n\016outputSen"
-    "sorID\030# \001(\005\022\017\n\007acquire\030$ \001(\010\022\022\n\ncalculat"
-    "ed\030% \001(\010\022\023\n\013normalState\030& \001(\005\022\025\n\rdecimal"
-    "Places\030\' \001(\005\022\020\n\010aperture\030( \001(\001\022\021\n\tinOutT"
-    "ype\030) \001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\rfilter"
-    "ingTime\030+ \001(\001\022\027\n\017spreadTolerance\030, \001(\001\022\021"
-    "\n\tbyteOrder\030- \001(\005\022\024\n\014enableTuning\030. \001(\010\022"
-    "\032\n\022tuningDefaultValue\030/ \001(\001\022\014\n\004hash\0300 \001("
-    "\004\022\033\n\022regValueAddrOffset\030\310\001 \001(\005\022\030\n\017regVal"
-    "ueAddrBit\030\311\001 \001(\005\022\036\n\025regValidityAddrOffse"
-    "t\030\312\001 \001(\005\022\033\n\022regValidityAddrBit\030\313\001 \001(\005\022\033\n"
-    "\022ioBufferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBufferAd"
-    "drBit\030\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001(\005\022\023\n\n"
-    "ramAddrBit\030\317\001 \001(\005\"v\n\016AppSignalState\022\014\n\004h"
-    "ash\030\001 \001(\004\022\r\n\005value\030\002 \001(\001\022\r\n\005flags\030\003 \001(\r\022"
-    "\022\n\nsystemTime\030\004 \001(\022\022\021\n\tlocalTime\030\005 \001(\022\022\021"
-    "\n\tplantTime\030\006 \001(\022*3\n\nSchemaUnit\022\013\n\007Displ"
-    "ay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connec"
-    "tionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n"
-    "\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001"
-    "*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSi"
-    "gnedInt\020\001\022\t\n\005Float\020\002", 7580);
+    ":\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\"\036\n\013Workstatio"
+    "n\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001"
+    " \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struct"
+    "_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Pro"
+    "to.ModuleConfigurationValue\022\016\n\004name\030\003 \001("
+    "\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004name\030"
+    "\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name"
+    "\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddress16\022\022\n\006of"
+    "fset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"\336\t\n\tAppS"
+    "ignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsignalGroupID\030\002 \001(\005"
+    "\022\030\n\020signalInstanceID\030\003 \001(\005\022\023\n\013changesetI"
+    "D\030\004 \001(\005\022\022\n\ncheckedOut\030\005 \001(\010\022\016\n\006userID\030\006 "
+    "\001(\005\022\030\n\020subsystemChannel\030\007 \001(\005\022\014\n\004type\030\010 "
+    "\001(\005\022\017\n\007created\030\t \001(\003\022\017\n\007deleted\030\n \001(\010\022\027\n"
+    "\017instanceCreated\030\013 \001(\003\022\026\n\016instanceAction"
+    "\030\014 \001(\005\022\023\n\013appSignalID\030\r \001(\t\022\031\n\021customApp"
+    "SignalID\030\016 \001(\t\022\017\n\007caption\030\017 \001(\t\022\022\n\ndataF"
+    "ormat\030\020 \001(\005\022\020\n\010dataSize\030\021 \001(\005\022\016\n\006lowADC\030"
+    "\022 \001(\005\022\017\n\007highADC\030\023 \001(\005\022\033\n\023lowEngeneering"
+    "Units\030\024 \001(\001\022\034\n\024highEngeneeringUnits\030\025 \001("
+    "\001\022\016\n\006unitID\030\026 \001(\005\022\022\n\nadjustment\030\027 \001(\001\022\025\n"
+    "\rlowValidRange\030\030 \001(\001\022\026\n\016highValidRange\030\031"
+    " \001(\001\022\026\n\016unbalanceLimit\030\032 \001(\001\022\025\n\rinputLow"
+    "Limit\030\033 \001(\001\022\026\n\016inputHighLimit\030\034 \001(\001\022\023\n\013i"
+    "nputUnitID\030\035 \001(\005\022\025\n\rinputSensorID\030\036 \001(\005\022"
+    "\026\n\016outputLowLimit\030\037 \001(\001\022\027\n\017outputHighLim"
+    "it\030  \001(\001\022\024\n\014outputUnitID\030! \001(\005\022\022\n\noutput"
+    "Mode\030\" \001(\005\022\026\n\016outputSensorID\030# \001(\005\022\017\n\007ac"
+    "quire\030$ \001(\010\022\022\n\ncalculated\030% \001(\010\022\023\n\013norma"
+    "lState\030& \001(\005\022\025\n\rdecimalPlaces\030\' \001(\005\022\020\n\010a"
+    "perture\030( \001(\001\022\021\n\tinOutType\030) \001(\005\022\023\n\013equi"
+    "pmentID\030* \001(\t\022\025\n\rfilteringTime\030+ \001(\001\022\027\n\017"
+    "spreadTolerance\030, \001(\001\022\021\n\tbyteOrder\030- \001(\005"
+    "\022\024\n\014enableTuning\030. \001(\010\022\032\n\022tuningDefaultV"
+    "alue\030/ \001(\001\022\014\n\004hash\0300 \001(\004\022\033\n\022regValueAddr"
+    "Offset\030\310\001 \001(\005\022\030\n\017regValueAddrBit\030\311\001 \001(\005\022"
+    "\036\n\025regValidityAddrOffset\030\312\001 \001(\005\022\033\n\022regVa"
+    "lidityAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrOffs"
+    "et\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026\n\rr"
+    "amAddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001(\005"
+    "\"\210\001\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005"
+    "value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsyst"
+    "emTime\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001(\022:\0010\022\024\n"
+    "\tplantTime\030\006 \001(\022:\0010*3\n\nSchemaUnit\022\013\n\007Dis"
+    "play\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conn"
+    "ectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*"
+    ")\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete"
+    "\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\t"
+    "SignedInt\020\001\022\t\n\005Float\020\002", 7622);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -15583,6 +15585,7 @@ const int DeviceSignal::kValueOffsetFieldNumber;
 const int DeviceSignal::kValueBitFieldNumber;
 const int DeviceSignal::kTypeFieldNumber;
 const int DeviceSignal::kFunctionFieldNumber;
+const int DeviceSignal::kMemoryAreaFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceSignal::DeviceSignal()
@@ -15611,6 +15614,7 @@ void DeviceSignal::SharedCtor() {
   valuebit_ = 0;
   type_ = 0;
   function_ = 0;
+  memoryarea_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -15658,6 +15662,7 @@ void DeviceSignal::Clear() {
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     type_ = 0;
     function_ = 0;
+    memoryarea_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -15824,6 +15829,22 @@ bool DeviceSignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(88)) goto parse_memoryArea;
+        break;
+      }
+
+      // optional int32 memoryArea = 11 [default = 0];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_memoryArea:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &memoryarea_)));
+          set_has_memoryarea();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -15896,6 +15917,11 @@ void DeviceSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->function(), output);
   }
 
+  // optional int32 memoryArea = 11 [default = 0];
+  if (has_memoryarea()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->memoryarea(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -15952,6 +15978,11 @@ void DeviceSignal::SerializeWithCachedSizes(
   // optional int32 function = 10 [default = 0];
   if (has_function()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->function(), target);
+  }
+
+  // optional int32 memoryArea = 11 [default = 0];
+  if (has_memoryarea()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->memoryarea(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -16037,6 +16068,13 @@ int DeviceSignal::ByteSize() const {
           this->function());
     }
 
+    // optional int32 memoryArea = 11 [default = 0];
+    if (has_memoryarea()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->memoryarea());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -16096,6 +16134,9 @@ void DeviceSignal::MergeFrom(const DeviceSignal& from) {
     if (from.has_function()) {
       set_function(from.function());
     }
+    if (from.has_memoryarea()) {
+      set_memoryarea(from.memoryarea());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -16129,6 +16170,7 @@ void DeviceSignal::Swap(DeviceSignal* other) {
     std::swap(valuebit_, other->valuebit_);
     std::swap(type_, other->type_);
     std::swap(function_, other->function_);
+    std::swap(memoryarea_, other->memoryarea_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -20260,7 +20302,7 @@ bool AppSignalState::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional uint64 hash = 1;
+      // optional uint64 hash = 1 [default = 0];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -20275,7 +20317,7 @@ bool AppSignalState::MergePartialFromCodedStream(
         break;
       }
 
-      // optional double value = 2;
+      // optional double value = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
@@ -20291,7 +20333,7 @@ bool AppSignalState::MergePartialFromCodedStream(
         break;
       }
 
-      // optional uint32 flags = 3;
+      // optional uint32 flags = 3 [default = 0];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -20307,7 +20349,7 @@ bool AppSignalState::MergePartialFromCodedStream(
         break;
       }
 
-      // optional sint64 systemTime = 4;
+      // optional sint64 systemTime = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -20323,7 +20365,7 @@ bool AppSignalState::MergePartialFromCodedStream(
         break;
       }
 
-      // optional sint64 localTime = 5;
+      // optional sint64 localTime = 5 [default = 0];
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -20339,7 +20381,7 @@ bool AppSignalState::MergePartialFromCodedStream(
         break;
       }
 
-      // optional sint64 plantTime = 6;
+      // optional sint64 plantTime = 6 [default = 0];
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -20373,32 +20415,32 @@ bool AppSignalState::MergePartialFromCodedStream(
 
 void AppSignalState::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional uint64 hash = 1;
+  // optional uint64 hash = 1 [default = 0];
   if (has_hash()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->hash(), output);
   }
 
-  // optional double value = 2;
+  // optional double value = 2 [default = 0];
   if (has_value()) {
     ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->value(), output);
   }
 
-  // optional uint32 flags = 3;
+  // optional uint32 flags = 3 [default = 0];
   if (has_flags()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->flags(), output);
   }
 
-  // optional sint64 systemTime = 4;
+  // optional sint64 systemTime = 4 [default = 0];
   if (has_systemtime()) {
     ::google::protobuf::internal::WireFormatLite::WriteSInt64(4, this->systemtime(), output);
   }
 
-  // optional sint64 localTime = 5;
+  // optional sint64 localTime = 5 [default = 0];
   if (has_localtime()) {
     ::google::protobuf::internal::WireFormatLite::WriteSInt64(5, this->localtime(), output);
   }
 
-  // optional sint64 plantTime = 6;
+  // optional sint64 plantTime = 6 [default = 0];
   if (has_planttime()) {
     ::google::protobuf::internal::WireFormatLite::WriteSInt64(6, this->planttime(), output);
   }
@@ -20411,32 +20453,32 @@ void AppSignalState::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* AppSignalState::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional uint64 hash = 1;
+  // optional uint64 hash = 1 [default = 0];
   if (has_hash()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->hash(), target);
   }
 
-  // optional double value = 2;
+  // optional double value = 2 [default = 0];
   if (has_value()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->value(), target);
   }
 
-  // optional uint32 flags = 3;
+  // optional uint32 flags = 3 [default = 0];
   if (has_flags()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->flags(), target);
   }
 
-  // optional sint64 systemTime = 4;
+  // optional sint64 systemTime = 4 [default = 0];
   if (has_systemtime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(4, this->systemtime(), target);
   }
 
-  // optional sint64 localTime = 5;
+  // optional sint64 localTime = 5 [default = 0];
   if (has_localtime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(5, this->localtime(), target);
   }
 
-  // optional sint64 plantTime = 6;
+  // optional sint64 plantTime = 6 [default = 0];
   if (has_planttime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(6, this->planttime(), target);
   }
@@ -20452,40 +20494,40 @@ int AppSignalState::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional uint64 hash = 1;
+    // optional uint64 hash = 1 [default = 0];
     if (has_hash()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt64Size(
           this->hash());
     }
 
-    // optional double value = 2;
+    // optional double value = 2 [default = 0];
     if (has_value()) {
       total_size += 1 + 8;
     }
 
-    // optional uint32 flags = 3;
+    // optional uint32 flags = 3 [default = 0];
     if (has_flags()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->flags());
     }
 
-    // optional sint64 systemTime = 4;
+    // optional sint64 systemTime = 4 [default = 0];
     if (has_systemtime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::SInt64Size(
           this->systemtime());
     }
 
-    // optional sint64 localTime = 5;
+    // optional sint64 localTime = 5 [default = 0];
     if (has_localtime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::SInt64Size(
           this->localtime());
     }
 
-    // optional sint64 plantTime = 6;
+    // optional sint64 plantTime = 6 [default = 0];
     if (has_planttime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::SInt64Size(

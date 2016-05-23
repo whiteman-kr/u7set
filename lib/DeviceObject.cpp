@@ -2339,6 +2339,7 @@ static const QString typeCaption("Type");				// Optimization
 static const QString functionCaption("Function");
 static const QString byteOrderCaption("ByteOrder");
 static const QString formatCaption("Format");
+static const QString memoryAreaCaption("MemoryArea");
 static const QString sizeCaption("Size");
 static const QString validityOffsetCaption("ValidityOffset");
 static const QString validityBitCaption("ValidityBit");
@@ -2349,6 +2350,7 @@ static const QString valueBitCaption("ValueBit");
 		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, functionCaption, true, DeviceSignal::function, DeviceSignal::setFunction)
 		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
 		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, formatCaption, true, DeviceSignal::format, DeviceSignal::setFormat)
+		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, memoryAreaCaption, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
 
 		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, sizeCaption, true, DeviceSignal::size, DeviceSignal::setSize)
 		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, validityOffsetCaption, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
@@ -2368,6 +2370,9 @@ static const QString valueBitCaption("ValueBit");
 
 		formatProp->setUpdateFromPreset(true);
 		formatProp->setExpert(preset);
+
+		memoryAreaProp->setUpdateFromPreset(true);
+		memoryAreaProp->setExpert(preset);
 
 		sizeProp->setUpdateFromPreset(true);
 		sizeProp->setExpert(preset);
@@ -2408,6 +2413,7 @@ static const QString valueBitCaption("ValueBit");
 
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));
+		signalMessage->set_memoryarea(static_cast<int>(m_memoryArea));
 
 		signalMessage->set_size(static_cast<int>(m_size));
 
@@ -2489,6 +2495,7 @@ static const QString valueBitCaption("ValueBit");
 
 		m_byteOrder = static_cast<E::ByteOrder>(signalMessage.byteorder());
 		m_format = static_cast<E::DataFormat>(signalMessage.format());
+		m_memoryArea = static_cast<E::MemoryArea>(signalMessage.memoryarea());
 
 		m_size = signalMessage.size();
 
@@ -2660,6 +2667,16 @@ static const QString valueBitCaption("ValueBit");
 	void DeviceSignal::setFormat(E::DataFormat value)
 	{
 		m_format = value;
+	}
+
+	E::MemoryArea DeviceSignal::memoryArea() const
+	{
+		return m_memoryArea;
+	}
+
+	void DeviceSignal::setMemoryArea(E::MemoryArea value)
+	{
+		m_memoryArea = value;
 	}
 
 	int DeviceSignal::size() const

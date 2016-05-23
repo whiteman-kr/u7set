@@ -3,7 +3,7 @@
     <AfbElement StrId="#and_v1">
         <Properties>
             <Caption>and</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
 	  <Implementation Version="206" OpIndex="22"/>
             <Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
             <Category>Logic</Category>

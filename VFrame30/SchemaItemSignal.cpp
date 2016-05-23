@@ -2,6 +2,8 @@
 #include "SchemaItemSignal.h"
 #include "LogicSchema.h"
 
+#include "../include/AppSignalManager.h"
+
 namespace VFrame30
 {
 	//
@@ -28,6 +30,15 @@ namespace VFrame30
 	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, schema, layer);
+
+		if (drawParam->isMonitorMode() == true)
+		{
+			if (drawParam->appSignalManager() ==  nullptr)
+			{
+				assert(drawParam->appSignalManager() != nullptr);
+				return;
+			}
+		}
 
 		//--
 		//
@@ -112,6 +123,12 @@ namespace VFrame30
 		else
 		{
 			text = appSignalIds();
+
+			if (drawParam->isMonitorMode() == true)
+			{
+				AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
+				text += QString(" %1").arg(QString::number(signalState.value));
+			}
 		}
 
 		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);

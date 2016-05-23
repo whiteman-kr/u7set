@@ -82,7 +82,8 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	m_tcpAddDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
 															tcpAppDataSever,
-															m_appSignals);
+															m_appSignals,
+															m_signalStates);
 	m_tcpAddDataServerThread->start();
 }
 
@@ -539,7 +540,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	for(Signal* signal : m_appSignals)
 	{
-		AppSignalState* signalState = m_signalStates[index];
+		AppSignalStateEx* signalState = m_signalStates[index];
 
 		if (signalState == nullptr)
 		{
@@ -551,6 +552,8 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 		index++;
 	}
+
+	m_signalStates.buidlHash2State();
 }
 
 

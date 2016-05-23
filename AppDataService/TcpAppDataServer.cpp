@@ -175,8 +175,6 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 			continue;
 		}
 
-		//	m_protoAppSignal.Clear();
-
 		Proto::AppSignal* appSignal = m_getAppSignalParamReply.add_appsignalparams();
 
 		signal->serializeToProtoAppSignal(appSignal);
@@ -188,9 +186,46 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
 {
-	/*Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
-	Network::GetAppSignalStateReply m_getAppSignalStateReply;*/
+	bool result = m_getAppSignalStateRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
 
+	m_getAppSignalStateReply.Clear();
+
+	if (result == false)
+	{
+		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_getAppSignalStateReply);
+		return;
+	}
+
+	int hashesCount = m_getAppSignalStateRequest.signalhashes_size();
+
+	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+	{
+		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		sendReply(m_getAppSignalStateReply);
+		return;
+	}
+
+	for(int i = 0; i < hashesCount; i++)
+	{
+		Hash hash = m_getAppSignalStateRequest.signalhashes(i);
+
+		AppSignalState appSignalState;
+
+		result = getState(hash, appSignalState);
+
+		if (result == false)
+		{
+			assert(false);			// unknown hash
+			continue;
+		}
+
+		Proto::AppSignalState* protoAppSignalState = m_getAppSignalStateReply.add_appsignalstates();
+
+		appSignalState.setProtoAppSignalState(hash, protoAppSignalState);
+	}
+
+	sendReply(m_getAppSignalStateReply);
 }
 
 
@@ -213,17 +248,25 @@ const AppSignals& TcpAppDataServer::appSignals() const
 }
 
 
+bool TcpAppDataServer::getState(Hash hash, AppSignalState& state)
+{
+	return m_thread->getState(hash, state);
+}
+
+
 // -------------------------------------------------------------------------------
 //
 // TcpAppDataServerThread class implementation
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServerThread::TcpAppDataServerThread(	const HostAddressPort& listenAddressPort,
+TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 												TcpAppDataServer* server,
-												const AppSignals &appSignals) :
+												const AppSignals& appSignals,
+												const AppSignalStates& appSignalStates) :
 	Tcp::ServerThread(listenAddressPort, server),
-	m_appSignals(appSignals)
+	m_appSignals(appSignals),
+	m_appSignalStates(appSignalStates)
 {
 	server->setThread(this);
 	buildAppSignalIDs();
@@ -244,4 +287,10 @@ void TcpAppDataServerThread::buildAppSignalIDs()
 
 		i++;
 	}
+}
+
+
+bool TcpAppDataServerThread::getState(Hash hash, AppSignalState& state)
+{
+	return m_appSignalStates.getState(hash, state);
 }

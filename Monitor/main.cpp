@@ -7,6 +7,10 @@
 #include "../include/SimpleThread.h"
 #include "TcpSignalClient.h"
 
+
+AppSignalManager theSignals;
+
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
@@ -28,7 +32,7 @@ int main(int argc, char *argv[])
 	// --
 	//
 	VFrame30::VFrame30Library::Init();
-	//Hardware::Init();
+	Hardware::Init();
 
 	// Configuration Service communication
 	//
@@ -58,7 +62,7 @@ int main(int argc, char *argv[])
 	delete tcpClientThread;
 
 	VFrame30::VFrame30Library::Shutdown();
-	//Hardware::Shutdwon();
+	Hardware::Shutdwon();
 	//google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

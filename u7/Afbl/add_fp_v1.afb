@@ -3,7 +3,7 @@
     <AfbElement StrId="#add_fp_v1">
         <Properties>
             <Caption>add_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="103" OpIndex="14"/>
             <Description>Adder Block with float data format</Description>
             <Category>Math</Category>

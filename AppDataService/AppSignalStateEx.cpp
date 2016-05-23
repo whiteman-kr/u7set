@@ -1,4 +1,4 @@
-#include "AppSignalState.h"
+#include "AppSignalStateEx.h"
 
 
 // -------------------------------------------------------------------------------
@@ -7,13 +7,13 @@
 //
 // -------------------------------------------------------------------------------
 
-AppSignalState::AppSignalState()
+AppSignalStateEx::AppSignalStateEx()
 {
-	m_flags.reset();
+	m_state.flags.all = 0;
 }
 
 
-void AppSignalState::setSignalParams(int index, Signal* signal)
+void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 {
 	if (signal == nullptr)
 	{
@@ -32,7 +32,7 @@ void AppSignalState::setSignalParams(int index, Signal* signal)
 }
 
 
-void AppSignalState::setState(Times time, AppSignalStateFlags flags, double value)
+void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double value)
 {
 	bool writeStateChanges = false;
 
@@ -43,7 +43,7 @@ void AppSignalState::setState(Times time, AppSignalStateFlags flags, double valu
 	}
 	else
 	{
-		if (m_flags.valid != flags.valid)
+		if (m_state.flags.valid != flags.valid)
 		{
 			writeStateChanges = true;		// changes of signal validity always writing
 		}
@@ -56,7 +56,7 @@ void AppSignalState::setState(Times time, AppSignalStateFlags flags, double valu
 			{
 				// is discrete signal
 				//
-				if (static_cast<int>(value) != static_cast<int>(m_value))
+				if (static_cast<int>(value) != static_cast<int>(m_state.value))
 				{
 					writeStateChanges = true;
 				}
@@ -65,7 +65,7 @@ void AppSignalState::setState(Times time, AppSignalStateFlags flags, double valu
 			{
 				// is analog signal
 				//
-				if (fabs(value - m_value) > m_absAperture)
+				if (fabs(value - m_state.value) > m_absAperture)
 				{
 					writeStateChanges = true;
 				}
@@ -80,7 +80,7 @@ void AppSignalState::setState(Times time, AppSignalStateFlags flags, double valu
 					flags.underflow = 1;
 				}
 
-				if (flags.allFlags != m_flags.allFlags)
+				if (flags.all != m_state.flags.all)
 				{
 					writeStateChanges = true;
 				}
@@ -90,10 +90,10 @@ void AppSignalState::setState(Times time, AppSignalStateFlags flags, double valu
 
 	if (writeStateChanges)
 	{
-		m_time = time;
+		m_state.time = time;
 
-		m_flags = flags;
-		m_value = value;
+		m_state.flags = flags;
+		m_state.value = value;
 	}
 }
 
@@ -106,6 +106,8 @@ AppSignalStates::~AppSignalStates()
 
 void AppSignalStates::clear()
 {
+	m_hash2State.clear();
+
 	if (m_appSignalState != nullptr)
 	{
 		delete [] m_appSignalState;
@@ -126,12 +128,12 @@ void AppSignalStates::setSize(int size)
 		return;
 	}
 
-	m_appSignalState = new AppSignalState[size];
+	m_appSignalState = new AppSignalStateEx[size];
 	m_size = size;
 }
 
 
-AppSignalState* AppSignalStates::operator [] (int index)
+AppSignalStateEx* AppSignalStates::operator [] (int index)
 {
 #ifdef QT_DEBUG
 
@@ -145,6 +147,41 @@ AppSignalState* AppSignalStates::operator [] (int index)
 #endif
 
 	return m_appSignalState + index;
+}
+
+
+void AppSignalStates::buidlHash2State()
+{
+	m_hash2State.clear();
+
+	m_hash2State.reserve(m_size * 1.3);
+
+	for(int i = 0; i < m_size; i++)
+	{
+		AppSignalStateEx& state = m_appSignalState[i];
+
+		if (state.m_signal == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		Hash hash = calcHash(state.m_signal->appSignalID());
+
+		m_hash2State.insert(hash, &state.m_state);
+	}
+}
+
+
+bool AppSignalStates::getState(Hash hash, AppSignalState& state) const
+{
+	if (m_hash2State.contains(hash))
+	{
+		state = *m_hash2State[hash];
+		return true;
+	}
+
+	return false;
 }
 
 

@@ -3,7 +3,7 @@
     <AfbElement StrId="#lim_fp_v1">
         <Properties>
             <Caption>lim_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="3" OpIndex="12"/>
             <Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
             <Category>Other</Category>

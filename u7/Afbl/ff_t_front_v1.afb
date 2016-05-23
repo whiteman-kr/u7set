@@ -3,7 +3,7 @@
     <AfbElement StrId="#ff_t_front_v1">
         <Properties>
             <Caption>ff_t_front</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="106" OpIndex="9"/>
             <Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a front.</Description>
             <Category>FlipFlop</Category>

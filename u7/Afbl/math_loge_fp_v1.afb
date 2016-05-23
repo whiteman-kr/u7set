@@ -3,7 +3,7 @@
     <AfbElement StrId="#math_loge_fp_v1">
         <Properties>
             <Caption>math_loge_fp</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="0" OpIndex="13"/>
             <Description>Function Block outputs the natural logarithmic calculation result</Description>
             <Category>Math</Category>

@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmpc_fp_ne_v1">
         <Properties>
             <Caption>cmpc_fp_ne</Caption>
-            <Version>1.0</Version>
+            <Version>1.1</Version>
             <Implementation Version="108" OpIndex="12"/>
             <Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
             <Category>Compare</Category>
@@ -21,7 +21,7 @@
             <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="10" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp_s" Caption="Setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -39,7 +39,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
