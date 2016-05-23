@@ -84,17 +84,17 @@ namespace Builder
 			xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
 
 			//
-			// DataAquisitionServiceID1(2)
+			// AppDataServiceID1(2)
 			//
-			QString dacStrID1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "DataAquisitionServiceID1", &ok).trimmed();
+			QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
 			}
 
-			if (dacStrID1.isEmpty() == true)
+			if (appDataServiceId1.isEmpty() == true)
 			{
-				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceID1 is invalid")
+				QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID1 is invalid")
 								   .arg(m_software->equipmentIdTemplate());
 
 				m_log->writeError(errorStr);
@@ -103,15 +103,15 @@ namespace Builder
 			}
 
 			//
-			// DataAquisitionServiceID2
+			// AppDataServiceID2
 			//
-			QString dacStrID2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "DataAquisitionServiceID2", &ok).trimmed();
+			QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
 			}
 
-			if (dacStrID2.isEmpty() == true)
+			if (appDataServiceId2.isEmpty() == true)
 			{
 				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceID2 is invalid")
 								   .arg(m_software->equipmentIdTemplate());
@@ -124,12 +124,12 @@ namespace Builder
 			//
 			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
 			//
-			Hardware::Software* dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(dacStrID1));
-			Hardware::Software* dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(dacStrID2));
+			Hardware::Software* dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
+			Hardware::Software* dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
 
 			if (dasObject1 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dacStrID1);
+				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId1);
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
@@ -138,7 +138,7 @@ namespace Builder
 
 			if (dasObject2 == nullptr)
 			{
-				QString errorStr = tr("Object %1 is not found").arg(dacStrID2);
+				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId2);
 
 				m_log->writeError(errorStr);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
@@ -162,8 +162,8 @@ namespace Builder
 
 				// --
 				//
-				xmlWriter.writeAttribute("DasID1", dacStrID1);
-				xmlWriter.writeAttribute("DasID2", dacStrID2);
+				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
+				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
 
 				xmlWriter.writeAttribute("ip1", dasSettings1.clientRequestIP.address().toString());
 				xmlWriter.writeAttribute("port1", QString::number(dasSettings1.clientRequestIP.port()));

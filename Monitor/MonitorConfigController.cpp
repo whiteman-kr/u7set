@@ -269,8 +269,8 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	qDebug() << "New configuration arrived";
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
-	qDebug() << "DAS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
-	qDebug() << "DAS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+	qDebug() << "ADS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
+	qDebug() << "ADS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
 
 	// Emit signal to inform everybody about new configuration
 	//
@@ -373,11 +373,11 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 		{
 			QDomElement dasXmlElement = dasNodes.at(0).toElement();
 
-			QString dasId1 = dasXmlElement.attribute("DasID1");
+			QString dasId1 = dasXmlElement.attribute("AppDataServiceID1");
 			QString dasIp1 = dasXmlElement.attribute("ip1");
 			int dasPort1 = dasXmlElement.attribute("port1").toInt();
 
-			QString dasId2 = dasXmlElement.attribute("DasID2");
+			QString dasId2 = dasXmlElement.attribute("AppDataServiceID2");
 			QString dasIp2 = dasXmlElement.attribute("ip2");
 			int dasPort2 = dasXmlElement.attribute("port2").toInt();
 
