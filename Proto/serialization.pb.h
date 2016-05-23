@@ -5028,6 +5028,13 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 function() const;
   inline void set_function(::google::protobuf::int32 value);
 
+  // optional int32 memoryArea = 11 [default = 0];
+  inline bool has_memoryarea() const;
+  inline void clear_memoryarea();
+  static const int kMemoryAreaFieldNumber = 11;
+  inline ::google::protobuf::int32 memoryarea() const;
+  inline void set_memoryarea(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
   inline void set_has_obsoletetype();
@@ -5050,6 +5057,8 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_type();
   inline void set_has_function();
   inline void clear_has_function();
+  inline void set_has_memoryarea();
+  inline void clear_has_memoryarea();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -5063,9 +5072,10 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 valuebit_;
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 function_;
+  ::google::protobuf::int32 memoryarea_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6357,42 +6367,42 @@ class AppSignalState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 hash = 1;
+  // optional uint64 hash = 1 [default = 0];
   inline bool has_hash() const;
   inline void clear_hash();
   static const int kHashFieldNumber = 1;
   inline ::google::protobuf::uint64 hash() const;
   inline void set_hash(::google::protobuf::uint64 value);
 
-  // optional double value = 2;
+  // optional double value = 2 [default = 0];
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 2;
   inline double value() const;
   inline void set_value(double value);
 
-  // optional uint32 flags = 3;
+  // optional uint32 flags = 3 [default = 0];
   inline bool has_flags() const;
   inline void clear_flags();
   static const int kFlagsFieldNumber = 3;
   inline ::google::protobuf::uint32 flags() const;
   inline void set_flags(::google::protobuf::uint32 value);
 
-  // optional sint64 systemTime = 4;
+  // optional sint64 systemTime = 4 [default = 0];
   inline bool has_systemtime() const;
   inline void clear_systemtime();
   static const int kSystemTimeFieldNumber = 4;
   inline ::google::protobuf::int64 systemtime() const;
   inline void set_systemtime(::google::protobuf::int64 value);
 
-  // optional sint64 localTime = 5;
+  // optional sint64 localTime = 5 [default = 0];
   inline bool has_localtime() const;
   inline void clear_localtime();
   static const int kLocalTimeFieldNumber = 5;
   inline ::google::protobuf::int64 localtime() const;
   inline void set_localtime(::google::protobuf::int64 value);
 
-  // optional sint64 plantTime = 6;
+  // optional sint64 plantTime = 6 [default = 0];
   inline bool has_planttime() const;
   inline void clear_planttime();
   static const int kPlantTimeFieldNumber = 6;
@@ -11862,6 +11872,28 @@ inline void DeviceSignal::set_function(::google::protobuf::int32 value) {
   function_ = value;
 }
 
+// optional int32 memoryArea = 11 [default = 0];
+inline bool DeviceSignal::has_memoryarea() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void DeviceSignal::set_has_memoryarea() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void DeviceSignal::clear_has_memoryarea() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void DeviceSignal::clear_memoryarea() {
+  memoryarea_ = 0;
+  clear_has_memoryarea();
+}
+inline ::google::protobuf::int32 DeviceSignal::memoryarea() const {
+  return memoryarea_;
+}
+inline void DeviceSignal::set_memoryarea(::google::protobuf::int32 value) {
+  set_has_memoryarea();
+  memoryarea_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // Workstation
@@ -13851,7 +13883,7 @@ inline void AppSignal::set_ramaddrbit(::google::protobuf::int32 value) {
 
 // AppSignalState
 
-// optional uint64 hash = 1;
+// optional uint64 hash = 1 [default = 0];
 inline bool AppSignalState::has_hash() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -13873,7 +13905,7 @@ inline void AppSignalState::set_hash(::google::protobuf::uint64 value) {
   hash_ = value;
 }
 
-// optional double value = 2;
+// optional double value = 2 [default = 0];
 inline bool AppSignalState::has_value() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -13895,7 +13927,7 @@ inline void AppSignalState::set_value(double value) {
   value_ = value;
 }
 
-// optional uint32 flags = 3;
+// optional uint32 flags = 3 [default = 0];
 inline bool AppSignalState::has_flags() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -13917,7 +13949,7 @@ inline void AppSignalState::set_flags(::google::protobuf::uint32 value) {
   flags_ = value;
 }
 
-// optional sint64 systemTime = 4;
+// optional sint64 systemTime = 4 [default = 0];
 inline bool AppSignalState::has_systemtime() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -13939,7 +13971,7 @@ inline void AppSignalState::set_systemtime(::google::protobuf::int64 value) {
   systemtime_ = value;
 }
 
-// optional sint64 localTime = 5;
+// optional sint64 localTime = 5 [default = 0];
 inline bool AppSignalState::has_localtime() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -13961,7 +13993,7 @@ inline void AppSignalState::set_localtime(::google::protobuf::int64 value) {
   localtime_ = value;
 }
 
-// optional sint64 plantTime = 6;
+// optional sint64 plantTime = 6 [default = 0];
 inline bool AppSignalState::has_planttime() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }

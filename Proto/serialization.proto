@@ -641,6 +641,7 @@ message DeviceSignal
 	optional int32 valueBit = 8 [default = 0];
 	optional int32 type = 9 [default = 0];					// RPCT-345
 	optional int32 function = 10 [default = 0];				// RPCT-345
+	optional int32 memoryArea = 11 [default = 0];				// RPCT-888
 }
 
 message Workstation
