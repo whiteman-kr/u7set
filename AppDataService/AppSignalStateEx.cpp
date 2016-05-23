@@ -94,6 +94,8 @@ void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double va
 
 		m_state.flags = flags;
 		m_state.value = value;
+
+		qDebug() << "State changes " << m_signal->appSignalID() << " val = " << m_state.value  << " flags = " << m_state.flags.all;
 	}
 }
 
@@ -130,6 +132,11 @@ void AppSignalStates::setSize(int size)
 
 	m_appSignalState = new AppSignalStateEx[size];
 	m_size = size;
+
+	for(int i = 0; i < m_size; i++)
+	{
+		m_appSignalState[i].invalidate();
+	}
 }
 
 

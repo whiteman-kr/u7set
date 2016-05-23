@@ -28,6 +28,8 @@ public:
 	void setSignalParams(int index, Signal* signal);
 	void setState(Times time, AppSignalStateFlags flags, double value);
 
+	void invalidate() { m_state.flags.all = 0; }
+
 	friend class AppSignalStates;
 };
 

@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
 {
 	QString buildFolder = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
 	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
+	QString ipStr = ServiceStarter::getCommandLineKeyValue(argc, argv, "ip");
 
-	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker(serviceStrID, buildFolder);
+	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker(serviceStrID, buildFolder, ipStr);
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", cfgServiceWorker);
 
