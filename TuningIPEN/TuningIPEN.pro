@@ -45,7 +45,8 @@ SOURCES +=\
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
     TuningIPENService.cpp \
-    ../TuningService/TuningDataStorage.cpp
+    ../TuningService/TuningDataStorage.cpp \
+    ../u7/Builder/IssueLogger.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../include/ServiceSettings.h \
@@ -78,7 +79,8 @@ HEADERS  += TuningMainWindow.h \
     ../include/Utils.h \
     ../include/WUtils.h \
     TuningIPENService.h \
-    ../TuningService/TuningDataStorage.h
+    ../TuningService/TuningDataStorage.h \
+    ../u7/Builder/IssueLogger.h
 
 include(../qtservice/src/qtservice.pri)
 

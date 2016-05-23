@@ -654,7 +654,7 @@ namespace Builder
 		const SignalSet& signalSet() { return *m_signals; }
 		Signal* getSignal(const QString& strID);
 
-		OutputLog* log() { return m_log; }
+		IssueLogger* log() { return m_log; }
 
 		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
