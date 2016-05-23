@@ -993,7 +993,7 @@ bool SignalsModel::isEditableSignal(int row)
 
 void SignalsModel::addSignal()
 {
-	QDialog signalTypeDialog;
+	QDialog signalTypeDialog(m_parentWindow);
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
 	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
@@ -1031,6 +1031,9 @@ void SignalsModel::addSignal()
 	fl->addRow(buttonBox);
 
 	signalTypeDialog.setLayout(fl);
+
+	signalTypeDialog.setWindowTitle("Create signals");
+	signalTypeDialog.setFixedSize(600, 200);
 
 	if (signalTypeDialog.exec() != QDialog::Accepted)
 	{
