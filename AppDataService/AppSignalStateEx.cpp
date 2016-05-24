@@ -100,6 +100,18 @@ void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double va
 }
 
 
+QString AppSignalStateEx::appSignalID()
+{
+	if (m_signal == nullptr)
+	{
+		assert(false);
+		return QString();
+	}
+
+	return m_signal->appSignalID();
+}
+
+
 AppSignalStates::~AppSignalStates()
 {
 	clear();

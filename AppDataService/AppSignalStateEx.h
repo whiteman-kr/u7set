@@ -30,6 +30,8 @@ public:
 
 	void invalidate() { m_state.flags.all = 0; }
 
+	QString appSignalID();
+
 	friend class AppSignalStates;
 };
 

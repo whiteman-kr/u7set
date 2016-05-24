@@ -242,6 +242,7 @@ namespace Builder
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_POL_paramValues();
+		bool calculate_DER_paramValues();
 
 		//
 
