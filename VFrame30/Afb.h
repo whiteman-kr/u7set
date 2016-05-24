@@ -30,19 +30,19 @@ namespace Afb
 		enum Type
 		{
 			UNKNOWN = 0,
-            LOGIC = 1,
-            NOT = 2,
-            TCT = 3,
+			LOGIC = 1,
+			NOT = 2,
+			TCT = 3,
 			FLIP_FLOP = 4,
-            CTUD = 5,
-            MAJ = 6,
-            SRSST = 7,
-            BCOD = 8,
-            BDEC = 9,
+			CTUD = 5,
+			MAJ = 6,
+			SRSST = 7,
+			BCOD = 8,
+			BDEC = 9,
 			BCOMP = 10,
 			DAMPER = 11,
 			MEM = 12,
-            MATH = 13,
+			MATH = 13,
 			SCALE = 14,
 			SCALE_P = 15,
 			FUNC = 16,
@@ -54,11 +54,9 @@ namespace Afb
 			LATCH = 22,
 			LIM = 23,
 			DEAD_ZONE = 24,
-			ADEL = 25,
-			DDEL = 26,
-			POL = 27,
-			DER = 28,
-            First = LOGIC,
+			POL = 25,
+			DER = 26,
+			First = LOGIC,
 			Last = DER,
 		};
 
@@ -93,12 +91,12 @@ namespace Afb
 	//
 	// Param type
 	//
-    enum AfbDataFormat
+	enum AfbDataFormat
 	{
-        UnsignedInt,
-        SignedInt,
-        Float
-    };
+		UnsignedInt,
+		SignedInt,
+		Float
+	};
 
 	//
 	// AfbSignal
@@ -137,14 +135,14 @@ namespace Afb
 		Q_INVOKABLE int jsType() const;
 		void setType(AfbSignalType type);
 
-        AfbDataFormat dataFormat() const;
-        void setDataFormat(AfbDataFormat dataFormat);
+		AfbDataFormat dataFormat() const;
+		void setDataFormat(AfbDataFormat dataFormat);
 
-        Q_INVOKABLE int operandIndex() const;
+		Q_INVOKABLE int operandIndex() const;
 		void setOperandIndex(int value);
 
 		Q_INVOKABLE int size() const;
-        void setSize(int value);
+		void setSize(int value);
 
 		bool isAnalog() const;
 		bool isDiscrete() const;
@@ -155,9 +153,9 @@ private:
 		QString m_opName;
 		QString m_caption;
 		AfbSignalType m_type;
-        AfbDataFormat m_dataFormat;
+		AfbDataFormat m_dataFormat;
 		int m_operandIndex;
-        int m_size;
+		int m_size;
 	};
 
 
@@ -197,16 +195,16 @@ private:
 		bool visible() const;
 		void setVisible(bool visible);
 
-        AfbSignalType type() const;
-        void setType(AfbSignalType type);
+		AfbSignalType type() const;
+		void setType(AfbSignalType type);
 
-        AfbDataFormat dataFormat() const;
-        void setDataFormat(AfbDataFormat dataFormat);
+		AfbDataFormat dataFormat() const;
+		void setDataFormat(AfbDataFormat dataFormat);
 
-        bool isAnalog() const;
-        bool isDiscrete() const;
+		bool isAnalog() const;
+		bool isDiscrete() const;
 
-        const QVariant& value() const;
+		const QVariant& value() const;
 		void setValue(const QVariant& value);
 
 		const QVariant& defaultValue() const;
@@ -217,12 +215,12 @@ private:
 
 		const QVariant& highLimit() const;
 		void setHighLimit(const QVariant& highLimit);
-						
+
 		int operandIndex() const;
 		void setOperandIndex(int value);
 
-        int size() const;
-        void setSize(int value);
+		int size() const;
+		void setSize(int value);
 
 		bool instantiator() const;
 		void setInstantiator(bool value);
@@ -233,14 +231,14 @@ private:
 		QString changedScript() const;
 		void setChangedScript(const QString& value);
 
-        // Data
+		// Data
 		//
 	private:
 		QString m_opName;			// Param name
 		QString m_caption;			// Param caption
 		bool m_visible;
-        AfbSignalType m_type;		// Param type
-        AfbDataFormat m_dataFormat;
+		AfbSignalType m_type;		// Param type
+		AfbDataFormat m_dataFormat;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
@@ -252,9 +250,9 @@ private:
 		QVariant m_highLimit;		// High limit for param
 
 		int m_operandIndex;
-        int m_size;
-    };
-	
+		int m_size;
+	};
+
 
 	//
 	// FblElement
@@ -278,8 +276,8 @@ private:
 		friend Proto::ObjectSerialization<AfbElement>;
 
 	public:
-        bool loadFromXml(const Proto::AfbElementXml& data, QString &errorMsg);
-        bool loadFromXml(const QByteArray& data, QString &errorMsg);
+		bool loadFromXml(const Proto::AfbElementXml& data, QString &errorMsg);
+		bool loadFromXml(const QByteArray& data, QString &errorMsg);
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 
 		bool saveToXml(Proto::AfbElementXml* dst) const;
@@ -315,17 +313,17 @@ private:
 		QString description() const;
 		void setDescription(const QString& value);
 
-        QString version() const;
-        void setVersion(const QString& value);
+		QString version() const;
+		void setVersion(const QString& value);
 
-        int implementationVersion() const;
-        void setImplementationVersion(int value);
+		int implementationVersion() const;
+		void setImplementationVersion(int value);
 
-        int implementationOpIndex() const;
-        void setImplementationOpIndex(int value);
+		int implementationOpIndex() const;
+		void setImplementationOpIndex(int value);
 
-        QString category() const;
-        void setCategory(const QString& value);
+		QString category() const;
+		void setCategory(const QString& value);
 
 		const Afb::AfbType& type() const;
 		Afb::AfbType& type();
@@ -337,8 +335,8 @@ private:
 		bool requiredStart() const;
 		void setRequiredStart(bool value);
 
-        bool internalUse() const;
-        void setInternalUse(bool value);
+		bool internalUse() const;
+		void setInternalUse(bool value);
 
 		QString libraryScript() const;
 		void setLibraryScript(const QString& value);
@@ -364,14 +362,14 @@ private:
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
-        QString m_version;
-        int m_implementationVersion;
-        int m_implementationOpIndex;
-        QString m_category;
+		QString m_version;
+		int m_implementationVersion;
+		int m_implementationOpIndex;
+		QString m_category;
 		Afb::AfbType m_type;
 		bool m_hasRam;
 		bool m_requiredStart;
-        bool m_internalUse;
+		bool m_internalUse;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;

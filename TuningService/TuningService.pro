@@ -53,7 +53,8 @@ SOURCES += \
     TuningMain.cpp \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
-    ../lib/DataProtocols.cpp
+    ../lib/DataProtocols.cpp \
+    ../u7/Builder/IssueLogger.cpp
 
 HEADERS += \
     ../include/BuildInfo.h \
@@ -85,7 +86,8 @@ HEADERS += \
     ../AppDataService/AppSignalStateEx.h \
     ../include/Crc.h \
     TuningDataStorage.h \
-    ../include/Hash.h
+    ../include/Hash.h \
+    ../u7/Builder/IssueLogger.h
 
 include(../qtservice/src/qtservice.pri)
 

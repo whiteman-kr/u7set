@@ -29,7 +29,7 @@ namespace Builder
 
 	class IssueLogger : public OutputLog
 	{
-        Q_OBJECT
+		Q_OBJECT
 
 	public:
 		IssueLogger();
@@ -56,16 +56,16 @@ namespace Builder
 
 		// CFG			FSC configuration						3000-3999
 		//
-        Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
-        Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
-        Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
+		Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
+		Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
+		Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
 		Q_INVOKABLE void errCFG3003(int channel, QString module);
-        Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
+		Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
 
-        Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);
-        Q_INVOKABLE void wrnCFG3006(int place, QString controllerID);
-        Q_INVOKABLE void wrnCFG3007(QString signalID);
-        Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
+		Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);
+		Q_INVOKABLE void wrnCFG3006(int place, QString controllerID);
+		Q_INVOKABLE void wrnCFG3007(QString signalID);
+		Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
 
 		Q_INVOKABLE void errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module);
 		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);
@@ -82,7 +82,13 @@ namespace Builder
 
 		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
 
-        // ALP			Application Logic Parsing				4000-4999
+		void errCFG3014(QString suffix, QString objectID);									// Can't find child object wuith suffix '%1' in object '%2'
+		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
+		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
+		void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
+
+
+		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
 		void errALP4001(QString schema);
@@ -100,6 +106,9 @@ namespace Builder
 
 		// ALC			Application logic compiler				5000-5999
 		//
+
+		void errALC5000(QString appSignalID, QUuid itemUuid);					// Signal identifier '%1' is not found.
+		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
 
 		// EQP			Equipment issues						6000-6999
 		//
