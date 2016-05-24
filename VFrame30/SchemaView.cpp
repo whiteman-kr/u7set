@@ -112,34 +112,42 @@ namespace VFrame30
 			return;
 		}
 
-		// --
-		//
 		QPainter p(this);
 		CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 
+		draw(drawParam);
+
+		return;
+	}
+
+	void SchemaView::draw(CDrawParam& drawParam)
+	{
+		if (schema().get() == nullptr)
+		{
+			return;
+		}
+
+		QPainter* p = drawParam.painter();
+
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), zoom());
-		int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), zoom());
+		int widthInPixel = schema()->GetDocumentWidth(p->device()->logicalDpiX(), zoom());
+		int heightInPixel = schema()->GetDocumentHeight(p->device()->logicalDpiY(), zoom());
 
 		// Clear device
 		//
-		p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-		p.setRenderHint(QPainter::Antialiasing);
+		p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+		p->setRenderHint(QPainter::Antialiasing);
 
 		// Ajust QPainter
 		//
-		Ajust(&p, 0, 0, zoom());
+		Ajust(p, 0, 0, zoom());
 
 		// Draw Schema
 		//
 		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
 		schema()->Draw(&drawParam, clipRect);
-
-		// Ending
-		//
-		return;
 	}
 
 	void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const

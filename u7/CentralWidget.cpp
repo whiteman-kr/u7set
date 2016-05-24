@@ -5,7 +5,7 @@
 CentralWidget::CentralWidget(QWidget* parent) :
 	QTabWidget(parent)
 {
-	setStyleSheet("QTabBar::tab { min-width: 120px; min-height: 18px;}");
+	setStyleSheet("QTabBar::tab { min-width: 100px; min-height: 18px;}");
 }
 
 int CentralWidget::addTabPage(MainTabPage* tabPage, const QString& label)

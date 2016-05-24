@@ -27,6 +27,8 @@ protected:
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
 
+	void timerEvent(QTimerEvent* event);
+
 	// Events
 	//
 protected:
