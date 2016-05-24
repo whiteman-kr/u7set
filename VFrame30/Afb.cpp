@@ -41,7 +41,7 @@ namespace Afb
 #ifdef Q_DEBUG
 		if (toText(opCode) == "UNKNOWN")
 		{
-            //assert(false);
+			//assert(false);
 			m_type = Type::UNKNOWN;
 			return;
 		}
@@ -71,8 +71,8 @@ namespace Afb
 		{
 			case Type::UNKNOWN:
 				return "UNKNOWN";
-            case Type::LOGIC:
-                return "LOGIC";
+			case Type::LOGIC:
+				return "LOGIC";
 			case Type::NOT:
 				return "NOT";
 			case Type::TCT:
@@ -95,8 +95,8 @@ namespace Afb
 				return "DAMPER";
 			case Type::MEM:
 				return "MEM";
-            case Type::MATH:
-                return "MATH";
+			case Type::MATH:
+				return "MATH";
 			case Type::SCALE:
 				return "SCALE";
 			case Type::SCALE_P:
@@ -119,10 +119,6 @@ namespace Afb
 				return "LIM";
 			case Type::DEAD_ZONE:
 				return "DEAD_ZONE";
-			case Type::ADEL:
-				return "ADEL";
-			case Type::DDEL:
-				return "DDEL";
 			case Type::POL:
 				return "POL";
 			case Type::DER:
@@ -139,7 +135,7 @@ namespace Afb
 	//
 	AfbSignal::AfbSignal(void):
 		m_type(AfbSignalType::Analog),
-        m_dataFormat(AfbDataFormat::UnsignedInt),
+		m_dataFormat(AfbDataFormat::UnsignedInt),
 		m_operandIndex(0),
 		m_size(0)
 	{
@@ -164,7 +160,7 @@ namespace Afb
 		m_opName = that.m_opName;
 		m_caption = that.m_caption;
 		m_type = that.m_type;
-        m_dataFormat = that.m_dataFormat;
+		m_dataFormat = that.m_dataFormat;
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
 
@@ -178,13 +174,13 @@ namespace Afb
 		assert(false);
 		return false;
 
-        //message->set_index(index());
-        //message->set_size(size());
+		//message->set_index(index());
+		//message->set_size(size());
 //		Proto::Write(message->mutable_caption(), m_caption);
 //		message->set_type(static_cast<Proto::FblSignalType>(m_type));
 //		return true;
 	}
-	
+
 	bool AfbSignal::LoadData(const Proto::AfbSignal& /*message*/)
 	{
 		assert(false);
@@ -206,34 +202,34 @@ namespace Afb
 		xmlWriter->writeStartElement("AfbElementSignal");
 		xmlWriter->writeAttribute("OpName", opName());
 		xmlWriter->writeAttribute("Caption", caption());
-        xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
+		xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
 
-        switch (dataFormat())
-        {
-        case AfbDataFormat::UnsignedInt:
-            {
-                xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
-                break;
-            }
-        case AfbDataFormat::SignedInt:
-            {
-                xmlWriter->writeAttribute("DataFormat", "SignedInt");
-                break;
-            }
-        case AfbDataFormat::Float:
-            {
-                xmlWriter->writeAttribute("DataFormat", "Float");
-                break;
-            }
-        default:
-            {
-                xmlWriter->writeAttribute("DataFormat", "Unknown");
-                assert(false);
-            }
-        }
+		switch (dataFormat())
+		{
+		case AfbDataFormat::UnsignedInt:
+			{
+				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
+				break;
+			}
+		case AfbDataFormat::SignedInt:
+			{
+				xmlWriter->writeAttribute("DataFormat", "SignedInt");
+				break;
+			}
+		case AfbDataFormat::Float:
+			{
+				xmlWriter->writeAttribute("DataFormat", "Float");
+				break;
+			}
+		default:
+			{
+				xmlWriter->writeAttribute("DataFormat", "Unknown");
+				assert(false);
+			}
+		}
 
 		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
-        xmlWriter->writeAttribute("Size", QString::number(size()));
+		xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeEndElement();
 
 		return true;
@@ -269,50 +265,50 @@ namespace Afb
 			{
 				setType(AfbSignalType::Analog);
 			}
-            else
-                if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
-                {
-                    setType(AfbSignalType::Discrete);
-                }
-                else
-                {
-                    xmlReader->raiseError(QObject::tr("AfbSignal, unknown Type"));
-                    return false;
-                }
+			else
+				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
+				{
+					setType(AfbSignalType::Discrete);
+				}
+				else
+				{
+					xmlReader->raiseError(QObject::tr("AfbSignal, unknown Type"));
+					return false;
+				}
 		}
 
-        if (xmlReader->attributes().hasAttribute("DataFormat"))
-        {
-            if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
-            {
-                setDataFormat(AfbDataFormat::UnsignedInt);
-            }
-            else
-                if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
-                {
-                    setDataFormat(AfbDataFormat::SignedInt);
-                }
-                else
-                    if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
-                    {
-                        setDataFormat(AfbDataFormat::Float);
-                    }
-                    else
-                    {
-                        xmlReader->raiseError(QObject::tr("AfbSignal, unknown DataFormat"));
-                        return false;
-                    }
-        }
+		if (xmlReader->attributes().hasAttribute("DataFormat"))
+		{
+			if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
+			{
+				setDataFormat(AfbDataFormat::UnsignedInt);
+			}
+			else
+				if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
+				{
+					setDataFormat(AfbDataFormat::SignedInt);
+				}
+				else
+					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
+					{
+						setDataFormat(AfbDataFormat::Float);
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("AfbSignal, unknown DataFormat"));
+						return false;
+					}
+		}
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
-        {
+		{
 			setOperandIndex(xmlReader->attributes().value("OpIndex").toInt());
-        }
+		}
 
-        if (xmlReader->attributes().hasAttribute("Size"))
-        {
-            setSize(xmlReader->attributes().value("Size").toInt());
-        }
+		if (xmlReader->attributes().hasAttribute("Size"))
+		{
+			setSize(xmlReader->attributes().value("Size").toInt());
+		}
 
 		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
@@ -362,35 +358,35 @@ namespace Afb
 		m_type = type;
 	}
 
-    AfbDataFormat AfbSignal::dataFormat() const
-    {
-        return m_dataFormat;
-    }
+	AfbDataFormat AfbSignal::dataFormat() const
+	{
+		return m_dataFormat;
+	}
 
-    void AfbSignal::setDataFormat(AfbDataFormat dataFormat)
-    {
-        m_dataFormat = dataFormat;
-    }
+	void AfbSignal::setDataFormat(AfbDataFormat dataFormat)
+	{
+		m_dataFormat = dataFormat;
+	}
 
 	int AfbSignal::operandIndex() const
-    {
-        return m_operandIndex;
-    }
+	{
+		return m_operandIndex;
+	}
 
 	void AfbSignal::setOperandIndex(int value)
-    {
-        m_operandIndex = value;
-    }
+	{
+		m_operandIndex = value;
+	}
 
 	int AfbSignal::size() const
-    {
-        return m_size;
-    }
+	{
+		return m_size;
+	}
 
 	void AfbSignal::setSize(int value)
-    {
-        m_size = value;
-    }
+	{
+		m_size = value;
+	}
 
 	bool AfbSignal::isAnalog() const
 	{
@@ -402,22 +398,22 @@ namespace Afb
 		return m_type == AfbSignalType::Discrete;
 	}
 
-    //
+	//
 	//
 	//							AfbParam
 	//
 	//
 
 	AfbParam::AfbParam(void):
-        m_visible(true),
-        m_type(AfbSignalType::Analog),
-        m_dataFormat(AfbDataFormat::UnsignedInt),
-        m_instantiator(false),
+		m_visible(true),
+		m_type(AfbSignalType::Analog),
+		m_dataFormat(AfbDataFormat::UnsignedInt),
+		m_instantiator(false),
 		m_user(false),
 		m_operandIndex(0),
 		m_size(0)
 
-    {
+	{
 		m_value = 0;
 		m_defaultValue = 0;
 		m_lowLimit = 0;
@@ -428,11 +424,11 @@ namespace Afb
 	{
 	}
 
-    void AfbParam::update(const AfbSignalType& type, const AfbDataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
+	void AfbParam::update(const AfbSignalType& type, const AfbDataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
 	{
 
 		m_type = type;
-        m_dataFormat = dataFormat;
+		m_dataFormat = dataFormat;
 		m_lowLimit = lowLimit;
 		m_highLimit = highLimit;
 
@@ -518,56 +514,56 @@ namespace Afb
 			setVisible(xmlReader->attributes().value("Visible").toString() == "true" ? true : false);
 		}
 
-        if (xmlReader->attributes().hasAttribute("Type"))
-        {
-            if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
-            {
-                setType(AfbSignalType::Analog);
-            }
-            else
-                if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
-                {
-                    setType(AfbSignalType::Discrete);
-                }
-                else
-                {
-                    xmlReader->raiseError(QObject::tr("AfbElementParam, unknown Type"));
-                    return false;
-                }
-        }
+		if (xmlReader->attributes().hasAttribute("Type"))
+		{
+			if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
+			{
+				setType(AfbSignalType::Analog);
+			}
+			else
+				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
+				{
+					setType(AfbSignalType::Discrete);
+				}
+				else
+				{
+					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown Type"));
+					return false;
+				}
+		}
 
-        if (xmlReader->attributes().hasAttribute("DataFormat"))
-        {
-            if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
-            {
-                setDataFormat(AfbDataFormat::UnsignedInt);
-            }
-            else
-                if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
-                {
-                    setDataFormat(AfbDataFormat::SignedInt);
-                }
-                else
-                    if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
-                    {
-                        setDataFormat(AfbDataFormat::Float);
-                    }
-                    else
-                    {
-                        xmlReader->raiseError(QObject::tr("AfbElementParam, unknown DataFormat"));
-                        return false;
-                    }
-        }
+		if (xmlReader->attributes().hasAttribute("DataFormat"))
+		{
+			if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
+			{
+				setDataFormat(AfbDataFormat::UnsignedInt);
+			}
+			else
+				if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
+				{
+					setDataFormat(AfbDataFormat::SignedInt);
+				}
+				else
+					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
+					{
+						setDataFormat(AfbDataFormat::Float);
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("AfbElementParam, unknown DataFormat"));
+						return false;
+					}
+		}
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
-        {
+		{
 			setOperandIndex(xmlReader->attributes().value("OpIndex").toInt());
-        }
+		}
 
-        if (xmlReader->attributes().hasAttribute("Size"))
-        {
-            setSize(xmlReader->attributes().value("Size").toInt());
-        }
+		if (xmlReader->attributes().hasAttribute("Size"))
+		{
+			setSize(xmlReader->attributes().value("Size").toInt());
+		}
 
 		if (xmlReader->attributes().hasAttribute("Instantiator"))
 		{
@@ -603,35 +599,35 @@ namespace Afb
 
 			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0
-                    || QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
+					|| QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 			{
 				QString str = xmlReader->readElementText();
 				QVariant val;
 
-                if (isAnalog())
-                {
-                    switch (dataFormat())
-                    {
-                        case AfbDataFormat::UnsignedInt:
-                        case AfbDataFormat::SignedInt:
-                        {
-                            val = str.toInt();
-                            break;
-                        }
-                        case AfbDataFormat::Float:
-                        {
-                            val = str.toDouble();
-                            break;
-                        }
-                        default:
-                            assert(false);
-                    }
-                }
-                else
-                {
-                    val = str == "1" ? true : false;
-                }
+				if (isAnalog())
+				{
+					switch (dataFormat())
+					{
+						case AfbDataFormat::UnsignedInt:
+						case AfbDataFormat::SignedInt:
+						{
+							val = str.toInt();
+							break;
+						}
+						case AfbDataFormat::Float:
+						{
+							val = str.toDouble();
+							break;
+						}
+						default:
+							assert(false);
+					}
+				}
+				else
+				{
+					val = str == "1" ? true : false;
+				}
 
 				if (val.isNull())
 				{
@@ -676,36 +672,36 @@ namespace Afb
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Visible", visible() ? "true" : "false");
 		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
-        xmlWriter->writeAttribute("Size", QString::number(size()));
+		xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeAttribute("Instantiator", instantiator() ? "true" : "false");
 		xmlWriter->writeAttribute("User", user() ? "true" : "false");
-        xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
+		xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
 
-        switch (dataFormat())
-        {
-        case AfbDataFormat::UnsignedInt:
-            {
-                xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
-                break;
-            }
-        case AfbDataFormat::SignedInt:
-            {
-                xmlWriter->writeAttribute("DataFormat", "SignedInt");
-                break;
-            }
-        case AfbDataFormat::Float:
-            {
-                xmlWriter->writeAttribute("DataFormat", "Float");
-                break;
-            }
-        default:
-            {
-                xmlWriter->writeAttribute("DataFormat", "Unknown");
-                assert(false);
-            }
-        }
+		switch (dataFormat())
+		{
+		case AfbDataFormat::UnsignedInt:
+			{
+				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
+				break;
+			}
+		case AfbDataFormat::SignedInt:
+			{
+				xmlWriter->writeAttribute("DataFormat", "SignedInt");
+				break;
+			}
+		case AfbDataFormat::Float:
+			{
+				xmlWriter->writeAttribute("DataFormat", "Float");
+				break;
+			}
+		default:
+			{
+				xmlWriter->writeAttribute("DataFormat", "Unknown");
+				assert(false);
+			}
+		}
 
-        if (isDiscrete())
+		if (isDiscrete())
 		{
 			xmlWriter->writeTextElement("Value", value() == true ? "1" : "0");
 			xmlWriter->writeTextElement("Default", defaultValue() == true ? "1" : "0");
@@ -763,34 +759,34 @@ namespace Afb
 
 	// Type
 	//
-    AfbSignalType AfbParam::type() const
+	AfbSignalType AfbParam::type() const
 	{
 		return m_type;
 	}
-    void AfbParam::setType(AfbSignalType type)
+	void AfbParam::setType(AfbSignalType type)
 	{
 		m_type = type;
 	}
 
-    AfbDataFormat AfbParam::dataFormat() const
-    {
-        return m_dataFormat;
-    }
+	AfbDataFormat AfbParam::dataFormat() const
+	{
+		return m_dataFormat;
+	}
 
-    void AfbParam::setDataFormat(AfbDataFormat dataFormat)
-    {
-        m_dataFormat = dataFormat;
-    }
+	void AfbParam::setDataFormat(AfbDataFormat dataFormat)
+	{
+		m_dataFormat = dataFormat;
+	}
 
-    bool AfbParam::isAnalog() const
-    {
-        return m_type == AfbSignalType::Analog;
-    }
+	bool AfbParam::isAnalog() const
+	{
+		return m_type == AfbSignalType::Analog;
+	}
 
-    bool AfbParam::isDiscrete() const
-    {
-        return m_type == AfbSignalType::Discrete;
-    }
+	bool AfbParam::isDiscrete() const
+	{
+		return m_type == AfbSignalType::Discrete;
+	}
 
 	// Value
 	//
@@ -836,24 +832,24 @@ namespace Afb
 	}
 
 	int AfbParam::operandIndex() const
-    {
+	{
 		return m_operandIndex;
-    }
+	}
 
 	void AfbParam::setOperandIndex(int value)
-    {
+	{
 		m_operandIndex = value;
-    }
+	}
 
 	int AfbParam::size() const
-    {
-        return m_size;
-    }
+	{
+		return m_size;
+	}
 
 	void AfbParam::setSize(int value)
-    {
-        m_size = value;
-    }
+	{
+		m_size = value;
+	}
 
 	bool AfbParam::instantiator() const
 	{
@@ -885,18 +881,18 @@ namespace Afb
 		m_changedScript = value;
 	}
 
-    //
 	//
-	//							FblElement		
+	//
+	//							FblElement
 	//
 	//
 
 	AfbElement::AfbElement(void) :
 		m_version("0.0"),
-        m_implementationVersion(0),
-        m_implementationOpIndex(0),
+		m_implementationVersion(0),
+		m_implementationOpIndex(0),
 		m_hasRam(false),
-        m_requiredStart(true),
+		m_requiredStart(true),
 		m_internalUse(false)
 	{
 	}
@@ -922,14 +918,14 @@ namespace Afb
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
 		m_description = that.m_description;
-        m_version = that.m_version;
-        m_implementationVersion = that.m_implementationVersion;
-        m_implementationOpIndex = that.m_implementationOpIndex;
-        m_category = that.m_category;
+		m_version = that.m_version;
+		m_implementationVersion = that.m_implementationVersion;
+		m_implementationOpIndex = that.m_implementationOpIndex;
+		m_category = that.m_category;
 		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
-        m_internalUse = that.m_internalUse;
+		m_internalUse = that.m_internalUse;
 
 		m_libraryScript = that.m_libraryScript;
 		m_afterCreationScript = that.m_afterCreationScript;
@@ -941,24 +937,24 @@ namespace Afb
 		return *this;
 	}
 
-    bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString& errorMsg)
+	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString& errorMsg)
 	{
 		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
-        bool result = loadFromXml(ba, errorMsg);
+		bool result = loadFromXml(ba, errorMsg);
 
-        return result;
+		return result;
 	}
 
-    bool AfbElement::loadFromXml(const QByteArray& data, QString& errorMsg)
+	bool AfbElement::loadFromXml(const QByteArray& data, QString& errorMsg)
 	{
 		QXmlStreamReader reader(data);
 		bool result = loadFromXml(&reader);
 
-        errorMsg.clear();
-        if (result == false)
-        {
-            errorMsg = reader.errorString();
-        }
+		errorMsg.clear();
+		if (result == false)
+		{
+			errorMsg = reader.errorString();
+		}
 		return result;
 	}
 
@@ -1011,79 +1007,79 @@ namespace Afb
 					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader->readElementText());
-                        continue;
+						continue;
 					}
 
 					if (QString::compare(xmlReader->name().toString(), "Description", Qt::CaseInsensitive) == 0)
 					{
 						setDescription(xmlReader->readElementText());
-                        continue;
-                    }
+						continue;
+					}
 
-                    if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
-                    {
-                        setVersion(xmlReader->readElementText());
-                        continue;
-                    }
+					if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
+					{
+						setVersion(xmlReader->readElementText());
+						continue;
+					}
 
-                    if (QString::compare(xmlReader->name().toString(), "Implementation", Qt::CaseInsensitive) == 0)
-                    {
-                        if (xmlReader->attributes().hasAttribute("Version"))
-                        {
-                            setImplementationVersion(xmlReader->attributes().value("Version").toInt());
-                        }
-                        if (xmlReader->attributes().hasAttribute("OpIndex"))
-                        {
-                            setImplementationOpIndex(xmlReader->attributes().value("OpIndex").toInt());
-                        }
+					if (QString::compare(xmlReader->name().toString(), "Implementation", Qt::CaseInsensitive) == 0)
+					{
+						if (xmlReader->attributes().hasAttribute("Version"))
+						{
+							setImplementationVersion(xmlReader->attributes().value("Version").toInt());
+						}
+						if (xmlReader->attributes().hasAttribute("OpIndex"))
+						{
+							setImplementationOpIndex(xmlReader->attributes().value("OpIndex").toInt());
+						}
 
-                        xmlReader->readElementText();
-                        continue;
-                    }
+						xmlReader->readElementText();
+						continue;
+					}
 
-                    if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
-                    {
-                        setCategory(xmlReader->readElementText());
-                        continue;
-                    }
+					if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
+					{
+						setCategory(xmlReader->readElementText());
+						continue;
+					}
 
-                    if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
 						int opCode = xmlReader->readElementText().toInt();
 
-                        if (opCode < Afb::AfbType::First || opCode > Afb::AfbType::Last)
-                        {
-                            xmlReader->raiseError(QObject::tr("AfbElement '%1': wrong opCode (%2), expected %3..%4.").arg(strID()).arg(opCode).arg(Afb::AfbType::First).arg(Afb::AfbType::Last));
-                            return !xmlReader->hasError();
-                        }
+						if (opCode < Afb::AfbType::First || opCode > Afb::AfbType::Last)
+						{
+							xmlReader->raiseError(QObject::tr("AfbElement '%1': wrong opCode (%2), expected %3..%4.").arg(strID()).arg(opCode).arg(Afb::AfbType::First).arg(Afb::AfbType::Last));
+							return !xmlReader->hasError();
+						}
 
 						Afb::AfbType type;
 						type.fromOpCode(opCode);
 
 						setType(type);
-                        continue;
-                    }
+						continue;
+					}
 
 					if (QString::compare(xmlReader->name().toString(), "HasRam", Qt::CaseInsensitive) == 0)
 					{
 						setHasRam(xmlReader->readElementText() == "true" ? true : false);
-                        continue;
-                    }
+						continue;
+					}
 
 					if (QString::compare(xmlReader->name().toString(), "RequiredStart", Qt::CaseInsensitive) == 0)
 					{
 						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
-                        continue;
-                    }
+						continue;
+					}
 
-                    if (QString::compare(xmlReader->name().toString(), "InternalUse", Qt::CaseInsensitive) == 0)
-                    {
-                        setInternalUse(xmlReader->readElementText() == "true" ? true : false);
-                        continue;
-                    }
+					if (QString::compare(xmlReader->name().toString(), "InternalUse", Qt::CaseInsensitive) == 0)
+					{
+						setInternalUse(xmlReader->readElementText() == "true" ? true : false);
+						continue;
+					}
 
-                    xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-                    xmlReader->skipCurrentElement();
+					xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+					xmlReader->skipCurrentElement();
 				}
 
 				continue;
@@ -1231,18 +1227,18 @@ namespace Afb
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("Description", description());
-        xmlWriter->writeTextElement("Version", version());
+		xmlWriter->writeTextElement("Version", version());
 
-        xmlWriter->writeStartElement("Implementation");
-        xmlWriter->writeAttribute("Version", QString::number(implementationVersion()));
-        xmlWriter->writeAttribute("OpIndex", QString::number(implementationOpIndex()));
-        xmlWriter->writeEndElement();
+		xmlWriter->writeStartElement("Implementation");
+		xmlWriter->writeAttribute("Version", QString::number(implementationVersion()));
+		xmlWriter->writeAttribute("OpIndex", QString::number(implementationOpIndex()));
+		xmlWriter->writeEndElement();
 
-        xmlWriter->writeTextElement("Category", category());
-        xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
+		xmlWriter->writeTextElement("Category", category());
+		xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
-        xmlWriter->writeTextElement("InternalUse", internalUse() ? "true" : "false");
+		xmlWriter->writeTextElement("InternalUse", internalUse() ? "true" : "false");
 		xmlWriter->writeEndElement();
 
 		xmlWriter->writeStartElement("InputSignals");
@@ -1355,7 +1351,7 @@ namespace Afb
 //			Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
 //			param->SaveData(p);
 //		}
-		
+
 //		return true;
 	}
 
@@ -1376,7 +1372,7 @@ namespace Afb
 //		m_strID = Proto::Read(fblelement.strid());
 //		m_caption = Proto::Read(fblelement.caption());
 //		m_opcode = fblelement.opcode();
-			
+
 //		// Read input signals
 //		//
 //		m_inputSignals.clear();
@@ -1384,7 +1380,7 @@ namespace Afb
 //		{
 //			Fbl::FblElementSignal s;
 //			s.LoadData(fblelement.inputsignals(i));
-			
+
 //			m_inputSignals.push_back(s);
 //		}
 
@@ -1395,7 +1391,7 @@ namespace Afb
 //		{
 //			Fbl::FblElementSignal s;
 //			s.LoadData(fblelement.outputsignals(i));
-			
+
 //			m_outputSignals.push_back(s);
 //		}
 
@@ -1406,7 +1402,7 @@ namespace Afb
 //		{
 //			Fbl::FblElementParam p;
 //			p.LoadData(fblelement.params(i));
-			
+
 //			m_params.push_back(p);
 //		}
 
@@ -1427,7 +1423,7 @@ namespace Afb
 //		}
 
 //		FblElement* pFblElement = new FblElement();
-		
+
 //		pFblElement->LoadData(message);
 
 //		return pFblElement;
@@ -1448,7 +1444,7 @@ namespace Afb
 
 			if (found != m_params.end())
 			{
-                found->update(p.type(), p.dataFormat(), p.lowLimit(), p.highLimit());
+				found->update(p.type(), p.dataFormat(), p.lowLimit(), p.highLimit());
 				newParams.push_back(*found);
 			}
 			else
@@ -1493,45 +1489,45 @@ namespace Afb
 		m_description = value;
 	}
 
-    QString AfbElement::version() const
-    {
-        return m_version;
-    }
+	QString AfbElement::version() const
+	{
+		return m_version;
+	}
 
-    void AfbElement::setVersion(const QString& value)
-    {
-        m_version = value;
-    }
+	void AfbElement::setVersion(const QString& value)
+	{
+		m_version = value;
+	}
 
-    int AfbElement::implementationVersion() const
-    {
-        return m_implementationVersion;
-    }
+	int AfbElement::implementationVersion() const
+	{
+		return m_implementationVersion;
+	}
 
-    void AfbElement::setImplementationVersion(int value)
-    {
-        m_implementationVersion = value;
-    }
+	void AfbElement::setImplementationVersion(int value)
+	{
+		m_implementationVersion = value;
+	}
 
-    int AfbElement::implementationOpIndex() const
-    {
-        return m_implementationOpIndex;
-    }
+	int AfbElement::implementationOpIndex() const
+	{
+		return m_implementationOpIndex;
+	}
 
-    void AfbElement::setImplementationOpIndex(int value)
-    {
-        m_implementationOpIndex = value;
-    }
+	void AfbElement::setImplementationOpIndex(int value)
+	{
+		m_implementationOpIndex = value;
+	}
 
-    QString AfbElement::category() const
-    {
-        return m_category;
-    }
+	QString AfbElement::category() const
+	{
+		return m_category;
+	}
 
-    void AfbElement::setCategory(const QString& value)
-    {
-        m_category = value;
-    }
+	void AfbElement::setCategory(const QString& value)
+	{
+		m_category = value;
+	}
 
 
 	// Type - Opcode
@@ -1572,15 +1568,15 @@ namespace Afb
 		m_requiredStart = value;
 	}
 
-    bool AfbElement::internalUse() const
-    {
-        return m_internalUse;
-    }
+	bool AfbElement::internalUse() const
+	{
+		return m_internalUse;
+	}
 
-    void AfbElement::setInternalUse(bool value)
-    {
-        m_internalUse = value;
-    }
+	void AfbElement::setInternalUse(bool value)
+	{
+		m_internalUse = value;
+	}
 
 	QString AfbElement::libraryScript() const
 	{
@@ -1684,12 +1680,12 @@ namespace Afb
 		{
 			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
 
-            QString errorMsg;
-            bool result = e->loadFromXml(message.elements(i), errorMsg);
-            if (result == true)
-            {
-                m_elements.push_back(e);
-            }
+			QString errorMsg;
+			bool result = e->loadFromXml(message.elements(i), errorMsg);
+			if (result == true)
+			{
+				m_elements.push_back(e);
+			}
 		}
 
 		return true;
@@ -1717,7 +1713,7 @@ namespace Afb
 			{
 				return fblelement->strID() == strID;
 			});
-		
+
 		return result == m_elements.end() ? std::shared_ptr<AfbElement>() : *result;
 	}
 

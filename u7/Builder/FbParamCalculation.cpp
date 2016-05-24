@@ -130,6 +130,10 @@ namespace Builder
 			result = calculate_POL_paramValues();
 			break;
 
+		case Afb::AfbType::DER:				// opcode 28
+			result = calculate_DER_paramValues();
+			break;
+
 		default:
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
 					  QString(tr("Parameter's values calculation for FB %1 (opcode %2) is not implemented")).
@@ -1333,6 +1337,55 @@ namespace Builder
 
 		LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
 				  QString(tr("Unknown runtime of FB POLY")));
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_DER_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_td");
+		requiredParams.append("i_max");
+		requiredParams.append("i_min");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_td = m_paramValuesArray["i_td"];
+		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
+		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
+
+		CHECK_FLOAT32(i_td);
+		CHECK_FLOAT32(i_max);
+		CHECK_FLOAT32(i_min);
+
+		float i_td_value = i_td.floatValue();
+
+		if (i_td_value < m_compiler->lmCycleDuration() / 1000)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Value of parameter '%1.%2' must be greate or equal of %3")).
+					  arg(caption()).arg(i_td.caption()).arg(m_compiler->lmCycleDuration()/ 1000));
+			return false;
+		}
+
+		float i_max_value = i_max.floatValue();
+		float i_min_value = i_min.floatValue();
+
+		if (i_max_value <= i_min_value)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%3.%4'")).
+					  arg(caption()).arg(i_max.caption()).
+					  arg(caption()).arg(i_min.caption()));
+
+			return false;
+		}
+
+		i_td.setFloatValue((i_td.floatValue() * 1000) / m_compiler->lmCycleDuration());
+
+		m_runTime = 32;
 
 		return true;
 	}

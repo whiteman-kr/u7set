@@ -9,6 +9,7 @@
 
 namespace Builder
 {
+
 	class SoftwareCfgGenerator : public QObject
 	{
 		Q_OBJECT
@@ -49,6 +50,21 @@ namespace Builder
 
 		struct LmEthernetAdapterNetworkProperties
 		{
+			static const char* PROP_TUNING_ENABLE;
+			static const char* PROP_TUNING_IP;
+			static const char* PROP_TUNING_PORT;
+			static const char* PROP_TUNING_SERVICE_ID;
+
+			static const char* PROP_APP_DATA_ENABLE;
+			static const char* PROP_APP_DATA_IP;
+			static const char* PROP_APP_DATA_PORT;
+			static const char* PROP_APP_DATA_SERVICE_ID;
+
+			static const char* PROP_DIAG_DATA_ENABLE;
+			static const char* PROP_DIAG_DATA_IP;
+			static const char* PROP_DIAG_DATA_PORT;
+			static const char* PROP_DIAG_DATA_SERVICE_ID;
+
 			int adapterNo;		// LM_ETHERNET_ADAPTER* values
 			QString adapterID;
 

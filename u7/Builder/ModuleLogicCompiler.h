@@ -242,6 +242,7 @@ namespace Builder
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_POL_paramValues();
+		bool calculate_DER_paramValues();
 
 		//
 
@@ -654,7 +655,7 @@ namespace Builder
 		const SignalSet& signalSet() { return *m_signals; }
 		Signal* getSignal(const QString& strID);
 
-		OutputLog* log() { return m_log; }
+		IssueLogger* log() { return m_log; }
 
 		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
