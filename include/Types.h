@@ -67,6 +67,13 @@ public:
 	};
 	Q_ENUM(DataFormat)
 
+	enum class MemoryArea
+	{
+		ApplicationData,
+		DiagnosticsData
+	};
+	Q_ENUM(MemoryArea)
+
 	// Software Module Type Identifiers
 	//
 	enum SoftwareType

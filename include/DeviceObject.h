@@ -517,6 +517,9 @@ namespace Hardware
 		E::DataFormat format() const;
 		void setFormat(E::DataFormat value);
 
+		E::MemoryArea memoryArea() const;
+		void setMemoryArea(E::MemoryArea value);
+
 		int size() const;
 		void setSize(int value);
 
@@ -550,6 +553,8 @@ namespace Hardware
 
 		E::ByteOrder m_byteOrder = E::ByteOrder::LittleEndian;
 		E::DataFormat m_format = E::DataFormat::UnsignedInt;
+
+		E::MemoryArea m_memoryArea = E::MemoryArea::ApplicationData;
 
 		int m_size = 0;
 		int m_validityOffset = -1;
