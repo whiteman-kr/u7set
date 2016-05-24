@@ -2952,10 +2952,10 @@ static const QString valueBitCaption("ValueBit");
 		m_deviceTable.insert(m_root->equipmentIdTemplate(), m_root);
 		addDeviceChildrenToHashTable(m_root);
 
-		for (auto it : m_deviceTable)
-		{
-			qDebug() << it->equipmentIdTemplate();
-		}
+//		for (auto it : m_deviceTable)
+//		{
+//			qDebug() << it->equipmentIdTemplate();
+//		}
 
 		return;
 	}

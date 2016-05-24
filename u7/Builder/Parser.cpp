@@ -380,6 +380,8 @@ namespace Builder
 			return false;
 		}
 
+		qDebug() << "Order items for module " << m_moduleEquipmentId;
+
 		bool result = true;
 
 		// The last preparation - connect SchemaItemInput to SchemaItemOutput
@@ -425,7 +427,10 @@ namespace Builder
 				hasItemsWithouInputs = true;
 				continue;
 			}
+		}
 
+		for (const AppLogicItem& item : fblItems)
+		{
 			if (item.m_fblItem->outputsCount() == 0)
 			{
 				orderedList.push_back(item);	// items without outputs must be at the end of the list
@@ -438,24 +443,129 @@ namespace Builder
 			fblItems.erase(orderedItem);
 		}
 
-		if (hasItemsWithouInputs == false)
+//		if (hasItemsWithouInputs == false)
+//		{
+//			// Imposible set exucution order for module, there is no first item,
+//			// firts item can be item without inputs
+//			//
+//			log->errALP4020(moduleEquipmentId());
+
+//			result = false;
+//			return result;
+//		}
+
+		int pass = 1;
+		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
+		while (fblItems.empty() == false)
 		{
-			// Imposible set exucution order for module, there is no first item,
-			// firts item can be item without inputs
+			qDebug() << "Pass " << pass++;
+
+			setItemsOrder(log, fblItems, orderedList, constFblItems);
+
+			if (checkRemainsCount == fblItems.size())
+			{
+				// setItemsOrder did not processed any item
+				//
+				break;
+			}
+			else
+			{
+				checkRemainsCount = fblItems.size();	// fblItems.size() must be changed in setItemsOrder, if it did not happened
+			}
+
+			if (fblItems.empty() == false)
+			{
+				// some items in the accumulator
+				//
+				const AppLogicItem& item = *fblItems.begin();
+				orderedList.push_back(item);
+				fblItems.erase(item);
+			}
+		}
+
+		// --
+		//
+		if (fblItems.empty() == false)
+		{
+			// Not all items were processes, it can happen if item with input pins does not have any connection
+			// to these inputs
 			//
-			log->errALP4020(moduleEquipmentId());
+			for (const AppLogicItem& item : fblItems)
+			{
+				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+						  tr("%1 was not processed").arg(item.m_fblItem->buildName()));
+			}
 
 			result = false;
-			return result;
+		}
+		else
+		{
+//			// -- debug
+//			qDebug() << "";
+//			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleEquipmentId;
+//			qDebug() << "";
+
+//			for (const AppLogicItem& item : orderedList)
+//			{
+//				if (item.m_fblItem->isInputSignalElement())
+//				{
+//					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->appSignalIds();
+//					continue;
+//				}
+
+//				if (item.m_fblItem->isOutputSignalElement())
+//				{
+//					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->appSignalIds();
+//					continue;
+//				}
+
+//				if (item.m_fblItem->isConstElement())
+//				{
+//					qDebug() << "Constant " << item.m_fblItem->toSchemaItemConst()->valueToString();
+//					continue;
+//				}
+
+
+//				if (item.m_fblItem->isAfbElement())
+//				{
+//					qDebug() << "Fbl " << item.m_afbElement.caption();
+//					continue;
+//				}
+
+//				qDebug() << "ERROR, UNKWNOW element " << item.m_fblItem->metaObject()->className();
+//			}
+
+//			// -- end of debug
+
+			// Set complete data
+			//
+
+			std::swap(m_items, orderedList);
+		}
+
+		return result;
+	}
+
+	bool AppLogicModule::setItemsOrder(IssueLogger* log,
+									   std::set<AppLogicItem>& remainItems,
+									   std::list<AppLogicItem>& orderedItems,
+									   const std::set<AppLogicItem>& constItems)
+	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
 		}
 
 		std::list<ChangeOrder> changeOrderHistory;
 
 		// Set other items
 		//
-		for (auto currentIt = orderedList.begin(); currentIt != orderedList.end(); ++currentIt)
+		for (auto currentIt = orderedItems.begin(); currentIt != orderedItems.end(); ++currentIt)
 		{
 			AppLogicItem currentItem = *currentIt;		// NOT REFERENCE, ITEM CAN BE MOVED LATER
+
+			//qDebug() << "Parsing -- order item " << currentItem.m_fblItem->buildName();
 
 			// Get dependant items
 			//
@@ -465,7 +575,7 @@ namespace Builder
 
 			for (const VFrame30::AfbPin& out : outputs)
 			{
-				auto deps = getItemsWithInput(constFblItems.begin(), constFblItems.end(), out.guid());
+				auto deps = getItemsWithInput(constItems.begin(), constItems.end(), out.guid());
 
 				dependantItems.insert(deps.begin(), deps.end());
 			}
@@ -490,9 +600,9 @@ namespace Builder
 
 				// Check if dependant item is below current, if so, thats ok, don't do anything
 				//
-				auto dependantisBelow = std::find(currentIt, orderedList.end(), dep);
+				auto dependantisBelow = std::find(currentIt, orderedItems.end(), dep);
 
-				if (dependantisBelow != orderedList.end())
+				if (dependantisBelow != orderedItems.end())
 				{
 					// Dependant item already in orderedList, and it is under currentItem
 					//
@@ -501,7 +611,7 @@ namespace Builder
 
 				// Check if the dependant above currentItem
 				//
-				auto dependantIsAbove = std::find(orderedList.begin(), currentIt, dep);
+				auto dependantIsAbove = std::find(orderedItems.begin(), currentIt, dep);
 
 				if (dependantIsAbove != currentIt)
 				{
@@ -542,83 +652,25 @@ namespace Builder
 					//
 					auto tempIter = currentIt;
 
-					currentIt = orderedList.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and part of the algorithm!
+					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and part of the algorithm!
 
-					orderedList.erase(tempIter);
+					orderedItems.erase(tempIter);
 
 					continue;	// Process other dependtants, do not break!
 				}
 
-				// Obviusly dependant item not in orderedList yet, add it right after currentItem
+				// Obviusly dependant item is not in orderedList yet, add it right after currentItem
 				//
-				assert(std::find(orderedList.begin(), orderedList.end(), dep) == orderedList.end());
+				assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
 
-				orderedList.insert(std::next(currentIt), dep);
-				fblItems.erase(dep);
+				orderedItems.insert(std::next(currentIt), dep);
+				remainItems.erase(dep);
 
 				// process other dependtants, do not break!
 			}
 		}
 
-		if (fblItems.empty() == false)
-		{
-			// Not all items were processes, it can happen if item with input pins does not have any connection
-			// to these inputs
-			//
-			for (const AppLogicItem& item : fblItems)
-			{
-				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-						  tr("%1 was not processed").arg(item.m_fblItem->buildName()));
-			}
-
-			result = false;
-		}
-		else
-		{
-			// -- debug
-			qDebug() << "";
-			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleEquipmentId;
-			qDebug() << "";
-
-			for (const AppLogicItem& item : orderedList)
-			{
-				if (item.m_fblItem->isInputSignalElement())
-				{
-					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->appSignalIds();
-					continue;
-				}
-
-				if (item.m_fblItem->isOutputSignalElement())
-				{
-					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->appSignalIds();
-					continue;
-				}
-
-				if (item.m_fblItem->isConstElement())
-				{
-					qDebug() << "Constant " << item.m_fblItem->toSchemaItemConst()->valueToString();
-					continue;
-				}
-
-
-				if (item.m_fblItem->isAfbElement())
-				{
-					qDebug() << "Fbl " << item.m_afbElement.caption();
-					continue;
-				}
-
-				qDebug() << "ERROR, UNKWNOW element " << item.m_fblItem->metaObject()->className();
-			}
-
-			// -- end of debug
-
-			// Set complete data
-			//
-
-			std::swap(m_items, orderedList);
-		}
-
-		return result;
+		return true;
 	}
 
 	bool AppLogicModule::setInputOutputsElementsConnection(IssueLogger* log)
