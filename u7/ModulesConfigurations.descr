@@ -883,8 +883,8 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 			}
 
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + lowValidRangeADC +
-			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + highValidRangeADC +
+			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + highValidRangeADC +
+			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + lowValidRangeADC +
 			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + spreadTolerance + "\r\n");
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
