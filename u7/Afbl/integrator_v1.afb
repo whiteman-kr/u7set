@@ -3,7 +3,7 @@
     <AfbElement StrId="#integrator_v1">
         <Properties>
             <Caption>integrator</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
             <Implementation Version="1" OpIndex="29"/>
             <Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
             <Category>Other</Category>
@@ -13,6 +13,7 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
+            <AfbElementSignal OpName="i_x_tr" Caption="track_in" Type="Analog" DataFormat="Float" OpIndex="12" Size="32"/>
             <AfbElementSignal OpName="i_x" Caption="in" Type="Analog" DataFormat="Float" OpIndex="14" Size="32"/>
             <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="16" Size="1"/>
             <AfbElementSignal OpName="i_pause" Caption="pause" Type="Discrete" OpIndex="17" Size="1"/>
@@ -74,16 +75,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="i_x_tr" Caption="XTr" Visible="true" OpIndex="10" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
-                <Value>0</Value>
-                <Default>0</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>                   
+            </AfbElementParam>                             
             <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
