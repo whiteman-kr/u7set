@@ -1856,7 +1856,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 
 		if (device != nullptr)
 		{
-			strIds.push_back(device->equipmentId());
+			strIds.push_back(device->equipmentId() + "*");
 		}
 	}
 
