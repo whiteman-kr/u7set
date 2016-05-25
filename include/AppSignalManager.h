@@ -21,8 +21,8 @@ public:
 
 	void setState(Hash signalHash, const AppSignalState& state);
 
-	AppSignalState signalState(Hash signalHash);
-	AppSignalState signalState(const QString& appSignalId);
+	AppSignalState signalState(Hash signalHash, bool* found = nullptr);
+	AppSignalState signalState(const QString& appSignalId, bool* found = nullptr);
 
 private:
 	QMutex m_paramMutex;
