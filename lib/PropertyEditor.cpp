@@ -995,7 +995,7 @@ namespace ExtWidgets
 		setLayout(lt);
 	}
 
-    void QtMultiCheckBox::setValue(std::shared_ptr<Property> property, bool sameValue)
+	void QtMultiCheckBox::setValue(bool value, bool readOnly)
 	{
 		if (m_checkBox == nullptr)
 		{
@@ -1004,16 +1004,10 @@ namespace ExtWidgets
 		}
 
 		m_checkBox->blockSignals(true);
-        if (sameValue == true)
-        {
-            m_checkBox->setCheckState(property->value().toBool() == true ? Qt::Checked : Qt::Unchecked);
-        }
-        else
-        {
-            m_checkBox->setCheckState(Qt::PartiallyChecked);
-        }
+		m_checkBox->setCheckState(value ? Qt::Checked : Qt::Unchecked);
+
 		updateText();
-        m_checkBox->setEnabled(property->readOnly() == false);
+		m_checkBox->setEnabled(readOnly == false);
 		m_checkBox->blockSignals(false);
 	}
 
@@ -1143,10 +1137,33 @@ namespace ExtWidgets
 							QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
 							editor = m_editor;
 
-                            m_editor->setValue(p, manager->sameValue(property) == true);
-
 							connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+
+							if (p->readOnly())
+							{
+								m_editor->setValue(p->value().toBool(), p->readOnly());
+							}
+							else
+							{
+								// change value on first click
+								//
+								bool newValue = p->value().toBool();
+
+								if (manager->sameValue(property) == false)
+								{
+									newValue = true;
+								}
+								else
+								{
+									newValue = !newValue;
+								}
+
+								m_editor->setValue(newValue, p->readOnly());
+
+								m_valueSetOnTimer = newValue;
+								QTimer::singleShot(10, this, &QtMultiVariantFactory::slotSetValueTimer);
+							}
 						}
 						break;
 					case QVariant::String:
@@ -1217,6 +1234,11 @@ namespace ExtWidgets
 	Q_UNUSED(property);
 	Q_UNUSED(value);
 }*/
+
+	void QtMultiVariantFactory::slotSetValueTimer()
+	{
+		emit slotSetValue(m_valueSetOnTimer);
+	}
 
 	void QtMultiVariantFactory::slotSetValue(QVariant value)
 	{
@@ -1651,17 +1673,9 @@ namespace ExtWidgets
 		m_propertyGroupManager = new QtGroupPropertyManager(this);
 		m_propertyVariantManager = new QtMultiVariantPropertyManager(this);
 
-		QtMultiVariantFactory* spinBoxFactory = new QtMultiVariantFactory(this);
-		QtMultiVariantFactory* doubleSpinBoxFactory = new QtMultiVariantFactory(this);
-		QtMultiVariantFactory* lineEditFactory = new QtMultiVariantFactory(this);
-		QtMultiVariantFactory *checkBoxFactory = new QtMultiVariantFactory(this);
-		QtMultiVariantFactory *colorFactory = new QtMultiVariantFactory(this);
+		QtMultiVariantFactory* editFactory = new QtMultiVariantFactory(this);
 
-		setFactoryForManager(m_propertyVariantManager, lineEditFactory);
-		setFactoryForManager(m_propertyVariantManager, spinBoxFactory);
-		setFactoryForManager(m_propertyVariantManager, doubleSpinBoxFactory);
-		setFactoryForManager(m_propertyVariantManager, checkBoxFactory);
-		setFactoryForManager(m_propertyVariantManager, colorFactory);
+		setFactoryForManager(m_propertyVariantManager, editFactory);
 
 		connect(m_propertyVariantManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
 

@@ -152,7 +152,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiCheckBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property, bool sameValue);
+		void setValue(bool value, bool readOnly);
 
 	public slots:
 		void onStateChanged(int state);
@@ -327,12 +327,17 @@ namespace ExtWidgets
 
 	public slots:
 		//void slotPropertyChanged(QtProperty* property, QVariant value);
-		void slotSetValue(QVariant value);
+
+		void slotSetValue(QVariant value);		// sets value from argument
+		void slotSetValueTimer();				// sets value m_valueSetOnTimer, needed for QTimer::singleShot
+
 		void slotEditorDestroyed(QObject* object);
 
 	private:
 		QtMultiVariantPropertyManager* m_manager = nullptr;
 		QtProperty* m_property = nullptr;
+
+		QVariant m_valueSetOnTimer;
 	};
 
 	// -------------------------------------------------------------------------------
