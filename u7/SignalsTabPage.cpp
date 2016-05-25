@@ -993,7 +993,7 @@ bool SignalsModel::isEditableSignal(int row)
 
 void SignalsModel::addSignal()
 {
-	QDialog signalTypeDialog(m_parentWindow);
+	QDialog signalTypeDialog(m_parentWindow, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
 	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
@@ -1271,15 +1271,23 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalTypeFilterCombo->addItem(tr("Analog signals"), ST_ANALOG);
 	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), ST_DISCRETE);
 
+	m_signalIdFieldCombo = new QComboBox(this);
+	m_signalIdFieldCombo->addItem(tr("AppSignalID"), FI_APP_SIGNAL_ID);
+	m_signalIdFieldCombo->addItem(tr("CustomAppSignalID"), FI_CUSTOM_APP_SIGNAL_ID);
+	m_signalIdFieldCombo->addItem(tr("EquipmentID"), FI_EQUIPMENT_ID);
+
 	QToolBar* toolBar = new QToolBar(this);
-	toolBar->addWidget(m_signalTypeFilterCombo);
 
 	connect(GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
 
 	QToolBar* filterToolBar = new QToolBar(this);
 
 	m_filterEdit = new QLineEdit(this);
-	filterToolBar->addWidget(new QLabel("Filter:", this));
+	filterToolBar->addWidget(new QLabel("Filter ", this));
+	filterToolBar->addWidget(m_signalTypeFilterCombo);
+	filterToolBar->addWidget(new QLabel(" by ", this));
+	filterToolBar->addWidget(m_signalIdFieldCombo);
+	filterToolBar->addWidget(new QLabel(" complies ", this));
 	filterToolBar->addWidget(m_filterEdit);
 
 	QSettings settings;
@@ -1296,9 +1304,9 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SignalsTabPage::applySignalIdFilter);
 	filterToolBar->addWidget(applyButton);
 
-	QPushButton* clearButton = new QPushButton("Clear", this);
-	connect(clearButton, &QPushButton::clicked, this, &SignalsTabPage::clearSignalIdFilter);
-	filterToolBar->addWidget(clearButton);
+	QPushButton* resetButton = new QPushButton("Reset", this);
+	connect(resetButton, &QPushButton::clicked, this, &SignalsTabPage::resetSignalIdFilter);
+	filterToolBar->addWidget(resetButton);
 
 	// Property View
 	//
@@ -1726,7 +1734,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	m_signalsView->resizeColumnsToContents();
 }
 
-void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refreshSignalList)
+void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignalList)
 {
 	// Update signals
 	//
@@ -1747,15 +1755,17 @@ void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refresh
 			}
 		}
 		m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
+		m_signalIdFieldCombo->setCurrentIndex(FI_EQUIPMENT_ID);
+		m_signalsProxyModel->setIdFilterField(FI_EQUIPMENT_ID);
 	}
 
 	// Set signal id filter
 	//
-	m_signalsProxyModel->setSignalIdFilter(deviceStrIds);
+	m_signalsProxyModel->setSignalIdFilter(strIds);
 
 	// Set signal id filter editor text and save filter history
 	//
-	QString newFilter = deviceStrIds.join(" || ");
+	QString newFilter = strIds.join(" | ");
 	while (newFilter.indexOf("  ") != -1)
 	{
 		newFilter.replace("  ", " ");
@@ -1783,13 +1793,16 @@ void SignalsTabPage::changeSignalIdFilter(QStringList deviceStrIds, bool refresh
 
 void SignalsTabPage::applySignalIdFilter()
 {
-	changeSignalIdFilter(m_filterEdit->text().trimmed().split("||", QString::SkipEmptyParts), false);
+	m_signalsProxyModel->setIdFilterField(m_signalIdFieldCombo->currentIndex());
+	changeSignalIdFilter(m_filterEdit->text().trimmed().split("|", QString::SkipEmptyParts), false);
 }
 
-void SignalsTabPage::clearSignalIdFilter()
+void SignalsTabPage::resetSignalIdFilter()
 {
 	m_signalsProxyModel->setSignalIdFilter(QStringList());
+	m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
 	m_filterEdit->setText("");
+	m_signalTypeFilterCombo->setCurrentIndex(0);
 }
 
 void SignalsTabPage::changeColumnVisibility(QAction* action)
@@ -2203,14 +2216,31 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 	{
 		return false;
 	}
-	if (m_deviceStrIds.isEmpty())
+	if (m_strIdMasks.isEmpty())
 	{
 		return true;
 	}
-	QString&& deviceStrId = currentSignal.equipmentID().trimmed();
-	for (QString id : m_deviceStrIds)
+	QString strId;
+	switch (m_idFilterField)
 	{
-		if (deviceStrId.startsWith(id.trimmed()))
+		case FI_APP_SIGNAL_ID:
+			strId = currentSignal.appSignalID().trimmed();
+			break;
+		case FI_CUSTOM_APP_SIGNAL_ID:
+			strId = currentSignal.customAppSignalID().trimmed();
+			break;
+		case FI_EQUIPMENT_ID:
+			strId = currentSignal.equipmentID().trimmed();
+			break;
+		default:
+			assert(false);
+			return false;
+	}
+	for (QString idMask : m_strIdMasks)
+	{
+		QRegExp rx(idMask.trimmed());
+		rx.setPatternSyntax(QRegExp::Wildcard);
+		if (rx.exactMatch(strId))
 		{
 			return true;
 		}
@@ -2228,18 +2258,18 @@ void SignalsProxyModel::setSignalTypeFilter(int signalType)
 	}
 }
 
-void SignalsProxyModel::setSignalIdFilter(QStringList deviceStrIds)
+void SignalsProxyModel::setSignalIdFilter(QStringList strIds)
 {
 	bool equal = true;
-	if (m_deviceStrIds.count() != deviceStrIds.count())
+	if (m_strIdMasks.count() != strIds.count())
 	{
 		equal = false;
 	}
 	else
 	{
-		for (int i = 0; i < m_deviceStrIds.count(); i++)
+		for (int i = 0; i < m_strIdMasks.count(); i++)
 		{
-			if (m_deviceStrIds[i] != deviceStrIds[i])
+			if (m_strIdMasks[i] != strIds[i])
 			{
 				equal = false;
 				break;
@@ -2248,7 +2278,17 @@ void SignalsProxyModel::setSignalIdFilter(QStringList deviceStrIds)
 	}
 	if (!equal)
 	{
-		m_deviceStrIds = deviceStrIds;
+		m_strIdMasks = strIds;
+
+		invalidateFilter();
+	}
+}
+
+void SignalsProxyModel::setIdFilterField(int field)
+{
+	if (m_idFilterField != field)
+	{
+		m_idFilterField = field;
 
 		invalidateFilter();
 	}
