@@ -28,6 +28,11 @@ const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
 			ST_ANY = 0xff;
 
 
+const int	FI_APP_SIGNAL_ID = 0,
+			FI_CUSTOM_APP_SIGNAL_ID = 1,
+			FI_EQUIPMENT_ID = 2;
+
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -145,12 +150,14 @@ public:
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 	void setSignalTypeFilter(int signalType);
-	void setSignalIdFilter(QStringList deviceStrIds);
+	void setSignalIdFilter(QStringList strIds);
+	void setIdFilterField(int field);
 
 private:
 	SignalsModel* m_sourceModel;
 	int m_signalType = ST_ANY;
-	QStringList m_deviceStrIds;
+	int m_idFilterField = FI_EQUIPMENT_ID;
+	QStringList m_strIdMasks;
 };
 
 
@@ -254,9 +261,9 @@ public slots:
 	void restoreSelection();
 
 	void changeSignalTypeFilter(int selectedType);
-	void changeSignalIdFilter(QStringList deviceStrIds, bool refreshSignalList);
+	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);
 	void applySignalIdFilter();
-	void clearSignalIdFilter();
+	void resetSignalIdFilter();
 
 	void changeColumnVisibility(QAction* action);
 
@@ -269,6 +276,7 @@ private:
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
+	QComboBox* m_signalIdFieldCombo = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_completer = nullptr;
 	QActionGroup* m_tableHeadersContextMenuActions = nullptr;

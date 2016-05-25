@@ -293,7 +293,7 @@ namespace Builder
 		MemoryArea m_tuningData;
 		MemoryArea m_appLogicWordData;
 		MemoryArea m_lmDiagData;
-		MemoryArea m_lmIntOutData;
+		MemoryArea m_lmAppData;
 
 		const DeviceHelper::IntPropertyNameVar memSettings[] =
 		{
@@ -311,11 +311,11 @@ namespace Builder
 			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
 			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
 
-			{	"LMDiagDataOffset", m_lmDiagData.ptrStartAddress() },
-			{	"LMDiagDataSize", m_lmDiagData.ptrSizeW() },
+			{	"DiagDataOffset", m_lmDiagData.ptrStartAddress() },
+			{	"DiagDataSize", m_lmDiagData.ptrSizeW() },
 
-			{	"LMInOutDataOffset", m_lmIntOutData.ptrStartAddress() },
-			{	"LMInOutDataSize", m_lmIntOutData.ptrSizeW() }
+			{	"AppDataOffset", m_lmAppData.ptrStartAddress() },
+			{	"AppDataSize", m_lmAppData.ptrSizeW() }
 		};
 
 		for(DeviceHelper::IntPropertyNameVar memSetting : memSettings)
@@ -331,7 +331,7 @@ namespace Builder
 							 m_tuningData,
 							 m_appLogicWordData,
 							 m_lmDiagData,
-							 m_lmIntOutData);
+							 m_lmAppData);
 
 			m_code.initCommandMemoryRanges(m_appLogicBitData.startAddress(),
 										   m_appLogicBitData.sizeW(),
@@ -369,7 +369,7 @@ namespace Builder
 
 		// build Module structures array
 		//
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		for(int place = 0; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
 
@@ -383,29 +383,55 @@ namespace Builder
 			m.device = device;
 			m.place = place;
 
-			const DeviceHelper::IntPropertyNameVar moduleSettings[] =
+			if (device->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 			{
-				{	"TxDataSize", &m.txDataSize },
-				{	"RxDataSize", &m.rxDataSize },
+				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
+				{
+					{	"DiagDataOffset", &m.diagDataOffset },
+					{	"DiagDataSize", &m.diagDataSize },
 
-				{	"DiagDataOffset", &m.diagDataOffset },
-				{	"DiagDataSize", &m.diagDataSize },
+					{	"AppDataOffset", &m.appLogicDataOffset },
+					{	"AppDataSize", &m.appLogicDataSize },
+				};
 
-				{	"AppLogicDataOffset", &m.appLogicDataOffset },
-				{	"AppLogicDataSize", &m.appLogicDataSize },
-				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
+				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
+				{
+					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
+				}
 
-				{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
-			};
+				m.rxTxDataOffset = 0;
 
-			for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
-			{
-				result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
+				m.moduleAppDataOffset = m.appLogicDataOffset;
+				m.appLogicRegDataSize = m.appLogicDataSize;
+
+				m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
 			}
+			else
+			{
+				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
+				{
+					{	"TxDataSize", &m.txDataSize },
+					{	"RxDataSize", &m.rxDataSize },
 
-			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
-			m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
-			m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+					{	"DiagDataOffset", &m.diagDataOffset },
+					{	"DiagDataSize", &m.diagDataSize },
+
+					{	"AppDataOffset", &m.appLogicDataOffset },
+					{	"AppDataSize", &m.appLogicDataSize },
+					{	"AppDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
+
+					{	"AppRegDataSize", &m.appLogicRegDataSize },
+				};
+
+				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
+				{
+					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
+				}
+
+				m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
+				m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
+				m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+			}
 
 			m_modules.append(m);
 		}
@@ -4301,6 +4327,9 @@ namespace Builder
 
 							case Hardware::DeviceModule::FamilyType::DIM:
 							case Hardware::DeviceModule::FamilyType::DOM:
+								break;
+
+							case Hardware::DeviceModule::FamilyType::LM:
 								break;
 
 							default:

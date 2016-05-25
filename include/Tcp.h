@@ -342,7 +342,7 @@ namespace Tcp
 		void onReplyTimeoutTimer();
 
 	public:
-		Client(const HostAddressPort &serverAddressPort);
+		Client(const HostAddressPort& serverAddressPort);
 		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
 		virtual ~Client();
