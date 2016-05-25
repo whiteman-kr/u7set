@@ -94,7 +94,8 @@ SOURCES += main.cpp \
     ../Proto/serialization.pb.cc \
     AppSignalStateEx.cpp \
     ../lib/AppSignalState.cpp \
-    ../u7/Builder/IssueLogger.cpp
+    ../u7/Builder/IssueLogger.cpp \
+    TcpAppDataClient.cpp
 
 HEADERS += \
 	Stable.h \
@@ -138,7 +139,8 @@ HEADERS += \
     ../Proto/serialization.pb.h \
     ../include/AppSignalState.h \
     AppSignalStateEx.h \
-    ../u7/Builder/IssueLogger.h
+    ../u7/Builder/IssueLogger.h \
+    TcpAppDataClient.h
 
 include(../qtservice/src/qtservice.pri)
 
