@@ -154,6 +154,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 		if (signal->isAnalog() && !signal->isInput())
 		{
+			signal->propertyByCaption("LowValidRange")->setVisible(false);
+			signal->propertyByCaption("HighValidRange")->setVisible(false);
 			signal->propertyByCaption("FilteringTime")->setVisible(false);
 			signal->propertyByCaption("SpreadTolerance")->setVisible(false);
 		}
