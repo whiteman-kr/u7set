@@ -75,6 +75,10 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		processSignalParam(data);
 		break;
 
+	case ADS_GET_APP_SIGNAL_STATE:
+		processSignalState(data);
+		break;
+
 	default:
 		assert(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";

@@ -9,6 +9,8 @@ MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *pare
 	qDebug() << Q_FUNC_INFO;
 	assert(m_schemaManager);
 
+	startTimer(250);
+
 	return;
 }
 
@@ -90,11 +92,11 @@ bool MonitorSchemaView::setSchema(QString schemaId)
 	return true;
 }
 
-void MonitorSchemaView::paintEvent(QPaintEvent* pe)
+void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 {
 	// Draw Schema
 	//
-	VFrame30::SchemaView::paintEvent(pe);
+	//VFrame30::SchemaView::paintEvent(pe);
 
 	QPainter p;
 	p.begin(this);
@@ -102,10 +104,12 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 	p.save();
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
-
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
 
+	// Draw schema
+	//
+	SchemaView::draw(drawParam);
 
 	// Calc size
 	//
@@ -138,6 +142,10 @@ void MonitorSchemaView::paintEvent(QPaintEvent* pe)
 	return;
 }
 
+void MonitorSchemaView::timerEvent(QTimerEvent* /*event*/)
+{
+	update();
+}
 
 void MonitorSchemaView::mousePressEvent(QMouseEvent* event)
 {

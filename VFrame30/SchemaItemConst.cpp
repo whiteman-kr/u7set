@@ -23,6 +23,8 @@ namespace VFrame30
 		valFloatProp->setCategory(PropertyNames::functionalCategory);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
 
+		setPrecision(precision());		// This function will set Presion for valueFloat property
+
 		// --
 		//
 		addOutput();
@@ -77,6 +79,8 @@ namespace VFrame30
 		m_intValue = constitem.intvalue();
 		m_floatValue = constitem.floatvalue();
 		m_precision = constitem.precision();
+
+		setPrecision(m_precision);		// This function will set Presion for valueFloat property
 
 		return true;
 	}
@@ -221,6 +225,18 @@ namespace VFrame30
 		}
 
 		m_precision = value;
+
+		// Set precision to m_floatValue property
+		//
+		std::shared_ptr<Property> prop = propertyByCaption(PropertyNames::valueFloat);
+
+		if (prop == false)
+		{
+			assert(prop);
+			return;
+		}
+
+		prop->setPrecision(m_precision);
 	}
 
 }

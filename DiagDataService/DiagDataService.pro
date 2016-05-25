@@ -84,7 +84,8 @@ SOURCES += main.cpp \
     ../lib/DataChannel.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    ../u7/Builder/IssueLogger.cpp
 
 HEADERS += \
 	Stable.h \
@@ -115,7 +116,8 @@ HEADERS += \
     DiagDataService.h \
     ../include/DataChannel.h \
     ../include/Queue.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    ../u7/Builder/IssueLogger.h
 
 include(../qtservice/src/qtservice.pri)
 

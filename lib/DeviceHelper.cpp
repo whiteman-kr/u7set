@@ -76,8 +76,7 @@ void DeviceHelper::logPropertyNotFoundError(const QString& propertyName, const Q
 {
 	if (log != nullptr)
 	{
-		LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-				  QString(tr("Property '%1' is not found in device '%2'")).arg(propertyName).arg(deviceStrID));
+		log->errCFG3000(propertyName, deviceStrID);
 		return;
 	}
 }
@@ -117,9 +116,7 @@ Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardwar
 
 	if (log != nullptr)
 	{
-		LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-						   QString("Can't find child object by suffix '%1' in object '%2'").
-						   arg(suffix).arg(device->equipmentIdTemplate()));
+		log->errCFG3014(suffix, device->equipmentIdTemplate());
 	}
 
 	return nullptr;

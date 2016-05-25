@@ -13,6 +13,8 @@ private:
 
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
+	QString m_clientIPStr;
+
 	QString m_buildFolder;
 
 	void startCfgServerThread();
@@ -26,14 +28,14 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 public:
-	ConfigurationServiceWorker(const QString& serviceStrID, const QString& buildFolder);
+	ConfigurationServiceWorker(const QString& serviceStrID, const QString& buildFolder, const QString& ipStr);
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
 	ServiceWorker* createInstance() override
 	{
-		return new ConfigurationServiceWorker(serviceStrID(), m_buildFolder);
+		return new ConfigurationServiceWorker(serviceStrID(), m_buildFolder, m_clientIPStr);
 	}
 
 signals:

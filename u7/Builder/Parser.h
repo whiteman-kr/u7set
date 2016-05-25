@@ -128,6 +128,11 @@ namespace Builder
 		bool orderItems(IssueLogger* log);
 
 	private:
+		bool setItemsOrder(IssueLogger* log,
+						   std::set<AppLogicItem>& remainItems,
+						   std::list<AppLogicItem>& orderedItems,
+						   const std::set<AppLogicItem>& constItems);
+
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//
 		bool setInputOutputsElementsConnection(IssueLogger* log);

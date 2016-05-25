@@ -93,7 +93,8 @@ SOURCES += main.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     AppSignalStateEx.cpp \
-    ../lib/AppSignalState.cpp
+    ../lib/AppSignalState.cpp \
+    ../u7/Builder/IssueLogger.cpp
 
 HEADERS += \
 	Stable.h \
@@ -136,7 +137,8 @@ HEADERS += \
     ../include/Hash.h \
     ../Proto/serialization.pb.h \
     ../include/AppSignalState.h \
-    AppSignalStateEx.h
+    AppSignalStateEx.h \
+    ../u7/Builder/IssueLogger.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -433,8 +433,7 @@ namespace Builder
 
 		if (m_moduleLogic == nullptr)
 		{
-			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->equipmentIdTemplate());
-			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			m_log->wrnALC5001(m_lm->equipmentIdTemplate());			//	Application logic for module '%1' is not found.
 		}
 
 		do
@@ -5190,6 +5189,11 @@ namespace Builder
 	//
 	bool AppSignalMap::insert(const AppItem* appItem)
 	{
+		if (appItem == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
 		if (!appItem->isSignal())
 		{
 			ASSERT_RETURN_FALSE
@@ -5206,10 +5210,7 @@ namespace Builder
 
 		if (s == nullptr)
 		{
-			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
-
-			LOG_ERROR_OBSOLETE(m_compiler.log(), Builder::IssueType::NotDefined, msg);
-
+			m_compiler.log()->errALC5000(strID, appItem->guid());			// Signal identifier '%1' is not found.
 			return false;
 		}
 

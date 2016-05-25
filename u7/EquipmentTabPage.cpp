@@ -1697,7 +1697,7 @@ void EquipmentView::addInOutsToSignals()
 
 	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
 
-	if (module == nullptr || module->isIOModule() == false)
+	if (module == nullptr || (module->isIOModule() == false && module->isLM() == false))
 	{
 		assert(module);
 		return;
@@ -2948,7 +2948,7 @@ void EquipmentTabPage::setActionState()
 
 		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
 
-		if (module != nullptr && module->isIOModule() == true)
+		if (module != nullptr && (module->isIOModule() == true || module->isLM()))
 		{
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);

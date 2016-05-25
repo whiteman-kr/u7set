@@ -71,6 +71,11 @@ void AppDataProcessingWorker::parseRupData()
 	{
 		double value = 0;
 
+		if (parseInfo.valueAddr.offset() == -1)
+		{
+			continue;
+		}
+
 		bool result = getDoubleValue(parseInfo, value);
 
 		if (result == false)
@@ -96,6 +101,11 @@ void AppDataProcessingWorker::parseRupData()
 		{
 			m_badSignalStateIndexCount++;
 			continue;
+		}
+
+		if (signalState->appSignalID() == "#SINT_SIG0")
+		{
+			int a = 0;
 		}
 
 		signalState->setState(m_rupData.time, flags, value);
@@ -131,8 +141,6 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		if (parseInfo.dataSize == 32)
 		{
 			assert(parseInfo.valueAddr.bit() == 0);
-
-			float vf = 123.456;
 
 			quint32 rawValue = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
 
