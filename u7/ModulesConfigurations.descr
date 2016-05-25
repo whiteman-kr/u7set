@@ -53,7 +53,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 7;		// MAC address calculation changed
 //var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
 //var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
-var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
+//var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
+var configScriptVersion = 11;		// If software for LM ethernet controller is not found, default values are used
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -125,6 +126,16 @@ function storeHash64(confFirmware, log, frameIndex, offset, data)
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function storeHash64");
     }
     return result;
+}
+
+function ipToString(ip)
+{
+	var ip0 = (ip >> 24) & 0xff;
+	var ip1 = (ip >> 16) & 0xff;
+	var ip2 = (ip >> 8) & 0xff;
+	var ip3 = (ip) & 0xff;
+	var result = ip0 + "." + ip1 + "." + ip2 + "." + ip3;
+	return result;
 }
 
 function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -571,8 +582,17 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		var ip = [0, 0];
 		var port = [0, 0];
 		
-		var serviceIP = [0, 0];		//	Take from software!!!
+		var serviceIP = [0, 0];		
 		var servicePort = [0, 0];
+		
+		if (i == 0)
+		{
+			serviceIP[0] = 0xc0a80bfe;	//	192.168.11.254
+			serviceIP[1] = 0xc0a815fe;	//	192.168.21.254
+			
+			servicePort[0] = 13322;
+			servicePort[1] = 13352;
+		}
 
 		ethernetcontrollerID = "_ETHERNET0" + (i + 2);
 		ethernetController = module.jsFindChildObjectByMask(lmID + ethernetcontrollerID);
@@ -611,7 +631,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			{
 				log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.propertyValue("EquipmentID"));
 				return false;
-	}
+			}
 			
 			// Service
 			var serviceID = ethernetController.propertyValue(servicesName[s] + "DataServiceID");
@@ -623,6 +643,10 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				if (service == null)
 				{
 					log.wrnCFG3008(serviceID, module.propertyValue("EquipmentID"));
+					if (serviceIP[s] != 0 && servicePort[s] != 0)
+					{
+						log.wrnCFG3018(servicesName[s] + "DataService", ipToString(serviceIP[s]), servicePort[s], ethernetController.propertyValue("EquipmentID"));
+					}
 				}
 				else
 				{
@@ -1568,11 +1592,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 	
 	// regIP
 
-	var ip0 = (regIP >> 24) & 0xff;
-	var ip1 = (regIP >> 16) & 0xff;
-	var ip2 = (regIP >> 8) & 0xff;
-	var ip3 = (regIP) & 0xff;
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 1 = " + ip0 + "." + ip1 + "." + ip2 + "." + ip3 + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 1 = " + ipToString(regIP) + "\r\n");
 	
 	setData32(confFirmware, log, frame, ptr, regIP); 
 	ptr += 4;
@@ -1586,11 +1606,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 	
 	// diagIP
 
-	ip0 = (diagIP >> 24) & 0xff;
-	ip1 = (diagIP >> 16) & 0xff;
-	ip2 = (diagIP >> 8) & 0xff;
-	ip3 = (diagIP) & 0xff;
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 2 = " + ip0 + "." + ip1 + "." + ip2 + "." + ip3 + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 2 = " + ipToString(diagIP) + "\r\n");
 	
 	setData32(confFirmware, log, frame, ptr, diagIP); 
 	ptr += 4;
@@ -1604,11 +1620,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 		
 	// regServiceIP
 
-	ip0 = (regServiceIP >> 24) & 0xff;
-	ip1 = (regServiceIP >> 16) & 0xff;
-	ip2 = (regServiceIP >> 8) & 0xff;
-	ip3 = (regServiceIP) & 0xff;
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 1 = " + ip0 + "." + ip1 + "." + ip2 + "." + ip3 + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 1 = " + ipToString(regServiceIP) + "\r\n");
 	
 	setData32(confFirmware, log, frame, ptr, regServiceIP); 
 	ptr += 4;
@@ -1629,11 +1641,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 
 	// diagServiceIP
 
-	ip0 = (diagServiceIP >> 24) & 0xff;
-	ip1 = (diagServiceIP >> 16) & 0xff;
-	ip2 = (diagServiceIP >> 8) & 0xff;
-	ip3 = (diagServiceIP) & 0xff;
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 2 = " + ip0 + "." + ip1 + "." + ip2 + "." + ip3 + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 2 = " + ipToString(diagServiceIP) + "\r\n");
 	
 	setData32(confFirmware, log, frame, ptr, diagServiceIP); 
 	ptr += 4;

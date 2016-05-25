@@ -392,7 +392,7 @@ namespace Builder
 	///         %2 Module StrID
 	///
 	/// Description:
-	///			Software is not found in Equipment. Default values will be used.
+	///			Software is not found in Equipment.
 	///
 	void IssueLogger::wrnCFG3008(QString softwareID, QString module)
 	{
@@ -654,6 +654,30 @@ namespace Builder
 				  .arg(objectID)
 				  .arg(propertyName)
 				  .arg(softwareID));
+	}
+
+	/// IssueCode: CFG3018
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Default '%1' IP address %2:%3 is used in controller %4.
+	///
+	/// Parameters:
+	///			%1 Software StrID
+	///         %2 Module StrID
+	///
+	/// Description:
+	///			Warning occurs when default IP address and port are used in ethernet controller.
+	///
+	void IssueLogger::wrnCFG3018(QString propertyName, QString ip, int port, QString controller)
+	{
+		LOG_WARNING(IssueType::FscConfiguration,
+				  3018,
+				  tr("Default '%1' IP address %2:%3 is used in controller %4.")
+				  .arg(propertyName)
+				  .arg(ip)
+				  .arg(port)
+				  .arg(controller));
 	}
 
 
