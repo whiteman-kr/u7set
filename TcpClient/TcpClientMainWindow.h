@@ -6,6 +6,8 @@
 #include "../include/TcpFileTransfer.h"
 #include "../include/CfgServerLoader.h"
 
+#include "../AppDataService/TcpAppDataClient.h"
+
 namespace Ui {
 class TcpClientMainWindow;
 }
@@ -58,6 +60,8 @@ private:
 
 	Tcp::FileClient* m_fileClient = nullptr;
 	Tcp::Thread* m_fileClientThread = nullptr;
+
+	SimpleThread* m_appDataClientTread = nullptr;
 
 	CfgLoader* m_cfgLoader = nullptr;
 };

@@ -22,7 +22,10 @@ SOURCES +=\
     ../lib/SocketIO.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/CfgServerLoader.cpp \
-    ../lib/BuildInfo.cpp
+    ../lib/BuildInfo.cpp \
+    ../AppDataService/TcpAppDataClient.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
@@ -32,7 +35,10 @@ HEADERS  += TcpClientMainWindow.h \
     ../include/CfgServerLoader.h \
     ../include/BuildInfo.h \
     ../include/Utils.h \
-    ../include/Md5Hash.h
+    ../include/Md5Hash.h \
+    ../AppDataService/TcpAppDataClient.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h
 
 FORMS    += TcpClientMainWindow.ui
 
