@@ -18,9 +18,9 @@ public:
 	void reset();
 
 	void addSignal(const Signal& signal);
+	bool signal(Hash signalHash, Signal* out);
 
 	void setState(Hash signalHash, const AppSignalState& state);
-
 	AppSignalState signalState(Hash signalHash, bool* found = nullptr);
 	AppSignalState signalState(const QString& appSignalId, bool* found = nullptr);
 

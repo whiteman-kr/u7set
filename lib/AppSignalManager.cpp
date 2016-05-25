@@ -34,6 +34,29 @@ void AppSignalManager::addSignal(const Signal& signal)
 	return;
 }
 
+bool AppSignalManager::signal(Hash signalHash, Signal* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	QMutexLocker l(&m_paramMutex);
+
+	auto result = m_signals.find(signalHash);
+
+	if (result == m_signals.end())
+	{
+		return false;
+	}
+	else
+	{
+		*out = result->second;
+		return true;
+	}
+}
+
 void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 {
 	if (signalHash == 0)
@@ -46,7 +69,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 
 	m_states[signalHash] = state;
 
-		return;
+	return;
 }
 
 AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found)
