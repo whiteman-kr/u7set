@@ -86,6 +86,7 @@ namespace Builder
 		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
 		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
 		void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
+		Q_INVOKABLE void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);
 
 
 		// ALP			Application Logic Parsing				4000-4999

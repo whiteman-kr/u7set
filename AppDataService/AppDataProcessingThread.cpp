@@ -34,6 +34,8 @@ void AppDataProcessingWorker::slot_rupDataQueueIsNotEmpty()
 {
 	int count = 0;
 
+//	static int ctr = 0;
+
 	do
 	{
 		bool result = m_rupDataQueue.pop(&m_rupData);
@@ -46,14 +48,28 @@ void AppDataProcessingWorker::slot_rupDataQueueIsNotEmpty()
 		parseRupData();
 
 		count++;
+
+/*		ctr++;
+
+		if ((ctr % 200) == 0)
+		{
+			qDebug() << "Queue size" << m_rupDataQueue.getSize();
+		}*/
 	}
-	while(count < 50);		//
+	while(count < 500);
+
+
 }
 
 
 void AppDataProcessingWorker::parseRupData()
 {
 	m_parsedRupDataCount++;
+
+	if ((m_parsedRupDataCount % 200) == 0)
+	{
+		qDebug() << "Parced" << m_parsedRupDataCount;
+	}
 
 	// parse data from m_rupData
 	//
@@ -101,11 +117,6 @@ void AppDataProcessingWorker::parseRupData()
 		{
 			m_badSignalStateIndexCount++;
 			continue;
-		}
-
-		if (signalState->appSignalID() == "#SINT_SIG0")
-		{
-			int a = 0;
 		}
 
 		signalState->setState(m_rupData.time, flags, value);

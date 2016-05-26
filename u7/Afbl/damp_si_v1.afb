@@ -3,7 +3,7 @@
     <AfbElement StrId="#damp_si_v1">
         <Properties>
             <Caption>damp_si</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
             <Implementation Version="104" OpIndex="19"/>
             <Description>Damper Block with signed int data format</Description>
             <Category>Damper</Category>
@@ -14,6 +14,7 @@
         </Properties>
         <InputSignals>
             <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+            <AfbElementSignal OpName="i_track" Caption="track" Type="Discrete" OpIndex="7" Size="1"/>
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="12" Size="32"/>

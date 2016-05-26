@@ -44,7 +44,11 @@ namespace Hardware
 
 	void Init()
 	{
-		qDebug() << "Hardware::Init";
+#ifdef VFRAME30LIB_LIBRARY
+		qDebug() << "Hardware::Init" << " VFrame30 instance";
+#else
+		qDebug() << "Hardware::Init" << " not VFrame30 instance";
+#endif
 
 		static bool firstRun = false;
 		if (firstRun)
@@ -68,7 +72,11 @@ namespace Hardware
 
 	void Shutdwon()
 	{
-		qDebug() << "Hardware::Shutdown";
+#ifdef VFRAME30LIB_LIBRARY
+		qDebug() << "Hardware::Shutdown" << " VFrame30 instance";
+#else
+		qDebug() << "Hardware::Shutdown" << " not VFrame30 instance";
+#endif
 
 		DeviceObject::PrintRefCounter("DeviceObject");
 
