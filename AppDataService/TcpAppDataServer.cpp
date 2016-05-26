@@ -75,6 +75,14 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalStateRequest(requestData, requestDataSize);
 		break;
 
+	case ADS_GET_DATA_SOURCES_INFO:
+		onGetDataSourcesInfoRequest();
+		break;
+
+	case ADS_GET_DATA_SOURCES_STATES:
+		onGetDataSourcesStatesRequest(requestData, requestDataSize);
+		break;
+
 	default:
 		assert(false);
 		break;
@@ -257,10 +265,39 @@ const AppSignals& TcpAppDataServer::appSignals() const
 }
 
 
+const AppDataSources& TcpAppDataServer::appDataSources() const
+{
+	return m_thread->appDataSources();
+}
+
+
 bool TcpAppDataServer::getState(Hash hash, AppSignalState& state)
 {
 	return m_thread->getState(hash, state);
 }
+
+
+void TcpAppDataServer::onGetDataSourcesInfoRequest()
+{
+	m_getDataSourcesInfoReply.Clear();
+
+	const AppDataSources& dataSources = appDataSources();
+
+	for(const DataSource* source : dataSources)
+	{
+		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
+		//source->setProtoDataSourceInfo(protoInfo);
+	}
+
+	sendReply(m_getDataSourcesInfoReply);
+}
+
+
+void TcpAppDataServer::onGetDataSourcesStatesRequest(const char* requestData, quint32 requestDataSize)
+{
+
+}
+
 
 
 // -------------------------------------------------------------------------------
@@ -271,9 +308,11 @@ bool TcpAppDataServer::getState(Hash hash, AppSignalState& state)
 
 TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 												TcpAppDataServer* server,
+												const AppDataSources& appDataSources,
 												const AppSignals& appSignals,
 												const AppSignalStates& appSignalStates) :
 	Tcp::ServerThread(listenAddressPort, server),
+	m_appDataSources(appDataSources),
 	m_appSignals(appSignals),
 	m_appSignalStates(appSignalStates)
 {

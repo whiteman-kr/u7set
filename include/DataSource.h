@@ -235,4 +235,6 @@ public:
 	void clearAssociatedSignals() { m_associatedSignals.clear(); }
 
 	const QStringList& associatedSignals() const { return m_associatedSignals; }
+
+	//void setProtoDataSourceInfo(NetworkprotoInfo) const
 };
