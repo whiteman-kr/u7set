@@ -89,7 +89,9 @@ void AppDataChannel::onThreadStarted()
 {
 	DataChannel::onThreadStarted();
 
-	m_processingThreadsPool.createProcessingThreads(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
+	m_processingThreadsPool.createProcessingThreads(1, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
+
+//	m_processingThreadsPool.createProcessingThreads(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
 	m_processingThreadsPool.startProcessingThreads();
 }
 

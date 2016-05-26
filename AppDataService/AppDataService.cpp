@@ -84,7 +84,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															tcpAppDataSever,
 															m_appSignals,
 															m_signalStates);
-	//m_tcpAddDataServerThread->start();
+	m_tcpAddDataServerThread->start();
 }
 
 

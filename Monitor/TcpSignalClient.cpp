@@ -28,6 +28,8 @@ void TcpSignalClient::onClientThreadStarted()
 void TcpSignalClient::onClientThreadFinished()
 {
 	qDebug() << "TcpSignalClient::onClientThreadFinished()";
+
+	theSignals.reset();
 }
 
 void TcpSignalClient::onConnection()

@@ -52,6 +52,9 @@ void TcpAppDataClient::init()
 	m_partCount = 0;
 	m_itemsPerPart = 0;
 	m_currentPart = 0;
+
+	m_getParamsCurrentPart = 0;
+	m_getStatesCurrentPart = 0;
 }
 
 
@@ -65,6 +68,14 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 
 	case ADS_GET_APP_SIGNAL_LIST_NEXT:
 		onGetAppSignalListNextReply(replyData, replyDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_PARAM:
+		onGetAppSignalParamReply(replyData, replyDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_STATE:
+		onGetAppSignalStateReply(replyData, replyDataSize);
 		break;
 
 
@@ -90,6 +101,9 @@ void TcpAppDataClient::onGetAppSignalListStartReply(const char* replyData, quint
 
 	if (m_partCount > 0)
 	{
+		m_hash2Index.clear();
+		m_hash2Index.reserve(m_signalHahes.count() * 1.3);
+
 		m_currentPart = 0;
 		getNextItemsPart();
 	}
@@ -100,7 +114,11 @@ void TcpAppDataClient::getNextItemsPart()
 {
 	if (m_currentPart >= m_partCount)
 	{
-		assert(false);
+		// all hashes received
+		//
+		m_signalParams.resize(m_signalHahes.count());
+		m_getParamsCurrentPart = 0;
+		getNextParamPart();
 		return;
 	}
 
@@ -129,9 +147,150 @@ void TcpAppDataClient::onGetAppSignalListNextReply(const char* replyData, quint3
 		Hash hash = calcHash(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
 
 		m_signalHahes.append(hash);
+
+		m_hash2Index.insert(hash, m_signalHahes.count() - 1);
 	}
 
 	m_currentPart++;
 
 	getNextItemsPart();
+}
+
+
+void TcpAppDataClient::getNextParamPart()
+{
+	int paramsTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_PARAM_MAX +
+							((m_totalItemsCount % ADS_GET_APP_SIGNAL_PARAM_MAX) == 0 ? 0 : 1);
+
+	if (m_getParamsCurrentPart >= paramsTotalParts)
+	{
+		m_states.resize(m_signalParams.count());
+		m_getStatesCurrentPart = 0;
+		getNextStatePart();
+		return;
+	}
+
+	int startIndex = m_getParamsCurrentPart * ADS_GET_APP_SIGNAL_PARAM_MAX;
+
+	int paramsInPartCount = m_totalItemsCount - startIndex;
+
+	if (paramsInPartCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+	{
+		paramsInPartCount = ADS_GET_APP_SIGNAL_PARAM_MAX;
+	}
+
+	m_getSignalParamRequest.Clear();
+
+	for(int i = 0; i < paramsInPartCount; i++)
+	{
+		m_getSignalParamRequest.add_signalhashes(m_signalHahes[startIndex + i]);
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalParamRequest);
+}
+
+
+void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	int paramCount = m_getSignalParamReply.appsignalparams_size();
+
+	int startIndex = m_getParamsCurrentPart * ADS_GET_APP_SIGNAL_PARAM_MAX;
+
+	int signalCount = m_signalParams.count();
+
+	for(int i = 0; i < paramCount; i++)
+	{
+		if (startIndex + i >= signalCount)
+		{
+			assert(false);
+			break;
+		}
+
+		m_signalParams[startIndex + i].serializeFromProtoAppSignal(&m_getSignalParamReply.appsignalparams(i));
+	}
+
+	m_getParamsCurrentPart++;
+
+	getNextParamPart();
+}
+
+
+void TcpAppDataClient::getNextStatePart()
+{
+	int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
+							((m_totalItemsCount % ADS_GET_APP_SIGNAL_STATE_MAX) == 0 ? 0 : 1);
+
+	if (m_getStatesCurrentPart >= statesTotalParts)
+	{
+		m_getStatesCurrentPart = 0;
+	}
+
+	int startIndex = m_getStatesCurrentPart * ADS_GET_APP_SIGNAL_STATE_MAX;
+
+	int paramsInPartCount = m_totalItemsCount - startIndex;
+
+	if (paramsInPartCount > ADS_GET_APP_SIGNAL_STATE_MAX)
+	{
+		paramsInPartCount = ADS_GET_APP_SIGNAL_STATE_MAX;
+	}
+
+	m_getSignalStateRequest.Clear();
+
+	for(int i = 0; i < paramsInPartCount; i++)
+	{
+		m_getSignalStateRequest.add_signalhashes(m_signalHahes[startIndex + i]);
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+}
+
+
+void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	int stateCount = m_getSignalStateReply.appsignalstates_size();
+
+	int startIndex = m_getStatesCurrentPart * ADS_GET_APP_SIGNAL_STATE_MAX;
+
+	int signalCount = m_signalParams.count();
+
+	for(int i = 0; i < stateCount; i++)
+	{
+		if (startIndex + i >= signalCount)
+		{
+			assert(false);
+			break;
+		}
+
+		Hash hash = m_getSignalStateReply.appsignalstates(i).hash();
+
+		if (m_hash2Index.contains(hash) == false)
+		{
+			assert(false);
+			continue;
+		}
+
+		int index = m_hash2Index[hash];
+
+		m_states[index].getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+	}
+
+	m_getParamsCurrentPart++;
+
+	getNextParamPart();
 }

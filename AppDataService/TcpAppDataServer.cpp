@@ -226,6 +226,15 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 	}
 
 	sendReply(m_getAppSignalStateReply);
+
+	static int ctr = 0;
+
+	ctr++;
+
+	if ((ctr % 100) == 0)
+	{
+		qDebug() << "Send states" << ctr;
+	}
 }
 
 

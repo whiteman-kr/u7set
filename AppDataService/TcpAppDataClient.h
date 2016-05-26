@@ -3,12 +3,17 @@
 #include "../include/Tcp.h"
 #include "../include/SocketIO.h"
 #include "../include/Hash.h"
+#include "../include/OrderedHash.h"
+#include "../include/Signal.h"
 #include "../Proto/network.pb.h"
 
 class TcpAppDataClient : public Tcp::Client
 {
 private:
 	QVector<Hash> m_signalHahes;
+	QVector<Signal> m_signalParams;
+	QVector<AppSignalState> m_states;
+	QHash<Hash, int> m_hash2Index;
 
 	// reused protobuf messages
 	//
@@ -16,6 +21,12 @@ private:
 
 	Network::GetSignalListNextRequest m_getSignalListNextRequest;
 	Network::GetSignalListNextReply m_getSignalListNextReply;
+
+	Network::GetAppSignalParamRequest m_getSignalParamRequest;
+	Network::GetAppSignalParamReply m_getSignalParamReply;
+
+	Network::GetAppSignalStateRequest m_getSignalStateRequest;
+	Network::GetAppSignalStateReply m_getSignalStateReply;
 
 	//
 
@@ -25,14 +36,20 @@ private:
 
 	int m_currentPart = 0;
 
+	int m_getParamsCurrentPart = 0;
+	int m_getStatesCurrentPart = 0;
+
 	//
 
 	void init();
 	void getNextItemsPart();
+	void getNextParamPart();
+	void getNextStatePart();
 
 	void onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
-
+	void onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
 
 public:
 	TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);

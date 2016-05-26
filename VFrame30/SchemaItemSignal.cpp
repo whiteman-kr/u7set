@@ -127,7 +127,15 @@ namespace VFrame30
 			if (drawParam->isMonitorMode() == true)
 			{
 				AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
-				text += QString("    %1").arg(QString::number(signalState.value));
+
+				if (signalState.flags.valid == false)
+				{
+					text += QString("    ?");
+				}
+				else
+				{
+					text += QString("    %1").arg(QString::number(signalState.value));
+				}
 			}
 		}
 

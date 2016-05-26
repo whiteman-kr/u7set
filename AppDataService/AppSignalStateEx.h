@@ -44,7 +44,7 @@ private:
 	AppSignalStateEx* m_appSignalState = nullptr;
 	int m_size = 0;
 
-	QHash<Hash, const AppSignalState*> m_hash2State;
+	QHash<Hash, const AppSignalStateEx*> m_hash2State;
 
 public:
 	~AppSignalStates();

@@ -4764,7 +4764,8 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
-	if (allItemsAreSignals == true &&
+	if (selected.empty() == false &&
+		allItemsAreSignals == true &&
 		mimeData->hasText() == true &&
 		mimeData->text().startsWith('#') == true)
 	{
