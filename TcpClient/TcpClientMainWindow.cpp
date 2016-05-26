@@ -23,6 +23,10 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 	m_fileClientThread->start();
 
 	//connect(m_fileClient, &Tcp::FileClient::signal_endDownloadFile, this, &TcpClientMainWindow::onEndDownloadFile);
+
+	m_appDataClientTread = new SimpleThread(new TcpAppDataClient(HostAddressPort("192.168.1.2", 13323), HostAddressPort("192.168.1.2", 13323)));
+
+	m_appDataClientTread->start();
 }
 
 
@@ -35,6 +39,9 @@ void TcpClientMainWindow::onEndDownloadFile(const QString filename, Tcp::FileTra
 
 TcpClientMainWindow::~TcpClientMainWindow()
 {
+	m_appDataClientTread->quitAndWait();
+	delete m_appDataClientTread;
+
 	m_fileClientThread->quit();
 	delete m_fileClientThread;
 	m_tcpThread->quit();

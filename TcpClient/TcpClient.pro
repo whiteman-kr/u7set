@@ -22,7 +22,19 @@ SOURCES +=\
     ../lib/SocketIO.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/CfgServerLoader.cpp \
-    ../lib/BuildInfo.cpp
+    ../lib/BuildInfo.cpp \
+    ../AppDataService/TcpAppDataClient.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc \
+    ../lib/PropertyObject.cpp \
+    ../lib/AppSignalState.cpp \
+    ../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/ProtobufHelper.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Types.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
@@ -32,7 +44,19 @@ HEADERS  += TcpClientMainWindow.h \
     ../include/CfgServerLoader.h \
     ../include/BuildInfo.h \
     ../include/Utils.h \
-    ../include/Md5Hash.h
+    ../include/Md5Hash.h \
+    ../AppDataService/TcpAppDataClient.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h \
+    ../include/PropertyObject.h \
+    ../include/AppSignalState.h \
+    ../include/Signal.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h \
+    ../include/XmlHelper.h \
+    ../include/ProtobufHelper.h \
+    ../include/ProtoSerialization.h \
+    ../include/Types.h
 
 FORMS    += TcpClientMainWindow.ui
 
@@ -82,3 +106,7 @@ win32 {
 		INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 		INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto

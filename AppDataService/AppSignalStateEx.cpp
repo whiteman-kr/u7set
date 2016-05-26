@@ -187,7 +187,7 @@ void AppSignalStates::buidlHash2State()
 
 		Hash hash = calcHash(state.m_signal->appSignalID());
 
-		m_hash2State.insert(hash, &state.m_state);
+		m_hash2State.insert(hash, &state);
 	}
 }
 
@@ -196,7 +196,10 @@ bool AppSignalStates::getState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
 	{
-		state = *m_hash2State[hash];
+		const AppSignalStateEx* stateEx = m_hash2State[hash];
+
+		state = stateEx->m_state;
+
 		return true;
 	}
 
