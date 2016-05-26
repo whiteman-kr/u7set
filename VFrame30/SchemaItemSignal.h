@@ -43,6 +43,15 @@ namespace VFrame30
 		//
 	private:
 		QStringList m_appSignalIds;
+
+		// Monitor mode settings
+		//
+		// Columns: width, data (StrID, Value, Validity, Imitation, Simultaion, FlagCombination?)
+		// Anaolog: format (0.00, 15E-12, ...), precision,
+		// Discrete: 0/1, No/Yes
+
+		// Width, %		Format
+		// 80;
 	};
 
 
