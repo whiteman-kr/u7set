@@ -40,7 +40,26 @@
                 <LowLimit>1</LowLimit>
                 <HighLimit>16</HighLimit>
                 <Script>
-                    <Changed>
+                    <Changed>	
+function(videoItemFblElement, afbElement)
+{
+	var xCount = videoItemFblElement.getParamIntValue("XCount");
+	if (xCount == -1)
+	{
+		return false;
+	}
+	var yCount = videoItemFblElement.getParamIntValue("YCount");
+	if (yCount == -1)
+	{
+		return false;
+	}
+	if (xCount &gt; yCount)
+	{	
+		videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount);
+		return false;
+	}
+	return true;
+}
 		</Changed>
                 </Script>
             </AfbElementParam>
@@ -75,22 +94,22 @@ function createInputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeInputSignals();
 
-	var count = videoItemFblElement.getParamIntValue("YCount");
-	if (count == -1)
+	var yCount = videoItemFblElement.getParamIntValue("YCount");
+	if (yCount == -1)
 	{
 		return false;
 	}
-	if (count &lt; 2)
+	if (yCount &lt; 1)
 	{
-		count = 2;
+		yCount = 1;
 	}
-	if (count &gt; 16)
+	if (yCount &gt; 16)
 	{
-		count = 16;
+		yCount = 16;
 	}
 
 	var opIndex = 2;
-	for (var i = 0; i &lt; count; i++)
+	for (var i = 0; i &lt; yCount; i++)
 	{
 		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
 		if (afbInputSignal != null)

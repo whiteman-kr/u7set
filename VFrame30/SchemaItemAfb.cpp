@@ -318,6 +318,7 @@ namespace VFrame30
 					return false;
 				}
 			}
+
 		}
 
 		return true;
@@ -342,9 +343,26 @@ namespace VFrame30
 			return false;
 		}
 
+		qDebug() << tr("Param %1 was changed from %2 to %3").
+					arg(opName).
+					arg(found->value().toString()).
+					arg(value.toString());
+
 		found->setValue(value);
 
 		return true;
+	}
+
+	QVariant SchemaItemAfb::getAfbParam(const QString& name)
+	{
+		for (Afb::AfbParam& p : m_afbElement.params())
+		{
+			if (p.caption() == name)
+			{
+				return p.value();
+			}
+		}
+		return QVariant();
 	}
 
 
@@ -627,44 +645,24 @@ namespace VFrame30
 
 	int SchemaItemAfb::getParamIntValue(const QString& name)
 	{
-		for (Afb::AfbParam& p : m_afbElement.params())
+		QVariant result = getAfbParam(name);
+		if (result.isNull() || result.isValid() == false)
 		{
-			if (p.caption() == name)
-			{
-                if (p.isAnalog() && (p.dataFormat() ==Afb::AfbDataFormat::SignedInt || p.dataFormat() == Afb::AfbDataFormat::UnsignedInt) && p.value().isValid() == true)
-				{
-					return p.value().toInt();
-				}
-				else
-				{
-					qDebug()<<"ERROR: SchemaItemAfb::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
-					assert(false);
-					return -1;
-				}
-			}
+			return -1;
 		}
-		return -1;
+
+		return result.toInt();
 	}
 
 	bool SchemaItemAfb::getParamBoolValue(const QString& name)
 	{
-		for (Afb::AfbParam& p : m_afbElement.params())
+		QVariant result = getAfbParam(name);
+		if (result.isNull() || result.isValid() == false)
 		{
-			if (p.caption() == name)
-			{
-				if (p.isDiscrete() && p.value().isValid() == true)
-				{
-					return p.value().toBool();
-				}
-				else
-				{
-					qDebug()<<"ERROR: SchemaItemAfb::getParamBoolValue, parameter "<<name<<" is not bool or is not valid!";
-					assert(false);
-					return false;
-				}
-			}
+			return false;
 		}
-		return false;
+
+		return result.toBool();
 	}
 
 	void SchemaItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)

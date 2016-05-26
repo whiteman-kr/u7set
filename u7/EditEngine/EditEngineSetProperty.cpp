@@ -71,6 +71,15 @@ namespace EditEngine
 				{
 					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
 				}
+
+				// setAfbParam executes script that can correct the value. If it was corrected, update the value
+				//
+
+				QVariant v = fblElement->getAfbParam(r.propertyName);
+				if (v != r.newValue)
+				{
+					r.item->setPropertyValue(r.propertyName, v);
+				}
 			}
 		}
 
