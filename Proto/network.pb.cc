@@ -257,7 +257,18 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetDataSourcesInfoReply));
   DataSourceState_descriptor_ = file->message_type(11);
-  static const int DataSourceState_offsets_[1] = {
+  static const int DataSourceState_offsets_[11] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, uptime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, receiveddatasize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, datareceivingrate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, receivedframescount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, processingenabled_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, processedpacketcount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorprotocolversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorframesquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorframeno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, lostedpackets_),
   };
   DataSourceState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -408,11 +419,18 @@ void protobuf_AddDesc_network_2eproto() {
     "\n\010lmDataID\030\016 \001(\004\"\033\n\031GetDataSourcesInfoRe"
     "quest\"\\\n\027GetDataSourcesInfoReply\022\020\n\005erro"
     "r\030\001 \001(\005:\0010\022/\n\016dataSourceInfo\030\002 \003(\0132\027.Net"
-    "work.DataSourceInfo\"\021\n\017DataSourceState\"4"
-    "\n\033GetDataSourcesStatesRequest\022\025\n\rdataSou"
-    "rceIDs\030\001 \003(\004\"b\n\031GetDataSourcesStatesRepl"
-    "y\022\020\n\005error\030\001 \001(\005:\0010\0223\n\021dataSourcesStates"
-    "\030\002 \003(\0132\030.Network.DataSourceState", 1152);
+    "work.DataSourceInfo\"\240\002\n\017DataSourceState\022"
+    "\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receivedD"
+    "ataSize\030\003 \001(\003\022\031\n\021dataReceivingRate\030\004 \001(\001"
+    "\022\033\n\023receivedFramesCount\030\005 \001(\003\022\031\n\021process"
+    "ingEnabled\030\006 \001(\010\022\034\n\024processedPacketCount"
+    "\030\007 \001(\003\022\034\n\024errorProtocolVersion\030\010 \001(\003\022\033\n\023"
+    "errorFramesQuantity\030\t \001(\003\022\024\n\014errorFrameN"
+    "o\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\"4\n\033GetDat"
+    "aSourcesStatesRequest\022\025\n\rdataSourceIDs\030\001"
+    " \003(\004\"b\n\031GetDataSourcesStatesReply\022\020\n\005err"
+    "or\030\001 \001(\005:\0010\0223\n\021dataSourcesStates\030\002 \003(\0132\030"
+    ".Network.DataSourceState", 1424);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -3583,6 +3601,17 @@ void GetDataSourcesInfoReply::Swap(GetDataSourcesInfoReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int DataSourceState::kIdFieldNumber;
+const int DataSourceState::kUptimeFieldNumber;
+const int DataSourceState::kReceivedDataSizeFieldNumber;
+const int DataSourceState::kDataReceivingRateFieldNumber;
+const int DataSourceState::kReceivedFramesCountFieldNumber;
+const int DataSourceState::kProcessingEnabledFieldNumber;
+const int DataSourceState::kProcessedPacketCountFieldNumber;
+const int DataSourceState::kErrorProtocolVersionFieldNumber;
+const int DataSourceState::kErrorFramesQuantityFieldNumber;
+const int DataSourceState::kErrorFrameNoFieldNumber;
+const int DataSourceState::kLostedPacketsFieldNumber;
 #endif  // !_MSC_VER
 
 DataSourceState::DataSourceState()
@@ -3601,6 +3630,17 @@ DataSourceState::DataSourceState(const DataSourceState& from)
 
 void DataSourceState::SharedCtor() {
   _cached_size_ = 0;
+  id_ = GOOGLE_ULONGLONG(0);
+  uptime_ = GOOGLE_LONGLONG(0);
+  receiveddatasize_ = GOOGLE_LONGLONG(0);
+  datareceivingrate_ = 0;
+  receivedframescount_ = GOOGLE_LONGLONG(0);
+  processingenabled_ = false;
+  processedpacketcount_ = GOOGLE_LONGLONG(0);
+  errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  errorframesquantity_ = GOOGLE_LONGLONG(0);
+  errorframeno_ = GOOGLE_LONGLONG(0);
+  lostedpackets_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3635,6 +3675,21 @@ DataSourceState* DataSourceState::New() const {
 }
 
 void DataSourceState::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    id_ = GOOGLE_ULONGLONG(0);
+    uptime_ = GOOGLE_LONGLONG(0);
+    receiveddatasize_ = GOOGLE_LONGLONG(0);
+    datareceivingrate_ = 0;
+    receivedframescount_ = GOOGLE_LONGLONG(0);
+    processingenabled_ = false;
+    processedpacketcount_ = GOOGLE_LONGLONG(0);
+    errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    errorframesquantity_ = GOOGLE_LONGLONG(0);
+    errorframeno_ = GOOGLE_LONGLONG(0);
+    lostedpackets_ = GOOGLE_LONGLONG(0);
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -3644,12 +3699,193 @@ bool DataSourceState::MergePartialFromCodedStream(
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint64 id = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &id_)));
+          set_has_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_uptime;
+        break;
+      }
+
+      // optional int64 uptime = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_uptime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &uptime_)));
+          set_has_uptime();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_receivedDataSize;
+        break;
+      }
+
+      // optional int64 receivedDataSize = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_receivedDataSize:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &receiveddatasize_)));
+          set_has_receiveddatasize();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(33)) goto parse_dataReceivingRate;
+        break;
+      }
+
+      // optional double dataReceivingRate = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_dataReceivingRate:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &datareceivingrate_)));
+          set_has_datareceivingrate();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_receivedFramesCount;
+        break;
+      }
+
+      // optional int64 receivedFramesCount = 5;
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_receivedFramesCount:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &receivedframescount_)));
+          set_has_receivedframescount();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(48)) goto parse_processingEnabled;
+        break;
+      }
+
+      // optional bool processingEnabled = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_processingEnabled:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &processingenabled_)));
+          set_has_processingenabled();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(56)) goto parse_processedPacketCount;
+        break;
+      }
+
+      // optional int64 processedPacketCount = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_processedPacketCount:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &processedpacketcount_)));
+          set_has_processedpacketcount();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(64)) goto parse_errorProtocolVersion;
+        break;
+      }
+
+      // optional int64 errorProtocolVersion = 8;
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errorProtocolVersion:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errorprotocolversion_)));
+          set_has_errorprotocolversion();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(72)) goto parse_errorFramesQuantity;
+        break;
+      }
+
+      // optional int64 errorFramesQuantity = 9;
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errorFramesQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errorframesquantity_)));
+          set_has_errorframesquantity();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(80)) goto parse_errorFrameNo;
+        break;
+      }
+
+      // optional int64 errorFrameNo = 10;
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errorFrameNo:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errorframeno_)));
+          set_has_errorframeno();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_lostedPackets;
+        break;
+      }
+
+      // optional int64 lostedPackets = 11;
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_lostedPackets:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &lostedpackets_)));
+          set_has_lostedpackets();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
     }
-    DO_(::google::protobuf::internal::WireFormat::SkipField(
-          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
@@ -3657,6 +3893,61 @@ bool DataSourceState::MergePartialFromCodedStream(
 
 void DataSourceState::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint64 id = 1;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->id(), output);
+  }
+
+  // optional int64 uptime = 2;
+  if (has_uptime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->uptime(), output);
+  }
+
+  // optional int64 receivedDataSize = 3;
+  if (has_receiveddatasize()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->receiveddatasize(), output);
+  }
+
+  // optional double dataReceivingRate = 4;
+  if (has_datareceivingrate()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->datareceivingrate(), output);
+  }
+
+  // optional int64 receivedFramesCount = 5;
+  if (has_receivedframescount()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(5, this->receivedframescount(), output);
+  }
+
+  // optional bool processingEnabled = 6;
+  if (has_processingenabled()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->processingenabled(), output);
+  }
+
+  // optional int64 processedPacketCount = 7;
+  if (has_processedpacketcount()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(7, this->processedpacketcount(), output);
+  }
+
+  // optional int64 errorProtocolVersion = 8;
+  if (has_errorprotocolversion()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(8, this->errorprotocolversion(), output);
+  }
+
+  // optional int64 errorFramesQuantity = 9;
+  if (has_errorframesquantity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(9, this->errorframesquantity(), output);
+  }
+
+  // optional int64 errorFrameNo = 10;
+  if (has_errorframeno()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(10, this->errorframeno(), output);
+  }
+
+  // optional int64 lostedPackets = 11;
+  if (has_lostedpackets()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(11, this->lostedpackets(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3665,6 +3956,61 @@ void DataSourceState::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* DataSourceState::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // optional uint64 id = 1;
+  if (has_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->id(), target);
+  }
+
+  // optional int64 uptime = 2;
+  if (has_uptime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->uptime(), target);
+  }
+
+  // optional int64 receivedDataSize = 3;
+  if (has_receiveddatasize()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->receiveddatasize(), target);
+  }
+
+  // optional double dataReceivingRate = 4;
+  if (has_datareceivingrate()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->datareceivingrate(), target);
+  }
+
+  // optional int64 receivedFramesCount = 5;
+  if (has_receivedframescount()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(5, this->receivedframescount(), target);
+  }
+
+  // optional bool processingEnabled = 6;
+  if (has_processingenabled()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->processingenabled(), target);
+  }
+
+  // optional int64 processedPacketCount = 7;
+  if (has_processedpacketcount()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(7, this->processedpacketcount(), target);
+  }
+
+  // optional int64 errorProtocolVersion = 8;
+  if (has_errorprotocolversion()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(8, this->errorprotocolversion(), target);
+  }
+
+  // optional int64 errorFramesQuantity = 9;
+  if (has_errorframesquantity()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(9, this->errorframesquantity(), target);
+  }
+
+  // optional int64 errorFrameNo = 10;
+  if (has_errorframeno()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(10, this->errorframeno(), target);
+  }
+
+  // optional int64 lostedPackets = 11;
+  if (has_lostedpackets()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(11, this->lostedpackets(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -3675,6 +4021,83 @@ void DataSourceState::SerializeWithCachedSizes(
 int DataSourceState::ByteSize() const {
   int total_size = 0;
 
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint64 id = 1;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->id());
+    }
+
+    // optional int64 uptime = 2;
+    if (has_uptime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->uptime());
+    }
+
+    // optional int64 receivedDataSize = 3;
+    if (has_receiveddatasize()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->receiveddatasize());
+    }
+
+    // optional double dataReceivingRate = 4;
+    if (has_datareceivingrate()) {
+      total_size += 1 + 8;
+    }
+
+    // optional int64 receivedFramesCount = 5;
+    if (has_receivedframescount()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->receivedframescount());
+    }
+
+    // optional bool processingEnabled = 6;
+    if (has_processingenabled()) {
+      total_size += 1 + 1;
+    }
+
+    // optional int64 processedPacketCount = 7;
+    if (has_processedpacketcount()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->processedpacketcount());
+    }
+
+    // optional int64 errorProtocolVersion = 8;
+    if (has_errorprotocolversion()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errorprotocolversion());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional int64 errorFramesQuantity = 9;
+    if (has_errorframesquantity()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errorframesquantity());
+    }
+
+    // optional int64 errorFrameNo = 10;
+    if (has_errorframeno()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errorframeno());
+    }
+
+    // optional int64 lostedPackets = 11;
+    if (has_lostedpackets()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->lostedpackets());
+    }
+
+  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -3700,6 +4123,43 @@ void DataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
 
 void DataSourceState::MergeFrom(const DataSourceState& from) {
   GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_id()) {
+      set_id(from.id());
+    }
+    if (from.has_uptime()) {
+      set_uptime(from.uptime());
+    }
+    if (from.has_receiveddatasize()) {
+      set_receiveddatasize(from.receiveddatasize());
+    }
+    if (from.has_datareceivingrate()) {
+      set_datareceivingrate(from.datareceivingrate());
+    }
+    if (from.has_receivedframescount()) {
+      set_receivedframescount(from.receivedframescount());
+    }
+    if (from.has_processingenabled()) {
+      set_processingenabled(from.processingenabled());
+    }
+    if (from.has_processedpacketcount()) {
+      set_processedpacketcount(from.processedpacketcount());
+    }
+    if (from.has_errorprotocolversion()) {
+      set_errorprotocolversion(from.errorprotocolversion());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_errorframesquantity()) {
+      set_errorframesquantity(from.errorframesquantity());
+    }
+    if (from.has_errorframeno()) {
+      set_errorframeno(from.errorframeno());
+    }
+    if (from.has_lostedpackets()) {
+      set_lostedpackets(from.lostedpackets());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -3722,6 +4182,18 @@ bool DataSourceState::IsInitialized() const {
 
 void DataSourceState::Swap(DataSourceState* other) {
   if (other != this) {
+    std::swap(id_, other->id_);
+    std::swap(uptime_, other->uptime_);
+    std::swap(receiveddatasize_, other->receiveddatasize_);
+    std::swap(datareceivingrate_, other->datareceivingrate_);
+    std::swap(receivedframescount_, other->receivedframescount_);
+    std::swap(processingenabled_, other->processingenabled_);
+    std::swap(processedpacketcount_, other->processedpacketcount_);
+    std::swap(errorprotocolversion_, other->errorprotocolversion_);
+    std::swap(errorframesquantity_, other->errorframesquantity_);
+    std::swap(errorframeno_, other->errorframeno_);
+    std::swap(lostedpackets_, other->lostedpackets_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }

@@ -104,6 +104,10 @@ message DataSourceState
     optional int64 receivedFramesCount = 5;
     optional bool processingEnabled = 6;
     optional int64 processedPacketCount = 7;
+    optional int64 errorProtocolVersion = 8;
+    optional int64 errorFramesQuantity = 9;
+    optional int64 errorFrameNo = 10;
+    optional int64 lostedPackets = 11;
 }
 
 

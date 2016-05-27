@@ -1244,14 +1244,124 @@ class DataSourceState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // optional uint64 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint64 id() const;
+  inline void set_id(::google::protobuf::uint64 value);
+
+  // optional int64 uptime = 2;
+  inline bool has_uptime() const;
+  inline void clear_uptime();
+  static const int kUptimeFieldNumber = 2;
+  inline ::google::protobuf::int64 uptime() const;
+  inline void set_uptime(::google::protobuf::int64 value);
+
+  // optional int64 receivedDataSize = 3;
+  inline bool has_receiveddatasize() const;
+  inline void clear_receiveddatasize();
+  static const int kReceivedDataSizeFieldNumber = 3;
+  inline ::google::protobuf::int64 receiveddatasize() const;
+  inline void set_receiveddatasize(::google::protobuf::int64 value);
+
+  // optional double dataReceivingRate = 4;
+  inline bool has_datareceivingrate() const;
+  inline void clear_datareceivingrate();
+  static const int kDataReceivingRateFieldNumber = 4;
+  inline double datareceivingrate() const;
+  inline void set_datareceivingrate(double value);
+
+  // optional int64 receivedFramesCount = 5;
+  inline bool has_receivedframescount() const;
+  inline void clear_receivedframescount();
+  static const int kReceivedFramesCountFieldNumber = 5;
+  inline ::google::protobuf::int64 receivedframescount() const;
+  inline void set_receivedframescount(::google::protobuf::int64 value);
+
+  // optional bool processingEnabled = 6;
+  inline bool has_processingenabled() const;
+  inline void clear_processingenabled();
+  static const int kProcessingEnabledFieldNumber = 6;
+  inline bool processingenabled() const;
+  inline void set_processingenabled(bool value);
+
+  // optional int64 processedPacketCount = 7;
+  inline bool has_processedpacketcount() const;
+  inline void clear_processedpacketcount();
+  static const int kProcessedPacketCountFieldNumber = 7;
+  inline ::google::protobuf::int64 processedpacketcount() const;
+  inline void set_processedpacketcount(::google::protobuf::int64 value);
+
+  // optional int64 errorProtocolVersion = 8;
+  inline bool has_errorprotocolversion() const;
+  inline void clear_errorprotocolversion();
+  static const int kErrorProtocolVersionFieldNumber = 8;
+  inline ::google::protobuf::int64 errorprotocolversion() const;
+  inline void set_errorprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errorFramesQuantity = 9;
+  inline bool has_errorframesquantity() const;
+  inline void clear_errorframesquantity();
+  static const int kErrorFramesQuantityFieldNumber = 9;
+  inline ::google::protobuf::int64 errorframesquantity() const;
+  inline void set_errorframesquantity(::google::protobuf::int64 value);
+
+  // optional int64 errorFrameNo = 10;
+  inline bool has_errorframeno() const;
+  inline void clear_errorframeno();
+  static const int kErrorFrameNoFieldNumber = 10;
+  inline ::google::protobuf::int64 errorframeno() const;
+  inline void set_errorframeno(::google::protobuf::int64 value);
+
+  // optional int64 lostedPackets = 11;
+  inline bool has_lostedpackets() const;
+  inline void clear_lostedpackets();
+  static const int kLostedPacketsFieldNumber = 11;
+  inline ::google::protobuf::int64 lostedpackets() const;
+  inline void set_lostedpackets(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceState)
  private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_uptime();
+  inline void clear_has_uptime();
+  inline void set_has_receiveddatasize();
+  inline void clear_has_receiveddatasize();
+  inline void set_has_datareceivingrate();
+  inline void clear_has_datareceivingrate();
+  inline void set_has_receivedframescount();
+  inline void clear_has_receivedframescount();
+  inline void set_has_processingenabled();
+  inline void clear_has_processingenabled();
+  inline void set_has_processedpacketcount();
+  inline void clear_has_processedpacketcount();
+  inline void set_has_errorprotocolversion();
+  inline void clear_has_errorprotocolversion();
+  inline void set_has_errorframesquantity();
+  inline void clear_has_errorframesquantity();
+  inline void set_has_errorframeno();
+  inline void clear_has_errorframeno();
+  inline void set_has_lostedpackets();
+  inline void clear_has_lostedpackets();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::uint64 id_;
+  ::google::protobuf::int64 uptime_;
+  ::google::protobuf::int64 receiveddatasize_;
+  double datareceivingrate_;
+  ::google::protobuf::int64 receivedframescount_;
+  ::google::protobuf::int64 processedpacketcount_;
+  ::google::protobuf::int64 errorprotocolversion_;
+  ::google::protobuf::int64 errorframesquantity_;
+  ::google::protobuf::int64 errorframeno_;
+  ::google::protobuf::int64 lostedpackets_;
+  bool processingenabled_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2427,6 +2537,248 @@ GetDataSourcesInfoReply::mutable_datasourceinfo() {
 // -------------------------------------------------------------------
 
 // DataSourceState
+
+// optional uint64 id = 1;
+inline bool DataSourceState::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DataSourceState::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DataSourceState::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DataSourceState::clear_id() {
+  id_ = GOOGLE_ULONGLONG(0);
+  clear_has_id();
+}
+inline ::google::protobuf::uint64 DataSourceState::id() const {
+  return id_;
+}
+inline void DataSourceState::set_id(::google::protobuf::uint64 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional int64 uptime = 2;
+inline bool DataSourceState::has_uptime() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DataSourceState::set_has_uptime() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DataSourceState::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DataSourceState::clear_uptime() {
+  uptime_ = GOOGLE_LONGLONG(0);
+  clear_has_uptime();
+}
+inline ::google::protobuf::int64 DataSourceState::uptime() const {
+  return uptime_;
+}
+inline void DataSourceState::set_uptime(::google::protobuf::int64 value) {
+  set_has_uptime();
+  uptime_ = value;
+}
+
+// optional int64 receivedDataSize = 3;
+inline bool DataSourceState::has_receiveddatasize() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DataSourceState::set_has_receiveddatasize() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DataSourceState::clear_has_receiveddatasize() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = GOOGLE_LONGLONG(0);
+  clear_has_receiveddatasize();
+}
+inline ::google::protobuf::int64 DataSourceState::receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline void DataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
+  set_has_receiveddatasize();
+  receiveddatasize_ = value;
+}
+
+// optional double dataReceivingRate = 4;
+inline bool DataSourceState::has_datareceivingrate() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DataSourceState::set_has_datareceivingrate() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DataSourceState::clear_has_datareceivingrate() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DataSourceState::clear_datareceivingrate() {
+  datareceivingrate_ = 0;
+  clear_has_datareceivingrate();
+}
+inline double DataSourceState::datareceivingrate() const {
+  return datareceivingrate_;
+}
+inline void DataSourceState::set_datareceivingrate(double value) {
+  set_has_datareceivingrate();
+  datareceivingrate_ = value;
+}
+
+// optional int64 receivedFramesCount = 5;
+inline bool DataSourceState::has_receivedframescount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DataSourceState::set_has_receivedframescount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DataSourceState::clear_has_receivedframescount() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DataSourceState::clear_receivedframescount() {
+  receivedframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_receivedframescount();
+}
+inline ::google::protobuf::int64 DataSourceState::receivedframescount() const {
+  return receivedframescount_;
+}
+inline void DataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
+  set_has_receivedframescount();
+  receivedframescount_ = value;
+}
+
+// optional bool processingEnabled = 6;
+inline bool DataSourceState::has_processingenabled() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DataSourceState::set_has_processingenabled() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DataSourceState::clear_has_processingenabled() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DataSourceState::clear_processingenabled() {
+  processingenabled_ = false;
+  clear_has_processingenabled();
+}
+inline bool DataSourceState::processingenabled() const {
+  return processingenabled_;
+}
+inline void DataSourceState::set_processingenabled(bool value) {
+  set_has_processingenabled();
+  processingenabled_ = value;
+}
+
+// optional int64 processedPacketCount = 7;
+inline bool DataSourceState::has_processedpacketcount() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DataSourceState::set_has_processedpacketcount() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DataSourceState::clear_has_processedpacketcount() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DataSourceState::clear_processedpacketcount() {
+  processedpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_processedpacketcount();
+}
+inline ::google::protobuf::int64 DataSourceState::processedpacketcount() const {
+  return processedpacketcount_;
+}
+inline void DataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
+  set_has_processedpacketcount();
+  processedpacketcount_ = value;
+}
+
+// optional int64 errorProtocolVersion = 8;
+inline bool DataSourceState::has_errorprotocolversion() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DataSourceState::set_has_errorprotocolversion() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DataSourceState::clear_has_errorprotocolversion() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errorprotocolversion();
+}
+inline ::google::protobuf::int64 DataSourceState::errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline void DataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
+  set_has_errorprotocolversion();
+  errorprotocolversion_ = value;
+}
+
+// optional int64 errorFramesQuantity = 9;
+inline bool DataSourceState::has_errorframesquantity() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DataSourceState::set_has_errorframesquantity() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DataSourceState::clear_has_errorframesquantity() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesquantity();
+}
+inline ::google::protobuf::int64 DataSourceState::errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline void DataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
+  set_has_errorframesquantity();
+  errorframesquantity_ = value;
+}
+
+// optional int64 errorFrameNo = 10;
+inline bool DataSourceState::has_errorframeno() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void DataSourceState::set_has_errorframeno() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void DataSourceState::clear_has_errorframeno() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void DataSourceState::clear_errorframeno() {
+  errorframeno_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframeno();
+}
+inline ::google::protobuf::int64 DataSourceState::errorframeno() const {
+  return errorframeno_;
+}
+inline void DataSourceState::set_errorframeno(::google::protobuf::int64 value) {
+  set_has_errorframeno();
+  errorframeno_ = value;
+}
+
+// optional int64 lostedPackets = 11;
+inline bool DataSourceState::has_lostedpackets() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void DataSourceState::set_has_lostedpackets() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void DataSourceState::clear_has_lostedpackets() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void DataSourceState::clear_lostedpackets() {
+  lostedpackets_ = GOOGLE_LONGLONG(0);
+  clear_has_lostedpackets();
+}
+inline ::google::protobuf::int64 DataSourceState::lostedpackets() const {
+  return lostedpackets_;
+}
+inline void DataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
+  set_has_lostedpackets();
+  lostedpackets_ = value;
+}
 
 // -------------------------------------------------------------------
 

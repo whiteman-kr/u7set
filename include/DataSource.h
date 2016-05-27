@@ -7,6 +7,7 @@
 #include "../include/DataProtocols.h"
 #include "../include/DeviceObject.h"
 #include "../include/AppSignalState.h"
+#include "../Proto/network.pb.h"
 
 
 enum DataSourceState
@@ -80,23 +81,6 @@ public:
 
 protected:
 
-	// static information
-	//
-	quint32 m_id = 0;
-	QHostAddress m_hostAddress;
-	QString m_name;
-	quint32 m_partCount = 1;
-	QVector<int> m_relatedSignalIndexes;
-
-	// dynamic information
-	//
-	DataSourceState m_state = DataSourceState::noData;
-	quint64 m_uptime = 0;
-	quint64 m_receivedDataSize = 0;
-	quint64 m_receivedFramesCount = 0;
-	quint64 m_receivedPacketCount = 0;
-	double m_dataReceivingRate = 0;
-
 	// XML-serializable members
 	//
 	static const char* DATA_TYPE_APP;
@@ -136,10 +120,44 @@ protected:
 
 	QStringList m_associatedSignals;
 
+	// static information
+	//
+	quint64 m_id = 0;
+	QHostAddress m_hostAddress;
+	QString m_name;
+	quint32 m_partCount = 1;
+	QVector<int> m_relatedSignalIndexes;
+
+	quint64 generateID() const;
+
+	// dynamic state information
+	//
+	DataSourceState m_state = DataSourceState::noData;
+	qint64 m_uptime = 0;
+	qint64 m_receivedDataSize = 0;
+	qint64 m_receivedFramesCount = 0;
+	qint64 m_receivedPacketCount = 0;
+	double m_dataReceivingRate = 0;
+	bool m_dataReceived = false;
+
+	qint64 m_errorProtocolVersion = 0;
+	qint64 m_errorFramesQuantity = 0;
+	qint64 m_errorFrameNo = 0;
+	qint64 m_lostedPackets = 0;
+
+	bool m_dataProcessingEnabled = true;
+
+	//
+
+	bool m_firstPacket = true;
+	quint16 m_prevNumerator = 0;
+
 	//
 
 	RupFrame* m_rupFrames = nullptr;
 	char* m_framesData = nullptr;
+
+	//
 
 public:
 	DataSource();
@@ -192,7 +210,7 @@ public:
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
 
-	quint32 ID() const { return m_id; }
+	quint64 ID() const { return m_id; }
 	QHostAddress hostAddress() const { return m_hostAddress; }
 	quint32 partCount() const { return m_partCount; }
 	QString name() const { return m_name; }
@@ -236,5 +254,8 @@ public:
 
 	const QStringList& associatedSignals() const { return m_associatedSignals; }
 
-	//void setProtoDataSourceInfo(NetworkprotoInfo) const
+	bool getDataSourceInfo(Network::DataSourceInfo* protoInfo) const;
+	bool setDataSourceInfo(const Network::DataSourceInfo& protoInfo);
+
+	bool getDataSourceState(Network::DataSourceState* protoState) const;
 };

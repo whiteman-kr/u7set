@@ -11,7 +11,7 @@ namespace Builder
 	private:
 		QStringList m_associatedLMs;
 		QHash<QString, bool> m_associatedAppSignals;
-		//QHash<QString, int>
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool getAssociatedLMs();
 
@@ -24,7 +24,12 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	public:
-		AppDataServiceCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		AppDataServiceCfgGenerator(	DbController* db,
+									Hardware::SubsystemStorage* subsystems,
+									Hardware::Software* software,
+									SignalSet* signalSet,
+									Hardware::EquipmentSet* equipment,
+									BuildResultWriter* buildResultWriter);
 		~AppDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;

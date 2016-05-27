@@ -784,7 +784,7 @@ namespace Builder
 				switch(software->type())
 				{
 				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				case E::SoftwareType::DiagDataService:

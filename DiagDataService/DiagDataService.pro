@@ -85,7 +85,8 @@ SOURCES += main.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../u7/Builder/IssueLogger.cpp
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/Crc.cpp
 
 HEADERS += \
 	Stable.h \
@@ -117,7 +118,8 @@ HEADERS += \
     ../include/DataChannel.h \
     ../include/Queue.h \
     ../include/WUtils.h \
-    ../u7/Builder/IssueLogger.h
+    ../u7/Builder/IssueLogger.h \
+    ../include/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 

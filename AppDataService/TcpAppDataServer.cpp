@@ -286,8 +286,10 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 	for(const DataSource* source : dataSources)
 	{
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
-		//source->setProtoDataSourceInfo(protoInfo);
+		source->getDataSourceInfo(protoInfo);
 	}
+
+	m_getDataSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
 
 	sendReply(m_getDataSourcesInfoReply);
 }
