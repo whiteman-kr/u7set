@@ -361,6 +361,8 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 		return;
 	}
 
+	rupFrame.header.reverseBytes();
+
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)
