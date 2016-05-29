@@ -74,17 +74,6 @@ std::shared_ptr<VFrame30::Schema> SchemaManager::schema(QString schemaId)
 void SchemaManager::slot_configurationArrived(ConfigSettings configuration)
 {
 	m_schemas.clear();
-
-	// DEBUGGGGG!!!!!!!!!!!!
-
-	std::shared_ptr<VFrame30::Schema> s = schema(configuration.startSchemaId);
-	if (s != nullptr)
-	{
-		qDebug() << s->caption();
-	}
-
-	// END OF DEBUGGGGG!!!!!!!!!!!!
-
 	emit resetSchema(configuration.startSchemaId);
 	return;
 }

@@ -25,6 +25,10 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
+	// --
+	//
+	qDebug() << "GUI Thread ID: " << QThread::currentThreadId();
+
 	// Read settings
 	//
 	theSettings.load();
@@ -32,24 +36,11 @@ int main(int argc, char *argv[])
 	// --
 	//
 	VFrame30::VFrame30Library::Init();
-	Hardware::Init();
-
-	// Configuration Service communication
-	//
-	MonitorConfigController configController(theSettings.configuratorAddress1(),
-											 theSettings.configuratorAddress2());
-
-	HostAddressPort aaa("192.168.1.1", 13323);
-	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(aaa, aaa));
-
-//	SimpleThread* tcpClientThread = new SimpleThread(new TcpSignalClient(theSettings.configuratorAddress1(),
-//																		 theSettings.configuratorAddress2()));
-
-	tcpClientThread->start();
+	//Hardware::Init();
 
 	// --
 	//
-	MonitorMainWindow w(&configController);
+	MonitorMainWindow w;
 	w.show();
 
 	// --
@@ -58,12 +49,10 @@ int main(int argc, char *argv[])
 
 	// Shutting down
 	//
-	tcpClientThread->quitAndWait(10000);
-	delete tcpClientThread;
 
 	VFrame30::VFrame30Library::Shutdown();
-	Hardware::Shutdwon();
-	//google::protobuf::ShutdownProtobufLibrary();
+	//Hardware::Shutdwon();
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;
 }
