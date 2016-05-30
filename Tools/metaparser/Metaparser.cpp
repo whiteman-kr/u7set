@@ -274,6 +274,11 @@ int Metaparser::writeToHtml()
 	dataForOutputFile << "\n<head>";
 	dataForOutputFile << "\n\t<title>Metaparser_Log_" + fileName + "</title>";
 	dataForOutputFile << "\n</head>";
+	dataForOutputFile << "\n<style>"
+					  << "\ntd {"
+					  << "\n\tvertical-align: top;"
+					  << "\n\t}"
+					  << "\n</style>";
 	dataForOutputFile << "\n<body>";
 	dataForOutputFile << "\n\t<h3>Issues</h3>";
 	dataForOutputFile << "\n\t<table>";
@@ -397,12 +402,16 @@ int Metaparser::writeToHtml()
 		}
 
 		dataForOutputFile << "\n\t<a id=\"" << htmlAnchor << "\"></a>"
-						  << "<table border=\"1\">"
-						  << "\n\t<tr><td>" << issueCode << ": </td><td>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":") << "</td></tr>"
-						  << "\n\t<tr><td>" << issueType << ": </td><td>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":") << "</td></tr>"
-						  << "\n\t<tr><td>" << title << ": </td><td>" << block.title.replace("\\n", "<br>").remove(title + ":") << "</td></tr>"
-						  << "\n\t<tr><td>" << parameters << ": </td><td>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":") << "</td></tr>"
-						  << "\n\t<tr><td>" << description << ": </td><td>" << block.description.replace("\\n", "<br>").remove(description + ":") << "</td></tr></table>";
+						  << "<table>"
+						  << "\n\t<tr><td>" << issueCode << ": </td><td>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":").trimmed() << "</td></tr>"
+						  << "\n\t<tr><td>" << issueType << ": </td><td>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":").trimmed() << "</td></tr>"
+						  << "\n\t<tr><td>" << title << ": </td><td>" << block.title.replace("\\n", "<br>").remove(title + ":").trimmed() << "</td></tr>";
+		if (block.parameters.replace("\\n", "<br>").remove(parameters + ":").trimmed().isEmpty() == false)
+		{
+			dataForOutputFile << "\n\t<tr><td>" << parameters << ": </td><td>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":").trimmed() << "</td></tr>";
+		}
+
+		dataForOutputFile << "\n\t<tr><td>" << description << ": </td><td>" << block.description.replace("\\n", "<br>").remove(description + ":").trimmed() << "</td></tr></table>";
 
 		if (block.error == true)
 		{
@@ -412,7 +421,7 @@ int Metaparser::writeToHtml()
 			dataForOutputFile << "</font>";
 		}
 
-		dataForOutputFile << "\n\t<br><br><br>";
+		dataForOutputFile << "\n\t<br>";
 	}
 
 	// End writing document
