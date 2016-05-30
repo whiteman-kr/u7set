@@ -3,7 +3,7 @@
     <AfbElement StrId="#voter_v1">
         <Properties>
             <Caption>voter</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
             <Implementation Version="104" OpIndex="21"/>
             <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
             <Category>Logic</Category>

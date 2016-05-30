@@ -1,9 +1,12 @@
 #include "TcpSignalClient.h"
 #include "Settings.h"
 
-TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2)
+TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(serverAddressPort1, serverAddressPort2),
+	m_cfgController(configController)
 {
+	assert(m_cfgController);
+
 	qDebug() << "TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)";
 
 	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
@@ -23,6 +26,12 @@ void TcpSignalClient::timerEvent(QTimerEvent* event)
 void TcpSignalClient::onClientThreadStarted()
 {
 	qDebug() << "TcpSignalClient::onClientThreadStarted()";
+
+	connect(m_cfgController, &MonitorConfigController::configurationArrived,
+			this, &TcpSignalClient::slot_configurationArrived,
+			Qt::QueuedConnection);
+
+	return;
 }
 
 void TcpSignalClient::onClientThreadFinished()
@@ -374,6 +383,16 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 	}
 
 	requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
+
+	return;
+}
+
+void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
+{
+	HostAddressPort h1 = configuration.das1.address();
+	HostAddressPort h2 = configuration.das2.address();
+
+	setServers(h1, h2, true);
 
 	return;
 }

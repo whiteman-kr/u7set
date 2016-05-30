@@ -5,14 +5,20 @@
 #include "MonitorSchemaWidget.h"
 #include "../VFrame30/Schema.h"
 
-MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, QWidget *parent) :
+MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	m_configController(configController),
-	m_schemaManager(configController)
+	m_configController(theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
+	m_schemaManager(&m_configController)
 {
 	qDebug() << Q_FUNC_INFO;
 
-	assert(m_configController);
+	// TcpSignalClient
+	//
+	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
+	m_tcpSignalClient = new TcpSignalClient(&m_configController, fakeAddress, fakeAddress);
+
+	m_tcpClientThread = new SimpleThread(m_tcpSignalClient);
+	m_tcpClientThread->start();
 
 	// --
 	//
@@ -44,12 +50,17 @@ MonitorMainWindow::MonitorMainWindow(MonitorConfigController* configController, 
 	//
 	centralWidget()->show();
 
+	m_configController.start();
+
 	return;
 }
 
 MonitorMainWindow::~MonitorMainWindow()
 {
 	qDebug() << Q_FUNC_INFO;
+
+	m_tcpClientThread->quitAndWait(10000);
+	delete m_tcpClientThread;
 
 	return;
 }
