@@ -37,17 +37,38 @@
             <AfbElementParam OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>2</Value>
                 <Default>2</Default>
-                <LowLimit>1</LowLimit>
-                <HighLimit>16</HighLimit>
+                <LowLimit>2</LowLimit>
+                <HighLimit>15</HighLimit>
                 <Script>
-                    <Changed>
+                    <Changed>	
+function(videoItemFblElement, afbElement)
+{
+	var xCount = videoItemFblElement.getParamIntValue("XCount");
+	if (xCount == -1)
+	{
+		return false;
+	}
+
+	var yCount = videoItemFblElement.getParamIntValue("YCount");
+	if (yCount == -1)
+	{
+		return false;
+	}
+
+	if (xCount &gt;= yCount)
+	{	
+		videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+		return false;
+	}
+	return true;
+}
 		</Changed>
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="4" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>3</Value>
                 <Default>3</Default>
-                <LowLimit>1</LowLimit>
+                <LowLimit>3</LowLimit>
                 <HighLimit>16</HighLimit>
                 <Script>
                     <Changed>
@@ -75,22 +96,14 @@ function createInputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeInputSignals();
 
-	var count = videoItemFblElement.getParamIntValue("YCount");
-	if (count == -1)
+	var yCount = videoItemFblElement.getParamIntValue("YCount");
+	if (yCount == -1)
 	{
 		return false;
 	}
-	if (count &lt; 2)
-	{
-		count = 2;
-	}
-	if (count &gt; 16)
-	{
-		count = 16;
-	}
 
 	var opIndex = 2;
-	for (var i = 0; i &lt; count; i++)
+	for (var i = 0; i &lt; yCount; i++)
 	{
 		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
 		if (afbInputSignal != null)

@@ -82,6 +82,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	m_tcpAddDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
 															tcpAppDataSever,
+															m_appDataSources,
 															m_appSignals,
 															m_signalStates);
 	m_tcpAddDataServerThread->start();

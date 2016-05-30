@@ -264,8 +264,11 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addAction(m_afblEditorAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
-    pToolsMenu->addAction(m_connectionsEditorAction);
-	pToolsMenu->addAction(m_rs232SignalListEditorAction);
+	if (theSettings.useConnections())
+	{
+		pToolsMenu->addAction(m_connectionsEditorAction);
+		pToolsMenu->addAction(m_rs232SignalListEditorAction);
+	}
     pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
 

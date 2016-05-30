@@ -1,6 +1,6 @@
 #include "../include/DataSource.h"
 #include "../include/WUtils.h"
-
+#include "../include/Crc.h"
 
 
 void RupData::dump()
@@ -97,6 +97,25 @@ DataSource::~DataSource()
 {
 	delete [] m_rupFrames;
 	delete [] m_framesData;
+}
+
+
+quint64 DataSource::generateID() const
+{
+	if (m_lmAdapterID.isEmpty())
+	{
+		assert(false);
+		return 0;
+	}
+
+	Crc64 crc;
+
+	crc.add(m_lmAdapterID);
+	crc.add(TO_INT(m_lmDataType));
+	crc.add(static_cast<int>(m_lmAddressPort.address32()));
+	crc.add(static_cast<int>(m_lmAddressPort.port()));
+
+	return crc.result();
 }
 
 
@@ -307,6 +326,8 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= readAdditionalSectionsFromXml(xml);
 
+	m_id = generateID();
+
 	return result;
 }
 
@@ -324,38 +345,30 @@ bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
 
 void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
 {
+	m_dataReceived = true;
 	m_receivedFramesCount++;
 	m_receivedDataSize += sizeof(rupFrame);
 
-	if (rupFrame.header.protocolVersion != 4)
+	if (rupFrame.header.protocolVersion != reverseUint16(5))
 	{
-		if (rupFrame.header.protocolVersion == 3)
-		{
-			// if version == 3
-			//
-			const RpPacketHeader* oldHeader = reinterpret_cast<const RpPacketHeader*>(&rupFrame);
-			Q_UNUSED(oldHeader);
-			assert(false);
-			return;
-		}
+		m_errorProtocolVersion++;
 
-		if (rupFrame.header.protocolVersion != reverseUint16(5))
-		{
-			assert(false);
-			return;
-		}
-
-		// protocol version 5
-		// all data in rupFrame in Big Endian format
-		//
-		rupFrame.header.reverseBytes();
+		return;
 	}
+
+	if (m_dataProcessingEnabled == false)
+	{
+		return;
+	}
+
+	rupFrame.header.reverseBytes();
 
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)
 	{
 		assert(false);
+		m_errorFramesQuantity++;
 		return;
 	}
 
@@ -364,6 +377,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 	if (frameNo >= framesQuantity)
 	{
 		assert(false);
+		m_errorFrameNo++;
 		return ;
 	}
 
@@ -425,3 +439,71 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 }
 
 
+bool DataSource::getDataSourceInfo(Network::DataSourceInfo* protoInfo) const
+{
+	if (protoInfo == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	protoInfo->set_id(m_id);
+	protoInfo->set_equipmentid(m_lmEquipmentID.toStdString());
+	protoInfo->set_caption(m_lmCaption.toStdString());
+	protoInfo->set_datatype(TO_INT(m_lmDataType));
+	protoInfo->set_ip(m_lmAddressPort.addressStr().toStdString());
+	protoInfo->set_port(m_lmAddressPort.port());
+	protoInfo->set_channel(m_lmChannel);
+	protoInfo->set_subsystemid(m_lmSubsystemID);
+	protoInfo->set_subsystem(m_lmSubsystem.toStdString());
+	protoInfo->set_lmnumber(m_lmNumber);
+	protoInfo->set_lmmoduletype(m_lmModuleType);
+	protoInfo->set_lmadapterid(m_lmAdapterID.toStdString());
+	protoInfo->set_lmdataenable(m_lmDataEnable);
+	protoInfo->set_lmdataid(m_lmDataID);
+}
+
+
+bool DataSource::setDataSourceInfo(const Network::DataSourceInfo& protoInfo)
+{
+	m_id = protoInfo.id();
+	m_lmEquipmentID = QString::fromStdString(protoInfo.equipmentid());
+	m_lmCaption = QString::fromStdString(protoInfo.caption());
+	m_lmDataType = static_cast<DataType>(protoInfo.datatype());
+	m_lmAddressPort.setAddress(QString::fromStdString(protoInfo.ip()));
+	m_lmAddressPort.setPort(protoInfo.port());
+	m_lmChannel = protoInfo.channel();
+	m_lmSubsystemID = protoInfo.subsystemid();
+	m_lmSubsystem = QString::fromStdString(protoInfo.subsystem());
+	m_lmNumber = protoInfo.lmnumber();
+	m_lmModuleType = protoInfo.lmmoduletype();
+	m_lmAdapterID = QString::fromStdString(protoInfo.lmadapterid());
+	m_lmDataEnable = protoInfo.lmdataenable();
+	m_lmDataID = protoInfo.lmdataid();
+
+	assert(m_id = generateID());
+
+	return true;
+}
+
+
+bool DataSource::getDataSourceState(Network::DataSourceState* protoState) const
+{
+	if (protoState == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	protoState->set_id(m_id);
+	protoState->set_uptime(m_uptime);
+	protoState->set_receiveddatasize(m_receivedDataSize);
+	protoState->set_datareceivingrate(m_dataReceivingRate);
+	protoState->set_receivedframescount(m_receivedFramesCount);
+	protoState->set_processingenabled(m_dataProcessingEnabled);
+	protoState->set_processedpacketcount(m_receivedPacketCount);
+	protoState->set_errorprotocolversion(m_errorProtocolVersion);
+	protoState->set_errorframesquantity(m_errorFramesQuantity);
+	protoState->set_errorframeno(m_errorFrameNo);
+	protoState->set_lostedpackets(m_lostedPackets);
+}

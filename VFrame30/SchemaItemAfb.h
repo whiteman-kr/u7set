@@ -40,7 +40,9 @@ namespace VFrame30
 		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);
-		bool setAfbParamByOpName(const QString& opName, QVariant value);
+		Q_INVOKABLE bool setAfbParamByOpName(const QString& opName, QVariant value);
+
+		QVariant getAfbParam(const QString& name);
 
 		// Set Afb element parameters
 		//
@@ -62,6 +64,7 @@ namespace VFrame30
 
 		Q_INVOKABLE void removeInputSignals();
 		Q_INVOKABLE void removeOutputSignals();
+
 		// Properties and Data
 		//
 	public:

@@ -72,7 +72,7 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
 
 	s.setValue("m_freezeBuildPath", m_freezeBuildPath);
-
+	s.setValue("m_useConnections", m_useConnections);
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	return;
@@ -141,7 +141,7 @@ void Settings::loadUserScope()
 	}
 
 	m_freezeBuildPath = s.value("m_freezeBuildPath", false).toBool();
-
+	m_useConnections = s.value("m_useConnections", false).toBool();
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
     return;
@@ -232,6 +232,11 @@ QStringList& Settings::loginCompleter()
 bool Settings::freezeBuildPath() const
 {
 	return m_freezeBuildPath;
+}
+
+bool Settings::useConnections() const
+{
+	return m_useConnections;
 }
 
 void Settings::setDebugMode(bool value)

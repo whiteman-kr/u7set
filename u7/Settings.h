@@ -44,6 +44,7 @@ public:
 	QStringList& loginCompleter();
 
 	bool freezeBuildPath() const;
+	bool useConnections() const;
 
 	void setDebugMode(bool value);
 	bool debugMode() const;
@@ -124,13 +125,15 @@ private:
 	QString m_serverUsername;
 	QString m_serverPassword;
 	QString m_buildOutputPath;
-	bool m_expertMode;
+	bool m_expertMode = false;
 
 	QStringList m_loginCompleter;
 
 	bool m_freezeBuildPath = false;
+	bool m_useConnections = false;
 
 	bool m_debugMode = false;
+
 };
 
 extern Settings theSettings;

@@ -15,7 +15,7 @@
 #include "DbControllerFileManagementTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 70;
+const int DatabaseProjectVersion = 74;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -92,25 +92,24 @@ int main(int argc, char *argv[])
 		{
 			qDebug() << "Cannot upgrade project database. Error: " << dbc.lastError();
 
-			// TODO: Drop database project
-			//
+			DbController dbc;
+
+			dbc.disableProgress();
+			dbc.setHost(DatabaseHost);
+			dbc.setServerPassword(DatabaseUserPassword);
+			dbc.setServerUsername(DatabaseUser);
+
+			bool ok = dbc.deleteProject(ProjectName, ProjectAdministratorPassword, true, nullptr);
+
+			if (ok == false)
+			{
+				qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
+			}
 
 			Hardware::Shutdwon();
 
 			return 1;
 		}
-
-		// Open project
-		//
-		//	ok = db.openProject(ProjectName, ProjectAdministratorName, ProjectAdministratorPassword, nullptr);
-		//	if (ok == false)
-		//	{
-		//		qDebug() << "Cannot open project database. Error: " << db.lastError();
-
-		//		// TODO: Drop database project
-		//		//
-		//		return 1;
-		//	}
 	}
 
 	int returnCode = 0;

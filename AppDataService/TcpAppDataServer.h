@@ -4,6 +4,7 @@
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
 #include "AppSignalStateEx.h"
+#include "AppDataSource.h"
 
 
 class TcpAppDataServerThread;
@@ -33,6 +34,9 @@ private:
 	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
+	void onGetDataSourcesInfoRequest();
+	void onGetDataSourcesStatesRequest(const char* requestData, quint32 requestDataSize);
+
 	// reused protobuf messages
 	//
 	Network::GetSignalListStartReply m_getSignalListStartReply;
@@ -46,12 +50,17 @@ private:
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
+	//
+
+	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
+
 	// helper functions
 	//
 	int getSignalListPartCount(int signalCount);
 
 	const QVector<QString>& appSignalIDs() const;
 	const AppSignals& appSignals() const;
+	const AppDataSources& appDataSources() const;
 
 	bool getState(Hash hash, AppSignalState& state);
 
@@ -81,14 +90,16 @@ class TcpAppDataServerThread : public Tcp::ServerThread
 {
 private:
 	QVector<QString> m_appSignalIDs;
+	const AppDataSources& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const AppSignalStates& m_appSignalStates;
 
 	void buildAppSignalIDs();
 
 public:
-	TcpAppDataServerThread(	const HostAddressPort& listenAddressPort,
+	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 							TcpAppDataServer* server,
+							const AppDataSources& appDataSources,
 							const AppSignals& appSignals,
 							const AppSignalStates& appSignalStates);
 
@@ -96,6 +107,7 @@ public:
 	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
 
 	const AppSignals& appSignals() const { return m_appSignals; }
+	const AppDataSources& appDataSources() const { return  m_appDataSources; }
 
 	bool getState(Hash hash, AppSignalState& state);
 };

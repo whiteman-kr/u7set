@@ -963,6 +963,8 @@ namespace Tcp
 
 	void Client::onPeriodicTimer()
 	{
+		AUTO_LOCK(m_mutex);
+
 		if (isConnected() == false)
 		{
 			m_connectTimeout++;
@@ -1018,6 +1020,8 @@ namespace Tcp
 
 	bool Client::sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
+		AUTO_LOCK(m_mutex);
+
 		if (!isClearToSendRequest())
 		{
 			assert(false);

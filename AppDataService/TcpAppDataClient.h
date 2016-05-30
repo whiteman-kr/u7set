@@ -10,6 +10,8 @@
 class TcpAppDataClient : public Tcp::Client
 {
 private:
+	QHash<quint64, DataSource*> m_dataSources;		// id => DataSource
+
 	QVector<Hash> m_signalHahes;
 	QVector<Signal> m_signalParams;
 	QVector<AppSignalState> m_states;
@@ -17,6 +19,8 @@ private:
 
 	// reused protobuf messages
 	//
+	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
+
 	Network::GetSignalListStartReply m_getSignalListStartReply;
 
 	Network::GetSignalListNextRequest m_getSignalListNextRequest;
@@ -46,10 +50,17 @@ private:
 	void getNextParamPart();
 	void getNextStatePart();
 
+	void onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
+	void onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
+
 	void onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
+
+	//
+
+	void clearDataSources();
 
 public:
 	TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);

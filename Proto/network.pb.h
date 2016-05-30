@@ -42,6 +42,12 @@ class GetAppSignalParamRequest;
 class GetAppSignalParamReply;
 class GetAppSignalStateRequest;
 class GetAppSignalStateReply;
+class DataSourceInfo;
+class GetDataSourcesInfoRequest;
+class GetDataSourcesInfoReply;
+class DataSourceState;
+class GetDataSourcesStatesRequest;
+class GetDataSourcesStatesReply;
 
 // ===================================================================
 
@@ -778,6 +784,772 @@ class GetAppSignalStateReply : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static GetAppSignalStateReply* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class DataSourceInfo : public ::google::protobuf::Message {
+ public:
+  DataSourceInfo();
+  virtual ~DataSourceInfo();
+
+  DataSourceInfo(const DataSourceInfo& from);
+
+  inline DataSourceInfo& operator=(const DataSourceInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DataSourceInfo& default_instance();
+
+  void Swap(DataSourceInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  DataSourceInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DataSourceInfo& from);
+  void MergeFrom(const DataSourceInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint64 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint64 id() const;
+  inline void set_id(::google::protobuf::uint64 value);
+
+  // optional string equipmentID = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIDFieldNumber = 2;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // optional string caption = 3;
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 3;
+  inline const ::std::string& caption() const;
+  inline void set_caption(const ::std::string& value);
+  inline void set_caption(const char* value);
+  inline void set_caption(const char* value, size_t size);
+  inline ::std::string* mutable_caption();
+  inline ::std::string* release_caption();
+  inline void set_allocated_caption(::std::string* caption);
+
+  // optional int32 dataType = 4;
+  inline bool has_datatype() const;
+  inline void clear_datatype();
+  static const int kDataTypeFieldNumber = 4;
+  inline ::google::protobuf::int32 datatype() const;
+  inline void set_datatype(::google::protobuf::int32 value);
+
+  // optional string ip = 5;
+  inline bool has_ip() const;
+  inline void clear_ip();
+  static const int kIpFieldNumber = 5;
+  inline const ::std::string& ip() const;
+  inline void set_ip(const ::std::string& value);
+  inline void set_ip(const char* value);
+  inline void set_ip(const char* value, size_t size);
+  inline ::std::string* mutable_ip();
+  inline ::std::string* release_ip();
+  inline void set_allocated_ip(::std::string* ip);
+
+  // optional int32 port = 6;
+  inline bool has_port() const;
+  inline void clear_port();
+  static const int kPortFieldNumber = 6;
+  inline ::google::protobuf::int32 port() const;
+  inline void set_port(::google::protobuf::int32 value);
+
+  // optional int32 channel = 7;
+  inline bool has_channel() const;
+  inline void clear_channel();
+  static const int kChannelFieldNumber = 7;
+  inline ::google::protobuf::int32 channel() const;
+  inline void set_channel(::google::protobuf::int32 value);
+
+  // optional int32 subsystemID = 8;
+  inline bool has_subsystemid() const;
+  inline void clear_subsystemid();
+  static const int kSubsystemIDFieldNumber = 8;
+  inline ::google::protobuf::int32 subsystemid() const;
+  inline void set_subsystemid(::google::protobuf::int32 value);
+
+  // optional string subsystem = 9;
+  inline bool has_subsystem() const;
+  inline void clear_subsystem();
+  static const int kSubsystemFieldNumber = 9;
+  inline const ::std::string& subsystem() const;
+  inline void set_subsystem(const ::std::string& value);
+  inline void set_subsystem(const char* value);
+  inline void set_subsystem(const char* value, size_t size);
+  inline ::std::string* mutable_subsystem();
+  inline ::std::string* release_subsystem();
+  inline void set_allocated_subsystem(::std::string* subsystem);
+
+  // optional int32 lmNumber = 10;
+  inline bool has_lmnumber() const;
+  inline void clear_lmnumber();
+  static const int kLmNumberFieldNumber = 10;
+  inline ::google::protobuf::int32 lmnumber() const;
+  inline void set_lmnumber(::google::protobuf::int32 value);
+
+  // optional int32 lmModuleType = 11;
+  inline bool has_lmmoduletype() const;
+  inline void clear_lmmoduletype();
+  static const int kLmModuleTypeFieldNumber = 11;
+  inline ::google::protobuf::int32 lmmoduletype() const;
+  inline void set_lmmoduletype(::google::protobuf::int32 value);
+
+  // optional string lmAdapterID = 12;
+  inline bool has_lmadapterid() const;
+  inline void clear_lmadapterid();
+  static const int kLmAdapterIDFieldNumber = 12;
+  inline const ::std::string& lmadapterid() const;
+  inline void set_lmadapterid(const ::std::string& value);
+  inline void set_lmadapterid(const char* value);
+  inline void set_lmadapterid(const char* value, size_t size);
+  inline ::std::string* mutable_lmadapterid();
+  inline ::std::string* release_lmadapterid();
+  inline void set_allocated_lmadapterid(::std::string* lmadapterid);
+
+  // optional bool lmDataEnable = 13;
+  inline bool has_lmdataenable() const;
+  inline void clear_lmdataenable();
+  static const int kLmDataEnableFieldNumber = 13;
+  inline bool lmdataenable() const;
+  inline void set_lmdataenable(bool value);
+
+  // optional uint64 lmDataID = 14;
+  inline bool has_lmdataid() const;
+  inline void clear_lmdataid();
+  static const int kLmDataIDFieldNumber = 14;
+  inline ::google::protobuf::uint64 lmdataid() const;
+  inline void set_lmdataid(::google::protobuf::uint64 value);
+
+  // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_caption();
+  inline void clear_has_caption();
+  inline void set_has_datatype();
+  inline void clear_has_datatype();
+  inline void set_has_ip();
+  inline void clear_has_ip();
+  inline void set_has_port();
+  inline void clear_has_port();
+  inline void set_has_channel();
+  inline void clear_has_channel();
+  inline void set_has_subsystemid();
+  inline void clear_has_subsystemid();
+  inline void set_has_subsystem();
+  inline void clear_has_subsystem();
+  inline void set_has_lmnumber();
+  inline void clear_has_lmnumber();
+  inline void set_has_lmmoduletype();
+  inline void clear_has_lmmoduletype();
+  inline void set_has_lmadapterid();
+  inline void clear_has_lmadapterid();
+  inline void set_has_lmdataenable();
+  inline void clear_has_lmdataenable();
+  inline void set_has_lmdataid();
+  inline void clear_has_lmdataid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 id_;
+  ::std::string* equipmentid_;
+  ::std::string* caption_;
+  ::std::string* ip_;
+  ::google::protobuf::int32 datatype_;
+  ::google::protobuf::int32 port_;
+  ::google::protobuf::int32 channel_;
+  ::google::protobuf::int32 subsystemid_;
+  ::std::string* subsystem_;
+  ::google::protobuf::int32 lmnumber_;
+  ::google::protobuf::int32 lmmoduletype_;
+  ::std::string* lmadapterid_;
+  ::google::protobuf::uint64 lmdataid_;
+  bool lmdataenable_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static DataSourceInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetDataSourcesInfoRequest : public ::google::protobuf::Message {
+ public:
+  GetDataSourcesInfoRequest();
+  virtual ~GetDataSourcesInfoRequest();
+
+  GetDataSourcesInfoRequest(const GetDataSourcesInfoRequest& from);
+
+  inline GetDataSourcesInfoRequest& operator=(const GetDataSourcesInfoRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetDataSourcesInfoRequest& default_instance();
+
+  void Swap(GetDataSourcesInfoRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetDataSourcesInfoRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetDataSourcesInfoRequest& from);
+  void MergeFrom(const GetDataSourcesInfoRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesInfoRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetDataSourcesInfoRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetDataSourcesInfoReply : public ::google::protobuf::Message {
+ public:
+  GetDataSourcesInfoReply();
+  virtual ~GetDataSourcesInfoReply();
+
+  GetDataSourcesInfoReply(const GetDataSourcesInfoReply& from);
+
+  inline GetDataSourcesInfoReply& operator=(const GetDataSourcesInfoReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetDataSourcesInfoReply& default_instance();
+
+  void Swap(GetDataSourcesInfoReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetDataSourcesInfoReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetDataSourcesInfoReply& from);
+  void MergeFrom(const GetDataSourcesInfoReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Network.DataSourceInfo dataSourceInfo = 2;
+  inline int datasourceinfo_size() const;
+  inline void clear_datasourceinfo();
+  static const int kDataSourceInfoFieldNumber = 2;
+  inline const ::Network::DataSourceInfo& datasourceinfo(int index) const;
+  inline ::Network::DataSourceInfo* mutable_datasourceinfo(int index);
+  inline ::Network::DataSourceInfo* add_datasourceinfo();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >&
+      datasourceinfo() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >*
+      mutable_datasourceinfo();
+
+  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesInfoReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo > datasourceinfo_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetDataSourcesInfoReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DataSourceState : public ::google::protobuf::Message {
+ public:
+  DataSourceState();
+  virtual ~DataSourceState();
+
+  DataSourceState(const DataSourceState& from);
+
+  inline DataSourceState& operator=(const DataSourceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DataSourceState& default_instance();
+
+  void Swap(DataSourceState* other);
+
+  // implements Message ----------------------------------------------
+
+  DataSourceState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DataSourceState& from);
+  void MergeFrom(const DataSourceState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint64 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint64 id() const;
+  inline void set_id(::google::protobuf::uint64 value);
+
+  // optional int64 uptime = 2;
+  inline bool has_uptime() const;
+  inline void clear_uptime();
+  static const int kUptimeFieldNumber = 2;
+  inline ::google::protobuf::int64 uptime() const;
+  inline void set_uptime(::google::protobuf::int64 value);
+
+  // optional int64 receivedDataSize = 3;
+  inline bool has_receiveddatasize() const;
+  inline void clear_receiveddatasize();
+  static const int kReceivedDataSizeFieldNumber = 3;
+  inline ::google::protobuf::int64 receiveddatasize() const;
+  inline void set_receiveddatasize(::google::protobuf::int64 value);
+
+  // optional double dataReceivingRate = 4;
+  inline bool has_datareceivingrate() const;
+  inline void clear_datareceivingrate();
+  static const int kDataReceivingRateFieldNumber = 4;
+  inline double datareceivingrate() const;
+  inline void set_datareceivingrate(double value);
+
+  // optional int64 receivedFramesCount = 5;
+  inline bool has_receivedframescount() const;
+  inline void clear_receivedframescount();
+  static const int kReceivedFramesCountFieldNumber = 5;
+  inline ::google::protobuf::int64 receivedframescount() const;
+  inline void set_receivedframescount(::google::protobuf::int64 value);
+
+  // optional bool processingEnabled = 6;
+  inline bool has_processingenabled() const;
+  inline void clear_processingenabled();
+  static const int kProcessingEnabledFieldNumber = 6;
+  inline bool processingenabled() const;
+  inline void set_processingenabled(bool value);
+
+  // optional int64 processedPacketCount = 7;
+  inline bool has_processedpacketcount() const;
+  inline void clear_processedpacketcount();
+  static const int kProcessedPacketCountFieldNumber = 7;
+  inline ::google::protobuf::int64 processedpacketcount() const;
+  inline void set_processedpacketcount(::google::protobuf::int64 value);
+
+  // optional int64 errorProtocolVersion = 8;
+  inline bool has_errorprotocolversion() const;
+  inline void clear_errorprotocolversion();
+  static const int kErrorProtocolVersionFieldNumber = 8;
+  inline ::google::protobuf::int64 errorprotocolversion() const;
+  inline void set_errorprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errorFramesQuantity = 9;
+  inline bool has_errorframesquantity() const;
+  inline void clear_errorframesquantity();
+  static const int kErrorFramesQuantityFieldNumber = 9;
+  inline ::google::protobuf::int64 errorframesquantity() const;
+  inline void set_errorframesquantity(::google::protobuf::int64 value);
+
+  // optional int64 errorFrameNo = 10;
+  inline bool has_errorframeno() const;
+  inline void clear_errorframeno();
+  static const int kErrorFrameNoFieldNumber = 10;
+  inline ::google::protobuf::int64 errorframeno() const;
+  inline void set_errorframeno(::google::protobuf::int64 value);
+
+  // optional int64 lostedPackets = 11;
+  inline bool has_lostedpackets() const;
+  inline void clear_lostedpackets();
+  static const int kLostedPacketsFieldNumber = 11;
+  inline ::google::protobuf::int64 lostedpackets() const;
+  inline void set_lostedpackets(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:Network.DataSourceState)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_uptime();
+  inline void clear_has_uptime();
+  inline void set_has_receiveddatasize();
+  inline void clear_has_receiveddatasize();
+  inline void set_has_datareceivingrate();
+  inline void clear_has_datareceivingrate();
+  inline void set_has_receivedframescount();
+  inline void clear_has_receivedframescount();
+  inline void set_has_processingenabled();
+  inline void clear_has_processingenabled();
+  inline void set_has_processedpacketcount();
+  inline void clear_has_processedpacketcount();
+  inline void set_has_errorprotocolversion();
+  inline void clear_has_errorprotocolversion();
+  inline void set_has_errorframesquantity();
+  inline void clear_has_errorframesquantity();
+  inline void set_has_errorframeno();
+  inline void clear_has_errorframeno();
+  inline void set_has_lostedpackets();
+  inline void clear_has_lostedpackets();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 id_;
+  ::google::protobuf::int64 uptime_;
+  ::google::protobuf::int64 receiveddatasize_;
+  double datareceivingrate_;
+  ::google::protobuf::int64 receivedframescount_;
+  ::google::protobuf::int64 processedpacketcount_;
+  ::google::protobuf::int64 errorprotocolversion_;
+  ::google::protobuf::int64 errorframesquantity_;
+  ::google::protobuf::int64 errorframeno_;
+  ::google::protobuf::int64 lostedpackets_;
+  bool processingenabled_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static DataSourceState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetDataSourcesStatesRequest : public ::google::protobuf::Message {
+ public:
+  GetDataSourcesStatesRequest();
+  virtual ~GetDataSourcesStatesRequest();
+
+  GetDataSourcesStatesRequest(const GetDataSourcesStatesRequest& from);
+
+  inline GetDataSourcesStatesRequest& operator=(const GetDataSourcesStatesRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetDataSourcesStatesRequest& default_instance();
+
+  void Swap(GetDataSourcesStatesRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetDataSourcesStatesRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetDataSourcesStatesRequest& from);
+  void MergeFrom(const GetDataSourcesStatesRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated uint64 dataSourceIDs = 1;
+  inline int datasourceids_size() const;
+  inline void clear_datasourceids();
+  static const int kDataSourceIDsFieldNumber = 1;
+  inline ::google::protobuf::uint64 datasourceids(int index) const;
+  inline void set_datasourceids(int index, ::google::protobuf::uint64 value);
+  inline void add_datasourceids(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      datasourceids() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_datasourceids();
+
+  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesStatesRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > datasourceids_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetDataSourcesStatesRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetDataSourcesStatesReply : public ::google::protobuf::Message {
+ public:
+  GetDataSourcesStatesReply();
+  virtual ~GetDataSourcesStatesReply();
+
+  GetDataSourcesStatesReply(const GetDataSourcesStatesReply& from);
+
+  inline GetDataSourcesStatesReply& operator=(const GetDataSourcesStatesReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetDataSourcesStatesReply& default_instance();
+
+  void Swap(GetDataSourcesStatesReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetDataSourcesStatesReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetDataSourcesStatesReply& from);
+  void MergeFrom(const GetDataSourcesStatesReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Network.DataSourceState dataSourcesStates = 2;
+  inline int datasourcesstates_size() const;
+  inline void clear_datasourcesstates();
+  static const int kDataSourcesStatesFieldNumber = 2;
+  inline const ::Network::DataSourceState& datasourcesstates(int index) const;
+  inline ::Network::DataSourceState* mutable_datasourcesstates(int index);
+  inline ::Network::DataSourceState* add_datasourcesstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >&
+      datasourcesstates() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
+      mutable_datasourcesstates();
+
+  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesStatesReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState > datasourcesstates_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetDataSourcesStatesReply* default_instance_;
+};
 // ===================================================================
 
 
@@ -1153,6 +1925,939 @@ GetAppSignalStateReply::appsignalstates() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
 GetAppSignalStateReply::mutable_appsignalstates() {
   return &appsignalstates_;
+}
+
+// -------------------------------------------------------------------
+
+// DataSourceInfo
+
+// optional uint64 id = 1;
+inline bool DataSourceInfo::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DataSourceInfo::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DataSourceInfo::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DataSourceInfo::clear_id() {
+  id_ = GOOGLE_ULONGLONG(0);
+  clear_has_id();
+}
+inline ::google::protobuf::uint64 DataSourceInfo::id() const {
+  return id_;
+}
+inline void DataSourceInfo::set_id(::google::protobuf::uint64 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional string equipmentID = 2;
+inline bool DataSourceInfo::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DataSourceInfo::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DataSourceInfo::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DataSourceInfo::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& DataSourceInfo::equipmentid() const {
+  return *equipmentid_;
+}
+inline void DataSourceInfo::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void DataSourceInfo::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void DataSourceInfo::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* DataSourceInfo::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string caption = 3;
+inline bool DataSourceInfo::has_caption() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DataSourceInfo::set_has_caption() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DataSourceInfo::clear_has_caption() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DataSourceInfo::clear_caption() {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    caption_->clear();
+  }
+  clear_has_caption();
+}
+inline const ::std::string& DataSourceInfo::caption() const {
+  return *caption_;
+}
+inline void DataSourceInfo::set_caption(const ::std::string& value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void DataSourceInfo::set_caption(const char* value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void DataSourceInfo::set_caption(const char* value, size_t size) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_caption() {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  return caption_;
+}
+inline ::std::string* DataSourceInfo::release_caption() {
+  clear_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = caption_;
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_caption(::std::string* caption) {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    delete caption_;
+  }
+  if (caption) {
+    set_has_caption();
+    caption_ = caption;
+  } else {
+    clear_has_caption();
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 dataType = 4;
+inline bool DataSourceInfo::has_datatype() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DataSourceInfo::set_has_datatype() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DataSourceInfo::clear_has_datatype() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DataSourceInfo::clear_datatype() {
+  datatype_ = 0;
+  clear_has_datatype();
+}
+inline ::google::protobuf::int32 DataSourceInfo::datatype() const {
+  return datatype_;
+}
+inline void DataSourceInfo::set_datatype(::google::protobuf::int32 value) {
+  set_has_datatype();
+  datatype_ = value;
+}
+
+// optional string ip = 5;
+inline bool DataSourceInfo::has_ip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DataSourceInfo::set_has_ip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DataSourceInfo::clear_has_ip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DataSourceInfo::clear_ip() {
+  if (ip_ != &::google::protobuf::internal::kEmptyString) {
+    ip_->clear();
+  }
+  clear_has_ip();
+}
+inline const ::std::string& DataSourceInfo::ip() const {
+  return *ip_;
+}
+inline void DataSourceInfo::set_ip(const ::std::string& value) {
+  set_has_ip();
+  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+    ip_ = new ::std::string;
+  }
+  ip_->assign(value);
+}
+inline void DataSourceInfo::set_ip(const char* value) {
+  set_has_ip();
+  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+    ip_ = new ::std::string;
+  }
+  ip_->assign(value);
+}
+inline void DataSourceInfo::set_ip(const char* value, size_t size) {
+  set_has_ip();
+  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+    ip_ = new ::std::string;
+  }
+  ip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_ip() {
+  set_has_ip();
+  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+    ip_ = new ::std::string;
+  }
+  return ip_;
+}
+inline ::std::string* DataSourceInfo::release_ip() {
+  clear_has_ip();
+  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = ip_;
+    ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_ip(::std::string* ip) {
+  if (ip_ != &::google::protobuf::internal::kEmptyString) {
+    delete ip_;
+  }
+  if (ip) {
+    set_has_ip();
+    ip_ = ip;
+  } else {
+    clear_has_ip();
+    ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 port = 6;
+inline bool DataSourceInfo::has_port() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DataSourceInfo::set_has_port() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DataSourceInfo::clear_has_port() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DataSourceInfo::clear_port() {
+  port_ = 0;
+  clear_has_port();
+}
+inline ::google::protobuf::int32 DataSourceInfo::port() const {
+  return port_;
+}
+inline void DataSourceInfo::set_port(::google::protobuf::int32 value) {
+  set_has_port();
+  port_ = value;
+}
+
+// optional int32 channel = 7;
+inline bool DataSourceInfo::has_channel() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DataSourceInfo::set_has_channel() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DataSourceInfo::clear_has_channel() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DataSourceInfo::clear_channel() {
+  channel_ = 0;
+  clear_has_channel();
+}
+inline ::google::protobuf::int32 DataSourceInfo::channel() const {
+  return channel_;
+}
+inline void DataSourceInfo::set_channel(::google::protobuf::int32 value) {
+  set_has_channel();
+  channel_ = value;
+}
+
+// optional int32 subsystemID = 8;
+inline bool DataSourceInfo::has_subsystemid() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DataSourceInfo::set_has_subsystemid() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DataSourceInfo::clear_has_subsystemid() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DataSourceInfo::clear_subsystemid() {
+  subsystemid_ = 0;
+  clear_has_subsystemid();
+}
+inline ::google::protobuf::int32 DataSourceInfo::subsystemid() const {
+  return subsystemid_;
+}
+inline void DataSourceInfo::set_subsystemid(::google::protobuf::int32 value) {
+  set_has_subsystemid();
+  subsystemid_ = value;
+}
+
+// optional string subsystem = 9;
+inline bool DataSourceInfo::has_subsystem() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DataSourceInfo::set_has_subsystem() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DataSourceInfo::clear_has_subsystem() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DataSourceInfo::clear_subsystem() {
+  if (subsystem_ != &::google::protobuf::internal::kEmptyString) {
+    subsystem_->clear();
+  }
+  clear_has_subsystem();
+}
+inline const ::std::string& DataSourceInfo::subsystem() const {
+  return *subsystem_;
+}
+inline void DataSourceInfo::set_subsystem(const ::std::string& value) {
+  set_has_subsystem();
+  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+    subsystem_ = new ::std::string;
+  }
+  subsystem_->assign(value);
+}
+inline void DataSourceInfo::set_subsystem(const char* value) {
+  set_has_subsystem();
+  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+    subsystem_ = new ::std::string;
+  }
+  subsystem_->assign(value);
+}
+inline void DataSourceInfo::set_subsystem(const char* value, size_t size) {
+  set_has_subsystem();
+  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+    subsystem_ = new ::std::string;
+  }
+  subsystem_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_subsystem() {
+  set_has_subsystem();
+  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+    subsystem_ = new ::std::string;
+  }
+  return subsystem_;
+}
+inline ::std::string* DataSourceInfo::release_subsystem() {
+  clear_has_subsystem();
+  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = subsystem_;
+    subsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_subsystem(::std::string* subsystem) {
+  if (subsystem_ != &::google::protobuf::internal::kEmptyString) {
+    delete subsystem_;
+  }
+  if (subsystem) {
+    set_has_subsystem();
+    subsystem_ = subsystem;
+  } else {
+    clear_has_subsystem();
+    subsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 lmNumber = 10;
+inline bool DataSourceInfo::has_lmnumber() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void DataSourceInfo::set_has_lmnumber() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void DataSourceInfo::clear_has_lmnumber() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void DataSourceInfo::clear_lmnumber() {
+  lmnumber_ = 0;
+  clear_has_lmnumber();
+}
+inline ::google::protobuf::int32 DataSourceInfo::lmnumber() const {
+  return lmnumber_;
+}
+inline void DataSourceInfo::set_lmnumber(::google::protobuf::int32 value) {
+  set_has_lmnumber();
+  lmnumber_ = value;
+}
+
+// optional int32 lmModuleType = 11;
+inline bool DataSourceInfo::has_lmmoduletype() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void DataSourceInfo::set_has_lmmoduletype() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void DataSourceInfo::clear_has_lmmoduletype() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void DataSourceInfo::clear_lmmoduletype() {
+  lmmoduletype_ = 0;
+  clear_has_lmmoduletype();
+}
+inline ::google::protobuf::int32 DataSourceInfo::lmmoduletype() const {
+  return lmmoduletype_;
+}
+inline void DataSourceInfo::set_lmmoduletype(::google::protobuf::int32 value) {
+  set_has_lmmoduletype();
+  lmmoduletype_ = value;
+}
+
+// optional string lmAdapterID = 12;
+inline bool DataSourceInfo::has_lmadapterid() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void DataSourceInfo::set_has_lmadapterid() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void DataSourceInfo::clear_has_lmadapterid() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void DataSourceInfo::clear_lmadapterid() {
+  if (lmadapterid_ != &::google::protobuf::internal::kEmptyString) {
+    lmadapterid_->clear();
+  }
+  clear_has_lmadapterid();
+}
+inline const ::std::string& DataSourceInfo::lmadapterid() const {
+  return *lmadapterid_;
+}
+inline void DataSourceInfo::set_lmadapterid(const ::std::string& value) {
+  set_has_lmadapterid();
+  if (lmadapterid_ == &::google::protobuf::internal::kEmptyString) {
+    lmadapterid_ = new ::std::string;
+  }
+  lmadapterid_->assign(value);
+}
+inline void DataSourceInfo::set_lmadapterid(const char* value) {
+  set_has_lmadapterid();
+  if (lmadapterid_ == &::google::protobuf::internal::kEmptyString) {
+    lmadapterid_ = new ::std::string;
+  }
+  lmadapterid_->assign(value);
+}
+inline void DataSourceInfo::set_lmadapterid(const char* value, size_t size) {
+  set_has_lmadapterid();
+  if (lmadapterid_ == &::google::protobuf::internal::kEmptyString) {
+    lmadapterid_ = new ::std::string;
+  }
+  lmadapterid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_lmadapterid() {
+  set_has_lmadapterid();
+  if (lmadapterid_ == &::google::protobuf::internal::kEmptyString) {
+    lmadapterid_ = new ::std::string;
+  }
+  return lmadapterid_;
+}
+inline ::std::string* DataSourceInfo::release_lmadapterid() {
+  clear_has_lmadapterid();
+  if (lmadapterid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmadapterid_;
+    lmadapterid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_lmadapterid(::std::string* lmadapterid) {
+  if (lmadapterid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmadapterid_;
+  }
+  if (lmadapterid) {
+    set_has_lmadapterid();
+    lmadapterid_ = lmadapterid;
+  } else {
+    clear_has_lmadapterid();
+    lmadapterid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool lmDataEnable = 13;
+inline bool DataSourceInfo::has_lmdataenable() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void DataSourceInfo::set_has_lmdataenable() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void DataSourceInfo::clear_has_lmdataenable() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void DataSourceInfo::clear_lmdataenable() {
+  lmdataenable_ = false;
+  clear_has_lmdataenable();
+}
+inline bool DataSourceInfo::lmdataenable() const {
+  return lmdataenable_;
+}
+inline void DataSourceInfo::set_lmdataenable(bool value) {
+  set_has_lmdataenable();
+  lmdataenable_ = value;
+}
+
+// optional uint64 lmDataID = 14;
+inline bool DataSourceInfo::has_lmdataid() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void DataSourceInfo::set_has_lmdataid() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void DataSourceInfo::clear_has_lmdataid() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void DataSourceInfo::clear_lmdataid() {
+  lmdataid_ = GOOGLE_ULONGLONG(0);
+  clear_has_lmdataid();
+}
+inline ::google::protobuf::uint64 DataSourceInfo::lmdataid() const {
+  return lmdataid_;
+}
+inline void DataSourceInfo::set_lmdataid(::google::protobuf::uint64 value) {
+  set_has_lmdataid();
+  lmdataid_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// GetDataSourcesInfoRequest
+
+// -------------------------------------------------------------------
+
+// GetDataSourcesInfoReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetDataSourcesInfoReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetDataSourcesInfoReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetDataSourcesInfoReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetDataSourcesInfoReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetDataSourcesInfoReply::error() const {
+  return error_;
+}
+inline void GetDataSourcesInfoReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// repeated .Network.DataSourceInfo dataSourceInfo = 2;
+inline int GetDataSourcesInfoReply::datasourceinfo_size() const {
+  return datasourceinfo_.size();
+}
+inline void GetDataSourcesInfoReply::clear_datasourceinfo() {
+  datasourceinfo_.Clear();
+}
+inline const ::Network::DataSourceInfo& GetDataSourcesInfoReply::datasourceinfo(int index) const {
+  return datasourceinfo_.Get(index);
+}
+inline ::Network::DataSourceInfo* GetDataSourcesInfoReply::mutable_datasourceinfo(int index) {
+  return datasourceinfo_.Mutable(index);
+}
+inline ::Network::DataSourceInfo* GetDataSourcesInfoReply::add_datasourceinfo() {
+  return datasourceinfo_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >&
+GetDataSourcesInfoReply::datasourceinfo() const {
+  return datasourceinfo_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >*
+GetDataSourcesInfoReply::mutable_datasourceinfo() {
+  return &datasourceinfo_;
+}
+
+// -------------------------------------------------------------------
+
+// DataSourceState
+
+// optional uint64 id = 1;
+inline bool DataSourceState::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DataSourceState::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DataSourceState::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DataSourceState::clear_id() {
+  id_ = GOOGLE_ULONGLONG(0);
+  clear_has_id();
+}
+inline ::google::protobuf::uint64 DataSourceState::id() const {
+  return id_;
+}
+inline void DataSourceState::set_id(::google::protobuf::uint64 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional int64 uptime = 2;
+inline bool DataSourceState::has_uptime() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DataSourceState::set_has_uptime() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DataSourceState::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DataSourceState::clear_uptime() {
+  uptime_ = GOOGLE_LONGLONG(0);
+  clear_has_uptime();
+}
+inline ::google::protobuf::int64 DataSourceState::uptime() const {
+  return uptime_;
+}
+inline void DataSourceState::set_uptime(::google::protobuf::int64 value) {
+  set_has_uptime();
+  uptime_ = value;
+}
+
+// optional int64 receivedDataSize = 3;
+inline bool DataSourceState::has_receiveddatasize() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DataSourceState::set_has_receiveddatasize() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DataSourceState::clear_has_receiveddatasize() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = GOOGLE_LONGLONG(0);
+  clear_has_receiveddatasize();
+}
+inline ::google::protobuf::int64 DataSourceState::receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline void DataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
+  set_has_receiveddatasize();
+  receiveddatasize_ = value;
+}
+
+// optional double dataReceivingRate = 4;
+inline bool DataSourceState::has_datareceivingrate() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DataSourceState::set_has_datareceivingrate() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DataSourceState::clear_has_datareceivingrate() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DataSourceState::clear_datareceivingrate() {
+  datareceivingrate_ = 0;
+  clear_has_datareceivingrate();
+}
+inline double DataSourceState::datareceivingrate() const {
+  return datareceivingrate_;
+}
+inline void DataSourceState::set_datareceivingrate(double value) {
+  set_has_datareceivingrate();
+  datareceivingrate_ = value;
+}
+
+// optional int64 receivedFramesCount = 5;
+inline bool DataSourceState::has_receivedframescount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DataSourceState::set_has_receivedframescount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DataSourceState::clear_has_receivedframescount() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DataSourceState::clear_receivedframescount() {
+  receivedframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_receivedframescount();
+}
+inline ::google::protobuf::int64 DataSourceState::receivedframescount() const {
+  return receivedframescount_;
+}
+inline void DataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
+  set_has_receivedframescount();
+  receivedframescount_ = value;
+}
+
+// optional bool processingEnabled = 6;
+inline bool DataSourceState::has_processingenabled() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DataSourceState::set_has_processingenabled() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DataSourceState::clear_has_processingenabled() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DataSourceState::clear_processingenabled() {
+  processingenabled_ = false;
+  clear_has_processingenabled();
+}
+inline bool DataSourceState::processingenabled() const {
+  return processingenabled_;
+}
+inline void DataSourceState::set_processingenabled(bool value) {
+  set_has_processingenabled();
+  processingenabled_ = value;
+}
+
+// optional int64 processedPacketCount = 7;
+inline bool DataSourceState::has_processedpacketcount() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DataSourceState::set_has_processedpacketcount() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DataSourceState::clear_has_processedpacketcount() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DataSourceState::clear_processedpacketcount() {
+  processedpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_processedpacketcount();
+}
+inline ::google::protobuf::int64 DataSourceState::processedpacketcount() const {
+  return processedpacketcount_;
+}
+inline void DataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
+  set_has_processedpacketcount();
+  processedpacketcount_ = value;
+}
+
+// optional int64 errorProtocolVersion = 8;
+inline bool DataSourceState::has_errorprotocolversion() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DataSourceState::set_has_errorprotocolversion() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DataSourceState::clear_has_errorprotocolversion() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errorprotocolversion();
+}
+inline ::google::protobuf::int64 DataSourceState::errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline void DataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
+  set_has_errorprotocolversion();
+  errorprotocolversion_ = value;
+}
+
+// optional int64 errorFramesQuantity = 9;
+inline bool DataSourceState::has_errorframesquantity() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DataSourceState::set_has_errorframesquantity() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DataSourceState::clear_has_errorframesquantity() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesquantity();
+}
+inline ::google::protobuf::int64 DataSourceState::errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline void DataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
+  set_has_errorframesquantity();
+  errorframesquantity_ = value;
+}
+
+// optional int64 errorFrameNo = 10;
+inline bool DataSourceState::has_errorframeno() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void DataSourceState::set_has_errorframeno() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void DataSourceState::clear_has_errorframeno() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void DataSourceState::clear_errorframeno() {
+  errorframeno_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframeno();
+}
+inline ::google::protobuf::int64 DataSourceState::errorframeno() const {
+  return errorframeno_;
+}
+inline void DataSourceState::set_errorframeno(::google::protobuf::int64 value) {
+  set_has_errorframeno();
+  errorframeno_ = value;
+}
+
+// optional int64 lostedPackets = 11;
+inline bool DataSourceState::has_lostedpackets() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void DataSourceState::set_has_lostedpackets() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void DataSourceState::clear_has_lostedpackets() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void DataSourceState::clear_lostedpackets() {
+  lostedpackets_ = GOOGLE_LONGLONG(0);
+  clear_has_lostedpackets();
+}
+inline ::google::protobuf::int64 DataSourceState::lostedpackets() const {
+  return lostedpackets_;
+}
+inline void DataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
+  set_has_lostedpackets();
+  lostedpackets_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// GetDataSourcesStatesRequest
+
+// repeated uint64 dataSourceIDs = 1;
+inline int GetDataSourcesStatesRequest::datasourceids_size() const {
+  return datasourceids_.size();
+}
+inline void GetDataSourcesStatesRequest::clear_datasourceids() {
+  datasourceids_.Clear();
+}
+inline ::google::protobuf::uint64 GetDataSourcesStatesRequest::datasourceids(int index) const {
+  return datasourceids_.Get(index);
+}
+inline void GetDataSourcesStatesRequest::set_datasourceids(int index, ::google::protobuf::uint64 value) {
+  datasourceids_.Set(index, value);
+}
+inline void GetDataSourcesStatesRequest::add_datasourceids(::google::protobuf::uint64 value) {
+  datasourceids_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+GetDataSourcesStatesRequest::datasourceids() const {
+  return datasourceids_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+GetDataSourcesStatesRequest::mutable_datasourceids() {
+  return &datasourceids_;
+}
+
+// -------------------------------------------------------------------
+
+// GetDataSourcesStatesReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetDataSourcesStatesReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetDataSourcesStatesReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetDataSourcesStatesReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetDataSourcesStatesReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetDataSourcesStatesReply::error() const {
+  return error_;
+}
+inline void GetDataSourcesStatesReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// repeated .Network.DataSourceState dataSourcesStates = 2;
+inline int GetDataSourcesStatesReply::datasourcesstates_size() const {
+  return datasourcesstates_.size();
+}
+inline void GetDataSourcesStatesReply::clear_datasourcesstates() {
+  datasourcesstates_.Clear();
+}
+inline const ::Network::DataSourceState& GetDataSourcesStatesReply::datasourcesstates(int index) const {
+  return datasourcesstates_.Get(index);
+}
+inline ::Network::DataSourceState* GetDataSourcesStatesReply::mutable_datasourcesstates(int index) {
+  return datasourcesstates_.Mutable(index);
+}
+inline ::Network::DataSourceState* GetDataSourcesStatesReply::add_datasourcesstates() {
+  return datasourcesstates_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >&
+GetDataSourcesStatesReply::datasourcesstates() const {
+  return datasourcesstates_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
+GetDataSourcesStatesReply::mutable_datasourcesstates() {
+  return &datasourcesstates_;
 }
 
 

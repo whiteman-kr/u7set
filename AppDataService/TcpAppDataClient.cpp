@@ -9,6 +9,18 @@ TcpAppDataClient::TcpAppDataClient(const HostAddressPort& serverAddressPort1, co
 
 TcpAppDataClient::~TcpAppDataClient()
 {
+	clearDataSources();
+}
+
+
+void TcpAppDataClient::clearDataSources()
+{
+	for(DataSource* source : m_dataSources)
+	{
+		delete source;
+	}
+
+	m_dataSources.clear();
 }
 
 
@@ -28,7 +40,9 @@ void TcpAppDataClient::onConnection()
 {
 	init();
 
-	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+	//sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+
+	sendRequest(ADS_GET_DATA_SOURCES_INFO);
 }
 
 
@@ -62,6 +76,14 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 {
 	switch(requestID)
 	{
+	case ADS_GET_DATA_SOURCES_INFO:
+		onGetDataSourcesInfoReply(replyData, replyDataSize);
+		break;
+
+	case ADS_GET_DATA_SOURCES_STATES:
+		onGetDataSourcesStatesReply(replyData, replyDataSize);
+		break;
+
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartReply(replyData, replyDataSize);
 		break;
@@ -78,10 +100,53 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		onGetAppSignalStateReply(replyData, replyDataSize);
 		break;
 
-
 	default:
 		assert(false);
 	}
+}
+
+
+void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	if (m_getDataSourcesInfoReply.error() != TO_INT(NetworkError::Success))
+	{
+		assert(false);
+		return;
+	}
+
+	clearDataSources();
+
+	int sourcesCount = m_getDataSourcesInfoReply.datasourceinfo_size();
+
+	for(int i = 0; i < sourcesCount; i++)
+	{
+		DataSource* source = new DataSource();
+
+		source->setDataSourceInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+
+		if (m_dataSources.contains(source->ID()))
+		{
+			assert(false);
+			delete source;
+			continue;
+		}
+
+		m_dataSources.insert(source->ID(), source);
+	}
+}
+
+
+void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
+{
+
 }
 
 
