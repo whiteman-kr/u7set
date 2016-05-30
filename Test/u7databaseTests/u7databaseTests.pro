@@ -55,7 +55,8 @@ SOURCES += main.cpp \
     DbControllerUserManagementTests.cpp \
     DbControllerFileManagementTests.cpp \
     ../../lib/WUtils.cpp \
-    ../../lib/DataProtocols.cpp
+    ../../lib/DataProtocols.cpp \
+    ../../lib/Crc.cpp
 
 HEADERS += \
     UserTests.h \
@@ -85,7 +86,8 @@ HEADERS += \
     DbControllerUserManagementTests.h \
     DbControllerFileManagementTests.h \
     ../../include/WUtils.h \
-    ../../include/DataProtocols.h
+    ../../include/DataProtocols.h \
+    ../../include/Crc.h
 
 #c++11 support for GCC
 #

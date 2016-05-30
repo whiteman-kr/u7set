@@ -25,8 +25,16 @@ int ConfigConnection::port() const
 	return m_port;
 }
 
+HostAddressPort ConfigConnection::address() const
+{
+	HostAddressPort h(m_ip, m_port);
+	return h;
+}
+
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
+	qRegisterMetaType<ConfigSettings>("ConfigSettings");
+
 	// Communication instance no
 	//
 	m_appInstanceSharedMemory.setKey("MonitorInstanceNo");
@@ -119,10 +127,6 @@ MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostA
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 
-	m_cfgLoaderThread->start();
-
-	m_cfgLoaderThread->enableDownloadConfiguration();
-
 	return;
 }
 
@@ -204,6 +208,20 @@ bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileDat
 	//
 	assert(false);
 	return false;
+}
+
+void MonitorConfigController::start()
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread);
+		return;
+	}
+
+	m_cfgLoaderThread->start();
+	m_cfgLoaderThread->enableDownloadConfiguration();
+
+	return;
 }
 
 void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)

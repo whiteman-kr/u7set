@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#dz_1si_v1">
+    <AfbElement StrId="#db1_si_v1">
         <Properties>
-            <Caption>dz_1si</Caption>
-            <Version>1.1</Version>
+            <Caption>db1_si</Caption>
+            <Version>1.0001</Version>
             <Implementation Version="1" OpIndex="14"/>
             <Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
             <Category>Other</Category>

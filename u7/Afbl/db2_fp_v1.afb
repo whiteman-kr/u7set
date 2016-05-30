@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#dz_2fp_v1">
+    <AfbElement StrId="#db2_fp_v1">
         <Properties>
-            <Caption>dz_2fp</Caption>
-            <Version>1.1</Version>
+            <Caption>db2_fp</Caption>
+            <Version>1.0001</Version>
             <Implementation Version="1" OpIndex="14"/>
             <Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
             <Category>Other</Category>
