@@ -523,6 +523,100 @@ void DbControllerFileTests::checkInTest()
 	db.close();
 }
 
+void DbControllerFileTests::checkOutTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file1;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileOne = "FirstFileCheckOut";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int firstFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(firstFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file1.setFileName(fileOne);
+	file1.setSize(instanceQuery.value("Size").toInt());
+	file1.setUserId(1);
+	file1.setParentId(1);
+	file1.setDetails(instanceQuery.value("details").toString());
+	file1.setFileId(query.value("fileId").toInt());
+
+	QString comment = "Testing function check_out of dbController";
+
+	ok = m_dbController->checkIn(file1, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file1, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(firstFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value(0).toInt() == 1, qPrintable("Error: function check_out was not create record in checkout table (one file)"));
+
+	DbFileInfo file2;
+	QString fileTwo = "SecondFileCheckOut";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwo));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int secondFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(secondFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file2.setFileName(fileTwo);
+	file2.setSize(instanceQuery.value("Size").toInt());
+	file2.setUserId(1);
+	file2.setParentId(1);
+	file2.setDetails(instanceQuery.value("details").toString());
+	file2.setFileId(query.value("fileId").toInt());
+
+	std::vector<DbFileInfo> files;
+
+	files.push_back(file1);
+	files.push_back(file2);
+
+	ok = m_dbController->checkIn(files, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(files, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileId = %1 OR fileId = %2").arg(firstFileId).arg(secondFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value(0).toInt() == 2, qPrintable("Error: function check_out was not create record in checkout table (two files)"));
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
