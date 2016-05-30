@@ -573,6 +573,8 @@ namespace Builder
 		bool copyAifmDataToRegBuf(const Module& module);
 
 		bool initOutModulesAppLogicDataInRegBuf();
+		bool initDOMAppLogicDataInRegBuf(const Module& module);
+		bool initAOMAppLogicDataInRegBuf(const Module& module);
 
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);

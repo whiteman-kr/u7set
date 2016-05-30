@@ -1074,24 +1074,113 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
 	{
+		bool result = true;
+
 		m_code.comment("Init output modules application logic data in RegBuf");
 		m_code.newLine();
 
-		for(Module module : m_modules)
+		for(const Module& module : m_modules)
 		{
 			if (!module.isOutputModule())
 			{
 				continue;
 			}
 
-			Command cmd;
+			switch(module.familyType())
+			{
+			case Hardware::DeviceModule::FamilyType::DOM:
+				result &= initDOMAppLogicDataInRegBuf(module);
+				break;
 
-			cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
+			case Hardware::DeviceModule::FamilyType::AOM:
+				result &= initAOMAppLogicDataInRegBuf(module);
+				break;
 
-			cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+			default:
+				assert(false);
 
-			m_code.append(cmd);
+				/*
+
+				Command cmd;
+
+				cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
+
+				cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+				m_code.append(cmd);
+
+				*/
+			}
 		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::initDOMAppLogicDataInRegBuf(const Module& module)
+	{
+		Comment comment;
+
+		comment.setComment(QString(tr("Init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		Command cmd;
+
+		const int FAULT_FLAGS_OFFSET1 = 1;
+		const int FAULT_FLAGS_OFFSET2 = 3;
+
+		cmd.movConst(module.appLogicRegDataOffset, 0);
+		cmd.setComment(QString(tr("init output signals 16..01")));
+		m_code.append(cmd);
+
+		cmd.mov(module.appLogicRegDataOffset + FAULT_FLAGS_OFFSET1,
+				module.moduleAppDataOffset + module.appLogicDataOffset + FAULT_FLAGS_OFFSET1);
+		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 16..01")));
+		m_code.append(cmd);
+
+		cmd.movConst(module.appLogicRegDataOffset + 2, 0);
+		cmd.setComment(QString(tr("init output signals 32..17")));
+		m_code.append(cmd);
+
+		cmd.mov(module.appLogicRegDataOffset + FAULT_FLAGS_OFFSET2,
+				module.moduleAppDataOffset + module.appLogicDataOffset + FAULT_FLAGS_OFFSET2);
+		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 32..17")));
+		m_code.append(cmd);
+
+		m_code.newLine();
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::initAOMAppLogicDataInRegBuf(const Module& module)
+	{
+		Comment comment;
+
+		comment.setComment(QString(tr("Init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		Command cmd;
+
+		cmd.setMem(module.appLogicRegDataOffset, 0, module.appLogicRegDataSize - 2);
+		cmd.setComment(QString(tr("init output signals 32..01 to 0")));
+		m_code.append(cmd);
+
+		const int ADC_DAC_COMPARISON_RESULT_OFFSET = 32;
+
+		cmd.mov(module.appLogicRegDataOffset + module.appLogicRegDataSize - 2,
+				module.moduleAppDataOffset + ADC_DAC_COMPARISON_RESULT_OFFSET);
+		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 16..01")));
+		m_code.append(cmd);
+
+		cmd.mov(module.appLogicRegDataOffset + module.appLogicRegDataSize - 1,
+				module.moduleAppDataOffset + ADC_DAC_COMPARISON_RESULT_OFFSET + 1);
+		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 32..17")));
+		m_code.append(cmd);
 
 		m_code.newLine();
 
@@ -2943,12 +3032,17 @@ namespace Builder
 
 		assert(module.appLogicDataSize == module.appLogicRegDataSize);
 
-		cmd.movMem(module.moduleAppDataOffset, module.appLogicRegDataOffset, module.appLogicDataSize);
+		cmd.mov(module.rxTxDataOffset, module.appLogicRegDataOffset);
+		cmd.setComment(QString(tr("copy signals 16..01")));
 		m_code.append(cmd);
 
-		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
+		cmd.mov(module.rxTxDataOffset + 1, module.appLogicRegDataOffset + 2);
+		cmd.setComment(QString(tr("copy signals 32..17")));
+		m_code.append(cmd);
+
+		if (module.appLogicDataSizeWithReserve - 2 > 0)
 		{
-			cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
+			cmd.setMem(module.moduleAppDataOffset + 2, module.appLogicDataSizeWithReserve - 2, 0);
 			cmd.setComment(QString(tr("set reserv data to 0")));
 
 			m_code.append(cmd);
@@ -3098,7 +3192,7 @@ namespace Builder
 				cmd.setComment("");
 				m_code.append(cmd);
 
-				cmd.readFuncBlock(module.moduleAppDataOffset + deviceSignal->valueOffset(), appFb->opcode(), appFb->instance(),
+				cmd.readFuncBlock(module.rxTxDataOffset + deviceSignal->valueOffset(), appFb->opcode(), appFb->instance(),
 								fbScal.outputSignalIndex, appFb->caption());
 				m_code.append(cmd);
 

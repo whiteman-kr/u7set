@@ -207,7 +207,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	int hashesCount = m_getAppSignalStateRequest.signalhashes_size();
 
-	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+	if (hashesCount > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
 		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalStateReply);
