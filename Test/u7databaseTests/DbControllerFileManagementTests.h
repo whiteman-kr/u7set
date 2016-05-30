@@ -16,6 +16,7 @@ private slots:
 	void addFilesTest();
 	void deleteFileTest();
 	void getFileInfo();
+	void checkInTest();
 	void cleanupTestCase();
 
 private:
