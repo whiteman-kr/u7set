@@ -397,11 +397,12 @@ int Metaparser::writeToHtml()
 		}
 
 		dataForOutputFile << "\n\t<a id=\"" << htmlAnchor << "\"></a>"
-						  << "\n\t<br><b>" << issueCode << ": </b>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":")
-						  << "\n\t<br><b>" << issueType << ": </b>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":")
-						  << "\n\t<br><b>" << title << ": </b>" << block.title.replace("\\n", "<br>").remove(title + ":")
-						  << "\n\t<br><b>" << parameters << ": </b>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":")
-						  << "\n\t<br><b>" << description << ": </b>" << block.description.replace("\\n", "<br>").remove(description + ":");
+						  << "<table border=\"1\">"
+						  << "\n\t<tr><td>" << issueCode << ": </td><td>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":") << "</td></tr>"
+						  << "\n\t<tr><td>" << issueType << ": </td><td>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":") << "</td></tr>"
+						  << "\n\t<tr><td>" << title << ": </td><td>" << block.title.replace("\\n", "<br>").remove(title + ":") << "</td></tr>"
+						  << "\n\t<tr><td>" << parameters << ": </td><td>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":") << "</td></tr>"
+						  << "\n\t<tr><td>" << description << ": </td><td>" << block.description.replace("\\n", "<br>").remove(description + ":") << "</td></tr></table>";
 
 		if (block.error == true)
 		{
