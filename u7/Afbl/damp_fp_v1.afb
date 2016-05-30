@@ -3,7 +3,7 @@
     <AfbElement StrId="#damp_fp_v1">
         <Properties>
             <Caption>damp_fp</Caption>
-            <Version>1.0001</Version>
+            <Version>1.0002</Version>
             <Implementation Version="104" OpIndex="19"/>
             <Description>Damper Block with float data format</Description>
             <Category>Damper</Category>
@@ -25,7 +25,7 @@
             <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="17" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_del" Caption="Value" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>5</Value>
                 <Default>0</Default>
                 <LowLimit>0</LowLimit>
