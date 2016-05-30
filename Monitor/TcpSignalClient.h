@@ -6,11 +6,14 @@
 #include "../include/Hash.h"
 #include "../Proto/network.pb.h"
 #include "../include/AppSignalManager.h"
+#include "MonitorConfigController.h"
 
 class TcpSignalClient : public Tcp::Client
 {
+	Q_OBJECT
+
 public:
-	TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 	virtual ~TcpSignalClient();
 
 protected:
@@ -43,8 +46,12 @@ protected:
 	void requestSignalState(int startIndex);
 	void processSignalState(const QByteArray& data);
 
+protected slots:
+	void slot_configurationArrived(ConfigSettings configuration);
+
 private:
 	int m_startStateTimerId = -1;
+	MonitorConfigController* m_cfgController = nullptr;
 
 private:
 	// Cache protobug messages

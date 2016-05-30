@@ -3,6 +3,7 @@
 
 #include "MonitorConfigController.h"
 #include "SchemaManager.h"
+#include "TcpSignalClient.h"
 
 class MonitorCentralWidget;
 
@@ -11,7 +12,7 @@ class MonitorMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MonitorMainWindow(MonitorConfigController* configController, QWidget* parent = nullptr);
+	MonitorMainWindow(QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
 	// Events
@@ -58,8 +59,11 @@ protected:
 	//
 private:
 
-	MonitorConfigController* m_configController = nullptr;
+	MonitorConfigController m_configController;
 	SchemaManager m_schemaManager;
+
+	TcpSignalClient* m_tcpSignalClient = nullptr;
+	SimpleThread* m_tcpClientThread = nullptr;
 
 	// File menu
 	//

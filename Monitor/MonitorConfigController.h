@@ -17,6 +17,8 @@ public:
 	QString ip() const;
 	int port() const;
 
+	HostAddressPort address() const;
+
 protected:
 	QString m_equipmentId;
 	QString m_ip;
@@ -33,6 +35,8 @@ struct ConfigSettings
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
+
+
 
 class MonitorConfigController : public QObject
 {
@@ -60,6 +64,9 @@ signals:
 
 	// slots
 	//
+public slots:
+	void start();
+
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
