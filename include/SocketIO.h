@@ -478,12 +478,20 @@ const quint32 ADS_GET_APP_SIGNAL_LIST_NEXT = 0x1201;
 const quint32 ADS_GET_APP_SIGNAL_PARAM = 0x1301;
 const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1302;
 
-
 // Limiters and other constants
 //
 const int ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART = 1000;
 const int ADS_GET_APP_SIGNAL_PARAM_MAX = 500;
 const int ADS_GET_APP_SIGNAL_STATE_MAX = 2000;
+
+
+// Data Sources info/state communication, Port PORT_APP_DATA_SERVICE_CLIENT_REQUEST
+//
+const quint32 ADS_GET_DATA_SOURCES_INFO = 0x1401;
+const quint32 ADS_GET_DATA_SOURCES_STATES = 0x1402;
+
+const int ADS_GET_DATA_SOURCES_STATES_MAX = 1000;
+
 
 enum class NetworkError
 {
@@ -492,6 +500,7 @@ enum class NetworkError
 	RequestParamExceed,
 	RequestStateExceed,
 	ParseRequestError,
+	RequestDataSourcesStatesExceed,
 };
 
 //int operator= (NetworkError e)

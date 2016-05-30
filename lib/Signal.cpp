@@ -190,6 +190,8 @@ void Signal::InitProperties()
 	static const QString dataSizeCaption("DataSize");
 	static const QString lowADCCaption("LowADC");
 	static const QString highADCCaption("HighADC");
+	static const QString lowDACCaption("LowDAC");
+	static const QString highDACCaption("HighDAC");
 	static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
 	static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
 	static const QString unitCaption("Unit");
@@ -281,6 +283,10 @@ void Signal::InitProperties()
 		lowADCProperty->setCategory(signalProcessingCategory);
 		auto highADCProperty = ADD_PROPERTY_GETTER_SETTER(int, highADCCaption, true, Signal::highADC, Signal::setHighADC);
 		highADCProperty->setCategory(signalProcessingCategory);
+		auto lowDACProperty = ADD_PROPERTY_GETTER_SETTER(int, lowDACCaption, true, Signal::lowADC, Signal::setLowADC);
+		lowDACProperty->setCategory(signalProcessingCategory);
+		auto highDACProperty = ADD_PROPERTY_GETTER_SETTER(int, highDACCaption, true, Signal::highADC, Signal::setHighADC);
+		highDACProperty->setCategory(signalProcessingCategory);
 
 		auto lowEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER(double, lowEngeneeringUnitsCaption, true, Signal::lowEngeneeringUnits, Signal::setLowEngeneeringUnits);
 		lowEngeneeringUnitsProperty->setCategory(signalProcessingCategory);

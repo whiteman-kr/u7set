@@ -179,8 +179,45 @@ void UserManagementDialog::on_userChanged(const QString & username)
 
 	if (m_currentUser.isAdminstrator() == false)
 	{
-		ui->isAdministrator->setEnabled(false);		// Just Administrator has rights to chnge there fileds
+		ui->isAdministrator->setEnabled(false);		// Just Administrator has rights to change there fileds
 		ui->isDisabled->setEnabled(false);
+	}
+
+	if (username == m_currentUser.username())
+	{
+		ui->oldPasswordEdit->setEnabled(true);
+	}
+	else if (m_currentUser.isAdminstrator())
+	{
+		ui->oldPasswordEdit->setEnabled(false);
+	}
+
+	if (username == m_currentUser.username() || username == "Administrator")
+	{
+		ui->isAdministrator->setEnabled(false);
+		ui->isReadonly->setEnabled(false);
+		ui->isDisabled->setEnabled(false);
+	}
+	else
+	{
+		ui->isReadonly->setEnabled(m_currentUser.isAdminstrator());
+		ui->isAdministrator->setEnabled(m_currentUser.isAdminstrator());
+		ui->isDisabled->setEnabled(m_currentUser.isAdminstrator());
+	}
+
+	if (username == "Administrator" && m_currentUser.username() != "Administrator")
+	{
+		ui->passwordConfirmationEdit->setEnabled(false);
+		ui->newPasswordEdit->setEnabled(false);
+		ui->firstNameEdit->setEnabled(false);
+		ui->lastNameEdit->setEnabled(false);
+	}
+	else
+	{
+		ui->passwordConfirmationEdit->setEnabled(true);
+		ui->newPasswordEdit->setEnabled(true);
+		ui->firstNameEdit->setEnabled(true);
+		ui->lastNameEdit->setEnabled(true);
 	}
 
 	disableApply();
@@ -296,6 +333,27 @@ void UserManagementDialog::applyChanges(const QString& username)
 
 		if (changePassword == false)
 		{
+			ui->oldPasswordEdit->setFocus();
+			return;
+		}
+
+		ui->oldPasswordEdit->clear();
+		ui->newPasswordEdit->clear();
+		ui->passwordConfirmationEdit->clear();
+	}
+
+	// Check password if user who change record is administrator
+	//
+	if (m_currentUser.isAdminstrator() &&
+		m_currentUser.username() != username &&
+		oldPassword.isEmpty() == true &&
+		newPassword.isEmpty() == false &&
+		passwordConfirmation.isEmpty() == false)
+	{
+		changePassword = PasswordService::checkPassword(newPassword, passwordConfirmation, true, this);
+
+		if (changePassword == false)
+		{
 			return;
 		}
 	}
@@ -344,7 +402,7 @@ void UserManagementDialog::on_buttonBox_clicked(QAbstractButton* button)
 		if (dbController()->currentUser().isAdminstrator() || dbController()->currentUser().username() == username)
 		{
 			applyChanges(username);
-			fillUserList(username);
+			//fillUserList(username);
 		}
 
 		if (buttonRole == QDialogButtonBox::AcceptRole)

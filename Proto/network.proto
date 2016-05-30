@@ -58,3 +58,70 @@ message GetAppSignalStateReply
 }
 
 
+// Getting Data Sources info
+//
+
+message DataSourceInfo
+{
+    optional uint64 id = 1;		    // unique id
+    optional string equipmentID = 2;
+    optional string caption = 3;
+    optional int32 dataType = 4;
+    optional string ip = 5;
+    optional int32 port = 6;
+    optional int32 channel = 7;
+    optional int32 subsystemID = 8;
+    optional string subsystem = 9;
+
+    optional int32 lmNumber = 10;
+    optional int32 lmModuleType = 11;
+    optional string lmAdapterID = 12;
+    optional bool lmDataEnable = 13;
+    optional uint64 lmDataID = 14;
+}
+
+message GetDataSourcesInfoRequest
+{
+}
+
+
+message GetDataSourcesInfoReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated DataSourceInfo dataSourceInfo = 2;
+}
+
+
+// Getting Data Sources states
+//
+
+message DataSourceState
+{
+    optional uint64 id = 1;			    // unique id
+    optional int64 uptime = 2;
+    optional int64 receivedDataSize = 3;
+    optional double dataReceivingRate = 4;	    // bytes/sec
+    optional int64 receivedFramesCount = 5;
+    optional bool processingEnabled = 6;
+    optional int64 processedPacketCount = 7;
+    optional int64 errorProtocolVersion = 8;
+    optional int64 errorFramesQuantity = 9;
+    optional int64 errorFrameNo = 10;
+    optional int64 lostedPackets = 11;
+}
+
+
+message GetDataSourcesStatesRequest
+{
+    repeated uint64 dataSourceIDs = 1;
+}
+
+
+message GetDataSourcesStatesReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated DataSourceState dataSourcesStates = 2;
+}
+
+
+

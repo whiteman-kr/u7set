@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     SendTuningFrameWidget.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    ../lib/Crc.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -61,7 +62,8 @@ HEADERS  += SourceListWidget.h \
     ../include/XmlHelper.h \
     SendTuningFrameWidget.h \
     ../include/Queue.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    ../include/Crc.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

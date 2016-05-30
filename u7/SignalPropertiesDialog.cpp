@@ -152,25 +152,35 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 			signal->propertyByCaption("TuningDefaultValue")->setVisible(false);
 		}
 
-		if (signal->isAnalog() && !signal->isInput())
+		if (signal->isAnalog())
 		{
-			signal->propertyByCaption("LowValidRange")->setVisible(false);
-			signal->propertyByCaption("HighValidRange")->setVisible(false);
-			signal->propertyByCaption("FilteringTime")->setVisible(false);
-			signal->propertyByCaption("SpreadTolerance")->setVisible(false);
-		}
+			if (!signal->isInput())
+			{
+				signal->propertyByCaption("LowValidRange")->setVisible(false);
+				signal->propertyByCaption("HighValidRange")->setVisible(false);
+				signal->propertyByCaption("FilteringTime")->setVisible(false);
+				signal->propertyByCaption("SpreadTolerance")->setVisible(false);
+			}
 
-		if (signal->isAnalog() && signal->isInternal())
-		{
-			signal->propertyByCaption("LowADC")->setVisible(false);
-			signal->propertyByCaption("HighADC")->setVisible(false);
-			signal->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
-			signal->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
-		}
+			if (signal->isInternal())
+			{
+				signal->propertyByCaption("LowADC")->setVisible(false);
+				signal->propertyByCaption("HighADC")->setVisible(false);
+				signal->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
+				signal->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
+			}
 
-		if (signal->isAnalog() && !signal->isOutput())
-		{
-			signal->propertyByCaption("OutputMode")->setVisible(false);
+			if (signal->isOutput())
+			{
+				signal->propertyByCaption("LowADC")->setVisible(false);
+				signal->propertyByCaption("HighADC")->setVisible(false);
+			}
+			else
+			{
+				signal->propertyByCaption("LowDAC")->setVisible(false);
+				signal->propertyByCaption("HighDAC")->setVisible(false);
+				signal->propertyByCaption("OutputMode")->setVisible(false);
+			}
 		}
 		m_objList.push_back(signal);
 	}

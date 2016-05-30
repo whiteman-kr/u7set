@@ -29,6 +29,9 @@ private:
 	quint64 calc(const quint8* data, qint64 size);
 
 public:
+	Crc64();
+
+	quint64 add(int val);
 	quint64 add(double val);
 	quint64 add(const QString& str);
 

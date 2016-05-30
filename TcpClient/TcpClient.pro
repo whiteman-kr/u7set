@@ -34,7 +34,12 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../lib/Crc.cpp \
+    ../lib/DataSource.cpp \
+    ../lib/Queue.cpp \
+    ../lib/WUtils.cpp \
+    ../lib/DataProtocols.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
@@ -56,7 +61,12 @@ HEADERS  += TcpClientMainWindow.h \
     ../include/XmlHelper.h \
     ../include/ProtobufHelper.h \
     ../include/ProtoSerialization.h \
-    ../include/Types.h
+    ../include/Types.h \
+    ../include/Crc.h \
+    ../include/DataSource.h \
+    ../include/Queue.h \
+    ../include/WUtils.h \
+    ../include/DataProtocols.h
 
 FORMS    += TcpClientMainWindow.ui
 

@@ -96,6 +96,8 @@ void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double va
 		m_state.value = value;
 
 		qDebug() << "State changes " << m_signal->appSignalID() << " val = " << m_state.value  << " flags = " << m_state.flags.all;
+		// <<
+		 //"reg " << m_signal->regValueAddr().offset() << ":" << m_signal->regValueAddr().bit();
 	}
 }
 

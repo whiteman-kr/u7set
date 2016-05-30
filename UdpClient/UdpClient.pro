@@ -76,7 +76,8 @@ SOURCES += \
     ../lib/XmlHelper.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    ../lib/Crc.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -95,7 +96,8 @@ HEADERS  += MainWindow.h \
     ../include/XmlHelper.h \
     ../include/Queue.h \
     ../include/DataProtocols.h \
-    ../include/WUtils.h
+    ../include/WUtils.h \
+    ../include/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 

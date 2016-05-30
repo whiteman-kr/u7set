@@ -5,8 +5,14 @@
 
 namespace Builder
 {
-	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter)
+	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(	DbController* db,
+															Hardware::SubsystemStorage *subsystems,
+															Hardware::Software* software,
+															SignalSet* signalSet,
+															Hardware::EquipmentSet* equipment,
+															BuildResultWriter* buildResultWriter) :
+		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
+		m_subsystems(subsystems)
 	{
 	}
 
@@ -386,6 +392,14 @@ namespace Builder
 
 				result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, m_log);
 
+				int lmNumber = 0;
+				int lmChannel = 0;
+				QString lmSubsystem;
+
+				result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
+				result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
+				result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
+
 				if (result == false)
 				{
 					break;
@@ -393,11 +407,30 @@ namespace Builder
 
 				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
 				{
+					int lmSubsystemID = 0;
+
+					int subsystemsCount = m_subsystems->count();
+
+					for(int i = 0; i < subsystemsCount; i++)
+					{
+						std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+
+						if (subsystem->subsystemId() == lmSubsystem)
+						{
+							lmSubsystemID = subsystem->key();
+							break;
+						}
+					}
+
 					DataSource ds;
 
 					ds.setLmChannel(channel);
+					ds.setLmSubsystem(lmSubsystem);
+					ds.setLmSubsystemID(lmSubsystemID);
+					ds.setLmNumber(lmNumber);
 					ds.setLmDataType(DataSource::DataType::App);
 					ds.setLmEquipmentID(lm->equipmentIdTemplate());
+					ds.setLmModuleType(lm->moduleType());
 					ds.setLmCaption(lm->caption());
 					ds.setLmAdapterID(lmNetProperties.adapterID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);

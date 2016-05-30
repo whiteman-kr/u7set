@@ -113,6 +113,17 @@ quint64 Crc::crc64Reverse(const void* src, qint64 size)
 //
 // -------------------------------------------------------------------------------------
 
+Crc64::Crc64()
+{
+}
+
+
+quint64 Crc64::add(int val)
+{
+	return calc(reinterpret_cast<const quint8*>(&val), sizeof(int));
+}
+
+
 quint64 Crc64::add(double val)
 {
 	return calc(reinterpret_cast<const quint8*>(&val), sizeof(double));
