@@ -141,7 +141,7 @@ namespace Builder
 		m_appWordAdressed.memory = appLogicWordData;
 		m_appWordAdressed.memory.lock();
 
-		m_appWordAdressed.lmDiagnostics.setStartAddress(appLogicWordData.startAddress());
+//		m_appWordAdressed.lmDiagnostics.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmInputs.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmOutputs.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.regAnalogSignals.setStartAddress(appLogicWordData.startAddress());
@@ -183,12 +183,12 @@ namespace Builder
 
 		// LM diagnostics
 
-		m_appWordAdressed.lmDiagnostics.setStartAddress(m_appWordAdressed.memory.startAddress());
-		m_appWordAdressed.lmDiagnostics.setSizeW(m_lmDiagnostics.memory.sizeW());
+		//m_appWordAdressed.lmDiagnostics.setStartAddress(m_appWordAdressed.memory.startAddress());
+		//m_appWordAdressed.lmDiagnostics.setSizeW(m_lmDiagnostics.memory.sizeW());
 
 		// LM input discrete signals
 
-		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.lmDiagnostics.nextAddress());
+		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.memory.startAddress());
 		m_appWordAdressed.lmInputs.setSizeW(m_lmInOuts.memory.sizeW());
 
 		// LM output discrete signals
@@ -323,7 +323,7 @@ namespace Builder
 
 		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory");
 
-		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
+		//		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
 		addRecord(memFile, m_appWordAdressed.lmInputs, "LM's inputs state");
 		addRecord(memFile, m_appWordAdressed.lmOutputs, "LM's outputs state");
 

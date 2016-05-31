@@ -274,6 +274,11 @@ int Metaparser::writeToHtml()
 	dataForOutputFile << "\n<head>";
 	dataForOutputFile << "\n\t<title>Metaparser_Log_" + fileName + "</title>";
 	dataForOutputFile << "\n</head>";
+	dataForOutputFile << "\n<style>"
+					  << "\ntd {"
+					  << "\n\tvertical-align: top;"
+					  << "\n\t}"
+					  << "\n</style>";
 	dataForOutputFile << "\n<body>";
 	dataForOutputFile << "\n\t<h3>Issues</h3>";
 	dataForOutputFile << "\n\t<table>";
@@ -397,11 +402,16 @@ int Metaparser::writeToHtml()
 		}
 
 		dataForOutputFile << "\n\t<a id=\"" << htmlAnchor << "\"></a>"
-						  << "\n\t<br><b>" << issueCode << ": </b>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":")
-						  << "\n\t<br><b>" << issueType << ": </b>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":")
-						  << "\n\t<br><b>" << title << ": </b>" << block.title.replace("\\n", "<br>").remove(title + ":")
-						  << "\n\t<br><b>" << parameters << ": </b>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":")
-						  << "\n\t<br><b>" << description << ": </b>" << block.description.replace("\\n", "<br>").remove(description + ":");
+						  << "<table>"
+						  << "\n\t<tr><td>" << issueCode << ": </td><td>" << block.issueCode.replace("\\n", "<br>").remove(issueCode + ":").trimmed() << "</td></tr>"
+						  << "\n\t<tr><td>" << issueType << ": </td><td>" << block.issueType.replace("\\n", "<br>").remove(issueType + ":").trimmed() << "</td></tr>"
+						  << "\n\t<tr><td>" << title << ": </td><td>" << block.title.replace("\\n", "<br>").remove(title + ":").trimmed() << "</td></tr>";
+		if (block.parameters.replace("\\n", "<br>").remove(parameters + ":").trimmed().isEmpty() == false)
+		{
+			dataForOutputFile << "\n\t<tr><td>" << parameters << ": </td><td>" << block.parameters.replace("\\n", "<br>").remove(parameters + ":").trimmed() << "</td></tr>";
+		}
+
+		dataForOutputFile << "\n\t<tr><td>" << description << ": </td><td>" << block.description.replace("\\n", "<br>").remove(description + ":").trimmed() << "</td></tr></table>";
 
 		if (block.error == true)
 		{
@@ -411,7 +421,7 @@ int Metaparser::writeToHtml()
 			dataForOutputFile << "</font>";
 		}
 
-		dataForOutputFile << "\n\t<br><br><br>";
+		dataForOutputFile << "\n\t<br>";
 	}
 
 	// End writing document

@@ -110,6 +110,15 @@ namespace Builder
 
 		void errALC5000(QString appSignalID, QUuid itemUuid);					// Signal identifier '%1' is not found.
 		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
+		void errALC5002(QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined.
+		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output '%1.%2' is connected to discrete signal '%3'.
+		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+		void errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data size.
+		void errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Discrete output '%1.%2' is connected to analog signal '%3'.
+		void errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Discrete signal '%1' is connected to analog input '%2.%3'.
+		void errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data format.
+		void errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
+		void errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Analog signal '%1' is connected to discrete input '%2.%3'.
 
 		// EQP			Equipment issues						6000-6999
 		//

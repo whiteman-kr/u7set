@@ -130,7 +130,7 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea lmDiagnostics;					// copying from this->lmDiagnostics
+			//MemoryArea lmDiagnostics;					// copying from this->lmDiagnostics
 			MemoryArea lmInputs;						// reads from this->m_lmInOuts area
 			MemoryArea lmOutputs;						// writes to this->m_lmInOuts ares
 			MemoryArea module[MODULES_COUNT];			// depends from chassis	configuration
@@ -186,7 +186,7 @@ namespace Builder
 
 		// rb_* - adrresses and sizes in Registration Buffer
 		//
-		int rb_lmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
+		//int rb_lmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
 		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
 
 		int rb_lmInputsAddress() const { return m_appWordAdressed.lmInputs.startAddress(); }

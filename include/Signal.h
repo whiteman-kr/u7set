@@ -130,7 +130,7 @@ private:
 	double m_highEngeneeringUnits = 100;
 	int m_unitID = NO_UNIT_ID;
 	double m_lowValidRange = 0;
-	double m_highValidRange = 0;
+	double m_highValidRange = 100;
 	double m_unbalanceLimit = 0;
 	double m_inputLowLimit = 0;
 	double m_inputHighLimit = 0;
