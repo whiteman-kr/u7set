@@ -18,6 +18,7 @@ private slots:
 	void getFileInfo();
 	void checkInTest();
 	void checkOutTest();
+	void fileHasChildrenTest();
 	void cleanupTestCase();
 
 private:
