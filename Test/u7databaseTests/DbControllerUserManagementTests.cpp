@@ -342,4 +342,9 @@ void DbControllerUserTests::cleanupTestCase()
 	QVERIFY2 (ok == true, qPrintable ("Error: can not close project: " + m_dbController->lastError()));
 	ok = m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not delete project: " + m_dbController->lastError()));
+
+	for (QString connection : QSqlDatabase::connectionNames())
+	{
+		QSqlDatabase::removeDatabase(connection);
+	}
 }
