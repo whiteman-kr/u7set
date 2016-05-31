@@ -54,7 +54,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 8;		// IP address of LAN controller is written even service is not specified
 //var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
 //var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
-var configScriptVersion = 11;		// If software for LM ethernet controller is not found, default values are used
+//var configScriptVersion = 11;		// If software for LM ethernet controller is not found, default values are used
+var configScriptVersion = 12;		// DiagDataSize changed to TxDiagDataSize
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -423,7 +424,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			log.errCFG3000("EquipmentID", "I/O_module");
 			return false;
 		}
-		var checkProperties = ["ModuleFamily", "Place", "DiagDataSize"];
+		var checkProperties = ["ModuleFamily", "Place"];
 		for (var cp = 0; cp < checkProperties.length; cp++)
 		{
 			if (ioModule.propertyValue(checkProperties[cp]) == undefined)
@@ -480,7 +481,13 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 				return false;
 			}
 			
-			var diagWordsIoCount = ioModule.propertyValue("DiagDataSize");
+			var diagWordsIoCount = ioModule.propertyValue("TxDiagDataSize");
+			if (diagWordsIoCount == null)
+			{
+				log.errCFG3000("TxDiagDataSize", ioModule.propertyValue("EquipmentID"));
+				return false;
+			}
+			
 			diagWordsCount += diagWordsIoCount;
         }
     }
