@@ -5317,8 +5317,8 @@ namespace Builder
 
 	bool AppSignal::isComputed() const
 	{
-		return true;
-	//	return m_computed;
+	//	return true;
+		return m_computed;
 	}
 
 
@@ -5331,8 +5331,6 @@ namespace Builder
 
 		return QUuid();
 	}
-
-
 
 
 	// ---------------------------------------------------------------------------------------
@@ -5473,6 +5471,10 @@ namespace Builder
 		else
 		{
 			appSignal = new AppSignal(outPinGuid, signalType, dataFormat, s.size(), appFb, strID);
+
+			// shadow signals always connected to output pin, therefore considered computed
+			//
+			appSignal->setComputed();
 
 			m_signalStrIdMap.insert(strID, appSignal);
 
