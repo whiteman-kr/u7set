@@ -58,7 +58,6 @@ protected:
 	// Data
 	//
 private:
-
 	MonitorConfigController m_configController;
 	SchemaManager m_schemaManager;
 
@@ -92,9 +91,20 @@ private:
 	// Controls
 	//
 	QToolBar* m_toolBar = nullptr;
+
 	QLabel* m_pStatusBarInfo = nullptr;
 	QLabel* m_pStatusBarConnectionStatistics = nullptr;
 	QLabel* m_pStatusBarConnectionState = nullptr;
 };
+
+//class SchemaListWidget : public QWidget
+//{
+//public:
+//	SchemaListWidget(QWidget* parent = nullptr);
+//	virtual ~SchemaListWidget();
+
+////	QLabel* m_label = nullptr;
+////	* m_label = nullptr;
+//}
 
 #endif // MONITORMAINWINDOW_H
