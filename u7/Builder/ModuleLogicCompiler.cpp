@@ -3138,6 +3138,34 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
+		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, OUTPUT_CONTROLLER_SUFFIX, m_log);
+
+		if (controller == nullptr)
+		{
+			return false;
+		}
+
+		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
+
+		// sort signals by place ascending
+		//
+
+		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
+
+		for(int i = 0; i < moduleSignalsCount - 1; i++)
+		{
+			for(int j = i + 1; j < moduleSignalsCount; j++)
+			{
+				if (moduleSignals[i]->place() > moduleSignals[j]->place())
+				{
+					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
+					moduleSignals[i] = moduleSignals[j];
+					moduleSignals[j] = tmp;
+				}
+			}
+
+		}
+
 		msg = QString(tr("Copying AOM data place %1 to modules memory")).arg(module.place);
 
 		if (m_convertUsedInOutAnalogSignalsOnly == true)
@@ -3162,27 +3190,6 @@ namespace Builder
 		}
 
 		bool result = true;
-
-		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
-
-		// sort signals by place ascending
-		//
-
-		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
-
-		for(int i = 0; i < moduleSignalsCount - 1; i++)
-		{
-			for(int j = i + 1; j < moduleSignalsCount; j++)
-			{
-				if (moduleSignals[i]->place() > moduleSignals[j]->place())
-				{
-					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
-					moduleSignals[i] = moduleSignals[j];
-					moduleSignals[j] = tmp;
-				}
-			}
-
-		}
 
 		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 		{
