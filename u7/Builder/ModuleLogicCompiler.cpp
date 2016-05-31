@@ -11,6 +11,11 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
+	const char* ModuleLogicCompiler::INPUT_CONTROLLER_SUFFIX = "_CTRLIN";
+	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
+	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
+
+
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
 		m_memoryMap(appLogicCompiler.m_log),
@@ -488,6 +493,8 @@ namespace Builder
 
 			if (!calculateInternalSignalsAddresses()) break;
 
+			if (!setOutputSignalsAsComputed()) break;
+
 			result = true;
 		}
 		while(false);
@@ -498,6 +505,11 @@ namespace Builder
 
 	void ModuleLogicCompiler::dumApplicationLogicItems()
 	{
+		if (m_moduleLogic == nullptr)
+		{
+			return;
+		}
+
 		const std::list<AppLogicItem>& logicItems = m_moduleLogic->items();
 
 		if (logicItems.empty() == true)
@@ -941,6 +953,39 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
+		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
+
+		if (controller == nullptr)
+		{
+			return false;
+		}
+
+		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
+
+		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
+
+		if (moduleSignalsCount != 128)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("AIM module must have 128 input signals")));
+			return false;
+		}
+
+		// sort signals by place ascending
+		//
+		for(int i = 0; i < moduleSignalsCount - 1; i++)
+		{
+			for(int j = i + 1; j < moduleSignalsCount; j++)
+			{
+				if (moduleSignals[i]->place() > moduleSignals[j]->place())
+				{
+					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
+					moduleSignals[i] = moduleSignals[j];
+					moduleSignals[j] = tmp;
+				}
+			}
+
+		}
+
 		msg = QString(tr("Copying AIM data place %1 to RegBuf")).arg(module.place);
 
 		if (m_convertUsedInOutAnalogSignalsOnly == true)
@@ -968,33 +1013,6 @@ namespace Builder
 		}
 
 		bool result = true;
-
-		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
-
-		// sort signals by place ascending
-		//
-
-		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
-
-		if (moduleSignalsCount != 128)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("AIM module must have 128 input signals")));
-			return false;
-		}
-
-		for(int i = 0; i < moduleSignalsCount - 1; i++)
-		{
-			for(int j = i + 1; j < moduleSignalsCount; j++)
-			{
-				if (moduleSignals[i]->place() > moduleSignals[j]->place())
-				{
-					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
-					moduleSignals[i] = moduleSignals[j];
-					moduleSignals[j] = tmp;
-				}
-			}
-
-		}
 
 		// copy validity words
 		//
@@ -1182,18 +1200,24 @@ namespace Builder
 		const int OUT_SIGNALS_OFFSET2 = 2;
 		const int TX_FAULT_FLAGS_OFFSET2 = 3;
 
-		cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET1, 0);
+		//
+		// output signals initialization has been removed
+		// because if this signals involving in back loop
+		// its state from previous work cycle will be lost !!!
+		//
+
+		/*cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET1, 0);
 		cmd.setComment(QString(tr("init output signals 16..01")));
-		m_code.append(cmd);
+		m_code.append(cmd);*/
 
 		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET1,
 				module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET1);
 		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 16..01")));
 		m_code.append(cmd);
 
-		cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET2, 0);
+		/*cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET2, 0);
 		cmd.setComment(QString(tr("init output signals 32..17")));
-		m_code.append(cmd);
+		m_code.append(cmd);*/
 
 		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET2,
 		module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET2);
@@ -1230,9 +1254,15 @@ namespace Builder
 		const int TX_ADC_DAC_COMPARISON_RESULT_OFFSET = 32;
 		const int REG_ADC_DAC_COMPARISON_RESULT_OFFSET = 64;
 
-		cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize - 2);
+		//
+		// output signals initialization has been removed
+		// because if this signals involving in back loop
+		// its state from previous work cycle will be lost !!!
+		//
+
+		/*cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize - 2);
 		cmd.setComment(QString(tr("init output signals 32..01 to 0")));
-		m_code.append(cmd);
+		m_code.append(cmd);*/
 
 		cmd.mov(module.appRegDataOffset + REG_ADC_DAC_COMPARISON_RESULT_OFFSET,
 				module.moduleDataOffset + module.txAppDataOffset + TX_ADC_DAC_COMPARISON_RESULT_OFFSET);
@@ -4614,6 +4644,50 @@ namespace Builder
 		processedSignalsMap.clear();
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::setOutputSignalsAsComputed()
+	{
+		if (m_moduleLogic == nullptr)
+		{
+			return true;
+		}
+
+		const std::list<AppLogicItem>& logicItems = m_moduleLogic->items();
+
+		if (logicItems.empty() == true)
+		{
+			return true;
+		}
+
+		for(const AppLogicItem& item : logicItems)
+		{
+			if (item.m_fblItem == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (item.m_fblItem->isOutputSignalElement() == false)
+			{
+				continue;
+			}
+
+			const VFrame30::SchemaItemSignal* s = item.m_fblItem->toSignalElement();
+
+			AppSignal* appSignal = m_appSignals.getByStrID(s->appSignalIds());
+
+			if (appSignal == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			appSignal->setComputed();
+		}
+
+		return true;
 	}
 
 

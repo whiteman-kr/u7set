@@ -524,6 +524,10 @@ namespace Builder
 		const int FB_SCALE_FP_16UI_INDEX = 2;
 		const int FB_SCALE_SI_16UI_INDEX = 3;
 
+		static const char* INPUT_CONTROLLER_SUFFIX;
+		static const char* OUTPUT_CONTROLLER_SUFFIX;
+		static const char* PLATFORM_INTERFACE_CONTROLLER_SUFFIX;
+
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
@@ -634,6 +638,7 @@ namespace Builder
 		bool calculateLmMemoryMap();
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
+		bool setOutputSignalsAsComputed();
 
 		bool buildOptoModulesStorage();
 
