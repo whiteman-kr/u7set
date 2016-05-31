@@ -5317,7 +5317,8 @@ namespace Builder
 
 	bool AppSignal::isComputed() const
 	{
-		return m_computed;
+		return true;
+	//	return m_computed;
 	}
 
 
