@@ -326,6 +326,8 @@ namespace Builder
 
 		QString strID() const { return m_signal->appSignalID(); }
 
+		QUuid guid() const;
+
 		const Address16& ramAddr() const { return m_signal->ramAddr(); }
 		const Address16& regAddr() const { return m_signal->regValueAddr(); }
 
@@ -404,26 +406,24 @@ namespace Builder
 
 			// properties loaded from Hardware::DeviceModule::dynamicProperties
 			//
-			int txDataSize = 0;					// size of data transmitted to LM
-			int rxDataSize = 0;					// size of data received from LM
+			int txDataSize = 0;			// size of data transmitted from module to LM
+			int txDiagDataOffset = 0;
+			int txDiagDataSize = 0;
+			int txAppDataOffset = 0;
+			int txAppDataSize = 0;
 
-			int diagDataOffset = 0;
-			int diagDataSize = 0;
+			int rxDataSize = 0;			// size of data transmitted from LM to module
+			int rxAppDataOffset = 0;
+			int rxAppDataSize = 0;
 
-			int appLogicDataOffset = 0;
-			int appLogicDataSize = 0;
-			int appLogicDataSizeWithReserve = 0;
-			int appLogicRegDataSize = 0;
+			int appRegDataSize = 0;		// size of module data in registartion buffer
 
 			// calculated fields
 			//
-			int rxTxDataOffset = 0;				// offset of data received from module or transmitted to module in LM's memory
-												// depends of module place in the chassis
+			int moduleDataOffset = 0;	// offset of data received from module or transmitted to module in LM's memory
+										// depends of module place in the chassis
 
-			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
-												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
-
-			int appLogicRegDataOffset = 0;			// offset of module application data for processing (in registration buffer)
+			int appRegDataOffset = 0;	// offset of module application data in registration buffer
 
 			bool isInputModule() const;
 			bool isOutputModule() const;
@@ -631,8 +631,6 @@ namespace Builder
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
 
-		bool copyInOutSignalsToRegistration();
-
 		bool calculateLmMemoryMap();
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
@@ -650,6 +648,8 @@ namespace Builder
 		bool writeOcmRsSignalsXml();
 
 		void cleanup();
+
+		void dumApplicationLogicItems();
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);

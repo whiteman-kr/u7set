@@ -387,11 +387,11 @@ namespace Builder
 			{
 				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
 				{
-					{	"DiagDataOffset", &m.diagDataOffset },
-					{	"DiagDataSize", &m.diagDataSize },
+					{	"DiagDataOffset", &m.txDiagDataOffset },
+					{	"DiagDataSize", &m.txDiagDataSize },
 
-					{	"AppDataOffset", &m.appLogicDataOffset },
-					{	"AppDataSize", &m.appLogicDataSize },
+					{	"AppDataOffset", &m.txAppDataOffset },
+					{	"AppDataSize", &m.txAppDataSize },
 				};
 
 				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
@@ -399,28 +399,32 @@ namespace Builder
 					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
 				}
 
-				m.rxTxDataOffset = 0;
+				m.moduleDataOffset = 0;
 
-				m.moduleAppDataOffset = m.appLogicDataOffset;
-				m.appLogicRegDataSize = m.appLogicDataSize;
+				m.rxAppDataOffset = m.txAppDataOffset;
+				m.rxAppDataSize = m.txAppDataSize;
 
-				m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+				// LM diag data has been removed form registartion buffer !!!
+				//
+				// m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+				//
+				//
 			}
 			else
 			{
 				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
 				{
 					{	"TxDataSize", &m.txDataSize },
+					{	"TxDiagDataOffset", &m.txDiagDataOffset },
+					{	"TxDiagDataSize", &m.txDiagDataSize },
+					{	"TxAppDataOffset", &m.txAppDataOffset },
+					{	"TxAppDataSize", &m.txAppDataSize },
+
 					{	"RxDataSize", &m.rxDataSize },
+					{	"RxAppDataOffset", &m.rxAppDataOffset },
+					{	"RxAppDataSize", &m.rxAppDataSize },
 
-					{	"DiagDataOffset", &m.diagDataOffset },
-					{	"DiagDataSize", &m.diagDataSize },
-
-					{	"AppDataOffset", &m.appLogicDataOffset },
-					{	"AppDataSize", &m.appLogicDataSize },
-					{	"AppDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
-
-					{	"AppRegDataSize", &m.appLogicRegDataSize },
+					{	"AppRegDataSize", &m.appRegDataSize },
 				};
 
 				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
@@ -428,9 +432,8 @@ namespace Builder
 					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
 				}
 
-				m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
-				m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
-				m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+				m.moduleDataOffset = m_memoryMap.getModuleDataOffset(place);
+				m.appRegDataOffset = m_memoryMap.addModule(place, m.appRegDataSize);
 			}
 
 			m_modules.append(m);
@@ -462,6 +465,8 @@ namespace Builder
 			m_log->wrnALC5001(m_lm->equipmentIdTemplate());			//	Application logic for module '%1' is not found.
 		}
 
+		dumApplicationLogicItems();
+
 		do
 		{
 			if (!getLmAssociatedSignals()) break;
@@ -487,6 +492,49 @@ namespace Builder
 		while(false);
 
 		return result;
+	}
+
+
+	void ModuleLogicCompiler::dumApplicationLogicItems()
+	{
+		qDebug() << "----------------------------- APPLICATION LOGIC BEGIN --------------------------";
+
+		const std::list<AppLogicItem>& logicItems = m_moduleLogic->items();
+
+		for(const AppLogicItem& item : logicItems)
+		{
+			if (item.m_fblItem->isSignalElement())
+			{
+				const VFrame30::SchemaItemSignal* s = item.m_fblItem->toSignalElement();
+
+				if (item.m_fblItem->isInputSignalElement())
+				{
+					qDebug() << QString("Input signal %1").arg(s->appSignalIds());
+					continue;
+				}
+
+				if (item.m_fblItem->isOutputSignalElement())
+				{
+					qDebug() << QString("Output signal %1").arg(s->appSignalIds());
+					continue;
+				}
+			}
+
+			if (item.m_fblItem->isAfbElement())
+			{
+				const VFrame30::SchemaItemAfb* afb = item.m_fblItem->toAfbElement();
+				qDebug() << QString("Afb %1").arg(afb->afbStrID());
+				continue;
+			}
+
+			if (item.m_fblItem->isConstElement())
+			{
+				const VFrame30::SchemaItemConst* c = item.m_fblItem->toSchemaItemConst();
+				qDebug() << QString("Const %1").arg(c->valueToString());
+				continue;
+			}
+		}
+		qDebug() << "----------------------------- APPLICATION LOGIC END --------------------------";
 	}
 
 
@@ -750,11 +798,10 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
-		m_code.newLine();
-
 		Comment comment;
+		Command cmd;
 
-		comment.setComment("Copy LM diagnostics data to RegBuf");
+		/*comment.setComment("Copy LM diagnostics data to RegBuf");
 
 		m_code.append(comment);
 		m_code.newLine();
@@ -766,7 +813,7 @@ namespace Builder
 				   m_memoryMap.lmDiagnosticsSizeW());
 
 		m_code.append(cmd);
-		m_code.newLine();
+		m_code.newLine();*/
 
 		comment.setComment("Copy LM's' input signals to RegBuf");
 
@@ -785,7 +832,7 @@ namespace Builder
 		m_code.append(comment);
 		m_code.newLine();
 
-		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
+		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), 0, m_memoryMap.lmInOutsSizeW());
 
 		m_code.append(cmd);
 		m_code.newLine();
@@ -803,8 +850,8 @@ namespace Builder
 		cmd.movMem(	m_memoryMap.lmInOutsAddress(),
 					m_memoryMap.rb_lmOutputsAddress(),
 					m_memoryMap.lmInOutsSizeW());
-
 		m_code.append(cmd);
+		m_code.newLine();
 
 		return true;
 	}
@@ -872,7 +919,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(module.appLogicRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
 		m_code.append(cmd);
 
 		m_code.newLine();
@@ -908,7 +955,7 @@ namespace Builder
 		{
 			// initialize module signals memory to 0
 			//
-			cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
+			cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
 			cmd.setComment(tr("initialize module memory to 0"));
 			m_code.append(cmd);
 			m_code.newLine();
@@ -945,14 +992,15 @@ namespace Builder
 
 		// copy validity words
 		//
-		const int dataBlockSize = 17;
-		const int regDataBlockSize = 33;
+		const int DATA_BLOCK_SIZE = 17;
+		const int REG_DATA_BLOCK_SIZE = 33;
+		const int DATA_BLOCK_COUNT = 4;
 
-		for(int dataBlock = 0; dataBlock < 4; dataBlock++)
+		for(int block = 0; block < DATA_BLOCK_COUNT; block++)
 		{
-			cmd.mov(module.appLogicRegDataOffset + regDataBlockSize * dataBlock,
-					module.moduleAppDataOffset + dataBlockSize * dataBlock);
-			cmd.setComment(QString(tr("validity of %1 ... %2 inputs")).arg(dataBlock * 16 + 16).arg(dataBlock * 16 + 1));
+			cmd.mov(module.appRegDataOffset + REG_DATA_BLOCK_SIZE * block,
+					module.moduleDataOffset + module.txAppDataOffset + DATA_BLOCK_SIZE * block);
+			cmd.setComment(QString(tr("validity of %1 ... %2 inputs")).arg(block * 16 + 16).arg(block * 16 + 1));
 			m_code.append(cmd);
 		}
 
@@ -1038,7 +1086,7 @@ namespace Builder
 				}
 
 				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   module.moduleAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
+								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
 				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
 				m_code.append(cmd);
 
@@ -1098,18 +1146,6 @@ namespace Builder
 
 			default:
 				assert(false);
-
-				/*
-
-				Command cmd;
-
-				cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
-
-				cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-				m_code.append(cmd);
-
-				*/
 			}
 		}
 
@@ -1128,24 +1164,33 @@ namespace Builder
 
 		Command cmd;
 
-		const int FAULT_FLAGS_OFFSET1 = 1;
-		const int FAULT_FLAGS_OFFSET2 = 3;
+		// DOM registartion data format
+		//
+		// +0	output signals 16..01
+		// +1	fault flags of output signals 16..01
+		// +2	output signals 32..17
+		// +3	fault flags of output signals 32..17
+		//
+		const int OUT_SIGNALS_OFFSET1 = 0;
+		const int TX_FAULT_FLAGS_OFFSET1 = 1;
+		const int OUT_SIGNALS_OFFSET2 = 2;
+		const int TX_FAULT_FLAGS_OFFSET2 = 3;
 
-		cmd.movConst(module.appLogicRegDataOffset, 0);
+		cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET1, 0);
 		cmd.setComment(QString(tr("init output signals 16..01")));
 		m_code.append(cmd);
 
-		cmd.mov(module.appLogicRegDataOffset + FAULT_FLAGS_OFFSET1,
-				module.moduleAppDataOffset + module.appLogicDataOffset + FAULT_FLAGS_OFFSET1);
+		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET1,
+				module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET1);
 		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 16..01")));
 		m_code.append(cmd);
 
-		cmd.movConst(module.appLogicRegDataOffset + 2, 0);
+		cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET2, 0);
 		cmd.setComment(QString(tr("init output signals 32..17")));
 		m_code.append(cmd);
 
-		cmd.mov(module.appLogicRegDataOffset + FAULT_FLAGS_OFFSET2,
-				module.moduleAppDataOffset + module.appLogicDataOffset + FAULT_FLAGS_OFFSET2);
+		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET2,
+		module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET2);
 		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 32..17")));
 		m_code.append(cmd);
 
@@ -1166,19 +1211,30 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.setMem(module.appLogicRegDataOffset, 0, module.appLogicRegDataSize - 2);
+		// AOM registartion data format
+		//
+		// +0	output signal 01
+		// +2	output signal 02
+		//		...
+		// +60	output signal 31
+		// +62	output signal 32
+		// +64	fault flags of output signals 16..01
+		// +65	fault flags of output signals 32..17
+		//
+		const int TX_ADC_DAC_COMPARISON_RESULT_OFFSET = 32;
+		const int REG_ADC_DAC_COMPARISON_RESULT_OFFSET = 64;
+
+		cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize - 2);
 		cmd.setComment(QString(tr("init output signals 32..01 to 0")));
 		m_code.append(cmd);
 
-		const int ADC_DAC_COMPARISON_RESULT_OFFSET = 32;
-
-		cmd.mov(module.appLogicRegDataOffset + module.appLogicRegDataSize - 2,
-				module.moduleAppDataOffset + ADC_DAC_COMPARISON_RESULT_OFFSET);
+		cmd.mov(module.appRegDataOffset + REG_ADC_DAC_COMPARISON_RESULT_OFFSET,
+				module.moduleDataOffset + module.txAppDataOffset + TX_ADC_DAC_COMPARISON_RESULT_OFFSET);
 		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 16..01")));
 		m_code.append(cmd);
 
-		cmd.mov(module.appLogicRegDataOffset + module.appLogicRegDataSize - 1,
-				module.moduleAppDataOffset + ADC_DAC_COMPARISON_RESULT_OFFSET + 1);
+		cmd.mov(module.appRegDataOffset + REG_ADC_DAC_COMPARISON_RESULT_OFFSET + 1,
+				module.moduleDataOffset + module.txAppDataOffset + TX_ADC_DAC_COMPARISON_RESULT_OFFSET + 1);
 		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 32..17")));
 		m_code.append(cmd);
 
@@ -1206,6 +1262,12 @@ namespace Builder
 				// appItem is signal
 				//
 				result &= generateAppSignalCode(appItem);
+
+				if (result == false)
+				{
+					break;
+				}
+
 				continue;
 			}
 
@@ -1214,6 +1276,12 @@ namespace Builder
 				// appItem is FB
 				//
 				result &= generateFbCode(appItem);
+
+				if (result == false)
+				{
+					break;
+				}
+
 				continue;
 			}
 
@@ -1252,10 +1320,10 @@ namespace Builder
 
 		bool result = true;
 
-		/*if (appSignal->isComputed())
+		if (appSignal->isComputed())
 		{
 			return true;				// signal already computed
-		}*/
+		}
 
 		int inPinsCount = 1;
 
@@ -1359,8 +1427,8 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
+			m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
+			result = false;
 		}
 
 		return result;
@@ -1757,8 +1825,7 @@ namespace Builder
 
 				if (!appSignal->isComputed())
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
-
+					m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
 					RESULT_FALSE_BREAK
 				}
 
@@ -1884,32 +1951,19 @@ namespace Builder
 		{
 			if (!appSignal.isAnalog())
 			{
-				msg = QString(tr("Discrete signal %1 connected to analog input '%2' of %3")).
-						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5007(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 
 			if (appSignal.isCompatibleDataFormat(afbSignal.dataFormat()) == false)
 			{
-				msg = QString(tr("Signal %1 data format is not compatible with input '%2' data format of %3 ")).
-						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5008(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 
 			if (appSignal.dataSize() != afbSignal.size())
 			{
-				msg = QString(tr("Signal %1 data size (%2) is not compatible with input '%3' data size (%4) of %4")).
-						arg(appSignal.strID()).arg(appSignal.dataSize()).
-						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5009(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 		}
@@ -1919,11 +1973,7 @@ namespace Builder
 			{
 				if (!appSignal.isDiscrete())
 				{
-					msg = QString(tr("Analog signal %1 connected to discrete input '%2' of %3")).
-							arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
-
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+					m_log->errALC5010(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 					return false;
 				}
 			}
@@ -2078,32 +2128,19 @@ namespace Builder
 		{
 			if (!appSignal->isAnalog())
 			{
-				msg = QString(tr("Analog output %1.%2 connected to discrete signal %3")).
-						arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5003(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
 				return false;
 			}
 
 			if (appSignal->isCompatibleDataFormat(afbSignal.dataFormat()) == false)
 			{
-				msg = QString(tr("Signal %1 data format is not compatible with output '%2' data format of %3 ")).
-						arg(appSignal->strID()).arg(afbSignal.caption()).arg(appFb.caption());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
 				return false;
 			}
 
 			if (appSignal->dataSize() != afbSignal.size())
 			{
-				msg = QString(tr("Signal %1 data size (%2) is not compatible with output '%3' data size (%4) of %4")).
-						arg(appSignal->strID()).arg(appSignal->dataSize()).
-						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+				m_log->errALC5005(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
 				return false;
 			}
 		}
@@ -2113,11 +2150,7 @@ namespace Builder
 			{
 				if (!appSignal->isDiscrete())
 				{
-					msg = QString(tr("Discrete output %1.%2 connected to analog signal %3")).
-							arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
-
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+					m_log->errALC5006(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
 					return false;
 				}
 			}
@@ -3021,8 +3054,6 @@ namespace Builder
 	}
 
 
-
-
 	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
 	{
 		m_code.comment(QString(tr("Copying DOM data place %1 to modules memory")).arg(module.place));
@@ -3030,23 +3061,33 @@ namespace Builder
 
 		Command cmd;
 
-		assert(module.appLogicDataSize == module.appLogicRegDataSize);
+		// DOM registartion data format
+		//
+		// +0	output signals 16..01
+		// +1	fault flags of output signals 16..01
+		// +2	output signals 32..17
+		// +3	fault flags of output signals 32..17
+		//
+		const int REG_OUT_SIGNALS_OFFSET1 = 0;
+		const int REG_OUT_SIGNALS_OFFSET2 = 2;
 
-		cmd.mov(module.rxTxDataOffset, module.appLogicRegDataOffset);
+		// DOM output data format
+		//
+		// +0	output signals 16..01
+		// +1	output signals 32..17
+		//
+		const int RX_OUT_SIGNALS_OFFSET1 = 0;
+		const int RX_OUT_SIGNALS_OFFSET2 = 1;
+
+		cmd.mov(module.moduleDataOffset + module.rxAppDataOffset + RX_OUT_SIGNALS_OFFSET1,
+				module.appRegDataOffset + REG_OUT_SIGNALS_OFFSET1);
 		cmd.setComment(QString(tr("copy signals 16..01")));
 		m_code.append(cmd);
 
-		cmd.mov(module.rxTxDataOffset + 1, module.appLogicRegDataOffset + 2);
+		cmd.mov(module.moduleDataOffset + module.rxAppDataOffset + RX_OUT_SIGNALS_OFFSET2,
+				module.appRegDataOffset + REG_OUT_SIGNALS_OFFSET2);
 		cmd.setComment(QString(tr("copy signals 32..17")));
 		m_code.append(cmd);
-
-		if (module.appLogicDataSizeWithReserve - 2 > 0)
-		{
-			cmd.setMem(module.moduleAppDataOffset + 2, module.appLogicDataSizeWithReserve - 2, 0);
-			cmd.setComment(QString(tr("set reserv data to 0")));
-
-			m_code.append(cmd);
-		}
 
 		m_code.newLine();
 
@@ -3079,7 +3120,7 @@ namespace Builder
 
 		if (m_convertUsedInOutAnalogSignalsOnly == true)
 		{
-			cmd.setMem(module.moduleAppDataOffset, module.appLogicDataSize, 0);
+			cmd.setMem(module.moduleDataOffset + module.rxAppDataOffset, 0, module.rxAppDataSize);
 			m_code.append(cmd);
 			m_code.newLine();
 		}
@@ -3192,8 +3233,9 @@ namespace Builder
 				cmd.setComment("");
 				m_code.append(cmd);
 
-				cmd.readFuncBlock(module.rxTxDataOffset + deviceSignal->valueOffset(), appFb->opcode(), appFb->instance(),
-								fbScal.outputSignalIndex, appFb->caption());
+				cmd.readFuncBlock(module.moduleDataOffset + module.rxAppDataOffset + deviceSignal->valueOffset(),
+								  appFb->opcode(), appFb->instance(),
+									fbScal.outputSignalIndex, appFb->caption());
 				m_code.append(cmd);
 
 				codeWritten = true;
@@ -3203,15 +3245,6 @@ namespace Builder
 			{
 				m_code.newLine();
 			}
-		}
-
-		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
-		{
-			cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
-			cmd.setComment(QString(tr("set reserv data to 0")));
-
-			m_code.append(cmd);
-			m_code.newLine();
 		}
 
 		return result;
@@ -4384,7 +4417,7 @@ namespace Builder
 
 					if (valueOffset != ERR_VALUE && valueBit != ERR_VALUE)
 					{
-						if (valueOffset >= module.appLogicDataSize)
+						if (valueOffset >= module.appRegDataSize)
 						{
 							LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 									  QString(tr("Signal %1 offset out of module application data size")).arg(signal->appSignalID()));
@@ -4433,7 +4466,7 @@ namespace Builder
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramAddr(module.appLogicRegDataOffset + valueOffset, valueBit);
+							Address16 ramAddr(module.appRegDataOffset + valueOffset, valueBit);
 							Address16 regAddr(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), valueBit);
 
 							signal->ramAddr() = ramAddr;
@@ -5284,10 +5317,20 @@ namespace Builder
 
 	bool AppSignal::isComputed() const
 	{
-		return true;
-
-		// return m_computed;  !!!
+		return m_computed;
 	}
+
+
+	QUuid AppSignal::guid() const
+	{
+		if (m_appItem != nullptr)
+		{
+			return m_appItem->guid();
+		}
+
+		return QUuid();
+	}
+
 
 
 

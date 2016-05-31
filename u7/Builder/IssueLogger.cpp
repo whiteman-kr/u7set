@@ -214,7 +214,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3000,
-				  tr("Property '%1'' does not exist in object '%2'.")
+				  tr("Property '%1' does not exist in object '%2'.")
 				  .arg(propertyName)
 				  .arg(object));
 	}
@@ -1014,6 +1014,242 @@ namespace Builder
 				  5001,
 				  tr("Application logic for module '%1' is not found.").arg(logicModuleID));
 	}
+
+
+	/// IssueCode: ALC5002
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of signal '%1' is undefined.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Signal value can not be calculated
+	///
+	void IssueLogger::errALC5002(QString appSignalID, QUuid itemUuid)
+	{
+		if (itemUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5002,
+				  tr("Value of signal '%1' is undefined.").arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5003
+	///
+	/// IssueType: Error
+	///
+	/// Title: Analog output '%1.%2' is connected to discrete signal '%3'.
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 AFB output
+	///		%3 Application signal ID
+	///
+	/// Description:
+	///		Analog outpuf of AFB is connected to discrete signal
+	///
+	void IssueLogger::errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5003,
+				  tr("Analog output '%1.%2' is connected to discrete signal '%3'.").arg(afbCaption).arg(output).arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5004
+	///
+	/// IssueType: Error
+	///
+	/// Title: Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 AFB output
+	///		%3 Application signal ID
+	///
+	/// Description:
+	///		Outpuf of AFB is connected to signal with uncompatible data format.
+	///
+	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5004,
+				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format.").arg(afbCaption).arg(output).arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5005
+	///
+	/// IssueType: Error
+	///
+	/// Title: Output '%1.%2' is connected to signal '%3' with uncompatible data size.
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 AFB output
+	///		%3 Application signal ID
+	///
+	/// Description:
+	///		Outpuf of AFB is connected to signal with uncompatible data size.
+	///
+	void IssueLogger::errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5005,
+				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data size.").arg(afbCaption).arg(output).arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5006
+	///
+	/// IssueType: Error
+	///
+	/// Title: Discrete output '%1.%2' is connected to analog signal '%3'.
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 AFB output
+	///		%3 Application signal ID
+	///
+	/// Description:
+	///		Discrete outpuf of AFB is connected to analog signal
+	///
+	void IssueLogger::errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5006,
+				  tr("Discrete output '%1.%2' is connected to analog signal '%3'.").arg(afbCaption).arg(output).arg(appSignalID));
+	}
+
+
+	/// IssueCode: ALC5007
+	///
+	/// IssueType: Error
+	///
+	/// Title: Discrete signal '%1' is connected to analog input '%2.%3'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 AFB caption
+	///		%3 AFB input
+	///
+	/// Description:
+	///		Discrete signal is connected to analog input of AFB.
+	///
+	void IssueLogger::errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5007,
+				  tr("Discrete signal '%1' is connected to analog input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
+	}
+
+	/// IssueCode: ALC5008
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is connected to input '%2.%3' with uncompatible data format.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 AFB caption
+	///		%3 AFB input
+	///
+	/// Description:
+	///		Outpuf of AFB is connected to signal with uncompatible data format.
+	///
+	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5008,
+				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format.").arg(appSignalID).arg(afbCaption).arg(input));
+	}
+
+
+	/// IssueCode: ALC5009
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is connected to input '%2.%3' with uncompatible data size.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 AFB caption
+	///		%3 AFB input
+	///
+	/// Description:
+	///		Outpuf of AFB is connected to signal with uncompatible data size.
+	///
+	void IssueLogger::errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5009,
+				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data size.").arg(appSignalID).arg(afbCaption).arg(input));
+	}
+
+	/// IssueCode: ALC5010
+	///
+	/// IssueType: Error
+	///
+	/// Title: Analog signal '%1' is connected to discrete input '%2.%3'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 AFB caption
+	///		%3 AFB input
+	///
+	/// Description:
+	///		Discrete signal is connected to analog input of AFB.
+	///
+	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	{
+		if (signalUuid.isNull() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5010,
+				  tr("Analog signal '%1' is connected to discrete input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
+	}
+
 
 
 	// EQP			Equipment issues						6000-6999

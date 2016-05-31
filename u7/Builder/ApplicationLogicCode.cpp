@@ -451,7 +451,7 @@ namespace Builder
     }
 
 
-    void Command::setMem(quint16 addr, quint16 sizeW, quint16 constValue)
+	void Command::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
     {
         if (addressInBitMemory(addr) ||
             addressInBitMemory(addr + sizeW - 1))

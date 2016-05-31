@@ -295,7 +295,7 @@ namespace Builder
         void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption);
         void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
         void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption);
-        void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
+		void setMem(quint16 addr, quint16 constValue, quint16 sizeW);
         void movBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
         void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime);
         void appStart(quint16 appStartAddr);
