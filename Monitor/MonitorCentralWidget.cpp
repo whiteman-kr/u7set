@@ -225,6 +225,11 @@ void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
 
 		setTabText(i, newSchema->caption());
 		tabPage->setSchema(newSchema);
+
+		if (i == currentIndex())
+		{
+			emit signal_schemaChanged(newSchema->schemaID());
+		}
 	}
 
 	return;

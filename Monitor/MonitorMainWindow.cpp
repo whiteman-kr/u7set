@@ -365,9 +365,11 @@ void MonitorMainWindow::debug()
 
 
 SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
-	m_configController(configController)
+	m_configController(configController),
+	m_centraWidget(centralWidget)
 {
 	assert(m_configController);
+	assert(m_centraWidget);
 
 	m_label = new QLabel;
 	m_label->setText(tr("Schema:"));
@@ -382,7 +384,7 @@ SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, Mo
 	setLayout(layout);
 
 	connect(m_configController, &MonitorConfigController::configurationArrived, this, &SchemaListWidget::slot_configurationArrived);
-	connect(centralWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SchemaListWidget::slot_schemaChanged);
+	connect(m_centraWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SchemaListWidget::slot_schemaChanged);
 	connect(m_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SchemaListWidget::slot_indexChanged);
 }
 
@@ -395,17 +397,31 @@ void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*
 {
 	assert(m_comboBox);
 	assert(m_configController);
+	assert(m_centraWidget);
 
 	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
 
 	// Save state
-	QVariant selected = m_comboBox->currentData();
+	//
+	QVariant selected;
+
+	MonitorSchemaWidget* tab = m_centraWidget->currentTab();
+	if (tab != nullptr)
+	{
+		selected = tab->schemaId();
+	}
 
 	// Clear all and fill with new data;
 	//
 	m_comboBox->clear();
 
 	std::vector<ConfigSchema> schemas = m_configController->schemas();
+
+	std::sort(schemas.begin(), schemas.end(),
+		[](const ConfigSchema& s1, const ConfigSchema& s2) -> bool
+		{
+			return s1.strId < s2.strId;
+		});
 
 	for (const ConfigSchema& s : schemas)
 	{
@@ -474,11 +490,8 @@ void SchemaListWidget::slot_schemaChanged(QString strId)
 	return;
 }
 
-void SchemaListWidget::slot_indexChanged(int index)
+void SchemaListWidget::slot_indexChanged(int /*index*/)
 {
-	qDebug() << "Schema icombo box index changed " << index;
-
-
 	QVariant data = m_comboBox->currentData();
 
 	if (data.isValid() == false ||

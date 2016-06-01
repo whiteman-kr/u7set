@@ -120,6 +120,7 @@ protected slots:
 
 private:
 	MonitorConfigController* m_configController = nullptr;
+	MonitorCentralWidget* m_centraWidget = nullptr;
 
 	QLabel* m_label = nullptr;
 	QComboBox* m_comboBox = nullptr;

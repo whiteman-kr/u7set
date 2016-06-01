@@ -15,10 +15,9 @@ public:
 	~MonitorCentralWidget();
 
 public:
-
-protected:
 	MonitorSchemaWidget* currentTab();
 
+protected:
 	int addSchemaTabPage(QString schemaId);
 
 	// Signals
