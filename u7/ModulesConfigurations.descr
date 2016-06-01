@@ -1671,9 +1671,9 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 	
 	// appDUID
 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 DUID = " + appDataID + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 DUID = " + regDataID + "\r\n");
 	
-	setData32(confFirmware, log, frame, ptr, appDataID); 
+	setData32(confFirmware, log, frame, ptr, regDataID); 
 	ptr += 4;
 	
 	// diagDUID
