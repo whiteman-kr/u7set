@@ -15,6 +15,7 @@ public:
 	~MonitorCentralWidget();
 
 public:
+	MonitorSchemaWidget* currentTab();
 
 protected:
 	int addSchemaTabPage(QString schemaId);
@@ -22,6 +23,7 @@ protected:
 	// Signals
 signals:
 	void signal_actionCloseTabUpdated(bool allowed);
+	void signal_schemaChanged(QString strId);
 
 	// Slots
 	//
@@ -36,6 +38,7 @@ public slots:
 	void slot_historyBack();
 	void slot_historyForward();
 
+	void slot_selectSchemaForCurrentTab(QString schemaId);
 
 protected slots:
 	void slot_tabCloseRequested(int index);
@@ -45,6 +48,8 @@ protected slots:
 	void slot_closeTab(MonitorSchemaWidget* tabWidget);
 
 	void slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema);
+
+	void slot_tabPageChanged(int index);
 
 	// Data
 	//
