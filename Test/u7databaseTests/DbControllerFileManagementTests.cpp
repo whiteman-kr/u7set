@@ -617,8 +617,96 @@ void DbControllerFileTests::checkOutTest()
 	db.close();
 }
 
+void DbControllerFileTests::fileHasChildrenTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo parentFile, childFile;
+
+	QSqlQuery query, instanceQuery;
+
+	QString parentFileName = "FirstFilehasChildren";
+	QString childFileName = "SecndFilehasChildren";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(parentFileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int parentFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(parentFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	parentFile.setFileName(parentFileName);
+	parentFile.setSize(instanceQuery.value("Size").toInt());
+	parentFile.setUserId(1);
+	parentFile.setParentId(1);
+	parentFile.setDetails(instanceQuery.value("details").toString());
+	parentFile.setFileId(query.value("fileId").toInt());
+
+	QString comment = "ParentFile for test function fileHasChildren of dbController";
+
+	ok = m_dbController->checkIn(parentFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	bool result;
+
+	ok = m_dbController->fileHasChildren(&result, parentFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (result == false, qPrintable("Error: function fileHasChildren from dbController returned wrong result (false expected)"));
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(childFileName).arg(parentFileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int childFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(childFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	childFile.setFileName(childFileName);
+	childFile.setSize(instanceQuery.value("Size").toInt());
+	childFile.setUserId(1);
+	childFile.setParentId(1);
+	childFile.setDetails(instanceQuery.value("details").toString());
+	childFile.setFileId(query.value("fileId").toInt());
+
+	comment = "Testing function fileHasChildren of dbController";
+
+	ok = m_dbController->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->fileHasChildren(&result, parentFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (result == true, qPrintable("Error: function fileHasChildren from dbController returned wrong result (true expected)"));
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
+	for (QString connection : QSqlDatabase::connectionNames())
+	{
+		QSqlDatabase::removeDatabase(connection);
+	}
+
 	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
 }
 
