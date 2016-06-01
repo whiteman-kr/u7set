@@ -343,10 +343,10 @@ namespace VFrame30
 			return false;
 		}
 
-		qDebug() << tr("Param %1 was changed from %2 to %3").
-					arg(opName).
-					arg(found->value().toString()).
-					arg(value.toString());
+//		qDebug() << tr("Param %1 was changed from %2 to %3").
+//					arg(opName).
+//					arg(found->value().toString()).
+//					arg(value.toString());
 
 		found->setValue(value);
 
@@ -439,7 +439,7 @@ namespace VFrame30
 				{
 					p.setValue(currentParam.value());
 
-					qDebug() << "Param: " << currentParam.caption() << ", value: " << p.value();
+					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.value();
 				}
 			}
 		}

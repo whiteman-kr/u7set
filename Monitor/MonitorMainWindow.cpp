@@ -354,4 +354,13 @@ void MonitorMainWindow::debug()
 }
 
 
+//SchemaListWidget::SchemaListWidget(QWidget* parent) :
+//	QWidget(parent)
+//{
 
+//}
+
+//SchemaListWidget::~SchemaListWidget()
+//{
+
+//}

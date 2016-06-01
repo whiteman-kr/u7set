@@ -45,6 +45,8 @@ namespace Builder
 		VFrame30::SchemaPoint ptBegin() const;
 		VFrame30::SchemaPoint ptEnd() const;
 
+		static QUuid getNextId();
+
 		bool isPinOnLink(VFrame30::SchemaPoint pt) const;
 
 		std::list<VFrame30::SchemaPoint> m_points;
@@ -55,9 +57,9 @@ namespace Builder
 		QUuid outputPin;						// Output pin for this branch, can be the only
 		std::set<QUuid> inputPins;				// Input pins for this branch
 		std::map<QUuid, Link> links;			// Links for this branch
-		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
+		std::map<QUuid, std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 
-		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
+		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId) const;
 		VFrame30::FblItemRect* itemByGuid(QUuid uuid) const;
 		VFrame30::AfbPin pinByGuid(QUuid pinId);
 
@@ -75,6 +77,8 @@ namespace Builder
 		int getBranchByPinGuid(const QUuid& guid) const;
 
 		void removeEmptyBushes();
+
+		void debugInfo();
 	};
 
 
@@ -129,9 +133,9 @@ namespace Builder
 
 	private:
 		bool setItemsOrder(IssueLogger* log,
-						   std::set<AppLogicItem>& remainItems,
+						   std::map<QUuid, AppLogicItem>& remainItems,
 						   std::list<AppLogicItem>& orderedItems,
-						   const std::set<AppLogicItem>& constItems);
+						   const std::map<QUuid, AppLogicItem>& constItems);
 
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//
@@ -153,7 +157,7 @@ namespace Builder
 	private:
 		QString m_moduleEquipmentId;
 		std::list<AppLogicItem> m_items;		// Ordered items
-		std::set<AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
+		std::map<QUuid, AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
 	};
 
 
