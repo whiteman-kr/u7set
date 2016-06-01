@@ -14,7 +14,7 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 
 	if (val.isValid() == false)
 	{
-		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
+		logPropertyNotFoundError(device, name, log);
 		return false;
 	}
 
@@ -38,7 +38,7 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 
 	if (val.isValid() == false)
 	{
-		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
+		logPropertyNotFoundError(device, name, log);
 		return false;
 	}
 
@@ -54,7 +54,6 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 		value == nullptr ||
 		log == nullptr)
 	{
-		logPropertyNotFoundError(name, device->equipmentIdTemplate(), log);
 		assert(false);
 		return false;
 	}
@@ -63,6 +62,7 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 
 	if (val.isValid() == false)
 	{
+		logPropertyNotFoundError(device, name, log);
 		return false;
 	}
 
@@ -72,11 +72,50 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 }
 
 
-void DeviceHelper::logPropertyNotFoundError(const QString& propertyName, const QString& deviceStrID, Builder::IssueLogger *log)
+bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)
 {
-	if (log != nullptr)
+	if (device == nullptr ||
+		log == nullptr)
 	{
-		log->errCFG3000(propertyName, deviceStrID);
+		assert(false);
+		return false;
+	}
+
+	if (device->propertyExists(name) == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	QVariant v(value);
+
+	bool result = device->setPropertyValue(name, v);
+
+	if (result == false)
+	{
+		logPropertyWriteError(device, name, log);
+	}
+
+	return result;
+
+}
+
+
+void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+
+void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
 		return;
 	}
 }

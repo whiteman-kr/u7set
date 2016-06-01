@@ -95,4 +95,6 @@ public:
 		m_offset = list[0].toInt();
 		m_bit = list[1].toInt();
 	}
+
+	int bitAddress() const { return m_offset * 16 + m_bit; }
 };

@@ -234,7 +234,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
-	xml.writeUInt64Attribute(PROP_LM_DATA_ID, m_lmDataID, true);
+	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, false);
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
@@ -290,7 +290,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmAddressPort.setAddress(ipStr);
 	m_lmAddressPort.setPort(port);
 
-	result &= xml.readUInt64Attribute(PROP_LM_DATA_ID, &m_lmDataID);
+	result &= xml.readUInt32Attribute(PROP_LM_DATA_ID, &m_lmDataID);
 
 	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
@@ -461,6 +461,8 @@ bool DataSource::getDataSourceInfo(Network::DataSourceInfo* protoInfo) const
 	protoInfo->set_lmadapterid(m_lmAdapterID.toStdString());
 	protoInfo->set_lmdataenable(m_lmDataEnable);
 	protoInfo->set_lmdataid(m_lmDataID);
+
+	return true;
 }
 
 
@@ -506,4 +508,6 @@ bool DataSource::getDataSourceState(Network::DataSourceState* protoState) const
 	protoState->set_errorframesquantity(m_errorFramesQuantity);
 	protoState->set_errorframeno(m_errorFrameNo);
 	protoState->set_lostedpackets(m_lostedPackets);
+
+	return true;
 }
