@@ -17,6 +17,9 @@ public:
 public:
 	std::shared_ptr<VFrame30::Schema> schema(QString schemaId);
 
+protected:
+	std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId);
+
 	// Signals
 	//
 signals:
@@ -41,7 +44,7 @@ public:
 private:
 	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;		// map by SchemaID
 
-	MonitorConfigController* m_configController = nullptr;
+	MonitorConfigController* const m_configController = nullptr;
 };
 
 #endif // SCHEMAMANAGER_H

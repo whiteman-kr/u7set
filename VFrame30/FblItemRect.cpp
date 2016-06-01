@@ -511,7 +511,7 @@ namespace VFrame30
 		{
 			// Can't do anything, required variables are not set
 			//
-			qDebug() << Q_FUNC_INFO << " Variables m_gridSize and m_pingGridStep were not initiazized, cannot perform operation";
+			//qDebug() << Q_FUNC_INFO << " Variables m_gridSize and m_pingGridStep were not initiazized, cannot perform operation";
 			return;
 		}
 

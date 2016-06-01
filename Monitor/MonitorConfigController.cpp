@@ -31,6 +31,11 @@ HostAddressPort ConfigConnection::address() const
 	return h;
 }
 
+void ConfigSchema::setFromBuildFileInfo(const Builder::BuildFileInfo& f)
+{
+	strId = f.ID;
+}
+
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
@@ -224,7 +229,7 @@ void MonitorConfigController::start()
 	return;
 }
 
-void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
+void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
@@ -289,6 +294,26 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
 	qDebug() << "ADS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
 	qDebug() << "ADS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+
+	// Get all schema list
+	//
+	{
+		QMutexLocker locker(&m_mutex);
+		m_schemas.clear();
+		m_schemas.reserve(buildFileInfoArray.size());
+
+		for (const Builder::BuildFileInfo& f: buildFileInfoArray)
+		{
+			if (f.tag == QLatin1String("LogicSchema") ||
+				f.tag == QLatin1String("MonitorSchema"))
+			{
+				ConfigSchema cs;
+				cs.setFromBuildFileInfo(f);
+
+				m_schemas.push_back(cs);
+			}
+		}
+	}
 
 	// Emit signal to inform everybody about new configuration
 	//
@@ -445,4 +470,10 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 //	}
 
 //	return outSetting->errorMessage.isEmpty();
+}
+
+std::vector<ConfigSchema> MonitorConfigController::schemas() const
+{
+	QMutexLocker locker(&m_mutex);
+	return m_schemas;
 }

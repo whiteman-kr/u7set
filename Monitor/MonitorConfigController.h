@@ -1,6 +1,8 @@
 #ifndef MONITORCONFIGTHREAD_H
 #define MONITORCONFIGTHREAD_H
 
+#include <vector>
+#include <set>
 #include <QThread>
 #include "../include/CfgServerLoader.h"
 #include "../include/SocketIO.h"
@@ -36,6 +38,15 @@ struct ConfigSettings
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
 
+
+struct ConfigSchema
+{
+	QString strId;
+	QString caption;
+	std::set<QString> appSignals;
+
+	void setFromBuildFileInfo(const Builder::BuildFileInfo& f);
+};
 
 
 class MonitorConfigController : public QObject
@@ -74,6 +85,10 @@ private:
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
 
+	// Public properties
+public:
+	std::vector<ConfigSchema> schemas() const;
+
 	// Data section
 	//
 private:
@@ -81,6 +96,9 @@ private:
 	int m_appInstanceNo = -1;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+
+	mutable QMutex m_mutex;
+	std::vector<ConfigSchema> m_schemas;
 };
 
 #endif // MONITORCONFIGTHREAD_H
