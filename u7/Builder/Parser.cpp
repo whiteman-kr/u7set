@@ -58,8 +58,6 @@ namespace Builder
 		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(newid), 16);
 		QUuid u = QUuid::fromRfc4122(ba);
 
-		qDebug() << "getNextId():    " << u.toString();
-
 		return u;
 	}
 
