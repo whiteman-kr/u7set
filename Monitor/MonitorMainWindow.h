@@ -6,6 +6,9 @@
 #include "TcpSignalClient.h"
 
 class MonitorCentralWidget;
+class SchemaListWidget;
+class QLabel;
+class QComboBox;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -92,19 +95,34 @@ private:
 	//
 	QToolBar* m_toolBar = nullptr;
 
+	SchemaListWidget* m_schemaListWidget = nullptr;
+
 	QLabel* m_pStatusBarInfo = nullptr;
 	QLabel* m_pStatusBarConnectionStatistics = nullptr;
 	QLabel* m_pStatusBarConnectionState = nullptr;
 };
 
-//class SchemaListWidget : public QWidget
-//{
-//public:
-//	SchemaListWidget(QWidget* parent = nullptr);
-//	virtual ~SchemaListWidget();
+class SchemaListWidget : public QWidget
+{
+	Q_OBJECT
 
-////	QLabel* m_label = nullptr;
-////	* m_label = nullptr;
-//}
+public:
+	SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
+	virtual ~SchemaListWidget();
+
+signals:
+	void selectionChanged(QString schemaId);
+
+protected slots:
+	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_schemaChanged(QString strId);
+	void slot_indexChanged(int index);
+
+private:
+	MonitorConfigController* m_configController = nullptr;
+
+	QLabel* m_label = nullptr;
+	QComboBox* m_comboBox = nullptr;
+};
 
 #endif // MONITORMAINWINDOW_H
