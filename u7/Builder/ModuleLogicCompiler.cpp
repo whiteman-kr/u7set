@@ -409,6 +409,8 @@ namespace Builder
 				m.rxAppDataOffset = m.txAppDataOffset;
 				m.rxAppDataSize = m.txAppDataSize;
 
+				m.appRegDataSize = m.txAppDataSize;
+
 				// LM diag data has been removed form registartion buffer !!!
 				//
 				// m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
@@ -4433,6 +4435,11 @@ namespace Builder
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
 				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+				{
+					continue;
+				}
+
+				if (deviceSignal->memoryArea() != E::MemoryArea::ApplicationData)
 				{
 					continue;
 				}
