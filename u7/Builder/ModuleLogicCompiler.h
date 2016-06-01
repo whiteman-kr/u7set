@@ -310,6 +310,7 @@ namespace Builder
 		bool m_isShadowSignal = false;
 
 		bool m_computed = false;
+		bool m_resultSaved = false;
 
 	public:
 		AppSignal(Signal* signal, const AppItem* appItem);
@@ -322,6 +323,9 @@ namespace Builder
 		void setComputed() { m_computed = true; }
 		bool isComputed() const;
 
+		void setResultSaved() { m_resultSaved = true; }
+		bool isResultSaved() const { return m_resultSaved; }
+
 		bool isShadowSignal() const { return m_isShadowSignal; }
 
 		QString strID() const { return m_signal->appSignalID(); }
@@ -333,7 +337,6 @@ namespace Builder
 
 		Address16& ramAddr() { return m_signal->ramAddr(); }
 		Address16& regAddr() { return m_signal->regValueAddr(); }
-
 
 		E::SignalType type() const { return m_signal->type(); }
 		E::DataFormat dataFormat() const { return m_signal->dataFormat(); }
