@@ -76,7 +76,7 @@ void DbControllerFileTests::getFileListTest()
 
 	db.close();
 
-	QVERIFY2 (filesForCheck.size() == files.size(), qPrintable("Error: getFileList() function returned wrong amount of files!"));
+	QVERIFY2 (uint(filesForCheck.size()) == files.size(), qPrintable("Error: getFileList() function returned wrong amount of files!"));
 
 	for (DbFileInfo buff : files)
 	{
@@ -801,6 +801,91 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 	resultFile = result.at(1);
 
 	QVERIFY2(resultFile.fileId() == secondChildFile.fileId(), qPrintable("Error: wong file has been returned"));
+}
+
+void DbControllerFileTests::getFileHistoryTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FileForGetFileHistory";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "First file commit. I have no idea: what I must do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Second file commit. I still have no idea, what I must do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Third file commit. I have idea, what to do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_file_history(%1);").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	std::vector<DbChangesetInfo> result;
+
+	ok = m_dbController->getFileHistory(file, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	while (query.next())
+	{
+		bool exist = false;
+
+		for (uint currentElement = 0; currentElement < result.size(); currentElement++)
+		{
+			DbChangesetInfo buff = result.at(currentElement);
+			if (buff.changeset() == query.value("changesetId").toInt())
+			{
+				exist = true;
+			}
+		}
+
+		QVERIFY2 (exist == true, qPrintable ("Error: function getFileHistory of DbController has returned wrong result!"));
+	}
+
+	db.close();
 }
 
 void DbControllerFileTests::cleanupTestCase()
