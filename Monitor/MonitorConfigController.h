@@ -68,6 +68,8 @@ public:
 	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
 	bool getFileById(const QString& id, QByteArray* fileData);
 
+	Tcp::ConnectionState getConnectionState() const;
+
 	// signals
 	//
 signals:

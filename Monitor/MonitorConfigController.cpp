@@ -215,6 +215,23 @@ bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileDat
 	return false;
 }
 
+Tcp::ConnectionState MonitorConfigController::getConnectionState() const
+{
+	Tcp::ConnectionState result;
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread);
+
+		result.isConnected = false;
+		return result;
+	}
+
+	result = m_cfgLoaderThread->getConnectionState();
+
+	return result;
+}
+
 void MonitorConfigController::start()
 {
 	if (m_cfgLoaderThread == nullptr)

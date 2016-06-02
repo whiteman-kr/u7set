@@ -22,6 +22,7 @@ public:
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
+	virtual void timerEvent(QTimerEvent* event) override;
 
 	// Public methods
 	//
@@ -97,9 +98,11 @@ private:
 
 	SchemaListWidget* m_schemaListWidget = nullptr;
 
-	QLabel* m_pStatusBarInfo = nullptr;
-	QLabel* m_pStatusBarConnectionStatistics = nullptr;
-	QLabel* m_pStatusBarConnectionState = nullptr;
+	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarConnectionStatistics = nullptr;
+	QLabel* m_statusBarConnectionState = nullptr;
+
+	int m_updateStatusBarTimerId = -1;
 };
 
 class SchemaListWidget : public QWidget
