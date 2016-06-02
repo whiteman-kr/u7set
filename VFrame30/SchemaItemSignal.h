@@ -14,7 +14,7 @@ namespace VFrame30
 		SchemaItemSignal(void);
 		SchemaItemSignal(SchemaUnit unit);
 		virtual ~SchemaItemSignal(void);
-	
+
 	public:
 
 		// Serialization
@@ -52,6 +52,26 @@ namespace VFrame30
 
 		// Width, %		Format
 		// 80;
+
+		enum class ColumnData
+		{
+			AppSignalID,
+			CustomerSignalID,
+			Caption,
+			StateDiscrete,
+			StateAnalog_e,		// format as [-]9.9e[+|-]999
+			StateAnalog_E,		// format as [-]9.9E[+|-]999
+			StateAnalog_f,		// format as [-]9.9
+			StateAnalog_g,		// use e or f format, whichever is the most concise
+			StateAnalog_G,		// use E or f format, whichever is the most concise
+		};
+		Q_ENUM(ColumnData)
+
+		struct SchemaItemSignalColumn
+		{
+			double width;
+			ColumnData data;
+		};
 	};
 
 
