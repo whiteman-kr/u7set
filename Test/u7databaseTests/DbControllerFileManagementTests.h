@@ -20,6 +20,7 @@ private slots:
 	void checkOutTest();
 	void fileHasChildrenTest();
 	void getCheckedOutFilesTest();
+	void getFileHistoryTest();
 	void cleanupTestCase();
 
 private:
