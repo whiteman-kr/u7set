@@ -76,27 +76,27 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 
 void AppDataServiceWorker::runTcpAppDataServer()
 {
-	assert(m_tcpAddDataServerThread == nullptr);
+	assert(m_tcpAppDataServerThread == nullptr);
 
 	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
 
-	m_tcpAddDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
 															tcpAppDataSever,
 															m_appDataSources,
 															m_appSignals,
 															m_signalStates);
-	m_tcpAddDataServerThread->start();
+	m_tcpAppDataServerThread->start();
 }
 
 
 void AppDataServiceWorker::stopTcpAppDataServer()
 {
-	if (m_tcpAddDataServerThread != nullptr)
+	if (m_tcpAppDataServerThread != nullptr)
 	{
-		m_tcpAddDataServerThread->quitAndWait(10000);
-		delete m_tcpAddDataServerThread;
+		m_tcpAppDataServerThread->quitAndWait(10000);
+		delete m_tcpAppDataServerThread;
 
-		m_tcpAddDataServerThread = nullptr;
+		m_tcpAppDataServerThread = nullptr;
 	}
 }
 
@@ -220,7 +220,18 @@ void AppDataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 
 void AppDataServiceWorker::onTimer()
 {
-	//m_cfgLoaderThread->enableDownloadConfiguration();
+	if (m_cfgLoaderThread != nullptr)
+	{
+		static int c = 0;
+
+		c++;
+
+		if (c == 5)
+		{
+			c = 0;
+			m_cfgLoaderThread->getConnectionState().dump();
+		}
+	}
 }
 
 

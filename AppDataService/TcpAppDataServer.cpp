@@ -220,7 +220,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		AppSignalState appSignalState;
 
-		result = getState(hash, appSignalState);
+		result = getConnectionState(hash, appSignalState);
 
 		if (result == false)
 		{
@@ -271,7 +271,7 @@ const AppDataSources& TcpAppDataServer::appDataSources() const
 }
 
 
-bool TcpAppDataServer::getState(Hash hash, AppSignalState& state)
+bool TcpAppDataServer::getConnectionState(Hash hash, AppSignalState& state)
 {
 	return m_thread->getState(hash, state);
 }

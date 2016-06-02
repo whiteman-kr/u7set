@@ -93,6 +93,12 @@ private:
 public:
 	HostAddressPort() {}
 
+	explicit HostAddressPort(const QHostAddress& addr, quint16 port)
+	{
+		m_hostAddress = addr;
+		m_port = port;
+	}
+
 	explicit HostAddressPort(quint32 ip4Addr, quint16 port)
 	{
 		m_hostAddress.setAddress(ip4Addr);
@@ -174,6 +180,12 @@ public:
 
 	QString addressPortStr() const { return QString("%1:%2").arg(address().toString()).arg(port()); }
 	QString addressStr() const { return QString("%1").arg(address().toString()); }
+
+	void clear()
+	{
+		m_hostAddress.setAddress(static_cast<quint32>(0));
+		m_port = 0;
+	}
 };
 
 

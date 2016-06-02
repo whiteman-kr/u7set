@@ -870,6 +870,10 @@ QString CfgLoaderThread::getLastErrorStr()
 }
 
 
+Tcp::ConnectionState CfgLoaderThread::getConnectionState()
+{
+	return m_cfgLoader->getConnectionState();
+}
 
 
 

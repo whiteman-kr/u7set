@@ -38,7 +38,7 @@ private:
 
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
-	TcpAppDataServerThread* m_tcpAddDataServerThread = nullptr;
+	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
 	QTimer m_timer;
 

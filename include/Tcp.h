@@ -22,6 +22,19 @@ namespace Tcp
 	const int TCP_AUTO_ACK_TIMER_INTERVAL = 1000;				// 1 second
 	const int TCP_CONNECT_TIMEOUT = 3;							// 3 seconds
 
+	struct ConnectionState
+	{
+		bool isConnected = false;
+
+		// nex data is valid if isConnected == true
+		//
+		HostAddressPort host;
+		qint64 startTime = 0;					// milliseconds since epoch
+		qint64 sentBytes = 0;
+		qint64 receivedBytes = 0;
+
+		void dump();
+	};
 
 	class SocketWorker : public SimpleThreadWorker
 	{
@@ -71,21 +84,25 @@ namespace Tcp
 
 		QTcpSocket* m_tcpSocket = nullptr;
 
+
+		ConnectionState m_state;
+
+		QMutex m_stateMutex;
+
 		QMutex m_mutex;
 
 		// read-status variables
 		//
 		ReadState m_readState = ReadState::WaitingForHeader;
-		quint32 m_readedHeaderSize = 0;
-		quint32 m_readedDataSize = 0;
+		quint32 m_readHeaderSize = 0;
+		quint32 m_readDataSize = 0;
 
 		//
 
 		Header m_header;
 		char* m_dataBuffer = nullptr;
 
-
-		bool m_headerAndDataReady = false;					// set to TRUE when full header and data readed from socket
+		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
 
 		virtual void createSocket();
 		void deleteSocket();
@@ -97,6 +114,14 @@ namespace Tcp
 
 		qint64 socketWrite(const char* data, qint64 size);
 		qint64 socketWrite(const Header& header);
+
+		void resetStaticstics();
+
+		void addSentBytes(int bytes);
+		void addReceivedBytes(int bytes);
+
+		void setStateConnected(const HostAddressPort& hostPort);
+		void setStateDisconnected();
 
 	private:
 		bool m_enableSocketRead = true;
@@ -126,6 +151,8 @@ namespace Tcp
 
 		virtual void onConnection() {}
 		virtual void onDisconnection() {}
+
+		ConnectionState getConnectionState();
 	};
 
 
