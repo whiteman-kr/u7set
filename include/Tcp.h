@@ -30,8 +30,12 @@ namespace Tcp
 		//
 		HostAddressPort host;
 		qint64 startTime = 0;					// milliseconds since epoch
+
 		qint64 sentBytes = 0;
 		qint64 receivedBytes = 0;
+
+		qint64 requestCount = 0;
+		qint64 replyCount = 0;
 
 		void dump();
 	};
@@ -119,6 +123,9 @@ namespace Tcp
 
 		void addSentBytes(int bytes);
 		void addReceivedBytes(int bytes);
+
+		void addRequest();
+		void addReply();
 
 		void setStateConnected(const HostAddressPort& hostPort);
 		void setStateDisconnected();

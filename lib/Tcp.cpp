@@ -16,6 +16,8 @@ namespace Tcp
 			qDebug() << qPrintable(QString("Start time: %1").arg(QDateTime::fromMSecsSinceEpoch(startTime).toString()));
 			qDebug() << qPrintable(QString("Sent bytes: %1").arg(sentBytes));
 			qDebug() << qPrintable(QString("Received bytes: %1\n").arg(receivedBytes));
+			qDebug() << qPrintable(QString("Request count: %1").arg(requestCount));
+			qDebug() << qPrintable(QString("Reply count: %1\n").arg(replyCount));
 		}
 	}
 
@@ -367,6 +369,8 @@ namespace Tcp
 		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
 	}
 
 
@@ -379,6 +383,8 @@ namespace Tcp
 		m_state.startTime = 0;
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
 	}
 
 
@@ -397,6 +403,20 @@ namespace Tcp
 		m_state.receivedBytes += bytes;
 	}
 
+	void SocketWorker::addRequest()
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.requestCount++;
+	}
+
+
+	void SocketWorker::addReply()
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.replyCount++;
+	}
 
 
 	// -------------------------------------------------------------------------------------
@@ -501,6 +521,8 @@ namespace Tcp
 		}
 
 		m_requestProcessingPorgress = 0;
+
+		addRequest();
 
 		processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
 	}
@@ -607,6 +629,8 @@ namespace Tcp
 			return false;
 		}
 
+		addReply();
+
 		SocketWorker::Header header;
 
 		header.type = SocketWorker::Header::Type::Reply;
@@ -633,6 +657,8 @@ namespace Tcp
 		if (replyDataSize > 0)
 		{
 			written = socketWrite(replyData, replyDataSize);
+
+
 
 			if (written == -1)
 			{
@@ -969,6 +995,8 @@ namespace Tcp
 
 			initReadStatusVariables();
 
+			addReply();
+
 			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
 
 			break;
@@ -1107,6 +1135,8 @@ namespace Tcp
 			assert(false);
 			return false;
 		}
+
+		addRequest();
 
 		m_sentRequestHeader.type = Header::Type::Request;
 		m_sentRequestHeader.id = requestID;
