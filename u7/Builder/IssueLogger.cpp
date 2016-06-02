@@ -680,6 +680,47 @@ namespace Builder
 				  .arg(controller));
 	}
 
+	/// IssueCode: CFG3019
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1.%2' write error.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Error occurs during property writing.
+	///
+	void IssueLogger::errCFG3019(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3019,
+				  tr("Property '%1.%2' write error.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3020
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1.%2' is not found.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Property is not found in object.
+	///
+	void IssueLogger::errCFG3020(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3020,
+				  tr("Property '%1.%2'is not found.").arg(objectID).arg(propertyName));
+	}
+
+
 
 	// ALP			Application Logic Parsing				4000-4999
 	//

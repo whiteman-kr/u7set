@@ -395,10 +395,17 @@ namespace Builder
 				int lmNumber = 0;
 				int lmChannel = 0;
 				QString lmSubsystem;
+				quint32 lmAppLANDataUID = 0;
 
 				result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
 				result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
 				result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
+
+				int dataUID = 0;
+
+				result &= DeviceHelper::getIntProperty(lm, "AppLANDataUID", &dataUID, m_log);
+
+				lmAppLANDataUID = dataUID;
 
 				if (result == false)
 				{
@@ -432,6 +439,7 @@ namespace Builder
 					ds.setLmEquipmentID(lm->equipmentIdTemplate());
 					ds.setLmModuleType(lm->moduleType());
 					ds.setLmCaption(lm->caption());
+					ds.setLmDataID(lmAppLANDataUID);
 					ds.setLmAdapterID(lmNetProperties.adapterID);
 					ds.setLmDataEnable(lmNetProperties.appDataEnable);
 					ds.setLmAddressStr(lmNetProperties.appDataIP);

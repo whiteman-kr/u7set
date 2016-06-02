@@ -245,4 +245,6 @@ public:
 	bool isFileReady();
 
 	QString getLastErrorStr();
+
+	Tcp::ConnectionState getConnectionState();
 };

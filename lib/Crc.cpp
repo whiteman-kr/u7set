@@ -147,6 +147,12 @@ quint64 Crc64::add(const QString& str)
 }
 
 
+quint64 Crc64::add(const QByteArray& bytes)
+{
+	return calc(reinterpret_cast<const quint8*>(bytes.constData()), bytes.size());
+}
+
+
 quint64 Crc64::calc(const quint8* data, qint64 size)
 {
 	while (size > 0)

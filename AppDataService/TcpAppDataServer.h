@@ -62,7 +62,7 @@ private:
 	const AppSignals& appSignals() const;
 	const AppDataSources& appDataSources() const;
 
-	bool getState(Hash hash, AppSignalState& state);
+	bool getConnectionState(Hash hash, AppSignalState& state);
 
 public:
 	TcpAppDataServer();
