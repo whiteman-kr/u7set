@@ -888,6 +888,141 @@ void DbControllerFileTests::getFileHistoryTest()
 	db.close();
 }
 
+void DbControllerFileTests::getLatestFileVersionTest()
+{
+	std::shared_ptr<DbFile> singleFileOutput(new DbFile);
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FileForGetLatestFileVersion";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "First file commit. I have no idea: what I must do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Second file commit. I still have no idea, what I must do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Third file commit. I have idea, what to do";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->getLatestVersion(file, &singleFileOutput, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_file_version (1, %1)").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("changesetId").toInt() == singleFileOutput.get()->changeset(), qPrintable ("Error: wrong changeset Id in get_latest_file function of DbController"));
+
+	DbFileInfo secondFile;
+
+	fileName = "SecondFileForGetLatestFileVersion";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondFile.setFileName(fileName);
+	secondFile.setSize(instanceQuery.value("Size").toInt());
+	secondFile.setUserId(1);
+	secondFile.setParentId(1);
+	secondFile.setDetails(instanceQuery.value("details").toString());
+	secondFile.setFileId(query.value("fileId").toInt());
+
+	comment = "First file commit. I have no idea: what I must do";
+
+	ok = m_dbController->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Second file commit. I still have no idea, what I must do";
+
+	ok = m_dbController->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Third file commit. I have idea, what to do";
+
+	ok = m_dbController->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	std::vector<DbFileInfo> files;
+	files.push_back(file);
+	files.push_back(secondFile);
+
+	std::vector<std::shared_ptr<DbFile>> multiFileOutput;
+
+	ok = m_dbController->getLatestVersion(files, &multiFileOutput, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	for (std::shared_ptr<DbFile> buff : multiFileOutput)
+	{
+
+		ok = query.exec(QString("SELECT * FROM get_latest_file_version(1, %1)").arg(buff.get()->fileId()));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2(query.value("changesetId").toInt() == buff.get()->changeset(), qPrintable ("Error: wrong changeset Id in get_latest_file function of DbController"));
+	}
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())

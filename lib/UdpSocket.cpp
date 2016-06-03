@@ -119,14 +119,14 @@ void UdpClientSocket::onSocketReadyRead()
 	locker.unlock();
 
 	if (unknownAck)
-    {
+	{
 		emit unknownAckReceived(m_ack);
-    }
-    else
-    {
+	}
+	else
+	{
 		assert(m_ack.data() == m_ack.readDataPtr());
 		emit ackReceived(m_ack);
-    }
+	}
 }
 
 
@@ -164,6 +164,7 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 
 	if (m_state != State::ReadyToSend)
 	{
+		//qDebug() << "request: " << request.ID() << " last ack: " << m_ack.ID() << " last request: " << m_request.ID();
 		assert(m_state == State::ReadyToSend);
 		return;
 	}
