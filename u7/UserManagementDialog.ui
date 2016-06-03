@@ -54,7 +54,7 @@
        <item row="18" column="0" colspan="2">
         <widget class="QCheckBox" name="isAdministrator">
          <property name="text">
-          <string>Administrator (can't edit project)</string>
+          <string>Administrator</string>
          </property>
         </widget>
        </item>

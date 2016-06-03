@@ -187,6 +187,13 @@ void PropertyObject::removeAllProperties()
 	m_properties.clear();
 }
 
+bool PropertyObject::removeProperty(const QString& caption)
+{
+	uint hash = qHash(caption);
+	size_t removed = m_properties.erase(hash);
+	return removed > 0;
+}
+
 void PropertyObject::addProperties(std::vector<std::shared_ptr<Property>> properties)
 {
 	for (auto p : properties)

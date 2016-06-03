@@ -57,6 +57,8 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 
 	m_configController.start();
 
+	m_updateStatusBarTimerId = startTimer(100);
+
 	return;
 }
 
@@ -74,6 +76,43 @@ void MonitorMainWindow::closeEvent(QCloseEvent* e)
 {
 	saveWindowState();
 	e->accept();
+
+	return;
+}
+
+void MonitorMainWindow::timerEvent(QTimerEvent* event)
+{
+	assert(event);
+
+	// Update status bar
+	//
+	if  (event->timerId() == m_updateStatusBarTimerId &&
+		 m_tcpSignalClient != nullptr)
+	{
+		assert(m_statusBarConnectionState);
+		assert(m_statusBarConnectionStatistics);
+
+		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
+
+		// State
+		//
+		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
+					   .arg(confiConnState.isConnected ? confiConnState.host.addressStr() : "NoConnection")
+						.arg(signalClientState.isConnected ? signalClientState.host.addressStr() : "NoConnection");
+
+		m_statusBarConnectionState->setText(text);
+
+		// Statistics
+		//
+		text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
+			   .arg(QString::number(confiConnState.replyCount))
+			   .arg(QString::number(signalClientState.replyCount));
+
+		m_statusBarConnectionStatistics->setText(text);
+
+		return;
+	}
 
 	return;
 }
@@ -264,23 +303,23 @@ void MonitorMainWindow::createToolBars()
 
 void MonitorMainWindow::createStatusBar()
 {
-	m_pStatusBarInfo = new QLabel();
-	m_pStatusBarInfo->setAlignment(Qt::AlignLeft);
-	m_pStatusBarInfo->setIndent(3);
+	m_statusBarInfo = new QLabel();
+	m_statusBarInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarInfo->setIndent(3);
 
-	m_pStatusBarConnectionStatistics = new QLabel();
-	m_pStatusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarConnectionStatistics = new QLabel();
+	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionStatistics->setMinimumWidth(100);
 
-	m_pStatusBarConnectionState = new QLabel();
-	m_pStatusBarConnectionState->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionState->setMinimumWidth(100);
+	m_statusBarConnectionState = new QLabel();
+	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionState->setMinimumWidth(100);
 
 	// --
 	//
-	statusBar()->addWidget(m_pStatusBarInfo, 1);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionStatistics, 0);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionState, 0);
+	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
+	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 
 	return;
 }

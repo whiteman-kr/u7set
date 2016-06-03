@@ -14,7 +14,7 @@ namespace VFrame30
 		SchemaItemSignal(void);
 		SchemaItemSignal(SchemaUnit unit);
 		virtual ~SchemaItemSignal(void);
-	
+
 	public:
 
 		// Serialization
@@ -28,6 +28,9 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
+	private:
+		void createColumnProperties();
+
 		// Properties
 		//
 	public:
@@ -39,10 +42,41 @@ namespace VFrame30
 
 		bool multiChannel() const;
 
+		int precision() const;
+		void setPrecision(int value);
+
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat value);
+
+		int columnCount() const;
+		void setColumnCount(int value);
+
+		double columnWidth(int columnIndex) const;
+		void setColumnWidth(double value, int columnIndex);
+
+		E::ColumnData columnData(int columnIndex) const;
+		void setColumnData(E::ColumnData value, int columnIndex);
+
+		E::HorzAlign columnHorzAlign(int columnIndex) const;
+		void setColumnHorzAlign(E::HorzAlign value, int columnIndex);
+
+		//	Data Structures
+		//
+	public:
+		struct Column
+		{
+			double width = 20.0;
+			E::ColumnData data = E::ColumnData::AppSignalID;
+			E::HorzAlign horzAlign = E::HorzAlign::AlignLeft;
+		};
+
 		// Data
 		//
 	private:
 		QStringList m_appSignalIds;
+
+		int m_precision = 2;
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f;
 
 		// Monitor mode settings
 		//
@@ -52,6 +86,7 @@ namespace VFrame30
 
 		// Width, %		Format
 		// 80;
+		std::vector<Column> m_columns;
 	};
 
 

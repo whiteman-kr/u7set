@@ -55,7 +55,32 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 
 void BaseServiceStateWidget::updateServiceState()
 {
-	m_whoIsLabel->setText("Base Service" /*serviceTypeStr[SERVICE_DATA_ACQUISITION]*/ + QString(" v%1.%2.%3(0x%4)")
+	QString serviceType;
+	switch (serviceState.type) {
+		case ServiceType::BaseService:
+			serviceType = "Base Service";
+		break;
+		case ServiceType::ConfigurationService:
+			serviceType = "Configuration Service";
+		break;
+		case ServiceType::AppDataService:
+			serviceType = "Application Data Service";
+		break;
+		case ServiceType::TuningService:
+			serviceType = "Tuning Service";
+		break;
+		case ServiceType::ArchivingService:
+			serviceType = "Archiving Service";
+		break;
+		case ServiceType::DiagDataService:
+			serviceType = "Diagnostic Data Service";
+		break;
+		break;
+		default:
+			assert(false);
+		break;
+	}
+	m_whoIsLabel->setText(serviceType + QString(" v%1.%2.%3(0x%4)")
 						  .arg(serviceState.majorVersion)
 						  .arg(serviceState.minorVersion)
 						  .arg(serviceState.buildNo)
@@ -193,6 +218,7 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 			serviceState = *(ServiceInformation*)udpRequest.data();
 			updateServiceState();
 		}
+		break;
 		case RQID_SERVICE_START:
 		case RQID_SERVICE_STOP:
 		case RQID_SERVICE_RESTART:

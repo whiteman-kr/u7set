@@ -73,7 +73,18 @@ SOURCES += MainWindow.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    TcpAppDataClient.cpp \
+    ../lib/Tcp.cpp \
+    ../Proto/network.pb.cc \
+    ../lib/Signal.cpp \
+    ../lib/PropertyObject.cpp \
+    ../Proto/serialization.pb.cc \
+    ../lib/AppSignalState.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/Types.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtoSerialization.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -91,7 +102,18 @@ HEADERS  += MainWindow.h \
     ../include/Queue.h \
     ../include/DataProtocols.h \
     ../include/WUtils.h \
-    ../include/Crc.h
+    ../include/Crc.h \
+    TcpAppDataClient.h \
+    ../include/Tcp.h \
+    ../Proto/network.pb.h \
+    ../include/Signal.h \
+    ../include/PropertyObject.h \
+    ../Proto/serialization.pb.h \
+    ../include/AppSignalState.h \
+    ../include/DeviceObject.h \
+    ../include/Types.h \
+    ../include/DbStruct.h \
+    ../include/ProtoSerialization.h
 
 FORMS    +=
 

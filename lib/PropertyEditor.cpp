@@ -1702,7 +1702,7 @@ namespace ExtWidgets
 	}
 
 
-    void PropertyEditor::setObjects(QList<std::shared_ptr<PropertyObject> >& objects)
+	void PropertyEditor::setObjects(const QList<std::shared_ptr<PropertyObject>>& objects)
 	{
         setVisible(false);
 
@@ -1877,6 +1877,11 @@ namespace ExtWidgets
 
         setVisible(true);
 		return;
+	}
+
+	const QList<std::shared_ptr<PropertyObject>>& PropertyEditor::objects() const
+	{
+		return m_objects;
 	}
 
     QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString& description, const std::shared_ptr<Property> value, bool sameValue)

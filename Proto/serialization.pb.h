@@ -61,6 +61,7 @@ class FblConnectionPoint;
 class FblItem;
 class FblItemRect;
 class FblItemLine;
+class SchemaItemSignalColumn;
 class SchemaItemSignal;
 class SchemaItemInput;
 class SchemaItemOutput;
@@ -3610,6 +3611,108 @@ class FblItemLine : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class SchemaItemSignalColumn : public ::google::protobuf::Message {
+ public:
+  SchemaItemSignalColumn();
+  virtual ~SchemaItemSignalColumn();
+
+  SchemaItemSignalColumn(const SchemaItemSignalColumn& from);
+
+  inline SchemaItemSignalColumn& operator=(const SchemaItemSignalColumn& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemSignalColumn& default_instance();
+
+  void Swap(SchemaItemSignalColumn* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemSignalColumn* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemSignalColumn& from);
+  void MergeFrom(const SchemaItemSignalColumn& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional double width = 1 [default = 20];
+  inline bool has_width() const;
+  inline void clear_width();
+  static const int kWidthFieldNumber = 1;
+  inline double width() const;
+  inline void set_width(double value);
+
+  // optional int32 data = 2 [default = 0];
+  inline bool has_data() const;
+  inline void clear_data();
+  static const int kDataFieldNumber = 2;
+  inline ::google::protobuf::int32 data() const;
+  inline void set_data(::google::protobuf::int32 value);
+
+  // optional int32 horzAlign = 3 [default = 1];
+  inline bool has_horzalign() const;
+  inline void clear_horzalign();
+  static const int kHorzAlignFieldNumber = 3;
+  inline ::google::protobuf::int32 horzalign() const;
+  inline void set_horzalign(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignalColumn)
+ private:
+  inline void set_has_width();
+  inline void clear_has_width();
+  inline void set_has_data();
+  inline void clear_has_data();
+  inline void set_has_horzalign();
+  inline void clear_has_horzalign();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double width_;
+  ::google::protobuf::int32 data_;
+  ::google::protobuf::int32 horzalign_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemSignalColumn* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class SchemaItemSignal : public ::google::protobuf::Message {
  public:
   SchemaItemSignal();
@@ -3676,15 +3779,48 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
       mutable_appsignalids();
 
+  // optional int32 precision = 2 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 2;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional int32 analogFormat = 3 [default = 102];
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 3;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
+  // repeated .Proto.SchemaItemSignalColumn columns = 4;
+  inline int columns_size() const;
+  inline void clear_columns();
+  static const int kColumnsFieldNumber = 4;
+  inline const ::Proto::SchemaItemSignalColumn& columns(int index) const;
+  inline ::Proto::SchemaItemSignalColumn* mutable_columns(int index);
+  inline ::Proto::SchemaItemSignalColumn* add_columns();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >&
+      columns() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >*
+      mutable_columns();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignal)
  private:
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::wstring > appsignalids_;
+  ::google::protobuf::int32 precision_;
+  ::google::protobuf::int32 analogformat_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn > columns_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -10587,6 +10723,76 @@ inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
 
 // -------------------------------------------------------------------
 
+// SchemaItemSignalColumn
+
+// optional double width = 1 [default = 20];
+inline bool SchemaItemSignalColumn::has_width() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemSignalColumn::set_has_width() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemSignalColumn::clear_has_width() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemSignalColumn::clear_width() {
+  width_ = 20;
+  clear_has_width();
+}
+inline double SchemaItemSignalColumn::width() const {
+  return width_;
+}
+inline void SchemaItemSignalColumn::set_width(double value) {
+  set_has_width();
+  width_ = value;
+}
+
+// optional int32 data = 2 [default = 0];
+inline bool SchemaItemSignalColumn::has_data() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemSignalColumn::set_has_data() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemSignalColumn::clear_has_data() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemSignalColumn::clear_data() {
+  data_ = 0;
+  clear_has_data();
+}
+inline ::google::protobuf::int32 SchemaItemSignalColumn::data() const {
+  return data_;
+}
+inline void SchemaItemSignalColumn::set_data(::google::protobuf::int32 value) {
+  set_has_data();
+  data_ = value;
+}
+
+// optional int32 horzAlign = 3 [default = 1];
+inline bool SchemaItemSignalColumn::has_horzalign() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemSignalColumn::set_has_horzalign() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemSignalColumn::clear_has_horzalign() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemSignalColumn::clear_horzalign() {
+  horzalign_ = 1;
+  clear_has_horzalign();
+}
+inline ::google::protobuf::int32 SchemaItemSignalColumn::horzalign() const {
+  return horzalign_;
+}
+inline void SchemaItemSignalColumn::set_horzalign(::google::protobuf::int32 value) {
+  set_has_horzalign();
+  horzalign_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // SchemaItemSignal
 
 // repeated .Proto.wstring appSignalIDs = 1;
@@ -10612,6 +10818,75 @@ SchemaItemSignal::appsignalids() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
 SchemaItemSignal::mutable_appsignalids() {
   return &appsignalids_;
+}
+
+// optional int32 precision = 2 [default = 2];
+inline bool SchemaItemSignal::has_precision() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemSignal::set_has_precision() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemSignal::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemSignal::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemaItemSignal::precision() const {
+  return precision_;
+}
+inline void SchemaItemSignal::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional int32 analogFormat = 3 [default = 102];
+inline bool SchemaItemSignal::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemSignal::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemSignal::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemSignal::clear_analogformat() {
+  analogformat_ = 102;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 SchemaItemSignal::analogformat() const {
+  return analogformat_;
+}
+inline void SchemaItemSignal::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
+}
+
+// repeated .Proto.SchemaItemSignalColumn columns = 4;
+inline int SchemaItemSignal::columns_size() const {
+  return columns_.size();
+}
+inline void SchemaItemSignal::clear_columns() {
+  columns_.Clear();
+}
+inline const ::Proto::SchemaItemSignalColumn& SchemaItemSignal::columns(int index) const {
+  return columns_.Get(index);
+}
+inline ::Proto::SchemaItemSignalColumn* SchemaItemSignal::mutable_columns(int index) {
+  return columns_.Mutable(index);
+}
+inline ::Proto::SchemaItemSignalColumn* SchemaItemSignal::add_columns() {
+  return columns_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >&
+SchemaItemSignal::columns() const {
+  return columns_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >*
+SchemaItemSignal::mutable_columns() {
+  return &columns_;
 }
 
 // -------------------------------------------------------------------
