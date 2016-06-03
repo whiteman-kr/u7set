@@ -34,6 +34,12 @@ void AppSignalManager::addSignal(const Signal& signal)
 	return;
 }
 
+bool AppSignalManager::signal(const QString& appSignalId, Signal* out)
+{
+	Hash h = ::calcHash(appSignalId);
+	return signal(h, out);
+}
+
 bool AppSignalManager::signal(Hash signalHash, Signal* out)
 {
 	if (out == nullptr)

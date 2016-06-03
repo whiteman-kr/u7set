@@ -1,6 +1,7 @@
 #include "SchemaItemPropertiesDialog.h"
 #include "ui_SchemaItemPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
+#include "../VFrame30/SchemaItemSignal.h"
 
 
 SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
@@ -101,6 +102,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	// Set the new property value in all objects
 	//
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+	bool updateRequired = false;
 
 	for (auto i : m_objects)
 	{
@@ -115,6 +117,14 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		}
 
 		items.push_back(vi);
+
+		if (dynamic_cast<VFrame30::SchemaItemSignal*>(vi.get()) != nullptr &&
+			property->propertyName() == "ColumnCount")
+		{
+			// If SchemaItemSignal::ColumnCount changed, new properties are created
+			//
+			updateRequired = true;
+		}
 	}
 
 	if (items.empty() == true)
@@ -123,6 +133,13 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	}
 
 	editEngine()->runSetProperty(property->propertyName(), value, items);
+
+	if (updateRequired == true)
+	{
+		auto o = objects();		// Copy of m_objects, it's not a reference
+		setObjects(o);
+	}
+
 	return;
 }
 

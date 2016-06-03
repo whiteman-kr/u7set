@@ -104,8 +104,12 @@ static const QString presetRootCaption("PresetRoot");
 static const QString presetNameCaption("PresetName");
 static const QString presetObjectUuidCaption("PresetObjectUuid");
 
-		ADD_PROPERTY_GETTER(int, fileIdCaption, true, DeviceObject::fileId);
-		ADD_PROPERTY_GETTER(QUuid, uuidCaption, true, DeviceObject::uuid);
+		auto fileIdProp = ADD_PROPERTY_GETTER(int, fileIdCaption, true, DeviceObject::fileId);
+		fileIdProp->setExpert(true);
+
+		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, uuidCaption, true, DeviceObject::uuid);
+		uuidProp->setExpert(true);
+
 		ADD_PROPERTY_GETTER_SETTER(QString, equipmentIdTemplateCaption, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
 
 		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, equipmentIdCaption, true, DeviceObject::equipmentId);
@@ -2056,6 +2060,7 @@ R"DELIM({
 	{
 		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType)
 		typeProp->setUpdateFromPreset(true);
+		typeProp->setExpert(true);
 	}
 
 	DeviceChassis::~DeviceChassis()

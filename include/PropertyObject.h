@@ -924,6 +924,8 @@ public:
 	//
 	void removeAllProperties();
 
+	bool removeProperty(const QString& caption);
+
 	// Add properties
 	// 1. If properties have getter or setter the must be added via PropertyObject::addProperty
 	// because getter and setter are binded to this
@@ -990,7 +992,7 @@ public:
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
-	std::map<uint, std::shared_ptr<Property>> m_properties;
+	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
 };
 
 

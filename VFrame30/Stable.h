@@ -27,6 +27,7 @@
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #ifdef _MSC_VER
 	#pragma warning(pop)

@@ -18,6 +18,8 @@ public:
 	void reset();
 
 	void addSignal(const Signal& signal);
+
+	bool signal(const QString& appSignalId, Signal* out);
 	bool signal(Hash signalHash, Signal* out);
 
 	void setState(Hash signalHash, const AppSignalState& state);

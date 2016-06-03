@@ -330,13 +330,13 @@ void ProjectsTabPage::deleteProject()
 
 	if (dbController()->isProjectOpened() == true)
 	{
-		QMessageBox msgBox;
+		QMessageBox msgBox(this);
 		msgBox.setText(tr("You can not delete project while any is open. Please, close the project first."));
 		msgBox.exec();
 		return;
 	}
 
-	QMessageBox msgBox;
+	QMessageBox msgBox(this);
 	msgBox.setText(tr("Deleting project %1.").arg(projectName));
 	msgBox.setInformativeText(tr("Do you want to delete project %1 and lost all data?").arg(projectName));
 	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);

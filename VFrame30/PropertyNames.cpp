@@ -15,6 +15,8 @@ const QString PropertyNames::type("Type");
 const QString PropertyNames::valueInteger("ValueInteger");
 const QString PropertyNames::valueFloat("ValueFloat");
 const QString PropertyNames::precision("Precision");
+const QString PropertyNames::analogFormat("AnalogFormat");
+const QString PropertyNames::columnCount("ColumnCount");
 
 const QString PropertyNames::lineColor("LineColor");
 const QString PropertyNames::lineWeight("LineWeight");
@@ -23,6 +25,9 @@ const QString PropertyNames::fill("Fill");
 const QString PropertyNames::drawRect("DrawRect");
 const QString PropertyNames::textColor("TextColor");
 const QString PropertyNames::text("Text");
+
+const QString PropertyNames::width("Width");
+const QString PropertyNames::height("Height");
 
 const QString PropertyNames::alignHorz("AlignHorz");
 const QString PropertyNames::alignVert("AlignVert");
@@ -33,5 +38,6 @@ const QString PropertyNames::behaviourCategory("Behaviour");
 const QString PropertyNames::appearanceCategory("Appearance");
 const QString PropertyNames::functionalCategory("Functional");
 const QString PropertyNames::textCategory("Text");
+const QString PropertyNames::monitorCategory("Monitor");
 
 }

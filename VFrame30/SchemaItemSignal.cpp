@@ -20,12 +20,121 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
+		m_columns.resize(2);
+
+		Column& c0 = m_columns[0];
+		c0.width = 80;
+		c0.data = E::ColumnData::AppSignalID;
+		c0.horzAlign = E::HorzAlign::AlignLeft;
+
+		Column& c1 = m_columns[1];
+		c1.width = 20;
+		c1.data = E::ColumnData::State;
+		c0.horzAlign = E::HorzAlign::AlignHCenter;
+
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::monitorCategory, true, SchemaItemSignal::precision, SchemaItemSignal::setPrecision);
+		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat, PropertyNames::analogFormat, PropertyNames::monitorCategory, true, SchemaItemSignal::analogFormat, SchemaItemSignal::setAnalogFormat);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::columnCount, PropertyNames::monitorCategory, true, SchemaItemSignal::columnCount, SchemaItemSignal::setColumnCount);
+
+		createColumnProperties();
+
+		return;
 	}
 
 	SchemaItemSignal::~SchemaItemSignal(void)
 	{
 	}
+
+	bool SchemaItemSignal::SaveData(Proto::Envelope* message) const
+	{
+		bool result = FblItemRect::SaveData(message);
+
+		if (result == false || message->has_schemaitem() == false)
+		{
+			assert(result);
+			assert(message->has_schemaitem());
+			return false;
+		}
+
+		// --
+		//
+		Proto::SchemaItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
+
+		for (const QString& strId : m_appSignalIds)
+		{
+			::Proto::wstring* ps = signal->add_appsignalids();
+			Proto::Write(ps, strId);
+		}
+
+		signal->set_precision(m_precision);
+		signal->set_analogformat(static_cast<int>(m_analogFormat));
+
+		for (const Column& c : m_columns)
+		{
+			::Proto::SchemaItemSignalColumn* protoColumn = signal->add_columns();
+
+			protoColumn->set_width(c.width);
+			protoColumn->set_data(static_cast<int>(c.data));
+			protoColumn->set_horzalign(static_cast<int>(c.horzAlign));
+		}
+
+		return true;
+	}
+
+	bool SchemaItemSignal::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_schemaitem() == false)
+		{
+			assert(message.has_schemaitem());
+			return false;
+		}
+
+		// --
+		//
+		bool result = FblItemRect::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.schemaitem().has_signal() == false)
+		{
+			assert(message.schemaitem().has_signal());
+			return false;
+		}
+
+		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
+
+		m_appSignalIds.clear();
+		m_appSignalIds.reserve(signal.appsignalids_size());
+
+		for (int i = 0; i < signal.appsignalids_size(); i++)
+		{
+			QString s;
+			Proto::Read(signal.appsignalids().Get(i), &s);
+			m_appSignalIds.push_back(s);
+		}
+
+		m_precision = signal.precision();
+		m_analogFormat = static_cast<E::AnalogFormat>(signal.analogformat());
+
+		m_columns.resize(signal.columns_size());
+		for (int i = 0; i < signal.columns_size(); i++)
+		{
+			const ::Proto::SchemaItemSignalColumn& c = signal.columns(i);
+
+			m_columns[i].width = c.width();
+			m_columns[i].data = static_cast<E::ColumnData>(c.data());
+			m_columns[i].horzAlign = static_cast<E::HorzAlign>(c.horzalign());
+		}
+		createColumnProperties();
+
+		return true;
+	}
+
 
 	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
@@ -67,14 +176,16 @@ namespace VFrame30
 			dpiX = paintDevice->logicalDpiX();
 		}
 
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		QPen linePen(lineColor());
+		linePen.setWidthF(m_weight);		// Don't use getter!
 
+		// --
+		//
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		if (multiChannel() == true)
 		{
-			QPen pen(lineColor());
-			pen.setWidthF(m_weight);		// Don't use getter!
-			p->setPen(pen);
+			p->setPen(linePen);
 
 			if (inputsCount() > 0)
 			{
@@ -108,41 +219,250 @@ namespace VFrame30
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
-		// Draw Signals StrIDs
 		//
-		p->setPen(textColor());
+		// Draw columns text and devider
+		//
 
-		QString text;
-
-		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
-
-		if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
+		// If there is no column or it's a multi just draw identififers
+		//
+		if (columnCount() == 0 ||
+			multiChannel() == true)
 		{
-			text = appSignalIds();
+			p->setPen(textColor());
+
+			QString text;
+
+			const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
+
+			if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
+			{
+				text = appSignalIds();
+			}
+			else
+			{
+				text = appSignalIds();
+
+				if (drawParam->isMonitorMode() == true)
+				{
+					AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
+
+					if (signalState.flags.valid == false)
+					{
+						text += QString("    ?");
+					}
+					else
+					{
+						text += QString("    %1").arg(QString::number(signalState.value));
+					}
+				}
+			}
+
+			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
 		}
 		else
 		{
-			text = appSignalIds();
+			assert(multiChannel() == false);	// implement multi channel in future
 
-			if (drawParam->isMonitorMode() == true)
+			double startOffset = 0;
+			bool isMonitorMode = drawParam->isMonitorMode();
+
+			QString appSignalId = appSignalIds();
+
+			Signal signal;
+
+			AppSignalState signalState;
+			signalState.flags.valid = false;
+
+			bool signalFound = false;
+
+			if (isMonitorMode == true)
 			{
-				AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
+				signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+				signalState = drawParam->appSignalManager()->signalState(appSignalId);
+			}
 
-				if (signalState.flags.valid == false)
+			for (size_t i = 0; i < m_columns.size(); i++)
+			{
+				const Column& c = m_columns[i];
+
+				double width = r.width() * (c.width / 100.0);
+
+				// if this is the last column, give all rest width to it
+				//
+				if (i == m_columns.size() - 1)
 				{
-					text += QString("    ?");
+					width = r.width() - startOffset;
 				}
-				else
+
+				// Draw data
+				//
+				QString text;
+
+				switch (c.data)
 				{
-					text += QString("    %1").arg(QString::number(signalState.value));
+				case E::ColumnData::AppSignalID:
+					text = appSignalId;
+					break;
+
+				case E::ColumnData::CustomerSignalID:
+					if (isMonitorMode == true)
+					{
+						if (signalFound == true)
+						{
+							text = signal.customAppSignalID();
+						}
+						else
+						{
+							text = QLatin1String("?");
+						}
+					}
+					else
+					{
+						text = QLatin1String("CustomerSignalID");
+					}
+					break;
+
+				case E::ColumnData::Caption:
+					if (isMonitorMode == true)
+					{
+						if (signalFound == true)
+						{
+							text = signal.caption();
+						}
+						else
+						{
+							text = QLatin1String("?");
+						}
+					}
+					else
+					{
+						text = QLatin1String("Caption");
+					}
+					break;
+
+
+				case E::ColumnData::State:
+					{
+						if (isMonitorMode == true)
+						{
+							if (signalState.flags.valid == false)
+							{
+								const static QString nonValidStr = "?";
+								text = nonValidStr;
+							}
+							else
+							{
+								if (signal.isAnalog())
+								{
+									text = QString::number(signalState.value, static_cast<char>(m_analogFormat), m_precision);
+								}
+								else
+								{
+									text = QString::number(signalState.value);
+								}
+							}
+						}
+						else
+						{
+							text = QLatin1String("0");
+						}
+					}
+					break;
+
+				default:
+					assert(false);
+				}
+
+				QRectF textRect(r.left() + startOffset, r.top(), width, r.height());
+				textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+				textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+				p->setPen(textColor());
+
+				DrawHelper::DrawText(p, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+
+				// --
+				//
+				startOffset += width;
+
+				if (startOffset >= r.width())
+				{
+					break;
+				}
+
+				// Draw vertical line devider from othe columns
+				//
+				if (i < m_columns.size() - 1)	// For all columns exceprt last
+				{
+					p->setPen(linePen);
+
+					p->drawLine(QPointF(r.left() + startOffset, r.top()),
+								QPointF(r.left() + startOffset, r.bottom()));
 				}
 			}
 		}
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
+		return;
+	}
+
+
+	void SchemaItemSignal::createColumnProperties()
+	{
+static const QString monitorColumnsCategory = "MonitorColumns";
+
+static const QString column_width_caption[8] = {"Column_00_Width", "Column_01_Width", "Column_02_Width", "Column_03_Width",
+												"Column_04_Width", "Column_05_Width", "Column_06_Width", "Column_07_Width"};
+
+static const QString column_data_caption[8] = {"Column_00_Data", "Column_01_Data", "Column_02_Data", "Column_03_Data",
+											   "Column_04_Data", "Column_05_Data", "Column_06_Data", "Column_07_Data"};
+
+static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Column_01_HorzAlign", "Column_02_HorzAlign", "Column_03_HorzAlign",
+											   "Column_04_HorzAlign", "Column_05_HorzAlign", "Column_06_HorzAlign", "Column_07_HorzAlign"};
+
+		if (m_columns.size() > 8)
+		{
+			assert(m_columns.size() <= 8);
+			return;
+		}
+
+		// Delete all ColumnXX props
+		//
+		std::vector<std::shared_ptr<Property>> allProperties = properties();
+
+		for (const std::shared_ptr<Property>& p : allProperties)
+		{
+			if (p->caption().startsWith(QLatin1String("Column_")) == true)
+			{
+				removeProperty(p->caption());
+			}
+		}
+
+		// Create new ColumnXX props
+		//
+		for (size_t i = 0; i < m_columns.size(); i++)
+		{
+			addProperty<double>(column_width_caption[i],
+								monitorColumnsCategory,
+								true,
+								std::bind(&SchemaItemSignal::columnWidth, this, static_cast<int>(i)),
+								std::bind(&SchemaItemSignal::setColumnWidth, this, std::placeholders::_1, static_cast<int>(i)));
+
+			addProperty<E::ColumnData>(column_data_caption[i],
+									   monitorColumnsCategory,
+									   true,
+									   std::bind(&SchemaItemSignal::columnData, this, static_cast<int>(i)),
+									   std::bind(&SchemaItemSignal::setColumnData, this, std::placeholders::_1, static_cast<int>(i)));
+
+			addProperty<E::HorzAlign>(column_horzAlign_caption[i],
+									  monitorColumnsCategory,
+									  true,
+									  std::bind(&SchemaItemSignal::columnHorzAlign, this, static_cast<int>(i)),
+									  std::bind(&SchemaItemSignal::setColumnHorzAlign, this, std::placeholders::_1, static_cast<int>(i)));
+		}
 
 		return;
 	}
+
 
 	QString SchemaItemSignal::appSignalIds() const
 	{
@@ -183,69 +503,152 @@ namespace VFrame30
 		return m_appSignalIds.size() > 1;
 	}
 
-	bool SchemaItemSignal::SaveData(Proto::Envelope* message) const
+	int SchemaItemSignal::precision() const
 	{
-		bool result = FblItemRect::SaveData(message);
-
-		if (result == false || message->has_schemaitem() == false)
-		{
-			assert(result);
-			assert(message->has_schemaitem());
-			return false;
-		}
-
-		// --
-		//
-		Proto::SchemaItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
-
-		for (const QString& strId : m_appSignalIds)
-		{
-			::Proto::wstring* ps = signal->add_appsignalids();
-			Proto::Write(ps, strId);
-		}
-
-		return true;
+		return m_precision;
 	}
 
-	bool SchemaItemSignal::LoadData(const Proto::Envelope& message)
+	void SchemaItemSignal::setPrecision(int value)
 	{
-		if (message.has_schemaitem() == false)
+		if (value < 0)
 		{
-			assert(message.has_schemaitem());
-			return false;
-		}
-		
-		// --
-		//
-		bool result = FblItemRect::LoadData(message);
-		if (result == false)
-		{
-			return false;
+			value = 0;
 		}
 
-		// --
-		//
-		if (message.schemaitem().has_signal() == false)
+		if (value > 12)
 		{
-			assert(message.schemaitem().has_signal());
-			return false;
+			value = 12;
 		}
 
-		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
-
-		m_appSignalIds.clear();
-		m_appSignalIds.reserve(signal.appsignalids_size());
-
-		for (int i = 0; i < signal.appsignalids_size(); i++)
-		{
-			QString s;
-			Proto::Read(signal.appsignalids().Get(i), &s);
-			m_appSignalIds.push_back(s);
-		}
-
-		return true;
+		m_precision = value;
 	}
 
+	E::AnalogFormat SchemaItemSignal::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void SchemaItemSignal::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
+	}
+
+	int SchemaItemSignal::columnCount() const
+	{
+		return static_cast<int>(m_columns.size());
+	}
+
+	void SchemaItemSignal::setColumnCount(int value)
+	{
+		if (value < 1)
+		{
+			value = 1;
+		}
+
+		if (value > 8)
+		{
+			value = 8;
+		}
+
+		if (m_columns.size() != value)
+		{
+			m_columns.resize(value);
+			createColumnProperties();
+		}
+
+		return;
+	}
+
+	double SchemaItemSignal::columnWidth(int columnIndex) const
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return 0.0;
+		}
+
+		return m_columns[columnIndex].width;
+	}
+
+	void SchemaItemSignal::setColumnWidth(double value, int columnIndex)
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return;
+		}
+
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (value > 100)
+		{
+			value = 100;
+		}
+
+		m_columns[columnIndex].width = value;
+		return;
+	}
+
+	E::ColumnData SchemaItemSignal::columnData(int columnIndex) const
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return E::ColumnData::AppSignalID;
+		}
+
+		return m_columns[columnIndex].data;
+	}
+
+	void SchemaItemSignal::setColumnData(E::ColumnData value, int columnIndex)
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return;
+		}
+
+		m_columns[columnIndex].data = value;
+		return;
+	}
+
+	E::HorzAlign SchemaItemSignal::columnHorzAlign(int columnIndex) const
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return E::HorzAlign::AlignLeft;
+		}
+
+		return m_columns[columnIndex].horzAlign;
+	}
+
+	void SchemaItemSignal::setColumnHorzAlign(E::HorzAlign value, int columnIndex)
+	{
+		if (columnIndex < 0 ||
+			columnIndex >= m_columns.size())
+		{
+			assert(columnIndex >= 0);
+			assert(columnIndex < m_columns.size());
+			return;
+		}
+
+		m_columns[columnIndex].horzAlign = value;
+		return;
+	}
 
 	//
 	// CSchemaItemInputSignal

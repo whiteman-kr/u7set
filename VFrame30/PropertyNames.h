@@ -23,6 +23,8 @@ namespace VFrame30
 		static const QString valueInteger;
 		static const QString valueFloat;
 		static const QString precision;
+		static const QString analogFormat;
+		static const QString columnCount;
 
 		static const QString lineColor;
 		static const QString lineWeight;
@@ -31,6 +33,9 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
+
+		static const QString width;
+		static const QString height;
 
 		static const QString alignHorz;
 		static const QString alignVert;
@@ -41,6 +46,7 @@ namespace VFrame30
 		static const QString appearanceCategory;
 		static const QString functionalCategory;
 		static const QString textCategory;
+		static const QString monitorCategory;
 	};
 
 }

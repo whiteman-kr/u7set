@@ -503,11 +503,20 @@ message FblItemLine
 // SchemaItemSignal
 //
 //
+message SchemaItemSignalColumn
+{
+    optional double width = 1 [default = 20.0];
+	optional int32 data = 2 [default = 0];
+	optional int32 horzAlign = 3 [default = 1];		// Default: AlignLeft = 0x0001
+}
+
 message SchemaItemSignal
 {
 	repeated wstring appSignalIDs = 1;
+	optional int32 precision = 2 [default = 2];
+	optional int32 analogFormat = 3 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+	repeated SchemaItemSignalColumn columns = 4;
 }
-
 
 //
 //
