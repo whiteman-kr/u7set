@@ -34,8 +34,10 @@ public:
 	quint64 add(int val);
 	quint64 add(double val);
 	quint64 add(const QString& str);
+	quint64 add(const QByteArray& bytes);
 
 	quint64 result() const { return m_crc; }
+	quint32 result32() const { return m_crc & 0xFFFFFFFF; }
 
 	void reset() { m_crc = CRC64_INIT_VALUE; }
 };

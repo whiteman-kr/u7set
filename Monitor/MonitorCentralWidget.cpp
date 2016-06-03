@@ -20,13 +20,21 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	// --
 	//
 	connect(this->tabBar(), &QTabBar::tabCloseRequested, this, &MonitorCentralWidget::slot_tabCloseRequested);
+	connect(this, &MonitorCentralWidget::currentChanged, this, &MonitorCentralWidget::slot_tabPageChanged);
 
 	connect(m_schemaManager, &SchemaManager::resetSchema, this, &MonitorCentralWidget::slot_resetSchema);
+
+	return;
 }
 
 MonitorCentralWidget::~MonitorCentralWidget()
 {
 	qDebug() << Q_FUNC_INFO;
+}
+
+MonitorSchemaWidget* MonitorCentralWidget::currentTab()
+{
+	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 }
 
 int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
@@ -140,6 +148,23 @@ void MonitorCentralWidget::slot_historyForward()
 	return;
 }
 
+void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
+{
+	MonitorSchemaWidget* tab = currentTab();
+
+	if (tab == nullptr)
+	{
+		assert(tab);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+
+	tab->setSchema(schema);
+
+	return;
+}
+
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
 {
 	// Close Tab request
@@ -200,6 +225,11 @@ void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
 
 		setTabText(i, newSchema->caption());
 		tabPage->setSchema(newSchema);
+
+		if (i == currentIndex())
+		{
+			emit signal_schemaChanged(newSchema->schemaID());
+		}
 	}
 
 	return;
@@ -221,6 +251,7 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 	if (tabIndex != -1)
 	{
 		setCurrentIndex(tabIndex);
+		emit signal_schemaChanged(schemaId);
 	}
 
 	return;
@@ -263,7 +294,22 @@ void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VF
 		setTabText(tabIndex, schema->caption());
 	}
 
+	emit signal_schemaChanged(schema->schemaID());
+
 	return;
 }
+
+void MonitorCentralWidget::slot_tabPageChanged(int /*index*/)
+{
+	MonitorSchemaWidget* tab = currentTab();
+
+	if (tab != nullptr)
+	{
+		emit signal_schemaChanged(tab->schemaId());
+	}
+
+	return;
+}
+
 
 

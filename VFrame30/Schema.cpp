@@ -25,6 +25,7 @@ namespace VFrame30
 
 	void Schema::Init(void)
 	{
+		ADD_PROPERTY_GETTER(QString, "SchemaID", true, Schema::schemaID);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);

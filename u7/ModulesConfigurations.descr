@@ -1,5 +1,4 @@
 var RootType = 0;
-var RootType = 0;
 var SystemType = 1;
 var RackType = 2;
 var ChassisType = 3;
@@ -55,7 +54,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 9;		// IP address and port of LAN controller can't be zero - an error is reported
 //var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
 //var configScriptVersion = 11;		// If software for LM ethernet controller is not found, default values are used
-var configScriptVersion = 12;		// DiagDataSize changed to TxDiagDataSize
+//var configScriptVersion = 12;		// DiagDataSize changed to TxDiagDataSize
+var configScriptVersion = 13;		// AppDataSize changed to AppLANDataSize
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -274,7 +274,9 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		log.errCFG3000("EquipmentID", "LM-1");
 		return false;
 	}
-    var checkProperties = ["SubsystemID", "LMNumber", "ConfigFrameSize", "ConfigFrameCount", "AppDataSize", "DiagDataSize"];
+    var checkProperties = ["SubsystemID", "LMNumber", "ConfigFrameSize", "ConfigFrameCount", "AppLANDataSize", "TxDiagDataSize", "TuningLANDataUID",
+	"AppLANDataUID", "DiagLANDataUID"];
+	
 	for (var cp = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -308,8 +310,8 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     
     var uartId = 0x0102; 
 	
-	var appWordsCount = module.jsPropertyInt("AppDataSize");
-    var diagWordsCount = module.jsPropertyInt("DiagDataSize");
+	var appWordsCount = module.jsPropertyInt("AppLANDataSize");
+    var diagWordsCount = module.jsPropertyInt("TxDiagDataSize");
     
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
     if (ssKeyValue == -1)
@@ -572,10 +574,10 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			tuningServicePort = service.propertyValue("TuningDataPort");
 		}
 	}
-
+	
 	generate_LANConfiguration(confFirmware, log, lanFrame, module, 
-								tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, 
-								0, 0, 0, 0, 0);	//Subnet2 is not used
+								tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, module.propertyValue("TuningLANDataUID"),
+								0, 0, 0, 0, 0, 0);	//Subnet2 is not used
 	lanFrame++;
 								
 	// REG / DIAG
@@ -682,8 +684,8 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			
 		
 		generate_LANConfiguration(confFirmware, log, lanFrame, module, 
-									appWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], 
-									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1]);
+									appWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], module.propertyValue("AppLANDataUID"),
+									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], module.propertyValue("DiagLANDataUID"));
 		lanFrame++;
 	}
 	
@@ -1563,8 +1565,8 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
 }
 
 function generate_LANConfiguration(confFirmware, log, frame, module, 
-									regWordsCount, regIP, regPort, regServiceIP, regServicePort,
-									diagWordsCount, diagIP, diagPort, diagServiceIP, diagServicePort)
+									regWordsCount, regIP, regPort, regServiceIP, regServicePort, regDataID,
+									diagWordsCount, diagIP, diagPort, diagServiceIP, diagServicePort, diagDataID)
 {
 	var ptr = 0;		
 	
@@ -1668,18 +1670,14 @@ function generate_LANConfiguration(confFirmware, log, frame, module,
 	ptr += 2;
 	
 	// appDUID
+
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 DUID = " + regDataID + "\r\n");
 	
-	var appDataID = 0;
-	
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 DUID = " + appDataID + "\r\n");
-	
-	setData32(confFirmware, log, frame, ptr, appDataID); 
+	setData32(confFirmware, log, frame, ptr, regDataID); 
 	ptr += 4;
 	
 	// diagDUID
 
-	var diagDataID = 0;
-	
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 2 DUID = " + diagDataID + "\r\n");
 
 	setData16(confFirmware, log, frame, ptr, diagDataID); 

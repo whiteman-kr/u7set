@@ -6,6 +6,9 @@
 #include "TcpSignalClient.h"
 
 class MonitorCentralWidget;
+class SchemaListWidget;
+class QLabel;
+class QComboBox;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -19,6 +22,7 @@ public:
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
+	virtual void timerEvent(QTimerEvent* event) override;
 
 	// Public methods
 	//
@@ -58,7 +62,6 @@ protected:
 	// Data
 	//
 private:
-
 	MonitorConfigController m_configController;
 	SchemaManager m_schemaManager;
 
@@ -92,9 +95,38 @@ private:
 	// Controls
 	//
 	QToolBar* m_toolBar = nullptr;
-	QLabel* m_pStatusBarInfo = nullptr;
-	QLabel* m_pStatusBarConnectionStatistics = nullptr;
-	QLabel* m_pStatusBarConnectionState = nullptr;
+
+	SchemaListWidget* m_schemaListWidget = nullptr;
+
+	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarConnectionStatistics = nullptr;
+	QLabel* m_statusBarConnectionState = nullptr;
+
+	int m_updateStatusBarTimerId = -1;
+};
+
+class SchemaListWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
+	virtual ~SchemaListWidget();
+
+signals:
+	void selectionChanged(QString schemaId);
+
+protected slots:
+	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_schemaChanged(QString strId);
+	void slot_indexChanged(int index);
+
+private:
+	MonitorConfigController* m_configController = nullptr;
+	MonitorCentralWidget* m_centraWidget = nullptr;
+
+	QLabel* m_label = nullptr;
+	QComboBox* m_comboBox = nullptr;
 };
 
 #endif // MONITORMAINWINDOW_H

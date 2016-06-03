@@ -1,4 +1,7 @@
 #include "MonitorMainWindow.h"
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QComboBox>
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -46,11 +49,15 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 			m_closeTabAction->setEnabled(allowed);
 		});
 
+	connect(m_schemaListWidget, &SchemaListWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+
 	// --
 	//
 	centralWidget()->show();
 
 	m_configController.start();
+
+	m_updateStatusBarTimerId = startTimer(100);
 
 	return;
 }
@@ -69,6 +76,43 @@ void MonitorMainWindow::closeEvent(QCloseEvent* e)
 {
 	saveWindowState();
 	e->accept();
+
+	return;
+}
+
+void MonitorMainWindow::timerEvent(QTimerEvent* event)
+{
+	assert(event);
+
+	// Update status bar
+	//
+	if  (event->timerId() == m_updateStatusBarTimerId &&
+		 m_tcpSignalClient != nullptr)
+	{
+		assert(m_statusBarConnectionState);
+		assert(m_statusBarConnectionStatistics);
+
+		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
+
+		// State
+		//
+		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
+					   .arg(confiConnState.isConnected ? confiConnState.host.addressStr() : "NoConnection")
+						.arg(signalClientState.isConnected ? signalClientState.host.addressStr() : "NoConnection");
+
+		m_statusBarConnectionState->setText(text);
+
+		// Statistics
+		//
+		text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
+			   .arg(QString::number(confiConnState.replyCount))
+			   .arg(QString::number(signalClientState.replyCount));
+
+		m_statusBarConnectionStatistics->setText(text);
+
+		return;
+	}
 
 	return;
 }
@@ -244,6 +288,11 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addSeparator();
 
+	m_schemaListWidget = new SchemaListWidget(&m_configController, monitorCentralWidget());
+	m_schemaListWidget->setMinimumWidth(300);
+	m_toolBar->addWidget(m_schemaListWidget);
+	m_toolBar->addSeparator();
+
 	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
 
@@ -254,23 +303,23 @@ void MonitorMainWindow::createToolBars()
 
 void MonitorMainWindow::createStatusBar()
 {
-	m_pStatusBarInfo = new QLabel();
-	m_pStatusBarInfo->setAlignment(Qt::AlignLeft);
-	m_pStatusBarInfo->setIndent(3);
+	m_statusBarInfo = new QLabel();
+	m_statusBarInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarInfo->setIndent(3);
 
-	m_pStatusBarConnectionStatistics = new QLabel();
-	m_pStatusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarConnectionStatistics = new QLabel();
+	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionStatistics->setMinimumWidth(100);
 
-	m_pStatusBarConnectionState = new QLabel();
-	m_pStatusBarConnectionState->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionState->setMinimumWidth(100);
+	m_statusBarConnectionState = new QLabel();
+	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionState->setMinimumWidth(100);
 
 	// --
 	//
-	statusBar()->addWidget(m_pStatusBarInfo, 1);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionStatistics, 0);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionState, 0);
+	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
+	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 
 	return;
 }
@@ -354,4 +403,145 @@ void MonitorMainWindow::debug()
 }
 
 
+SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
+	m_configController(configController),
+	m_centraWidget(centralWidget)
+{
+	assert(m_configController);
+	assert(m_centraWidget);
 
+	m_label = new QLabel;
+	m_label->setText(tr("Schema:"));
+
+	m_comboBox = new QComboBox;
+
+	QLayout* layout = new QVBoxLayout(this);
+
+	layout->addWidget(m_label);
+	layout->addWidget(m_comboBox);
+
+	setLayout(layout);
+
+	connect(m_configController, &MonitorConfigController::configurationArrived, this, &SchemaListWidget::slot_configurationArrived);
+	connect(m_centraWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SchemaListWidget::slot_schemaChanged);
+	connect(m_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SchemaListWidget::slot_indexChanged);
+}
+
+SchemaListWidget::~SchemaListWidget()
+{
+
+}
+
+void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*/)
+{
+	assert(m_comboBox);
+	assert(m_configController);
+	assert(m_centraWidget);
+
+	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
+
+	// Save state
+	//
+	QVariant selected;
+
+	MonitorSchemaWidget* tab = m_centraWidget->currentTab();
+	if (tab != nullptr)
+	{
+		selected = tab->schemaId();
+	}
+
+	// Clear all and fill with new data;
+	//
+	m_comboBox->clear();
+
+	std::vector<ConfigSchema> schemas = m_configController->schemas();
+
+	std::sort(schemas.begin(), schemas.end(),
+		[](const ConfigSchema& s1, const ConfigSchema& s2) -> bool
+		{
+			return s1.strId < s2.strId;
+		});
+
+	for (const ConfigSchema& s : schemas)
+	{
+		QVariant data = QVariant::fromValue(s.strId);
+		m_comboBox->addItem(s.strId + "  " + s.caption, data);
+	}
+
+	// Restore selected
+	//
+	if (selected.isValid() == true)
+	{
+		int index = m_comboBox->findData(selected);
+
+		if (index != -1)
+		{
+			m_comboBox->setCurrentIndex(index);
+		}
+		else
+		{
+			m_comboBox->setCurrentIndex(-1);
+		}
+	}
+	else
+	{
+		m_comboBox->setCurrentIndex(-1);
+	}
+
+	// Allow signals
+	//
+	m_comboBox->blockSignals(false);	// Allo wto emit signals
+
+	return;
+}
+
+void SchemaListWidget::slot_schemaChanged(QString strId)
+{
+	if (m_comboBox == nullptr ||
+		m_configController == nullptr)
+	{
+		assert(m_comboBox);
+		assert(m_configController);
+		return;
+	}
+
+	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
+
+	// Restore selected
+	//
+	QVariant data = QVariant::fromValue(strId);
+
+	int index = m_comboBox->findData(data);
+
+	if (index != -1)
+	{
+		m_comboBox->setCurrentIndex(index);
+	}
+	else
+	{
+		m_comboBox->setCurrentIndex(-1);
+	}
+
+	// Allow signals
+	//
+	m_comboBox->blockSignals(false);	// Allo wto emit signals
+
+	return;
+}
+
+void SchemaListWidget::slot_indexChanged(int /*index*/)
+{
+	QVariant data = m_comboBox->currentData();
+
+	if (data.isValid() == false ||
+		data.type() != QVariant::String)
+	{
+		return;
+	}
+
+	QString strId = data.toString();
+
+	emit selectionChanged(strId);
+
+	return;
+}

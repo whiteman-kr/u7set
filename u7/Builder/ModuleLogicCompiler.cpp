@@ -1,6 +1,7 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../include/DeviceHelper.h"
+#include "../include/Crc.h"
 
 namespace Builder
 {
@@ -140,7 +141,7 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
-			if (!setLmAppDataSize()) break;
+			if (!setLmAppLANDataSize()) break;
 
 			if (!copyRS232Signals()) break;
 
@@ -316,8 +317,8 @@ namespace Builder
 			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
 			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
 
-			{	"DiagDataOffset", m_lmDiagData.ptrStartAddress() },
-			{	"DiagDataSize", m_lmDiagData.ptrSizeW() },
+			{	"TxDiagDataOffset", m_lmDiagData.ptrStartAddress() },
+			{	"TxDiagDataSize", m_lmDiagData.ptrSizeW() },
 
 			{	"AppDataOffset", m_lmAppData.ptrStartAddress() },
 			{	"AppDataSize", m_lmAppData.ptrSizeW() }
@@ -353,13 +354,9 @@ namespace Builder
 
 		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
 
-		if (result)
+		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Loading LMs settings... Ok")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM settings are not loaded")));
 		}
 
 		return result;
@@ -392,8 +389,8 @@ namespace Builder
 			{
 				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
 				{
-					{	"DiagDataOffset", &m.txDiagDataOffset },
-					{	"DiagDataSize", &m.txDiagDataSize },
+					{	"TxDiagDataOffset", &m.txDiagDataOffset },
+					{	"TxDiagDataSize", &m.txDiagDataSize },
 
 					{	"AppDataOffset", &m.txAppDataOffset },
 					{	"AppDataSize", &m.txAppDataSize },
@@ -408,6 +405,8 @@ namespace Builder
 
 				m.rxAppDataOffset = m.txAppDataOffset;
 				m.rxAppDataSize = m.txAppDataSize;
+
+				m.appRegDataSize = m.txAppDataSize;
 
 				// LM diag data has been removed form registartion buffer !!!
 				//
@@ -444,13 +443,9 @@ namespace Builder
 			m_modules.append(m);
 		}
 
-		if (result)
+		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Loading modules settings... Ok")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Modules settings are not loaded")));
 		}
 
 		return result;
@@ -1356,9 +1351,9 @@ namespace Builder
 
 		bool result = true;
 
-		if (appSignal->isComputed())
+		if (appSignal->isResultSaved())
 		{
-			return true;				// signal already computed
+			return true;				// signal value is already set
 		}
 
 		int inPinsCount = 1;
@@ -1563,7 +1558,7 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		appSignal.setComputed();
+		appSignal.setResultSaved();
 
 		return true;
 	}
@@ -1705,7 +1700,7 @@ namespace Builder
 		m_code.append(cmd);
 		m_code.newLine();
 
-		appSignal.setComputed();
+		appSignal.setResultSaved();
 
 		return true;
 	}
@@ -2244,7 +2239,7 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		appSignal->setComputed();
+		appSignal->setResultSaved();
 
 		return true;
 	}
@@ -2320,7 +2315,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::setLmAppDataSize()
+	bool ModuleLogicCompiler::setLmAppLANDataSize()
 	{
 		if (m_lm == nullptr)
 		{
@@ -2329,29 +2324,75 @@ namespace Builder
 			return false;
 		}
 
-		if (m_lm->propertyExists("AppDataSize") == false)
+		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+											"AppLANDataSize",
+											m_memoryMap.getAppDataSize(),
+											m_log);
+	}
+
+
+	bool ModuleLogicCompiler::setLmAppLANDataUID(const QByteArray& lmAppCode)
+	{
+		Crc64 crc;
+
+		crc.add(lmAppCode);
+
+		// copy registered signals in appRegSignals array
+		//
+		QVector<AppSignal*> appRegSignals;
+
+		int count = m_appSignals.count();
+
+		for(int i = 0; i < count; i++)
 		{
-			assert(false);
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Property 'AppDataSize' is not exists in LM '%1'")).
-						  arg(m_lm->equipmentId()));
-			return false;
+			AppSignal* s = m_appSignals[i];
+
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 regAddr = s->regAddr();
+
+			if (regAddr.offset() == BAD_ADDRESS ||
+				regAddr.bit() == BAD_ADDRESS)
+			{
+				continue;
+			}
+
+			appRegSignals.append(s);
 		}
 
-		unsigned int appDataSize = static_cast<unsigned int>(m_memoryMap.getAppDataSize());
+		int regCount = appRegSignals.count();
 
-		QVariant v(appDataSize);
-
-		bool result = const_cast<Hardware::DeviceModule*>(m_lm)->setPropertyValue("AppDataSize", v);
-
-		if (result == false)
+		// sort appRegSignals by reg bitAddress ascending
+		//
+		for(int k = 0; k < regCount - 1; k++)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Set property 'AppDataSize' value error in LM '%1'")).
-						  arg(m_lm->equipmentId()));
+			for(int i = k + 1; i < regCount; i++)
+			{
+				if (appRegSignals[k]->regAddr().bitAddress() > appRegSignals[i]->regAddr().bitAddress())
+				{
+					AppSignal* temp = appRegSignals[k];
+					appRegSignals[k] = appRegSignals[i];
+					appRegSignals[i] = temp;
+				}
+			}
 		}
 
-		return result;
+		// add signals to UID
+		//
+		for(int k = 0; k < regCount; k++)
+		{
+			crc.add(appRegSignals[k]->strID());
+			crc.add(appRegSignals[k]->regAddr().bitAddress());
+		}
+
+		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+											"AppLANDataUID",
+											crc.result32(),
+											m_log);
 	}
 
 
@@ -3348,6 +3389,9 @@ namespace Builder
 
 		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmCaption, lmNumber,
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
+
+		result &= setLmAppLANDataUID(binCode);
+
 		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
@@ -4433,6 +4477,11 @@ namespace Builder
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
 				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+				{
+					continue;
+				}
+
+				if (deviceSignal->memoryArea() != E::MemoryArea::ApplicationData)
 				{
 					continue;
 				}

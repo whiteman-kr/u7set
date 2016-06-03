@@ -67,7 +67,8 @@ SOURCES += main.cpp \
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalState.cpp \
-    ../lib/AppSignalManager.cpp
+    ../lib/AppSignalManager.cpp \
+    Statistics.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -98,7 +99,8 @@ HEADERS  += \
     ../include/ProtobufHelper.h \
     ../include/ProtoSerialization.h \
     ../include/AppSignalState.h \
-    ../include/AppSignalManager.h
+    ../include/AppSignalManager.h \
+    Statistics.h
 
 FORMS    += \
     DialogSettings.ui

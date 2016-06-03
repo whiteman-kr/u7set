@@ -19,6 +19,9 @@ private slots:
 	void checkInTest();
 	void checkOutTest();
 	void fileHasChildrenTest();
+	void getCheckedOutFilesTest();
+	void getFileHistoryTest();
+	void getLatestFileVersionTest();
 	void cleanupTestCase();
 
 private:

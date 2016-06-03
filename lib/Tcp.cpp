@@ -3,6 +3,24 @@
 namespace Tcp
 {
 
+	void ConnectionState::dump()
+	{
+		if (isConnected == false)
+		{
+			qDebug() << "\nTcp::ConnectionState - is not connected\n";
+		}
+		else
+		{
+			qDebug() << "\nTcp::ConnectionState - is connected";
+			qDebug() << qPrintable(QString("Host: %1").arg(host.addressPortStr()));
+			qDebug() << qPrintable(QString("Start time: %1").arg(QDateTime::fromMSecsSinceEpoch(startTime).toString()));
+			qDebug() << qPrintable(QString("Sent bytes: %1").arg(sentBytes));
+			qDebug() << qPrintable(QString("Received bytes: %1\n").arg(receivedBytes));
+			qDebug() << qPrintable(QString("Request count: %1").arg(requestCount));
+			qDebug() << qPrintable(QString("Reply count: %1\n").arg(replyCount));
+		}
+	}
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::SocketWorker class implementation
@@ -62,12 +80,17 @@ namespace Tcp
 	void SocketWorker::onSocketConnected()
 	{
 		initReadStatusVariables();
+
+		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
+
 		onConnection();
 	}
 
 
 	void SocketWorker::onSocketDisconnected()
 	{
+		setStateDisconnected();
+
 		onDisconnection();
 
 		qDebug() << "Socket disconnected";
@@ -85,7 +108,10 @@ namespace Tcp
 		}
 
 		int bytesAvailable = m_tcpSocket->bytesAvailable();
-		int bytesReaded = 0;
+
+		addReceivedBytes(bytesAvailable);
+
+		int bytesRead = 0;
 
 		while(bytesAvailable > 0)
 		{
@@ -96,26 +122,26 @@ namespace Tcp
 				return;
 
 			case ReadState::WaitingForHeader:
-				bytesReaded = readHeader(bytesAvailable);
+				bytesRead = readHeader(bytesAvailable);
 				break;
 
 			case ReadState::WaitingForData:
-				bytesReaded = readData(bytesAvailable);
+				bytesRead = readData(bytesAvailable);
 				break;
 
 			default:
 				assert(false);
 			}
 
-			bytesAvailable -= bytesReaded;
+			bytesAvailable -= bytesRead;
 
 			if (m_headerAndDataReady)
 			{
 				// prepare to read next request
 				//
 				m_headerAndDataReady = false;
-				m_readedHeaderSize = 0;
-				m_readedDataSize = 0;
+				m_readHeaderSize = 0;
+				m_readDataSize = 0;
 
 				onHeaderAndDataReady();
 			}
@@ -131,29 +157,26 @@ namespace Tcp
 			return 0;
 		}
 
-		int bytesToRead = sizeof(SocketWorker::Header) - m_readedHeaderSize;
+		int bytesToRead = sizeof(SocketWorker::Header) - m_readHeaderSize;
 
 		if (bytesToRead > bytesAvailable)
 		{
 			bytesToRead = bytesAvailable;
 		}
 
-		int bytesReaded = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readedHeaderSize, bytesToRead);
+		int bytesRead = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
 
-		//qDebug() << "Read header bytes " << bytesReaded;
+		m_readHeaderSize += bytesRead;
 
-		m_readedHeaderSize += bytesReaded;
+		assert(m_readHeaderSize <= sizeof(SocketWorker::Header));
 
-		assert(m_readedHeaderSize <= sizeof(SocketWorker::Header));
-
-		if (m_readedHeaderSize < sizeof(SocketWorker::Header))
+		if (m_readHeaderSize < sizeof(SocketWorker::Header))
 		{
-			return bytesReaded;
+			return bytesRead;
 		}
 
-		// Full requestHeader is readed
+		// Full requestHeader is read
 		//
-
 		if (m_header.checkCRC() == false)
 		{
 			assert(false);
@@ -171,7 +194,7 @@ namespace Tcp
 
 			m_readState = ReadState::WaitingAnything;
 
-			return bytesReaded;
+			return bytesRead;
 		}
 
 		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
@@ -187,7 +210,7 @@ namespace Tcp
 
 		m_readState = ReadState::WaitingForData;
 
-		return bytesReaded;
+		return bytesRead;
 	}
 
 
@@ -199,14 +222,14 @@ namespace Tcp
 			return 0;
 		}
 
-		int bytesToRead = m_header.dataSize - m_readedDataSize;
+		int bytesToRead = m_header.dataSize - m_readDataSize;
 
 		if (bytesToRead > bytesAvailable)
 		{
 			bytesToRead = bytesAvailable;
 		}
 
-		if (m_readedDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
+		if (m_readDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
 		{
 			assert(false);
 
@@ -217,22 +240,20 @@ namespace Tcp
 			return 0;
 		}
 
-		int bytesReaded = m_tcpSocket->read(m_dataBuffer + m_readedDataSize, bytesToRead);
+		int bytesRead = m_tcpSocket->read(m_dataBuffer + m_readDataSize, bytesToRead);
 
-		//qDebug() << "Read data bytes " << bytesReaded;
+		m_readDataSize += bytesRead;
 
-		m_readedDataSize += bytesReaded;
+		assert(m_readDataSize <= m_header.dataSize);
 
-		assert(m_readedDataSize <= m_header.dataSize);
-
-		if (m_readedDataSize == m_header.dataSize)
+		if (m_readDataSize == m_header.dataSize)
 		{
 			m_headerAndDataReady = true;
 
 			m_readState = ReadState::WaitingAnything;
 		}
 
-		return bytesReaded;
+		return bytesRead;
 	}
 
 
@@ -252,6 +273,8 @@ namespace Tcp
 		}
 
 		m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
+
+		addSentBytes(size);
 
 		return written;
 	}
@@ -325,6 +348,77 @@ namespace Tcp
 	}
 
 
+	ConnectionState SocketWorker::getConnectionState()
+	{
+		m_stateMutex.lock();
+
+		ConnectionState state = m_state;
+
+		m_stateMutex.unlock();
+
+		return state;
+	}
+
+
+	void SocketWorker::setStateConnected(const HostAddressPort& hostPort)
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.isConnected = true;
+		m_state.host = hostPort;
+		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
+		m_state.sentBytes = 0;
+		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
+	}
+
+
+	void SocketWorker::setStateDisconnected()
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.isConnected = false;
+		m_state.host.clear();
+		m_state.startTime = 0;
+		m_state.sentBytes = 0;
+		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
+	}
+
+
+	void SocketWorker::addSentBytes(int bytes)
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.sentBytes += bytes;
+	}
+
+
+	void SocketWorker::addReceivedBytes(int bytes)
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.receivedBytes += bytes;
+	}
+
+	void SocketWorker::addRequest()
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.requestCount++;
+	}
+
+
+	void SocketWorker::addReply()
+	{
+		AUTO_LOCK(m_stateMutex);
+
+		m_state.replyCount++;
+	}
+
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::Server class implementation
@@ -389,8 +483,8 @@ namespace Tcp
 	{
 		m_serverState = ServerState::WainigForRequest;
 		m_readState = ReadState::WaitingForHeader;
-		m_readedHeaderSize = 0;
-		m_readedDataSize = 0;
+		m_readHeaderSize = 0;
+		m_readDataSize = 0;
 	}
 
 	void Server::onConnection()
@@ -427,6 +521,8 @@ namespace Tcp
 		}
 
 		m_requestProcessingPorgress = 0;
+
+		addRequest();
 
 		processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
 	}
@@ -533,6 +629,8 @@ namespace Tcp
 			return false;
 		}
 
+		addReply();
+
 		SocketWorker::Header header;
 
 		header.type = SocketWorker::Header::Type::Reply;
@@ -559,6 +657,8 @@ namespace Tcp
 		if (replyDataSize > 0)
 		{
 			written = socketWrite(replyData, replyDataSize);
+
+
 
 			if (written == -1)
 			{
@@ -836,8 +936,8 @@ namespace Tcp
 	{
 		m_clientState = ClientState::ClearToSendRequest;
 		m_readState = ReadState::WaitingAnything;
-		m_readedHeaderSize = 0;
-		m_readedDataSize = 0;
+		m_readHeaderSize = 0;
+		m_readDataSize = 0;
 		m_connectTimeout = 0;
 	}
 
@@ -894,6 +994,8 @@ namespace Tcp
 			stopReplyTimeoutTimer();
 
 			initReadStatusVariables();
+
+			addReply();
 
 			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
 
@@ -1033,6 +1135,8 @@ namespace Tcp
 			assert(false);
 			return false;
 		}
+
+		addRequest();
 
 		m_sentRequestHeader.type = Header::Type::Request;
 		m_sentRequestHeader.id = requestID;
