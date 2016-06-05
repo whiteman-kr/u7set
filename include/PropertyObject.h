@@ -18,6 +18,7 @@
 #include <QHash>
 #include <QTime>
 #include <QTimer>
+#include <QDebug>
 
 #include "../include/OrderedHash.h"
 

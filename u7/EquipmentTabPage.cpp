@@ -2552,7 +2552,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	{
 		m_equipmentView->addAction(m_connectionsAction);
 	}
-	m_equipmentView->addAction(m_pendingChangesAction);
+	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
+
 	// -----------------
 	//m_equipmentView->addAction(m_SeparatorAction4);
 	//m_equipmentView->addAction(m_moduleConfigurationAction);
@@ -2597,7 +2598,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	{
 		m_toolBar->addAction(m_connectionsAction);
 	}
-	m_toolBar->addAction(m_pendingChangesAction);
+	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
 	//
 	// Layouts
