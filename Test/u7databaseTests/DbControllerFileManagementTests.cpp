@@ -1261,6 +1261,140 @@ void DbControllerFileTests::getWorkcopyTest()
 	db.close();
 }
 
+void DbControllerFileTests::setWorkcopyTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	std::shared_ptr<DbFile> file(new DbFile);
+	std::shared_ptr<DbFile> secondFile(new DbFile);
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FirstFileForSetWorkcopyTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.get()->setFileName(fileName);
+	file.get()->setSize(instanceQuery.value("Size").toInt());
+	file.get()->setUserId(1);
+	file.get()->setParentId(1);
+	file.get()->setDetails(instanceQuery.value("details").toString());
+	file.get()->setFileId(query.value("fileId").toInt());
+
+	QString name = "FileForSetWorkcopyFunctionFromDbControllerTest";
+
+	QFile fileFromDisk(name);
+
+	if (fileFromDisk.exists())
+	{
+		QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+	}
+
+	if (fileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (fileFromDisk.write("Testing data"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+		fileFromDisk.close();
+	}
+
+	file.get()->readFromDisk(name);
+
+
+	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+
+
+	ok = m_dbController->setWorkcopy(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value("data").toString() == file.get()->data(), qPrintable("Error: function set_wor"));
+	QVERIFY2 (query.value("size").toInt() == file.get()->size(), qPrintable("Error: wrong size"));
+	QVERIFY2 (query.value("details").toString() == file.get()->details(), qPrintable("Errpr: wrong details"));
+
+	fileName = "SecondFileForSetWorkcopyTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondFile.get()->setFileName(fileName);
+	secondFile.get()->setSize(instanceQuery.value("Size").toInt());
+	secondFile.get()->setUserId(1);
+	secondFile.get()->setParentId(1);
+	secondFile.get()->setDetails(instanceQuery.value("details").toString());
+	secondFile.get()->setFileId(query.value("fileId").toInt());
+
+	name = "SecondFileForSetWorkcopyFunctionFromDbControllerTest";
+
+	fileFromDisk.setFileName(name);
+
+	if (fileFromDisk.exists())
+	{
+		QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+	}
+
+	if (fileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (fileFromDisk.write("Testing data For Second File"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+		fileFromDisk.close();
+	}
+
+	secondFile.get()->readFromDisk(name);
+
+
+	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	files.push_back(file);
+	files.push_back(secondFile);
+
+	m_dbController->setWorkcopy(files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	for (std::shared_ptr<DbFile> buff : files)
+	{
+		ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(buff.get()->fileId()));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2 (query.value("data").toString() == buff.get()->data(), qPrintable("Error: function set_wor"));
+		QVERIFY2 (query.value("size").toInt() == buff.get()->size(), qPrintable("Error: wrong size"));
+		QVERIFY2 (query.value("details").toString() == buff.get()->details(), qPrintable("Errpr: wrong details"));
+	}
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
