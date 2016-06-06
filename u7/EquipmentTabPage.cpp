@@ -674,14 +674,21 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 		updateRowFuncOnCheckIn(index, updateFiles, updatedModelIndexes);
 	}
 
+	emit objectVcsStateChanged();
+
 	return;
 }
 
 void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 {
 	std::vector<DbFileInfo> files;
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> objects;
+
+	files.reserve(rowList.size());
+	objects.reserve(rowList.size());
+
 	QModelIndexList checkedInList;
-	DbUser currentUser = dbController()->currentUser();
+	//DbUser currentUser = dbController()->currentUser();
 
 	for (QModelIndex& index : rowList)
 	{
@@ -692,6 +699,8 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		{
 			files.push_back(d->fileInfo());
 			checkedInList.push_back(index);
+
+			objects.push_back(deviceObjectSharedPtr(index));
 		}
 	}
 
@@ -720,6 +729,8 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 			}
 		}
 	}
+
+	emit objectVcsStateChanged();
 
 	return;
 }
@@ -811,6 +822,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 		assert(updated == true);
 	}
+
+	emit objectVcsStateChanged();
 
 	return;
 }
@@ -2552,7 +2565,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	{
 		m_equipmentView->addAction(m_connectionsAction);
 	}
-	m_equipmentView->addAction(m_pendingChangesAction);
+	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
+
 	// -----------------
 	//m_equipmentView->addAction(m_SeparatorAction4);
 	//m_equipmentView->addAction(m_moduleConfigurationAction);
@@ -2597,7 +2611,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	{
 		m_toolBar->addAction(m_connectionsAction);
 	}
-	m_toolBar->addAction(m_pendingChangesAction);
+	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
 	//
 	// Layouts
@@ -2621,6 +2635,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
     connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
+	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
 
 	// Evidently, project is not opened yet
 	//
@@ -3393,4 +3408,11 @@ void EquipmentTabPage::pendingChanges()
 {
 	EquipmentVcsDialog d(db(), this);
 	d.exec();
+}
+
+void EquipmentTabPage::objectVcsStateChanged()
+{
+	setActionState();
+	setProperties();
+	return;
 }

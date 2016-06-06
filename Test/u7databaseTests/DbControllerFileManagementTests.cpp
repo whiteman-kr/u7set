@@ -1023,6 +1023,378 @@ void DbControllerFileTests::getLatestFileVersionTest()
 	db.close();
 }
 
+void DbControllerFileTests::getLatestTreeVersionTest()
+{
+	qRegisterMetaType<DbFileInfo>("DbFileInfo");
+	std::list<std::shared_ptr<DbFile>> result;
+
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "ParentFileForGetLatestTreeVersionTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "Parent file for GetLatestTreeVersionTest created";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Parent file for GetLatestTreeVersionTest updated";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	DbFileInfo childFile;
+
+	fileName = "ChildFileForGetLatestTreeVersionTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(fileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int parentFileId = fileId;
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	childFile.setFileName(fileName);
+	childFile.setSize(instanceQuery.value("Size").toInt());
+	childFile.setUserId(1);
+	childFile.setParentId(1);
+	childFile.setDetails(instanceQuery.value("details").toString());
+	childFile.setFileId(query.value("fileId").toInt());
+
+	comment = "Child file for GetLatestTreeVersionTest created";
+
+	ok = m_dbController->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(childFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Child file for GetLatestTreeVersionTest updated";
+
+	ok = m_dbController->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->getLatestTreeVersion(file, &result, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (result.size() == 2, qPrintable ("Error: function getLatestTreeVersion returned wrong amount of files"));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_file_tree_version(1, %1)").arg(parentFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next())
+	{
+		bool exist = false;
+
+		for (std::shared_ptr<DbFile> buff : result)
+		{
+			if (buff.get()->fileId() == query.value("fileId").toInt())
+			{
+				exist = true;
+			}
+		}
+
+		QVERIFY2 (exist == true, qPrintable("Error: function getLatestTreeVersion returned wrong data!"));
+	}
+
+	db.close();
+}
+
+void DbControllerFileTests::getWorkcopyTest()
+{
+	std::shared_ptr<DbFile> result(new DbFile);
+
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FirstFileForGetWorkcopyTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "File for getWorkcopy test of dbController created";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->getWorkcopy(file, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (result.get()->fileId() == query.value("fileId").toInt(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->action().toInt() == query.value("action").toInt(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file Id"));
+
+	DbFileInfo secondFile;
+
+	fileName = "SecondFileForGetWorkcopyTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondFile.setFileName(fileName);
+	secondFile.setSize(instanceQuery.value("Size").toInt());
+	secondFile.setUserId(1);
+	secondFile.setParentId(1);
+	secondFile.setDetails(instanceQuery.value("details").toString());
+	secondFile.setFileId(query.value("fileId").toInt());
+
+	comment = "Second file for getWorkcopy test of dbController created";
+
+	ok = m_dbController->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	std::vector<DbFileInfo> files;
+	std::vector<std::shared_ptr<DbFile>> multipleResult;
+
+	files.push_back(file);
+	files.push_back(secondFile);
+
+	ok = m_dbController->getWorkcopy(files, &multipleResult, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (multipleResult.size() == files.size(), qPrintable("Error: wrong amount of records in vector from function result"));
+
+	for (std::shared_ptr<DbFile> buff : multipleResult)
+	{
+		ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(buff.get()->fileId()));
+		QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2 (buff.get()->fileId() == query.value("fileId").toInt(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->action().toInt() == query.value("action").toInt(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file Id"));
+	}
+
+	db.close();
+}
+
+void DbControllerFileTests::setWorkcopyTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	std::shared_ptr<DbFile> file(new DbFile);
+	std::shared_ptr<DbFile> secondFile(new DbFile);
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FirstFileForSetWorkcopyTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.get()->setFileName(fileName);
+	file.get()->setSize(instanceQuery.value("Size").toInt());
+	file.get()->setUserId(1);
+	file.get()->setParentId(1);
+	file.get()->setDetails(instanceQuery.value("details").toString());
+	file.get()->setFileId(query.value("fileId").toInt());
+
+	QString name = "FileForSetWorkcopyFunctionFromDbControllerTest";
+
+	QFile fileFromDisk(name);
+
+	if (fileFromDisk.exists())
+	{
+		QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+	}
+
+	if (fileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (fileFromDisk.write("Testing data"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+		fileFromDisk.close();
+	}
+
+	file.get()->readFromDisk(name);
+
+
+	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+
+
+	ok = m_dbController->setWorkcopy(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value("data").toString() == file.get()->data(), qPrintable("Error: function set_wor"));
+	QVERIFY2 (query.value("size").toInt() == file.get()->size(), qPrintable("Error: wrong size"));
+	QVERIFY2 (query.value("details").toString() == file.get()->details(), qPrintable("Errpr: wrong details"));
+
+	fileName = "SecondFileForSetWorkcopyTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondFile.get()->setFileName(fileName);
+	secondFile.get()->setSize(instanceQuery.value("Size").toInt());
+	secondFile.get()->setUserId(1);
+	secondFile.get()->setParentId(1);
+	secondFile.get()->setDetails(instanceQuery.value("details").toString());
+	secondFile.get()->setFileId(query.value("fileId").toInt());
+
+	name = "SecondFileForSetWorkcopyFunctionFromDbControllerTest";
+
+	fileFromDisk.setFileName(name);
+
+	if (fileFromDisk.exists())
+	{
+		QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+	}
+
+	if (fileFromDisk.open(QIODevice::ReadWrite))
+	{
+		QVERIFY2 (fileFromDisk.write("Testing data For Second File"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+		fileFromDisk.close();
+	}
+
+	secondFile.get()->readFromDisk(name);
+
+
+	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	files.push_back(file);
+	files.push_back(secondFile);
+
+	m_dbController->setWorkcopy(files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	for (std::shared_ptr<DbFile> buff : files)
+	{
+		ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(buff.get()->fileId()));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2 (query.value("data").toString() == buff.get()->data(), qPrintable("Error: function set_wor"));
+		QVERIFY2 (query.value("size").toInt() == buff.get()->size(), qPrintable("Error: wrong size"));
+		QVERIFY2 (query.value("details").toString() == buff.get()->details(), qPrintable("Errpr: wrong details"));
+	}
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
