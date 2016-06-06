@@ -3,7 +3,7 @@
     <AfbElement StrId="#median_si_v1">
         <Properties>
             <Caption>median_si</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
 	  <Implementation Version="0" OpIndex="44"/>
             <Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
             <Category>Logic</Category>

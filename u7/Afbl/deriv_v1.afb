@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#derive_v1">
+    <AfbElement StrId="#deriv_v1">
         <Properties>
-            <Caption>derive</Caption>
-            <Version>1.0</Version>
+            <Caption>deriv</Caption>
+            <Version>1.0001</Version>
             <Implementation Version="1" OpIndex="28"/>
             <Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
             <Category>Other</Category>

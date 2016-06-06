@@ -15,7 +15,7 @@
 #include "DbControllerFileManagementTests.h"
 #include "../../include/DbController.h"
 
-const int DatabaseProjectVersion = 80;
+const int DatabaseProjectVersion = 81;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
