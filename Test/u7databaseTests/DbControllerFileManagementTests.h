@@ -23,6 +23,7 @@ private slots:
 	void getFileHistoryTest();
 	void getLatestFileVersionTest();
 	void getLatestTreeVersionTest();
+	void getWorkcopyTest();
 	void cleanupTestCase();
 
 private:
