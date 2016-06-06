@@ -3,7 +3,7 @@
     <AfbElement StrId="#median_fp_v1">
         <Properties>
             <Caption>median_fp</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
 	  <Implementation Version="0" OpIndex="44"/>
             <Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
             <Category>Logic</Category>
@@ -43,8 +43,7 @@
             <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="37" Size="1"/>
             <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="38" Size="1"/>
             <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="39" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="40" Size="1"/>
-            <AfbElementSignal OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" OpIndex="41" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="40" Size="1"/>            
             <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="42" Size="1"/>           
         </OutputSignals>
         <Params>
@@ -175,19 +174,7 @@ function(videoItemFblElement, afbElement)
 }
 		</Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutDivByZero" Caption="OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>1</Value>
-                <Default>1</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>     
+            </AfbElementParam>           
             <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -304,7 +291,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
         createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
 
 	videoItemFblElement.adjustHeight();

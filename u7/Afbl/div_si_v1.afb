@@ -3,7 +3,7 @@
     <AfbElement StrId="#div_si_v1">
         <Properties>
             <Caption>div_si</Caption>
-            <Version>1.1</Version>
+            <Version>1.0001</Version>
             <Implementation Version="103" OpIndex="14"/>
             <Description>Divider Block with signed int data format</Description>
             <Category>Math</Category>
@@ -18,8 +18,7 @@
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="6" Size="32"/>
-            
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="9" Size="1"/>            
+                       
             <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="11" Size="1"/>
             <AfbElementSignal OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" OpIndex="13" Size="1"/>
         </OutputSignals>
@@ -32,19 +31,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-                <Value>1</Value>
-                <Default>1</Default>
-                <Script>
-                    <Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-		</Changed>
-                </Script>
-            </AfbElementParam>           
+            </AfbElementParam>            
             <AfbElementParam OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -103,9 +90,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	if (out != null)
 	{
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
+	}	
 	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
 
