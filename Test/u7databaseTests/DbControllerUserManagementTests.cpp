@@ -308,7 +308,7 @@ void DbControllerUserTests::getUserListTest()
 		usersFromQuery.push_back(buff);
 	}
 
-	QVERIFY2 (usersFromQuery.size() == usersList.size(), qPrintable("Error: function getUsersList returned wrong amount of users"));
+	QVERIFY2 (uint(usersFromQuery.size()) == usersList.size(), qPrintable("Error: function getUsersList returned wrong amount of users"));
 
 	bool userExist = false;
 

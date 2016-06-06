@@ -22,6 +22,7 @@ private slots:
 	void getCheckedOutFilesTest();
 	void getFileHistoryTest();
 	void getLatestFileVersionTest();
+	void getLatestTreeVersionTest();
 	void cleanupTestCase();
 
 private:

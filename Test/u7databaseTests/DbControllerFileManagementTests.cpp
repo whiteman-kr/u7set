@@ -1023,6 +1023,123 @@ void DbControllerFileTests::getLatestFileVersionTest()
 	db.close();
 }
 
+void DbControllerFileTests::getLatestTreeVersionTest()
+{
+	qRegisterMetaType<DbFileInfo>("DbFileInfo");
+	std::list<std::shared_ptr<DbFile>> result;
+
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "ParentFileForGetLatestTreeVersionTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "Parent file for GetLatestTreeVersionTest created";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Parent file for GetLatestTreeVersionTest updated";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	DbFileInfo childFile;
+
+	fileName = "ChildFileForGetLatestTreeVersionTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(fileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int parentFileId = fileId;
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	childFile.setFileName(fileName);
+	childFile.setSize(instanceQuery.value("Size").toInt());
+	childFile.setUserId(1);
+	childFile.setParentId(1);
+	childFile.setDetails(instanceQuery.value("details").toString());
+	childFile.setFileId(query.value("fileId").toInt());
+
+	comment = "Child file for GetLatestTreeVersionTest created";
+
+	ok = m_dbController->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(childFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Child file for GetLatestTreeVersionTest updated";
+
+	ok = m_dbController->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->getLatestTreeVersion(file, &result, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (result.size() == 2, qPrintable ("Error: function getLatestTreeVersion returned wrong amount of files"));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_file_tree_version(1, %1)").arg(parentFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next())
+	{
+		bool exist = false;
+
+		for (std::shared_ptr<DbFile> buff : result)
+		{
+			if (buff.get()->fileId() == query.value("fileId").toInt())
+			{
+				exist = true;
+			}
+		}
+
+		QVERIFY2 (exist == true, qPrintable("Error: function getLatestTreeVersion returned wrong data!"));
+	}
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
