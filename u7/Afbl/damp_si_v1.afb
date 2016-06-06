@@ -3,7 +3,7 @@
     <AfbElement StrId="#damp_si_v1">
         <Properties>
             <Caption>damp_si</Caption>
-            <Version>1.0002</Version>
+            <Version>1.0003</Version>
             <Implementation Version="104" OpIndex="19"/>
             <Description>Damper Block with signed int data format</Description>
             <Category>Damper</Category>
@@ -23,7 +23,7 @@
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-                <Value>0</Value>
+                <Value>5</Value>
                 <Default>0</Default>
                 <LowLimit>0</LowLimit>
                 <HighLimit>65535</HighLimit>

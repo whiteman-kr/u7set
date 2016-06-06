@@ -52,7 +52,7 @@ void OtherTests::get_unitsTest()
 				 qPrintable(QString("Error: values \"unit_ru\" not match at row %1").arg(rowNumber)));
 	}
 
-	QVERIFY2(rowNumber = rowCount, qPrintable("Error: different nomber of rows"));
+	QVERIFY2(rowNumber == rowCount, qPrintable("Error: different nomber of rows"));
 }
 
 void OtherTests::build_startTest()

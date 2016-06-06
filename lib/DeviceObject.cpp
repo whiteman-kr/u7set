@@ -2781,9 +2781,8 @@ static const QString valueBitCaption("ValueBit");
 	Workstation::Workstation(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
-
-		typeProp->setUpdateFromPreset(true);
+		//auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
+		//typeProp->setUpdateFromPreset(true);
 	}
 
 	Workstation::~Workstation()

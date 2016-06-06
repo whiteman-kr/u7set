@@ -265,7 +265,7 @@ namespace Builder
 			}
 
 			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
-			int channel = m->propertyValue("LMNumber").toInt();
+			int lmNumber = m->propertyValue("LMNumber").toInt();
 
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->equipmentIdTemplate();
@@ -273,10 +273,10 @@ namespace Builder
 			lmReport << "Place: " + QString::number(m->place());
 			lmReport << "Subsystem ID: " + m->propertyValue("SubsystemID").toString();
 			lmReport << "Subsystem code: " + QString::number(ssKey);
-			lmReport << "Channel: " + QString::number(channel);
+			lmReport << "LM Number: " + QString::number(lmNumber);
 
 			quint16 jumpers = ssKey << 6;
-			jumpers |= channel;
+			jumpers |= lmNumber;
 
 			quint16 crc4 = Crc::crc4(jumpers);
 			jumpers |= (crc4 << 12);

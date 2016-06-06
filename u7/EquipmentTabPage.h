@@ -68,7 +68,11 @@ public slots:
 
 	void switchMode();
 
+signals:
+	void objectVcsStateChanged();
+
 	// Properties
+	//
 public:
 	DbController* dbController();
 	DbController* dbController() const;
@@ -225,6 +229,8 @@ protected slots:
 	void addNewPresetTriggered();
 
 	void pendingChanges();
+
+	void objectVcsStateChanged();
 
 	// Data
 	//

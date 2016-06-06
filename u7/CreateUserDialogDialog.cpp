@@ -55,7 +55,7 @@ void CreateUserDialogDialog::done(int r)
 		if (fu != m_users.end())
 		{
 			QMessageBox mb(this);
-			mb.setText(tr("Username %1 is already exists."));
+			mb.setText(tr("Username %1 is already exists.").arg(username));
 			mb.setInformativeText(tr("Choose another username."));
 			mb.exec();
 

@@ -4442,7 +4442,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 			oneStringIds += s + QChar::LineFeed;
 		}
 
-		m_editEngine->runSetProperty("AppSignalIDs", QVariant(oneStringIds), schemaItem);
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
 	}
 
 	return;
@@ -4509,7 +4509,7 @@ void EditSchemaWidget::f2Key()
 	{
 		// Set value
 		//
-		m_editEngine->runSetProperty("AppSignalIDs", QVariant(newValue), item);
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
 
 		editSchemaView()->update();
 	}
@@ -4749,10 +4749,97 @@ void EditSchemaWidget::editPaste()
 		return;
 	}
 
+	// Specific pastes
+	//
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+
+	if (selected.empty() == true ||
+		mimeData->hasText() == false)
+	{
+		return;
+	}
+
+	// Paste text to SchemeItemConst
+	//
+	bool allItemsAreConsts = true;
+
+	bool okInteger = false;
+	bool okFloat = false;
+
+	int constInt = mimeData->text().toInt(&okInteger);
+	double constFloat = mimeData->text().toDouble(&okFloat);
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
+	constIntItems.reserve(selected.size());
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
+	constFloatItems.reserve(selected.size());
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
+
+		if (constItem == nullptr)
+		{
+			allItemsAreConsts = false;
+			break;
+		}
+
+		switch (constItem->type())
+		{
+		case VFrame30::SchemaItemConst::ConstType::IntegerlType:
+			if (okInteger == true)
+			{
+				constIntItems.push_back(item);
+			}
+			break;
+
+		case VFrame30::SchemaItemConst::ConstType::FloatType:
+			if (okFloat == true)
+			{
+				constFloatItems.push_back(item);
+			}
+			break;
+
+		default:
+			assert(false);
+			allItemsAreConsts = false;
+		}
+	}
+
+	if (allItemsAreConsts == true)
+	{
+		if (okInteger == true && constIntItems.empty() == false)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant(constInt), constIntItems);
+		}
+
+		if (okFloat == true && constFloatItems.empty() == false)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(constFloat), constFloatItems);
+		}
+	}
+
+	// Paste text to SchemeItemRect
+	//
+
+	bool allItemsAreRects = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemRect*>(item.get()) == nullptr)
+		{
+			allItemsAreRects = false;
+			break;
+		}
+	}
+
+	if (allItemsAreRects == true)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(mimeData->text()), selected);
+	}
 
 	// Paste appSignalID to SchemaItemSignal
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
 	bool allItemsAreSignals = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
@@ -4764,12 +4851,10 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
-	if (selected.empty() == false &&
-		allItemsAreSignals == true &&
-		mimeData->hasText() == true &&
+	if (allItemsAreSignals == true &&
 		mimeData->text().startsWith('#') == true)
 	{
-		m_editEngine->runSetProperty("AppSignalIDs", QVariant(mimeData->text()), selected);
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
 	}
 
 	return;
@@ -4867,8 +4952,6 @@ void EditSchemaWidget::selectionChanged()
 
 void EditSchemaWidget::clipboardDataChanged()
 {
-	bool paste = false;
-
 	const QClipboard* clipboard = QApplication::clipboard();
 	const QMimeData* mimeData = clipboard->mimeData();
 
@@ -4890,10 +4973,94 @@ void EditSchemaWidget::clipboardDataChanged()
 		}
 	}
 
-	// if Any SchemaItemSignal is selected and AppSignalID is in the clipboard
+	// Specific items cases
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
+	// All Items are SchemaItemConsts
+	//
+	bool allItemsAreConsts = true;
+
+	bool okInteger = false;
+	bool okFloat = false;
+
+	mimeData->text().toInt(&okInteger);
+	mimeData->text().toDouble(&okFloat);
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
+	constIntItems.reserve(selected.size());
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
+	constFloatItems.reserve(selected.size());
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
+
+		if (constItem == nullptr)
+		{
+			allItemsAreConsts = false;
+			break;
+		}
+
+		switch (constItem->type())
+		{
+		case VFrame30::SchemaItemConst::ConstType::IntegerlType:
+			if (okInteger == true)
+			{
+				constIntItems.push_back(item);
+			}
+			break;
+
+		case VFrame30::SchemaItemConst::ConstType::FloatType:
+			if (okFloat == true)
+			{
+				constFloatItems.push_back(item);
+			}
+			break;
+
+		default:
+			assert(false);
+			allItemsAreConsts = false;
+		}
+	}
+
+	if (allItemsAreConsts == true)
+	{
+		if (okInteger == true && constIntItems.empty() == false)
+		{
+			m_editPasteAction->setEnabled(true);
+			return;
+		}
+
+		if (okFloat == true && constFloatItems.empty() == false)
+		{
+			m_editPasteAction->setEnabled(true);
+			return;
+		}
+	}
+
+	// if SchemaItemRect is selected and Text is in the clipboard
+	//
+	bool allItemsAreRects = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemRect*>(item.get()) == nullptr)
+		{
+			allItemsAreRects = false;
+			break;
+		}
+	}
+
+	if (allItemsAreRects == true &&
+		mimeData->hasText() == true)
+	{
+		m_editPasteAction->setEnabled(true);
+		return;
+	}
+
+	// if Any SchemaItemSignal is selected and AppSignalID is in the clipboard
+	//
 	bool allItemsAreSignals = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
@@ -4908,12 +5075,13 @@ void EditSchemaWidget::clipboardDataChanged()
 		mimeData->hasText() == true &&
 		mimeData->text().startsWith('#') == true)
 	{
-		paste = true;
+		m_editPasteAction->setEnabled(true);
+		return;
 	}
 
 	// --
 	//
-	m_editPasteAction->setEnabled(paste);
+	m_editPasteAction->setEnabled(false);
 
 	return;
 }

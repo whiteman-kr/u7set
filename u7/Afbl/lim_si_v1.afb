@@ -29,7 +29,7 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_lim_max" Caption="LimMax" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="SignedInt">
-                <Value>0</Value>
+                <Value>100</Value>
                 <Default>0</Default>
                 <LowLimit>-2147483648</LowLimit>
                 <HighLimit>2147483647</HighLimit>
