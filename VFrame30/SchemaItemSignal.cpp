@@ -318,7 +318,7 @@ namespace VFrame30
 					}
 					else
 					{
-						text = QLatin1String("CustomerSignalID");
+						text = appSignalId;
 					}
 					break;
 
