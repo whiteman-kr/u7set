@@ -17,6 +17,7 @@
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "SignalsTabPage.h"
 
 
@@ -1743,6 +1744,25 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemLink>(schema()->unit()));
 			});
 
+	m_addTransmitter = new QAction(tr("Transmitter"), this);
+	m_addTransmitter->setEnabled(true);
+	m_addTransmitter->setIcon(QIcon(":/Images/Images/SchemaTransmitter.svg"));
+	connect(m_addTransmitter, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemTransmitter>(schema()->unit()));
+			});
+
+	m_addReceiver = new QAction(tr("Receiver"), this);
+	m_addReceiver->setEnabled(true);
+	m_addReceiver->setIcon(QIcon(":/Images/Images/SchemaReceiver.svg"));
+	connect(m_addReceiver, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit()));
+			});
+
+
 	//
 	// Edit
 	//
@@ -2026,6 +2046,8 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addOutputSignalAction);
 		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
+		m_addMenu->addAction(m_addTransmitter);
+		m_addMenu->addAction(m_addReceiver);
 
 	m_editMenu = new QMenu(this);
 	m_editAction->setMenu(m_editMenu);

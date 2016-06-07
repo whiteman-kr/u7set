@@ -344,8 +344,8 @@ message SchemaItem
 	// --
 	//
 	optional FblItem FblItem = 106;							//
-	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
-	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
+	optional FblItemRect FblItemRect = 107;					// +PosRectImpl, FblItem
+	optional FblItemLine FblItemLine = 108;					// +PosConnectionImpl, FblItem
 
 	// Inherited from PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
@@ -353,12 +353,15 @@ message SchemaItem
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
 
-	optional SchemaItemSignal Signal = 124;						// +FblItemRect
-	optional SchemaItemInput InputSignal = 125;					// +Signal
-	optional SchemaItemOutput OutputSignal = 126;                                   // +Signal
+    optional SchemaItemSignal Signal = 124;					// +FblItemRect
+	optional SchemaItemInput InputSignal = 125;				// +Signal
+	optional SchemaItemOutput OutputSignal = 126;           // +Signal
 	optional SchemaItemLink Link = 127;						// +FblItemLine
 	optional SchemaItemAfb Afb = 128;						// +FblItemRect
-	optional SchemaItemConst ConstItem = 129;					// +FblItemRect
+	optional SchemaItemConst ConstItem = 129;				// +FblItemRect
+	optional SchemaItemConnection ConnectionItem = 130;		// +FblItemRect
+	optional SchemaItemTransmitter TransmitterItem = 131;	// +ConnectionItem, FblItemRect
+	optional SchemaItemReceiver ReceiverItem = 132;			// +ConnectionItem, FblItemRect
 }
 
 //
@@ -572,6 +575,37 @@ message SchemaItemConst
 	optional int32 intValue = 2 [default = 0];
 	optional double floatValue = 3 [default = 0.0];
 	optional int32 precision = 4 [default = 2];
+}
+
+//
+//
+// SchemaItemConnection
+//
+//
+message SchemaItemConnection
+{
+    optional string connectionid = 1;
+}
+
+//
+//
+// SchemaItemTransmitter
+//
+//
+message SchemaItemTransmitter
+{
+    optional int32 pinCount = 1 [default = 1];
+}
+
+//
+//
+// SchemaItemReceiver
+//
+//
+message SchemaItemReceiver
+{
+    optional bool showValidity = 1 [default = true];
+	optional string appSignalId = 2;
 }
 
 //------------------------------------------------------------------------------------------

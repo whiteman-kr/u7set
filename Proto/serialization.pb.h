@@ -68,6 +68,9 @@ class SchemaItemOutput;
 class SchemaItemLink;
 class SchemaItemAfb;
 class SchemaItemConst;
+class SchemaItemConnection;
+class SchemaItemTransmitter;
+class SchemaItemReceiver;
 class DeviceObject;
 class DeviceRoot;
 class DeviceSystem;
@@ -2429,6 +2432,33 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemConst* release_constitem();
   inline void set_allocated_constitem(::Proto::SchemaItemConst* constitem);
 
+  // optional .Proto.SchemaItemConnection ConnectionItem = 130;
+  inline bool has_connectionitem() const;
+  inline void clear_connectionitem();
+  static const int kConnectionItemFieldNumber = 130;
+  inline const ::Proto::SchemaItemConnection& connectionitem() const;
+  inline ::Proto::SchemaItemConnection* mutable_connectionitem();
+  inline ::Proto::SchemaItemConnection* release_connectionitem();
+  inline void set_allocated_connectionitem(::Proto::SchemaItemConnection* connectionitem);
+
+  // optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
+  inline bool has_transmitteritem() const;
+  inline void clear_transmitteritem();
+  static const int kTransmitterItemFieldNumber = 131;
+  inline const ::Proto::SchemaItemTransmitter& transmitteritem() const;
+  inline ::Proto::SchemaItemTransmitter* mutable_transmitteritem();
+  inline ::Proto::SchemaItemTransmitter* release_transmitteritem();
+  inline void set_allocated_transmitteritem(::Proto::SchemaItemTransmitter* transmitteritem);
+
+  // optional .Proto.SchemaItemReceiver ReceiverItem = 132;
+  inline bool has_receiveritem() const;
+  inline void clear_receiveritem();
+  static const int kReceiverItemFieldNumber = 132;
+  inline const ::Proto::SchemaItemReceiver& receiveritem() const;
+  inline ::Proto::SchemaItemReceiver* mutable_receiveritem();
+  inline ::Proto::SchemaItemReceiver* release_receiveritem();
+  inline void set_allocated_receiveritem(::Proto::SchemaItemReceiver* receiveritem);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItem)
  private:
   inline void set_has_uuid();
@@ -2473,6 +2503,12 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_afb();
   inline void set_has_constitem();
   inline void clear_has_constitem();
+  inline void set_has_connectionitem();
+  inline void clear_has_connectionitem();
+  inline void set_has_transmitteritem();
+  inline void clear_has_transmitteritem();
+  inline void set_has_receiveritem();
+  inline void clear_has_receiveritem();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2497,9 +2533,12 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemLink* link_;
   ::Proto::SchemaItemAfb* afb_;
   ::Proto::SchemaItemConst* constitem_;
+  ::Proto::SchemaItemConnection* connectionitem_;
+  ::Proto::SchemaItemTransmitter* transmitteritem_;
+  ::Proto::SchemaItemReceiver* receiveritem_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(24 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4275,6 +4314,272 @@ class SchemaItemConst : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemConst* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemConnection : public ::google::protobuf::Message {
+ public:
+  SchemaItemConnection();
+  virtual ~SchemaItemConnection();
+
+  SchemaItemConnection(const SchemaItemConnection& from);
+
+  inline SchemaItemConnection& operator=(const SchemaItemConnection& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemConnection& default_instance();
+
+  void Swap(SchemaItemConnection* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemConnection* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemConnection& from);
+  void MergeFrom(const SchemaItemConnection& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string connectionid = 1;
+  inline bool has_connectionid() const;
+  inline void clear_connectionid();
+  static const int kConnectionidFieldNumber = 1;
+  inline const ::std::string& connectionid() const;
+  inline void set_connectionid(const ::std::string& value);
+  inline void set_connectionid(const char* value);
+  inline void set_connectionid(const char* value, size_t size);
+  inline ::std::string* mutable_connectionid();
+  inline ::std::string* release_connectionid();
+  inline void set_allocated_connectionid(::std::string* connectionid);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemConnection)
+ private:
+  inline void set_has_connectionid();
+  inline void clear_has_connectionid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* connectionid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemConnection* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemTransmitter : public ::google::protobuf::Message {
+ public:
+  SchemaItemTransmitter();
+  virtual ~SchemaItemTransmitter();
+
+  SchemaItemTransmitter(const SchemaItemTransmitter& from);
+
+  inline SchemaItemTransmitter& operator=(const SchemaItemTransmitter& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemTransmitter& default_instance();
+
+  void Swap(SchemaItemTransmitter* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemTransmitter* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemTransmitter& from);
+  void MergeFrom(const SchemaItemTransmitter& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 pinCount = 1 [default = 1];
+  inline bool has_pincount() const;
+  inline void clear_pincount();
+  static const int kPinCountFieldNumber = 1;
+  inline ::google::protobuf::int32 pincount() const;
+  inline void set_pincount(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemTransmitter)
+ private:
+  inline void set_has_pincount();
+  inline void clear_has_pincount();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 pincount_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemTransmitter* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemReceiver : public ::google::protobuf::Message {
+ public:
+  SchemaItemReceiver();
+  virtual ~SchemaItemReceiver();
+
+  SchemaItemReceiver(const SchemaItemReceiver& from);
+
+  inline SchemaItemReceiver& operator=(const SchemaItemReceiver& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemReceiver& default_instance();
+
+  void Swap(SchemaItemReceiver* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemReceiver* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemReceiver& from);
+  void MergeFrom(const SchemaItemReceiver& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool showValidity = 1 [default = true];
+  inline bool has_showvalidity() const;
+  inline void clear_showvalidity();
+  static const int kShowValidityFieldNumber = 1;
+  inline bool showvalidity() const;
+  inline void set_showvalidity(bool value);
+
+  // optional string appSignalId = 2;
+  inline bool has_appsignalid() const;
+  inline void clear_appsignalid();
+  static const int kAppSignalIdFieldNumber = 2;
+  inline const ::std::string& appsignalid() const;
+  inline void set_appsignalid(const ::std::string& value);
+  inline void set_appsignalid(const char* value);
+  inline void set_appsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalid();
+  inline ::std::string* release_appsignalid();
+  inline void set_allocated_appsignalid(::std::string* appsignalid);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemReceiver)
+ private:
+  inline void set_has_showvalidity();
+  inline void clear_has_showvalidity();
+  inline void set_has_appsignalid();
+  inline void clear_has_appsignalid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* appsignalid_;
+  bool showvalidity_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemReceiver* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -9754,6 +10059,120 @@ inline void SchemaItem::set_allocated_constitem(::Proto::SchemaItemConst* consti
   }
 }
 
+// optional .Proto.SchemaItemConnection ConnectionItem = 130;
+inline bool SchemaItem::has_connectionitem() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void SchemaItem::set_has_connectionitem() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void SchemaItem::clear_has_connectionitem() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void SchemaItem::clear_connectionitem() {
+  if (connectionitem_ != NULL) connectionitem_->::Proto::SchemaItemConnection::Clear();
+  clear_has_connectionitem();
+}
+inline const ::Proto::SchemaItemConnection& SchemaItem::connectionitem() const {
+  return connectionitem_ != NULL ? *connectionitem_ : *default_instance_->connectionitem_;
+}
+inline ::Proto::SchemaItemConnection* SchemaItem::mutable_connectionitem() {
+  set_has_connectionitem();
+  if (connectionitem_ == NULL) connectionitem_ = new ::Proto::SchemaItemConnection;
+  return connectionitem_;
+}
+inline ::Proto::SchemaItemConnection* SchemaItem::release_connectionitem() {
+  clear_has_connectionitem();
+  ::Proto::SchemaItemConnection* temp = connectionitem_;
+  connectionitem_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_connectionitem(::Proto::SchemaItemConnection* connectionitem) {
+  delete connectionitem_;
+  connectionitem_ = connectionitem;
+  if (connectionitem) {
+    set_has_connectionitem();
+  } else {
+    clear_has_connectionitem();
+  }
+}
+
+// optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
+inline bool SchemaItem::has_transmitteritem() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void SchemaItem::set_has_transmitteritem() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void SchemaItem::clear_has_transmitteritem() {
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline void SchemaItem::clear_transmitteritem() {
+  if (transmitteritem_ != NULL) transmitteritem_->::Proto::SchemaItemTransmitter::Clear();
+  clear_has_transmitteritem();
+}
+inline const ::Proto::SchemaItemTransmitter& SchemaItem::transmitteritem() const {
+  return transmitteritem_ != NULL ? *transmitteritem_ : *default_instance_->transmitteritem_;
+}
+inline ::Proto::SchemaItemTransmitter* SchemaItem::mutable_transmitteritem() {
+  set_has_transmitteritem();
+  if (transmitteritem_ == NULL) transmitteritem_ = new ::Proto::SchemaItemTransmitter;
+  return transmitteritem_;
+}
+inline ::Proto::SchemaItemTransmitter* SchemaItem::release_transmitteritem() {
+  clear_has_transmitteritem();
+  ::Proto::SchemaItemTransmitter* temp = transmitteritem_;
+  transmitteritem_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_transmitteritem(::Proto::SchemaItemTransmitter* transmitteritem) {
+  delete transmitteritem_;
+  transmitteritem_ = transmitteritem;
+  if (transmitteritem) {
+    set_has_transmitteritem();
+  } else {
+    clear_has_transmitteritem();
+  }
+}
+
+// optional .Proto.SchemaItemReceiver ReceiverItem = 132;
+inline bool SchemaItem::has_receiveritem() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void SchemaItem::set_has_receiveritem() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void SchemaItem::clear_has_receiveritem() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void SchemaItem::clear_receiveritem() {
+  if (receiveritem_ != NULL) receiveritem_->::Proto::SchemaItemReceiver::Clear();
+  clear_has_receiveritem();
+}
+inline const ::Proto::SchemaItemReceiver& SchemaItem::receiveritem() const {
+  return receiveritem_ != NULL ? *receiveritem_ : *default_instance_->receiveritem_;
+}
+inline ::Proto::SchemaItemReceiver* SchemaItem::mutable_receiveritem() {
+  set_has_receiveritem();
+  if (receiveritem_ == NULL) receiveritem_ = new ::Proto::SchemaItemReceiver;
+  return receiveritem_;
+}
+inline ::Proto::SchemaItemReceiver* SchemaItem::release_receiveritem() {
+  clear_has_receiveritem();
+  ::Proto::SchemaItemReceiver* temp = receiveritem_;
+  receiveritem_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_receiveritem(::Proto::SchemaItemReceiver* receiveritem) {
+  delete receiveritem_;
+  receiveritem_ = receiveritem;
+  if (receiveritem) {
+    set_has_receiveritem();
+  } else {
+    clear_has_receiveritem();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -11118,6 +11537,202 @@ inline ::google::protobuf::int32 SchemaItemConst::precision() const {
 inline void SchemaItemConst::set_precision(::google::protobuf::int32 value) {
   set_has_precision();
   precision_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemConnection
+
+// optional string connectionid = 1;
+inline bool SchemaItemConnection::has_connectionid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemConnection::set_has_connectionid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemConnection::clear_has_connectionid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemConnection::clear_connectionid() {
+  if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+    connectionid_->clear();
+  }
+  clear_has_connectionid();
+}
+inline const ::std::string& SchemaItemConnection::connectionid() const {
+  return *connectionid_;
+}
+inline void SchemaItemConnection::set_connectionid(const ::std::string& value) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(value);
+}
+inline void SchemaItemConnection::set_connectionid(const char* value) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(value);
+}
+inline void SchemaItemConnection::set_connectionid(const char* value, size_t size) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemConnection::mutable_connectionid() {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  return connectionid_;
+}
+inline ::std::string* SchemaItemConnection::release_connectionid() {
+  clear_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = connectionid_;
+    connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemConnection::set_allocated_connectionid(::std::string* connectionid) {
+  if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+    delete connectionid_;
+  }
+  if (connectionid) {
+    set_has_connectionid();
+    connectionid_ = connectionid;
+  } else {
+    clear_has_connectionid();
+    connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemTransmitter
+
+// optional int32 pinCount = 1 [default = 1];
+inline bool SchemaItemTransmitter::has_pincount() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemTransmitter::set_has_pincount() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemTransmitter::clear_has_pincount() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemTransmitter::clear_pincount() {
+  pincount_ = 1;
+  clear_has_pincount();
+}
+inline ::google::protobuf::int32 SchemaItemTransmitter::pincount() const {
+  return pincount_;
+}
+inline void SchemaItemTransmitter::set_pincount(::google::protobuf::int32 value) {
+  set_has_pincount();
+  pincount_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemReceiver
+
+// optional bool showValidity = 1 [default = true];
+inline bool SchemaItemReceiver::has_showvalidity() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemReceiver::set_has_showvalidity() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemReceiver::clear_has_showvalidity() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemReceiver::clear_showvalidity() {
+  showvalidity_ = true;
+  clear_has_showvalidity();
+}
+inline bool SchemaItemReceiver::showvalidity() const {
+  return showvalidity_;
+}
+inline void SchemaItemReceiver::set_showvalidity(bool value) {
+  set_has_showvalidity();
+  showvalidity_ = value;
+}
+
+// optional string appSignalId = 2;
+inline bool SchemaItemReceiver::has_appsignalid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemReceiver::set_has_appsignalid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemReceiver::clear_has_appsignalid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemReceiver::clear_appsignalid() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalid_->clear();
+  }
+  clear_has_appsignalid();
+}
+inline const ::std::string& SchemaItemReceiver::appsignalid() const {
+  return *appsignalid_;
+}
+inline void SchemaItemReceiver::set_appsignalid(const ::std::string& value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void SchemaItemReceiver::set_appsignalid(const char* value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void SchemaItemReceiver::set_appsignalid(const char* value, size_t size) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemReceiver::mutable_appsignalid() {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  return appsignalid_;
+}
+inline ::std::string* SchemaItemReceiver::release_appsignalid() {
+  clear_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalid_;
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemReceiver::set_allocated_appsignalid(::std::string* appsignalid) {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
+  if (appsignalid) {
+    set_has_appsignalid();
+    appsignalid_ = appsignalid;
+  } else {
+    clear_has_appsignalid();
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
