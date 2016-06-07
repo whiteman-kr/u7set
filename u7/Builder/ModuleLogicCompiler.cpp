@@ -3975,7 +3975,7 @@ namespace Builder
 
 						m_inOutSignalsToScalAppFbMap.insert(signal->appSignalID(), appFb);
 
-						qDebug() << signal->appSignalID();
+						//qDebug() << signal->appSignalID();
 
 						delete appItem;
 					}
@@ -5521,7 +5521,7 @@ namespace Builder
 		{
 			appSignal = m_signalStrIdMap[strID];
 
-			qDebug() << "Bind appSignal = " << strID;
+			//qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
