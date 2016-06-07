@@ -89,4 +89,6 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 	QList<DataSource*> dataSources() { return m_dataSources.values(); }
+	const QVector<Signal>& signalParams() { return m_signalParams; }
+	const QVector<AppSignalState>& signalStates() { return m_states; }
 };

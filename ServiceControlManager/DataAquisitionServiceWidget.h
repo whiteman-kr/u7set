@@ -31,6 +31,26 @@ private:
 	QList<DataSource*> m_dataSource;
 };
 
+class SignalStateModel : public QAbstractTableModel
+{
+	Q_OBJECT
+public:
+	explicit SignalStateModel(TcpAppDataClient* clientSocket, QObject *parent = 0);
+	~SignalStateModel();
+
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
+public slots:
+	void invalidateData();
+	void reloadList();
+
+private:
+	TcpAppDataClient* m_clientSocket;
+};
+
 class DataAquisitionServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
@@ -40,11 +60,14 @@ public:
 
 public slots:
 	void updateSourceInfo();
-	void updateSourceState();
+
+	void updateSignalInfo();
+
 	void checkVisibility();
 
 private:
 	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
+	SignalStateModel* m_signalStateModel = nullptr;
 	QTableView* m_dataSourcesView = nullptr;
 	QTableView* m_signalsView = nullptr;
 

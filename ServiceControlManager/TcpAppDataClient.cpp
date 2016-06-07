@@ -148,7 +148,7 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 
 	emit dataSourcesInfoLoaded();
 
-	//sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 }
 
 
@@ -240,6 +240,7 @@ void TcpAppDataClient::getNextParamPart()
 		m_states.resize(m_signalParams.count());
 		m_getStatesCurrentPart = 0;
 		getNextStatePart();
+		emit appSignalListLoaded();
 		return;
 	}
 
@@ -375,5 +376,5 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 	m_getParamsCurrentPart++;
 
-	getNextParamPart();
+	getNextStatePart();
 }
