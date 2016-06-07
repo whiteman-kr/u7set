@@ -635,7 +635,7 @@ namespace Builder
 		{
 			AppLogicItem currentItem = *currentIt;		// NOT REFERENCE, ITEM CAN BE MOVED LATER
 
-			qDebug() << "Parsing -- order item " << currentItem.m_fblItem->buildName();
+			//qDebug() << "Parsing -- order item " << currentItem.m_fblItem->buildName();
 
 			// Get dependant items
 			//

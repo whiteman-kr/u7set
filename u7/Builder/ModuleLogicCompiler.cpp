@@ -466,7 +466,7 @@ namespace Builder
 			return true;
 		}
 
-		dumApplicationLogicItems();
+		//dumApplicationLogicItems();
 
 		do
 		{
@@ -5529,7 +5529,7 @@ namespace Builder
 
 			m_signalStrIdMap.insert(strID, appSignal);
 
-			qDebug() << "Create appSignal = " << strID;
+			//qDebug() << "Create appSignal = " << strID;
 
 			incCounters(appSignal);
 		}
@@ -5602,7 +5602,7 @@ namespace Builder
 
 			appSignal = m_signalStrIdMap[strID];
 
-			qDebug() << "Bind appSignal = " << strID;
+			//qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
@@ -5614,7 +5614,7 @@ namespace Builder
 
 			m_signalStrIdMap.insert(strID, appSignal);
 
-			qDebug() << "Create appSignal = " << strID;
+			//qDebug() << "Create appSignal = " << strID;
 
 			incCounters(appSignal);
 		}
