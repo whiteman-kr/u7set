@@ -48,7 +48,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiFilePathEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
 		void onEditingFinished();
@@ -77,7 +77,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiEnumEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
 		void indexChanged(int index);
@@ -102,7 +102,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiColorEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
 		void onEditingFinished();
@@ -175,7 +175,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
 		void onEditingFinished();
@@ -198,73 +198,6 @@ namespace ExtWidgets
 		QString m_caption;
 	};
 
-
-	/*
-	class QtMultiDoubleSpinBox : public QWidget
-	{
-		Q_OBJECT
-
-	public:
-		explicit QtMultiDoubleSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
-
-	public slots:
-		void onValueChanged(double value);
-
-	signals:
-		void valueChanged(QVariant value);
-
-	private:
-		bool eventFilter(QObject* watched, QEvent* event);
-
-	private:
-		QDoubleSpinBox* m_spinBox = nullptr;
-		bool m_escape = false;
-	};
-
-
-	class QtMultiIntSpinBox : public QWidget
-	{
-		Q_OBJECT
-	public:
-		explicit QtMultiIntSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
-
-	public slots:
-		void onValueChanged(int value);
-
-	signals:
-		void valueChanged(QVariant value);
-
-	private:
-		bool eventFilter(QObject* watched, QEvent* event);
-
-	private:
-		QSpinBox* m_spinBox = nullptr;
-		bool m_escape = false;
-	};
-
-
-	class QtMultiUIntSpinBox : public QWidget
-	{
-		Q_OBJECT
-	public:
-		explicit QtMultiUIntSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
-
-	public slots:
-		void onValueChanged(quint32 value);
-
-	signals:
-		void valueChanged(QVariant value);
-
-	private:
-		bool eventFilter(QObject* watched, QEvent* event);
-
-	private:
-		QSpinBox* m_spinBox = nullptr;
-		bool m_escape = false;
-	};*/
 
 
 	class QtMultiVariantPropertyManager : public QtAbstractPropertyManager
@@ -360,6 +293,7 @@ namespace ExtWidgets
 		void clearProperties();
 
 		void setExpertMode(bool expertMode);
+		void setEditingEnabled(bool editingEnabled);
 
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
@@ -393,6 +327,7 @@ namespace ExtWidgets
 
 	private:
 		bool m_expertMode = false;
+		bool m_editingEnabled = true;
 	};
 
 }
