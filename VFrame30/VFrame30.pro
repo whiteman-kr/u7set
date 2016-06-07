@@ -127,7 +127,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/AppSignalManager.h \
     ../lib/Signal.h \
     ../lib/XmlHelper.h \
-    ../lib/DeviceObject.h
+    ../lib/DeviceObject.h \
+    SchemaItemConnection.h
 
 SOURCES += \
     Settings.cpp \
@@ -173,7 +174,8 @@ SOURCES += \
     ../lib/AppSignalManager.cpp \
     ../lib/Signal.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/DeviceObject.cpp
+    ../lib/DeviceObject.cpp \
+    SchemaItemConnection.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

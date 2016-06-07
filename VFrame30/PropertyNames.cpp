@@ -17,6 +17,8 @@ const QString PropertyNames::valueFloat("ValueFloat");
 const QString PropertyNames::precision("Precision");
 const QString PropertyNames::analogFormat("AnalogFormat");
 const QString PropertyNames::columnCount("ColumnCount");
+const QString PropertyNames::pinCount("PinCount");
+const QString PropertyNames::showValidityPin("ValidityPin");
 
 const QString PropertyNames::lineColor("LineColor");
 const QString PropertyNames::lineWeight("LineWeight");
@@ -33,6 +35,8 @@ const QString PropertyNames::alignHorz("AlignHorz");
 const QString PropertyNames::alignVert("AlignVert");
 
 const QString PropertyNames::appSignalIDs("AppSignalIDs");
+const QString PropertyNames::appSignalId("AppSignalID");
+const QString PropertyNames::connectionId("ConnectionID");
 
 const QString PropertyNames::behaviourCategory("Behaviour");
 const QString PropertyNames::appearanceCategory("Appearance");

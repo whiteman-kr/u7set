@@ -573,6 +573,8 @@ private:
 		QAction* m_addConstantAction = nullptr;
 		QAction* m_addFblElementAction = nullptr;
 		QAction* m_addLinkAction = nullptr;
+		QAction* m_addTransmitter = nullptr;
+		QAction* m_addReceiver = nullptr;
 
 	// Edit
 	//
