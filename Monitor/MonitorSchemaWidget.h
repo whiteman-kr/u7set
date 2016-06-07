@@ -5,6 +5,11 @@
 class MonitorSchemaView;
 class SchemaManager;
 
+namespace VFrame30
+{
+	class SchemaItem;
+}
+
 //
 //
 // MonitorSchemaWidget
@@ -23,6 +28,8 @@ public:
 
 protected:
 	void createActions();
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsUnderCursor(const QPoint& pos);
 
 	// Methods
 	//
@@ -46,6 +53,7 @@ signals:
 	//
 protected slots:
 	void contextMenu(const QPoint &pos);
+	void signalInfo(QString appSignalId);
 
 	// Properties
 	//
