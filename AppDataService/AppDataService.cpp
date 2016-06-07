@@ -30,12 +30,16 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 void AppDataServiceWorker::runServiceInfoThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_APP_DATA_SERVICE_INFO);
+	assert(m_serviceInfoThread == nullptr);
 
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &AppDataServiceWorker::onInformationRequest);
-	connect(this, &AppDataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
 
-	m_serviceInfoThread = new UdpSocketThread(serverSocket);
+	m_serviceInfoThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
+															tcpAppDataSever,
+															m_appDataSources,
+															m_appSignals,
+															m_signalStates,
+															m_unitInfo);
 	m_serviceInfoThread->start();
 }
 
@@ -122,10 +126,7 @@ void AppDataServiceWorker::initialize()
 	// Service Main Function initialization
 	//
 	runCfgLoaderThread();
-	runServiceInfoThread();
-
 	runTimer();
-
 	qDebug() << "DataServiceMainFunctionWorker initialized";
 }
 
@@ -574,6 +575,7 @@ void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
+	stopServiceInfoThread();
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
 
@@ -594,6 +596,8 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runDataChannelThreads();
 
 	runTcpAppDataServer();
+
+	runServiceInfoThread();
 }
 
 

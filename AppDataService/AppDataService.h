@@ -24,7 +24,7 @@ class AppDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 private:
-	UdpSocketThread* m_serviceInfoThread = nullptr;
+	//UdpSocketThread* m_serviceInfoThread = nullptr;
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_settings;
@@ -39,6 +39,7 @@ private:
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
+	TcpAppDataServerThread* m_serviceInfoThread = nullptr;
 
 	QTimer m_timer;
 
