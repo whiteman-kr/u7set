@@ -52,6 +52,10 @@ void TcpAppDataClient::onConnection()
 
 void TcpAppDataClient::onDisconnection()
 {
+	m_unitList.clear();
+	m_signalHahes.clear();
+	m_signalParams.clear();
+	m_states.clear();
 	emit disconnected();
 }
 
@@ -104,6 +108,10 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		onGetAppSignalStateReply(replyData, replyDataSize);
 		break;
 
+	case ADS_GET_UNITS:
+		onGetUnitsReply(replyData, replyDataSize);
+		break;
+
 	default:
 		assert(false);
 	}
@@ -148,13 +156,28 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 
 	emit dataSourcesInfoLoaded();
 
-	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+	sendRequest(ADS_GET_UNITS);
 }
 
 
 void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
-	//emit dataSoursesStateUpdated();
+	bool result = m_getDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	/*int statesCount = m_getDataSourcesStatesReply.datasourcesstates_size();
+
+	for(int i = 0; i < statesCount; i++)
+	{
+		m_dataSourceStates[i] = m_getDataSourcesStatesReply.datasourcesstates(i);
+	}
+
+	emit dataSoursesStateUpdated();*/
 }
 
 
@@ -291,11 +314,6 @@ void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 r
 		m_signalParams[startIndex + i].serializeFromProtoAppSignal(&m_getSignalParamReply.appsignalparams(i));
 	}
 
-	if (startIndex + paramCount == signalCount)
-	{
-		emit appSignalListLoaded();
-	}
-
 	m_getParamsCurrentPart++;
 
 	getNextParamPart();
@@ -377,4 +395,26 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 	m_getParamsCurrentPart++;
 
 	getNextStatePart();
+}
+
+void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_unitList.clear();
+
+	int unitCount = m_getUnitsReply.units_size();
+
+	for (int i = 0; i < unitCount; i++)
+	{
+		m_unitList.append(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 }
