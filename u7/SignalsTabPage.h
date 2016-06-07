@@ -188,7 +188,7 @@ class CheckinSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-    CheckinSignalsDialog(SignalsModel* sourceModel, QModelIndexList selection, QWidget *parent = 0);
+	CheckinSignalsDialog(QString title, SignalsModel* sourceModel, QModelIndexList selection, bool showUndoButton = true, QWidget *parent = 0);
 
 public slots:
 	void checkinSelected();
@@ -254,6 +254,7 @@ public slots:
 
 	void undoSignalChanges();
 	void showPendingChanges();
+	void checkIn();
 
 	void changeSignalActionsVisibility();
 

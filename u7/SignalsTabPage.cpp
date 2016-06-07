@@ -647,7 +647,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		{
 			switch (col)
 			{
-				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 				case SC_STR_ID: return signal.appSignalID();
 				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
@@ -709,7 +709,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		{
 			switch (col)
 			{
-				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 				case SC_STR_ID: return signal.appSignalID();
 				case SC_EXT_STR_ID: return signal.customAppSignalID();
 				case SC_NAME: return signal.caption();
@@ -993,7 +993,7 @@ bool SignalsModel::isEditableSignal(int row)
 
 void SignalsModel::addSignal()
 {
-	QDialog signalTypeDialog(m_parentWindow, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
+	QDialog signalTypeDialog(m_parentWindow, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
 	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
@@ -1315,6 +1315,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	m_signalsView->verticalHeader()->setFixedWidth(75);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -1522,6 +1523,12 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
+	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("CheckIn"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
 	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("Show pending changes..."), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::showPendingChanges);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
@@ -1638,7 +1645,22 @@ void SignalsTabPage::showPendingChanges()
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
 
-	CheckinSignalsDialog dlg(m_signalsModel, sourceSelection.indexes(), this);
+	CheckinSignalsDialog dlg(tr("Pending changes"), m_signalsModel, sourceSelection.indexes(), true, this);
+
+	if (dlg.exec() == QDialog::Rejected)
+	{
+		return;
+	}
+
+	m_signalsModel->loadSignals();
+}
+
+void SignalsTabPage::checkIn()
+{
+	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
+	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+
+	CheckinSignalsDialog dlg(tr("CheckIn"), m_signalsModel, sourceSelection.indexes(), false, this);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -1933,11 +1955,11 @@ void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 }
 
 
-CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelIndexList selection, QWidget* parent) :
+CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceModel, QModelIndexList selection, bool showUndoButton, QWidget* parent) :
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
-	setWindowTitle(tr("Pending changes"));
+	setWindowTitle(title);
 
 	m_splitter = new QSplitter(Qt::Vertical, this);
 
@@ -1988,13 +2010,16 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	QHBoxLayout* hl = new QHBoxLayout;
 	hl->addStretch();
 
-	QPushButton* checkinSelectedButton = new QPushButton(tr("Checkin"), this);
+	QPushButton* checkinSelectedButton = new QPushButton(tr("CheckIn"), this);
 	connect(checkinSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::checkinSelected);
 	hl->addWidget(checkinSelectedButton);
 
-	QPushButton* undoSelectedButton = new QPushButton(tr("Undo"), this);
-	connect(undoSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::undoSelected);
-	hl->addWidget(undoSelectedButton);
+	if (showUndoButton)
+	{
+		QPushButton* undoSelectedButton = new QPushButton(tr("Undo"), this);
+		connect(undoSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::undoSelected);
+		hl->addWidget(undoSelectedButton);
+	}
 
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 	connect(cancelButton, &QPushButton::clicked, this, &CheckinSignalsDialog::cancel);
