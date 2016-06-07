@@ -48,6 +48,8 @@ class GetDataSourcesInfoReply;
 class DataSourceState;
 class GetDataSourcesStatesRequest;
 class GetDataSourcesStatesReply;
+class Unit;
+class GetUnitsReply;
 
 // ===================================================================
 
@@ -1550,6 +1552,198 @@ class GetDataSourcesStatesReply : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static GetDataSourcesStatesReply* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class Unit : public ::google::protobuf::Message {
+ public:
+  Unit();
+  virtual ~Unit();
+
+  Unit(const Unit& from);
+
+  inline Unit& operator=(const Unit& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Unit& default_instance();
+
+  void Swap(Unit* other);
+
+  // implements Message ----------------------------------------------
+
+  Unit* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Unit& from);
+  void MergeFrom(const Unit& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::int32 id() const;
+  inline void set_id(::google::protobuf::int32 value);
+
+  // optional string unit = 2;
+  inline bool has_unit() const;
+  inline void clear_unit();
+  static const int kUnitFieldNumber = 2;
+  inline const ::std::string& unit() const;
+  inline void set_unit(const ::std::string& value);
+  inline void set_unit(const char* value);
+  inline void set_unit(const char* value, size_t size);
+  inline ::std::string* mutable_unit();
+  inline ::std::string* release_unit();
+  inline void set_allocated_unit(::std::string* unit);
+
+  // @@protoc_insertion_point(class_scope:Network.Unit)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_unit();
+  inline void clear_has_unit();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* unit_;
+  ::google::protobuf::int32 id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static Unit* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetUnitsReply : public ::google::protobuf::Message {
+ public:
+  GetUnitsReply();
+  virtual ~GetUnitsReply();
+
+  GetUnitsReply(const GetUnitsReply& from);
+
+  inline GetUnitsReply& operator=(const GetUnitsReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetUnitsReply& default_instance();
+
+  void Swap(GetUnitsReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetUnitsReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetUnitsReply& from);
+  void MergeFrom(const GetUnitsReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Network.Unit units = 2;
+  inline int units_size() const;
+  inline void clear_units();
+  static const int kUnitsFieldNumber = 2;
+  inline const ::Network::Unit& units(int index) const;
+  inline ::Network::Unit* mutable_units(int index);
+  inline ::Network::Unit* add_units();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::Unit >&
+      units() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::Unit >*
+      mutable_units();
+
+  // @@protoc_insertion_point(class_scope:Network.GetUnitsReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::Unit > units_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetUnitsReply* default_instance_;
+};
 // ===================================================================
 
 
@@ -2858,6 +3052,153 @@ GetDataSourcesStatesReply::datasourcesstates() const {
 inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
 GetDataSourcesStatesReply::mutable_datasourcesstates() {
   return &datasourcesstates_;
+}
+
+// -------------------------------------------------------------------
+
+// Unit
+
+// optional int32 id = 1;
+inline bool Unit::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Unit::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Unit::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Unit::clear_id() {
+  id_ = 0;
+  clear_has_id();
+}
+inline ::google::protobuf::int32 Unit::id() const {
+  return id_;
+}
+inline void Unit::set_id(::google::protobuf::int32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional string unit = 2;
+inline bool Unit::has_unit() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Unit::set_has_unit() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Unit::clear_has_unit() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Unit::clear_unit() {
+  if (unit_ != &::google::protobuf::internal::kEmptyString) {
+    unit_->clear();
+  }
+  clear_has_unit();
+}
+inline const ::std::string& Unit::unit() const {
+  return *unit_;
+}
+inline void Unit::set_unit(const ::std::string& value) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(value);
+}
+inline void Unit::set_unit(const char* value) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(value);
+}
+inline void Unit::set_unit(const char* value, size_t size) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Unit::mutable_unit() {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  return unit_;
+}
+inline ::std::string* Unit::release_unit() {
+  clear_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = unit_;
+    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Unit::set_allocated_unit(::std::string* unit) {
+  if (unit_ != &::google::protobuf::internal::kEmptyString) {
+    delete unit_;
+  }
+  if (unit) {
+    set_has_unit();
+    unit_ = unit;
+  } else {
+    clear_has_unit();
+    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GetUnitsReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetUnitsReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetUnitsReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetUnitsReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetUnitsReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetUnitsReply::error() const {
+  return error_;
+}
+inline void GetUnitsReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// repeated .Network.Unit units = 2;
+inline int GetUnitsReply::units_size() const {
+  return units_.size();
+}
+inline void GetUnitsReply::clear_units() {
+  units_.Clear();
+}
+inline const ::Network::Unit& GetUnitsReply::units(int index) const {
+  return units_.Get(index);
+}
+inline ::Network::Unit* GetUnitsReply::mutable_units(int index) {
+  return units_.Mutable(index);
+}
+inline ::Network::Unit* GetUnitsReply::add_units() {
+  return units_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::Unit >&
+GetUnitsReply::units() const {
+  return units_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::Unit >*
+GetUnitsReply::mutable_units() {
+  return &units_;
 }
 
 

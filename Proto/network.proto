@@ -124,4 +124,20 @@ message GetDataSourcesStatesReply
 }
 
 
+// Get Units
+//
+
+message Unit
+{
+    optional int32 id = 1;
+    optional string unit = 2;
+}
+
+
+message GetUnitsReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated Unit units = 2;
+}
+
 

@@ -37,6 +37,8 @@ private:
 	void onGetDataSourcesInfoRequest();
 	void onGetDataSourcesStatesRequest(const char* requestData, quint32 requestDataSize);
 
+	void onGetUnitsRequest();
+
 	// reused protobuf messages
 	//
 	Network::GetSignalListStartReply m_getSignalListStartReply;
@@ -50,6 +52,8 @@ private:
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
+	Network::GetUnitsReply m_getUnitsReply;
+
 	//
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
@@ -61,6 +65,7 @@ private:
 	const QVector<QString>& appSignalIDs() const;
 	const AppSignals& appSignals() const;
 	const AppDataSources& appDataSources() const;
+	const UnitList& units() const;
 
 	bool getConnectionState(Hash hash, AppSignalState& state);
 
@@ -93,6 +98,7 @@ private:
 	const AppDataSources& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const AppSignalStates& m_appSignalStates;
+	const UnitList& m_units;
 
 	void buildAppSignalIDs();
 
@@ -101,13 +107,15 @@ public:
 							TcpAppDataServer* server,
 							const AppDataSources& appDataSources,
 							const AppSignals& appSignals,
-							const AppSignalStates& appSignalStates);
+							const AppSignalStates& appSignalStates,
+							const UnitList& units);
 
 	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
 	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
 
 	const AppSignals& appSignals() const { return m_appSignals; }
 	const AppDataSources& appDataSources() const { return  m_appDataSources; }
+	const UnitList& units() const { return m_units; }
 
 	bool getState(Hash hash, AppSignalState& state);
 };

@@ -504,6 +504,12 @@ const quint32 ADS_GET_DATA_SOURCES_STATES = 0x1402;
 
 const int ADS_GET_DATA_SOURCES_STATES_MAX = 1000;
 
+// Getting application signals Units
+//
+const quint32 ADS_GET_UNITS = 0x1500;
+
+const int ADS_GET_DATA_UNITS_MAX = 1000;
+
 
 enum class NetworkError
 {
@@ -513,14 +519,5 @@ enum class NetworkError
 	RequestStateExceed,
 	ParseRequestError,
 	RequestDataSourcesStatesExceed,
+	UnitsExceed
 };
-
-//int operator= (NetworkError e)
-//{
-//	return static_cast<int>(e);
-//}
-
-//NetworkError operator = (int e)
-//{
-//	return static_cast<NetworkError>(e);
-//}

@@ -83,6 +83,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetDataSourcesStatesRequest(requestData, requestDataSize);
 		break;
 
+	case ADS_GET_UNITS:
+		onGetUnitsRequest();
+		break;
+
 	default:
 		assert(false);
 		break;
@@ -271,6 +275,12 @@ const AppDataSources& TcpAppDataServer::appDataSources() const
 }
 
 
+const UnitList& TcpAppDataServer::units() const
+{
+	return m_thread->units();
+}
+
+
 bool TcpAppDataServer::getConnectionState(Hash hash, AppSignalState& state)
 {
 	return m_thread->getState(hash, state);
@@ -301,6 +311,34 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest(const char* requestData, qu
 }
 
 
+void TcpAppDataServer::onGetUnitsRequest()
+{
+	m_getUnitsReply.Clear();
+
+	const UnitList& unitList = units();
+
+	if (unitList.count() > ADS_GET_DATA_UNITS_MAX)
+	{
+		m_getUnitsReply.set_error(TO_INT(NetworkError::UnitsExceed));
+
+	}
+	else
+	{
+		for(const QPair<int, QString>& unit : unitList)
+		{
+			Network::Unit* u = m_getUnitsReply.add_units();
+
+			u->set_id(unit.first);
+			u->set_unit(unit.second.toStdString());
+		}
+
+		m_getUnitsReply.set_error(TO_INT(NetworkError::Success));
+	}
+
+	sendReply(m_getUnitsReply);
+}
+
+
 
 // -------------------------------------------------------------------------------
 //
@@ -312,11 +350,13 @@ TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddr
 												TcpAppDataServer* server,
 												const AppDataSources& appDataSources,
 												const AppSignals& appSignals,
-												const AppSignalStates& appSignalStates) :
+												const AppSignalStates& appSignalStates,
+												const UnitList& units) :
 	Tcp::ServerThread(listenAddressPort, server),
 	m_appDataSources(appDataSources),
 	m_appSignals(appSignals),
-	m_appSignalStates(appSignalStates)
+	m_appSignalStates(appSignalStates),
+	m_units(units)
 {
 	server->setThread(this);
 	buildAppSignalIDs();

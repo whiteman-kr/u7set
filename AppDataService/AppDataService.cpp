@@ -84,7 +84,8 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															tcpAppDataSever,
 															m_appDataSources,
 															m_appSignals,
-															m_signalStates);
+															m_signalStates,
+															m_unitInfo);
 	m_tcpAppDataServerThread->start();
 }
 
@@ -322,7 +323,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		return;
 	}
 
-	// stopp all AppDataChannelThreads and
+	// stop all AppDataChannelThreads and
 	// free all allocated resources
 	//
 	clearConfiguration();
