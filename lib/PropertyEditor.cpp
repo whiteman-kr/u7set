@@ -106,7 +106,7 @@ namespace ExtWidgets
 		emit valueChanged(QVariant::fromValue(f));
 	}
 
-    void QtMultiFilePathEdit::setValue(std::shared_ptr<Property> property)
+	void QtMultiFilePathEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		if (m_lineEdit == nullptr)
 		{
@@ -118,8 +118,8 @@ namespace ExtWidgets
 
         FilePathPropertyType f = property->value().value<FilePathPropertyType>();
 		m_lineEdit->setText(f.filePath);
-        m_lineEdit->setReadOnly(property->readOnly());
-        m_button->setEnabled(property->readOnly() == false);
+		m_lineEdit->setReadOnly(readOnly);
+		m_button->setEnabled(readOnly == false);
 	}
 
 	void QtMultiFilePathEdit::onEditingFinished()
@@ -155,7 +155,7 @@ namespace ExtWidgets
 		setLayout(lt);
 	}
 
-    void QtMultiEnumEdit::setValue(std::shared_ptr<Property> property)
+	void QtMultiEnumEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		if (m_combo == nullptr)
 		{
@@ -198,7 +198,7 @@ namespace ExtWidgets
 			m_combo->setCurrentIndex(-1);
         }
 
-        m_combo->setEnabled(property->readOnly() == false);
+		m_combo->setEnabled(readOnly == false);
 	}
 
 	void QtMultiEnumEdit::indexChanged(int index)
@@ -290,7 +290,7 @@ namespace ExtWidgets
 		}
 	}
 
-    void QtMultiColorEdit::setValue(std::shared_ptr<Property> property)
+	void QtMultiColorEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		if (m_lineEdit == nullptr)
 		{
@@ -308,8 +308,8 @@ namespace ExtWidgets
 		m_oldColor = color;
 
         m_lineEdit->setText(str);
-        m_lineEdit->setReadOnly(property->readOnly());
-        m_button->setEnabled(property->readOnly() == false);
+		m_lineEdit->setReadOnly(readOnly);
+		m_button->setEnabled(readOnly == false);
 	}
 
 	void QtMultiColorEdit::onEditingFinished()
@@ -509,7 +509,7 @@ namespace ExtWidgets
         }
 	}
 
-    void QtMultiTextEdit::setValue(std::shared_ptr<Property> property)
+	void QtMultiTextEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		if (m_lineEdit == nullptr)
 		{
@@ -549,11 +549,11 @@ namespace ExtWidgets
 		}
 
 
-        m_lineEdit->setReadOnly(property->readOnly());
+		m_lineEdit->setReadOnly(readOnly);
 
 		if (m_button != nullptr)
 		{
-			m_button->setEnabled(property->readOnly() == false);
+			m_button->setEnabled(readOnly == false);
 		}
 	}
 
@@ -621,284 +621,7 @@ namespace ExtWidgets
 
         m_lineEdit->blockSignals(false);
 	}
-/*
-	//
-	// ---------QtMultiDoubleSpinBox----------
-	//
 
-	QtMultiDoubleSpinBox::QtMultiDoubleSpinBox(QWidget* parent):
-		QWidget(parent)
-	{
-        m_spinBox = new QDoubleSpinBox(parent);
-        m_spinBox->setKeyboardTracking(false);
-        m_spinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-        m_spinBox->setDecimals(1);
-		m_spinBox->setSingleStep(0.01);
-
-		connect(m_spinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-				this, &QtMultiDoubleSpinBox::onValueChanged);
-
-		QHBoxLayout* lt = new QHBoxLayout;
-		lt->setContentsMargins(0, 0, 0, 0);
-		lt->addWidget(m_spinBox);
-		setLayout(lt);
-
-		m_spinBox->installEventFilter(this);
-	}
-
-	bool QtMultiDoubleSpinBox::eventFilter(QObject* watched, QEvent* event)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return QWidget::eventFilter(watched, event);
-		}
-
-		if (watched == m_spinBox && event->type() == QEvent::KeyPress)
-		{
-			QKeyEvent* ke = static_cast<QKeyEvent*>(event);
-			if (ke->key() == Qt::Key_Escape)
-			{
-				m_escape = true;
-			}
-		}
-
-		return QWidget::eventFilter(watched, event);
-	}
-
-	void QtMultiDoubleSpinBox::setValue(std::shared_ptr<Property> property)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return;
-		}
-
-        m_spinBox->blockSignals(true);
-
-        // Set limits
-        //
-        bool ok1 = false;
-        bool ok2 = false;
-        double lowLimit = property->lowLimit().toDouble(&ok1);
-        double highLimit = property->lowLimit().toDouble(&ok2);
-        if (ok1 == true && ok2 == true && lowLimit < highLimit)
-        {
-            m_spinBox->setRange(lowLimit, highLimit);
-
-        }
-
-        // Set step
-        //
-        bool ok3 = false;
-        double step = property->step().toDouble(&ok3);
-        if (ok3 == true && step > 0)
-        {
-            m_spinBox->setSingleStep(step);
-        }
-
-        // Set precision and value
-        //
-        int precision = property->precision();
-        if (precision > 0)
-        {
-            m_spinBox->setDecimals(precision);
-        }
-        m_spinBox->setValue(property->value().toDouble());
-        m_spinBox->setReadOnly(property->readOnly());
-
-		m_spinBox->blockSignals(false);
-	}
-
-	void QtMultiDoubleSpinBox::onValueChanged(double value)
-	{
-		if (m_escape == false)
-		{
-            emit valueChanged(value);
-		}
-	}
-
-	//
-	// ---------QtMultiIntSpinBox----------
-	//
-
-	QtMultiIntSpinBox::QtMultiIntSpinBox(QWidget* parent):
-		QWidget(parent)
-	{
-		m_spinBox = new QSpinBox(parent);
-		m_spinBox->setKeyboardTracking(false);
-		m_spinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-
-		connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-				this, &QtMultiIntSpinBox::onValueChanged);
-
-		QHBoxLayout *lt = new QHBoxLayout;
-		lt->setContentsMargins(0, 0, 0, 0);
-		lt->addWidget(m_spinBox);
-		setLayout(lt);
-
-		m_spinBox->installEventFilter(this);
-	}
-
-	bool QtMultiIntSpinBox::eventFilter(QObject * watched, QEvent * event)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return false;
-		}
-
-		if (watched == m_spinBox && event->type() == QEvent::KeyPress)
-		{
-			QKeyEvent* ke = static_cast<QKeyEvent*>(event);
-			if (ke->key() == Qt::Key_Escape)
-			{
-				m_escape = true;
-			}
-		}
-
-		return QWidget::eventFilter(watched, event);
-	}
-
-    void QtMultiIntSpinBox::setValue(std::shared_ptr<Property> property)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return;
-		}
-
-        m_spinBox->blockSignals(true);
-
-        // Set limits
-        //
-        bool ok1 = false;
-        bool ok2 = false;
-        int lowLimit = property->lowLimit().toInt(&ok1);
-        int highLimit = property->lowLimit().toInt(&ok2);
-        if (ok1 == true && ok2 == true && lowLimit < highLimit)
-        {
-            m_spinBox->setRange(lowLimit, highLimit);
-
-        }
-
-        // Set step
-        //
-        bool ok3 = false;
-        int step = property->step().toInt(&ok3);
-        if (ok3 == true && step > 0)
-        {
-            m_spinBox->setSingleStep(step);
-        }
-
-        // Set precision and value
-        //
-        m_spinBox->setValue(property->value().toInt());
-        m_spinBox->setReadOnly(property->readOnly());
-
-		m_spinBox->blockSignals(false);
-	}
-
-	void QtMultiIntSpinBox::onValueChanged(int value)
-	{
-		if (m_escape == false)
-		{
-            emit valueChanged(value);
-		}
-	}
-
-	//
-	// ---------QtMultiUIntSpinBox----------
-	//
-
-	QtMultiUIntSpinBox::QtMultiUIntSpinBox(QWidget* parent):
-		QWidget(parent)
-	{
-		m_spinBox = new QSpinBox(parent);
-		m_spinBox->setKeyboardTracking(false);
-		m_spinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-
-		connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-				this, &QtMultiUIntSpinBox::onValueChanged);
-
-		QHBoxLayout* lt = new QHBoxLayout;
-		lt->setContentsMargins(0, 0, 0, 0);
-		lt->addWidget(m_spinBox);
-		setLayout(lt);
-
-		m_spinBox->installEventFilter(this);
-	}
-
-	bool QtMultiUIntSpinBox::eventFilter(QObject* watched, QEvent* event)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return false;
-		}
-
-		if (watched == m_spinBox && event->type() == QEvent::KeyPress)
-		{
-			QKeyEvent* ke = static_cast<QKeyEvent*>(event);
-			if (ke->key() == Qt::Key_Escape)
-			{
-				m_escape = true;
-			}
-		}
-
-		return QWidget::eventFilter(watched, event);
-	}
-
-    void QtMultiUIntSpinBox::setValue(std::shared_ptr<Property> property)
-	{
-		if (m_spinBox == nullptr)
-		{
-			Q_ASSERT(m_spinBox);
-			return;
-		}
-
-        m_spinBox->blockSignals(true);
-
-        // QSpinBox has limits and step parameters with type int!
-        //
-
-        // Set limits
-        //
-        bool ok1 = false;
-        bool ok2 = false;
-        int lowLimit = property->lowLimit().toInt(&ok1);
-        int highLimit = property->lowLimit().toInt(&ok2);
-        if (ok1 == true && ok2 == true && lowLimit < highLimit)
-        {
-            m_spinBox->setRange(lowLimit, highLimit);
-
-        }
-
-        // Set step
-        //
-        bool ok3 = false;
-        int step = property->step().toInt(&ok3);
-        if (ok3 == true && step > 0)
-        {
-            m_spinBox->setSingleStep(step);
-        }
-
-        // Set precision and value
-        //
-        m_spinBox->setValue(property->value().toUInt());
-        m_spinBox->setReadOnly(property->readOnly());
-
-		m_spinBox->blockSignals(false);
-	}
-
-	void QtMultiUIntSpinBox::onValueChanged(quint32 value)
-	{
-		if (m_escape == false)
-		{
-            emit valueChanged(value);
-		}
-	}
-*/
 	//
 	// ---------QtMultiCheckBox----------
 	//
@@ -1080,7 +803,7 @@ namespace ExtWidgets
         {
             QtMultiEnumEdit* m_editor = new QtMultiEnumEdit(parent);
             editor = m_editor;
-            m_editor->setValue(p);
+			m_editor->setValue(p, m_property->isEnabled() == false);
 
             connect(m_editor, &QtMultiEnumEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
             connect(m_editor, &QtMultiEnumEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1092,7 +815,7 @@ namespace ExtWidgets
             {
                 QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
                 editor = m_editor;
-                m_editor->setValue(p);
+				m_editor->setValue(p, m_property->isEnabled() == false);
 
                 connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
                 connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1140,9 +863,9 @@ namespace ExtWidgets
 							connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 
-							if (p->readOnly())
+							if (m_property->isEnabled() == false)
 							{
-								m_editor->setValue(p->value().toBool(), p->readOnly());
+								m_editor->setValue(p->value().toBool(), m_property->isEnabled() == false);
 							}
 							else
 							{
@@ -1159,7 +882,7 @@ namespace ExtWidgets
 									newValue = !newValue;
 								}
 
-								m_editor->setValue(newValue, p->readOnly());
+								m_editor->setValue(newValue, m_property->isEnabled() == false);
 
 								m_valueSetOnTimer = newValue;
 								QTimer::singleShot(10, this, &QtMultiVariantFactory::slotSetValueTimer);
@@ -1173,7 +896,7 @@ namespace ExtWidgets
 						{
 							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption());
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p, m_property->isEnabled() == false);
 
 							connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1184,7 +907,7 @@ namespace ExtWidgets
 						{
 							QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p, m_property->isEnabled() == false);
 
 							connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1195,7 +918,7 @@ namespace ExtWidgets
 						{
 							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption());
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p, m_property->isEnabled() == false);
 
 							connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1495,11 +1218,11 @@ namespace ExtWidgets
 					if (sameValue(property) == true)
 					{
                         Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
-                        return drawCheckBox(checkState, p->readOnly() == false);
+						return drawCheckBox(checkState, property->isEnabled());
 					}
 					else
 					{
-                        return drawCheckBox(Qt::PartiallyChecked, p->readOnly() == false);
+						return drawCheckBox(Qt::PartiallyChecked, property->isEnabled());
 					}
 				}
 				break;
@@ -1820,7 +1543,7 @@ namespace ExtWidgets
             //
             QString description = p->description().isEmpty() ? p->caption() : p->description();
 
-            if (p->readOnly() == true)
+			if (p->readOnly() == true || m_editingEnabled == false)
             {
                 description = QString("[ReadOnly] ") + description;
             }
@@ -1929,6 +1652,7 @@ namespace ExtWidgets
 
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
+			subProperty->setEnabled(m_editingEnabled && value->readOnly() == false);
             m_propertyVariantManager->setProperty(subProperty, value);
             m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
 
@@ -2026,6 +1750,11 @@ namespace ExtWidgets
 	void PropertyEditor::setExpertMode(bool expertMode)
 	{
 		m_expertMode = expertMode;
+	}
+
+	void PropertyEditor::setEditingEnabled(bool editingEnabled)
+	{
+		m_editingEnabled = editingEnabled;
 	}
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)

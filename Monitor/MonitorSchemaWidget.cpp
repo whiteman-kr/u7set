@@ -1,6 +1,7 @@
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaView.h"
 #include "SchemaManager.h"
+#include "../VFrame30/SchemaItemSignal.h"
 
 //
 //
@@ -60,6 +61,45 @@ void MonitorSchemaWidget::createActions()
 
 }
 
+std::vector<std::shared_ptr<VFrame30::SchemaItem>> MonitorSchemaWidget::itemsUnderCursor(const QPoint& pos)
+{
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
+	result.reserve(8);
+
+	QPointF docPoint;
+
+	bool convertResult = MousePosToDocPoint(pos, &docPoint);
+	if (convertResult == false)
+	{
+		return result;
+	}
+
+	double x = docPoint.x();
+	double y = docPoint.y();
+
+	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+	{
+		const VFrame30::SchemaLayer* pLayer = layer->get();
+
+		if (pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+
+			if (item->IsIntersectPoint(x, y) == true)
+			{
+				result.push_back(item);
+			}
+		}
+	}
+
+	return result;
+}
+
 QString MonitorSchemaWidget::schemaId() const
 {
 	if (schema() == nullptr)
@@ -80,7 +120,7 @@ QString MonitorSchemaWidget::caption() const
 	return schema()->caption();
 }
 
-void MonitorSchemaWidget::contextMenu(const QPoint& /*pos*/)
+void MonitorSchemaWidget::contextMenu(const QPoint& pos)
 {
 	// Disable/enable actions
 	//
@@ -90,13 +130,60 @@ void MonitorSchemaWidget::contextMenu(const QPoint& /*pos*/)
 	// Compose menu
 	//
 	QMenu menu(this);
+	QList<QAction*> actions;
 
-//	QList<QAction*> actions;
+	// Signals items
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = itemsUnderCursor(pos);
 
+	if (items.empty() == false)
+	{
+		for (const std::shared_ptr<VFrame30::SchemaItem>& item : items)
+		{
+			VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+
+			if (schemaItemSignal != nullptr)
+			{
+				const QStringList& signalList = schemaItemSignal->appSignalIdList();
+
+				for (const QString& s: signalList)
+				{
+					Signal signal;
+					bool ok = theSignals.signal(s, &signal);
+
+					QString signalId = ok ? QString("%1 %2").arg(signal.customAppSignalID()).arg(signal.caption()) : s;
+
+					QAction* a = new QAction(signalId, &menu);
+
+					auto f = [this, s]() -> void
+							 {
+								signalInfo(s);
+							 };
+
+					connect(a, &QAction::triggered, this, f);
+
+					actions << a;
+				}
+			}
+		}
+	}
+
+//
 //	actions << m_newTabAction;
 //	actions << m_closeTabAction;
 
-//	menu.exec(actions, mapToGlobal(pos), 0, this);
+	menu.exec(actions, mapToGlobal(pos), 0, this);
+
+	return;
+}
+
+void MonitorSchemaWidget::signalInfo(QString appSignalId)
+{
+	qDebug() << "MonitorSchemaWidget::signalInfo:  " << appSignalId;
+
+	// To do
+	//
+
 	return;
 }
 

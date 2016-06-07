@@ -11,7 +11,6 @@ DSC_UPTIME = 5,
 DSC_RECEIVED = 6,
 DSC_SPEED = 7;
 
-
 const char* const dataSourceColumnStr[] =
 {
 	"Caption",
@@ -25,6 +24,23 @@ const char* const dataSourceColumnStr[] =
 };
 
 const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSourceColumnStr[0]);
+
+
+const int SC_ID = 0,
+SC_CAPTION = 1,
+SC_VALUE = 2,
+SC_UNIT = 3;
+
+const char* const signalColumnStr[] =
+{
+	"ID",
+	"Caption",
+	"Value",
+	"Unit"
+};
+
+const int SIGNAL_COLUMN_COUNT = sizeof(signalColumnStr) / sizeof(signalColumnStr[0]);
+
 
 
 DataSourcesStateModel::DataSourcesStateModel(TcpAppDataClient* clientSocket, QObject* parent) :
@@ -95,7 +111,7 @@ QVariant DataSourcesStateModel::headerData(int section, Qt::Orientation orientat
 			return section + 1;
 		}
 	}
-	return QVariant();
+	return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 void DataSourcesStateModel::invalidateData()
@@ -133,15 +149,24 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 
 	m_dataSourcesView->resizeColumnsToContents();
 
-	QTimer* timer = new QTimer(this);
-	connect(timer, &QTimer::timeout, this, &DataAquisitionServiceWidget::checkVisibility);
-	timer->start(5);
-
 	addTab(m_dataSourcesView, tr("Data Sources"));
 
 	// Signals
+	m_signalStateModel = new SignalStateModel(m_clientSocket, this);
 	m_signalsView = new QTableView;
+	m_signalsView->setModel(m_signalStateModel);
+
+	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
+	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, this, &DataAquisitionServiceWidget::updateSignalInfo);
+	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
+
 	addTab(m_signalsView, tr("Signals"));
+
+	//For pausing requests if window hided
+	//
+	/*QTimer* timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, this, &DataAquisitionServiceWidget::checkVisibility);
+	timer->start(5);*/
 
 	m_appDataClientTread->start();
 }
@@ -159,12 +184,9 @@ void DataAquisitionServiceWidget::updateSourceInfo()
 	m_dataSourcesView->resizeColumnToContents(DSC_PART_COUNT);
 }
 
-void DataAquisitionServiceWidget::updateSourceState()
+void DataAquisitionServiceWidget::updateSignalInfo()
 {
-	m_dataSourcesView->resizeColumnToContents(DSC_STATE);
-	m_dataSourcesView->resizeColumnToContents(DSC_UPTIME);
-	m_dataSourcesView->resizeColumnToContents(DSC_RECEIVED);
-	m_dataSourcesView->resizeColumnToContents(DSC_SPEED);
+	//m_signalsView->resizeColumnToContents();
 }
 
 void DataAquisitionServiceWidget::checkVisibility()
@@ -178,4 +200,83 @@ void DataAquisitionServiceWidget::checkVisibility()
 	{
 		m_dataSourcesStateModel->setActive(false);
 	}*/
+}
+
+SignalStateModel::SignalStateModel(TcpAppDataClient* clientSocket, QObject* parent) :
+	QAbstractTableModel(parent),
+	m_clientSocket(clientSocket)
+{
+}
+
+SignalStateModel::~SignalStateModel()
+{
+}
+
+int SignalStateModel::rowCount(const QModelIndex&) const
+{
+	return m_clientSocket->signalParams().count();
+}
+
+int SignalStateModel::columnCount(const QModelIndex&) const
+{
+	return SIGNAL_COLUMN_COUNT;
+}
+
+QVariant SignalStateModel::data(const QModelIndex& index, int role) const
+{
+	int row = index.row();
+	if (row < 0 || row > m_clientSocket->signalParams().count())
+	{
+		return QVariant();
+	}
+	if (role == Qt::DisplayRole)
+	{
+		const Signal& s = m_clientSocket->signalParams()[row];
+		switch (index.column())
+		{
+			case SC_ID: return s.appSignalID();
+			case SC_CAPTION: return s.caption();
+			case SC_VALUE:
+			{
+				if (row < 0 || row > m_clientSocket->signalStates().count())
+				{
+					return QVariant();
+				}
+				const AppSignalState& ass = m_clientSocket->signalStates()[row];
+				return ass.value;
+			}
+			case SC_UNIT: return s.unitID();
+			default:
+				assert(false);
+		}
+	}
+	return QVariant();
+}
+
+QVariant SignalStateModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (role == Qt::DisplayRole)
+	{
+		if (orientation == Qt::Horizontal && section < DATA_SOURCE_COLUMN_COUNT)
+		{
+			return signalColumnStr[section];
+		}
+		if (orientation == Qt::Vertical)
+		{
+			return section + 1;
+		}
+	}
+	return QAbstractTableModel::headerData(section, orientation, role);
+}
+
+void SignalStateModel::invalidateData()
+{
+	beginResetModel();
+	endResetModel();
+}
+
+void SignalStateModel::reloadList()
+{
+	beginResetModel();
+	endResetModel();
 }

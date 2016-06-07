@@ -278,8 +278,8 @@ void MonitorMainWindow::createToolBars()
 {
 	m_toolBar = new QToolBar(this);
 	m_toolBar->setMovable(false);
-	m_toolBar->setIconSize(QSize(32, 32));
-	m_toolBar->setStyleSheet("QToolBar{spacing:6px;padding:6px;}");
+	m_toolBar->setIconSize(QSize(28, 28));
+	m_toolBar->setStyleSheet("QToolBar{spacing:2px;padding:2px;}");
 
 	m_toolBar->addAction(m_newTabAction);
 	m_toolBar->addSeparator();
