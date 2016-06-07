@@ -14,7 +14,7 @@
 #include <QCompleter>
 #include <QStringListModel>
 
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 #include "SignalsTabPage.h"
 #include "Settings.h"

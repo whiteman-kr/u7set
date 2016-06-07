@@ -76,17 +76,17 @@ SOURCES += main.cpp \
 
 HEADERS += \
     version.h \
-    ../include/CfgServerLoader.h \
-    ../include/Tcp.h \
-    ../include/TcpFileTransfer.h \
-    ../include/SimpleThread.h \
-    ../include/BuildInfo.h \
-    ../include/SocketIO.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/Tcp.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/SimpleThread.h \
+    ../lib/BuildInfo.h \
+    ../lib/SocketIO.h \
     ConfigurationService.h \
-	../include/Service.h \
-    ../include/UdpSocket.h \
-    ../include/CircularLogger.h \
-    ../include/JsonSerializable.h
+	../lib/Service.h \
+    ../lib/UdpSocket.h \
+    ../lib/CircularLogger.h \
+    ../lib/JsonSerializable.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -47,23 +47,23 @@ SOURCES += main.cpp\
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
     SourceStatusWidget.h \
-    ../include/DataSource.h \
-    ../include/DeviceObject.h \
-    ../include/Signal.h \
+    ../lib/DataSource.h \
+    ../lib/DeviceObject.h \
+    ../lib/Signal.h \
     Stable.h \
-    ../include/SocketIO.h \
-    ../include/DbStruct.h \
-    ../include/ProtoSerialization.h \
+    ../lib/SocketIO.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtoSerialization.h \
     PacketBufferTableModel.h \
-    ../include/PropertyObject.h \
+    ../lib/PropertyObject.h \
     SignalTableModel.h \
-    ../include/Types.h \
-    ../include/DataProtocols.h \
-    ../include/XmlHelper.h \
+    ../lib/Types.h \
+    ../lib/DataProtocols.h \
+    ../lib/XmlHelper.h \
     SendTuningFrameWidget.h \
-    ../include/Queue.h \
-    ../include/WUtils.h \
-    ../include/Crc.h
+    ../lib/Queue.h \
+    ../lib/WUtils.h \
+    ../lib/Crc.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

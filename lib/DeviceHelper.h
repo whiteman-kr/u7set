@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/DeviceObject.h"
-#include "../include/OutputLog.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/OutputLog.h"
 #include "../u7/Builder/IssueLogger.h"
 
 

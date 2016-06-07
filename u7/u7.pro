@@ -188,17 +188,17 @@ HEADERS  += \
     Settings.h \
     Stable.h \
     UserManagementDialog.h \
-    ../include/DbStruct.h \
-	../include/DeviceObject.h \
-	../include/DbController.h \
-	../include/DbWorker.h \
-	../include/DbProgressDialog.h \
-	../include/StreamedData.h \
-	../include/ProtoSerialization.h \
-	../include/Factory.h \
-	../include/CUtils.h \
-	../include/Signal.h \
-	../include/OrderedHash.h \
+    ../lib/DbStruct.h \
+	../lib/DeviceObject.h \
+	../lib/DbController.h \
+	../lib/DbWorker.h \
+	../lib/DbProgressDialog.h \
+	../lib/StreamedData.h \
+	../lib/ProtoSerialization.h \
+	../lib/Factory.h \
+	../lib/CUtils.h \
+	../lib/Signal.h \
+	../lib/OrderedHash.h \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
@@ -212,13 +212,13 @@ HEADERS  += \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
-    ../include/ModuleConfiguration.h \
+    ../lib/ModuleConfiguration.h \
     BuildTabPage.h \
-    ../include/OutputLog.h \
-    ../include/DbProgress.h \
+    ../lib/OutputLog.h \
+    ../lib/DbProgress.h \
     FileListView.h \
     version.h \
-    ../include/Crc.h \
+    ../lib/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
 	Builder/BuildResultWriter.h \
@@ -226,22 +226,22 @@ HEADERS  += \
     Builder/ApplicationLogicCode.h \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
-    ../include/Types.h \
+    ../lib/Types.h \
     Subsystem.h \
     ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
-    ../include/DataSource.h \
-    ../include/SocketIO.h \
-    ../include/PropertyObject.h \
-    ../include/PropertyEditorOld.h \
-    ../include/PropertyEditor.h \
+    ../lib/DataSource.h \
+    ../lib/SocketIO.h \
+    ../lib/PropertyObject.h \
+    ../lib/PropertyEditorOld.h \
+    ../lib/PropertyEditor.h \
 	Builder/Parser.h \
     Connection.h \
     DialogConnectionsEditor.h \
-    ../include/PropertyEditorDialog.h \
-    ../include/DebugInstCounter.h \
+    ../lib/PropertyEditorDialog.h \
+    ../lib/DebugInstCounter.h \
     Builder/SoftwareCfgGenerator.h \
-    ../include/BuildInfo.h \
+    ../lib/BuildInfo.h \
     Rs232SignalListEditor.h \
     Builder/TuningBuilder.h \
     Builder/IssueLogger.h \
@@ -249,9 +249,9 @@ HEADERS  += \
 	GlobalMessanger.h \
     Builder/LmMemoryMap.h \
     Builder/LmLimits.h \
-    ../include/Address16.h \
+    ../lib/Address16.h \
     Builder/ModuleLogicCompiler.h \
-    ../include/WUtils.h \
+    ../lib/WUtils.h \
     EditSchemaWidget.h \
     SchemaPropertiesDialog.h \
     SchemaItemPropertiesDialog.h \
@@ -260,20 +260,20 @@ HEADERS  += \
     CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
-    ../include/DeviceHelper.h \
-    ../include/XmlHelper.h \
+    ../lib/DeviceHelper.h \
+    ../lib/XmlHelper.h \
     Builder/MonitorCfgGenerator.h \
-    ../include/ServiceSettings.h \
+    ../lib/ServiceSettings.h \
     Builder/TuningServiceCfgGenerator.h \
     Builder/AppDataServiceCfgGenerator.h \
     Builder/DiagDataServiceCfgGenerator.h \
-    ../include/Queue.h \
-    ../include/ProtobufHelper.h \
+    ../lib/Queue.h \
+    ../lib/ProtobufHelper.h \
     UploadTabPage.h \
     ../TuningService/TuningDataSource.h \
     DialogChoosePreset.h \
     ../TuningService/TuningDataStorage.h \
-    ../include/DataProtocols.h
+    ../lib/DataProtocols.h
 
 FORMS    += \
     ChangesetDialog.ui \

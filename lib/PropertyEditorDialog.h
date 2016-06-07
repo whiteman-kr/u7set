@@ -2,7 +2,7 @@
 #define PROPERTYEDITORDIALOG_H
 
 #include <QDialog>
-#include "../include/PropertyObject.h"
+#include "../lib/PropertyObject.h"
 
 class PropertyEditorDialog : public QDialog
 {

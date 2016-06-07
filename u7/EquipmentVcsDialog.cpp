@@ -1,6 +1,6 @@
 #include "EquipmentVcsDialog.h"
 #include "ui_EquipmentVcsDialog.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 const wchar_t* EquipmentVcsDialog::ColumnName[] = {L"StrID", L"Caption", L"Place", L"Type", L"User", L"Action"};
 

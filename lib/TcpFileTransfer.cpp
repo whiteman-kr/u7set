@@ -1,4 +1,4 @@
-#include "../include/TcpFileTransfer.h"
+#include "../lib/TcpFileTransfer.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>

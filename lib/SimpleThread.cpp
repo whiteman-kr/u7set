@@ -1,4 +1,4 @@
-#include "../include/SimpleThread.h"
+#include "../lib/SimpleThread.h"
 #include <cassert>
 #include <QTimer>
 #include <QMetaMethod>

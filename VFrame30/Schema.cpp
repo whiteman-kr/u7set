@@ -7,7 +7,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemLink.h"
 #include "HorzVertLinks.h"
-#include "../include/ProtoSerialization.h"
+#include "../lib/ProtoSerialization.h"
 
 
 namespace VFrame30

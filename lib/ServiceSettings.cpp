@@ -1,6 +1,6 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include "../include/ServiceSettings.h"
+#include "../lib/ServiceSettings.h"
 
 
 // -------------------------------------------------------------------------------------

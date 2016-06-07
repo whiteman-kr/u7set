@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include "../VFrame30/VFrame30Library.h"
 #include "MonitorConfigController.h"
-#include "../include/SimpleThread.h"
+#include "../lib/SimpleThread.h"
 #include "TcpSignalClient.h"
 
 

@@ -3,15 +3,15 @@
 
 #include <QString>
 #include <QMultiHash>
-#include "../include/Types.h"
-#include "../include/DbStruct.h"
-#include "../include/OrderedHash.h"
-#include "../include/DeviceObject.h"
-#include "../include/Address16.h"
-#include "../include/DataSource.h"
+#include "../lib/Types.h"
+#include "../lib/DbStruct.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/Address16.h"
+#include "../lib/DataSource.h"
 #include "../VFrame30/Afb.h"
-#include "../include/ProtobufHelper.h"
-#include "../include/Hash.h"
+#include "../lib/ProtobufHelper.h"
+#include "../lib/Hash.h"
 
 
 class QXmlStreamAttributes;

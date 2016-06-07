@@ -78,21 +78,21 @@ SOURCES +=\
     ../lib/JsonSerializable.cpp
 
 HEADERS  += \
-    ../include/SocketIO.h \
-    ../include/UdpSocket.h \
+    ../lib/SocketIO.h \
+    ../lib/UdpSocket.h \
     ServerSocket.h \
-	../include/Service.h \
+	../lib/Service.h \
     ServerMainWindow.h \
-    ../include/CircularLogger.h \
+    ../lib/CircularLogger.h \
     version.h \
-	../include/ProtoUdp.h \
-    ../include/Factory.h \
-	../include/Tcp.h \
-    ../include/SimpleThread.h \
-    ../include/TcpFileTransfer.h \
-	../include/CfgServerLoader.h \
-    ../include/BuildInfo.h \
-    ../include/JsonSerializable.h
+	../lib/ProtoUdp.h \
+    ../lib/Factory.h \
+	../lib/Tcp.h \
+    ../lib/SimpleThread.h \
+    ../lib/TcpFileTransfer.h \
+	../lib/CfgServerLoader.h \
+    ../lib/BuildInfo.h \
+    ../lib/JsonSerializable.h
 
 
 include(../qtservice/src/qtservice.pri)

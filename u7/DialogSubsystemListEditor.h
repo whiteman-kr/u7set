@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QItemDelegate>
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "Subsystem.h"
 
 namespace Ui {

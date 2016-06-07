@@ -3,11 +3,11 @@
 #include "SchemaPoint.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../include/PropertyObject.h"
-#include "../include/ProtoSerialization.h"
-#include "../include/DebugInstCounter.h"
-#include "../include/Types.h"
-#include "../include/TypesAndEnums.h"
+#include "../lib/PropertyObject.h"
+#include "../lib/ProtoSerialization.h"
+#include "../lib/DebugInstCounter.h"
+#include "../lib/Types.h"
+#include "../lib/TypesAndEnums.h"
 
 namespace VFrame30
 {

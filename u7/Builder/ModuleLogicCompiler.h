@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../include/WUtils.h"
-#include "../include/DeviceObject.h"
-#include "../include/Signal.h"
-#include "../include/OrderedHash.h"
-#include "../include/ModuleConfiguration.h"
+#include "../lib/WUtils.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/Signal.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/ModuleConfiguration.h"
 
 #include "../Builder/Parser.h"
 #include "../Builder/BuildResultWriter.h"

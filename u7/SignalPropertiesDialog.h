@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QMap>
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 
 class QtProperty;
 class QtStringPropertyManager;

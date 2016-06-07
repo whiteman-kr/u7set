@@ -1,4 +1,4 @@
-#include "../include/UdpSocket.h"
+#include "../lib/UdpSocket.h"
 #include <QByteArray>
 
 

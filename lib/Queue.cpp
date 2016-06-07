@@ -1,6 +1,6 @@
 #include <cassert>
-#include "../include/Queue.h"
-#include "../include/Utils.h"
+#include "../lib/Queue.h"
+#include "../lib/Utils.h"
 
 
 QueueBase::QueueBase(int itemSize, int queueSize) :

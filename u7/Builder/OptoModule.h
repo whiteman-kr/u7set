@@ -2,10 +2,10 @@
 
 #include <QObject>
 
-#include "../include/OrderedHash.h"
-#include "../include/DeviceObject.h"
-#include "../include/Address16.h"
-#include "../include/Signal.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/Address16.h"
+#include "../lib/Signal.h"
 #include "IssueLogger.h"
 
 

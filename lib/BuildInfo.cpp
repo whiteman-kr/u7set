@@ -1,4 +1,4 @@
-#include "../include/BuildInfo.h"
+#include "../lib/BuildInfo.h"
 
 
 namespace Builder

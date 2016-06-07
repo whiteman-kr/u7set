@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/TypesAndEnums.h"
+#include "../lib/TypesAndEnums.h"
 
 namespace VFrame30
 {

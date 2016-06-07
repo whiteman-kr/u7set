@@ -1,4 +1,4 @@
-#include "../include/SocketIO.h"
+#include "../lib/SocketIO.h"
 #include <assert.h>
 
 /*

@@ -5,9 +5,9 @@
 #include <QSqlError>
 #include <QDebug>
 
-#include "../include/DbWorker.h"
-#include "../include/DeviceObject.h"
-#include "../include/DbProgress.h"
+#include "../lib/DbWorker.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/DbProgress.h"
 
 
 // Upgrade database

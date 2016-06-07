@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "../VFrame30/Schema.h"
-#include "../include/PropertyEditor.h"
+#include "../lib/PropertyEditor.h"
 
 
 namespace Ui {

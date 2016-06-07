@@ -8,9 +8,9 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <cassert>
-#include "../include/SocketIO.h"
-#include "../include/SimpleThread.h"
-#include "../include/Utils.h"
+#include "../lib/SocketIO.h"
+#include "../lib/SimpleThread.h"
+#include "../lib/Utils.h"
 #include "../Proto/serialization.pb.h"
 
 namespace Tcp

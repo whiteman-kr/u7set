@@ -73,15 +73,15 @@ SOURCES += main.cpp \
     ../lib/SimpleThread.cpp
 
 HEADERS += \
-    ../include/SocketIO.h \
-    ../include/UdpSocket.h \
-    ../include/CircularLogger.h \
-	../include/FscDataFormat.h \
+    ../lib/SocketIO.h \
+    ../lib/UdpSocket.h \
+    ../lib/CircularLogger.h \
+	../lib/FscDataFormat.h \
     version.h \
-    ../include/JsonSerializable.h \
-    ../include/UdpFileTransfer.h \
-    ../include/Service.h \
-    ../include/SimpleThread.h
+    ../lib/JsonSerializable.h \
+    ../lib/UdpFileTransfer.h \
+    ../lib/Service.h \
+    ../lib/SimpleThread.h
 
 include(../qtservice/src/qtservice.pri)
 

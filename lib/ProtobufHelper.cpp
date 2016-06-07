@@ -1,4 +1,4 @@
-#include "../include/ProtobufHelper.h"
+#include "../lib/ProtobufHelper.h"
 
 
 const int ProtobufHelper::FINALIZER = 0;

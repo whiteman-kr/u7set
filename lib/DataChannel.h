@@ -3,12 +3,12 @@
 #include <QTimer>
 #include <QUdpSocket>
 
-#include "../include/DataSource.h"
-#include "../include/DataProtocols.h"
-#include "../include/OrderedHash.h"
-#include "../include/SimpleThread.h"
-#include "../include/Queue.h"
-#include "../include/Signal.h"
+#include "../lib/DataSource.h"
+#include "../lib/DataProtocols.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/SimpleThread.h"
+#include "../lib/Queue.h"
+#include "../lib/Signal.h"
 
 
 typedef Queue<RupData> RupDataQueue;

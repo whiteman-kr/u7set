@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 
 class DbController;
 class QTableView;

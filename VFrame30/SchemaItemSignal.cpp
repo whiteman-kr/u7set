@@ -2,7 +2,7 @@
 #include "SchemaItemSignal.h"
 #include "LogicSchema.h"
 
-#include "../include/AppSignalManager.h"
+#include "../lib/AppSignalManager.h"
 
 namespace VFrame30
 {

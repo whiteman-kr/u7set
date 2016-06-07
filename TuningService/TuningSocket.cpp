@@ -1,5 +1,5 @@
 #include "TuningSocket.h"
-#include "../include/Types.h"
+#include "../lib/Types.h"
 #include "TuningService.h"
 
 namespace Tuning

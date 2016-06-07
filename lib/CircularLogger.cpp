@@ -1,4 +1,4 @@
-#include "../include/CircularLogger.h"
+#include "../lib/CircularLogger.h"
 #include <QFile>
 #include <QDir>
 #include <QDateTime>

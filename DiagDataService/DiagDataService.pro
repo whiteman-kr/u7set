@@ -90,36 +90,36 @@ SOURCES += main.cpp \
 
 HEADERS += \
 	Stable.h \
-	../include/SocketIO.h \
-	../include/UdpSocket.h \
-	../include/Service.h \
-	../include/CircularLogger.h \
-    ../include/DataSource.h \
+	../lib/SocketIO.h \
+	../lib/UdpSocket.h \
+	../lib/Service.h \
+	../lib/CircularLogger.h \
+    ../lib/DataSource.h \
     version.h \
-    ../include/DeviceObject.h \
-    ../include/DbStruct.h \
-    ../include/ProtoSerialization.h \
-    ../include/Signal.h \
-    ../include/CUtils.h \
-    ../include/PropertyObject.h \
-    ../include/Types.h \
-    ../include/JsonSerializable.h \
-    ../include/CfgServerLoader.h \
-    ../include/Tcp.h \
-    ../include/TcpFileTransfer.h \
-    ../include/BuildInfo.h \
-    ../include/SimpleThread.h \
-    ../include/ServiceSettings.h \
-    ../include/DeviceHelper.h \
-    ../include/OutputLog.h \
-    ../include/XmlHelper.h \
-    ../include/DataProtocols.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Signal.h \
+    ../lib/CUtils.h \
+    ../lib/PropertyObject.h \
+    ../lib/Types.h \
+    ../lib/JsonSerializable.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/Tcp.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/BuildInfo.h \
+    ../lib/SimpleThread.h \
+    ../lib/ServiceSettings.h \
+    ../lib/DeviceHelper.h \
+    ../lib/OutputLog.h \
+    ../lib/XmlHelper.h \
+    ../lib/DataProtocols.h \
     DiagDataService.h \
-    ../include/DataChannel.h \
-    ../include/Queue.h \
-    ../include/WUtils.h \
+    ../lib/DataChannel.h \
+    ../lib/Queue.h \
+    ../lib/WUtils.h \
     ../u7/Builder/IssueLogger.h \
-    ../include/Crc.h
+    ../lib/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 

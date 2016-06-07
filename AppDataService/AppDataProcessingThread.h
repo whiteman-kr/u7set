@@ -1,8 +1,8 @@
 #pragma once
 
 #include "AppDataServiceTypes.h"
-#include "../include/SimpleThread.h"
-#include "../include/DataChannel.h"
+#include "../lib/SimpleThread.h"
+#include "../lib/DataChannel.h"
 
 
 class AppDataProcessingWorker : public SimpleThreadWorker

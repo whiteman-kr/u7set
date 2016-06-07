@@ -1,7 +1,7 @@
 
-#include "../include/ModuleConfiguration.h"
-#include "../include/Crc.h"
-#include "../include/CUtils.h"
+#include "../lib/ModuleConfiguration.h"
+#include "../lib/Crc.h"
+#include "../lib/CUtils.h"
 #include <QMap>
 #include <QHash>
 #include <QQmlEngine>

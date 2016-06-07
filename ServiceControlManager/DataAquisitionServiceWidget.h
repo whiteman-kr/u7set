@@ -2,9 +2,9 @@
 #define DATAAQUISITIONSERVICEWIDGET_H
 
 #include "BaseServiceStateWidget.h"
-#include "../include/OrderedHash.h"
+#include "../lib/OrderedHash.h"
 #include <QAbstractTableModel>
-#include "../include/DataSource.h"
+#include "../lib/DataSource.h"
 
 class QTableView;
 class TcpAppDataClient;

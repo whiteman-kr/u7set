@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/Tcp.h"
+#include "../lib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
 #include "AppSignalStateEx.h"

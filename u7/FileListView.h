@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QTableView>
-#include "../include/DbStruct.h"
+#include "../lib/DbStruct.h"
 
 class DbController;
 

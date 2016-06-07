@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/Signal.h"
-#include "../include/OrderedHash.h"
+#include "../lib/Signal.h"
+#include "../lib/OrderedHash.h"
 #include "AppDataSource.h"
 
 

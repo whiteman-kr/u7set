@@ -1,4 +1,4 @@
-#include "../include/OutputLog.h"
+#include "../lib/OutputLog.h"
 #include <cassert>
 
 

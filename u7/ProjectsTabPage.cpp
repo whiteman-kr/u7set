@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ProjectsTabPage.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 #include "Settings.h"

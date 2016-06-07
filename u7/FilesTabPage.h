@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include <vector>
 #include <memory>
-#include "../include/DbStruct.h"
+#include "../lib/DbStruct.h"
 
 class DbController;
 

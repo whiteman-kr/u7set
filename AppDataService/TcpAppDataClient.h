@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../include/Tcp.h"
-#include "../include/SocketIO.h"
-#include "../include/Hash.h"
-#include "../include/OrderedHash.h"
-#include "../include/Signal.h"
+#include "../lib/Tcp.h"
+#include "../lib/SocketIO.h"
+#include "../lib/Hash.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/Signal.h"
 #include "../Proto/network.pb.h"
 
 class TcpAppDataClient : public Tcp::Client

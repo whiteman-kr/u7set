@@ -10,7 +10,7 @@
 #include <QUdpSocket>
 #include <QtEndian>
 
-#include "../include/DataProtocols.h"
+#include "../lib/DataProtocols.h"
 #include "SendTuningFrameWidget.h"
 #include "PacketSourceModel.h"
 

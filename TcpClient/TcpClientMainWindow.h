@@ -2,9 +2,9 @@
 #define TCPCLIENTMAINWINDOW_H
 
 #include <QMainWindow>
-#include "../include/Tcp.h"
-#include "../include/TcpFileTransfer.h"
-#include "../include/CfgServerLoader.h"
+#include "../lib/Tcp.h"
+#include "../lib/TcpFileTransfer.h"
+#include "../lib/CfgServerLoader.h"
 
 #include "../AppDataService/TcpAppDataClient.h"
 

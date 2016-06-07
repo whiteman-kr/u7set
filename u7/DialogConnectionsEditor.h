@@ -3,9 +3,9 @@
 
 #include <QDialog>
 #include <QItemDelegate>
-#include "../include/DbController.h"
-#include "../include/PropertyEditor.h"
-#include "../include/PropertyEditorDialog.h"
+#include "../lib/DbController.h"
+#include "../lib/PropertyEditor.h"
+#include "../lib/PropertyEditorDialog.h"
 #include "Connection.h"
 
 class DialogConnectionsPropertyEditor : public PropertyEditorDialog

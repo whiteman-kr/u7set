@@ -102,9 +102,9 @@
 // Other stable includes
 //
 #include "../VFrame30/VFrame30Lib_global.h"
-#include "../include/Factory.h"
-#include "../include/TypesAndEnums.h"
-#include "../include/CUtils.h"
+#include "../lib/Factory.h"
+#include "../lib/TypesAndEnums.h"
+#include "../lib/CUtils.h"
 
 // Disable some warnings
 //

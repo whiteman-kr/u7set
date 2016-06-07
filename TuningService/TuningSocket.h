@@ -2,10 +2,10 @@
 
 #include <QtCore>
 #include <QUdpSocket>
-#include "../include/SocketIO.h"
-#include "../include/SimpleThread.h"
-#include "../include/DataProtocols.h"
-#include "../include/Queue.h"
+#include "../lib/SocketIO.h"
+#include "../lib/SimpleThread.h"
+#include "../lib/DataProtocols.h"
+#include "../lib/Queue.h"
 
 namespace Tuning
 {

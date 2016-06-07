@@ -1,6 +1,6 @@
 #include "TcpClientMainWindow.h"
 #include "ui_TcpClientMainWindow.h"
-#include "../include/OrderedHash.h"
+#include "../lib/OrderedHash.h"
 
 TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 	QMainWindow(parent),

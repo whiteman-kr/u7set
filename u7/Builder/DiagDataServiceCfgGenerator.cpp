@@ -1,5 +1,5 @@
 #include "DiagDataServiceCfgGenerator.h"
-#include "../include/ServiceSettings.h"
+#include "../lib/ServiceSettings.h"
 
 
 namespace Builder

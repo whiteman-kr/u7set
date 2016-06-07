@@ -3,10 +3,10 @@
 #include <QVector>
 #include <QThread>
 
-#include "../include/DbStruct.h"
-#include "../include/DbWorker.h"
-#include "../include/DeviceObject.h"
-#include "../include/DbProgress.h"
+#include "../lib/DbStruct.h"
+#include "../lib/DbWorker.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/DbProgress.h"
 
 class DbController : public QObject
 {

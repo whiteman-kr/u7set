@@ -4,8 +4,8 @@
 #include <QDialog>
 #include <QSet>
 #include <QNetworkAddressEntry>
-#include "../include/SocketIO.h"
-#include "../include/Service.h"
+#include "../lib/SocketIO.h"
+#include "../lib/Service.h"
 
 class QLineEdit;
 class ServiceTableModel;

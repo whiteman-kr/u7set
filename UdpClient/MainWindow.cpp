@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "../include/DataSource.h"
+#include "../lib/DataSource.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :

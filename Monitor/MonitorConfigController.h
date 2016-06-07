@@ -4,8 +4,8 @@
 #include <vector>
 #include <set>
 #include <QThread>
-#include "../include/CfgServerLoader.h"
-#include "../include/SocketIO.h"
+#include "../lib/CfgServerLoader.h"
+#include "../lib/SocketIO.h"
 
 
 class ConfigConnection

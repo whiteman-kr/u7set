@@ -2,7 +2,7 @@
 #include "UserManagementDialog.h"
 #include "ui_UserManagementDialog.h"
 #include "CreateUserDialogDialog.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "PasswordService.h"
 
 UserManagementDialog::UserManagementDialog(QWidget* parent, DbController* dbController) :

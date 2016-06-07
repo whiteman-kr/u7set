@@ -1,4 +1,4 @@
-#include "../include/AppSignalManager.h"
+#include "../lib/AppSignalManager.h"
 
 AppSignalManager::AppSignalManager()
 {

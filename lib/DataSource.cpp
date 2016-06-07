@@ -1,6 +1,6 @@
-#include "../include/DataSource.h"
-#include "../include/WUtils.h"
-#include "../include/Crc.h"
+#include "../lib/DataSource.h"
+#include "../lib/WUtils.h"
+#include "../lib/Crc.h"
 
 
 void RupData::dump()

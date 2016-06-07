@@ -2,7 +2,7 @@
 #define DIALOGAFBLEDITOR_H
 
 #include <QDialog>
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 namespace Ui {
 class DialogAfblEditor;

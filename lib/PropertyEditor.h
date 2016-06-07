@@ -1,7 +1,7 @@
 #ifndef PROPERTYEDITOR_H
 #define PROPERTYEDITOR_H
 
-#include "../include/PropertyObject.h"
+#include "../lib/PropertyObject.h"
 #include "../qtpropertybrowser/src/qteditorfactory.h"
 #include <memory>
 #include <QWidget>

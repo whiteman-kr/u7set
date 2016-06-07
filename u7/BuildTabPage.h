@@ -2,8 +2,8 @@
 #include "MainTabPage.h"
 #include "./Builder/Builder.h"
 #include "./Builder/IssueLogger.h"
-#include "../include/DeviceObject.h"
-#include "../include/OutputLog.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/OutputLog.h"
 
 class DbController;
 class QCheckBox;

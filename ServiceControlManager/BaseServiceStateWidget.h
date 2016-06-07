@@ -2,8 +2,8 @@
 #define BASESERVICESTATEWIDGET_H
 
 #include <QMainWindow>
-#include "../include/UdpSocket.h"
-#include "../include/Service.h"
+#include "../lib/UdpSocket.h"
+#include "../lib/Service.h"
 
 class QAction;
 class QLabel;

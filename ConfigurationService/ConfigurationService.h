@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/Service.h"
-#include "../include/CfgServerLoader.h"
+#include "../lib/Service.h"
+#include "../lib/CfgServerLoader.h"
 
 
 class ConfigurationServiceWorker : public ServiceWorker

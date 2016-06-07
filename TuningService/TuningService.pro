@@ -57,36 +57,36 @@ SOURCES += \
     ../u7/Builder/IssueLogger.cpp
 
 HEADERS += \
-    ../include/BuildInfo.h \
-    ../include/CfgServerLoader.h \
-    ../include/CircularLogger.h \
-    ../include/OrderedHash.h \
-    ../include/Service.h \
-    ../include/SocketIO.h \
-    ../include/UdpSocket.h \
-    ../include/SimpleThread.h \
-    ../include/WUtils.h \
-    ../include/TcpFileTransfer.h \
-    ../include/Tcp.h \
+    ../lib/BuildInfo.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/CircularLogger.h \
+    ../lib/OrderedHash.h \
+    ../lib/Service.h \
+    ../lib/SocketIO.h \
+    ../lib/UdpSocket.h \
+    ../lib/SimpleThread.h \
+    ../lib/WUtils.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/Tcp.h \
     TuningSocket.h \
     TuningService.h \
-    ../include/DataSource.h \
-    ../include/XmlHelper.h \
-    ../include/ServiceSettings.h \
+    ../lib/DataSource.h \
+    ../lib/XmlHelper.h \
+    ../lib/ServiceSettings.h \
     TuningDataSource.h \
-    ../include/Queue.h \
-    ../include/DeviceHelper.h \
-    ../include/DeviceObject.h \
-    ../include/PropertyObject.h \
-    ../include/DbStruct.h \
-    ../include/OutputLog.h \
-    ../include/ProtoSerialization.h \
-    ../include/Types.h \
-    ../include/Signal.h \
+    ../lib/Queue.h \
+    ../lib/DeviceHelper.h \
+    ../lib/DeviceObject.h \
+    ../lib/PropertyObject.h \
+    ../lib/DbStruct.h \
+    ../lib/OutputLog.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Types.h \
+    ../lib/Signal.h \
     ../AppDataService/AppSignalStateEx.h \
-    ../include/Crc.h \
+    ../lib/Crc.h \
     TuningDataStorage.h \
-    ../include/Hash.h \
+    ../lib/Hash.h \
     ../u7/Builder/IssueLogger.h
 
 include(../qtservice/src/qtservice.pri)

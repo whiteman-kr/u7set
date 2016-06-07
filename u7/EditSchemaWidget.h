@@ -5,7 +5,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/FblItem.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 
 

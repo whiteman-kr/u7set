@@ -1,6 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
-#include "../include/OutputLog.h"
+#include "../lib/OutputLog.h"
 
 class DbController;
 class QCheckBox;

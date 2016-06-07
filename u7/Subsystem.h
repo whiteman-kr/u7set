@@ -1,7 +1,7 @@
 #ifndef SUBSYSTEM_H
 #define SUBSYSTEM_H
 
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 namespace Hardware
 {

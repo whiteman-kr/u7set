@@ -2,8 +2,8 @@
 
 #include "SchemaLayer.h"
 #include "Afb.h"
-#include "../include/PropertyObject.h"
-#include "../include/TypesAndEnums.h"
+#include "../lib/PropertyObject.h"
+#include "../lib/TypesAndEnums.h"
 
 namespace VFrame30
 {

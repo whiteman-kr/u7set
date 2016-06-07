@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QMainWindow>
-#include "../include/ServiceSettings.h"
-#include "../include/DataSource.h"
-#include "../include/Service.h"
+#include "../lib/ServiceSettings.h"
+#include "../lib/DataSource.h"
+#include "../lib/Service.h"
 #include "../TuningService/TuningDataSource.h"
 #include "../TuningService/TuningService.h"
 #include "TuningIPENService.h"

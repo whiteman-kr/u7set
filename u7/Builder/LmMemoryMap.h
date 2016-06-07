@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/Address16.h"
-#include "../include/Signal.h"
-#include "../include/OutputLog.h"
+#include "../lib/Address16.h"
+#include "../lib/Signal.h"
+#include "../lib/OutputLog.h"
 
 #include "../Builder/LmLimits.h"
 

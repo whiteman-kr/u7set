@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <map>
 #include <memory>
-#include "../include/CUtils.h"
+#include "../lib/CUtils.h"
 
 template<typename BaseClass>
 class Factory

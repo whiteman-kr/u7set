@@ -20,7 +20,7 @@
 #include <QTimer>
 #include <QDebug>
 
-#include "../include/OrderedHash.h"
+#include "../lib/OrderedHash.h"
 
 namespace Proto
 {

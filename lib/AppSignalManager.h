@@ -3,8 +3,8 @@
 
 #include <QMutex>
 #include <unordered_map>
-#include "../include/Hash.h"
-#include "../include/Signal.h"
+#include "../lib/Hash.h"
+#include "../lib/Signal.h"
 
 typedef quint64 SignalHash;
 

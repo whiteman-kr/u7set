@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "../include/DbStruct.h"
+#include "../lib/DbStruct.h"
 
 class QListWidget;
 class DbController;

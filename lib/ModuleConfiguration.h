@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/ProtoSerialization.h"
-#include "../include/DeviceObject.h"
+#include "../lib/ProtoSerialization.h"
+#include "../lib/DeviceObject.h"
 
 // ----------------------------------------------------------------------------
 //

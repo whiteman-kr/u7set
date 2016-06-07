@@ -1,5 +1,5 @@
-#include "../include/PropertyObject.h"
-#include "../include/PropertyEditor.h"
+#include "../lib/PropertyObject.h"
+#include "../lib/PropertyEditor.h"
 #include "Settings.h"
 //#include "PropertyEditor.h"
 

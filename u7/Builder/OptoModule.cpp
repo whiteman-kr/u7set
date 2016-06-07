@@ -2,7 +2,7 @@
 
 #include "../Builder/Builder.h"
 #include "../Builder/ApplicationLogicCompiler.h"
-#include "../include/DeviceHelper.h"
+#include "../lib/DeviceHelper.h"
 
 namespace Hardware
 {

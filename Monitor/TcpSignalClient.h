@@ -2,10 +2,10 @@
 #define TCPSIGNALCLIENT_H
 
 #include <QStringList>
-#include "../include/Tcp.h"
-#include "../include/Hash.h"
+#include "../lib/Tcp.h"
+#include "../lib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../include/AppSignalManager.h"
+#include "../lib/AppSignalManager.h"
 #include "MonitorConfigController.h"
 
 class TcpSignalClient : public Tcp::Client

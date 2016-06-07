@@ -1,4 +1,4 @@
-#include "../include/CfgServerLoader.h"
+#include "../lib/CfgServerLoader.h"
 #include <QXmlStreamReader>
 #include <QStandardPaths>
 

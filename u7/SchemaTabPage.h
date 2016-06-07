@@ -2,7 +2,7 @@
 
 #include "MainTabPage.h"
 #include "FileListView.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "EditSchemaWidget.h"
 #include "GlobalMessanger.h"
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/DbController.h"
-#include "../include/Signal.h"
-#include "../include/DeviceObject.h"
+#include "../lib/DbController.h"
+#include "../lib/Signal.h"
+#include "../lib/DeviceObject.h"
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "Subsystem.h"

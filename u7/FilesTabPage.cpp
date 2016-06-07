@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QMessageBox>
 
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"

@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "Settings.h"
-#include "../include/CUtils.h"
+#include "../lib/CUtils.h"
 
 namespace VFrame30
 {

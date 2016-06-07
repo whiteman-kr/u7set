@@ -5,12 +5,12 @@
 #include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
-#include "../include/DebugInstCounter.h"
-#include "../include/PropertyObject.h"
-#include "../include/Factory.h"
-#include "../include/Types.h"
-#include "../include/ProtoSerialization.h"
-#include "../include/ModuleConfiguration.h"
+#include "../lib/DebugInstCounter.h"
+#include "../lib/PropertyObject.h"
+#include "../lib/Factory.h"
+#include "../lib/Types.h"
+#include "../lib/ProtoSerialization.h"
+#include "../lib/ModuleConfiguration.h"
 
 class DbController;
 

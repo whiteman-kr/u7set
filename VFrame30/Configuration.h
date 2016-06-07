@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/ProtoSerialization.h"
-#include "../include/DebugInstCounter.h"
+#include "../lib/ProtoSerialization.h"
+#include "../lib/DebugInstCounter.h"
 
 namespace VFrame30
 {

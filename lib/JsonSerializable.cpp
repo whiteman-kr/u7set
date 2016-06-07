@@ -1,4 +1,4 @@
-#include "../include/JsonSerializable.h"
+#include "../lib/JsonSerializable.h"
 
 
 JsonSerializable::JsonSerializable(int version) :

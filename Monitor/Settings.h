@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QMutex>
-#include <../include/SocketIO.h>
+#include <../lib/SocketIO.h>
 
 class Settings
 {

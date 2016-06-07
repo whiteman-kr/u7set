@@ -118,22 +118,22 @@ HEADERS  += \
     version.h \
     Conversion.h \
     Calculator.h \
-    ../include/Signal.h \
-    ../include/CUtils.h \
-    ../include/Crc.h \
-    ../include/Factory.h \
-    ../include/DeviceObject.h \
-    ../include/DbStruct.h \
-    ../include/ModuleConfiguration.h \
-    ../include/ProtoSerialization.h \
-    ../include/Types.h \
-    ../include/OrderedHash.h \
+    ../lib/Signal.h \
+    ../lib/CUtils.h \
+    ../lib/Crc.h \
+    ../lib/Factory.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbStruct.h \
+    ../lib/ModuleConfiguration.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Types.h \
+    ../lib/OrderedHash.h \
     Stable.h \
     ObjectVector.h \
     MeasureSignalBase.h \
-    ../include/SocketIO.h \
-    ../include/PropertyObject.h \
-    ../include/XmlHelper.h
+    ../lib/SocketIO.h \
+    ../lib/PropertyObject.h \
+    ../lib/XmlHelper.h
 
 
 FORMS    +=

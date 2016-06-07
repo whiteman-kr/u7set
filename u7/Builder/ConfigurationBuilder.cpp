@@ -1,10 +1,10 @@
 #include "ConfigurationBuilder.h"
 
-#include "../../include/DbController.h"
+#include "../../lib/DbController.h"
 #include "Builder/IssueLogger.h"
-#include "../../include/DeviceObject.h"
+#include "../../lib/DeviceObject.h"
 #include "Connection.h"
-#include "../../include/Crc.h"
+#include "../../lib/Crc.h"
 
 namespace Builder
 {

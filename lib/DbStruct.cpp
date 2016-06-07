@@ -1,4 +1,4 @@
-#include "../include/DbStruct.h"
+#include "../lib/DbStruct.h"
 
 #include <QObject>
 #include <QFile>

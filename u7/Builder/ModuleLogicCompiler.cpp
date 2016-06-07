@@ -1,7 +1,7 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
-#include "../include/DeviceHelper.h"
-#include "../include/Crc.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/Crc.h"
 
 namespace Builder
 {

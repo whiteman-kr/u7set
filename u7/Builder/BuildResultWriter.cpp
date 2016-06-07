@@ -6,7 +6,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "../u7/Settings.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 namespace Builder
 {

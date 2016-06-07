@@ -1,5 +1,5 @@
-#include "../include/DbProgress.h"
-#include "../include/DbProgressDialog.h"
+#include "../lib/DbProgress.h"
+#include "../lib/DbProgressDialog.h"
 
 #include <QThread>
 #include <QDebug>

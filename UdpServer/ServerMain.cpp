@@ -1,5 +1,5 @@
 #include "ServerMainWindow.h"
-#include "../include/UdpSocket.h"
+#include "../lib/UdpSocket.h"
 #include <QApplication>
 
 

@@ -1,4 +1,4 @@
-#include "../include/DeviceHelper.h"
+#include "../lib/DeviceHelper.h"
 
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
 {

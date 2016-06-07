@@ -2,7 +2,7 @@
 
 #include <QtGlobal>
 #include "../Proto/serialization.pb.h"
-#include "../include/Hash.h"
+#include "../lib/Hash.h"
 
 
 struct Times

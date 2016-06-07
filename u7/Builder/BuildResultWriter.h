@@ -6,10 +6,10 @@
 #include <QVector>
 #include <QHash>
 
-#include "../include/OutputLog.h"
-#include "../include/OrderedHash.h"
-#include "../include/DeviceObject.h"
-#include "../include/BuildInfo.h"
+#include "../lib/OutputLog.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/BuildInfo.h"
 
 
 class DbController;

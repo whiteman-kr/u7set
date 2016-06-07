@@ -1,5 +1,5 @@
-#include "../include/Service.h"
-#include "../include/Types.h"
+#include "../lib/Service.h"
+#include "../lib/Types.h"
 
 
 // -------------------------------------------------------------------------------------

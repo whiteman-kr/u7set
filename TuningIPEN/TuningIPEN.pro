@@ -49,35 +49,35 @@ SOURCES +=\
     ../u7/Builder/IssueLogger.cpp
 
 HEADERS  += TuningMainWindow.h \
-	../include/ServiceSettings.h \
-	../include/DeviceHelper.h \
-	../include/XmlHelper.h \
-	../include/DeviceObject.h \
-	../include/PropertyObject.h \
-	../include/OutputLog.h \
-	../include/DbStruct.h \
+	../lib/ServiceSettings.h \
+	../lib/DeviceHelper.h \
+	../lib/XmlHelper.h \
+	../lib/DeviceObject.h \
+	../lib/PropertyObject.h \
+	../lib/OutputLog.h \
+	../lib/DbStruct.h \
 	../Proto/serialization.pb.h \
-	../include/Types.h \
-	../include/ProtoSerialization.h \
+	../lib/Types.h \
+	../lib/ProtoSerialization.h \
 	../TuningService/TuningDataSource.h \
 	../TuningService/TuningService.h \
-	../include/Service.h \
-	../include/DataProtocols.h \
-	../include/DataSource.h \
-	../include/SimpleThread.h \
-	../include/SocketIO.h \
-	../include/UdpSocket.h \
-	../include/CircularLogger.h \
-	../include/Queue.h \
-	../include/JsonSerializable.h \
-	../include/Signal.h \
+	../lib/Service.h \
+	../lib/DataProtocols.h \
+	../lib/DataSource.h \
+	../lib/SimpleThread.h \
+	../lib/SocketIO.h \
+	../lib/UdpSocket.h \
+	../lib/CircularLogger.h \
+	../lib/Queue.h \
+	../lib/JsonSerializable.h \
+	../lib/Signal.h \
 	SafetyChannelSignalsModel.h \
 	../AppDataService/AppSignalStateEx.h \
 	../TuningService/TuningSocket.h \
-	../include/Crc.h \
+	../lib/Crc.h \
 	AnalogSignalSetter.h \
-    ../include/Utils.h \
-    ../include/WUtils.h \
+    ../lib/Utils.h \
+    ../lib/WUtils.h \
     TuningIPENService.h \
     ../TuningService/TuningDataStorage.h \
     ../u7/Builder/IssueLogger.h

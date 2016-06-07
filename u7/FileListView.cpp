@@ -2,7 +2,7 @@
 #include "FileListView.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 
 FileListModel::FileListModel(QObject* parent) :

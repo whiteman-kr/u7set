@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/Hash.h"
-#include "../include/Signal.h"
-#include "../include/AppSignalState.h"
+#include "../lib/Hash.h"
+#include "../lib/Signal.h"
+#include "../lib/AppSignalState.h"
 
 
 struct AppSignalStateEx

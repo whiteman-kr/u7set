@@ -75,31 +75,31 @@ HEADERS  += \
     MonitorCentralWidget.h \
 	Stable.h \
 	Settings.h \
-    ../include/SocketIO.h \
+    ../lib/SocketIO.h \
     DialogSettings.h \
-    ../include/Tcp.h \
-    ../include/TcpFileTransfer.h \
-    ../include/CfgServerLoader.h \
-    ../include/BuildInfo.h \
-    ../include/SimpleThread.h \
+    ../lib/Tcp.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/BuildInfo.h \
+    ../lib/SimpleThread.h \
     MonitorSchemaView.h \
     MonitorSchemaWidget.h \
-    ../include/Types.h \
+    ../lib/Types.h \
     MonitorConfigController.h \
     SchemaManager.h \
     ../Proto/network.pb.h \
     TcpSignalClient.h \
-    ../include/Hash.h \
+    ../lib/Hash.h \
     ../Proto/serialization.pb.h \
-    ../include/Signal.h \
-    ../include/PropertyObject.h \
-    ../include/XmlHelper.h \
-    ../include/DeviceObject.h \
-    ../include/DbStruct.h \
-    ../include/ProtobufHelper.h \
-    ../include/ProtoSerialization.h \
-    ../include/AppSignalState.h \
-    ../include/AppSignalManager.h \
+    ../lib/Signal.h \
+    ../lib/PropertyObject.h \
+    ../lib/XmlHelper.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtobufHelper.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/AppSignalState.h \
+    ../lib/AppSignalManager.h \
     Statistics.h
 
 FORMS    += \

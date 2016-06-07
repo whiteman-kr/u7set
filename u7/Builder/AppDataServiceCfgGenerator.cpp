@@ -1,6 +1,6 @@
 #include "AppDataServiceCfgGenerator.h"
-#include "../include/ServiceSettings.h"
-#include "../include/ProtobufHelper.h"
+#include "../lib/ServiceSettings.h"
+#include "../lib/ProtobufHelper.h"
 
 
 namespace Builder

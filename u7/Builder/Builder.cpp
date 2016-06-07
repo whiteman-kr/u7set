@@ -5,8 +5,8 @@
 #include "Subsystem.h"
 #include "GlobalMessanger.h"
 
-#include "../../include/DbController.h"
-#include "../../include/DeviceObject.h"
+#include "../../lib/DbController.h"
+#include "../../lib/DeviceObject.h"
 
 #include "../../VFrame30/LogicSchema.h"
 #include "../../VFrame30/SchemaItemLink.h"

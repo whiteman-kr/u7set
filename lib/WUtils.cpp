@@ -1,4 +1,4 @@
-#include "../include/WUtils.h"
+#include "../lib/WUtils.h"
 
 
 void swapBytes(const char* src, char* dest, int size)

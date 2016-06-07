@@ -2,7 +2,7 @@
 #include "UploadTabPage.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 
 //

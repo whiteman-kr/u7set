@@ -1,7 +1,7 @@
 #ifndef BUILDER_H
 #define BUILDER_H
 
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 #include "Subsystem.h"
 #include "Connection.h"
 #include "../Builder/BuildResultWriter.h"

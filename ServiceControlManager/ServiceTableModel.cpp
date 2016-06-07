@@ -1,15 +1,15 @@
 #include "ServiceTableModel.h"
 #include <QBrush>
 #include <QDebug>
-#include "../include/UdpSocket.h"
-#include "../include/SocketIO.h"
+#include "../lib/UdpSocket.h"
+#include "../lib/SocketIO.h"
 #include <QSettings>
 #include <QWidget>
 #include <QApplication>
 #include <QBuffer>
 #include "DataAquisitionServiceWidget.h"
 #include "ConfigurationServiceWidget.h"
-#include "../include/Types.h"
+#include "../lib/Types.h"
 
 
 ServiceData::ServiceData() :

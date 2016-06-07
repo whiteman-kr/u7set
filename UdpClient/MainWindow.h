@@ -2,12 +2,12 @@
 
 #include <QMainWindow>
 
-#include "../include/Service.h"
-#include "../include/SocketIO.h"
+#include "../lib/Service.h"
+#include "../lib/SocketIO.h"
 #include "FscDataSource.h"
 #include "ClientSocket.h"
-#include "../include/ProtoUdp.h"
-#include "../include/Tcp.h"
+#include "../lib/ProtoUdp.h"
+#include "../lib/Tcp.h"
 
 namespace Ui {
 class MainWindow;

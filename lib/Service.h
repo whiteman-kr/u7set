@@ -8,9 +8,9 @@
 #include <QCoreApplication>
 #include <iostream>
 #include "../qtservice/src/qtservice.h"
-#include "../include/UdpSocket.h"
-#include "../include/CircularLogger.h"
-#include "../include/SimpleThread.h"
+#include "../lib/UdpSocket.h"
+#include "../lib/CircularLogger.h"
+#include "../lib/SimpleThread.h"
 
 
 class Service;

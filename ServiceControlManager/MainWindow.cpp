@@ -13,7 +13,7 @@
 #include <QApplication>
 #include "ScanOptionsWidget.h"
 #include "ServiceTableModel.h"
-#include "../include/UdpSocket.h"
+#include "../lib/UdpSocket.h"
 #include <functional>
 
 MainWindow::MainWindow(QWidget *parent) :

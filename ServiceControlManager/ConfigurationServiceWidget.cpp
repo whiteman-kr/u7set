@@ -1,5 +1,5 @@
 #include "ConfigurationServiceWidget.h"
-#include <../include/SocketIO.h>
+#include <../lib/SocketIO.h>
 #include <QLabel>
 
 ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex, QWidget *parent) :

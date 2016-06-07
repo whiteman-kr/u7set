@@ -1,4 +1,4 @@
-#include "../include/PropertyObject.h"
+#include "../lib/PropertyObject.h"
 #include <QDebug>
 #include "../Proto/serialization.pb.h"
 

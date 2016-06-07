@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QMutex>
-#include "../include/OutputLog.h"
-#include "../include/DbStruct.h"
+#include "../lib/OutputLog.h"
+#include "../lib/DbStruct.h"
 
 class GlobalMessanger : public QObject
 {

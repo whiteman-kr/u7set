@@ -2,11 +2,11 @@
 #define SERVERMAINWINDOW_H
 
 #include <QMainWindow>
-#include "../include/Service.h"
-#include "../include/ProtoUdp.h"
-#include "../include/Tcp.h"
-#include "../include/TcpFileTransfer.h"
-#include "../include/CfgServerLoader.h"
+#include "../lib/Service.h"
+#include "../lib/ProtoUdp.h"
+#include "../lib/Tcp.h"
+#include "../lib/TcpFileTransfer.h"
+#include "../lib/CfgServerLoader.h"
 
 namespace Ui
 {

@@ -3,9 +3,9 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../VFrame30/VFrame30Library.h"
-#include "../include/DbController.h"
-#include "../include/DeviceObject.h"
-#include "../include/PropertyObject.h"
+#include "../lib/DbController.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/PropertyObject.h"
 #include "Builder/OptoModule.h"
 #include "version.h"
 

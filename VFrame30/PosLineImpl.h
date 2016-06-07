@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SchemaItem.h"
-#include "../include/CUtils.h"
+#include "../lib/CUtils.h"
 #include "Settings.h"
 
 namespace VFrame30

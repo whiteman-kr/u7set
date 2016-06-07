@@ -5,8 +5,8 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 
-#include "../include/BuildInfo.h"
-#include "../include/JsonSerializable.h"
+#include "../lib/BuildInfo.h"
+#include "../lib/JsonSerializable.h"
 
 
 const int MAX_DATAGRAM_SIZE = 4096;

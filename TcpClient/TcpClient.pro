@@ -42,31 +42,31 @@ SOURCES +=\
     ../lib/DataProtocols.cpp
 
 HEADERS  += TcpClientMainWindow.h \
-    ../include/SimpleThread.h \
-    ../include/Tcp.h \
-    ../include/SocketIO.h \
-    ../include/TcpFileTransfer.h \
-    ../include/CfgServerLoader.h \
-    ../include/BuildInfo.h \
-    ../include/Utils.h \
-    ../include/Md5Hash.h \
+    ../lib/SimpleThread.h \
+    ../lib/Tcp.h \
+    ../lib/SocketIO.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/BuildInfo.h \
+    ../lib/Utils.h \
+    ../lib/Md5Hash.h \
     ../AppDataService/TcpAppDataClient.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../include/PropertyObject.h \
-    ../include/AppSignalState.h \
-    ../include/Signal.h \
-    ../include/DeviceObject.h \
-    ../include/DbStruct.h \
-    ../include/XmlHelper.h \
-    ../include/ProtobufHelper.h \
-    ../include/ProtoSerialization.h \
-    ../include/Types.h \
-    ../include/Crc.h \
-    ../include/DataSource.h \
-    ../include/Queue.h \
-    ../include/WUtils.h \
-    ../include/DataProtocols.h
+    ../lib/PropertyObject.h \
+    ../lib/AppSignalState.h \
+    ../lib/Signal.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbStruct.h \
+    ../lib/XmlHelper.h \
+    ../lib/ProtobufHelper.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Types.h \
+    ../lib/Crc.h \
+    ../lib/DataSource.h \
+    ../lib/Queue.h \
+    ../lib/WUtils.h \
+    ../lib/DataProtocols.h
 
 FORMS    += TcpClientMainWindow.ui
 

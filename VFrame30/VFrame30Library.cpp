@@ -15,7 +15,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemSignal.h"
 #include "SchemaItemConst.h"
-#include "../include/Types.h"
+#include "../lib/Types.h"
 
 namespace VFrame30
 {

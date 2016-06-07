@@ -89,31 +89,31 @@ SOURCES += MainWindow.cpp \
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
     ServiceTableModel.h \
-    ../include/UdpSocket.h \
-    ../include/SocketIO.h \
-    ../include/DataSource.h \
+    ../lib/UdpSocket.h \
+    ../lib/SocketIO.h \
+    ../lib/DataSource.h \
     version.h \
-    ../include/JsonSerializable.h \
+    ../lib/JsonSerializable.h \
     BaseServiceStateWidget.h \
     DataAquisitionServiceWidget.h \
     ConfigurationServiceWidget.h \
-    ../include/SimpleThread.h \
-    ../include/XmlHelper.h \
-    ../include/Queue.h \
-    ../include/DataProtocols.h \
-    ../include/WUtils.h \
-    ../include/Crc.h \
+    ../lib/SimpleThread.h \
+    ../lib/XmlHelper.h \
+    ../lib/Queue.h \
+    ../lib/DataProtocols.h \
+    ../lib/WUtils.h \
+    ../lib/Crc.h \
     TcpAppDataClient.h \
-    ../include/Tcp.h \
+    ../lib/Tcp.h \
     ../Proto/network.pb.h \
-    ../include/Signal.h \
-    ../include/PropertyObject.h \
+    ../lib/Signal.h \
+    ../lib/PropertyObject.h \
     ../Proto/serialization.pb.h \
-    ../include/AppSignalState.h \
-    ../include/DeviceObject.h \
-    ../include/Types.h \
-    ../include/DbStruct.h \
-    ../include/ProtoSerialization.h
+    ../lib/AppSignalState.h \
+    ../lib/DeviceObject.h \
+    ../lib/Types.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtoSerialization.h
 
 FORMS    +=
 

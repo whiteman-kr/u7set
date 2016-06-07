@@ -1,7 +1,7 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "./Builder/OptoModule.h"
 
 namespace Hardware

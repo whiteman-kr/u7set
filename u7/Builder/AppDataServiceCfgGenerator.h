@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../include/DeviceHelper.h"
-#include "../include/XmlHelper.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/XmlHelper.h"
 
 namespace Builder
 {

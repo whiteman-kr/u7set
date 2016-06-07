@@ -1,6 +1,6 @@
 #include <QtEndian>
 #include <QString>
-#include "../include/Crc.h"
+#include "../lib/Crc.h"
 #include <vector>
 #include <cassert>
 

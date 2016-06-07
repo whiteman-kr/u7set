@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../include/Tcp.h"
+#include "../lib/Tcp.h"
 #include <QFile>
 #include <QDir>
-#include "../include/Md5Hash.h"
+#include "../lib/Md5Hash.h"
 
 
 namespace Tcp

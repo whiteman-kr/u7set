@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "../include/DeviceObject.h"
-#include "../include/PropertyEditor.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/PropertyEditor.h"
 
 class DbController;
 

@@ -92,19 +92,19 @@ HEADERS += VFrame30Lib_global.h \
     Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
-	../include/TypesAndEnums.h \
+	../lib/TypesAndEnums.h \
     FrameHistoryItem.h \
 	Configuration.h \
     VFrame30.h \
-    ../include/StreamedData.h \
-    ../include/ProtoSerialization.h \
-    ../include/CUtils.h \
+    ../lib/StreamedData.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/CUtils.h \
 	MonitorSchema.h \
     version.h \
-    ../include/DbStruct.h \
+    ../lib/DbStruct.h \
     Afb.h \
-    ../include/DebugInstCounter.h \
-	../include/PropertyObject.h \
+    ../lib/DebugInstCounter.h \
+	../lib/PropertyObject.h \
     Schema.h \
     LogicSchema.h \
     WiringSchema.h \
@@ -121,13 +121,13 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemSignal.h \
     BaseSchemaWidget.h \
     SchemaPoint.h \
-    ../include/Types.h \
+    ../lib/Types.h \
     PropertyNames.h \
-    ../include/AppSignalState.h \
-    ../include/AppSignalManager.h \
-    ../include/Signal.h \
-    ../include/XmlHelper.h \
-    ../include/DeviceObject.h
+    ../lib/AppSignalState.h \
+    ../lib/AppSignalManager.h \
+    ../lib/Signal.h \
+    ../lib/XmlHelper.h \
+    ../lib/DeviceObject.h
 
 SOURCES += \
     Settings.cpp \

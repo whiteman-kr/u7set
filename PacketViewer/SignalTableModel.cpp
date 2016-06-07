@@ -1,7 +1,7 @@
 #include "SignalTableModel.h"
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 #include "PacketBufferTableModel.h"
-#include "../include/DataProtocols.h"
+#include "../lib/DataProtocols.h"
 
 const int C_STR_ID = 0,
 C_DESCRIPTION = 1,

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/TcpFileTransfer.h"
-#include "../include/OrderedHash.h"
-#include "../include/BuildInfo.h"
+#include "../lib/TcpFileTransfer.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/BuildInfo.h"
 
 
 

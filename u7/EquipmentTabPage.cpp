@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "EquipmentTabPage.h"
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 #include "Settings.h"
 #include "CheckInDialog.h"
 #include "Subsystem.h"

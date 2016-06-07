@@ -4,8 +4,8 @@
 #include <QAbstractItemModel>
 #include <memory>
 #include <unordered_map>
-#include "../include/Signal.h"
-#include "../include/DataProtocols.h"
+#include "../lib/Signal.h"
+#include "../lib/DataProtocols.h"
 
 class QUdpSocket;
 class PacketSourceModel;

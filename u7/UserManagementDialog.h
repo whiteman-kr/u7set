@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "../include/DbStruct.h"
+#include "../lib/DbStruct.h"
 
 namespace Ui {
 	class UserManagementDialog;

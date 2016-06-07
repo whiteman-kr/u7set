@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../include/Service.h"
-#include "../include/DataSource.h"
-#include "../include/Signal.h"
-#include "../include/CfgServerLoader.h"
-#include "../include/ServiceSettings.h"
-#include "../include/DataChannel.h"
+#include "../lib/Service.h"
+#include "../lib/DataSource.h"
+#include "../lib/Signal.h"
+#include "../lib/CfgServerLoader.h"
+#include "../lib/ServiceSettings.h"
+#include "../lib/DataChannel.h"
 
 namespace Hardware
 {

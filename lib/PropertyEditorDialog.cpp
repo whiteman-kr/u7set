@@ -2,8 +2,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
-#include "../include/PropertyEditor.h"
-#include "../include/PropertyEditorDialog.h"
+#include "../lib/PropertyEditor.h"
+#include "../lib/PropertyEditorDialog.h"
 
 PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget* parent)
     :QDialog(parent)

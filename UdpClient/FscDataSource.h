@@ -4,7 +4,7 @@
 #include <QUdpSocket>
 #include <QThread>
 #include <QTimer>
-#include "../include/SocketIO.h"
+#include "../lib/SocketIO.h"
 
 
 class FscDataSourceWorker : public QObject

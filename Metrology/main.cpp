@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 #include "Options.h"
 
-#include "../include/ProtoSerialization.h"
+#include "../lib/ProtoSerialization.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

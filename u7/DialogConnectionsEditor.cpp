@@ -1,6 +1,6 @@
 #include "DialogConnectionsEditor.h"
 #include "ui_DialogConnectionsEditor.h"
-#include "../include/PropertyEditorDialog.h"
+#include "../lib/PropertyEditorDialog.h"
 #include "Settings.h"
 
 //

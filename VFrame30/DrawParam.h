@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "FontParam.h"
-#include "../include/TypesAndEnums.h"
+#include "../lib/TypesAndEnums.h"
 
 class QPainter;
 class QPaintDevice;

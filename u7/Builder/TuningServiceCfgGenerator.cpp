@@ -1,4 +1,4 @@
-#include "../include/ServiceSettings.h"
+#include "../lib/ServiceSettings.h"
 #include "../u7/Subsystem.h"
 #include "TuningServiceCfgGenerator.h"
 

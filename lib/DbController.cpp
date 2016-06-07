@@ -1,4 +1,4 @@
-#include "../include/DbController.h"
+#include "../lib/DbController.h"
 
 #include <QDebug>
 

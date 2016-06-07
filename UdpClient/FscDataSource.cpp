@@ -1,5 +1,5 @@
 #include "FscDataSource.h"
-#include "../include/FscDataFormat.h"
+#include "../lib/FscDataFormat.h"
 
 
 FscDataSourceWorker::FscDataSourceWorker(HostAddressPort hostAddressPort, QHostAddress sourceAddress, quint32 interval, quint32 partCount, QObject *parent) :

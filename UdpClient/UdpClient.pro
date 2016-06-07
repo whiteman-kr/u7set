@@ -81,23 +81,23 @@ SOURCES += \
 
 
 HEADERS  += MainWindow.h \
-        ../include/SocketIO.h \
-        ../include/UdpSocket.h \
-	../include/Service.h \
-    ../include/CircularLogger.h \
-    ../include/DataSource.h \
+        ../lib/SocketIO.h \
+        ../lib/UdpSocket.h \
+	../lib/Service.h \
+    ../lib/CircularLogger.h \
+    ../lib/DataSource.h \
 	FscDataSource.h \
-	../include/FscDataFormat.h \
+	../lib/FscDataFormat.h \
     version.h \
-    ../include/ProtoUdp.h \
-    ../include/SimpleThread.h \
-    ../include/Tcp.h \
-    ../include/JsonSerializable.h \
-    ../include/XmlHelper.h \
-    ../include/Queue.h \
-    ../include/DataProtocols.h \
-    ../include/WUtils.h \
-    ../include/Crc.h
+    ../lib/ProtoUdp.h \
+    ../lib/SimpleThread.h \
+    ../lib/Tcp.h \
+    ../lib/JsonSerializable.h \
+    ../lib/XmlHelper.h \
+    ../lib/Queue.h \
+    ../lib/DataProtocols.h \
+    ../lib/WUtils.h \
+    ../lib/Crc.h
 
 include(../qtservice/src/qtservice.pri)
 

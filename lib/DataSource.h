@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QObject>
-#include "../include/SocketIO.h"
-#include "../include/Queue.h"
-#include "../include/XmlHelper.h"
-#include "../include/DataProtocols.h"
-#include "../include/DeviceObject.h"
-#include "../include/AppSignalState.h"
+#include "../lib/SocketIO.h"
+#include "../lib/Queue.h"
+#include "../lib/XmlHelper.h"
+#include "../lib/DataProtocols.h"
+#include "../lib/DeviceObject.h"
+#include "../lib/AppSignalState.h"
 #include "../Proto/network.pb.h"
 
 

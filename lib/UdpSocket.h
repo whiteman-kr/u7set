@@ -11,8 +11,8 @@
 #include <QQueue>
 #include <QDateTime>
 
-#include "../include/SocketIO.h"
-#include "../include/SimpleThread.h"
+#include "../lib/SocketIO.h"
+#include "../lib/SimpleThread.h"
 
 
 class UdpClientSocket;

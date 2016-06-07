@@ -1,5 +1,5 @@
 #include "AppDataProcessingThread.h"
-#include "../include/WUtils.h"
+#include "../lib/WUtils.h"
 
 
 // -------------------------------------------------------------------------------

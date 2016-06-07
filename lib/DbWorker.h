@@ -4,7 +4,7 @@
 #include <QMutex>
 
 #include "DbStruct.h"
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 
 #define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 

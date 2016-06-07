@@ -1,4 +1,4 @@
-#include "../include/PropertyEditorOld.h"
+#include "../lib/PropertyEditorOld.h"
 #include "Settings.h"
 //#include "PropertyEditor.h"
 

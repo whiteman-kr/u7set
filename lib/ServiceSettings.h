@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/DeviceHelper.h"
-#include "../include/XmlHelper.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/XmlHelper.h"
 #include "../u7/Builder/IssueLogger.h"
 
 

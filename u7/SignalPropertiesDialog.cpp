@@ -3,10 +3,10 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QSettings>
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 #include "SignalsTabPage.h"
-#include "../include/PropertyEditor.h"
-#include "../include/DbController.h"
+#include "../lib/PropertyEditor.h"
+#include "../lib/DbController.h"
 #include "Stable.h"
 
 

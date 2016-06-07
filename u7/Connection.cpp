@@ -1,7 +1,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-#include "../include/CUtils.h"
+#include "../lib/CUtils.h"
 
 #include "Connection.h"
 

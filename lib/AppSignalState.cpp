@@ -1,4 +1,4 @@
-#include "../include/AppSignalState.h"
+#include "../lib/AppSignalState.h"
 
 
 void AppSignalState::setProtoAppSignalState(Hash hash, Proto::AppSignalState* protoState)

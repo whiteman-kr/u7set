@@ -1,4 +1,4 @@
-#include "../include/Service.h"
+#include "../lib/Service.h"
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
 	#include <vld.h>		// Enable Visual Leak Detector

@@ -1,6 +1,6 @@
 #include <QtEndian>
-#include "../include/DataProtocols.h"
-#include "../include/WUtils.h"
+#include "../lib/DataProtocols.h"
+#include "../lib/WUtils.h"
 
 
 void RupTimeStamp::reverseBytes()

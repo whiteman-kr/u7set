@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/UdpSocket.h"
+#include "../lib/UdpSocket.h"
 
 class ClientSocket : public UdpClientSocket
 {

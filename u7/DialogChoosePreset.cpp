@@ -1,7 +1,7 @@
 #include "DialogChoosePreset.h"
 #include "ui_DialogChoosePreset.h"
 
-#include "../include/DeviceObject.h"
+#include "../lib/DeviceObject.h"
 
 int DialogChoosePreset::m_lastSortColumn = 0;
 QString DialogChoosePreset::m_lastSelectedPreset;

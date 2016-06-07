@@ -3,8 +3,8 @@
 
 #include <QAbstractTableModel>
 #include <QHostAddress>
-#include "../include/UdpSocket.h"
-#include "../include/Service.h"
+#include "../lib/UdpSocket.h"
+#include "../lib/Service.h"
 
 
 

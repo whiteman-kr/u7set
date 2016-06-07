@@ -1,4 +1,4 @@
-#include "../include/Signal.h"
+#include "../lib/Signal.h"
 #include <QXmlStreamAttributes>
 #include <QFile>
 

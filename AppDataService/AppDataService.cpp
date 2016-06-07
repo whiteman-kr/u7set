@@ -1,6 +1,6 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
-#include "../include/DeviceObject.h"
+#include "../lib/DeviceObject.h"
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 
