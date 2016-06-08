@@ -111,12 +111,6 @@ message DataSourceState
 }
 
 
-message GetDataSourcesStatesRequest
-{
-    repeated uint64 dataSourceIDs = 1;
-}
-
-
 message GetDataSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];

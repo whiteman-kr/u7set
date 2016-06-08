@@ -80,7 +80,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		break;
 
 	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesRequest(requestData, requestDataSize);
+		onGetDataSourcesStatesRequest();
 		break;
 
 	case ADS_GET_UNITS:
@@ -224,7 +224,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		AppSignalState appSignalState;
 
-		result = getConnectionState(hash, appSignalState);
+		result = getAppSignalStateState(hash, appSignalState);
 
 		if (result == false)
 		{
@@ -281,9 +281,9 @@ const UnitList& TcpAppDataServer::units() const
 }
 
 
-bool TcpAppDataServer::getConnectionState(Hash hash, AppSignalState& state)
+bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
 {
-	return m_thread->getState(hash, state);
+	return m_thread->getAppSignalState(hash, state);
 }
 
 
@@ -305,9 +305,22 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 }
 
 
-void TcpAppDataServer::onGetDataSourcesStatesRequest(const char* requestData, quint32 requestDataSize)
+void TcpAppDataServer::onGetDataSourcesStatesRequest()
 {
+	m_getDataSourcesStatesReply.Clear();
 
+	const AppDataSources& dataSources = appDataSources();
+
+
+	for (const DataSource* source : dataSources)
+	{
+		Network::DataSourceState* state = m_getDataSourcesStatesReply.add_datasourcesstates();
+		source->getDataSourceState(state);
+	}
+
+	m_getDataSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+
+	sendReply(m_getDataSourcesStatesReply);
 }
 
 
@@ -380,7 +393,7 @@ void TcpAppDataServerThread::buildAppSignalIDs()
 }
 
 
-bool TcpAppDataServerThread::getState(Hash hash, AppSignalState& state)
+bool TcpAppDataServerThread::getAppSignalState(Hash hash, AppSignalState& state)
 {
 	return m_appSignalStates.getState(hash, state);
 }
