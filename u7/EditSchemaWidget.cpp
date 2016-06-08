@@ -2247,6 +2247,19 @@ void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 	event->ignore();
 }
 
+void EditSchemaWidget::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	setMouseState(MouseState::None);
+
+	if (selectedItems().empty() == false)
+	{
+		properties();
+	}
+
+	event->accept();
+	return;
+}
+
 void EditSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	BaseSchemaWidget::mouseMoveEvent(event);
