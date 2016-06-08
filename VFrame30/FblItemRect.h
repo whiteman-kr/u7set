@@ -10,6 +10,7 @@ namespace VFrame30
 	class SchemaItemOutput;
 	class SchemaItemConst;
 	class SchemaItemAfb;
+	class SchemaItemInOut;
 }
 
 namespace VFrame30
@@ -27,7 +28,7 @@ namespace VFrame30
 		FblItemRect(SchemaUnit itemunit);
 	public:
 		virtual ~FblItemRect(void);
-		
+
 		// Serialization
 		//
 	protected:
@@ -77,6 +78,7 @@ namespace VFrame30
 
 		bool isInputSignalElement() const;
 		bool isOutputSignalElement() const;
+		bool isInOutSignalElement() const;
 		bool isSignalElement() const;
 		bool isConstElement() const;
 		bool isAfbElement() const;
@@ -96,6 +98,9 @@ namespace VFrame30
 		SchemaItemAfb* toAfbElement();
 		const VFrame30::SchemaItemAfb* toAfbElement() const;
 
+		VFrame30::SchemaItemInOut* toInOutSignalElement();
+		const VFrame30::SchemaItemInOut* toInOutSignalElement() const;
+
 		double weight() const;
 		void setWeight(double weight);
 
@@ -109,7 +114,7 @@ namespace VFrame30
 		void setTextColor(QRgb color);
 
 		DECLARE_FONT_PROPERTIES(Font);
-		
+
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.
 		// We need these variables in case we call functions and do not have schema pointer.

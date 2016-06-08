@@ -169,7 +169,7 @@ namespace VFrame30
 				outputIndex ++;
 			}
 		}
-				
+
 		return;
 	}
 
@@ -220,7 +220,7 @@ namespace VFrame30
 
 			index ++;
 		}
-		
+
 		// The point is not found
 		//
 		assert(false);
@@ -298,7 +298,7 @@ namespace VFrame30
 		{
 			dpiX = pPaintDevice->logicalDpiX();
 		}
-		
+
 		// Correct rect width
 		//
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
@@ -319,11 +319,11 @@ namespace VFrame30
 
 		//
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight);		// Don't use getter! 
+		pen.setWidthF(m_weight);		// Don't use getter!
 		p->setPen(pen);
 
 		p->drawRect(r);
-		
+
 		// Draw in/outs
 		//
 		if (inputsCount() == 0 && outputsCount() == 0)
@@ -337,7 +337,7 @@ namespace VFrame30
 
 		QPen redPen(QColor(0xE0B00000));
 		redPen.setWidthF(m_weight);		// Don't use getter!
-		
+
 		for (const AfbPin& input : inputPins)
 		{
 			// Get pin position
@@ -443,7 +443,7 @@ namespace VFrame30
 								 pinTextRect,
 								 Qt::TextDontClip | Qt::AlignVCenter | Qt::AlignLeft);
 		}
-		
+
 		return;
 	}
 
@@ -616,9 +616,14 @@ namespace VFrame30
 		return ptr != nullptr;
 	}
 
+	bool FblItemRect::isInOutSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemInOut*>(this) != nullptr;
+	}
+
 	bool FblItemRect::isSignalElement() const
 	{
-		return isInputSignalElement() || isOutputSignalElement();
+		return dynamic_cast<const VFrame30::SchemaItemSignal*>(this) != nullptr;
 	}
 
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
@@ -670,7 +675,17 @@ namespace VFrame30
 	{
 		return dynamic_cast<const VFrame30::SchemaItemAfb*>(this);
 	}
-	
+
+	VFrame30::SchemaItemInOut* FblItemRect::toInOutSignalElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemInOut*>(this);
+	}
+
+	const VFrame30::SchemaItemInOut* FblItemRect::toInOutSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemInOut*>(this);
+	}
+
 	// Weight propertie
 	//
 	double FblItemRect::weight() const
