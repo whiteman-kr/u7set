@@ -26,6 +26,7 @@ private slots:
 	void getWorkcopyTest();
 	void setWorkcopyTest();
 	void getSpecificCopyTest();
+	void checkInTreeTest();
 	void cleanupTestCase();
 
 private:

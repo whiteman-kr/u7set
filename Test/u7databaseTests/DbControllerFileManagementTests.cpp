@@ -2,6 +2,7 @@
 #include <QSql>
 #include <QSqlError>
 #include <QFile>
+#include <QDebug>
 
 DbControllerFileTests::DbControllerFileTests()
 {
@@ -1526,6 +1527,130 @@ void DbControllerFileTests::getSpecificCopyTest()
 	}
 
 	db.close();
+}
+
+void DbControllerFileTests::checkInTreeTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo firstParentFile, firstChildFile, secondParentFile, secondChildFile;
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FirstParentForCheckInTreeTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	firstParentFile.setFileName(fileName);
+	firstParentFile.setSize(instanceQuery.value("Size").toInt());
+	firstParentFile.setUserId(1);
+	firstParentFile.setParentId(1);
+	firstParentFile.setDetails(instanceQuery.value("details").toString());
+	firstParentFile.setFileId(query.value("fileId").toInt());
+
+	fileName = "FirstChildForCheckInTreeTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(firstParentFile.fileId()));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	firstChildFile.setFileName(fileName);
+	firstChildFile.setSize(instanceQuery.value("Size").toInt());
+	firstChildFile.setUserId(1);
+	firstChildFile.setParentId(1);
+	firstChildFile.setDetails(instanceQuery.value("details").toString());
+	firstChildFile.setFileId(query.value("fileId").toInt());
+
+	fileName = "SecondParentForCheckInTreeTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondParentFile.setFileName(fileName);
+	secondParentFile.setSize(instanceQuery.value("Size").toInt());
+	secondParentFile.setUserId(1);
+	secondParentFile.setParentId(1);
+	secondParentFile.setDetails(instanceQuery.value("details").toString());
+	secondParentFile.setFileId(query.value("fileId").toInt());
+
+	fileName = "SecondChildForCheckInTreeTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(secondParentFile.fileId()));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondChildFile.setFileName(fileName);
+	secondChildFile.setSize(instanceQuery.value("Size").toInt());
+	secondChildFile.setUserId(1);
+	secondChildFile.setParentId(1);
+	secondChildFile.setDetails(instanceQuery.value("details").toString());
+	secondChildFile.setFileId(query.value("fileId").toInt());
+
+	std::vector<DbFileInfo> files;
+
+	files.push_back(firstParentFile);
+	files.push_back(secondParentFile);
+
+	std::vector<DbFileInfo> out;
+
+	QString comment = "Check for checkInTree";
+
+	ok = m_dbController->checkInTree(files, &out, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	for (DbFileInfo buff : out)
+	{
+		ok = query.exec(QString("SELECT * FROM get_file_state(%1)").arg(buff.fileId()));
+		QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2 (query.value("checkedout").toBool() == false, qPrintable ("Error: file was not checked in"));
+	}
 }
 
 void DbControllerFileTests::cleanupTestCase()
