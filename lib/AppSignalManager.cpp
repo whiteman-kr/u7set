@@ -34,13 +34,28 @@ void AppSignalManager::addSignal(const Signal& signal)
 	return;
 }
 
-bool AppSignalManager::signal(const QString& appSignalId, Signal* out)
+std::vector<Signal> AppSignalManager::signalList() const
+{
+	QMutexLocker l(&m_paramMutex);
+
+	std::vector<Signal> result;
+	result.reserve(m_signals.size());
+
+	for (auto& s : m_signals)
+	{
+		result.push_back(s.second);
+	}
+
+	return result;
+}
+
+bool AppSignalManager::signal(const QString& appSignalId, Signal* out) const
 {
 	Hash h = ::calcHash(appSignalId);
 	return signal(h, out);
 }
 
-bool AppSignalManager::signal(Hash signalHash, Signal* out)
+bool AppSignalManager::signal(Hash signalHash, Signal* out) const
 {
 	if (out == nullptr)
 	{

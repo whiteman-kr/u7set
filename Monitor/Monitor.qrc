@@ -9,5 +9,6 @@
         <file>Images/Settings.svg</file>
         <file>Images/Close.svg</file>
         <file>Images/About.svg</file>
+        <file>Images/FindSignal.svg</file>
     </qresource>
 </RCC>
