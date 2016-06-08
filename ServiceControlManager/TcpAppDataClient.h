@@ -18,10 +18,13 @@ private:
 	QVector<Signal> m_signalParams;
 	QVector<AppSignalState> m_states;
 	QHash<Hash, int> m_hash2Index;
+	UnitList m_unitList;
 
 	// reused protobuf messages
 	//
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
+
+	Network::GetDataSourcesStatesReply m_getDataSourcesStatesReply;
 
 	Network::GetSignalListStartReply m_getSignalListStartReply;
 
@@ -33,6 +36,8 @@ private:
 
 	Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	Network::GetAppSignalStateReply m_getSignalStateReply;
+
+	Network::GetUnitsReply m_getUnitsReply;
 
 	//
 
@@ -59,6 +64,8 @@ private:
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
+
+	void onGetUnitsReply(const char* replyData, quint32 replyDataSize);
 
 	//
 
@@ -91,4 +98,5 @@ public:
 	QList<DataSource*> dataSources() { return m_dataSources.values(); }
 	const QVector<Signal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
+	QString unit(int id) { return m_unitList.contains(id) ? m_unitList.value(id) : tr("Unknown unit ID = %1").arg(id); }
 };

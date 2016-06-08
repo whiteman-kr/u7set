@@ -29,13 +29,15 @@ const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSo
 const int SC_ID = 0,
 SC_CAPTION = 1,
 SC_VALUE = 2,
-SC_UNIT = 3;
+SC_VALID = 3,
+SC_UNIT = 4;
 
 const char* const signalColumnStr[] =
 {
 	"ID",
 	"Caption",
 	"Value",
+	"Valid",
 	"Unit"
 };
 
@@ -157,8 +159,9 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 	m_signalsView->setModel(m_signalStateModel);
 
 	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
+	connect(m_clientSocket, &TcpAppDataClient::appSignalsStateUpdated, m_signalStateModel, &SignalStateModel::updateStateColumns);
 	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, this, &DataAquisitionServiceWidget::updateSignalInfo);
-	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
+	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
 
 	addTab(m_signalsView, tr("Signals"));
 
@@ -186,7 +189,9 @@ void DataAquisitionServiceWidget::updateSourceInfo()
 
 void DataAquisitionServiceWidget::updateSignalInfo()
 {
-	//m_signalsView->resizeColumnToContents();
+	m_signalsView->resizeColumnToContents(SC_ID);
+	m_signalsView->resizeColumnToContents(SC_CAPTION);
+	m_signalsView->resizeColumnToContents(SC_UNIT);
 }
 
 void DataAquisitionServiceWidget::checkVisibility()
@@ -245,7 +250,16 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 				const AppSignalState& ass = m_clientSocket->signalStates()[row];
 				return ass.value;
 			}
-			case SC_UNIT: return s.unitID();
+			case SC_VALID:
+			{
+				if (row < 0 || row > m_clientSocket->signalStates().count())
+				{
+					return QVariant();
+				}
+				const AppSignalState& ass = m_clientSocket->signalStates()[row];
+				return ass.flags.valid ? tr("Yes") : tr("No");
+			}
+			case SC_UNIT: return m_clientSocket->unit(s.unitID());
 			default:
 				assert(false);
 		}
@@ -279,4 +293,9 @@ void SignalStateModel::reloadList()
 {
 	beginResetModel();
 	endResetModel();
+}
+
+void SignalStateModel::updateStateColumns()
+{
+	emit dataChanged(index(0, SC_VALUE), index(rowCount() - 1, SC_VALID));
 }
