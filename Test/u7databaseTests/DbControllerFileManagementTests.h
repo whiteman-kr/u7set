@@ -1,6 +1,6 @@
 #pragma once
 #include <QTest>
-#include "../../include/DbController.h"
+#include "../../lib/DbController.h"
 
 class DbControllerFileTests : public QObject
 {
@@ -25,6 +25,9 @@ private slots:
 	void getLatestTreeVersionTest();
 	void getWorkcopyTest();
 	void setWorkcopyTest();
+	void getSpecificCopyTest();
+	void checkInTreeTest();
+	void undoChangestest();
 	void cleanupTestCase();
 
 private:
