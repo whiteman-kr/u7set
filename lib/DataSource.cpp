@@ -511,3 +511,18 @@ bool DataSource::getDataSourceState(Network::DataSourceState* protoState) const
 
 	return true;
 }
+
+bool DataSource::setDataSourceState(const Network::DataSourceState& protoState)
+{
+	m_id = protoState.id();
+	m_uptime = protoState.uptime();
+	m_receivedDataSize = protoState.receiveddatasize();
+	m_dataReceivingRate = protoState.datareceivingrate();
+	m_receivedFramesCount = protoState.receivedframescount();
+	m_dataProcessingEnabled = protoState.processingenabled();
+	m_receivedPacketCount = protoState.processedpacketcount();
+	m_errorProtocolVersion = protoState.errorprotocolversion();
+	m_errorFramesQuantity = protoState.errorframesquantity();
+	m_errorFrameNo = protoState.errorframeno();
+	m_lostedPackets = protoState.lostedpackets();
+}

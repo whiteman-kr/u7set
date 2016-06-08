@@ -133,6 +133,11 @@ void DataSourcesStateModel::reloadList()
 	endResetModel();
 }
 
+void DataSourcesStateModel::updateStateColumns()
+{
+	emit dataChanged(index(0, DSC_STATE), index(rowCount() - 1, DSC_SPEED));
+}
+
 
 DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
 	BaseServiceStateWidget(ip, portIndex, parent)

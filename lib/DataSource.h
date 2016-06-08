@@ -259,4 +259,5 @@ public:
 	bool setDataSourceInfo(const Network::DataSourceInfo& protoInfo);
 
 	bool getDataSourceState(Network::DataSourceState* protoState) const;
+	bool setDataSourceState(const Network::DataSourceState& protoState);
 };

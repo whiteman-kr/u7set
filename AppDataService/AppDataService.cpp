@@ -46,6 +46,10 @@ void AppDataServiceWorker::runServiceInfoThread()
 
 void AppDataServiceWorker::stopServiceInfoThread()
 {
+	if (m_serviceInfoThread == nullptr)
+	{
+		return;
+	}
 	m_serviceInfoThread->quitAndWait();
 	delete m_serviceInfoThread;
 }
