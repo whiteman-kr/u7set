@@ -572,6 +572,7 @@ private:
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addInputSignalAction = nullptr;
 		QAction* m_addOutputSignalAction = nullptr;
+		QAction* m_addInOutSignalAction = nullptr;
 		QAction* m_addConstantAction = nullptr;
 		QAction* m_addFblElementAction = nullptr;
 		QAction* m_addLinkAction = nullptr;

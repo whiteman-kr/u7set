@@ -65,8 +65,8 @@ namespace VFrame30
 	public:
 		Q_INVOKABLE void adjustHeight();
 
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Properties and Data
 		//

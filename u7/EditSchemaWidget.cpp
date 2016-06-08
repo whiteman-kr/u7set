@@ -1721,6 +1721,16 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
+	m_addInOutSignalAction = new QAction(tr("In/Out"), this);
+	m_addInOutSignalAction->setEnabled(true);
+	m_addInOutSignalAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
+	connect(m_addInOutSignalAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemInOut>(schema()->unit());
+				addItem(item);
+			});
+
 	m_addConstantAction = new QAction(tr("Constant"), this);
 	m_addConstantAction->setEnabled(true);
 	m_addConstantAction->setIcon(QIcon(":/Images/Images/SchemaConstant.svg"));
@@ -2044,6 +2054,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addLinkAction);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
+		m_addMenu->addAction(m_addInOutSignalAction);
 		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
 		m_addMenu->addAction(m_addTransmitter);

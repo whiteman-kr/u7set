@@ -20,5 +20,6 @@
         <file>Images/logo.png</file>
         <file>Images/SchemaReceiver.svg</file>
         <file>Images/SchemaTransmitter.svg</file>
+        <file>Images/SchemaInOutSignal.svg</file>
     </qresource>
 </RCC>

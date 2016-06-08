@@ -51,6 +51,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemAfb>();
 		SchemaItemFactory.Register<SchemaItemInput>();
 		SchemaItemFactory.Register<SchemaItemOutput>();
+		SchemaItemFactory.Register<SchemaItemInOut>();
 		SchemaItemFactory.Register<SchemaItemConst>();
 		SchemaItemFactory.Register<SchemaItemTransmitter>();
 		SchemaItemFactory.Register<SchemaItemReceiver>();
