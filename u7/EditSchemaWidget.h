@@ -568,6 +568,7 @@ private:
 		QAction* m_addLineAction = nullptr;
 		QAction* m_addRectAction = nullptr;
 		QAction* m_addPathAction = nullptr;
+		QAction* m_addTextAction = nullptr;
 		// ------------------------------
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addInputSignalAction = nullptr;

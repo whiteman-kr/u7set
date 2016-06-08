@@ -1698,6 +1698,19 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemRect>(schema()->unit()));
 			});
 
+	m_addTextAction = new QAction(tr("Text"), this);
+	m_addTextAction->setEnabled(true);
+	m_addTextAction->setIcon(QIcon(":/Images/Images/SchemaText.svg"));
+	connect(m_addTextAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto text = std::make_shared<VFrame30::SchemaItemRect>(schema()->unit());
+				text->setText(QLatin1String("Text"));
+				text->setFill(false);
+				text->setDrawRect(false);
+				addItem(text);
+			});
+
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
 
@@ -2049,6 +2062,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addLineAction);
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
+		m_addMenu->addAction(m_addTextAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 		m_addMenu->addAction(m_addLinkAction);

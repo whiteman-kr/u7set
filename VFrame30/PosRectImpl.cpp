@@ -316,6 +316,16 @@ namespace VFrame30
 			return result;
 		}
 
+		if (itemRect.isEmpty() == true)
+		{
+			bool result = false;
+
+			result |= CUtils::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x() + itemRect.width(), itemRect.y(), detRect);
+			result |= CUtils::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x(), itemRect.y() + itemRect.height(), detRect);
+
+			return result;
+		}
+
 		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 

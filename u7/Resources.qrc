@@ -21,5 +21,6 @@
         <file>Images/SchemaReceiver.svg</file>
         <file>Images/SchemaTransmitter.svg</file>
         <file>Images/SchemaInOutSignal.svg</file>
+        <file>Images/SchemaText.svg</file>
     </qresource>
 </RCC>
