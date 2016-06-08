@@ -63,31 +63,31 @@ HEADERS += \
     FileTests.h \
     OtherTests.h \
     SignalTests.h \
-    ../../include/DbController.h \
-    ../../include/DbWorker.h \
-    ../../include/DbStruct.h \
-    ../../include/DeviceObject.h \
-    ../../include/Factory.h \
-    ../../include/DbProgress.h \
-    ../../include/Signal.h \
-    ../../include/ProtoSerialization.h \
-    ../../include/DbProgressDialog.h \
-    ../../include/DataSource.h \
-    ../../include/SocketIO.h \
-    ../../include/PropertyObject.h \
-    ../../include/Types.h \
+    ../../lib/DbController.h \
+    ../../lib/DbWorker.h \
+    ../../lib/DbStruct.h \
+    ../../lib/DeviceObject.h \
+    ../../lib/Factory.h \
+    ../../lib/DbProgress.h \
+    ../../lib/Signal.h \
+    ../../lib/ProtoSerialization.h \
+    ../../lib/DbProgressDialog.h \
+    ../../lib/DataSource.h \
+    ../../lib/SocketIO.h \
+    ../../lib/PropertyObject.h \
+    ../../lib/Types.h \
     MultiThreadFileTest.h \
     MultiThreadSignalTests.h \
     PropertyObjectTests.h \
     ProjectPropertyTests.h \
-    ../../include/XmlHelper.h \
+    ../../lib/XmlHelper.h \
     DbControllerProjectManagementTests.h \
-    ../../include/Queue.h \
+    ../../lib/Queue.h \
     DbControllerUserManagementTests.h \
     DbControllerFileManagementTests.h \
-    ../../include/WUtils.h \
-    ../../include/DataProtocols.h \
-    ../../include/Crc.h
+    ../../lib/WUtils.h \
+    ../../lib/DataProtocols.h \
+    ../../lib/Crc.h
 
 #c++11 support for GCC
 #

@@ -1395,6 +1395,139 @@ void DbControllerFileTests::setWorkcopyTest()
 	db.close();
 }
 
+void DbControllerFileTests::getSpecificCopyTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	DbFileInfo file, secondFile;
+
+	QSqlQuery query, instanceQuery;
+
+	QString fileName = "FirstFileForGetSpecificCopyTestOfDbController";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file.setFileName(fileName);
+	file.setSize(instanceQuery.value("Size").toInt());
+	file.setUserId(1);
+	file.setParentId(1);
+	file.setDetails(instanceQuery.value("details").toString());
+	file.setFileId(query.value("fileId").toInt());
+
+	QString comment = "First checkIn for file from getSpecificCopy of dbController test";
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	int lastChangesetId = 0;
+
+	ok = m_dbController->lastChangesetId(&lastChangesetId);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = comment.replace("First", "Second");
+
+	ok = m_dbController->checkIn(file, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	std::shared_ptr<DbFile> result(new DbFile);
+
+	ok = m_dbController->getSpecificCopy(file, lastChangesetId, &result, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM get_specific_copy(1, %1, %2)").arg(fileId).arg(lastChangesetId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("changesetId").toInt() == result.get()->changeset(), qPrintable ("Error: Wrong changeset has been returned"));
+	QVERIFY2(query.value("data").toString() == result.get()->data(), qPrintable ("Error: Wrong data in changeset"));
+
+
+	fileName = "SecondFileForGetSpecificCopyTestOfDbController";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	secondFile.setFileName(fileName);
+	secondFile.setSize(instanceQuery.value("Size").toInt());
+	secondFile.setUserId(1);
+	secondFile.setParentId(1);
+	secondFile.setDetails(instanceQuery.value("details").toString());
+	secondFile.setFileId(query.value("fileId").toInt());
+
+	comment = "Checking in two files for getSpecificCopy of dbController test";
+
+	ok = m_dbController->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	std::vector<DbFileInfo> files;
+
+	files.push_back(file);
+	files.push_back(secondFile);
+
+	ok = m_dbController->checkIn(files, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->lastChangesetId(&lastChangesetId);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(secondFile, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	comment = "Just for test check out second file in getSpecificCopy of dbController test";
+
+	ok = m_dbController->checkIn(secondFile, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	std::vector<std::shared_ptr<DbFile>> out;
+
+	ok = m_dbController->getSpecificCopy(files, lastChangesetId, &out, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	for (std::shared_ptr<DbFile> buff : out)
+	{
+		ok = query.exec(QString("SELECT * FROM get_specific_copy(1, %2, %3)").arg(buff.get()->fileId()).arg(lastChangesetId));
+		QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2(query.value("changesetId").toInt() == buff.get()->changeset(), qPrintable ("Error: Wrong changeset has been returned"));
+		QVERIFY2(query.value("data").toString() == buff.get()->data(), qPrintable ("Error: Wrong data in changeset"));
+	}
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
