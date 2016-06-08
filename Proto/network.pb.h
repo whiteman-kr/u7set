@@ -46,7 +46,6 @@ class DataSourceInfo;
 class GetDataSourcesInfoRequest;
 class GetDataSourcesInfoReply;
 class DataSourceState;
-class GetDataSourcesStatesRequest;
 class GetDataSourcesStatesReply;
 class Unit;
 class GetUnitsReply;
@@ -1371,91 +1370,6 @@ class DataSourceState : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DataSourceState* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class GetDataSourcesStatesRequest : public ::google::protobuf::Message {
- public:
-  GetDataSourcesStatesRequest();
-  virtual ~GetDataSourcesStatesRequest();
-
-  GetDataSourcesStatesRequest(const GetDataSourcesStatesRequest& from);
-
-  inline GetDataSourcesStatesRequest& operator=(const GetDataSourcesStatesRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const GetDataSourcesStatesRequest& default_instance();
-
-  void Swap(GetDataSourcesStatesRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  GetDataSourcesStatesRequest* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetDataSourcesStatesRequest& from);
-  void MergeFrom(const GetDataSourcesStatesRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // repeated uint64 dataSourceIDs = 1;
-  inline int datasourceids_size() const;
-  inline void clear_datasourceids();
-  static const int kDataSourceIDsFieldNumber = 1;
-  inline ::google::protobuf::uint64 datasourceids(int index) const;
-  inline void set_datasourceids(int index, ::google::protobuf::uint64 value);
-  inline void add_datasourceids(::google::protobuf::uint64 value);
-  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
-      datasourceids() const;
-  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
-      mutable_datasourceids();
-
-  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesStatesRequest)
- private:
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > datasourceids_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static GetDataSourcesStatesRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2972,35 +2886,6 @@ inline ::google::protobuf::int64 DataSourceState::lostedpackets() const {
 inline void DataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
   set_has_lostedpackets();
   lostedpackets_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// GetDataSourcesStatesRequest
-
-// repeated uint64 dataSourceIDs = 1;
-inline int GetDataSourcesStatesRequest::datasourceids_size() const {
-  return datasourceids_.size();
-}
-inline void GetDataSourcesStatesRequest::clear_datasourceids() {
-  datasourceids_.Clear();
-}
-inline ::google::protobuf::uint64 GetDataSourcesStatesRequest::datasourceids(int index) const {
-  return datasourceids_.Get(index);
-}
-inline void GetDataSourcesStatesRequest::set_datasourceids(int index, ::google::protobuf::uint64 value) {
-  datasourceids_.Set(index, value);
-}
-inline void GetDataSourcesStatesRequest::add_datasourceids(::google::protobuf::uint64 value) {
-  datasourceids_.Add(value);
-}
-inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
-GetDataSourcesStatesRequest::datasourceids() const {
-  return datasourceids_;
-}
-inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
-GetDataSourcesStatesRequest::mutable_datasourceids() {
-  return &datasourceids_;
 }
 
 // -------------------------------------------------------------------

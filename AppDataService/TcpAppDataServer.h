@@ -35,7 +35,7 @@ private:
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetDataSourcesInfoRequest();
-	void onGetDataSourcesStatesRequest(const char* requestData, quint32 requestDataSize);
+	void onGetDataSourcesStatesRequest();
 
 	void onGetUnitsRequest();
 
@@ -57,6 +57,7 @@ private:
 	//
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
+	Network::GetDataSourcesStatesReply m_getDataSourcesStatesReply;
 
 	// helper functions
 	//
@@ -67,7 +68,8 @@ private:
 	const AppDataSources& appDataSources() const;
 	const UnitList& units() const;
 
-	bool getConnectionState(Hash hash, AppSignalState& state);
+	bool getAppSignalStateState(Hash hash, AppSignalState& state);
+	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 public:
 	TcpAppDataServer();
@@ -117,6 +119,6 @@ public:
 	const AppDataSources& appDataSources() const { return  m_appDataSources; }
 	const UnitList& units() const { return m_units; }
 
-	bool getState(Hash hash, AppSignalState& state);
+	bool getAppSignalState(Hash hash, AppSignalState& state);
 };
 

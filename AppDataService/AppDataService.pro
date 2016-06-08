@@ -127,7 +127,6 @@ HEADERS += \
     AppDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../lib/Utils.h \
     ../lib/DataChannel.h \
     AppDataChannel.h \
     AppDataSource.h \

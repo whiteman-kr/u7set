@@ -18,6 +18,8 @@
 										return false; \
 									}
 
+#define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
+
 
 void swapBytes(const char* src, char* dest, int size);
 
