@@ -55,6 +55,10 @@ protected slots:
 	void showAbout();
 	void debug();
 
+	// slots
+protected:
+	void slot_findSignal();
+
 	// Properties
 	//
 protected:
@@ -91,6 +95,8 @@ private:
 
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;
+
+	QAction* m_findSignalAction = nullptr;
 
 	// Controls
 	//

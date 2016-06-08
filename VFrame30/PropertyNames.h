@@ -25,6 +25,8 @@ namespace VFrame30
 		static const QString precision;
 		static const QString analogFormat;
 		static const QString columnCount;
+		static const QString pinCount;
+		static const QString showValidityPin;
 
 		static const QString lineColor;
 		static const QString lineWeight;
@@ -41,6 +43,8 @@ namespace VFrame30
 		static const QString alignVert;
 
 		static const QString appSignalIDs;
+		static const QString appSignalId;
+		static const QString connectionId;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;

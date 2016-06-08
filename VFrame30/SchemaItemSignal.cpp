@@ -808,5 +808,108 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return true;
 	}
 
+
+	//
+	// SchemaItemInOut
+	//
+	SchemaItemInOut::SchemaItemInOut(void)
+	{
+		// Вызов этого конструктора возможен при сериализации объектов такого типа.
+		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		//
+	}
+
+	SchemaItemInOut::SchemaItemInOut(SchemaUnit unit) :
+		SchemaItemSignal(unit)
+	{
+		addInput();
+		addOutput();
+		setAppSignalIds("#APPSIGNALID");
+
+		m_columns.resize(1);
+
+		Column& c0 = m_columns[0];
+		c0.width = 100;
+		c0.data = E::ColumnData::State;
+		c0.horzAlign = E::HorzAlign::AlignHCenter;
+
+		createColumnProperties();
+	}
+
+	SchemaItemInOut::~SchemaItemInOut(void)
+	{
+		assert(inputsCount() == 1);
+		assert(outputsCount() == 1);
+	}
+
+	QString SchemaItemInOut::buildName() const
+	{
+		return QString("Input/Output (%1)").arg(appSignalIds());
+	}
+
+	double SchemaItemInOut::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		return m_cachedGridSize * 10;
+	}
+
+	// Serialization
+	//
+	bool SchemaItemInOut::SaveData(Proto::Envelope* message) const
+	{
+		bool result = SchemaItemSignal::SaveData(message);
+
+		if (result == false || message->has_schemaitem() == false)
+		{
+			assert(result);
+			assert(message->has_schemaitem());
+			return false;
+		}
+
+		// --
+		//
+		/*Proto::VideoItemOutputSignal* inoutSignal = */message->mutable_schemaitem()->mutable_inoutsignal();
+
+		//inoutSignal->set_weight(weight);
+
+		return true;
+	}
+
+	bool SchemaItemInOut::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_schemaitem() == false)
+		{
+			assert(message.has_schemaitem());
+			return false;
+		}
+
+		// --
+		//
+		bool result = SchemaItemSignal::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.schemaitem().has_inoutsignal() == false)
+		{
+			assert(message.schemaitem().has_inoutsignal());
+			return false;
+		}
+
+		/*const Proto::VideoItemOutputSignal& inoutSignal = */message.schemaitem().inoutsignal();
+		//fill = inoutSignal.fill();
+
+		return true;
+	}
+
 }
 

@@ -858,8 +858,11 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
 	m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
 	m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+	m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
 	m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
 	m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
+	m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
+	m_toolBar->addAction(m_schemaWidget->m_addReceiver);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_schemaWidget->m_orderAction);

@@ -15,6 +15,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemSignal.h"
 #include "SchemaItemConst.h"
+#include "SchemaItemConnection.h"
 #include "../lib/Types.h"
 
 namespace VFrame30
@@ -50,7 +51,10 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemAfb>();
 		SchemaItemFactory.Register<SchemaItemInput>();
 		SchemaItemFactory.Register<SchemaItemOutput>();
+		SchemaItemFactory.Register<SchemaItemInOut>();
 		SchemaItemFactory.Register<SchemaItemConst>();
+		SchemaItemFactory.Register<SchemaItemTransmitter>();
+		SchemaItemFactory.Register<SchemaItemReceiver>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 
