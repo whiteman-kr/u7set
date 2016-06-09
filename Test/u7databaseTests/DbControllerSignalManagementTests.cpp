@@ -147,6 +147,92 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("byteOrder").toInt() == newSignal.byteOrder(), qPrintable(QString("Error: byteOrder is wrong")));
 	QVERIFY2(query.value("enableTuning").toBool() == newSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == newSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));
+
+	db.close();
+}
+
+void DbControllerSignalTests::getSignalIds()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	QVector<Signal> signalsToAdd;
+
+	Signal newSignal;
+	newSignal.setCaption("firstSignalForGetSignalIdsTest");
+	newSignal.setAcquire(true);
+	newSignal.setAperture(0.3);
+	newSignal.setAppSignalID("firstSignalForGetSignalIdsTest");
+	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
+	newSignal.setCalculated(true);
+	newSignal.setCustomAppSignalID("firstSignalForGetSignalIdsTest");
+	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setDataSize(30);
+	newSignal.setDecimalPlaces(3);
+	newSignal.setEnableTuning(true);
+	newSignal.setEquipmentID("firstSignalForGetSignalIdsTest");
+	newSignal.setFilteringTime(7.3);
+	newSignal.setHighADC(500);
+	newSignal.setHighEngeneeringUnits(3245.6);
+	newSignal.setHighValidRange(3546.4);
+	newSignal.setInOutType(E::SignalInOutType::Input);
+	newSignal.setInputHighLimit(2345.3);
+	newSignal.setInputLowLimit(134.4);
+	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(1);
+	newSignal.setLowADC(1234);
+	newSignal.setLowEngeneeringUnits(345.1);
+	newSignal.setLowValidRange(134.9);
+	newSignal.setNormalState(1234);
+	newSignal.setObjectName("firstSignalForGetSignalIdsTest");
+	newSignal.setOutputHighLimit(85678.5);
+	newSignal.setOutputLowLimit(12536.5);
+	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
+	newSignal.setOutputSensorID(13443);
+	newSignal.setOutputUnitID(1);
+	newSignal.setReadOnly(false);
+	newSignal.setSpreadTolerance(35634.6);
+	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setUnbalanceLimit(98769.3);
+	newSignal.setUnitID(1);
+
+	signalsToAdd.push_back(newSignal);
+
+	newSignal.setCaption("firstSignalForGetSignalIdsTest");
+	newSignal.setAppSignalID("firstSignalForGetSignalIdsTest");
+	newSignal.setCustomAppSignalID("firstSignalForGetSignalIdsTest");
+	newSignal.setEquipmentID("firstSignalForGetSignalIdsTest");
+	newSignal.setObjectName("firstSignalForGetSignalIdsTest");
+
+	signalsToAdd.push_back(newSignal);
+
+	bool ok = query.exec("SELECT * FROM get_signals_ids(1, true)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	QVector <int> result;
+
+	ok = m_dbController->getSignalsIDs(&result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	int amountOfSignalsFromQuery = 0;
+
+	while (query.next())
+	{
+		QVERIFY2(result.contains(query.value(0).toInt()) == true, qPrintable("Error: function returned wrong data"));
+		amountOfSignalsFromQuery++;
+	}
+
+	QVERIFY2 (result.size() == amountOfSignalsFromQuery, qPrintable("Function returned wrong amount of signals"));
+
+	db.close();
 }
 
 void DbControllerSignalTests::cleanupTestCase()

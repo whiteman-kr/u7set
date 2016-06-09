@@ -12,6 +12,7 @@ public:
 private slots:
 	void initTestCase();
 	void addSignalTest();
+	void getSignalIds();
 	void cleanupTestCase();
 
 private:
