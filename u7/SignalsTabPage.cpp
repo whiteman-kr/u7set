@@ -1523,7 +1523,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("CheckIn"), this);
+	action = new QAction(QIcon(":/Images/Images/checkin.png"), tr("CheckIn"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
