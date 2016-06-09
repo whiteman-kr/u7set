@@ -4,6 +4,13 @@
 #include <QPainter>
 #include <QClipboard>
 
+
+//
+//
+//	SignalFlagsWidget
+//
+//
+
 SignalFlagsWidget::SignalFlagsWidget(QWidget *parent)
 	: QWidget(parent)
 {
@@ -104,8 +111,14 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 }
 
 
+//
+//
+//	DialogSignalInfo
+//
+//
+
 DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_signal(signal),
 	ui(new Ui::DialogSignalInfo)
 {
@@ -122,7 +135,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	//
 	if (m_signal.isAnalog())
 	{
-		ui->labelStrUnit->setText(QString("#%1").arg(m_signal.unitID()));
+		ui->labelStrUnit->setText(theSignals.units(m_signal.unitID()));
 	}
 	else
 	{
@@ -162,7 +175,8 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	ui->treeProperties->insertTopLevelItem(i++, new QTreeWidgetItem(QStringList()<<"-"<<"-"));
 
-	ui->treeProperties->insertTopLevelItem(i++, new QTreeWidgetItem(QStringList()<<tr("UnitID")<<QString::number(m_signal.unitID())));
+	str = QString("%1 - %2").arg(m_signal.unitID()).arg(theSignals.units(m_signal.unitID()));
+	ui->treeProperties->insertTopLevelItem(i++, new QTreeWidgetItem(QStringList()<<tr("UnitID")<<str));
 
 	ui->treeProperties->insertTopLevelItem(i++, new QTreeWidgetItem(QStringList()<<tr("DataSize")<<QString::number(m_signal.dataSize())));
 	ui->treeProperties->insertTopLevelItem(i++, new QTreeWidgetItem(QStringList()<<tr("ByteOrder")<<E::valueToString<E::ByteOrder>(m_signal.byteOrderInt())));

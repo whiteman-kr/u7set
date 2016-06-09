@@ -40,7 +40,6 @@ public:
 
 	Q_ENUM(ViewType)
 
-
 private slots:
 
 protected:
@@ -67,8 +66,6 @@ private:
 	ViewType m_viewType = ViewType::Dec;
 
 	int m_currentFontSize = 20;
-
-
 
 };
 
