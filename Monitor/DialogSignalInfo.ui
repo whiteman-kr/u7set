@@ -59,12 +59,12 @@
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,0,0,0">
+         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,1,0,0">
           <item row="0" column="1">
            <widget class="QLineEdit" name="editCustomAppID">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>8</pointsize>
               <weight>75</weight>
               <bold>true</bold>
              </font>
@@ -78,7 +78,7 @@
            <widget class="QLineEdit" name="editCaption">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>8</pointsize>
               <weight>75</weight>
               <bold>true</bold>
              </font>
