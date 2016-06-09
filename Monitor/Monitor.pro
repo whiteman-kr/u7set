@@ -68,7 +68,8 @@ SOURCES += main.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalState.cpp \
     ../lib/AppSignalManager.cpp \
-    Statistics.cpp
+    Statistics.cpp \
+    DialogSignalInfo.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -100,10 +101,12 @@ HEADERS  += \
     ../lib/ProtoSerialization.h \
     ../lib/AppSignalState.h \
     ../lib/AppSignalManager.h \
-    Statistics.h
+    Statistics.h \
+    DialogSignalInfo.h
 
 FORMS    += \
-    DialogSettings.ui
+    DialogSettings.ui \
+    DialogSignalInfo.ui
 
 
 # Optimization flags

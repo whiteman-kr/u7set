@@ -1,6 +1,8 @@
+#include <QMessageBox>
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaView.h"
 #include "SchemaManager.h"
+#include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 
 //
@@ -181,8 +183,17 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	qDebug() << "MonitorSchemaWidget::signalInfo:  " << appSignalId;
 
-	// To do
-	//
+	Signal signal;
+	bool ok = theSignals.signal(appSignalId, &signal);
+	if (ok == true)
+	{
+		DialogSignalInfo* dsi = new DialogSignalInfo(this, signal);
+		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("Error"), tr("No information about this signal!"));
+	}
 
 	return;
 }
