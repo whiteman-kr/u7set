@@ -36,6 +36,10 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* pLayer) const override;
 
+	protected:
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
 		// Properties and Data
 		//
 	public:

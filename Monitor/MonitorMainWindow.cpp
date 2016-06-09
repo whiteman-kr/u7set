@@ -223,6 +223,13 @@ void MonitorMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
+	m_findSignalAction = new QAction(tr("Find Signal"), this);
+	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
+	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
+	m_findSignalAction->setEnabled(true);
+	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+	connect(m_findSignalAction, &QAction::triggered, this, &MonitorMainWindow::slot_findSignal);
+
 	return;
 }
 
@@ -252,6 +259,9 @@ void MonitorMainWindow::createMenus()
 
 	viewMenu->addAction(m_historyForward);
 	viewMenu->addAction(m_historyBack );
+
+	viewMenu->addSeparator();
+	viewMenu->addAction(m_findSignalAction);
 
 
 	// Tools
@@ -295,6 +305,9 @@ void MonitorMainWindow::createToolBars()
 
 	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_findSignalAction);
 
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
@@ -400,6 +413,15 @@ void MonitorMainWindow::debug()
 //	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
+}
+
+void MonitorMainWindow::slot_findSignal()
+{
+	// To do
+	//
+	assert(false);
+
+	return;
 }
 
 

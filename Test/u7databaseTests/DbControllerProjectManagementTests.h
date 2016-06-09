@@ -1,6 +1,6 @@
 #pragma once
 #include <QTest>
-#include "../../include/DbController.h"
+#include "../../lib/DbController.h"
 
 class DbControllerProjectTests : public QObject
 {

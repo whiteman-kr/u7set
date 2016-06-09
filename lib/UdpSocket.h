@@ -150,18 +150,18 @@ protected:
 
 class UdpClientSocket : public UdpSocket
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
 	enum State
-    {
+	{
 		ReadyToSend,
 		WaitingForAck
-    };
+	};
 
-    QMutex m_mutex;
+	mutable QMutex m_mutex;
 
-    QHostAddress m_serverAddress;
+	QHostAddress m_serverAddress;
 	qint16 m_port = 0;
 
 	State m_state = State::ReadyToSend;
@@ -175,29 +175,27 @@ private:
 	quint32 m_ackTimeoutCtr = 0;
 
 private:
-    void retryRequest();
+	void retryRequest();
 
 	virtual void onThreadStarted() final;
 	virtual void onThreadFinished() final;
 
 public:
-    UdpClientSocket(const QHostAddress& serverAddress, quint16 port);
-    virtual ~UdpClientSocket();
+	UdpClientSocket(const QHostAddress& serverAddress, quint16 port);
+	virtual ~UdpClientSocket();
 
-    const QHostAddress& serverAddress() const;
-    void setServerAddress(const QHostAddress& serverAddress);
+	const QHostAddress& serverAddress() const;
+	void setServerAddress(const QHostAddress& serverAddress);
 
-    quint16 port() const;
-    void setPort(quint16 port);
+	quint16 port() const;
+	void setPort(quint16 port);
 
-	bool isWaitingForAck() { return m_state == WaitingForAck; }
+	bool isWaitingForAck() const;
+	bool isReadyToSend() const;
 
-    void setProtocolVersion(quint32 version) { m_protocolVersion = version; }
-    void setTimeout(int msTimeout) { m_msTimeout = msTimeout; }
-    void setRetryCount(int retryCount) { m_retryCount = retryCount; }
-
-    virtual void onAckTimeout();
-    virtual void onRequestTimeout(const RequestHeader& requestHeader);
+	void setProtocolVersion(quint32 version) { m_protocolVersion = version; }
+	void setTimeout(int msTimeout) { m_msTimeout = msTimeout; }
+	void setRetryCount(int retryCount) { m_retryCount = retryCount; }
 
 	virtual void onSocketThreadStarted() {}
 	virtual void onSocketThreadFinished() {}
@@ -215,8 +213,8 @@ signals:
 
 private slots:
 	void onSendRequest(UdpRequest request);
-    void onSocketReadyRead();
-    void onAckTimerTimeout();
+	void onSocketReadyRead();
+	void onAckTimerTimeout();
 };
 
 
@@ -233,53 +231,53 @@ class UdpClientRequestHandler;
 //
 class UdpRequestProcessor : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
-    UdpClientRequestHandler* m_clientRequestHandler;
+	UdpClientRequestHandler* m_clientRequestHandler;
 
 public:
-    UdpRequestProcessor();
+	UdpRequestProcessor();
 
-    virtual void onThreadStarted() { qDebug() << "UdpRequestProcessor thread started"; }
-    virtual void onThreadFinished() { qDebug() << "UdpRequestProcessor thread finished"; }
+	virtual void onThreadStarted() { qDebug() << "UdpRequestProcessor thread started"; }
+	virtual void onThreadFinished() { qDebug() << "UdpRequestProcessor thread finished"; }
 
-    virtual void processRequest(const UdpRequest& request) = 0;
+	virtual void processRequest(const UdpRequest& request) = 0;
 
-    void setClientRequestHandler(UdpClientRequestHandler* clientRequestHandler);
+	void setClientRequestHandler(UdpClientRequestHandler* clientRequestHandler);
 
 public slots:
-    void onThreadStartedSlot();
-    void onThreadFinishedSlot();
+	void onThreadStartedSlot();
+	void onThreadFinishedSlot();
 
-    void onRequestQueueIsNotEmpty();
+	void onRequestQueueIsNotEmpty();
 };
 
 
 class UdpClientRequestHandler : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
-    QMutex m_queueMutex;
-    QThread m_handlerThread;
+	QMutex m_queueMutex;
+	QThread m_handlerThread;
 
-    QQueue<UdpRequest> requestQueue;
+	QQueue<UdpRequest> requestQueue;
 
-    qint64 m_lastRequestTime;
+	qint64 m_lastRequestTime;
 
 public:
-    UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor);
-    virtual ~UdpClientRequestHandler();
+	UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor);
+	virtual ~UdpClientRequestHandler();
 
-    void putRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize);
-    UdpRequest getRequest();
-    bool hasRequest();
+	void putRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize);
+	UdpRequest getRequest();
+	bool hasRequest();
 
-    qint64 lastRequestTime() const;
+	qint64 lastRequestTime() const;
 
 signals:
-    void requestQueueIsNotEmpty();
+	void requestQueueIsNotEmpty();
 };
 
 
@@ -292,7 +290,7 @@ signals:
 
 class UdpServerSocket : public UdpSocket
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
 	QHostAddress m_bindToAddress;
@@ -300,7 +298,7 @@ private:
 
 	QMutex m_clientMapMutex;
 
-    QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
+	QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
 
 	void bind();
 
@@ -308,13 +306,13 @@ private:
 	virtual void onThreadFinished() final;
 
 public:
-    UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
-    virtual ~UdpServerSocket();
+	UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
+	virtual ~UdpServerSocket();
 
-    virtual void onSocketThreadStarted();
-    virtual void onSocketThreadFinished();
+	virtual void onSocketThreadStarted();
+	virtual void onSocketThreadFinished();
 
-    virtual UdpRequestProcessor* createUdpRequestProcessor() { return nullptr; }
+	virtual UdpRequestProcessor* createUdpRequestProcessor() { return nullptr; }
 
 signals:
 	void receiveRequest(UdpRequest request);
@@ -323,7 +321,7 @@ public slots:
 	void sendAck(UdpRequest m_request);
 
 private slots:
-    void onTimer();
+	void onTimer();
 	void onSocketReadyRead();
 };
 

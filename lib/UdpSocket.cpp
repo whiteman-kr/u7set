@@ -1,4 +1,5 @@
 #include "../lib/UdpSocket.h"
+#include "../lib/WUtils.h"
 #include <QByteArray>
 
 
@@ -43,7 +44,7 @@ void UdpSocket::registerMetaTypes()
 // -----------------------------------------------------------------------------
 
 UdpClientSocket::UdpClientSocket(const QHostAddress &serverAddress, quint16 port) :
-    m_serverAddress(serverAddress),
+	m_serverAddress(serverAddress),
 	m_port(port)
 {
 }
@@ -77,9 +78,29 @@ void UdpClientSocket::onThreadFinished()
 }
 
 
+bool UdpClientSocket::isWaitingForAck() const
+{
+	AUTO_LOCK(m_mutex)
+
+	bool result = m_state == WaitingForAck;
+
+	return result;
+}
+
+
+bool UdpClientSocket::isReadyToSend() const
+{
+	AUTO_LOCK(m_mutex)
+
+	bool result = m_state == ReadyToSend;
+
+	return result;
+}
+
+
 void UdpClientSocket::onSocketReadyRead()
 {
-	QMutexLocker locker(&m_mutex);
+	AUTO_LOCK(m_mutex);
 
 	assert(m_state == State::WaitingForAck);
 
@@ -88,10 +109,13 @@ void UdpClientSocket::onSocketReadyRead()
 
 	qint64 recevedDataSize = m_socket.readDatagram(m_ack.rawData(), MAX_DATAGRAM_SIZE, &address, &port);
 
+	m_state = State::ReadyToSend;
+
 	if (recevedDataSize == -1)
 	{
 		QAbstractSocket::SocketError err = m_socket.error();
 		Q_UNUSED(err)
+
 		return;
 	}
 
@@ -105,8 +129,6 @@ void UdpClientSocket::onSocketReadyRead()
 
 	m_ack.initRead();
 
-	m_state = State::ReadyToSend;
-
 	bool unknownAck = true;
 
 	if (m_request.ID() == m_ack.ID() &&
@@ -115,8 +137,6 @@ void UdpClientSocket::onSocketReadyRead()
 	{
 		unknownAck = false;
 	}
-
-	locker.unlock();
 
 	if (unknownAck)
 	{
@@ -132,7 +152,7 @@ void UdpClientSocket::onSocketReadyRead()
 
 const QHostAddress& UdpClientSocket::serverAddress() const
 {
-    return m_serverAddress;
+	return m_serverAddress;
 }
 
 
@@ -140,13 +160,13 @@ void UdpClientSocket::setServerAddress(const QHostAddress& serverAddress)
 {
 	QMutexLocker locker(&m_mutex);
 
-    m_serverAddress = serverAddress;
+	m_serverAddress = serverAddress;
 }
 
 
 quint16 UdpClientSocket::port() const
 {
-    return m_port;
+	return m_port;
 }
 
 
@@ -154,13 +174,13 @@ void UdpClientSocket::setPort(quint16 port)
 {
 	QMutexLocker locker(&m_mutex);
 
-    m_port = port;
+	m_port = port;
 }
 
 
 void UdpClientSocket::onSendRequest(UdpRequest request)
 {
-    QMutexLocker m(&m_mutex);
+	AUTO_LOCK(m_mutex)
 
 	if (m_state != State::ReadyToSend)
 	{
@@ -189,16 +209,16 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 
 	qint64 sent = m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
-    if (sent == -1)
-    {
+	if (sent == -1)
+	{
 		assert(false);
-    }
+	}
 
-    m_requestNo++;
+	m_requestNo++;
 
 	m_state = State::WaitingForAck;
 
-    m_retryCtr = 0;
+	m_retryCtr = 0;
 
 	m_timer.start(m_msTimeout);
 }
@@ -234,33 +254,23 @@ void UdpClientSocket::onAckTimerTimeout()
 {
 	QMutexLocker locker(&m_mutex);
 
-    m_ackTimeoutCtr++;
+	m_ackTimeoutCtr++;
 
-    m_retryCtr++;
+	m_retryCtr++;
 
-    if (m_retryCtr < m_retryCount)
-    {
-        retryRequest();
-    }
-    else
-    {
-       m_retryCtr = 0;
+	if (m_retryCtr < m_retryCount)
+	{
+		retryRequest();
+	}
+	else
+	{
+	   m_retryCtr = 0;
 	   m_state = State::ReadyToSend;
 
 	   emit ackTimeout(m_request);
 
 	   qDebug() << "Ack timeout: server " << m_request.address().toString() << " : " << m_request.port();
-    }
-}
-
-
-void UdpClientSocket::onAckTimeout()
-{
-}
-
-
-void UdpClientSocket::onRequestTimeout(const RequestHeader& /* requestHeader */)
-{
+	}
 }
 
 
@@ -276,20 +286,20 @@ void UdpClientSocket::onRequestTimeout(const RequestHeader& /* requestHeader */)
 // -----------------------------------------------------------------------------
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
-    m_address(senderAddress),
+	m_address(senderAddress),
 	m_port(senderPort)
 {
 	memset(header(), 0, sizeof(RequestHeader));
 
-    if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
-    {
+	if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
+	{
 		memcpy(m_rawData, receivedData, m_rawDataSize);
 
 		m_rawDataSize = receivedDataSize;
-    }
-    else
-    {
-        assert(false);
+	}
+	else
+	{
+		assert(false);
 	}
 }
 
@@ -314,7 +324,7 @@ UdpRequest&UdpRequest::operator =(const UdpRequest& request)
 
 	m_readDataIndex = request.m_readDataIndex;
 	m_writeDataIndex = request.m_writeDataIndex;
-	
+
 	return *this;
 }
 
@@ -327,10 +337,10 @@ UdpRequest::UdpRequest()
 
 void UdpRequest::initAck(const UdpRequest& request)
 {
-    assert(!request.isEmpty());
+	assert(!request.isEmpty());
 
-    m_address = request.m_address;
-    m_port = request.m_port;
+	m_address = request.m_address;
+	m_port = request.m_port;
 
 	memset(header(), 0, sizeof(RequestHeader));
 
@@ -350,10 +360,10 @@ void UdpRequest::initAck(const UdpRequest& request)
 bool UdpRequest::writeDword(quint32 dw)
 {
 	if (m_rawDataSize + sizeof(quint32) > MAX_DATAGRAM_SIZE)
-    {
+	{
 		assert(m_rawDataSize + sizeof(quint32) <= MAX_DATAGRAM_SIZE);
-        return false;
-    }
+		return false;
+	}
 
 	*reinterpret_cast<quint32*>(writeDataPtr()) = dw;
 
@@ -363,7 +373,7 @@ bool UdpRequest::writeDword(quint32 dw)
 
 	m_rawDataSize += sizeof(quint32);
 
-    return true;
+	return true;
 }
 
 
@@ -376,10 +386,10 @@ bool UdpRequest::writeData(const char* data, quint32 dataSize)
 	}
 
 	if (m_rawDataSize + dataSize > MAX_DATAGRAM_SIZE)
-    {
+	{
 		assert(m_rawDataSize + dataSize <= MAX_DATAGRAM_SIZE);
-        return false;
-    }
+		return false;
+	}
 
 	memcpy(writeDataPtr(), data, dataSize);
 
@@ -389,7 +399,7 @@ bool UdpRequest::writeData(const char* data, quint32 dataSize)
 
 	m_rawDataSize += dataSize;
 
-    return true;
+	return true;
 }
 
 
@@ -464,65 +474,65 @@ bool UdpRequest::readStruct(JsonSerializable* s)
 
 
 UdpRequestProcessor::UdpRequestProcessor() :
-    m_clientRequestHandler(nullptr)
+	m_clientRequestHandler(nullptr)
 {
 }
 
 
 void UdpRequestProcessor::setClientRequestHandler(UdpClientRequestHandler* clientRequestHandler)
 {
-    m_clientRequestHandler = clientRequestHandler;
+	m_clientRequestHandler = clientRequestHandler;
 }
 
 
 void UdpRequestProcessor::onThreadStartedSlot()
 {
-    onThreadStarted();
+	onThreadStarted();
 }
 
 
 void UdpRequestProcessor::onThreadFinishedSlot()
 {
-    onThreadFinished();
-    deleteLater();
+	onThreadFinished();
+	deleteLater();
 }
 
 
 void UdpRequestProcessor::onRequestQueueIsNotEmpty()
 {
-    assert(m_clientRequestHandler != nullptr);
+	assert(m_clientRequestHandler != nullptr);
 
-    int count = 0;
+	int count = 0;
 
-    do
-    {
-        UdpRequest request = m_clientRequestHandler->getRequest();
+	do
+	{
+		UdpRequest request = m_clientRequestHandler->getRequest();
 
-        if (request.isEmpty())
-        {
-            break;
-        }
+		if (request.isEmpty())
+		{
+			break;
+		}
 
-        processRequest(request);
+		processRequest(request);
 
-        count++;
+		count++;
 
-    } while (m_clientRequestHandler->hasRequest() && count < 5);
+	} while (m_clientRequestHandler->hasRequest() && count < 5);
 }
 
 
 UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor) :
-    m_lastRequestTime(0)
+	m_lastRequestTime(0)
 {
-    udpRequestProcessor->setClientRequestHandler(this);
-    udpRequestProcessor->moveToThread(&m_handlerThread);
+	udpRequestProcessor->setClientRequestHandler(this);
+	udpRequestProcessor->moveToThread(&m_handlerThread);
 
-    connect(&m_handlerThread, &QThread::started, udpRequestProcessor, &UdpRequestProcessor::onThreadStartedSlot);
-    connect(&m_handlerThread, &QThread::finished, udpRequestProcessor, &UdpRequestProcessor::onThreadFinishedSlot);
+	connect(&m_handlerThread, &QThread::started, udpRequestProcessor, &UdpRequestProcessor::onThreadStartedSlot);
+	connect(&m_handlerThread, &QThread::finished, udpRequestProcessor, &UdpRequestProcessor::onThreadFinishedSlot);
 
-    connect(this, &UdpClientRequestHandler::requestQueueIsNotEmpty, udpRequestProcessor, &UdpRequestProcessor::onRequestQueueIsNotEmpty);
+	connect(this, &UdpClientRequestHandler::requestQueueIsNotEmpty, udpRequestProcessor, &UdpRequestProcessor::onRequestQueueIsNotEmpty);
 
-    m_handlerThread.start();
+	m_handlerThread.start();
 }
 
 
@@ -533,14 +543,14 @@ UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequest
 
 UdpClientRequestHandler::~UdpClientRequestHandler()
 {
-    m_handlerThread.quit();
-    m_handlerThread.wait();
+	m_handlerThread.quit();
+	m_handlerThread.wait();
 }
 
 
 qint64 UdpClientRequestHandler::lastRequestTime() const
 {
-    return m_lastRequestTime;
+	return m_lastRequestTime;
 }
 
 
@@ -548,13 +558,13 @@ void UdpClientRequestHandler::putRequest(const QHostAddress& senderAddress, qint
 {
 	QMutexLocker locker(&m_queueMutex);
 
-    m_lastRequestTime = QDateTime::currentMSecsSinceEpoch();
+	m_lastRequestTime = QDateTime::currentMSecsSinceEpoch();
 
-    requestQueue.enqueue(UdpRequest(senderAddress, senderPort, receivedData, recevedDataSize));
+	requestQueue.enqueue(UdpRequest(senderAddress, senderPort, receivedData, recevedDataSize));
 
 	locker.unlock();
 
-    emit requestQueueIsNotEmpty();
+	emit requestQueueIsNotEmpty();
 }
 
 
@@ -562,26 +572,26 @@ UdpRequest UdpClientRequestHandler::getRequest()
 {
 	QMutexLocker locker(&m_queueMutex);
 
-    if (requestQueue.isEmpty())
-    {
-        return UdpRequest();
-    }
+	if (requestQueue.isEmpty())
+	{
+		return UdpRequest();
+	}
 
-    UdpRequest request = requestQueue.dequeue();
+	UdpRequest request = requestQueue.dequeue();
 
-    return request;
+	return request;
 }
 
 
 bool UdpClientRequestHandler::hasRequest()
 {
-    bool result = false;
+	bool result = false;
 
 	QMutexLocker locker(&m_queueMutex);
 
-    result = !requestQueue.isEmpty();
+	result = !requestQueue.isEmpty();
 
-    return result;
+	return result;
 }
 
 
@@ -590,7 +600,7 @@ bool UdpClientRequestHandler::hasRequest()
 //
 
 UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port) :
-    m_bindToAddress(bindToAddress),
+	m_bindToAddress(bindToAddress),
 	m_port(port)
 {
 }
@@ -603,26 +613,26 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onThreadStarted()
 {
-    m_timer.start(1000);
+	m_timer.start(1000);
 
-    connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
+	connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
 	connect(&m_socket, &QUdpSocket::readyRead, this, &UdpServerSocket::onSocketReadyRead);
 
 	bind();
 
-    onSocketThreadStarted();
+	onSocketThreadStarted();
 }
 
 
 void UdpServerSocket::onSocketThreadStarted()
 {
-    qDebug() << "Called UdpServerSocket::onSocketThreadStarted";
+	qDebug() << "Called UdpServerSocket::onSocketThreadStarted";
 }
 
 
 void UdpServerSocket::onThreadFinished()
 {
-    onSocketThreadFinished();
+	onSocketThreadFinished();
 }
 
 
@@ -650,10 +660,10 @@ void UdpServerSocket::sendAck(UdpRequest request)
 {
 	qint64 sent = m_socket.writeDatagram(request.rawData(), request.rawDataSize(), request.address(), request.port());
 
-    if (sent == -1)
-    {
+	if (sent == -1)
+	{
 		assert(false);
-    }
+	}
 }
 
 
@@ -665,33 +675,33 @@ void UdpServerSocket::onTimer()
 
 	QMutexLocker locker(&m_clientMapMutex);
 
-    QHashIterator<quint32, UdpClientRequestHandler*> i(clientRequestHandlerMap);
+	QHashIterator<quint32, UdpClientRequestHandler*> i(clientRequestHandlerMap);
 
-    while (i.hasNext())
-    {
-        i.next();
+	while (i.hasNext())
+	{
+		i.next();
 
-        UdpClientRequestHandler* clientHandler = i.value();
+		UdpClientRequestHandler* clientHandler = i.value();
 
-        if (clientHandler == nullptr)
-        {
-            assert(false);
-        }
-        else
-        {
-            qint64 dtime = currentTime - clientHandler->lastRequestTime();
+		if (clientHandler == nullptr)
+		{
+			assert(false);
+		}
+		else
+		{
+			qint64 dtime = currentTime - clientHandler->lastRequestTime();
 
-            if (dtime > 5 * 1000)
-            {
-                // time from last request more then 5 sec
-                //
-                quint32 clientID = i.key();
+			if (dtime > 5 * 1000)
+			{
+				// time from last request more then 5 sec
+				//
+				quint32 clientID = i.key();
 
-                clientRequestHandlerMap.remove(clientID);
+				clientRequestHandlerMap.remove(clientID);
 
-                delete clientHandler;
-            }
-        }
+				delete clientHandler;
+			}
+		}
 	}*/
 }
 
@@ -721,28 +731,28 @@ void UdpServerSocket::onSocketReadyRead()
 
 /*    UdpClientRequestHandler* clientRequestHandler = nullptr;
 
-    quint32 clientID = requestHeader->ClientID;
+	quint32 clientID = requestHeader->ClientID;
 
-    m_clientMapMutex.lock();
+	m_clientMapMutex.lock();
 
-    if (clientRequestHandlerMap.contains(clientID))
-    {
-        clientRequestHandler = clientRequestHandlerMap.value(clientID);
+	if (clientRequestHandlerMap.contains(clientID))
+	{
+		clientRequestHandler = clientRequestHandlerMap.value(clientID);
 
-        qDebug() << "clientRequestHandler found";
-    }
-    else
-    {
-        clientRequestHandler = new UdpClientRequestHandler(createUdpRequestProcessor());
+		qDebug() << "clientRequestHandler found";
+	}
+	else
+	{
+		clientRequestHandler = new UdpClientRequestHandler(createUdpRequestProcessor());
 
-        clientRequestHandlerMap.insert(clientID, clientRequestHandler);
+		clientRequestHandlerMap.insert(clientID, clientRequestHandler);
 
-        qDebug() << "clientRequestHandler created";
-    }
+		qDebug() << "clientRequestHandler created";
+	}
 
-    clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
+	clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
 
-    m_clientMapMutex.unlock();*/
+	m_clientMapMutex.unlock();*/
 }
 
 

@@ -13,7 +13,7 @@
 #include "DbControllerProjectManagementTests.h"
 #include "DbControllerUserManagementTests.h"
 #include "DbControllerFileManagementTests.h"
-#include "../../include/DbController.h"
+#include "../../lib/DbController.h"
 
 const int DatabaseProjectVersion = 81;
 

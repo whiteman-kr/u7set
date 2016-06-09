@@ -217,6 +217,16 @@ namespace VFrame30
 		return;
 	}
 
+	double SchemaItemRect::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
+	{
+		return gridSize;
+	}
+
+	double SchemaItemRect::minimumPossibleWidthDocPt(double gridSize, int /*pinGridStep*/) const
+	{
+		return gridSize;
+	}
+
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(SchemaItemRect, Font, m_font);

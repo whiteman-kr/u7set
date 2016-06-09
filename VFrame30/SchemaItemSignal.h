@@ -28,7 +28,7 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-	private:
+	protected:
 		void createColumnProperties();
 
 		// Properties
@@ -72,11 +72,11 @@ namespace VFrame30
 
 		// Data
 		//
-	private:
+	protected:
 		QStringList m_appSignalIds;
 
 		int m_precision = 2;
-		E::AnalogFormat m_analogFormat = E::AnalogFormat::f;
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 
 		// Monitor mode settings
 		//
@@ -122,7 +122,7 @@ namespace VFrame30
 
 
 	//
-	// SchemaItemInput
+	// SchemaItemOutput
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemaItemOutput : public SchemaItemSignal
 	{
@@ -139,6 +139,38 @@ namespace VFrame30
 		virtual ~SchemaItemOutput(void);
 
 		virtual QString buildName() const override;
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+		// Properties and Data
+	public:
+	private:
+	};
+
+	//
+	// SchemaItemInOut
+	//
+	class VFRAME30LIBSHARED_EXPORT SchemaItemInOut : public SchemaItemSignal
+	{
+		Q_OBJECT
+
+#ifdef VFRAME30LIB_LIBRARY
+		friend ::Factory<SchemaItem>::DerivedType<SchemaItemInOut>;
+#endif
+
+	private:
+		SchemaItemInOut(void);
+	public:
+		explicit SchemaItemInOut(SchemaUnit unit);
+		virtual ~SchemaItemInOut(void);
+
+		virtual QString buildName() const override;
+
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Serialization
 		//

@@ -7,6 +7,8 @@
 #include "../lib/Signal.h"
 #include "../Proto/network.pb.h"
 
+class QTimer;
+
 class TcpAppDataClient : public Tcp::Client
 {
 	Q_OBJECT
@@ -19,6 +21,8 @@ private:
 	QVector<AppSignalState> m_states;
 	QHash<Hash, int> m_hash2Index;
 	UnitList m_unitList;
+
+	QTimer* m_updateStatesTimer = nullptr;
 
 	// reused protobuf messages
 	//
@@ -70,6 +74,9 @@ private:
 	//
 
 	void clearDataSources();
+
+private slots:
+	void updateStates();
 
 signals:
 	void dataSourcesInfoLoaded();

@@ -30,6 +30,13 @@ void TcpAppDataClient::clearDataSources()
 }
 
 
+void TcpAppDataClient::updateStates()
+{
+	m_getStatesCurrentPart = 0;
+	getNextStatePart();
+}
+
+
 void TcpAppDataClient::onClientThreadStarted()
 {
 
@@ -52,6 +59,8 @@ void TcpAppDataClient::onConnection()
 
 void TcpAppDataClient::onDisconnection()
 {
+	m_updateStatesTimer->stop();
+
 	m_unitList.clear();
 	m_signalHahes.clear();
 	m_signalParams.clear();
@@ -170,14 +179,29 @@ void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint3
 		return;
 	}
 
-	/*int statesCount = m_getDataSourcesStatesReply.datasourcesstates_size();
+	if (m_getDataSourcesStatesReply.error() != TO_INT(NetworkError::Success))
+	{
+		assert(false);
+		return;
+	}
+
+	int statesCount = m_getDataSourcesStatesReply.datasourcesstates_size();
 
 	for(int i = 0; i < statesCount; i++)
 	{
-		m_dataSourceStates[i] = m_getDataSourcesStatesReply.datasourcesstates(i);
+		auto id = m_getDataSourcesStatesReply.datasourcesstates(i).id();
+		if (!m_dataSources.contains(id))
+		{
+			assert(m_dataSources.contains(id));
+			continue;
+		}
+
+		DataSource* source = m_dataSources.value(id);
+
+		source->setDataSourceState(m_getDataSourcesStatesReply.datasourcesstates(i));
 	}
 
-	emit dataSoursesStateUpdated();*/
+	emit dataSoursesStateUpdated();
 }
 
 
@@ -261,9 +285,16 @@ void TcpAppDataClient::getNextParamPart()
 	if (m_getParamsCurrentPart >= paramsTotalParts)
 	{
 		m_states.resize(m_signalParams.count());
-		m_getStatesCurrentPart = 0;
-		getNextStatePart();
+
 		emit appSignalListLoaded();
+
+		if (m_updateStatesTimer == nullptr)
+		{
+			m_updateStatesTimer = new QTimer(this);
+			connect(m_updateStatesTimer, &QTimer::timeout, this, &TcpAppDataClient::updateStates);
+		}
+
+		m_updateStatesTimer->start(200);
 		return;
 	}
 
@@ -387,12 +418,15 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 		m_states[index].getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
 	}
 
-	if (startIndex + stateCount == signalCount)
+	m_getParamsCurrentPart++;
+
+	if (startIndex + stateCount >= signalCount)
 	{
 		emit appSignalsStateUpdated();
-	}
 
-	m_getParamsCurrentPart++;
+		sendRequest(ADS_GET_DATA_SOURCES_STATES);
+		return;
+	}
 
 	getNextStatePart();
 }

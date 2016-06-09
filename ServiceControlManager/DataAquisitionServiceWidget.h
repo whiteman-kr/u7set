@@ -25,6 +25,7 @@ public:
 public slots:
 	void invalidateData();
 	void reloadList();
+	void updateStateColumns();
 
 private:
 	TcpAppDataClient* m_clientSocket;

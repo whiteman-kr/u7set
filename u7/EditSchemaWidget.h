@@ -312,6 +312,8 @@ protected:
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
+	virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 	// Mouse Left Button Down
@@ -566,10 +568,12 @@ private:
 		QAction* m_addLineAction = nullptr;
 		QAction* m_addRectAction = nullptr;
 		QAction* m_addPathAction = nullptr;
+		QAction* m_addTextAction = nullptr;
 		// ------------------------------
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addInputSignalAction = nullptr;
 		QAction* m_addOutputSignalAction = nullptr;
+		QAction* m_addInOutSignalAction = nullptr;
 		QAction* m_addConstantAction = nullptr;
 		QAction* m_addFblElementAction = nullptr;
 		QAction* m_addLinkAction = nullptr;

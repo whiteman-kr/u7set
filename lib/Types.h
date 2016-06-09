@@ -37,11 +37,11 @@ public:
 	//
 	enum class AnalogFormat
 	{
-		e = 'e',		// format as [-]9.9e[+|-]999
-		E = 'E',		// format as [-]9.9E[+|-]999
-		f = 'f',		// format as [-]9.9
-		g = 'g',		// use e or f format, whichever is the most concise
-		G = 'G'			// use E or f format, whichever is the most concise
+		e_9e = 'e',			// format as [-]9.9e[+|-]999
+		E_9E = 'E',			// format as [-]9.9E[+|-]999
+		f_9 = 'f',			// format as [-]9.9
+		g_9_or_9e = 'g',	// use e or f format, whichever is the most concise
+		G_9_or_9E = 'G'		// use E or f format, whichever is the most concise
 	};
 	Q_ENUM(AnalogFormat)
 

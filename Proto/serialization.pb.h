@@ -65,6 +65,7 @@ class SchemaItemSignalColumn;
 class SchemaItemSignal;
 class SchemaItemInput;
 class SchemaItemOutput;
+class SchemaItemInOut;
 class SchemaItemLink;
 class SchemaItemAfb;
 class SchemaItemConst;
@@ -2459,6 +2460,15 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemReceiver* release_receiveritem();
   inline void set_allocated_receiveritem(::Proto::SchemaItemReceiver* receiveritem);
 
+  // optional .Proto.SchemaItemInOut InOutSignal = 133;
+  inline bool has_inoutsignal() const;
+  inline void clear_inoutsignal();
+  static const int kInOutSignalFieldNumber = 133;
+  inline const ::Proto::SchemaItemInOut& inoutsignal() const;
+  inline ::Proto::SchemaItemInOut* mutable_inoutsignal();
+  inline ::Proto::SchemaItemInOut* release_inoutsignal();
+  inline void set_allocated_inoutsignal(::Proto::SchemaItemInOut* inoutsignal);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItem)
  private:
   inline void set_has_uuid();
@@ -2509,6 +2519,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_transmitteritem();
   inline void set_has_receiveritem();
   inline void clear_has_receiveritem();
+  inline void set_has_inoutsignal();
+  inline void clear_has_inoutsignal();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2536,9 +2548,10 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemConnection* connectionitem_;
   ::Proto::SchemaItemTransmitter* transmitteritem_;
   ::Proto::SchemaItemReceiver* receiveritem_;
+  ::Proto::SchemaItemInOut* inoutsignal_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(24 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(25 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4011,6 +4024,78 @@ class SchemaItemOutput : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemOutput* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemInOut : public ::google::protobuf::Message {
+ public:
+  SchemaItemInOut();
+  virtual ~SchemaItemInOut();
+
+  SchemaItemInOut(const SchemaItemInOut& from);
+
+  inline SchemaItemInOut& operator=(const SchemaItemInOut& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemInOut& default_instance();
+
+  void Swap(SchemaItemInOut* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemInOut* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemInOut& from);
+  void MergeFrom(const SchemaItemInOut& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemInOut)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemInOut* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -10173,6 +10258,44 @@ inline void SchemaItem::set_allocated_receiveritem(::Proto::SchemaItemReceiver* 
   }
 }
 
+// optional .Proto.SchemaItemInOut InOutSignal = 133;
+inline bool SchemaItem::has_inoutsignal() const {
+  return (_has_bits_[0] & 0x01000000u) != 0;
+}
+inline void SchemaItem::set_has_inoutsignal() {
+  _has_bits_[0] |= 0x01000000u;
+}
+inline void SchemaItem::clear_has_inoutsignal() {
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline void SchemaItem::clear_inoutsignal() {
+  if (inoutsignal_ != NULL) inoutsignal_->::Proto::SchemaItemInOut::Clear();
+  clear_has_inoutsignal();
+}
+inline const ::Proto::SchemaItemInOut& SchemaItem::inoutsignal() const {
+  return inoutsignal_ != NULL ? *inoutsignal_ : *default_instance_->inoutsignal_;
+}
+inline ::Proto::SchemaItemInOut* SchemaItem::mutable_inoutsignal() {
+  set_has_inoutsignal();
+  if (inoutsignal_ == NULL) inoutsignal_ = new ::Proto::SchemaItemInOut;
+  return inoutsignal_;
+}
+inline ::Proto::SchemaItemInOut* SchemaItem::release_inoutsignal() {
+  clear_has_inoutsignal();
+  ::Proto::SchemaItemInOut* temp = inoutsignal_;
+  inoutsignal_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_inoutsignal(::Proto::SchemaItemInOut* inoutsignal) {
+  delete inoutsignal_;
+  inoutsignal_ = inoutsignal;
+  if (inoutsignal) {
+    set_has_inoutsignal();
+  } else {
+    clear_has_inoutsignal();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -11315,6 +11438,10 @@ SchemaItemSignal::mutable_columns() {
 // -------------------------------------------------------------------
 
 // SchemaItemOutput
+
+// -------------------------------------------------------------------
+
+// SchemaItemInOut
 
 // -------------------------------------------------------------------
 

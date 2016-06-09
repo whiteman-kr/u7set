@@ -1698,6 +1698,19 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemRect>(schema()->unit()));
 			});
 
+	m_addTextAction = new QAction(tr("Text"), this);
+	m_addTextAction->setEnabled(true);
+	m_addTextAction->setIcon(QIcon(":/Images/Images/SchemaText.svg"));
+	connect(m_addTextAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto text = std::make_shared<VFrame30::SchemaItemRect>(schema()->unit());
+				text->setText(QLatin1String("Text"));
+				text->setFill(false);
+				text->setDrawRect(false);
+				addItem(text);
+			});
+
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
 
@@ -1718,6 +1731,16 @@ void EditSchemaWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemaItemOutput>(schema()->unit());
+				addItem(item);
+			});
+
+	m_addInOutSignalAction = new QAction(tr("In/Out"), this);
+	m_addInOutSignalAction->setEnabled(true);
+	m_addInOutSignalAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
+	connect(m_addInOutSignalAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemInOut>(schema()->unit());
 				addItem(item);
 			});
 
@@ -2039,11 +2062,13 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addLineAction);
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
+		m_addMenu->addAction(m_addTextAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 		m_addMenu->addAction(m_addLinkAction);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
+		m_addMenu->addAction(m_addInOutSignalAction);
 		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
 		m_addMenu->addAction(m_addTransmitter);
@@ -2245,6 +2270,19 @@ void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 
 	//unsetCursor();
 	event->ignore();
+}
+
+void EditSchemaWidget::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	setMouseState(MouseState::None);
+
+	if (selectedItems().empty() == false)
+	{
+		properties();
+	}
+
+	event->accept();
+	return;
 }
 
 void EditSchemaWidget::mouseMoveEvent(QMouseEvent* event)

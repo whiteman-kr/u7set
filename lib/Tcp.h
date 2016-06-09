@@ -10,7 +10,7 @@
 #include <cassert>
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/Utils.h"
+#include "../lib/WUtils.h"
 #include "../Proto/serialization.pb.h"
 
 namespace Tcp
