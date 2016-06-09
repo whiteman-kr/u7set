@@ -90,6 +90,12 @@
           </item>
           <item row="0" column="3">
            <widget class="QLineEdit" name="editSignalType">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -176,7 +182,7 @@
          </property>
          <property name="font">
           <font>
-           <pointsize>20</pointsize>
+           <pointsize>8</pointsize>
           </font>
          </property>
          <property name="autoFillBackground">

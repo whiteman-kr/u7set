@@ -140,6 +140,10 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	}
 	ui->labelValue->setText("");
 
+	QFont font = ui->labelValue->font();
+	font.setPixelSize(m_currentFontSize);
+	ui->labelValue->setFont(font);
+
 	ui->editCustomAppID->setText(m_signal.customAppSignalID());
 	ui->editCaption->setText(m_signal.caption());
 
@@ -254,7 +258,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	updateData();
 
-	m_updateStateTimerId = startTimer(100);
+	m_updateStateTimerId = startTimer(500);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -299,12 +303,12 @@ void DialogSignalInfo::updateData()
 		{
 			if ((int)state.value == m_signal.normalState())
 			{
-				strValue = QString("Yes (%1)").arg(state.value);
+				strValue = QString("No (%1)").arg(state.value);
 			}
 			else
 			{
 
-				strValue = QString("No (%1)").arg(state.value);
+				strValue = QString("Yes (%1)").arg(state.value);
 			}
 
 		}
