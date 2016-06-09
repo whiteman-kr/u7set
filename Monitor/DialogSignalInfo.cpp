@@ -66,7 +66,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 		for (int i = 0; i < colCount; i++)
 		{
-
 			QRect flagRect(x + 1, y + 1, colWidth - 2, rowHeight - 2);
 
 			if (flagNo < FLAG_NAME_COUNT)
@@ -92,7 +91,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 				painter.setBrush(noFlagBrush);
 			}
 
-
 			painter.drawRect(flagRect);
 
 			if (flagNo < FLAG_NAME_COUNT)
@@ -107,7 +105,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 		y += rowHeight;
 	}
-
 }
 
 

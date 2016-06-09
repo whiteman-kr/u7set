@@ -52,7 +52,7 @@ signals:
 	// Slots
 	//
 protected slots:
-	void contextMenu(const QPoint &pos);
+	void contextMenuRequested(const QPoint &pos);
 	void signalInfo(QString appSignalId);
 
 	// Properties
@@ -60,6 +60,7 @@ protected slots:
 public:
 	//MonitorSchemaView* schemaView();
 	//const MonitorSchemaView* schemaView() const;
+	void signalContextMenu(const QStringList signalList);
 
 	// Data
 	//

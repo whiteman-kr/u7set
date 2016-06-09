@@ -57,6 +57,11 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
+	QPoint m_signalSearchPos;
+	QByteArray m_signalSearchGeometry;
+	int m_signalSearchColumnCount = 0;
+	QByteArray m_signalSearchColumnWidth;
+
 private:
 	mutable QMutex m_mutex;
 

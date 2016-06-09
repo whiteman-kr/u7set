@@ -6,6 +6,7 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
+#include "DialogSignalSearch.h"
 #include "../VFrame30/Schema.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
@@ -417,9 +418,8 @@ void MonitorMainWindow::debug()
 
 void MonitorMainWindow::slot_findSignal()
 {
-	// To do
-	//
-	assert(false);
+	DialogSignalSearch* dsi = new DialogSignalSearch(this);
+	dsi->show();
 
 	return;
 }
