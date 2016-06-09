@@ -48,6 +48,7 @@ class GetDataSourcesInfoReply;
 class DataSourceState;
 class GetDataSourcesStatesRequest;
 class GetDataSourcesStatesReply;
+class GetUnitsRequest;
 class Unit;
 class GetUnitsReply;
 
@@ -1554,6 +1555,78 @@ class GetDataSourcesStatesReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class GetUnitsRequest : public ::google::protobuf::Message {
+ public:
+  GetUnitsRequest();
+  virtual ~GetUnitsRequest();
+
+  GetUnitsRequest(const GetUnitsRequest& from);
+
+  inline GetUnitsRequest& operator=(const GetUnitsRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetUnitsRequest& default_instance();
+
+  void Swap(GetUnitsRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetUnitsRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetUnitsRequest& from);
+  void MergeFrom(const GetUnitsRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.GetUnitsRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetUnitsRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class Unit : public ::google::protobuf::Message {
  public:
   Unit();
@@ -3053,6 +3126,10 @@ inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
 GetDataSourcesStatesReply::mutable_datasourcesstates() {
   return &datasourcesstates_;
 }
+
+// -------------------------------------------------------------------
+
+// GetUnitsRequest
 
 // -------------------------------------------------------------------
 

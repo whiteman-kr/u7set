@@ -13,21 +13,62 @@ AppSignalManager::~AppSignalManager()
 void AppSignalManager::reset()
 {
 	{
-		QMutexLocker l(&m_paramMutex);
+		QMutexLocker l(&m_unitsMutex);
+		m_units.clear();
+	}
+
+	{
+		QMutexLocker l(&m_paramsMutex);
 		m_signals.clear();
 	}
 
 	{
-		QMutexLocker l(&m_stateMutex);
+		QMutexLocker l(&m_statesMutex);
 		m_states.clear();
 	}
 
 	return;
 }
 
+void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
+{
+	QMutexLocker l(&m_unitsMutex);
+
+	m_units.clear();
+
+	for (const AppSignalUnits& u : units)
+	{
+		m_units[u.id] = u.unit;
+	}
+
+	return;
+}
+
+std::map<int, QString> AppSignalManager::units() const
+{
+	QMutexLocker l(&m_unitsMutex);
+	return std::map<int, QString>(m_units);
+}
+
+QString AppSignalManager::units(int id) const
+{
+	QMutexLocker l(&m_unitsMutex);
+
+	auto it = m_units.find(id);
+
+	if (it == m_units.end())
+	{
+		return QString();
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
 void AppSignalManager::addSignal(const Signal& signal)
 {
-	QMutexLocker l(&m_paramMutex);
+	QMutexLocker l(&m_paramsMutex);
 
 	m_signals[signal.hash()] = signal;
 
@@ -36,7 +77,7 @@ void AppSignalManager::addSignal(const Signal& signal)
 
 std::vector<Signal> AppSignalManager::signalList() const
 {
-	QMutexLocker l(&m_paramMutex);
+	QMutexLocker l(&m_paramsMutex);
 
 	std::vector<Signal> result;
 	result.reserve(m_signals.size());
@@ -63,7 +104,7 @@ bool AppSignalManager::signal(Hash signalHash, Signal* out) const
 		return false;
 	}
 
-	QMutexLocker l(&m_paramMutex);
+	QMutexLocker l(&m_paramsMutex);
 
 	auto result = m_signals.find(signalHash);
 
@@ -86,7 +127,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 		return;
 	}
 
-	QMutexLocker l(&m_stateMutex);
+	QMutexLocker l(&m_statesMutex);
 
 	m_states[signalHash] = state;
 
@@ -101,7 +142,7 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found)
 		return AppSignalState();
 	}
 
-	QMutexLocker l(&m_stateMutex);
+	QMutexLocker l(&m_statesMutex);
 
 	AppSignalState result;
 	result.flags.valid = false;

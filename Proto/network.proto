@@ -126,13 +126,15 @@ message GetDataSourcesStatesReply
 
 // Get Units
 //
+message GetUnitsRequest
+{
+}
 
 message Unit
 {
     optional int32 id = 1;
     optional string unit = 2;
 }
-
 
 message GetUnitsReply
 {
