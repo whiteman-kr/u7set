@@ -56,9 +56,6 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DataSourceState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DataSourceState_reflection_ = NULL;
-const ::google::protobuf::Descriptor* GetDataSourcesStatesRequest_descriptor_ = NULL;
-const ::google::protobuf::internal::GeneratedMessageReflection*
-  GetDataSourcesStatesRequest_reflection_ = NULL;
 const ::google::protobuf::Descriptor* GetDataSourcesStatesReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetDataSourcesStatesReply_reflection_ = NULL;
@@ -290,22 +287,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DataSourceState));
-  GetDataSourcesStatesRequest_descriptor_ = file->message_type(12);
-  static const int GetDataSourcesStatesRequest_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesRequest, datasourceids_),
-  };
-  GetDataSourcesStatesRequest_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      GetDataSourcesStatesRequest_descriptor_,
-      GetDataSourcesStatesRequest::default_instance_,
-      GetDataSourcesStatesRequest_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesRequest, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesRequest, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(GetDataSourcesStatesRequest));
-  GetDataSourcesStatesReply_descriptor_ = file->message_type(13);
+  GetDataSourcesStatesReply_descriptor_ = file->message_type(12);
   static const int GetDataSourcesStatesReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, datasourcesstates_),
@@ -321,7 +303,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetDataSourcesStatesReply));
-  GetUnitsRequest_descriptor_ = file->message_type(14);
+  GetUnitsRequest_descriptor_ = file->message_type(13);
   static const int GetUnitsRequest_offsets_[1] = {
   };
   GetUnitsRequest_reflection_ =
@@ -335,7 +317,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetUnitsRequest));
-  Unit_descriptor_ = file->message_type(15);
+  Unit_descriptor_ = file->message_type(14);
   static const int Unit_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, unit_),
@@ -351,7 +333,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Unit));
-  GetUnitsReply_descriptor_ = file->message_type(16);
+  GetUnitsReply_descriptor_ = file->message_type(15);
   static const int GetUnitsReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetUnitsReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetUnitsReply, units_),
@@ -404,8 +386,6 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DataSourceState_descriptor_, &DataSourceState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    GetDataSourcesStatesRequest_descriptor_, &GetDataSourcesStatesRequest::default_instance());
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetDataSourcesStatesReply_descriptor_, &GetDataSourcesStatesReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetUnitsRequest_descriptor_, &GetUnitsRequest::default_instance());
@@ -442,8 +422,6 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete GetDataSourcesInfoReply_reflection_;
   delete DataSourceState::default_instance_;
   delete DataSourceState_reflection_;
-  delete GetDataSourcesStatesRequest::default_instance_;
-  delete GetDataSourcesStatesRequest_reflection_;
   delete GetDataSourcesStatesReply::default_instance_;
   delete GetDataSourcesStatesReply_reflection_;
   delete GetUnitsRequest::default_instance_;
@@ -493,14 +471,13 @@ void protobuf_AddDesc_network_2eproto() {
     "ingEnabled\030\006 \001(\010\022\034\n\024processedPacketCount"
     "\030\007 \001(\003\022\034\n\024errorProtocolVersion\030\010 \001(\003\022\033\n\023"
     "errorFramesQuantity\030\t \001(\003\022\024\n\014errorFrameN"
-    "o\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\"4\n\033GetDat"
-    "aSourcesStatesRequest\022\025\n\rdataSourceIDs\030\001"
-    " \003(\004\"b\n\031GetDataSourcesStatesReply\022\020\n\005err"
-    "or\030\001 \001(\005:\0010\0223\n\021dataSourcesStates\030\002 \003(\0132\030"
-    ".Network.DataSourceState\"\021\n\017GetUnitsRequ"
-    "est\" \n\004Unit\022\n\n\002id\030\001 \001(\005\022\014\n\004unit\030\002 \001(\t\"\?\n"
-    "\rGetUnitsReply\022\020\n\005error\030\001 \001(\005:\0010\022\034\n\005unit"
-    "s\030\002 \003(\0132\r.Network.Unit", 1542);
+    "o\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\"b\n\031GetDat"
+    "aSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0223\n"
+    "\021dataSourcesStates\030\002 \003(\0132\030.Network.DataS"
+    "ourceState\"\021\n\017GetUnitsRequest\" \n\004Unit\022\n\n"
+    "\002id\030\001 \001(\005\022\014\n\004unit\030\002 \001(\t\"\?\n\rGetUnitsReply"
+    "\022\020\n\005error\030\001 \001(\005:\0010\022\034\n\005units\030\002 \003(\0132\r.Netw"
+    "ork.Unit", 1488);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -515,7 +492,6 @@ void protobuf_AddDesc_network_2eproto() {
   GetDataSourcesInfoRequest::default_instance_ = new GetDataSourcesInfoRequest();
   GetDataSourcesInfoReply::default_instance_ = new GetDataSourcesInfoReply();
   DataSourceState::default_instance_ = new DataSourceState();
-  GetDataSourcesStatesRequest::default_instance_ = new GetDataSourcesStatesRequest();
   GetDataSourcesStatesReply::default_instance_ = new GetDataSourcesStatesReply();
   GetUnitsRequest::default_instance_ = new GetUnitsRequest();
   Unit::default_instance_ = new Unit();
@@ -532,7 +508,6 @@ void protobuf_AddDesc_network_2eproto() {
   GetDataSourcesInfoRequest::default_instance_->InitAsDefaultInstance();
   GetDataSourcesInfoReply::default_instance_->InitAsDefaultInstance();
   DataSourceState::default_instance_->InitAsDefaultInstance();
-  GetDataSourcesStatesRequest::default_instance_->InitAsDefaultInstance();
   GetDataSourcesStatesReply::default_instance_->InitAsDefaultInstance();
   GetUnitsRequest::default_instance_->InitAsDefaultInstance();
   Unit::default_instance_->InitAsDefaultInstance();
@@ -4280,217 +4255,6 @@ void DataSourceState::Swap(DataSourceState* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = DataSourceState_descriptor_;
   metadata.reflection = DataSourceState_reflection_;
-  return metadata;
-}
-
-
-// ===================================================================
-
-#ifndef _MSC_VER
-const int GetDataSourcesStatesRequest::kDataSourceIDsFieldNumber;
-#endif  // !_MSC_VER
-
-GetDataSourcesStatesRequest::GetDataSourcesStatesRequest()
-  : ::google::protobuf::Message() {
-  SharedCtor();
-}
-
-void GetDataSourcesStatesRequest::InitAsDefaultInstance() {
-}
-
-GetDataSourcesStatesRequest::GetDataSourcesStatesRequest(const GetDataSourcesStatesRequest& from)
-  : ::google::protobuf::Message() {
-  SharedCtor();
-  MergeFrom(from);
-}
-
-void GetDataSourcesStatesRequest::SharedCtor() {
-  _cached_size_ = 0;
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-}
-
-GetDataSourcesStatesRequest::~GetDataSourcesStatesRequest() {
-  SharedDtor();
-}
-
-void GetDataSourcesStatesRequest::SharedDtor() {
-  if (this != default_instance_) {
-  }
-}
-
-void GetDataSourcesStatesRequest::SetCachedSize(int size) const {
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-}
-const ::google::protobuf::Descriptor* GetDataSourcesStatesRequest::descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return GetDataSourcesStatesRequest_descriptor_;
-}
-
-const GetDataSourcesStatesRequest& GetDataSourcesStatesRequest::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
-  return *default_instance_;
-}
-
-GetDataSourcesStatesRequest* GetDataSourcesStatesRequest::default_instance_ = NULL;
-
-GetDataSourcesStatesRequest* GetDataSourcesStatesRequest::New() const {
-  return new GetDataSourcesStatesRequest;
-}
-
-void GetDataSourcesStatesRequest::Clear() {
-  datasourceids_.Clear();
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
-}
-
-bool GetDataSourcesStatesRequest::MergePartialFromCodedStream(
-    ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
-  ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated uint64 dataSourceIDs = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_dataSourceIDs:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
-                 1, 8, input, this->mutable_datasourceids())));
-        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
-                   == ::google::protobuf::internal::WireFormatLite::
-                      WIRETYPE_LENGTH_DELIMITED) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
-                 input, this->mutable_datasourceids())));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(8)) goto parse_dataSourceIDs;
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
-    }
-  }
-  return true;
-#undef DO_
-}
-
-void GetDataSourcesStatesRequest::SerializeWithCachedSizes(
-    ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated uint64 dataSourceIDs = 1;
-  for (int i = 0; i < this->datasourceids_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(
-      1, this->datasourceids(i), output);
-  }
-
-  if (!unknown_fields().empty()) {
-    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
-        unknown_fields(), output);
-  }
-}
-
-::google::protobuf::uint8* GetDataSourcesStatesRequest::SerializeWithCachedSizesToArray(
-    ::google::protobuf::uint8* target) const {
-  // repeated uint64 dataSourceIDs = 1;
-  for (int i = 0; i < this->datasourceids_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteUInt64ToArray(1, this->datasourceids(i), target);
-  }
-
-  if (!unknown_fields().empty()) {
-    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
-        unknown_fields(), target);
-  }
-  return target;
-}
-
-int GetDataSourcesStatesRequest::ByteSize() const {
-  int total_size = 0;
-
-  // repeated uint64 dataSourceIDs = 1;
-  {
-    int data_size = 0;
-    for (int i = 0; i < this->datasourceids_size(); i++) {
-      data_size += ::google::protobuf::internal::WireFormatLite::
-        UInt64Size(this->datasourceids(i));
-    }
-    total_size += 1 * this->datasourceids_size() + data_size;
-  }
-
-  if (!unknown_fields().empty()) {
-    total_size +=
-      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
-        unknown_fields());
-  }
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = total_size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-  return total_size;
-}
-
-void GetDataSourcesStatesRequest::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  const GetDataSourcesStatesRequest* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const GetDataSourcesStatesRequest*>(
-      &from);
-  if (source == NULL) {
-    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
-  } else {
-    MergeFrom(*source);
-  }
-}
-
-void GetDataSourcesStatesRequest::MergeFrom(const GetDataSourcesStatesRequest& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  datasourceids_.MergeFrom(from.datasourceids_);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
-}
-
-void GetDataSourcesStatesRequest::CopyFrom(const ::google::protobuf::Message& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void GetDataSourcesStatesRequest::CopyFrom(const GetDataSourcesStatesRequest& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool GetDataSourcesStatesRequest::IsInitialized() const {
-
-  return true;
-}
-
-void GetDataSourcesStatesRequest::Swap(GetDataSourcesStatesRequest* other) {
-  if (other != this) {
-    datasourceids_.Swap(&other->datasourceids_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
-}
-
-::google::protobuf::Metadata GetDataSourcesStatesRequest::GetMetadata() const {
-  protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::Metadata metadata;
-  metadata.descriptor = GetDataSourcesStatesRequest_descriptor_;
-  metadata.reflection = GetDataSourcesStatesRequest_reflection_;
   return metadata;
 }
 

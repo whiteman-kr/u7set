@@ -48,7 +48,6 @@ HEADERS  += TcpClientMainWindow.h \
     ../lib/TcpFileTransfer.h \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
-    ../lib/Utils.h \
     ../lib/Md5Hash.h \
     ../AppDataService/TcpAppDataClient.h \
     ../Proto/network.pb.h \

@@ -76,7 +76,6 @@ HEADERS  += TuningMainWindow.h \
 	../TuningService/TuningSocket.h \
 	../lib/Crc.h \
 	AnalogSignalSetter.h \
-    ../lib/Utils.h \
     ../lib/WUtils.h \
     TuningIPENService.h \
     ../TuningService/TuningDataStorage.h \
