@@ -306,6 +306,10 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
 		}
+		if (!m_editedSignalsId.contains(signal->ID()))
+		{
+			m_editedSignalsId.append(signal->ID());
+		}
 	}
 }
 

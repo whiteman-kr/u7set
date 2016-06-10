@@ -538,6 +538,7 @@ bool SignalsModel::checkoutSignal(int index)
 			return false;
 		}
 	}
+	loadSignal(index, true);
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
@@ -587,6 +588,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 			return false;
 		}
 	}
+	loadSignal(index, true);
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
@@ -1195,9 +1197,12 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		QVector<ObjectState> states;
 		for (int i = 0; i < ids.count(); i++)
 		{
-			ObjectState state;
-			dbController()->setSignalWorkcopy(signalVector[i], &state, parrentWindow());
-			states.append(state);
+			if (dlg.isEditedSignal(ids[i]))
+			{
+				ObjectState state;
+				dbController()->setSignalWorkcopy(signalVector[i], &state, parrentWindow());
+				states.append(state);
+			}
 		}
 		showErrors(states);
 
