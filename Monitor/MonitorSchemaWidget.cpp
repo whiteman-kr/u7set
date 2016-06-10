@@ -1,6 +1,9 @@
+#include <QMessageBox>
+#include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaView.h"
 #include "SchemaManager.h"
+#include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 
 //
@@ -16,7 +19,7 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 	assert(m_schemaManager);
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenu);
+	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
 
 	createActions();
 
@@ -120,17 +123,13 @@ QString MonitorSchemaWidget::caption() const
 	return schema()->caption();
 }
 
-void MonitorSchemaWidget::contextMenu(const QPoint& pos)
+void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
 	// Disable/enable actions
 	//
 
 	//m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
 
-	// Compose menu
-	//
-	QMenu menu(this);
-	QList<QAction*> actions;
 
 	// Signals items
 	//
@@ -146,24 +145,7 @@ void MonitorSchemaWidget::contextMenu(const QPoint& pos)
 			{
 				const QStringList& signalList = schemaItemSignal->appSignalIdList();
 
-				for (const QString& s: signalList)
-				{
-					Signal signal;
-					bool ok = theSignals.signal(s, &signal);
-
-					QString signalId = ok ? QString("%1 %2").arg(signal.customAppSignalID()).arg(signal.caption()) : s;
-
-					QAction* a = new QAction(signalId, &menu);
-
-					auto f = [this, s]() -> void
-							 {
-								signalInfo(s);
-							 };
-
-					connect(a, &QAction::triggered, this, f);
-
-					actions << a;
-				}
+				signalContextMenu(signalList);
 			}
 		}
 	}
@@ -172,17 +154,53 @@ void MonitorSchemaWidget::contextMenu(const QPoint& pos)
 //	actions << m_newTabAction;
 //	actions << m_closeTabAction;
 
-	menu.exec(actions, mapToGlobal(pos), 0, this);
 
 	return;
 }
 
+void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
+{
+	// Compose menu
+	//
+	QMenu menu(this);
+	QList<QAction*> actions;
+
+	for (const QString& s : signalList)
+	{
+		Signal signal;
+		bool ok = theSignals.signal(s, &signal);
+
+		QString signalId = ok ? QString("%1 %2").arg(signal.customAppSignalID()).arg(signal.caption()) : s;
+
+		QAction* a = new QAction(signalId, &menu);
+
+		auto f = [this, s]() -> void
+				 {
+					signalInfo(s);
+				 };
+
+		connect(a, &QAction::triggered, this, f);
+
+		actions << a;
+
+	}
+
+	menu.exec(actions, QCursor::pos(), 0, this);
+}
+
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	qDebug() << "MonitorSchemaWidget::signalInfo:  " << appSignalId;
-
-	// To do
-	//
+	Signal signal;
+	bool ok = theSignals.signal(appSignalId, &signal);
+	if (ok == true)
+	{
+		DialogSignalInfo* dsi = new DialogSignalInfo(this, signal);
+		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("Error"), tr("No information about this signal!"));
+	}
 
 	return;
 }

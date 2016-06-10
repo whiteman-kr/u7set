@@ -177,7 +177,8 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		}
 		else
 		{
-			assert(false);
+			qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
+			//assert(false);
 			return false;
 		}
 	}
