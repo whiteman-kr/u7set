@@ -13,6 +13,7 @@ private slots:
 	void initTestCase();
 	void addSignalTest();
 	void getSignalIds();
+	void checkInSignals();
 	void cleanupTestCase();
 
 private:
