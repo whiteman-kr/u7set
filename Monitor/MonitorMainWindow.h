@@ -135,4 +135,6 @@ private:
 	QComboBox* m_comboBox = nullptr;
 };
 
+extern MonitorMainWindow* theMonitorMainWindow;
+
 #endif // MONITORMAINWINDOW_H

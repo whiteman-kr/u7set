@@ -53,6 +53,8 @@ signals:
 	//
 protected slots:
 	void contextMenuRequested(const QPoint &pos);
+
+public slots:
 	void signalInfo(QString appSignalId);
 
 	// Properties

@@ -41,6 +41,7 @@ public:
 	Q_ENUM(ViewType)
 
 private slots:
+	void prepareContextMenu(const QPoint& pos);
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;

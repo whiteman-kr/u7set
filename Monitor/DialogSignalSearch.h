@@ -18,9 +18,10 @@ public:
 
 private slots:
 	void on_editSignalID_textEdited(const QString &arg1);
-	void on_comboSignalType_currentIndexChanged(int index);
 	void on_DialogSignalSearch_finished(int result);
 	void prepareContextMenu(const QPoint& pos);
+
+	void on_signalsTree_doubleClicked(const QModelIndex &index);
 
 protected:
 
@@ -31,7 +32,6 @@ private:
 	Ui::DialogSignalSearch *ui;
 
 	static QString m_signalID;
-	static int m_signalTypeIndex;
 
 	std::vector<Signal> m_signals;
 };

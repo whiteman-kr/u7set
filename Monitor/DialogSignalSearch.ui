@@ -28,16 +28,6 @@
        <item>
         <widget class="QLineEdit" name="editSignalID"/>
        </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Type</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboSignalType"/>
-       </item>
       </layout>
      </item>
      <item>
