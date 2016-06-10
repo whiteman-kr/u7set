@@ -27,6 +27,8 @@ public:
 	explicit SignalPropertiesDialog(Signal& signal, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
 	explicit SignalPropertiesDialog(QVector<Signal*> signalVector, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
 
+	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
+
 signals:
 	void onError(QString message);
 
@@ -38,6 +40,7 @@ public slots:
 
 private:
 	QVector<Signal*> m_signalVector;
+	QVector<int> m_editedSignalsId;
 	QDialogButtonBox* m_buttonBox;
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
