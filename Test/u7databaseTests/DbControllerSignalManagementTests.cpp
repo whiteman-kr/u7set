@@ -359,6 +359,39 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	db.close();
 }
 
+void DbControllerSignalTests::getUnitsTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	UnitList result;
+	QSqlQuery query;
+
+	bool ok = m_dbController->getUnits(&result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec("SELECT * FROM get_units()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	int unitIndex = 0;
+
+	while (query.next())
+	{
+		QVERIFY2(result.at(unitIndex).first == query.value("unitId").toInt(), qPrintable("Error: wrong unitId"));
+		QVERIFY2(result.at(unitIndex).second == query.value("unit_en").toString(), qPrintable("Error: wrong unit_en"));
+		unitIndex++;
+	}
+
+	db.close();
+
+}
+
 void DbControllerSignalTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
