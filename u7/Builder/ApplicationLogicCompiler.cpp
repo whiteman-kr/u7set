@@ -250,7 +250,7 @@ namespace Builder
 
 			Hardware::OptoPort* optoPort1 = nullptr;
 
-			optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1StrID());
+			optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
 
 			// check port 1
 			//
@@ -258,20 +258,20 @@ namespace Builder
 			{
 				// Undefined opto port '%1' in the connection '%2'.
 				//
-				m_log->errALC5021(connection->port1StrID(), connection->caption());
+				m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
 				result = false;
 				continue;
 			}
 
 			if (optoPort1->connectionCaption().isEmpty() == true)
 			{
-				optoPort1->setConnectionCaption(connection->caption());
+				optoPort1->setConnectionCaption(connection->connectionID());
 			}
 			else
 			{
 				// Opto port '%1' of connection '%2' is already used in connection '%3'.
 				//
-				m_log->errALC5019(optoPort1->strID(), connection->caption(), optoPort1->connectionCaption());
+				m_log->errALC5019(optoPort1->strID(), connection->connectionID(), optoPort1->connectionCaption());
 				result = false;
 				continue;
 			}
@@ -301,14 +301,14 @@ namespace Builder
 				{
 					// LM's port '%1' can't work in RS232/485 mode (connection '%2').
 					//
-					m_log->errALC5020(connection->port1StrID(), connection->caption());
+					m_log->errALC5020(connection->port1EquipmentID(), connection->connectionID());
 					result = false;
 				}
 
 				optoPort1->addTxSignalsStrID(connection->signalList());
 
 				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
-							arg(connection->caption()).arg(portID));
+							arg(connection->connectionID()).arg(portID));
 			}
 			else
 			{
@@ -316,13 +316,13 @@ namespace Builder
 
 				// check port 2
 				//
-				Hardware::OptoPort* optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2StrID());
+				Hardware::OptoPort* optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
 
 				if (optoPort2 == nullptr)
 				{
 					// Undefined opto port '%1' in the connection '%2'.
 					//
-					m_log->errALC5021(connection->port2StrID(), connection->caption());
+					m_log->errALC5021(connection->port2EquipmentID(), connection->connectionID());
 					result = false;
 					continue;
 				}
@@ -331,7 +331,7 @@ namespace Builder
 				{
 					// Opto ports '%1' and '%2' are not compatible (connection '%3').
 					//
-					m_log->errALC5018(connection->port1StrID(), connection->port2StrID(), connection->caption());
+					m_log->errALC5018(connection->port1EquipmentID(), connection->port2EquipmentID(), connection->connectionID());
 					result = false;
 					continue;
 				}
@@ -345,7 +345,7 @@ namespace Builder
 					{
 						//  Opto ports of the same chassis is linked via connection '%1'.
 						//
-						m_log->errALC5022(connection->caption());
+						m_log->errALC5022(connection->connectionID());
 						result = false;
 						continue;
 					}
@@ -357,13 +357,13 @@ namespace Builder
 
 				if (optoPort2->connectionCaption().isEmpty() == true)
 				{
-					optoPort2->setConnectionCaption(connection->caption());
+					optoPort2->setConnectionCaption(connection->connectionID());
 				}
 				else
 				{
 					// Opto port '%1' of connection '%2' is already used in connection '%3'.
 					//
-					m_log->errALC5019(optoPort2->strID(), connection->caption(), optoPort2->connectionCaption());
+					m_log->errALC5019(optoPort2->strID(), connection->connectionID(), optoPort2->connectionCaption());
 					result = false;
 					continue;
 				}
@@ -384,7 +384,7 @@ namespace Builder
 				optoPort2->setLinkedPortStrID(optoPort1->strID());
 
 				LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
-							arg(connection->caption()).arg(portID));
+							arg(connection->connectionID()).arg(portID));
 			}
 		}
 
@@ -552,7 +552,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -571,7 +571,7 @@ namespace Builder
 
 		bool result = true;
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount);
 
 		if (multichannelFile != nullptr)
 		{

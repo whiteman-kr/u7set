@@ -812,13 +812,13 @@ namespace Hardware
 				continue;
 			}
 
-			if (m_connections.contains(connection->caption()) == false)
+			if (m_connections.contains(connection->connectionID()) == false)
 			{
-				m_connections.insert(connection->caption(), connection);
+				m_connections.insert(connection->connectionID(), connection);
 			}
 			else
 			{
-				m_log->errALC5023(connection->caption());
+				m_log->errALC5023(connection->connectionID());
 				result = false;
 				break;
 			}

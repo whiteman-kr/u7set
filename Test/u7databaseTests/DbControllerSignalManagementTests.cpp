@@ -151,7 +151,7 @@ void DbControllerSignalTests::addSignalTest()
 	db.close();
 }
 
-void DbControllerSignalTests::getSignalIds()
+void DbControllerSignalTests::getSignalIdsTest()
 {
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -235,7 +235,7 @@ void DbControllerSignalTests::getSignalIds()
 	db.close();
 }
 
-void DbControllerSignalTests::checkInSignals()
+void DbControllerSignalTests::checkInCheckOutSignalsTest()
 {
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -337,7 +337,59 @@ void DbControllerSignalTests::checkInSignals()
 		QVERIFY2(query.value("checkedInInstanceId").toInt() != 0, qPrintable("Error: Actually, signal was not checked In (Not empty checkedInInstanceId)"));
 	}
 
+	os.clear();
+
+	ok = m_dbController->checkoutSignals(&signalIds, &os, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2(os.size() == signalsToAdd.size(), qPrintable("Error: wrong amount of signals object states returned"));
+
+	for (ObjectState buffObjectState : os)
+	{
+		QVERIFY2(buffObjectState.checkedOut == true, qPrintable("Error: wrong objectState returned"));
+
+		ok = query.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(buffObjectState.id));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first(), qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2(query.value("checkedOutInstanceId").toInt() != 0, qPrintable("Error: Actually, signal was not checked In (Not empty checkedOutInstanceId)"));
+		QVERIFY2(query.value("checkedInInstanceId").toInt() != 0, qPrintable("Error: Actually, signal was not checked In (Not empty checkedInInstanceId)"));
+	}
+
 	db.close();
+}
+
+void DbControllerSignalTests::getUnitsTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	UnitList result;
+	QSqlQuery query;
+
+	bool ok = m_dbController->getUnits(&result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec("SELECT * FROM get_units()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	int unitIndex = 0;
+
+	while (query.next())
+	{
+		QVERIFY2(result.at(unitIndex).first == query.value("unitId").toInt(), qPrintable("Error: wrong unitId"));
+		QVERIFY2(result.at(unitIndex).second == query.value("unit_en").toString(), qPrintable("Error: wrong unit_en"));
+		unitIndex++;
+	}
+
+	db.close();
+
 }
 
 void DbControllerSignalTests::cleanupTestCase()

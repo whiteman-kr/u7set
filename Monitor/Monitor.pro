@@ -70,7 +70,8 @@ SOURCES += main.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     DialogSignalInfo.cpp \
-    DialogSignalSearch.cpp
+    DialogSignalSearch.cpp \
+    DialogSignalSnapshot.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -104,12 +105,14 @@ HEADERS  += \
     ../lib/AppSignalManager.h \
     Statistics.h \
     DialogSignalInfo.h \
-    DialogSignalSearch.h
+    DialogSignalSearch.h \
+    DialogSignalSnapshot.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogSignalInfo.ui \
-    DialogSignalSearch.ui
+    DialogSignalSearch.ui \
+    DialogSignalSnapshot.ui
 
 
 # Optimization flags

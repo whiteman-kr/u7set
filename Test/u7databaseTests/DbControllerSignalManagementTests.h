@@ -12,8 +12,9 @@ public:
 private slots:
 	void initTestCase();
 	void addSignalTest();
-	void getSignalIds();
-	void checkInSignals();
+	void getSignalIdsTest();
+	void checkInCheckOutSignalsTest();
+	void getUnitsTest();
 	void cleanupTestCase();
 
 private:

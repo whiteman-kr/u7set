@@ -59,7 +59,7 @@ namespace Builder
 		Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
 		Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
 		Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
-		Q_INVOKABLE void errCFG3003(int channel, QString module);
+		Q_INVOKABLE void errCFG3003(int LMNumber, QString module);
 		Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
 
 		Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);

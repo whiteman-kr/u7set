@@ -53,9 +53,8 @@ namespace Hardware
 		//
 	public:
 		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
-		bool save(QByteArray &dest, QString *errorMsg);
         bool load(QString fileName);
-        bool isEmpty() const;
+		bool isEmpty() const;
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
 		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
@@ -74,10 +73,8 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
-		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, QString* errorMsg);
 
 	private:
-		bool storeChannelData(QString *errorMsg);
 
 		// Properties
 		//
@@ -93,7 +90,7 @@ namespace Hardware
 
 		// Data
 		//
-    private:
+	protected:
 		QString m_caption;
 		QString m_subsysId;
 		quint16 m_ssKey = 0;
@@ -111,34 +108,6 @@ namespace Hardware
         QByteArray m_log;
     };
 
-	class ModuleFirmwareCollection : public QObject
-	{
-		Q_OBJECT
 
-	public:
-		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int changesetId);
-		virtual ~ModuleFirmwareCollection();
-
-		// Methods
-		//
-	public:
-		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount);
-
-		// Properties
-		//
-	public:
-
-		// Data
-		//
-	public:
-		std::map<QString, ModuleFirmware> &firmwares();
-
-	private:
-		std::map<QString, ModuleFirmware> m_firmwares;
-
-		QString m_projectName;
-		QString m_userName;
-		int m_changesetId;
-	};
 }
 

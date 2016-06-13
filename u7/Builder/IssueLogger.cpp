@@ -274,21 +274,21 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property System\\Channel (%1) is not unique (Logic Module '%2').
+	/// Title: Property System\\LMNumber (%1) is not unique in Logic Module '%2'.
 	///
 	/// Parameters:
-	///         %1 Channel
-	///			%2 Module StrID
+	///         %1 LMNumber
+	///			%2 Module ID
 	///
 	/// Description:
-	///			Property System\\Channel in Logic Module must be unique.
+	///			Property System\\LMNumber in logic modules for same subsystem must be unique.
 	///
-	void IssueLogger::errCFG3003(int channel, QString module)
+	void IssueLogger::errCFG3003(int LMNumber, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3003,
-				  tr("Property System\\Channel (%1) is not unique (Logic Module '%2').")
-				  .arg(channel)
+				  tr("Property System\\LMNumber (%1) is not unique in Logic Module '%2'.")
+				  .arg(LMNumber)
 				  .arg(module));
 	}
 

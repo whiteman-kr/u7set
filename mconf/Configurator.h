@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include "../include/ModuleConfiguration.h"
+#include "../lib/ModuleConfiguration.h"
 
 class OutputLog;
 
