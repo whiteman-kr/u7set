@@ -9,6 +9,7 @@
 
 
 AppSignalManager theSignals;
+MonitorMainWindow* theMonitorMainWindow = nullptr;
 
 
 int main(int argc, char *argv[])
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
 	// --
 	//
 	MonitorMainWindow w;
+	theMonitorMainWindow = &w;
 	w.show();
 
 	// --

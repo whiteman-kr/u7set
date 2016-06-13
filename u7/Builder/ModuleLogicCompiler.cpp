@@ -3369,8 +3369,10 @@ namespace Builder
 		bool result = true;
 
 		QString subsysId;
+		QString lmEduipmentID;
 		int lmNumber = 0;
 
+		result &= DeviceHelper::getStrProperty(m_lm, "EquipmentID", &lmEduipmentID, m_log);
 		result &= DeviceHelper::getStrProperty(m_lm, "SubsystemID", &subsysId, m_log);
 		result &= DeviceHelper::getIntProperty(m_lm, "LMNumber", &lmNumber, m_log);
 
@@ -3387,7 +3389,7 @@ namespace Builder
 
 		m_code.getBinCode(binCode);
 
-		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmCaption, lmNumber,
+		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmEduipmentID, lmCaption, lmNumber,
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 
 		result &= setLmAppLANDataUID(binCode);

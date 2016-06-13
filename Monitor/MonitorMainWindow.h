@@ -57,6 +57,7 @@ protected slots:
 
 	// slots
 protected:
+	void slot_signalSnapshot();
 	void slot_findSignal();
 
 	// Properties
@@ -96,6 +97,7 @@ private:
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;
 
+	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
 	// Controls
@@ -134,5 +136,7 @@ private:
 	QLabel* m_label = nullptr;
 	QComboBox* m_comboBox = nullptr;
 };
+
+extern MonitorMainWindow* theMonitorMainWindow;
 
 #endif // MONITORMAINWINDOW_H

@@ -10,6 +10,7 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/BuildInfo.h"
+#include "../Builder/ModuleFirmwareWriter.h"
 
 
 class DbController;
@@ -87,15 +88,16 @@ namespace Builder
 	{
 	private:
 		BuildResultWriter& m_buildResultWriter;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 		QString m_subsysStrID;
 		int m_subsysID = 0;
+		QString m_lmEquipmentID;
 		QString m_lmCaption;
 
-		Hardware::ModuleFirmware m_moduleFirmware;
+		Hardware::ModuleFirmwareWriter m_moduleFirmware;
 
 	public:
-		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
+		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount);
 
 		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
@@ -165,7 +167,7 @@ namespace Builder
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
-		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
+		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount);
 		bool writeMultichannelFiles();
 
 		bool writeConfigurationXmlFiles();

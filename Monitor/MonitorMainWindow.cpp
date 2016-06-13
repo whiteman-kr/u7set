@@ -7,6 +7,7 @@
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
 #include "DialogSignalSearch.h"
+#include "DialogSignalSnapshot.h"
 #include "../VFrame30/Schema.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
@@ -224,6 +225,13 @@ void MonitorMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
+	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
+	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
+	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Camera.svg"));
+	m_signalSnapshotAction->setEnabled(true);
+	m_signalSnapshotAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	connect(m_signalSnapshotAction, &QAction::triggered, this, &MonitorMainWindow::slot_signalSnapshot);
+
 	m_findSignalAction = new QAction(tr("Find Signal"), this);
 	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
 	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
@@ -262,6 +270,7 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_historyBack );
 
 	viewMenu->addSeparator();
+	viewMenu->addAction(m_signalSnapshotAction);
 	viewMenu->addAction(m_findSignalAction);
 
 
@@ -308,6 +317,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_historyForward);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
@@ -414,6 +424,14 @@ void MonitorMainWindow::debug()
 //	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
+}
+
+void MonitorMainWindow::slot_signalSnapshot()
+{
+	DialogSignalSnapshot* dss = new DialogSignalSnapshot(this);
+	dss->show();
+
+	return;
 }
 
 void MonitorMainWindow::slot_findSignal()

@@ -31,22 +31,22 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 HEADERS += \
 	Stable.h \
 	ftdi/ftd2xx.h \
-	../include/DbStruct.h \
-    ../include/DeviceObject.h \
-    ../include/OutputLog.h \
+        ../lib/DbStruct.h \
+    ../lib/DeviceObject.h \
+    ../lib/OutputLog.h \
     ../Proto/serialization.pb.h \
-    ../include/ModuleConfiguration.h \
-    ../include/ProtoSerialization.h \
+    ../lib/ModuleConfiguration.h \
+    ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
     Configurator.h \
     DiagTabPage.h \
     ModuleConfigurator.h \
     SettingsForm.h \
-	../include/Crc.h \
-	../include/CUtils.h \
-    ../include/PropertyObject.h \
-    ../include/Types.h
+        ../lib/Crc.h \
+        ../lib/CUtils.h \
+    ../lib/PropertyObject.h \
+    ../lib/Types.h
 
 SOURCES += \
 	main.cpp \

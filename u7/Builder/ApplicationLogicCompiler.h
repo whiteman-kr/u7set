@@ -45,7 +45,7 @@ namespace Builder
 		bool compileModulesLogicsPass2();
 		bool disposeOptoModulesTxRxBuffers();
 
-		bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
 		void clear();
 

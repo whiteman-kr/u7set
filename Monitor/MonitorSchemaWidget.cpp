@@ -190,11 +190,17 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
+	if (theMonitorMainWindow == nullptr)
+	{
+		assert(theMonitorMainWindow);
+		return;
+	}
+
 	Signal signal;
 	bool ok = theSignals.signal(appSignalId, &signal);
 	if (ok == true)
 	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(this, signal);
+		DialogSignalInfo* dsi = new DialogSignalInfo(theMonitorMainWindow, signal);
 		dsi->show();
 	}
 	else

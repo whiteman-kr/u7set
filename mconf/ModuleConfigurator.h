@@ -3,8 +3,8 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_moduleconfigurator.h"
-#include "../include/ModuleConfiguration.h"
-#include "../include/OutputLog.h"
+#include "../lib/ModuleConfiguration.h"
+#include "../lib/OutputLog.h"
 #include "Settings.h"
 
 class QLineEdit;
