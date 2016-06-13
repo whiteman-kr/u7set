@@ -235,6 +235,111 @@ void DbControllerSignalTests::getSignalIds()
 	db.close();
 }
 
+void DbControllerSignalTests::checkInSignals()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	QVector<Signal> signalsToAdd;
+
+	QString firstCaption, secondCaption;
+
+	firstCaption = "firstCheckInTest";
+	secondCaption = "secondCheckInTest";
+
+	Signal newSignal;
+	newSignal.setCaption(firstCaption);
+	newSignal.setAcquire(true);
+	newSignal.setAperture(0.3);
+	newSignal.setAppSignalID(firstCaption);
+	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
+	newSignal.setCalculated(true);
+	newSignal.setCustomAppSignalID(firstCaption);
+	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setDataSize(30);
+	newSignal.setDecimalPlaces(3);
+	newSignal.setEnableTuning(true);
+	newSignal.setEquipmentID(firstCaption);
+	newSignal.setFilteringTime(7.3);
+	newSignal.setHighADC(500);
+	newSignal.setHighEngeneeringUnits(3245.6);
+	newSignal.setHighValidRange(3546.4);
+	newSignal.setInOutType(E::SignalInOutType::Input);
+	newSignal.setInputHighLimit(2345.3);
+	newSignal.setInputLowLimit(134.4);
+	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(1);
+	newSignal.setLowADC(1234);
+	newSignal.setLowEngeneeringUnits(345.1);
+	newSignal.setLowValidRange(134.9);
+	newSignal.setNormalState(1234);
+	newSignal.setObjectName(firstCaption);
+	newSignal.setOutputHighLimit(85678.5);
+	newSignal.setOutputLowLimit(12536.5);
+	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
+	newSignal.setOutputSensorID(13443);
+	newSignal.setOutputUnitID(1);
+	newSignal.setReadOnly(false);
+	newSignal.setSpreadTolerance(35634.6);
+	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setUnbalanceLimit(98769.3);
+	newSignal.setUnitID(1);
+
+	signalsToAdd.push_back(newSignal);
+
+	newSignal.setCaption(secondCaption);
+	newSignal.setAppSignalID(secondCaption);
+	newSignal.setCustomAppSignalID(secondCaption);
+	newSignal.setEquipmentID(secondCaption);
+	newSignal.setObjectName(secondCaption);
+
+	signalsToAdd.push_back(newSignal);
+
+	bool ok = m_dbController->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVector<int> signalIds;
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption = '%1' OR caption = '%2'").arg(firstCaption).arg(secondCaption));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next())
+	{
+		signalIds.push_back(query.value("signalId").toInt());
+	}
+
+	QVERIFY2 (signalIds.size() == signalsToAdd.size(), qPrintable("Error: wrong amount of records when detecting signalId"));
+
+	QVector<ObjectState> os;
+
+	ok = m_dbController->checkinSignals(&signalIds, "CheckIn test for signals", &os, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2(os.size() == signalsToAdd.size(), qPrintable("Error: wrong amount of signals object states returned"));
+
+	for (ObjectState buffObjectState : os)
+	{
+		QVERIFY2(buffObjectState.checkedOut == false, qPrintable("Error: wrong objectState returned"));
+
+		ok = query.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(buffObjectState.id));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first(), qPrintable(query.lastError().databaseText()));
+
+		QVERIFY2(query.value("checkedOutInstanceId").toInt() == 0, qPrintable("Error: Actually, signal was not checked In (Not empty checkedOutInstanceId)"));
+		QVERIFY2(query.value("checkedInInstanceId").toInt() != 0, qPrintable("Error: Actually, signal was not checked In (Not empty checkedInInstanceId)"));
+	}
+
+	db.close();
+}
+
 void DbControllerSignalTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
