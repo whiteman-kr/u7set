@@ -450,7 +450,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -469,7 +469,7 @@ namespace Builder
 
 		bool result = true;
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount);
 
 		if (multichannelFile != nullptr)
 		{
