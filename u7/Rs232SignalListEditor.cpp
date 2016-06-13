@@ -204,8 +204,8 @@ void Rs232SignalListEditor::addConnection()
 		assert(connection);
 		return;
 	}
-	connection->setCaption(QString("RS232/485 connection %1").arg(index + 1));
-    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+	connection->setConnectionID(QString("RS232/485 connection %1").arg(index + 1));
+	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
     connection->setSerialMode(Hardware::OptoPort::SerialMode::RS232);
     connection->setMode(Hardware::OptoPort::Mode::Serial);
 	connection->setEnable(true);
@@ -213,9 +213,9 @@ void Rs232SignalListEditor::addConnection()
 	m_connections.add(connection);
 
 	m_rs232Connections->insertRow(index);
-	m_rs232Connections->setItem(index, 0, new QTableWidgetItem(connection->caption()));
+	m_rs232Connections->setItem(index, 0, new QTableWidgetItem(connection->connectionID()));
 	m_rs232Connections->item(index, 0)->setData(Qt::UserRole, m_connections.count() - 1);
-    m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->port1StrID()));
+	m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->port1EquipmentID()));
 	m_rs232Connections->item(index, 1)->setData(Qt::UserRole, m_connections.count() - 1);
     m_rs232Connections->setItem(index, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 	m_rs232Connections->item(index, 2)->setData(Qt::UserRole, m_connections.count() - 1);
@@ -468,9 +468,9 @@ void Rs232SignalListEditor::fillConnectionsList()
 		}
 
 		m_rs232Connections->insertRow(rowCount);
-		m_rs232Connections->setItem(rowCount, 0, new QTableWidgetItem(connection->caption()));
+		m_rs232Connections->setItem(rowCount, 0, new QTableWidgetItem(connection->connectionID()));
 		m_rs232Connections->item(rowCount, 0)->setData(Qt::UserRole, i);
-        m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->port1StrID()));
+		m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->port1EquipmentID()));
 		m_rs232Connections->item(rowCount, 1)->setData(Qt::UserRole, i);
         m_rs232Connections->setItem(rowCount, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 		m_rs232Connections->item(rowCount, 2)->setData(Qt::UserRole, i);
@@ -610,10 +610,10 @@ bool Rs232SignalListEditor::continueWithDuplicateCaptions()
 				continue;
 			}
 
-			if (e->caption() == c->caption())
+			if (e->connectionID() == c->connectionID())
 			{
 				duplicated = true;
-				duplicatedCaption = e->caption();
+				duplicatedCaption = e->connectionID();
 				break;
 			}
 		}
@@ -625,7 +625,7 @@ bool Rs232SignalListEditor::continueWithDuplicateCaptions()
 
 	if (duplicated == true)
 	{
-		QString s = QString("Warning!!!\r\n\r\nCaption of the connection '%1' is duplicated.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
+		QString s = QString("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
 		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
 		{
 			return false;

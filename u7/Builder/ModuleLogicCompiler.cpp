@@ -2615,14 +2615,14 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::OptoPort* optoPort = m_optoModuleStorage->getOptoPort(connection->port1StrID());
+			Hardware::OptoPort* optoPort = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
 
 			if (optoPort == nullptr)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("OCM port '%1' is not found (connection '%2')")).
-						  arg(connection->port1StrID().
-						  arg(connection->caption())));
+						  arg(connection->port1EquipmentID().
+						  arg(connection->connectionID())));
 				return false;
 			}
 
@@ -2675,7 +2675,7 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-						  arg(signalStrID).arg(connection->caption()));
+						  arg(signalStrID).arg(connection->connectionID()));
 				result &= false;
 				continue;
 			}

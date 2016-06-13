@@ -162,15 +162,15 @@ namespace Builder
 
 			Hardware::OptoPort* optoPort1 = nullptr;
 
-			optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1StrID());
+			optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
 
 			// check port 1
 			//
 			if (optoPort1 == nullptr)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					QString(tr("Undefined port StrID '%1' (connection '%2')")).
-								   arg(connection->port1StrID()).arg(connection->caption()));
+					QString(tr("Undefined port EquipmentID '%1' (connection '%2')")).
+								   arg(connection->port1EquipmentID()).arg(connection->connectionID()));
 
 				result = false;
 				continue;
@@ -178,13 +178,13 @@ namespace Builder
 
 			if (optoPort1->connectionCaption().isEmpty() == true)
 			{
-				optoPort1->setConnectionCaption(connection->caption());
+				optoPort1->setConnectionCaption(connection->connectionID());
 			}
 			else
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					QString(tr("Opto-port '%1' already used in connection '%2'")).
-								   arg(optoPort1->strID()).arg(connection->caption()));
+								   arg(optoPort1->strID()).arg(connection->connectionID()));
 				result = false;
 				continue;
 			}
@@ -214,7 +214,7 @@ namespace Builder
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						QString(tr("LM's port '%1' can't work in RS232/485 mode (connection '%2')")).
-									   arg(connection->port1StrID()).arg(connection->caption()));
+									   arg(connection->port1EquipmentID()).arg(connection->connectionID()));
 
 					result = false;
 				}
@@ -222,7 +222,7 @@ namespace Builder
 				optoPort1->addTxSignalsStrID(connection->signalList());
 
 				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
-							arg(connection->caption()).arg(portID));
+							arg(connection->connectionID()).arg(portID));
 			}
 			else
 			{
@@ -230,13 +230,13 @@ namespace Builder
 
 				// check port 2
 				//
-				Hardware::OptoPort* optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2StrID());
+				Hardware::OptoPort* optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
 
 				if (optoPort2 == nullptr)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						QString(tr("Undefined port StrID '%1' (connection '%2')")).
-									   arg(connection->port2StrID()).arg(connection->caption()));
+						QString(tr("Undefined port EquipmentID '%1' (connection '%2')")).
+									   arg(connection->port2EquipmentID()).arg(connection->connectionID()));
 
 					result = false;
 					continue;
@@ -246,22 +246,22 @@ namespace Builder
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 									   QString(tr("Uncompatible ports '%1' and '%2' in connection '%3'. Only LM-LM and OCM-OCM connections possible.")).
-									   arg(connection->port1StrID()).
-									   arg(connection->port2StrID()).
-									   arg(connection->caption()));
+									   arg(connection->port1EquipmentID()).
+									   arg(connection->port2EquipmentID()).
+									   arg(connection->connectionID()));
 					result = false;
 					continue;
 				}
 
 				if (optoPort2->connectionCaption().isEmpty() == true)
 				{
-					optoPort2->setConnectionCaption(connection->caption());
+					optoPort2->setConnectionCaption(connection->connectionID());
 				}
 				else
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						QString(tr("Opto-port '%1' already used in connection '%2'")).
-									   arg(optoPort2->strID()).arg(connection->caption()));
+									   arg(optoPort2->strID()).arg(connection->connectionID()));
 					result = false;
 					continue;
 				}
@@ -282,7 +282,7 @@ namespace Builder
 				optoPort2->setLinkedPortStrID(optoPort1->strID());
 
 				LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
-							arg(connection->caption()).arg(portID));
+							arg(connection->connectionID()).arg(portID));
 			}
 		}
 

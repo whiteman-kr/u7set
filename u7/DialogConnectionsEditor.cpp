@@ -46,9 +46,9 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 
 	// Check if port 1 ID is not equal to port 2 ID
 	//
-	if (e->port1StrID() == e->port2StrID())
+	if (e->port1EquipmentID() == e->port2EquipmentID())
 	{
-		QString s = QString("Warning!!!\r\n\r\nPort1 identifier is eqal to Port2 identifier.\r\n\r\nAre you sure you want to set the value?");
+		QString s = QString("Port 1 identifier is eqal to Port 2 identifier.\r\n\r\nAre you sure you want to continue?");
 		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
 		{
 			return true;
@@ -60,11 +60,10 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 	//
 
 	QString duplicateConnectionName;
-	int portNumber1 = 0;
-	int portNumber2 = 0;
+	QString duplicatePortName;
 
-	QString port1ID = e->port1StrID();
-	QString port2ID = e->port2StrID();
+	QString port1ID = e->port1EquipmentID();
+	QString port2ID = e->port2EquipmentID();
 
 	bool duplicateFound = false;
 
@@ -79,18 +78,16 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 
 		if (port1ID.length() > 0)
 		{
-			if (port1ID == c->port1StrID())
+			if (port1ID == c->port1EquipmentID())
 			{
-				duplicateConnectionName = c->caption();
-				portNumber1 = 1;
-				portNumber2 = 1;
+				duplicatePortName = port1ID;
+				duplicateConnectionName = c->connectionID();
 				duplicateFound = true;
 			}
-			if (port1ID == c->port2StrID())
+			if (port1ID == c->port2EquipmentID())
 			{
-				duplicateConnectionName = c->caption();
-				portNumber1 = 1;
-				portNumber2 = 2;
+				duplicatePortName = port1ID;
+				duplicateConnectionName = c->connectionID();
 				duplicateFound = true;
 			}
 		}
@@ -99,18 +96,16 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 		{
 			if (port2ID.length() > 0)
 			{
-				if (port2ID == c->port1StrID())
+				if (port2ID == c->port1EquipmentID())
 				{
-					duplicateConnectionName = c->caption();
-					portNumber1 = 2;
-					portNumber2 = 1;
+					duplicatePortName = port2ID;
+					duplicateConnectionName = c->connectionID();
 					duplicateFound = true;
 				}
-				if (port2ID == c->port2StrID())
+				if (port2ID == c->port2EquipmentID())
 				{
-					duplicateConnectionName = c->caption();
-					portNumber1 = 2;
-					portNumber2 = 2;
+					duplicatePortName = port2ID;
+					duplicateConnectionName = c->connectionID();
 					duplicateFound = true;
 				}
 			}
@@ -119,7 +114,7 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 
 	if (duplicateFound == true)
     {
-		QString s = QString("Warning!!!\r\n\r\nPort%1 identifier is duplicated in Connection '%2', Port%3.\r\n\r\nAre you sure you want to set the value?").arg(portNumber1).arg(duplicateConnectionName).arg(portNumber2);
+		QString s = QString("Port '%1' is already in use in connection '%2'.\r\n\r\nAre you sure you want to continue?").arg(duplicatePortName).arg(duplicateConnectionName);
 		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
 		{
 			return true;
@@ -170,7 +165,7 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     QStringList l;
     l << tr("ID");
-    l << tr("Caption");
+	l << tr("ConnectionID");
 	l << tr("Port1 EquipmentID");
 	l << tr("Port2 EquipmentID");
     ui->m_list->setColumnCount(l.size());
@@ -217,9 +212,9 @@ void DialogConnectionsEditor::fillConnectionsList()
 		}
 
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
-                                                    connection->caption() <<
-                                                    connection->port1StrID() <<
-                                                    connection->port2StrID());
+													connection->connectionID() <<
+													connection->port1EquipmentID() <<
+													connection->port2EquipmentID());
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
     }
@@ -299,10 +294,10 @@ bool DialogConnectionsEditor::continueWithDuplicateCaptions()
 				continue;
 			}
 
-			if (e->caption() == c->caption())
+			if (e->connectionID() == c->connectionID())
 			{
 				duplicated = true;
-				duplicatedCaption = e->caption();
+				duplicatedCaption = e->connectionID();
 				break;
 			}
 		}
@@ -314,7 +309,7 @@ bool DialogConnectionsEditor::continueWithDuplicateCaptions()
 
 	if (duplicated == true)
 	{
-		QString s = QString("Warning!!!\r\n\r\nCaption of the connection '%1' is duplicated.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
+		QString s = QString("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
 		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
 		{
 			return false;
@@ -356,17 +351,17 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         assert(connection);
         return;
     }
-    connection->setCaption("New Connection");
-    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
-    connection->setPort2StrID("SYSTEMID_RACKID_CHID_MD00_PORT02");
+	connection->setConnectionID("NewConnection");
+	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+	connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
     connection->setEnable(true);
 
     connections.add(connection);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
-                                                connection->caption() <<
-                                                connection->port1StrID() <<
-                                                connection->port2StrID());
+												connection->connectionID() <<
+												connection->port1EquipmentID() <<
+												connection->port2EquipmentID());
     item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
     ui->m_list->insertTopLevelItem(index, item);
 

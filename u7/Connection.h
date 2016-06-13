@@ -24,14 +24,14 @@ namespace Hardware
 		int index() const;
 		void setIndex(int value);
 
-		QString caption() const;
-		void setCaption(const QString& value);
+		QString connectionID() const;
+		void setConnectionID(const QString& value);
 
-		QString port1StrID() const;
-		void setPort1StrID(const QString& value);
+		QString port1EquipmentID() const;
+		void setPort1EquipmentID(const QString& value);
 
-		QString port2StrID() const;
-		void setPort2StrID(const QString& value);
+		QString port2EquipmentID() const;
+		void setPort2EquipmentID(const QString& value);
 
 		quint16 getID() const;
 
@@ -104,9 +104,9 @@ namespace Hardware
 		Hardware::Connection& operator = (const Hardware::Connection& that)
 		{
 			m_index = that.m_index;
-			m_caption = that.m_caption;
-			m_port1StrID = that.m_port1StrID;
-			m_port2StrID = that.m_port2StrID;
+			m_connectionID = that.m_connectionID;
+			m_port1EquipmentID = that.m_port1EquipmentID;
+			m_port2EquipmentID = that.m_port2EquipmentID;
 
 			m_port1ManualTxWordsQuantity = that.m_port1ManualTxWordsQuantity;
 			m_port1ManualRxWordsQuantity = that.m_port1ManualRxWordsQuantity;
@@ -135,9 +135,9 @@ namespace Hardware
 
 	private:
 		int m_index = -1;
-		QString m_caption;
+		QString m_connectionID;
 
-		QString m_port1StrID;
+		QString m_port1EquipmentID;
 		int m_port1ManualTxWordsQuantity = 479;
 		int m_port1ManualRxWordsQuantity = 479;
 		int m_port1TxRxOptoID = 0;
@@ -145,7 +145,7 @@ namespace Hardware
 		int m_port1TxRsID = 0;
 		quint32 m_port1TxRsDataUID = 0;
 
-		QString m_port2StrID;
+		QString m_port2EquipmentID;
 		int m_port2ManualTxWordsQuantity = 479;
 		int m_port2ManualRxWordsQuantity = 479;
 		int m_port2TxRxOptoID = 0;
@@ -181,10 +181,10 @@ namespace Hardware
 
 		void clear();
 
-		bool setLMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+		bool setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
 								 int m_txRxOptoID, quint32 m_txRxOptoDataUID);
 
-		bool setOCMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+		bool setOCMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
 								 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);
 
 		bool load(DbController* db, QString &errorCode);
