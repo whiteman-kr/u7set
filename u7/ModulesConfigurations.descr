@@ -219,7 +219,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 			// Variables
 			//
             var subSysID = device.propertyValue("SubsystemID");
-            var channel = device.propertyValue("LMNumber");
+            var LMNumber = device.propertyValue("LMNumber");
 			
 			var frameSize = device.jsPropertyInt("ConfigFrameSize");
 			var frameCount = device.jsPropertyInt("ConfigFrameCount");			
@@ -241,9 +241,9 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 			var frameStorageConfig = 1;
 			var ptr = 14;
 
-			var channelCount = confFirmware.data16(frameStorageConfig, ptr);
+			var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
 			confFirmware.writeLog("---\r\n");
-			confFirmware.writeLog("LM-1 for subsystem " + subSysID + ", Channel " + channel +": Frame " + frameStorageConfig + ", offset " + ptr +": ChannelCount = " + channelCount + "\r\n");
+			confFirmware.writeLog("LM-1 for subsystem " + subSysID + ", LMNumber " + LMNumber +": Frame " + frameStorageConfig + ", offset " + ptr +": LMNumberCount = " + LMNumberCount + "\r\n");
 			return true;
 		}
 
@@ -289,7 +289,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	// Variables
     //
     var subSysID = module.propertyValue("SubsystemID");
-    var channel = module.propertyValue("LMNumber");
+    var LMNumber = module.propertyValue("LMNumber");
     
     // Constants
     //
@@ -320,14 +320,14 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
         return false;
     }
 
-    var maxChannel = 4;                 // Can be changed!
+    var maxLMNumber = 4;                 // Can be changed!
     var configStartFrames = 2;
     var configFrameCount = 19;          // number of frames in each configuration
     var ioModulesMaxCount = 14;
     
-    if (channel < 1 || channel > maxChannel)
+    if (LMNumber < 1 || LMNumber > maxLMNumber)
     {
-		log.errCFG3002("System/Channel", channel, 1, maxChannel, module.propertyValue("EquipmentID"));
+		log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.propertyValue("EquipmentID"));
         return false;
     }
 
@@ -340,7 +340,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	confFirmware.writeLog("Key value = " + ssKeyValue+ "\r\n");
 	confFirmware.writeLog("UartID = " + uartId+ "\r\n");
 	confFirmware.writeLog("Frame size = " + frameSize+ "\r\n");
-	confFirmware.writeLog("Channel = " + channel + "\r\n");
+	confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
 
     // Configuration storage format
     //
@@ -364,25 +364,25 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     // reserved
     ptr += 8;
     
-    // write channelCount, if old value is less than current. If it is the same, output an error.
+    // write LMNumberCount, if old value is less than current. If it is the same, output an error.
     //
-    var oldChannelCount = confFirmware.data16(frameStorageConfig, ptr);
+    var oldLMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
     
-    if (oldChannelCount == channel)
+    if (oldLMNumberCount == LMNumber)
     {
-        log.errCFG3003(channel, module.propertyValue("EquipmentID"));
+        log.errCFG3003(LMNumber, module.propertyValue("EquipmentID"));
         return false;
     }
     
-    if (oldChannelCount < channel)
+    if (oldLMNumberCount < LMNumber)
     {
-        setData16(confFirmware, log, frameStorageConfig, ptr, channel);
+        setData16(confFirmware, log, frameStorageConfig, ptr, LMNumber);
 
     }
     ptr += 2;
     
-    var configIndexOffset = ptr + (channel - 1) * (2/*offset*/ + 4/*reserved*/);
-    var configFrame = configStartFrames + configFrameCount * (channel - 1);
+    var configIndexOffset = ptr + (LMNumber - 1) * (2/*offset*/ + 4/*reserved*/);
+    var configFrame = configStartFrames + configFrameCount * (LMNumber - 1);
     
     setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + configIndexOffset + "] configFrame = " + configFrame + "\r\n");

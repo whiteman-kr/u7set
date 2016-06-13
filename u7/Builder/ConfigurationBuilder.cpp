@@ -312,14 +312,12 @@ namespace Builder
 		{
 			for (auto i = confCollection.firmwares().begin(); i != confCollection.firmwares().end(); i++)
 			{
-				Hardware::ModuleFirmware& f = i->second;
+				Hardware::ModuleFirmwareWriter& f = i->second;
 
 				QByteArray data;
 
-				QString errorMsg;
-				if (f.save(data, &errorMsg) == false)
+				if (f.save(data, m_log) == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, errorMsg);
 					return false;
 				}
 

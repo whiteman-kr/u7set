@@ -10,5 +10,6 @@
         <file>Images/Close.svg</file>
         <file>Images/About.svg</file>
         <file>Images/FindSignal.svg</file>
+        <file>Images/Camera.svg</file>
     </qresource>
 </RCC>

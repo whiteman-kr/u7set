@@ -100,7 +100,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmware* firmware = (Hardware::ModuleFirmware*)firmwareCollection.jsGet(tr("LM-1"), subsysStrID, subsysID, 0x104, frameSize, frameCount);
+			Hardware::ModuleFirmwareWriter* firmware = (Hardware::ModuleFirmwareWriter*)firmwareCollection.jsGet(tr("LM-1"), subsysStrID, subsysID, 0x104, frameSize, frameCount);
 			if (firmware == nullptr)
 			{
 				assert(firmware);
@@ -130,25 +130,21 @@ namespace Builder
 
 			}
 
-
-			if (firmware->setChannelData(channel, frameSize, frameCount, uniqueID, data, &errorString) == false)
+			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, m_log) == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("%1, LM %2")).arg(errorString).arg(m->caption()));
 				return false;
 			}
 		}
 
-		std::map<QString, Hardware::ModuleFirmware>& firmwares = firmwareCollection.firmwares();
+		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = firmwareCollection.firmwares();
 		for (auto it = firmwares.begin(); it != firmwares.end(); it++)
 		{
-			Hardware::ModuleFirmware& f = it->second;
+			Hardware::ModuleFirmwareWriter& f = it->second;
 
 			QByteArray data;
 
-			QString errorMsg;
-			if (f.save(data, &errorMsg) == false)
+			if (f.save(data, m_log) == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, errorMsg);
 				return false;
 			}
 
