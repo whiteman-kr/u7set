@@ -1027,10 +1027,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid)
 	{
-		if (itemUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, itemUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5000,
@@ -1071,10 +1068,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5002(QString appSignalID, QUuid itemUuid)
 	{
-		if (itemUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, itemUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5002,
@@ -1097,10 +1091,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5003,
@@ -1123,10 +1114,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
@@ -1149,10 +1137,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5005,
@@ -1175,10 +1160,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5006,
@@ -1202,10 +1184,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5007,
@@ -1228,10 +1207,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
@@ -1255,10 +1231,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5009,
@@ -1281,16 +1254,378 @@ namespace Builder
 	///
 	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		if (signalUuid.isNull() == false)
-		{
-			addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		}
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5010,
 				  tr("Analog signal '%1' is connected to discrete input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
 	}
 
+
+	/// IssueCode: ALC5011
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application item '%1' has unknown type.
+	///
+	/// Parameters:
+	///		%1 Item Uuid
+	///
+	/// Description:
+	///		Application item has unknown type. Contact to the RPCT developers.
+	///
+	void IssueLogger::errALC5011(QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5011,
+				  tr("Application item '%1' has unknown type. Contact to the RPCT developers.").arg(itemUuid.toString()));
+	}
+
+	/// IssueCode: ALC5012
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Application signal '%1' is not bound to any device object.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Application signal is not bound to any device object. Fill the 'EquipmentID' property of this signal.
+	///
+	void IssueLogger::wrnALC5012(QString appSignalID)
+	{
+		LOG_WARNING(IssueType::AlCompiler,
+				  5012,
+				  tr("Application signal '%1' is not bound to any device object.").arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application signal '%1' is bound to unknown device object '%2'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Application signal EquipmentID
+	///
+	/// Description:
+	///		Application signal is bound to unknown device object. Set the 'EquipmentID' property of this signal to correct device object ID.
+	///
+	void IssueLogger::errALC5013(QString appSignalID, QString equipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5013,
+				  tr("Application signal '%1' is bound to unknown device object '%2'.").
+					arg(appSignalID).arg(equipmentID));
+	}
+
+	/// IssueCode: ALC5014
+	///
+	/// IssueType: Error
+	///
+	/// Title: Discrete signal '%1' must have DataSize equal to 1.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Discrete signal has DataSize not equal to 1. Set the 'DataSize' property of this signal to 1.
+	///
+	void IssueLogger::errALC5014(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5014,
+				  tr("Discrete signal '%1' must have DataSize equal to 1.").
+					arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5015
+	///
+	/// IssueType: Error
+	///
+	/// Title: Analog signal '%1' must have DataSize equal to 32.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Analog signal has DataSize not equal to 32. Set the 'DataSize' property of this signal to 32.
+	///
+	void IssueLogger::errALC5015(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5015,
+				  tr("Analog signal '%1' must have DataSize equal to 32.").
+					arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5016
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application signal identifier '%1' is not unique.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Application signal identifier is not unique. Change identifier.
+	///
+	void IssueLogger::errALC5016(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5016,
+				  tr("Application signal identifier '%1' is not unique.").
+					arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5017
+	///
+	/// IssueType: Error
+	///
+	/// Title: Non-signal element is connected to transmitter.
+	///
+	/// Parameters:
+	///		%1 Transmitter Uuid
+	///		%2 Connected item Uuid
+	///
+	/// Description:
+	///		Non-signal element is connected to transmitter. Check connections on logic schema.
+	///
+	void IssueLogger::errALC5017(QUuid transmitterUuid, QUuid connectedItemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, connectedItemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5017,
+				  tr("Non-signal element is connected to transmitter."));
+	}
+
+	/// IssueCode: ALC5018
+	///
+	/// IssueType: Error
+	///
+	/// Title: Opto ports '%1' and '%2' are not compatible (connection '%3').
+	///
+	/// Parameters:
+	///		%1 Opto port 1 EquipmentID
+	///		%2 Opto port 2 EquipmentID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Opto ports in the connection are not compatible. Only LM-LM or OCM-OCM ports can be connected.
+	///		Set correct ports in the connection.
+	///
+	void IssueLogger::errALC5018(QString port1, QString port2, QString connection)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5018,
+				  QString(tr("Opto ports '%1' and '%2' are not compatible (connection '%3').")).
+				  arg(port1).arg(port2).arg(connection));
+	}
+
+	/// IssueCode: ALC5019
+	///
+	/// IssueType: Error
+	///
+	/// Title: Opto port '%1' of connection '%2' is already used in connection '%3'.
+	///
+	/// Parameters:
+	///		%1 Opto port EquipmentID
+	///		%2 Connection 1 ID
+	///		%3 Connection 2 ID
+	///
+	/// Description:
+	///		The same opto port is used in several connections. Check connections to resolve this problem.
+	///
+	void IssueLogger::errALC5019(QString port, QString connection1, QString connection2)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5019,
+				  QString(tr("Opto port '%1' of connection '%2' is already used in connection '%3'.")).
+				  arg(port).arg(connection1).arg(connection2));
+	}
+
+	/// IssueCode: ALC5020
+	///
+	/// IssueType: Error
+	///
+	/// Title: LM's opto port '%1' can't work in RS232/485 mode (connection '%2').
+	///
+	/// Parameters:
+	///		%1 Opto port EquipmentID
+	///		%2 Connection ID
+	///
+	/// Description:
+	///		LM's opto ports can't work in RS232/485 mode. Use OCM's opto ports for RS232/485 mode.
+	///
+	void IssueLogger::errALC5020(QString port, QString connection)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5020,
+				  QString(tr("LM's opto port '%1' can't work in RS232/485 mode (connection '%2').")).
+				  arg(port).arg(connection));
+	}
+
+	/// IssueCode: ALC5021
+	///
+	/// IssueType: Error
+	///
+	/// Title: Undefined opto port '%1' in the connection '%2'.
+	///
+	/// Parameters:
+	///		%1 Opto port EquipmentID
+	///		%2 Connection ID
+	///
+	/// Description:
+	///		Undefined opto port in the connection. Check specified port ID.
+	///
+	void IssueLogger::errALC5021(QString port, QString connection)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5021,
+				  QString(tr("Undefined opto port '%1' in the connection '%2'.")).
+				  arg(port).arg(connection));
+	}
+
+	/// IssueCode: ALC5022
+	///
+	/// IssueType: Error
+	///
+	/// Title: Opto ports of the same chassis is linked via connection '%1'.
+	///
+	/// Parameters:
+	///		%1 Connection ID
+	///
+	/// Description:
+	///		Connection of the opto ports of the same chassis is not allowed. Check the connection settings.
+	///
+	void IssueLogger::errALC5022(QString connection)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5022,
+				  QString(tr("Opto ports of the same chassis is linked via connection '%1'.")).
+				  arg(connection));
+	}
+
+	/// IssueCode: ALC5023
+	///
+	/// IssueType: Error
+	///
+	/// Title: Opto connection caption '%1' is not unique.
+	///
+	/// Parameters:
+	///		%1 Connection ID
+	///
+	/// Description:
+	///		Opto connection caption is not unique. Change caption.
+	///
+	void IssueLogger::errALC5023(QString connection)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5023,
+				  QString(tr("Opto connection caption '%1' is not unique.")).
+				  arg(connection));
+	}
+
+	/// IssueCode: ALC5024
+	///
+	/// IssueType: Error
+	///
+	/// Title: Transmitter is linked to unknown opto connection '%1'.
+	///
+	/// Parameters:
+	///		%1 Connection ID
+	///		%2 Transmitter Uuid
+	///
+	/// Description:
+	///		Transmitter is linked to unknown opto connection. Check transmitter's 'ConnectionID' property.
+	///
+	void IssueLogger::errALC5024(QString connection, QUuid transmitterUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5024,
+				  QString(tr("Transmitter is linked to unknown opto connection '%1'.")).
+				  arg(connection));
+	}
+
+	/// IssueCode: ALC5025
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver is linked to unknown opto connection '%1'.
+	///
+	/// Parameters:
+	///		%1 Connection ID
+	///		%2 Receiver Uuid
+	///
+	/// Description:
+	///		Receiver is linked to unknown opto connection. Check receiver's 'ConnectionID' property.
+	///
+	void IssueLogger::errALC5025(QString connection, QUuid transmitterUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5025,
+				  QString(tr("Receiver is linked to unknown opto connection '%1'.")).
+				  arg(connection));
+	}
+
+	/// IssueCode: ALC5026
+	///
+	/// IssueType: Error
+	///
+	/// Title: Transmitter input can be linked to one signal only.
+	///
+	/// Parameters:
+	///		%1 Transmitter Uuid
+	///		%2 Signals Uuid list
+	///
+	/// Description:
+	///		Transmitter input can be linked to one signal only. Check transmitter's inputs links.
+	///
+	void IssueLogger::errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		for(QUuid signalID : signalIDs)
+		{
+			addItemsIssues(OutputMessageLevel::Error, signalID);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5026,
+				  QString(tr("Transmitter input can be linked to one signal only.")));
+	}
+
+	/// IssueCode: ALC5027
+	///
+	/// IssueType: Error
+	///
+	/// Title: All transmitter inputs must be directly linked to a signals.
+	///
+	/// Parameters:
+	///		%1 Transmitter Uuid
+	///
+	/// Description:
+	///		All transmitter inputs must be directly linked to a signals. Check transmitter's inputs links.
+	///
+	void IssueLogger::errALC5027(QUuid transmitterUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5027,
+				  QString(tr("All transmitter inputs must be directly linked to a signals.")));
+	}
 
 
 	// EQP			Equipment issues						6000-6999

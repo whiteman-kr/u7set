@@ -19,6 +19,7 @@
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemConst.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/FblItem.h"
 
 #include "../u7/Connection.h"
@@ -34,6 +35,8 @@ namespace Builder
 	typedef VFrame30::SchemaItemAfb LogicFb;
 	typedef VFrame30::AfbPin LogicPin;
 	typedef VFrame30::SchemaItemConst LogicConst;
+	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
+	typedef VFrame30::SchemaItemReceiver LogicReceiver;
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
@@ -127,6 +130,8 @@ namespace Builder
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isAfbElement(); }
 		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
+		bool isTransmitter() const { return m_appLogicItem.m_fblItem->isTransmitterElement(); }
+		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
 
 		bool hasRam() const { return afb().hasRam(); }
 
@@ -136,6 +141,8 @@ namespace Builder
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
+		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
+		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
@@ -391,7 +398,6 @@ namespace Builder
 
 	class ApplicationLogicCompiler;
 
-
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -586,6 +592,8 @@ namespace Builder
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateFbCode(const AppItem *appItem);
+		bool generateTransmitterCode(const AppItem *appItem);
+		bool generateReceiverCode(const AppItem *appItem);
 
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool startFb(const AppFb* appFb);
@@ -643,6 +651,7 @@ namespace Builder
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
 		bool setOutputSignalsAsComputed();
+		bool createOptoExchangeLists();
 
 		bool buildOptoModulesStorage();
 

@@ -145,11 +145,11 @@ private:
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
-	double m_aperture = 0;
+	double m_aperture = 1;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
 	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 0.5;
+	double m_spreadTolerance = 2;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
 	double m_tuningDefaultValue = 0;

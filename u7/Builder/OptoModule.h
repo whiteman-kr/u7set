@@ -12,6 +12,8 @@
 namespace Hardware
 {
 	class DeviceModule;
+	class Connection;
+	class ConnectionStorage;
 
 	class OptoPort : public QObject
 	{
@@ -222,8 +224,16 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-	private:
+	public:
+		struct ConnectionInfo
+		{
+			QString caption;
+			QString port1;
+			QString port2;
+			std::shared_ptr<Connection> connection;
+		};
 
+	private:
 		EquipmentSet* m_equipmentSet = nullptr;
 		Builder::IssueLogger* m_log = nullptr;
 
@@ -231,6 +241,8 @@ namespace Hardware
 		HashedVector<QString, OptoPort*> m_ports;
 
 		QHash<QString, OptoModule*> m_lmAssociatedModules;
+
+		QHash<QString, std::shared_ptr<Connection>> m_connections;
 
 		QList<OptoModule*> modules();
 		QList<OptoPort*> ports();
@@ -257,5 +269,9 @@ namespace Hardware
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsTxRxStartAddresses();
+
+		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
+
+		std::shared_ptr<Connection> getConnection(const QString& caption);
 	};
 }

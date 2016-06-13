@@ -237,20 +237,18 @@ enum ServiceState
 
 struct ServiceInformation
 {
-	ServiceType type;
-	quint32 majorVersion;
-	quint32 minorVersion;
-	quint32 buildNo;
-	quint32 crc;
-	quint64 uptime;
-	ServiceState serviceState;
-	quint32 serviceUptime;
+	ServiceType type = ServiceType::BaseService;
+	quint32 majorVersion = 0;
+	quint32 minorVersion = 0;
+	quint32 buildNo = 0;
+	quint32 crc = 0;
+	quint64 uptime = 0;
+	ServiceState serviceState = ServiceState::Undefined;
+	quint32 serviceUptime = 0;
 
-	ServiceInformation()
-	{
-		memset(this, 0, sizeof(*this));
-		serviceState = Undefined;
-	}
+	// Services specific information
+	//
+	HostAddressPort clientRequestIP;
 };
 
 

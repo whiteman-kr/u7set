@@ -13,10 +13,10 @@
 #include "TcpAppDataServer.h"
 
 
-namespace Hardware
+/*namespace Hardware
 {
 	class DeviceRoot;
-}
+}*/
 
 
 class AppDataServiceWorker : public ServiceWorker
@@ -24,7 +24,6 @@ class AppDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 private:
-	//UdpSocketThread* m_serviceInfoThread = nullptr;
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_settings;
@@ -39,16 +38,12 @@ private:
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
-	TcpAppDataServerThread* m_serviceInfoThread = nullptr;
 
 	QTimer m_timer;
 
 	//
 
 	void readConfigurationFiles();
-
-	void runServiceInfoThread();
-	void stopServiceInfoThread();
 
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
@@ -84,6 +79,8 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
+	virtual void getServiceSpecificInfo(ServiceInformation& serviceInfo) override;
+
 public:
 	AppDataServiceWorker(const QString& serviceStrID,
 					  const QString& cfgServiceIP1,
@@ -97,11 +94,5 @@ public:
 	{
 		return new AppDataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
 	}
-
-signals:
-	void ackInformationRequest(UdpRequest request);
-
-public slots:
-	void onInformationRequest(UdpRequest request);
 };
 

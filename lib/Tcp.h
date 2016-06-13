@@ -78,22 +78,24 @@ namespace Tcp
 
 		#pragma pack(pop)
 
-
 		enum ReadState
 		{
 			WaitingForHeader,
 			WaitingForData,
-			WaitingAnything
+			WaitingNothing
 		};
 
 		QTcpSocket* m_tcpSocket = nullptr;
-
 
 		ConnectionState m_state;
 
 		QMutex m_stateMutex;
 
 		QMutex m_mutex;
+
+		QTimer m_watchdogTimer;
+		int m_watchdogTimerTimeout = 5000;			// ms
+		bool m_watchdogTimerEnable = true;
 
 		// read-status variables
 		//
@@ -131,8 +133,6 @@ namespace Tcp
 		void setStateDisconnected();
 
 	private:
-		bool m_enableSocketRead = true;
-
 		int readHeader(int bytesAvailable);
 		int readData(int bytesAvailable);
 
@@ -143,6 +143,9 @@ namespace Tcp
 		void onSocketConnected();
 		void onSocketDisconnected();
 		void onSocketReadyRead();
+
+	protected slots:
+		virtual void onWatchdogTimerTimeout();
 
 	signals:
 		void disconnected(const SocketWorker* socketWorker);
@@ -158,6 +161,12 @@ namespace Tcp
 
 		virtual void onConnection() {}
 		virtual void onDisconnection() {}
+
+		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
+		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
+		void enableWatchdogTimer(bool enable);
+
+		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState();
 	};
@@ -374,6 +383,9 @@ namespace Tcp
 	private slots:
 		void onPeriodicTimer();
 		void onReplyTimeoutTimer();
+
+	protected slots:
+		virtual void onWatchdogTimerTimeout() override;
 
 	public:
 		Client(const HostAddressPort& serverAddressPort);
