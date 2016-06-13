@@ -103,6 +103,18 @@ const char* Columns[] =
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
+const QVector<int> defaultColumnVisibility =
+{
+	SC_STR_ID,
+	SC_EXT_STR_ID,
+	SC_NAME,
+	SC_TYPE,
+	SC_IN_OUT_TYPE,
+	SC_DEVICE_STR_ID,
+	SC_LOW_LIMIT,
+	SC_HIGH_LIMIT
+};
+
 
 
 SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
@@ -1341,7 +1353,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(i)).toInt());
+		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+														m_signalsView->columnWidth(i)).toInt());
 	}
 
 	m_tableHeadersContextMenuActions = new QActionGroup(this);
@@ -1349,16 +1362,20 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	QAction* columnAction = m_tableHeadersContextMenuActions->addAction("All columns");
 	columnAction->setCheckable(true);
 	columnAction->setChecked(settings.value("SignalsTabPage/ColumnVisibility/All columns", true).toBool());
+
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
 		columnAction = m_tableHeadersContextMenuActions->addAction(QString(Columns[i]).replace("\n", " "));
 		columnAction->setCheckable(true);
-		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), true).toBool();
+		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+									  defaultColumnVisibility.contains(i)).toBool();
 		columnAction->setChecked(checked);
 		m_signalsView->setColumnHidden(i, !checked);
 	}
+
 	m_signalsView->horizontalHeader()->addActions(m_tableHeadersContextMenuActions->actions());
 	connect(m_tableHeadersContextMenuActions, &QActionGroup::triggered, this, &SignalsTabPage::changeColumnVisibility);
+	connect(horizontalHeader, &QHeaderView::sectionResized, this, &SignalsTabPage::saveColumnWidth);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -1408,7 +1425,7 @@ SignalsTabPage::~SignalsTabPage()
 		{
 			saveColumnWidth(i);
 		}
-		settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "), columnVisibilityAction->isChecked());
+		saveColumnVisibility(i, columnVisibilityAction->isChecked());
 	}
 	settings.setValue("SignalsTabPage/ColumnVisibility/All columns", m_tableHeadersContextMenuActions->actions()[0]->isChecked());
 }
@@ -1834,8 +1851,8 @@ void SignalsTabPage::resetSignalIdFilter()
 
 void SignalsTabPage::changeColumnVisibility(QAction* action)
 {
-	int columnIndex = m_tableHeadersContextMenuActions->actions().indexOf(action);
-	if (columnIndex == 0)
+	int actionIndex = m_tableHeadersContextMenuActions->actions().indexOf(action);
+	if (actionIndex == 0)
 	{
 		for (int i = 0; i < COLUMNS_COUNT; i++)
 		{
@@ -1843,6 +1860,7 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 			{
 				saveColumnWidth(i);
 			}
+			saveColumnVisibility(i, action->isChecked());
 			m_signalsView->setColumnHidden(i, !action->isChecked());
 			m_tableHeadersContextMenuActions->actions()[i + 1]->setChecked(action->isChecked());
 		}
@@ -1851,14 +1869,16 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 	{
 		if (!action->isChecked())
 		{
-			saveColumnWidth(columnIndex - 1);
+			saveColumnWidth(actionIndex - 1);
 		}
-		m_signalsView->setColumnHidden(columnIndex - 1, !action->isChecked());
+		saveColumnVisibility(actionIndex - 1, action->isChecked());
+		m_signalsView->setColumnHidden(actionIndex - 1, !action->isChecked());
 	}
 	if (m_signalsView->horizontalHeader()->hiddenSectionCount() == COLUMNS_COUNT)
 	{
 		m_signalsView->showColumn(SC_STR_ID);
 		m_tableHeadersContextMenuActions->actions()[SC_STR_ID + 1]->setChecked(true);
+		saveColumnVisibility(SC_STR_ID, true);
 	}
 }
 
@@ -1871,6 +1891,12 @@ void SignalsTabPage::saveColumnWidth(int index)
 {
 	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(index));
+}
+
+void SignalsTabPage::saveColumnVisibility(int index, bool visible)
+{
+	QSettings settings;
+	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
 }
 
 
@@ -1995,6 +2021,24 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_signalsView->horizontalHeader()->setHighlightSections(false);
 
+	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
+
+	QSettings settings;
+	m_signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
+													m_signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
+	for (int i = 1; i < COLUMNS_COUNT; i++)
+	{
+		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+									  defaultColumnVisibility.contains(i)).toBool();
+		m_signalsView->setColumnHidden(i, !checked);
+
+		if (checked)
+		{
+			m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+															m_signalsView->columnWidth(i)).toInt());
+		}
+	}
+
 	QAction* undoAction = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
 	connect(undoAction, &QAction::triggered, this, &CheckinSignalsDialog::openUndoDialog);
 	m_signalsView->addAction(undoAction);
@@ -2034,7 +2078,6 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	setLayout(vl1);
 
-	QSettings settings;
 	resize(settings.value("PendingChangesDialog/size", qApp->desktop()->size() * 3 / 4).toSize());
 	m_splitter->setChildrenCollapsible(false);
 
@@ -2170,6 +2213,23 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	signalsView->resizeColumnsToContents();
 	signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
+
+	signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(signalsView->fontMetrics().height() * 1.4));
+
+	signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
+												  signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
+	for (int i = 1; i < COLUMNS_COUNT; i++)
+	{
+		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+									  defaultColumnVisibility.contains(i)).toBool();
+		signalsView->setColumnHidden(i, !checked);
+
+		if (checked)
+		{
+			signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
+														  signalsView->columnWidth(i)).toInt());
+		}
+	}
 
 	signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	signalsView->horizontalHeader()->setHighlightSections(false);

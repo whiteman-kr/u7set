@@ -289,6 +289,9 @@ private:
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
 
+	void saveColumnVisibility(int index, bool visible);
+
+private slots:
 	void saveColumnWidth(int index);
 };
 
