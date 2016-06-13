@@ -16,11 +16,13 @@ namespace Hardware
     Connection::Connection()
     {
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Connection::caption, Connection::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(QString, "Port1StrID", true, Connection::port1StrID, Connection::setPort1StrID);
-		ADD_PROPERTY_GETTER_SETTER(QString, "Port2StrID", true, Connection::port2StrID, Connection::setPort2StrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1StrID, Connection::setPort1StrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2StrID, Connection::setPort2StrID);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
-		ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
+		auto proptx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
+		proptx1wq->setCategory(tr("ManualSettings"));
+		auto proprx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
+		proprx1wq->setCategory(tr("ManualSettings"));
 
 		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRxOptoID", false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRxOptoDataUID", false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
@@ -28,8 +30,10 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRsID", false, Connection::port1TxRsID, Connection::setPort1TxRsID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRsDataUID", false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
-		ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
+		auto proptx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
+		proptx2wq->setCategory(tr("ManualSettings"));
+		auto proprx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
+		proprx2wq->setCategory(tr("ManualSettings"));
 
 		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRxOptoID", false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRxOptoDataUID", false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
@@ -41,7 +45,9 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", false, Connection::serialMode, Connection::setSerialMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, "Enable", false, Connection::enable, Connection::setEnable);
 		ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", false, Connection::enableDuplex, Connection::setEnableDuplex);
-		ADD_PROPERTY_GETTER_SETTER(bool, "ManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
+
+		auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, "EnableManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
+		propManual->setCategory(tr("ManualSettings"));
     }
 
     Connection::Connection(const Connection& that):Connection()
@@ -53,8 +59,8 @@ namespace Hardware
     {
         writer.writeAttribute("Index", QString::number(index()));
         writer.writeAttribute("Caption", caption());
-        writer.writeAttribute("Port1StrID", port1StrID());
-        writer.writeAttribute("Port2StrID", port2StrID());
+		writer.writeAttribute("Port1StrID", port1StrID());
+		writer.writeAttribute("Port2StrID", port2StrID());
         writer.writeAttribute("SerialMode", QString::number(static_cast<int>(serialMode())));
         writer.writeAttribute("Mode", QString::number(static_cast<int>(mode())));
         writer.writeAttribute("Enable", enable() ? "true" : "false");
@@ -85,14 +91,14 @@ namespace Hardware
             setCaption(reader.attributes().value("Caption").toString());
         }
 
-        if (reader.attributes().hasAttribute("Port1StrID"))
+		if (reader.attributes().hasAttribute("Port1StrID"))
         {
-            setPort1StrID(reader.attributes().value("Port1StrID").toString());
+			setPort1StrID(reader.attributes().value("Port1StrID").toString());
         }
 
-        if (reader.attributes().hasAttribute("Port2StrID"))
+		if (reader.attributes().hasAttribute("Port2StrID"))
         {
-            setPort2StrID(reader.attributes().value("Port2StrID").toString());
+			setPort2StrID(reader.attributes().value("Port2StrID").toString());
         }
 
         if (reader.attributes().hasAttribute("SerialMode"))
@@ -395,7 +401,7 @@ namespace Hardware
                 propertyVisibilityChanger("Enable", false);
                 propertyVisibilityChanger("EnableDuplex", false);
 
-                propertyVisibilityChanger("Port2StrID", true);
+				propertyVisibilityChanger("Port2EquipmentID", true);
                 propertyVisibilityChanger("Port2TxWordsQuantity", true);
                 propertyVisibilityChanger("Port2RxWordsQuantity", true);
 
@@ -406,7 +412,7 @@ namespace Hardware
                 propertyVisibilityChanger("Enable", true);
                 propertyVisibilityChanger("EnableDuplex", true);
 
-                propertyVisibilityChanger("Port2StrID", false);
+				propertyVisibilityChanger("Port2EquipmentID", false);
                 propertyVisibilityChanger("Port2TxWordsQuantity", false);
                 propertyVisibilityChanger("Port2RxWordsQuantity", false);
                 break;
@@ -552,53 +558,6 @@ namespace Hardware
     void ConnectionStorage::clear()
     {
         m_connections.clear();
-    }
-
-    bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
-    {
-        // Optical connection
-        //
-        if (editObject->port1StrID() == editObject->port2StrID())
-        {
-            return false;
-        }
-
-        for (std::shared_ptr<Hardware::Connection> c : m_connections)
-        {
-            if (editObject->index() == c->index())
-            {
-                continue;
-            }
-
-            if (editObject->port1StrID().length() > 0)
-            {
-                if (editObject->port1StrID() == c->port1StrID())
-                {
-                    return false;
-                }
-                if (editObject->port1StrID() == c->port2StrID())
-                {
-                    return false;
-                }
-            }
-
-            if (editObject->mode() == OptoPort::Mode::Optical)
-            {
-                if (editObject->port2StrID().length() > 0)
-                {
-                    if (editObject->port2StrID() == c->port2StrID())
-                    {
-                        return false;
-                    }
-                    if (editObject->port2StrID() == c->port1StrID())
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
     }
 
     bool ConnectionStorage::setLMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,

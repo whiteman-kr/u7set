@@ -45,6 +45,7 @@ private:
     bool checkUniqueConnections();
     bool saveChanges();
     void updateButtons(bool checkOut);
+	bool continueWithDuplicateCaptions();
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -59,6 +60,8 @@ private slots:
     void on_m_checkOut_clicked();
     void on_m_checkIn_clicked();
     void on_m_Undo_clicked();
+	void reject();
+
 private:
     Ui::DialogConnectionsEditor *ui;
 

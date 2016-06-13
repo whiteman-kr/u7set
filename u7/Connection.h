@@ -180,7 +180,6 @@ namespace Hardware
 		Q_INVOKABLE QObject* jsGet(int index) const;
 
 		void clear();
-		bool checkUniqueConnections(Connection *editObject);
 
 		bool setLMConnectionParams(const QString& portStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
 								 int m_txRxOptoID, quint32 m_txRxOptoDataUID);
