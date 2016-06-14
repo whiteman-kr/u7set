@@ -16,10 +16,26 @@ public:
 	explicit DialogColumns(QWidget *parent, const QStringList& columnsNames, const std::vector<int>& columnsIndexes);
 	~DialogColumns();
 
-	std::vector<int> columnIndexes();
+	std::vector<int> columnsIndexes();
 
 private slots:
 	void accept();
+
+	void on_buttonAdd_clicked();
+
+	void on_buttonAddAll_clicked();
+
+	void on_buttonRemove_clicked();
+
+	void on_buttonRemoveAll_clicked();
+
+	void on_buttonUp_clicked();
+
+	void on_buttonDown_clicked();
+
+	void on_listExistingColumns_doubleClicked(const QModelIndex &index);
+
+	void on_listSelectedColumns_doubleClicked(const QModelIndex &index);
 
 private:
 	Ui::DialogColumns *ui;
