@@ -62,6 +62,12 @@ public:
 	int m_signalSearchColumnCount = 0;
 	QByteArray m_signalSearchColumnWidth;
 
+	QPoint m_signalSnapshotPos;
+	QByteArray m_signalSnapshotGeometry;
+	int m_signalSnapshotColumnCount = 0;
+	QByteArray m_signalSnapshotColumns;
+
+
 private:
 	mutable QMutex m_mutex;
 
