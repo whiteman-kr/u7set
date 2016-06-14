@@ -1627,6 +1627,56 @@ namespace Builder
 				  QString(tr("All transmitter inputs must be directly linked to a signals.")));
 	}
 
+	/// IssueCode: ALC5028
+	///
+	/// IssueType: Error
+	///
+	/// Title: Floating point constant is connected to discrete signal '%1'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Constant Uuid
+	///		%3 Signal Uuid
+	///
+	/// Description:
+	///		Floating point constant is connected to discrete signal. Change property 'Type' of the constant to 'IntegerType' value.
+	///
+	void IssueLogger::errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constUuid);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5028,
+				  QString(tr("Floating point constant is connected to discrete signal '%1'.").arg(appSignalID)));
+	}
+
+	/// IssueCode: ALC5029
+	///
+	/// IssueType: Error
+	///
+	/// Title: The signal '%1' is repeatedly connected to the transmitter '%2'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Connection ID
+	///		%3 Signal Uuid
+	///		%4 Transmitter Uuid
+	///
+	/// Description:
+	///		The same signal can be connected only once to the transmitter. Check transmitter input links.
+	///
+	void IssueLogger::errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5029,
+				  QString(tr("The signal '%1' is repeatedly connected to the transmitter '%2'.").
+						  arg(appSignalID).arg(connection)));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

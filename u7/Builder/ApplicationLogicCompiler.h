@@ -48,6 +48,8 @@ namespace Builder
 
 		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
+		bool writeConnectionsFile();
+
 		void clear();
 
 	public:

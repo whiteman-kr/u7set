@@ -110,6 +110,8 @@ namespace Builder
 
 			if (compileModulesLogicsPass1() == false) break;
 
+			if (writeConnectionsFile() == false) break;
+
 			if (disposeOptoModulesTxRxBuffers() == false) break;
 
 			if (compileModulesLogicsPass2() == false) break;
@@ -263,15 +265,15 @@ namespace Builder
 				continue;
 			}
 
-			if (optoPort1->connectionCaption().isEmpty() == true)
+			if (optoPort1->connectionID().isEmpty() == true)
 			{
-				optoPort1->setConnectionCaption(connection->connectionID());
+				optoPort1->setConnectionID(connection->connectionID());
 			}
 			else
 			{
 				// Opto port '%1' of connection '%2' is already used in connection '%3'.
 				//
-				m_log->errALC5019(optoPort1->strID(), connection->connectionID(), optoPort1->connectionCaption());
+				m_log->errALC5019(optoPort1->equipmentID(), connection->connectionID(), optoPort1->connectionID());
 				result = false;
 				continue;
 			}
@@ -305,7 +307,7 @@ namespace Builder
 					result = false;
 				}
 
-				optoPort1->addTxSignalsStrID(connection->signalList());
+				optoPort1->addTxSignalsID(connection->signalList());
 
 				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
 							arg(connection->connectionID()).arg(portID));
@@ -341,7 +343,7 @@ namespace Builder
 
 				if (m1 != nullptr && m2 != nullptr)
 				{
-					if (m1->lmStrID() == m2->lmStrID())
+					if (m1->lmID() == m2->lmID())
 					{
 						//  Opto ports of the same chassis is linked via connection '%1'.
 						//
@@ -355,15 +357,15 @@ namespace Builder
 					assert(false);
 				}
 
-				if (optoPort2->connectionCaption().isEmpty() == true)
+				if (optoPort2->connectionID().isEmpty() == true)
 				{
-					optoPort2->setConnectionCaption(connection->connectionID());
+					optoPort2->setConnectionID(connection->connectionID());
 				}
 				else
 				{
 					// Opto port '%1' of connection '%2' is already used in connection '%3'.
 					//
-					m_log->errALC5019(optoPort2->strID(), connection->connectionID(), optoPort2->connectionCaption());
+					m_log->errALC5019(optoPort2->equipmentID(), connection->connectionID(), optoPort2->connectionID());
 					result = false;
 					continue;
 				}
@@ -380,8 +382,8 @@ namespace Builder
 				optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 
-				optoPort1->setLinkedPortStrID(optoPort2->strID());
-				optoPort2->setLinkedPortStrID(optoPort1->strID());
+				optoPort1->setLinkedPortID(optoPort2->equipmentID());
+				optoPort2->setLinkedPortID(optoPort1->equipmentID());
 
 				LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
 							arg(connection->connectionID()).arg(portID));
@@ -529,6 +531,73 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+
+	bool ApplicationLogicCompiler::writeConnectionsFile()
+	{
+		QStringList list;
+
+		int count = m_connections->count();
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<Hardware::Connection> cn = m_connections->get(i);
+
+			if (cn == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
+			{
+				list.append(delim);
+				str = QString("Opto connection %1").arg(cn->connectionID());
+				list.append(str);
+				list.append(delim);
+				list.append("");
+
+				str = QString("Port1 %1, txSignals:\n").arg(cn->port1EquipmentID());
+				list.append(str);
+
+				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+
+				if (p1 != nullptr)
+				{
+					list.append(p1->getTxSignalsID());
+					list.append("");
+				}
+
+				str = QString("Port2 %1, txSignals:\n").arg(cn->port2EquipmentID());
+				list.append(str);
+
+				Hardware::OptoPort* p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+
+				if (p2 != nullptr)
+				{
+					list.append(p2->getTxSignalsID());
+					list.append("");
+				}
+			}
+			else
+			{
+				list.append(delim);
+				str = QString(" RS232/485 connection %1").arg(cn->connectionID());
+				list.append(str);
+				list.append(delim);
+				list.append("");
+
+			}
+		}
+
+		m_resultWriter->addFile("Reports", "connections.txt", "", "", list);
+
+		return true;
 	}
 
 
