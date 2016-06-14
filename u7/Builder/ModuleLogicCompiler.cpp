@@ -2,6 +2,7 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/Crc.h"
+#include "Connection.h"
 
 namespace Builder
 {
@@ -489,6 +490,8 @@ namespace Builder
 			if (!calculateInternalSignalsAddresses()) break;
 
 			if (!setOutputSignalsAsComputed()) break;
+
+			if (!createOptoExchangeLists()) break;
 
 			result = true;
 		}
@@ -1290,8 +1293,6 @@ namespace Builder
 
 			if (appItem->isSignal())
 			{
-				// appItem is signal
-				//
 				result &= generateAppSignalCode(appItem);
 
 				if (result == false)
@@ -1304,8 +1305,6 @@ namespace Builder
 
 			if (appItem->isFb())
 			{
-				// appItem is FB
-				//
 				result &= generateFbCode(appItem);
 
 				if (result == false)
@@ -1318,17 +1317,35 @@ namespace Builder
 
 			if (appItem->isConst())
 			{
-				// appItem is Const, no code generation needed
-				//
 				continue;
 			}
 
-			// unknown type of appItem
-			//
-			assert(false);
+			if (appItem->isTransmitter())
+			{
+				result &= generateTransmitterCode(appItem);
 
+				if (result == false)
+				{
+					break;
+				}
+
+				continue;
+			}
+
+			if (appItem->isReceiver())
+			{
+				result &= generateReceiverCode(appItem);
+
+				if (result == false)
+				{
+					break;
+				}
+
+				continue;
+			}
+
+			m_log->errALC5011(appItem->guid());			// Application item '%1' has unknown type.
 			result = false;
-
 			break;
 		}
 
@@ -2092,7 +2109,8 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				if (connectedPinParent->isFb())
+				if (connectedPinParent->isFb() ||
+					connectedPinParent->isTransmitter())
 				{
 					continue;
 				}
@@ -2242,6 +2260,32 @@ namespace Builder
 		appSignal->setResultSaved();
 
 		return true;
+	}
+
+
+	bool ModuleLogicCompiler::generateTransmitterCode(const AppItem *appItem)
+	{
+		bool result = true;
+
+		if (appItem == nullptr)
+		{
+			return false;
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateReceiverCode(const AppItem *appItem)
+	{
+		bool result = true;
+
+		if (appItem == nullptr)
+		{
+			return false;
+		}
+
+		return result;
 	}
 
 
@@ -2438,29 +2482,6 @@ namespace Builder
 				}
 				QStringList txSignalsStrIDList = port->getTxSignalsStrID();
 
-				/*for(const QString& txSignalStrID : txSignalsStrIDList)
-				{
-					if (m_signalsStrID.contains(txSignalStrID) == false)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-								  arg(txSignalStrID).arg(port->connectionCaption()));
-
-						result = false;
-						continue;
-					}
-
-					Signal* txSignal = m_signalsStrID[txSignalStrID];
-
-					if (txSignal == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					port->addTxSignal(txSignal);
-				}*/
-
 				QString idStr;
 
 
@@ -2482,17 +2503,6 @@ namespace Builder
 					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
 								  arg(port->connectionCaption()));
-
-					/*
-						idStr.sprintf("0x%X", port->txDataID());
-
-						LOG_MESSAGE(m_log, QString(tr("Opto connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-									arg(port->connectionCaption()).
-									arg(port->txAnalogSignalsCount()).
-									arg(port->txDiscreteSignalsCount()).
-									arg(port->txDataSizeW() * 2).
-									arg(idStr)  );
-					 */
 				}
 			}
 		}
@@ -4198,21 +4208,50 @@ namespace Builder
 		m_appItems.clear();
 		m_pinParent.clear();
 
+		if (m_moduleLogic == nullptr)
+		{
+			return true;
+		}
+
 		bool result = true;
 
-		if (m_moduleLogic != nullptr)
+		for(const AppLogicItem& logicItem : m_moduleLogic->items())
 		{
-			for(const AppLogicItem& logicItem : m_moduleLogic->items())
+			// build QHash<QUuid, AppItem*> m_appItems
+			// item GUID -> item ptr
+			//
+			if (m_appItems.contains(logicItem.m_fblItem->guid()))
 			{
-				// build QHash<QUuid, AppItem*> m_appItems
-				// item GUID -> item ptr
-				//
-				if (m_appItems.contains(logicItem.m_fblItem->guid()))
-				{
-					AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
+				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
 
-					msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-							arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
+				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
+
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+
+				result = false;
+
+				continue;
+			}
+
+			AppItem* appItem = new AppItem(logicItem);
+
+			m_appItems.insert(appItem->guid(), appItem);
+
+			// build QHash<QUuid, LogicItem*> m_itemsPins;
+			// pin GUID -> parent item ptr
+			//
+
+			// add input pins
+			//
+			for(LogicPin input : appItem->inputs())
+			{
+				if (m_pinParent.contains(input.guid()))
+				{
+					AppItem* firstItem = m_pinParent[input.guid()];
+
+					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -4221,55 +4260,28 @@ namespace Builder
 					continue;
 				}
 
-				AppItem* appItem = new AppItem(logicItem);
+				m_pinParent.insert(input.guid(), appItem);
+			}
 
-				m_appItems.insert(appItem->guid(), appItem);
-
-				// build QHash<QUuid, LogicItem*> m_itemsPins;
-				// pin GUID -> parent item ptr
-				//
-
-				// add input pins
-				//
-				for(LogicPin input : appItem->inputs())
+			// add output pins
+			//
+			for(LogicPin output : appItem->outputs())
+			{
+				if (m_pinParent.contains(output.guid()))
 				{
-					if (m_pinParent.contains(input.guid()))
-					{
-						AppItem* firstItem = m_pinParent[input.guid()];
+					AppItem* firstItem = m_pinParent[output.guid()];
 
-						msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
-								arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
-						result = false;
+					result = false;
 
-						continue;
-					}
-
-					m_pinParent.insert(input.guid(), appItem);
+					continue;
 				}
 
-				// add output pins
-				//
-				for(LogicPin output : appItem->outputs())
-				{
-					if (m_pinParent.contains(output.guid()))
-					{
-						AppItem* firstItem = m_pinParent[output.guid()];
-
-						msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
-								arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
-
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
-						result = false;
-
-						continue;
-					}
-
-					m_pinParent.insert(output.guid(), appItem);
-				}
+				m_pinParent.insert(output.guid(), appItem);
 			}
 		}
 
@@ -4395,7 +4407,7 @@ namespace Builder
 
 			for(LogicPin output : item->outputs())
 			{
-				bool connectedToFbl = false;
+				bool connectedToFb = false;
 				bool connectedToSignal = false;
 
 				for(QUuid connectedPinUuid : output.associatedIOs())
@@ -4410,7 +4422,7 @@ namespace Builder
 
 						if (connectedAppItem->isFb())
 						{
-							connectedToFbl = true;
+							connectedToFb = true;
 						}
 						else
 						{
@@ -4418,13 +4430,13 @@ namespace Builder
 							{
 								connectedToSignal = true;
 
-								m_outPinSignal.insert(output.guid(), connectedAppItem->signal().guid());
+								m_outPinSignal.insertMulti(output.guid(), connectedAppItem->signal().guid());
 							}
 						}
 					}
 				}
 
-				if (connectedToFbl && !connectedToSignal)
+				if (connectedToFb && !connectedToSignal)
 				{
 					// create shadow signal with Uuid of this output pin
 					//
@@ -4727,7 +4739,8 @@ namespace Builder
 				return false;
 			}
 
-			if (item.m_fblItem->isOutputSignalElement() == false)
+			if (item.m_fblItem->isOutputSignalElement() == false &&
+				item.m_fblItem->isInOutSignalElement() == false)
 			{
 				continue;
 			}
@@ -4746,6 +4759,133 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+
+	bool ModuleLogicCompiler::createOptoExchangeLists()
+	{
+		bool result = true;
+
+		for(const AppItem* item : m_appItems)
+		{
+			if (item->isTransmitter() == false)
+			{
+				continue;
+			}
+
+			const LogicTransmitter& transmitter = item->logicTransmitter();
+
+			for(LogicPin inPin : transmitter.inputs())
+			{
+				if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(item->strID()));
+					RESULT_FALSE_BREAK
+				}
+
+				int connectedPinsCount = 1;
+
+				for(QUuid connectedPinGuid : inPin.associatedIOs())
+				{
+					if (connectedPinsCount > 1)
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								  QString(tr("More than one pin is connected to the input")));
+
+						ASSERT_RESULT_FALSE_BREAK
+					}
+
+					connectedPinsCount++;
+
+					if (!m_pinParent.contains(connectedPinGuid))
+					{
+						ASSERT_RESULT_FALSE_BREAK
+					}
+
+					AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
+
+					if (connectedPinParent == nullptr)
+					{
+						ASSERT_RESULT_FALSE_BREAK
+					}
+
+					QUuid srcSignalGuid;
+
+					if (connectedPinParent->isSignal())
+					{
+						// input connected to real signal
+						//
+						srcSignalGuid = connectedPinParent->guid();
+					}
+					else
+					{
+						// connectedPinParent is FB
+						//
+						if (!m_outPinSignal.contains(connectedPinGuid))
+						{
+							// All transmitter inputs must be directly linked to a signals.
+							//
+							m_log->errALC5027(transmitter.guid());
+							RESULT_FALSE_BREAK
+						}
+
+						QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
+
+						if (ids.count() >  1)
+						{
+							// Transmitter input can be linked to one signal only.
+							//
+							m_log->errALC5026(transmitter.guid(), ids);
+							RESULT_FALSE_BREAK
+						}
+						else
+						{
+							srcSignalGuid = ids.first();
+						}
+					}
+
+					if (!m_appSignals.contains(srcSignalGuid))
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
+						RESULT_FALSE_BREAK
+					}
+
+					AppSignal* appSignal = m_appSignals[srcSignalGuid];
+
+					if (appSignal == nullptr)
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(srcSignalGuid.toString()));
+						RESULT_FALSE_BREAK
+					}
+
+					if (!appSignal->isComputed())
+					{
+						m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
+						RESULT_FALSE_BREAK
+					}
+
+					std::shared_ptr<Hardware::Connection> cn = m_optoModuleStorage->getConnection(transmitter.connectionId());
+
+					if (cn == nullptr)
+					{
+						// Transmitter is linked to unknown opto connection '%1'.
+						//
+						m_log->errALC5024(transmitter.connectionId(), transmitter.guid());
+						RESULT_FALSE_BREAK
+					}
+
+					assert(false);			// continue here !!!
+				}
+
+				if (result == false)
+				{
+					break;
+				}
+			}
+		}
+
+		return result;
 	}
 
 

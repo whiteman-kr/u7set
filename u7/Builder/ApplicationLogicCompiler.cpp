@@ -104,6 +104,8 @@ namespace Builder
 
 		do
 		{
+			if (checkAppSignals() == false) break;
+
 			if (checkOptoConnections() == false) break;
 
 			if (compileModulesLogicsPass1() == false) break;
@@ -124,11 +126,92 @@ namespace Builder
 	}
 
 
+	bool ApplicationLogicCompiler::checkAppSignals()
+	{
+		bool result = true;
+
+		int count = m_signals->count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Checking application signals")));
+
+		QHash<QString, int> appSignalIDs;
+
+		appSignalIDs.reserve(count * 1.3);
+
+		for(int i = 0; i < count; i++)
+		{
+			const Signal& s = (*m_signals)[i];
+
+			// check AppSignalID
+			//
+			if (appSignalIDs.contains(s.appSignalID()) == true)
+			{
+				m_log->errALC5016(s.appSignalID());		// Application signal identifier '%1' is not unique.
+				result = false;
+			}
+			else
+			{
+				appSignalIDs.insert(s.appSignalID(), i);
+			}
+
+			// check EquipmentID
+			//
+			if (s.equipmentID().isEmpty() == true)
+			{
+				m_log->wrnALC5012(s.appSignalID());		// Application signal '%1' is not bound to any device object.
+			}
+			else
+			{
+				Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID());
+
+				if (device == nullptr)
+				{
+					m_log->errALC5013(s.appSignalID(), s.equipmentID());		// Application signal '%1' is bound to unknown device object '%2'.
+					result = false;
+				}
+			}
+
+			// check other signal properties
+			//
+			if (s.isDiscrete())
+			{
+				if (s.dataSize() != 1)
+				{
+					m_log->errALC5014(s.appSignalID());		// Discrete signal '%1' must have DataSize equal to 1.
+					result = false;
+				}
+			}
+			else
+			{
+				assert(s.isAnalog() == true);
+
+				if (s.dataSize() != 32)
+				{
+					m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
+					result = false;
+				}
+			}
+		}
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString(tr("Ok")))
+		}
+
+		return result;
+	}
+
+
 	bool ApplicationLogicCompiler::checkOptoConnections()
 	{
 		if (m_optoModuleStorage == nullptr ||
-			m_connections == nullptr ||
-			m_optoModuleStorage == nullptr)
+			m_connections == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
@@ -142,6 +225,11 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking opto connections")));
+
+		if (m_optoModuleStorage->addConnections(*m_connections) == false)
+		{
+			return false;
+		}
 
 		int connectionsCount = m_connections->count();
 
@@ -168,10 +256,9 @@ namespace Builder
 			//
 			if (optoPort1 == nullptr)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					QString(tr("Undefined port EquipmentID '%1' (connection '%2')")).
-								   arg(connection->port1EquipmentID()).arg(connection->connectionID()));
-
+				// Undefined opto port '%1' in the connection '%2'.
+				//
+				m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
 				result = false;
 				continue;
 			}
@@ -182,9 +269,9 @@ namespace Builder
 			}
 			else
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					QString(tr("Opto-port '%1' already used in connection '%2'")).
-								   arg(optoPort1->strID()).arg(connection->connectionID()));
+				// Opto port '%1' of connection '%2' is already used in connection '%3'.
+				//
+				m_log->errALC5019(optoPort1->strID(), connection->connectionID(), optoPort1->connectionCaption());
 				result = false;
 				continue;
 			}
@@ -212,10 +299,9 @@ namespace Builder
 
 				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						QString(tr("LM's port '%1' can't work in RS232/485 mode (connection '%2')")).
-									   arg(connection->port1EquipmentID()).arg(connection->connectionID()));
-
+					// LM's port '%1' can't work in RS232/485 mode (connection '%2').
+					//
+					m_log->errALC5020(connection->port1EquipmentID(), connection->connectionID());
 					result = false;
 				}
 
@@ -234,23 +320,39 @@ namespace Builder
 
 				if (optoPort2 == nullptr)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						QString(tr("Undefined port EquipmentID '%1' (connection '%2')")).
-									   arg(connection->port2EquipmentID()).arg(connection->connectionID()));
-
+					// Undefined opto port '%1' in the connection '%2'.
+					//
+					m_log->errALC5021(connection->port2EquipmentID(), connection->connectionID());
 					result = false;
 					continue;
 				}
 
 				if (m_optoModuleStorage->isCompatiblePorts(optoPort1, optoPort2) == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Uncompatible ports '%1' and '%2' in connection '%3'. Only LM-LM and OCM-OCM connections possible.")).
-									   arg(connection->port1EquipmentID()).
-									   arg(connection->port2EquipmentID()).
-									   arg(connection->connectionID()));
+					// Opto ports '%1' and '%2' are not compatible (connection '%3').
+					//
+					m_log->errALC5018(connection->port1EquipmentID(), connection->port2EquipmentID(), connection->connectionID());
 					result = false;
 					continue;
+				}
+
+				Hardware::OptoModule* m1 = m_optoModuleStorage->getOptoModule(optoPort1);
+				Hardware::OptoModule* m2 = m_optoModuleStorage->getOptoModule(optoPort2);
+
+				if (m1 != nullptr && m2 != nullptr)
+				{
+					if (m1->lmStrID() == m2->lmStrID())
+					{
+						//  Opto ports of the same chassis is linked via connection '%1'.
+						//
+						m_log->errALC5022(connection->connectionID());
+						result = false;
+						continue;
+					}
+				}
+				else
+				{
+					assert(false);
 				}
 
 				if (optoPort2->connectionCaption().isEmpty() == true)
@@ -259,9 +361,9 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						QString(tr("Opto-port '%1' already used in connection '%2'")).
-									   arg(optoPort2->strID()).arg(connection->connectionID()));
+					// Opto port '%1' of connection '%2' is already used in connection '%3'.
+					//
+					m_log->errALC5019(optoPort2->strID(), connection->connectionID(), optoPort2->connectionCaption());
 					result = false;
 					continue;
 				}

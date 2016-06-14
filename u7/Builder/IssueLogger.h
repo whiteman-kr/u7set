@@ -120,6 +120,23 @@ namespace Builder
 		void errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data format.
 		void errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
 		void errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Analog signal '%1' is connected to discrete input '%2.%3'.
+		void errALC5011(QUuid itemUuid);										// Application item '%1' has unknown type.
+		void wrnALC5012(QString appSignalID);									// Application signal '%1' is not bound to any device object.
+		void errALC5013(QString appSignalID, QString equipmentID);				// Application signal '%1' is bound to unknown device object '%2'.
+		void errALC5014(QString appSignalID);									// Discrete signal '%1' must have DataSize equal to 1.
+		void errALC5015(QString appSignalID);									// Analog signal '%1' must have DataSize equal to 32.
+		void errALC5016(QString appSignalID);									// Application signal identifier '%1' is not unique.
+		void errALC5017(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
+		void errALC5018(QString port1, QString port2, QString connection);			// Opto ports '%1' and '%2' are not compatible (connection '%3').
+		void errALC5019(QString port, QString connection1, QString connection2);	// Opto port '%1' of connection '%2' is already used in connection '%3'.
+		void errALC5020(QString port, QString connection);							// LM's port '%1' can't work in RS232/485 mode (connection '%2').
+		void errALC5021(QString port, QString connection);							// Undefined opto port '%1' in the connection '%2'.
+		void errALC5022(QString connection);									// Opto ports of the same chassis is linked via connection '%1'.
+		void errALC5023(QString connection);									// Opto connection caption '%1' is not unique.
+		void errALC5024(QString connection, QUuid transmitterUuid);				// Transmitter is linked to unknown opto connection '%1'.
+		void errALC5025(QString connection, QUuid receiverUuid);				// Receiver is linked to unknown opto connection '%1'.
+		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
+		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
 
 		// EQP			Equipment issues						6000-6999
 		//

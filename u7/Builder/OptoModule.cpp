@@ -795,4 +795,45 @@ namespace Hardware
 		return result;
 	}
 
+
+	bool OptoModuleStorage::addConnections(const Hardware::ConnectionStorage& connectionStorage)
+	{
+		bool result = true;
+
+		int count = connectionStorage.count();
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<Connection> connection = connectionStorage.get(i);
+
+			if (connection == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (m_connections.contains(connection->connectionID()) == false)
+			{
+				m_connections.insert(connection->connectionID(), connection);
+			}
+			else
+			{
+				m_log->errALC5023(connection->connectionID());
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& caption)
+	{
+		if (m_connections.contains(caption) == false)
+		{
+			return nullptr;
+		}
+
+		return m_connections[caption];
+	}
 }

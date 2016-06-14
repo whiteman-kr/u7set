@@ -5,6 +5,7 @@
 #include "SchemaItemSignal.h"
 #include "SchemaItemConst.h"
 #include "SchemaItemAfb.h"
+#include "SchemaItemConnection.h"
 
 
 namespace VFrame30
@@ -604,6 +605,16 @@ namespace VFrame30
 		return ptr != nullptr;
 	}
 
+	bool FblItemRect::isSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemSignal*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isInOutSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemInOut*>(this) != nullptr;
+	}
+
 	bool FblItemRect::isConstElement() const
 	{
 		const VFrame30::SchemaItemConst* ptr = dynamic_cast<const VFrame30::SchemaItemConst*>(this);
@@ -616,14 +627,19 @@ namespace VFrame30
 		return ptr != nullptr;
 	}
 
-	bool FblItemRect::isInOutSignalElement() const
+	bool FblItemRect::isConnectionElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemaItemInOut*>(this) != nullptr;
+		return dynamic_cast<const VFrame30::SchemaItemConnection*>(this) != nullptr;
 	}
 
-	bool FblItemRect::isSignalElement() const
+	bool FblItemRect::isReceiverElement() const
 	{
-		return dynamic_cast<const VFrame30::SchemaItemSignal*>(this) != nullptr;
+		return dynamic_cast<const VFrame30::SchemaItemReceiver*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isTransmitterElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemTransmitter*>(this) != nullptr;
 	}
 
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
@@ -684,6 +700,26 @@ namespace VFrame30
 	const VFrame30::SchemaItemInOut* FblItemRect::toInOutSignalElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemInOut*>(this);
+	}
+
+	VFrame30::SchemaItemReceiver* FblItemRect::toReceiverElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemReceiver*>(this);
+	}
+
+	const VFrame30::SchemaItemReceiver* FblItemRect::toReceiverElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemReceiver*>(this);
+	}
+
+	VFrame30::SchemaItemTransmitter* FblItemRect::toTransmitterElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemTransmitter*>(this);
+	}
+
+	const VFrame30::SchemaItemTransmitter* FblItemRect::toTransmitterElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemTransmitter*>(this);
 	}
 
 	// Weight propertie

@@ -214,8 +214,6 @@ namespace Builder
 				}
 			}
 
-			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
-
 			//
 			// Loading connections
 			//
@@ -233,6 +231,8 @@ namespace Builder
 					break;
 				}
 			}
+
+			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
 
 			//
 			// Parse application logic

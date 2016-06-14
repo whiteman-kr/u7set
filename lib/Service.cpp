@@ -359,7 +359,7 @@ void Service::onBaseRequest(UdpRequest request)
 
 void Service::onServiceWork()
 {
-	qDebug() << "Called Service::onServicenWork";
+	qDebug() << "Called Service::onServiceWork";
 
 	m_state = ServiceState::Work;
 }
@@ -391,6 +391,11 @@ void Service::getServiceInfo(ServiceInformation &serviceInfo)
 	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_startTime) / 1000;
 
 	serviceInfo.serviceState = m_state;
+
+	if (m_serviceWorker != nullptr)
+	{
+		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+	}
 
 	if (m_state != ServiceState::Stopped)
 	{

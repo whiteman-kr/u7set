@@ -219,6 +219,8 @@ protected:
 
 	ServiceType serviceType() const { return m_serviceType; }
 
+	virtual void getServiceSpecificInfo(ServiceInformation& serviceInfo) { Q_UNUSED(serviceInfo); }
+
 public:
 	ServiceWorker(ServiceType serviceType,
 				  const QString& serviceStrID,

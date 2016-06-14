@@ -40,6 +40,7 @@ namespace Builder
 		void findLMs();
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
+		bool checkAppSignals();
 		bool checkOptoConnections();
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();

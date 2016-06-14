@@ -11,6 +11,9 @@ namespace VFrame30
 	class SchemaItemConst;
 	class SchemaItemAfb;
 	class SchemaItemInOut;
+	class SchemaItemConnection;
+	class SchemaItemReceiver;
+	class SchemaItemTransmitter;
 }
 
 namespace VFrame30
@@ -82,6 +85,9 @@ namespace VFrame30
 		bool isSignalElement() const;
 		bool isConstElement() const;
 		bool isAfbElement() const;
+		bool isConnectionElement() const;
+		bool isReceiverElement() const;
+		bool isTransmitterElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -100,6 +106,12 @@ namespace VFrame30
 
 		VFrame30::SchemaItemInOut* toInOutSignalElement();
 		const VFrame30::SchemaItemInOut* toInOutSignalElement() const;
+
+		VFrame30::SchemaItemReceiver* toReceiverElement();
+		const VFrame30::SchemaItemReceiver* toReceiverElement() const;
+
+		VFrame30::SchemaItemTransmitter* toTransmitterElement();
+		const VFrame30::SchemaItemTransmitter* toTransmitterElement() const;
 
 		double weight() const;
 		void setWeight(double weight);
