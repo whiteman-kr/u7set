@@ -15,6 +15,7 @@ private slots:
 	void getSignalIdsTest();
 	void checkInCheckOutSignalsTest();
 	void getUnitsTest();
+	void getLatestSignalTest();
 	void cleanupTestCase();
 
 private:
