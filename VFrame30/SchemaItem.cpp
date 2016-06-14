@@ -193,7 +193,7 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, int /*runOrderIndex*/) const
+	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, const QString& /*runOrderIndex*/) const
 	{
 	}
 

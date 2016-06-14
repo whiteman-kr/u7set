@@ -123,6 +123,27 @@ namespace Builder
 				  .arg(debugMessage));
 	}
 
+	/// IssueCode: INT1001
+	///
+	/// IssueType: Error
+	///
+	/// Title: Internal exception: %1.
+	///
+	/// Parameters:
+	///		%1 Debug information
+	///
+	/// Description:
+	///		Error may occur if interanl exception occured. In most cases it is an internal software error
+	/// and it shoud be reported to developers.
+	///
+	void IssueLogger::errINT1001(QString debugMessage)
+	{
+		LOG_ERROR(IssueType::Internal,
+				  1001,
+				  tr("Internal exception: %1.")
+				  .arg(debugMessage));
+	}
+
 	// PDB			Project database issues					2000-2999
 	//
 
@@ -1007,6 +1028,58 @@ namespace Builder
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
 				  tr("Schema does not have Logic layer (Logic Schema '%1').").arg(schema));
+	}
+
+
+	/// IssueCode: ALP4030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Singlechannel Logic Schema '%1' cannot contain multichannel signal block ('%2').
+	///
+	/// Parameters:
+	///		%1 Logic schema StrID
+	///		%2 Schema item description
+	///
+	/// Description:
+	///		Singlechannel Logic Schema '%1' cannot contain multichannel signal blocks ('%2'). Only one signal can be assigned for
+	/// input/output/internal signal elements.
+	///
+	void IssueLogger::errALP4030(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4030,
+				  tr("Singlechannel Logic Schema '%1' cannot contain multichannel signal block ('%2').")
+				  .arg(schema)
+				  .arg(schemaItem));
+
+	}
+
+
+	/// IssueCode: ALP4031
+	///
+	/// IssueType: Error
+	///
+	/// Title: Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
+	///
+	/// Parameters:
+	///		%1 Logic schema StrID
+	///		%2 Schema item description
+	///
+	/// Description:
+	///		Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
+	///
+	void IssueLogger::errALP4031(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4031,
+				  tr("Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.")
+				  .arg(schema)
+				  .arg(schemaItem));
 	}
 
 

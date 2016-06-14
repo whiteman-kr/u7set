@@ -49,7 +49,7 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const override;
+		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const override;
 
 		// Вычислить координаты точки
 		//

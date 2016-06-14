@@ -1,5 +1,7 @@
 #include "Parser.h"
 
+#include <typeindex>
+
 #include "IssueLogger.h"
 #include "GlobalMessanger.h"
 
@@ -390,7 +392,7 @@ namespace Builder
 	}
 
 	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-			const BushContainer& bushContainer,
+			const BushContainer& bushes,
 			IssueLogger* log)
 	{
 		if (logicSchema == nullptr ||
@@ -409,20 +411,114 @@ namespace Builder
 			return false;
 		}
 
-		if (bushContainer.bushes.empty() == true)
+		// Create a copy of bushcontainer, as in case of processing multisignlas in multichannel schemas
+		// these multisignals will be created for all channels
+		//
+		BushContainer busheContainer = bushes;
+
+		if (busheContainer.bushes.empty() == true)
 		{
 			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic schema does no contains any correct links."));
 			assert(false);	// if fires then add error to IussueLogger
 			return true;
 		}
 
+		// Multischema checks. All multichannel signals must be transformed to singlechannel here
+		//
+		if (logicSchema->isMultichannelSchema() == true)
+		{
+			int signalIndexInBlocks = logicSchema->equipmentIdList().indexOf(moduleEquipmentId());
+
+			if (signalIndexInBlocks == -1)
+			{
+				// "this" AppLogicModule has LM's equipmentID  but Schema's equipmentIdList does not have any.
+				// How did we end up here?
+				//
+				assert(signalIndexInBlocks != -1);
+				log->errINT1001(QString("AppLogicModule::AppLogicModule(%1) signalIndexInBlocks == -1").arg(logicSchema->schemaID()));
+				return false;
+			}
+
+			for (Bush& bush : busheContainer.bushes)
+			{
+				for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
+				{
+					const std::shared_ptr<VFrame30::FblItemRect>& f = it->second;
+
+					if (f->isSignalElement() == true)
+					{
+						// All multichannel signals must be transformed to singlechannel here
+						//
+						const VFrame30::SchemaItemSignal* signal = f->toSignalElement();
+
+						if (signal == nullptr)
+						{
+							assert(signal != nullptr);	// No error report, unlikely we will be here ever
+							continue;
+						}
+
+						if (signal->multiChannel() == true)
+						{
+							// Get correct SignalID
+							//
+							const QStringList& signalIds = signal->appSignalIdList();
+
+							if (signalIds.size() <= signalIndexInBlocks)
+							{
+								// Multichannel signal block must have the same number of AppSignalIDs
+								// as schema's channel number (number of schema's EquipmentIDs)
+								//
+								log->errALP4031(logicSchema->schemaID(), f->buildName(), f->guid());
+								continue;
+							}
+
+							QString signalId = signalIds[signalIndexInBlocks];
+
+							// Create a copy of this AFB and set its AppSignaLD to ONE signalId
+							//
+							QByteArray data;
+							f->Save(data);
+
+							VFrame30::SchemaItem* newRawItem = VFrame30::SchemaItem::Create(data);
+
+							if (QLatin1String(newRawItem->metaObject()->className()) != QLatin1String(f->metaObject()->className()) ||
+								dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) == nullptr)
+							{
+								log->errINT1001(QString("AppLogicModule::addBranch(%1) newRawItem->metaObject()->className() != f->metaObject()->className()")
+												.arg(logicSchema->schemaID()));
+								assert(QLatin1String(newRawItem->metaObject()->className()) == QLatin1String(f->metaObject()->className()));
+								assert(dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) != nullptr);
+								continue;
+							}
+
+							std::shared_ptr<VFrame30::FblItemRect> newSignalElement(dynamic_cast<VFrame30::FblItemRect*>(newRawItem));
+							assert(newSignalElement->isSignalElement() == true);
+
+							VFrame30::SchemaItemSignal* newSignal = newSignalElement->toSignalElement();
+
+							newSignal->setAppSignalIds(signalId);
+
+							// Set this item
+							//
+							it->second = newSignalElement;	// id (key) remains the same
+						}
+					}
+				}
+			}
+		}
+
 		// Save all items to accumulator, they will be ordered in orderItems()
 		//
-		for (const Bush& bush : bushContainer.bushes)
+		for (const Bush& bush : busheContainer.bushes)
 		{
 			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
 			{
 				const std::shared_ptr<VFrame30::FblItemRect>& f = it->second;
+
+				if (f->isSignalElement() == true && f->toSignalElement()->multiChannel() == true)
+				{
+					log->errALP4030(logicSchema->schemaID(), f->buildName(), f->guid());
+				}
 
 				AppLogicItem li{f, logicSchema};
 
@@ -2095,14 +2191,14 @@ namespace Builder
 
 		// Set Schema Ityem Run Order for drawing on schemas
 		//
-		std::map<QUuid, int> schemaItemRunOrder;
-
 		const AppLogicData* appLogicData = applicationData();
 		const auto& logicModules = appLogicData->modules();
 
 		for (std::shared_ptr<AppLogicModule> lm : logicModules)
 		{
 			const std::list<AppLogicItem>& items = lm->items();
+
+			std::map<QUuid, int> schemaItemRunOrder;
 
 			int index = 0;
 			for (const AppLogicItem& it : items)
@@ -2112,9 +2208,9 @@ namespace Builder
 				schemaItemRunOrder[it.m_fblItem->guid()] = index;
 				index ++;
 			}
-		}
 
-		GlobalMessanger::instance()->swapSchemaItemRunOrder(schemaItemRunOrder);
+			GlobalMessanger::instance()->setRunOrder(lm->moduleEquipmentId(), schemaItemRunOrder);
+		}
 
 		return;
 	}

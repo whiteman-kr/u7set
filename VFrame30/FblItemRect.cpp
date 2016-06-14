@@ -448,7 +448,7 @@ namespace VFrame30
 		return;
 	}
 
-	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const
+	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
 	{
 		int dpiX = 96;
 

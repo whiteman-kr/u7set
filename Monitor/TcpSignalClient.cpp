@@ -364,6 +364,8 @@ void TcpSignalClient::processUnits(const QByteArray& data)
 
 	theSignals.setUnits(units);
 
+	qDebug() << "TcpSignalClient::processUnits UnitsCount: " << units.size();
+
 	resetToGetState();				// Switch to next get
 
 	return;

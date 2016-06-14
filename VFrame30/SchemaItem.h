@@ -111,7 +111,7 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const;
+		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//

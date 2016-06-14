@@ -126,7 +126,7 @@ namespace Builder
 		AppLogicModule(QString moduleEquipmentId);
 
 		bool addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-					   const BushContainer& bushContainer,
+					   const BushContainer& bushes,
 					   IssueLogger* log);
 
 		bool orderItems(IssueLogger* log);
