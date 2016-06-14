@@ -63,6 +63,9 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalSearch/columnCount", m_signalSearchColumnCount);
 	s.setValue("DialogSignalSearch/columnWidth", m_signalSearchColumnWidth);
 
+	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
+	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -77,6 +80,9 @@ void Settings::loadUserScope()
 	m_signalSearchGeometry = s.value("DialogSignalSearch/geometry").toByteArray();
 	m_signalSearchColumnCount = s.value("DialogSignalSearch/columnCount").toInt();
 	m_signalSearchColumnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
+
+	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
+	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
 
 	return;
 }
