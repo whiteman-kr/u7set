@@ -21,11 +21,17 @@ public:
 
 	void removeAll();
 	void setSignals(const std::vector<Signal>& signalList);
+
+	std::vector<int> сolumnsIndexes();
+	void setColumnsIndexes(std::vector<int> columnsIndexes);
+
+	QStringList columnsNames();
+
 	void update();
 
+	const Signal& signal(int index);
+
 public:
-	QStringList m_columnsNames;
-	std::vector<int> m_columnsIndexes;
 
 	enum DialogSignalSnapshotColumns
 	{
@@ -60,6 +66,8 @@ protected:
 
 private:
 	std::vector<Signal> m_signals;
+	QStringList m_columnsNames;
+	std::vector<int> m_columnsIndexes;
 
 };
 
@@ -73,8 +81,10 @@ public:
 
 private slots:
 	void on_buttonColumns_clicked();
-
 	void on_DialogSignalSnapshot_finished(int result);
+	void prepareContextMenu(const QPoint& pos);
+
+	void on_tableView_doubleClicked(const QModelIndex &index);
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;

@@ -11,23 +11,31 @@ DialogColumns::DialogColumns(QWidget *parent, const QStringList& columnsNames, c
 {
 	ui->setupUi(this);
 
+	for (int i : columnsIndexes)
+	{
+		QListWidgetItem* item = new QListWidgetItem(columnsNames.at(i));
+		item->setData(Qt::UserRole, i);
+
+		ui->listSelectedColumns->addItem(item);
+
+	}
+
 	int i = 0;
 	for (const QString& s : columnsNames)
 	{
-		QListWidgetItem* item = new QListWidgetItem(s);
-		item->setData(Qt::UserRole, i);
 
-		if (std::find(columnsIndexes.begin(), columnsIndexes.end(), i) != columnsIndexes.end())
+		if (std::find(columnsIndexes.begin(), columnsIndexes.end(), i) == columnsIndexes.end())
 		{
-			ui->listSelectedColumns->addItem(item);
-		}
-		else
-		{
+			QListWidgetItem* item = new QListWidgetItem(s);
+			item->setData(Qt::UserRole, i);
 			ui->listExistingColumns->addItem(item);
 		}
 
 		i++;
 	}
+
+	ui->listExistingColumns->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui->listSelectedColumns->setSelectionMode(QAbstractItemView::SingleSelection);
 
 }
 
@@ -36,7 +44,7 @@ DialogColumns::~DialogColumns()
 	delete ui;
 }
 
-std::vector<int> DialogColumns::columnIndexes()
+std::vector<int> DialogColumns::columnsIndexes()
 {
 	return m_columnsIndexes;
 }
@@ -72,4 +80,112 @@ void DialogColumns::accept()
 	}
 
 	QDialog::accept();
+}
+
+void DialogColumns::on_buttonAdd_clicked()
+{
+	int row = ui->listExistingColumns->currentRow();
+	if (row == -1)
+	{
+		return;
+	}
+
+	QListWidgetItem* item = ui->listExistingColumns->takeItem(row);
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	ui->listSelectedColumns->addItem(item);
+
+}
+
+void DialogColumns::on_buttonAddAll_clicked()
+{
+	while (ui->listExistingColumns->count() > 0)
+	{
+		QListWidgetItem* item = ui->listExistingColumns->takeItem(0);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		ui->listSelectedColumns->addItem(item);
+	}
+}
+
+void DialogColumns::on_buttonRemove_clicked()
+{
+	int row = ui->listSelectedColumns->currentRow();
+	if (row == -1)
+	{
+		return;
+	}
+
+	QListWidgetItem* item = ui->listSelectedColumns->takeItem(row);
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	ui->listExistingColumns->addItem(item);
+}
+
+void DialogColumns::on_buttonRemoveAll_clicked()
+{
+	ui->listSelectedColumns->clear();
+	ui->listExistingColumns->clear();
+
+	int i = 0;
+	for (const QString& s : m_columnsNames)
+	{
+		QListWidgetItem* item = new QListWidgetItem(s);
+		item->setData(Qt::UserRole, i);
+
+		ui->listExistingColumns->addItem(item);
+
+		i++;
+	}
+}
+
+void DialogColumns::on_buttonUp_clicked()
+{
+	int row = ui->listSelectedColumns->currentRow();
+	if (row < 1)
+	{
+		return;
+	}
+
+	QListWidgetItem * item = ui->listSelectedColumns->takeItem(row);
+	ui->listSelectedColumns->insertItem(row - 1, item);
+	ui->listSelectedColumns->setCurrentRow(row - 1);
+}
+
+void DialogColumns::on_buttonDown_clicked()
+{
+	int row = ui->listSelectedColumns->currentRow();
+	if (row >= ui->listSelectedColumns->count() - 1)
+	{
+		return;
+	}
+
+	QListWidgetItem * item = ui->listSelectedColumns->takeItem(row);
+	ui->listSelectedColumns->insertItem(row + 1, item);
+	ui->listSelectedColumns->setCurrentRow(row + 1);
+}
+
+void DialogColumns::on_listExistingColumns_doubleClicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+	on_buttonAdd_clicked();
+}
+
+void DialogColumns::on_listSelectedColumns_doubleClicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+	on_buttonRemove_clicked();
+
 }
