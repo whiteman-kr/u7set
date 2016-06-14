@@ -90,20 +90,15 @@ namespace Hardware
 
 		Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
 
-		QString equipmentID() const { return m_equipmentID; }
+		Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
 
 		QString linkedPortID() const { return m_linkedPortID; }
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
 
 		bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
-		QString connectionID() const { return m_connectionID; }
+		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
 		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
-
-		// DELETE !!!!
-		Q_INVOKABLE QString connectionCaption() const { return m_connectionID; }
-		Q_INVOKABLE QString strID() const { return m_equipmentID; }
-		// DELETE !!!!
 
 		int port() const { return m_port; }
 		void setPort(int port) { m_port = port; }
