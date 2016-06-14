@@ -55,7 +55,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 10;		// AIM signals parameters algorithm has been changed
 //var configScriptVersion = 11;		// If software for LM ethernet controller is not found, default values are used
 //var configScriptVersion = 12;		// DiagDataSize changed to TxDiagDataSize
-var configScriptVersion = 13;		// AppDataSize changed to AppLANDataSize
+//var configScriptVersion = 13;		// AppDataSize changed to AppLANDataSize
+var configScriptVersion = 14;		// connectionCaption=>connectionID; strID=>equipmentID
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -1729,20 +1730,20 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, opticM
 			continue;
 		}
 		
-		if (optoPort.connectionCaption() == "" && optoPort.txDataSizeW() == 0 && optoPort.rxDataSizeW() == 0)
+		if (optoPort.connectionID() == "" && optoPort.txDataSizeW() == 0 && optoPort.rxDataSizeW() == 0)
 		{
 			continue;
 		}			
 		
 		if (optoPort.mode() == Mode_Optical)
 		{
-			confFirmware.writeLog("    OptoPort " + controller.propertyValue("EquipmentID") + ": Opto connection ID = " + optoPort.strID() + 
-				" (" + optoPort.connectionCaption() + ")\r\n");
+			confFirmware.writeLog("    OptoPort " + controller.propertyValue("EquipmentID") + ": Opto connection ID = " + optoPort.equipmentID() + 
+				" (" + optoPort.connectionID() + ")\r\n");
 		}
 		else
 		{
-			confFirmware.writeLog("    OptoPort " + controller.propertyValue("EquipmentID") + ": RS connection ID = " + optoPort.strID() + 
-				" (" + optoPort.connectionCaption() + ")\r\n");
+			confFirmware.writeLog("    OptoPort " + controller.propertyValue("EquipmentID") + ": RS connection ID = " + optoPort.equipmentID() + 
+				" (" + optoPort.connectionID() + ")\r\n");
 		}
 					
 		var ptr = 0 + p * 2;
