@@ -19,8 +19,7 @@ public:
 public:
 
 
-	void removeAll();
-	void setSignals(const std::vector<Signal>& signalList);
+	void setSignals(const std::vector<Signal*>& signalList);
 
 	std::vector<int> сolumnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
@@ -29,7 +28,7 @@ public:
 
 	void update();
 
-	const Signal& signal(int index);
+	const Signal* signal(int index);
 
 public:
 
@@ -49,10 +48,18 @@ public:
 		Valid,
 		Underflow,
 		Overflow,
+	};
 
-
+	enum TypeFilter
+	{
+		All = 0,
+		AnalogInput,
+		AnalogOutput,
+		DiscreteInput,
+		DiscreteOutput
 
 	};
+
 
 protected:
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -65,10 +72,31 @@ protected:
 
 
 private:
-	std::vector<Signal> m_signals;
+	std::vector<Signal*> m_signals;
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 
+};
+
+class SnapshotItemProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	SnapshotItemProxyModel(SnapshotItemModel* sourceModel, QObject* parent = 0);
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+
+	void setSignalTypeFilter(int signalType);
+	void setSignalIdFilter(QStringList strIds);
+	void refreshFilters();
+
+	const Signal* signal(const QModelIndex &mi);
+
+private:
+	SnapshotItemModel* m_sourceModel = nullptr;
+	int m_signalType = SnapshotItemModel::All;
+	QStringList m_strIdMasks;
 };
 
 class DialogSignalSnapshot : public QDialog
@@ -86,6 +114,14 @@ private slots:
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
 
+	void on_typeCombo_currentIndexChanged(int index);
+
+	void on_buttonMaskApply_clicked();
+
+	void on_editMask_returnPressed();
+
+	void on_buttonMaskInfo_clicked();
+
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -94,9 +130,14 @@ private:
 private:
 	Ui::DialogSignalSnapshot *ui;
 
-	SnapshotItemModel *m_model;
+	QCompleter* m_completer = nullptr;
+
+	SnapshotItemModel *m_model = nullptr;
+	SnapshotItemProxyModel *m_proxyModel = nullptr;
 
 	int m_updateStateTimerId = -1;
+
+	std::vector<Signal> m_signals;
 
 
 };

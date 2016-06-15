@@ -67,6 +67,9 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
 	s.setValue("DialogSignalSnapshot/columnCount", m_signalSnapshotColumnCount);
 	s.setValue("DialogSignalSnapshot/columns", m_signalSnapshotColumns);
+	s.setValue("DialogSignalSnapshot/type", m_signalSnapshotSignalType);
+	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
+
 
 	return;
 }
@@ -87,6 +90,8 @@ void Settings::loadUserScope()
 	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
 	m_signalSnapshotColumnCount = s.value("DialogSignalSnapshot/columnCount").toInt();
 	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").toByteArray();
+	m_signalSnapshotSignalType = s.value("DialogSignalSnapshot/type").toInt();
+	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 
 	return;
 }
