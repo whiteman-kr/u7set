@@ -48,6 +48,12 @@ namespace VFrame30
 		cpm->set_operandindex(m_afbOperandIndex);
 		cpm->set_caption(m_caption.toStdString());
 
+		for (const QUuid au : m_associatedIOs)
+		{
+			::Proto::Uuid* p = cpm->add_associatedios();
+			Proto::Write(p, au);
+		}
+
 		return true;
 	}
 
@@ -59,6 +65,13 @@ namespace VFrame30
 		m_guid = Proto::Read(cpm.uuid());
 		m_afbOperandIndex = cpm.operandindex();
 		m_caption = QString::fromStdString(cpm.caption());
+
+		m_associatedIOs.clear();
+		for (int i = 0; i < cpm.associatedios_size(); i++)
+		{
+			QUuid au = Proto::Read(cpm.associatedios(i));
+			m_associatedIOs.push_back(au);
+		}
 
 		return true;
 	}

@@ -158,6 +158,12 @@ namespace VFrame30
 		qDebug() << str;
 	}
 
+	void SchemaItem::debug() const
+	{
+		qDebug() << "Item: " << metaObject()->className();
+		qDebug() << "\tguid:" << guid();
+	}
+
 	// Drawing Functions
 	//
 

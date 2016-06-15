@@ -559,6 +559,53 @@ namespace VFrame30
 		return m_cachedGridSize * 16;
 	}
 
+	void FblItemRect::debug() const
+	{
+		PosRectImpl::debug();
+
+		qDebug() << "\tBuildName: " << buildName();
+
+		if (inputsCount() != 0)
+		{
+			qDebug() << "\tInputs: ";
+			const std::list<VFrame30::AfbPin>& ins = inputs();
+			for (const VFrame30::AfbPin& pin : ins)
+			{
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
+
+				const std::list<QUuid>& asios = pin.associatedIOs();
+				if (asios.empty() == false)
+				{
+					for (const QUuid& u : asios)
+					{
+						qDebug() << "\t\t\tAssocIOs: " << u;
+					}
+				}
+			}
+		}
+
+		if (outputsCount() != 0)
+		{
+			qDebug() << "\tOutputs: ";
+			const std::list<VFrame30::AfbPin>& outs = outputs();
+			for (const VFrame30::AfbPin& pin : outs)
+			{
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
+
+				const std::list<QUuid>& asios = pin.associatedIOs();
+				if (asios.empty() == false)
+				{
+					for (const QUuid& u : asios)
+					{
+						qDebug() << "\t\t\tAssocIOs: " << u;
+					}
+				}
+			}
+		}
+
+		return;
+	}
+
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(FblItemRect, Font, m_font);

@@ -72,6 +72,8 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
+		virtual void debug() const override;
+
 		// Properties and Data
 		//
 	public:

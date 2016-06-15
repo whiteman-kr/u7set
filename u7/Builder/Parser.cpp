@@ -443,7 +443,7 @@ namespace Builder
 			{
 				for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
 				{
-					const std::shared_ptr<VFrame30::FblItemRect>& f = it->second;
+					std::shared_ptr<VFrame30::FblItemRect> f = it->second;
 
 					if (f->isSignalElement() == true)
 					{
@@ -666,43 +666,6 @@ namespace Builder
 		}
 		else
 		{
-//			// -- debug
-//			qDebug() << "";
-//			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleEquipmentId;
-//			qDebug() << "";
-
-//			for (const AppLogicItem& item : orderedList)
-//			{
-//				if (item.m_fblItem->isInputSignalElement())
-//				{
-//					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->appSignalIds();
-//					continue;
-//				}
-
-//				if (item.m_fblItem->isOutputSignalElement())
-//				{
-//					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->appSignalIds();
-//					continue;
-//				}
-
-//				if (item.m_fblItem->isConstElement())
-//				{
-//					qDebug() << "Constant " << item.m_fblItem->toSchemaItemConst()->valueToString();
-//					continue;
-//				}
-
-
-//				if (item.m_fblItem->isAfbElement())
-//				{
-//					qDebug() << "Fbl " << item.m_afbElement.caption();
-//					continue;
-//				}
-
-//				qDebug() << "ERROR, UNKWNOW element " << item.m_fblItem->metaObject()->className();
-//			}
-
-//			// -- end of debug
-
 			// Set complete data
 			//
 
@@ -743,8 +706,10 @@ namespace Builder
 			{
 				auto deps = getItemsWithInput(constItems.begin(), constItems.end(), out.guid());
 
+				//qDebug() << "Dependant Items:";
 				for (const AppLogicItem& di : deps)
 				{
+					//qDebug() << "\t" << di.m_fblItem->buildName();
 					dependantItems[di.m_fblItem->guid()] = di;
 				}
 			}
@@ -866,8 +831,6 @@ namespace Builder
 				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
-				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
-				//
 				QString signalStrId = signalElement->appSignalIds();
 
 				signalInputItems.insert(signalStrId, li);
@@ -879,8 +842,6 @@ namespace Builder
 				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
-				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
-				//
 				QString signalStrId = signalElement->appSignalIds();
 
 				auto duplicateItem = signalOutputItems.find(signalStrId);
@@ -1614,8 +1575,6 @@ namespace Builder
 		// Associates input/outputs
 		//
 		result = setPinConnections(logicSchema, layer, &bushContainer);
-
-		//bushContainer.debugInfo();
 
 		// Generate afb list, and set it to some container
 		//

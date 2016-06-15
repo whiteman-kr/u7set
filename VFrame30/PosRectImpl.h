@@ -45,6 +45,11 @@ namespace VFrame30
 	private:
 		void Init(void);
 
+		// Public methods
+		//
+	public:
+		virtual void debug() const override;
+
 		// Serialization
 		//
 	protected:

@@ -3329,6 +3329,18 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::std::string* release_caption();
   inline void set_allocated_caption(::std::string* caption);
 
+  // repeated .Proto.Uuid associatedIos = 6;
+  inline int associatedios_size() const;
+  inline void clear_associatedios();
+  static const int kAssociatedIosFieldNumber = 6;
+  inline const ::Proto::Uuid& associatedios(int index) const;
+  inline ::Proto::Uuid* mutable_associatedios(int index);
+  inline ::Proto::Uuid* add_associatedios();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
+      associatedios() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
+      mutable_associatedios();
+
   // @@protoc_insertion_point(class_scope:Proto.FblConnectionPoint)
  private:
   inline void set_has_point();
@@ -3349,9 +3361,10 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   int dirrection_;
   ::google::protobuf::int32 operandindex_;
   ::std::string* caption_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > associatedios_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11054,6 +11067,31 @@ inline void FblConnectionPoint::set_allocated_caption(::std::string* caption) {
     clear_has_caption();
     caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// repeated .Proto.Uuid associatedIos = 6;
+inline int FblConnectionPoint::associatedios_size() const {
+  return associatedios_.size();
+}
+inline void FblConnectionPoint::clear_associatedios() {
+  associatedios_.Clear();
+}
+inline const ::Proto::Uuid& FblConnectionPoint::associatedios(int index) const {
+  return associatedios_.Get(index);
+}
+inline ::Proto::Uuid* FblConnectionPoint::mutable_associatedios(int index) {
+  return associatedios_.Mutable(index);
+}
+inline ::Proto::Uuid* FblConnectionPoint::add_associatedios() {
+  return associatedios_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
+FblConnectionPoint::associatedios() const {
+  return associatedios_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
+FblConnectionPoint::mutable_associatedios() {
+  return &associatedios_;
 }
 
 // -------------------------------------------------------------------
