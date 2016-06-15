@@ -407,7 +407,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 
 	QVector<Signal> signalsToAdd;
 
-	QString firstCaption, secondCaption;
+	QString firstCaption;
 
 	firstCaption = "getLatestSignalTest";
 
@@ -518,6 +518,168 @@ void DbControllerSignalTests::getLatestSignalTest()
 	QVERIFY2(query.value("enableTuning").toBool() == resultSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == resultSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));
 
+	db.close();
+}
+
+void DbControllerSignalTests::setSignalWorkCopyTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	QVector<Signal> signalsToAdd;
+
+	QString firstCaption;
+
+	firstCaption = "setSignalWorkcopyTest";
+
+	Signal newSignal;
+	newSignal.setCaption(firstCaption);
+	newSignal.setAcquire(true);
+	newSignal.setAperture(0.3);
+	newSignal.setAppSignalID(firstCaption);
+	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
+	newSignal.setCalculated(true);
+	newSignal.setCustomAppSignalID(firstCaption);
+	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setDataSize(30);
+	newSignal.setDecimalPlaces(3);
+	newSignal.setEnableTuning(true);
+	newSignal.setEquipmentID(firstCaption);
+	newSignal.setFilteringTime(7.3);
+	newSignal.setHighADC(500);
+	newSignal.setHighEngeneeringUnits(3245.6);
+	newSignal.setHighValidRange(3546.4);
+	newSignal.setInOutType(E::SignalInOutType::Input);
+	newSignal.setInputHighLimit(2345.3);
+	newSignal.setInputLowLimit(134.4);
+	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(1);
+	newSignal.setLowADC(1234);
+	newSignal.setLowEngeneeringUnits(345.1);
+	newSignal.setLowValidRange(134.9);
+	newSignal.setNormalState(1234);
+	newSignal.setObjectName(firstCaption);
+	newSignal.setOutputHighLimit(85678.5);
+	newSignal.setOutputLowLimit(12536.5);
+	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
+	newSignal.setOutputSensorID(13443);
+	newSignal.setOutputUnitID(1);
+	newSignal.setReadOnly(false);
+	newSignal.setSpreadTolerance(35634.6);
+	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setUnbalanceLimit(98769.3);
+	newSignal.setUnitID(1);
+
+	signalsToAdd.push_back(newSignal);
+
+	bool ok = m_dbController->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption = '%1'").arg(firstCaption));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("signalId").toInt();
+
+
+	QVector<int> signalIds;
+	QVector<ObjectState> result;
+
+	signalIds.push_back(signalId);
+
+	ok = m_dbController->checkinSignals(&signalIds, "First comment of setSignalWorkCopyTest", &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	result.clear();
+
+	ok = m_dbController->checkoutSignals(&signalIds, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	Signal resultSignal;
+
+	ok = m_dbController->getLatestSignal(signalId, &resultSignal, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	resultSignal.setAcquire(false);
+	resultSignal.setAperture(0.4);
+	resultSignal.setByteOrder(E::ByteOrder::BigEndian);
+	resultSignal.setCalculated(false);
+	resultSignal.setDataFormat(E::DataFormat::UnsignedInt);
+	resultSignal.setDataSize(40);
+	resultSignal.setDecimalPlaces(4);
+	resultSignal.setEnableTuning(false);
+	resultSignal.setFilteringTime(9.7);
+	resultSignal.setHighADC(243);
+	resultSignal.setHighEngeneeringUnits(1783.7);
+	resultSignal.setHighValidRange(2333.8);
+	resultSignal.setInOutType(E::SignalInOutType::Output);
+	resultSignal.setInputHighLimit(1928.3);
+	resultSignal.setInputLowLimit(12.8);
+	resultSignal.setInputSensorID(3452);
+	resultSignal.setInputUnitID(1);
+	resultSignal.setLowADC(4321);
+	resultSignal.setLowEngeneeringUnits(123.4);
+	resultSignal.setLowValidRange(125.3);
+	resultSignal.setNormalState(7564);
+	resultSignal.setOutputHighLimit(5263.1);
+	resultSignal.setOutputLowLimit(754.7);
+	resultSignal.setOutputMode(E::OutputMode::Minus10_Plus10_V);
+	resultSignal.setOutputSensorID(34847);
+	resultSignal.setOutputUnitID(1);
+	resultSignal.setReadOnly(true);
+	resultSignal.setSpreadTolerance(2346.8);
+	resultSignal.setType(E::SignalType::Discrete);
+	resultSignal.setUnbalanceLimit(2345.3);
+	resultSignal.setUnitID(2);
+
+	ObjectState os;
+
+	m_dbController->setSignalWorkcopy(&resultSignal, &os, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE signalInstanceId = %1").arg(resultSignal.signalInstanceID()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next(), qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("changeSetId").toInt() == resultSignal.changesetID(), qPrintable(QString("Error: changeSetId is wrong")));
+	QVERIFY2(query.value("appSignalID").toString() == resultSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
+	QVERIFY2(query.value("customAppSignalID").toString() == resultSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
+	QVERIFY2(query.value("caption").toString() == resultSignal.caption(), qPrintable(QString("Error: caption is wrong")));
+	QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
+	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
+	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
+	QVERIFY2(query.value("unitId").toInt() == resultSignal.unitID(), qPrintable(QString("Error: unitId is wrong")));
+	QVERIFY2(query.value("unbalanceLimit").toDouble() == resultSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
+	QVERIFY2(query.value("inputLowLimit").toDouble() == resultSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
+	QVERIFY2(query.value("inputHighLimit").toDouble() == resultSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
+	QVERIFY2(query.value("inputUnitId").toInt() == resultSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
+	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
+	QVERIFY2(query.value("outputLowLimit").toDouble() == resultSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
+	QVERIFY2(query.value("outputHighLimit").toDouble() == resultSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
+	QVERIFY2(query.value("outputUnitId").toInt() == resultSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
+	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+	QVERIFY2(query.value("acquire").toBool() == resultSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
+	QVERIFY2(query.value("calculated").toBool() == resultSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
+	QVERIFY2(query.value("normalState").toInt() == resultSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
+	QVERIFY2(query.value("decimalPlaces").toInt() == resultSignal.decimalPlaces(), qPrintable(QString("Error: decimalPlaces is wrong")));
+	QVERIFY2(query.value("aperture").toDouble() == resultSignal.aperture(), qPrintable(QString("Error: aperture is wrong")));
+	QVERIFY2(query.value("inOutType").toInt() == int(resultSignal.inOutType()), qPrintable(QString("Error: inOutType is wrong")));
+	QVERIFY2(query.value("equipmentID").toString() == resultSignal.equipmentID(), qPrintable(QString("Error: deviceStrId is wrong")));
+	QVERIFY2(query.value("filteringTime").toDouble() == resultSignal.filteringTime(), qPrintable(QString("Error: filteringTime is wrong")));
+	QVERIFY2(query.value("byteOrder").toInt() == resultSignal.byteOrder(), qPrintable(QString("Error: byteOrder is wrong")));
+	QVERIFY2(query.value("enableTuning").toBool() == resultSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == resultSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));
+
+	db.close();
 }
 
 void DbControllerSignalTests::cleanupTestCase()
