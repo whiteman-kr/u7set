@@ -6,6 +6,12 @@
 #include "../lib/OutputLog.h"
 #include "../lib/DbStruct.h"
 
+struct RunOrderDebugInfo
+{
+	QString equipmentId;							// LM's ID
+	std::map<QUuid, int> schemaItemsRunOrder;		// Key is item's guid, value is run order index
+};
+
 class GlobalMessanger : public QObject
 {
 	Q_OBJECT
@@ -36,8 +42,8 @@ public:
 	OutputMessageLevel issueForSchemaItem(QUuid itemId) const;
 
 	void clearSchemaItemRunOrder();
-	void swapSchemaItemRunOrder(std::map<QUuid, int>& data);
-	int schemaItemRunOrder(QUuid itemId) const;
+	void setRunOrder(const QString& equipmentId, std::map<QUuid, int>& data);
+	int schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const;
 
 	// Select tab
 	//
@@ -67,7 +73,9 @@ private:
 	mutable QMutex m_buildResultMutex;
 
 	std::map<QUuid, OutputMessageLevel> m_buildSchemaIssues;
-	std::map<QUuid, int> m_schemaItemRunOrder;					// Debug information for dispalying on schema in debugMode
+	std::list<RunOrderDebugInfo> m_runOrder;
+
+	//std::map<QUuid, int> m_schemaItemRunOrder;					// Debug information for dispalying on schema in debugMode
 
 	// -- end of data for m_buildResultMutex
 	//

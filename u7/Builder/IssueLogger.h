@@ -47,6 +47,7 @@ namespace Builder
 		// INT			Internal issues							1000-1999
 		//
 		void errINT1000(QString debugMessage);
+		void errINT1001(QString debugMessage);
 
 		// PDB			Project database issues					2000-2999
 		//
@@ -105,6 +106,11 @@ namespace Builder
 		void errALP4020(QString logicModule);
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
+
+		// Multichannel pasing errors
+		//
+		void errALP4030(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4031(QString schema, QString schemaItem, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//

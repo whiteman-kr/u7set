@@ -49,7 +49,7 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const override;
+		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const override;
 
 		// Вычислить координаты точки
 		//
@@ -71,6 +71,8 @@ namespace VFrame30
 
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
+		virtual void debug() const override;
 
 		// Properties and Data
 		//

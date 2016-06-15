@@ -158,6 +158,12 @@ namespace VFrame30
 		qDebug() << str;
 	}
 
+	void SchemaItem::debug() const
+	{
+		qDebug() << "Item: " << metaObject()->className();
+		qDebug() << "\tguid:" << guid();
+	}
+
 	// Drawing Functions
 	//
 
@@ -193,7 +199,7 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, int /*runOrderIndex*/) const
+	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, const QString& /*runOrderIndex*/) const
 	{
 	}
 

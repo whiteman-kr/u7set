@@ -21,6 +21,12 @@ namespace VFrame30
 		m_heightDocPt = 0;
 	}
 
+	void PosRectImpl::debug() const
+	{
+		SchemaItem::debug();
+		qDebug() << "\t x, y, w, h: " << m_leftDocPt << ", " << m_topDocPt << ", " << m_widthDocPt << ", " << m_heightDocPt;
+	}
+
 	bool PosRectImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItem::SaveData(message);

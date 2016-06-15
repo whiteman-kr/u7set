@@ -91,6 +91,7 @@ namespace VFrame30
 		virtual void SetHeightInDocPt(double heightInDocPt);
 
 		static void debug(std::shared_ptr<SchemaItem> item);
+		virtual void debug() const;
 		
 		// Draw Functions
 		//
@@ -111,7 +112,7 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void DrawDebugInfo(CDrawParam* drawParam, int runOrderIndex) const;
+		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//

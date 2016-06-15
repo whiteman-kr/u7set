@@ -81,27 +81,39 @@ OutputMessageLevel GlobalMessanger::issueForSchemaItem(QUuid itemId) const
 void GlobalMessanger::clearSchemaItemRunOrder()
 {
 	QMutexLocker ml(&m_buildResultMutex);
-	m_schemaItemRunOrder.clear();
+	m_runOrder.clear();
 }
 
-void GlobalMessanger::swapSchemaItemRunOrder(std::map<QUuid, int>& data)
-{
-	QMutexLocker ml(&m_buildResultMutex);
-	std::swap(m_schemaItemRunOrder, data);
-}
-
-int GlobalMessanger::schemaItemRunOrder(QUuid itemId) const
+void GlobalMessanger::setRunOrder(const QString& equipmentId, std::map<QUuid, int>& data)
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
-	auto it = m_schemaItemRunOrder.find(itemId);
+	RunOrderDebugInfo ro = {equipmentId, data};
+	m_runOrder.push_back(ro);
 
-	if (it == m_schemaItemRunOrder.end())
+	return;
+}
+
+int GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const
+{
+	QMutexLocker ml(&m_buildResultMutex);
+
+	for (const RunOrderDebugInfo& ro : m_runOrder)
 	{
-		return -1;
+		if (ro.equipmentId == equipmentId)
+		{
+			auto it = ro.schemaItemsRunOrder.find(itemId);
+
+			if (it == ro.schemaItemsRunOrder.end())
+			{
+				return -1;
+			}
+
+			return it->second;
+		}
 	}
 
-	return it->second;
+	return -1;
 }
 
 void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)

@@ -458,6 +458,8 @@ message FblConnectionPoint
 	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];             // -1 is not used, for links etc...
 	optional string caption = 5 [default = ""];
+	repeated Uuid associatedIos = 6;
+
 
 	//optional Uuid signalUuid = 10;
 	//optional wstring signalStrID = 11;

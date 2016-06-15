@@ -229,6 +229,19 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect)
 {
+	if (schema()->isLogicSchema() == false)
+	{
+		return;
+	}
+
+	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>((schema().get()));
+
+	if (logicSchema == nullptr)
+	{
+		assert(logicSchema);
+		return;
+	}
+
 	if (drawParam == nullptr)
 	{
 		assert(drawParam != nullptr);
@@ -244,7 +257,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 	// Find compile layer
 	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	for (auto layer = logicSchema->Layers.cbegin(); layer != logicSchema->Layers.cend(); ++layer)
 	{
 		const VFrame30::SchemaLayer* pLayer = layer->get();
 
@@ -257,10 +270,38 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 		{
 			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
 
+			QString orderIndexText;
+			orderIndexText.reserve(32);
+
 			if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
-				int orderIndex = GlobalMessanger::instance()->schemaItemRunOrder(item->guid());
-				item->DrawDebugInfo(drawParam, orderIndex);
+				orderIndexText = "?";
+
+				if (logicSchema->isMultichannelSchema() == true)
+				{
+					QStringList eqIds = logicSchema->equipmentIdList();
+
+					for (int i = 0; i < eqIds.size(); i++)
+					{
+						int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
+
+						if (i == 0)
+						{
+							orderIndexText = QString::number(runIndex);
+						}
+						else
+						{
+							orderIndexText.append(QLatin1String(", ") + QString::number(runIndex));
+						}
+					}
+				}
+				else
+				{
+					int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
+					orderIndexText = QString::number(runIndex);
+				}
+
+				item->DrawDebugInfo(drawParam, orderIndexText);
 			}
 		}
 	}
