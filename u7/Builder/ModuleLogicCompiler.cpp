@@ -1475,7 +1475,7 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
+			m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 			result = false;
 		}
 
@@ -1496,9 +1496,9 @@ namespace Builder
 
 			if (!constItem.isIntegral())
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()));
-
+				// Floating point constant is connected to discrete signal '%1'
+				//
+				m_log->errALC5028(appSignal.appSignalID(), constItem.guid(), appSignal.guid());
 				return false;
 			}
 			else
@@ -1507,7 +1507,7 @@ namespace Builder
 
 				cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
 				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-							   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constValue));
+							   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constValue));
 			}
 			break;
 
@@ -1517,7 +1517,7 @@ namespace Builder
 			case SIZE_16BIT:
 				cmd.movConst(ramAddrOffset, constItem.intValue());
 				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-							   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
+							   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
 				break;
 
 			case SIZE_32BIT:
@@ -1528,13 +1528,13 @@ namespace Builder
 					{
 						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
 						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-									   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
+									   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
 					}
 					else
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
-								  arg(constItem.floatValue()).arg(appSignal.strID()));
+								  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
 					}
 					break;
 
@@ -1543,13 +1543,13 @@ namespace Builder
 					{
 						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
 						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-									   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.floatValue()));
+									   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constItem.floatValue()));
 					}
 					else
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
-								  arg(constItem.intValue()).arg(appSignal.strID()));
+								  arg(constItem.intValue()).arg(appSignal.appSignalID()));
 					}
 					break;
 
@@ -1583,7 +1583,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
 	{
-		if (appSignal.strID() == srcSignal.strID())
+		if (appSignal.appSignalID() == srcSignal.appSignalID())
 		{
 			return true;
 		}
@@ -1593,7 +1593,7 @@ namespace Builder
 			if (!srcSignal.isAnalog())
 			{
 				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
-						arg(srcSignal.strID()).arg(appSignal.strID());
+						arg(srcSignal.appSignalID()).arg(appSignal.appSignalID());
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -1603,7 +1603,7 @@ namespace Builder
 			if (appSignal.dataFormat() != srcSignal.dataFormat())
 			{
 				msg = QString(tr("Signals %1 and %2 data formats are not compatible")).
-						arg(appSignal.strID()).arg(srcSignal.strID());
+						arg(appSignal.appSignalID()).arg(srcSignal.appSignalID());
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -1613,7 +1613,7 @@ namespace Builder
 			if (appSignal.dataSize() != srcSignal.dataSize())
 			{
 				msg = QString(tr("Signals %1 and %2 have different data sizes")).
-						arg(appSignal.strID()).arg(srcSignal.strID());
+						arg(appSignal.appSignalID()).arg(srcSignal.appSignalID());
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -1627,7 +1627,7 @@ namespace Builder
 				if (!srcSignal.isDiscrete())
 				{
 					msg = QString(tr("Analog signal %1 connected to discrete signal %2")).
-							arg(srcSignal.strID()).arg(appSignal.strID());
+							arg(srcSignal.appSignalID()).arg(appSignal.appSignalID());
 
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -1645,7 +1645,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
-					  arg(srcSignal.strID()).arg(appSignal.strID()));
+					  arg(srcSignal.appSignalID()).arg(appSignal.appSignalID()));
 
 			return false;
 		}
@@ -1654,7 +1654,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
-					  arg(srcSignal.strID()).arg(appSignal.strID()));
+					  arg(srcSignal.appSignalID()).arg(appSignal.appSignalID()));
 
 			return false;
 		}
@@ -1671,7 +1671,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal %1 RAM addreess is not calculated")).
-					  arg(srcSignal.strID()));
+					  arg(srcSignal.appSignalID()));
 			return false;
 		}
 
@@ -1679,7 +1679,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal %1 RAM addreess is not calculated")).
-					  arg(appSignal.strID()));
+					  arg(appSignal.appSignalID()));
 			return false;
 		}
 
@@ -1700,7 +1700,7 @@ namespace Builder
 			default:
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("Unknown data size of signal %1 - %2 bit")).
-						  arg(appSignal.strID()).arg(appSignal.dataSize()));
+						  arg(appSignal.appSignalID()).arg(appSignal.dataSize()));
 				return false;
 			}
 		}
@@ -1712,8 +1712,8 @@ namespace Builder
 		}
 
 		cmd.setComment(QString(tr("%1 (reg %2) <= %3 (reg %4)")).
-					   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).
-					   arg(srcSignal.strID()).arg(srcSignal.regAddr().toString()));
+					   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).
+					   arg(srcSignal.appSignalID()).arg(srcSignal.regAddr().toString()));
 		m_code.append(cmd);
 		m_code.newLine();
 
@@ -1873,7 +1873,7 @@ namespace Builder
 
 				if (!appSignal->isComputed())
 				{
-					m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
+					m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 					RESULT_FALSE_BREAK
 				}
 
@@ -1999,19 +1999,19 @@ namespace Builder
 		{
 			if (!appSignal.isAnalog())
 			{
-				m_log->errALC5007(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+				m_log->errALC5007(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 
 			if (appSignal.isCompatibleDataFormat(afbSignal.dataFormat()) == false)
 			{
-				m_log->errALC5008(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+				m_log->errALC5008(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 
 			if (appSignal.dataSize() != afbSignal.size())
 			{
-				m_log->errALC5009(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+				m_log->errALC5009(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 		}
@@ -2021,7 +2021,7 @@ namespace Builder
 			{
 				if (!appSignal.isDiscrete())
 				{
-					m_log->errALC5010(appSignal.strID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+					m_log->errALC5010(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 					return false;
 				}
 			}
@@ -2041,7 +2041,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Address of signal '%1' is not calculated")).
-					  arg(appSignal.strID()));
+					  arg(appSignal.appSignalID()));
 			return false;
 		}
 		else
@@ -2073,7 +2073,7 @@ namespace Builder
 			}
 
 			cmd.setComment(QString(tr("%1 <= %2 (reg %3)")).
-						   arg(inPin.caption()).arg(appSignal.strID()).arg(appSignal.regAddr().toString()));
+						   arg(inPin.caption()).arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()));
 
 			m_code.append(cmd);
 		}
@@ -2177,19 +2177,19 @@ namespace Builder
 		{
 			if (!appSignal->isAnalog())
 			{
-				m_log->errALC5003(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
+				m_log->errALC5003(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
 				return false;
 			}
 
 			if (appSignal->isCompatibleDataFormat(afbSignal.dataFormat()) == false)
 			{
-				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
+				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
 				return false;
 			}
 
 			if (appSignal->dataSize() != afbSignal.size())
 			{
-				m_log->errALC5005(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
+				m_log->errALC5005(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
 				return false;
 			}
 		}
@@ -2199,7 +2199,7 @@ namespace Builder
 			{
 				if (!appSignal->isDiscrete())
 				{
-					m_log->errALC5006(appFb.caption(), afbSignal.caption(), appSignal->strID(), appSignal->guid());
+					m_log->errALC5006(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
 					return false;
 				}
 			}
@@ -2217,7 +2217,7 @@ namespace Builder
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->strID()));
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->appSignalID()));
 			return false;
 		}
 		else
@@ -2239,7 +2239,7 @@ namespace Builder
 				default:
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							  QString(tr("Signal %1 has wrong data size - %2 bit(s)")).
-									   arg(appSignal->strID()).
+									   arg(appSignal->appSignalID()).
 									   arg(appSignal->dataSize()));
 					return false;
 				}
@@ -2252,7 +2252,7 @@ namespace Builder
 			}
 
 			cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-						   arg(appSignal->strID()).arg(appSignal->regAddr().toString()).arg(outPin.caption()));
+						   arg(appSignal->appSignalID()).arg(appSignal->regAddr().toString()).arg(outPin.caption()));
 
 			m_code.append(cmd);
 		}
@@ -2429,7 +2429,7 @@ namespace Builder
 		//
 		for(int k = 0; k < regCount; k++)
 		{
-			crc.add(appRegSignals[k]->strID());
+			crc.add(appRegSignals[k]->appSignalID());
 			crc.add(appRegSignals[k]->regAddr().bitAddress());
 		}
 
@@ -2480,7 +2480,7 @@ namespace Builder
 				{
 					continue;
 				}
-				QStringList txSignalsStrIDList = port->getTxSignalsStrID();
+				QStringList txSignalsStrIDList = port->getTxSignalsID();
 
 				QString idStr;
 
@@ -2491,7 +2491,7 @@ namespace Builder
 
 					idStr.sprintf("0x%X", port->txDataID());
 					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', manual settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-							arg(port->connectionCaption()).
+							arg(port->connectionID()).
 							arg(port->txAnalogSignalsCount()).
 							arg(port->txDiscreteSignalsCount()).
 							arg(port->txDataSizeW() * 2).
@@ -2502,7 +2502,7 @@ namespace Builder
 				{
 					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
-								  arg(port->connectionCaption()));
+								  arg(port->connectionID()));
 				}
 			}
 		}
@@ -2552,7 +2552,7 @@ namespace Builder
 
 			for(Hardware::OptoPort* port : rs232Ports)
 			{
-				QStringList txSignalsStrIDList = port->getTxSignalsStrID();
+				QStringList txSignalsStrIDList = port->getTxSignalsID();
 
 				for(const QString& txSignalStrID : txSignalsStrIDList)
 				{
@@ -2560,7 +2560,7 @@ namespace Builder
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-								  arg(txSignalStrID).arg(port->connectionCaption()));
+								  arg(txSignalStrID).arg(port->connectionID()));
 
 						result = false;
 						continue;
@@ -2584,7 +2584,7 @@ namespace Builder
 				idStr.sprintf("0x%X", port->txDataID());
 
 				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-							arg(port->connectionCaption()).
+							arg(port->connectionID()).
 							arg(port->txAnalogSignalsCount()).
 							arg(port->txDiscreteSignalsCount()).
 							arg(port->txDataSizeW() * 2).
@@ -2644,7 +2644,7 @@ namespace Builder
 				continue;
 			}
 
-			if (optoModule->lmStrID() == m_lm->equipmentIdTemplate())
+			if (optoModule->lmID() == m_lm->equipmentIdTemplate())
 			{
 				// this serial connection must be processed in this LM
 				//
@@ -2784,7 +2784,7 @@ namespace Builder
 
 		xmlWriter.writeStartElement("PortInfo");
 
-		xmlWriter.writeAttribute("StrID", rs232Port->strID());
+		xmlWriter.writeAttribute("StrID", rs232Port->equipmentID());
 		xmlWriter.writeAttribute("ID", QString::number(rs232Port->portID()));
 		xmlWriter.writeAttribute("DataID", QString::number(rs232Port->txDataID()));
 		xmlWriter.writeAttribute("Speed", "115200");
@@ -2804,7 +2804,7 @@ namespace Builder
 		m_code.newLine();
 
 		Comment comment(QString(tr("Copy signals to RS232/485 port %1, connection - %2")).
-						arg(rs232Port->strID()).arg(rs232Port->connectionCaption()));
+						arg(rs232Port->equipmentID()).arg(rs232Port->connectionID()));
 
 		m_code.append(comment);
 
@@ -2835,7 +2835,7 @@ namespace Builder
 		xmlWriter.writeEndElement();	// </SerialData>
 		xmlWriter.writeEndDocument();
 
-		m_resultWriter->addFile(m_lm->propertyValue("SubsystemID").toString(), QString("rs232-%1.xml").arg(rs232Port->strID()), xmlData);
+		m_resultWriter->addFile(m_lm->propertyValue("SubsystemID").toString(), QString("rs232-%1.xml").arg(rs232Port->equipmentID()), xmlData);
 
 		return result;
 	}
@@ -4623,7 +4623,7 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			if (processedSignalsMap.contains(appSignal->strID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()))
 			{
 				continue;
 			}
@@ -4635,7 +4635,7 @@ namespace Builder
 				appSignal->ramAddr() = ramAddr;
 				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
 
-				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}
 		}
 
@@ -4646,7 +4646,7 @@ namespace Builder
 
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (processedSignalsMap.contains(appSignal->strID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()))
 			{
 				continue;
 			}
@@ -4661,7 +4661,7 @@ namespace Builder
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
 
-				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}
 		}
 
@@ -4671,7 +4671,7 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (processedSignalsMap.contains(appSignal->strID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()))
 			{
 				continue;
 			}
@@ -4682,7 +4682,7 @@ namespace Builder
 
 				appSignal->ramAddr() = ramAddr;
 
-				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}
 		}
 
@@ -4692,7 +4692,7 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (processedSignalsMap.contains(appSignal->strID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()))
 			{
 				continue;
 			}
@@ -4703,7 +4703,7 @@ namespace Builder
 
 				appSignal->ramAddr() = ramAddr;
 
-				processedSignalsMap.insert(appSignal->strID(), appSignal->strID());
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}
 		}
 
@@ -4861,7 +4861,7 @@ namespace Builder
 
 					if (!appSignal->isComputed())
 					{
-						m_log->errALC5002(appSignal->strID(), appSignal->guid());			// Value of signal '%1' is undefined.
+						m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 						RESULT_FALSE_BREAK
 					}
 
@@ -4875,7 +4875,20 @@ namespace Builder
 						RESULT_FALSE_BREAK
 					}
 
-					assert(false);			// continue here !!!
+					bool signalAllreadyInTxList = false;
+
+					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
+															   m_lm->equipmentId(),
+															   appSignal->appSignalID(),
+															   &signalAllreadyInTxList);
+					if (signalAllreadyInTxList == true)
+					{
+						// The signal '%1' is repeatedly connected to the transmitter '%2'
+						//
+						m_log->errALC5029(appSignal->appSignalID(), transmitter.connectionId(), appSignal->guid(), transmitter.guid());
+						RESULT_FALSE_BREAK
+					}
+					break;
 				}
 
 				if (result == false)

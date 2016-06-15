@@ -1238,6 +1238,93 @@ void SignalsModel::saveSignal(Signal& signal)
 	emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1));
 }
 
+void SignalsModel::cloneSignals(const QSet<int>& signalIDs)
+{
+	m_signalSet.buildStrID2IndexMap();
+
+	auto idMaker = [](QString prefix, QString id) {
+		if (id[0] == '#')
+		{
+			return '#' + prefix + id.mid(1);
+		}
+		else
+		{
+			return prefix + id;
+		}
+	};
+
+	QSet<int> clonedSignalIDs;
+	QList<int> signalIDsList = signalIDs.toList();
+	qSort(signalIDsList);
+	for (const int signalID : signalIDsList)
+	{
+		if (clonedSignalIDs.contains(signalID))
+		{
+			continue;
+		}
+
+		const Signal&& signal = m_signalSet.value(signalID);
+		E::SignalType type = signal.type();
+		QVector<int> groupSignalIDs;
+
+		if (signal.signalGroupID() == 0)
+		{
+			groupSignalIDs.append(signal.ID());
+		}
+		else
+		{
+			groupSignalIDs = m_signalSet.getChannelSignalsID(signal);
+		}
+		qSort(groupSignalIDs);
+
+		for (int groupSignalID : groupSignalIDs)
+		{
+			clonedSignalIDs.insert(groupSignalID);
+		}
+
+		QString prefix = "CLONE_";
+		int prefixNumerator = 1;
+		bool hasConflict;
+		do
+		{
+			hasConflict = false;
+			for (int groupSignalID : groupSignalIDs)
+			{
+				if (m_signalSet.contains(idMaker(prefix, m_signalSet.value(groupSignalID).appSignalID())))
+				{
+					hasConflict = true;
+					break;
+				}
+			}
+			if (hasConflict)
+			{
+				prefixNumerator++;
+				prefix = QString("CLONE%1_").arg(prefixNumerator);
+			}
+		}
+		while (hasConflict && prefixNumerator < 1000);
+
+		if (prefixNumerator >= 1000)
+		{
+			assert(false);
+			return;
+		}
+
+		QVector<Signal> groupSignals(groupSignalIDs.count());
+		for (int i = 0; i < groupSignalIDs.count(); i++)
+		{
+			const Signal&& groupSignal = m_signalSet.value(groupSignalIDs[i]);
+			groupSignals[i] = groupSignal;
+
+			groupSignals[i].setAppSignalID(idMaker(prefix, groupSignal.appSignalID()));
+			groupSignals[i].setCustomAppSignalID(idMaker(prefix, groupSignal.customAppSignalID()));
+		}
+
+		dbController()->addSignal(type, &groupSignals, m_parentWindow);
+	}
+	loadSignals();
+}
+
 void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
 {
 	foreach (const int groupID, signalGroupIDs)
@@ -1562,6 +1649,12 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
+	action = new QAction(QIcon(":/Images/Images/copy.png"), tr("Clone signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::cloneSignal);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
 	action = new QAction(QIcon(":/Images/Images/cross.png"), tr("Delete signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
 	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
@@ -1620,6 +1713,23 @@ void SignalsTabPage::editSignal()
 		m_signalsView->selectRow(m_signalsProxyModel->mapFromSource(m_signalsModel->index(m_signalsModel->keyIndex(selectedSignalId[i]), 0)).row());
 	}
 	m_signalsView->setSelectionMode(selectionMode);
+}
+
+void SignalsTabPage::cloneSignal()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+	}
+	QSet<int> clonedSignalIDs;
+	for (int i = 0; i < selection.count(); i++)
+	{
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		int id = m_signalsModel->key(row);
+		clonedSignalIDs.insert(id);
+	}
+	m_signalsModel->cloneSignals(clonedSignalIDs);
 }
 
 void SignalsTabPage::deleteSignal()
@@ -1738,14 +1848,28 @@ void SignalsTabPage::saveSelection()
 
 void SignalsTabPage::restoreSelection()
 {
+	auto basicSelectionMode = m_signalsView->selectionMode();
+	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
+
+	QModelIndex currentSourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(m_focusedCellSignalID), m_focusedCellColumn);
+	QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
+
 	foreach (int id, m_selectedRowsSignalID)
 	{
 		QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(id), 0);
 		QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
+		if (proxyIndex.row() == currentProxyIndex.row())
+		{
+			//QTableView::setCurrentIndex will inverse selection on this row
+			continue;
+		}
 		m_signalsView->selectRow(proxyIndex.row());
 	}
-	QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(m_focusedCellSignalID), m_focusedCellColumn);
-	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
+
+	m_signalsView->setCurrentIndex(currentProxyIndex);
+
+	m_signalsView->setSelectionMode(basicSelectionMode);
+
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 }

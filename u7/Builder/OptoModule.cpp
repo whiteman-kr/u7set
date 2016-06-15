@@ -15,7 +15,7 @@ namespace Hardware
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
 		m_deviceController(optoPortController),
-		m_optoModuleStrID(optoModuleStrID)
+		m_optoModuleID(optoModuleStrID)
 	{
 		if (optoPortController == nullptr)
 		{
@@ -23,24 +23,24 @@ namespace Hardware
 			return;
 		}
 
-		m_strID = optoPortController->equipmentIdTemplate();
+		m_equipmentID = optoPortController->equipmentIdTemplate();
 		m_port = port;
 	}
 
 
-	void OptoPort::addTxSignalStrID(const QString& signalStrID)
+	void OptoPort::addTxSignalID(const QString& signalID)
 	{
-		if (signalStrID.isEmpty())
+		if (signalID.isEmpty())
 		{
 			assert(false);
 			return;
 		}
 
-		m_txSignalsStrIDList.append(signalStrID);
+		m_txSignalsIDList.append(signalID);
 	}
 
 
-	void OptoPort::addTxSignalsStrID(const QStringList& signalStrIDList)
+	void OptoPort::addTxSignalsID(const QStringList& signalStrIDList)
 	{
 		for(const QString& signalStrID : signalStrIDList)
 		{
@@ -50,7 +50,7 @@ namespace Hardware
 				continue;
 			}
 
-			m_txSignalsStrIDList.append(signalStrID);
+			m_txSignalsIDList.append(signalStrID);
 		}
 	}
 
@@ -100,7 +100,7 @@ namespace Hardware
 
 		// mix port StrID in dataID
 		//
-		m_txDataID = CRC32(m_txDataID, C_STR(m_strID), m_strID.length(), false);
+		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
 
 		// m_txDataID first placed in buffer
 		//
@@ -149,7 +149,7 @@ namespace Hardware
 				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (connection %3)")).
 								   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
-								   arg(m_connectionCaption));
+								   arg(m_connectionID));
 
 				result = false;
 			}
@@ -160,6 +160,20 @@ namespace Hardware
 		}
 
 		return result;
+	}
+
+
+	bool OptoPort::isTxSignalIDExists(const QString& appSignalID)
+	{
+		for(const QString& id : m_txSignalsIDList)
+		{
+			if (id == appSignalID)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -179,7 +193,7 @@ namespace Hardware
 			return;
 		}
 
-		m_strID = module->equipmentIdTemplate();
+		m_equipmentID = module->equipmentIdTemplate();
 		m_place = module->place();
 
 		bool result = true;
@@ -246,7 +260,7 @@ namespace Hardware
 		{
 			// OCM module
 			//
-			m_lmStrID = module->equipmentIdTemplate();
+			m_lmID = module->equipmentIdTemplate();
 			m_lmDeviceModule = module;
 		}
 		else
@@ -302,7 +316,7 @@ namespace Hardware
 						assert(false);          // second LM in chassis ?
 					}
 
-					m_lmStrID = childModule->equipmentIdTemplate();
+					m_lmID = childModule->equipmentIdTemplate();
 					m_lmDeviceModule = childModule;
 
 					lmAlreadyFound = true;
@@ -431,7 +445,7 @@ namespace Hardware
 		{
 			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("TxDataSize exceeded OptoPortAppDataSize in module '%1'")).
-						  arg(m_strID));
+						  arg(m_equipmentID));
 			return false;
 		}
 
@@ -506,7 +520,7 @@ namespace Hardware
 		{
 			for(OptoPort* optoPort : optoModule->m_ports)
 			{
-				m_ports.insert(optoPort->strID(), optoPort);
+				m_ports.insert(optoPort->equipmentID(), optoPort);
 			}
 		}
 
@@ -547,17 +561,17 @@ namespace Hardware
 
 		m_modules.insert(module->equipmentIdTemplate(), optoModule);
 
-		m_lmAssociatedModules.insertMulti(optoModule->lmStrID(), optoModule);
+		m_lmAssociatedModules.insertMulti(optoModule->lmID(), optoModule);
 
 		return true;
 	}
 
 
-	OptoModule* OptoModuleStorage::getOptoModule(const QString& optoModuleStrID)
+	OptoModule* OptoModuleStorage::getOptoModule(const QString& optoModuleID)
 	{
-		if (m_modules.contains(optoModuleStrID))
+		if (m_modules.contains(optoModuleID))
 		{
-			return m_modules[optoModuleStrID];
+			return m_modules[optoModuleID];
 		}
 
 		return nullptr;
@@ -572,24 +586,25 @@ namespace Hardware
 			return nullptr;
 		}
 
-		if (m_modules.contains(optoPort->optoModuleStrID()))
+		if (m_modules.contains(optoPort->optoModuleID()))
 		{
-			return m_modules[optoPort->optoModuleStrID()];
+			return m_modules[optoPort->optoModuleID()];
 		}
 
 		return nullptr;
 	}
 
 
-	OptoPort* OptoModuleStorage::getOptoPort(const QString& optoPortStrID)
+	OptoPort* OptoModuleStorage::getOptoPort(const QString& optoPortID)
 	{
-		if (m_ports.contains(optoPortStrID))
+		if (m_ports.contains(optoPortID))
 		{
-			return m_ports[optoPortStrID];
+			return m_ports[optoPortID];
 		}
 
 		return nullptr;
 	}
+
 
 	Hardware::OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
 	{
@@ -673,7 +688,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->connectionCaption().isEmpty())
+			if (port->connectionID().isEmpty())
 			{
 				// optical port is not linked (used in connection)
 				//
@@ -683,7 +698,7 @@ namespace Hardware
 
 			if (port->txDataSizeW() > 0)
 			{
-				Hardware::OptoPort* linkedPort = getOptoPort(port->linkedPortStrID());
+				Hardware::OptoPort* linkedPort = getOptoPort(port->linkedPortID());
 
 				if (linkedPort == nullptr)
 				{
@@ -701,8 +716,8 @@ namespace Hardware
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 										   QString(tr("Manual rxDataSizeW of port '%1' less then txDataSizeW of linked port '%2' (connection %3)")).
-										   arg(linkedPort->strID()).arg(port->strID()).
-										   arg(port->connectionCaption()));
+										   arg(linkedPort->equipmentID()).arg(port->equipmentID()).
+										   arg(port->connectionID()));
 						result = false;
 					}
 				}
@@ -753,8 +768,8 @@ namespace Hardware
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->strID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionCaption()));
+										   arg(txStartAddress).arg(port->equipmentID()).
+										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
 
 						result = false;
 						break;
@@ -775,8 +790,8 @@ namespace Hardware
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->strID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionCaption()));
+										   arg(txStartAddress).arg(port->equipmentID()).
+										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
 
 						result = false;
 						break;
@@ -827,13 +842,88 @@ namespace Hardware
 		return result;
 	}
 
-	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& caption)
+
+	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID)
 	{
-		if (m_connections.contains(caption) == false)
+		if (m_connections.contains(connectionID) == false)
 		{
 			return nullptr;
 		}
 
-		return m_connections[caption];
+		return m_connections[connectionID];
 	}
+
+
+	bool OptoModuleStorage::addTxSignal(const QString& connectionID,
+										const QString& lmID,
+										const QString& appSignalID,
+										bool* signalAllreadyInList)
+	{
+		if (signalAllreadyInList == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		*signalAllreadyInList = false;
+
+		std::shared_ptr<Connection> cn = getConnection(connectionID);
+
+		if (cn == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		OptoPort* p1 = getOptoPort(cn->port1EquipmentID());
+		OptoPort* p2 = getOptoPort(cn->port2EquipmentID());
+
+		if (p1 == nullptr || p2 == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		OptoModule* m1 = getOptoModule(p1);
+		OptoModule* m2 = getOptoModule(p2);
+
+		if (m1 == nullptr || m2 == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		assert(m1->lmID() != m2->lmID());
+
+		if (m1->lmID() == lmID)
+		{
+			if (p1->isTxSignalIDExists(appSignalID))
+			{
+				*signalAllreadyInList = true;
+			}
+			else
+			{
+				p1->addTxSignalID(appSignalID);
+			}
+			return true;
+		}
+
+		if (m2->lmID() == lmID)
+		{
+			if (p2->isTxSignalIDExists(appSignalID))
+			{
+				*signalAllreadyInList = true;
+			}
+			else
+			{
+				p2->addTxSignalID(appSignalID);
+			}
+			return true;
+		}
+
+		assert(false);		// WTF?
+
+		return false;
+	}
+
 }

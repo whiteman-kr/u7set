@@ -100,6 +100,7 @@ public:
 	bool checkoutSignal(int index, QString& message);
 	bool editSignals(QVector<int> ids);
 	void saveSignal(Signal& signal);
+	void cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignal(int signalID);
 
@@ -250,6 +251,7 @@ public slots:
 	void projectClosed();
 
 	void editSignal();
+	void cloneSignal();
 	void deleteSignal();
 
 	void undoSignalChanges();

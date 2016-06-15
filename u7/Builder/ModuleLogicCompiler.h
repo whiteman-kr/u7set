@@ -321,7 +321,7 @@ namespace Builder
 
 	public:
 		AppSignal(Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& strID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
 
 		~AppSignal();
 
@@ -335,7 +335,7 @@ namespace Builder
 
 		bool isShadowSignal() const { return m_isShadowSignal; }
 
-		QString strID() const { return m_signal->appSignalID(); }
+		QString appSignalID() const { return m_signal->appSignalID(); }
 
 		QUuid guid() const;
 
