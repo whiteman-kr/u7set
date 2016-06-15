@@ -82,7 +82,7 @@ void SnapshotItemModel::setSignals(const std::vector<Signal*>& signalList)
 
 }
 
-std::vector<int> SnapshotItemModel::сolumnsIndexes()
+std::vector<int> SnapshotItemModel::columnsIndexes()
 {
 	return m_columnsIndexes;
 
@@ -404,7 +404,7 @@ bool SnapshotItemProxyModel::lessThan(const QModelIndex &left,
 		 return false;
 	 }
 
-	 std::vector<int> ci = m_sourceModel->сolumnsIndexes();
+	 std::vector<int> ci = m_sourceModel->columnsIndexes();
 
 	 int sc = sortColumn();
 	 if (sc < 0 || sc >= ci.size())
@@ -682,7 +682,7 @@ void DialogSignalSnapshot::fillSignals()
 
 void DialogSignalSnapshot::on_buttonColumns_clicked()
 {
-	DialogColumns dc(this, m_model->columnsNames(), m_model->сolumnsIndexes());
+	DialogColumns dc(this, m_model->columnsNames(), m_model->columnsIndexes());
 	if (dc.exec() == QDialog::Accepted)
 	{
 		m_model->setColumnsIndexes(dc.columnsIndexes());
@@ -695,7 +695,7 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 {
 	Q_UNUSED(result);
 
-	std::vector<int> columnIndexes = m_model->сolumnsIndexes();
+	std::vector<int> columnIndexes = m_model->columnsIndexes();
 	theSettings.m_signalSnapshotColumnCount = (int)columnIndexes.size();
 
 	theSettings.m_signalSnapshotColumns = QByteArray(reinterpret_cast<const char*>(columnIndexes.data()), (int)columnIndexes.size() * sizeof(int));

@@ -21,7 +21,7 @@ public:
 
 	void setSignals(const std::vector<Signal*>& signalList);
 
-	std::vector<int> сolumnsIndexes();
+	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
 	QStringList columnsNames();
