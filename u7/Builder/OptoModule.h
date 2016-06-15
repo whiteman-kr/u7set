@@ -12,6 +12,8 @@
 namespace Hardware
 {
 	class DeviceModule;
+	class Connection;
+	class ConnectionStorage;
 
 	class OptoPort : public QObject
 	{
@@ -40,16 +42,16 @@ namespace Hardware
 		};
 
 	private:
-		QString m_strID;
+		QString m_equipmentID;
 		DeviceController* m_deviceController = nullptr;
 
-		QString m_optoModuleStrID;
+		QString m_optoModuleID;
 
-		QString m_linkedPortStrID;
+		QString m_linkedPortID;
 
-		QString m_connectionCaption;
+		QString m_connectionID;
 
-		QStringList m_txSignalsStrIDList;
+		QStringList m_txSignalsIDList;
 
 		QList<TxSignal> m_txAnalogSignalList;
 		QList<TxSignal> m_txDiscreteSignalList;
@@ -81,22 +83,22 @@ namespace Hardware
 		int m_manualRxSizeW = 0;
 
 	public:
-		OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port);
+		OptoPort(const QString& optoModuleID, DeviceController* optoPortController, int port);
 
 		Q_INVOKABLE quint16 portID() const { return m_portID; }
 		void setPortID(quint16 portID) { m_portID = portID; }
 
 		Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
 
-		Q_INVOKABLE QString strID() const { return m_strID; }
+		Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
 
-		QString linkedPortStrID() const { return m_linkedPortStrID; }
-		void setLinkedPortStrID(const QString& linkedPortStrID) { m_linkedPortStrID = linkedPortStrID; }
+		QString linkedPortID() const { return m_linkedPortID; }
+		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
 
-		bool isLinked() const { return !m_linkedPortStrID.isEmpty(); }
+		bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
-		Q_INVOKABLE QString connectionCaption() const { return m_connectionCaption; }
-		void setConnectionCaption(const QString& connectionCaption) { m_connectionCaption = connectionCaption; }
+		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
+		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
 
 		int port() const { return m_port; }
 		void setPort(int port) { m_port = port; }
@@ -121,12 +123,12 @@ namespace Hardware
 
 		const DeviceController* deviceController() const { return m_deviceController; }
 
-		QString optoModuleStrID() const { return m_optoModuleStrID; }
+		QString optoModuleID() const { return m_optoModuleID; }
 
-		void addTxSignalStrID(const QString& signalStrID);
-		void addTxSignalsStrID(const QStringList& signalStrIDList);
+		void addTxSignalID(const QString& signalID);
+		void addTxSignalsID(const QStringList& signalStrIDList);
 
-		QStringList getTxSignalsStrID() const { return m_txSignalsStrIDList; }
+		QStringList getTxSignalsID() const { return m_txSignalsIDList; }
 
 		void addTxSignal(Signal* txSignal);
 		bool calculateTxSignalsAddresses(OutputLog* log);
@@ -153,6 +155,8 @@ namespace Hardware
 
 		int manualRxSizeW() const { return m_manualRxSizeW; }
 		void setManualRxSizeW(int manualRxSizeW) { m_manualRxSizeW = manualRxSizeW; }
+
+		bool isTxSignalIDExists(const QString& appSignalID);
 	};
 
 
@@ -165,7 +169,7 @@ namespace Hardware
 	private:
 		// device properties
 		//
-		QString m_strID;
+		QString m_equipmentID;
 		DeviceModule* m_deviceModule = nullptr;
 		int m_place = 0;
 
@@ -177,7 +181,7 @@ namespace Hardware
 
 		//
 
-		QString m_lmStrID;
+		QString m_lmID;
 		DeviceModule* m_lmDeviceModule = nullptr;
 
 		HashedVector<QString, OptoPort*> m_ports;
@@ -195,7 +199,7 @@ namespace Hardware
 		bool isLM();
 		bool isOCM();
 
-		QString strID() const { return m_strID; }
+		QString equipmentID() const { return m_equipmentID; }
 		const DeviceModule* deviceModule() const { return m_deviceModule; }
 
 		int place() const { return m_place; }
@@ -204,7 +208,7 @@ namespace Hardware
 		int optoPortAppDataOffset() const { return m_optoPortAppDataOffset; }
 		int optoPortAppDataSize() const { return m_optoPortAppDataSize; }
 
-		QString lmStrID() const { return m_lmStrID; }
+		QString lmID() const { return m_lmID; }
 		const DeviceModule* lmDeviceModule() const { return m_lmDeviceModule; }
 
 		QList<OptoPort*> getSerialPorts();
@@ -222,8 +226,16 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-	private:
+	public:
+		struct ConnectionInfo
+		{
+			QString caption;
+			QString port1;
+			QString port2;
+			std::shared_ptr<Connection> connection;
+		};
 
+	private:
 		EquipmentSet* m_equipmentSet = nullptr;
 		Builder::IssueLogger* m_log = nullptr;
 
@@ -231,6 +243,8 @@ namespace Hardware
 		HashedVector<QString, OptoPort*> m_ports;
 
 		QHash<QString, OptoModule*> m_lmAssociatedModules;
+
+		QHash<QString, std::shared_ptr<Connection>> m_connections;		// connectionID -> connection
 
 		QList<OptoModule*> modules();
 		QList<OptoPort*> ports();
@@ -245,11 +259,12 @@ namespace Hardware
 
 		bool build();
 
-		OptoModule* getOptoModule(const QString& optoModuleStrID);
+		OptoModule* getOptoModule(const QString& optoModuleID);
 		OptoModule* getOptoModule(const OptoPort* optoPort);
-		OptoPort* getOptoPort(const QString& optoPortStrID);
 
-		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortStrID);
+		OptoPort* getOptoPort(const QString& optoPortID);
+
+		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
 
 		bool isCompatiblePorts(const OptoPort* optoPort1, const OptoPort* optoPort2);
 
@@ -257,5 +272,13 @@ namespace Hardware
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsTxRxStartAddresses();
+
+		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
+		std::shared_ptr<Connection> getConnection(const QString& connectionID);
+
+		bool addTxSignal(const QString& connectionID,
+						 const QString& lmID,
+						 const QString& appSignalID,
+						 bool* signalAllreadyInList);
 	};
 }

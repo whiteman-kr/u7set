@@ -43,7 +43,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 	QPainter painter(this);
 
-	QBrush alertBrush(Qt::red);
+	QBrush alertBrush(QColor(192, 0, 0));
 	QColor noAlertBrush(Qt::darkGreen);
 	QColor noFlagBrush(Qt::lightGray);
 
@@ -51,11 +51,6 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 	QFont font = painter.font();
 	font.setPixelSize(14);
 	painter.setFont(font);
-
-	QPen pen = painter.pen();
-	pen.setColor(Qt::white);
-	painter.setPen(pen);
-
 
 	int flagNo = 0;
 	double y = 0;
@@ -91,11 +86,12 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 				painter.setBrush(noFlagBrush);
 			}
 
+			painter.setPen(Qt::NoPen);
 			painter.drawRect(flagRect);
 
 			if (flagNo < FLAG_NAME_COUNT)
 			{
-
+				painter.setPen(Qt::white);
 				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, flagNameStr[flagNo]);
 			}
 
@@ -173,6 +169,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList()<<tr("EquipmentID")<<m_signal.equipmentID()));
 	if (m_signal.isAnalog())
 	{
+		str = QString("%1 - %2").arg(m_signal.unitID()).arg(theSignals.units(m_signal.unitID()));
 		itemGroup1->addChild(new QTreeWidgetItem(QStringList()<<tr("UnitID")<<str));
 	}
 
@@ -181,7 +178,6 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList()<<tr("Format"));
 
-	str = QString("%1 - %2").arg(m_signal.unitID()).arg(theSignals.units(m_signal.unitID()));
 	itemGroup2->addChild(new QTreeWidgetItem(QStringList()<<tr("DataSize")<<QString::number(m_signal.dataSize())));
 	//if (m_signal.isAnalog())
 	//{
@@ -474,12 +470,12 @@ void DialogSignalInfo::updateData()
 		ui->labelValue->setText("???");
 	}
 
-	QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
+	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
 	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(state.time.local);
 	QDateTime plaitTime = QDateTime::fromMSecsSinceEpoch(state.time.plant);
 
 
-	ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	//ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->editLocalTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->editPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 

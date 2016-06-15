@@ -28,30 +28,9 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
-void AppDataServiceWorker::runServiceInfoThread()
+void AppDataServiceWorker::getServiceSpecificInfo(ServiceInformation& serviceInfo)
 {
-	assert(m_serviceInfoThread == nullptr);
-
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
-
-	m_serviceInfoThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
-															tcpAppDataSever,
-															m_appDataSources,
-															m_appSignals,
-															m_signalStates,
-															m_unitInfo);
-	m_serviceInfoThread->start();
-}
-
-
-void AppDataServiceWorker::stopServiceInfoThread()
-{
-	if (m_serviceInfoThread == nullptr)
-	{
-		return;
-	}
-	m_serviceInfoThread->quitAndWait();
-	delete m_serviceInfoThread;
+	serviceInfo.clientRequestIP = m_settings.clientRequestIP;
 }
 
 
@@ -144,178 +123,14 @@ void AppDataServiceWorker::shutdown()
 	stopTimer();
 
 	stopTcpAppDataServer();
-	stopServiceInfoThread();
 	stopCfgLoaderThread();
 
 	qDebug() << "DataServiceWorker stoped";
 }
 
 
-void AppDataServiceWorker::onInformationRequest(UdpRequest request)
-{
-	switch(request.ID())
-	{
-	case RQID_GET_DATA_SOURCES_IDS:
-		onGetDataSourcesIDs(request);
-		break;
-
-	case RQID_GET_DATA_SOURCES_INFO:
-		onGetDataSourcesInfo(request);
-		break;
-
-	case RQID_GET_DATA_SOURCES_STATISTICS:
-		onGetDataSourcesState(request);
-		break;
-
-	default:
-		assert(false);
-	}
-}
-
-
-void AppDataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
-{
-	/*int dataSourcesCount = m_dataSources.count();
-
-	QVector<quint32> dataSourcesID;
-
-	dataSourcesID.resize(dataSourcesCount);
-
-	int i = 0;
-
-	QHashIterator<quint32, DataSource> iterator(m_dataSources);
-
-	while (iterator.hasNext() && i < dataSourcesCount)
-	{
-		iterator.next();
-
-		dataSourcesID[i] = iterator.key();
-
-		i++;
-	}
-
-	// Sort IDs by ascending
-	//
-	for(int i = 0; i < dataSourcesCount - 1; i++)
-	{
-		for(int j = i + 1; j < dataSourcesCount; j++)
-		{
-			if (dataSourcesID[i] > dataSourcesID[j])
-			{
-				quint32 tmp = dataSourcesID[i];
-				dataSourcesID[i] = dataSourcesID[j];
-				dataSourcesID[j] = tmp;
-			}
-		}
-	}
-
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	ack.writeDword(dataSourcesCount);
-
-	for(int i = 0; i < dataSourcesCount; i++)
-	{
-		ack.writeDword(dataSourcesID[i]);
-	}
-
-	emit ackInformationRequest(ack);*/
-}
-
-
 void AppDataServiceWorker::onTimer()
 {
-	if (m_cfgLoaderThread != nullptr)
-	{
-		static int c = 0;
-
-		c++;
-
-		if (c == 5)
-		{
-			c = 0;
-			m_cfgLoaderThread->getConnectionState().dump();
-		}
-	}
-}
-
-
-void AppDataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
-{
-/*	quint32 count = request.readDword();
-
-	QVector<DataSourceInfo> dsInfo;
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		quint32 sourceID = request.readDword();
-
-		if (m_dataSources.contains(sourceID))
-		{
-			DataSourceInfo dsi;
-
-			DataSource ds = m_dataSources.value(sourceID);
-
-			ds.getInfo(dsi);
-
-			dsInfo.append(dsi);
-		}
-	}
-
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	count = static_cast<quint32>(dsInfo.count());
-
-	ack.writeDword(count);
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		ack.writeStruct(&dsInfo[i]);
-	}
-
-	ackInformationRequest(ack);*/
-}
-
-
-void AppDataServiceWorker::onGetDataSourcesState(UdpRequest& request)
-{
-/*	quint32 count = request.readDword();
-
-	QVector<DataSourceStatistics> dsStatistics;
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		quint32 sourceID = request.readDword();
-
-		if (m_dataSources.contains(sourceID))
-		{
-			DataSourceStatistics dss;
-
-			DataSource ds = m_dataSources.value(sourceID);
-
-			ds.getStatistics(dss);
-
-			dsStatistics.append(dss);
-		}
-	}
-
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	count = static_cast<quint32>(dsStatistics.count());
-
-	ack.writeDword(count);
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		ack.writeStruct(&dsStatistics[i]);
-	}
-
-	ackInformationRequest(ack);*/
 }
 
 
@@ -579,7 +394,6 @@ void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
-	stopServiceInfoThread();
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
 
@@ -600,8 +414,6 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runDataChannelThreads();
 
 	runTcpAppDataServer();
-
-	runServiceInfoThread();
 }
 
 

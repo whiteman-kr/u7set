@@ -40,12 +40,15 @@ namespace Builder
 		void findLMs();
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
+		bool checkAppSignals();
 		bool checkOptoConnections();
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
 		bool disposeOptoModulesTxRxBuffers();
 
 		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+
+		bool writeConnectionsFile();
 
 		void clear();
 

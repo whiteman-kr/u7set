@@ -16,11 +16,10 @@ public:
 	explicit Rs232SignalListEditor(DbController* pDbController, QWidget *parent = 0);
 
 protected:
-	virtual void closeEvent(QCloseEvent * e);
 
 signals:
 
-public slots:
+private slots:
 	void checkOut();
 	void checkIn();
 	void undo();
@@ -35,12 +34,16 @@ public slots:
 
 	void onConnectionChanged();
 
+	void reject();
+
 private:
 	void fillConnectionsList();
 	void fillSignalList(bool forceUpdate = false);
 	bool askForSaveChanged();
 	bool saveChanges();
 	void updateButtons(bool checkOut);
+	bool continueWithDuplicateCaptions();
+
 
 	QPushButton* m_addConnection;
 	QPushButton* m_editConnection;

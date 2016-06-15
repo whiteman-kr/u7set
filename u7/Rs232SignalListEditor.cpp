@@ -118,18 +118,6 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	m_rs232Connections->selectionModel()->select(m_rs232Connections->model()->index(0, 0), QItemSelectionModel::SelectCurrent);
 }
 
-void Rs232SignalListEditor::closeEvent(QCloseEvent *e)
-{
-	if (askForSaveChanged())
-	{
-		e->accept();
-	}
-	else
-	{
-		e->ignore();
-	}
-}
-
 void Rs232SignalListEditor::checkOut()
 {
 	if (!m_connections.checkOut(m_db))
@@ -216,8 +204,8 @@ void Rs232SignalListEditor::addConnection()
 		assert(connection);
 		return;
 	}
-	connection->setCaption(QString("RS232/485 connection %1").arg(index + 1));
-    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+	connection->setConnectionID(QString("RS232/485 connection %1").arg(index + 1));
+	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
     connection->setSerialMode(Hardware::OptoPort::SerialMode::RS232);
     connection->setMode(Hardware::OptoPort::Mode::Serial);
 	connection->setEnable(true);
@@ -225,9 +213,9 @@ void Rs232SignalListEditor::addConnection()
 	m_connections.add(connection);
 
 	m_rs232Connections->insertRow(index);
-	m_rs232Connections->setItem(index, 0, new QTableWidgetItem(connection->caption()));
+	m_rs232Connections->setItem(index, 0, new QTableWidgetItem(connection->connectionID()));
 	m_rs232Connections->item(index, 0)->setData(Qt::UserRole, m_connections.count() - 1);
-    m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->port1StrID()));
+	m_rs232Connections->setItem(index, 1, new QTableWidgetItem(connection->port1EquipmentID()));
 	m_rs232Connections->item(index, 1)->setData(Qt::UserRole, m_connections.count() - 1);
     m_rs232Connections->setItem(index, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 	m_rs232Connections->item(index, 2)->setData(Qt::UserRole, m_connections.count() - 1);
@@ -443,6 +431,14 @@ void Rs232SignalListEditor::onConnectionChanged()
 	fillSignalList();
 }
 
+void Rs232SignalListEditor::reject()
+{
+	if (askForSaveChanged())
+	{
+		QDialog::reject();
+	}
+}
+
 void Rs232SignalListEditor::fillConnectionsList()
 {
 	int row = -1;
@@ -472,9 +468,9 @@ void Rs232SignalListEditor::fillConnectionsList()
 		}
 
 		m_rs232Connections->insertRow(rowCount);
-		m_rs232Connections->setItem(rowCount, 0, new QTableWidgetItem(connection->caption()));
+		m_rs232Connections->setItem(rowCount, 0, new QTableWidgetItem(connection->connectionID()));
 		m_rs232Connections->item(rowCount, 0)->setData(Qt::UserRole, i);
-        m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->port1StrID()));
+		m_rs232Connections->setItem(rowCount, 1, new QTableWidgetItem(connection->port1EquipmentID()));
 		m_rs232Connections->item(rowCount, 1)->setData(Qt::UserRole, i);
         m_rs232Connections->setItem(rowCount, 2, new QTableWidgetItem(connection->serialMode() == Hardware::OptoPort::SerialMode::RS232 ? "RS-232" : "RS-485"));
 		m_rs232Connections->item(rowCount, 2)->setData(Qt::UserRole, i);
@@ -529,6 +525,12 @@ void Rs232SignalListEditor::fillSignalList(bool forceUpdate)
 
 bool Rs232SignalListEditor::askForSaveChanged()
 {
+	if (continueWithDuplicateCaptions() == false)
+	{
+		return false;
+	}
+
+	//
 	if (m_modified == false)
 	{
 		return true;
@@ -582,4 +584,56 @@ void Rs232SignalListEditor::updateButtons(bool checkOut)
 	m_checkOut->setEnabled(!checkOut);
 	m_undo->setEnabled(checkOut);
 }
+
+bool Rs232SignalListEditor::continueWithDuplicateCaptions()
+{
+	// check for duplicate connections
+	//
+
+	bool duplicated = false;
+	QString duplicatedCaption;
+
+	for (int i = 0; i < m_connections.count(); i++)
+	{
+		Hardware::Connection* c = m_connections.get(i).get();
+		if (c->mode() != Hardware::OptoPort::Mode::Serial)
+		{
+			continue;
+		}
+
+		for (int j = 0; j < m_connections.count(); j++)
+		{
+			Hardware::Connection* e = m_connections.get(j).get();
+
+			if (i == j)
+			{
+				continue;
+			}
+
+			if (e->connectionID() == c->connectionID())
+			{
+				duplicated = true;
+				duplicatedCaption = e->connectionID();
+				break;
+			}
+		}
+		if (duplicated == true)
+		{
+			break;
+		}
+	}
+
+	if (duplicated == true)
+	{
+		QString s = QString("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
+		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+
+	return true;
+
+}
+
 

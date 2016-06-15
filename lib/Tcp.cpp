@@ -28,7 +28,8 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	SocketWorker::SocketWorker() :
-		m_mutex(QMutex::Recursive)
+		m_mutex(QMutex::Recursive),
+		m_watchdogTimer(this)
 	{
 		m_dataBuffer = new char[TCP_MAX_DATA_SIZE];
 	}
@@ -42,6 +43,8 @@ namespace Tcp
 	void SocketWorker::onThreadStarted()
 	{
 		createSocket();
+
+		connect(&m_watchdogTimer, &QTimer::timeout, this, &SocketWorker::onWatchdogTimerTimeout);
 	}
 
 
@@ -117,7 +120,7 @@ namespace Tcp
 		{
 			switch(m_readState)
 			{
-			case ReadState::WaitingAnything:
+			case ReadState::WaitingNothing:
 				assert(false);
 				return;
 
@@ -145,6 +148,36 @@ namespace Tcp
 
 				onHeaderAndDataReady();
 			}
+		}
+	}
+
+
+	void SocketWorker::onWatchdogTimerTimeout()
+	{
+		if (m_watchdogTimerEnable == true)
+		{
+			qDebug() << "Tcp connection WatchdogTimer timeout";
+		}
+	}
+
+
+	void SocketWorker::enableWatchdogTimer(bool enable)
+	{
+		m_watchdogTimerEnable = enable;
+
+		if (enable == false)
+		{
+			m_watchdogTimer.stop();
+		}
+	}
+
+
+	void SocketWorker::restartWatchdogTimer()
+	{
+		if (m_watchdogTimerEnable)
+		{
+			m_watchdogTimer.setSingleShot(true);
+			m_watchdogTimer.start(m_watchdogTimerTimeout);
 		}
 	}
 
@@ -192,7 +225,7 @@ namespace Tcp
 		{
 			m_headerAndDataReady = true;
 
-			m_readState = ReadState::WaitingAnything;
+			m_readState = ReadState::WaitingNothing;
 
 			return bytesRead;
 		}
@@ -250,7 +283,7 @@ namespace Tcp
 		{
 			m_headerAndDataReady = true;
 
-			m_readState = ReadState::WaitingAnything;
+			m_readState = ReadState::WaitingNothing;
 		}
 
 		return bytesRead;
@@ -288,6 +321,8 @@ namespace Tcp
 
 	void SocketWorker::onSocketStateChanged(QAbstractSocket::SocketState newState)
 	{
+		return;			// its Ok!
+
 		QString stateStr;
 
 		switch(newState)
@@ -910,6 +945,8 @@ namespace Tcp
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 		m_periodicTimer.start();
 
+		restartWatchdogTimer();
+
 		connectToServer();
 	}
 
@@ -935,7 +972,7 @@ namespace Tcp
 	void Client::initReadStatusVariables()
 	{
 		m_clientState = ClientState::ClearToSendRequest;
-		m_readState = ReadState::WaitingAnything;
+		m_readState = ReadState::WaitingNothing;
 		m_readHeaderSize = 0;
 		m_readDataSize = 0;
 		m_connectTimeout = 0;
@@ -970,6 +1007,8 @@ namespace Tcp
 			closeConnection();
 			return;
 		}
+
+		restartWatchdogTimer();
 
 		if (m_header.id != m_sentRequestHeader.id ||
 			m_header.numerator != m_sentRequestHeader.numerator)
@@ -1124,6 +1163,8 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
+		restartWatchdogTimer();
+
 		if (!isClearToSendRequest())
 		{
 			assert(false);
@@ -1212,5 +1253,14 @@ namespace Tcp
 
 		return sendRequest(requestID, m_protobufBuffer, messageSize);
 	}
+
+
+	void Client::onWatchdogTimerTimeout()
+	{
+		SocketWorker::onWatchdogTimerTimeout();
+
+		closeConnection();
+	}
+
 
 }

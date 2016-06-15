@@ -2,6 +2,7 @@
 #include "ui_DialogConnectionsEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 #include "Settings.h"
+#include <QMessageBox>
 
 //
 //
@@ -12,6 +13,8 @@
 DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage *connections)
     :PropertyEditorDialog(object, parent)
 {
+	setWindowTitle(tr("Connection Properties"));
+
 	m_connections = connections;
 
     setSplitterPosition(theSettings.m_connectionSplitterState);
@@ -34,19 +37,91 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
         return false;
     }
 
-    Hardware::Connection* c = dynamic_cast<Hardware::Connection*>(object.get());
-    if (c == nullptr)
+	Hardware::Connection* e = dynamic_cast<Hardware::Connection*>(object.get());
+	if (e == nullptr)
     {
-        assert(c);
+		assert(e);
         return false;
     }
 
-    bool uniqueConnections = m_connections->checkUniqueConnections(c);
-    if (uniqueConnections == false)
+	// Check if port 1 ID is not equal to port 2 ID
+	//
+	if (e->port1EquipmentID() == e->port2EquipmentID())
+	{
+		QString s = QString("Port 1 identifier is eqal to Port 2 identifier.\r\n\r\nAre you sure you want to continue?");
+		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	// Check if port IDs are not equal port IDs in other connections
+	//
+
+	QString duplicateConnectionName;
+	QString duplicatePortName;
+
+	QString port1ID = e->port1EquipmentID();
+	QString port2ID = e->port2EquipmentID();
+
+	bool duplicateFound = false;
+
+	for (int i = 0; i < m_connections->count(); i++)
+	{
+		Hardware::Connection* c = m_connections->get(i).get();
+
+		if (e->index() == c->index())
+		{
+			continue;
+		}
+
+		if (port1ID.length() > 0)
+		{
+			if (port1ID == c->port1EquipmentID())
+			{
+				duplicatePortName = port1ID;
+				duplicateConnectionName = c->connectionID();
+				duplicateFound = true;
+			}
+			if (port1ID == c->port2EquipmentID())
+			{
+				duplicatePortName = port1ID;
+				duplicateConnectionName = c->connectionID();
+				duplicateFound = true;
+			}
+		}
+
+		if (e->mode() == Hardware::OptoPort::Mode::Optical)
+		{
+			if (port2ID.length() > 0)
+			{
+				if (port2ID == c->port1EquipmentID())
+				{
+					duplicatePortName = port2ID;
+					duplicateConnectionName = c->connectionID();
+					duplicateFound = true;
+				}
+				if (port2ID == c->port2EquipmentID())
+				{
+					duplicatePortName = port2ID;
+					duplicateConnectionName = c->connectionID();
+					duplicateFound = true;
+				}
+			}
+		}
+	}
+
+	if (duplicateFound == true)
     {
-        QMessageBox::warning(this, "Connections Editor", "Duplicate string identifiers and port numbers found! Please correct the errors.");
+		QString s = QString("Port '%1' is already in use in connection '%2'.\r\n\r\nAre you sure you want to continue?").arg(duplicatePortName).arg(duplicateConnectionName);
+		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
+		{
+			return true;
+		}
         return false;
     }
+
     return true;
 }
 
@@ -90,9 +165,9 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     QStringList l;
     l << tr("ID");
-    l << tr("Caption");
-    l << tr("Port1 ID");
-    l << tr("Port2 ID");
+	l << tr("ConnectionID");
+	l << tr("Port1 EquipmentID");
+	l << tr("Port2 EquipmentID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
@@ -137,9 +212,9 @@ void DialogConnectionsEditor::fillConnectionsList()
 		}
 
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
-                                                    connection->caption() <<
-                                                    connection->port1StrID() <<
-                                                    connection->port2StrID());
+													connection->connectionID() <<
+													connection->port1EquipmentID() <<
+													connection->port2EquipmentID());
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
     }
@@ -172,7 +247,8 @@ bool DialogConnectionsEditor::askForSaveChanged()
 
 bool DialogConnectionsEditor::saveChanges()
 {
-    // save to db
+
+	// save to db
     //
     if (connections.save(db()) == false)
     {
@@ -196,16 +272,68 @@ void DialogConnectionsEditor::updateButtons(bool checkOut)
     ui->m_OK->setEnabled(checkOut == true);
 }
 
+bool DialogConnectionsEditor::continueWithDuplicateCaptions()
+{
+	bool duplicated = false;
+	QString duplicatedCaption;
+
+	for (int i = 0; i < connections.count(); i++)
+	{
+		Hardware::Connection* c = connections.get(i).get();
+		if (c->mode() != Hardware::OptoPort::Mode::Optical)
+		{
+			continue;
+		}
+
+		for (int j = 0; j < connections.count(); j++)
+		{
+			Hardware::Connection* e = connections.get(j).get();
+
+			if (i == j)
+			{
+				continue;
+			}
+
+			if (e->connectionID() == c->connectionID())
+			{
+				duplicated = true;
+				duplicatedCaption = e->connectionID();
+				break;
+			}
+		}
+		if (duplicated == true)
+		{
+			break;
+		}
+	}
+
+	if (duplicated == true)
+	{
+		QString s = QString("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
+		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void DialogConnectionsEditor::closeEvent(QCloseEvent* e)
 {
-    if (askForSaveChanged() == true)
-    {
-        e->accept();
-    }
-    else
-    {
-        e->ignore();
-    }
+	if (continueWithDuplicateCaptions() == false)
+	{
+		e->ignore();
+		return;
+	}
+
+	if (askForSaveChanged() == true)
+	{
+		e->accept();
+	}
+	else
+	{
+		e->ignore();
+	}
 }
 
 DbController* DialogConnectionsEditor::db()
@@ -223,17 +351,17 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         assert(connection);
         return;
     }
-    connection->setCaption("New Connection");
-    connection->setPort1StrID("SYSTEMID_RACKID_CHID_MD00_PORT01");
-    connection->setPort2StrID("SYSTEMID_RACKID_CHID_MD00_PORT02");
+	connection->setConnectionID("NewConnection");
+	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+	connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
     connection->setEnable(true);
 
     connections.add(connection);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
-                                                connection->caption() <<
-                                                connection->port1StrID() <<
-                                                connection->port2StrID());
+												connection->connectionID() <<
+												connection->port1EquipmentID() <<
+												connection->port2EquipmentID());
     item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
     ui->m_list->insertTopLevelItem(index, item);
 
@@ -319,25 +447,40 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
 
 void DialogConnectionsEditor::on_m_OK_clicked()
 {
-    if (m_modified == true)
-    {
-        if (saveChanges() == false)
-        {
-            return;
-        }
-    }
+	if (continueWithDuplicateCaptions() == false)
+	{
+		return;
+	}
 
-    accept();
-    return;
+	if (m_modified == true)
+	{
+		if (saveChanges() == false)
+		{
+			return;
+		}
+	}
+
+	accept();
+	return;
 }
 
 void DialogConnectionsEditor::on_m_Cancel_clicked()
 {
-    if (askForSaveChanged() == true)
-    {
-        reject();
-    }
-    return;
+	reject();
+}
+
+void DialogConnectionsEditor::reject()
+{
+	if (continueWithDuplicateCaptions() == false)
+	{
+		return;
+	}
+
+	if (askForSaveChanged() == true)
+	{
+		QDialog::reject();
+	}
+
 }
 
 

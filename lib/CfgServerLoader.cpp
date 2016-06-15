@@ -108,7 +108,7 @@ void CfgServer::readBuildXml()
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
 
-	qDebug() << "File " << m_buildXmlPathFileName << " has been readed";
+	qDebug() << "File " << m_buildXmlPathFileName << " has been read";
 }
 
 
@@ -128,6 +128,12 @@ CfgLoader::CfgLoader(	const QString& appStrID,
 	m_enableDownloadConfiguration(enableDownloadCfg)
 {
 	changeApp(appStrID, appInstance);
+
+	// DELETE after periodic CFG requests to be added
+	//
+	enableWatchdogTimer(false);
+	//
+	// DELETE after periodic CFG requests to be added
 }
 
 
@@ -495,7 +501,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
-				qDebug() << "Readed configuration.xml";
+				qDebug() << "Read configuration.xml";
 
 				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML].fileData, bfiArray);
 			}

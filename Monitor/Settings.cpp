@@ -63,6 +63,14 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalSearch/columnCount", m_signalSearchColumnCount);
 	s.setValue("DialogSignalSearch/columnWidth", m_signalSearchColumnWidth);
 
+	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
+	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
+	s.setValue("DialogSignalSnapshot/columnCount", m_signalSnapshotColumnCount);
+	s.setValue("DialogSignalSnapshot/columns", m_signalSnapshotColumns);
+	s.setValue("DialogSignalSnapshot/type", m_signalSnapshotSignalType);
+	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
+
+
 	return;
 }
 void Settings::loadUserScope()
@@ -77,6 +85,13 @@ void Settings::loadUserScope()
 	m_signalSearchGeometry = s.value("DialogSignalSearch/geometry").toByteArray();
 	m_signalSearchColumnCount = s.value("DialogSignalSearch/columnCount").toInt();
 	m_signalSearchColumnWidth = s.value("DialogSignalSearch/columnWidth").toByteArray();
+
+	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
+	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
+	m_signalSnapshotColumnCount = s.value("DialogSignalSnapshot/columnCount").toInt();
+	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").toByteArray();
+	m_signalSnapshotSignalType = s.value("DialogSignalSnapshot/type").toInt();
+	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 
 	return;
 }
