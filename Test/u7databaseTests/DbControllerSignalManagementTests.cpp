@@ -682,6 +682,101 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	db.close();
 }
 
+void DbControllerSignalTests::undoSignalChangesTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	QVector<Signal> signalsToAdd;
+
+	QString firstCaption;
+
+	firstCaption = "undoSignalChangesTest";
+
+	Signal newSignal;
+	newSignal.setCaption(firstCaption);
+	newSignal.setAcquire(true);
+	newSignal.setAperture(0.3);
+	newSignal.setAppSignalID(firstCaption);
+	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
+	newSignal.setCalculated(true);
+	newSignal.setCustomAppSignalID(firstCaption);
+	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setDataSize(30);
+	newSignal.setDecimalPlaces(3);
+	newSignal.setEnableTuning(true);
+	newSignal.setEquipmentID(firstCaption);
+	newSignal.setFilteringTime(7.3);
+	newSignal.setHighADC(500);
+	newSignal.setHighEngeneeringUnits(3245.6);
+	newSignal.setHighValidRange(3546.4);
+	newSignal.setInOutType(E::SignalInOutType::Input);
+	newSignal.setInputHighLimit(2345.3);
+	newSignal.setInputLowLimit(134.4);
+	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(1);
+	newSignal.setLowADC(1234);
+	newSignal.setLowEngeneeringUnits(345.1);
+	newSignal.setLowValidRange(134.9);
+	newSignal.setNormalState(1234);
+	newSignal.setObjectName(firstCaption);
+	newSignal.setOutputHighLimit(85678.5);
+	newSignal.setOutputLowLimit(12536.5);
+	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
+	newSignal.setOutputSensorID(13443);
+	newSignal.setOutputUnitID(1);
+	newSignal.setReadOnly(false);
+	newSignal.setSpreadTolerance(35634.6);
+	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setUnbalanceLimit(98769.3);
+	newSignal.setUnitID(1);
+
+	signalsToAdd.push_back(newSignal);
+
+	bool ok = m_dbController->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption = '%1'").arg(firstCaption));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("signalId").toInt();
+
+	QVector<int> signalIds;
+	QVector<ObjectState> os;
+
+	signalIds.push_back(signalId);
+
+	ok = m_dbController->checkinSignals(&signalIds, "UndoSignalChangesTest", &os, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkoutSignals(&signalIds, &os, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ObjectState currentSignalObjectState = os.first();
+
+	ok = m_dbController->undoSignalChanges(signalId, &currentSignalObjectState, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2(currentSignalObjectState.checkedOut == false, qPrintable ("Error: signal is not checkedIn"));
+
+	ok = query.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("checkedOutInstanceId").toInt()  == 0, qPrintable("Error: actually, signal was not checked In"));
+	QVERIFY2(query.value("checkedInInstanceId").toInt()  != 0, qPrintable("Error: actually, signal was not checked In"));
+
+	db.close();
+}
+
 void DbControllerSignalTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
