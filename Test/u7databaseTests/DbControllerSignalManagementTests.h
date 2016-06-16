@@ -18,6 +18,7 @@ private slots:
 	void getLatestSignalTest();
 	void setSignalWorkCopyTest();
 	void undoSignalChangesTest();
+	void deleteSignalTest();
 	void cleanupTestCase();
 
 private:
