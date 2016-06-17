@@ -1342,6 +1342,5 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 		return &(*this)[m_strID2IndexMap[appSignalID]];
 	}
 
-	assert(false);			//	appSignalD is not found
 	return nullptr;
 }

@@ -87,7 +87,7 @@ namespace Builder
 
 		// Build Application Logic
 		//
-		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipment, int changesetId);
+		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipment, SignalSet* signalSet, int changesetId);
 
 		// Compile Application Logic
 		//

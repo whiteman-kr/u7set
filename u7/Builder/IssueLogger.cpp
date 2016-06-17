@@ -1083,6 +1083,30 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALP4032
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///
+	/// Description:
+	///		Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').
+	/// All Inputs/Outputs/Interconnection Signal elements must be the same type.
+	///
+	void IssueLogger::errALP4032(QString schema, const std::vector<QUuid>& itemsUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4032,
+				  tr("Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').")
+				  .arg(schema));
+	}
+
+
 	// ALC			Application logic compiler				5000-5999
 	//
 
