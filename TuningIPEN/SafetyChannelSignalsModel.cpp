@@ -229,6 +229,10 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
 
 	QWidget* parentWidget = dynamic_cast<QWidget*>(QObject::parent());
+	if (parentWidget == nullptr || !parentWidget->isVisible())
+	{
+		return true;
+	}
 
 	bool ok = false;
 	double newValue = valueStr.toDouble(&ok);
