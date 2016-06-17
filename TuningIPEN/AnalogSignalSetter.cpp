@@ -53,7 +53,7 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 			m_currentValue->setText(QString::number(value));
 		}
 
-		if (validity == true && qAbs(value - m_lastSentValue) < std::numeric_limits<double>::epsilon())
+		if (validity == true && qAbs(value - m_lastSentValue) < std::numeric_limits<float>::epsilon())
 		{
 			m_input->clear();
 			m_lastSentValue = qQNaN();
@@ -67,17 +67,17 @@ void AnalogSignalSetter::setNewValue()
 	double newValue = m_input->text().replace(',', '.').toDouble(&ok);
 	if (!ok)
 	{
-		QMessageBox::critical(nullptr, "Not valid input", "Please, enter valid float pointing number");
+		QMessageBox::critical(this, "Not valid input", "Please, enter valid float pointing number");
 		return;
 	}
 
 	if (newValue < 0 || newValue > m_highLimit)
 	{
-		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between 0 and %1").arg(m_highLimit));
+		QMessageBox::critical(this, "Not valid input", QString("Please, enter number between 0 and %1").arg(m_highLimit));
 		return;
 	}
 
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
+	auto reply = QMessageBox::question(this, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
 									   .arg(m_signalId).arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)

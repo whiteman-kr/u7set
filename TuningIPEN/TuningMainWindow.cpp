@@ -267,7 +267,7 @@ void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 {
 	m_automaticMode->setChecked(!enabled);
 
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
+	auto reply = QMessageBox::question(this, "Confirmation", QString("Are you sure you want change <b>HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
 									   .arg(enabled ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)

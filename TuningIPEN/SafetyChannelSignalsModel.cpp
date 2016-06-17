@@ -176,7 +176,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 			{
 				return QColor(Qt::red);
 			}
-			if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<double>::epsilon())
+			if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
 			{
 				return QColor(Qt::yellow);
 			}
@@ -228,6 +228,8 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 
 	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
 
+	QWidget* parentWidget = dynamic_cast<QWidget*>(QObject::parent());
+
 	bool ok = false;
 	double newValue = valueStr.toDouble(&ok);
 	if (!ok)
@@ -243,24 +245,24 @@ bool SafetyChannelSignalsModel::setData(const QModelIndex& index, const QVariant
 					newValue = 0;
 					break;
 				default:
-					QMessageBox::critical(nullptr, "Not valid input", "Please, enter 0 or 1");
+					QMessageBox::critical(parentWidget, "Not valid input", "Please, enter 0 or 1");
 					return false;
 			}
 		}
 		else
 		{
-			QMessageBox::critical(nullptr, "Not valid input", "Please, enter valid float pointing number");
+			QMessageBox::critical(parentWidget, "Not valid input", "Please, enter valid float pointing number");
 			return false;
 		}
 	}
 
 	if (newValue < signal.lowEngeneeringUnits() || newValue > signal.highEngeneeringUnits())
 	{
-		QMessageBox::critical(nullptr, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngeneeringUnits()).arg(signal.highEngeneeringUnits()));
+		QMessageBox::critical(parentWidget, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngeneeringUnits()).arg(signal.highEngeneeringUnits()));
 		return false;
 	}
 
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
+	auto reply = QMessageBox::question(parentWidget, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
 									   .arg(signal.customAppSignalID()).arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
@@ -311,7 +313,7 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<double>::epsilon())
+		if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
@@ -334,7 +336,9 @@ void SafetyChannelSignalsModel::changeDiscreteSignal(const QModelIndex& index)
 
 	double newValue = m_states[index.row()].currentValue == 0 ? 1 : 0;
 
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
+	QWidget* parentWidget = dynamic_cast<QWidget*>(QObject::parent());
+
+	auto reply = QMessageBox::question(parentWidget, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
 									   .arg(signal.customAppSignalID()).arg(newValue == 1 ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
