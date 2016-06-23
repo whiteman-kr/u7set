@@ -140,8 +140,16 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 		if (signal->isDiscrete())
 		{
-			signal->setDataFormat(E::UnsignedInt);
-			signal->setDataSize(1);
+			if (signal->dataFormat() != E::UnsignedInt)
+			{
+				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signal);
+				signal->setDataFormat(E::UnsignedInt);
+			}
+			if (signal->dataSize() != 1)
+			{
+				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signal);
+				signal->setDataSize(1);
+			}
 			signal->propertyByCaption("DataFormat")->setReadOnly(true);
 			signal->propertyByCaption("DataSize")->setReadOnly(true);
 		}
