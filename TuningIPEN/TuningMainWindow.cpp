@@ -108,7 +108,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	//Init tabs
 	//
-	QTabWidget* tabs = new QTabWidget(this);
+	QTabWidget* mainTabs = new QTabWidget(this);
 
 	QLabel* image = new QLabel(this);
 	image->setPixmap(QPixmap(":/Images/u7/Images/logo.png"));
@@ -125,7 +125,7 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	QVBoxLayout* vl = new QVBoxLayout;
 	vl->addLayout(hl);
-	vl->addWidget(tabs);
+	vl->addWidget(mainTabs);
 
 	QWidget* container = new QWidget(this);
 	container->setLayout(vl);
@@ -133,14 +133,14 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	m_automaticPowerRegulatorWidget = new QWidget;
 
-	tabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
+	mainTabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
 
 	m_setOfSignalsScram = new QTabWidget(this);
 	QWidget* widget = new QWidget;
 	hl = new QHBoxLayout;
 	widget->setLayout(hl);
 	hl->addWidget(m_setOfSignalsScram);
-	tabs->addTab(widget, "Set of signals SCRAM");
+	mainTabs->addTab(widget, "Set of signals SCRAM");
 }
 
 
@@ -267,7 +267,7 @@ void TuningMainWindow::applyNewAutomaticMode(bool enabled)
 {
 	m_automaticMode->setChecked(!enabled);
 
-	auto reply = QMessageBox::question(nullptr, "Confirmation", QString("Are you sure you want change <b>HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
+	auto reply = QMessageBox::question(this, "Confirmation", QString("Are you sure you want change <b>HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
 									   .arg(enabled ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 	if (reply == QMessageBox::No)
@@ -300,7 +300,7 @@ void TuningMainWindow::onTuningServiceReady()
 		m_setOfSignalsScram->insertTab(place, view, sourceInfo.lmCaption);
 		sourceIndexes.insert(place, index);
 
-		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, this);
+		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, view);
 		view->setModel(model);
 		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate;
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
