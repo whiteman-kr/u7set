@@ -34,7 +34,6 @@ SOURCES += main.cpp\
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     PacketBufferTableModel.cpp \
-    ../lib/PropertyObject.cpp \
     SignalTableModel.cpp \
     ../lib/Types.cpp \
     ../lib/XmlHelper.cpp \

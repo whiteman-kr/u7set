@@ -68,7 +68,6 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/Types.cpp \
     ../lib/JsonSerializable.cpp \
     ../lib/CfgServerLoader.cpp \

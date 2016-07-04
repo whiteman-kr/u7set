@@ -132,7 +132,6 @@ SOURCES +=\
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
-	../lib/PropertyObject.cpp \
     Builder/FbParamCalculation.cpp \
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \

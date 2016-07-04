@@ -2,6 +2,7 @@
 #include "QUuid"
 
 #include "../lib/ProtoSerialization.h"
+#include "PropertyObject.h"
 
 #ifdef Q_OS_WIN
 #pragma warning(push)
@@ -146,6 +147,121 @@ namespace Proto
 		default:
 			assert(false);
 		}
+	}
+
+	void saveProperty(::Proto::Property* protoProperty, const std::shared_ptr<::Property>& property)
+	{
+		return saveProperty(protoProperty, property.get());
+	}
+
+	void saveProperty(::Proto::Property* protoProperty, const ::Property* property)
+	{
+		assert(property);
+
+		protoProperty->set_name(property->caption().toStdString());
+
+		QString valueStr;
+
+		QVariant value = property->value();
+
+		if (property->isEnum() == true)
+		{
+			valueStr = value.toString();
+		}
+		else
+		{
+			switch (value.type())
+			{
+			case QVariant::Bool:
+				valueStr = value.toBool() ? "t" : "f";
+				break;
+			case QVariant::Int:
+				valueStr.setNum(value.toInt());
+				break;
+			case QVariant::UInt:
+				valueStr.setNum(value.toUInt());
+				break;
+			case QVariant::String:
+				valueStr = value.toString();
+				break;
+			case QVariant::Double:
+				valueStr.setNum(value.toDouble());
+				break;
+			default:
+				assert(false);
+			}
+		}
+
+		protoProperty->set_value(valueStr.toLocal8Bit());
+	}
+
+	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property)
+	{
+		return loadProperty(protoProperty, property.get());
+	}
+
+	bool loadProperty(const ::Proto::Property& protoProperty, ::Property* property)
+	{
+		assert(property);
+
+		if (protoProperty.name() != property->caption().toStdString())
+		{
+			assert(protoProperty.name() == property->caption().toStdString());
+			return false;
+		}
+
+		bool ok = false;
+		QString sv(protoProperty.value().c_str());
+		QVariant value = property->value();
+
+		if (property->isEnum() == true)
+		{
+			property->setValue(protoProperty.value().c_str());
+			return true;
+		}
+
+		switch (value.type())
+		{
+			case QVariant::Bool:
+				{
+					value = (sv == "t") ? true : false;
+					ok = true;
+				}
+				break;
+			case QVariant::Int:
+				{
+					qint32 i = sv.toInt(&ok);
+					value = QVariant(i);
+				}
+				break;
+			case QVariant::UInt:
+				{
+					quint32 ui = sv.toUInt(&ok);
+					value = QVariant(ui);
+				}
+				break;
+			case QVariant::String:
+				{
+					value = sv;
+					ok = true;
+				}
+				break;
+			case QVariant::Double:
+				{
+					double d = sv.toDouble(&ok);
+					value = QVariant(d);
+				}
+				break;
+			default:
+				assert(false);
+		}
+
+		if (ok == true)
+		{
+			property->setValue(value);
+		}
+
+		return ok;
 	}
 }
 

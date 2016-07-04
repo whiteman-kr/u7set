@@ -22,10 +22,6 @@
 
 #include "../lib/OrderedHash.h"
 
-namespace Proto
-{
-	class Property;
-}
 
 class PropertyObject;
 
@@ -73,100 +69,114 @@ void setCaption(QString value);
 class Property
 {
 public:
-	Property();
-	virtual ~Property();
+	Property() : m_flags(0)
+	{
+	}
+
+	virtual ~Property()
+	{
+	}
 
 public:
-	void saveValue(::Proto::Property* protoProperty) const;
-	bool loadValue(const ::Proto::Property& protoProperty);
-
 	virtual bool isEnum() const = 0;
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
 
 public:
-	inline QString caption() const
+	QString caption() const
 	{
 		return m_caption;
 	}
-	inline void setCaption(const QString& value)
+	void setCaption(const QString& value)
 	{
 		m_caption = value;
 	}
 
-	inline QString description() const
+	QString description() const
 	{
 		return m_description;
 	}
-	inline void setDescription(const QString& value)
+	void setDescription(const QString& value)
 	{
 		m_description = value;
 	}
 
-	inline QString category() const
+	QString category() const
 	{
 		return m_category;
 	}
-	inline void setCategory(const QString& value)
+	void setCategory(const QString& value)
 	{
 		m_category = value;
 	}
 
-	inline QString validator() const
+	QString validator() const
 	{
 		return m_validator;
 	}
-	inline void setValidator(const QString& value)
+	void setValidator(const QString& value)
 	{
 		m_validator = value;
 	}
 
-	inline bool readOnly() const
+	bool readOnly() const
 	{
 		return m_readOnly;
 	}
-	inline void setReadOnly(bool value)
+	void setReadOnly(bool value)
 	{
 		m_readOnly = value;
 	}
 
-	inline bool updateFromPreset() const
+	bool updateFromPreset() const
 	{
 		return m_updateFromPreset;
 	}
-	inline void setUpdateFromPreset(bool value)
+	void setUpdateFromPreset(bool value)
 	{
 		m_updateFromPreset = value;
 	}
 
-	inline bool specific() const
+	bool specific() const
 	{
 		return m_specific;
 	}
-	inline void setSpecific(bool value)
+	void setSpecific(bool value)
 	{
 		m_specific = value;
 	}
 
-	inline bool visible() const
+	bool visible() const
 	{
 		return m_visible;
 	}
-	inline void setVisible(bool value)
+	void setVisible(bool value)
 	{
 		m_visible = value;
 	}
 
-	inline bool expert() const
+	bool expert() const
 	{
 		return m_expert;
 	}
-	inline void setExpert(bool value)
+	void setExpert(bool value)
 	{
 		m_expert = value;
 	}
 
-	int precision() const;
-	void setPrecision(int value);
+	int precision() const
+	{
+		return m_precision;
+	}
+	void setPrecision(int value)
+	{
+		if (value < 0)
+		{
+			assert(value >= 0);
+			value = 0;
+		}
+
+		m_precision = value;
+	}
 
 	virtual QVariant value() const = 0;
 	virtual void setValue(const QVariant& value) = 0;
@@ -184,7 +194,24 @@ public:
 	virtual void updateFromPreset(Property* presetProperty, bool updateValue) = 0;
 
 protected:
-	void copy(const Property* source);
+	void copy(const Property* source)
+	{
+		if (source == nullptr ||
+			source == this)
+		{
+			assert(source);
+			return;
+		}
+
+		m_caption = source->m_caption;
+		m_description = source->m_description;
+		m_category = source->m_category;
+		m_validator = source->m_validator;
+		m_flags = source->m_flags;
+		m_precision = source->m_precision;
+
+		return;
+	}
 
 private:
 	// WARNING!!! If you add a field, do not forget to add it to void copy(const Property* source);
@@ -807,8 +834,14 @@ class PropertyObject : public QObject
 	Q_OBJECT
 
 public:
-	explicit PropertyObject(QObject* parent = nullptr);
-	virtual ~PropertyObject();
+	explicit PropertyObject(QObject* parent = nullptr)  :
+		QObject(parent)
+	{
+	}
+
+	virtual ~PropertyObject()
+	{
+	}
 
 public:
 
@@ -850,7 +883,7 @@ public:
 
 	template <typename TYPE>
 	PropertyValue<TYPE>* addProperty(const QString& caption,
-									 QString category,
+									 const QString& category,
 									 bool visible = false,
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
@@ -919,13 +952,30 @@ public:
 
 	// Get all properties
 	//
-	std::vector<std::shared_ptr<Property>> properties() const;
+	std::vector<std::shared_ptr<Property>> properties() const
+	{
+		std::vector<std::shared_ptr<Property>> result;
+		result.reserve(m_properties.size());
 
-	// Delete all properties
-	//
-	void removeAllProperties();
+		for (const std::pair<uint, std::shared_ptr<Property>>& p : m_properties)
+		{
+			result.push_back(p.second);
+		}
 
-	bool removeProperty(const QString& caption);
+		return result;
+	}
+
+	void removeAllProperties()
+	{
+		m_properties.clear();
+	}
+
+	bool removeProperty(const QString& caption)
+	{
+		uint hash = qHash(caption);
+		size_t removed = m_properties.erase(hash);
+		return removed > 0;
+	}
 
 	// Add properties
 	// 1. If properties have getter or setter the must be added via PropertyObject::addProperty
@@ -933,23 +983,90 @@ public:
 	// 2. It is posible to use addProperties with getter and setter properties
 	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
 	//
-	void addProperties(std::vector<std::shared_ptr<Property>> properties);
+	void addProperties(std::vector<std::shared_ptr<Property>> properties)
+	{
+		for (std::shared_ptr<Property> p : properties)
+		{
+			uint hash = qHash(p->caption());
+			m_properties[hash] = p;
+		}
+	}
 
 	// Delete all deynamic properties
 	//
-	void removeSpecificProperties();
+	void removeSpecificProperties()
+	{
+		for(auto it = m_properties.begin(); it != m_properties.end();)
+		{
+			if(it->second->specific() == true)
+			{
+				it = m_properties.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
 
-    Q_INVOKABLE bool propertyExists(QString caption) const;
+	Q_INVOKABLE bool propertyExists(const QString& caption) const
+	{
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+		return it != m_properties.end();
+	}
 
     // Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
-    std::shared_ptr<Property> propertyByCaption(QString caption);
-    const std::shared_ptr<Property> propertyByCaption(QString caption) const;
+	std::shared_ptr<Property> propertyByCaption(const QString& caption)
+	{
+		std::shared_ptr<Property> result = nullptr;
+
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+
+		if (it != m_properties.end())
+		{
+			result = it->second;
+		}
+
+		return result;
+	}
+
+	const std::shared_ptr<Property> propertyByCaption(const QString& caption) const
+	{
+		std::shared_ptr<Property> result = nullptr;
+
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+
+		if (it != m_properties.end())
+		{
+			result = it->second;
+		}
+
+		return result;
+	}
 
     // Get property value
 	//
-    Q_INVOKABLE QVariant propertyValue(QString caption) const;
+	Q_INVOKABLE QVariant propertyValue(const QString& caption) const
+	{
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+
+		if (it != m_properties.end())
+		{
+			QVariant result(it->second->value());
+			return result;
+		}
+		else
+		{
+			qDebug() << "PropertyObject::propertyValue: property not found: " << caption;
+			return QVariant();
+		}
+	}
 
 	template <typename TYPE>
 	bool setPropertyValue(const QString& caption, const TYPE& value)
@@ -988,9 +1105,69 @@ public:
 		return false;
 	}
 
-    bool setPropertyValue(QString caption, const char* value);
-	Q_INVOKABLE bool setPropertyValue(QString caption, const QVariant& value);
-	std::list<std::pair<int, QString>> enumValues(QString property);
+	bool setPropertyValue(const QString& caption, const char* value)
+	{
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+
+		if (it == m_properties.end())
+		{
+			return false;
+		}
+
+		std::shared_ptr<Property> property = it->second;
+
+		if (property->isEnum() == true)
+		{
+			property->setEnumValue(value);
+			return true;
+		}
+		else
+		{
+			PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
+
+			if (propertyValue == nullptr)
+			{
+				assert(propertyValue);
+				return false;
+			}
+
+			propertyValue->setValueDirect(QString(value));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	Q_INVOKABLE bool setPropertyValue(const QString& caption, const QVariant& value)
+	{
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+
+		if (it == m_properties.end())
+		{
+			return false;
+		}
+
+		it->second->setValue(value);
+
+		return true;
+	}
+	std::list<std::pair<int, QString>> enumValues(const QString& property)
+	{
+		std::list<std::pair<int, QString>> result;
+
+		uint hash = qHash(property);
+		auto it = m_properties.find(hash);
+
+		if (it != m_properties.end())
+		{
+			result = it->second->enumValues();
+		}
+
+		return result;
+	}
 
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)

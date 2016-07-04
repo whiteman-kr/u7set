@@ -1,8 +1,11 @@
 #pragma once
 
+#include <fstream>
+#include <memory>
+
 #include <QtCore/QUuid>
 #include <QVariant>
-#include <fstream>
+
 
 #ifdef Q_OS_WIN
 #pragma warning (push)
@@ -23,12 +26,14 @@
 
 #include "StreamedData.h"
 
+class Property;
 
 namespace Proto
 {
 	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream);
 	bool ParseFromString(::google::protobuf::Message& message, const char* str);
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data);
+
 
 
 	// Шаблон и реализация необходимых фукнций сериализации
@@ -283,7 +288,6 @@ namespace Proto
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const = 0;
 		virtual bool LoadData(const Proto::Envelope& message) = 0;
-
 	};
 
 
@@ -301,6 +305,12 @@ namespace Proto
 	//
 	const QVariant Read(const Proto::qvariant& message);
 	void Write(Proto::qvariant* pMessage, const QVariant& value);
+
+	void saveProperty(::Proto::Property* protoProperty, const std::shared_ptr<::Property>& property);
+	void saveProperty(::Proto::Property* protoProperty, const ::Property* property);
+
+	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property);
+	bool loadProperty(const ::Proto::Property& protoProperty, ::Property* property);
 }
 
 

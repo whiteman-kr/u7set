@@ -60,7 +60,6 @@ SOURCES += main.cpp \
     TcpSignalClient.cpp \
     ../Proto/serialization.pb.cc \
     ../lib/Signal.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \

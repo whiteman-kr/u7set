@@ -42,7 +42,6 @@ SOURCES += \
     ../lib/Queue.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/DeviceObject.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
     ../lib/ProtoSerialization.cpp \

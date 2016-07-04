@@ -26,7 +26,6 @@ SOURCES +=\
     ../AppDataService/TcpAppDataClient.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/PropertyObject.cpp \
     ../lib/AppSignalState.cpp \
     ../lib/Signal.cpp \
     ../lib/DeviceObject.cpp \

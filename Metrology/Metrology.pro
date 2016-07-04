@@ -91,7 +91,6 @@ SOURCES += \
     ../lib/Signal.cpp \
     MeasureSignalBase.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/XmlHelper.cpp
 
 

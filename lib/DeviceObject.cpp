@@ -197,7 +197,7 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 			if (p->specific() == true)
 			{
 				::Proto::Property* protoProp = mutableDeviceObject->mutable_properties()->Add();
-				p->saveValue(protoProp);
+				Proto::saveProperty(protoProp, p);
 			}
 		}
 
@@ -273,12 +273,12 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 				assert(property->specific() == true);	// it's suppose to be specific property;
 
-				bool loadOk = property->loadValue(p);
+
+				bool loadOk = Proto::loadProperty(p, property);
 
 				Q_UNUSED(loadOk);
 				assert(loadOk);
 			}
-
 		}
 
 		// --
