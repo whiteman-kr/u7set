@@ -1049,11 +1049,7 @@ public:
 		property->setGetter(getter);
 		property->setSetter(setter);
 
-		if (setter)
-		{
-			property->setValueDirect(TYPE());
-		}
-		else
+		if (!setter)
 		{
 			property->setReadOnly(true);
 		}

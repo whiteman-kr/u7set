@@ -111,15 +111,15 @@ namespace VFrame30
 		QString m_schemaID;
 		QString m_caption;
 
-		double m_width;				// pixels or inches, depends on m_unit
-		double m_height;			// pixels or inches, depends on m_unit
+		double m_width = 0.0;					// pixels or inches, depends on m_unit
+		double m_height = 0.0;					// pixels or inches, depends on m_unit
 
-		SchemaUnit m_unit;			// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+		SchemaUnit m_unit = SchemaUnit::Inch;	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 
-		double m_gridSize = 1.0;	// Grid size for this schema, depends on SchemaUnit
-		int m_pinGridStep = 2;		// Grid multiplier to determine vertical distance between pins
+		double m_gridSize = 1.0;				// Grid size for this schema, depends on SchemaUnit
+		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 
-		bool m_excludeFromBuild = false;	// Exclude Schema from build or any other processing
+		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
 	};
 
 
