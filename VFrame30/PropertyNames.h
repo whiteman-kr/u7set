@@ -51,6 +51,7 @@ namespace VFrame30
 		static const QString functionalCategory;
 		static const QString textCategory;
 		static const QString monitorCategory;
+		static const QString parametersCategory;
 	};
 
 }

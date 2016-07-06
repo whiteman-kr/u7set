@@ -34,13 +34,13 @@ class PropertyObject;
 void setCaption(QString value);
 //
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
-	addProperty<TYPE>(NAME, VISIBLE, \
+	addProperty<TYPE>(NAME, QString(), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
-	addProperty<TYPE>(NAME, VISIBLE, \
+	addProperty<TYPE>(NAME, QString(), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
@@ -262,38 +262,6 @@ public:
 			return true;
 		}
 
-		// Enum can be inside QVariant
-		//
-		if (m_value.isValid() == true)
-		{
-			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
-			if (mo == nullptr)
-			{
-				return false;
-			}
-
-			const char* typeName = m_value.typeName();
-			QString typeStr(typeName);
-			QStringRef typeNameRef(&typeStr);
-
-			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
-			if (doubleColumnIndex != -1)
-			{
-				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
-			}
-
-			int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
-
-			if (enumIndex == -1)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
-		}
-
 		return false;
 	}
 
@@ -324,52 +292,9 @@ private:
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override
 	{
-		std::list<std::pair<int, QString>> result;
-
-		if (std::is_enum<TYPE>::value == false &&
-			m_value.isValid() == true)
-		{
-			// Enum can be inside QVariant
-			//
-			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
-			if (mo == nullptr)
-			{
-				assert(mo);
-				return result;
-			}
-
-			const char* typeName = m_value.typeName();
-			QString typeStr(typeName);
-			QStringRef typeNameRef(&typeStr);
-
-			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
-			if (doubleColumnIndex != -1)
-			{
-				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
-			}
-
-			int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
-			if (enumIndex != -1)
-			{
-				QMetaEnum me = mo->enumerator(enumIndex);
-
-				if (me.isValid() == false)
-				{
-					assert(me.isValid() == true);
-					return result;
-				}
-
-				int keyCount = me.keyCount();
-				for (int i = 0; i < keyCount; i++)
-				{
-					result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
-				}
-			}
-
-			return result;
-		}
-
 		assert(std::is_enum<TYPE>::value == true);
+
+		std::list<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
@@ -395,10 +320,9 @@ public:
 			QVariant result(QVariant::fromValue(m_getter()));
 			return result;
 		}
-		else
-		{
-			return m_value;
-		}
+
+		assert(false);
+		return QVariant();
 	}
 
 	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
@@ -409,68 +333,22 @@ public:
 		}
 		else
 		{
-			//assert(m_value.type() == value.type());
-			m_value = QVariant::fromValue(value);
+			assert(false);
 		}
-
-		checkLimits();
 	}
 
 	void setValue(const QVariant& value) override	// Overriden from class Propery
 	{
-		if (m_setter)
+		if (!m_setter)
+		{
+			//assert(false);
+			qDebug() << "Set property value for property without Setter: " << caption();
+		}
+		else
 		{
 			assert(value.canConvert<TYPE>());
 			m_setter(value.value<TYPE>());
 		}
-		else
-		{
-			if (m_value.isValid() == false)
-			{
-				// It is initialization
-				//
-				m_value = value;
-				return;
-			}
-
-			if (value.canConvert<TYPE>() == true)
-			{
-				m_value.setValue(value.value<TYPE>());
-				checkLimits();
-				return;
-			}
-
-			if (value.canConvert(m_value.type()) == true)
-			{
-				QVariant v(value);
-
-				bool ok = v.convert(m_value.type());
-				assert(ok);
-				Q_UNUSED(ok);
-
-				m_value.setValue(v);
-				checkLimits();
-				return;
-			}
-
-			if (value.canConvert(m_value.userType()) == true)
-			{
-				QVariant v(value);
-
-				bool ok = v.convert(m_value.userType());
-				assert(ok);
-				Q_UNUSED(ok);
-
-				m_value.setValue(v);
-				checkLimits();
-				return;
-			}
-
-			assert(m_value.type() == value.type());
-			m_value.setValue(value.value<TYPE>());
-		}
-
-		checkLimits();
 	}
 
 	virtual void setEnumValue(int value) override	// Overriden from class Propery
@@ -494,7 +372,7 @@ private:
 		}
 		else
 		{
-			m_value = QVariant::fromValue(static_cast<TYPE>(value));
+			assert(false);
 		}
 	}
 	template <typename NON_ENUM>
@@ -521,75 +399,33 @@ private:
 		assert(false);
 	}
 
-private:
-
-	void checkLimits()
-	{
-		if (lowLimit().isValid() == true)
-		{
-			if (m_getter)
-			{
-				// Setter suppose to check limits
-				//
-			}
-			else
-			{
-				// Theres is no setter or getter, it is specific property
-				//
-				assert(m_lowLimit.type() == m_value.type());
-
-				if (m_value < m_lowLimit)
-				{
-					m_value = m_lowLimit;
-				}
-			}
-		}
-
-		if (highLimit().isValid() == true)
-		{
-			if (m_getter)
-			{
-				// Setter suppose to check limits
-				//
-			}
-			else
-			{
-				// Theres is no setter or getter, it is specific property
-				//
-				assert(m_highLimit.type() == m_value.type());
-
-				if (m_value > m_highLimit)
-				{
-					m_value = m_highLimit;
-				}
-			}
-		}
-	}
-
 public:
-
-	void setLimits(const QVariant& low, const QVariant& high)
+	virtual const QVariant& lowLimit() const override
 	{
-		setLowLimit(low);
-		setHighLimit(high);
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+static QVariant staticQVariant;
+		return staticQVariant;
+	}
+	virtual void setLowLimit(const QVariant&) override
+	{
+		// Limits must be checked in getter/setter
+		assert(false);
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& highLimit() const override
 	{
-		return m_lowLimit;
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+static QVariant staticQVariant;
+		return staticQVariant;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant&) override
 	{
-		m_lowLimit = value;
-	}
-
-	const QVariant& highLimit() const
-	{
-		return m_highLimit;
-	}
-	void setHighLimit(const QVariant& value)
-	{
-		m_highLimit = value;
+		// Limits must be checked in getter/setter
+		assert(false);
 	}
 
 	void setGetter(const std::function<TYPE(void)>& getter)
@@ -631,11 +467,345 @@ public:
 			setValue(presetProperty->value());
 		}
 
+		// Do not copy m_getter/m_setter, because the yare binded to own object instances
+		//
+		return;
+	}
+
+private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
+	std::function<TYPE(void)> m_getter;
+	std::function<void(TYPE)> m_setter;
+};
+
+
+//
+//
+//			Class PropertyValue
+//
+//
+class PropertyValueNoGetterSetter : public Property
+{
+public:
+	PropertyValueNoGetterSetter()
+	{
+	}
+
+	virtual ~PropertyValueNoGetterSetter()
+	{
+	}
+
+public:
+	virtual bool isEnum() const override
+	{
+		if (m_value.isValid() == false)
+		{
+			return false;
+		}
+
+		// Enum can be inside QVariant
+		//
+		const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+		if (mo == nullptr)
+		{
+			return false;
+		}
+
+		const char* typeName = m_value.typeName();
+		QString typeStr(typeName);
+		QStringRef typeNameRef(&typeStr);
+
+		int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+		if (doubleColumnIndex != -1)
+		{
+			typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
+		}
+
+		int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
+
+		if (enumIndex == -1)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+//	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
+//	// Example is in question:
+//	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
+//	//
+//private:
+//	template <bool> struct enumness {};
+//	typedef enumness<true> enum_tag;
+//	typedef enumness<false> non_enum_tag;
+
+//	template <typename ENUM>
+//	const QMetaEnum metaEnum(enum_tag) const
+//	{
+//		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
+//		return me;
+//	}
+
+//	template <typename NOT_ENUM>
+//	const QMetaEnum metaEnum(non_enum_tag) const
+//	{
+//		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+//		return QMetaEnum();
+//	}
+
+public:
+	virtual std::list<std::pair<int, QString>> enumValues() const override
+	{
+		std::list<std::pair<int, QString>> result;
+
+		if (isEnum() == false)
+		{
+			assert(isEnum());
+			return result;
+		}
+
+		if (m_value.isValid() == true)
+		{
+			// Enum can be inside QVariant
+			//
+			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+			if (mo == nullptr)
+			{
+				assert(mo);
+				return result;
+			}
+
+			const char* typeName = m_value.typeName();
+			QString typeStr(typeName);
+			QStringRef typeNameRef(&typeStr);
+
+			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+			if (doubleColumnIndex != -1)
+			{
+				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
+			}
+
+			int enumIndex = mo->indexOfEnumerator(typeNameRef.toLocal8Bit());
+			if (enumIndex != -1)
+			{
+				QMetaEnum me = mo->enumerator(enumIndex);
+
+				if (me.isValid() == false)
+				{
+					assert(me.isValid() == true);
+					return result;
+				}
+
+				int keyCount = me.keyCount();
+				for (int i = 0; i < keyCount; i++)
+				{
+					result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+				}
+			}
+		}
+
+		return result;
+	}
+
+public:
+	virtual QVariant value() const override
+	{
+		return m_value;
+	}
+
+	void setValue(const QVariant& value) override	// Overriden from class Propery
+	{
+		if (m_value.isValid() == false)
+		{
+			// It is initialization
+			//
+			m_value = value;
+			return;
+		}
+
+		if (value.canConvert(m_value.type()) == true)
+		{
+			QVariant v(value);
+
+			bool ok = v.convert(m_value.type());
+			assert(ok);
+			Q_UNUSED(ok);
+
+			m_value.setValue(v);
+
+			checkLimits();
+			return;
+		}
+
+		if (value.canConvert(m_value.userType()) == true)
+		{
+			QVariant v(value);
+
+			bool ok = v.convert(m_value.userType());
+			assert(ok);
+			Q_UNUSED(ok);
+
+			m_value.setValue(v);
+			checkLimits();
+			return;
+		}
+
+		assert(m_value.type() == value.type());
+
+		m_value = value;
+
+		checkLimits();
+	}
+
+	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	{
+		// cannot implement it now, but it's possible
+		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
+		// QVariant::canConvert from int to enum returns false (for QString its ok)
+		// Possible approch is get
+		//
+		m_value.d.data.i = value;	// hack
+		return;
+	}
+
+	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	{
+		QVariant v(value);
+
+		if (v.canConvert(m_value.userType()) == true)
+		{
+			QVariant v(value);
+
+			bool ok = v.convert(m_value.userType());
+			assert(ok);
+			Q_UNUSED(ok);
+
+			m_value.setValue(v);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+private:
+//	template <typename ENUM>
+//	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
+//	{
+//		m_value = QVariant::fromValue(static_cast<TYPE>(value));
+//	}
+////	template <typename NON_ENUM>
+////	void setEnumValueInternal(int value, non_enum_tag)
+////	{
+////		Q_UNUSED(value)
+////		assert(false);
+////	}
+
+//	template <typename ENUM>
+//	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
+//	{
+//		assert(std::is_enum<TYPE>::value == true);
+
+//		QVariant v(value);
+//		setValue(v);
+
+//		return;
+//	}
+//	template <typename NON_ENUM>
+//	void setEnumValueInternal(const char* value, non_enum_tag)
+//	{
+//		Q_UNUSED(value)
+//		assert(false);
+//	}
+
+private:
+
+	void checkLimits()
+	{
+		if (lowLimit().isValid() == true)
+		{
+			assert(m_lowLimit.type() == m_value.type());
+
+			if (m_value < m_lowLimit)
+			{
+				m_value = m_lowLimit;
+			}
+		}
+
+		if (highLimit().isValid() == true)
+		{
+			assert(m_highLimit.type() == m_value.type());
+
+			if (m_value > m_highLimit)
+			{
+				m_value = m_highLimit;
+			}
+		}
+	}
+
+public:
+
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		setLowLimit(low);
+		setHighLimit(high);
+	}
+
+	const QVariant& lowLimit() const
+	{
+		return m_lowLimit;
+	}
+	void setLowLimit(const QVariant& value)
+	{
+		m_lowLimit = value;
+	}
+
+	const QVariant& highLimit() const
+	{
+		return m_highLimit;
+	}
+	void setHighLimit(const QVariant& value)
+	{
+		m_highLimit = value;
+	}
+
+	virtual bool isTheSameType(Property* property) override
+	{
+		if (dynamic_cast<PropertyValueNoGetterSetter*>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+
+		PropertyValueNoGetterSetter* source = dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty);
+		assert(source);
+
+		if (updateValue == true)
+		{
+			m_value = source->m_value;
+		}
+
 		m_lowLimit = source->m_lowLimit;
 		m_highLimit = source->m_highLimit;
 
-		// Do not copy m_getter/m_setter, because the yare binded to own object instances
-		//
 		return;
 	}
 
@@ -645,9 +815,6 @@ private:
 	QVariant m_value;
 	QVariant m_lowLimit;
 	QVariant m_highLimit;
-
-	std::function<TYPE(void)> m_getter;
-	std::function<void(TYPE)> m_setter;
 };
 
 
@@ -839,6 +1006,14 @@ public:
 	{
 	}
 
+	PropertyObject(const PropertyObject& src) :
+		QObject(src.parent())
+	{
+		// Shallow copy of properties
+		//
+		m_properties = src.m_properties;
+	}
+
 	virtual ~PropertyObject()
 	{
 	}
@@ -853,41 +1028,17 @@ public:
 	//
 	template <typename TYPE>
 	PropertyValue<TYPE>* addProperty(const QString& caption,
-									 bool visible = false,
-									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
+									 const QString& category,
+									 bool visible,
+									 std::function<TYPE(void)> getter,
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
-		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
-
-		uint hash = qHash(caption);
-
-		property->setCaption(caption);
-		property->setVisible(visible);
-		property->setGetter(getter);
-		property->setSetter(setter);
-
 		if (!getter)
 		{
-			property->setValue(QVariant::fromValue(TYPE()));
+			assert(getter);
+			return nullptr;
 		}
 
-		if (!setter)
-		{
-			property->setReadOnly(true);
-		}
-
-		m_properties[hash] = property;
-
-		return property.get();
-	}
-
-	template <typename TYPE>
-	PropertyValue<TYPE>* addProperty(const QString& caption,
-									 const QString& category,
-									 bool visible = false,
-									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
-									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
-	{
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		uint hash = qHash(caption);
@@ -898,15 +1049,31 @@ public:
 		property->setGetter(getter);
 		property->setSetter(setter);
 
-		if (!getter)
+		if (setter)
 		{
-			property->setValue(QVariant::fromValue(TYPE()));
+			property->setValueDirect(TYPE());
 		}
-
-		if (!setter)
+		else
 		{
 			property->setReadOnly(true);
 		}
+
+		m_properties[hash] = property;
+
+		return property.get();
+	}
+
+	PropertyValueNoGetterSetter* addProperty(const QString& caption,
+											 const QString& category,
+											 bool visible)
+	{
+		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
+
+		uint hash = qHash(caption);
+
+		property->setCaption(caption);
+		property->setCategory(category);
+		property->setVisible(visible);
 
 		m_properties[hash] = property;
 
@@ -965,6 +1132,13 @@ public:
 		return result;
 	}
 
+	Q_INVOKABLE bool propertyExists(const QString& caption) const
+	{
+		uint hash = qHash(caption);
+		auto it = m_properties.find(hash);
+		return it != m_properties.end();
+	}
+
 	void removeAllProperties()
 	{
 		m_properties.clear();
@@ -977,22 +1151,7 @@ public:
 		return removed > 0;
 	}
 
-	// Add properties
-	// 1. If properties have getter or setter the must be added via PropertyObject::addProperty
-	// because getter and setter are binded to this
-	// 2. It is posible to use addProperties with getter and setter properties
-	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
-	//
-	void addProperties(std::vector<std::shared_ptr<Property>> properties)
-	{
-		for (std::shared_ptr<Property> p : properties)
-		{
-			uint hash = qHash(p->caption());
-			m_properties[hash] = p;
-		}
-	}
-
-	// Delete all deynamic properties
+	// Delete all specific properties
 	//
 	void removeSpecificProperties()
 	{
@@ -1009,12 +1168,22 @@ public:
 		}
 	}
 
-	Q_INVOKABLE bool propertyExists(const QString& caption) const
+
+	// Add properties
+	// 1. If properties have getter or setter they must be added via PropertyObject::addProperty
+	// because getter and setter are binded to this
+	// 2. It is posible to use addProperties with getter and setter properties
+	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
+	//
+	void addProperties(std::vector<std::shared_ptr<Property>> properties)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-		return it != m_properties.end();
+		for (std::shared_ptr<Property> p : properties)
+		{
+			uint hash = qHash(p->caption());
+			m_properties[hash] = p;
+		}
 	}
+
 
     // Get specific property by its caption,
 	// return Property* or nullptr if property is not found
@@ -1049,8 +1218,6 @@ public:
 		return result;
 	}
 
-    // Get property value
-	//
 	Q_INVOKABLE QVariant propertyValue(const QString& caption) const
 	{
 		uint hash = qHash(caption);
@@ -1079,7 +1246,7 @@ public:
 			return false;
 		}
 
-		std::shared_ptr<Property> property = it->second;
+		Property* property = it->second.get();
 
 		if (property->isEnum() == true)
 		{
@@ -1090,15 +1257,17 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property.get());
+			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
 
-			if (propertyValue == nullptr)
+			if (propertyValue != nullptr)
 			{
-				assert(propertyValue);
-				return false;
+				propertyValue->setValueDirect(value);
+			}
+			else
+			{
+				property->setValue(QVariant::fromValue(value));
 			}
 
-			propertyValue->setValueDirect(value);
 			return true;
 		}
 
@@ -1154,6 +1323,7 @@ public:
 
 		return true;
 	}
+
 	std::list<std::pair<int, QString>> enumValues(const QString& property)
 	{
 		std::list<std::pair<int, QString>> result;

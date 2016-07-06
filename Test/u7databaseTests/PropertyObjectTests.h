@@ -15,6 +15,7 @@ private slots:
 	void initTestCase();
 	void cleanupTestCase();
 
+	void testMethods();
 	void testSttaticProperties();
 	void testDynamicProperties();
 

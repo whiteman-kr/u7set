@@ -574,12 +574,11 @@ namespace VFrame30
 
 			QVariant value = p.value();
 
-			auto prop = this->addProperty<QVariant>(p.caption(),true);
+			auto prop = this->addProperty(p.caption(), PropertyNames::parametersCategory, true);
 
 			prop->setValue(value);
 			prop->setReadOnly(false);
 			prop->setSpecific(true);
-			prop->setCategory(tr("Parameters"));
 			if (p.isAnalog())
 			{
 				prop->setLimits(p.lowLimit(), p.highLimit());
