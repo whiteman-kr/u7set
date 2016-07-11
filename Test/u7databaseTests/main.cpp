@@ -14,6 +14,7 @@
 #include "DbControllerUserManagementTests.h"
 #include "DbControllerFileManagementTests.h"
 #include "DbControllerSignalManagementTests.h"
+#include "DbControllerHardwareConfigurationTests.h"
 #include "../../lib/DbController.h"
 
 const int DatabaseProjectVersion = 82;
@@ -172,6 +173,7 @@ int main(int argc, char *argv[])
 		DbControllerUserTests dbControllerUserTests;
 		DbControllerFileTests dbControllerFileTests;
 		DbControllerSignalTests dbControllerSignalTests;
+		DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
 
 		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
 
@@ -254,6 +256,14 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " dbControllerSignal test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " dbControllerHardwareConfigurationTests test(s) has been interrupted by error(s)";
 			db.close();
 			throw testResult;
 		}
