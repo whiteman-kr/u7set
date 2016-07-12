@@ -78,7 +78,6 @@ SOURCES += MainWindow.cpp \
     ../lib/Tcp.cpp \
     ../Proto/network.pb.cc \
     ../lib/Signal.cpp \
-    ../lib/PropertyObject.cpp \
     ../Proto/serialization.pb.cc \
     ../lib/AppSignalState.cpp \
     ../lib/DeviceObject.cpp \

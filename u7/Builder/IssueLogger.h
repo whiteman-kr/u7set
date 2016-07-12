@@ -111,6 +111,7 @@ namespace Builder
 		//
 		void errALP4030(QString schema, QString schemaItem, QUuid itemUuid);
 		void errALP4031(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4032(QString schema, const std::vector<QUuid>& itemsUuids);
 
 		// ALC			Application logic compiler				5000-5999
 		//

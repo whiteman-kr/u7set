@@ -299,7 +299,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
-	qDebug() << object->caption() << " has children = " << hasChildren;
+	//qDebug() << object->caption() << " has children = " << hasChildren;
 
 	return hasChildren;
 }

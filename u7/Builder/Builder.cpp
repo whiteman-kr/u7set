@@ -44,6 +44,9 @@ namespace Builder
 		m_log->startStrLogging();
 		m_log->clearItemsIssues();
 
+		GlobalMessanger::instance()->clearBuildSchemaIssues();
+		GlobalMessanger::instance()->clearSchemaItemRunOrder();
+
 		// Create database controller and open project
 		//
 		DbController db;
@@ -239,7 +242,7 @@ namespace Builder
 			//
 			AppLogicData appLogicData;
 
-			parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, lastChangesetId);
+			parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, &signalSet, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -682,22 +685,27 @@ namespace Builder
 												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
 												  Hardware::EquipmentSet* equipment,
+												  SignalSet* signalSet,
 												  int changesetId)
 	{
 		if (db == nullptr ||
 			appLogicData == nullptr ||
-			afbCollection == nullptr)
+			afbCollection == nullptr ||
+			equipment == nullptr ||
+			signalSet == nullptr)
 		{
 			assert(db);
 			assert(appLogicData);
 			assert(afbCollection);
+			assert(equipment);
+			assert(signalSet);
 			return false;
 		}
 
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic parsing..."));
 
-		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, changesetId, debug()};
+		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, signalSet, changesetId, debug()};
 
 		bool result = alPareser.build();
 

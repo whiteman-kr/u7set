@@ -152,7 +152,6 @@ SOURCES += \
 	MonitorSchema.cpp \
     ../lib/DbStruct.cpp \
     Afb.cpp \
-	../lib/PropertyObject.cpp \
     Schema.cpp \
     LogicSchema.cpp \
     WiringSchema.cpp \

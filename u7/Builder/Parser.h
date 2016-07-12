@@ -1,6 +1,7 @@
 #ifndef APPLOGICBUILDER_H
 #define APPLOGICBUILDER_H
 
+#include "../lib/Signal.h"
 #include "../../VFrame30/SchemaItem.h"
 #include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
@@ -147,6 +148,10 @@ namespace Builder
 			Iter end,
 			const QUuid& inputGuid);
 
+		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
+									BushContainer* busheContainer,
+									IssueLogger* log);
+
 	public:
 		QString moduleEquipmentId() const;
 		void setModuleEquipmentId(QString value);
@@ -176,10 +181,10 @@ namespace Builder
 		// Public methods
 		//
 	public:
-		bool addData(const BushContainer& bushContainer,
-			std::shared_ptr<VFrame30::LogicSchema> schema,
-			std::shared_ptr<VFrame30::SchemaLayer> layer,
-			IssueLogger* log);
+		bool addData(QString equipmentId,
+					 const BushContainer& bushContainer,
+					 std::shared_ptr<VFrame30::LogicSchema> schema,
+					 IssueLogger* log);
 
 		bool orderItems(IssueLogger* log);
 
@@ -210,6 +215,7 @@ namespace Builder
 			   AppLogicData* appLogicData,
 			   Afb::AfbElementCollection* afbCollection,
 			   Hardware::EquipmentSet* equipmentSet,
+			   SignalSet* signalSet,
 			   int changesetId,
 			   bool debug);
 
@@ -227,6 +233,10 @@ namespace Builder
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 								  std::shared_ptr<VFrame30::SchemaLayer> layer);
+
+		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> schema,
+									std::shared_ptr<VFrame30::SchemaLayer> layer,
+									QString equipmentId);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
@@ -262,6 +272,7 @@ namespace Builder
 		AppLogicData* m_applicationData = nullptr;
 		Afb::AfbElementCollection* m_afbCollection = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
+		SignalSet* m_signalSet = nullptr;
 	};
 
 }

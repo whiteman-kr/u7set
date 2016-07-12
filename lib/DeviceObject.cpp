@@ -197,7 +197,7 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 			if (p->specific() == true)
 			{
 				::Proto::Property* protoProp = mutableDeviceObject->mutable_properties()->Add();
-				p->saveValue(protoProp);
+				Proto::saveProperty(protoProp, p);
 			}
 		}
 
@@ -273,12 +273,12 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 				assert(property->specific() == true);	// it's suppose to be specific property;
 
-				bool loadOk = property->loadValue(p);
+
+				bool loadOk = Proto::loadProperty(p, property);
 
 				Q_UNUSED(loadOk);
 				assert(loadOk);
 			}
-
 		}
 
 		// --
@@ -389,7 +389,7 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		oldProperties.erase(std::remove_if(oldProperties.begin(), oldProperties.end(),
 			[](std::shared_ptr<Property> p)
 			{
-				return p->specific();
+				return p->specific() == false;
 			}), oldProperties.end());
 
 		// Delete all previous object's specific properties
@@ -438,33 +438,30 @@ static const QString presetNameCaption("PresetName");	// Optimization
 			QString strVersion(columns[0]);
 			bool ok = false;
 			int version = strVersion.toInt(&ok);
-			if (ok == false || version < 1)
+
+			if (ok == false)
 			{
-				qDebug() << Q_FUNC_INFO << " SpecificProperties: version should be greater than 0: " << strVersion;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: failed to parse specific prop version filed: " << r;
 				continue;
 			}
 
-			if (version > 2)
+			switch (version)
 			{
-				qDebug() << Q_FUNC_INFO << " SpecificProperties: Unsupported property version: " << version;
-				continue;
-			}
-
-			if (version == 1)
-			{
+			case 1:
 				parseSpecificPropertieyStructV1(columns);
-			}
-
-			if (version == 2)
-			{
+				break;
+			case 2:
 				parseSpecificPropertieyStructV2(columns);
+				break;
+			default:
+				assert(false);
+				qDebug() << "Object " << this->equipmentId() << " has spec prop with unsuported version: " << r;
 			}
-
 		}
 
 		// Set to parsed properties old value
 		//
-		auto newProperties = properties();
+		std::vector<std::shared_ptr<Property>> newProperties = properties();
 
 		for (std::shared_ptr<Property> p : oldProperties)
 		{
@@ -475,7 +472,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 				}
 				);
 
-			if (it != newProperties.end() && (*it)->value().type() == p->value().type())
+			if (it != newProperties.end() &&
+				(*it)->value().type() == p->value().type() &&
+				p != (*it))
 			{
 				setPropertyValue(p->caption(), p->value());
 			}
@@ -490,7 +489,7 @@ static const QString presetNameCaption("PresetName");	// Optimization
 	}
 
 
-	void DeviceObject::parseSpecificPropertieyStructV1(const QStringList &columns)
+	void DeviceObject::parseSpecificPropertieyStructV1(const QStringList& columns)
 	{
 		if (columns.count() != 9)
 		{
@@ -559,10 +558,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
 			newProperty->setValue(QVariant(defaultInt));
 			newProperty->setReadOnly(false);
@@ -597,10 +595,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
 			newProperty->setValue(QVariant(defaultUInt));
 			newProperty->setReadOnly(false);
@@ -635,10 +632,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
 			newProperty->setValue(QVariant(defaultDouble));
 			newProperty->setReadOnly(false);
@@ -656,10 +652,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(QVariant(defaultBool));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
@@ -676,11 +671,10 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 			newProperty->setValue(QVariant::fromValue(E::Channel::A));
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(defaultString.toStdString().c_str());
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
@@ -693,10 +687,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(QVariant(defaultValue.toString()));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
@@ -782,10 +775,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
 			newProperty->setValue(QVariant(defaultInt));
 			newProperty->setReadOnly(false);
@@ -822,10 +814,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
 			newProperty->setValue(QVariant(defaultUInt));
 			newProperty->setReadOnly(false);
@@ -862,10 +853,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
 			newProperty->setValue(QVariant(defaultDouble));
 			newProperty->setReadOnly(false);
@@ -885,10 +875,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(QVariant(defaultBool));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
@@ -907,11 +896,10 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 			newProperty->setValue(QVariant::fromValue(E::Channel::A));
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(defaultString.toStdString().c_str());
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
@@ -926,10 +914,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty<QVariant>(name, true);
+			auto newProperty = addProperty(name, category, true);
 
 			newProperty->setSpecific(true);
-			newProperty->setCategory(category);
 			newProperty->setValue(QVariant(defaultValue.toString()));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);

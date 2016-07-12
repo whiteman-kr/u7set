@@ -19,7 +19,6 @@ SOURCES +=\
 	../lib/DeviceHelper.cpp \
 	../lib/XmlHelper.cpp \
 	../lib/DeviceObject.cpp \
-	../lib/PropertyObject.cpp \
 	../lib/OutputLog.cpp \
 	../lib/DbStruct.cpp \
 	../Proto/serialization.pb.cc \

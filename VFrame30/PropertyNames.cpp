@@ -43,5 +43,5 @@ const QString PropertyNames::appearanceCategory("Appearance");
 const QString PropertyNames::functionalCategory("Functional");
 const QString PropertyNames::textCategory("Text");
 const QString PropertyNames::monitorCategory("Monitor");
-
+const QString PropertyNames::parametersCategory("Parameters");
 }
