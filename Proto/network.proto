@@ -136,4 +136,33 @@ message GetUnitsReply
     repeated Unit units = 2;
 }
 
+// Get Service Info
+//
+
+message GetServiceInfoRequest
+{
+}
+
+message ServiceInfo
+{
+    optional int32 type = 1 [default = 0];	    // ServiceType::BaseService
+    optional int32 majorVersion = 2 [default = 0];
+    optional int32 minorVersion = 3 [default = 0];
+    optional int32 buildNo = 4 [default = 0];
+    optional uint32 crc = 5 [default = 0];
+    optional int64 uptime = 6 [default = 0];
+    optional int32 serviceState = 7 [default = 0];    // ServiceState::Undefined;
+    optional int64 serviceUptime = 8 [default = 0];
+
+    optional uint32 clientRequestIP = 9 [default = 0];
+    optional int32 clientRequestPort = 10 [default = 0];
+}
+
+message GetServiceInfoReply
+{
+    required int32 error = 1;
+    required ServiceInfo serviceInfo = 2;
+}
+
+
 

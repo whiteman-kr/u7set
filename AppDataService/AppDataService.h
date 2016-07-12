@@ -79,7 +79,7 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
-	virtual void getServiceSpecificInfo(ServiceInformation& serviceInfo) override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
 
 public:
 	AppDataServiceWorker(const QString& serviceStrID,

@@ -363,6 +363,17 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 
 	rupFrame.header.reverseBytes();
 
+	if (rupFrame.header.dataId != m_lmDataID)
+	{
+		m_errorDataID++;
+
+		if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
+		{
+			qDebug() << "Wrong DataID, packet processing skiped" << m_errorDataID;
+		}
+		return;
+	}
+
 	int framesQuantity = rupFrame.header.framesQuantity;
 
 	if (framesQuantity > RUP_MAX_FRAME_COUNT)

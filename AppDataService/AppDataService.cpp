@@ -28,9 +28,10 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
-void AppDataServiceWorker::getServiceSpecificInfo(ServiceInformation& serviceInfo)
+void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 {
-	serviceInfo.clientRequestIP = m_settings.clientRequestIP;
+	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_settings.clientRequestIP.port());
 }
 
 

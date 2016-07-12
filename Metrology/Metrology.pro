@@ -92,7 +92,8 @@ SOURCES += \
     MeasureSignalBase.cpp \
     ../lib/SocketIO.cpp \
     ../lib/PropertyObject.cpp \
-    ../lib/XmlHelper.cpp
+    ../lib/XmlHelper.cpp \
+    ../lib/HostAddressPort.cpp
 
 
 HEADERS  += \
@@ -133,7 +134,8 @@ HEADERS  += \
     MeasureSignalBase.h \
     ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
-    ../lib/XmlHelper.h
+    ../lib/XmlHelper.h \
+    ../lib/HostAddressPort.h
 
 
 FORMS    +=

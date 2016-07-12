@@ -7,6 +7,7 @@
 
 #include "../lib/BuildInfo.h"
 #include "../lib/JsonSerializable.h"
+#include "../lib/HostAddressPort.h"
 
 
 const int MAX_DATAGRAM_SIZE = 4096;
@@ -71,8 +72,6 @@ const quint32	RQID_GET_CONFIGURATION_SERVICE_INFO = 1300,
 				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1302;
 
 
-
-
 // Request error codes
 //
 const quint32	RQERROR_OK = 0,
@@ -81,112 +80,6 @@ const quint32	RQERROR_OK = 0,
 				RQERROR_RECEIVE_FILE = 3,				// file receive error on receiver side
 				RQERROR_TIMEOUT = 4;					// request ack timeout
 
-
-
-
-class HostAddressPort
-{
-private:
-	QHostAddress m_hostAddress;
-	quint16 m_port = 0;
-
-public:
-	HostAddressPort() {}
-
-	explicit HostAddressPort(const QHostAddress& addr, quint16 port)
-	{
-		m_hostAddress = addr;
-		m_port = port;
-	}
-
-	explicit HostAddressPort(quint32 ip4Addr, quint16 port)
-	{
-		m_hostAddress.setAddress(ip4Addr);
-		m_port = port;
-	}
-
-	explicit HostAddressPort(quint8 *ip6Addr, quint16 port)
-	{
-		m_hostAddress.setAddress(ip6Addr);
-		m_port = port;
-	}
-
-	explicit HostAddressPort(const Q_IPV6ADDR &ip6Addr, quint16 port)
-	{
-		m_hostAddress.setAddress(ip6Addr);
-		m_port = port;
-	}
-
-	explicit HostAddressPort(const sockaddr *sockaddr, quint16 port)
-	{
-		m_hostAddress.setAddress(sockaddr);
-		m_port = port;
-	}
-
-	explicit HostAddressPort(const QString &address, quint16 port)
-	{
-		m_hostAddress.setAddress(address);
-		m_port = port;
-	}
-
-	HostAddressPort(const HostAddressPort &copy)
-	{
-		m_hostAddress = copy.m_hostAddress;
-		m_port = copy.m_port;
-	}
-
-	HostAddressPort &operator=(const HostAddressPort &other)
-	{
-		m_hostAddress = other.m_hostAddress;
-		m_port = other.m_port;
-
-		return *this;
-	}
-
-	void setAddress(quint32 ip4Addr)
-	{
-		m_hostAddress.setAddress(ip4Addr);
-	}
-
-	void setAddress(quint8 *ip6Addr)
-	{
-		m_hostAddress.setAddress(ip6Addr);
-	}
-
-	void setAddress(const Q_IPV6ADDR &ip6Addr)
-	{
-		m_hostAddress.setAddress(ip6Addr);
-	}
-
-	void setAddress(const sockaddr *sockaddr)
-	{
-		m_hostAddress.setAddress(sockaddr);
-	}
-
-	bool setAddress(const QString &address)
-	{
-		return m_hostAddress.setAddress(address);
-	}
-
-	void setPort(quint16 port)
-	{
-		m_port = port;
-	}
-
-	quint32 address32() const { return m_hostAddress.toIPv4Address(); }
-	QHostAddress address() const { return m_hostAddress; }
-
-	quint16 port() const { return m_port; }
-
-	QString addressPortStr() const { return QString("%1:%2").arg(address().toString()).arg(port()); }
-	QString addressStr() const { return QString("%1").arg(address().toString()); }
-
-	void clear()
-	{
-		m_hostAddress.setAddress(static_cast<quint32>(0));
-		m_port = 0;
-	}
-};
 
 
 #pragma pack(push, 1)
@@ -232,31 +125,6 @@ enum ServiceState
 
 	Undefined,			// this states used by 'Service Control Manager' only
 	Unavailable,
-};
-
-
-struct ServiceInformation
-{
-	ServiceType type = ServiceType::BaseService;
-	quint32 majorVersion = 0;
-	quint32 minorVersion = 0;
-	quint32 buildNo = 0;
-	quint32 crc = 0;
-	quint64 uptime = 0;
-	ServiceState serviceState = ServiceState::Undefined;
-	quint32 serviceUptime = 0;
-
-	// Services specific information
-	//
-	HostAddressPort clientRequestIP;
-};
-
-
-struct AckGetServiceInfo
-{
-	RequestHeader header;
-
-	ServiceInformation serviceInfo;
 };
 
 

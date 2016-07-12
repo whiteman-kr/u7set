@@ -325,9 +325,9 @@ void Service::onBaseRequest(UdpRequest request)
 	{
 		case RQID_SERVICE_GET_INFO:
 		{
-			ServiceInformation si;
+			Network::ServiceInfo si;
 			getServiceInfo(si);
-			ack.writeData(reinterpret_cast<const char*>(&si), sizeof(si));
+			ack.writeData(si);
 			break;
 		}
 
@@ -379,18 +379,18 @@ void Service::onTimer500ms()
 }
 
 
-void Service::getServiceInfo(ServiceInformation &serviceInfo)
+void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
 	QMutexLocker locker(&m_mutex);
 
-	serviceInfo.type = m_type;
-	serviceInfo.majorVersion = m_majorVersion;
-	serviceInfo.minorVersion = m_minorVersion;
-	serviceInfo.buildNo = m_buildNo;
-	serviceInfo.crc = m_crc;
-	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_startTime) / 1000;
+	serviceInfo.set_type(TO_INT(m_type));
+	serviceInfo.set_majorversion(m_majorVersion);
+	serviceInfo.set_minorversion(m_minorVersion);
+	serviceInfo.set_buildno(m_buildNo);
+	serviceInfo.set_crc(m_crc);
+	serviceInfo.set_uptime((QDateTime::currentMSecsSinceEpoch() - m_startTime) / 1000);
 
-	serviceInfo.serviceState = m_state;
+	serviceInfo.set_servicestate(TO_INT(m_state));
 
 	if (m_serviceWorker != nullptr)
 	{
@@ -399,11 +399,11 @@ void Service::getServiceInfo(ServiceInformation &serviceInfo)
 
 	if (m_state != ServiceState::Stopped)
 	{
-		serviceInfo.serviceUptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
+		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
 	}
 	else
 	{
-		serviceInfo.serviceUptime = 0;
+		serviceInfo.set_serviceuptime(0);
 	}
 }
 

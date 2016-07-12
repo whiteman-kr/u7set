@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_serviceModel(new ServiceTableModel(this)),
 	m_serviceTable(new QTableView(this))
 {
-	qRegisterMetaType<ServiceInformation>("ServiceInformation");
+	qRegisterMetaType<Network::ServiceInfo>("ServiceInformation");
 
 	m_serviceTable->setModel(m_serviceModel);
 	connect(m_serviceModel, &ServiceTableModel::dataChanged, m_serviceTable, &QTableView::resizeColumnsToContents);

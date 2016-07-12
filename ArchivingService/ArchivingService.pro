@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core
-
+QT	+= network
 QT       -= gui
 
 TARGET = ArchSrv
@@ -24,35 +24,37 @@ unix:system([ -e ./version.h ] || touch ./version.h)
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-        contains(QMAKE_TARGET.arch, x86_64){
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/ArchivingService.pro
-        }
-        else{
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/ArchivingService.pro
-        }
+	contains(QMAKE_TARGET.arch, x86_64){
+	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+	    nmake & \
+	    chdir $$PWD & \
+	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/ArchivingService.pro
+	}
+	else{
+	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+	    nmake & \
+	    chdir $$PWD & \
+	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/ArchivingService.pro
+	}
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/ArchivingService.pro
+	qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+	make; \
+	cd $$PWD; \
+	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/ArchivingService.pro
 }
 PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../lib/HostAddressPort.cpp
 
 HEADERS += \
-    version.h
+    version.h \
+    ../lib/HostAddressPort.h
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

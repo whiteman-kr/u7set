@@ -173,7 +173,8 @@ SOURCES +=\
     ../lib/WUtils.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
-    Builder/ModuleFirmwareWriter.cpp
+    Builder/ModuleFirmwareWriter.cpp \
+    ../lib/HostAddressPort.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -275,7 +276,8 @@ HEADERS  += \
     DialogChoosePreset.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/DataProtocols.h \
-    Builder/ModuleFirmwareWriter.h
+    Builder/ModuleFirmwareWriter.h \
+    ../lib/HostAddressPort.h
 
 FORMS    += \
     ChangesetDialog.ui \

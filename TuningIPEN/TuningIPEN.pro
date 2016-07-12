@@ -46,7 +46,9 @@ SOURCES +=\
     ../lib/WUtils.cpp \
     TuningIPENService.cpp \
     ../TuningService/TuningDataStorage.cpp \
-    ../u7/Builder/IssueLogger.cpp
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -79,7 +81,9 @@ HEADERS  += TuningMainWindow.h \
     ../lib/WUtils.h \
     TuningIPENService.h \
     ../TuningService/TuningDataStorage.h \
-    ../u7/Builder/IssueLogger.h
+    ../u7/Builder/IssueLogger.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h
 
 include(../qtservice/src/qtservice.pri)
 
