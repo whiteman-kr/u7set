@@ -8,13 +8,21 @@ QT       += core sql testlib network qml widgets
 QT       -= gui
 
 TARGET = u7databasetests
-CONFIG   += console
+CONFIG   += console coverage
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 DEFINES += Q_CONSOLE_APP
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
+
+# Use this flags for code coverage info
+
+QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage
+
+LIBS += \
+-lgcov
 
 # DESTDIR
 #
@@ -57,7 +65,8 @@ SOURCES += main.cpp \
     ../../lib/WUtils.cpp \
     ../../lib/DataProtocols.cpp \
     ../../lib/Crc.cpp \
-    DbControllerSignalManagementTests.cpp
+    DbControllerSignalManagementTests.cpp \
+    DbControllerHardwareConfigurationTests.cpp
 
 HEADERS += \
     UserTests.h \
@@ -89,7 +98,8 @@ HEADERS += \
     ../../lib/WUtils.h \
     ../../lib/DataProtocols.h \
     ../../lib/Crc.h \
-    DbControllerSignalManagementTests.h
+    DbControllerSignalManagementTests.h \
+    DbControllerHardwareConfigurationTests.h
 
 #c++11 support for GCC
 #
