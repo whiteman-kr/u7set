@@ -6,6 +6,8 @@
 #include <QXmlStreamWriter>
 #include <cassert>
 
+#include <../lib/Types.h>
+
 namespace Builder
 {
 
@@ -26,16 +28,20 @@ namespace Builder
 		void readFromXml(QXmlStreamReader& xmlReader);
 	};
 
+
 	struct BuildFileInfo
 	{
-		QString pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
-		QString tag;				// file tag
-		QString ID;					// file ID
-		qint64 size = 0;			// size of file
-		QString md5;				// MD5 hash of file
+		QString pathFileName;			// path and file name from build root directory, like "/subdir/filename.xml"
+		QString tag;					// file tag
+		QString ID;						// file ID
+		qint64 size = 0;				// size of file
+		QString md5;					// MD5 hash of file
+		QList<StringPair> metadata;		// metadata (pairs of strings)
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);
+
+		BuildFileInfo& operator = (const BuildFileInfo& bfi);
 	};
 
 }

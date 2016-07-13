@@ -66,6 +66,11 @@ namespace Builder
 		xmlWriter.writeAttribute("Size", QString::number(size));
 		xmlWriter.writeAttribute("MD5", md5);
 
+		for(const StringPair& pair : metadata)
+		{
+			xmlWriter.writeTextElement(pair.first, pair.second);
+		}
+
 		xmlWriter.writeEndElement();		// file
 	}
 
@@ -83,5 +88,43 @@ namespace Builder
 		tag = xmlReader.attributes().value("Tag").toString();
 		size = xmlReader.attributes().value("Size").toInt();
 		md5 = xmlReader.attributes().value("MD5").toString();
+
+		metadata.clear();
+
+		xmlReader.readNext();
+
+		while (!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == "File"))
+		{
+			if (xmlReader.tokenType() == QXmlStreamReader::StartElement)
+			{
+				StringPair pair;
+
+				pair.first = xmlReader.name().toString();
+
+				xmlReader.readNext();
+
+				if (xmlReader.tokenType() == QXmlStreamReader::Characters)
+				{
+					pair.second = xmlReader.text().toString();
+
+					metadata.append(pair);
+				}
+			}
+
+			xmlReader.readNext();
+		}
+	}
+
+
+	BuildFileInfo& BuildFileInfo::operator = (const BuildFileInfo& bfi)
+	{
+		pathFileName = bfi.pathFileName;
+		tag = bfi.tag;
+		ID = bfi.ID;
+		size = bfi.size;
+		md5 = bfi.md5;
+		metadata = bfi.metadata;
+
+		return *this;
 	}
 }

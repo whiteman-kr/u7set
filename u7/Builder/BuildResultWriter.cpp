@@ -79,6 +79,18 @@ namespace Builder
 	}
 
 
+	void BuildFile::addMetadata(const QString& name, const QString& value)
+	{
+		m_info.metadata.append(StringPair(name, value));
+	}
+
+
+	void BuildFile::addMetadata(QList<StringPair>& nameValueList)
+	{
+		m_info.metadata.append(nameValueList);
+	}
+
+
 	bool BuildFile::open(const QString& fullBuildPath, bool textMode, IssueLogger* log)
 	{
 		QString fullPathFileName = fullBuildPath + m_info.pathFileName;
@@ -232,6 +244,30 @@ namespace Builder
 	}
 
 
+	bool ConfigurationXmlFile::addLinkToFile(BuildFile* buildFile)
+	{
+		if (buildFile == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool result = m_buildResultWriter.checkBuildFilePtr(buildFile);
+
+		if (result == false)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Build file '%1' is not found")).
+					  arg(buildFile->pathFileName()).arg(m_subDir));
+			return false;
+		}
+
+		m_linkedFiles.append(buildFile);
+
+		return true;
+	}
+
+
 	bool ConfigurationXmlFile::addLinkToFile(const QString& subDir, const QString& fileName)
 	{
 		QString pathFileName = BuildFile::constructPathFileName(subDir, fileName);
@@ -241,12 +277,12 @@ namespace Builder
 		if (buildFile == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Build file '%1' is not found, can't link to '%2/configuration.xml'")).
+					  QString(tr("Build file '%1' is not found")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
 		}
 
-		m_linkedFilesInfo.insert(pathFileName, buildFile->getInfo());
+		m_linkedFiles.append(buildFile);
 
 		return true;
 	}
@@ -256,11 +292,17 @@ namespace Builder
 	{
 		m_xmlWriter.writeStartElement("Files");
 
-		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFilesInfo.count()));
+		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFiles.count()));
 
-		for(const BuildFileInfo& buildFileInfo : m_linkedFilesInfo)
+		for(const BuildFile* buildFile : m_linkedFiles)
 		{
-			buildFileInfo.writeToXml(m_xmlWriter);
+			if (buildFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
 		}
 
 		m_xmlWriter.writeEndElement();		// </Files>
@@ -560,60 +602,75 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
 	{
 		return addFile(subDir, fileName, "", "", data);
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
 	{
 		return addFile(subDir, fileName, "", "", dataString);
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
 	{
 		return addFile(subDir, fileName, "", "", stringList);
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data)
 	{
 		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
-			return false;
+			return nullptr;
 		}
 
-		return buildFile->write(m_buildFullPath, data, m_log);
+		if (buildFile->write(m_buildFullPath, data, m_log) == false)
+		{
+			return nullptr;
+		}
+
+		return buildFile;
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString)
 	{
 		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
-			return false;
+			return nullptr;
 		}
 
-		return buildFile->write(m_buildFullPath, dataString, m_log);
+		if (buildFile->write(m_buildFullPath, dataString, m_log) == false)
+		{
+			return nullptr;
+		}
+
+		return buildFile;
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList)
 	{
 		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
 
 		if (buildFile == nullptr)
 		{
-			return false;
+			return nullptr;
 		}
 
-		return buildFile->write(m_buildFullPath, stringList, m_log);
+		if (buildFile->write(m_buildFullPath, stringList, m_log) == false)
+		{
+			return nullptr;
+		}
+
+		return buildFile;
 	}
 
 
@@ -654,7 +711,7 @@ namespace Builder
 				continue;
 			}
 
-			buildFile->getInfo().writeToXml(m_xmlWriter);
+			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
 		}
 
 		m_xmlWriter.writeEndElement();			// </Files>
@@ -704,7 +761,12 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			result &= addFile(cfgFile->subDir(), "configuration.xml", cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(), "configuration.xml", cfgFile->getFileData());
+
+			if (buildFile == nullptr)
+			{
+				result = false;
+			}
 
 			delete cfgFile;		// is no longer needed
 		}
@@ -773,7 +835,12 @@ namespace Builder
 
 			if (multichannelFile->getFileData(fileData) == true)
 			{
-				result &= addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
+				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
+
+				if (buildFile == nullptr)
+				{
+					result = false;
+				}
 			}
 			else
 			{
@@ -805,7 +872,7 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName)
+	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName) const
 	{
 		if (m_buildFiles.contains(pathFileName))
 		{
@@ -813,6 +880,19 @@ namespace Builder
 		}
 
 		return nullptr;
+	}
+
+
+	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
+	{
+		for(const BuildFile* bFile : m_buildFiles)
+		{
+			if (bFile == buildFile)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool BuildResultWriter::isDebug() const
