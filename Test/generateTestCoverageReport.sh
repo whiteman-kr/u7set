@@ -70,9 +70,26 @@ if ! lcov -c -d "u7databaseTests/DbWorker.gcda" -o coverageDbWorker.info; then
         exit 5;
 fi
 
+echo "Generating coverageDbStruct.info...";
+
+if ! lcov -c -d "u7databaseTests/DbStruct.gcda" -o coverageDbStruct.info; then
+	echo "Can not generate coverageDbStruct.info. Err code $?";
+	echo "This script must be placed in project build dir.";
+        exit 5;
+fi
+
+echo "Generating coveragePropertyObject.info...";
+
+if ! lcov -c -d "u7databaseTests/PropertyObject.gcda" -o coveragepropertyObject.info; then
+        echo "Can not generate coveragePropertyObject.info. Err code $?";
+        echo "This script must be placed in project build dir.";
+        exit 5;
+fi
+
+
 echo "Merging coverage files into coverage.info...";
 
-if ! lcov --add-tracefile coverageDbController.info -a coverageDbWorker.info -o coverage.info; then
+if ! lcov --add-tracefile coverageDbController.info -a coverageDbWorker.info -a coverageDbStruct.info -a coveragePropertyObject.info -o coverage.info; then
 	echo "Can not merge files to coverage.info. Err code $?";
         exit 6;
 fi

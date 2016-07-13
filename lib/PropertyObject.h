@@ -668,7 +668,10 @@ public:
 		// QVariant::canConvert from int to enum returns false (for QString its ok)
 		// Possible approch is get
 		//
-		m_value.d.data.i = value;	// hack
+
+		assert (false);
+
+		//m_value.d.data.i = value;	// hack
 		return;
 	}
 
