@@ -61,6 +61,9 @@ namespace VFrame30
 		bool isMonitorMode() const;
 		void setMonitorMode(bool value);
 
+		bool infoMode() const;
+		void setInfoMode(bool value);
+
 		AppSignalManager* appSignalManager();
 		void setAppSignalManager(AppSignalManager* value);
 
@@ -73,6 +76,7 @@ namespace VFrame30
 		double m_gridSize = 0.0;
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
+		bool m_infoMode = false;
 	};
 
 	class VFRAME30LIBSHARED_EXPORT DrawHelper

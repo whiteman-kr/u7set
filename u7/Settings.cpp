@@ -75,6 +75,8 @@ void Settings::writeUserScope() const
 	s.setValue("m_useConnections", m_useConnections);
 	s.setValue("Main/m_expertMode", m_expertMode);
 
+	s.setValue("m_infoMode", m_infoMode);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -143,6 +145,8 @@ void Settings::loadUserScope()
 	m_freezeBuildPath = s.value("m_freezeBuildPath", false).toBool();
 	m_useConnections = s.value("m_useConnections", false).toBool();
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
+
+	m_infoMode = s.value("m_infoMode").toBool();
 
     return;
 }
@@ -262,5 +266,20 @@ bool Settings::isExpertMode() const
 void Settings::setExpertMode(bool value)
 {
 	m_expertMode = value;
+}
+
+bool Settings::isInfoMode() const
+{
+	return m_infoMode;
+}
+
+bool Settings::infoMode() const
+{
+	return m_infoMode;
+}
+
+void Settings::setInfoMode(bool value)
+{
+	m_infoMode = value;
 }
 

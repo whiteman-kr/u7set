@@ -83,6 +83,16 @@ namespace VFrame30
 		setEditMode(!value);
 	}
 
+	bool CDrawParam::infoMode() const
+	{
+		return m_infoMode;
+	}
+
+	void CDrawParam::setInfoMode(bool value)
+	{
+		m_infoMode = value;
+	}
+
 	AppSignalManager* CDrawParam::appSignalManager()
 	{
 		return m_appSignalmanager;

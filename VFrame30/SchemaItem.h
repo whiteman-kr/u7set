@@ -13,6 +13,7 @@ namespace VFrame30
 {
 	class Schema;
 	class SchemaLayer;
+	class SchemaItemAfb;
 }
 
 
@@ -159,6 +160,10 @@ namespace VFrame30
 		bool IsDynamic() const;
 
 		virtual bool IsFblItem() const;
+
+		bool isSchemaItemAfb() const;
+		SchemaItemAfb* toSchemaItemAfb();
+		const SchemaItemAfb* toSchemaItemAfb() const;
 
 		bool IsLocked() const;
 		void setLocked(bool locked);

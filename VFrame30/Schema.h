@@ -11,6 +11,7 @@ namespace VFrame30
 	class VideoFrameWidgetAgent;
 	class SchemaLayer;
 	class SchemaItem;
+	class LogicSchema;
 
 	
 	class VFRAME30LIBSHARED_EXPORT Schema :
@@ -102,6 +103,9 @@ namespace VFrame30
 		bool isLogicSchema() const;
 		bool isMonitorSchema() const;
 		bool isDiagSchema() const;
+
+		LogicSchema* toLogicSchema();
+		const LogicSchema* toLogicSchema() const;
 		
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;

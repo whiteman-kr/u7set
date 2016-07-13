@@ -53,6 +53,10 @@ public:
 	bool isExpertMode() const;
 	void setExpertMode(bool value);
 
+	bool isInfoMode() const;
+	bool infoMode() const;
+	void setInfoMode(bool value);
+
 	// Data
 	//
 public:
@@ -133,6 +137,7 @@ private:
 	bool m_useConnections = false;
 
 	bool m_debugMode = false;
+	bool m_infoMode = false;
 
 };
 
