@@ -1774,6 +1774,50 @@ namespace Builder
 						  arg(appSignalID).arg(connection)));
 	}
 
+	/// IssueCode: ALC5030
+	///
+	/// IssueType: Error
+	///
+	/// Title: The signal '%1' is not associated with LM '%2'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic module equipmentID
+	///		%3 Signal Uuid
+	///
+	/// Description:
+	///		The signal is not associated with logic module. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5030,
+				  QString(tr("The signal '%1' is not associated with LM '%2'.").
+						  arg(appSignalID).arg(lmEquipmentID)));
+	}
+
+	/// IssueCode: ALC5031
+	///
+	/// IssueType: Error
+	///
+	/// Title: The signal '%1' can be bind only to Logic Module or Equipment Signal.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5031(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5031,
+				  QString(tr("The signal '%1' can be bind only to Logic Module or Equipment Signal.").
+						  arg(appSignalID)));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

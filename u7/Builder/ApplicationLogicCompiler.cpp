@@ -177,6 +177,34 @@ namespace Builder
 					m_log->errALC5013(s.appSignalID(), s.equipmentID());		// Application signal '%1' is bound to unknown device object '%2'.
 					result = false;
 				}
+
+				bool deviceOK = false;
+
+				if (device->isModule())
+				{
+					Hardware::DeviceModule* module = device->toModule();
+
+					if (module != nullptr && module->isLM())
+					{
+						deviceOK = true;
+					}
+				}
+				else
+				{
+					if (device->isSignal())
+					{
+						deviceOK = true;
+					}
+				}
+
+				if (deviceOK == false)
+				{
+					// The signal '%1' can be bind only to Logic Module or Equipment Signal.
+					//
+					m_log->errALC5031(s.appSignalID());
+					result = false;
+					continue;
+				}
 			}
 
 			// check other signal properties

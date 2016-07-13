@@ -4403,6 +4403,15 @@ namespace Builder
 				continue;
 			}
 
+			if (m_lmAssociatedSignals.contains(item->strID()) == false)
+			{
+				// The signal '%1' is not associated with LM '%2'.
+				//
+				m_log->errALC5030(item->strID(), m_lm->equipmentId(), item->guid());
+				result = false;
+				continue;
+			}
+
 			result &= m_appSignals.insert(item);
 		}
 
