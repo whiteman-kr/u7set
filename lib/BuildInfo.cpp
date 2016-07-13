@@ -115,16 +115,4 @@ namespace Builder
 		}
 	}
 
-
-	BuildFileInfo& BuildFileInfo::operator = (const BuildFileInfo& bfi)
-	{
-		pathFileName = bfi.pathFileName;
-		tag = bfi.tag;
-		ID = bfi.ID;
-		size = bfi.size;
-		md5 = bfi.md5;
-		metadata = bfi.metadata;
-
-		return *this;
-	}
 }

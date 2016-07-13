@@ -40,8 +40,6 @@ namespace Builder
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);
-
-		BuildFileInfo& operator = (const BuildFileInfo& bfi);
 	};
 
 }
