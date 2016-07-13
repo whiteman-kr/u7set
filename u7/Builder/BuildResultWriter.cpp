@@ -81,13 +81,16 @@ namespace Builder
 
 	void BuildFile::addMetadata(const QString& name, const QString& value)
 	{
-		m_info.metadata.append(StringPair(name, value));
+		m_info.metadata.insert(name, value);
 	}
 
 
 	void BuildFile::addMetadata(QList<StringPair>& nameValueList)
 	{
-		m_info.metadata.append(nameValueList);
+		for(const StringPair& p : nameValueList)
+		{
+			m_info.metadata.insert(p.first, p.second);
+		}
 	}
 
 

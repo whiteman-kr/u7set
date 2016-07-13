@@ -31,15 +31,17 @@ namespace Builder
 
 	struct BuildFileInfo
 	{
-		QString pathFileName;			// path and file name from build root directory, like "/subdir/filename.xml"
-		QString tag;					// file tag
-		QString ID;						// file ID
-		qint64 size = 0;				// size of file
-		QString md5;					// MD5 hash of file
-		QList<StringPair> metadata;		// metadata (pairs of strings)
+		QString pathFileName;					// path and file name from build root directory, like "/subdir/filename.xml"
+		QString tag;							// file tag
+		QString ID;								// file ID
+		qint64 size = 0;						// size of file
+		QString md5;							// MD5 hash of file
+		QHash<QString, QString> metadata;		// metadata (pairs of strings)
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);
+
+		QString getMetadata(const QString& key);
 	};
 
 }
