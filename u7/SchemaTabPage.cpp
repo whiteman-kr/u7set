@@ -869,6 +869,8 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	m_toolBar->addAction(m_schemaWidget->m_orderAction);
 	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
+	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
+
 	// --
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();

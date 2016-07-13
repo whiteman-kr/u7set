@@ -460,7 +460,12 @@ static QVariant staticQVariant;
 		Property::copy(presetProperty);	// Copy data from the base class
 
 		PropertyValue<TYPE>* source = dynamic_cast<PropertyValue<TYPE>*>(presetProperty);
-		assert(source);
+
+		if (source == nullptr)
+		{
+			assert(source);
+			return;
+		}
 
 		if (updateValue == true)
 		{
@@ -533,29 +538,6 @@ public:
 			return true;
 		}
 	}
-
-//	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
-//	// Example is in question:
-//	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
-//	//
-//private:
-//	template <bool> struct enumness {};
-//	typedef enumness<true> enum_tag;
-//	typedef enumness<false> non_enum_tag;
-
-//	template <typename ENUM>
-//	const QMetaEnum metaEnum(enum_tag) const
-//	{
-//		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
-//		return me;
-//	}
-
-//	template <typename NOT_ENUM>
-//	const QMetaEnum metaEnum(non_enum_tag) const
-//	{
-//		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
-//		return QMetaEnum();
-//	}
 
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override
@@ -661,17 +643,24 @@ public:
 		checkLimits();
 	}
 
+	class QVariantEx : public QVariant
+	{
+	public:
+		void setEnumHack(QVariant* dst, int value)
+		{
+			dst->d.data.i = value;
+		}
+	};
+
 	virtual void setEnumValue(int value) override	// Overriden from class Propery
 	{
 		// cannot implement it now, but it's possible
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
 		// QVariant::canConvert from int to enum returns false (for QString its ok)
-		// Possible approch is get
 		//
+		QVariantEx vex;
+		vex.setEnumHack(&m_value, value);
 
-		assert (false);
-
-		//m_value.d.data.i = value;	// hack
 		return;
 	}
 
@@ -696,37 +685,6 @@ public:
 	}
 
 private:
-//	template <typename ENUM>
-//	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
-//	{
-//		m_value = QVariant::fromValue(static_cast<TYPE>(value));
-//	}
-////	template <typename NON_ENUM>
-////	void setEnumValueInternal(int value, non_enum_tag)
-////	{
-////		Q_UNUSED(value)
-////		assert(false);
-////	}
-
-//	template <typename ENUM>
-//	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
-//	{
-//		assert(std::is_enum<TYPE>::value == true);
-
-//		QVariant v(value);
-//		setValue(v);
-
-//		return;
-//	}
-//	template <typename NON_ENUM>
-//	void setEnumValueInternal(const char* value, non_enum_tag)
-//	{
-//		Q_UNUSED(value)
-//		assert(false);
-//	}
-
-private:
-
 	void checkLimits()
 	{
 		if (lowLimit().isValid() == true)

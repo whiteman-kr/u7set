@@ -770,5 +770,13 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
 
+	LogicSchema* Schema::toLogicSchema()
+	{
+		return dynamic_cast<VFrame30::LogicSchema*>(this);
+	}
 
+	const LogicSchema* Schema::toLogicSchema() const
+	{
+		return dynamic_cast<const VFrame30::LogicSchema*>(this);
+	}
 }

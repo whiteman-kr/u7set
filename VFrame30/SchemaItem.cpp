@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "SchemaItem.h"
 #include "SchemaItemRect.h"
+#include "SchemaItemAfb.h"
 
 namespace VFrame30
 {
@@ -318,6 +319,21 @@ namespace VFrame30
 	bool SchemaItem::IsFblItem() const
 	{
 		return false;
+	}
+
+	bool SchemaItem::isSchemaItemAfb() const
+	{
+		return dynamic_cast<const SchemaItemAfb*>(this) != nullptr;
+	}
+
+	SchemaItemAfb* SchemaItem::toSchemaItemAfb()
+	{
+		return dynamic_cast<SchemaItemAfb*>(this);
+	}
+
+	const SchemaItemAfb* SchemaItem::toSchemaItemAfb() const
+	{
+		return dynamic_cast<const SchemaItemAfb*>(this);
 	}
 
 	bool SchemaItem::IsLocked() const

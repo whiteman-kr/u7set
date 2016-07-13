@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "LogicSchema.h"
+#include "SchemaItemAfb.h"
 
 namespace VFrame30
 {
@@ -92,6 +93,25 @@ namespace VFrame30
 		}
 
 		m_counter = ls.counter();
+
+		// Initialize Labels for SchemaItemAfbs (if they were not created with label)
+		//
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			assert(layer);
+
+			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			{
+				if (item->isSchemaItemAfb() == true)
+				{
+					SchemaItemAfb* schemaItemAfb = item->toSchemaItemAfb();
+					assert(schemaItemAfb);
+
+					int labelCounter = this->nextCounterValue();
+					schemaItemAfb->setLabel(schemaID() + "_" + QString::number(labelCounter));
+				}
+			}
+		}
 
 		return true;
 	}

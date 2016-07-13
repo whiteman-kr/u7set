@@ -534,6 +534,8 @@ private:
 	QAction* m_escapeAction = nullptr;
 	QAction* m_f2Action = nullptr;	// Edit inputs/outputs signal strid
 
+	QAction* m_infoModeAction = nullptr;
+
 	//	Contexet Menu
 	//
 friend class EditSchemaTabPage;		// EditSchemaTabPage has toolbar, and it will contain some actions from this class

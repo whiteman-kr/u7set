@@ -50,6 +50,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
+#include <QStaticText>
 #include <QScreen>
 #include <QUuid>
 #include <QDebug>

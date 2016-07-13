@@ -77,8 +77,12 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
+		QString label() const;
+		void setLabel(const QString& value);
+
 	private:
 		int m_precision = 2;
 		Afb::AfbElement m_afbElement;
+		QString m_label;
 	};
 }

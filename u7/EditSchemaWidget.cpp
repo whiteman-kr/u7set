@@ -102,21 +102,32 @@ EditSchemaView::~EditSchemaView()
 {
 }
 
-void EditSchemaView::paintEvent(QPaintEvent* pe)
+void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 {
 	// Draw schema
 	//
-	VFrame30::SchemaView::paintEvent(pe);
+
+	// VFrame30::SchemaView::paintEvent(pe);
+	//
+	if (schema().get() != nullptr)
+	{
+		QPainter p(this);
+
+		VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+		drawParam.setInfoMode(theSettings.infoMode());
+
+		draw(drawParam);
+	}
 
 	// Draw other -- selection, grid, outlines, rullers, etc
 	//
-
 	QPainter p;
 	p.begin(this);
 
 	p.save();
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	drawParam.setInfoMode(theSettings.infoMode());
 
 	// Calc size
 	//
@@ -1637,6 +1648,20 @@ void EditSchemaWidget::createActions()
 	connect(m_f2Action, &QAction::triggered, this, &EditSchemaWidget::f2Key);
 	addAction(m_f2Action);
 
+	// Info Mode Action
+	//
+	m_infoModeAction = new QAction(tr("Info Mode"), this);
+	m_infoModeAction->setEnabled(true);
+	m_infoModeAction->setCheckable(true);
+	m_infoModeAction->setChecked(theSettings.isInfoMode());
+	m_infoModeAction->setMenuRole(QAction::NoRole);
+	m_infoModeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+	connect(m_infoModeAction, &QAction::toggled, this, [this](bool checked)
+		{
+			theSettings.setInfoMode(checked);
+			editSchemaView()->update();
+		});
+	addAction(m_infoModeAction);
 
 	//
 	// File
@@ -2880,8 +2905,10 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 		//
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> newItems;
 
+		auto logicSchema = schema()->toLogicSchema();
+
 		std::for_each(selectedItems().begin(), selectedItems().end(),
-			[xdif, ydif, &newItems](const std::shared_ptr<VFrame30::SchemaItem>& si)
+			[xdif, ydif, &newItems, logicSchema](const std::shared_ptr<VFrame30::SchemaItem>& si)
 			{
 				QByteArray data;
 
@@ -2904,6 +2931,16 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 				std::shared_ptr<VFrame30::SchemaItem> newItem(newItemRawPtr);
 
 				newItem->setNewGuid();
+
+				if (newItem->isSchemaItemAfb() == true
+					&& logicSchema != nullptr)
+				{
+					auto schemaItemAfb = newItem->toSchemaItemAfb();
+					assert(schemaItemAfb);
+
+					int counterValue = logicSchema->nextCounterValue();
+					schemaItemAfb->setLabel(logicSchema->schemaID() + "_" + QString::number(counterValue));
+				}
 
 				newItem->MoveItem(xdif, ydif);
 
@@ -4006,6 +4043,24 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	editSchemaView()->m_newItem = newItem;
 
+	// If items is SchemaItemAfb and this is LogicSchema, set lavel to it
+	//
+	if (schema()->isLogicSchema() == true &&
+		newItem->isSchemaItemAfb() == true)
+	{
+		auto logicSchema = schema()->toLogicSchema();
+		assert(logicSchema);
+
+		auto schemaItemAfb = newItem->toSchemaItemAfb();
+		assert(schemaItemAfb);
+
+		int counterValue = logicSchema->nextCounterValue();
+
+		schemaItemAfb->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+	}
+
+	// --
+	//
 	bool posInterfaceFound = false;
 
 	// Добавляется элемент с расположением ISchemaPosLine
@@ -4793,6 +4848,8 @@ void EditSchemaWidget::editPaste()
 	const QClipboard* clipboard = QApplication::clipboard();
 	const QMimeData* mimeData = clipboard->mimeData();
 
+	VFrame30::LogicSchema* logicSchema = schema()->toLogicSchema();
+
 	if (mimeData == nullptr)
 	{
 		return;
@@ -4828,9 +4885,20 @@ void EditSchemaWidget::editPaste()
 				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
 			}
 
-			if (dynamic_cast<VFrame30::SchemaItemAfb*>(schemaItem) != nullptr)
+			if (schemaItem->isSchemaItemAfb() == true)
 			{
 				schemaItemAfbIsPresent = true;
+
+				// If items is SchemaItemAfb and this is LogicSchema, set lavel to it
+				//
+				if (logicSchema != nullptr)
+				{
+					auto schemaItemAfb = schemaItem->toSchemaItemAfb();
+					assert(schemaItemAfb);
+
+					int counterValue = logicSchema->nextCounterValue();
+					schemaItemAfb->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+				}
 			}
 		}
 

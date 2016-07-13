@@ -17,6 +17,9 @@ namespace VFrame30
 	{
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
+
+		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
+		labelProp->setCategory(PropertyNames::functionalCategory);
 	}
 
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg) :
@@ -27,6 +30,9 @@ namespace VFrame30
 
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
+
+		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
+		labelProp->setCategory(PropertyNames::functionalCategory);
 
 		// Create input output signals in VFrame30::FblEtem
 		//
@@ -75,6 +81,9 @@ namespace VFrame30
 
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
+		FontParam smallFont = m_font;
+		smallFont.setDrawSize(m_font.drawSize() * 0.75);
+
 		// Draw rect and pins
 		//
 		FblItemRect::Draw(drawParam, schema, pLayer);
@@ -102,6 +111,8 @@ namespace VFrame30
 		{
 			r.setRight(r.right() - pinWidth);
 		}
+
+		QRectF labelRect(r);	// save rect for future use
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -195,10 +206,23 @@ namespace VFrame30
 		}
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+		DrawHelper::DrawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+
+		// Draw Label
+		//
+		if (drawParam->infoMode() == true)
+		{
+			QString labelText = label();
+
+			labelRect.moveBottomLeft(labelRect.topRight());
+
+			p->setPen(Qt::darkGray);
+			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
+		}
 
 		// Draw line under caption
 		//
+
 //		QPen captionLinePen(lineColor());
 //		captionLinePen.setWidthF(0.0);		// Don't use getter!
 
@@ -742,4 +766,15 @@ namespace VFrame30
 
 		return;
 	}
+
+	QString SchemaItemAfb::label() const
+	{
+		return m_label;
+	}
+
+	void SchemaItemAfb::setLabel(const QString& value)
+	{
+		m_label = value;
+	}
+
 }
