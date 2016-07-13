@@ -49,7 +49,7 @@ private:
 	QLabel* m_runningLabel = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
 
-	ServiceInformation serviceState;
+	Network::ServiceInfo serviceState;
 };
 
 #endif // BASESERVICESTATEWIDGET_H

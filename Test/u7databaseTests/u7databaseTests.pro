@@ -51,7 +51,6 @@ SOURCES += main.cpp \
     ../../lib/DbProgressDialog.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/SocketIO.cpp  \
-    ../../lib/PropertyObject.cpp \
     ../../lib/Types.cpp \
     MultiThreadFileTest.cpp \
     MultiThreadSignalTests.cpp \

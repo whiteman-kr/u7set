@@ -145,6 +145,7 @@ protected:
 	qint64 m_errorFramesQuantity = 0;
 	qint64 m_errorFrameNo = 0;
 	qint64 m_lostedPackets = 0;
+	qint64 m_errorDataID = 0;
 
 	bool m_dataProcessingEnabled = true;
 

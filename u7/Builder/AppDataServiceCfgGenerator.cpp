@@ -184,9 +184,14 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		m_buildResultWriter->addFile(m_subDir, "appSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "appSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
 
-		m_cfgXml->addLinkToFile(m_subDir, "appSignals.xml");
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);
 
 		return true;
 	}
@@ -346,7 +351,12 @@ namespace Builder
 
 		//equipmentWriter.writeEndDocument();
 
-		m_buildResultWriter->addFile(m_subDir, "equipment.xml", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "equipment.xml", data);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
 
 		m_cfgXml->addLinkToFile(m_subDir, "equipment.xml");
 
@@ -460,8 +470,17 @@ namespace Builder
 		xml.writeEndElement();	// </AppDataSources>
 		xml.writeEndDocument();
 
-		m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
-		m_cfgXml->addLinkToFile(m_subDir, "AppDataSources.xml");
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
+
+		buildFile->addMetadata("Meta1", "Data1");
+		buildFile->addMetadata("Meta2", "Data2");
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);
 
 		return result;
 	}

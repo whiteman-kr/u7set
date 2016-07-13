@@ -25,5 +25,9 @@ int main(int argc, char *argv[])
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", cfgServiceWorker);
 
-	return serviceStarter.exec();
+	int result = serviceStarter.exec();
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	return result;
 }

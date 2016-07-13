@@ -5,14 +5,14 @@
 #include <QHostAddress>
 #include "../lib/UdpSocket.h"
 #include "../lib/Service.h"
-
+#include "../lib/Types.h"
 
 
 class UdpClientSocket;
 
 struct ServiceData
 {
-	ServiceInformation information;
+	Network::ServiceInfo information;
 
 	UdpClientSocket* clientSocket = nullptr;
 	QWidget* statusWidget = nullptr;
@@ -30,7 +30,7 @@ struct HostInfo
 	{
 		for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
 		{
-			servicesData[i].information.type = serviceInfo[i].serviceType;
+			servicesData[i].information.set_type(TO_INT(serviceInfo[i].serviceType));
 		}
 	}
 };
@@ -60,7 +60,7 @@ public slots:
 	void removeHost(int row);
 	void openServiceStatusWidget(const QModelIndex& index);
 
-	void setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo);
+	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo);
 
 private:
 	QVector<HostInfo> m_hostsInfo;

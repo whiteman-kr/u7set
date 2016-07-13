@@ -3408,22 +3408,34 @@ namespace Builder
 
 		m_code.getMifCode(mifCode);
 
-		result &= m_resultWriter->addFile(subsysId, QString("%1-%2.mif").
-										  arg(lmCaption).arg(lmNumber), mifCode);
+		BuildFile* buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.mif").arg(lmCaption).arg(lmNumber), mifCode);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
-		result = m_resultWriter->addFile(subsysId, QString("%1-%2.asm").
-										 arg(lmCaption).arg(lmNumber), asmCode);
+		buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.asm").arg(lmCaption).arg(lmNumber), asmCode);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
 
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile);
 
-		result = m_resultWriter->addFile(subsysId, QString("%1-%2.mem").
-										 arg(lmCaption).arg(lmNumber), memFile);
+		buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.mem").arg(lmCaption).arg(lmNumber), memFile);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
 
 		writeTuningInfoFile(lmCaption, subsysId, lmNumber);
 

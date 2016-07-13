@@ -70,7 +70,10 @@ SOURCES += main.cpp \
     ../lib/JsonSerializable.cpp \
     ../lib/UdpFileTransfer.cpp \
     ../lib/Service.cpp \
-    ../lib/SimpleThread.cpp
+    ../lib/SimpleThread.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS += \
     ../lib/SocketIO.h \
@@ -81,7 +84,10 @@ HEADERS += \
     ../lib/JsonSerializable.h \
     ../lib/UdpFileTransfer.h \
     ../lib/Service.h \
-    ../lib/SimpleThread.h
+    ../lib/SimpleThread.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -119,3 +125,6 @@ win32 {
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto

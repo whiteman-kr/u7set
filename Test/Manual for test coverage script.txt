@@ -1,0 +1,63 @@
+
+Инструкция по получению информации о степени покрытия кода тестами
+
+============================================================
+
+1. Для начала необходимо установить пакеты lcov и gcovr, предоставляющие графический инерфейс для отображения результатов работы утилиты gcov. Утилита gcov будет установлена автоматически, в случае её отсутствия. Обычно она поставляется с пакетом компилятора GCC.
+Для установки утилит из репозиториев необходимо ввести следующие комманды:
+
+	Debian-based: 	sudo apt-get install lcov gcovr
+	Fedora:		sudo dnf install lcov gcovr
+	Gentoo:		emerge lcov gcovr
+	Arch-based:		sudo pacman -S lcov gcovr
+
+В противном случае, предоставляется возможность собрать пакеты из исходников. Исходники утилит могут быть взяты из официальных сайтов:
+
+1. lcov: http://ltp.sourceforge.net/coverage/lcov.php
+2. gcovr: https://github.com/gcovr/gcovr/releases
+
+2. Необходимо собрать проект u7settest. Для этого надо открыть QtCreator, и выбрать проэкт из u7set/u7settest.pro. После этого его необходимо собрать, чтобы на компьютере была создана папка build-* этого проекта. Запускать тесты не обязательно.
+
+3. Переместить скрипт generateTestCoverageReport.sh из u7set/Test/ в папку с билдом проэкта u7settest. Очень важно переместить его именно в корень данной папки. В противном случае, скрипт выдаст соответствующее сообщение об ошибке.
+
+4. Проверить: выданы ли права на запуск. Если таких прав выдано не было, необходимо ввести следующую команду:  chmod +x  generateTestCoverageReport.sh. В противном случае, запуск скрипта будет невозможен.
+
+5. Теперь можно запустить скрипт. Для этого стоит перейти в папку со сборкой проекта u7settest, и ввести следующую команду: ./generateTestCoverageReport.sh. Для начала скрипт запустит тесты, и создаст файлы *.gcda, которые будут использованы для генерации информации о покрытии кода тестами. После выполнения тестов, скрипт запустит утилиту lcov на создание *.info файла. В конце работы скрипта, он создаст *.html страничку, где будет детально отображена информация о покрытии кода тестами. Затем откроется браузер, который выставлен по умолчанию, и отобразит созданный файл.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Manual for test coverage script execution
+
+============================================================
+
+1. You need to install lcov and gcovr packets first. These packets used for generating graphical output from result of gcov utility work. If gcov utility does not exist, it will be installed automatically.
+To install these packets from repository, enter next commands:
+
+	Debian-based: 	sudo apt-get install lcov gcovr
+	Fedora:		sudo dnf install lcov gcovr
+	Gentoo:		emerge lcov gcovr
+	Arch-based:		sudo pacman -S lcov gcovr
+
+In other way, you need to compile them manually. Source codes can be found at official sites:
+
+1. lcov: http://ltp.sourceforge.net/coverage/lcov.php
+2. gcovr: https://github.com/gcovr/gcovr/releases
+
+2. Next, you must compile u7settest project. To do that, you need open QtCreator and select u7set/u7settest.pro file. After project opening, build it. You may not run tests.
+
+3. Move  generateTestCoverageReport.sh script from u7set/Test/ to u7settest build folder
+
+4. Add execution bit to script if needed (chmod +x  generateTestCoverageReport.sh)
+
+5. Exec script by typing ./generateTestCoverageReport.sh. It will check if execution binary exists, and automatically start tests. This will generate *.gcda files, for lcov. After tests end their work, lcov utility will start, and generate *.info files, which needed for test coverage report. After that, *.html files will be generated and your default browser will open report.

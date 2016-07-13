@@ -490,13 +490,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				for(const CfgFileInfo& cfi : m_cfgFilesInfo)
 				{
-					Builder::BuildFileInfo bfi;
-
-					bfi.pathFileName = cfi.pathFileName;
-					bfi.ID = cfi.ID;
-					bfi.tag = cfi.tag;
-					bfi.size = cfi.size;
-					bfi.md5 = cfi.md5;
+					Builder::BuildFileInfo bfi = cfi;
 
 					bfiArray.append(bfi);
 				}

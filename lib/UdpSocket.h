@@ -13,6 +13,7 @@
 
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
+#include "../Proto/network.pb.h"
 
 
 class UdpClientSocket;
@@ -101,6 +102,7 @@ public:
 	bool writeDword(quint32 dw);
 	bool writeData(const char* data, quint32 dataSize);
 	bool writeData(const QByteArray& data);
+	bool writeData(google::protobuf::Message& protobufMessage);
 	bool writeStruct(Serializable *s);
 	bool writeStruct(const JsonSerializable& s);
 

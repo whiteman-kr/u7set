@@ -377,6 +377,28 @@ bool UdpRequest::writeDword(quint32 dw)
 }
 
 
+bool UdpRequest::writeData(google::protobuf::Message& protobufMessage)
+{
+	int messageSize = protobufMessage.ByteSize();
+
+	if (m_rawDataSize + messageSize > MAX_DATAGRAM_SIZE)
+	{
+		assert(m_rawDataSize + messageSize <= MAX_DATAGRAM_SIZE);
+		return false;
+	}
+
+	protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(writeDataPtr()));
+
+	m_writeDataIndex += messageSize;
+
+	header()->dataSize += messageSize;
+
+	m_rawDataSize += messageSize;
+
+	return true;
+}
+
+
 bool UdpRequest::writeData(const char* data, quint32 dataSize)
 {
 	if (data == nullptr)

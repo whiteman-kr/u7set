@@ -95,7 +95,8 @@ SOURCES += main.cpp \
     ../lib/AppSignalState.cpp \
     ../u7/Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    ../lib/HostAddressPort.cpp
 
 HEADERS += \
 	Stable.h \
@@ -140,7 +141,8 @@ HEADERS += \
     AppSignalStateEx.h \
     ../u7/Builder/IssueLogger.h \
     TcpAppDataClient.h \
-    ../lib/Crc.h
+    ../lib/Crc.h \
+    ../lib/HostAddressPort.h
 
 include(../qtservice/src/qtservice.pri)
 

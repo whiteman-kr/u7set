@@ -334,8 +334,8 @@ namespace Builder
 				break;
 
 			case BCOMP_32SI_NOT_EQU:
-				sSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
-				rSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
+				sSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
+				rSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
 				break;
 
 			default:
@@ -383,8 +383,8 @@ namespace Builder
 				break;
 
 			case BCOMP_32FP_NOT_EQU:
-				sSettingParam.setFloatValue(sSetting - hysteresis / 2);
-				rSettingParam.setFloatValue(sSetting + hysteresis / 2);
+				sSettingParam.setFloatValue(sSetting + hysteresis / 2);
+				rSettingParam.setFloatValue(sSetting - hysteresis / 2);
 				break;
 
 			default:

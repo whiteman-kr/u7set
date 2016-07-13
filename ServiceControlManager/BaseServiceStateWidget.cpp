@@ -4,6 +4,8 @@
 #include <QLabel>
 #include <QToolBar>
 #include <QMessageBox>
+#include "../lib/Types.h"
+
 
 BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent) : QMainWindow(parent)
 {
@@ -15,7 +17,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 
 	resize(640, 480);
 
-	serviceState.serviceState = ServiceState::Undefined;
+	serviceState.set_servicestate(TO_INT(ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
 	startServiceButton = toolBar->addAction("Start", this, SLOT(startService()));
@@ -56,7 +58,8 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 void BaseServiceStateWidget::updateServiceState()
 {
 	QString serviceType;
-	switch (serviceState.type) {
+	switch (static_cast<ServiceType>(serviceState.type()))
+	{
 		case ServiceType::BaseService:
 			serviceType = "Base Service";
 		break;
@@ -81,14 +84,17 @@ void BaseServiceStateWidget::updateServiceState()
 		break;
 	}
 	m_whoIsLabel->setText(serviceType + QString(" v%1.%2.%3(0x%4)")
-						  .arg(serviceState.majorVersion)
-						  .arg(serviceState.minorVersion)
-						  .arg(serviceState.buildNo)
-						  .arg(serviceState.crc, 0, 16, QChar('0')));
+						  .arg(serviceState.majorversion())
+						  .arg(serviceState.minorversion())
+						  .arg(serviceState.buildno())
+						  .arg(serviceState.crc(), 0, 16, QChar('0')));
 
-	if (serviceState.serviceState != ServiceState::Undefined && serviceState.serviceState != ServiceState::Unavailable)
+	ServiceState srvState = static_cast<ServiceState>(serviceState.servicestate());
+
+	if (srvState != ServiceState::Undefined &&
+		srvState != ServiceState::Unavailable)
 	{
-		quint32 time = serviceState.uptime;
+		quint32 time = serviceState.uptime();
 		int s = time % 60; time /= 60;
 		int m = time % 60; time /= 60;
 		int h = time % 24; time /= 24;
@@ -100,11 +106,11 @@ void BaseServiceStateWidget::updateServiceState()
 	}
 
 	QString str;
-	switch (serviceState.serviceState)
+	switch (srvState)
 	{
 		case ServiceState::Work:
 		{
-			quint32 time = serviceState.serviceUptime;
+			quint32 time = serviceState.serviceuptime();
 			int s = time % 60; time /= 60;
 			int m = time % 60; time /= 60;
 			int h = time % 24; time /= 24;
@@ -132,7 +138,7 @@ void BaseServiceStateWidget::updateServiceState()
 	}
 	m_runningLabel->setText(str);
 
-	switch(serviceState.serviceState)
+	switch(srvState)
 	{
 		case ServiceState::Work:
 			m_runningLabel->setStyleSheet("background-color: rgb(127, 255, 127);");
@@ -150,7 +156,7 @@ void BaseServiceStateWidget::updateServiceState()
 			m_runningLabel->setStyleSheet("background-color: red;");
 	}
 
-	switch (serviceState.serviceState)
+	switch (srvState)
 	{
 		case ServiceState::Work:
 			startServiceButton->setEnabled(false);
@@ -205,17 +211,28 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 	{
 		case RQID_SERVICE_GET_INFO:
 		{
-			ServiceInformation& newServiceState = *(ServiceInformation*)udpRequest.data();
-			if (newServiceState.serviceState != ServiceState::Work && serviceState.serviceState == ServiceState::Work)
+			Network::ServiceInfo newServiceState;
+
+			bool result = newServiceState.ParseFromArray(udpRequest.data(), udpRequest.dataSize());
+
+			assert(result == true);
+
+			ServiceState oldState = static_cast<ServiceState>(serviceState.servicestate());
+			ServiceState newState = static_cast<ServiceState>(newServiceState.servicestate());
+
+			if (newState != ServiceState::Work && oldState == ServiceState::Work)
 			{
 				emit invalidateData();
 			}
-			if (newServiceState.serviceState == ServiceState::Work &&
-					(serviceState.serviceState != ServiceState::Work || newServiceState.serviceUptime < serviceState.serviceUptime))
+
+			if (newState == ServiceState::Work &&
+					(oldState != ServiceState::Work || newServiceState.serviceuptime() < serviceState.serviceuptime()))
 			{
 				emit needToReloadData();
 			}
-			serviceState = *(ServiceInformation*)udpRequest.data();
+
+			serviceState = newServiceState;
+
 			updateServiceState();
 		}
 		break;
@@ -230,9 +247,9 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 
 void BaseServiceStateWidget::serviceNotFound()
 {
-	if (serviceState.serviceState != ServiceState::Unavailable)
+	if (serviceState.servicestate() != TO_INT(ServiceState::Unavailable))
 	{
-		serviceState.serviceState = ServiceState::Unavailable;
+		serviceState.set_servicestate(TO_INT(ServiceState::Unavailable));
 		updateServiceState();
 	}
 }
@@ -244,7 +261,8 @@ int BaseServiceStateWidget::addTab(QWidget* page, const QString& label)
 
 void BaseServiceStateWidget::sendCommand(int command)
 {
-	int state = serviceState.serviceState;
+	ServiceState state = static_cast<ServiceState>(serviceState.servicestate());
+
 	if (!(state == ServiceState::Work && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
 		!(state == ServiceState::Stopped && (command == RQID_SERVICE_START || command == RQID_SERVICE_RESTART)))
 	{

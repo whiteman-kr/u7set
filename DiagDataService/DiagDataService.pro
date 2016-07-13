@@ -85,7 +85,10 @@ SOURCES += main.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../u7/Builder/IssueLogger.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS += \
 	Stable.h \
@@ -118,7 +121,10 @@ HEADERS += \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../u7/Builder/IssueLogger.h \
-    ../lib/Crc.h
+    ../lib/Crc.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h
 
 include(../qtservice/src/qtservice.pri)
 

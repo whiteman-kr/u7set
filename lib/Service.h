@@ -11,14 +11,11 @@
 #include "../lib/UdpSocket.h"
 #include "../lib/CircularLogger.h"
 #include "../lib/SimpleThread.h"
+#include "../Proto/network.pb.h"
 
 
 class Service;
 class ServiceWorker;
-
-
-struct ServiceInformation;
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -155,7 +152,7 @@ private:
 	void startBaseRequestSocketThread();
 	void stopBaseRequestSocketThread();
 
-	void getServiceInfo(ServiceInformation& serviceInfo);
+	void getServiceInfo(Network::ServiceInfo& serviceInfo);
 
 private slots:
 	void onTimer500ms();
@@ -219,7 +216,7 @@ protected:
 
 	ServiceType serviceType() const { return m_serviceType; }
 
-	virtual void getServiceSpecificInfo(ServiceInformation& serviceInfo) { Q_UNUSED(serviceInfo); }
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) { Q_UNUSED(serviceInfo); }
 
 public:
 	ServiceWorker(ServiceType serviceType,

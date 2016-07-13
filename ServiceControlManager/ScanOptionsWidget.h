@@ -20,7 +20,7 @@ public:
 
 signals:
 	void setChecked(int count);
-	void hostFound(quint32 ip, quint16 port, ServiceInformation serviceInfo);
+	void hostFound(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo);
 
 public slots:
 	void startChecking();
@@ -40,16 +40,18 @@ private:
 	QTimer* m_sendPacketTimer;
 	int m_totalHostCount;
 
+	char readBuffer[MAX_DATAGRAM_SIZE];
+
 	void setSubnet(int index);
 };
 
 class ScanOptionsWidget : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
 	explicit ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *parent = 0);
 
-    QString getSelectedAddress();
+	QString getSelectedAddress();
 
 signals:
 
@@ -57,7 +59,7 @@ public slots:
 	void startChecking();
 
 private:
-    QLineEdit* m_addressEdit;
+	QLineEdit* m_addressEdit;
 	QList<QNetworkAddressEntry> m_addressEntryList;
 	ServiceTableModel* m_serviceModel;
 };

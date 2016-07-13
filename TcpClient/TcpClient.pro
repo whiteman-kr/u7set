@@ -38,7 +38,8 @@ SOURCES +=\
     ../lib/DataSource.cpp \
     ../lib/Queue.cpp \
     ../lib/WUtils.cpp \
-    ../lib/DataProtocols.cpp
+    ../lib/DataProtocols.cpp \
+    ../lib/HostAddressPort.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../lib/SimpleThread.h \
@@ -64,7 +65,8 @@ HEADERS  += TcpClientMainWindow.h \
     ../lib/DataSource.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../lib/DataProtocols.h
+    ../lib/DataProtocols.h \
+    ../lib/HostAddressPort.h
 
 FORMS    += TcpClientMainWindow.ui
 

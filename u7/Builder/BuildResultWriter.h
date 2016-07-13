@@ -18,6 +18,8 @@ class DbController;
 namespace Builder
 {
 	class IssueLogger;
+	class BuildResultWriter;
+
 
 	class BuildFile : public QObject
 	{
@@ -34,7 +36,7 @@ namespace Builder
 
 		static QString removeHeadTailSeparator(const QString& str);
 
-	public:
+	protected:
 		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
 		bool open(const QString& fullBuildPath, bool textMode, IssueLogger* log);
@@ -51,13 +53,17 @@ namespace Builder
 
 		QFile& file() { return m_file; }
 
-		BuildFileInfo getInfo() const { return m_info; }
+		BuildFileInfo getBuildFileInfo() const { return m_info; }
 
 		static QString constructPathFileName(const QString& subDir, const QString& fileName);
+
+		friend class BuildResultWriter;
+		friend class ConfigurationXmlFile;
+
+	public:
+		void addMetadata(const QString& name, const QString& value);
+		void addMetadata(QList<StringPair>& nameValueList);
 	};
-
-
-	class BuildResultWriter;
 
 
 	class ConfigurationXmlFile : public QObject
@@ -71,14 +77,18 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 		QString m_subDir;
 
-		HashedVector<QString, BuildFileInfo> m_linkedFilesInfo;
+		QList<BuildFile*> m_linkedFiles;
 
 	public:
 		ConfigurationXmlFile(BuildResultWriter& buildResultWriter, const QString& subDir);
 
 		QXmlStreamWriter& xmlWriter() { return m_xmlWriter; }
+
+		bool addLinkToFile(BuildFile* buildFile);
 		bool addLinkToFile(const QString& subDir, const QString& fileName);
+
 		void finalize();
+
 		const QByteArray& getFileData() { return m_fileData; }
 		QString subDir() const { return m_subDir; }
 	};
@@ -156,14 +166,13 @@ namespace Builder
 		bool start(DbController *db, IssueLogger* log, bool release, int changesetID);
 		bool finish();
 
-		bool addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& dataString);
-		bool addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
 
-		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList);
-
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList);
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
@@ -184,7 +193,8 @@ namespace Builder
 
 		IssueLogger* log() { return m_log; }
 
-		BuildFile* getBuildFile(const QString& pathFileName);
+		BuildFile* getBuildFile(const QString& pathFileName) const;
+		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		bool isDebug() const;
 		bool isRelease() const;

@@ -83,7 +83,8 @@ SOURCES += MainWindow.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp
+    ../lib/ProtoSerialization.cpp \
+    ../lib/HostAddressPort.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -112,7 +113,8 @@ HEADERS  += MainWindow.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h
+    ../lib/ProtoSerialization.h \
+    ../lib/HostAddressPort.h
 
 FORMS    +=
 
@@ -156,3 +158,7 @@ win32 {
         INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
         INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto

@@ -53,7 +53,10 @@ SOURCES += \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
-    ../u7/Builder/IssueLogger.cpp
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -86,7 +89,10 @@ HEADERS += \
     ../lib/Crc.h \
     TuningDataStorage.h \
     ../lib/Hash.h \
-    ../u7/Builder/IssueLogger.h
+    ../u7/Builder/IssueLogger.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h
 
 include(../qtservice/src/qtservice.pri)
 

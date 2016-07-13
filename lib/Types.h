@@ -198,6 +198,8 @@ public:
 };
 
 
+typedef QPair<QString, QString> StringPair;
+
 
 const char* const DataFormatStr[] =
 {

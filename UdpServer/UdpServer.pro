@@ -75,7 +75,10 @@ SOURCES +=\
     ../lib/TcpFileTransfer.cpp \
 	../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/JsonSerializable.cpp
+    ../lib/JsonSerializable.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc
 
 HEADERS  += \
     ../lib/SocketIO.h \
@@ -92,7 +95,10 @@ HEADERS  += \
     ../lib/TcpFileTransfer.h \
 	../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
-    ../lib/JsonSerializable.h
+    ../lib/JsonSerializable.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h
 
 
 include(../qtservice/src/qtservice.pri)

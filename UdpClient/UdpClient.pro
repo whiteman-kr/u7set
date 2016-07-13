@@ -77,7 +77,10 @@ SOURCES += \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc \
+    ../lib/HostAddressPort.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -97,7 +100,10 @@ HEADERS  += MainWindow.h \
     ../lib/Queue.h \
     ../lib/DataProtocols.h \
     ../lib/WUtils.h \
-    ../lib/Crc.h
+    ../lib/Crc.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h \
+    ../lib/HostAddressPort.h
 
 include(../qtservice/src/qtservice.pri)
 

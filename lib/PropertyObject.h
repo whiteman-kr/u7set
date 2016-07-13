@@ -660,6 +660,7 @@ public:
 		//
 		QVariantEx vex;
 		vex.setEnumHack(&m_value, value);
+
 		return;
 	}
 

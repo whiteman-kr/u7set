@@ -50,6 +50,9 @@ class GetDataSourcesStatesReply;
 class GetUnitsRequest;
 class Unit;
 class GetUnitsReply;
+class GetServiceInfoRequest;
+class ServiceInfo;
+class GetServiceInfoReply;
 
 // ===================================================================
 
@@ -1731,6 +1734,344 @@ class GetUnitsReply : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static GetUnitsReply* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class GetServiceInfoRequest : public ::google::protobuf::Message {
+ public:
+  GetServiceInfoRequest();
+  virtual ~GetServiceInfoRequest();
+
+  GetServiceInfoRequest(const GetServiceInfoRequest& from);
+
+  inline GetServiceInfoRequest& operator=(const GetServiceInfoRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetServiceInfoRequest& default_instance();
+
+  void Swap(GetServiceInfoRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetServiceInfoRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetServiceInfoRequest& from);
+  void MergeFrom(const GetServiceInfoRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.GetServiceInfoRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetServiceInfoRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ServiceInfo : public ::google::protobuf::Message {
+ public:
+  ServiceInfo();
+  virtual ~ServiceInfo();
+
+  ServiceInfo(const ServiceInfo& from);
+
+  inline ServiceInfo& operator=(const ServiceInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ServiceInfo& default_instance();
+
+  void Swap(ServiceInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  ServiceInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ServiceInfo& from);
+  void MergeFrom(const ServiceInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 majorVersion = 2 [default = 0];
+  inline bool has_majorversion() const;
+  inline void clear_majorversion();
+  static const int kMajorVersionFieldNumber = 2;
+  inline ::google::protobuf::int32 majorversion() const;
+  inline void set_majorversion(::google::protobuf::int32 value);
+
+  // optional int32 minorVersion = 3 [default = 0];
+  inline bool has_minorversion() const;
+  inline void clear_minorversion();
+  static const int kMinorVersionFieldNumber = 3;
+  inline ::google::protobuf::int32 minorversion() const;
+  inline void set_minorversion(::google::protobuf::int32 value);
+
+  // optional int32 buildNo = 4 [default = 0];
+  inline bool has_buildno() const;
+  inline void clear_buildno();
+  static const int kBuildNoFieldNumber = 4;
+  inline ::google::protobuf::int32 buildno() const;
+  inline void set_buildno(::google::protobuf::int32 value);
+
+  // optional uint32 crc = 5 [default = 0];
+  inline bool has_crc() const;
+  inline void clear_crc();
+  static const int kCrcFieldNumber = 5;
+  inline ::google::protobuf::uint32 crc() const;
+  inline void set_crc(::google::protobuf::uint32 value);
+
+  // optional int64 uptime = 6 [default = 0];
+  inline bool has_uptime() const;
+  inline void clear_uptime();
+  static const int kUptimeFieldNumber = 6;
+  inline ::google::protobuf::int64 uptime() const;
+  inline void set_uptime(::google::protobuf::int64 value);
+
+  // optional int32 serviceState = 7 [default = 0];
+  inline bool has_servicestate() const;
+  inline void clear_servicestate();
+  static const int kServiceStateFieldNumber = 7;
+  inline ::google::protobuf::int32 servicestate() const;
+  inline void set_servicestate(::google::protobuf::int32 value);
+
+  // optional int64 serviceUptime = 8 [default = 0];
+  inline bool has_serviceuptime() const;
+  inline void clear_serviceuptime();
+  static const int kServiceUptimeFieldNumber = 8;
+  inline ::google::protobuf::int64 serviceuptime() const;
+  inline void set_serviceuptime(::google::protobuf::int64 value);
+
+  // optional uint32 clientRequestIP = 9 [default = 0];
+  inline bool has_clientrequestip() const;
+  inline void clear_clientrequestip();
+  static const int kClientRequestIPFieldNumber = 9;
+  inline ::google::protobuf::uint32 clientrequestip() const;
+  inline void set_clientrequestip(::google::protobuf::uint32 value);
+
+  // optional int32 clientRequestPort = 10 [default = 0];
+  inline bool has_clientrequestport() const;
+  inline void clear_clientrequestport();
+  static const int kClientRequestPortFieldNumber = 10;
+  inline ::google::protobuf::int32 clientrequestport() const;
+  inline void set_clientrequestport(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_majorversion();
+  inline void clear_has_majorversion();
+  inline void set_has_minorversion();
+  inline void clear_has_minorversion();
+  inline void set_has_buildno();
+  inline void clear_has_buildno();
+  inline void set_has_crc();
+  inline void clear_has_crc();
+  inline void set_has_uptime();
+  inline void clear_has_uptime();
+  inline void set_has_servicestate();
+  inline void clear_has_servicestate();
+  inline void set_has_serviceuptime();
+  inline void clear_has_serviceuptime();
+  inline void set_has_clientrequestip();
+  inline void clear_has_clientrequestip();
+  inline void set_has_clientrequestport();
+  inline void clear_has_clientrequestport();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 majorversion_;
+  ::google::protobuf::int32 minorversion_;
+  ::google::protobuf::int32 buildno_;
+  ::google::protobuf::int64 uptime_;
+  ::google::protobuf::uint32 crc_;
+  ::google::protobuf::int32 servicestate_;
+  ::google::protobuf::int64 serviceuptime_;
+  ::google::protobuf::uint32 clientrequestip_;
+  ::google::protobuf::int32 clientrequestport_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ServiceInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetServiceInfoReply : public ::google::protobuf::Message {
+ public:
+  GetServiceInfoReply();
+  virtual ~GetServiceInfoReply();
+
+  GetServiceInfoReply(const GetServiceInfoReply& from);
+
+  inline GetServiceInfoReply& operator=(const GetServiceInfoReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetServiceInfoReply& default_instance();
+
+  void Swap(GetServiceInfoReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetServiceInfoReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetServiceInfoReply& from);
+  void MergeFrom(const GetServiceInfoReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 error = 1;
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // required .Network.ServiceInfo serviceInfo = 2;
+  inline bool has_serviceinfo() const;
+  inline void clear_serviceinfo();
+  static const int kServiceInfoFieldNumber = 2;
+  inline const ::Network::ServiceInfo& serviceinfo() const;
+  inline ::Network::ServiceInfo* mutable_serviceinfo();
+  inline ::Network::ServiceInfo* release_serviceinfo();
+  inline void set_allocated_serviceinfo(::Network::ServiceInfo* serviceinfo);
+
+  // @@protoc_insertion_point(class_scope:Network.GetServiceInfoReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_serviceinfo();
+  inline void clear_has_serviceinfo();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Network::ServiceInfo* serviceinfo_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetServiceInfoReply* default_instance_;
+};
 // ===================================================================
 
 
@@ -3161,6 +3502,298 @@ GetUnitsReply::units() const {
 inline ::google::protobuf::RepeatedPtrField< ::Network::Unit >*
 GetUnitsReply::mutable_units() {
   return &units_;
+}
+
+// -------------------------------------------------------------------
+
+// GetServiceInfoRequest
+
+// -------------------------------------------------------------------
+
+// ServiceInfo
+
+// optional int32 type = 1 [default = 0];
+inline bool ServiceInfo::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ServiceInfo::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ServiceInfo::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ServiceInfo::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 ServiceInfo::type() const {
+  return type_;
+}
+inline void ServiceInfo::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 majorVersion = 2 [default = 0];
+inline bool ServiceInfo::has_majorversion() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ServiceInfo::set_has_majorversion() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ServiceInfo::clear_has_majorversion() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServiceInfo::clear_majorversion() {
+  majorversion_ = 0;
+  clear_has_majorversion();
+}
+inline ::google::protobuf::int32 ServiceInfo::majorversion() const {
+  return majorversion_;
+}
+inline void ServiceInfo::set_majorversion(::google::protobuf::int32 value) {
+  set_has_majorversion();
+  majorversion_ = value;
+}
+
+// optional int32 minorVersion = 3 [default = 0];
+inline bool ServiceInfo::has_minorversion() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServiceInfo::set_has_minorversion() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServiceInfo::clear_has_minorversion() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ServiceInfo::clear_minorversion() {
+  minorversion_ = 0;
+  clear_has_minorversion();
+}
+inline ::google::protobuf::int32 ServiceInfo::minorversion() const {
+  return minorversion_;
+}
+inline void ServiceInfo::set_minorversion(::google::protobuf::int32 value) {
+  set_has_minorversion();
+  minorversion_ = value;
+}
+
+// optional int32 buildNo = 4 [default = 0];
+inline bool ServiceInfo::has_buildno() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ServiceInfo::set_has_buildno() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ServiceInfo::clear_has_buildno() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ServiceInfo::clear_buildno() {
+  buildno_ = 0;
+  clear_has_buildno();
+}
+inline ::google::protobuf::int32 ServiceInfo::buildno() const {
+  return buildno_;
+}
+inline void ServiceInfo::set_buildno(::google::protobuf::int32 value) {
+  set_has_buildno();
+  buildno_ = value;
+}
+
+// optional uint32 crc = 5 [default = 0];
+inline bool ServiceInfo::has_crc() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void ServiceInfo::set_has_crc() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void ServiceInfo::clear_has_crc() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void ServiceInfo::clear_crc() {
+  crc_ = 0u;
+  clear_has_crc();
+}
+inline ::google::protobuf::uint32 ServiceInfo::crc() const {
+  return crc_;
+}
+inline void ServiceInfo::set_crc(::google::protobuf::uint32 value) {
+  set_has_crc();
+  crc_ = value;
+}
+
+// optional int64 uptime = 6 [default = 0];
+inline bool ServiceInfo::has_uptime() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ServiceInfo::set_has_uptime() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ServiceInfo::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ServiceInfo::clear_uptime() {
+  uptime_ = GOOGLE_LONGLONG(0);
+  clear_has_uptime();
+}
+inline ::google::protobuf::int64 ServiceInfo::uptime() const {
+  return uptime_;
+}
+inline void ServiceInfo::set_uptime(::google::protobuf::int64 value) {
+  set_has_uptime();
+  uptime_ = value;
+}
+
+// optional int32 serviceState = 7 [default = 0];
+inline bool ServiceInfo::has_servicestate() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ServiceInfo::set_has_servicestate() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ServiceInfo::clear_has_servicestate() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ServiceInfo::clear_servicestate() {
+  servicestate_ = 0;
+  clear_has_servicestate();
+}
+inline ::google::protobuf::int32 ServiceInfo::servicestate() const {
+  return servicestate_;
+}
+inline void ServiceInfo::set_servicestate(::google::protobuf::int32 value) {
+  set_has_servicestate();
+  servicestate_ = value;
+}
+
+// optional int64 serviceUptime = 8 [default = 0];
+inline bool ServiceInfo::has_serviceuptime() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void ServiceInfo::set_has_serviceuptime() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void ServiceInfo::clear_has_serviceuptime() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void ServiceInfo::clear_serviceuptime() {
+  serviceuptime_ = GOOGLE_LONGLONG(0);
+  clear_has_serviceuptime();
+}
+inline ::google::protobuf::int64 ServiceInfo::serviceuptime() const {
+  return serviceuptime_;
+}
+inline void ServiceInfo::set_serviceuptime(::google::protobuf::int64 value) {
+  set_has_serviceuptime();
+  serviceuptime_ = value;
+}
+
+// optional uint32 clientRequestIP = 9 [default = 0];
+inline bool ServiceInfo::has_clientrequestip() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ServiceInfo::set_has_clientrequestip() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void ServiceInfo::clear_has_clientrequestip() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void ServiceInfo::clear_clientrequestip() {
+  clientrequestip_ = 0u;
+  clear_has_clientrequestip();
+}
+inline ::google::protobuf::uint32 ServiceInfo::clientrequestip() const {
+  return clientrequestip_;
+}
+inline void ServiceInfo::set_clientrequestip(::google::protobuf::uint32 value) {
+  set_has_clientrequestip();
+  clientrequestip_ = value;
+}
+
+// optional int32 clientRequestPort = 10 [default = 0];
+inline bool ServiceInfo::has_clientrequestport() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void ServiceInfo::set_has_clientrequestport() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void ServiceInfo::clear_has_clientrequestport() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void ServiceInfo::clear_clientrequestport() {
+  clientrequestport_ = 0;
+  clear_has_clientrequestport();
+}
+inline ::google::protobuf::int32 ServiceInfo::clientrequestport() const {
+  return clientrequestport_;
+}
+inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) {
+  set_has_clientrequestport();
+  clientrequestport_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// GetServiceInfoReply
+
+// required int32 error = 1;
+inline bool GetServiceInfoReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetServiceInfoReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetServiceInfoReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetServiceInfoReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetServiceInfoReply::error() const {
+  return error_;
+}
+inline void GetServiceInfoReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// required .Network.ServiceInfo serviceInfo = 2;
+inline bool GetServiceInfoReply::has_serviceinfo() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GetServiceInfoReply::set_has_serviceinfo() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GetServiceInfoReply::clear_has_serviceinfo() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GetServiceInfoReply::clear_serviceinfo() {
+  if (serviceinfo_ != NULL) serviceinfo_->::Network::ServiceInfo::Clear();
+  clear_has_serviceinfo();
+}
+inline const ::Network::ServiceInfo& GetServiceInfoReply::serviceinfo() const {
+  return serviceinfo_ != NULL ? *serviceinfo_ : *default_instance_->serviceinfo_;
+}
+inline ::Network::ServiceInfo* GetServiceInfoReply::mutable_serviceinfo() {
+  set_has_serviceinfo();
+  if (serviceinfo_ == NULL) serviceinfo_ = new ::Network::ServiceInfo;
+  return serviceinfo_;
+}
+inline ::Network::ServiceInfo* GetServiceInfoReply::release_serviceinfo() {
+  clear_has_serviceinfo();
+  ::Network::ServiceInfo* temp = serviceinfo_;
+  serviceinfo_ = NULL;
+  return temp;
+}
+inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInfo* serviceinfo) {
+  delete serviceinfo_;
+  serviceinfo_ = serviceinfo;
+  if (serviceinfo) {
+    set_has_serviceinfo();
+  } else {
+    clear_has_serviceinfo();
+  }
 }
 
 

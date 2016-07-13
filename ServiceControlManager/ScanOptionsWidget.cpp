@@ -189,7 +189,7 @@ void SubnetChecker::checkNextHost()
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
 											  ip, serviceInfo[i].port);
 		if (sent == -1)
-	    {
+		{
 			if (m_socket->error() == QAbstractSocket::NetworkError)
 			{
 				//Looks like buffer overflow
@@ -197,8 +197,8 @@ void SubnetChecker::checkNextHost()
 				return;
 			}
 			qDebug() << "Socket error " << m_socket->error() << "(ip=" << ip.toString() << "): " << m_socket->errorString();
-	    }
-    }
+		}
+	}
 	//Select next ip
 	//
 	m_ip++;
@@ -231,12 +231,16 @@ void SubnetChecker::readAck()
 	{
 		QHostAddress sender;
 		quint16 senderPort;
-		AckGetServiceInfo ack;
 
-		qint64 size = m_socket->readDatagram((char*)&ack, sizeof(ack), &sender, &senderPort);
-		if (size == sizeof(ack))
+		qint64 size = m_socket->readDatagram(readBuffer, sizeof(readBuffer), &sender, &senderPort);
+
+		if (size > 0)
 		{
-			emit hostFound(sender.toIPv4Address(), senderPort, ack.serviceInfo);
+			Network::GetServiceInfoReply ack;
+
+			ack.ParseFromArray(readBuffer, size);
+
+			emit hostFound(sender.toIPv4Address(), senderPort, ack.serviceinfo());
 		}
 	}
 }
