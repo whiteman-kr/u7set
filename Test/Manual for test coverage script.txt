@@ -26,9 +26,9 @@
 
 Если тесты не будут изменены, повторный запуск необязателен, однако с каждым новым изменением проекта u7settest крайне необходимо их запускать для обновления .gcda-файлов.
 
-3. Отредактируйте файл coverageConfig.txt. Необходимо открыть его в любом доступном текстовом редакторе, и написать имена файлов, которые необходимо исследовать на покрытие тестами. По умолчанию написаны имена лишь трёх файлов: DbController и DbWorker. Имя каждого файла следует писать с новой строки. В противном случае, скрипт не обнаружит заданные файлы и выдаст ошибку.
+3. Отредактируйте файл coverageConfig.files. Необходимо открыть его в любом доступном текстовом редакторе, и написать имена файлов, которые необходимо исследовать на покрытие тестами. По умолчанию написаны имена лишь трёх файлов: DbController и DbWorker. Имя каждого файла следует писать с новой строки. В противном случае, скрипт не обнаружит заданные файлы и выдаст ошибку.
 
-4. Переместить скрипт generateTestCoverageReport.sh и файл coverageConfig.txt из u7set/Test/ в папку со сборкой проекта u7settest. Очень важно переместить их именно в корень данной папки. В противном случае, скрипт выдаст соответствующее сообщение об ошибке.
+4. Переместить скрипт generateTestCoverageReport.sh и файл coverageConfig.files из u7set/Test/ в папку со сборкой проекта u7settest. Очень важно переместить их именно в корень данной папки. В противном случае, скрипт выдаст соответствующее сообщение об ошибке.
 
 5. Проверить: выданы ли права на запуск. Если таких прав выдано не было, необходимо ввести следующую команду:  chmod +x  generateTestCoverageReport.sh. В противном случае, запуск скрипта будет невозможен.
 
@@ -71,9 +71,9 @@ IMPORTANT: Before executting test coverage, you must run test at least once. You
 
 If tests were not changed, you can not execute them. But if it does, you need execute them. In other way, test coverage info will use old information.
 
-3. Change coverageConfig.txt file, according to files, that must be inspected. By default, this file contains two records: DbController and DbWorker. Every new record must be inserted in new line. In other way, script will exit with error.
+3. Change coverageConfig.files file, according to files, that must be inspected. By default, this file contains two records: DbController and DbWorker. Every new record must be inserted in new line. In other way, script will exit with error.
 
-3. Move  generateTestCoverageReport.sh script and coverageConfig.txt file from u7set/Test/ to u7settest build folder
+3. Move  generateTestCoverageReport.sh script and coverageConfig.files file from u7set/Test/ to u7settest build folder
 
 4. Add execution bit to script if needed (chmod +x  generateTestCoverageReport.sh)
 
