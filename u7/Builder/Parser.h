@@ -68,6 +68,9 @@ namespace Builder
 		std::vector<QUuid> getLinksUuids() const;				// Used for IssueLogger
 
 		std::vector<VFrame30::AfbPin> getInputPinsForItem(QUuid fblItemUuid) const;
+
+		bool hasInputOrOutput(const QUuid& uuid) const;
+		bool hasJoinedInOuts(Bush& bush) const;
 	};
 
 	struct BushContainer
@@ -237,6 +240,8 @@ namespace Builder
 		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> schema,
 									std::shared_ptr<VFrame30::SchemaLayer> layer,
 									QString equipmentId);
+
+		bool filterSingleChannelBranchesInMulischema(QString equipmnetId, BushContainer* bushContainer);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
