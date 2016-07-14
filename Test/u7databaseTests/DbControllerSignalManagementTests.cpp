@@ -48,6 +48,8 @@ void DbControllerSignalTests::initTestCase()
 
 void DbControllerSignalTests::addSignalTest()
 {
+	qRegisterMetaType<E::SignalType>("E::SignalType");
+
 	QSqlDatabase db = QSqlDatabase::database();
 
 	db.setHostName(m_databaseHost);

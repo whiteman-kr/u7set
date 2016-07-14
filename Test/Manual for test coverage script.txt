@@ -6,25 +6,33 @@
 1. Для начала необходимо установить пакеты lcov и gcovr, предоставляющие графический инерфейс для отображения результатов работы утилиты gcov. Утилита gcov будет установлена автоматически, в случае её отсутствия. Обычно она поставляется с пакетом компилятора GCC.
 Для установки утилит из репозиториев необходимо ввести следующие комманды:
 
-	Debian-based: 	sudo apt-get install lcov gcovr
-	Fedora:		sudo dnf install lcov gcovr
+	Debian-based: 	apt-get install lcov gcovr
+	Fedora:		dnf install lcov gcovr
 	Gentoo:		emerge lcov gcovr
-	Arch-based:		sudo pacman -S lcov gcovr
+	Arch-based:	pacman -S lcov gcovr
+	Open SUSE:	zypper install lcov gcovr
 
 В противном случае, предоставляется возможность собрать пакеты из исходников. Исходники утилит могут быть взяты из официальных сайтов:
 
-1. lcov: http://ltp.sourceforge.net/coverage/lcov.php
-2. gcovr: https://github.com/gcovr/gcovr/releases
+1) lcov: http://ltp.sourceforge.net/coverage/lcov.php
+2) gcovr: https://github.com/gcovr/gcovr/releases
 
-2. Необходимо собрать проект u7settest. Для этого надо открыть QtCreator, и выбрать проэкт из u7set/u7settest.pro. После этого его необходимо собрать, чтобы на компьютере была создана папка build-* этого проекта. Запускать тесты не обязательно.
+2. Необходимо собрать проект u7settest. Для этого надо открыть QtCreator, и выбрать проэкт из u7set/u7settest.pro. После этого его необходимо собрать, чтобы на компьютере была создана папка build-* этого проекта.
 
-3. Переместить скрипт generateTestCoverageReport.sh из u7set/Test/ в папку с билдом проэкта u7settest. Очень важно переместить его именно в корень данной папки. В противном случае, скрипт выдаст соответствующее сообщение об ошибке.
+ВАЖНО: для проверки покрытия кода тестами важно запустить тесты хотя бы один раз для того, чтобы сформировались *.gcda-файлы необходимые для работы lcov. Запустить тесты можно двумя способами:1
 
-4. Проверить: выданы ли права на запуск. Если таких прав выдано не было, необходимо ввести следующую команду:  chmod +x  generateTestCoverageReport.sh. В противном случае, запуск скрипта будет невозможен.
+1) Запустить прямо в QtCreator.
+2) Запустить скрипт generateTestCoverageReport.sh с ключом -exec. В таком случае перед запуском проверки покрытия, тесты будут запущены.
 
-5. Теперь можно запустить скрипт. Для этого стоит перейти в папку со сборкой проекта u7settest, и ввести следующую команду: ./generateTestCoverageReport.sh. Для начала скрипт запустит тесты, и создаст файлы *.gcda, которые будут использованы для генерации информации о покрытии кода тестами. После выполнения тестов, скрипт запустит утилиту lcov на создание *.info файла. В конце работы скрипта, он создаст *.html страничку, где будет детально отображена информация о покрытии кода тестами. Затем откроется браузер, который выставлен по умолчанию, и отобразит созданный файл.
+Если тесты не будут изменены, повторный запуск необязателен, однако с каждым новым изменением проекта u7settest крайне необходимо их запускать для обновления .gcda-файлов.
 
+3. Отредактируйте файл coverageConfig.files. Необходимо открыть его в любом доступном текстовом редакторе, и написать имена файлов, которые необходимо исследовать на покрытие тестами. По умолчанию написаны имена лишь трёх файлов: DbController и DbWorker. Имя каждого файла следует писать с новой строки. В противном случае, скрипт не обнаружит заданные файлы и выдаст ошибку.
 
+4. Переместить скрипт generateTestCoverageReport.sh и файл coverageConfig.files из u7set/Test/ в папку со сборкой проекта u7settest. Очень важно переместить их именно в корень данной папки. В противном случае, скрипт выдаст соответствующее сообщение об ошибке.
+
+5. Проверить: выданы ли права на запуск. Если таких прав выдано не было, необходимо ввести следующую команду:  chmod +x  generateTestCoverageReport.sh. В противном случае, запуск скрипта будет невозможен.
+
+6. Теперь можно запустить скрипт. Для этого стоит перейти в папку со сборкой проекта u7settest, и ввести следующую команду: ./generateTestCoverageReport.sh. Для начала скрипт запустит тесты, и создаст файлы *.gcda, которые будут использованы для генерации информации о покрытии кода тестами. После выполнения тестов, скрипт запустит утилиту lcov на создание *.info файла. В конце работы скрипта, он создаст *.html страничку, где будет детально отображена информация о покрытии кода тестами. Затем откроется браузер, который выставлен по умолчанию, и отобразит созданный файл.
 
 
 
@@ -44,19 +52,28 @@ Manual for test coverage script execution
 1. You need to install lcov and gcovr packets first. These packets used for generating graphical output from result of gcov utility work. If gcov utility does not exist, it will be installed automatically.
 To install these packets from repository, enter next commands:
 
-	Debian-based: 	sudo apt-get install lcov gcovr
-	Fedora:		sudo dnf install lcov gcovr
+	Debian-based: 	apt-get install lcov gcovr
+	Fedora:		dnf install lcov gcovr
 	Gentoo:		emerge lcov gcovr
-	Arch-based:		sudo pacman -S lcov gcovr
+	Arch-based:	pacman -S lcov gcovr
+	Open SUSE:	zypper install lcov gcovr
 
 In other way, you need to compile them manually. Source codes can be found at official sites:
 
-1. lcov: http://ltp.sourceforge.net/coverage/lcov.php
-2. gcovr: https://github.com/gcovr/gcovr/releases
+1) lcov: http://ltp.sourceforge.net/coverage/lcov.php
+2) gcovr: https://github.com/gcovr/gcovr/releases
 
-2. Next, you must compile u7settest project. To do that, you need open QtCreator and select u7set/u7settest.pro file. After project opening, build it. You may not run tests.
+2. Next, you must compile u7settest project. To do that, you need open QtCreator and select u7set/u7settest.pro file. After project opening, build it.
 
-3. Move  generateTestCoverageReport.sh script from u7set/Test/ to u7settest build folder
+IMPORTANT: Before executting test coverage, you must run test at least once. You can do that by two ways:
+1) Start test execution in QtCreator;
+2) Start generateTestCoverageScript.sh with key -exec; It will automatically start tests before lcov utility execution.
+
+If tests were not changed, you can not execute them. But if it does, you need execute them. In other way, test coverage info will use old information.
+
+3. Change coverageConfig.files file, according to files, that must be inspected. By default, this file contains two records: DbController and DbWorker. Every new record must be inserted in new line. In other way, script will exit with error.
+
+3. Move  generateTestCoverageReport.sh script and coverageConfig.files file from u7set/Test/ to u7settest build folder
 
 4. Add execution bit to script if needed (chmod +x  generateTestCoverageReport.sh)
 
