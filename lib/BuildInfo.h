@@ -6,7 +6,7 @@
 #include <QXmlStreamWriter>
 #include <cassert>
 
-#include <../lib/Types.h>
+#include "../lib/Types.h"
 
 namespace Builder
 {

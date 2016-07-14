@@ -12,9 +12,11 @@ else
 	exit 1;
 fi
 
-if ! ./u7databasetests; then
-        echo "Can not execute tests binary";
-        exit 2;
+if [ $1 == "-exec" ]; then
+	if ! ./u7databasetests; then
+        	echo "Can not execute tests binary";
+	        exit 2;
+	fi
 fi
 
 if [ -d "../../Test" ]; then
@@ -33,63 +35,41 @@ echo "=========================";
 if [ -d "testCoverage/" ]; then
 	rm -r testCoverage/;
 	echo "Old data folder wiped!";
-fi
-
-if [ -f "coverage.info" ]; then
-	rm coverage.info;
-	echo "Old coverage.info wiped";
-fi
-
-if [ -f "coverageDbController.info" ]; then
-	rm coverageDbController.info;
-	echo "Old coverageDbController.info wiped";
-fi
-
-if [ -f "coverageDbWorker.info" ]; then
-        rm coverageDbWorker.info;
-        echo "Old coverageDbWorker.info wiped";
+else
+	echo "Nothing to clean";
 fi
 
 echo "=========================";
 echo "Generating Coverage files";
 echo "-------------------------";
-echo "Generating coverageDbController.info...";
 
+file="../coverageConfig.files";
+mergeFiles="";
+while IFS= read -r line
+do
+	if [ -n $line ]; then
+		if [ -f "$line.info" ]; then
+        		rm $line.info;
+        		echo "Old $line.info wiped";
+		fi
 
-if ! lcov -c -d "u7databaseTests/DbController.gcda" -o coverageDbController.info; then
-	echo "Can not generate coverageDbController.info. Err code $?";
-	echo "This script must be placed in project build dir.";
-	exit 4;
-fi
+		echo "Generating $line.info...";
 
-echo "Generating coverageDbWorker.info...";
+		if ! lcov -c -d "u7databaseTests/$line.gcda" -o $line.info; then
+			echo "Can not generate $line.info. Err code $?";
+			echo "This script must be placed in project build dir.";
+			echo "If it is already done, try to delete build dir, and rebuild u7setest";
+			exit 4;
+		fi
+	fi
 
-if ! lcov -c -d "u7databaseTests/DbWorker.gcda" -o coverageDbWorker.info; then
-	echo "Can not generate coverageDbWorker.info. Err code $?";
-	echo "This script must be placed in project build dir.";
-        exit 5;
-fi
+	mergeFiles="$mergeFiles -a $line.info";
 
-echo "Generating coverageDbStruct.info...";
-
-if ! lcov -c -d "u7databaseTests/DbStruct.gcda" -o coverageDbStruct.info; then
-	echo "Can not generate coverageDbStruct.info. Err code $?";
-	echo "This script must be placed in project build dir.";
-        exit 5;
-fi
-
-echo "Generating coveragePropertyObject.info...";
-
-if ! lcov -c -d "u7databaseTests/PropertyObject.gcda" -o coveragepropertyObject.info; then
-        echo "Can not generate coveragePropertyObject.info. Err code $?";
-        echo "This script must be placed in project build dir.";
-        exit 5;
-fi
-
+done < $file;
 
 echo "Merging coverage files into coverage.info...";
 
-if ! lcov --add-tracefile coverageDbController.info -a coverageDbWorker.info -a coverageDbStruct.info -a coveragePropertyObject.info -o coverage.info; then
+if ! lcov $mergeFiles -o coverage.info; then
 	echo "Can not merge files to coverage.info. Err code $?";
         exit 6;
 fi

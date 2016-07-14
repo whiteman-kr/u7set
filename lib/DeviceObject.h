@@ -368,6 +368,8 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+		std::shared_ptr<DeviceModule> getLogicModuleSharedPointer();
+
 		// Properties
 		//
 	public:

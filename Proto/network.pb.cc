@@ -559,9 +559,9 @@ void protobuf_AddDesc_network_2eproto() {
     "me\030\006 \001(\003:\0010\022\027\n\014serviceState\030\007 \001(\005:\0010\022\030\n\r"
     "serviceUptime\030\010 \001(\003:\0010\022\032\n\017clientRequestI"
     "P\030\t \001(\r:\0010\022\034\n\021clientRequestPort\030\n \001(\005:\0010"
-    "\"O\n\023GetServiceInfoReply\022\r\n\005error\030\001 \002(\005\022)"
-    "\n\013serviceInfo\030\002 \002(\0132\024.Network.ServiceInf"
-    "o", 1841);
+    "\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001 \002(\005:\001"
+    "0\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.Service"
+    "Info", 1844);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -6073,7 +6073,7 @@ bool GetServiceInfoReply::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int32 error = 1;
+      // required int32 error = 1 [default = 0];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -6120,7 +6120,7 @@ bool GetServiceInfoReply::MergePartialFromCodedStream(
 
 void GetServiceInfoReply::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int32 error = 1;
+  // required int32 error = 1 [default = 0];
   if (has_error()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
@@ -6139,7 +6139,7 @@ void GetServiceInfoReply::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* GetServiceInfoReply::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required int32 error = 1;
+  // required int32 error = 1 [default = 0];
   if (has_error()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
@@ -6162,7 +6162,7 @@ int GetServiceInfoReply::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int32 error = 1;
+    // required int32 error = 1 [default = 0];
     if (has_error()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(

@@ -165,6 +165,8 @@ private:
 
 	Address16 m_tuningAddr;
 
+	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
+
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
 	//
@@ -384,6 +386,9 @@ public:
 	void serializeToProtoAppSignal(Proto::AppSignal* s) const;
 	void serializeFromProtoAppSignal(const Proto::AppSignal* s);
 
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
+	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
+
 	friend class DbWorker;
 };
 
@@ -411,6 +416,7 @@ public:
 	QVector<int> getChannelSignalsID(int signalGroupID);
 
 	void buildStrID2IndexMap();
+	void initLmProperty(Hardware::EquipmentSet& equipment);
 
 	bool contains(const QString& appSignalID);
 

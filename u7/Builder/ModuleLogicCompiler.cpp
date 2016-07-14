@@ -1771,12 +1771,12 @@ namespace Builder
 		if (startCount == 1)
 		{
 			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-			cmd.setComment(QString(tr("compute %1")).arg(appFb->caption()));
+			cmd.setComment(QString(tr("compute %1 @%2")).arg(appFb->caption()).arg(appFb->label()));
 		}
 		else
 		{
 			cmd.nstart(appFb->opcode(), appFb->instance(), startCount, appFb->caption(), appFb->runTime());
-			cmd.setComment(QString(tr("compute %1 %2 times")).arg(appFb->afbStrID()).arg(startCount));
+			cmd.setComment(QString(tr("compute %1 @%2 %3 times")).arg(appFb->afbStrID()).arg(appFb->label()).arg(startCount));
 		}
 
 		m_code.append(cmd);
@@ -5317,6 +5317,18 @@ namespace Builder
 
 		assert(false);		// unknown type of item
 		return "";
+	}
+
+
+	QString AppItem::label() const
+	{
+		if (isFb() == false)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_appLogicItem.m_fblItem->toAfbElement()->label();
 	}
 
 

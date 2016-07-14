@@ -2107,6 +2107,42 @@ R"DELIM({
 		return m_deviceType;
 	}
 
+	std::shared_ptr<DeviceModule> DeviceChassis::getLogicModuleSharedPointer()
+	{
+		int count = childrenCount();
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<DeviceObject> device = childSharedPtr(i);
+
+			if (device == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (device->isModule())
+			{
+				std::shared_ptr<DeviceModule> module = std::dynamic_pointer_cast<DeviceModule>(device);
+
+				if (module == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (module->isLM())
+				{
+					return module;
+				}
+
+				return nullptr;
+			}
+		}
+
+		return nullptr;
+	}
+
 	int DeviceChassis::type() const
 	{
 		return m_type;
