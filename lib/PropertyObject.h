@@ -646,9 +646,9 @@ public:
 	class QVariantEx : public QVariant
 	{
 	public:
-		void setEnumHack(QVariant* dst, int value)
+		void setEnumHack(int value)
 		{
-			dst->d.data.i = value;
+			this->d.data.i = value;
 		}
 	};
 
@@ -658,8 +658,8 @@ public:
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
 		// QVariant::canConvert from int to enum returns false (for QString its ok)
 		//
-		QVariantEx vex;
-		vex.setEnumHack(&m_value, value);
+		QVariantEx* vex = static_cast<QVariantEx*>(&m_value);
+		vex->setEnumHack(value);
 
 		return;
 	}
