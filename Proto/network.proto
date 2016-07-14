@@ -160,7 +160,7 @@ message ServiceInfo
 
 message GetServiceInfoReply
 {
-    required int32 error = 1;
+    required int32 error = 1 [default = 0];
     required ServiceInfo serviceInfo = 2;
 }
 

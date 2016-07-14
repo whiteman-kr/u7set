@@ -170,7 +170,7 @@ namespace Builder
 
 			SignalSet signalSet;
 
-			if (loadSignals(&db, &signalSet) == false)
+			if (loadSignals(&db, &signalSet, equipmentSet) == false)
 			{
 				break;
 			}
@@ -535,7 +535,7 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet)
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet& equipment)
 	{
 		if (db == nullptr ||
 			signalSet == nullptr)
@@ -564,6 +564,7 @@ namespace Builder
 		LOG_SUCCESS(m_log, tr("Ok"));
 
 		signalSet->buildStrID2IndexMap();
+		signalSet->initLmProperty(equipment);
 
 		return true;
 	}

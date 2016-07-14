@@ -1317,6 +1317,87 @@ void SignalSet::buildStrID2IndexMap()
 }
 
 
+void SignalSet::initLmProperty(Hardware::EquipmentSet& equipment)
+{
+	int signalCount = count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		Signal& s = (*this)[i];
+
+		s.setLm(nullptr);
+
+		if (s.equipmentID().isEmpty())
+		{
+			continue;
+		}
+
+		std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
+
+		Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
+
+		if (deviceObject == nullptr)
+		{
+			continue;
+		}
+
+		if (deviceObject->isModule() == true)
+		{
+			// device is Module
+			//
+			Hardware::DeviceModule* module = deviceObject->toModule();
+
+			if (module == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (module->isLM())
+			{
+				s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
+			}
+			else
+			{
+				// error!!!!
+			}
+		}
+		else
+		{
+			if (deviceObject->isSignal())
+			{
+				// device is Signal
+				//
+				Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
+
+				if (chassis == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
+
+				if (lm != nullptr)
+				{
+					s.setLm(lm);
+				}
+				else
+				{
+					// error !!!!
+
+				}
+			}
+			else
+			{
+				// invalid device type
+				//
+			}
+		}
+	}
+}
+
+
 bool SignalSet::contains(const QString& appSignalID)
 {
 	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)

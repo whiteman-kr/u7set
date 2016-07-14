@@ -145,6 +145,8 @@ namespace Builder
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
+		QString label() const;
+
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 	};
 

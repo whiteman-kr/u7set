@@ -2034,7 +2034,7 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 error = 1;
+  // required int32 error = 1 [default = 0];
   inline bool has_error() const;
   inline void clear_error();
   static const int kErrorFieldNumber = 1;
@@ -3736,7 +3736,7 @@ inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) 
 
 // GetServiceInfoReply
 
-// required int32 error = 1;
+// required int32 error = 1 [default = 0];
 inline bool GetServiceInfoReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
