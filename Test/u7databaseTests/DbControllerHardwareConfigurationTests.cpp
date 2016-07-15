@@ -48,7 +48,7 @@ void DbControllerHardwareConfigurationTests::initTestCase()
 	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
 }
 
-void DbControllerHardwareConfigurationTests::addDeviceObjectTest()
+void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 {
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -59,9 +59,11 @@ void DbControllerHardwareConfigurationTests::addDeviceObjectTest()
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("u7_" + m_databaseName);
 
+	QString dataForTest = "DataForFileFromAddDeviceObjectTest";
+
 	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, 'addDeviceObjectTest', 1, 'DataForFileFromAddDeviceObjectTest', '{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}')"));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, 'addDeviceObjectTest', 1, '%1', '{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}')").arg(dataForTest));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -76,8 +78,8 @@ void DbControllerHardwareConfigurationTests::addDeviceObjectTest()
 	//deviceForTest
 
 	deviceForTest->setFileInfo(fileInfo);
-	deviceForTest->setCaption("addDeviceObjectTest");
-	deviceForTest->setObjectName("addDeviceObjectTest");
+	deviceForTest->setCaption("addDeviceObjectTestDevice");
+	deviceForTest->setObjectName("addDeviceObjectTestDevice");
 	deviceForTest->setPlace(1);
 	deviceForTest->setChildRestriction("ChildRestriction");
 
@@ -88,11 +90,31 @@ void DbControllerHardwareConfigurationTests::addDeviceObjectTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1").arg(query.value(0).toInt()));
+	int deviceObjectFileId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1").arg(deviceObjectFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value("details").toString().contains("\"Place\": 1") == true, qPrintable("Error: wrong record in fileinstance"));
+	QVERIFY2(query.value("details").toString().contains("addDeviceObjectTestDevice") == true, qPrintable("Error: wrong record in fileinstance"));
+
+	std::vector<Hardware::DeviceObject*> devices;
+	devices.push_back(deviceForTest);
+
+	ok = m_dbController->deleteDeviceObjects(devices,0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM fileInstance WHERE fileId = %1").arg(deviceObjectFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == 0, qPrintable("Error: deleteDeviceObject function not delete the object from fileInstance"));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM file WHERE fileId = %1").arg(deviceObjectFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == 0, qPrintable("Error: deleteDeviceObject function not delete the object from file table"));
 
 	db.close();
 }
