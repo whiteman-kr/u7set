@@ -6,7 +6,6 @@
 #include "GlobalMessanger.h"
 
 #include "../../lib/DbController.h"
-#include "../../lib/DeviceObject.h"
 
 #include "../../VFrame30/LogicSchema.h"
 #include "../../VFrame30/SchemaItemLink.h"
@@ -185,41 +184,91 @@ namespace Builder
 		return result;
 	}
 
-	bool Bush::hasInputOrOutput(const QUuid& uuid) const
+	bool Bush::hasCommonFbls(const Bush& bush) const
 	{
-		if (outputPin == uuid)
+		for (std::pair<QUuid, std::shared_ptr<VFrame30::FblItemRect>> fbl : bush.fblItems)
 		{
-			return true;
-		}
+			auto found = this->fblItems.find(fbl.first);
 
-		auto findIt = inputPins.find(uuid);
-
-		if (findIt == inputPins.end())
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	bool Bush::hasJoinedInOuts(Bush& bush) const
-	{
-		if (bush.hasInputOrOutput(this->outputPin) == true)
-		{
-			return true;
-		}
-
-		for (const QUuid& uuid : inputPins)
-		{
-			if (bush.hasInputOrOutput(uuid) == true)
+			if (found != this->fblItems.end())
 			{
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+//	bool Bush::hasInputOrOutput(const QUuid& uuid) const
+//	{
+//		if (outputPin == uuid)
+//		{
+//			return true;
+//		}
+
+//		auto findIt = inputPins.find(uuid);
+
+//		if (findIt == inputPins.end())
+//		{
+//			return false;
+//		}
+//		else
+//		{
+//			return true;
+//		}
+//	}
+
+//	bool Bush::hasJoinedInOuts(Bush& bush) const
+//	{
+//		if (bush.hasInputOrOutput(this->outputPin) == true)
+//		{
+//			return true;
+//		}
+
+//		for (const QUuid& uuid : inputPins)
+//		{
+//			if (bush.hasInputOrOutput(uuid) == true)
+//			{
+//				return true;
+//			}
+//		}
+
+//		return false;
+//	}
+
+	void Bush::debugInfo() const
+	{
+		qDebug() << "Bush debug info:";
+		qDebug() << "    OutputPin: "  << outputPin.toString();
+		qDebug() << "    InputPins: ";
+
+		for (QUuid u : inputPins)
+		{
+			qDebug() << "             " << u.toString();
+		}
+
+		if (itemByPinGuid(outputPin) != nullptr)
+		{
+			qDebug() << "    OutputItem: " << itemByPinGuid(outputPin)->buildName();
+		}
+
+		qDebug() << "    Links:";
+		for (auto l = links.begin(); l != links.end(); l++)
+		{
+			qDebug() << "             " << l->first.toString();
+		}
+
+		qDebug() << "    FblItems:";
+		for (auto it = fblItems.begin(); it != fblItems.end(); ++it)
+		{
+			std::shared_ptr<VFrame30::FblItemRect> item = it->second;
+			assert(item);
+
+			if (item != nullptr)
+			{
+				qDebug() << "           " << item->buildName();
+			}
+		}
 	}
 
 	// Function finds branch with a point on it.
@@ -289,37 +338,7 @@ namespace Builder
 
 		for (const Bush& b : bushes)
 		{
-			qDebug() << "Bush:";
-			qDebug() << "    OutputPin: "  << b.outputPin.toString();
-			qDebug() << "    InputPins: ";
-
-			for (QUuid u : b.inputPins)
-			{
-				qDebug() << "             " << u.toString();
-			}
-
-			if (b.itemByPinGuid(b.outputPin) != nullptr)
-			{
-				qDebug() << "    OutputItem: " << b.itemByPinGuid(b.outputPin)->buildName();
-			}
-
-			qDebug() << "    Links:";
-			for (auto l = b.links.begin(); l != b.links.end(); l++)
-			{
-				qDebug() << "             " << l->first.toString();
-			}
-
-			qDebug() << "    FblItems:";
-			for (auto it = b.fblItems.begin(); it != b.fblItems.end(); ++it)
-			{
-				std::shared_ptr<VFrame30::FblItemRect> item = it->second;
-				assert(item);
-
-				if (item != nullptr)
-				{
-					qDebug() << "           " << item->buildName();
-				}
-			}
+			b.debugInfo();
 		}
 	}
 
@@ -1516,7 +1535,7 @@ namespace Builder
 			//
 			if (logicSchema->isMultichannelSchema() == true)
 			{
-				filterSingleChannelBranchesInMulischema(equipmentId, &bushContainer);
+				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, &bushContainer);
 			}
 
 			// Generate afb list, and set it to some container
@@ -1611,7 +1630,8 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::filterSingleChannelBranchesInMulischema(QString equipmentId,
+	bool Parser::filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema,
+														 QString equipmentId,
 														 BushContainer* bushContainer)
 	{
 		if (bushContainer == nullptr)
@@ -1647,7 +1667,7 @@ namespace Builder
 				auto findIt = bushes.begin();		// bushes is not empty!!!
 				do
 				{
-					if (accItertaor->hasJoinedInOuts(*findIt) == true)
+					if (accItertaor->hasCommonFbls(*findIt) == true)
 					{
 						bushAcc.push_back(*findIt);
 
@@ -1668,6 +1688,7 @@ namespace Builder
 			// if bushAcc has all this channel signals, then add it
 			//
 			bool allSignalsFromThisChannel = true;
+			QString lmEquipmnetId;
 			for (const Bush& b : bushAcc)
 			{
 				for (std::pair<QUuid,std::shared_ptr<VFrame30::FblItemRect>> fbl : b.fblItems)
@@ -1686,17 +1707,24 @@ namespace Builder
 						Signal* signal = m_signalSet->getSignal(appSignalId);
 
 						if (signal == nullptr ||
-							signal->lm()->equipmnetId() != equipmentId)
+							signal->lm().get() == nullptr ||
+							signal->lm()->equipmentId() != equipmentId)
 						{
 							allSignalsFromThisChannel = false;
-							break;
+
+							if (lmEquipmnetId.isEmpty() == true)
+							{
+								lmEquipmnetId = signal->lm()->equipmentId();
+							}
+							else
+							{
+								if (lmEquipmnetId != signal->lm()->equipmentId())
+								{
+									m_log->errALP4033(schema->schemaID(), appSignalId, signalElement->guid());
+								}
+							}
 						}
 					}
-				}
-
-				if (allSignalsFromThisChannel == false)
-				{
-					break;
 				}
 			}
 

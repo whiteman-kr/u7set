@@ -107,8 +107,11 @@ namespace VFrame30
 					SchemaItemAfb* schemaItemAfb = item->toSchemaItemAfb();
 					assert(schemaItemAfb);
 
-					int labelCounter = this->nextCounterValue();
-					schemaItemAfb->setLabel(schemaID() + "_" + QString::number(labelCounter));
+					if (schemaItemAfb->label().isEmpty() == true)
+					{
+						int labelCounter = this->nextCounterValue();
+						schemaItemAfb->setLabel(schemaID() + "_" + QString::number(labelCounter));
+					}
 				}
 			}
 		}

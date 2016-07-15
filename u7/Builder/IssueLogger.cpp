@@ -1106,6 +1106,31 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4033
+	///
+	/// IssueType: Error
+	///
+	/// Title: Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 Logic Schema ID
+	///
+	/// Description:
+	///		Multichannel schema can contain single channel branch, all signals (inputs/outputs/intermediate) in the branch
+	/// must be from the same channel.
+	///
+	void IssueLogger::errALP4033(QString schema, const QString& appSignalId, const QUuid& itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4033,
+				  tr("Single channel branch contains signals (%1) from different channels (LogicSchema '%2').")
+				  .arg(appSignalId)
+				  .arg(schema));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//

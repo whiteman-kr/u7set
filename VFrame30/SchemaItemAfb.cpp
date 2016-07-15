@@ -303,7 +303,9 @@ namespace VFrame30
 
 	QString SchemaItemAfb::buildName() const
 	{
-		return QString("AFB (%1)").arg(afbStrID());
+		return QString("%1 %2")
+				.arg(afbStrID())
+				.arg(label());
 	}
 
 	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString* errorMsg)
