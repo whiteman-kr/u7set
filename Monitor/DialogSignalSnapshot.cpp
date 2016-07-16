@@ -127,7 +127,7 @@ const Signal* SnapshotItemModel::signal(int index)
 	if (index < 0 || index >= m_signals.size())
 	{
 		assert(false);
-		return false;
+		return nullptr;
 	}
 	return m_signals[index];
 
