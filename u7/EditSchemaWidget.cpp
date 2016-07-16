@@ -4928,7 +4928,7 @@ void EditSchemaWidget::editPaste()
 		return;
 	}
 
-	// Paste text to SchemeItemConst
+	// Paste text to SchemaItemConst
 	//
 	bool allItemsAreConsts = true;
 
@@ -4989,7 +4989,7 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
-	// Paste text to SchemeItemRect
+	// Paste text to SchemaItemRect
 	//
 
 	bool allItemsAreRects = true;

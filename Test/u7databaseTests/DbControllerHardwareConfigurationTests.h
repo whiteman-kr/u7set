@@ -11,7 +11,7 @@ public:
 
 private slots:
 	void initTestCase();
-	void addDeviceObjectTest();
+	void addAndRemoveDeviceObjectTest();
 	void cleanupTestCase();
 
 private:

@@ -6,7 +6,6 @@
 #include "GlobalMessanger.h"
 
 #include "../../lib/DbController.h"
-#include "../../lib/DeviceObject.h"
 
 #include "../../VFrame30/LogicSchema.h"
 #include "../../VFrame30/SchemaItemLink.h"
@@ -185,6 +184,93 @@ namespace Builder
 		return result;
 	}
 
+	bool Bush::hasCommonFbls(const Bush& bush) const
+	{
+		for (std::pair<QUuid, std::shared_ptr<VFrame30::FblItemRect>> fbl : bush.fblItems)
+		{
+			auto found = this->fblItems.find(fbl.first);
+
+			if (found != this->fblItems.end())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+//	bool Bush::hasInputOrOutput(const QUuid& uuid) const
+//	{
+//		if (outputPin == uuid)
+//		{
+//			return true;
+//		}
+
+//		auto findIt = inputPins.find(uuid);
+
+//		if (findIt == inputPins.end())
+//		{
+//			return false;
+//		}
+//		else
+//		{
+//			return true;
+//		}
+//	}
+
+//	bool Bush::hasJoinedInOuts(Bush& bush) const
+//	{
+//		if (bush.hasInputOrOutput(this->outputPin) == true)
+//		{
+//			return true;
+//		}
+
+//		for (const QUuid& uuid : inputPins)
+//		{
+//			if (bush.hasInputOrOutput(uuid) == true)
+//			{
+//				return true;
+//			}
+//		}
+
+//		return false;
+//	}
+
+	void Bush::debugInfo() const
+	{
+		qDebug() << "Bush debug info:";
+		qDebug() << "    OutputPin: "  << outputPin.toString();
+		qDebug() << "    InputPins: ";
+
+		for (QUuid u : inputPins)
+		{
+			qDebug() << "             " << u.toString();
+		}
+
+		if (itemByPinGuid(outputPin) != nullptr)
+		{
+			qDebug() << "    OutputItem: " << itemByPinGuid(outputPin)->buildName();
+		}
+
+		qDebug() << "    Links:";
+		for (auto l = links.begin(); l != links.end(); l++)
+		{
+			qDebug() << "             " << l->first.toString();
+		}
+
+		qDebug() << "    FblItems:";
+		for (auto it = fblItems.begin(); it != fblItems.end(); ++it)
+		{
+			std::shared_ptr<VFrame30::FblItemRect> item = it->second;
+			assert(item);
+
+			if (item != nullptr)
+			{
+				qDebug() << "           " << item->buildName();
+			}
+		}
+	}
+
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
@@ -252,37 +338,7 @@ namespace Builder
 
 		for (const Bush& b : bushes)
 		{
-			qDebug() << "Bush:";
-			qDebug() << "    OutputPin: "  << b.outputPin.toString();
-			qDebug() << "    InputPins: ";
-
-			for (QUuid u : b.inputPins)
-			{
-				qDebug() << "             " << u.toString();
-			}
-
-			if (b.itemByPinGuid(b.outputPin) != nullptr)
-			{
-				qDebug() << "    OutputItem: " << b.itemByPinGuid(b.outputPin)->buildName();
-			}
-
-			qDebug() << "    Links:";
-			for (auto l = b.links.begin(); l != b.links.end(); l++)
-			{
-				qDebug() << "             " << l->first.toString();
-			}
-
-			qDebug() << "    FblItems:";
-			for (auto it = b.fblItems.begin(); it != b.fblItems.end(); ++it)
-			{
-				std::shared_ptr<VFrame30::FblItemRect> item = it->second;
-				assert(item);
-
-				if (item != nullptr)
-				{
-					qDebug() << "           " << item->buildName();
-				}
-			}
+			b.debugInfo();
 		}
 	}
 
@@ -1475,6 +1531,13 @@ namespace Builder
 			//
 			setPinConnections(logicSchema, moduleLayer, &bushContainer);
 
+			// Filter singlechannel logic branches in multischema drawing
+			//
+			if (logicSchema->isMultichannelSchema() == true)
+			{
+				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, &bushContainer);
+			}
+
 			// Generate afb list, and set it to some container
 			//
 			applicationData()->addData(equipmentId, bushContainer, logicSchema, m_log);
@@ -1565,272 +1628,118 @@ namespace Builder
 		}
 
 		return true;
+	}
 
-		// Singlechannel items check and filter in multischema
-		//
-		//
-//		for (Bush& bush : bushContainer->bushes)
-//		{
-//			// Get all SIGNAL blocks and
-//			//
-//			std::vector<const VFrame30::SchemaItemSignal*> signalItems;
-//			signalItems.reserve(128);
+	bool Parser::filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema,
+														 QString equipmentId,
+														 BushContainer* bushContainer)
+	{
+		if (bushContainer == nullptr)
+		{
+			assert(bushContainer);
+			return false;
+		}
 
-//			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
-//			{
-//				const std::shared_ptr<VFrame30::FblItemRect>& f = it->second;
-//				if (f->isSignalElement() == true)
-//				{
-//					const VFrame30::SchemaItemSignal* signal = f->toSignalElement();
-//					assert(signal);
+		std::list<Bush> bushes(bushContainer->bushes.begin(), bushContainer->bushes.end());
+		bushContainer->bushes.clear();
 
-//					signalItems.push_back(signal);
-//				}
-//			}
+		while (bushes.empty() == false)
+		{
+			std::list<Bush> bushAcc;			// Whole jonedBranch Accumulator
 
-//			// All SignalItems must be multichannel or singlechannel
-//			//
-//			bool hasMultichannel = false;
-//			bool hasSinglechannel = false;
+			Bush startBush = bushes.front();
+			bushAcc.push_back(startBush);		// Move front of bushes to the accumulator
 
-//			for (const VFrame30::SchemaItemSignal* si : signalItems)
-//			{
-//				if (si->multiChannel() == true)
-//				{
-//					hasMultichannel = true;
-//				}
-//				else
-//				{
-//					hasSinglechannel = true;
-//				}
-//			}
+			bushes.pop_front();					// Remove this bush from bushes
 
-//			if (hasMultichannel == true &&
-//				hasSinglechannel == true)
-//			{
-//				// Mixed branch, error
-//				//
-//				m_log->errALP4032(schema->schemaID(), bush.getAllUuid());
-//				continue;
-//			}
-//		}
+			// Get all bushes related to this bushAcc
+			//
+			auto accItertaor = bushAcc.begin();		// Just added one iterato, so it cannot be empty
+			do
+			{
+				if (bushes.empty() == true)
+				{
+					// No more bushes to find
+					//
+					break;
+				}
 
-		// Multischema checks. All multichannel signals must be transformed to singlechannel here
-		//
-//		for (Bush& bush : bushContainer->bushes)
-//		{
-//			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
-//			{
-//				std::shared_ptr<VFrame30::FblItemRect> f = it->second;
+				auto findIt = bushes.begin();		// bushes is not empty!!!
+				do
+				{
+					if (accItertaor->hasCommonFbls(*findIt) == true)
+					{
+						bushAcc.push_back(*findIt);
 
-//				if (f->isSignalElement() == true)
-//				{
-//					// All multichannel signals must be transformed to singlechannel here
-//					//
-//					const VFrame30::SchemaItemSignal* signal = f->toSignalElement();
+						findIt = bushes.erase(findIt);	// findIt points to the next item
 
-//					if (signal == nullptr)
-//					{
-//						assert(signal != nullptr);	// No error report, unlikely we will be here ever
-//						continue;
-//					}
+						if (findIt == bushes.end())
+						{
+							break;
+						}
 
-//					if (signal->multiChannel() == true)
-//					{
-//						// Get correct SignalID
-//						//
-//						const QStringList& signalIds = signal->appSignalIdList();
+						continue;		// findIt already incremente
+					}
+				}
+				while (++findIt != bushes.end());
+			}
+			while (++accItertaor != bushAcc.end());
 
-//						if (signalIds.size() <= signalIndexInBlocks)
-//						{
-//							// Multichannel signal block must have the same number of AppSignalIDs
-//							// as schema's channel number (number of schema's EquipmentIDs)
-//							//
-//							m_log->errALP4031(schema->schemaID(), f->buildName(), f->guid());
-//							continue;
-//						}
+			// if bushAcc has all this channel signals, then add it
+			//
+			bool allSignalsFromThisChannel = true;
+			QString lmEquipmnetId;
+			for (const Bush& b : bushAcc)
+			{
+				for (std::pair<QUuid,std::shared_ptr<VFrame30::FblItemRect>> fbl : b.fblItems)
+				{
+					if (fbl.second->isSignalElement() == true)
+					{
+						const VFrame30::SchemaItemSignal* signalElement = fbl.second->toSignalElement();
+						assert(signalElement);
 
-//						QString signalId = signalIds[signalIndexInBlocks];
+						assert(signalElement->multiChannel() == false);
 
-//						// Create a copy of this AFB and set its AppSignaLD to ONE signalId
-//						//
-//						QByteArray data;
-//						f->Save(data);
+						QString appSignalId = signalElement->appSignalIds();
 
-//						VFrame30::SchemaItem* newRawItem = VFrame30::SchemaItem::Create(data);
+						// Check if appSignalid from this channel
+						//
+						Signal* signal = m_signalSet->getSignal(appSignalId);
 
-//						if (QLatin1String(newRawItem->metaObject()->className()) != QLatin1String(f->metaObject()->className()) ||
-//							dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) == nullptr)
-//						{
-//							m_log->errINT1001(QString("AppLogicModule::addBranch(%1) newRawItem->metaObject()->className() != f->metaObject()->className()")
-//											.arg(schema->schemaID()));
-//							assert(QLatin1String(newRawItem->metaObject()->className()) == QLatin1String(f->metaObject()->className()));
-//							assert(dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) != nullptr);
-//							continue;
-//						}
+						if (signal == nullptr ||
+							signal->lm().get() == nullptr ||
+							signal->lm()->equipmentId() != equipmentId)
+						{
+							allSignalsFromThisChannel = false;
 
-//						std::shared_ptr<VFrame30::FblItemRect> newSignalElement(dynamic_cast<VFrame30::FblItemRect*>(newRawItem));
-//						assert(newSignalElement->isSignalElement() == true);
+							if (lmEquipmnetId.isEmpty() == true)
+							{
+								lmEquipmnetId = signal->lm()->equipmentId();
+							}
+							else
+							{
+								if (lmEquipmnetId != signal->lm()->equipmentId())
+								{
+									m_log->errALP4033(schema->schemaID(), appSignalId, signalElement->guid());
+								}
+							}
+						}
+					}
+				}
+			}
 
-//						VFrame30::SchemaItemSignal* newSignal = newSignalElement->toSignalElement();
+			if (allSignalsFromThisChannel == true)
+			{
+				// Add this bushAcc ti result bush container
+				//
+				for (const Bush& ac : bushAcc)
+				{
+					bushContainer->bushes.push_back(ac);
+				}
+			}
+		}
 
-//						newSignal->setAppSignalIds(signalId);
-
-//						// Set this item
-//						//
-//						it->second = newSignalElement;	// id (key) remains the same
-//					}
-//				}
-//			}
-//		}
-
-//		return true;
-
-//		if (schema == nullptr ||
-//			bushContainer == nullptr)
-//		{
-//			assert(schema);
-//			assert(bushContainer);
-
-//			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, bushContainer% 2.")
-//							  .arg(reinterpret_cast<size_t>(schema.get()))
-//							  .arg(reinterpret_cast<size_t>(bushContainer)));
-
-//			return false;
-//		}
-
-//		int signalIndexInBlocks = schema->equipmentIdList().indexOf(equipmentId);
-
-//		if (signalIndexInBlocks == -1)
-//		{
-//			// "this" AppLogicModule has LM's equipmentID  but Schema's equipmentIdList does not have any.
-//			// How did we end up here?
-//			//
-//			assert(signalIndexInBlocks != -1);
-//			m_log->errINT1001(QString("AppLogicModule::AppLogicModule(%1) signalIndexInBlocks == -1").arg(schema->schemaID()));
-//			return false;
-//		}
-
-//		// Singlechannel items check and filter in multischema
-//		//
-//		//
-//		for (Bush& bush : bushContainer->bushes)
-//		{
-//			// Get all SIGNAL blocks and
-//			//
-//			std::vector<const VFrame30::SchemaItemSignal*> signalItems;
-//			signalItems.reserve(128);
-
-//			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
-//			{
-//				const std::shared_ptr<VFrame30::FblItemRect>& f = it->second;
-//				if (f->isSignalElement() == true)
-//				{
-//					const VFrame30::SchemaItemSignal* signal = f->toSignalElement();
-//					assert(signal);
-
-//					signalItems.push_back(signal);
-//				}
-//			}
-
-//			// All SignalItems must be multichannel or singlechannel
-//			//
-//			bool hasMultichannel = false;
-//			bool hasSinglechannel = false;
-
-//			for (const VFrame30::SchemaItemSignal* si : signalItems)
-//			{
-//				if (si->multiChannel() == true)
-//				{
-//					hasMultichannel = true;
-//				}
-//				else
-//				{
-//					hasSinglechannel = true;
-//				}
-//			}
-
-//			if (hasMultichannel == true &&
-//				hasSinglechannel == true)
-//			{
-//				// Mixed branch, error
-//				//
-//				m_log->errALP4032(schema->schemaID(), bush.getAllUuid());
-//				continue;
-//			}
-
-//		}
-
-//		// Multischema checks. All multichannel signals must be transformed to singlechannel here
-//		//
-//		for (Bush& bush : bushContainer->bushes)
-//		{
-//			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
-//			{
-//				std::shared_ptr<VFrame30::FblItemRect> f = it->second;
-
-//				if (f->isSignalElement() == true)
-//				{
-//					// All multichannel signals must be transformed to singlechannel here
-//					//
-//					const VFrame30::SchemaItemSignal* signal = f->toSignalElement();
-
-//					if (signal == nullptr)
-//					{
-//						assert(signal != nullptr);	// No error report, unlikely we will be here ever
-//						continue;
-//					}
-
-//					if (signal->multiChannel() == true)
-//					{
-//						// Get correct SignalID
-//						//
-//						const QStringList& signalIds = signal->appSignalIdList();
-
-//						if (signalIds.size() <= signalIndexInBlocks)
-//						{
-//							// Multichannel signal block must have the same number of AppSignalIDs
-//							// as schema's channel number (number of schema's EquipmentIDs)
-//							//
-//							m_log->errALP4031(schema->schemaID(), f->buildName(), f->guid());
-//							continue;
-//						}
-
-//						QString signalId = signalIds[signalIndexInBlocks];
-
-//						// Create a copy of this AFB and set its AppSignaLD to ONE signalId
-//						//
-//						QByteArray data;
-//						f->Save(data);
-
-//						VFrame30::SchemaItem* newRawItem = VFrame30::SchemaItem::Create(data);
-
-//						if (QLatin1String(newRawItem->metaObject()->className()) != QLatin1String(f->metaObject()->className()) ||
-//							dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) == nullptr)
-//						{
-//							m_log->errINT1001(QString("AppLogicModule::addBranch(%1) newRawItem->metaObject()->className() != f->metaObject()->className()")
-//											.arg(schema->schemaID()));
-//							assert(QLatin1String(newRawItem->metaObject()->className()) == QLatin1String(f->metaObject()->className()));
-//							assert(dynamic_cast<VFrame30::SchemaItemSignal*>(newRawItem) != nullptr);
-//							continue;
-//						}
-
-//						std::shared_ptr<VFrame30::FblItemRect> newSignalElement(dynamic_cast<VFrame30::FblItemRect*>(newRawItem));
-//						assert(newSignalElement->isSignalElement() == true);
-
-//						VFrame30::SchemaItemSignal* newSignal = newSignalElement->toSignalElement();
-
-//						newSignal->setAppSignalIds(signalId);
-
-//						// Set this item
-//						//
-//						it->second = newSignalElement;	// id (key) remains the same
-//					}
-//				}
-//			}
-//		}
-
-//		return true;
+		return true;
 	}
 
 

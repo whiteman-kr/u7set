@@ -76,7 +76,7 @@ fi
 
 echo "Cleaning waste information from coverage.info...";
 
-if ! lcov -r coverage.info "/usr/*" "/home/$USER/Qt*" "lib/*.h" -o coverage.info; then
+if ! lcov -r coverage.info "/usr/*" "/home/$USER/Qt*" "lib/*.h" "Proto/*" -o coverage.info; then
 	echo "Can not cleanup waste data from coverage.info. Err code $?";
         exit 7;
 fi

@@ -1,5 +1,9 @@
 #pragma once
-#include "../lib/ProtoSerialization.h"
+
+namespace Proto
+{
+	class SchemaPoint;
+}
 
 namespace VFrame30
 {

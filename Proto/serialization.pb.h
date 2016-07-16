@@ -4275,6 +4275,18 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline ::Proto::AfbElementXml* release_afbelement();
   inline void set_allocated_afbelement(::Proto::AfbElementXml* afbelement);
 
+  // optional string label = 6;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 6;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemAfb)
  private:
   inline void set_has_afbstrid();
@@ -4283,16 +4295,19 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline void clear_has_precision();
   inline void set_has_afbelement();
   inline void clear_has_afbelement();
+  inline void set_has_label();
+  inline void clear_has_label();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
   ::Proto::AfbElementXml* afbelement_;
+  ::std::string* label_;
   ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11609,6 +11624,76 @@ inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbe
     set_has_afbelement();
   } else {
     clear_has_afbelement();
+  }
+}
+
+// optional string label = 6;
+inline bool SchemaItemAfb::has_label() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemAfb::set_has_label() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemAfb::clear_has_label() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemAfb::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& SchemaItemAfb::label() const {
+  return *label_;
+}
+inline void SchemaItemAfb::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItemAfb::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItemAfb::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemAfb::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* SchemaItemAfb::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemAfb::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
