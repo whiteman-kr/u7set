@@ -464,10 +464,7 @@ namespace Builder
 		if (m_moduleLogic == nullptr)
 		{
 			m_log->wrnALC5001(m_lm->equipmentIdTemplate());			//	Application logic for module '%1' is not found.
-			return true;
 		}
-
-		//dumApplicationLogicItems();
 
 		do
 		{
