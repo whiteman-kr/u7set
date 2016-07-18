@@ -253,6 +253,8 @@ namespace VFrame30
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
+		vifble->set_label(m_label.toStdString());
+
 		return true;
 	}
 
@@ -287,6 +289,11 @@ namespace VFrame30
 		QString errorMsg;
 		bool ok = m_afbElement.loadFromXml(vifble.afbelement(), errorMsg);
 
+		if (vifble.has_label() == true)
+		{
+			m_label = QString::fromStdString(vifble.label());
+		}
+
 		// Add afb properties to class meta object
 		//
 		addSpecificParamProperties();
@@ -296,7 +303,9 @@ namespace VFrame30
 
 	QString SchemaItemAfb::buildName() const
 	{
-		return QString("AFB (%1)").arg(afbStrID());
+		return QString("%1 %2")
+				.arg(afbStrID())
+				.arg(label());
 	}
 
 	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString* errorMsg)

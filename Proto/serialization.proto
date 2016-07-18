@@ -574,6 +574,7 @@ message SchemaItemAfb
 	optional wstring afbStrid = 3;					// NOT USED anymore, keep it for a while, RPCT-812
 	optional int32 precision = 4 [default = 2];
 	optional AfbElementXml afbelement = 5;			// RPCT-812
+	optional string label = 6;
 }
 
 //

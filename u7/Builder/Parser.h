@@ -1,7 +1,6 @@
 #ifndef APPLOGICBUILDER_H
 #define APPLOGICBUILDER_H
 
-#include "../lib/Signal.h"
 #include "../../VFrame30/SchemaItem.h"
 #include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
@@ -11,6 +10,8 @@
 //
 class QThread;
 class DbController;
+
+class SignalSet;
 
 namespace Hardware
 {
@@ -25,13 +26,6 @@ namespace VFrame30
 	class LogicSchema;
 	class SchemaLayer;
 	class SchemaItemAfb;
-	class FblItemRect;
-}
-
-namespace Afb
-{
-	class AfbElement;
-	class AfbElementCollection;
 }
 
 namespace Builder
@@ -68,6 +62,13 @@ namespace Builder
 		std::vector<QUuid> getLinksUuids() const;				// Used for IssueLogger
 
 		std::vector<VFrame30::AfbPin> getInputPinsForItem(QUuid fblItemUuid) const;
+
+		bool hasCommonFbls(const Bush& bush) const;
+
+		//bool hasInputOrOutput(const QUuid& uuid) const;
+		//bool hasJoinedInOuts(Bush& bush) const;
+
+		void debugInfo() const;
 	};
 
 	struct BushContainer
@@ -232,11 +233,13 @@ namespace Builder
 		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema);
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-								  std::shared_ptr<VFrame30::SchemaLayer> layer);
+								std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> schema,
 									std::shared_ptr<VFrame30::SchemaLayer> layer,
 									QString equipmentId);
+
+		bool filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema, QString equipmnetId, BushContainer* bushContainer);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,

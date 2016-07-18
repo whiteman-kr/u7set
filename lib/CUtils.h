@@ -4,6 +4,7 @@
 
 #include <QtWidgets/QApplication>
 #include <assert.h>
+#include <cmath>
 
 #ifdef _MSC_VER
 #pragma warning(push)

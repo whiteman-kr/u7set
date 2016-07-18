@@ -2135,8 +2135,6 @@ R"DELIM({
 				{
 					return module;
 				}
-
-				return nullptr;
 			}
 		}
 

@@ -4563,7 +4563,7 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
 {
 	if (isLogicSchema() == false ||
-		schemaItem == false ||
+		schemaItem == nullptr ||
 		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
 	{
 		assert(isLogicSchema() == false);
@@ -4928,7 +4928,7 @@ void EditSchemaWidget::editPaste()
 		return;
 	}
 
-	// Paste text to SchemeItemConst
+	// Paste text to SchemaItemConst
 	//
 	bool allItemsAreConsts = true;
 
@@ -4989,7 +4989,7 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
-	// Paste text to SchemeItemRect
+	// Paste text to SchemaItemRect
 	//
 
 	bool allItemsAreRects = true;
