@@ -12,6 +12,7 @@ public:
 private slots:
 	void initTestCase();
 	void addAndRemoveDeviceObjectTest();
+	void getDeviceTreeLatestVersionTest();
 	void cleanupTestCase();
 
 private:
