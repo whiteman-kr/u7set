@@ -72,6 +72,7 @@ namespace Builder
 		// Load Application Logic signals
 		//
 		bool loadSignals(DbController *db, SignalSet* signalSet, Hardware::EquipmentSet &equipment);
+		bool checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment);
 
 		// Load Application Functional Block Library
 		//

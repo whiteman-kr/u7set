@@ -1240,7 +1240,7 @@ void SignalsModel::saveSignal(Signal& signal)
 
 void SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 {
-	m_signalSet.buildStrID2IndexMap();
+	m_signalSet.buildID2IndexMap();
 
 	auto idMaker = [](QString prefix, QString id) {
 		if (id[0] == '#')

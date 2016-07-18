@@ -1,5 +1,4 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#pragma once
 
 #include <QString>
 #include <QMultiHash>
@@ -12,6 +11,7 @@
 #include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
+#include "../u7/Builder/IssueLogger.h"
 
 
 class QXmlStreamAttributes;
@@ -396,6 +396,9 @@ public:
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
 
 
+class Builder::IssueLogger;
+
+
 class SignalSet : public SignalPtrOrderedHash
 {
 private:
@@ -415,9 +418,9 @@ public:
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
 
-	void buildStrID2IndexMap();
-	void initLmProperty(Hardware::EquipmentSet& equipment);
+//	bool checkAppSignals(Hardware::EquipmentSet& equipment, Builder::IssueLogger* log);
 
+	void buildID2IndexMap();
 	bool contains(const QString& appSignalID);
 
 	Signal* getSignal(const QString& appSignalID);
@@ -429,6 +432,3 @@ public:
 
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
-
-
-#endif // SIGNAL_H

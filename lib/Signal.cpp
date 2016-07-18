@@ -1,6 +1,7 @@
-#include "../lib/Signal.h"
 #include <QXmlStreamAttributes>
 #include <QFile>
+#include "../lib/Signal.h"
+
 
 DataFormatList::DataFormatList()
 {
@@ -161,6 +162,8 @@ Signal& Signal::operator =(const Signal& signal)
 	m_byteOrder = signal.byteOrder();
 	m_enableTuning = signal.enableTuning();
 	m_tuningDefaultValue = signal.tuningDefaultValue();
+
+	m_lm = signal.m_lm;
 
 	return *this;
 }
@@ -1296,107 +1299,188 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 }
 
 
-void SignalSet::buildStrID2IndexMap()
+void SignalSet::buildID2IndexMap()
 {
-	int signalCount = count();
-
 	m_strID2IndexMap.clear();
 
-	for(int i = 0; i < signalCount; i++)
-	{
-		const Signal& s = (*this)[i];
-
-		if (m_strID2IndexMap.contains(s.appSignalID()))
-		{
-			qDebug() << "Duplicate signal strID " << s.appSignalID();
-			continue;
-		}
-
-		m_strID2IndexMap.insert(s.appSignalID(), i);
-	}
-}
-
-
-void SignalSet::initLmProperty(Hardware::EquipmentSet& equipment)
-{
 	int signalCount = count();
+
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	m_strID2IndexMap.reserve(signalCount * 1.3);
 
 	for(int i = 0; i < signalCount; i++)
 	{
 		Signal& s = (*this)[i];
 
-		s.setLm(nullptr);
-
-		if (s.equipmentID().isEmpty())
+		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
 		{
-			continue;
-		}
-
-		std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
-
-		Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
-
-		if (deviceObject == nullptr)
-		{
-			continue;
-		}
-
-		if (deviceObject->isModule() == true)
-		{
-			// device is Module
-			//
-			Hardware::DeviceModule* module = deviceObject->toModule();
-
-			if (module == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (module->isLM())
-			{
-				s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
-			}
-			else
-			{
-				// error!!!!
-			}
+			assert(false);
 		}
 		else
 		{
-			if (deviceObject->isSignal())
-			{
-				// device is Signal
-				//
-				Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
+			m_strID2IndexMap.insert(s.appSignalID(), i);
+		}
+	}
+}
 
-				if (chassis == nullptr)
+/*
+bool SignalSet::checkAppSignals(Hardware::EquipmentSet& equipment, Builder::IssueLogger* log)
+{
+	if (log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	int signalCount = count();
+
+	if (signalCount == 0)
+	{
+		return true;
+	}
+
+	m_strID2IndexMap.reserve(signalCount * 1.3);
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		Signal& s = (*this)[i];
+
+		// check AppSignalID
+		//
+		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
+		{
+			// Application signal identifier '%1' is not unique.
+			//
+			log->errALC5016(s.appSignalID());
+			result = false;
+			continue;
+		}
+		else
+		{
+			m_strID2IndexMap.insert(s.appSignalID(), i);
+		}
+
+		// check EquipmentID
+		//
+		s.setLm(nullptr);
+
+		if (s.equipmentID().isEmpty() == true)
+		{
+			// Application signal '%1' is not bound to any device object.
+			//
+			log->wrnALC5012(s.appSignalID());
+		}
+		else
+		{
+			std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
+
+			if (deviceObjectShared == nullptr)
+			{
+				// Application signal '%1' is bound to unknown device object '%2'.
+				//
+				log->errALC5013(s.appSignalID(), s.equipmentID());
+				result = false;
+				continue;
+			}
+
+			Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
+
+			if (deviceObject->isModule() == true)
+			{
+				// device is Module
+				//
+				Hardware::DeviceModule* module = deviceObject->toModule();
+
+				if (module == nullptr)
 				{
 					assert(false);
 					continue;
 				}
 
-				std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
-
-				if (lm != nullptr)
+				if (module->isLM())
 				{
-					s.setLm(lm);
+					s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
 				}
 				else
 				{
-					// error !!!!
-
+					// Application signal '%1' is bound to non logic module.
+					//
+					log->errALC5031(s.appSignalID());
+					result = false;
+					continue;
 				}
 			}
 			else
 			{
-				// invalid device type
-				//
+				if (deviceObject->isSignal())
+				{
+					// device is Signal
+					//
+					Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
+
+					if (chassis == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
+
+					if (lm != nullptr)
+					{
+						s.setLm(lm);
+					}
+					else
+					{
+						// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+						//
+						log->errALC5033(s.appSignalID(), chassis->equipmentId());
+						result = false;
+						continue;
+					}
+				}
+				else
+				{
+					// The signal '%1' can be bind to Logic Module or Equipment Signal.
+					//
+					log->errALC5031(s.appSignalID());
+					result = false;
+					continue;
+				}
+			}
+		}
+
+		// check other signal properties
+		//
+		if (s.isDiscrete())
+		{
+			if (s.dataSize() != 1)
+			{
+				log->errALC5014(s.appSignalID());		// Discrete signal '%1' must have DataSize equal to 1.
+				result = false;
+			}
+		}
+		else
+		{
+			assert(s.isAnalog() == true);
+
+			if (s.dataSize() != 32)
+			{
+				log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
+				result = false;
 			}
 		}
 	}
-}
 
+	return result;
+}
+*/
 
 bool SignalSet::contains(const QString& appSignalID)
 {
