@@ -71,15 +71,15 @@ int SafetyChannelSignalsModel::columnCount(const QModelIndex& parent) const
 	return COLUMN_COUNT;
 }
 
-QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) const
+QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int role) const
 {
-	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
-	auto state = m_states[index.row()];
+	Signal& signal = m_sourceInfo.tuningSignals[currentIndex.row()];
+	auto state = m_states[currentIndex.row()];
 	switch (role)
 	{
 		case Qt::DisplayRole:
 		{
-			switch (index.column())
+			switch (currentIndex.column())
 			{
 				case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
 				case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
@@ -168,7 +168,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 		break;
 		case Qt::BackgroundColorRole:
 		{
-			if (index.column() != CURRENT_VALUE_COLUMN)
+			if (currentIndex.column() != CURRENT_VALUE_COLUMN)
 			{
 				return QVariant();
 			}
@@ -176,7 +176,8 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& index, int role) con
 			{
 				return QColor(Qt::red);
 			}
-			if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
+			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
+			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() == data(currentIndex).toString())
 			{
 				return QColor(Qt::yellow);
 			}
@@ -317,7 +318,8 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
+		//if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
+		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);

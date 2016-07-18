@@ -21,11 +21,11 @@ AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double
 
 	m_input->setPlaceholderText("Enter new value");
 	m_input->setValidator(new QDoubleValidator(this));
-	connect(m_input, &QLineEdit::returnPressed, this, &AnalogSignalSetter::setNewValue);
+	connect(m_input, &QLineEdit::returnPressed, this, &AnalogSignalSetter::applyNewValue);
 	hl->addWidget(m_input);
 
 	QPushButton* applyButton = new QPushButton("Apply >>", this);
-	connect(applyButton, &QPushButton::clicked, this, &AnalogSignalSetter::setNewValue);
+	connect(applyButton, &QPushButton::clicked, this, &AnalogSignalSetter::applyNewValue);
 	hl->addWidget(applyButton);
 
 	m_currentValue->setReadOnly(true);
@@ -53,7 +53,9 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 			m_currentValue->setText(QString::number(value));
 		}
 
-		if (validity == true && qAbs(value - m_lastSentValue) < std::numeric_limits<float>::epsilon())
+		if (validity == true &&
+				//qAbs(value - m_lastSentValue) < std::numeric_limits<float>::epsilon())
+				QString::number(value) == QString::number(m_lastSentValue))
 		{
 			m_input->clear();
 			m_lastSentValue = qQNaN();
@@ -61,7 +63,7 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 	}
 }
 
-void AnalogSignalSetter::setNewValue()
+void AnalogSignalSetter::applyNewValue()
 {
 	bool ok = false;
 	double newValue = m_input->text().replace(',', '.').toDouble(&ok);

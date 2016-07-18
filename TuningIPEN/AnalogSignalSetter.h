@@ -16,8 +16,8 @@ public:
 public slots:
 	void updateValue();
 	void setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
-	void setNewValue();
-	void changeNewValue(double newValue);
+	void applyNewValue();
+	void changeNewValue(double newValue);	//In case if scrollbar used
 
 private:
 	QString m_signalId;
