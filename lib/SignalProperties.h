@@ -13,5 +13,7 @@ private:
 
 public:
 	explicit SignalProperties(Signal& signal);
+
+	Signal& signal() { return m_signal; }
 };
 

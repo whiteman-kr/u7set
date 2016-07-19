@@ -3,7 +3,7 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QSettings>
-#include "../lib/Signal.h"
+#include "../lib/SignalProperties.h"
 #include "SignalsTabPage.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
@@ -132,65 +132,65 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		std::shared_ptr<Signal> signal = std::make_shared<Signal>(*signalVector[i]);
-		signal->setReadOnly(readOnly);
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
+		signalProperties->signal().setReadOnly(readOnly);
 
-		signal->propertyByCaption("Type")->setReadOnly(true);
-		signal->propertyByCaption("InOutType")->setReadOnly(true);
+		signalProperties->propertyByCaption("Type")->setReadOnly(true);
+		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
 
-		if (signal->isDiscrete())
+		if (signalProperties->signal().isDiscrete())
 		{
-			if (signal->dataFormat() != E::UnsignedInt)
+			if (signalProperties->signal().dataFormat() != E::UnsignedInt)
 			{
-				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signal);
-				signal->setDataFormat(E::UnsignedInt);
+				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
+				signalProperties->signal().setDataFormat(E::UnsignedInt);
 			}
-			if (signal->dataSize() != 1)
+			if (signalProperties->signal().dataSize() != 1)
 			{
-				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signal);
-				signal->setDataSize(1);
+				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
+				signalProperties->signal().setDataSize(1);
 			}
-			signal->propertyByCaption("DataFormat")->setReadOnly(true);
-			signal->propertyByCaption("DataSize")->setReadOnly(true);
+			signalProperties->propertyByCaption("DataFormat")->setReadOnly(true);
+			signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
 		}
 
-		if (!signal->isInternal())
+		if (!signalProperties->signal().isInternal())
 		{
-			signal->propertyByCaption("EnableTuning")->setVisible(false);
-			signal->propertyByCaption("TuningDefaultValue")->setVisible(false);
+			signalProperties->propertyByCaption("EnableTuning")->setVisible(false);
+			signalProperties->propertyByCaption("TuningDefaultValue")->setVisible(false);
 		}
 
-		if (signal->isAnalog())
+		if (signalProperties->signal().isAnalog())
 		{
-			if (!signal->isInput())
+			if (!signalProperties->signal().isInput())
 			{
-				signal->propertyByCaption("LowValidRange")->setVisible(false);
-				signal->propertyByCaption("HighValidRange")->setVisible(false);
-				signal->propertyByCaption("FilteringTime")->setVisible(false);
-				signal->propertyByCaption("SpreadTolerance")->setVisible(false);
+				signalProperties->propertyByCaption("LowValidRange")->setVisible(false);
+				signalProperties->propertyByCaption("HighValidRange")->setVisible(false);
+				signalProperties->propertyByCaption("FilteringTime")->setVisible(false);
+				signalProperties->propertyByCaption("SpreadTolerance")->setVisible(false);
 			}
 
-			if (signal->isInternal())
+			if (signalProperties->signal().isInternal())
 			{
-				signal->propertyByCaption("LowADC")->setVisible(false);
-				signal->propertyByCaption("HighADC")->setVisible(false);
-				signal->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
-				signal->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
+				signalProperties->propertyByCaption("LowADC")->setVisible(false);
+				signalProperties->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
+				signalProperties->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
 			}
 
-			if (signal->isOutput())
+			if (signalProperties->signal().isOutput())
 			{
-				signal->propertyByCaption("LowADC")->setVisible(false);
-				signal->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption("LowADC")->setVisible(false);
+				signalProperties->propertyByCaption("HighADC")->setVisible(false);
 			}
 			else
 			{
-				signal->propertyByCaption("LowDAC")->setVisible(false);
-				signal->propertyByCaption("HighDAC")->setVisible(false);
-				signal->propertyByCaption("OutputMode")->setVisible(false);
+				signalProperties->propertyByCaption("LowDAC")->setVisible(false);
+				signalProperties->propertyByCaption("HighDAC")->setVisible(false);
+				signalProperties->propertyByCaption("OutputMode")->setVisible(false);
 			}
 		}
-		m_objList.push_back(signal);
+		m_objList.push_back(signalProperties);
 	}
 
 	pe->setObjects(m_objList);
