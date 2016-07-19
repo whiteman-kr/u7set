@@ -133,7 +133,14 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	for (int i = 0; i < signalVector.count(); i++)
 	{
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
-		signalProperties->signal().setReadOnly(readOnly);
+
+		if (readOnly)
+		{
+			for (auto property : signalProperties->properties())
+			{
+				property->setReadOnly(true);
+			}
+		}
 
 		signalProperties->propertyByCaption("Type")->setReadOnly(true);
 		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
@@ -242,13 +249,14 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	//
 	for (auto object : m_objList)
 	{
-		auto signal = dynamic_cast<Signal*>(object.get());
-		if (signal->appSignalID().trimmed().isEmpty())
+		auto signalProperties = dynamic_cast<SignalProperties*>(object.get());
+		Signal& signal = signalProperties->signal();
+		if (signal.appSignalID().trimmed().isEmpty())
 		{
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
 			return;
 		}
-		if (signal->isDiscrete() && signal->dataFormat() != E::UnsignedInt)
+		if (signal.isDiscrete() && signal.dataFormat() != E::UnsignedInt)
 		{
 			QMessageBox::critical(this, "Could not save signal", "Error: Discrete signal has not UnsignedInt DataFormat");
 			return;
@@ -261,7 +269,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	{
 		Signal& signal = *m_signalVector[i];
 
-		signal = *(dynamic_cast<Signal*>(m_objList[i].get()));
+		signal = dynamic_cast<SignalProperties*>(m_objList[i].get())->signal();
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
 		if (signal.appSignalID()[0] != '#')
@@ -304,8 +312,9 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
-		Signal* signal = dynamic_cast<Signal*>(object.get());
-		int row = m_signalsModel->keyIndex(signal->ID());
+		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
+		int id = signalProperites->signal().ID();
+		int row = m_signalsModel->keyIndex(id);
 		QString message;
 		if (!m_signalsModel->checkoutSignal(row, message) && !message.isEmpty())
 		{
@@ -314,9 +323,9 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
 		}
-		if (!m_editedSignalsId.contains(signal->ID()))
+		if (!m_editedSignalsId.contains(id))
 		{
-			m_editedSignalsId.append(signal->ID());
+			m_editedSignalsId.append(id);
 		}
 	}
 }

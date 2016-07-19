@@ -161,30 +161,6 @@ void SignalProperties::initProperties()
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime, m_signal);
 		filteringTimePropetry->setPrecision(6);
 		filteringTimePropetry->setCategory(signalProcessingCategory);
-
-		/*auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, inputLowLimitCaption, true, Signal::inputLowLimit, Signal::setInputLowLimit);
-		inputLowLimitPropetry->setCategory(inputSensorCategory);
-
-		auto inputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, inputHighLimitCaption, true, Signal::inputHighLimit, Signal::setInputHighLimit);
-		inputHighLimitPropetry->setCategory(inputSensorCategory);
-
-		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputUnitCaption, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);
-		inputUnitIDPropetry->setCategory(inputSensorCategory);
-
-		auto inputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputSensorCaption, true, sensorList, Signal::inputSensorID, Signal::setInputSensorID);
-		inputSensorPropetry->setCategory(inputSensorCategory);
-
-		auto outputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, outputLowLimitCaption, true, Signal::outputLowLimit, Signal::setOutputLowLimit);
-		outputLowLimitPropetry->setCategory(outputSensorCategory);
-
-		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, outputHighLimitCaption, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
-		outputHighLimitPropetry->setCategory(outputSensorCategory);
-
-		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputUnitCaption, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);
-		outputUnitIDPropetry->setCategory(outputSensorCategory);
-
-		auto outputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputSensorCaption, true, sensorList, Signal::outputSensorID, Signal::setOutputSensorID);
-		outputSensorPropetry->setCategory(outputSensorCategory);*/
 	}
 	else
 	{

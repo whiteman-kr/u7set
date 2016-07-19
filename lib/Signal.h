@@ -369,8 +369,6 @@ public:
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
-	void setReadOnly(bool value);
-
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
