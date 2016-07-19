@@ -4563,7 +4563,7 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
 {
 	if (isLogicSchema() == false ||
-		schemaItem == false ||
+		schemaItem == nullptr ||
 		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
 	{
 		assert(isLogicSchema() == false);

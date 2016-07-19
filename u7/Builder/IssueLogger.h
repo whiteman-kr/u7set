@@ -54,6 +54,8 @@ namespace Builder
 		void wrnPDB2000();
 		void errPDB2001(int parentFileId, QString filter, QString databaseMessage);
 		void errPDB2002(int fileId, QString fileName, QString databaseMessage);
+		void errPDB2003();										// Load signals from the project database error
+		void errPDB2004();										// Load units from the project database error
 
 		// CFG			FSC configuration						3000-3999
 		//
@@ -134,7 +136,7 @@ namespace Builder
 		void errALC5014(QString appSignalID);									// Discrete signal '%1' must have DataSize equal to 1.
 		void errALC5015(QString appSignalID);									// Analog signal '%1' must have DataSize equal to 32.
 		void errALC5016(QString appSignalID);									// Application signal identifier '%1' is not unique.
-		void errALC5017(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
+		void errALC5017(QString appSignalID);									// Custom application signal identifier '%1' is not unique.
 		void errALC5018(QString port1, QString port2, QString connection);			// Opto ports '%1' and '%2' are not compatible (connection '%3').
 		void errALC5019(QString port, QString connection1, QString connection2);	// Opto port '%1' of connection '%2' is already used in connection '%3'.
 		void errALC5020(QString port, QString connection);							// LM's port '%1' can't work in RS232/485 mode (connection '%2').
@@ -149,7 +151,9 @@ namespace Builder
 		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
-
+		// FREE FOR USE !!! void errALC5032(QString appSignalID);												// Application signal '%1' is bound to non logic module.
+		void errALC5033(QString appSignalId, QString chassisEquipmentID);					// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+		void errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
 
 		// EQP			Equipment issues						6000-6999
 		//

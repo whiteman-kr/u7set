@@ -215,6 +215,43 @@ namespace Builder
 				  .arg(databaseMessage));
 	}
 
+	/// IssueCode: PDB2003
+	///
+	/// IssueType: Error
+	///
+	/// Title: Load signals from the project database error.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		May occur if database function getSignals fails or database connection is lost.
+	///
+	void IssueLogger::errPDB2003()
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2003,
+				  tr("Load signals from the project database error."));
+	}
+
+	/// IssueCode: PDB2004
+	///
+	/// IssueType: Error
+	///
+	/// Title: Load units from the project database error.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		May occur if database function getUnits fails or database connection is lost.
+	///
+	void IssueLogger::errPDB2004()
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2004,
+				  tr("Load units from the project database error."));
+	}
+
+
 	// CFG			FSC configuration						3000-3999
 	//
 
@@ -1509,23 +1546,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Non-signal element is connected to transmitter.
+	/// Title: Custom application signal identifier '%1' is not unique.
 	///
 	/// Parameters:
-	///		%1 Transmitter Uuid
-	///		%2 Connected item Uuid
+	///		%1 Custom application signal ID
 	///
 	/// Description:
-	///		Non-signal element is connected to transmitter. Check connections on logic schema.
+	///		Custom application signal identifier is not unique. Change identifier.
 	///
-	void IssueLogger::errALC5017(QUuid transmitterUuid, QUuid connectedItemUuid)
+	void IssueLogger::errALC5017(QString appSignalID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-		addItemsIssues(OutputMessageLevel::Error, connectedItemUuid);
-
 		LOG_ERROR(IssueType::AlCompiler,
 				  5017,
-				  tr("Non-signal element is connected to transmitter."));
+				  tr("Custom application signal identifier '%1' is not unique.").
+					arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5018
@@ -1841,6 +1875,50 @@ namespace Builder
 				  5031,
 				  QString(tr("The signal '%1' can be bind only to Logic Module or Equipment Signal.").
 						  arg(appSignalID)));
+	}
+
+	/// IssueCode: ALC5033
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Chassis equipmet ID
+	///
+	/// Description:
+	///		Can't find logic module associated with signal. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5033(QString appSignalID, QString chassisEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5033,
+				  QString(tr("Can't find logic module associated with signal '%1' (no LM in chassis '%2').").
+						  arg(appSignalID).arg(chassisEquipmentID)));
+	}
+
+	/// IssueCode: ALC5034
+	///
+	/// IssueType: Error
+	///
+	/// Title: Non-signal element is connected to transmitter.
+	///
+	/// Parameters:
+	///		%1 Transmitter Uuid
+	///		%2 Connected item Uuid
+	///
+	/// Description:
+	///		Non-signal element is connected to transmitter. Check connections on logic schema.
+	///
+	void IssueLogger::errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, connectedItemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5034,
+				  tr("Non-signal element is connected to transmitter."));
 	}
 
 

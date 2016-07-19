@@ -14,6 +14,7 @@ class QPushButton;
 class QScrollBar;
 class QLabel;
 class AnalogSignalSetter;
+class DiscreteSignalSetter;
 
 class LogWriter : public QObject
 {
@@ -39,12 +40,13 @@ private:
 	QVector<Tuning::TuningDataSourceInfo> m_info;
 	QMap<QString, QLabel*> m_statusLabelMap;
 
-	QPushButton* m_automaticMode;
 	QScrollBar* m_scrollBar;
 	QTimer* m_updateTimer;
 	QThread* m_logThread;
 
 	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
+	DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id);
+
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
 
@@ -55,7 +57,6 @@ public slots:
 	void updateDataSourceStatus(Tuning::TuningDataSourceState state);
 
 	void applyNewScrollBarValue();
-	void applyNewAutomaticMode(bool enabled);
 
 signals:
 	void scrollBarMoved(double newValue);

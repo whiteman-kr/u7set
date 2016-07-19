@@ -73,6 +73,8 @@ namespace Builder
 		//
 		bool loadSignals(DbController *db, SignalSet* signalSet, Hardware::EquipmentSet &equipment);
 
+		bool checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment);
+
 		// Load Application Functional Block Library
 		//
 		bool loadAfbl(DbController *db, Afb::AfbElementCollection* afbCollection);

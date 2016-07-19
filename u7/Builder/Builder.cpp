@@ -550,24 +550,210 @@ namespace Builder
 
 		bool result = db->getSignals(signalSet, nullptr);
 
-		if (result)
+		if (result == false)
 		{
-			result = result && db->getUnits(Signal::m_unitList.get(), nullptr);
+			// Load signals from the project database error
+			//
+			m_log->errPDB2003();
+			return false;
 		}
+
+		result = db->getUnits(Signal::unitList.get(), nullptr);
 
 		if (result == false)
 		{
-			//LOG_ERROR(m_log, tr("Error"));
+			// Load units from the project database error
+			//
+			m_log->errPDB2004();
+			return false;
+		}
+
+		LOG_MESSAGE(m_log, QString(tr("Checking application signals")));
+
+		// Check some signals's properties and init Signal::lm property
+		//
+		result = checkAppSignals(*signalSet, equipment);
+
+		if (result == false)
+		{
 			return false;
 		}
 
 		LOG_SUCCESS(m_log, tr("Ok"));
 
-		signalSet->buildStrID2IndexMap();
-		signalSet->initLmProperty(equipment);
+		signalSet->buildID2IndexMap();
 
 		return true;
 	}
+
+
+	bool BuildWorkerThread::checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment)
+	{
+		bool result = true;
+
+		int signalCount = signalSet.count();
+
+		if (signalCount == 0)
+		{
+			return true;
+		}
+
+		QHash<QString, int> appSignalIDMap;
+		QHash<QString, int> customAppSignalIDMap;
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& s = signalSet[i];
+
+			// check AppSignalID
+			//
+			if (appSignalIDMap.contains(s.appSignalID()) == true)
+			{
+				// Application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5016(s.appSignalID());
+				result = false;
+				continue;
+			}
+			else
+			{
+				appSignalIDMap.insert(s.appSignalID(), i);
+			}
+
+			// check CustomAppSignalID
+			//
+			if (customAppSignalIDMap.contains(s.customAppSignalID()) == true)
+			{
+				// Custom application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5017(s.customAppSignalID());
+				result = false;
+				continue;
+			}
+			else
+			{
+				customAppSignalIDMap.insert(s.customAppSignalID(), i);
+			}
+
+			// check EquipmentID
+			//
+			s.setLm(nullptr);
+
+			if (s.equipmentID().isEmpty() == true)
+			{
+				// Application signal '%1' is not bound to any device object.
+				//
+				m_log->wrnALC5012(s.appSignalID());
+			}
+			else
+			{
+				std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
+
+				if (deviceObjectShared == nullptr)
+				{
+					// Application signal '%1' is bound to unknown device object '%2'.
+					//
+					m_log->errALC5013(s.appSignalID(), s.equipmentID());
+					result = false;
+					continue;
+				}
+
+				Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
+
+				if (deviceObject->isModule() == true)
+				{
+					// device is Module
+					//
+					Hardware::DeviceModule* module = deviceObject->toModule();
+
+					if (module == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (module->isLM())
+					{
+						s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
+					}
+					else
+					{
+						// The signal '%1' can be bind to Logic Module or Equipment Signal.
+						//
+						m_log->errALC5031(s.appSignalID());
+						result = false;
+						continue;
+					}
+				}
+				else
+				{
+					if (deviceObject->isSignal())
+					{
+						// device is Signal
+						//
+						Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
+
+						if (chassis == nullptr)
+						{
+							assert(false);
+							continue;
+						}
+
+						std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
+
+						if (lm != nullptr)
+						{
+							s.setLm(lm);
+						}
+						else
+						{
+							// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+							//
+							m_log->errALC5033(s.appSignalID(), chassis->equipmentId());
+							result = false;
+							continue;
+						}
+					}
+					else
+					{
+						// The signal '%1' can be bind to Logic Module or Equipment Signal.
+						//
+						m_log->errALC5031(s.appSignalID());
+						result = false;
+						continue;
+					}
+				}
+			}
+
+			// check other signal properties
+			//
+			if (s.isDiscrete())
+			{
+				if (s.dataSize() != 1)
+				{
+					// Discrete signal '%1' must have DataSize equal to 1.
+					//
+					m_log->errALC5014(s.appSignalID());
+					result = false;
+				}
+			}
+			else
+			{
+				assert(s.isAnalog() == true);
+
+				if (s.dataSize() != 32)
+				{
+					// Analog signal '%1' must have DataSize equal to 32.
+					//
+					m_log->errALC5015(s.appSignalID());
+					result = false;
+				}
+			}
+		}
+
+		return result;
+	}
+
 
 	bool BuildWorkerThread::loadAfbl(DbController* db, Afb::AfbElementCollection* afbCollection)
 	{

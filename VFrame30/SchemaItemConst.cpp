@@ -230,7 +230,7 @@ namespace VFrame30
 		//
 		std::shared_ptr<Property> prop = propertyByCaption(PropertyNames::valueFloat);
 
-		if (prop == false)
+		if (prop == nullptr)
 		{
 			assert(prop);
 			return;

@@ -1,5 +1,4 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#pragma once
 
 #include <QString>
 #include <QMultiHash>
@@ -185,21 +184,14 @@ private:
 	void setInstanceAction(E::InstanceAction action) { m_instanceAction = action; }
 
 public:
-	Signal(bool initProperties);
 	Signal();
-	virtual ~Signal();
-
-	Signal(const Signal& signal) :
-		PropertyObject()
-	{
-		*this = signal;
-
-		InitProperties();
-	}
-
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 
+	virtual ~Signal();
+
 	Signal& operator = (const Signal& signal);
+
+	static std::shared_ptr<UnitList> unitList;
 
 	int ID() const { return m_ID; }
 	int signalGroupID() const { return m_signalGroupID; }
@@ -378,7 +370,6 @@ public:
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
 	void setReadOnly(bool value);
-	static std::shared_ptr<UnitList> m_unitList;
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -415,9 +406,7 @@ public:
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
 
-	void buildStrID2IndexMap();
-	void initLmProperty(Hardware::EquipmentSet& equipment);
-
+	void buildID2IndexMap();
 	bool contains(const QString& appSignalID);
 
 	Signal* getSignal(const QString& appSignalID);
@@ -429,6 +418,3 @@ public:
 
 
 void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
-
-
-#endif // SIGNAL_H
