@@ -345,6 +345,9 @@ void TuningMainWindow::onTuningServiceReady()
 	auto automaticModeSetter = addDiscreteSetter(fl, m_info, "Automatic mode", "#HP01LC02RAM_01PPC");
 	connect(automaticModeSetter, &DiscreteSignalSetter::valueChanged, this, &TuningMainWindow::automaticModeChanged);
 
+	addDiscreteSetter(fl, m_info, "\"Test mode\" on N-16", "#HP01NR01_01PPC");
+	addDiscreteSetter(fl, m_info, "\"Test mode\" on Lin APR", "#HP01LC01_01PPC");
+
 	hl->addWidget(groupBox);
 
 	groupBox = new QGroupBox("Setting coeficients", this);
