@@ -1,7 +1,6 @@
 #include "DbControllerBuildManagementTests.h"
 #include <QSql>
 #include <QSqlError>
-#include <QFile>
 #include <QDebug>
 
 DbControllerBuildTests::DbControllerBuildTests()
@@ -9,7 +8,7 @@ DbControllerBuildTests::DbControllerBuildTests()
 	m_dbController = new DbController();
 
 	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollerfiletesting";
+	m_databaseName = "dbcontrollerbuildtesting";
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
 }
@@ -63,11 +62,14 @@ void DbControllerBuildTests::buidProcessTest()
 	QVector<Signal> signalsToAdd;
 
 	QString workstation = "testWorkstation";
+	QString buildLog;
 
 	Signal newSignal;
 
 	int lastChangesetId = 0;
 	int buildId = 0;
+	int errors = 0;
+	int warnings = 0;
 
 	newSignal.setCaption("BuildTest");
 	newSignal.setAcquire(true);
@@ -134,6 +136,19 @@ void DbControllerBuildTests::buidProcessTest()
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QVERIFY2 (query.value("release").toBool() == true, qPrintable("Error: wrong release value has been recorded when build starts"));
+
+	ok = m_dbController->buildFinish(buildId, errors, warnings, buildLog, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM build WHERE buildId = %1").arg(buildId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value("errors").toInt() == errors, qPrintable("Error: wrong errors value has been returned"));
+	QVERIFY2 (query.value("warnings").toInt() == warnings, qPrintable("Error: wrong warnings value has been returned"));
+	QVERIFY2 (query.value("buildLog").toString() == buildLog, qPrintable("Error: wrong buildLog value has been returned"));
+
+	db.close();
 }
 
 void DbControllerBuildTests::cleanupTestCase()
