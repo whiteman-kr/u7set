@@ -47,7 +47,8 @@ SOURCES +=\
     ../TuningService/TuningDataStorage.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc
+    ../Proto/network.pb.cc \
+    DiscreteSignalSetter.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -82,7 +83,8 @@ HEADERS  += TuningMainWindow.h \
     ../TuningService/TuningDataStorage.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h
+    ../Proto/network.pb.h \
+    DiscreteSignalSetter.h
 
 include(../qtservice/src/qtservice.pri)
 

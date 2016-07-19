@@ -1,6 +1,7 @@
 #include "TuningMainWindow.h"
 #include "SafetyChannelSignalsModel.h"
 #include "AnalogSignalSetter.h"
+#include "DiscreteSignalSetter.h"
 #include <QSettings>
 #include <QFile>
 #include <QGroupBox>
@@ -178,6 +179,26 @@ AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<T
 	return setter;
 }
 
+DiscreteSignalSetter*TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id)
+{
+	auto setter = new DiscreteSignalSetter(id, label, m_service, this);
+
+	Signal* signal = findSignal(id, sourceInfoVector);
+	if (signal == nullptr)
+	{
+		fl->addRow(id, setter);
+	}
+	else
+	{
+		fl->addRow(signal->caption().trimmed() + "\n" + signal->customAppSignalID().trimmed(), setter);
+	}
+
+	connect(m_updateTimer, &QTimer::timeout, setter, &DiscreteSignalSetter::updateValue);
+	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &DiscreteSignalSetter::setCurrentValue);
+
+	return setter;
+}
+
 
 template<typename T>
 void writeField(QTextStream& out, QString caption, T field)
@@ -208,27 +229,14 @@ void writeBuffer(QTextStream& out, QString caption, quint8* buffer, int size)
 
 void TuningMainWindow::updateSignalStates()
 {
-	//m_service->getSignalState("#HP01LC01DC_01PPC");
 	m_service->getSignalState("#HP01LC02RAM_01PPC");
 }
 
 
-void TuningMainWindow::updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid)
+void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*currentValue*/, double lowLimit, double highLimit, bool /*valid*/)
 {
-	Q_UNUSED(lowLimit);
-	Q_UNUSED(highLimit);
-	/*if (appSignalID == "#HP01LC01DC_01PPC")
-	{
-		m_scrollBar->setValue(value * 10);
-	}*/
-	if (appSignalID == "#HP01LC02RAM_01PPC")
-	{
-		m_automaticMode->setChecked(currentValue != 0 && valid != 0);
-		if (valid)
-		{
-			emit automaticModeChanged(currentValue != 0);
-		}
-	}
+	/*Q_UNUSED(lowLimit);
+	Q_UNUSED(highLimit);*/
 }
 
 void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState state)
@@ -260,22 +268,6 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 void TuningMainWindow::applyNewScrollBarValue()
 {
 	emit scrollBarMoved(m_scrollBar->value() * 10);
-}
-
-
-void TuningMainWindow::applyNewAutomaticMode(bool enabled)
-{
-	m_automaticMode->setChecked(!enabled);
-
-	auto reply = QMessageBox::question(this, "Confirmation", QString("Are you sure you want change <b>HP01LC02RAM_01PPC</b> signal value to <b>%1</b>?")
-									   .arg(enabled ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-	if (reply == QMessageBox::No)
-	{
-		return;
-	}
-
-	m_service->setSignalState("#HP01LC02RAM_01PPC", enabled ? 1 : 0);
 }
 
 
@@ -336,9 +328,9 @@ void TuningMainWindow::onTuningServiceReady()
 	fl->setVerticalSpacing(20);
 	groupBox->setLayout(fl);
 
-	auto setter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
-	connect(this, &TuningMainWindow::scrollBarMoved, setter, &AnalogSignalSetter::changeNewValue);
-	connect(this, &TuningMainWindow::automaticModeChanged, setter, &AnalogSignalSetter::setDisabled);
+	auto powerDemandControlSetter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
+	connect(this, &TuningMainWindow::scrollBarMoved, powerDemandControlSetter, &AnalogSignalSetter::changeNewValue);
+	connect(this, &TuningMainWindow::automaticModeChanged, powerDemandControlSetter, &AnalogSignalSetter::setDisabled);
 
 	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
@@ -350,20 +342,9 @@ void TuningMainWindow::onTuningServiceReady()
 
 	fl->addRow("", m_scrollBar);
 
-	m_automaticMode = new QPushButton("Automatic mode", this);
-	m_automaticMode->setCheckable(true);
-	connect(m_automaticMode, &QPushButton::clicked, this, &TuningMainWindow::applyNewAutomaticMode);
+	auto automaticModeSetter = addDiscreteSetter(fl, m_info, "Automatic mode", "#HP01LC02RAM_01PPC");
+	connect(automaticModeSetter, &DiscreteSignalSetter::valueChanged, this, &TuningMainWindow::automaticModeChanged);
 
-	QString automaticModeId = "#HP01LC02RAM_01PPC";
-	Signal* signal = findSignal(automaticModeId, m_info);
-	if (signal == nullptr)
-	{
-		fl->addRow(automaticModeId, m_automaticMode);
-	}
-	else
-	{
-		fl->addRow(signal->caption().trimmed() + "\n" + signal->customAppSignalID().trimmed(), m_automaticMode);
-	}
 	hl->addWidget(groupBox);
 
 	groupBox = new QGroupBox("Setting coeficients", this);
