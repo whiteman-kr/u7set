@@ -261,7 +261,7 @@ namespace Tuning
 		{
 			for(const Signal& signal : source.tuningSignals)
 			{
-				Signal* appSignal = new Signal(false);
+				Signal* appSignal = new Signal();
 
 				*appSignal = signal;
 

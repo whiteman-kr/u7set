@@ -11,7 +11,6 @@
 #include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
-#include "../u7/Builder/IssueLogger.h"
 
 
 class QXmlStreamAttributes;
@@ -185,21 +184,14 @@ private:
 	void setInstanceAction(E::InstanceAction action) { m_instanceAction = action; }
 
 public:
-	Signal(bool initProperties);
 	Signal();
-	virtual ~Signal();
-
-	Signal(const Signal& signal) :
-		PropertyObject()
-	{
-		*this = signal;
-
-		InitProperties();
-	}
-
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 
+	virtual ~Signal();
+
 	Signal& operator = (const Signal& signal);
+
+	static std::shared_ptr<UnitList> unitList;
 
 	int ID() const { return m_ID; }
 	int signalGroupID() const { return m_signalGroupID; }
@@ -378,7 +370,6 @@ public:
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
 	void setReadOnly(bool value);
-	static std::shared_ptr<UnitList> m_unitList;
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -394,9 +385,6 @@ public:
 
 
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
-
-
-class Builder::IssueLogger;
 
 
 class SignalSet : public SignalPtrOrderedHash
@@ -417,8 +405,6 @@ public:
 
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
-
-//	bool checkAppSignals(Hardware::EquipmentSet& equipment, Builder::IssueLogger* log);
 
 	void buildID2IndexMap();
 	bool contains(const QString& appSignalID);

@@ -14,7 +14,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 {
 	SignalSet signalSet;
 	dbController->getSignals(&signalSet, parent);
-	dbController->getUnits(Signal::m_unitList.get(), parent);
+	dbController->getUnits(Signal::unitList.get(), parent);
 	int readOnly = false;
 	QVector<Signal*> signalVector;
 	QMap<QString, int> signalIndexMap;
@@ -61,7 +61,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 		return;
 	}
 
-	SignalPropertiesDialog dlg(signalVector, *Signal::m_unitList.get(), readOnly, nullptr, parent);
+	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, nullptr, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -122,7 +122,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	m_unitInfo(unitInfo),
 	m_signalsModel(signalsModel)
 {
-	*Signal::m_unitList.get() = unitInfo;
+	*Signal::unitList.get() = unitInfo;
 	QSettings settings;
 
 	QVBoxLayout* vl = new QVBoxLayout;

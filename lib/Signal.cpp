@@ -14,27 +14,16 @@ DataFormatList::DataFormatList()
 }
 
 
-std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
+// --------------------------------------------------------------------------------------------------------
+//
+// Signal class implementation
+//
+// --------------------------------------------------------------------------------------------------------
 
+std::shared_ptr<UnitList> Signal::unitList = std::make_shared<UnitList>();
 
-Signal::Signal(bool initProperties) :
-	PropertyObject()
+Signal::Signal()
 {
-	if (initProperties == true)
-	{
-		InitProperties();		// same as Signal::Signal()
-	}
-	else
-	{
-		//	InitProperties();	// no init properties fot faster construction
-	}
-}
-
-
-Signal::Signal() :
-	PropertyObject()
-{
-	InitProperties();
 }
 
 
@@ -43,7 +32,7 @@ Signal::~Signal()
 }
 
 
-Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
+Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 {
 	if (deviceSignal.isDiagSignal())
 	{
@@ -108,8 +97,6 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 		m_dataFormat = E::DataFormat::UnsignedInt;
 		m_dataSize = deviceSignal.size();
 	}
-
-	InitProperties();
 }
 
 
@@ -168,200 +155,6 @@ Signal& Signal::operator =(const Signal& signal)
 	return *this;
 }
 
-void Signal::InitProperties()
-{
-	static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
-	static const QString signalGroupIDCaption("SignalGroupID");
-	static const QString signalInstanceIDCaption("SignalInstanceID");
-	static const QString changesetIDCaption("ChangesetID");
-	static const QString checkedOutCaption("CheckedOut");
-	static const QString userIdCaption("UserID");
-	static const QString channelCaption("Channel");
-	static const QString createdCaption("Created");
-	static const QString deletedCaption("Deleted");
-	static const QString instanceCreatedCaption("InstanceCreated");
-	static const QString instanceActionCaption("InstanceAction");
-	static const QString typeCaption("Type");
-	static const QString inOutTypeCaption("InOutType");
-	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
-	static const QString cacheValidator2("^[A-Za-z][A-Za-z\\d_]*$");
-	static const QString appSignalIDCaption("AppSignalID");
-	static const QString customSignalIDCaption("CustomAppSignalID");
-	static const QString captionCaption("Caption");
-	static const QString captionValidator("^.+$");
-	static const QString dataFormatCaption("DataFormat");
-	static const QString dataSizeCaption("DataSize");
-	static const QString lowADCCaption("LowADC");
-	static const QString highADCCaption("HighADC");
-	static const QString lowDACCaption("LowDAC");
-	static const QString highDACCaption("HighDAC");
-	static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
-	static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
-	static const QString unitCaption("Unit");
-	static const QString lowValidRangeCaption("LowValidRange");
-	static const QString highValidRangeCaption("HighValidRange");
-	static const QString unbalanceLimitCaption("UnbalanceLimit");
-	/*static const QString inputLowLimitCaption("InputLowLimit");
-	static const QString inputHighLimitCaption("InputHighLimit");
-	static const QString inputUnitCaption("InputUnit");
-	static const QString inputSensorCaption("InputSensor");
-	static const QString outputLowLimitCaption("OutputLowLimit");
-	static const QString outputHighLimitCaption("OutputHighLimit");
-	static const QString outputUnitCaption("OutputUnit");
-	static const QString outputSensorCaption("OutputSensor");*/
-	static const QString outputModeCaption("OutputMode");
-	static const QString acquireCaption("Acquire");
-	/*static const QString calculatedCaption("Calculated");*/
-	static const QString normalStateCaption("NormalState");
-	static const QString decimalPlacesCaption("DecimalPlaces");
-	static const QString apertureCaption("Aperture");
-	static const QString filteringTimeCaption("FilteringTime");
-	static const QString spreadToleranceCaption("SpreadTolerance");
-	static const QString byteOrderCaption("ByteOrder");
-	static const QString equipmentIDCaption("EquipmentID");
-	static const QString enableTuningCaption("EnableTuning");
-	static const QString tuningDefaultValueCaption("TuningDefaultValue");
-
-	/*static const QString inputSensorCategory("Input sensor");
-	static const QString outputSensorCategory("Output sensor");*/
-	static const QString identificationCategory("1 Identification");
-	static const QString signalTypeCategory("2 Signal type");
-	static const QString dataFormatCategory("3 Data Format");
-	static const QString signalProcessingCategory("4 Signal processing");
-	static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
-	static const QString tuningCategory("6 Tuning");
-
-	ADD_PROPERTY_GETTER(int, idCaption, false, Signal::ID);
-	ADD_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID);
-	ADD_PROPERTY_GETTER(int, signalInstanceIDCaption, false, Signal::signalInstanceID);
-	ADD_PROPERTY_GETTER(int, changesetIDCaption, false, Signal::changesetID);
-	ADD_PROPERTY_GETTER(bool, checkedOutCaption, false, Signal::checkedOut);
-	ADD_PROPERTY_GETTER(int, userIdCaption, false, Signal::userID);
-	ADD_PROPERTY_GETTER(E::Channel, channelCaption, false, Signal::channel);
-	ADD_PROPERTY_GETTER(QDateTime, createdCaption, false, Signal::created);
-	ADD_PROPERTY_GETTER(bool, deletedCaption, false, Signal::deleted);
-	ADD_PROPERTY_GETTER(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated);
-	ADD_PROPERTY_GETTER(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction);
-
-	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, Signal::type, Signal::setType);
-	signalTypeProperty->setCategory(signalTypeCategory);
-	auto signalInOutTypeProperty = ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType);
-	signalInOutTypeProperty->setCategory(signalTypeCategory);
-
-	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID);
-	strIdProperty->setValidator(cacheValidator1);
-	strIdProperty->setCategory(identificationCategory);
-	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID);
-	extStrIdProperty->setValidator(cacheValidator2);
-	extStrIdProperty->setCategory(identificationCategory);
-	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, captionCaption, true, Signal::caption, Signal::setCaption);
-	nameProperty->setValidator(captionValidator);
-	nameProperty->setCategory(identificationCategory);
-	auto equipmentProperty = ADD_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID);
-	equipmentProperty->setCategory(identificationCategory);
-
-	auto enableTuningProperty = ADD_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning);
-	enableTuningProperty->setCategory(tuningCategory);
-	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue);
-	tuningDefaultValueProperty->setCategory(tuningCategory);
-
-	auto dataFormatProperty = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat);
-	dataFormatProperty->setCategory(dataFormatCategory);
-	auto dataSizeProperty = ADD_PROPERTY_GETTER_SETTER(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize);
-	dataSizeProperty->setCategory(dataFormatCategory);
-
-	if (isAnalog())
-	{
-		static std::shared_ptr<OrderedHash<int, QString>> sensorList = std::make_shared<OrderedHash<int, QString>>();
-
-		if (sensorList->isEmpty())
-		{
-			for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
-			{
-				sensorList->append(i, SensorTypeStr[i]);
-			}
-		}
-
-		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC);
-		lowADCProperty->setCategory(signalProcessingCategory);
-		auto highADCProperty = ADD_PROPERTY_GETTER_SETTER(int, highADCCaption, true, Signal::highADC, Signal::setHighADC);
-		highADCProperty->setCategory(signalProcessingCategory);
-		auto lowDACProperty = ADD_PROPERTY_GETTER_SETTER(int, lowDACCaption, true, Signal::lowADC, Signal::setLowADC);
-		lowDACProperty->setCategory(signalProcessingCategory);
-		auto highDACProperty = ADD_PROPERTY_GETTER_SETTER(int, highDACCaption, true, Signal::highADC, Signal::setHighADC);
-		highDACProperty->setCategory(signalProcessingCategory);
-
-		auto lowEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER(double, lowEngeneeringUnitsCaption, true, Signal::lowEngeneeringUnits, Signal::setLowEngeneeringUnits);
-		lowEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
-		auto highEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER(double, highEngeneeringUnitsCaption, true, Signal::highEngeneeringUnits, Signal::setHighEngeneeringUnits);
-		highEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
-
-		auto lowValidRangeProperty = ADD_PROPERTY_GETTER_SETTER(double, lowValidRangeCaption, true, Signal::lowValidRange, Signal::setLowValidRange);
-		lowValidRangeProperty->setCategory(signalProcessingCategory);
-		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange);
-		highValidRangeProperty->setCategory(signalProcessingCategory);
-
-		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode);
-		outputModePropetry->setCategory(signalProcessingCategory);
-
-		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM(unitCaption, true, m_unitList, Signal::unitID, Signal::setUnitID);
-		unitProperty->setCategory(dataFormatCategory);
-
-		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit);
-		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);
-
-		/*auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputLowLimitCaption, true, Signal::inputLowLimit, Signal::setInputLowLimit);
-		inputLowLimitPropetry->setCategory(inputSensorCategory);
-
-		auto inputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, inputHighLimitCaption, true, Signal::inputHighLimit, Signal::setInputHighLimit);
-		inputHighLimitPropetry->setCategory(inputSensorCategory);
-
-		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputUnitCaption, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);
-		inputUnitIDPropetry->setCategory(inputSensorCategory);
-
-		auto inputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(inputSensorCaption, true, sensorList, Signal::inputSensorID, Signal::setInputSensorID);
-		inputSensorPropetry->setCategory(inputSensorCategory);
-
-		auto outputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, outputLowLimitCaption, true, Signal::outputLowLimit, Signal::setOutputLowLimit);
-		outputLowLimitPropetry->setCategory(outputSensorCategory);
-
-		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, outputHighLimitCaption, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
-		outputHighLimitPropetry->setCategory(outputSensorCategory);
-
-		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputUnitCaption, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);
-		outputUnitIDPropetry->setCategory(outputSensorCategory);
-
-		auto outputSensorPropetry = ADD_PROPERTY_DYNAMIC_ENUM(outputSensorCaption, true, sensorList, Signal::outputSensorID, Signal::setOutputSensorID);
-		outputSensorPropetry->setCategory(outputSensorCategory);*/
-	}
-
-	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire);
-	acquireProperty->setCategory(onlineMonitoringSystemCategory);
-
-	if (isAnalog() == true)
-	{
-		//ADD_PROPERTY_GETTER_SETTER(bool, calculatedCaption, true, Signal::calculated, Signal::setCalculated);
-
-		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces);
-		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
-		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER(double, apertureCaption, true, Signal::aperture, Signal::setAperture);
-		apertureProperty->setCategory(onlineMonitoringSystemCategory);
-
-		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance);
-		spreadToleranceProperty->setCategory(signalProcessingCategory);
-		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime);
-		filteringTimePropetry->setPrecision(6);
-		filteringTimePropetry->setCategory(signalProcessingCategory);
-	}
-	else
-	{
-		auto normalStateProperty = ADD_PROPERTY_GETTER_SETTER(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState);
-		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
-	}
-
-	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder);
-	byteOrderProperty->setCategory(dataFormatCategory);
-}
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
 {
@@ -1298,6 +1091,11 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 	}
 }
 
+// --------------------------------------------------------------------------------------------------------
+//
+// SignalSet class implementation
+//
+// --------------------------------------------------------------------------------------------------------
 
 void SignalSet::buildID2IndexMap()
 {
@@ -1327,160 +1125,6 @@ void SignalSet::buildID2IndexMap()
 	}
 }
 
-/*
-bool SignalSet::checkAppSignals(Hardware::EquipmentSet& equipment, Builder::IssueLogger* log)
-{
-	if (log == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	bool result = true;
-
-	int signalCount = count();
-
-	if (signalCount == 0)
-	{
-		return true;
-	}
-
-	m_strID2IndexMap.reserve(signalCount * 1.3);
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		Signal& s = (*this)[i];
-
-		// check AppSignalID
-		//
-		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
-		{
-			// Application signal identifier '%1' is not unique.
-			//
-			log->errALC5016(s.appSignalID());
-			result = false;
-			continue;
-		}
-		else
-		{
-			m_strID2IndexMap.insert(s.appSignalID(), i);
-		}
-
-		// check EquipmentID
-		//
-		s.setLm(nullptr);
-
-		if (s.equipmentID().isEmpty() == true)
-		{
-			// Application signal '%1' is not bound to any device object.
-			//
-			log->wrnALC5012(s.appSignalID());
-		}
-		else
-		{
-			std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
-
-			if (deviceObjectShared == nullptr)
-			{
-				// Application signal '%1' is bound to unknown device object '%2'.
-				//
-				log->errALC5013(s.appSignalID(), s.equipmentID());
-				result = false;
-				continue;
-			}
-
-			Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
-
-			if (deviceObject->isModule() == true)
-			{
-				// device is Module
-				//
-				Hardware::DeviceModule* module = deviceObject->toModule();
-
-				if (module == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				if (module->isLM())
-				{
-					s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
-				}
-				else
-				{
-					// Application signal '%1' is bound to non logic module.
-					//
-					log->errALC5031(s.appSignalID());
-					result = false;
-					continue;
-				}
-			}
-			else
-			{
-				if (deviceObject->isSignal())
-				{
-					// device is Signal
-					//
-					Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
-
-					if (chassis == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
-
-					if (lm != nullptr)
-					{
-						s.setLm(lm);
-					}
-					else
-					{
-						// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
-						//
-						log->errALC5033(s.appSignalID(), chassis->equipmentId());
-						result = false;
-						continue;
-					}
-				}
-				else
-				{
-					// The signal '%1' can be bind to Logic Module or Equipment Signal.
-					//
-					log->errALC5031(s.appSignalID());
-					result = false;
-					continue;
-				}
-			}
-		}
-
-		// check other signal properties
-		//
-		if (s.isDiscrete())
-		{
-			if (s.dataSize() != 1)
-			{
-				log->errALC5014(s.appSignalID());		// Discrete signal '%1' must have DataSize equal to 1.
-				result = false;
-			}
-		}
-		else
-		{
-			assert(s.isAnalog() == true);
-
-			if (s.dataSize() != 32)
-			{
-				log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
-				result = false;
-			}
-		}
-	}
-
-	return result;
-}
-*/
 
 bool SignalSet::contains(const QString& appSignalID)
 {

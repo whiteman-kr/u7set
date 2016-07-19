@@ -33,9 +33,14 @@ class PropertyObject;
 // Add property which has getter	QString caption() const;
 void setCaption(QString value);
 //
+
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this));
+
+#define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \
+	addProperty<TYPE>(NAME, QString(), VISIBLE, \
+			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
 
 // Add property which has getter and setter
 //
@@ -43,6 +48,11 @@ void setCaption(QString value);
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
+
+#define ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
+	addProperty<TYPE>(NAME, QString(), VISIBLE, \
+			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER), \
+			std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 // Add property which has getter, setter and category
 //
@@ -60,6 +70,11 @@ void setCaption(QString value);
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
 			(std::function<int(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
+
+#define ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER, OWNER) \
+	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
+			(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
+			std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 //
 //
@@ -184,11 +199,11 @@ public:
 	virtual void setEnumValue(int value) = 0;
 	virtual void setEnumValue(const char* value) = 0;
 
-    virtual const QVariant& lowLimit() const = 0;
-    virtual void setLowLimit(const QVariant& value) = 0;
+	virtual const QVariant& lowLimit() const = 0;
+	virtual void setLowLimit(const QVariant& value) = 0;
 
-    virtual const QVariant& highLimit() const = 0;
-    virtual void setHighLimit(const QVariant& value) = 0;
+	virtual const QVariant& highLimit() const = 0;
+	virtual void setHighLimit(const QVariant& value) = 0;
 
 	virtual bool isTheSameType(Property* property) = 0;
 	virtual void updateFromPreset(Property* presetProperty, bool updateValue) = 0;
@@ -1142,7 +1157,7 @@ public:
 	}
 
 
-    // Get specific property by its caption,
+	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
 	std::shared_ptr<Property> propertyByCaption(const QString& caption)
