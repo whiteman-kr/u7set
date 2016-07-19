@@ -119,6 +119,101 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 	db.close();
 }
 
+void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	QSqlQuery query;
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	Hardware::DeviceObject* parentDeviceForTest =  new Hardware::DeviceRoot();
+	Hardware::DeviceObject* firstChildDeviceForTest = new Hardware::DeviceModule();
+	Hardware::DeviceObject* secondChildDeviceForTest = new Hardware::DeviceModule();
+
+	assert(parentDeviceForTest);
+	assert(firstChildDeviceForTest);
+
+	// ParentDeviceForTest
+	//
+
+	parentDeviceForTest->setCaption("parentDeviceObjectTestDevice");
+	parentDeviceForTest->setObjectName("parentDeviceObjectTestDevice");
+	parentDeviceForTest->setPlace(1);
+	parentDeviceForTest->setUuid(QUuid("000fa400-00a0-0045-00b0-000c00000000"));
+
+	bool ok = m_dbController->addDeviceObject(parentDeviceForTest, 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	DbFileInfo parentFileInfo;
+
+	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int parentDeviceObjectFileId = query.value(0).toInt();
+
+	ok = m_dbController->getFileInfo(parentDeviceObjectFileId, &parentFileInfo, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	// First child device for test
+	//
+
+	QUuid firstChildUuid = QUuid("000fa400-0000-0000-0000-000000000000");
+
+	firstChildDeviceForTest->setCaption("firstChildDeviceObjectTestDevice");
+	firstChildDeviceForTest->setObjectName("secondChildDeviceObjectTestDevice");
+	firstChildDeviceForTest->setPlace(2);
+	firstChildDeviceForTest->setUuid(firstChildUuid);
+
+	ok = m_dbController->addDeviceObject(firstChildDeviceForTest, 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE file SET parentid = %1 WHERE fileid = %2").arg(parentDeviceObjectFileId).arg(query.value(0).toInt()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Second child device for test
+	//
+
+	QUuid secondChildUuid = QUuid("000fa40b-0000-0000-0000-000000000000");
+
+	secondChildDeviceForTest->setCaption("secondChildDeviceObjectTestDevice");
+	secondChildDeviceForTest->setObjectName("secondChildDeviceObjectTestDevice");
+	secondChildDeviceForTest->setPlace(3);
+	secondChildDeviceForTest->setUuid(secondChildUuid);
+
+	ok = m_dbController->addDeviceObject(secondChildDeviceForTest, 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE file SET parentid = %1 WHERE fileid = %2").arg(parentDeviceObjectFileId).arg(query.value(0).toInt()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	std::shared_ptr<Hardware::DeviceObject> out;
+
+	qRegisterMetaType<DbFileInfo>("DbFileInfo");
+
+	ok = m_dbController->getDeviceTreeLatestVersion(parentFileInfo, &out, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2(out.get()->childrenCount() == 2, qPrintable("Error: wrong amount of children!"));
+
+	QVERIFY2(out.get()->child(0)->uuid() == firstChildUuid, qPrintable("Error: wrong child  (first child)!"));
+	QVERIFY2(out.get()->child(1)->uuid() == secondChildUuid, qPrintable("Error: wrong child  (second child)!"));
+
+	db.close();
+}
+
 void DbControllerHardwareConfigurationTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())

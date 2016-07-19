@@ -14,7 +14,7 @@ private slots:
 	void initTestCase();
 	void createOpenUpgradeCloseDeleteProject();
 	void getProjectListTest();
-	void getDatabaseVersion();
+	void setProjectPropertyTest();
 	void cleanupTestCase();
 
 private:
