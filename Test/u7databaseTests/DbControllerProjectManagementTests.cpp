@@ -153,6 +153,13 @@ void DbControllerProjectTests::setProjectPropertyTest()
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.value(0).toInt() == 1, qPrintable("Error: project property has not been written to database"));
 
+	QString propertyValueResult;
+
+	ok = m_dbController->getProjectProperty(testPropertyName, &propertyValueResult, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2(propertyValueResult == testPropertyValue, qPrintable("Error: wrong property value returned!"));
+
 	ok = m_dbController->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable("Error: can not close project"));
 
