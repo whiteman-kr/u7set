@@ -177,7 +177,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 				return QColor(Qt::red);
 			}
 			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
-			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() == data(currentIndex).toString())
+			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() != data(currentIndex).toString())
 			{
 				return QColor(Qt::yellow);
 			}
