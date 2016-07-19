@@ -304,7 +304,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	{
 		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignalparams(i);
 
-		Signal s(false);
+		Signal s;
 		s.serializeFromProtoAppSignal(&protoSignal);
 
 		assert(s.hash() != 0);

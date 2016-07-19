@@ -708,7 +708,7 @@ namespace  Tuning
 					break;
 				}
 
-				Signal* signal = new Signal(false);
+				Signal* signal = new Signal();
 
 				result &= signal->readFromXml(xml);
 

@@ -324,7 +324,7 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 			break;
 		}
 
-		Signal* signal = new Signal(false);		// call constructor without InitProperties()
+		Signal* signal = new Signal();
 
 		bool res = signal->readFromXml(xml);	// time-expensive function !!!
 

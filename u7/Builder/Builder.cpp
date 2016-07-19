@@ -558,7 +558,7 @@ namespace Builder
 			return false;
 		}
 
-		result = db->getUnits(Signal::m_unitList.get(), nullptr);
+		result = db->getUnits(Signal::unitList.get(), nullptr);
 
 		if (result == false)
 		{

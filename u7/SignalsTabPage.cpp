@@ -1599,7 +1599,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalPtrVector.push_back(&signal);
 	}
-	SignalPropertiesDialog dlg(signalPtrVector, *Signal::m_unitList.get(), false, nullptr, parent);
+	SignalPropertiesDialog dlg(signalPtrVector, *Signal::unitList.get(), false, nullptr, parent);
 
 	if (dlg.exec() != QDialog::Accepted )
 	{

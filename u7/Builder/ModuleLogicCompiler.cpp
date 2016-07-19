@@ -2868,7 +2868,7 @@ namespace Builder
 			xmlWriter.writeAttribute("ExtStrID", s->customAppSignalID());
 			xmlWriter.writeAttribute("Name", s->caption());
 			xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
-			xmlWriter.writeAttribute("Unit", Signal::m_unitList->valueAt(s->unitID()));
+			xmlWriter.writeAttribute("Unit", Signal::unitList->valueAt(s->unitID()));
 			xmlWriter.writeAttribute("DataSize", QString::number(s->dataSize()));
 			xmlWriter.writeAttribute("DataFormat", QMetaEnum::fromType<E::DataFormat>().valueToKey(s->dataFormatInt()));
 			xmlWriter.writeAttribute("ByteOrder", QMetaEnum::fromType<E::ByteOrder>().valueToKey(s->byteOrderInt()));
