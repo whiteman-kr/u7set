@@ -351,7 +351,13 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			quint32 ip = socket->serverAddress().toIPv4Address();
 			QPair<int, int> place = getServiceState(ip, socket->port());
 
-			Network::GetServiceInfoReply ack;
+			Network::ServiceInfo newServiceInfo;
+
+			if (newServiceInfo.ParseFromArray(udpRequest.data(), udpRequest.dataSize()) == false)
+			{
+				assert(false);
+				return;
+			}
 
 			if (place.first == -1)
 			{
@@ -362,16 +368,9 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 					return;
 				}
 
-
-				if (ack.ParseFromArray(udpRequest.data(), udpRequest.dataSize()) == false)
-				{
-					assert(false);
-					return;
-				}
-
 				HostInfo hi;
 				hi.ip = sa.toIPv4Address();
-				hi.servicesData[place.second].information = ack.serviceinfo();
+				hi.servicesData[place.second].information = newServiceInfo;
 
 				beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
 
@@ -386,14 +385,14 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 
 			Network::ServiceInfo& info = m_hostsInfo[place.first].servicesData[place.second].information;
 
-			if (info.servicestate() != ack.serviceinfo().servicestate())
+			if (info.servicestate() != newServiceInfo.servicestate())
 			{
-				info = ack.serviceinfo();
+				info = newServiceInfo;
 				emit serviceStateChanged(place.first);
 			}
 			else
 			{
-				info = ack.serviceinfo();
+				info = newServiceInfo;
 			}
 			QModelIndex changedIndex = index(place.first, place.second);
 			emit dataChanged(changedIndex, changedIndex);
