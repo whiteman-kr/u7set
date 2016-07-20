@@ -67,7 +67,8 @@ SOURCES += main.cpp \
     DbControllerSignalManagementTests.cpp \
     DbControllerHardwareConfigurationTests.cpp \
     ../../lib/HostAddressPort.cpp \
-    DbControllerBuildManagementTests.cpp
+    DbControllerBuildManagementTests.cpp \
+    DbControllerVersionControlTests.cpp
 
 HEADERS += \
     UserTests.h \
@@ -102,7 +103,8 @@ HEADERS += \
     DbControllerSignalManagementTests.h \
     DbControllerHardwareConfigurationTests.h \
     ../../lib/HostAddressPort.h \
-    DbControllerBuildManagementTests.h
+    DbControllerBuildManagementTests.h \
+    DbControllerVersionControlTests.h
 
 #c++11 support for GCC
 #
