@@ -95,7 +95,7 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -200,7 +200,7 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -289,7 +289,7 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -445,7 +445,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -574,7 +574,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -636,7 +636,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setOutputMode(E::OutputMode::Minus10_Plus10_V);
 	resultSignal.setOutputSensorID(34847);
 	resultSignal.setOutputUnitID(1);
-	resultSignal.setReadOnly(true);
+//	resultSignal.setReadOnly(true);
 	resultSignal.setSpreadTolerance(2346.8);
 	resultSignal.setType(E::SignalType::Discrete);
 	resultSignal.setUnbalanceLimit(2345.3);
@@ -735,7 +735,7 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -830,7 +830,7 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -872,6 +872,44 @@ void DbControllerSignalTests::deleteSignalTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: signal has not been deleted"));
+}
+
+void DbControllerSignalTests::autoAddSignalsTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+		db.setHostName(m_databaseHost);
+		db.setUserName(m_databaseUser);
+		db.setPassword(m_adminPassword);
+		db.setDatabaseName("u7_" + m_databaseName);
+
+		QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+
+		QSqlQuery query;
+
+		Hardware::DeviceSignal newSignal;
+
+		QString firstCaption = "autoAddSignalTest";
+
+		newSignal.setCaption(firstCaption);
+		newSignal.setByteOrder(E::ByteOrder::LittleEndian);
+		newSignal.setObjectName(firstCaption);
+		newSignal.setType(E::SignalType::Discrete);
+		newSignal.setFunction(E::SignalFunction::Input);
+		newSignal.setEquipmentIdTemplate(firstCaption);
+
+		std::vector <Hardware::DeviceSignal*> newSignals;
+
+		newSignals.push_back(&newSignal);
+
+		bool ok = m_dbController->autoAddSignals(&newSignals, 0);
+		QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+		ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption='Signal #%1'").arg(firstCaption));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		db.close();
 }
 
 void DbControllerSignalTests::cleanupTestCase()
