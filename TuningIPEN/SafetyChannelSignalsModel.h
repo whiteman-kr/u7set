@@ -3,14 +3,7 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QHash>
-/*<<<<<<< HEAD
-
-class TuningDataSourceInfo;
-class TuningService;
-class Signal;
-=======*/
 #include "../TuningService/TuningService.h"
-//>>>>>>> f604605454aed8c615d8c9096c4216c91d30e089
 
 struct SignalState
 {
