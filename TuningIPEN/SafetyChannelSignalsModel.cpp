@@ -127,7 +127,18 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 					}
 				}
 				break;
-				case DEFAULT_VALUE_COLUMN: return signal.tuningDefaultValue();
+				case DEFAULT_VALUE_COLUMN:
+				{
+					double value = signal.tuningDefaultValue();
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return value == 0 ? "No" : "Yes";
+					}
+				}
 				case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
 				case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
 				case RECEIVED_LOW_LIMIT_COLUMN:
