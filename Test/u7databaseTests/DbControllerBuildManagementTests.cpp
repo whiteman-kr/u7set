@@ -102,7 +102,7 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	newSignal.setReadOnly(false);
+//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
