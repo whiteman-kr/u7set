@@ -26,7 +26,7 @@ bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	{
 		return false;
 	}
-	if (event->type() == QEvent::MouseButtonDblClick)
+	if (event->type() == QEvent::MouseButtonDblClick || event->type() == QEvent::KeyPress)
 	{
 		emit aboutToChangeDiscreteSignal(index);
 		return true;
@@ -188,7 +188,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 				return QColor(Qt::red);
 			}
 			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
-			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() != data(currentIndex).toString())
+			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString().trimmed() != data(currentIndex).toString().trimmed())
 			{
 				return QColor(Qt::yellow);
 			}
@@ -330,7 +330,7 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].validity = validity;
 
 		//if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
-		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString())
+		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString().trimmed() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString().trimmed())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);

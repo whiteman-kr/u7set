@@ -181,8 +181,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 			{
 				signalProperties->propertyByCaption("LowADC")->setVisible(false);
 				signalProperties->propertyByCaption("HighADC")->setVisible(false);
-				signalProperties->propertyByCaption("LowEngeneeringUnits")->setVisible(false);
-				signalProperties->propertyByCaption("HighEngeneeringUnits")->setVisible(false);
 			}
 
 			if (signalProperties->signal().isOutput())
