@@ -12,6 +12,7 @@ public:
 private slots:
 	void initTestCase();
 	void isAnyCheckedOutTest();
+	void lastChangesetIdTest();
 	void cleanupTestCase();
 
 private:

@@ -71,6 +71,42 @@ void DbControllerVersionControlTests::isAnyCheckedOutTest()
 	db.close();
 }
 
+void DbControllerVersionControlTests::lastChangesetIdTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	bool ok = query.exec("SELECT * FROM add_file(1, 'lstChangesetIdTest', 1, 'testtesttest', '{}')");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_in(1, '{%1}', 'TEST');").arg(query.value("id").toInt()));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec("SELECT MAX(changesetId) FROM changeset");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int result = 0;
+
+	ok = m_dbController->lastChangesetId(&result);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	assert(result != 0);
+
+	QVERIFY2 (query.value(0).toInt() == result, qPrintable("Error: wrong changesetId returned by function"));
+
+	db.close();
+}
+
 void DbControllerVersionControlTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())
