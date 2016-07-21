@@ -20,6 +20,7 @@ private slots:
 	void undoSignalChangesTest();
 	void deleteSignalTest();
 	void autoAddSignalsTest();
+	void getSignalsTest();
 	void cleanupTestCase();
 
 private:
