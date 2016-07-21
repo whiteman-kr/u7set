@@ -195,6 +195,57 @@ void DbControllerProjectTests::isProjectOpenedTest()
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 }
 
+void DbControllerProjectTests::connectionInfoTest()
+{
+	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	// Host testing
+	//
+
+	QVERIFY2 (m_dbController->host() == m_databaseHost, qPrintable("Error: wrong host returned"));
+	m_dbController->setHost("0.0.0.0");
+	QVERIFY2 (m_dbController->host() == "0.0.0.0", qPrintable("Error: wrong host returned"));
+	m_dbController->setHost(m_databaseHost);
+
+	// Port testing
+	//
+
+	QVERIFY2 (m_dbController->port() == m_databasePort, qPrintable("Error: wrong port returned"));
+	m_dbController->setPort(1234);
+	QVERIFY2 (m_dbController->port() == 1234, qPrintable("Error: wrong port returned"));
+	m_dbController->setPort(m_databasePort);
+
+	// Server username testing
+	//
+
+	QVERIFY2 (m_dbController->serverUsername() == m_databaseUser, qPrintable("Error: wrong server username returned"));
+	m_dbController->setServerUsername("Tester");
+	QVERIFY2 (m_dbController->serverUsername() == "Tester", qPrintable("Error: wrong server username returned"));
+	m_dbController->setServerUsername(m_databaseUser);
+
+	/*qDebug() << "Pass before: " << m_dbController->serverPassword();
+	m_dbController->setServerPassword("Test");
+	qDebug() << "Pass after: " << m_dbController->serverPassword();*/
+
+	// Current user testing
+	//
+
+	QVERIFY2 (m_dbController->currentUser().username() == "Administrator", qPrintable("Error: wrong current user returned"));
+
+	ok = m_dbController->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+}
+
 void DbControllerProjectTests::cleanupTestCase()
 {
 

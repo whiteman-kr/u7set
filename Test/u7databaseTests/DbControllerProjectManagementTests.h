@@ -16,6 +16,7 @@ private slots:
 	void getProjectListTest();
 	void setProjectPropertyTest();
 	void isProjectOpenedTest();
+	void connectionInfoTest();
 	void cleanupTestCase();
 
 private:
@@ -25,4 +26,5 @@ private:
 	QString m_databaseName;
 	QString m_databaseUser;
 	QString m_adminPassword;
+	int m_databasePort = 5432; // Current port by default. Not a magic number
 };
