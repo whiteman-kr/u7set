@@ -1752,6 +1752,109 @@ void DbControllerFileTests::undoChangestest()
 	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: file was not checked in by function"));
 }
 
+void DbControllerFileTests::systemFilesTest()
+{
+	QSqlDatabase db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("u7_" + m_databaseName);
+
+	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+
+	QSqlQuery query;
+
+	int afbl = 0;
+	int al = 0;
+	int mc = 0;
+	int mvs = 0;
+	int dvs = 0;
+	int hc = 0;
+	int hp = 0;
+
+	bool ok = query.exec("SELECT * FROM file WHERE name = 'AFBL'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	afbl = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'AL'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	al = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'MC'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	mc = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'MVS'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	mvs = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'DVS'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	dvs = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'HC'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	hc = query.value("fileId").toInt();
+
+	ok = query.exec("SELECT * FROM file WHERE name = 'HP'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	hp = query.value("fileId").toInt();
+
+	QVERIFY2 (m_dbController->rootFileId() == 0, qPrintable("Error: root fileId must be 0, function returned wrong id"));
+	QVERIFY2 (m_dbController->afblFileId() == afbl, qPrintable("Error: Wrong AFBL id returned"));
+	QVERIFY2 (m_dbController->alFileId() == al, qPrintable("Error: Wrong AL id returned"));
+	QVERIFY2 (m_dbController->mcFileId() == mc, qPrintable("Error: Wrong MC id returned"));
+	QVERIFY2 (m_dbController->mvsFileId() == mvs, qPrintable("Error: Wrong MVS id returned"));
+	QVERIFY2 (m_dbController->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
+	QVERIFY2 (m_dbController->hcFileId() == hc, qPrintable("Error: Wrong HC id returned"));
+	QVERIFY2 (m_dbController->hpFileId() == hp, qPrintable("Error: Wrong HP id returned"));
+
+	std::vector<DbFileInfo> systemFiles;
+	QVector<int> fileIds;
+
+	systemFiles = m_dbController->systemFiles();
+
+	for (DbFileInfo file : systemFiles)
+	{
+		fileIds.push_back(file.fileId());
+	}
+
+	QVERIFY2 (fileIds.contains(0) == true, qPrintable("Error: systemFiles function has not added root file to output!"));
+	QVERIFY2 (fileIds.contains(afbl) == true, qPrintable("Error: systemFiles function has not added AFBL file to output!"));
+	QVERIFY2 (fileIds.contains(al) == true, qPrintable("Error: systemFiles function has not added AL file to output!"));
+	QVERIFY2 (fileIds.contains(mc) == true, qPrintable("Error: systemFiles function has not added MC file to output!"));
+	QVERIFY2 (fileIds.contains(mvs) == true, qPrintable("Error: systemFiles function has not added MVS file to output!"));
+	QVERIFY2 (fileIds.contains(dvs) == true, qPrintable("Error: systemFiles function has not added DVS file to output!"));
+	QVERIFY2 (fileIds.contains(hc) == true, qPrintable("Error: systemFiles function has not added HC file to output!"));
+	QVERIFY2 (fileIds.contains(hp) == true, qPrintable("Error: systemFiles function has not added HP file to output!"));
+
+	QVERIFY2 (m_dbController->systemFileInfo("AFBL").fileId() == afbl, qPrintable("Error: function systemFileInfo returned wrong fileId"));
+	QVERIFY2 (m_dbController->systemFileInfo(hc).fileName() == "HC", qPrintable("Error: function systemFileInfo returned wrong fileName"));
+
+	ok = query.exec("SELECT * FROM add_file(1, 'systemFileName', 1, 'file_data', '{}')");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (m_dbController->systemFileInfo(query.value("id").toInt()).fileId() == -1, qPrintable("Error: -1 fileId expected"));
+
+	db.close();
+}
+
 void DbControllerFileTests::cleanupTestCase()
 {
 	for (QString connection : QSqlDatabase::connectionNames())

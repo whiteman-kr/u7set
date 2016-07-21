@@ -120,7 +120,7 @@ void DbControllerProjectTests::getProjectListTest()
 	db.close();
 }
 
-void DbControllerProjectTests::setProjectPropertyTest()
+void DbControllerProjectTests::ProjectPropertyTest()
 {
 	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));

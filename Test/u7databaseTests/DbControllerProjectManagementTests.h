@@ -14,7 +14,7 @@ private slots:
 	void initTestCase();
 	void createOpenUpgradeCloseDeleteProject();
 	void getProjectListTest();
-	void setProjectPropertyTest();
+	void ProjectPropertyTest();
 	void isProjectOpenedTest();
 	void connectionInfoTest();
 	void cleanupTestCase();
