@@ -946,7 +946,7 @@ void DbControllerSignalTests::getSignalsTest()
 
 	QVERIFY2 (signalAmount == signalsFromDb.count(), qPrintable(QString("Error: wrong amount of signals returned\nExpected: %1\nGot: %2").arg(signalAmount).arg(signalsFromDb.count())));
 
-	signalsFromDb.count();
+	db.close();
 }
 
 void DbControllerSignalTests::cleanupTestCase()
