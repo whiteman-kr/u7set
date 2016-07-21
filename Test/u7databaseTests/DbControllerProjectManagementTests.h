@@ -15,6 +15,7 @@ private slots:
 	void createOpenUpgradeCloseDeleteProject();
 	void getProjectListTest();
 	void setProjectPropertyTest();
+	void isProjectOpenedTest();
 	void cleanupTestCase();
 
 private:
