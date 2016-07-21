@@ -187,8 +187,8 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 			{
 				return QColor(Qt::red);
 			}
-			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
-			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString().trimmed() != data(currentIndex).toString().trimmed())
+			if (qAbs(static_cast<float>(state.currentValue) - static_cast<float>(signal.tuningDefaultValue())) > std::numeric_limits<float>::epsilon())
+			//if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString().trimmed() != data(currentIndex).toString().trimmed())
 			{
 				return QColor(Qt::yellow);
 			}
@@ -329,8 +329,8 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		//if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
-		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString().trimmed() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString().trimmed())
+		if (qAbs(static_cast<float>(m_states[signalIndex].newValue) - static_cast<float>(value)) < std::numeric_limits<float>::epsilon())
+		//if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString().trimmed() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString().trimmed())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
