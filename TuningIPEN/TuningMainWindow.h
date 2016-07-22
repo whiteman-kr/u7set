@@ -9,6 +9,7 @@
 #include "TuningIPENService.h"
 
 class QTabWidget;
+class QTableView;
 class QFormLayout;
 class QPushButton;
 class QScrollBar;
@@ -34,6 +35,8 @@ class TuningMainWindow : public QMainWindow
 private:
 	QString m_cfgPath;
 	QTabWidget* m_setOfSignalsScram;
+	QTableView* m_beamDoorsWidget;
+	QWidget* m_reactivityWidget;
 	QWidget* m_automaticPowerRegulatorWidget;
 
 	Tuning::TuningService* m_service = nullptr;
@@ -43,6 +46,7 @@ private:
 	QScrollBar* m_scrollBar;
 	QTimer* m_updateTimer;
 	QThread* m_logThread;
+	LogWriter* m_logWriter;
 
 	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
 	DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id);

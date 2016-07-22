@@ -1,5 +1,6 @@
 #include "TuningMainWindow.h"
 #include "SafetyChannelSignalsModel.h"
+#include "TripleChannelSignalsModel.h"
 #include "AnalogSignalSetter.h"
 #include "DiscreteSignalSetter.h"
 #include <QSettings>
@@ -95,12 +96,11 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 
-	LogWriter* logWriter = new LogWriter;
+	m_logWriter = new LogWriter;
 	m_logThread = new QThread(this);
-	logWriter->moveToThread(m_logThread);
-	connect(m_service, &Tuning::TuningService::userRequest, logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
-	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
-	connect(m_logThread, &QThread::finished, logWriter, &QObject::deleteLater);
+	m_logWriter->moveToThread(m_logThread);
+	connect(m_service, &Tuning::TuningService::userRequest, m_logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
+	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, m_logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
 
 	m_service->start();
 
@@ -132,16 +132,29 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	container->setLayout(vl);
 	setCentralWidget(container);
 
-	m_automaticPowerRegulatorWidget = new QWidget;
-
-	mainTabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
-
+	// ========== First tab ==========
 	m_setOfSignalsScram = new QTabWidget(this);
 	QWidget* widget = new QWidget;
 	hl = new QHBoxLayout;
 	widget->setLayout(hl);
 	hl->addWidget(m_setOfSignalsScram);
 	mainTabs->addTab(widget, "Set of signals SCRAM");
+	// ========== First tab ==========
+
+	// ========== Second tab ==========
+	m_beamDoorsWidget = new QTableView;
+	mainTabs->addTab(m_beamDoorsWidget, "Deactivate signals \"Open beam doors\"");
+	// ========== Second tab ==========
+
+	// ========== Third tab ==========
+	m_reactivityWidget = new QWidget;
+	mainTabs->addTab(m_reactivityWidget, "Set of signals Canais Nucleare. Reactivity");
+	// ========== Third tab ==========
+
+	// ========== Fourth tab ==========
+	m_automaticPowerRegulatorWidget = new QWidget;
+	mainTabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
+	// ========== Fourth tab ==========
 }
 
 
@@ -150,6 +163,7 @@ TuningMainWindow::~TuningMainWindow()
 	m_logThread->quit();
 	m_logThread->wait();
 	delete m_logThread;
+	delete m_logWriter;
 
 	m_updateTimer->stop();
 	m_service->stop();
@@ -233,10 +247,8 @@ void TuningMainWindow::updateSignalStates()
 }
 
 
-void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*currentValue*/, double lowLimit, double highLimit, bool /*valid*/)
+void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*currentValue*/, double /*lowLimit*/, double /*highLimit*/, bool /*valid*/)
 {
-	/*Q_UNUSED(lowLimit);
-	Q_UNUSED(highLimit);*/
 }
 
 void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState state)
@@ -277,6 +289,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	QVector<int> sourceIndexes;
 
+	// ========== First tab ==========
 	for (int index = 0; index < m_info.count(); index++)
 	{
 		Tuning::TuningDataSourceInfo& sourceInfo = m_info[index];
@@ -294,7 +307,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, view);
 		view->setModel(model);
-		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate;
+		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate(view);
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
 		view->setItemDelegate(delegate);
 
@@ -306,7 +319,9 @@ void TuningMainWindow::onTuningServiceReady()
 
 		view->resizeColumnsToContents();
 	}
+	// ========== First tab ==========
 
+	// ========== Status bar ==========
 	for (int i = 0; i < sourceIndexes.count(); i++)
 	{
 		Tuning::TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
@@ -315,16 +330,64 @@ void TuningMainWindow::onTuningServiceReady()
 
 		m_statusLabelMap.insert(sourceInfo.lmEquipmentID, newLabel);
 	}
+	// ========== Status bar ==========
 
 	connect(m_service, &Tuning::TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
 	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TuningMainWindow::updateSignalState);
 
+	// ========== Second tab ==========
+	TripleChannelSignalsModel* model = new TripleChannelSignalsModel(m_info, m_service, m_beamDoorsWidget);
+	m_beamDoorsWidget->setModel(model);
+	// ========== Second tab ==========
+
+	// ========== Third tab ==========
+	QVBoxLayout* vl = new QVBoxLayout;
+	m_reactivityWidget->setLayout(vl);
+
+	QFormLayout* fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	fl->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+	vl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "The average lifetime of prompt neutrons", "#HP01SC03A_01PPC", 0.001);
+
 	QHBoxLayout* hl = new QHBoxLayout;
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	hl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 1st group", "#HP01SC03A_02PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 2st group", "#HP01SC03A_04PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 3st group", "#HP01SC03A_06PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 4st group", "#HP01SC03A_08PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 5st group", "#HP01SC03A_10PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 6st group", "#HP01SC03A_12PPC", 0.3);
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	hl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 1st group", "#HP01SC03A_03PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 2st group", "#HP01SC03A_05PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 3st group", "#HP01SC03A_07PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 4st group", "#HP01SC03A_09PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 5st group", "#HP01SC03A_11PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 6st group", "#HP01SC03A_13PPC", 5);
+
+	vl->addLayout(hl);
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	fl->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+	vl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "The total fraction of delayed neutrons", "#HP01SC03A_14PPC", 1);
+	// ========== Third tab ==========
+
+	// ========== Fourth tab ==========
+	hl = new QHBoxLayout;
 	m_automaticPowerRegulatorWidget->setLayout(hl);
 
 	QGroupBox* groupBox = new QGroupBox("Power control", this);
 	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QFormLayout* fl = new QFormLayout;
+	fl = new QFormLayout;
 	fl->setVerticalSpacing(20);
 	groupBox->setLayout(fl);
 
@@ -363,6 +426,7 @@ void TuningMainWindow::onTuningServiceReady()
 	QFont font = m_automaticPowerRegulatorWidget->font();
 	font.setPointSize(font.pointSize() * 1.4);
 	setFontRecursive(m_automaticPowerRegulatorWidget, font);
+	// ========== Fourth tab ==========
 }
 
 
