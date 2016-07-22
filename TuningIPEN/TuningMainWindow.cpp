@@ -279,7 +279,12 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 
 void TuningMainWindow::applyNewScrollBarValue()
 {
-	emit scrollBarMoved(m_scrollBar->value() * 10);
+	double newValue = m_scrollBar->value() * 10;
+	if (newValue == 0)
+	{
+		newValue = 1;
+	}
+	emit scrollBarMoved(newValue);
 }
 
 
@@ -379,6 +384,12 @@ void TuningMainWindow::onTuningServiceReady()
 	fl->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
 	vl->addLayout(fl);
 	addAnalogSetter(fl, m_info, "The total fraction of delayed neutrons", "#HP01SC03A_14PPC", 1);
+
+	vl->addStretch();
+
+	QFont font = m_reactivityWidget->font();
+	font.setPointSize(font.pointSize() * 1.4);
+	setFontRecursive(m_reactivityWidget, font);
 	// ========== Third tab ==========
 
 	// ========== Fourth tab ==========
@@ -389,7 +400,10 @@ void TuningMainWindow::onTuningServiceReady()
 	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
 	fl = new QFormLayout;
 	fl->setVerticalSpacing(20);
-	groupBox->setLayout(fl);
+
+	vl = new QVBoxLayout;
+	vl->addLayout(fl);
+	groupBox->setLayout(vl);
 
 	auto powerDemandControlSetter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
 	connect(this, &TuningMainWindow::scrollBarMoved, powerDemandControlSetter, &AnalogSignalSetter::changeNewValue);
@@ -397,7 +411,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
-	m_scrollBar->setMaximum(11);
+	m_scrollBar->setMaximum(10);
 	m_scrollBar->setPageStep(1);
 	m_scrollBar->setTracking(false);
 	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
@@ -407,6 +421,10 @@ void TuningMainWindow::onTuningServiceReady()
 
 	auto automaticModeSetter = addDiscreteSetter(fl, m_info, "Automatic mode", "#HP01LC02RAM_01PPC");
 	connect(automaticModeSetter, &DiscreteSignalSetter::valueChanged, this, &TuningMainWindow::automaticModeChanged);
+
+	fl = new QFormLayout;
+	vl->addStretch();
+	vl->addLayout(fl);
 
 	addDiscreteSetter(fl, m_info, "\"Test mode\" on N-16", "#HP01NR01_01PPC");
 	addDiscreteSetter(fl, m_info, "\"Test mode\" on Lin APR", "#HP01LC01_01PPC");
@@ -423,7 +441,7 @@ void TuningMainWindow::onTuningServiceReady()
 	addAnalogSetter(fl, m_info, "Driving coefficient", "#HP01LC02RDC_01PPC", 100);
 	hl->addWidget(groupBox);
 
-	QFont font = m_automaticPowerRegulatorWidget->font();
+	font = m_automaticPowerRegulatorWidget->font();
 	font.setPointSize(font.pointSize() * 1.4);
 	setFontRecursive(m_automaticPowerRegulatorWidget, font);
 	// ========== Fourth tab ==========
