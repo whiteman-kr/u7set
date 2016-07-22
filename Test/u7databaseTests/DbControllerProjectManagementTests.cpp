@@ -56,6 +56,8 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("u7_" + m_databaseName);
 
+	QSqlQuery query;
+
 	// Create, open, close, and delete simple database
 	//
 
@@ -76,8 +78,39 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 
 	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
 
+	// Try open project twice
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == false, qPrintable("Error: Project already opened error exected"));
+
 	ok = m_dbController->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	// Try open project with invalid user
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "TEST", m_adminPassword, 0);
+	QVERIFY2 (ok == false, qPrintable("Error: wrong user error expected"));
+
+	// Try open project with invalid password
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", "testtesttest", 0);
+	QVERIFY2 (ok == false, qPrintable("Error: wrong pass error expected"));
+
+	// Try open project with disabled user
+	//
+
+	QVERIFY2 (db.open() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec ("SELECT * FROM create_user(1, 'Tester', 'Tester', 'Tester', 'TesterTester', false, false, true)");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = m_dbController->openProject(m_databaseName, "Tester", "TesterTester", 0);
+	QVERIFY2 (ok == false, qPrintable("Error: Disabled user"));
+
+	db.close();
 
 	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
