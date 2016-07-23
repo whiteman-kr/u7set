@@ -68,6 +68,8 @@ SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInf
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &SafetyChannelSignalsModel::updateSignalStates);
 	timer->start(200);
+
+	connect(m_service, &Tuning::TuningService::signalStateReady, this, &SafetyChannelSignalsModel::updateSignalState);
 }
 
 int SafetyChannelSignalsModel::rowCount(const QModelIndex&) const

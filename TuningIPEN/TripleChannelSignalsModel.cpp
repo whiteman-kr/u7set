@@ -40,9 +40,12 @@ TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataS
 	{
 		m_sourceStates[i].index = -1;
 	}
+
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &TripleChannelSignalsModel::updateSignalStates);
 	timer->start(200);
+
+	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TripleChannelSignalsModel::updateSignalState);
 }
 
 int TripleChannelSignalsModel::rowCount(const QModelIndex&) const

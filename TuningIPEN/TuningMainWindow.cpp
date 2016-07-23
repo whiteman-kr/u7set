@@ -337,8 +337,6 @@ void TuningMainWindow::onTuningServiceReady()
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
 		view->setItemDelegate(delegate);
 
-		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState);
-
 		QFont font = view->font();
 		font.setPointSize(font.pointSize() * 1.2);
 		view->setFont(font);
