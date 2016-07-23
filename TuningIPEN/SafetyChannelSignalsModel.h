@@ -5,6 +5,8 @@
 #include <QHash>
 #include "../TuningService/TuningService.h"
 
+class TripleChannelSignalsModel;
+
 struct SignalState
 {
 	double currentValue;
@@ -54,4 +56,17 @@ private:
 	QVector<SignalState> m_states;
 	Tuning::TuningService* m_service;
 	QHash<QString, int> signalIdMap;
+};
+
+class SafetyChannelSignalsProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	SafetyChannelSignalsProxyModel(TripleChannelSignalsModel* tripleSignalModel, SafetyChannelSignalsModel* sourceModel, QObject* parent = 0);
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+
+private:
+	TripleChannelSignalsModel* m_tripleSignalModel;
+	SafetyChannelSignalsModel* m_sourceModel;
 };

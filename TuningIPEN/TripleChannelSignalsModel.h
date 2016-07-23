@@ -32,6 +32,9 @@ class TripleChannelSignalsDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 
+public:
+	explicit TripleChannelSignalsDelegate(QObject *parent = Q_NULLPTR);
+
 signals:
 	void aboutToChangeDiscreteSignal(const QModelIndex& index);
 
@@ -54,13 +57,17 @@ public:
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
 	void addTripleSignal(QVector<QString> ids);
+
+	QVector<const SignalProperties*> state(const QModelIndex& index) const;
 	QVector<SignalProperties*> state(const QModelIndex& index);
-	QVector<Signal*> signal(const QModelIndex &index);
+	QVector<Signal*> signal(const QModelIndex &index) const;
+
+	bool contains(const QString& id);
 
 public slots:
 	void updateSignalStates();
 	void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
-	void changeDiscreteSignal(const QModelIndex& index);
+	void changeDiscreteSignal(const QModelIndex& currentIndex);
 
 private:
 	QVector<Tuning::TuningDataSourceInfo>& m_sourceInfo;

@@ -1,4 +1,5 @@
 #include "SafetyChannelSignalsModel.h"
+#include "TripleChannelSignalsModel.h"
 #include "../TuningService/TuningDataSource.h"
 #include "../TuningService/TuningService.h"
 #include <cmath>
@@ -22,7 +23,12 @@ SafetyChannelSignalsDelegate::SafetyChannelSignalsDelegate(QObject* parent) :
 
 bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem&, const QModelIndex& index)
 {
-	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(model);
+	SafetyChannelSignalsProxyModel* signalsProxyModel = qobject_cast<SafetyChannelSignalsProxyModel*>(model);
+	if (signalsProxyModel == nullptr)
+	{
+		return false;
+	}
+	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(signalsProxyModel->sourceModel());
 	if (signalsModel == nullptr)
 	{
 		return false;
@@ -142,6 +148,7 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 						return value == 0 ? "No" : "Yes";
 					}
 				}
+				break;
 				case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
 				case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
 				case RECEIVED_LOW_LIMIT_COLUMN:
@@ -370,4 +377,16 @@ void SafetyChannelSignalsModel::changeDiscreteSignal(const QModelIndex& index)
 	emit dataChanged(index, index);
 
 	m_service->setSignalState(signal.appSignalID(), newValue);
+}
+
+SafetyChannelSignalsProxyModel::SafetyChannelSignalsProxyModel(TripleChannelSignalsModel* tripleSignalModel, SafetyChannelSignalsModel* sourceModel, QObject* parent) :
+	QSortFilterProxyModel(parent),
+	m_tripleSignalModel(tripleSignalModel),
+	m_sourceModel(sourceModel)
+{
+}
+
+bool SafetyChannelSignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) const
+{
+	return !m_tripleSignalModel->contains(m_sourceModel->signal(m_sourceModel->index(source_row, 0)).appSignalID());
 }
