@@ -294,6 +294,25 @@ void TuningMainWindow::onTuningServiceReady()
 
 	QVector<int> sourceIndexes;
 
+
+	TripleChannelSignalsModel* tripleChannelSignalsModel = new TripleChannelSignalsModel(m_info, m_service, m_beamDoorsWidget);
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#YA10F04A_01PPC" << "#YA20F04A_01PPC" << "#YA30F04A_01PPC");
+
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G01_01PPC" << "#TR02G01_01PPC" << "#TR03G01_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G02_01PPC" << "#TR02G02_01PPC" << "#TR03G02_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G03_01PPC" << "#TR02G03_01PPC" << "#TR03G03_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G04_01PPC" << "#TR02G04_01PPC" << "#TR03G04_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G05_01PPC" << "#TR02G05_01PPC" << "#TR03G05_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G06_01PPC" << "#TR02G06_01PPC" << "#TR03G06_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G07_01PPC" << "#TR02G07_01PPC" << "#TR03G07_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G08_01PPC" << "#TR02G08_01PPC" << "#TR03G08_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G09_01PPC" << "#TR02G09_01PPC" << "#TR03G09_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G10_01PPC" << "#TR02G10_01PPC" << "#TR03G10_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G11_01PPC" << "#TR02G11_01PPC" << "#TR03G11_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G12_01PPC" << "#TR02G12_01PPC" << "#TR03G12_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G13_01PPC" << "#TR02G13_01PPC" << "#TR03G13_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G14_01PPC" << "#TR02G14_01PPC" << "#TR03G14_01PPC");
+
 	// ========== First tab ==========
 	for (int index = 0; index < m_info.count(); index++)
 	{
@@ -311,12 +330,12 @@ void TuningMainWindow::onTuningServiceReady()
 		sourceIndexes.insert(place, index);
 
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, view);
-		view->setModel(model);
+		SafetyChannelSignalsProxyModel* proxyModel = new SafetyChannelSignalsProxyModel(tripleChannelSignalsModel, model, view);
+		proxyModel->setSourceModel(model);
+		view->setModel(proxyModel);
 		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate(view);
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
 		view->setItemDelegate(delegate);
-
-		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState);
 
 		QFont font = view->font();
 		font.setPointSize(font.pointSize() * 1.2);
@@ -341,8 +360,18 @@ void TuningMainWindow::onTuningServiceReady()
 	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TuningMainWindow::updateSignalState);
 
 	// ========== Second tab ==========
-	TripleChannelSignalsModel* model = new TripleChannelSignalsModel(m_info, m_service, m_beamDoorsWidget);
-	m_beamDoorsWidget->setModel(model);
+	QFont font = m_beamDoorsWidget->font();
+	font.setPointSize(font.pointSize() * 1.3);
+	m_beamDoorsWidget->setFont(font);
+
+	m_beamDoorsWidget->setModel(tripleChannelSignalsModel);
+	m_beamDoorsWidget->setWordWrap(false);
+	m_beamDoorsWidget->resizeRowsToContents();
+	m_beamDoorsWidget->resizeColumnsToContents();
+
+	TripleChannelSignalsDelegate* delegate = new TripleChannelSignalsDelegate(m_beamDoorsWidget);
+	connect(delegate, &TripleChannelSignalsDelegate::aboutToChangeDiscreteSignal, tripleChannelSignalsModel, &TripleChannelSignalsModel::changeDiscreteSignal);
+	m_beamDoorsWidget->setItemDelegate(delegate);
 	// ========== Second tab ==========
 
 	// ========== Third tab ==========
@@ -387,7 +416,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	vl->addStretch();
 
-	QFont font = m_reactivityWidget->font();
+	font = m_reactivityWidget->font();
 	font.setPointSize(font.pointSize() * 1.4);
 	setFontRecursive(m_reactivityWidget, font);
 	// ========== Third tab ==========

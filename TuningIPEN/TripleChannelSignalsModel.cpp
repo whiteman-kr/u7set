@@ -9,7 +9,12 @@ const int	SIGNAL_ID_COLUMN = 0,
 			NEW_VALUE_COLUMN = 2,
 			CURRENT_VALUE_COLUMN = 3,
 			DEFAULT_VALUE_COLUMN = 4,
-			COLUMN_COUNT = 9;
+			COLUMN_COUNT = 5;
+
+TripleChannelSignalsDelegate::TripleChannelSignalsDelegate(QObject* parent) :
+	QStyledItemDelegate(parent)
+{
+}
 
 bool TripleChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem&, const QModelIndex& index)
 {
@@ -35,9 +40,12 @@ TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataS
 	{
 		m_sourceStates[i].index = -1;
 	}
+
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &TripleChannelSignalsModel::updateSignalStates);
 	timer->start(200);
+
+	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TripleChannelSignalsModel::updateSignalState);
 }
 
 int TripleChannelSignalsModel::rowCount(const QModelIndex&) const
@@ -50,99 +58,92 @@ int TripleChannelSignalsModel::columnCount(const QModelIndex&) const
 	return COLUMN_COUNT;
 }
 
-QVariant TripleChannelSignalsModel::data(const QModelIndex& /*currentIndex*/, int /*role*/) const
+QVariant TripleChannelSignalsModel::data(const QModelIndex& currentIndex, int role) const
 {
-	/*Signal& signal = m_sourceInfo.tuningSignals[currentIndex.row()];
-	auto state = m_states[currentIndex.row()];
+	QVector<const SignalProperties*> tripleState = state(currentIndex);
+	QVector<Signal*> tripleSignal = signal(currentIndex);
+
 	switch (role)
 	{
 		case Qt::DisplayRole:
 		{
-			switch (currentIndex.column())
+			QString resultStr;
+			for (int i = 0; i < 3; i++)
 			{
-				case SIGNAL_ID_COLUMN: return signal.customAppSignalID();
-				case SIGNAL_DESCRIPTION_COLUMN: return signal.caption();
-				case NEW_VALUE_COLUMN:
+				if (!resultStr.isEmpty())
 				{
-					double value = state.newValue;
-					if (qIsNaN(value))
+					resultStr += "\n";
+				}
+				switch (currentIndex.column())
+				{
+					case SIGNAL_ID_COLUMN:
+						resultStr += tripleSignal[i]->customAppSignalID().trimmed();
+					break;
+					case SIGNAL_DESCRIPTION_COLUMN:
+						resultStr += tripleSignal[i]->caption().trimmed();
+					break;
+					case NEW_VALUE_COLUMN:
 					{
-						return "";
-					}
-					else
-					{
-						if (signal.isAnalog())
+						double value = tripleState[i]->newValue;
+						if (qIsNaN(value))
 						{
-							return value;
+							resultStr += " ";
 						}
 						else
 						{
-							return value == 0 ? "No" : "Yes";
+							if (tripleSignal[i]->isAnalog())
+							{
+								resultStr += QString::number(value);
+							}
+							else
+							{
+								resultStr += value == 0 ? "No" : "Yes";
+							}
 						}
 					}
-				}
-				break;
-				case CURRENT_VALUE_COLUMN:
-				{
-					double value = state.currentValue;
-					if (qIsNaN(value))
+					break;
+					case CURRENT_VALUE_COLUMN:
 					{
-						return "";
-					}
-					else
-					{
-						if (state.validity == false)
+						double value = tripleState[i]->currentValue;
+						if (qIsNaN(value))
 						{
-							return "???";
-						}
-						if (signal.isAnalog())
-						{
-							return value;
+							resultStr += " ";
 						}
 						else
 						{
-							return value == 0 ? "No" : "Yes";
+							if (tripleState[i]->validity == false)
+							{
+								resultStr += "???";
+							}
+							else
+							{
+								if (tripleSignal[i]->isAnalog())
+								{
+									resultStr += QString::number(value);
+								}
+								else
+								{
+									resultStr += value == 0 ? "No" : "Yes";
+								}
+							}
 						}
 					}
-				}
-				break;
-				case DEFAULT_VALUE_COLUMN: return signal.tuningDefaultValue();
-				case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
-				case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
-				case RECEIVED_LOW_LIMIT_COLUMN:
-				{
-					double value = state.lowLimit;
-					if (qIsNaN(value))
+					break;
+					case DEFAULT_VALUE_COLUMN:
 					{
-						return "";
-					}
-					else
-					{
-						if (state.validity == false)
+						double value = tripleSignal[i]->tuningDefaultValue();
+						if (tripleSignal[i]->isAnalog())
 						{
-							return "???";
+							resultStr += QString::number(value);
 						}
-						return value;
-					}
-				}
-				break;
-				case RECEIVED_HIGH_LIMIT_COLUMN:{
-					double value = state.highLimit;
-					if (qIsNaN(value))
-					{
-						return "";
-					}
-					else
-					{
-						if (state.validity == false)
+						else
 						{
-							return "???";
+							resultStr += value == 0 ? "No" : "Yes";
 						}
-						return value;
 					}
 				}
-				break;
 			}
+			return resultStr;
 		}
 		break;
 		case Qt::BackgroundColorRole:
@@ -151,19 +152,32 @@ QVariant TripleChannelSignalsModel::data(const QModelIndex& /*currentIndex*/, in
 			{
 				return QVariant();
 			}
-			if (state.validity == false)
+			for (int i = 0; i < 3; i++)
 			{
-				return QColor(Qt::red);
+				if (tripleState[i]->validity == false)
+				{
+					return QColor(Qt::red);
+				}
 			}
-			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
-			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() != data(currentIndex).toString())
+			for (int i = 1; i < 3; i++)
 			{
-				return QColor(Qt::yellow);
+				if (qAbs(static_cast<float>(tripleState[i]->currentValue) - static_cast<float>(tripleState[i - 1]->currentValue)) > std::numeric_limits<float>::epsilon())
+				{
+					return QColor(Qt::red);
+				}
+			}
+			for (int i = 0; i < 3; i++)
+			{
+				if (qAbs(static_cast<float>(tripleState[i]->currentValue) - static_cast<float>(tripleSignal[i]->tuningDefaultValue())) > std::numeric_limits<float>::epsilon())
+					//if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() != data(currentIndex).toString())
+				{
+					return QColor(Qt::yellow);
+				}
 			}
 			return QVariant();
 		}
 		break;
-	}*/
+	}
 	return QVariant();
 }
 
@@ -191,65 +205,6 @@ QVariant TripleChannelSignalsModel::headerData(int section, Qt::Orientation orie
 
 bool TripleChannelSignalsModel::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/)
 {
-	/*if (index.column() != NEW_VALUE_COLUMN || role != Qt::EditRole)
-	{
-		return QAbstractTableModel::setData(index, value, role);
-	}
-
-	QString valueStr = value.toString().replace(',', '.');
-
-	Signal& signal = m_sourceInfo.tuningSignals[index.row()];
-
-	QWidget* parentWidget = dynamic_cast<QWidget*>(QObject::parent());
-	if (parentWidget == nullptr || !parentWidget->isVisible())
-	{
-		return true;
-	}
-
-	bool ok = false;
-	double newValue = valueStr.toDouble(&ok);
-	if (!ok)
-	{
-		if (signal.isDiscrete())
-		{
-			switch (value.toString().trimmed()[0].toLower().toLatin1())
-			{
-				case 'y':
-					newValue = 1;
-					break;
-				case 'n':
-					newValue = 0;
-					break;
-				default:
-					QMessageBox::critical(parentWidget, "Not valid input", "Please, enter 0 or 1");
-					return false;
-			}
-		}
-		else
-		{
-			QMessageBox::critical(parentWidget, "Not valid input", "Please, enter valid float pointing number");
-			return false;
-		}
-	}
-
-	if (newValue < signal.lowEngeneeringUnits() || newValue > signal.highEngeneeringUnits())
-	{
-		QMessageBox::critical(parentWidget, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngeneeringUnits()).arg(signal.highEngeneeringUnits()));
-		return false;
-	}
-
-	auto reply = QMessageBox::question(parentWidget, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
-									   .arg(signal.customAppSignalID()).arg(newValue), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-	if (reply == QMessageBox::No)
-	{
-		return false;
-	}
-
-	m_states[index.row()].newValue = newValue;
-	emit dataChanged(index, index);
-
-	m_service->setSignalState(signal.appSignalID(), newValue);*/
 	return true;
 }
 
@@ -282,9 +237,19 @@ void TripleChannelSignalsModel::addTripleSignal(QVector<QString> ids)
 			//first search
 			for (int infoIndex = 0; infoIndex < m_sourceInfo.count(); infoIndex++)
 			{
-				if (m_sourceInfo[infoIndex].channel == i + 1)
+				for (int signalIndex = 0; signalIndex < m_sourceInfo[infoIndex].tuningSignals.count(); signalIndex++)
 				{
-					m_sourceStates[i].index = infoIndex;
+					QString signalID = m_sourceInfo[infoIndex].tuningSignals[signalIndex].appSignalID();
+					if (signalID == ids[i])
+					{
+						map.insert(signalID, signalIndex);
+						m_sourceStates[i].index = infoIndex;
+						break;
+					}
+				}
+				if (m_sourceStates[i].index != -1)
+				{
+					break;
 				}
 			}
 		}
@@ -298,7 +263,11 @@ void TripleChannelSignalsModel::addTripleSignal(QVector<QString> ids)
 		for (int signalIndex = 0; signalIndex < currentSourceInfo.tuningSignals.count(); signalIndex++)
 		{
 			Signal& signal = currentSourceInfo.tuningSignals[signalIndex];
-			map.insert(signal.appSignalID(), signalIndex);
+			if (!map.contains(signal.appSignalID()))
+			{
+				map.insert(signal.appSignalID(), signalIndex);
+			}
+
 			if (signal.appSignalID() == ids[i])
 			{
 				m_sourceStates[i].signalStates.push_back(SignalProperties(signalIndex));
@@ -307,6 +276,21 @@ void TripleChannelSignalsModel::addTripleSignal(QVector<QString> ids)
 			}
 		}
 	}
+}
+
+QVector<const SignalProperties*> TripleChannelSignalsModel::state(const QModelIndex& index) const
+{
+	QVector<const SignalProperties*> result;
+	if (!index.isValid())
+	{
+		return result;
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		result.append(&m_sourceStates[i].signalStates[index.row()]);
+	}
+	return result;
 }
 
 QVector<SignalProperties*> TripleChannelSignalsModel::state(const QModelIndex& index)
@@ -324,7 +308,7 @@ QVector<SignalProperties*> TripleChannelSignalsModel::state(const QModelIndex& i
 	return result;
 }
 
-QVector<Signal*> TripleChannelSignalsModel::signal(const QModelIndex& index)
+QVector<Signal*> TripleChannelSignalsModel::signal(const QModelIndex& index) const
 {
 	QVector<Signal*> result;
 	if (!index.isValid())
@@ -341,6 +325,11 @@ QVector<Signal*> TripleChannelSignalsModel::signal(const QModelIndex& index)
 	return result;
 }
 
+bool TripleChannelSignalsModel::contains(const QString& id)
+{
+	return m_idToChannelMap.contains(id);
+}
+
 void TripleChannelSignalsModel::updateSignalStates()
 {
 	for (int i = 0; i < 3; i++)
@@ -352,56 +341,74 @@ void TripleChannelSignalsModel::updateSignalStates()
 	}
 }
 
-void TripleChannelSignalsModel::updateSignalState(QString /*appSignalID*/, double /*value*/, double /*lowLimit*/, double /*highLimit*/, bool /*validity*/)
+void TripleChannelSignalsModel::updateSignalState(QString appSignalID, double value, double /*lowLimit*/, double /*highLimit*/, bool validity)
 {
-	/*QVector<int> roles;
+	QVector<int> roles;
 	roles << Qt::DisplayRole;
 
-	if (signalIdMap.contains(appSignalID))
+	if (!m_idToChannelMap.contains(appSignalID))
 	{
-		int signalIndex = signalIdMap[appSignalID];
+		assert(false);
+		return;
+	}
+	int channel = m_idToChannelMap.value(appSignalID);
 
-		m_states[signalIndex].currentValue = value;
-		m_states[signalIndex].lowLimit = lowLimit;
-		m_states[signalIndex].highLimit = highLimit;
-		m_states[signalIndex].validity = validity;
-
-		//if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
-		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString())
-		{
-			m_states[signalIndex].newValue = qQNaN();
-			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
-		}
-
-		emit dataChanged(index(signalIndex, CURRENT_VALUE_COLUMN), index(signalIndex, CURRENT_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
-		emit dataChanged(index(signalIndex, RECEIVED_LOW_LIMIT_COLUMN), index(signalIndex, RECEIVED_HIGH_LIMIT_COLUMN), QVector<int>() << Qt::DisplayRole);
-	}*/
-}
-
-void TripleChannelSignalsModel::changeDiscreteSignal(const QModelIndex& /*index*/)
-{
-	/*Signal& signal = m_sourceInfo.tuningSignals[index.row()];
-
-	if (signal.isAnalog())
+	if (!m_sourceStates[channel].idToStateIndexMap.contains(appSignalID))
 	{
 		assert(false);
 		return;
 	}
 
-	double newValue = m_states[index.row()].currentValue == 0 ? 1 : 0;
+	int stateIndex = m_sourceStates[channel].idToStateIndexMap.value(appSignalID);
+	SignalProperties& sp = m_sourceStates[channel].signalStates[stateIndex];
+
+	sp.currentValue = value;
+	sp.validity = validity;
+
+	if (qAbs(static_cast<float>(sp.newValue) - static_cast<float>(value)) < std::numeric_limits<float>::epsilon())
+		//if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString())
+	{
+		sp.newValue = qQNaN();
+		emit dataChanged(index(stateIndex, NEW_VALUE_COLUMN), index(stateIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
+	}
+
+	emit dataChanged(index(stateIndex, CURRENT_VALUE_COLUMN), index(stateIndex, CURRENT_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
+}
+
+void TripleChannelSignalsModel::changeDiscreteSignal(const QModelIndex& currentIndex)
+{
+	QVector<Signal*> tripleSignal = signal(currentIndex);
+
+	QStringList idList;
+
+	for (int i = 0; i < tripleSignal.count(); i++)
+	{
+		if (tripleSignal[i]->isAnalog())
+		{
+			assert(false);
+			return;
+		}
+		idList.append(tripleSignal[i]->appSignalID().trimmed());
+	}
 
 	QWidget* parentWidget = dynamic_cast<QWidget*>(QObject::parent());
 
-	auto reply = QMessageBox::question(parentWidget, "Confirmation", QString("Are you sure you want change <b>%1</b> signal value to <b>%2</b>?")
-									   .arg(signal.customAppSignalID()).arg(newValue == 1 ? "Yes" : "No"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+	auto reply = QMessageBox::question(parentWidget, "Confirmation", QString("which value must be set for (<b>%1</b>) signals?")
+									   .arg(idList.join(',')),
+									   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel);
 
-	if (reply == QMessageBox::No)
+	if (reply == QMessageBox::Cancel)
 	{
 		return;
 	}
 
-	m_states[index.row()].newValue = newValue;
-	emit dataChanged(index, index);
+	emit dataChanged(currentIndex, currentIndex);
 
-	m_service->setSignalState(signal.appSignalID(), newValue);*/
+	QVector<SignalProperties*> tripleState = state(currentIndex);
+
+	for (int i = 0; i < tripleState.count(); i++)
+	{
+		tripleState[i]->newValue = reply == QMessageBox::Yes ? 1 : 0;
+		m_service->setSignalState(tripleSignal[i]->appSignalID(), tripleState[i]->newValue);
+	}
 }

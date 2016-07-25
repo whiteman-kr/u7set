@@ -153,256 +153,447 @@ namespace VFrame30
 		//
 		QPainter* p = drawParam->painter();
 
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001);
-		}
-		int dpiX = 96;
-		QPaintDevice* paintDevice = p->device();
-		if (paintDevice == nullptr)
-		{
-			assert(paintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = paintDevice->logicalDpiX();
-		}
-
 		QPen linePen(lineColor());
 		linePen.setWidthF(m_weight);		// Don't use getter!
 
-		// --
+		// Draw slash lines
 		//
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
-
 		if (multiChannel() == true)
 		{
-			p->setPen(linePen);
-
-			if (inputsCount() > 0)
-			{
-				const std::list<AfbPin>& inputPins = inputs();
-				assert(inputPins.empty() == false);
-
-				p->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
-							QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
-			}
-
-			if (outputsCount() > 0)
-			{
-				const std::list<AfbPin>& pins = outputs();
-				assert(pins.empty() == false);
-
-				p->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
-							QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
-			}
+			drawMultichannelSlashLines(p, linePen);
 		}
-
-		if (inputsCount() > 0)
-		{
-			r.setLeft(r.left() + pinWidth);
-		}
-
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth);
-		}
-
-		r.setLeft(r.left() + m_font.drawSize() / 4.0);
-		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
 		//
 		// Draw columns text and devider
 		//
 
-		// If there is no column or it's a multi just draw identififers
+		// If there is no column just draw identififers
 		//
-		if (columnCount() == 0 ||
-			multiChannel() == true)
+		if (columnCount() == 0)
 		{
-			p->setPen(textColor());
+			drawFullLineIds(drawParam);
+			return;
+		}
 
-			QString text;
-
-			const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
-
-			if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
-			{
-				text = appSignalIds();
-			}
-			else
-			{
-				text = appSignalIds();
-
-				if (drawParam->isMonitorMode() == true)
-				{
-					AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
-
-					if (signalState.flags.valid == false)
-					{
-						text += QString("    ?");
-					}
-					else
-					{
-						text += QString("    %1").arg(QString::number(signalState.value));
-					}
-				}
-			}
-
-			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
+		if (multiChannel() == true)
+		{
+			drawMultichannelValues(drawParam, linePen);
 		}
 		else
 		{
-			assert(multiChannel() == false);	// implement multi channel in future
+			drawSinglechannelValues(drawParam, linePen);
+		}
 
-			double startOffset = 0;
-			bool isMonitorMode = drawParam->isMonitorMode();
+		return;
+	}
 
-			QString appSignalId = appSignalIds();
+	void SchemaItemSignal::drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const
+	{
+		if (painter == nullptr)
+		{
+			assert(painter);
+			return;
+		}
 
-			Signal signal;
+		double pinWidth = GetPinWidth(itemUnit(), painter->device());
 
-			AppSignalState signalState;
-			signalState.flags.valid = false;
+		painter->setPen(linePen);
+
+		QRectF r = itemRectWithPins();
+
+		if (inputsCount() > 0)
+		{
+			const std::list<AfbPin>& inputPins = inputs();
+			assert(inputPins.empty() == false);
+
+			painter->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
+						QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
+		}
+
+		if (outputsCount() > 0)
+		{
+			const std::list<AfbPin>& pins = outputs();
+			assert(pins.empty() == false);
+
+			painter->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
+						QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
+		}
+
+		return;
+	}
+
+	void SchemaItemSignal::drawFullLineIds(CDrawParam* drawParam) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* painter = drawParam->painter();
+
+		QRectF rect = itemRectPinIndent(drawParam->device());
+
+		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
+		rect.setRight(rect.right() - m_font.drawSize() / 4.0);
+
+		painter->setPen(textColor());
+
+		QString text;
+
+		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
+
+		if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
+		{
+			text = appSignalIds();
+		}
+		else
+		{
+			text = appSignalIds();
+
+			if (drawParam->isMonitorMode() == true)
+			{
+				AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
+
+				if (signalState.flags.valid == false)
+				{
+					text += QString("    ?");
+				}
+				else
+				{
+					text += QString("    %1").arg(QString::number(signalState.value));
+				}
+			}
+		}
+
+		DrawHelper::DrawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
+	}
+
+	void SchemaItemSignal::drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* painter = drawParam->painter();
+		QRectF rect = itemRectPinIndent(drawParam->device());
+
+		// Get signakls and siognal states
+		//
+		//const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
+
+		const QStringList& signalIds = appSignalIdList();
+		if (signalIds.size() == 0)
+		{
+			return;
+		}
+
+		std::vector<Signal> appSignals;
+		appSignals.resize(signalIds.size());
+
+		std::vector<AppSignalState> appSignalStates;
+		appSignalStates.resize(signalIds.size());
+
+		bool isMonitorMode = drawParam->isMonitorMode();
+
+		int signalIndex = 0;
+		for (const QString& id : signalIds)
+		{
+			appSignals[signalIndex].setAppSignalID(id);
+			appSignalStates[signalIndex].flags.valid = false;
 
 			bool signalFound = false;
 
 			if (isMonitorMode == true)
 			{
-				signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
-				signalState = drawParam->appSignalManager()->signalState(appSignalId);
+				// Get signal description
+				//
+				signalFound = drawParam->appSignalManager()->signal(id, &appSignals[signalIndex]);
+
+				// Get signal state
+				//
+				appSignalStates[signalIndex] = drawParam->appSignalManager()->signalState(id);
 			}
 
-			for (size_t i = 0; i < m_columns.size(); i++)
+			signalIndex ++;
+		}
+
+		// Draw column text
+		//
+		double columntHeight = rect.height() / signalIds.size();
+
+		if (columntHeight < m_font.drawSize())
+		{
+			columntHeight = m_font.drawSize();
+		}
+
+		for (int i = 0; i < signalIds.size(); i++)
+		{
+			QString appSignalId = signalIds[i];
+
+			double top = rect.top() + i * columntHeight;
+
+			double startOffset = 0;
+
+			for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
 			{
-				const Column& c = m_columns[i];
+				const Column& column = m_columns[columnIndex];
 
-				double width = r.width() * (c.width / 100.0);
-
-				// if this is the last column, give all rest width to it
-				//
-				if (i == m_columns.size() - 1)
+				double columnWidth = rect.width() * (column.width / 100.0);
+				if (columnIndex == m_columns.size() - 1)
 				{
-					width = r.width() - startOffset;
+					// if this is the last column, give all rest width to it
+					//
+					columnWidth = rect.width() - startOffset;
 				}
 
-				// Draw data
-				//
-				QString text;
-
-				switch (c.data)
-				{
-				case E::ColumnData::AppSignalID:
-					text = appSignalId;
-					break;
-
-				case E::ColumnData::CustomerSignalID:
-					if (isMonitorMode == true)
-					{
-						if (signalFound == true)
-						{
-							text = signal.customAppSignalID();
-						}
-						else
-						{
-							text = QLatin1String("?");
-						}
-					}
-					else
-					{
-						text = appSignalId;
-					}
-					break;
-
-				case E::ColumnData::Caption:
-					if (isMonitorMode == true)
-					{
-						if (signalFound == true)
-						{
-							text = signal.caption();
-						}
-						else
-						{
-							text = QLatin1String("?");
-						}
-					}
-					else
-					{
-						text = QLatin1String("Caption");
-					}
-					break;
-
-
-				case E::ColumnData::State:
-					{
-						if (isMonitorMode == true)
-						{
-							if (signalState.flags.valid == false)
-							{
-								const static QString nonValidStr = "?";
-								text = nonValidStr;
-							}
-							else
-							{
-								if (signal.isAnalog())
-								{
-									text = QString::number(signalState.value, static_cast<char>(m_analogFormat), m_precision);
-								}
-								else
-								{
-									text = QString::number(signalState.value);
-								}
-							}
-						}
-						else
-						{
-							text = QLatin1String("0");
-						}
-					}
-					break;
-
-				default:
-					assert(false);
-				}
-
-				QRectF textRect(r.left() + startOffset, r.top(), width, r.height());
-				textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
-				textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
-
-				p->setPen(textColor());
-
-				DrawHelper::DrawText(p, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+				double left = rect.left() + startOffset;
 
 				// --
 				//
-				startOffset += width;
+				QString text = getCoulumnText(drawParam, column, appSignals[i], appSignalStates[i]);
 
-				if (startOffset >= r.width())
+				QRectF textRect(left, top, columnWidth, columntHeight);
+
+				textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+				textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+				painter->setPen(textColor());
+
+				QRectF boundingRect = rect.intersected(textRect);
+
+				DrawHelper::DrawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+
+				// --
+				//
+				startOffset += columnWidth;
+
+				if (startOffset >= rect.width())
 				{
 					break;
-				}
-
-				// Draw vertical line devider from othe columns
-				//
-				if (i < m_columns.size() - 1)	// For all columns exceprt last
-				{
-					p->setPen(linePen);
-
-					p->drawLine(QPointF(r.left() + startOffset, r.top()),
-								QPointF(r.left() + startOffset, r.bottom()));
 				}
 			}
 		}
 
+		// Draw horizontal deviders
+		//
+		painter->setPen(linePen);
+
+		for (int i = 0; i < signalIds.size(); i++)
+		{
+			QString appSignalId = signalIds[i];
+
+			double top = rect.top() + i * columntHeight;
+			double bottom = top + columntHeight;
+
+			if (bottom > rect.bottom() ||
+				i == signalIds.size() - 1)	// Dont draw the last line
+			{
+				break;
+			}
+
+			painter->drawLine(QLineF(rect.left(), bottom, rect.right(), bottom));
+		}
+
+		//  Draw vertical deviders
+		//
+		double startOffset = 0;
+		for (size_t i = 0; i < m_columns.size(); i++)
+		{
+			const Column& c = m_columns[i];
+
+			double width = rect.width() * (c.width / 100.0);
+
+			// if this is the last column, give all rest width to it
+			//
+			if (i == m_columns.size() - 1)
+			{
+				width = rect.width() - startOffset;
+			}
+
+			// --
+			//
+			startOffset += width;
+
+			if (startOffset >= rect.width())
+			{
+				break;
+			}
+
+			// Draw vertical line devider from othe columns
+			//
+			if (i < m_columns.size() - 1)	// For all columns exceprt last
+			{
+				painter->drawLine(QPointF(rect.left() + startOffset, rect.top()),
+								  QPointF(rect.left() + startOffset, rect.bottom()));
+			}
+		}
+
 		return;
+	}
+
+	void SchemaItemSignal::drawSinglechannelValues(CDrawParam* drawParam, QPen& linePen) const
+	{
+		if (drawParam == nullptr ||
+			multiChannel() == true)
+		{
+			assert(drawParam);
+			assert(multiChannel() == false);
+			return;
+		}
+
+		QPainter* painter = drawParam->painter();
+
+		QRectF rect = itemRectPinIndent(drawParam->device());
+
+		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
+		rect.setRight(rect.right() - m_font.drawSize() / 4.0);
+
+		double startOffset = 0;
+
+		QString appSignalId = appSignalIds();
+
+		Signal signal;
+		signal.setAppSignalID(appSignalId);
+
+		AppSignalState signalState;
+		signalState.flags.valid = false;
+
+		bool signalFound = false;
+
+		if (drawParam->isMonitorMode() == true)
+		{
+			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+			signalState = drawParam->appSignalManager()->signalState(appSignalId);
+		}
+
+		for (size_t i = 0; i < m_columns.size(); i++)
+		{
+			const Column& c = m_columns[i];
+
+			double width = rect.width() * (c.width / 100.0);
+
+			// if this is the last column, give all rest width to it
+			//
+			if (i == m_columns.size() - 1)
+			{
+				width = rect.width() - startOffset;
+			}
+
+			// Draw data
+			//
+			QString text = getCoulumnText(drawParam, c, signal, signalState);
+
+			QRectF textRect(rect.left() + startOffset, rect.top(), width, rect.height());
+			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+			textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+			painter->setPen(textColor());
+
+			DrawHelper::DrawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+
+			// --
+			//
+			startOffset += width;
+
+			if (startOffset >= rect.width())
+			{
+				break;
+			}
+
+			// Draw vertical line devider from othe columns
+			//
+			if (i < m_columns.size() - 1)	// For all columns exceprt last
+			{
+				painter->setPen(linePen);
+
+				painter->drawLine(QPointF(rect.left() + startOffset, rect.top()),
+								  QPointF(rect.left() + startOffset, rect.bottom()));
+			}
+		}
+
+		return;
+	}
+
+
+	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam, const Column& column, const Signal& signal, const AppSignalState& signalState) const
+	{
+		QString text;
+
+		switch (column.data)
+		{
+		case E::ColumnData::AppSignalID:
+			text = signal.appSignalID();
+			break;
+
+		case E::ColumnData::CustomerSignalID:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = signal.customAppSignalID();
+
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				text = signal.appSignalID();
+			}
+			break;
+
+		case E::ColumnData::Caption:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = signal.caption();
+
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				text = QLatin1String("Caption");
+			}
+			break;
+
+
+		case E::ColumnData::State:
+			{
+				if (drawParam->isMonitorMode() == true)
+				{
+					if (signalState.flags.valid == false)
+					{
+						const static QString nonValidStr = "?";
+						text = nonValidStr;
+					}
+					else
+					{
+						if (signal.isAnalog())
+						{
+							text = QString::number(signalState.value, static_cast<char>(m_analogFormat), m_precision);
+						}
+						else
+						{
+							text = QString::number(signalState.value);
+						}
+					}
+				}
+				else
+				{
+					text = QLatin1String("0");
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return text;
 	}
 
 

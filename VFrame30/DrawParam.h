@@ -87,7 +87,8 @@ namespace VFrame30
 							 SchemaUnit unit,
 							 const QString& str,
 							 const QRectF& rect,
-							 int flags);
+							 int flags,
+							 QRectF* boundingRect = nullptr);
 	};
 }
 
