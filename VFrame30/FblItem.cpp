@@ -288,6 +288,29 @@ namespace VFrame30
 		return pinWidth;
 	}
 
+	double FblItem::GetPinWidth(SchemaUnit unit, QPaintDevice* device) const
+	{
+		int dpi = 96;
+
+		if (device == nullptr)
+		{
+			assert(device);
+		}
+		else
+		{
+			dpi = device->logicalDpiX();
+		}
+
+		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!
+
+		if (unit == SchemaUnit::Display)
+		{
+			pinWidth = pinWidth * dpi;
+		}
+
+		return pinWidth;
+	}
+
 	// Connections
 	//
 	const std::list<VFrame30::AfbPin>& FblItem::inputs() const

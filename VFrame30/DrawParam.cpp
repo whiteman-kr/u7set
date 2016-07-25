@@ -103,7 +103,7 @@ namespace VFrame30
 		m_appSignalmanager = value;
 	}
 
-	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags)
+	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
 		if (painter == nullptr)
 		{
@@ -169,7 +169,7 @@ namespace VFrame30
 
 		painter->setFont(f);
 
-		painter->drawText(rc, flags, str);
+		painter->drawText(rc, flags, str, boundingRect);
 
 		painter->restore();
 		return;

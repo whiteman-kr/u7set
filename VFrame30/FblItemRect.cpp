@@ -450,43 +450,12 @@ namespace VFrame30
 
 	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
 	{
-		int dpiX = 96;
-
 		QPainter* p = drawParam->painter();
-		QPaintDevice* pPaintDevice = drawParam->device();
 
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->logicalDpiX();
-		}
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->logicalDpiX();
-		}
+		QRectF r = itemRectPinIndent(drawParam->device());
 
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
-		if (inputsCount() > 0)
-		{
-			r.setLeft(r.left() + pinWidth);
-		}
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth);
-		}
 		QRectF drawRect(r.right(), r.bottom(),
-				widthDocPt(), m_font.drawSize());
+						widthDocPt(), m_font.drawSize());
 
 		FontParam font = m_font;
 		font.setDrawSize(m_font.drawSize() * 0.75);
@@ -503,6 +472,42 @@ namespace VFrame30
 							 Qt::TextDontClip | Qt::AlignBottom | Qt::AlignLeft);
 	}
 
+
+	QRectF FblItemRect::itemRectWithPins() const
+	{
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+		return r;
+	}
+
+	QRectF FblItemRect::itemRectPinIndent(QPaintDevice* paintDevice) const
+	{
+		int dpiX = 96;
+
+		if (paintDevice == nullptr)
+		{
+			assert(paintDevice);
+			dpiX = 96;
+		}
+		else
+		{
+			dpiX = paintDevice->logicalDpiX();
+		}
+
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+		if (inputsCount() > 0)
+		{
+			r.setLeft(r.left() + pinWidth);
+		}
+		if (outputsCount() > 0)
+		{
+			r.setRight(r.right() - pinWidth);
+		}
+
+		return r;
+	}
 
 	Q_INVOKABLE void FblItemRect::adjustHeight()
 	{
