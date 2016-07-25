@@ -46,14 +46,20 @@ namespace EditEngine
 
 		for (Record& r : m_items)
 		{
+			QVariant newValue = r.newValue;
+
 			selection.push_back(r.item);
-			r.item->setPropertyValue(r.propertyName, r.newValue);
+			r.item->setPropertyValue(r.propertyName, newValue);
 
 			auto property = r.item->propertyByCaption(r.propertyName);
 			assert(property);
 
 			if (property.get() != nullptr && property->specific() == true)
 			{
+				// load the new value again from property, it could be corrected by checkLimits
+				//
+				newValue = r.item->propertyValue(r.propertyName);
+
 				// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
 				//
 				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
@@ -65,7 +71,7 @@ namespace EditEngine
 				}
 
 				QString errorMsg;
-				bool ok = fblElement->setAfbParam(r.propertyName, r.newValue, m_schema, &errorMsg);
+				bool ok = fblElement->setAfbParam(r.propertyName, newValue, m_schema, &errorMsg);
 
 				if (ok == false)
 				{
@@ -76,7 +82,7 @@ namespace EditEngine
 				//
 
 				QVariant v = fblElement->getAfbParam(r.propertyName);
-				if (v != r.newValue)
+				if (v != newValue)
 				{
 					r.item->setPropertyValue(r.propertyName, v);
 				}
