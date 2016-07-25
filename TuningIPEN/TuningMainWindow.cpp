@@ -1,5 +1,6 @@
 #include "TuningMainWindow.h"
 #include "SafetyChannelSignalsModel.h"
+#include "TripleChannelSignalsModel.h"
 #include "AnalogSignalSetter.h"
 #include "DiscreteSignalSetter.h"
 #include <QSettings>
@@ -95,12 +96,11 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 
-	LogWriter* logWriter = new LogWriter;
+	m_logWriter = new LogWriter;
 	m_logThread = new QThread(this);
-	logWriter->moveToThread(m_logThread);
-	connect(m_service, &Tuning::TuningService::userRequest, logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
-	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
-	connect(m_logThread, &QThread::finished, logWriter, &QObject::deleteLater);
+	m_logWriter->moveToThread(m_logThread);
+	connect(m_service, &Tuning::TuningService::userRequest, m_logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
+	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, m_logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
 
 	m_service->start();
 
@@ -132,16 +132,29 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 	container->setLayout(vl);
 	setCentralWidget(container);
 
-	m_automaticPowerRegulatorWidget = new QWidget;
-
-	mainTabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
-
+	// ========== First tab ==========
 	m_setOfSignalsScram = new QTabWidget(this);
 	QWidget* widget = new QWidget;
 	hl = new QHBoxLayout;
 	widget->setLayout(hl);
 	hl->addWidget(m_setOfSignalsScram);
 	mainTabs->addTab(widget, "Set of signals SCRAM");
+	// ========== First tab ==========
+
+	// ========== Second tab ==========
+	m_beamDoorsWidget = new QTableView;
+	mainTabs->addTab(m_beamDoorsWidget, "Deactivate signals \"Open beam doors\"");
+	// ========== Second tab ==========
+
+	// ========== Third tab ==========
+	m_reactivityWidget = new QWidget;
+	mainTabs->addTab(m_reactivityWidget, "Set of signals Canais Nucleare. Reactivity");
+	// ========== Third tab ==========
+
+	// ========== Fourth tab ==========
+	m_automaticPowerRegulatorWidget = new QWidget;
+	mainTabs->addTab(m_automaticPowerRegulatorWidget, "Automatic Power Regulator (APR)");
+	// ========== Fourth tab ==========
 }
 
 
@@ -150,6 +163,7 @@ TuningMainWindow::~TuningMainWindow()
 	m_logThread->quit();
 	m_logThread->wait();
 	delete m_logThread;
+	delete m_logWriter;
 
 	m_updateTimer->stop();
 	m_service->stop();
@@ -233,10 +247,8 @@ void TuningMainWindow::updateSignalStates()
 }
 
 
-void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*currentValue*/, double lowLimit, double highLimit, bool /*valid*/)
+void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*currentValue*/, double /*lowLimit*/, double /*highLimit*/, bool /*valid*/)
 {
-	/*Q_UNUSED(lowLimit);
-	Q_UNUSED(highLimit);*/
 }
 
 void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState state)
@@ -267,7 +279,12 @@ void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState stat
 
 void TuningMainWindow::applyNewScrollBarValue()
 {
-	emit scrollBarMoved(m_scrollBar->value() * 10);
+	double newValue = m_scrollBar->value() * 10;
+	if (newValue == 0)
+	{
+		newValue = 1;
+	}
+	emit scrollBarMoved(newValue);
 }
 
 
@@ -277,6 +294,26 @@ void TuningMainWindow::onTuningServiceReady()
 
 	QVector<int> sourceIndexes;
 
+
+	TripleChannelSignalsModel* tripleChannelSignalsModel = new TripleChannelSignalsModel(m_info, m_service, m_beamDoorsWidget);
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#YA10F04A_01PPC" << "#YA20F04A_01PPC" << "#YA30F04A_01PPC");
+
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G01_01PPC" << "#TR02G01_01PPC" << "#TR03G01_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G02_01PPC" << "#TR02G02_01PPC" << "#TR03G02_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G03_01PPC" << "#TR02G03_01PPC" << "#TR03G03_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G04_01PPC" << "#TR02G04_01PPC" << "#TR03G04_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G05_01PPC" << "#TR02G05_01PPC" << "#TR03G05_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G06_01PPC" << "#TR02G06_01PPC" << "#TR03G06_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G07_01PPC" << "#TR02G07_01PPC" << "#TR03G07_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G08_01PPC" << "#TR02G08_01PPC" << "#TR03G08_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G09_01PPC" << "#TR02G09_01PPC" << "#TR03G09_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G10_01PPC" << "#TR02G10_01PPC" << "#TR03G10_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G11_01PPC" << "#TR02G11_01PPC" << "#TR03G11_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G12_01PPC" << "#TR02G12_01PPC" << "#TR03G12_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G13_01PPC" << "#TR02G13_01PPC" << "#TR03G13_01PPC");
+	tripleChannelSignalsModel->addTripleSignal(QVector<QString>() << "#TR01G14_01PPC" << "#TR02G14_01PPC" << "#TR03G14_01PPC");
+
+	// ========== First tab ==========
 	for (int index = 0; index < m_info.count(); index++)
 	{
 		Tuning::TuningDataSourceInfo& sourceInfo = m_info[index];
@@ -293,12 +330,12 @@ void TuningMainWindow::onTuningServiceReady()
 		sourceIndexes.insert(place, index);
 
 		SafetyChannelSignalsModel* model = new SafetyChannelSignalsModel(sourceInfo, m_service, view);
-		view->setModel(model);
-		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate;
+		SafetyChannelSignalsProxyModel* proxyModel = new SafetyChannelSignalsProxyModel(tripleChannelSignalsModel, model, view);
+		proxyModel->setSourceModel(model);
+		view->setModel(proxyModel);
+		SafetyChannelSignalsDelegate* delegate = new SafetyChannelSignalsDelegate(view);
 		connect(delegate, &SafetyChannelSignalsDelegate::aboutToChangeDiscreteSignal, model, &SafetyChannelSignalsModel::changeDiscreteSignal);
 		view->setItemDelegate(delegate);
-
-		connect(m_service, &Tuning::TuningService::signalStateReady, model, &SafetyChannelSignalsModel::updateSignalState);
 
 		QFont font = view->font();
 		font.setPointSize(font.pointSize() * 1.2);
@@ -306,7 +343,9 @@ void TuningMainWindow::onTuningServiceReady()
 
 		view->resizeColumnsToContents();
 	}
+	// ========== First tab ==========
 
+	// ========== Status bar ==========
 	for (int i = 0; i < sourceIndexes.count(); i++)
 	{
 		Tuning::TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
@@ -315,18 +354,85 @@ void TuningMainWindow::onTuningServiceReady()
 
 		m_statusLabelMap.insert(sourceInfo.lmEquipmentID, newLabel);
 	}
+	// ========== Status bar ==========
 
 	connect(m_service, &Tuning::TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
 	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TuningMainWindow::updateSignalState);
 
+	// ========== Second tab ==========
+	QFont font = m_beamDoorsWidget->font();
+	font.setPointSize(font.pointSize() * 1.3);
+	m_beamDoorsWidget->setFont(font);
+
+	m_beamDoorsWidget->setModel(tripleChannelSignalsModel);
+	m_beamDoorsWidget->setWordWrap(false);
+	m_beamDoorsWidget->resizeRowsToContents();
+	m_beamDoorsWidget->resizeColumnsToContents();
+
+	TripleChannelSignalsDelegate* delegate = new TripleChannelSignalsDelegate(m_beamDoorsWidget);
+	connect(delegate, &TripleChannelSignalsDelegate::aboutToChangeDiscreteSignal, tripleChannelSignalsModel, &TripleChannelSignalsModel::changeDiscreteSignal);
+	m_beamDoorsWidget->setItemDelegate(delegate);
+	// ========== Second tab ==========
+
+	// ========== Third tab ==========
+	QVBoxLayout* vl = new QVBoxLayout;
+	m_reactivityWidget->setLayout(vl);
+
+	QFormLayout* fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	fl->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+	vl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "The average lifetime of prompt neutrons", "#HP01SC03A_01PPC", 0.001);
+
 	QHBoxLayout* hl = new QHBoxLayout;
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	hl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 1st group", "#HP01SC03A_02PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 2st group", "#HP01SC03A_04PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 3st group", "#HP01SC03A_06PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 4st group", "#HP01SC03A_08PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 5st group", "#HP01SC03A_10PPC", 0.3);
+	addAnalogSetter(fl, m_info, "Proportion of delayed neutrons of the 6st group", "#HP01SC03A_12PPC", 0.3);
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	hl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 1st group", "#HP01SC03A_03PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 2st group", "#HP01SC03A_05PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 3st group", "#HP01SC03A_07PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 4st group", "#HP01SC03A_09PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 5st group", "#HP01SC03A_11PPC", 5);
+	addAnalogSetter(fl, m_info, "Constant decay time of the 6st group", "#HP01SC03A_13PPC", 5);
+
+	vl->addLayout(hl);
+
+	fl = new QFormLayout;
+	fl->setVerticalSpacing(20);
+	fl->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+	vl->addLayout(fl);
+	addAnalogSetter(fl, m_info, "The total fraction of delayed neutrons", "#HP01SC03A_14PPC", 1);
+
+	vl->addStretch();
+
+	font = m_reactivityWidget->font();
+	font.setPointSize(font.pointSize() * 1.4);
+	setFontRecursive(m_reactivityWidget, font);
+	// ========== Third tab ==========
+
+	// ========== Fourth tab ==========
+	hl = new QHBoxLayout;
 	m_automaticPowerRegulatorWidget->setLayout(hl);
 
 	QGroupBox* groupBox = new QGroupBox("Power control", this);
 	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QFormLayout* fl = new QFormLayout;
+	fl = new QFormLayout;
 	fl->setVerticalSpacing(20);
-	groupBox->setLayout(fl);
+
+	vl = new QVBoxLayout;
+	vl->addLayout(fl);
+	groupBox->setLayout(vl);
 
 	auto powerDemandControlSetter = addAnalogSetter(fl, m_info, "Power demand control", "#HP01LC01DC_01PPC", 110);
 	connect(this, &TuningMainWindow::scrollBarMoved, powerDemandControlSetter, &AnalogSignalSetter::changeNewValue);
@@ -334,7 +440,7 @@ void TuningMainWindow::onTuningServiceReady()
 
 	m_scrollBar = new QScrollBar(Qt::Horizontal, this);
 	m_scrollBar->setMinimum(0);
-	m_scrollBar->setMaximum(11);
+	m_scrollBar->setMaximum(10);
 	m_scrollBar->setPageStep(1);
 	m_scrollBar->setTracking(false);
 	connect(m_scrollBar, &QScrollBar::valueChanged, this, &TuningMainWindow::applyNewScrollBarValue);
@@ -344,6 +450,13 @@ void TuningMainWindow::onTuningServiceReady()
 
 	auto automaticModeSetter = addDiscreteSetter(fl, m_info, "Automatic mode", "#HP01LC02RAM_01PPC");
 	connect(automaticModeSetter, &DiscreteSignalSetter::valueChanged, this, &TuningMainWindow::automaticModeChanged);
+
+	fl = new QFormLayout;
+	vl->addStretch();
+	vl->addLayout(fl);
+
+	addDiscreteSetter(fl, m_info, "\"Test mode\" on N-16", "#HP01NR01_01PPC");
+	addDiscreteSetter(fl, m_info, "\"Test mode\" on Lin APR", "#HP01LC01_01PPC");
 
 	hl->addWidget(groupBox);
 
@@ -357,9 +470,10 @@ void TuningMainWindow::onTuningServiceReady()
 	addAnalogSetter(fl, m_info, "Driving coefficient", "#HP01LC02RDC_01PPC", 100);
 	hl->addWidget(groupBox);
 
-	QFont font = m_automaticPowerRegulatorWidget->font();
+	font = m_automaticPowerRegulatorWidget->font();
 	font.setPointSize(font.pointSize() * 1.4);
 	setFontRecursive(m_automaticPowerRegulatorWidget, font);
+	// ========== Fourth tab ==========
 }
 
 

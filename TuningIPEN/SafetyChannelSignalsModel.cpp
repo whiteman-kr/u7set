@@ -1,4 +1,5 @@
 #include "SafetyChannelSignalsModel.h"
+#include "TripleChannelSignalsModel.h"
 #include "../TuningService/TuningDataSource.h"
 #include "../TuningService/TuningService.h"
 #include <cmath>
@@ -15,9 +16,19 @@ const int	SIGNAL_ID_COLUMN = 0,
 			RECEIVED_HIGH_LIMIT_COLUMN = 8,
 			COLUMN_COUNT = 9;
 
+SafetyChannelSignalsDelegate::SafetyChannelSignalsDelegate(QObject* parent) :
+	QStyledItemDelegate(parent)
+{
+}
+
 bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem&, const QModelIndex& index)
 {
-	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(model);
+	SafetyChannelSignalsProxyModel* signalsProxyModel = qobject_cast<SafetyChannelSignalsProxyModel*>(model);
+	if (signalsProxyModel == nullptr)
+	{
+		return false;
+	}
+	SafetyChannelSignalsModel* signalsModel = qobject_cast<SafetyChannelSignalsModel*>(signalsProxyModel->sourceModel());
 	if (signalsModel == nullptr)
 	{
 		return false;
@@ -26,7 +37,7 @@ bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	{
 		return false;
 	}
-	if (event->type() == QEvent::MouseButtonDblClick)
+	if (event->type() == QEvent::MouseButtonDblClick || event->type() == QEvent::KeyPress)
 	{
 		emit aboutToChangeDiscreteSignal(index);
 		return true;
@@ -57,17 +68,17 @@ SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInf
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &SafetyChannelSignalsModel::updateSignalStates);
 	timer->start(200);
+
+	connect(m_service, &Tuning::TuningService::signalStateReady, this, &SafetyChannelSignalsModel::updateSignalState);
 }
 
-int SafetyChannelSignalsModel::rowCount(const QModelIndex& parent) const
+int SafetyChannelSignalsModel::rowCount(const QModelIndex&) const
 {
-	Q_UNUSED(parent)
 	return m_sourceInfo.tuningSignals.count();
 }
 
-int SafetyChannelSignalsModel::columnCount(const QModelIndex& parent) const
+int SafetyChannelSignalsModel::columnCount(const QModelIndex&) const
 {
-	Q_UNUSED(parent)
 	return COLUMN_COUNT;
 }
 
@@ -127,7 +138,19 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 					}
 				}
 				break;
-				case DEFAULT_VALUE_COLUMN: return signal.tuningDefaultValue();
+				case DEFAULT_VALUE_COLUMN:
+				{
+					double value = signal.tuningDefaultValue();
+					if (signal.isAnalog())
+					{
+						return value;
+					}
+					else
+					{
+						return value == 0 ? "No" : "Yes";
+					}
+				}
+				break;
 				case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
 				case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
 				case RECEIVED_LOW_LIMIT_COLUMN:
@@ -176,8 +199,8 @@ QVariant SafetyChannelSignalsModel::data(const QModelIndex& currentIndex, int ro
 			{
 				return QColor(Qt::red);
 			}
-			//if (qAbs(state.currentValue - signal.tuningDefaultValue()) > std::numeric_limits<float>::epsilon())
-			if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() == data(currentIndex).toString())
+			if (qAbs(static_cast<float>(state.currentValue) - static_cast<float>(signal.tuningDefaultValue())) > std::numeric_limits<float>::epsilon())
+			//if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString().trimmed() != data(currentIndex).toString().trimmed())
 			{
 				return QColor(Qt::yellow);
 			}
@@ -318,8 +341,8 @@ void SafetyChannelSignalsModel::updateSignalState(QString appSignalID, double va
 		m_states[signalIndex].highLimit = highLimit;
 		m_states[signalIndex].validity = validity;
 
-		//if (qAbs(m_states[signalIndex].newValue - value) < std::numeric_limits<float>::epsilon())
-		if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString())
+		if (qAbs(static_cast<float>(m_states[signalIndex].newValue) - static_cast<float>(value)) < std::numeric_limits<float>::epsilon())
+		//if (data(index(signalIndex, NEW_VALUE_COLUMN)).toString().trimmed() == data(index(signalIndex, CURRENT_VALUE_COLUMN)).toString().trimmed())
 		{
 			m_states[signalIndex].newValue = qQNaN();
 			emit dataChanged(index(signalIndex, NEW_VALUE_COLUMN), index(signalIndex, NEW_VALUE_COLUMN), QVector<int>() << Qt::DisplayRole);
@@ -356,4 +379,16 @@ void SafetyChannelSignalsModel::changeDiscreteSignal(const QModelIndex& index)
 	emit dataChanged(index, index);
 
 	m_service->setSignalState(signal.appSignalID(), newValue);
+}
+
+SafetyChannelSignalsProxyModel::SafetyChannelSignalsProxyModel(TripleChannelSignalsModel* tripleSignalModel, SafetyChannelSignalsModel* sourceModel, QObject* parent) :
+	QSortFilterProxyModel(parent),
+	m_tripleSignalModel(tripleSignalModel),
+	m_sourceModel(sourceModel)
+{
+}
+
+bool SafetyChannelSignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) const
+{
+	return !m_tripleSignalModel->contains(m_sourceModel->signal(m_sourceModel->index(source_row, 0)).appSignalID());
 }

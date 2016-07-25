@@ -54,8 +54,8 @@ void AnalogSignalSetter::setCurrentValue(QString appSignalID, double value, doub
 		}
 
 		if (validity == true &&
-				//qAbs(value - m_lastSentValue) < std::numeric_limits<float>::epsilon())
-				QString::number(value) == QString::number(m_lastSentValue))
+				qAbs(static_cast<float>(value) - static_cast<float>(m_lastSentValue)) < std::numeric_limits<float>::epsilon())
+				//QString::number(value).trimmed() == QString::number(m_lastSentValue).trimmed())
 		{
 			m_input->clear();
 			m_lastSentValue = qQNaN();

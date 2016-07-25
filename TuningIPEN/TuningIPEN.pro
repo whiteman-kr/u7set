@@ -48,7 +48,8 @@ SOURCES +=\
     ../u7/Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
-    DiscreteSignalSetter.cpp
+    DiscreteSignalSetter.cpp \
+    TripleChannelSignalsModel.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -84,7 +85,8 @@ HEADERS  += TuningMainWindow.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
-    DiscreteSignalSetter.h
+    DiscreteSignalSetter.h \
+    TripleChannelSignalsModel.h
 
 include(../qtservice/src/qtservice.pri)
 

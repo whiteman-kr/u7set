@@ -236,11 +236,11 @@ void SubnetChecker::readAck()
 
 		if (size > 0)
 		{
-			Network::GetServiceInfoReply ack;
+			Network::ServiceInfo newServiceInfo;
 
-			ack.ParseFromArray(readBuffer, size);
+			newServiceInfo.ParseFromArray(readBuffer, size);
 
-			emit hostFound(sender.toIPv4Address(), senderPort, ack.serviceinfo());
+			emit hostFound(sender.toIPv4Address(), senderPort, newServiceInfo);
 		}
 	}
 }

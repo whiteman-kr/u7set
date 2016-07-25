@@ -432,14 +432,6 @@ bool Signal::isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const
 	return false;
 }
 
-void Signal::setReadOnly(bool value)
-{
-	for (auto property : properties())
-	{
-		property->setReadOnly(value);
-	}
-}
-
 
 SignalSet::SignalSet()
 {

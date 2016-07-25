@@ -8,6 +8,10 @@
 #include "../lib/Types.h"
 
 
+// For QueuedConnection (scan network)
+Q_DECLARE_METATYPE(Network::ServiceInfo)
+
+
 class UdpClientSocket;
 
 struct ServiceData

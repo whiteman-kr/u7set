@@ -2,17 +2,17 @@
 #include <QTest>
 #include "../../lib/DbController.h"
 
-class DbControllerHardwareConfigurationTests : public QObject
+class DbControllerVersionControlTests : public QObject
 {
 	Q_OBJECT
 
 public:
-	DbControllerHardwareConfigurationTests();
+	DbControllerVersionControlTests();
 
 private slots:
 	void initTestCase();
-	void addAndRemoveDeviceObjectTest();
-	void getDeviceTreeLatestVersionTest();
+	void isAnyCheckedOutTest();
+	void lastChangesetIdTest();
 	void cleanupTestCase();
 
 private:

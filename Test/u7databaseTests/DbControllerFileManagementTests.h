@@ -28,6 +28,7 @@ private slots:
 	void getSpecificCopyTest();
 	void checkInTreeTest();
 	void undoChangestest();
+	void systemFilesTest();
 	void cleanupTestCase();
 
 private:

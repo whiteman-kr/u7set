@@ -18,6 +18,7 @@ DiscreteSignalSetter::DiscreteSignalSetter(QString signalId, QString label, Tuni
 	hl->addWidget(m_button);
 
 	m_button->setCheckable(true);
+	m_button->setStyleSheet("QPushButton:checked {color: black; background-color: red;}");
 	connect(m_button, &QPushButton::clicked, this, &DiscreteSignalSetter::applyNewValue);
 
 	setLayout(hl);

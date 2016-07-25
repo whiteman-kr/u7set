@@ -14,7 +14,12 @@ DbControllerUserTests::DbControllerUserTests()
 
 void DbControllerUserTests::initTestCase()
 {
-	QSqlDatabase db = QSqlDatabase::database();
+	for (QString connection : QSqlDatabase::connectionNames())
+	{
+		QSqlDatabase::removeDatabase(connection);
+	}
+
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
