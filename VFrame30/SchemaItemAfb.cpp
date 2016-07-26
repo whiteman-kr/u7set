@@ -331,6 +331,8 @@ namespace VFrame30
 			return false;
 		}
 
+
+
 		if (found->value() != value)
 		{
 			qDebug() << tr("Param %1 was changed from %2 to %3").
