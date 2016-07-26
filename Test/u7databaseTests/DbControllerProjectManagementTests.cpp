@@ -298,6 +298,14 @@ void DbControllerProjectTests::connectionInfoTest()
 	m_dbController->setServerPassword("Test");
 	qDebug() << "Pass after: " << m_dbController->serverPassword();*/
 
+	// Server pass test
+	//
+
+	QVERIFY2 (m_dbController->serverPassword() == "", qPrintable("Error: empty pass expected"));
+	m_dbController->setServerPassword("Test");
+	QVERIFY2 (m_dbController->serverPassword() == "Test", qPrintable("Error: \"Test\" pass expected"));
+	m_dbController->setServerPassword("");
+
 	// Current user testing
 	//
 
