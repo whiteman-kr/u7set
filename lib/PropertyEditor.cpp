@@ -1548,7 +1548,7 @@ namespace ExtWidgets
                 description = QString("[ReadOnly] ") + description;
             }
 
-			if (description.isEmpty() && p->value().userType() == QVariant::Double)
+			if (p->specific() && p->value().userType() == QVariant::Double)
             {
                 bool ok1 = false;
                 bool ok2 = false;
@@ -1561,7 +1561,7 @@ namespace ExtWidgets
                 }
             }
 
-			if (description.isEmpty() && p->value().userType() == QVariant::Int)
+			if (p->specific() && p->value().userType() == QVariant::Int)
             {
                 bool ok1 = false;
                 bool ok2 = false;
@@ -1574,7 +1574,7 @@ namespace ExtWidgets
                 }
             }
 
-			if (description.isEmpty() && p->value().userType() == QVariant::UInt)
+			if (p->specific() && p->value().userType() == QVariant::UInt)
             {
                 bool ok1 = false;
                 bool ok2 = false;

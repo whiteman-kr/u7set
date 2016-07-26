@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "../lib/Signal.h"
+#include "../lib/AppSignalState.h"
 
 namespace VFrame30
 {
@@ -15,7 +17,15 @@ namespace VFrame30
 		SchemaItemSignal(SchemaUnit unit);
 		virtual ~SchemaItemSignal(void);
 
+		//	Data Structures
+		//
 	public:
+		struct Column
+		{
+			double width = 20.0;
+			E::ColumnData data = E::ColumnData::AppSignalID;
+			E::HorzAlign horzAlign = E::HorzAlign::AlignLeft;
+		};
 
 		// Serialization
 		//
@@ -29,6 +39,15 @@ namespace VFrame30
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
 	protected:
+		void drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const;
+
+		void drawFullLineIds(CDrawParam* drawParam) const;
+
+		void drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const;
+		void drawSinglechannelValues(CDrawParam* drawParam, QPen& linePen) const;
+
+		QString getCoulumnText(CDrawParam* drawParam, const Column& column, const Signal& signal, const AppSignalState& signalState) const;
+
 		void createColumnProperties();
 
 		// Properties
@@ -59,16 +78,6 @@ namespace VFrame30
 
 		E::HorzAlign columnHorzAlign(int columnIndex) const;
 		void setColumnHorzAlign(E::HorzAlign value, int columnIndex);
-
-		//	Data Structures
-		//
-	public:
-		struct Column
-		{
-			double width = 20.0;
-			E::ColumnData data = E::ColumnData::AppSignalID;
-			E::HorzAlign horzAlign = E::HorzAlign::AlignLeft;
-		};
 
 		// Data
 		//

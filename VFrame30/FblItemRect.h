@@ -67,6 +67,9 @@ namespace VFrame30
 		// Other public methods
 		//
 	public:
+		QRectF itemRectWithPins() const;		// Get item rect with inputs and outputs
+		QRectF itemRectPinIndent(QPaintDevice* paintDevice) const;		// Get item rect without inputs and outputs
+
 		Q_INVOKABLE void adjustHeight();
 
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;

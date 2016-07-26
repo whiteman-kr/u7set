@@ -74,6 +74,23 @@ function(videoItemFblElement, afbElement)
                     <Changed>
 function(videoItemFblElement, afbElement)
 {
+	var xCount = videoItemFblElement.getParamIntValue("XCount");
+	if (xCount == -1)
+	{
+		return false;
+	}
+
+	var yCount = videoItemFblElement.getParamIntValue("YCount");
+	if (yCount == -1)
+	{
+		return false;
+	}
+
+	if (yCount &lt;= xCount)
+	{	
+		videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+	}
+
 	return createInputSignals(videoItemFblElement, afbElement);
 }
 		</Changed>
