@@ -1703,6 +1703,7 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		if (m_equipmentId != value)
 		{
 			m_equipmentId = value;
+			m_equipmentId.replace(QRegExp("[^a-zA-Z0-9#$_()]"), "#");
 		}
 	}
 

@@ -30,7 +30,7 @@ namespace VFrame30
 		Column& c1 = m_columns[1];
 		c1.width = 20;
 		c1.data = E::ColumnData::State;
-		c0.horzAlign = E::HorzAlign::AlignHCenter;
+		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::monitorCategory, true, SchemaItemSignal::precision, SchemaItemSignal::setPrecision);
