@@ -543,6 +543,8 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		}
 	}
 
+	emit objectVcsStateChanged();
+
 	return;
 }
 
@@ -1900,6 +1902,7 @@ void EquipmentView::deleteSelectedDevices()
 	//
 
 	emit updateState();
+
 	return;
 }
 
