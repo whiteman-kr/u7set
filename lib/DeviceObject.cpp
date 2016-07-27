@@ -1749,6 +1749,8 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		if (m_caption != value)
 		{
 			m_caption = value;
+
+			m_caption.replace(QChar::LineFeed, " ");
 		}
 	}
 
@@ -1817,6 +1819,10 @@ static const QString presetNameCaption("PresetName");	// Optimization
 	//
 	QString DeviceObject::details() const
 	{
+		QString captionEscaped = caption();
+		captionEscaped.replace("'", "''");
+		captionEscaped.replace("\"", "\\\"");
+
 		QString json = QString(
 R"DELIM({
 	"Uuid" : "%1",
@@ -1827,7 +1833,7 @@ R"DELIM({
 })DELIM")
 			.arg(uuid().toString())
 			.arg(equipmentIdTemplate())
-			.arg(caption())
+			.arg(captionEscaped)
 			.arg(place())
 			.arg(fileExtension());
 

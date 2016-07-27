@@ -474,6 +474,13 @@ QString DbFileInfo::details() const
 void DbFileInfo::setDetails(QString value)
 {
 	m_details = value;
+
+	if (m_details.isEmpty())
+	{
+		m_details = "{}";
+	}
+
+	return;
 }
 
 //

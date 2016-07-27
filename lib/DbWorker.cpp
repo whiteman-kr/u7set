@@ -1381,7 +1381,7 @@ WHERE
 				while (euipmentListQuery.next())
 				{
 					QUuid fileInstanceId = euipmentListQuery.value(0).toUuid();
-					int fileId = euipmentListQuery.value(1).toInt();
+					/*int fileId = */euipmentListQuery.value(1).toInt();
 					QString fileName = euipmentListQuery.value(2).toString();
 
 					//qDebug() << "FileName: " << fileName << ", FileID: " << fileId << ", FileInstanceID: " << fileInstanceId.toString();
@@ -2359,7 +2359,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 	//
 	for (unsigned int i = 0; i < files->size(); i++)
 	{
-		auto file = files->at(i);
+		std::shared_ptr<DbFile> file = files->at(i);
 
 		// Set progress value here
 		// ...
@@ -3276,7 +3276,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setLowEngeneeringUnits(q.value(19).toDouble());
 	s.setHighEngeneeringUnits(q.value(20).toDouble());
 	s.setUnitID(q.value(21).toInt());
-	double tempAdjustment = q.value(22).toDouble();
+	/*double tempAdjustment = */q.value(22).toDouble();
 	s.setLowValidRange(q.value(23).toDouble());
 	s.setHighValidRange(q.value(24).toDouble());
 	s.setUnbalanceLimit(q.value(25).toDouble());
