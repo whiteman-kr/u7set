@@ -38,9 +38,14 @@ public:
 	bool signal(const QString& appSignalId, Signal* out) const;
 	bool signal(Hash signalHash, Signal* out) const;
 
+	Signal signal(const QString& appSignalId, bool* found) const;
+	Signal signal(Hash signalHash, bool* found) const;
+
 	// Signal States
 	//
+	void setState(const QString& appSignalId, const AppSignalState& state);
 	void setState(Hash signalHash, const AppSignalState& state);
+
 	AppSignalState signalState(Hash signalHash, bool* found = nullptr);
 	AppSignalState signalState(const QString& appSignalId, bool* found = nullptr);
 

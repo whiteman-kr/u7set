@@ -119,6 +119,42 @@ bool AppSignalManager::signal(Hash signalHash, Signal* out) const
 	}
 }
 
+Signal AppSignalManager::signal(const QString& appSignalId, bool* found) const
+{
+	Hash signalHash = ::calcHash(appSignalId);
+
+	Signal resultSignal;
+
+	bool ok = signal(signalHash, &resultSignal);
+
+	if (found != nullptr)
+	{
+		*found = ok;
+	}
+
+	return resultSignal;
+}
+
+Signal AppSignalManager::signal(Hash signalHash, bool* found) const
+{
+	Signal resultSignal;
+
+	bool ok = signal(signalHash, &resultSignal);
+
+	if (found != nullptr)
+	{
+		*found = ok;
+	}
+
+	return resultSignal;
+}
+
+void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state)
+{
+	Hash signalHash = ::calcHash(appSignalId);
+	return setState(signalHash, state);
+}
+
 void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 {
 	if (signalHash == 0)
