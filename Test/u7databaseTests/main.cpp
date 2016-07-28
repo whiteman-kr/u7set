@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 82;
+const int DatabaseProjectVersion = 83;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -39,19 +39,40 @@ int main(int argc, char *argv[])
 	Hardware::Init();
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-	bool matchedForDeletion = false;
+	//bool matchedForDeletion = false;
 
 	db.setHostName(DatabaseHost);
 	db.setUserName(DatabaseUser);
 	db.setPassword(DatabaseUserPassword);
-	db.setDatabaseName(QString("u7_") + ProjectName);
+	db.setDatabaseName("postgres");
+
+	assert (db.open() == true);
+
+	QSqlQuery query;
+	bool ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
+
+	assert (ok == true);
+
+	if (query.next() == true)
+	{
+		ok = query.exec(QString("DROP DATABASE %1").arg(QString("u7_") + ProjectName));
+		if (ok == false)
+		{
+			qDebug() << "Error: " << query.lastError().databaseText();
+			assert(false);
+		}
+	}
+
+	db.close();
+
+	/*db.setDatabaseName(QString("u7_") + ProjectName);
 
 	if (db.open() == true)
 	{
 		matchedForDeletion = true;
 	}
 
-	db.close();
+	db.close();*/
 
 	{
 		DbController dbc;
@@ -64,7 +85,7 @@ int main(int argc, char *argv[])
 		// Check project need to be deleted
 		//
 
-		if (matchedForDeletion)
+		/*if (matchedForDeletion)
 		{
 			bool ok = dbc.deleteProject(ProjectName, ProjectAdministratorPassword, true, nullptr);
 
@@ -73,7 +94,7 @@ int main(int argc, char *argv[])
 				qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
 				return 1;
 			}
-		}
+		}*/
 
 		// Create Project
 		//

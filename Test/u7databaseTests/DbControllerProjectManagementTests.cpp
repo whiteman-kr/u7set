@@ -19,7 +19,6 @@ void DbControllerProjectTests::setProjectVersion(int version)
 
 void DbControllerProjectTests::initTestCase()
 {
-
 	QSqlDatabase db = QSqlDatabase::database();
 
 	db.setHostName(m_databaseHost);
@@ -29,14 +28,20 @@ void DbControllerProjectTests::initTestCase()
 
 	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
-	QSqlQuery query;
-	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' AND NOT datname LIKE 'u7u%'");
+	QSqlQuery query, tempQuery;
+
+	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' OR datname LIKE 'u7upgrade%' OR datname LIKE 'u7deleted%'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	while (query.next() == true)
 	{
-		if (query.value(0).toString() == "u7_" + m_databaseName)
-			m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+		if (query.value(0).toString().contains(m_databaseName))
+		{
+			//m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
+			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+			qDebug() << "Project " << query.value(0).toString() << "dropped!";
+		}
 	}
 
 	db.close();
@@ -50,6 +55,8 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("u7_" + m_databaseName);
+
+	QSqlQuery query;
 
 	// Create, open, close, and delete simple database
 	//
@@ -71,10 +78,67 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 
 	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
 
+	// Try open project twice
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == false, qPrintable("Error: Project already opened error exected"));
+
 	ok = m_dbController->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
+	// Try open project with invalid user
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "TEST", m_adminPassword, 0);
+	QVERIFY2 (ok == false, qPrintable("Error: wrong user error expected"));
+
+	// Try open project with invalid password
+	//
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", "testtesttest", 0);
+	QVERIFY2 (ok == false, qPrintable("Error: wrong pass error expected"));
+
+	// Try open project with disabled user
+	//
+
+	QVERIFY2 (db.open() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec ("SELECT * FROM create_user(1, 'Tester', 'Tester', 'Tester', 'TesterTester', false, false, true)");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = m_dbController->openProject(m_databaseName, "Tester", "TesterTester", 0);
+	QVERIFY2 (ok == false, qPrintable("Error: Disabled user"));
+
+	db.close();
+
 	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	// Do the same things, but now with backup
+	//
+
+	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	QVERIFY2 (db.open() == true, qPrintable("Error: project has not been created! " + db.lastError().databaseText()));
+	db.close();
+
+	// Upgrade project
+	//
+
+	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, false, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (m_dbController->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
+
+	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
+
+	ok = m_dbController->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, false, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 }
 
@@ -234,6 +298,14 @@ void DbControllerProjectTests::connectionInfoTest()
 	m_dbController->setServerPassword("Test");
 	qDebug() << "Pass after: " << m_dbController->serverPassword();*/
 
+	// Server pass test
+	//
+
+	QVERIFY2 (m_dbController->serverPassword() == "", qPrintable("Error: empty pass expected"));
+	m_dbController->setServerPassword("Test");
+	QVERIFY2 (m_dbController->serverPassword() == "Test", qPrintable("Error: \"Test\" pass expected"));
+	m_dbController->setServerPassword("");
+
 	// Current user testing
 	//
 
@@ -241,12 +313,38 @@ void DbControllerProjectTests::connectionInfoTest()
 
 	ok = m_dbController->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
-
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 }
 
 void DbControllerProjectTests::cleanupTestCase()
 {
+	QSqlDatabase db = QSqlDatabase::database();
 
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName("postgres");
+
+	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
+
+	QSqlQuery query, tempQuery;
+
+	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' OR datname LIKE 'u7upgrade%' OR datname LIKE 'u7deleted%'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next() == true)
+	{
+		if (query.value(0).toString().contains(m_databaseName))
+		{
+			//m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
+			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+		}
+	}
+
+	db.close();
+
+	for (QString connection : QSqlDatabase::connectionNames())
+	{
+		QSqlDatabase::removeDatabase(connection);
+	}
 }

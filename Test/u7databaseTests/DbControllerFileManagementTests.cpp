@@ -25,14 +25,18 @@ void DbControllerFileTests::initTestCase()
 
 	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
-	QSqlQuery query;
+	QSqlQuery query, tempQuery;
 	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' AND NOT datname LIKE 'u7u%'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	while (query.next() == true)
 	{
 		if (query.value(0).toString() == "u7_" + m_databaseName)
-			m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+		{
+			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
+			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+			qDebug() << "Project " << query.value(0).toString() << "dropped!";
+		}
 	}
 
 	db.close();
@@ -262,15 +266,23 @@ void DbControllerFileTests::deleteFileTest()
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
 	QString fileOne = "firstFile";
-	QString fileTwo = "secondFile";
+	QString fileTwo = "\'\"\\secondFile%\'\"\\";
+
+	// Before deleting some files by function, we must add them to database by
+	// using sql-queries. To do that, we need manually represent string to
+	// sql-format.
+	//
+
+	QString fileTwoForSqlQuery = "\'\'\"\"\\secondFile%\'\'\"\"\\";
+	QString data = "dataForFile";
 
 	QSqlQuery query;
 	QSqlQuery instanceQuery;
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, '%2', '{}')").arg(fileOne).arg(data));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwo));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, '%2', '{}')").arg(fileTwoForSqlQuery).arg(data));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	std::vector<DbFileInfo> files;
@@ -295,7 +307,7 @@ void DbControllerFileTests::deleteFileTest()
 
 	buffFile.clearData();
 
-	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwo));
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwoForSqlQuery));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -317,6 +329,10 @@ void DbControllerFileTests::deleteFileTest()
 	ok = m_dbController->deleteFiles(&files, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1' OR name='%2'").arg(fileTwoForSqlQuery).arg(fileOne));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == false, qPrintable("Error: files expected to be deleted"));
+
 	// Test another overloaded function
 	//
 
@@ -328,7 +344,7 @@ void DbControllerFileTests::deleteFileTest()
 	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileOne));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwo));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileTwoForSqlQuery));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileOne));
@@ -348,7 +364,7 @@ void DbControllerFileTests::deleteFileTest()
 
 	filesAnotherFunction.push_back(file1);
 
-	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwo));
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1'").arg(fileTwoForSqlQuery));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -367,6 +383,10 @@ void DbControllerFileTests::deleteFileTest()
 
 	ok = m_dbController->deleteFiles(&filesAnotherFunction, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT * FROM file WHERE name='%1' OR name='%2'").arg(fileTwoForSqlQuery).arg(fileOne));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == false, qPrintable("Error: files expected to be deleted"));
 
 	db.close();
 }
@@ -521,6 +541,54 @@ void DbControllerFileTests::checkInTest()
 
 	QVERIFY2 (instanceQuery.value(0).toInt() == 2, qPrintable("Error: function check_in has not checked in one file (wrong record in fileInstance)"));
 
+	DbFileInfo file3;
+
+	QString fileThree = "\\\'\"SpecialSymbolsFileCheckIn%\\\'\"";
+	QString fileThreeForSqlQuery = "\\\'\'\"\"SpecialSymbolsFileCheckIn%\\\'\'\"\"";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileThreeForSqlQuery));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int thirdFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(thirdFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file3.setFileName(fileThree);
+	file3.setSize(instanceQuery.value("Size").toInt());
+	file3.setUserId(1);
+	file3.setParentId(1);
+	file3.setDetails(instanceQuery.value("details").toString());
+	file3.setFileId(query.value("fileId").toInt());
+
+	comment = "Testing function check_in of dbController with file which name contains special symbols\\'\"";
+
+	ok = m_dbController->checkIn(file3, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(thirdFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value(0).toInt() == 0, qPrintable("Error: function check_in has not checked in one file (table checkout has record about checked in file)"));
+
+	comment.remove(comment.size()-4, 4);
+
+	ok = query.exec(QString("SELECT * FROM changeset WHERE comment LIKE '%1%'").arg(comment));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT COUNT(*) FROM fileInstance WHERE changesetId = %1").arg(query.value("changesetId").toInt()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	QVERIFY2 (instanceQuery.value(0).toInt() == 1, qPrintable("Error: function check_in has not checked in one file (wrong record in fileInstance)"));
+
 	db.close();
 }
 
@@ -615,6 +683,45 @@ void DbControllerFileTests::checkOutTest()
 
 	QVERIFY2 (query.value(0).toInt() == 2, qPrintable("Error: function check_out was not create record in checkout table (two files)"));
 
+	DbFileInfo file3;
+
+	QString fileThree = "CheckOutFileWithSpecialSymbols\\'\"";
+	QString fileThreeForSql = "CheckOutFileWithSpecialSymbols\\''\"\"";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileThreeForSql));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	int thirdFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(thirdFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	file3.setFileName(fileThree);
+	file3.setSize(instanceQuery.value("Size").toInt());
+	file3.setUserId(1);
+	file3.setParentId(1);
+	file3.setDetails(instanceQuery.value("details").toString());
+	file3.setFileId(query.value("fileId").toInt());
+
+	comment = "Testing function check_out of dbController with special symbols";
+
+	ok = m_dbController->checkIn(file3, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->checkOut(file3, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(firstFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value(0).toInt() == 1, qPrintable("Error: function check_out was not create record in checkout table (one file)"));
+
 	db.close();
 }
 
@@ -633,10 +740,13 @@ void DbControllerFileTests::fileHasChildrenTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString parentFileName = "FirstFilehasChildren";
-	QString childFileName = "SecndFilehasChildren";
+	QString parentFileName = "FirstFilehasChildren\\'\"";
+	QString childFileName = "SecndFilehasChildren\\'\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(parentFileName));
+	QString parentFileForSql = "FirstFilehasChildren\\''\"\"";
+	QString childFileForSql = "SecndFilehasChildren\\''\"\"";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(parentFileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int parentFileId = query.value("id").toInt();
@@ -668,7 +778,7 @@ void DbControllerFileTests::fileHasChildrenTest()
 
 	QVERIFY2 (result == false, qPrintable("Error: function fileHasChildren from dbController returned wrong result (false expected)"));
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(childFileName).arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(childFileForSql).arg(parentFileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int childFileId = query.value("id").toInt();
@@ -716,11 +826,15 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString parentFileName = "ParentFileForGetCheckedOutFiles";
-	QString firstChildFileName = "FirstChildFileForGetCheckedOutFiles";
-	QString secondChildFileName = "SecondChildFileForGetCheckedOutFiles";
+	QString parentFileName = "ParentFileForGetCheckedOutFiles\\'\"";
+	QString firstChildFileName = "FirstChildFileForGetCheckedOutFiles\\'\"";
+	QString secondChildFileName = "SecondChildFileForGetCheckedOutFiles\\'\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(parentFileName));
+	QString parentFileForSql = "ParentFileForGetCheckedOutFiles\\''\"\"";
+	QString firstChildFileForSql = "FirstChildFileForGetCheckedOutFiles\\''\"\"";
+	QString secondChildFileForSql = "SecondChildFileForGetCheckedOutFiles\\''\"\"";
+
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(parentFileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int parentFileId = query.value("id").toInt();
@@ -745,7 +859,7 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 	ok = m_dbController->checkIn(parentFile, comment, 0);
 	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(firstChildFileName).arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(firstChildFileForSql).arg(parentFileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int childFileId = query.value("id").toInt();
@@ -765,7 +879,7 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 	firstChildFile.setDetails(instanceQuery.value("details").toString());
 	firstChildFile.setFileId(query.value("fileId").toInt());
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(secondChildFileName).arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(secondChildFileForSql).arg(parentFileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	childFileId = query.value("id").toInt();
@@ -797,11 +911,11 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 
 	DbFileInfo resultFile = result.at(0);
 
-	QVERIFY2(resultFile.fileId() == firstChildFile.fileId(), qPrintable("Error: wong file has been returned"));
+	QVERIFY2(resultFile.fileId() == firstChildFile.fileId(), qPrintable("Error: wrong file has been returned"));
 
 	resultFile = result.at(1);
 
-	QVERIFY2(resultFile.fileId() == secondChildFile.fileId(), qPrintable("Error: wong file has been returned"));
+	QVERIFY2(resultFile.fileId() == secondChildFile.fileId(), qPrintable("Error: wrong file has been returned"));
 }
 
 void DbControllerFileTests::getFileHistoryTest()
@@ -819,9 +933,10 @@ void DbControllerFileTests::getFileHistoryTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FileForGetFileHistory";
+	QString fileName = "FileForGetFileHistory\\'\"";
+	QString fileForSql = "FileForGetFileHistory\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -905,9 +1020,10 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FileForGetLatestFileVersion";
+	QString fileName = "FileForGetLatestFileVersion\\'\"";
+	QString fileForSql = "FileForGetLatestFileVersion\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -959,9 +1075,10 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	DbFileInfo secondFile;
 
-	fileName = "SecondFileForGetLatestFileVersion";
+	fileName = "SecondFileForGetLatestFileVersion\\'\"";
+	fileForSql = "SecondFileForGetLatestFileVersion\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1042,9 +1159,10 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "ParentFileForGetLatestTreeVersionTestOfDbController";
+	QString fileName = "ParentFileForGetLatestTreeVersionTestOfDbController\\'\"";
+	QString fileForSql = "ParentFileForGetLatestTreeVersionTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1079,9 +1197,10 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	DbFileInfo childFile;
 
-	fileName = "ChildFileForGetLatestTreeVersionTestOfDbController";
+	fileName = "ChildFileForGetLatestTreeVersionTestOfDbController\\'\"";
+	fileForSql = "ChildFileForGetLatestTreeVersionTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileForSql).arg(fileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int parentFileId = fileId;
@@ -1158,9 +1277,10 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FirstFileForGetWorkcopyTestOfDbController";
+	QString fileName = "FirstFileForGetWorkcopyTestOfDbController\\'\"";
+	QString fileForSql = "FirstFileForGetWorkcopyTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1204,9 +1324,10 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	DbFileInfo secondFile;
 
-	fileName = "SecondFileForGetWorkcopyTestOfDbController";
+	fileName = "SecondFileForGetWorkcopyTestOfDbController\\'\"";
+	fileForSql = "SecondFileForGetWorkcopyTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1278,9 +1399,10 @@ void DbControllerFileTests::setWorkcopyTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FirstFileForSetWorkcopyTestOfDbController";
+	QString fileName = "FirstFileForSetWorkcopyTestOfDbController\\'\"";
+	QString fileForSql = "FirstFileForSetWorkcopyTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1332,9 +1454,10 @@ void DbControllerFileTests::setWorkcopyTest()
 	QVERIFY2 (query.value("size").toInt() == file.get()->size(), qPrintable("Error: wrong size"));
 	QVERIFY2 (query.value("details").toString() == file.get()->details(), qPrintable("Errpr: wrong details"));
 
-	fileName = "SecondFileForSetWorkcopyTestOfDbController";
+	fileName = "SecondFileForSetWorkcopyTestOfDbController\\'\"";
+	fileForSql = "SecondFileForSetWorkcopyTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1411,9 +1534,10 @@ void DbControllerFileTests::getSpecificCopyTest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FirstFileForGetSpecificCopyTestOfDbController";
+	QString fileName = "FirstFileForGetSpecificCopyTestOfDbController\\'\"";
+	QString fileForSql = "FirstFileForGetSpecificCopyTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1465,9 +1589,10 @@ void DbControllerFileTests::getSpecificCopyTest()
 	QVERIFY2(query.value("data").toString() == result.get()->data(), qPrintable ("Error: Wrong data in changeset"));
 
 
-	fileName = "SecondFileForGetSpecificCopyTestOfDbController";
+	fileName = "SecondFileForGetSpecificCopyTestOfDbController\\'\"";
+	fileForSql = "SecondFileForGetSpecificCopyTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1543,9 +1668,10 @@ void DbControllerFileTests::checkInTreeTest()
 	DbFileInfo firstParentFile, firstChildFile, secondParentFile, secondChildFile;
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FirstParentForCheckInTreeTestOfDbController";
+	QString fileName = "FirstParentForCheckInTreeTestOfDbController\\'\"";
+	QString fileForSql = "FirstParentForCheckInTreeTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1565,9 +1691,10 @@ void DbControllerFileTests::checkInTreeTest()
 	firstParentFile.setDetails(instanceQuery.value("details").toString());
 	firstParentFile.setFileId(query.value("fileId").toInt());
 
-	fileName = "FirstChildForCheckInTreeTestOfDbController";
+	fileName = "FirstChildForCheckInTreeTestOfDbController\\'\"";
+	fileForSql = "FirstChildForCheckInTreeTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(firstParentFile.fileId()));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileForSql).arg(firstParentFile.fileId()));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1587,9 +1714,10 @@ void DbControllerFileTests::checkInTreeTest()
 	firstChildFile.setDetails(instanceQuery.value("details").toString());
 	firstChildFile.setFileId(query.value("fileId").toInt());
 
-	fileName = "SecondParentForCheckInTreeTestOfDbController";
+	fileName = "SecondParentForCheckInTreeTestOfDbController\\'\"";
+	fileForSql = "SecondParentForCheckInTreeTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
@@ -1668,9 +1796,10 @@ void DbControllerFileTests::undoChangestest()
 
 	QSqlQuery query, instanceQuery;
 
-	QString fileName = "FirstFileForUndoChangesTestOfDbController";
+	QString fileName = "FirstFileForUndoChangesTestOfDbController\\'\"";
+	QString fileForSql = "FirstFileForUndoChangesTestOfDbController\\''\"\"";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	bool ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
@@ -1710,9 +1839,10 @@ void DbControllerFileTests::undoChangestest()
 	ok = m_dbController->checkOut(file, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
-	fileName = "SecondFileForUndoChangesTestOfDbController";
+	fileName = "SecondFileForUndoChangesTestOfDbController\\'\"";
+	fileForSql = "SecondFileForUndoChangesTestOfDbController\\''\"\"";
 
-	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileName));
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileForSql));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 	fileId = query.value("id").toInt();
