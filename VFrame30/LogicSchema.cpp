@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "LogicSchema.h"
 #include "SchemaItemAfb.h"
+#include "SchemaItemSignal.h"
 
 namespace VFrame30
 {
@@ -126,6 +127,71 @@ namespace VFrame30
 		Schema::Draw(pDrawParam, clipRect);
 		return;
     }
+
+	QStringList LogicSchema::getSignalList() const
+	{
+		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
+
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (std::shared_ptr<SchemaItem> item : layer->Items)
+				{
+					if (item->isType<VFrame30::SchemaItemSignal>() == true)
+					{
+						const VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
+						assert(itemSignal);
+
+						QStringList appSignals = itemSignal->appSignalIdList();
+
+						for (const QString& id : appSignals)
+						{
+							signalMap.insert(id);
+						}
+					}
+				}
+
+				break;
+			}
+		}
+
+		// Move set to list
+		//
+		QStringList result;
+		result.reserve(static_cast<int>(signalMap.size()));
+
+		for (const QString& id : signalMap)
+		{
+			result.append(id);
+		}
+
+		return result;
+	}
+
+	QStringList LogicSchema::getLabels() const
+	{
+		QStringList labels;	// signal ids can be duplicated, std::set removes dupilcates
+		labels.reserve(256);
+
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			{
+				if (item->isSchemaItemAfb() == true)
+				{
+					const VFrame30::SchemaItemAfb* afb = item->toType<VFrame30::SchemaItemAfb>();
+					assert(afb);
+
+					labels.append(afb->label());
+				}
+			}
+		}
+
+		return labels;
+	}
 
 	QString LogicSchema::equipmentIds() const
 	{

@@ -40,7 +40,10 @@ namespace Builder
 
 		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 		{
-			m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
+			m_cfgXml->addLinkToFile(schemaFile.subDir,
+									schemaFile.fileName,
+									QLatin1String("Details"),
+									schemaFile.details);
 		}
 
 		return result;

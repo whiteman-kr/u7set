@@ -14,6 +14,7 @@ namespace VFrame30
 	class Schema;
 	class SchemaLayer;
 	class SchemaItemAfb;
+	class SchemaItemSignal;
 }
 
 
@@ -164,6 +165,25 @@ namespace VFrame30
 		bool isSchemaItemAfb() const;
 		SchemaItemAfb* toSchemaItemAfb();
 		const SchemaItemAfb* toSchemaItemAfb() const;
+
+		template<typename SCHEMAITEMTYPE>
+		bool isType() const
+		{
+			return dynamic_cast<const SCHEMAITEMTYPE*>(this) != nullptr;
+		}
+
+		template<typename SCHEMAITEMTYPE>
+		SCHEMAITEMTYPE* toType()
+		{
+			return dynamic_cast<SCHEMAITEMTYPE*>(this);
+		}
+
+		template<typename SCHEMAITEMTYPE>
+		const SCHEMAITEMTYPE* toType() const
+		{
+			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
+		}
+
 
 		bool IsLocked() const;
 		void setLocked(bool locked);

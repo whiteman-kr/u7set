@@ -66,9 +66,9 @@ namespace Builder
 		xmlWriter.writeAttribute("Size", QString::number(size));
 		xmlWriter.writeAttribute("MD5", md5);
 
-		for(const QString& key : metadata)
+		for(auto it = metadata.begin(); it != metadata.end(); ++it)
 		{
-			xmlWriter.writeTextElement(key, metadata[key]);
+			xmlWriter.writeTextElement(it.key(), *it);
 		}
 
 		xmlWriter.writeEndElement();		// file

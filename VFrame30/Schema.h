@@ -12,6 +12,7 @@ namespace VFrame30
 	class SchemaLayer;
 	class SchemaItem;
 	class LogicSchema;
+	class SchemaDetails;
 
 	
 	class VFRAME30LIBSHARED_EXPORT Schema :
@@ -65,6 +66,13 @@ namespace VFrame30
 		void BuildFblConnectionMap() const;
 
 		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
+
+		virtual QStringList getSignalList() const;
+		virtual QStringList getLabels() const;
+		virtual std::vector<QUuid> getGuids() const;
+
+		virtual QString details() const;				// form details JSON object (signal list)
+		static SchemaDetails parseDetails(const QString& details);	// parse details section (from DB), result is signal list
 
 		// Properties and Datas
 		//
@@ -124,6 +132,35 @@ namespace VFrame30
 		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 
 		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
+	};
+
+
+	// SchemaDaetails is a class to parse to/from JSON doc
+	// Format:
+	//		Version : 1
+	//		SchemaID : "SCHMEAID"
+	//		Signals: ["id", "id", "id", ...]
+	//		Labels: ["Label1", "Label2", "Label3", ...]
+	//		ItemGuids: ["guid1", "guid2", "guid3", ...]
+	//
+
+	class VFRAME30LIBSHARED_EXPORT SchemaDetails
+	{
+	public:
+		SchemaDetails();
+		SchemaDetails(SchemaDetails&& r);
+
+		static QString getDetailsString(const Schema* schema);
+		bool parseDetails(const QString& details);
+
+	public:
+		// If add new members, add it to move construnctor;
+		//
+		int m_version = 0;
+		QString m_schemaId;
+		std::set<QString> m_signals;
+		std::set<QString> m_labels;
+		std::set<QUuid> m_guids;
 	};
 
 

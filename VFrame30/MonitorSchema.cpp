@@ -26,4 +26,10 @@ namespace VFrame30
 	{
 		qDebug() << "MonitorSchema::~MonitorSchema(void)";
 	}
+
+	QStringList MonitorSchema::getSignalList() const
+	{
+		QStringList result;
+		return result;
+	}
 }

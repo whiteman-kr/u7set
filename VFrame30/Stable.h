@@ -60,6 +60,9 @@
 #include <QQmlEngine>
 #include <QAction>
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif

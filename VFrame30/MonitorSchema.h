@@ -13,6 +13,9 @@ namespace VFrame30
 	public:
 		MonitorSchema(void);
 		virtual ~MonitorSchema(void);
+
+	public:
+		virtual QStringList getSignalList() const override;
 	};
 }
 

@@ -4,6 +4,7 @@
 #include "ChangesetDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
+#include <QJsonArray>
 
 //
 //
@@ -1248,6 +1249,9 @@ bool EditSchemaTabPage::saveWorkcopy()
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
 	file->swapData(data);
+
+	QString detailsString = m_schemaWidget->schema()->details();
+	file->setDetails(detailsString);
 
 	bool result = db()->setWorkcopy(file, this);
 	if (result == true)

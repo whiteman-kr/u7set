@@ -471,7 +471,7 @@ QString DbFileInfo::details() const
 	return m_details;
 }
 
-void DbFileInfo::setDetails(QString value)
+void DbFileInfo::setDetails(const QString& value)
 {
 	m_details = value;
 
