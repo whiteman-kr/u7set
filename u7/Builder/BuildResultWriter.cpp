@@ -323,7 +323,7 @@ namespace Builder
 	// --------------------------------------------------------------------------------------
 
 	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID,
-									   QString lmCaption, int frameSize, int frameCount) :
+									   QString lmCaption, int frameSize, int frameCount, const QStringList& descriptionFields) :
 		m_buildResultWriter(buildResultWriter),
 		m_log(buildResultWriter.log()),
 		m_subsysStrID(subsysStrID),
@@ -334,13 +334,13 @@ namespace Builder
 		BuildInfo bi = m_buildResultWriter.buildInfo();
 
 		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.changeset);
+						 bi.project, bi.user, bi.changeset, descriptionFields);
 	}
 
 
-	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode, const std::vector<QVariantList>& descriptionData)
 	{
-		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, m_log) == false)
+		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, descriptionData, m_log) == false)
 		{
 			return false;
 		}
@@ -783,7 +783,7 @@ namespace Builder
 	}
 
 
-	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount)
+	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, const QStringList& descriptionFields)
 	{
 		MultichannelFile* multichannelFile = nullptr;
 
@@ -809,7 +809,7 @@ namespace Builder
 		}
 		else
 		{
-			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount);
+			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFields);
 
 			m_multichannelFiles.insert(subsysStrID, multichannelFile);
 		}
