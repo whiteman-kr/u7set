@@ -130,7 +130,9 @@ namespace Builder
 
 			}
 
-			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, m_log) == false)
+			std::vector<QVariantList> descriptionData;
+
+			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{
 				return false;
 			}

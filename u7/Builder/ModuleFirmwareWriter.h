@@ -11,7 +11,7 @@ namespace Hardware
     public:
         ModuleFirmwareWriter();
 		bool save(QByteArray &dest, Builder::IssueLogger *log);
-		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, Builder::IssueLogger *log);
+		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger *log);
 
     private:
 		bool storeChannelData(Builder::IssueLogger *log);
@@ -46,6 +46,7 @@ namespace Hardware
 		QString m_projectName;
 		QString m_userName;
 		int m_changesetId;
+
 	};}
 
 #endif // MODULEFIRMWAREWRITER_H

@@ -668,11 +668,20 @@ namespace Builder
 
 		bool result = true;
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount);
+		// FILL REAL DESCRIPTION DATA HERE
+		QStringList descriptionFields;
+		//descriptionFields << "Field1" << "Field2";
+
+		std::vector<QVariantList> descriptionData;
+		//descriptionData.push_back(QVariantList() << 1 << 2);
+		//descriptionData.push_back(QVariantList() << 3 << 4);
+
+
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFields);
 
 		if (multichannelFile != nullptr)
 		{
-			result = multichannelFile->setChannelData(channel, frameSize, frameCount, appLogicBinCode);
+			result = multichannelFile->setChannelData(channel, frameSize, frameCount, appLogicBinCode, descriptionData);
 		}
 		else
 		{

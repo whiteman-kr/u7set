@@ -63,12 +63,19 @@ void ApplicationTabPage::openFileClicked()
 		return;
 	}
 
-    bool result = m_confFirmware.load(fileName);
+	QString errorCode;
+
+	bool result = m_confFirmware.load(fileName, errorCode);
 
 	if (result == false)
 	{
 		QMessageBox mb(this);
-		mb.setText(tr("File %1 wasn't loaded").arg(fileName));
+		QString str = tr("File %1 wasn't loaded!").arg(fileName);
+		if (errorCode.isEmpty() == false)
+		{
+			str += "\r\n\r\n" + errorCode;
+		}
+		mb.setText(str);
 		mb.setIcon(QMessageBox::Critical);
 		mb.exec();
 		return;

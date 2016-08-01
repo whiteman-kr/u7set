@@ -63,7 +63,6 @@ SOURCES += \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
     ../lib/Crc.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/Types.cpp
 
 FORMS += moduleconfigurator.ui \

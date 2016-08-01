@@ -52,8 +52,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
-        bool load(QString fileName);
+		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId, const QStringList& descriptionFields);
+		bool load(QString fileName, QString &errorCode);
 		bool isEmpty() const;
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
@@ -71,10 +71,18 @@ namespace Hardware
 
         Q_INVOKABLE void writeLog(QString logString);
 
+		Q_INVOKABLE void jsSetDescriptionFields(QString fields);
+
+		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
+
         std::vector<quint8> frame(int frameIndex);
 
 
+
 	private:
+
+		bool load_version1(const QJsonObject& jConfig);
+		bool load_version2(const QJsonObject& jConfig);
 
 		// Properties
 		//
@@ -86,6 +94,8 @@ namespace Hardware
 		int frameSize() const;
 		int frameCount() const;
 		int changesetId() const;
+		int fileVersion() const;
+		int maxFileVersion() const;
         const QByteArray& log() const;
 
 		// Data
@@ -97,15 +107,28 @@ namespace Hardware
 		int m_uartId = 0;
 		int m_frameSize = 0;
 		int m_changesetId = 0;
+		int m_fileVersion = 0;
+		int m_maxFileVersion = 2;
 
 		QString m_projectName;
 		QString m_userName;
 
-        std::vector<std::vector<quint8>> m_frames;
+		// data description
+		//
+		QStringList m_descriptionFields;
+		std::map<int, std::vector<QVariantList>> m_descriptonData;
 
+		// channel data
+		//
 		std::map<int, ModuleFirmwareData> m_channelData;
 
-        QByteArray m_log;
+		// binary data
+		//
+		std::vector<std::vector<quint8>> m_frames;
+
+
+		QByteArray m_log;
+
     };
 
 
