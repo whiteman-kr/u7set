@@ -48,7 +48,10 @@ namespace Builder
 
 		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
-		bool writeConnectionsFile();
+		bool writeOptoConnectionsReport();
+		bool writeOptoModulesReport();
+
+		void writeOptoPortInfo(Hardware::OptoPort *port, QStringList& list);
 
 		void clear();
 
