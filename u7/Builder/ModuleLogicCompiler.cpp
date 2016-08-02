@@ -144,6 +144,8 @@ namespace Builder
 
 			if (!setLmAppLANDataSize()) break;
 
+			if (!copyOptoConnectionsTxData()) break;
+
 			if (!copyRS232Signals()) break;
 
 			if (!buildTuningData()) break;
@@ -2717,6 +2719,195 @@ namespace Builder
 
 		int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
 		Q_UNUSED(discreteSignalsSizeW)
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoConnectionsTxData()
+	{
+		bool result = true;
+
+		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+
+		if (modules.count() == 0)
+		{
+			return true;
+		}
+
+		for(Hardware::OptoModule* module : modules)
+		{
+			if (module == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (module->lmID() != m_lm->equipmentId() ||
+				module->allOptoPortsTxDataSizeW() == 0)
+			{
+				continue;
+			}
+
+			Comment comment;
+
+			comment.setComment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
+			m_code.append(comment);
+			m_code.newLine();
+
+			QVector<Hardware::OptoPort*> ports = module->getOptoPortsSorted();
+
+			for(Hardware::OptoPort* port : ports)
+			{
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				result &= copyOptoPortTxData(module, port);
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxData(Hardware::OptoModule* module, Hardware::OptoPort* port)
+	{
+		if (module == nullptr ||
+			port == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (port->txDataSizeW() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		Command cmd;
+		Comment comment;
+
+		comment.setComment(QString(tr("Copying txData of opto-port %1")).arg(port->equipmentID()));
+		m_code.append(comment);
+		m_code.newLine();
+
+		// write data port txData identifier
+		//
+		cmd.movConstUInt32(port->txStartAddress(), port->txDataID());
+		cmd.setComment("txData ID");
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+		// copy analog signals
+		//
+		QVector<Hardware::OptoPort::TxSignal> txAnalogSignals = port->txAnalogSignals();
+
+		if (txAnalogSignals.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txSignal : txAnalogSignals)
+			{
+				Signal* s = m_signals->getSignal(txSignal.appSignalID);
+
+				if (s == nullptr)
+				{
+					// Signal identifier '%1' is not found.
+					//
+					m_log->errALC5000(txSignal.appSignalID, QUuid());
+					result = false;
+					continue;
+				}
+
+				int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+
+				cmd.mov32(txSignalAddress, s->ramAddr().offset());
+				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+
+				m_code.append(cmd);
+
+			}
+
+			m_code.newLine();
+		}
+
+		// copy discrete signals
+		//
+		QVector<Hardware::OptoPort::TxSignal> txDiscreteSignals = port->txDiscreteSignals();
+
+		if (txDiscreteSignals.count() > 0)
+		{
+			int count = txDiscreteSignals.count();
+
+			int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
+
+			int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
+
+			for(int i = 0; i < count; i++)
+			{
+				Hardware::OptoPort::TxSignal& txSignal = txDiscreteSignals[i];
+				Signal* s = m_signals->getSignal(txSignal.appSignalID);
+
+				if (s == nullptr)
+				{
+					// Signal identifier '%1' is not found.
+					//
+					m_log->errALC5000(txSignal.appSignalID, QUuid());
+					result = false;
+					continue;
+				}
+
+				if ((i % WORD_SIZE) == 0)
+				{
+					// this is new word!
+					//
+					if ((i / WORD_SIZE) == (wordCount - 1) &&			// if this is last word and
+						(count % WORD_SIZE) != 0 )						// signals count is not multiple WORD_SIZE
+					{
+						// generate bit-accumulator cleaning command
+						//
+						cmd.movConst(bitAccumulatorAddress, 0);
+						cmd.setComment(QString("bit accumulator cleaning"));
+
+						m_code.append(cmd);
+					}
+				}
+
+				int bit = i % WORD_SIZE;
+
+				assert(txSignal.address.bit() == bit);
+
+				// copy discrete signal value to bit accumulator
+				//
+				cmd.movBit(bitAccumulatorAddress, bit, s->ramAddr().offset(), s->ramAddr().bit());
+				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+
+				m_code.append(cmd);
+
+				if ((i % WORD_SIZE) == (WORD_SIZE -1) ||			// if this is last bit in word or
+					i == count -1)									// this is even the last bit
+				{
+					// txSignal.address.offset() the same for all signals in one word
+
+					int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+
+					// copy bit accumulator to opto interface buffer
+					//
+					cmd.mov(txSignalAddress, bitAccumulatorAddress);
+					cmd.setComment("");
+
+					m_code.append(cmd);
+				}
+			}
+
+			m_code.newLine();
+		}
 
 		return result;
 	}

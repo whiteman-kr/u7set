@@ -151,9 +151,10 @@ namespace Builder
         {
             qint32 int32Value;
             float floatValue;
+			quint32 uint32Value;
         } m_const;
 
-        bool m_constIsFloat = true;
+		E::DataFormat m_constDataFormat = E::DataFormat::Float;
 
     public:
         CommandCode()
@@ -207,7 +208,10 @@ namespace Builder
         void setConstInt32(qint32 int32Value);
         qint32 getConstInt32() const;
 
-        bool constIsFloat() const { return m_constIsFloat; }
+		void setConstUInt32(quint32 uint32Value);
+		quint32 getConstUInt32() const;
+
+		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
         int sizeW() const;
     };
@@ -302,6 +306,7 @@ namespace Builder
 
         void mov32(quint16 addrTo, quint16 addrFrom);
         void movConstInt32(quint16 addrTo, qint32 constInt32);
+		void movConstUInt32(quint16 addrTo, quint32 constUInt32);
         void movConstFloat(quint16 addrTo, float constFloat);
         void writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption);
         void readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
