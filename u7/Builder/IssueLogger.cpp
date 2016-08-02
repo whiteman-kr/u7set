@@ -99,6 +99,49 @@ namespace Builder
 	}
 
 
+	/// IssueCode: CMN0014
+	///
+	/// IssueType: Error
+	///
+	/// Title: File '%1' already exists.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't create file, because file alredy exists.
+	///
+	void IssueLogger::errCMN0014(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  14,
+				  tr("File '%1' already exists.")
+				  .arg(fileName));
+	}
+
+	/// IssueCode: CMN0015
+	///
+	/// IssueType: Warning
+	///
+	/// Title: '%1' and '%2' files have the same ID = '%3'.
+	///
+	/// Parameters:
+	///		%1 File name 1
+	///		%2 File name 2
+	///		%3 Files identifier
+	///
+	/// Description:
+	///		Build files have same string identifier. Contact to th RPCT developers.
+	///
+	void IssueLogger::wrnCMN0015(QString fileName1, QString fileName2, QString id)
+	{
+		LOG_WARNING(IssueType::Common,
+				  15,
+				  tr("'%1' and '%2' files have the same ID = '%3'.")
+				  .arg(fileName1).arg(fileName2).arg(id));
+	}
+
+
 	// INT			Internal issues							1000-1999
 	//
 

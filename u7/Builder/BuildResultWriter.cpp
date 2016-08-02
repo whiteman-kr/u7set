@@ -576,7 +576,9 @@ namespace Builder
 
 		if (m_buildFiles.contains(pathFileName))
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("File already exists: %1")).arg(pathFileName));
+			// File '%1' already exists.
+			//
+			m_log->errCMN0014(pathFileName);
 
 			delete buildFile;
 
@@ -592,8 +594,9 @@ namespace Builder
 			{
 				QString file1 = m_buildFileIDMap[id];
 
-				LOG_WARNING_OBSOLETE(m_log, IssueType::NotDefined, QString(tr("'%1' and '%2' files have the same ID = '%3'")).
-								   arg(file1).arg(pathFileName).arg(id));
+				// '%1' and '%2' files have the same ID = '%3'.
+				//
+				m_log->wrnCMN0015(file1, pathFileName, id);
 			}
 			else
 			{

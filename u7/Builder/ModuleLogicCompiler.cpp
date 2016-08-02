@@ -2477,10 +2477,8 @@ namespace Builder
 				{
 					continue;
 				}
-				QStringList txSignalsStrIDList = port->getTxSignalsID();
 
 				QString idStr;
-
 
 				if (port->manualSettings() == true)
 				{
@@ -2497,6 +2495,8 @@ namespace Builder
 				}
 				else
 				{
+					result &= port->calculateTxSignalsAddresses(m_log);
+
 					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
 								  arg(port->connectionID()));
@@ -2549,21 +2549,21 @@ namespace Builder
 
 			for(Hardware::OptoPort* port : rs232Ports)
 			{
-				QStringList txSignalsStrIDList = port->getTxSignalsID();
+				QVector<Hardware::OptoPort::TxSignal> txSignals = port->getTxSignals();
 
-				for(const QString& txSignalStrID : txSignalsStrIDList)
+				for(const Hardware::OptoPort::TxSignal& txSignal : txSignals)
 				{
-					if (m_signalsStrID.contains(txSignalStrID) == false)
+					if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-								  arg(txSignalStrID).arg(port->connectionID()));
+								  arg(txSignal.appSignalID).arg(port->connectionID()));
 
 						result = false;
 						continue;
 					}
 
-					Signal* txSignal = m_signalsStrID[txSignalStrID];
+					Signal* txSignal = m_signalsStrID[txSignal->appSignalID()];
 
 					if (txSignal == nullptr)
 					{
@@ -2838,13 +2838,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals)
+	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QVector<Hardware::OptoPort::TxSignal>& txSignals)
 	{
 		bool result = true;
 
-		for(Hardware::OptoPort::TxSignal txSignal : txSignals)
+		for(const Hardware::OptoPort::TxSignal& txSignal : txSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				assert(false);
@@ -2852,7 +2852,7 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = m_signalsStrID[txSignal.strID];
+			Signal* s = m_signalsStrID[txSignal.appSignalID];
 
 			if (s == nullptr)
 			{
@@ -2884,7 +2884,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
 	{
-		QList<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
+		QVector<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
 
 		if (txAnalogSignals.count() == 0)
 		{
@@ -2904,16 +2904,16 @@ namespace Builder
 
 		for(Hardware::OptoPort::TxSignal txSignal : txAnalogSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Unknown signal StrID '%1'")).
-								   arg(txSignal.strID));
+								   arg(txSignal.appSignalID));
 				result = false;
 				continue;
 			}
 
-			Signal* signal = m_signalsStrID[txSignal.strID];
+			Signal* signal = m_signalsStrID[txSignal.appSignalID];
 
 			if (signal == nullptr)
 			{
@@ -2951,12 +2951,12 @@ namespace Builder
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 									   QString(tr("Unknown size of analog signal '%1' - %2 bits)")).
-									   arg(txSignal.strID).arg(txSignal.sizeBit));
+									   arg(txSignal.appSignalID).arg(txSignal.sizeBit));
 					result = false;
 				}
 			}
 
-			cmd.setComment(QString("%1").arg(txSignal.strID));
+			cmd.setComment(QString("%1").arg(txSignal.appSignalID));
 
 			m_code.append(cmd);
 		}
@@ -2974,7 +2974,7 @@ namespace Builder
 	{
 		portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
 
-		QList<Hardware::OptoPort::TxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
+		QVector<Hardware::OptoPort::TxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
 
 		int txDiscreteSignalsCount = txDiscreteSignals.count();
 
@@ -3003,16 +3003,16 @@ namespace Builder
 
 		for(Hardware::OptoPort::TxSignal txSignal : txDiscreteSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Unknown signal StrID '%1'")).
-								   arg(txSignal.strID));
+								   arg(txSignal.appSignalID));
 				result = false;
 				continue;
 			}
 
-			Signal* signal = m_signalsStrID[txSignal.strID];
+			Signal* signal = m_signalsStrID[txSignal.appSignalID];
 
 			if (signal == nullptr)
 			{
@@ -3052,7 +3052,7 @@ namespace Builder
 			Address16 fromAddr = signal->ramAddr();
 
 			cmd.movBit(bitAccAddr, bitNo, fromAddr.offset(), fromAddr.bit());
-			cmd.setComment(QString("%1").arg(txSignal.strID));
+			cmd.setComment(QString("%1").arg(txSignal.appSignalID));
 			m_code.append(cmd);
 
 			lastWordCopied = false;
@@ -4897,7 +4897,7 @@ namespace Builder
 
 					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
 															   m_lm->equipmentId(),
-															   appSignal->appSignalID(),
+															   appSignal->signal(),
 															   &signalAllreadyInTxList);
 					if (signalAllreadyInTxList == true)
 					{

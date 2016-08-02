@@ -110,9 +110,11 @@ namespace Builder
 
 			if (compileModulesLogicsPass1() == false) break;
 
-			if (writeConnectionsFile() == false) break;
-
 			if (disposeOptoModulesTxRxBuffers() == false) break;
+
+			if (writeOptoConnectionsReport() == false) break;
+
+			if (writeOptoModulesReport() == false) break;
 
 			if (compileModulesLogicsPass2() == false) break;
 
@@ -334,8 +336,6 @@ namespace Builder
 					m_log->errALC5020(connection->port1EquipmentID(), connection->connectionID());
 					result = false;
 				}
-
-				optoPort1->addTxSignalsID(connection->signalList());
 
 				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
 							arg(connection->connectionID()).arg(portID));
@@ -562,7 +562,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeConnectionsFile()
+	bool ApplicationLogicCompiler::writeOptoConnectionsReport()
 	{
 		QStringList list;
 
@@ -585,47 +585,156 @@ namespace Builder
 			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
 			{
 				list.append(delim);
-				str = QString("Opto connection %1").arg(cn->connectionID());
+				str = QString(tr("Opto connection %1")).arg(cn->connectionID());
 				list.append(str);
 				list.append(delim);
 				list.append("");
 
-				str = QString("Port1 %1, txSignals:\n").arg(cn->port1EquipmentID());
-				list.append(str);
-
 				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
-				if (p1 != nullptr)
-				{
-					list.append(p1->getTxSignalsID());
-					list.append("");
-				}
-
-				str = QString("Port2 %1, txSignals:\n").arg(cn->port2EquipmentID());
-				list.append(str);
+				writeOptoPortInfo(p1, list);
 
 				Hardware::OptoPort* p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
 
-				if (p2 != nullptr)
-				{
-					list.append(p2->getTxSignalsID());
-					list.append("");
-				}
+				writeOptoPortInfo(p2, list);
 			}
 			else
 			{
 				list.append(delim);
-				str = QString(" RS232/485 connection %1").arg(cn->connectionID());
+				str = QString(tr("RS232/485 connection %1")).arg(cn->connectionID());
 				list.append(str);
 				list.append(delim);
 				list.append("");
-
 			}
 		}
 
-		m_resultWriter->addFile("Reports", "connections.txt", "", "", list);
+		m_resultWriter->addFile("Reports", "opto-connections.txt", "", "", list);
 
 		return true;
+	}
+
+
+	bool ApplicationLogicCompiler::writeOptoModulesReport()
+	{
+		QStringList list;
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+
+		int count = modules.count();
+
+		for(int i = 0; i < count; i++)
+		{
+			Hardware::OptoModule* module = modules[i];
+
+			if (module == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			list.append(delim);
+
+			if (module->isLM())
+			{
+				str = QString(tr("Opto module LM %1")).arg(module->equipmentID());
+			}
+			else
+			{
+				if (module->isOCM())
+				{
+					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
+				}
+				else
+				{
+					assert(false);
+				}
+			}
+
+			list.append(str);
+			list.append(delim);
+			list.append("");
+
+			// write module's opto ports information
+			//
+			QVector<Hardware::OptoPort*> ports = module->getPortsSorted();
+
+			for(Hardware::OptoPort* port : ports)
+			{
+				writeOptoPortInfo(port, list);
+			}
+		}
+
+		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
+
+		return true;
+	}
+
+
+
+	void ApplicationLogicCompiler::writeOptoPortInfo(Hardware::OptoPort* port, QStringList& list)
+	{
+		if (port == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		QString str;
+
+		str = QString(tr("Port equipmentID:\t%1")).arg(port->equipmentID());
+		list.append(str);
+
+		if (port->txDataSizeW() == 0)
+		{
+			str = QString(tr("Port ID:\t\tN/a")).arg(port->portID());
+			list.append(str);
+
+			str = QString(tr("Linked port ID:\t\tN/a")).arg(port->linkedPortID());
+			list.append(str);
+
+			str = QString(tr("Connection ID:\t\tN/a")).arg(port->connectionID());
+			list.append(str);
+
+			str = QString(tr("Associated LM ID:\t%1\n\n")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
+			list.append(str);
+
+			return;
+		}
+
+		str = QString(tr("Port ID:\t\t%1")).arg(port->portID());
+		list.append(str);
+
+		str = QString(tr("Linked port ID:\t\t%1")).arg(port->linkedPortID());
+		list.append(str);
+
+		str = QString(tr("Connection ID:\t\t%1")).arg(port->connectionID());
+		list.append(str);
+
+		str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
+		list.append(str);
+
+		str = QString(tr("TxData size:\t\t%1")).arg(port->txDataSizeW());
+		list.append(str);
+
+		list.append(QString(tr("Port txData:\n")));
+
+		str.sprintf("%04d:%02d\tTxDataID = 0x%08X (%u)", port->txStartAddress(), 0, port->txDataID(), port->txDataID());
+		list.append(str);
+
+		QVector<Hardware::OptoPort::TxSignal> txSignals = port->getTxSignals();
+
+		for(const Hardware::OptoPort::TxSignal& tx : txSignals)
+		{
+			str.sprintf("%04d:%02d\t%s", tx.address.offset(), tx.address.bit(), C_STR(tx.appSignalID));
+			list.append(str);
+		}
+
+		list.append("");
+		list.append("");
 	}
 
 
