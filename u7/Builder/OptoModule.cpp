@@ -164,7 +164,7 @@ namespace Hardware
 	// txSignals addresses recalculation after call of setTxStartAddress
 	// add value m_txStartAddress to address of txSignals
 	//
-	void OptoPort::recalulateTxSignalsAddresses()
+/*	void OptoPort::recalulateTxSignalsAddresses()
 	{
 		for(TxSignal& txSignal : m_txAnalogSignals)
 		{
@@ -175,7 +175,7 @@ namespace Hardware
 		{
 			txSignal.address.addWord(m_txStartAddress);
 		}
-	}
+	}*/
 
 
 	bool OptoPort::isTxSignalIDExists(const QString& appSignalID)
@@ -242,6 +242,15 @@ namespace Hardware
 		if (result == false)
 		{
 			return;
+		}
+
+		// set actual OptoInterfaceDataOffset for OCM module according to place of module
+		//
+		if (isOCM() == true)
+		{
+			// OCM's OptoPortDataSize property (m_optoPortDataSize) is equal to LM's ModuleDataSize property
+			//
+			m_optoInterfaceDataOffset = (m_deviceModule->place() - 1) * m_optoPortDataSize;
 		}
 
 		int findPortCount = 0;
@@ -460,7 +469,7 @@ namespace Hardware
 		return ports;
 	}
 
-	// return all opto ports sorted by equipmentID ascending alphabetical order
+	// return all ports sorted by equipmentID ascending alphabetical order
 	//
 	QVector<OptoPort*> OptoModule::getPortsSorted()
 	{
@@ -477,6 +486,40 @@ namespace Hardware
 			ports.append(port);
 		}
 
+		sortPortsByEquipmentIDAscending(ports);
+
+		return ports;
+	}
+
+
+	// return only opto-mode ports sorted by equipmentID ascending alphabetical order
+	//
+	QVector<OptoPort*> OptoModule::getOptoPortsSorted()
+	{
+		QVector<OptoPort*> ports;
+
+		for(OptoPort* port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (port->mode() == OptoPort::Mode::Optical)
+			{
+				ports.append(port);
+			}
+		}
+
+		sortPortsByEquipmentIDAscending(ports);
+
+		return ports;
+	}
+
+
+	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
+	{
 		int count = ports.count();
 
 		for(int i = 0; i < count - 1; i++)
@@ -491,8 +534,6 @@ namespace Hardware
 				}
 			}
 		}
-
-		return ports;
 	}
 
 
@@ -530,6 +571,27 @@ namespace Hardware
 		return true;
 	}
 
+
+	int OptoModule::allOptoPortsTxDataSizeW()
+	{
+		QList<OptoPort*> ports = getOptoPorts();
+
+		int txDataSizeW = 0;
+
+		for(OptoPort* port : ports)
+		{
+			if (port != nullptr)
+			{
+				txDataSizeW += port->txDataSizeW();
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		return txDataSizeW;
+	}
 
 
 	// ------------------------------------------------------------------
@@ -830,7 +892,7 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::calculatePortsTxRxStartAddresses()
+	bool OptoModuleStorage::calculatePortsTxStartAddresses()
 	{
 		bool result = true;
 
@@ -845,66 +907,86 @@ namespace Hardware
 				return false;
 			}
 
-			int txStartAddress = 0;
-
 			QList<OptoPort*> portsList = module->ports();
 
-			for(OptoPort* port : portsList)
+			if (module->isLM() == true)
 			{
-				if (port == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
-					return false;
-				}
+				// calculate tx addresses for LM module
+				//
+				int i = 0;
 
-				if (module->isLM())
+				for(OptoPort* port : portsList)
 				{
-					port->setTxStartAddress(txStartAddress);
-					port->recalulateTxSignalsAddresses();
-
-					if (port->txDataSizeW() > module->m_optoPortAppDataSize)
+					if (port == nullptr)
 					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->equipmentID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
 
+					int txStartAddress =	module->optoInterfaceDataOffset() +
+											i * module->optoPortDataSize() +
+											module->optoPortAppDataOffset();
+
+					port->setTxStartAddress(txStartAddress);
+
+					i++;
+
+					if (port->txDataSizeW() > module->optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
 						result = false;
 						break;
 					}
-
-					continue;
 				}
 
-				if (module->isOCM())
+				continue;
+			}
+
+			if (module->isOCM() == true)
+			{
+				// calculate tx addresses for OCM module
+				//
+				int txStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
+
+				int txDataSizeW = 0;
+
+				for(OptoPort* port : portsList)
 				{
-					// all data to transmit via all ports of OCM disposed in one buffer with max size - OptoPortAppDataSize
+					if (port == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+
+					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
 					port->setTxStartAddress(txStartAddress);
-					port->recalulateTxSignalsAddresses();
 
 					txStartAddress += port->txDataSizeW();
 
-					if (txStartAddress > module->m_optoPortAppDataSize)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->equipmentID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
+					txDataSizeW += port->txDataSizeW();
 
+					if (txDataSizeW > module->optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
 						result = false;
 						break;
 					}
-					continue;
 				}
 
-				LOG_INTERNAL_ERROR(m_log)
-				assert(false);      // unknown module type
-				result = false;
-				break;
+				continue;
 			}
 
+			LOG_INTERNAL_ERROR(m_log)
+			assert(false);      // unknown module type
+			result = false;
+			break;
 		}
 
 		return result;

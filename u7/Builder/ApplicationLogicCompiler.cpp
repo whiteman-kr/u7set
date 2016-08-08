@@ -445,14 +445,19 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Dispose opto modules tx/rx buffers...")));
 
-		result = m_optoModuleStorage->setPortsRxDataSizes();
+		result = m_optoModuleStorage->calculatePortsTxStartAddresses();
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result = m_optoModuleStorage->calculatePortsTxRxStartAddresses();
+		result = m_optoModuleStorage->setPortsRxDataSizes();
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		LOG_SUCCESS(m_log, QString(tr("Ok")));
 
@@ -564,9 +569,14 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeOptoConnectionsReport()
 	{
-		QStringList list;
-
 		int count = m_connections->count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		QStringList list;
 
 		QString delim = "--------------------------------------------------------------------";
 
@@ -616,15 +626,20 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeOptoModulesReport()
 	{
+		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+
+		int count = modules.count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
 		QStringList list;
 
 		QString delim = "--------------------------------------------------------------------";
 
 		QString str;
-
-		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
-
-		int count = modules.count();
 
 		for(int i = 0; i < count; i++)
 		{
@@ -690,20 +705,23 @@ namespace Builder
 
 		if (port->txDataSizeW() == 0)
 		{
-			str = QString(tr("Port ID:\t\tN/a")).arg(port->portID());
+			str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
 			list.append(str);
 
-			str = QString(tr("Linked port ID:\t\tN/a")).arg(port->linkedPortID());
+			str = QString(tr("Port ID:\t\t-")).arg(port->portID());
 			list.append(str);
 
-			str = QString(tr("Connection ID:\t\tN/a")).arg(port->connectionID());
+			str = QString(tr("Linked port ID:\t\t-")).arg(port->linkedPortID());
 			list.append(str);
 
-			str = QString(tr("Associated LM ID:\t%1\n\n")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
+			str = QString(tr("Connection ID:\t\t-\n\n")).arg(port->connectionID());
 			list.append(str);
 
 			return;
 		}
+
+		str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
+		list.append(str);
 
 		str = QString(tr("Port ID:\t\t%1")).arg(port->portID());
 		list.append(str);
@@ -714,22 +732,25 @@ namespace Builder
 		str = QString(tr("Connection ID:\t\t%1")).arg(port->connectionID());
 		list.append(str);
 
-		str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
+		str = QString(tr("TxData start address:\t%1")).arg(port->txStartAddress());
 		list.append(str);
 
-		str = QString(tr("TxData size:\t\t%1")).arg(port->txDataSizeW());
+		str = QString(tr("TxData size:\t\t%1\n")).arg(port->txDataSizeW());
 		list.append(str);
 
 		list.append(QString(tr("Port txData:\n")));
 
-		str.sprintf("%04d:%02d\tTxDataID = 0x%08X (%u)", port->txStartAddress(), 0, port->txDataID(), port->txDataID());
+		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)", port->txStartAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
 		list.append(str);
 
 		QVector<Hardware::OptoPort::TxSignal> txSignals = port->getTxSignals();
 
 		for(const Hardware::OptoPort::TxSignal& tx : txSignals)
 		{
-			str.sprintf("%04d:%02d\t%s", tx.address.offset(), tx.address.bit(), C_STR(tx.appSignalID));
+			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+						port->txStartAddress() + tx.address.offset(), tx.address.bit(),
+						tx.address.offset(), tx.address.bit(),
+						C_STR(tx.appSignalID));
 			list.append(str);
 		}
 

@@ -153,8 +153,8 @@ namespace Builder
 		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
-		// FREE FOR USE !!! void errALC5032(QString appSignalID);												// Application signal '%1' is bound to non logic module.
-		void errALC5033(QString appSignalId, QString chassisEquipmentID);					// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+		void errALC5033(QString appSignalId, QString chassisEquipmentID);		// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
 		void errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
 
 		// EQP			Equipment issues						6000-6999

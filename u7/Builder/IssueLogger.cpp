@@ -1920,6 +1920,31 @@ namespace Builder
 						  arg(appSignalID)));
 	}
 
+
+	/// IssueCode: ALC5032
+	///
+	/// IssueType: Error
+	///
+	/// Title: TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	///
+	/// Parameters:
+	///		%1 opto port txData size, words
+	///		%2 opto port equipmentID
+	///		%3 opto module equipmentID
+	///		%4 value of OptoPortAppDataSize of the opto module
+	///
+	/// Description:
+	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5032,
+				  QString(tr("TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+						  arg(txDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
+	}
+
+
 	/// IssueCode: ALC5033
 	///
 	/// IssueType: Error

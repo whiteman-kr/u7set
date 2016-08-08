@@ -128,7 +128,7 @@ namespace Hardware
 
 		QString optoModuleID() const { return m_optoModuleID; }
 
-		void recalulateTxSignalsAddresses();
+//		void recalulateTxSignalsAddresses();
 
 		QVector<TxSignal> getTxSignals();
 
@@ -191,6 +191,8 @@ namespace Hardware
 
 		bool m_valid = false;
 
+		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports);
+
 	public:
 		OptoModule(DeviceModule* module, Builder::IssueLogger* log);
 		~OptoModule();
@@ -218,8 +220,11 @@ namespace Hardware
 		QList<OptoPort*> ports();
 
 		QVector<OptoPort*> getPortsSorted();
+		QVector<OptoPort*> getOptoPortsSorted();
 
 		bool calculateTxStartAddresses();
+
+		int allOptoPortsTxDataSizeW();
 
 		friend class OptoModuleStorage;
 	};
@@ -276,7 +281,7 @@ namespace Hardware
 		QList<OptoModule*> getLmAssociatedOptoModules(const QString& lmStrID);
 
 		bool setPortsRxDataSizes();
-		bool calculatePortsTxRxStartAddresses();
+		bool calculatePortsTxStartAddresses();
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);
