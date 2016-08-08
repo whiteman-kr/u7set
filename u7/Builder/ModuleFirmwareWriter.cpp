@@ -93,28 +93,25 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 			int channel = channelDescription.first;
 			std::vector<QVariantList>& descriptionItems = channelDescription.second;
 
-			// header
-			//
-			QString str;
-			for (auto s : m_descriptionFields)
-			{
-				str += s + ";";
-			}
-			jDescription.insert("desc", str);
-
-			// data
-			//
 			int diIndex = 0;
 			for (auto di : descriptionItems)
 			{
-				str.clear();
-
-				for (auto v : di)
+				if (di.size() != m_descriptionFields.size())
 				{
-					str += v.toString() + ";";
+					qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << m_descriptionFields.size() << ")";
+					assert(false);
+					return false;
 				}
 
-				jDescription.insert("desc" + QString().number(diIndex++).rightJustified(4, '0'), str);
+				QJsonObject jDescriptionItem;
+
+				int l = 0;
+				for (auto v : di)
+				{
+					jDescriptionItem.insert(m_descriptionFields[l++], v.toString());
+				}
+
+				jDescription.insert("desc" + QString().number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
 			}
 
 			jObject.insert("z_description_channel_" + QString().number(channel).rightJustified(2, '0'), jDescription);
