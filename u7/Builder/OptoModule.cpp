@@ -28,33 +28,6 @@ namespace Hardware
 	}
 
 
-	void OptoPort::addTxSignalID(const QString& signalID)
-	{
-		if (signalID.isEmpty())
-		{
-			assert(false);
-			return;
-		}
-
-		m_txSignalsIDList.append(signalID);
-	}
-
-
-	void OptoPort::addTxSignalsID(const QStringList& signalStrIDList)
-	{
-		for(const QString& signalStrID : signalStrIDList)
-		{
-			if (signalStrID.isEmpty())
-			{
-				assert(false);
-				continue;
-			}
-
-			m_txSignalsIDList.append(signalStrID);
-		}
-	}
-
-
 	void OptoPort::addTxSignal(Signal* txSignal)
 	{
 		if (txSignal == nullptr)
@@ -63,29 +36,52 @@ namespace Hardware
 			return;
 		}
 
-		TxSignal txs;
-
-		txs.strID = txSignal->appSignalID();
-		txs.sizeBit = txSignal->dataSize();
-
-		if (txSignal->isAnalog())
+		if (m_txSignalsIDs.contains(txSignal->appSignalID()))
 		{
-			m_txAnalogSignalList.append(txs);
+			assert(false);
+			return;
 		}
 		else
 		{
-			if (txSignal->isDiscrete())
+			m_txSignalsIDs.insert(txSignal->appSignalID(), 0);
+
+			TxSignal txs;
+
+			txs.appSignalID = txSignal->appSignalID();
+			txs.sizeBit = txSignal->dataSize();
+
+			if (txSignal->isAnalog())
 			{
-				m_txDiscreteSignalList.append(txs);
+				m_txAnalogSignals.append(txs);
 			}
 			else
 			{
-				assert(false);  // unknown type of signal
+				if (txSignal->isDiscrete())
+				{
+					m_txDiscreteSignals.append(txs);
+				}
+				else
+				{
+					assert(false);  // unknown type of signal
+				}
 			}
 		}
 	}
 
 
+	QVector<OptoPort::TxSignal> OptoPort::getTxSignals()
+	{
+		QVector<TxSignal> txSignals;
+
+		txSignals.append(m_txAnalogSignals);
+		txSignals.append(m_txDiscreteSignals);
+
+		return txSignals;
+	}
+
+	// initial tsSignals addresses calculcation
+	// zero-offset from port txStartAddress
+	//
 	bool OptoPort::calculateTxSignalsAddresses(OutputLog* log)
 	{
 		if (log == nullptr)
@@ -93,6 +89,8 @@ namespace Hardware
 			assert(false);
 			return false;
 		}
+
+		sortTxSignals();
 
 		bool result = true;
 
@@ -102,26 +100,27 @@ namespace Hardware
 		//
 		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
 
+		Address16 address(0, 0);
+
 		// m_txDataID first placed in buffer
 		//
-
 		int txDataIDSizeW = sizeof(m_txDataID) / sizeof(quint16);
 
-		Address16 address(txDataIDSizeW, 0);
+		address.addWord(txDataIDSizeW);
 
-		for(TxSignal& txAnalogSignal : m_txAnalogSignalList)
+		for(TxSignal& txAnalogSignal : m_txAnalogSignals)
 		{
 			txAnalogSignal.address = address;
 
 			address.addBit(txAnalogSignal.sizeBit);
 			address.wordAlign();
 
-			m_txDataID = CRC32(m_txDataID, C_STR(txAnalogSignal.strID), txAnalogSignal.strID.length(), false);
+			m_txDataID = CRC32(m_txDataID, C_STR(txAnalogSignal.appSignalID), txAnalogSignal.appSignalID.length(), false);
 		}
 
 		m_txAnalogSignalsSizeW = address.offset() - txDataIDSizeW ;
 
-		for(TxSignal& txDiscreteSignal : m_txDiscreteSignalList)
+		for(TxSignal& txDiscreteSignal : m_txDiscreteSignals)
 		{
 			txDiscreteSignal.address = address;
 
@@ -129,7 +128,7 @@ namespace Hardware
 
 			address.add1Bit();
 
-			m_txDataID = CRC32(m_txDataID, C_STR(txDiscreteSignal.strID), txDiscreteSignal.strID.length(), false);
+			m_txDataID = CRC32(m_txDataID, C_STR(txDiscreteSignal.appSignalID), txDiscreteSignal.appSignalID.length(), false);
 		}
 
 		m_txDataID = CRC32(m_txDataID, nullptr, 0, true);       // finalize CRC32 calculation
@@ -162,18 +161,54 @@ namespace Hardware
 		return result;
 	}
 
+	// txSignals addresses recalculation after call of setTxStartAddress
+	// add value m_txStartAddress to address of txSignals
+	//
+/*	void OptoPort::recalulateTxSignalsAddresses()
+	{
+		for(TxSignal& txSignal : m_txAnalogSignals)
+		{
+			txSignal.address.addWord(m_txStartAddress);
+		}
+
+		for(TxSignal& txSignal : m_txDiscreteSignals)
+		{
+			txSignal.address.addWord(m_txStartAddress);
+		}
+	}*/
+
 
 	bool OptoPort::isTxSignalIDExists(const QString& appSignalID)
 	{
-		for(const QString& id : m_txSignalsIDList)
+		return m_txSignalsIDs.contains(appSignalID);
+	}
+
+
+	void OptoPort::sortTxSignals()
+	{
+		// sort txSignals in ascending alphabetical order
+		//
+		sortTxSignals(m_txAnalogSignals);
+		sortTxSignals(m_txDiscreteSignals);
+	}
+
+
+	void OptoPort::sortTxSignals(QVector<TxSignal>& array)
+	{
+		int count = array.count();
+
+		for(int i = 0; i < count - 1; i++)
 		{
-			if (id == appSignalID)
+			for(int k = i + 1; k < count; k++)
 			{
-				return true;
+				if (array[i].appSignalID > array[k].appSignalID)
+				{
+					TxSignal temp = array[i];
+					array[i] = array[k];
+					array[k] = temp;
+				}
 			}
 		}
-
-		return false;
 	}
 
 
@@ -207,6 +242,15 @@ namespace Hardware
 		if (result == false)
 		{
 			return;
+		}
+
+		// set actual OptoInterfaceDataOffset for OCM module according to place of module
+		//
+		if (isOCM() == true)
+		{
+			// OCM's OptoPortDataSize property (m_optoPortDataSize) is equal to LM's ModuleDataSize property
+			//
+			m_optoInterfaceDataOffset = (m_deviceModule->place() - 1) * m_optoPortDataSize;
 		}
 
 		int findPortCount = 0;
@@ -413,18 +457,23 @@ namespace Hardware
 
 		for(OptoPort* port : m_ports)
 		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
 			ports.append(port);
 		}
 
 		return ports;
 	}
 
-
-	bool OptoModule::calculateTxStartAddresses()
+	// return all ports sorted by equipmentID ascending alphabetical order
+	//
+	QVector<OptoPort*> OptoModule::getPortsSorted()
 	{
-		quint16 txStartAddress = 0;
-
-		//qDebug() << QString("TxStartAddresses of  module %1").arg(m_strID);
+		QVector<OptoPort*> ports;
 
 		for(OptoPort* port : m_ports)
 		{
@@ -434,9 +483,79 @@ namespace Hardware
 				continue;
 			}
 
-			port->setTxStartAddress(txStartAddress);
+			ports.append(port);
+		}
 
-			//qDebug() << QString("Port %1 = %2").arg(port->strID()).arg(port->txStartAddress());
+		sortPortsByEquipmentIDAscending(ports);
+
+		return ports;
+	}
+
+
+	// return only opto-mode ports sorted by equipmentID ascending alphabetical order
+	//
+	QVector<OptoPort*> OptoModule::getOptoPortsSorted()
+	{
+		QVector<OptoPort*> ports;
+
+		for(OptoPort* port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (port->mode() == OptoPort::Mode::Optical)
+			{
+				ports.append(port);
+			}
+		}
+
+		sortPortsByEquipmentIDAscending(ports);
+
+		return ports;
+	}
+
+
+	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
+	{
+		int count = ports.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if (ports[i]->equipmentID() > ports[k]->equipmentID())
+				{
+					OptoPort* temp = ports[i];
+					ports[i] = ports[k];
+					ports[k] = temp;
+				}
+			}
+		}
+	}
+
+
+	bool OptoModule::calculateTxStartAddresses()
+	{
+		quint16 txStartAddress = 0;
+
+		for(OptoPort* port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (port->equipmentID() == "TEST_R1_CH01_MD12_OPTOPORT01")
+			{
+				int a = 0;
+				a++;
+			}
+
+			port->setTxStartAddress(txStartAddress);
 
 			txStartAddress += port->txDataSizeW();
 		}
@@ -452,6 +571,27 @@ namespace Hardware
 		return true;
 	}
 
+
+	int OptoModule::allOptoPortsTxDataSizeW()
+	{
+		QList<OptoPort*> ports = getOptoPorts();
+
+		int txDataSizeW = 0;
+
+		for(OptoPort* port : ports)
+		{
+			if (port != nullptr)
+			{
+				txDataSizeW += port->txDataSizeW();
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		return txDataSizeW;
+	}
 
 
 	// ------------------------------------------------------------------
@@ -606,7 +746,27 @@ namespace Hardware
 	}
 
 
-	Hardware::OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
+	QString OptoModuleStorage::getOptoPortAssociatedLmID(const OptoPort* optoPort)
+	{
+		if (optoPort == nullptr)
+		{
+			assert(false);
+			return "";
+		}
+
+		OptoModule* optoModule = getOptoModule(optoPort);
+
+		if (optoModule == nullptr)
+		{
+			assert(false);
+			return "";
+		}
+
+		return optoModule->lmID();
+	}
+
+
+	OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
 	{
 		Hardware::OptoPort* port = getOptoPort(optoPortStrID);
 
@@ -732,7 +892,7 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::calculatePortsTxRxStartAddresses()
+	bool OptoModuleStorage::calculatePortsTxStartAddresses()
 	{
 		bool result = true;
 
@@ -747,64 +907,86 @@ namespace Hardware
 				return false;
 			}
 
-			int txStartAddress = 0;
-
 			QList<OptoPort*> portsList = module->ports();
 
-			for(OptoPort* port : portsList)
+			if (module->isLM() == true)
 			{
-				if (port == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
-					return false;
-				}
+				// calculate tx addresses for LM module
+				//
+				int i = 0;
 
-				if (module->isLM())
+				for(OptoPort* port : portsList)
 				{
+					if (port == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+
+					int txStartAddress =	module->optoInterfaceDataOffset() +
+											i * module->optoPortDataSize() +
+											module->optoPortAppDataOffset();
+
 					port->setTxStartAddress(txStartAddress);
 
-					if (port->txDataSizeW() > module->m_optoPortAppDataSize)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->equipmentID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
+					i++;
 
+					if (port->txDataSizeW() > module->optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
 						result = false;
 						break;
 					}
-
-					continue;
 				}
 
-				if (module->isOCM())
+				continue;
+			}
+
+			if (module->isOCM() == true)
+			{
+				// calculate tx addresses for OCM module
+				//
+				int txStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
+
+				int txDataSizeW = 0;
+
+				for(OptoPort* port : portsList)
 				{
-					// all data to transmit via all ports of OCM disposed in one buffer with max size - OptoPortAppDataSize
+					if (port == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+
+					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
 					port->setTxStartAddress(txStartAddress);
 
 					txStartAddress += port->txDataSizeW();
 
-					if (txStartAddress > module->m_optoPortAppDataSize)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString(tr("Data size %1 to transmit on port '%2' exceeded limit OptoPortAppDataSize = %3 (connection %4)")).
-										   arg(txStartAddress).arg(port->equipmentID()).
-										   arg(module->m_optoPortAppDataSize).arg(port->connectionID()));
+					txDataSizeW += port->txDataSizeW();
 
+					if (txDataSizeW > module->optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
 						result = false;
 						break;
 					}
-					continue;
 				}
 
-				LOG_INTERNAL_ERROR(m_log)
-				assert(false);      // unknown module type
-				result = false;
-				break;
+				continue;
 			}
 
+			LOG_INTERNAL_ERROR(m_log)
+			assert(false);      // unknown module type
+			result = false;
+			break;
 		}
 
 		return result;
@@ -856,10 +1038,11 @@ namespace Hardware
 
 	bool OptoModuleStorage::addTxSignal(const QString& connectionID,
 										const QString& lmID,
-										const QString& appSignalID,
+										Signal* appSignal,
 										bool* signalAllreadyInList)
 	{
-		if (signalAllreadyInList == nullptr)
+		if (appSignal == nullptr ||
+			signalAllreadyInList == nullptr)
 		{
 			assert(false);
 			return false;
@@ -897,26 +1080,26 @@ namespace Hardware
 
 		if (m1->lmID() == lmID)
 		{
-			if (p1->isTxSignalIDExists(appSignalID))
+			if (p1->isTxSignalIDExists(appSignal->appSignalID()))
 			{
 				*signalAllreadyInList = true;
 			}
 			else
 			{
-				p1->addTxSignalID(appSignalID);
+				p1->addTxSignal(appSignal);
 			}
 			return true;
 		}
 
 		if (m2->lmID() == lmID)
 		{
-			if (p2->isTxSignalIDExists(appSignalID))
+			if (p2->isTxSignalIDExists(appSignal->appSignalID()))
 			{
 				*signalAllreadyInList = true;
 			}
 			else
 			{
-				p2->addTxSignalID(appSignalID);
+				p2->addTxSignal(appSignal);
 			}
 			return true;
 		}
@@ -924,6 +1107,42 @@ namespace Hardware
 		assert(false);		// WTF?
 
 		return false;
+	}
+
+
+	// return all opto modules sorted by equipmentID ascending alphabetical order
+	//
+	QVector<OptoModule*> OptoModuleStorage::getOptoModulesSorted()
+	{
+		QVector<OptoModule*> modules;
+
+		for(OptoModule* optoModule : m_modules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			modules.append(optoModule);
+		}
+
+		int count = modules.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if (modules[i]->equipmentID() > modules[k]->equipmentID())
+				{
+					OptoModule* temp = modules[i];
+					modules[i] = modules[k];
+					modules[k] = temp;
+				}
+			}
+		}
+
+		return modules;
 	}
 
 }

@@ -26,6 +26,8 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 		}
 	}
 
+	const int frameStringWidth = 16;
+
 	QJsonObject jObject;
 
 	for (int i = 0; i < frameCount(); i++)
@@ -34,15 +36,90 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 		QJsonObject jFrame;
 
-		QJsonArray array;
-		for (size_t j = 0; j < frame.size(); j++)
-			array.push_back(QJsonValue(frame[j]));
 
-		jFrame.insert("data", array);
+		int dataSize = (int)frame.size();
+		int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
+
+		int dataPos = 0;
+
+		for (int l = 0; l < linesCount; l++)
+		{
+
+			//QJsonArray array;
+			//for (size_t j = 0; j < frame.size(); j++)
+				//array.push_back(QJsonValue(frame[j]));
+
+			QString str;
+			for (int i = 0; i < frameStringWidth; i++)
+			{
+				quint16 value = ((quint16)frame[dataPos++] << 8);
+				if (dataPos >= dataSize)
+				{
+					assert(false);
+					break;
+				}
+
+				value |= frame[dataPos++];
+				str += QString().number(value, 16).rightJustified(4, '0');
+
+				if (dataPos >= dataSize)
+				{
+					break;
+				}
+
+				if (i < frameStringWidth - 1)
+				{
+					str += " ";
+				}
+			}
+
+			jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str));
+		}
 		jFrame.insert("frameIndex", i);
 
-		jObject.insert("z_frame_" + QString().number(i), jFrame);
+
+		jObject.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
 	}
+
+	//description
+	//
+
+	if (m_descriptionFields.empty() == false && m_descriptonData.empty() == false)
+	{
+		for (auto channelDescription : m_descriptonData)
+		{
+			QJsonObject jDescription;
+
+			int channel = channelDescription.first;
+			std::vector<QVariantList>& descriptionItems = channelDescription.second;
+
+			int diIndex = 0;
+			for (auto di : descriptionItems)
+			{
+				if (di.size() != m_descriptionFields.size())
+				{
+					qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << m_descriptionFields.size() << ")";
+					assert(false);
+					return false;
+				}
+
+				QJsonObject jDescriptionItem;
+
+				int l = 0;
+				for (auto v : di)
+				{
+					jDescriptionItem.insert(m_descriptionFields[l++], v.toString());
+				}
+
+				jDescription.insert("desc" + QString().number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
+			}
+
+			jObject.insert("z_description_channel_" + QString().number(channel).rightJustified(2, '0'), jDescription);
+		}
+	}
+
+	// properties
+	//
 
 	jObject.insert("userName", m_userName);
 	jObject.insert("projectName", m_projectName);
@@ -52,13 +129,15 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 	jObject.insert("frameSize", frameSize());
 	jObject.insert("framesCount", frameCount());
 	jObject.insert("changesetId", m_changesetId);
+	jObject.insert("fileVersion", fileVersion());
+	jObject.insert("frameStringWidth", frameStringWidth);
 
 	dest = QJsonDocument(jObject).toJson();
 
 	return true;
 }
 
-bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, Builder::IssueLogger *log)
+bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger *log)
 {
 	if (log == nullptr)
 	{
@@ -88,6 +167,8 @@ bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int 
 	ModuleFirmwareData channelData;
 	channelData.data = data;
 	channelData.uniqueID = uniqueID;
+
+	m_descriptonData[channel] = descriptionData;
 
 	m_channelData[channel] = channelData;
 
@@ -296,7 +377,7 @@ QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int 
 
 	if (newFirmware == true)
 	{
-		fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
+		fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId, QStringList());
 	}
 
 	QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);

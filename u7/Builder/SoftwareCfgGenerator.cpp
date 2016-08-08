@@ -345,11 +345,11 @@ namespace Builder
 
 		if (result == true)
 		{
-			LOG_MESSAGE(log, QString(tr("Logic Modules list building... OK")));
+			LOG_MESSAGE(log, QString(tr("Software list building... OK")));
 		}
 		else
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build Logic Modules list")));
+			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build software list")));
 		}
 
 		return result;

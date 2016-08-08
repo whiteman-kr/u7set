@@ -189,13 +189,13 @@ namespace Builder
     void CommandCode::setConstFloat(float floatValue)
     {
         m_const.floatValue = floatValue;
-        m_constIsFloat = true;
+		m_constDataFormat = E::DataFormat::Float;
     }
 
 
     float CommandCode::getConstFloat() const
     {
-        if (m_constIsFloat == true)
+		if (m_constDataFormat == E::DataFormat::Float)
         {
             return m_const.floatValue;
         }
@@ -209,13 +209,13 @@ namespace Builder
     void CommandCode::setConstInt32(qint32 int32Value)
     {
         m_const.int32Value = int32Value;
-        m_constIsFloat = false;
+		m_constDataFormat = E::DataFormat::SignedInt;
     }
 
 
     qint32 CommandCode::getConstInt32() const
     {
-        if (m_constIsFloat == false)
+		if (m_constDataFormat == E::DataFormat::SignedInt)
         {
             return m_const.int32Value;
         }
@@ -225,6 +225,25 @@ namespace Builder
         return 0;
     }
 
+
+	void CommandCode::setConstUInt32(quint32 uint32Value)
+	{
+		m_const.uint32Value = uint32Value;
+		m_constDataFormat = E::DataFormat::UnsignedInt;
+	}
+
+
+	quint32 CommandCode::getConstUInt32() const
+	{
+		if (m_constDataFormat == E::DataFormat::UnsignedInt)
+		{
+			return m_const.uint32Value;
+		}
+
+		assert(false);
+
+		return 0;
+	}
 
 
     // ---------------------------------------------------------------------------------------
@@ -519,6 +538,16 @@ namespace Builder
     }
 
 
+	void Command::movConstUInt32(quint16 addrTo, quint32 constUInt32)
+	{
+		m_code.setOpCode(LmCommandCode::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constUInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constUInt32 & 0xFFFF);
+		m_code.setConstUInt32(constUInt32);
+	}
+
+
     void Command::movConstFloat(quint16 addrTo, float constFloat)
     {
         qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
@@ -789,56 +818,96 @@ namespace Builder
             break;
 
         case LmCommandCode::MOVC32:
-            if (m_code.constIsFloat())
+			switch(m_code.constDataFormat())
             {
+			case E::DataFormat::Float:
                 params = QString("%1, #%2").
                             arg(m_code.getWord2()).
                             arg(m_code.getConstFloat());
-            }
-            else
-            {
+				break;
+
+			case E::DataFormat::SignedInt:
                 params = QString("%1, #%2").
                             arg(m_code.getWord2()).
                             arg(m_code.getConstInt32());
-            }
+				break;
+
+			case E::DataFormat::UnsignedInt:
+				params = QString("%1, #%2").
+							arg(m_code.getWord2()).
+							arg(m_code.getConstUInt32());
+				break;
+
+			default:
+				assert(false);
+			}
+
             break;
 
         case LmCommandCode::WRFBC32:
-            if (m_code.constIsFloat())
-            {
-                params = QString("%1.%2[%3], #%4").
+			switch(m_code.constDataFormat())
+			{
+			case E::DataFormat::Float:
+				params = QString("%1.%2[%3], #%4").
                             arg(m_code.getFbCaption()).
                             arg(m_code.getFbInstanceInt()).
                             arg(m_code.getFbParamNoInt()).
                             arg(m_code.getConstFloat());
-            }
-            else
-            {
-                params = QString("%1.%2[%3], #%4").
+				break;
+
+			case E::DataFormat::SignedInt:
+				params = QString("%1.%2[%3], #%4").
                             arg(m_code.getFbCaption()).
                             arg(m_code.getFbInstanceInt()).
                             arg(m_code.getFbParamNoInt()).
                             arg(m_code.getConstInt32());
+				break;
+
+			case E::DataFormat::UnsignedInt:
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstUInt32());
+				break;
+
+			default:
+				assert(false);
             }
+
             break;
 
         case LmCommandCode::RDFBTS32:
-            if (m_code.constIsFloat())
-            {
-                params = QString("%1.%2[%3], #%4").
+			switch(m_code.constDataFormat())
+			{
+			case E::DataFormat::Float:
+				params = QString("%1.%2[%3], #%4").
                             arg(m_code.getFbCaption()).
                             arg(m_code.getFbInstanceInt()).
                             arg(m_code.getFbParamNoInt()).
                             arg(m_code.getConstFloat());
-            }
-            else
-            {
+				break;
+
+			case E::DataFormat::SignedInt:
                 params = QString("%1.%2[%3], #%4").
                             arg(m_code.getFbCaption()).
                             arg(m_code.getFbInstanceInt()).
                             arg(m_code.getFbParamNoInt()).
                             arg(m_code.getConstInt32());
+				break;
+
+			case E::DataFormat::UnsignedInt:
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstUInt32());
+				break;
+
+			default:
+				assert(false);
             }
+
             break;
 
         default:

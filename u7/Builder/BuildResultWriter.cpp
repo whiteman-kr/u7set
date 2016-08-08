@@ -344,7 +344,7 @@ namespace Builder
 	// --------------------------------------------------------------------------------------
 
 	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID,
-									   QString lmCaption, int frameSize, int frameCount) :
+									   QString lmCaption, int frameSize, int frameCount, const QStringList& descriptionFields) :
 		m_buildResultWriter(buildResultWriter),
 		m_log(buildResultWriter.log()),
 		m_subsysStrID(subsysStrID),
@@ -355,13 +355,13 @@ namespace Builder
 		BuildInfo bi = m_buildResultWriter.buildInfo();
 
 		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.changeset);
+						 bi.project, bi.user, bi.changeset, descriptionFields);
 	}
 
 
-	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode, const std::vector<QVariantList>& descriptionData)
 	{
-		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, m_log) == false)
+		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, descriptionData, m_log) == false)
 		{
 			return false;
 		}
@@ -597,7 +597,9 @@ namespace Builder
 
 		if (m_buildFiles.contains(pathFileName))
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("File already exists: %1")).arg(pathFileName));
+			// File '%1' already exists.
+			//
+			m_log->errCMN0014(pathFileName);
 
 			delete buildFile;
 
@@ -613,8 +615,9 @@ namespace Builder
 			{
 				QString file1 = m_buildFileIDMap[id];
 
-				LOG_WARNING_OBSOLETE(m_log, IssueType::NotDefined, QString(tr("'%1' and '%2' files have the same ID = '%3'")).
-								   arg(file1).arg(pathFileName).arg(id));
+				// '%1' and '%2' files have the same ID = '%3'.
+				//
+				m_log->wrnCMN0015(file1, pathFileName, id);
 			}
 			else
 			{
@@ -801,7 +804,7 @@ namespace Builder
 	}
 
 
-	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount)
+	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, const QStringList& descriptionFields)
 	{
 		MultichannelFile* multichannelFile = nullptr;
 
@@ -827,7 +830,7 @@ namespace Builder
 		}
 		else
 		{
-			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount);
+			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFields);
 
 			m_multichannelFiles.insert(subsysStrID, multichannelFile);
 		}

@@ -39,10 +39,12 @@ namespace Builder
 
 		// CMN			Common issues							0000-0999
 		//
-		void errCMN0010(QString fileName);
-		void errCMN0011(QString directory);
-		void errCMN0012(QString fileName);
-		void errCMN0013(QString fileName);
+		void errCMN0010(QString fileName);						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+		void errCMN0011(QString directory);						// Can't create directory '%1'.
+		void errCMN0012(QString fileName);						// Can't create file '%1'.
+		void errCMN0013(QString fileName);						// Write error of file '%1'.
+		void errCMN0014(QString fileName);						// File '%1' already exists.
+		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// '%1' and '%2' files have the same ID = '%3'.
 
 		// INT			Internal issues							1000-1999
 		//
@@ -151,8 +153,8 @@ namespace Builder
 		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
-		// FREE FOR USE !!! void errALC5032(QString appSignalID);												// Application signal '%1' is bound to non logic module.
-		void errALC5033(QString appSignalId, QString chassisEquipmentID);					// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+		void errALC5033(QString appSignalId, QString chassisEquipmentID);		// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
 		void errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
 
 		// EQP			Equipment issues						6000-6999

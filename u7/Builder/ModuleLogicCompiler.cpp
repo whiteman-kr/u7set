@@ -144,6 +144,8 @@ namespace Builder
 
 			if (!setLmAppLANDataSize()) break;
 
+			if (!copyOptoConnectionsTxData()) break;
+
 			if (!copyRS232Signals()) break;
 
 			if (!buildTuningData()) break;
@@ -2477,10 +2479,8 @@ namespace Builder
 				{
 					continue;
 				}
-				QStringList txSignalsStrIDList = port->getTxSignalsID();
 
 				QString idStr;
-
 
 				if (port->manualSettings() == true)
 				{
@@ -2497,6 +2497,8 @@ namespace Builder
 				}
 				else
 				{
+					result &= port->calculateTxSignalsAddresses(m_log);
+
 					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
 								  arg(port->connectionID()));
@@ -2549,21 +2551,21 @@ namespace Builder
 
 			for(Hardware::OptoPort* port : rs232Ports)
 			{
-				QStringList txSignalsStrIDList = port->getTxSignalsID();
+				QVector<Hardware::OptoPort::TxSignal> txSignals = port->getTxSignals();
 
-				for(const QString& txSignalStrID : txSignalsStrIDList)
+				for(const Hardware::OptoPort::TxSignal& txSignal : txSignals)
 				{
-					if (m_signalsStrID.contains(txSignalStrID) == false)
+					if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-								  arg(txSignalStrID).arg(port->connectionID()));
+								  arg(txSignal.appSignalID).arg(port->connectionID()));
 
 						result = false;
 						continue;
 					}
 
-					Signal* txSignal = m_signalsStrID[txSignalStrID];
+					Signal* txSignal = m_signalsStrID[txSignal->appSignalID()];
 
 					if (txSignal == nullptr)
 					{
@@ -2722,6 +2724,195 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::copyOptoConnectionsTxData()
+	{
+		bool result = true;
+
+		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+
+		if (modules.count() == 0)
+		{
+			return true;
+		}
+
+		for(Hardware::OptoModule* module : modules)
+		{
+			if (module == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (module->lmID() != m_lm->equipmentId() ||
+				module->allOptoPortsTxDataSizeW() == 0)
+			{
+				continue;
+			}
+
+			Comment comment;
+
+			comment.setComment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
+			m_code.append(comment);
+			m_code.newLine();
+
+			QVector<Hardware::OptoPort*> ports = module->getOptoPortsSorted();
+
+			for(Hardware::OptoPort* port : ports)
+			{
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				result &= copyOptoPortTxData(module, port);
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxData(Hardware::OptoModule* module, Hardware::OptoPort* port)
+	{
+		if (module == nullptr ||
+			port == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (port->txDataSizeW() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		Command cmd;
+		Comment comment;
+
+		comment.setComment(QString(tr("Copying txData of opto-port %1")).arg(port->equipmentID()));
+		m_code.append(comment);
+		m_code.newLine();
+
+		// write data port txData identifier
+		//
+		cmd.movConstUInt32(port->txStartAddress(), port->txDataID());
+		cmd.setComment("txData ID");
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+		// copy analog signals
+		//
+		QVector<Hardware::OptoPort::TxSignal> txAnalogSignals = port->txAnalogSignals();
+
+		if (txAnalogSignals.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txSignal : txAnalogSignals)
+			{
+				Signal* s = m_signals->getSignal(txSignal.appSignalID);
+
+				if (s == nullptr)
+				{
+					// Signal identifier '%1' is not found.
+					//
+					m_log->errALC5000(txSignal.appSignalID, QUuid());
+					result = false;
+					continue;
+				}
+
+				int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+
+				cmd.mov32(txSignalAddress, s->ramAddr().offset());
+				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+
+				m_code.append(cmd);
+
+			}
+
+			m_code.newLine();
+		}
+
+		// copy discrete signals
+		//
+		QVector<Hardware::OptoPort::TxSignal> txDiscreteSignals = port->txDiscreteSignals();
+
+		if (txDiscreteSignals.count() > 0)
+		{
+			int count = txDiscreteSignals.count();
+
+			int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
+
+			int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
+
+			for(int i = 0; i < count; i++)
+			{
+				Hardware::OptoPort::TxSignal& txSignal = txDiscreteSignals[i];
+				Signal* s = m_signals->getSignal(txSignal.appSignalID);
+
+				if (s == nullptr)
+				{
+					// Signal identifier '%1' is not found.
+					//
+					m_log->errALC5000(txSignal.appSignalID, QUuid());
+					result = false;
+					continue;
+				}
+
+				if ((i % WORD_SIZE) == 0)
+				{
+					// this is new word!
+					//
+					if ((i / WORD_SIZE) == (wordCount - 1) &&			// if this is last word and
+						(count % WORD_SIZE) != 0 )						// signals count is not multiple WORD_SIZE
+					{
+						// generate bit-accumulator cleaning command
+						//
+						cmd.movConst(bitAccumulatorAddress, 0);
+						cmd.setComment(QString("bit accumulator cleaning"));
+
+						m_code.append(cmd);
+					}
+				}
+
+				int bit = i % WORD_SIZE;
+
+				assert(txSignal.address.bit() == bit);
+
+				// copy discrete signal value to bit accumulator
+				//
+				cmd.movBit(bitAccumulatorAddress, bit, s->ramAddr().offset(), s->ramAddr().bit());
+				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+
+				m_code.append(cmd);
+
+				if ((i % WORD_SIZE) == (WORD_SIZE -1) ||			// if this is last bit in word or
+					i == count -1)									// this is even the last bit
+				{
+					// txSignal.address.offset() the same for all signals in one word
+
+					int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+
+					// copy bit accumulator to opto interface buffer
+					//
+					cmd.mov(txSignalAddress, bitAccumulatorAddress);
+					cmd.setComment("");
+
+					m_code.append(cmd);
+				}
+			}
+
+			m_code.newLine();
+		}
+
+		return result;
+	}
+
+
 	bool ModuleLogicCompiler::copyRS232Signals()
 	{
 		if (m_lm == nullptr ||
@@ -2838,13 +3029,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QList<Hardware::OptoPort::TxSignal>& txSignals)
+	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QVector<Hardware::OptoPort::TxSignal>& txSignals)
 	{
 		bool result = true;
 
-		for(Hardware::OptoPort::TxSignal txSignal : txSignals)
+		for(const Hardware::OptoPort::TxSignal& txSignal : txSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				assert(false);
@@ -2852,7 +3043,7 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = m_signalsStrID[txSignal.strID];
+			Signal* s = m_signalsStrID[txSignal.appSignalID];
 
 			if (s == nullptr)
 			{
@@ -2884,7 +3075,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
 	{
-		QList<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
+		QVector<Hardware::OptoPort::TxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
 
 		if (txAnalogSignals.count() == 0)
 		{
@@ -2904,16 +3095,16 @@ namespace Builder
 
 		for(Hardware::OptoPort::TxSignal txSignal : txAnalogSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Unknown signal StrID '%1'")).
-								   arg(txSignal.strID));
+								   arg(txSignal.appSignalID));
 				result = false;
 				continue;
 			}
 
-			Signal* signal = m_signalsStrID[txSignal.strID];
+			Signal* signal = m_signalsStrID[txSignal.appSignalID];
 
 			if (signal == nullptr)
 			{
@@ -2951,12 +3142,12 @@ namespace Builder
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 									   QString(tr("Unknown size of analog signal '%1' - %2 bits)")).
-									   arg(txSignal.strID).arg(txSignal.sizeBit));
+									   arg(txSignal.appSignalID).arg(txSignal.sizeBit));
 					result = false;
 				}
 			}
 
-			cmd.setComment(QString("%1").arg(txSignal.strID));
+			cmd.setComment(QString("%1").arg(txSignal.appSignalID));
 
 			m_code.append(cmd);
 		}
@@ -2974,7 +3165,7 @@ namespace Builder
 	{
 		portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
 
-		QList<Hardware::OptoPort::TxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
+		QVector<Hardware::OptoPort::TxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
 
 		int txDiscreteSignalsCount = txDiscreteSignals.count();
 
@@ -3003,16 +3194,16 @@ namespace Builder
 
 		for(Hardware::OptoPort::TxSignal txSignal : txDiscreteSignals)
 		{
-			if (m_signalsStrID.contains(txSignal.strID) == false)
+			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Unknown signal StrID '%1'")).
-								   arg(txSignal.strID));
+								   arg(txSignal.appSignalID));
 				result = false;
 				continue;
 			}
 
-			Signal* signal = m_signalsStrID[txSignal.strID];
+			Signal* signal = m_signalsStrID[txSignal.appSignalID];
 
 			if (signal == nullptr)
 			{
@@ -3052,7 +3243,7 @@ namespace Builder
 			Address16 fromAddr = signal->ramAddr();
 
 			cmd.movBit(bitAccAddr, bitNo, fromAddr.offset(), fromAddr.bit());
-			cmd.setComment(QString("%1").arg(txSignal.strID));
+			cmd.setComment(QString("%1").arg(txSignal.appSignalID));
 			m_code.append(cmd);
 
 			lastWordCopied = false;
@@ -4897,7 +5088,7 @@ namespace Builder
 
 					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
 															   m_lm->equipmentId(),
-															   appSignal->appSignalID(),
+															   appSignal->signal(),
 															   &signalAllreadyInTxList);
 					if (signalAllreadyInTxList == true)
 					{

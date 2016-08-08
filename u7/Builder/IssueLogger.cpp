@@ -99,6 +99,49 @@ namespace Builder
 	}
 
 
+	/// IssueCode: CMN0014
+	///
+	/// IssueType: Error
+	///
+	/// Title: File '%1' already exists.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't create file, because file alredy exists.
+	///
+	void IssueLogger::errCMN0014(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  14,
+				  tr("File '%1' already exists.")
+				  .arg(fileName));
+	}
+
+	/// IssueCode: CMN0015
+	///
+	/// IssueType: Warning
+	///
+	/// Title: '%1' and '%2' files have the same ID = '%3'.
+	///
+	/// Parameters:
+	///		%1 File name 1
+	///		%2 File name 2
+	///		%3 Files identifier
+	///
+	/// Description:
+	///		Build files have same string identifier. Contact to th RPCT developers.
+	///
+	void IssueLogger::wrnCMN0015(QString fileName1, QString fileName2, QString id)
+	{
+		LOG_WARNING(IssueType::Common,
+				  15,
+				  tr("'%1' and '%2' files have the same ID = '%3'.")
+				  .arg(fileName1).arg(fileName2).arg(id));
+	}
+
+
 	// INT			Internal issues							1000-1999
 	//
 
@@ -1876,6 +1919,31 @@ namespace Builder
 				  QString(tr("The signal '%1' can be bind only to Logic Module or Equipment Signal.").
 						  arg(appSignalID)));
 	}
+
+
+	/// IssueCode: ALC5032
+	///
+	/// IssueType: Error
+	///
+	/// Title: TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	///
+	/// Parameters:
+	///		%1 opto port txData size, words
+	///		%2 opto port equipmentID
+	///		%3 opto module equipmentID
+	///		%4 value of OptoPortAppDataSize of the opto module
+	///
+	/// Description:
+	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5032,
+				  QString(tr("TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+						  arg(txDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
+	}
+
 
 	/// IssueCode: ALC5033
 	///
