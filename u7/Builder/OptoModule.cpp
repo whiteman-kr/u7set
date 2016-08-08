@@ -79,7 +79,7 @@ namespace Hardware
 		return txSignals;
 	}
 
-	// initial tsSignals addresses calculcation
+	// initial txSignals addresses calculcation
 	// zero-offset from port txStartAddress
 	//
 	bool OptoPort::calculateTxSignalsAddresses(OutputLog* log)
@@ -161,26 +161,16 @@ namespace Hardware
 		return result;
 	}
 
-	// txSignals addresses recalculation after call of setTxStartAddress
-	// add value m_txStartAddress to address of txSignals
-	//
-/*	void OptoPort::recalulateTxSignalsAddresses()
-	{
-		for(TxSignal& txSignal : m_txAnalogSignals)
-		{
-			txSignal.address.addWord(m_txStartAddress);
-		}
-
-		for(TxSignal& txSignal : m_txDiscreteSignals)
-		{
-			txSignal.address.addWord(m_txStartAddress);
-		}
-	}*/
-
 
 	bool OptoPort::isTxSignalIDExists(const QString& appSignalID)
 	{
 		return m_txSignalsIDs.contains(appSignalID);
+	}
+
+
+	bool OptoPort::isConnected() const
+	{
+		return linkedPortID().isEmpty() != true;
 	}
 
 
@@ -848,7 +838,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->connectionID().isEmpty())
+			if (port->isConnected() == false)
 			{
 				// optical port is not linked (used in connection)
 				//
@@ -911,7 +901,7 @@ namespace Hardware
 
 			if (module->isLM() == true)
 			{
-				// calculate tx addresses for LM module
+				// calculate tx addresses for ports of LM module
 				//
 				int i = 0;
 
@@ -947,7 +937,7 @@ namespace Hardware
 
 			if (module->isOCM() == true)
 			{
-				// calculate tx addresses for OCM module
+				// calculate tx addresses for ports of OCM module
 				//
 				int txStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
 
@@ -991,6 +981,147 @@ namespace Hardware
 
 		return result;
 	}
+
+
+	bool OptoModuleStorage::calculatePortsRxStartAddresses()
+	{
+		bool result = true;
+
+		QList<OptoModule*> modulesList = modules();
+
+		for(OptoModule* module : modulesList)
+		{
+			if (module == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				assert(false);
+				return false;
+			}
+
+			QList<OptoPort*> portsList = module->ports();
+
+			if (module->isLM() == true)
+			{
+				// calculate rx addresses for ports of LM module
+				//
+				int i = 0;
+
+				for(OptoPort* port : portsList)
+				{
+					if (port == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+
+
+					if (port->isConnected() == false)
+					{
+						port->setRxStartAddress(0);
+
+						i++;
+
+						continue;
+					}
+
+					int rxStartAddress =	module->optoInterfaceDataOffset() +
+											i * module->optoPortDataSize() +
+											module->optoPortAppDataOffset();
+
+					port->setRxStartAddress(rxStartAddress);
+
+					i++;
+
+					OptoPort* linkedPort = getOptoPort(port->linkedPortID());
+
+					if (linkedPort != nullptr)
+					{
+						if (linkedPort->txDataSizeW() > module->optoPortAppDataSize())
+						{
+							// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
+					}
+					else
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+				}
+
+				continue;
+			}
+
+			if (module->isOCM() == true)
+			{
+				// calculate rx addresses for ports of OCM module
+				//
+				int rxStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
+
+				int rxDataSizeW = 0;
+
+				for(OptoPort* port : portsList)
+				{
+					if (port == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+
+					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
+					//
+
+					if (port->isConnected() == false)
+					{
+						port->setRxStartAddress(0);
+						continue;
+					}
+
+					port->setRxStartAddress(rxStartAddress);
+
+					OptoPort* linkedPort = getOptoPort(port->linkedPortID());
+
+					if (linkedPort != nullptr)
+					{
+						rxStartAddress += linkedPort->txDataSizeW();
+
+						rxDataSizeW += linkedPort->txDataSizeW();
+
+						if (rxDataSizeW > module->optoPortAppDataSize())
+						{
+							// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5035(rxDataSizeW, port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
+					}
+					else
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						assert(false);
+						return false;
+					}
+				}
+
+				continue;
+			}
+
+			LOG_INTERNAL_ERROR(m_log)
+			assert(false);      // unknown module type
+			result = false;
+			break;
+		}
+
+		return result;
+	}
+
 
 
 	bool OptoModuleStorage::addConnections(const Hardware::ConnectionStorage& connectionStorage)

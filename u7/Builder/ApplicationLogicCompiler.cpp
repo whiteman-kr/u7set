@@ -459,6 +459,13 @@ namespace Builder
 			return false;
 		}
 
+		result = m_optoModuleStorage->calculatePortsRxStartAddresses();
+
+		if (result == false)
+		{
+			return false;
+		}
+
 		LOG_SUCCESS(m_log, QString(tr("Ok")));
 
 		return result;

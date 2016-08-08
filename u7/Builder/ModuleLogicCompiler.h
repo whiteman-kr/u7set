@@ -593,8 +593,6 @@ namespace Builder
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateFbCode(const AppItem *appItem);
-		bool generateTransmitterCode(const AppItem *appItem);
-		bool generateReceiverCode(const AppItem *appItem);
 
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool startFb(const AppFb* appFb);
@@ -607,6 +605,8 @@ namespace Builder
 
 		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
+
+		bool generateWriteReceiverToSignalCode(AppSignal& appSignal, const LogicReceiver& receiver, const QUuid& pinGuid);
 
 		bool copyDiscreteSignalsToRegBuf();
 

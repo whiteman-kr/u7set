@@ -1990,6 +1990,30 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5035
+	///
+	/// IssueType: Error
+	///
+	/// Title: RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	///
+	/// Parameters:
+	///		%1 opto port rxData size, words
+	///		%2 opto port equipmentID
+	///		%3 opto module equipmentID
+	///		%4 value of OptoPortAppDataSize of the opto module
+	///
+	/// Description:
+	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5035(int rxDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5035,
+				  QString(tr("RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+						  arg(rxDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

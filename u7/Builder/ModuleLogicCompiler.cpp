@@ -1321,25 +1321,18 @@ namespace Builder
 
 			if (appItem->isTransmitter())
 			{
-				result &= generateTransmitterCode(appItem);
-
-				if (result == false)
-				{
-					break;
-				}
-
+				// no special code generation for transmitter here
+				// code for transmitters is generate in copyOptoConnectionsTxData()
+				//
 				continue;
 			}
 
 			if (appItem->isReceiver())
 			{
-				result &= generateReceiverCode(appItem);
-
-				if (result == false)
-				{
-					break;
-				}
-
+				// no special code generation for receiver here
+				// code for receivers is generate in:
+				//		generateWriteReceiverToSignalCode()
+				//
 				continue;
 			}
 
@@ -1417,6 +1410,12 @@ namespace Builder
 				if (connectedPinParent->isConst())
 				{
 					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->logicConst());
+					continue;
+				}
+
+				if (connectedPinParent->isReceiver())
+				{
+					result &= generateWriteReceiverToSignalCode(*appSignal, connectedPinParent->logicReceiver(), connectedPinGuid);
 					continue;
 				}
 
@@ -2081,6 +2080,13 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(AppSignal& appSignal, const LogicReceiver& receiver, const QUuid& pinGuid)
+	{
+		//receiver
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
 	{
 		bool result = true;
@@ -2259,32 +2265,6 @@ namespace Builder
 		appSignal->setResultSaved();
 
 		return true;
-	}
-
-
-	bool ModuleLogicCompiler::generateTransmitterCode(const AppItem *appItem)
-	{
-		bool result = true;
-
-		if (appItem == nullptr)
-		{
-			return false;
-		}
-
-		return result;
-	}
-
-
-	bool ModuleLogicCompiler::generateReceiverCode(const AppItem *appItem)
-	{
-		bool result = true;
-
-		if (appItem == nullptr)
-		{
-			return false;
-		}
-
-		return result;
 	}
 
 
@@ -2487,6 +2467,7 @@ namespace Builder
 					result &= port->calculateTxSignalsAddresses(m_log);
 
 					idStr.sprintf("0x%X", port->txDataID());
+
 					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', manual settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
 							arg(port->connectionID()).
 							arg(port->txAnalogSignalsCount()).
@@ -2499,9 +2480,12 @@ namespace Builder
 				{
 					result &= port->calculateTxSignalsAddresses(m_log);
 
-					LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Automatic data calculation is not implemented for connection '%1'")).
-								  arg(port->connectionID()));
+					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', automatic settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+							arg(port->connectionID()).
+							arg(port->txAnalogSignalsCount()).
+							arg(port->txDiscreteSignalsCount()).
+							arg(port->txDataSizeW() * 2).
+							arg(idStr)  );
 				}
 			}
 		}
