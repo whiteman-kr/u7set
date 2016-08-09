@@ -24,6 +24,9 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const override;
 
+		virtual QStringList getSignalList() const override;
+		virtual QStringList getLabels() const override;
+
 		// Properties
 		//
 	public:

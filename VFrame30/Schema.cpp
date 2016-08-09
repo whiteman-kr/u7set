@@ -511,6 +511,49 @@ namespace VFrame30
 		return errorMessage->isEmpty();
 	}
 
+	QStringList Schema::getSignalList() const
+	{
+		// Do nothing, override to get signal list
+		//
+		QStringList result;
+		return result;
+	}
+
+	QStringList Schema::getLabels() const
+	{
+		QStringList result;
+		return result;
+	}
+
+	std::vector<QUuid> Schema::getGuids() const
+	{
+		std::vector<QUuid> result;
+		result.reserve(1024);
+
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			{
+				result.push_back(item->guid());
+			}
+		}
+
+		return result;
+	}
+
+	QString Schema::details() const
+	{
+		return SchemaDetails::getDetailsString(this);
+	}
+
+	SchemaDetails Schema::parseDetails(const QString& details)
+	{
+		SchemaDetails d;
+		d.parseDetails(details);
+
+		return d;
+	}
+
 	// Properties and Data
 	//
 
@@ -778,5 +821,156 @@ namespace VFrame30
 	const LogicSchema* Schema::toLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
+	}
+
+	//
+	//
+	//				SchemaDetails
+	//
+	//
+
+	SchemaDetails::SchemaDetails()
+	{
+	}
+
+	SchemaDetails::SchemaDetails(SchemaDetails&& src)
+	{
+		m_version = src.m_version;
+		m_schemaId = src.m_schemaId;
+		m_signals = std::move(src.m_signals);
+		m_labels = std::move(src.m_labels);
+		m_guids = std::move(src.m_guids);
+	}
+
+	QString SchemaDetails::getDetailsString(const Schema* schema)
+	{
+		if (schema == nullptr)
+		{
+			assert(schema);
+			return QString();
+		}
+
+		// form details JSON object (signal list)
+		//
+		QJsonObject jsonObject;
+
+		// Get signalIds
+		//
+		QStringList signalIds = schema->getSignalList();
+		QVariant signaListVariant(signalIds);
+
+		// Get labels for AFBs
+		//
+		QStringList labels = schema->getLabels();
+		QVariant labelsVariant(labels);
+
+		// Get a list of guids
+		//
+		std::vector<QUuid> guids = schema->getGuids();
+
+		QStringList guidsStringList;
+		guidsStringList.reserve(static_cast<int>(guids.size()));
+
+		for (const QUuid uuid : guids)
+		{
+			guidsStringList.push_back(uuid.toString());
+		}
+
+		QVariant guidsVariant(guidsStringList);
+
+		// Form JSon object
+		//
+		jsonObject.insert("Version", QJsonValue(1));
+		jsonObject.insert("SchemaID", QJsonValue(schema->schemaID()));
+		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
+		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
+		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
+
+		// Convert json to string and return it
+		//
+		QJsonDocument jsonDoc(jsonObject);
+
+		QByteArray data = jsonDoc.toJson(QJsonDocument::JsonFormat::Indented);
+		QString result = QString::fromUtf8(data);
+
+		return result;
+	}
+
+	bool SchemaDetails::parseDetails(const QString& details)
+	{
+		// parse details section (from DB), result is signal list
+		//
+		QByteArray data = details.toUtf8();
+
+		QJsonParseError parseError;
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &parseError);
+
+		if (parseError.error != QJsonParseError::NoError)
+		{
+			qDebug() << "Schema details pasing error: " << parseError.errorString();
+			qDebug() << "JSON document: " << details;
+			return false;
+		}
+
+		if (jsonDoc.isObject() == false)
+		{
+			assert(jsonDoc.isObject());		// have a look at json doc, it is supposed to be an object
+			qDebug() << Q_FUNC_INFO << " json is supposed to be object";
+			return false;
+		}
+
+		QJsonObject jsonObject = jsonDoc.object();
+
+		QJsonValue version = jsonObject.value(QLatin1String("Version"));
+		int versionInt = version.toInt(-1);
+
+		if (versionInt == -1 ||
+			version.type() != QJsonValue::Double)
+		{
+			assert(versionInt != -1);
+			assert(version.type() == QJsonValue::Double);
+			return false;
+		}
+
+		switch (versionInt)
+		{
+		case 1:
+			{
+				// SchemaID
+				//
+				m_schemaId = jsonObject.value(QLatin1String("SchemaID")).toString();
+
+				// Signals
+				//
+				m_signals.clear();
+
+				QStringList signalsStrings = jsonObject.value(QLatin1String("Signals")).toVariant().toStringList();
+
+				std::for_each(signalsStrings.begin(), signalsStrings.end(), [this](const QString& str){	m_signals.insert(str);});
+
+				// Labels
+				//
+				m_labels.clear();
+
+				QStringList labelList = jsonObject.value(QLatin1String("Labels")).toVariant().toStringList();
+
+				std::for_each(labelList.begin(), labelList.end(), [this](const QString& str){	m_labels.insert(str);});
+
+				// ItemGuids
+				//
+				m_guids.clear();
+
+				QStringList guidList = jsonObject.value(QLatin1String("ItemGuids")).toVariant().toStringList();
+
+				std::for_each(guidList.begin(), guidList.end(), [this](const QString& str){	m_guids.insert(QUuid(str));});
+			}
+			break;
+		default:
+			assert(false);
+			return false;
+		}
+
+
+		return true;
 	}
 }

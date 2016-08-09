@@ -34,6 +34,7 @@ namespace Builder
 			QString subDir;
 			QString fileName;
 			QString group;
+			QString details;
 		};
 		static QList<SchemaFile> m_schemaFileList;
 

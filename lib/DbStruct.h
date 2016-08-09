@@ -267,7 +267,7 @@ public:
 	void setUserId(int value);
 
 	QString details() const;
-	void setDetails(QString value);		// Value must be valid JSON, Example: "{}"
+	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
 	// Data
 	//

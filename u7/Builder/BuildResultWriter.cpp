@@ -290,6 +290,27 @@ namespace Builder
 		return true;
 	}
 
+	bool ConfigurationXmlFile::addLinkToFile(const QString& subDir, const QString& fileName, const QString& metadataName, const QString& metadataValue)
+	{
+		QString pathFileName = BuildFile::constructPathFileName(subDir, fileName);
+
+		BuildFile* buildFile = m_buildResultWriter.getBuildFile(pathFileName);
+
+		if (buildFile == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+					  QString(tr("Build file '%1' is not found")).
+					  arg(pathFileName).arg(m_subDir));
+			return false;
+		}
+
+		buildFile->addMetadata(metadataName, metadataValue);
+
+		return addLinkToFile(buildFile);
+
+		return true;
+	}
+
 
 	void ConfigurationXmlFile::finalize()
 	{

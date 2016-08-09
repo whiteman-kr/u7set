@@ -86,6 +86,7 @@ namespace Builder
 
 		bool addLinkToFile(BuildFile* buildFile);
 		bool addLinkToFile(const QString& subDir, const QString& fileName);
+		bool addLinkToFile(const QString& subDir, const QString& fileName, const QString& metadataName, const QString& metadataValue);
 
 		void finalize();
 

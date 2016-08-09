@@ -245,6 +245,7 @@ namespace Builder
 			schemaFile.subDir = subDir;
 			schemaFile.fileName = schema->schemaID() + "." + fileExtension;		// File is stored under this name
 			schemaFile.group = group;
+			schemaFile.details = schema->details();
 
 			m_schemaFileList.push_back(schemaFile);
 		}
