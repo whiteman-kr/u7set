@@ -43,7 +43,7 @@ namespace Hardware
 		}
 		else
 		{
-			m_txSignalsIDs.insert(txSignal->appSignalID(), 0);
+			m_txSignalsIDs.insert(txSignal->appSignalID(), Address16());
 
 			TxSignal txs;
 
@@ -112,6 +112,15 @@ namespace Hardware
 		{
 			txAnalogSignal.address = address;
 
+			if (m_txSignalsIDs.contains(txAnalogSignal.appSignalID))
+			{
+				m_txSignalsIDs[txAnalogSignal.appSignalID] = address;
+			}
+			else
+			{
+				assert(false);
+			}
+
 			address.addBit(txAnalogSignal.sizeBit);
 			address.wordAlign();
 
@@ -123,6 +132,15 @@ namespace Hardware
 		for(TxSignal& txDiscreteSignal : m_txDiscreteSignals)
 		{
 			txDiscreteSignal.address = address;
+
+			if (m_txSignalsIDs.contains(txDiscreteSignal.appSignalID))
+			{
+				m_txSignalsIDs[txDiscreteSignal.appSignalID] = address;
+			}
+			else
+			{
+				assert(false);
+			}
 
 			assert(txDiscreteSignal.sizeBit == 1);
 
@@ -171,6 +189,19 @@ namespace Hardware
 	bool OptoPort::isConnected() const
 	{
 		return linkedPortID().isEmpty() != true;
+	}
+
+
+	Address16 OptoPort::getTxSignalAddress(const QString& appSignalID) const
+	{
+		if (m_txSignalsIDs.contains(appSignalID))
+		{
+			return m_txSignalsIDs[appSignalID];
+		}
+
+		assert(false);
+
+		return Address16();
 	}
 
 
@@ -1274,6 +1305,99 @@ namespace Hardware
 		}
 
 		return modules;
+	}
+
+
+	bool OptoModuleStorage::getSignalRxAddress(QString connectionID, QString appSignalID, QString receiverLM, QUuid receiverUuid, Address16& addr)
+	{
+		addr.reset();
+
+		std::shared_ptr<Connection> connection = getConnection(connectionID);
+
+		if (connection == nullptr)
+		{
+			m_log->errALC5040(connectionID);
+			return false;
+		}
+
+		OptoPort* port1 = getOptoPort(connection->port1EquipmentID());
+
+		if (port1 == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		OptoPort* port2 = getOptoPort(connection->port2EquipmentID());
+
+		if (port2 == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (port1->isTxSignalIDExists(appSignalID))
+		{
+			OptoModule* module1 = getOptoModule(port1->optoModuleID());
+
+			if (module1->lmID() == receiverLM)
+			{
+				// Signal '%1' exists in LM '%2'. No receivers needed.
+				//
+				m_log->errALC5041(appSignalID, receiverLM, receiverUuid);
+				return false;
+			}
+
+			OptoModule* module2 = getOptoModule(port2->optoModuleID());
+
+			if (module2->lmID() != receiverLM)
+			{
+				// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+				//
+				m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
+				return false;
+			}
+
+			addr = port1->getTxSignalAddress(appSignalID);
+
+			addr.addWord(port2->rxStartAddress());
+
+			return true;
+		}
+
+		if (port2->isTxSignalIDExists(appSignalID))
+		{
+			OptoModule* module2 = getOptoModule(port2->optoModuleID());
+
+			if (module2->lmID() == receiverLM)
+			{
+				// Signal '%1' exists in LM '%2'. No receivers needed.
+				//
+				m_log->errALC5041(appSignalID, receiverLM, receiverUuid);
+				return false;
+			}
+
+			OptoModule* module1 = getOptoModule(port1->optoModuleID());
+
+			if (module1->lmID() != receiverLM)
+			{
+				// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+				//
+				m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
+				return false;
+			}
+
+			addr = port2->getTxSignalAddress(appSignalID);
+
+			addr.addWord(port1->rxStartAddress());
+
+			return true;
+		}
+
+		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+		//
+		m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
+		return false;
 	}
 
 }

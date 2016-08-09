@@ -1415,7 +1415,7 @@ namespace Builder
 
 				if (connectedPinParent->isReceiver())
 				{
-					result &= generateWriteReceiverToSignalCode(*appSignal, connectedPinParent->logicReceiver(), connectedPinGuid);
+					result &= generateWriteReceiverToSignalCode(connectedPinParent->logicReceiver(), *appSignal, connectedPinGuid);
 					continue;
 				}
 
@@ -2080,10 +2080,146 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(AppSignal& appSignal, const LogicReceiver& receiver, const QUuid& pinGuid)
+	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid)
 	{
-		//receiver
-		return true;
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+
+		if (connection == nullptr)
+		{
+			// // Receiver is linked to unknown opto connection '%1'.
+			//
+			m_log->errALC5025(receiver.connectionId(), receiver.guid());
+			return false;
+		}
+
+		Address16 srcAddress;
+
+		if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
+															 receiver.appSignalId(),
+															 m_lm->equipmentId(),
+															 receiver.guid(),
+															 srcAddress) == false)
+		{
+			return false;
+		}
+
+		Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
+
+		if (destSignal == nullptr)
+		{
+			// Signal identifier '%1' is not found.
+			//
+			m_log->errALC5000(appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
+		Command cmd;
+
+		if (receiver.isOutputPin(pinGuid))
+		{
+			Signal* srcSignal = m_signals->getSignal(receiver.appSignalId());
+
+			if (srcSignal == nullptr)
+			{
+				// Signal identifier '%1' is not found.
+				//
+				m_log->errALC5000(receiver.appSignalId(), appSignal.guid());
+				return false;
+			}
+
+			if (checkSignalsCompatibility(srcSignal, receiver.guid(), destSignal, appSignal.guid()) == false)
+			{
+				return false;
+			}
+
+			if (destSignal->isAnalog())
+			{
+				cmd.mov32(destSignal->ramAddr().offset(), srcAddress.offset());
+				return true;
+			}
+
+			if (destSignal->isDiscrete())
+			{
+				cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
+						   srcAddress.offset(), srcAddress.bit());
+				return true;
+			}
+
+			assert(false);		// ???
+			return false;
+		}
+
+		if (receiver.isValidityPin(pinGuid))
+		{
+			return true;
+		}
+
+		LOG_INTERNAL_ERROR(m_log);
+
+		assert(false);		// unknown pin type
+
+		return false;
+	}
+
+
+	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal* srcSignal, QUuid srcSignalUuid, const Signal* destSignal, QUuid destSignalUuid)
+	{
+		if (srcSignal == nullptr ||
+			destSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (srcSignal->isDiscrete())
+		{
+			if (destSignal->isAnalog())
+			{
+				// Discrete signal '%1' is connected to analog signal '%2'.
+				//
+				m_log->errALC5037(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				return false;
+			}
+
+			assert(destSignal->isDiscrete());
+
+			// Both signals are discret
+
+			return true;
+		}
+
+		if (srcSignal->isAnalog())
+		{
+			if (destSignal->isDiscrete())
+			{
+				// Analog signal '%1' is connected to discrete signal '%2'.
+				//
+				m_log->errALC5036(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				return false;
+			}
+
+			if (srcSignal->dataFormat() != destSignal->dataFormat())
+			{
+				// Signals '%1' and '%2' have different data format.
+				//
+				m_log->errALC5038(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				return false;
+			}
+
+			if (srcSignal->dataSize() != destSignal->dataSize())
+			{
+				// Signals '%1' and '%2' have different data size.
+				//
+				m_log->errALC5039(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				return false;
+			}
+
+			return true;
+		}
+
+		assert(false);		// unknown signal type
+
+		return false;
 	}
 
 
@@ -2549,15 +2685,15 @@ namespace Builder
 						continue;
 					}
 
-					Signal* txSignal = m_signalsStrID[txSignal->appSignalID()];
+					Signal* s = m_signalsStrID[txSignal.appSignalID];
 
-					if (txSignal == nullptr)
+					if (s == nullptr)
 					{
 						assert(false);
 						continue;
 					}
 
-					port->addTxSignal(txSignal);
+					port->addTxSignal(s);
 				}
 
 				result &= port->calculateTxSignalsAddresses(m_log);

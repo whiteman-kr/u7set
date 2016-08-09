@@ -51,7 +51,7 @@ namespace Hardware
 
 		QString m_connectionID;
 
-		QHash<QString, int> m_txSignalsIDs;
+		QHash<QString, Address16> m_txSignalsIDs;		// appSignalID => txAddress
 
 		QVector<TxSignal> m_txAnalogSignals;
 		QVector<TxSignal> m_txDiscreteSignals;
@@ -159,6 +159,8 @@ namespace Hardware
 		bool isTxSignalIDExists(const QString& appSignalID);
 
 		bool isConnected() const;
+
+		Address16 getTxSignalAddress(const QString& appSignalID) const;
 	};
 
 
@@ -293,5 +295,7 @@ namespace Hardware
 						 bool* signalAllreadyInList);
 
 		QVector<OptoModule*> getOptoModulesSorted();
+
+		bool getSignalRxAddress(QString connectionID, QString appSignalID, QString receiverLM, QUuid receiverUuid, Address16& addr);
 	};
 }

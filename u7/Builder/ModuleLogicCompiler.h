@@ -606,7 +606,7 @@ namespace Builder
 		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
 
-		bool generateWriteReceiverToSignalCode(AppSignal& appSignal, const LogicReceiver& receiver, const QUuid& pinGuid);
+		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
 
 		bool copyDiscreteSignalsToRegBuf();
 
@@ -666,6 +666,8 @@ namespace Builder
 		void displayTimingInfo();
 
 		void writeLMCodeTestFile();
+
+		bool checkSignalsCompatibility(const Signal* srcSignal, QUuid srcSignalUuid, const Signal* destSignal, QUuid destSignalUuid);
 
 		bool writeOcmRsSignalsXml();
 
