@@ -143,6 +143,9 @@ namespace VFrame30
 		bool showValidity() const;
 		void setShowValidity(bool value);
 
+		bool isValidityPin(const QUuid& pin) const;
+		bool isOutputPin(const QUuid& pinGuid) const;
+
 		// Data
 		//
 	private:

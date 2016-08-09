@@ -535,4 +535,61 @@ namespace VFrame30
 			addOutput(1, QLatin1String("validity"));
 		}
 	}
+
+	bool SchemaItemReceiver::isValidityPin(const QUuid& pinGuid) const
+	{
+		assert(pinGuid.isNull() == false);
+
+		if (showValidity() == false)
+		{
+			// There is no validity output
+			//
+			return false;
+		}
+
+		// pin 0 is always output
+		// pin 1 is always validity
+		// its defined in setShowValidity function
+		//
+		const std::list<VFrame30::AfbPin>& outs = outputs();
+
+		if (outs.size() != 2)
+		{
+			assert(outs.size() == 2);
+			return false;
+		}
+
+		if (outs.back().guid() == pinGuid)
+		{
+			return true;
+		}
+		else
+		{
+			// if it's not validity this must be "output"
+			//
+			assert(outs.front().guid() == pinGuid);
+			return false;
+		}
+	}
+
+	bool SchemaItemReceiver::isOutputPin(const QUuid& pinGuid) const
+	{
+		assert(pinGuid.isNull() == false);
+
+		// pin 0 is always output
+		// pin 1 is always validity
+		// its defined in setShowValidity function
+		//
+
+		const std::list<VFrame30::AfbPin>& outs = outputs();
+
+		if (outs.size() < 1 || outs.size() > 2)
+		{
+			assert(outs.size() >= 1 && outs.size() <=2);
+			return false;
+		}
+
+		bool result = outs.front().guid() == pinGuid;
+		return result;
+	}
 }
