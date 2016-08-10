@@ -405,7 +405,7 @@ namespace Hardware
 			DOM = 0x1500,
 			AIFM = 0x1600,
 			OCM = 0x1700,
-			MPS = 0x5100
+			MPS17 = 0x5100
 		};
 		Q_ENUM(FamilyType)
 
