@@ -398,13 +398,14 @@ namespace Hardware
 		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
 		{					// (high byte is module family, low byte is module version)
 			OTHER = 0x0000,
-			LM = 0x0100,
-			AIM = 0x0200,
-			AOM = 0x0300,
-			DIM = 0x0400,
-			DOM = 0x0500,
-			AIFM = 0x0600,
-			OCM = 0x0700
+			LM = 0x1100,
+			AIM = 0x1200,
+			AOM = 0x1300,
+			DIM = 0x1400,
+			DOM = 0x1500,
+			AIFM = 0x1600,
+			OCM = 0x1700,
+			MPS = 0x5100
 		};
 		Q_ENUM(FamilyType)
 
@@ -434,6 +435,9 @@ namespace Hardware
 		int moduleVersion() const;
 		void setModuleVersion(int value);
 
+		QString configurationScript() const;
+		void setConfigurationScript(const QString& value);
+
 		int moduleType() const;
 
 		bool isIOModule() const;
@@ -447,6 +451,8 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::Module;
 
 		uint16_t m_type = 0;	// high byte is family type, low byte is module version
+
+		QString m_configurationScript;
 	};
 
 
