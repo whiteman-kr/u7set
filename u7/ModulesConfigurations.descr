@@ -1779,7 +1779,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 1 = " + ipToString(regIP) + "\r\n");
 	
-	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 1", ipToString(regIP)) == false)
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 1", regIP) == false)
 	{
 		return false;
 	}
@@ -1799,7 +1799,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 2 = " + ipToString(diagIP) + "\r\n");
 	
-	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 2", ipToString(diagIP)) == false)
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 2", diagIP) == false)
 	{
 		return false;
 	}
@@ -1819,7 +1819,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 1 = " + ipToString(regServiceIP) + "\r\n");
 	
-	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 1", ipToString(regServiceIP)) == false) 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 1", regServiceIP) == false) 
 	{
 		return false;
 	}
@@ -1849,7 +1849,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 2 = " + ipToString(diagServiceIP) + "\r\n");
 	
-	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 2", ipToString(diagServiceIP)) == false)
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 2", diagServiceIP) == false)
 	{
 		return false;
 	}
