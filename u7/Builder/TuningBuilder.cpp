@@ -112,6 +112,8 @@ namespace Builder
 
 			Tuning::TuningDataStorage::iterator it = m_tuningDataStorage->find(m->equipmentId());
 
+			std::vector<QVariantList> descriptionData;
+
 			if (it == m_tuningDataStorage->end())
 			{
 				data.fill(0, 100);
@@ -128,9 +130,9 @@ namespace Builder
 				tuningData->getTuningData(&data);
 				uniqueID = tuningData->uniqueID();
 
+				firmware->setDescriptionFields(tuningData->metadataFields());
+				descriptionData = tuningData->metadata();
 			}
-
-			std::vector<QVariantList> descriptionData;
 
 			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{

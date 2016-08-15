@@ -217,7 +217,7 @@ namespace  Tuning
 				signal->setTuningAddr(tuningAddr);
 
 				data.append(QVariant(tuningAddr.offset()));
-				data.append(QVariant(tuningAddr.bit()));
+				data.append(QVariant(15 - tuningAddr.bit()));			// conversion to big endian is reverse bits !!!
 
 				bit++;
 
@@ -235,6 +235,8 @@ namespace  Tuning
 
 			metadata.push_back(data);
 		}
+
+		converToBigEndian();		// !!!
 	}
 
 
@@ -567,7 +569,7 @@ namespace  Tuning
 
 			framesData.init(m_usedFramesCount, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
 			framesData.copySignalsData(tuningSignals, m_metadata);
-			framesData.converToBigEndian();
+
 
 			m_usedFramesCount += framesData.usedFramesCount();
 		}
@@ -597,7 +599,7 @@ namespace  Tuning
 
 	const std::vector<QVariantList>& TuningData::metadata() const
 	{
-		// m_metadata fills in TuningFramesData::copySignalsData()
+		// m_metadata fills inside TuningFramesData::copySignalsData()
 		//
 		return m_metadata;
 	}
