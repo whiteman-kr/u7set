@@ -373,6 +373,9 @@ namespace Builder
         void getBinCode(QByteArray& byteArray);
         void getMifCode(QStringList& mifCode);
 
+		void getAsmMetadataFields(QStringList& metadataFields);
+		void getAsmMetadata(std::vector<QVariantList>& metadata);
+
         bool getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount);
 
         void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }

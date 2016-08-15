@@ -1415,6 +1415,78 @@ namespace Builder
     }
 
 
+	void ApplicationLogicCode::getAsmMetadataFields(QStringList& metadataFields)
+	{
+		metadataFields.clear();
+
+		metadataFields.append("IsCommand");
+		metadataFields.append("Address");
+		metadataFields.append("BinCode");
+		metadataFields.append("MnemoCode");
+		metadataFields.append("Comment");
+	}
+
+	void ApplicationLogicCode::getAsmMetadata(std::vector<QVariantList>& metadata)
+	{
+		metadata.clear();
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			QVariantList data;
+
+			bool isCommand = false;
+			QString address;
+			QString binCode;
+			QString mnemoCode;
+			QString comment;
+
+			if (codeItem->isCommand())
+			{
+				isCommand = true;
+
+				Command* cmd = dynamic_cast<Command*>(codeItem);
+
+				if (cmd == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				address = QString().sprintf("%04X", cmd->address());
+				binCode = QString(cmd->getBinCode().toHex()).toUpper();
+				mnemoCode = cmd->getMnemoCode();
+				comment = cmd->getComment();
+			}
+			else
+			{
+				isCommand = false;
+
+				comment = codeItem->getComment();
+
+				if (comment.isEmpty())
+				{
+					continue;			// skip empty strings
+				}
+			}
+
+			data.append(QVariant(isCommand));
+			data.append(QVariant(address));
+			data.append(QVariant(binCode));
+			data.append(QVariant(mnemoCode));
+			data.append(QVariant(comment));
+
+			metadata.push_back(data);
+		}
+	}
+
+
+
     bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount)
     {
         if (idrPhaseClockCount == nullptr || alpPhaseClockCount == nullptr)

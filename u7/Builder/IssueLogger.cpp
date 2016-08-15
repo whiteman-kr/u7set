@@ -1716,19 +1716,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto connection caption '%1' is not unique.
+	/// Title: Opto connection ID '%1' is not unique.
 	///
 	/// Parameters:
 	///		%1 Connection ID
 	///
 	/// Description:
-	///		Opto connection caption is not unique. Change caption.
+	///		Opto connection ID is not unique. Change connection identifier.
 	///
 	void IssueLogger::errALC5023(QString connection)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5023,
-				  QString(tr("Opto connection caption '%1' is not unique.")).
+				  QString(tr("Opto connection ID '%1' is not unique.")).
 				  arg(connection));
 	}
 
@@ -1987,6 +1987,200 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5034,
 				  tr("Non-signal element is connected to transmitter."));
+	}
+
+
+	/// IssueCode: ALC5035
+	///
+	/// IssueType: Error
+	///
+	/// Title: RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	///
+	/// Parameters:
+	///		%1 opto port rxData size, words
+	///		%2 opto port equipmentID
+	///		%3 opto module equipmentID
+	///		%4 value of OptoPortAppDataSize of the opto module
+	///
+	/// Description:
+	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5035(int rxDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5035,
+				  QString(tr("RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+						  arg(rxDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
+	}
+
+	/// IssueCode: ALC5036
+	///
+	/// IssueType: Error
+	///
+	/// Title: Analog signal '%1' is connected to discrete signal '%3'.
+	///
+	/// Parameters:
+	///		%1 analog signal ID
+	///		%2 discrete signal ID
+	///		%3 analog signal Uuid
+	///		%4 discrete signal Uuid
+	///
+	/// Description:
+	///		The analog signal is connected to discrete signal. Change connections
+	///
+	void IssueLogger::errALC5036(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, destUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5036,
+				  QString(tr("Analog signal '%1' is connected to discrete signal '%2'.")).
+						  arg(srcSignalID).arg(destSignalID));
+	}
+
+
+	/// IssueCode: ALC5037
+	///
+	/// IssueType: Error
+	///
+	/// Title: Discrete signal '%1' is connected to analog signal '%3'.
+	///
+	/// Parameters:
+	///		%1 discrete signal ID
+	///		%2 analog signal ID
+	///		%3 discrete signal Uuid
+	///		%4 analog signal Uuid
+	///
+	/// Description:
+	///		The discrete signal is connected to analog signal. Change connections
+	///
+	void IssueLogger::errALC5037(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, destUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5037,
+				  QString(tr("Discrete signal '%1' is connected to analog signal '%2'.")).
+						  arg(srcSignalID).arg(destSignalID));
+	}
+
+	/// IssueCode: ALC5038
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signals '%1' and '%2' have different data format.
+	///
+	/// Parameters:
+	///		%1 first signal ID
+	///		%2 second signal ID
+	///		%3 first signal Uuid
+	///		%4 second signal Uuid
+	///
+	/// Description:
+	///		Signals with different data format are connected.
+	///
+	void IssueLogger::errALC5038(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, destUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5038,
+				  QString(tr("Signals '%1' and '%2' have different data format.")).
+						  arg(srcSignalID).arg(destSignalID));
+	}
+
+	/// IssueCode: ALC5039
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signals '%1' and '%2' have different data size.
+	///
+	/// Parameters:
+	///		%1 first signal ID
+	///		%2 second signal ID
+	///		%3 first signal Uuid
+	///		%4 second signal Uuid
+	///
+	/// Description:
+	///		Signals with different data size are connected.
+	///
+	void IssueLogger::errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, destUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5039,
+				  QString(tr("Signals '%1' and '%2' have different data size.")).
+						  arg(srcSignalID).arg(destSignalID));
+	}
+
+	/// IssueCode: ALC5040
+	///
+	/// IssueType: Error
+	///
+	/// Title: Connection with ID '%1' is not found.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		Connection with specified identifier is not found. Check connection ID.
+	///
+	void IssueLogger::errALC5040(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5040,
+				  QString(tr("Connection with ID '%1' is not found.")).arg(connectionID));
+	}
+
+	/// IssueCode: ALC5041
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' exists in LM '%2'. No receivers needed.
+	///
+	/// Parameters:
+	///		%1 application signal ID
+	///		%2 LM's equipmentID
+	///
+	/// Description:
+	///		The signal already exists in specified LM. No receivers is needed. Use iput or output items.
+	///
+	void IssueLogger::errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5041,
+				  QString(tr("Signal '%1' exists in LM '%2'. No receivers needed.")).
+				  arg(appSignalID).arg(lmID));
+	}
+
+	/// IssueCode: ALC5042
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not exists in connection '%2'.
+	///
+	/// Parameters:
+	///		%1 application signal ID
+	///		%2 LM's equipmentID
+	///
+	/// Description:
+	///		The signal is not exists in connection. Use transmitter to send signal via connection.
+	///
+	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5042,
+				  QString(tr("Signal '%1' is not exists in connection '%2'.")).
+				  arg(appSignalID).arg(connectionID));
 	}
 
 
