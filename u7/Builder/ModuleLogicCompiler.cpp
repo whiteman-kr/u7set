@@ -2092,17 +2092,6 @@ namespace Builder
 			return false;
 		}
 
-		Address16 srcAddress;
-
-		if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
-															 receiver.appSignalId(),
-															 m_lm->equipmentId(),
-															 receiver.guid(),
-															 srcAddress) == false)
-		{
-			return false;
-		}
-
 		Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
 
 		if (destSignal == nullptr)
@@ -2115,8 +2104,19 @@ namespace Builder
 
 		Command cmd;
 
-		if (receiver.isOutputPin(pinGuid))
+		if (receiver.isOutputPin(pinGuid) == true)
 		{
+			Address16 srcAddress;
+
+			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
+																 receiver.appSignalId(),
+																 m_lm->equipmentId(),
+																 receiver.guid(),
+																 srcAddress) == false)
+			{
+				return false;
+			}
+
 			Signal* srcSignal = m_signals->getSignal(receiver.appSignalId());
 
 			if (srcSignal == nullptr)
@@ -2132,25 +2132,38 @@ namespace Builder
 				return false;
 			}
 
+			QString str;
+
+			str = QString(tr("%1 >> %2 => %3")).arg(receiver.connectionId()).arg(receiver.appSignalId()).arg(destSignal->appSignalID());
+
 			if (destSignal->isAnalog())
 			{
 				cmd.mov32(destSignal->ramAddr().offset(), srcAddress.offset());
-				return true;
 			}
-
-			if (destSignal->isDiscrete())
+			else
 			{
-				cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
-						   srcAddress.offset(), srcAddress.bit());
-				return true;
+				if (destSignal->isDiscrete())
+				{
+					cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
+							   srcAddress.offset(), srcAddress.bit());
+				}
+				else
+				{
+					assert(false);		// unknown type of signal
+					return false;
+				}
 			}
 
-			assert(false);		// ???
-			return false;
+			cmd.setComment(str);
+			m_code.append(cmd);
+			m_code.newLine();
+
+			return true;
 		}
 
 		if (receiver.isValidityPin(pinGuid))
 		{
+			assert(false);	 // is not implemented now
 			return true;
 		}
 
