@@ -786,7 +786,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -805,20 +805,23 @@ namespace Builder
 
 		bool result = true;
 
-		// FILL REAL DESCRIPTION DATA HERE
-		QStringList descriptionFields;
-		//descriptionFields << "Field1" << "Field2";
+		QStringList metadataFields;
 
-		std::vector<QVariantList> descriptionData;
-		//descriptionData.push_back(QVariantList() << 1 << 2);
-		//descriptionData.push_back(QVariantList() << 3 << 4);
+		appLogicCode.getAsmMetadataFields(metadataFields);
 
-
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFields);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, metadataFields);
 
 		if (multichannelFile != nullptr)
 		{
-			result = multichannelFile->setChannelData(channel, frameSize, frameCount, appLogicBinCode, descriptionData);
+			QByteArray binCode;
+
+			appLogicCode.getBinCode(binCode);
+
+			std::vector<QVariantList> metadata;
+
+			appLogicCode.getAsmMetadata(metadata);
+
+			result = multichannelFile->setChannelData(channel, frameSize, frameCount, binCode, metadata);
 		}
 		else
 		{

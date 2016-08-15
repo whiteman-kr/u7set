@@ -3716,12 +3716,12 @@ namespace Builder
 
 		QString lmCaption = "LM-1";
 
+		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmEduipmentID, lmCaption, lmNumber,
+														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
+
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
-
-		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmEduipmentID, lmCaption, lmNumber,
-														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 
 		result &= setLmAppLANDataUID(binCode);
 
