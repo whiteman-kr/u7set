@@ -194,7 +194,7 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 	const int startDataFrame = 2;
 
 	const int LMNumber_Min = 1;
-	const int LMNumber_Max = 4;
+	const int LMNumber_Max = 12;
 
 	quint16 ssKeyValue = m_ssKey << 6;
 

@@ -134,7 +134,7 @@ private:
 	QStringList m_loginCompleter;
 
 	bool m_freezeBuildPath = false;
-	bool m_useConnections = false;
+	bool m_useConnections = true;
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;
