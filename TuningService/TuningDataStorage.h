@@ -43,7 +43,7 @@ namespace Tuning
 
 		int firstFrameNo() const { return m_firstFrameNo; }
 
-		void copySignalsData(QList<Signal*> signalsList);
+		void copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata);
 
 		int usedFramesCount() const { return m_usedFramesCount; }
 		int framesDataSize() const { return m_usedFramesCount * m_tuningFrameSizeBytes; }
@@ -84,6 +84,9 @@ namespace Tuning
 		QList<Signal*> m_tuningSignals[TYPES_COUNT];
 
 		QHash<QString, Signal*> m_id2SignalMap;
+
+		static QStringList m_metadataFields;
+		std::vector<QVariantList> m_metadata;
 
 		bool m_deleteSignals = false;
 
@@ -136,6 +139,9 @@ namespace Tuning
 
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
+
+		const QStringList& metadataFields();
+		const std::vector<QVariantList>& metadata() const;
 	};
 
 
