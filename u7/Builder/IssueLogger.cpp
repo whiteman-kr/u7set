@@ -2187,7 +2187,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter '%1.%2' must be greater or equal than 0.
+	/// Title: Value of parameter '%1.%2' must be greater or equal to 0.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -2195,7 +2195,7 @@ namespace Builder
 	///		%3 application logic item Uuid
 	///
 	/// Description:
-	///		Value of specified parameter must be greater or equal than 0. Check parameter value.
+	///		Value of specified parameter must be greater or equal to 0. Check parameter value.
 	///
 	void IssueLogger::errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid)
 	{
@@ -2203,7 +2203,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5043,
-				  QString(tr("Value of parameter '%1.%2' must be greater or equal than 0.")).
+				  QString(tr("Value of parameter '%1.%2' must be greater or equal to 0.")).
 				  arg(fbCaption).arg(paramCaption));
 	}
 
@@ -2445,6 +2445,31 @@ namespace Builder
 		LOG_WARNING(IssueType::AlCompiler,
 				  5053,
 				  QString(tr("Automatic sorting of XY points of FB '%1' has been performed.")).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5054
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Values of parameters '%1.%2' and '%1.%3' should not be equal.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Values of specified parameters should not be equal. Check parameters values.
+	///
+	void IssueLogger::errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5054,
+				  QString(tr("Values of parameters '%1.%2' and '%1.%3' should not be equal.")).
+				  arg(fbCaption).arg(param1).arg(param2));
 	}
 
 

@@ -509,8 +509,10 @@ namespace Builder
 					SCALE_FP_SI = 8,
 					SCALE_16UI_FP = 9;
 
-		if (iConf == SCALE_16UI_16UI || iConf == SCALE_16UI_SI ||
-			iConf == SCALE_SI_16UI || iConf == SCALE_SI_SI)
+		if (iConf == SCALE_16UI_16UI ||
+			iConf == SCALE_16UI_SI ||
+			iConf == SCALE_SI_16UI ||
+			iConf == SCALE_SI_SI)
 		{
 			// k1 & k2 are Signed Integer
 			//
@@ -575,6 +577,15 @@ namespace Builder
 
 			default:
 				assert(false);
+			}
+
+			if (x2 - x1 == 0)
+			{
+				// Values of parameters '%1.%2' and '%1.%3' should not be equal.
+				//
+				m_log->errALC5054(caption(), x1Param.caption(), x2Param.caption(), guid());
+
+				return false;
 			}
 
 			const int MULTIPLIER = 32768;
@@ -665,6 +676,15 @@ namespace Builder
 
 			default:
 				assert(false);
+			}
+
+			if (x2 - x1 == 0)
+			{
+				// Values of parameters '%1.%2' and '%1.%3' should not be equal.
+				//
+				m_log->errALC5054(caption(), x1Param.caption(), x2Param.caption(), guid());
+
+				return false;
 			}
 
 			double k1 = (y2 - y1) / (x2 - x1);
