@@ -135,9 +135,9 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Parameter's values calculation for FB %1 (opcode %2) is not implemented")).
-					  arg(afb().caption()).arg(afb().type().toOpCode()));
+			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
+			//
+			m_log->errALC5044(afb().caption(), afb().type().toOpCode(), guid());
 			result = false;
 		}
 
@@ -147,7 +147,31 @@ namespace Builder
 
 	bool AppFb::calculate_LOGIC_paramValues()
 	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
 		m_runTime = 2;
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:		//	and
+		case 2:		//	or
+		case 3:		//	xor
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
 		return true;
 	}
 
@@ -235,9 +259,9 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
-					  arg(i_conf.unsignedIntValue()).arg(caption()));
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 			return false;
 		}
 
@@ -251,15 +275,32 @@ namespace Builder
 
 		QStringList requiredParams;
 
+		requiredParams.append("i_conf");
 		requiredParams.append("i_counter");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
-		CHECK_UNSIGNED_INT(i_counter)
+		CHECK_UNSIGNED_INT(i_conf);
+		CHECK_UNSIGNED_INT(i_counter);
 
-		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:			// tct_on,		tctc_on
+		case 2:			// tct_off,		tctc_off
+		case 3:			// tct_vibr,	tctc_vibr
+		case 4:			// tct_filter,	tctc_filter
+		case 5:			// tct_rsv,		tctc_rsv
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
 
 		return true;
 	}
@@ -278,14 +319,14 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
 		AppFbParamValue& rSettingParam = m_paramValuesArray["i_sp_r"];
 		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
-		CHECK_UNSIGNED_INT(iConfParam)
+		CHECK_UNSIGNED_INT(i_conf)
 
-		int iConf = iConfParam.unsignedIntValue();
+		int iConf = i_conf.unsignedIntValue();
 
 		const int	BCOMP_32SI_EQU = 1,
 					BCOMP_32SI_GREAT = 2,
@@ -312,9 +353,9 @@ namespace Builder
 
 			if (hysteresis < 0)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
-								   arg(caption()).arg(hysteresisParam.caption()));
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
 				return false;
 			}
 
@@ -361,9 +402,10 @@ namespace Builder
 
 			if (hysteresis < 0)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
-								   arg(caption()).arg(hysteresisParam.caption()));
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+
 				return false;
 			}
 
@@ -394,8 +436,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
+		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+		//
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 
 		return false;
 	}
@@ -415,7 +458,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_сonf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
 		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
 		AppFbParamValue& x1Param = m_paramValuesArray["x1"];
@@ -423,9 +466,9 @@ namespace Builder
 		AppFbParamValue& y1Param = m_paramValuesArray["y1"];
 		AppFbParamValue& y2Param = m_paramValuesArray["y2"];
 
-		CHECK_UNSIGNED_INT(iConfParam)
+		CHECK_UNSIGNED_INT(i_сonf)
 
-		int iConf = iConfParam.unsignedIntValue();
+		int iConf = i_сonf.unsignedIntValue();
 
 		m_runTime = 0;
 
@@ -450,8 +493,9 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_сonf.unsignedIntValue(), i_сonf.caption(), caption(), guid());
 			return false;
 		}
 
@@ -631,8 +675,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).arg(iConf).arg(caption()));
+		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+		//
+		m_log->errALC5051(i_сonf.unsignedIntValue(), i_сonf.caption(), caption(), guid());
 
 		return false;
 	}
@@ -738,9 +783,9 @@ namespace Builder
 
 			if (autoSortPerformed == true)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Automatic sorting of XY points of FB '%1' has been performed")).
-									 arg(caption()));
+				// Automatic sorting of XY points of FB '%1' has been performed.
+				//
+				m_log->wrnALC5053(caption(), guid());
 			}
 
 			// get FB's parameters
@@ -850,9 +895,9 @@ namespace Builder
 
 			if (autoSortPerformed == true)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Automatic sorting of XY points of FB '%1' has been performed")).
-									 arg(caption()));
+				// Automatic sorting of XY points of FB '%1' has been performed.
+				//
+				m_log->wrnALC5053(caption(), guid());
 			}
 
 			// get FB's parameters
@@ -907,11 +952,10 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
-						   arg(i_conf.unsignedIntValue()).
-						   arg(i_conf.opName()).
-						   arg(caption()));
+		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+		//
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+
 		return false;
 	}
 
@@ -925,15 +969,15 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& iDel = m_paramValuesArray["i_del"];
-		AppFbParamValue& iConf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT16(iDel)
-		CHECK_UNSIGNED_INT(iConf)
+		CHECK_UNSIGNED_INT16(i_del)
+		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 0;
 
-		switch(iConf.unsignedIntValue())
+		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
 			m_runTime = 3;		// for signed int input
@@ -944,25 +988,12 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value %1 of parameter 'i_conf' of FB %2 is incorrect")).arg(iConf.unsignedIntValue()).arg(caption()));
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 
 			return false;
 		}
-
-		int v = iDel.unsignedIntValue();
-
-		v = (v * 1000) / m_compiler->lmCycleDuration();
-
-		if (v > 65535)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value %1 of parameter 'i_del' of FB %2 out of range (0..65535). The damper time should be less than %3 ms")).
-					  arg(v).arg(caption()).arg((65535 * m_compiler->lmCycleDuration()) / 1000));
-			return false;
-		}
-
-		iDel.setUnsignedIntValue(v);
 
 		return true;
 	}
@@ -976,13 +1007,13 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& iSiFp = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT(iSiFp)
+		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 0;
 
-		switch(iSiFp.unsignedIntValue())
+		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
 			m_runTime = 9;		// for signed int input
@@ -993,7 +1024,10 @@ namespace Builder
 			break;
 
 		default:
-			assert(false);
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
 		}
 
 		return true;
@@ -1008,13 +1042,13 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& iConf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT(iConf)
+		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 0;
 
-		switch(iConf.unsignedIntValue())
+		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
 			m_runTime = 17;		// sqrt
@@ -1046,7 +1080,10 @@ namespace Builder
 			break;
 
 		default:
-			assert(false);
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
 		}
 
 		return true;
@@ -1073,11 +1110,11 @@ namespace Builder
 
 		float i_ti_value = i_ti.floatValue();
 
-		if (i_ti_value < m_compiler->lmCycleDuration() / 1000)
+		if (i_ti_value < 0)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value of parameter '%1.%2' must be greate or equal of %3")).
-					  arg(caption()).arg(i_ti.caption()).arg(m_compiler->lmCycleDuration()/ 1000));
+			// Value of parameter '%1.%2' must be greater or equal to 0.
+			//
+			m_log->errALC5043(caption(), i_ti.caption(), guid());
 
 			return false;
 		}
@@ -1087,15 +1124,12 @@ namespace Builder
 
 		if (i_max_value <= i_min_value)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%3.%4'")).
-					  arg(caption()).arg(i_max.caption()).
-					  arg(caption()).arg(i_min.caption()));
+			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+			//
+			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
 
 			return false;
 		}
-
-		i_ti.setFloatValue((i_ti.floatValue() * 1000) / m_compiler->lmCycleDuration());
 
 		m_runTime = 24;
 
@@ -1114,12 +1148,12 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
-		CHECK_UNSIGNED_INT(iConfParam)
+		CHECK_UNSIGNED_INT(i_conf)
 
-		int iConf = iConfParam.unsignedIntValue();
+		int iConf = i_conf.unsignedIntValue();
 
 		const int	CMP_32SI_EQU = 1,
 					CMP_32SI_GREAT = 2,
@@ -1143,9 +1177,10 @@ namespace Builder
 
 			if (hysteresis < 0)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
-								   arg(caption()).arg(hysteresisParam.caption()));
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+
 				return false;
 			}
 
@@ -1165,20 +1200,21 @@ namespace Builder
 
 			if (hysteresis < 0)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Value of parameter '%1.%2' must be greate or equal 0")).
-								   arg(caption()).arg(hysteresisParam.caption()));
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+
 				return false;
 			}
 
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter '%2.%3' is incorrect")).
-						   arg(iConf).arg(caption()).arg(iConfParam.caption()));
+		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+		//
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 
-		return true;
+		return false;
 	}
 
 
@@ -1224,18 +1260,14 @@ namespace Builder
 
 			if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
 			{
-				// swap values
+				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 				//
-				qint32 tmp = i_lim_min.signedIntValue();
+				m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
 
-				i_lim_min.setSignedIntValue(i_lim_max.signedIntValue());
-
-				i_lim_max.setSignedIntValue(tmp);
-
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+				return false;
 			}
-			return true;
+
+			break;
 
 		case 2:								// float limiter
 			CHECK_FLOAT32(i_lim_max);
@@ -1243,30 +1275,24 @@ namespace Builder
 
 			if (i_lim_min.floatValue() > i_lim_max.floatValue())
 			{
-				// swap values
+				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 				//
-				float tmp = i_lim_min.floatValue();
+				m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
 
-				i_lim_min.setFloatValue(i_lim_max.floatValue());
-
-				i_lim_max.setFloatValue(tmp);
-
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
-						  QString(tr("Swap Min and Max vaues of FB %1")).arg(caption()));
+				return false;
 			}
 
-			return true;
+			break;
 
 		default:
-			assert(false);
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+
+			return false;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
-						   arg(i_conf.unsignedIntValue()).
-						   arg(i_conf.opName()).
-						   arg(caption()));
-		return false;
+		return true;
 	}
 
 
@@ -1292,42 +1318,41 @@ namespace Builder
 		case 2:
 			CHECK_SIGNED_INT32(i_data_x);
 
-			if (i_data_x.signedIntValue() >= 0)
+			if (i_data_x.signedIntValue() < 0)
 			{
-				return true;
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x.caption(), guid());
+
+				return false;
 			}
 
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
-							   arg(i_data_x.opName()).
-							   arg(caption()));
-			return false;
+			break;
 
 		case 3:								// float dead zone
 		case 4:
 			CHECK_FLOAT32(i_data_x);
 
-			if (i_data_x.floatValue() >= 0)
+			if (i_data_x.floatValue() < 0)
 			{
-				return true;
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x.caption(), guid());
+
+				return false;
 			}
 
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Parameter '%1' of FB %2 should be greate or equal 0 ")).
-							   arg(i_data_x.opName()).
-							   arg(caption()));
-			return false;
+			break;
 
 		default:
-			assert(false);
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+
+			return false;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Value %1 of parameter '%2' of FB %3 is incorrect")).
-						   arg(i_conf.unsignedIntValue()).
-						   arg(i_conf.opName()).
-						   arg(caption()));
-		return false;
+		return true;
 	}
 
 
@@ -1362,11 +1387,12 @@ namespace Builder
 
 		float i_td_value = i_td.floatValue();
 
-		if (i_td_value < m_compiler->lmCycleDuration() / 1000)
+		if (i_td_value < 0)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value of parameter '%1.%2' must be greate or equal of %3")).
-					  arg(caption()).arg(i_td.caption()).arg(m_compiler->lmCycleDuration()/ 1000));
+			// Value of parameter '%1.%2' must be greater or equal to 0.
+			//
+			m_log->errALC5043(caption(), i_td.caption(), guid());
+
 			return false;
 		}
 
@@ -1375,15 +1401,12 @@ namespace Builder
 
 		if (i_max_value <= i_min_value)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%3.%4'")).
-					  arg(caption()).arg(i_max.caption()).
-					  arg(caption()).arg(i_min.caption()));
+			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+			//
+			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
 
 			return false;
 		}
-
-		i_td.setFloatValue((i_td.floatValue() * 1000) / m_compiler->lmCycleDuration());
 
 		m_runTime = 32;
 
