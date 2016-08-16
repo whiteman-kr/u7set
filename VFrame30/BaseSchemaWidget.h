@@ -40,13 +40,13 @@ namespace VFrame30
 	public:
 		std::shared_ptr<VFrame30::Schema> schema();
 		const std::shared_ptr<VFrame30::Schema> schema() const;
-		void setSchema(std::shared_ptr<VFrame30::Schema> schema);
+		virtual void setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint);
 
 		SchemaView* schemaView();
 		const SchemaView* schemaView() const;
 
 		double zoom() const;
-		void setZoom(double zoom, int horzScrollValue = -1, int vertScrollValue = -1);
+		void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1);
 
 		// Data
 		//
@@ -57,7 +57,7 @@ namespace VFrame30
 
 		// Interface data
 		//
-		QPoint m_mousePos;				// Keeps mouse pos during different actions like scrolling etc
+		QPoint m_mousePos;					// Keeps mouse pos during different actions like scrolling etc
 		int m_horzScrollBarValue = 0;		// Horizintal scroll bar value in mousePressEvent -- midButton
 		int m_vertScrollBarValue = 0;		// Vertical scroll bar value in mousePressEvent -- midButton
 	};

@@ -344,6 +344,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 	void DeviceObject::expandEquipmentId()
 	{
+		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
+		//
+
 		if (parent() != nullptr)
 		{
 			m_equipmentId.replace(QString("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
@@ -1718,6 +1721,9 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 			d = d->parent();
 		}
+
+		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
+		//
 
 		QString parentId = "";
 		for (std::pair<const DeviceObject*, QString>& dp : devices)

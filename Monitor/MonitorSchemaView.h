@@ -4,6 +4,7 @@
 #include "../VFrame30/SchemaView.h"
 
 class SchemaManager;
+//struct SchemaHistoryItem;
 
 class MonitorSchemaView : public VFrame30::SchemaView
 {
@@ -37,6 +38,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
 
 signals:
+	void signal_setSchema(QString schemaId);
 
 public slots:
 
@@ -49,4 +51,6 @@ private:
 
 	QJSEngine m_jsEngine;
 };
+
+
 

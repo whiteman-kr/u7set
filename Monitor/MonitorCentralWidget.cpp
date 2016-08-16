@@ -50,9 +50,8 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
 
-	//connect(schemaWidget, &MonitorSchemaWidget::signal_newTab, this, &MonitorCentralWidget::slot_newSameTab);
-	//connect(schemaWidget, &MonitorSchemaWidget::signal_closeTab, this, &MonitorCentralWidget::slot_closeTab);
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
+	connect(schemaWidget, &MonitorSchemaWidget::signal_historyChanged, this, &MonitorCentralWidget::signal_historyChanged);
 
 	int index = addTab(schemaWidget, tabSchema->caption());
 
@@ -91,6 +90,9 @@ void MonitorCentralWidget::slot_closeCurrentTab()
 	}
 
 	slot_closeTab(curTabWidget);
+
+	curTabWidget->emitHistoryChanged();
+
 	return;
 }
 
@@ -138,13 +140,35 @@ void MonitorCentralWidget::slot_zoom100()
 
 void MonitorCentralWidget::slot_historyBack()
 {
-	qDebug() << "MonitorCentralWidget::slot_historyBack";
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	assert(curTabWidget->canBackHistory() == true);
+
+	curTabWidget->historyBack();
+
 	return;
 }
 
 void MonitorCentralWidget::slot_historyForward()
 {
-	qDebug() << "MonitorCentralWidget::slot_historyForward";
+	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+
+	if (curTabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	assert(curTabWidget->canForwardHistory() == true);
+
+	curTabWidget->historyForward();
+
 	return;
 }
 
@@ -158,9 +182,9 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+	tab->slot_setSchema(schemaId);
 
-	tab->setSchema(schema);
+	tab->emitHistoryChanged();
 
 	return;
 }
@@ -175,7 +199,14 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 		return;
 	}
 
-	QWidget* tabWidget = widget(index);
+	MonitorSchemaWidget* tabWidget = dynamic_cast<MonitorSchemaWidget*>(widget(index));
+
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget);
+		return;
+	}
+
 	removeTab(index);
 	delete tabWidget;
 
@@ -186,6 +217,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 	}
 
 	emit signal_actionCloseTabUpdated(count() > 1);
+
 	return;
 }
 
@@ -204,31 +236,13 @@ void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
 			continue;
 		}
 
-		std::shared_ptr<VFrame30::Schema> newSchema = m_schemaManager->schema(tabPage->schemaId());
-
-		if (newSchema == nullptr)
-		{
-			// Load startSchemaId
-			//
-			newSchema = m_schemaManager->schema(startSchemaId);
-
-			if (newSchema == nullptr)
-			{
-				// and there is no startSchemaId (((
-				// Just create an empty schema
-				//
-				newSchema = std::make_shared<VFrame30::MonitorSchema>();
-				newSchema->setSchemaID("EMPTYSCHEMA");
-				newSchema->setCaption("Empty Schema");
-			}
-		}
-
-		setTabText(i, newSchema->caption());
-		tabPage->setSchema(newSchema);
+		tabPage->slot_setSchema(tabPage->schemaId());
+		tabPage->resetHistory();
 
 		if (i == currentIndex())
 		{
-			emit signal_schemaChanged(newSchema->schemaID());
+			//emit signal_schemaChanged(newSchema->schemaID());
+			emit signal_schemaChanged(tabPage->schema()->schemaID());
 		}
 	}
 
@@ -252,6 +266,11 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 	{
 		setCurrentIndex(tabIndex);
 		emit signal_schemaChanged(schemaId);
+
+		MonitorSchemaWidget* newTab = currentTab();
+		assert(newTab);
+
+		newTab->emitHistoryChanged();
 	}
 
 	return;
@@ -274,6 +293,7 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 	}
 
 	slot_tabCloseRequested(tabIndex);
+
 	return;
 }
 
@@ -295,6 +315,7 @@ void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VF
 	}
 
 	emit signal_schemaChanged(schema->schemaID());
+	tabWidget->emitHistoryChanged();
 
 	return;
 }
@@ -306,6 +327,7 @@ void MonitorCentralWidget::slot_tabPageChanged(int /*index*/)
 	if (tab != nullptr)
 	{
 		emit signal_schemaChanged(tab->schemaId());
+		tab->emitHistoryChanged();
 	}
 
 	return;

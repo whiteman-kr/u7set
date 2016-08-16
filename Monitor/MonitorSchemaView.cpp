@@ -77,17 +77,38 @@ void MonitorSchemaView::runScript(const QString& script, VFrame30::SchemaItem* s
 
 bool MonitorSchemaView::setSchema(QString schemaId)
 {
-	assert(m_schemaManager);
+	// We can't change schema here, because we need to save history, so emit signal and change schema
+	// in MonitorSchemaWidget
+	//
+	emit signal_setSchema(schemaId);
 
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+//	assert(m_schemaManager);
 
-	if (schema == nullptr)
-	{
-		return false;
-	}
+//	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
 
-	SchemaView::setSchema(schema, false);
-	setZoom(100.0, true);
+//	if (schema == nullptr)
+//	{
+//		return false;
+//	}
+
+//	// --
+//	//
+////	if (m_historyIterator != m_history.end())
+////	{
+////		m_history.erase(m_historyIterator, m_history.end());
+////	}
+
+////	SchemaHistoryItem hi;
+////	hi.schemaId = schemaId;
+////	hi.zoom = 100.0;
+
+////	m_history.push_back(hi);
+////	m_historyIterator = m_history.end();
+
+//	// --
+//	//
+//	SchemaView::setSchema(schema, false);
+//	setZoom(100.0, true);
 
 	return true;
 }
@@ -270,3 +291,4 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	event->ignore();
 	return;
 }
+
