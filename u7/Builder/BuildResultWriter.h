@@ -18,8 +18,8 @@ class DbController;
 namespace Builder
 {
 	class IssueLogger;
+	class BuildResult;
 	class BuildResultWriter;
-
 
 	class BuildFile : public QObject
 	{
@@ -39,11 +39,11 @@ namespace Builder
 	protected:
 		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
-		bool open(const QString& fullBuildPath, bool textMode, IssueLogger* log);
+		bool open(const BuildResult& buildResult, bool textMode, IssueLogger* log);
 
-		bool write(const QString& fullBuildPath, const QByteArray& data, IssueLogger* log);
-		bool write(const QString& fullBuildPath, const QString& dataString, IssueLogger* log);
-		bool write(const QString& fullBuildPath, const QStringList& stringList, IssueLogger* log);
+		bool write(const BuildResult& buildResult, const QByteArray& data, IssueLogger* log);
+		bool write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log);
+		bool write(const BuildResult& buildResult, const QStringList& stringList, IssueLogger* log);
 
 		QString fileName() const { return m_fileName; }
 		QString pathFileName() const { return m_info.pathFileName; }
@@ -57,6 +57,7 @@ namespace Builder
 
 		static QString constructPathFileName(const QString& subDir, const QString& fileName);
 
+		friend class BuildResult;
 		friend class BuildResultWriter;
 		friend class ConfigurationXmlFile;
 
@@ -120,18 +121,49 @@ namespace Builder
 	};
 
 
+	class BuildResult : public QObject
+	{
+	private:
+		QString m_directory;
+		QString m_fullPath;
+
+		QFile m_buildXmlFile;
+		QXmlStreamWriter m_xmlWriter;
+
+		IssueLogger* m_log = nullptr;
+
+		bool m_enableMessages = true;
+
+		bool createBuildDirectory();
+		bool clearDirectory(const QString &directory);
+
+		bool createBuildXml(const BuildInfo& buildInfo);
+		bool writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles);
+		bool closeBuildXml();
+
+	public:
+		BuildResult();
+
+		bool create(const QString& buildDir, const QString& fullPath, const BuildInfo& buildInfo, IssueLogger* log);
+		bool finalize(const HashedVector<QString, BuildFile*>& buildFiles);
+
+		bool enableMessages() const { return m_enableMessages; }
+		void setEnableMessages(bool enable) { m_enableMessages = enable; }
+
+		QString fullPath() const { return m_fullPath; }
+	};
+
+
 	class BuildResultWriter : public QObject
 	{
 		Q_OBJECT
 
 	private:
+		static const int BUILD_RESULT_COUNT = 2;
+
 		QString msg;
 
-		QString m_buildDirectory;
-		QString m_buildFullPath;
-
-		QFile m_buildXmlFile;
-		QXmlStreamWriter m_xmlWriter;
+		BuildResult m_buildResults[BUILD_RESULT_COUNT];
 
 		BuildInfo m_buildInfo;
 
@@ -146,19 +178,12 @@ namespace Builder
 
 		QMap<QString, QString> m_buildFileIDMap;
 
-		bool m_runBuild = true;
-
 	private:
 		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
 
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
-		bool createBuildDirectory();
-		bool clearDirectory(QString directory);
-
-		bool createBuildXml();
-		bool writeBuildXmlFilesSection();
-		bool closeBuildXml();
+		bool createBuildResults();
 
 	public:
 		BuildResultWriter(QObject *parent = 0);
@@ -181,14 +206,6 @@ namespace Builder
 		bool writeMultichannelFiles();
 
 		bool writeConfigurationXmlFiles();
-
-/*		QString project() const { return m_buildInfo.project; }
-		QString user() const { return m_buildInfo.user; }
-		int changeset() const { return m_buildInfo.changeset; }
-		int id() const { return m_buildInfo.id; }
-		QString buildType() const { return m_buildInfo.release ? "release" : "debug"; }
-		QString workstation() const { return m_buildInfo.workstation; }
-		QDateTime buildDateTime() const { return m_buildInfo.dateTime; }*/
 
 		BuildInfo buildInfo() const { return m_buildInfo; }
 
