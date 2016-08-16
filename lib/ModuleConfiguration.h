@@ -73,6 +73,8 @@ namespace Hardware
 
 		Q_INVOKABLE void jsSetDescriptionFields(QString fields);
 
+		void setDescriptionFields(const QStringList& fields);
+
 		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
 
         std::vector<quint8> frame(int frameIndex);

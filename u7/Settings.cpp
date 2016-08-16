@@ -143,7 +143,7 @@ void Settings::loadUserScope()
 	}
 
 	m_freezeBuildPath = s.value("m_freezeBuildPath", false).toBool();
-	m_useConnections = s.value("m_useConnections", false).toBool();
+	m_useConnections = s.value("m_useConnections", true).toBool();
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
 	m_infoMode = s.value("m_infoMode").toBool();

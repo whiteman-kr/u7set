@@ -8,14 +8,15 @@ var WorkstationType = 6;
 var SoftwareType = 7;
 var SignalType = 8;
 
-var FamilyOTHER = 0x0000;
-var FamilyLM = 0x0100;
-var FamilyAIM = 0x0200;
-var FamilyAOM = 0x0300;
-var FamilyDIM = 0x0400;
-var FamilyDOM = 0x0500;
-var FamilyAIFM = 0x0600;
-var FamilyOCM = 0x0700;
+var FamilyOTHERID =	0x0000;
+var FamilyLMID = 	0x1100;
+var FamilyAIMID = 	0x1200;
+var FamilyAOMID = 	0x1300;
+var FamilyDIMID = 	0x1400;
+var FamilyDOMID = 	0x1500;
+var FamilyAIFMID = 	0x1600;
+var FamilyOCMID = 	0x1700;
+var FamilyMPS17ID = 0x5100;
 
 var Analog = 0;
 var Discrete = 1;
@@ -24,13 +25,6 @@ var Input = 0;
 var Output = 1;
 var Validity = 2;
 var Diagnostics = 3;
-
-var aimTxId = 0x1200;
-var aomTxId = 0x1300;
-var dimTxId = 0x1400;
-var domTxId = 0x1500;
-var aifmTxId = 0x1600;
-var ocmTxId = 0x1700;
 
 var Mode_05V = 0;
 var Mode_420mA = 1;
@@ -57,7 +51,9 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 12;		// DiagDataSize changed to TxDiagDataSize
 //var configScriptVersion = 13;		// AppDataSize changed to AppLANDataSize
 //var configScriptVersion = 14;		// connectionCaption=>connectionID; strID=>equipmentID
-var configScriptVersion = 15;		// added text description fields for every value
+//var configScriptVersion = 15;		// added text description fields for every value
+//var configScriptVersion = 16;		// added dynamic custom module family
+var configScriptVersion = 17;		// LMNumber limit is 12
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -172,7 +168,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
 			}
 		}
 
-        if (device.propertyValue("ModuleFamily") == FamilyLM)
+        if (device.propertyValue("ModuleFamily") == FamilyLMID)
         {
             log.writeMessage("Generating configuration for LM-1: " + device.propertyValue("EquipmentID"));
 
@@ -214,7 +210,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 			}
 		}
 		
-        if (device.propertyValue("ModuleFamily") == FamilyLM)
+        if (device.propertyValue("ModuleFamily") == FamilyLMID)
         {
             log.writeMessage("Generating statistics for LM-1: " + device.propertyValue("EquipmentID"));
 
@@ -277,8 +273,6 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 }
 
 // Generate configuration for module LM-1
-// module - Hardware::DeviceModule (LM-1)
-// confCollection - Hardware::ModuleConfCollection
 //
 //
 function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -334,7 +328,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
         return false;
     }
 
-    var maxLMNumber = 4;                 // Can be changed!
+    var maxLMNumber = 12;               // Can be changed!
     var configStartFrames = 2;
     var configFrameCount = 19;          // number of frames in each configuration
     var ioModulesMaxCount = 14;
@@ -365,18 +359,26 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     var frameStorageConfig = 1;
     var ptr = 0;
     
-    setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "Marker", 0xca70);     //CFG_Marker
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "Marker", 0xca70) == false)     //CFG_Marker
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Marker = 0xca70" + "\r\n");
-	confFirmware.
     ptr += 2;
     
-    setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "Version", 0x0001);     //CFG_Version
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "Version", 0x0001) == false)     //CFG_Version
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Version = 0x0001" + "\r\n");
     ptr += 2;
     
     
     var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
-    setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "SubsystemKey", ssKey);
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "SubsystemKey", ssKey) == false)
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
     ptr += 2;
     
@@ -395,15 +397,20 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
     
     if (oldLMNumberCount < LMNumber)
     {
-        setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumber", LMNumber);
-
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumber", LMNumber) == false)
+		{
+			return false;
+		}
     }
     ptr += 2;
     
     var configIndexOffset = ptr + (LMNumber - 1) * (2/*offset*/ + 4/*reserved*/);
     var configFrame = configStartFrames + configFrameCount * (LMNumber - 1);
     
-    setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, configIndexOffset, "ConfigStartFrame", configFrame);
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, configIndexOffset, "ConfigStartFrame", configFrame) == false)
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + configIndexOffset + "] configFrame = " + configFrame + "\r\n");
 
     // Service information
@@ -412,13 +419,23 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	
     var frameServiceConfig = configFrame;
     ptr = 0;
-    setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "ServiceVersion", 0x0001);   //CFG_Ch_Vers
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "ServiceVersion", 0x0001) == false)   //CFG_Ch_Vers
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
-    setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "UartID", uartId);   //CFG_Ch_Dtype == UARTID?
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "UartID", uartId) == false)  //CFG_Ch_Dtype == UARTID?
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = "+ uartId + "\r\n");
     ptr += 2;
 	var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
+	if (hashString == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = " + hashString + "\r\n");
     ptr += 8;
     
@@ -445,7 +462,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			log.errCFG3000("EquipmentID", "I/O_module");
 			return false;
 		}
-		var checkProperties = ["ModuleFamily", "Place"];
+		var checkProperties = ["ModuleFamily", "ModuleVersion", "Place", "PresetName", "ConfigurationScript"];
 		for (var cp = 0; cp < checkProperties.length; cp++)
 		{
 			if (ioModule.propertyValue(checkProperties[cp]) == undefined)
@@ -455,11 +472,13 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			}
 		}
 		
-        if (ioModule.propertyValue("ModuleFamily") == FamilyAIM || ioModule.propertyValue("ModuleFamily") == FamilyAIFM || 
-            ioModule.propertyValue("ModuleFamily") == FamilyAOM || ioModule.propertyValue("ModuleFamily") == FamilyOCM ||
-            ioModule.propertyValue("ModuleFamily") == FamilyDIM || ioModule.propertyValue("ModuleFamily") == FamilyDOM)
-        {
+		var ioModuleFamily = ioModule.propertyValue("ModuleFamily");
 		
+        if (ioModuleFamily == FamilyAIMID || ioModuleFamily == FamilyAIFMID || 
+            ioModuleFamily == FamilyAOMID || ioModuleFamily == FamilyOCMID ||
+            ioModuleFamily == FamilyDIMID ||ioModuleFamily == FamilyDOMID ||
+			ioModuleFamily == FamilyMPS17ID)
+        {
 			var place = ioModule.propertyValue("Place");
 		
             if (place < 1 || place > ioModulesMaxCount)
@@ -472,36 +491,54 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			
 			var result = true;
             
-            if (ioModule.propertyValue("ModuleFamily") == FamilyAIM)
+            if (ioModuleFamily == FamilyAIMID)
             {
                 result = generate_aim(confFirmware, ioModule, LMNumber, frame, log, signalSet);
             }
-            if (ioModule.propertyValue("ModuleFamily") == FamilyAIFM)
+            if (ioModuleFamily == FamilyAIFMID)
             {
                 result = generate_aifm(confFirmware, ioModule, LMNumber, frame, log);
             }
-            if (ioModule.propertyValue("ModuleFamily") == FamilyAOM)
+            if (ioModuleFamily == FamilyAOMID)
             {
                 result = generate_aom(confFirmware, ioModule, LMNumber, frame, log, signalSet);
             }
-            if (ioModule.propertyValue("ModuleFamily") == FamilyOCM)
+            if (ioModuleFamily == FamilyOCMID)
             {
                 result = generate_ocm(confFirmware, ioModule, LMNumber, frame, log, opticModuleStorage);
             }
-            if (ioModule.propertyValue("ModuleFamily") == FamilyDIM)
+            if (ioModuleFamily == FamilyDIMID)
             {
                 result = generate_dim(confFirmware, ioModule, LMNumber, frame, log);
             }
-            if (ioModule.propertyValue("ModuleFamily") == FamilyDOM)
+            if (ioModuleFamily == FamilyDOMID)
             {
                 result = generate_dom(confFirmware, ioModule, LMNumber, frame, log);
             }
 			
+			if (ioModuleFamily == FamilyMPS17ID)
+			{
+				var equipmentID = ioModule.propertyValue("EquipmentID");
+					
+				log.writeMessage("Generating configuration for MPS17: " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame);
+				confFirmware.writeLog("Generating configuration for MPS17: " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame + "\r\n");
+
+				var configScript = ioModule.propertyValue("ConfigurationScript");
+				if (configScript != "")
+				{
+					
+					//var funcStr = "(function f(confFirmware, ioModule, LMNumber, frame, log){   log.writeMessage(\"Hello\"); return true; })";
+					var funcStr = "(" + configScript + ")";
+					var funcVar = eval(funcStr);
+					result = funcVar(confFirmware, ioModule, LMNumber, frame, log);
+				}
+			}
+			
 			if (result == false)
 			{
 				return false;
-			}
-			
+			}	
+
 			var diagWordsIoCount = ioModule.propertyValue("TxDiagDataSize");
 			if (diagWordsIoCount == null)
 			{
@@ -594,9 +631,12 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		}
 	}
 	
-	generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
+	if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
 								tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, module.propertyValue("TuningLANDataUID"),
-								0, 0, 0, 0, 0, 0);	//Subnet2 is not used
+								0, 0, 0, 0, 0, 0) == false)	//Subnet2 is not used
+								{
+									return false;
+								}								
 	lanFrame++;
 								
 	// REG / DIAG
@@ -702,9 +742,12 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 		}
 			
 		
-		generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
+		if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
 									appWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], module.propertyValue("AppLANDataUID"),
-									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], module.propertyValue("DiagLANDataUID"));
+									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], module.propertyValue("DiagLANDataUID")) == false)
+									{
+										return false;
+									}								
 		lanFrame++;
 	}
 	
@@ -749,8 +792,6 @@ function truncate_to_int(x)
 }
 
 // Generate configuration for module AIM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
@@ -836,13 +877,25 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
 			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + defaultSpreadTolerance + "\r\n");
             
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultTf", defaultTf);          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultTf", defaultTf) == false)          // InA Filtering time constant
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultHighBound", defaultHighBound);         // InA High bound
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultHighBound", defaultHighBound) == false)         // InA High bound
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultLowBound", defaultLowBound);          // InA Low Bound
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultLowBound", defaultLowBound) == false)          // InA Low Bound
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultSpreadTolerance", defaultSpreadTolerance);      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultSpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
+			{
+				return false;
+			}
             ptr += 2;
         }
         else
@@ -942,13 +995,25 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
 			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + lowValidRangeADC +
 			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + spreadTolerance + "\r\n");
 
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "FilternigTime", filternigTime);          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "FilternigTime", filternigTime) == false)          // InA Filtering time constant
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRangeADC", highValidRangeADC);         // InA High bound
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRangeADC", highValidRangeADC) == false)         // InA High bound
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRangeADC", lowValidRangeADC);          // InA Low Bound
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRangeADC", lowValidRangeADC) == false)          // InA Low Bound
+			{
+				return false;
+			}
             ptr += 2;
-            setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", spreadTolerance);      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
+			{
+				return false;
+			}
             ptr += 2;
         }
     }
@@ -958,6 +1023,10 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
    
     // final crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;
     
@@ -977,9 +1046,12 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
     
     var configFramesQuantity = 5;
     var dataFramesQuantity = 0;
-    var txId = aimTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyAIMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
     
     // assert if we not on the correct place
@@ -993,8 +1065,6 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
 }
 
 // Generate configuration for module AIFM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_aifm(confFirmware, module, LMNumber, frame, log)
@@ -1075,9 +1145,16 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log)
 				
 			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 	
-			setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa); 
+			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
+			{
+				return false;
+			}
+			
 			ptr += 2;
-			setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent); 
+			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
+			{
+				return false;
+			}
 			ptr += 2;
 		}
 	}
@@ -1130,9 +1207,16 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log)
 						
 					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 			
-					setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa); 
+					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
+					{
+						return false;
+					}
+
 					ptr += 2;
-					setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent); 
+					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
+					{
+						return false;
+					}
 					ptr += 2;
 				}
 			}
@@ -1145,6 +1229,10 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log)
 	
     // final crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;
     
@@ -1164,9 +1252,12 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log)
     
     var configFramesQuantity = 5;
     var dataFramesQuantity = 1;
-    var txId = aifmTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyAIFMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
     
     // assert if we not on the correct place
@@ -1181,8 +1272,6 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log)
 }
 
 // Generate configuration for module AOM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
@@ -1267,7 +1356,10 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
             data |= (mode << bit);
         }
         
-        setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr + w * 2, "OutputModeFlags" + w, data);
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr + w * 2, "OutputModeFlags" + w, data) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + (ptr + w * 2) + "] data" + w + " = " + data + "\r\n");
     }
     
@@ -1275,6 +1367,10 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
     
     // crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
@@ -1294,9 +1390,12 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 1;
-    var txId = aomTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyAOMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
 
     // assert if we not on the correct place
@@ -1363,8 +1462,6 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
 }*/
 
 // Generate configuration for module OCM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_ocm(confFirmware, module, LMNumber, frame, log, opticModuleStorage)
@@ -1402,6 +1499,10 @@ function generate_ocm(confFirmware, module, LMNumber, frame, log, opticModuleSto
     
     // crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
@@ -1429,9 +1530,12 @@ function generate_ocm(confFirmware, module, LMNumber, frame, log, opticModuleSto
 	}
 	confFirmware.writeLog("    txWordsCount = " + txWordsCount + "\r\n");
 	
-    var txId = ocmTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyOCMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
 
     // assert if we not on the correct place
@@ -1446,8 +1550,6 @@ function generate_ocm(confFirmware, module, LMNumber, frame, log, opticModuleSto
 }
 
 // Generate configuration for module DIM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_dim(confFirmware, module, LMNumber, frame, log)
@@ -1477,6 +1579,10 @@ function generate_dim(confFirmware, module, LMNumber, frame, log)
     
     // crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
@@ -1496,9 +1602,12 @@ function generate_dim(confFirmware, module, LMNumber, frame, log)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 0;
-    var txId = dimTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyDIMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
 
     // assert if we not on the correct place
@@ -1513,8 +1622,6 @@ function generate_dim(confFirmware, module, LMNumber, frame, log)
 }
 
 // Generate configuration for module DOM
-// module - Hardware::DeviceModule (LM-1)
-// frame - Number of frame to generate
 //
 //
 function generate_dom(confFirmware, module, LMNumber, frame, log)
@@ -1544,6 +1651,10 @@ function generate_dom(confFirmware, module, LMNumber, frame, log)
     
     // crc
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "")
+	{
+		return false;
+	}
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
@@ -1563,9 +1674,12 @@ function generate_dom(confFirmware, module, LMNumber, frame, log)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 1;
-    var txId = domTxId + module.propertyValue("ModuleVersion");
+    var txId = FamilyDOMID + module.propertyValue("ModuleVersion");
     
-    generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	{
+		return false;
+	}
     ptr += 8;
 
     // assert if we not on the correct place
@@ -1589,13 +1703,25 @@ function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offse
 	"; [" + frame + ":" + (ptr + 4) +"] dataFrames = "+ dataFrames +
 	"; [" + frame + ":" + (ptr + 6) +"] txId = "+ txId + "\r\n");
     
-    setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags);        // Flags word
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false)        // Flags word
+	{
+		return false;
+	}
     ptr += 2;
-    setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames); // Configuration words quantity
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames) == false) // Configuration words quantity
+	{
+		return false;
+	}
     ptr += 2;
-    setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames);   // Data words quantity
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames) == false)   // Data words quantity
+	{
+		return false;
+	}
     ptr += 2;
-    setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tx ID", txId);         // Tx ID
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tx ID", txId) == false)         // Tx ID
+	{
+		return false;
+	}
     ptr += 2;
     
     return true;
@@ -1619,7 +1745,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 	if (size != 2)
 	{
 		log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
-		return;
+		return false;
 	}
 
 	var h0 = hashList.jsAt(0);
@@ -1633,95 +1759,140 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 	var m3 = (h0 >> 16) & 0x7fff;
 	
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false)
+	{
+		return false;
+	}
 	ptr += 2;
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC2", m2); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC2", m2) == false)
+	{
+		return false;
+	}
 	ptr += 2;
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC3", m3); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC3", m3) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 	
 	// regIP
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 1 = " + ipToString(regIP) + "\r\n");
 	
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 1", ipToString(regIP)); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 1", regIP) == false)
+	{
+		return false;
+	}
 	ptr += 4;
 
 	// regPort
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 = " + regPort + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1", regPort); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1", regPort) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 	
 	// diagIP
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP 2 = " + ipToString(diagIP) + "\r\n");
 	
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 2", ipToString(diagIP)); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "IP 2", diagIP) == false)
+	{
+		return false;
+	}
 	ptr += 4;
 
 	// diagPort
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 2 = " + diagPort + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2", regPort); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2", regPort) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 		
 	// regServiceIP
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 1 = " + ipToString(regServiceIP) + "\r\n");
 	
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 1", ipToString(regServiceIP)); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 1", regServiceIP) == false) 
+	{
+		return false;
+	}
 	ptr += 4;
 
 	// regServicePort
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service Port 1 = " + regServicePort + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service Port 1", regServicePort); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service Port 1", regServicePort) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 
 	// regWordsCount
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 words count = " + regWordsCount + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1 words count", regWordsCount); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1 words count", regWordsCount) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 
 	// diagServiceIP
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service IP 2 = " + ipToString(diagServiceIP) + "\r\n");
 	
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 2", ipToString(diagServiceIP)); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service IP 2", diagServiceIP) == false)
+	{
+		return false;
+	}
 	ptr += 4;
 
 	// diagServicePort
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Service Port 2 = " + diagServicePort + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service Port 2", diagServicePort); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Service Port 2", diagServicePort) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 
 	// diagWordsCount
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 2 words count = " + diagWordsCount + "\r\n");
 	
-	setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2 words count", diagWordsCount); 
+	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2 words count", diagWordsCount) == false)
+	{
+		return false;
+	}
 	ptr += 2;
 	
 	// appDUID
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 1 DUID = " + regDataID + "\r\n");
 	
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1 DUID", regDataID); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 1 DUID", regDataID) == false)
+	{
+		return false;
+	}
 	ptr += 4;
 	
 	// diagDUID
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port 2 DUID = " + diagDataID + "\r\n");
 
-	setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2 DUID", diagDataID); 
+	if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Port 2 DUID", diagDataID) == false) 
+	{
+		return false;
+	}
 	ptr += 4;
 
 	return true;
@@ -1790,40 +1961,61 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumb
 					
 		var ptr = 0 + p * 2;
 		var value = optoPort.txStartAddress();
-		setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX startAddress for TxRx Block (Opto) " + (p + 1), value); 
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX startAddress for TxRx Block (Opto) " + (p + 1), value) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
 		ptr = 5 * 2 + p * 2;
 		value = optoPort.txDataSizeW();
-		setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX data words quantity for TxRx Block (Opto) " + (p + 1), value); 
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX data words quantity for TxRx Block (Opto) " + (p + 1), value) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 		txWordsCount += value;
 				
 		ptr = 10 * 2 + p * 2;
 		value = optoPort.portID();
-		setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX id for TxRx Block (Opto) " + (p + 1), value); 
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX id for TxRx Block (Opto) " + (p + 1), value) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
 		ptr = 15 * 2 + p * 2;
 		value = optoPort.rxDataSizeW();
-		setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "RX data words quantity for TxRx Block (Opto) " + (p + 1), value); 
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "RX data words quantity for TxRx Block (Opto) " + (p + 1), value) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
 		ptr = 20 * 2 + p * 4;
 		value = optoPort.txDataID();
-		setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), value); 
+		if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), value) == false)
+		{
+			return false;
+		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
 				
 		if (modeOCM == true && optoPort.mode() == Mode_Serial)
 		{
 			ptr = 30 * 2 + p * 2;
 			value = optoPort.portID();	//???
-			setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX ID for RS-232/485 transmitter " + (p + 1), value); 
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX ID for RS-232/485 transmitter " + (p + 1), value) == false)
+			{
+				return false;
+			}
 			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
 					
 			ptr = 35 * 2 + p * 4;
 			value = optoPort.txDataID();	//???
-			setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "RS-232/485 Data UID " + (p + 1), value); 
+			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "RS-232/485 Data UID " + (p + 1), value) == false)
+			{
+				return false;
+			}
 			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
 				
 			//
@@ -1872,7 +2064,10 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumb
 				
 			var allModes = confFirmware.data16(frame, ptr);
 			allModes |= txMode;
-			setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "ModeFlags", allModes);
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "ModeFlags", allModes) == false)
+			{
+				return false;
+			}
 		}
 	} // p
 	

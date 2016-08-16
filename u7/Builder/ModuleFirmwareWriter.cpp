@@ -114,7 +114,10 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 				jDescription.insert("desc" + QString().number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
 			}
 
-			jObject.insert("z_description_channel_" + QString().number(channel).rightJustified(2, '0'), jDescription);
+			if (descriptionItems.empty() == false)
+			{
+				jObject.insert("z_description_channel_" + QString().number(channel).rightJustified(2, '0'), jDescription);
+			}
 		}
 	}
 
@@ -194,7 +197,7 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 	const int startDataFrame = 2;
 
 	const int LMNumber_Min = 1;
-	const int LMNumber_Max = 4;
+	const int LMNumber_Max = 12;
 
 	quint16 ssKeyValue = m_ssKey << 6;
 
@@ -280,25 +283,28 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 
 		frame++;
 
-		// store channel data in frames
-		//
-		int index = 0;
-		for (int i = 0; i < cd.data.size(); i++)
+		if (size != 0)
 		{
-			if (index >= frameSize())
+			// store channel data in frames
+			//
+			int index = 0;
+			for (int i = 0; i < cd.data.size(); i++)
 			{
-				// data is bigger than frame - switch to the next frame
-				//
-				frame++;
-				index = 0;
+				if (index >= frameSize())
+				{
+					// data is bigger than frame - switch to the next frame
+					//
+					frame++;
+					index = 0;
+				}
+
+				m_frames[frame][index++] = cd.data[i];
 			}
 
-			m_frames[frame][index++] = cd.data[i];
+			//switch to the next frame
+			//
+			frame++;
 		}
-
-		//switch to the next frame
-		//
-		frame++;
 	}
 
 
@@ -347,7 +353,7 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 		ptrChannel += sizeof(quint32);
 	}
 
-	ptr += (sizeof(quint16) * 3) * 4;
+	ptr += (sizeof(quint16)  + sizeof(quint32)) * LMNumber_Max;
 
 	return true;
 }

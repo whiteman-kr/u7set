@@ -2178,8 +2178,12 @@ R"DELIM({
 		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
 		moduleVersionProp->setExpert(true);
 
+		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
+		configScriptProp->setExpert(true);
+
 		familyTypeProp->setUpdateFromPreset(true);
 		moduleVersionProp->setUpdateFromPreset(true);
+		configScriptProp->setUpdateFromPreset(true);
 	}
 
 	DeviceModule::~DeviceModule()
@@ -2200,7 +2204,8 @@ R"DELIM({
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_type(static_cast<int>(m_type));
+		moduleMessage->set_moduletype(static_cast<int>(m_type));
+		moduleMessage->set_configurationscript(m_configurationScript.toStdString());
 
 		return true;
 	}
@@ -2227,9 +2232,30 @@ R"DELIM({
 			return false;
 		}
 
-		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
+		const Proto::DeviceModule& modulemessage = message.deviceobject().module();
 
-		m_type =  static_cast<decltype(m_type)>(moduleMessage.type());
+		if (modulemessage.has_moduletype())
+		{
+			m_type =  static_cast<decltype(m_type)>(modulemessage.moduletype());
+		}
+		else
+		{
+			m_type =  static_cast<decltype(m_type)>(modulemessage.typeobsolete());
+
+			if ((m_type & 0xff00) == 0x0100
+				|| (m_type & 0xff00) == 0x0200
+				|| (m_type & 0xff00) == 0x0300
+				|| (m_type & 0xff00) == 0x0400
+				|| (m_type & 0xff00) == 0x0500
+				|| (m_type & 0xff00) == 0x0600
+				|| (m_type & 0xff00) == 0x0700
+				)
+			{
+				m_type |= 0x1000;	// Module family 01..07 changed to 11..17, this is for compatibitity
+			}
+		}
+
+		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
 
 		return true;
 	}
@@ -2268,6 +2294,16 @@ R"DELIM({
 		assert((tmp & 0xFF00) == 0);
 
 		m_type = (m_type & 0xFF00) | tmp;
+	}
+
+	QString DeviceModule::configurationScript() const
+	{
+		return m_configurationScript;
+	}
+
+	void DeviceModule::setConfigurationScript(const QString& value)
+	{
+		m_configurationScript = value;
 	}
 
 	int DeviceModule::moduleType() const
@@ -3198,4 +3234,3 @@ static const QString valueBitCaption("ValueBit");
 	}
 
 }
-

@@ -94,9 +94,9 @@ namespace Builder
 	}
 
 
-	bool BuildFile::open(const QString& fullBuildPath, bool textMode, IssueLogger* log)
+	bool BuildFile::open(const BuildResult& buildResult, bool textMode, IssueLogger* log)
 	{
-		QString fullPathFileName = fullBuildPath + m_info.pathFileName;
+		QString fullPathFileName = buildResult.fullPath() + m_info.pathFileName;
 
 		QFileInfo fi(fullPathFileName);
 
@@ -129,7 +129,10 @@ namespace Builder
 			return false;
 		}
 
-		LOG_MESSAGE(log, QString(tr("File was created: %1")).arg(m_info.pathFileName));
+		if (buildResult.enableMessages())
+		{
+			LOG_MESSAGE(log, QString(tr("File was created: %1")).arg(m_info.pathFileName));
+		}
 
 		return true;
 	}
@@ -151,9 +154,9 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QByteArray& data, IssueLogger* log)
+	bool BuildFile::write(const BuildResult& buildResult, const QByteArray& data, IssueLogger* log)
 	{
-		if (open(fullBuildPath, false, log) == false)
+		if (open(buildResult, false, log) == false)
 		{
 			return false;
 		}
@@ -178,9 +181,9 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QString& dataString, IssueLogger* log)
+	bool BuildFile::write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log)
 	{
-		if (open(fullBuildPath, true, log) == false)
+		if (open(buildResult, true, log) == false)
 		{
 			return false;
 		}
@@ -199,9 +202,9 @@ namespace Builder
 	}
 
 
-	bool BuildFile::write(const QString& fullBuildPath, const QStringList& stringList, IssueLogger* log)
+	bool BuildFile::write(const BuildResult& buildResult, const QStringList& stringList, IssueLogger* log)
 	{
-		if (open(fullBuildPath, true, log) == false)
+		if (open(buildResult, true, log) == false)
 		{
 			return false;
 		}
@@ -385,6 +388,153 @@ namespace Builder
 
 	// --------------------------------------------------------------------------------------
 	//
+	//	BuildResult class implementation
+	//
+	// --------------------------------------------------------------------------------------
+
+	BuildResult::BuildResult()
+	{
+
+	}
+
+
+	bool BuildResult::create(const QString& buildDir, const QString& fullPath, const BuildInfo& buildInfo, IssueLogger* log)
+	{
+		m_directory = buildDir;
+		m_fullPath = fullPath;
+		m_log = log;
+
+		bool result = true;
+
+		result &= createBuildDirectory();
+
+		result &= createBuildXml(buildInfo);
+
+		return result;
+	}
+
+
+	bool BuildResult::finalize(const HashedVector<QString, BuildFile*>& buildFiles)
+	{
+		bool result = true;
+
+		result &= writeBuildXmlFilesSection(buildFiles);
+		result &= closeBuildXml();
+
+		return result;
+	}
+
+
+	bool BuildResult::createBuildDirectory()
+	{
+		if (QDir().mkpath(m_fullPath) == false)
+		{
+			m_log->errCMN0011(m_fullPath);
+			return false;
+		}
+
+		clearDirectory(m_fullPath);
+
+		LOG_MESSAGE(m_log, QString(tr("Build directory was created: %1")).arg(m_fullPath));
+
+		return true;
+	}
+
+
+	bool BuildResult::clearDirectory(const QString &directory)
+	{
+		bool result = true;
+		QDir dir(directory);
+
+		if (dir.exists(directory))
+		{
+			QFileInfoList dirContent = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
+			foreach(QFileInfo entry, dirContent)
+			{
+				if (entry.isDir())
+				{
+					result = clearDirectory(entry.absoluteFilePath());
+					result = dir.rmdir(entry.absoluteFilePath());
+				}
+				else
+				{
+					result = QFile::remove(entry.absoluteFilePath());
+				}
+
+				if (!result)
+				{
+						return result;
+				}
+			}
+		}
+		return result;
+	}
+
+
+	bool BuildResult::createBuildXml(const BuildInfo& buildInfo)
+	{
+		m_buildXmlFile.setFileName(m_fullPath + "/build.xml");
+
+		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
+		{
+			return false;
+		}
+
+		m_xmlWriter.setDevice(&m_buildXmlFile);
+
+		m_xmlWriter.setAutoFormatting(true);
+
+		m_xmlWriter.writeStartDocument();
+
+		m_xmlWriter.writeStartElement("Build");
+
+		buildInfo.writeToXml(m_xmlWriter);
+
+		return true;
+	}
+
+
+	bool BuildResult::writeBuildXmlFilesSection(const HashedVector<QString, BuildFile *>& buildFiles)
+	{
+		m_xmlWriter.writeStartElement("Files");
+		m_xmlWriter.writeAttribute("Count", QString("%1").arg(buildFiles.size()));
+
+		for(BuildFile* buildFile : buildFiles)
+		{
+			if (buildFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
+		}
+
+		m_xmlWriter.writeEndElement();			// </Files>
+
+		return true;
+	}
+
+
+	bool BuildResult::closeBuildXml()
+	{
+		m_xmlWriter.writeStartElement("BuildResult");
+
+		m_xmlWriter.writeAttribute("Errors", QString::number(m_log->errorCount()));
+		m_xmlWriter.writeAttribute("Warnings", QString::number(m_log->warningCount()));
+
+		m_xmlWriter.writeEndElement();			// </BuildResult>
+
+		m_xmlWriter.writeEndElement();			// </Build>
+		m_xmlWriter.writeEndDocument();
+
+		m_buildXmlFile.close();
+
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------
+	//
 	//	BuildResultWriter class implementation
 	//
 	// --------------------------------------------------------------------------------------
@@ -425,8 +575,7 @@ namespace Builder
 				LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
 			}
 
-			m_runBuild = false;
-			return m_runBuild;
+			return false;
 		}
 
 		m_buildInfo.project = m_dbController->currentProject().projectName();
@@ -437,8 +586,7 @@ namespace Builder
 		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
 			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
-			m_runBuild = false;
-			return m_runBuild;
+			return false;
 		}
 
 		msg = QString(tr("%1 building #%2 was started. User - %3, host - %4, changeset - %5."))
@@ -451,8 +599,7 @@ namespace Builder
 		if (m_buildInfo.release == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
-			m_runBuild = false;
-			return m_runBuild;
+			return false;
 		}
 		else
 		{
@@ -461,12 +608,7 @@ namespace Builder
 			m_log->wrnPDB2000();
 		}
 
-		if (createBuildDirectory() == false)
-		{
-			return false;
-		}
-
-		if (createBuildXml() == false)
+		if (createBuildResults() == false)
 		{
 			return false;
 		}
@@ -502,19 +644,27 @@ namespace Builder
 
 		QString buildLogStr = m_log->finishStrLogging();
 
-		addFile("", "build.log", buildLogStr);
+		BuildFile* buildLogFile = addFile("", "build.log", buildLogStr);
 
-		writeBuildXmlFilesSection();
+		if (buildLogFile == nullptr)
+		{
+			return false;
+		}
 
-		closeBuildXml();
+		bool result = true;
 
-		m_dbController->buildFinish(m_buildInfo.id, errors, warnings, buildLogStr, nullptr);
+		for(BuildResult& buildResult : m_buildResults)
+		{
+			result &= buildResult.finalize(m_buildFiles);
+		}
 
-		return true;
+		result &= m_dbController->buildFinish(m_buildInfo.id, errors, warnings, buildLogStr, nullptr);
+
+		return result;
 	}
 
 
-	bool BuildResultWriter::createBuildDirectory()
+	bool BuildResultWriter::createBuildResults()
 	{
 		QString appDataPath = QDir::fromNativeSeparators(theSettings.buildOutputPath());
 
@@ -523,66 +673,32 @@ namespace Builder
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
 
-		if (theSettings.freezeBuildPath() == false)
-		{
-			QString buildNoStr;
+		bool result = true;
 
-			buildNoStr.sprintf("%06d", m_buildInfo.id);
+		QString buildNoStr;
 
-			m_buildDirectory = QString("%1-%2-%3")
-					.arg(m_dbController->currentProject().projectName())
-					.arg(m_buildInfo.typeStr()).arg(buildNoStr);
-		}
-		else
-		{
-			m_buildDirectory = QString("%1-%2")
+		buildNoStr.sprintf("%06d", m_buildInfo.id);
+
+		QString buildDir = QString("%1-%2/build-%3")
+				.arg(m_dbController->currentProject().projectName())
+				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
+
+		QString buildFullPath = appDataPath + "/" + buildDir;
+
+		result &= m_buildResults[0].create(buildDir, buildFullPath, m_buildInfo, m_log);
+
+		// create build in fixed path
+		//
+		buildDir = QString("%1-%2/build")
 					.arg(m_dbController->currentProject().projectName())
 					.arg(m_buildInfo.typeStr());
-		}
 
-		m_buildFullPath = appDataPath + "/" + m_buildDirectory;
+		buildFullPath = appDataPath + "/" + buildDir;
 
-		if (QDir().mkpath(m_buildFullPath) == false)
-		{
-			m_log->errCMN0011(m_buildFullPath);
-			m_runBuild = false;
-			return false;
-		}
+		result &= m_buildResults[1].create(buildDir, buildFullPath, m_buildInfo, m_log);
 
-		clearDirectory(m_buildFullPath);
+		m_buildResults[1].setEnableMessages(false);
 
-		LOG_MESSAGE(m_log, QString(tr("Build directory was created: %1")).arg(m_buildFullPath));
-
-		return true;
-	}
-
-
-	bool BuildResultWriter::clearDirectory(QString directory)
-	{
-		bool result = true;
-		QDir dir(directory);
-
-		if (dir.exists(directory))
-		{
-			QFileInfoList dirContent = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
-			foreach(QFileInfo entry, dirContent)
-			{
-				if (entry.isDir())
-				{
-					result = clearDirectory(entry.absoluteFilePath());
-					result = dir.rmdir(entry.absoluteFilePath());
-				}
-				else
-				{
-					result = QFile::remove(entry.absoluteFilePath());
-				}
-
-				if (!result)
-				{
-						return result;
-				}
-			}
-		}
 		return result;
 	}
 
@@ -656,9 +772,12 @@ namespace Builder
 			return nullptr;
 		}
 
-		if (buildFile->write(m_buildFullPath, data, m_log) == false)
+		for(BuildResult& buildResult : m_buildResults)
 		{
-			return nullptr;
+			if (buildFile->write(buildResult, data, m_log) == false)
+			{
+				return nullptr;
+			}
 		}
 
 		return buildFile;
@@ -674,9 +793,12 @@ namespace Builder
 			return nullptr;
 		}
 
-		if (buildFile->write(m_buildFullPath, dataString, m_log) == false)
+		for(BuildResult& buildResult : m_buildResults)
 		{
-			return nullptr;
+			if (buildFile->write(buildResult, dataString, m_log) == false)
+			{
+				return nullptr;
+			}
 		}
 
 		return buildFile;
@@ -692,76 +814,15 @@ namespace Builder
 			return nullptr;
 		}
 
-		if (buildFile->write(m_buildFullPath, stringList, m_log) == false)
+		for(BuildResult& buildResult : m_buildResults)
 		{
-			return nullptr;
+			if (buildFile->write(buildResult, stringList, m_log) == false)
+			{
+				return nullptr;
+			}
 		}
 
 		return buildFile;
-	}
-
-
-	bool BuildResultWriter::createBuildXml()
-	{
-		m_buildXmlFile.setFileName(m_buildFullPath + "/build.xml");
-
-		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
-		{
-			m_runBuild = false;
-			return false;
-		}
-
-		m_xmlWriter.setDevice(&m_buildXmlFile);
-
-		m_xmlWriter.setAutoFormatting(true);
-
-		m_xmlWriter.writeStartDocument();
-
-		m_xmlWriter.writeStartElement("Build");
-
-		m_buildInfo.writeToXml(m_xmlWriter);
-
-		return true;
-	}
-
-
-	bool BuildResultWriter::writeBuildXmlFilesSection()
-	{
-		m_xmlWriter.writeStartElement("Files");
-		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_buildFiles.size()));
-
-		for(BuildFile* buildFile : m_buildFiles)
-		{
-			if (buildFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
-		}
-
-		m_xmlWriter.writeEndElement();			// </Files>
-
-		return true;
-	}
-
-
-	bool BuildResultWriter::closeBuildXml()
-	{
-
-		m_xmlWriter.writeStartElement("BuildResult");
-
-		m_xmlWriter.writeAttribute("Errors", QString::number(m_log->errorCount()));
-		m_xmlWriter.writeAttribute("Warnings", QString::number(m_log->warningCount()));
-
-		m_xmlWriter.writeEndElement();			// </BuildResult>
-
-		m_xmlWriter.writeEndElement();			// </Build>
-		m_xmlWriter.writeEndDocument();
-
-		m_buildXmlFile.close();
-		return true;
 	}
 
 

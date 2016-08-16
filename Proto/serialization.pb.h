@@ -5358,24 +5358,49 @@ class DeviceModule : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 type = 1 [default = 0];
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 type() const;
-  inline void set_type(::google::protobuf::int32 value);
+  // optional int32 typeObsolete = 1 [default = 0];
+  inline bool has_typeobsolete() const;
+  inline void clear_typeobsolete();
+  static const int kTypeObsoleteFieldNumber = 1;
+  inline ::google::protobuf::int32 typeobsolete() const;
+  inline void set_typeobsolete(::google::protobuf::int32 value);
+
+  // optional string configurationScript = 2;
+  inline bool has_configurationscript() const;
+  inline void clear_configurationscript();
+  static const int kConfigurationScriptFieldNumber = 2;
+  inline const ::std::string& configurationscript() const;
+  inline void set_configurationscript(const ::std::string& value);
+  inline void set_configurationscript(const char* value);
+  inline void set_configurationscript(const char* value, size_t size);
+  inline ::std::string* mutable_configurationscript();
+  inline ::std::string* release_configurationscript();
+  inline void set_allocated_configurationscript(::std::string* configurationscript);
+
+  // optional int32 moduleType = 3;
+  inline bool has_moduletype() const;
+  inline void clear_moduletype();
+  static const int kModuleTypeFieldNumber = 3;
+  inline ::google::protobuf::int32 moduletype() const;
+  inline void set_moduletype(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
-  inline void set_has_type();
-  inline void clear_has_type();
+  inline void set_has_typeobsolete();
+  inline void clear_has_typeobsolete();
+  inline void set_has_configurationscript();
+  inline void clear_has_configurationscript();
+  inline void set_has_moduletype();
+  inline void clear_has_moduletype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 type_;
+  ::std::string* configurationscript_;
+  ::google::protobuf::int32 typeobsolete_;
+  ::google::protobuf::int32 moduletype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -12762,26 +12787,118 @@ inline void DeviceChassis::set_type(::google::protobuf::int32 value) {
 
 // DeviceModule
 
-// optional int32 type = 1 [default = 0];
-inline bool DeviceModule::has_type() const {
+// optional int32 typeObsolete = 1 [default = 0];
+inline bool DeviceModule::has_typeobsolete() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DeviceModule::set_has_type() {
+inline void DeviceModule::set_has_typeobsolete() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DeviceModule::clear_has_type() {
+inline void DeviceModule::clear_has_typeobsolete() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void DeviceModule::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void DeviceModule::clear_typeobsolete() {
+  typeobsolete_ = 0;
+  clear_has_typeobsolete();
 }
-inline ::google::protobuf::int32 DeviceModule::type() const {
-  return type_;
+inline ::google::protobuf::int32 DeviceModule::typeobsolete() const {
+  return typeobsolete_;
 }
-inline void DeviceModule::set_type(::google::protobuf::int32 value) {
-  set_has_type();
-  type_ = value;
+inline void DeviceModule::set_typeobsolete(::google::protobuf::int32 value) {
+  set_has_typeobsolete();
+  typeobsolete_ = value;
+}
+
+// optional string configurationScript = 2;
+inline bool DeviceModule::has_configurationscript() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DeviceModule::set_has_configurationscript() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DeviceModule::clear_has_configurationscript() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DeviceModule::clear_configurationscript() {
+  if (configurationscript_ != &::google::protobuf::internal::kEmptyString) {
+    configurationscript_->clear();
+  }
+  clear_has_configurationscript();
+}
+inline const ::std::string& DeviceModule::configurationscript() const {
+  return *configurationscript_;
+}
+inline void DeviceModule::set_configurationscript(const ::std::string& value) {
+  set_has_configurationscript();
+  if (configurationscript_ == &::google::protobuf::internal::kEmptyString) {
+    configurationscript_ = new ::std::string;
+  }
+  configurationscript_->assign(value);
+}
+inline void DeviceModule::set_configurationscript(const char* value) {
+  set_has_configurationscript();
+  if (configurationscript_ == &::google::protobuf::internal::kEmptyString) {
+    configurationscript_ = new ::std::string;
+  }
+  configurationscript_->assign(value);
+}
+inline void DeviceModule::set_configurationscript(const char* value, size_t size) {
+  set_has_configurationscript();
+  if (configurationscript_ == &::google::protobuf::internal::kEmptyString) {
+    configurationscript_ = new ::std::string;
+  }
+  configurationscript_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DeviceModule::mutable_configurationscript() {
+  set_has_configurationscript();
+  if (configurationscript_ == &::google::protobuf::internal::kEmptyString) {
+    configurationscript_ = new ::std::string;
+  }
+  return configurationscript_;
+}
+inline ::std::string* DeviceModule::release_configurationscript() {
+  clear_has_configurationscript();
+  if (configurationscript_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = configurationscript_;
+    configurationscript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DeviceModule::set_allocated_configurationscript(::std::string* configurationscript) {
+  if (configurationscript_ != &::google::protobuf::internal::kEmptyString) {
+    delete configurationscript_;
+  }
+  if (configurationscript) {
+    set_has_configurationscript();
+    configurationscript_ = configurationscript;
+  } else {
+    clear_has_configurationscript();
+    configurationscript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 moduleType = 3;
+inline bool DeviceModule::has_moduletype() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DeviceModule::set_has_moduletype() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DeviceModule::clear_has_moduletype() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DeviceModule::clear_moduletype() {
+  moduletype_ = 0;
+  clear_has_moduletype();
+}
+inline ::google::protobuf::int32 DeviceModule::moduletype() const {
+  return moduletype_;
+}
+inline void DeviceModule::set_moduletype(::google::protobuf::int32 value) {
+  set_has_moduletype();
+  moduletype_ = value;
 }
 
 // -------------------------------------------------------------------

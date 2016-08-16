@@ -534,6 +534,11 @@ namespace Hardware
 		m_descriptionFields = fields.split(';');
 	}
 
+	void ModuleFirmware::setDescriptionFields(const QStringList& fields)
+	{
+		m_descriptionFields = fields;
+	}
+
 	void ModuleFirmware::jsAddDescription(int channel, QString descriptionCSV)
 	{
 		QStringList l = descriptionCSV.split(';');

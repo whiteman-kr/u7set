@@ -398,7 +398,7 @@ namespace VFrame30
 		const Proto::SchemaItemReceiver& receiver = message.schemaitem().receiveritem();
 
 		m_showValidity = receiver.showvalidity();
-		m_appSignalId.fromStdString(receiver.appsignalid());
+		m_appSignalId = QString::fromStdString(receiver.appsignalid());
 
 		return true;
 	}

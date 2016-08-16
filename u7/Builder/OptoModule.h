@@ -51,7 +51,7 @@ namespace Hardware
 
 		QString m_connectionID;
 
-		QHash<QString, int> m_txSignalsIDs;
+		QHash<QString, Address16> m_txSignalsIDs;		// appSignalID => txAddress
 
 		QVector<TxSignal> m_txAnalogSignals;
 		QVector<TxSignal> m_txDiscreteSignals;
@@ -128,8 +128,6 @@ namespace Hardware
 
 		QString optoModuleID() const { return m_optoModuleID; }
 
-//		void recalulateTxSignalsAddresses();
-
 		QVector<TxSignal> getTxSignals();
 
 		void addTxSignal(Signal* txSignal);
@@ -159,6 +157,10 @@ namespace Hardware
 		void setManualRxSizeW(int manualRxSizeW) { m_manualRxSizeW = manualRxSizeW; }
 
 		bool isTxSignalIDExists(const QString& appSignalID);
+
+		bool isConnected() const;
+
+		Address16 getTxSignalAddress(const QString& appSignalID) const;
 	};
 
 
@@ -282,6 +284,7 @@ namespace Hardware
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsTxStartAddresses();
+		bool calculatePortsRxStartAddresses();
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);
@@ -292,5 +295,7 @@ namespace Hardware
 						 bool* signalAllreadyInList);
 
 		QVector<OptoModule*> getOptoModulesSorted();
+
+		bool getSignalRxAddress(QString connectionID, QString appSignalID, QString receiverLM, QUuid receiverUuid, Address16& addr);
 	};
 }

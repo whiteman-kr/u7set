@@ -144,7 +144,7 @@ namespace Builder
 		void errALC5020(QString port, QString connection);							// LM's port '%1' can't work in RS232/485 mode (connection '%2').
 		void errALC5021(QString port, QString connection);							// Undefined opto port '%1' in the connection '%2'.
 		void errALC5022(QString connection);									// Opto ports of the same chassis is linked via connection '%1'.
-		void errALC5023(QString connection);									// Opto connection caption '%1' is not unique.
+		void errALC5023(QString connection);									// Opto connection ID '%1' is not unique.
 		void errALC5024(QString connection, QUuid transmitterUuid);				// Transmitter is linked to unknown opto connection '%1'.
 		void errALC5025(QString connection, QUuid receiverUuid);				// Receiver is linked to unknown opto connection '%1'.
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
@@ -156,6 +156,14 @@ namespace Builder
 		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 		void errALC5033(QString appSignalId, QString chassisEquipmentID);		// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
 		void errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
+		void errALC5035(int rxDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+		void errALC5036(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Analog signal '%1' is connected to discrete signal '%2'.
+		void errALC5037(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Discrete signal '%1' is connected to analog signal '%2'.
+		void errALC5038(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data format.
+		void errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data size.
+		void errALC5040(QString connectionID);												// Connection with ID '%1' is not found.
+		void errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid);				// Signal '%1' exists in LM '%2'. No receivers needed.
+		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid);		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
 
 		// EQP			Equipment issues						6000-6999
 		//
