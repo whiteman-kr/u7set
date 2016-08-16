@@ -5771,9 +5771,9 @@ namespace Builder
 		{
 			if (m_paramValuesArray.contains(opName) == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
-						  arg(opName).arg(caption()).arg(typeCaption()));
+				// Required parameter '%1' of AFB '%2' is missing.
+				//
+				m_log->errALC5045(opName, caption(), guid());
 				result = false;
 			}
 		}
@@ -5789,9 +5789,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt")).
-				  arg(paramValue.opName()).arg(afb().caption()));
+		// Parameter '%1' of AFB '%2' must have type Unsigned Int.
+		//
+		m_log->errALC5046(paramValue.opName(), caption(), guid());
 
 		return false;
 	}
@@ -5804,9 +5804,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt16")).
-				  arg(paramValue.opName()).arg(afb().caption()));
+		// Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.
+		//
+		m_log->errALC5047(paramValue.opName(), caption(), guid());
 
 		return false;
 	}
@@ -5819,9 +5819,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Parameter '%1' of FB '%2' must have type UnsignedInt32")).
-				  arg(paramValue.opName()).arg(afb().caption()));
+		// Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.
+		//
+		m_log->errALC5048(paramValue.opName(), caption(), guid());
 
 		return false;
 	}
@@ -5834,9 +5834,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Parameter '%1' of FB '%2' must have type SignedInt32")).
-				  arg(paramValue.opName()).arg(afb().caption()));
+		// Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
+		//
+		m_log->errALC5049(paramValue.opName(), caption(), guid());
 
 		return false;
 	}
@@ -5849,9 +5849,9 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Parameter '%1' of FB '%2' must have type Float32")).
-				  arg(paramValue.opName()).arg(afb().caption()));
+		// Parameter '%1' of AFB '%2' must have type 32-bit Float.
+		//
+		m_log->errALC5050(paramValue.opName(), caption(), guid());
 
 		return false;
 	}

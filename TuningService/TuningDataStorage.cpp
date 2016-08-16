@@ -90,7 +90,7 @@ namespace  Tuning
 	}
 
 
-	void TuningFramesData::copySignalsData(QList<Signal*> signalsList)
+	void TuningFramesData::copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata)
 	{
 		if (signalsList.count() != m_signalCount )
 		{
@@ -121,31 +121,57 @@ namespace  Tuning
 				continue;
 			}
 
-			if (signal->isAnalog())
+			QVariantList data;
+
+			data.append(QVariant(signal->appSignalID()));
+			data.append(QVariant(signal->customAppSignalID()));
+			data.append(QVariant(signal->caption()));
+
+			if (signal->isAnalog() == true)
 			{
 				if (signal->dataFormat() == E::DataFormat::Float)
 				{
+					data.append(QVariant(QString("AnalogFloat")));
+
 					float* defaultValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes);
 					*defaultValuePtr = static_cast<float>(signal->tuningDefaultValue());
+
+					data.append(QVariant(*defaultValuePtr));
 
 					float* lowBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
 					*lowBoundValuePtr = static_cast<float>(signal->lowEngeneeringUnits());
 
+					data.append(QVariant(*lowBoundValuePtr));
+
 					float* highBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
 					*highBoundValuePtr = static_cast<float>(signal->highEngeneeringUnits());
+
+					data.append(QVariant(*highBoundValuePtr));
 				}
 				else
 				{
-					assert(signal->dataFormat() == E::DataFormat::SignedInt);
+					if (signal->dataFormat() != E::DataFormat::SignedInt)
+					{
+						assert(false);
+						continue;
+					}
+
+					data.append(QVariant(QString("AnalogInt")));
 
 					qint32* defaultValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes);
 					*defaultValuePtr = static_cast<qint32>(signal->tuningDefaultValue());
 
+					data.append(QVariant(*defaultValuePtr));
+
 					qint32* lowBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
 					*lowBoundValuePtr = static_cast<qint32>(signal->lowEngeneeringUnits());
 
+					data.append(QVariant(*lowBoundValuePtr));
+
 					qint32* highBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
 					*highBoundValuePtr = static_cast<qint32>(signal->highEngeneeringUnits());
+
+					data.append(QVariant(*highBoundValuePtr));
 				}
 
 				Address16 tuningAddr;
@@ -154,6 +180,9 @@ namespace  Tuning
 				tuningAddr.setBit(0);
 
 				signal->setTuningAddr(tuningAddr);
+
+				data.append(QVariant(tuningAddr.offset()));
+				data.append(QVariant(tuningAddr.bit()));
 
 				writeOffsetBytes += m_signalSizeBits / BITS_8;
 
@@ -164,9 +193,21 @@ namespace  Tuning
 			}
 			else
 			{
+				if (signal->isDiscrete() == false)
+				{
+					assert(false);
+					continue;
+				}
+
+				data.append(QVariant(QString("Discrete")));
+
 				setFramesDataBit(writeOffsetBytes, bit, signal->tuningDefaultValue() == 0.0 ? 0 : 1);
 				setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes, bit, 0);					// low bound
 				setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes * 2, bit, 1);				// high bound
+
+				data.append(QVariant(static_cast<int>(signal->tuningDefaultValue() == 0.0 ? 0 : 1)));
+				data.append(QVariant(static_cast<int>(0)));
+				data.append(QVariant(static_cast<int>(1)));
 
 				Address16 tuningAddr;
 
@@ -174,6 +215,9 @@ namespace  Tuning
 				tuningAddr.setBit(bit);
 
 				signal->setTuningAddr(tuningAddr);
+
+				data.append(QVariant(tuningAddr.offset()));
+				data.append(QVariant(15 - tuningAddr.bit()));			// conversion to big endian is reverse bits !!!
 
 				bit++;
 
@@ -188,7 +232,11 @@ namespace  Tuning
 					writeOffsetBytes += m_tuningFrameSizeBytes * 2;
 				}
 			}
+
+			metadata.push_back(data);
 		}
+
+		converToBigEndian();		// !!!
 	}
 
 
@@ -403,6 +451,7 @@ namespace  Tuning
 	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
 	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
 
+	QStringList TuningData::m_metadataFields;
 
 	TuningData::TuningData()
 	{
@@ -507,10 +556,11 @@ namespace  Tuning
 	}
 
 
-
 	bool TuningData::buildTuningData()
 	{
 		m_usedFramesCount = 0;
+
+		m_metadata.clear();
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
@@ -518,13 +568,40 @@ namespace  Tuning
 			QList<Signal*>& tuningSignals = m_tuningSignals[type];
 
 			framesData.init(m_usedFramesCount, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
-			framesData.copySignalsData(tuningSignals);
-			framesData.converToBigEndian();
+			framesData.copySignalsData(tuningSignals, m_metadata);
+
 
 			m_usedFramesCount += framesData.usedFramesCount();
 		}
 
 		return true;
+	}
+
+
+	const QStringList& TuningData::metadataFields()
+	{
+		if (m_metadataFields.isEmpty() == true)
+		{
+			m_metadataFields.append("AppSignalID");
+			m_metadataFields.append("CustomSignalID");
+			m_metadataFields.append("Caption");
+			m_metadataFields.append("Type");
+			m_metadataFields.append("Default");
+			m_metadataFields.append("Min");
+			m_metadataFields.append("Max");
+			m_metadataFields.append("Offset");
+			m_metadataFields.append("BitNo");
+		}
+
+		return m_metadataFields;
+	}
+
+
+	const std::vector<QVariantList>& TuningData::metadata() const
+	{
+		// m_metadata fills inside TuningFramesData::copySignalsData()
+		//
+		return m_metadata;
 	}
 
 
