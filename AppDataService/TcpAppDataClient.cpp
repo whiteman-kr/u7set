@@ -146,7 +146,8 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 
 void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
-
+	Q_UNUSED(replyData)
+	Q_UNUSED(replyDataSize)
 }
 
 

@@ -1100,7 +1100,7 @@ void SignalSet::buildID2IndexMap()
 		return;
 	}
 
-	m_strID2IndexMap.reserve(signalCount * 1.3);
+	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
 
 	for(int i = 0; i < signalCount; i++)
 	{

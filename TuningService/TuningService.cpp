@@ -202,8 +202,6 @@ namespace Tuning
 			return;
 		}
 
-		quint16 updateFrameStartAddressW = 0;
-
 		Tuning::SocketRequest sr;
 
 		bool result = source->setSignalState(appSignalID, value, &sr);
