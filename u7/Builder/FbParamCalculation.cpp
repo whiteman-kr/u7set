@@ -158,6 +158,7 @@ namespace Builder
 		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 2;
+
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:		//	and
@@ -179,92 +180,6 @@ namespace Builder
 	bool AppFb::calculate_NOT_paramValues()
 	{
 		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_FLIP_FLOP_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_CTUD_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_MAJ_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_SRSST_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_BCOD_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_BDEC_paramValues()
-	{
-		m_runTime = 2;
-		return true;
-	}
-
-
-	bool AppFb::calculate_MATH_paramValues()
-	{
-		QStringList requiredParams;
-
-		requiredParams.append("i_conf");
-
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
-
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
-
-		CHECK_UNSIGNED_INT(i_conf)
-
-		m_runTime = 0;
-
-		switch(i_conf.unsignedIntValue())
-		{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			m_runTime = 2;
-			break;
-
-		case 5:
-		case 6:
-		case 8:
-			m_runTime = 8;
-			break;
-
-		case 7:
-			m_runTime = 6;
-			break;
-
-		default:
-			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
-			return false;
-		}
-
 		return true;
 	}
 
@@ -302,6 +217,100 @@ namespace Builder
 			return false;
 		}
 
+		return true;
+	}
+
+
+	bool AppFb::calculate_FLIP_FLOP_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 2;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:		// ff_sr
+		case 2:		// ff_rs
+		case 3:		// ff_d_front
+		case 4:		// ff_t_front
+		case 5:		// ff_d_decay
+		case 6:		// ff_t_decay
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_CTUD_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 2;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:		// cnt_up
+		case 2:		// cnt_dn
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MAJ_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_SRSST_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_BCOD_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_BDEC_paramValues()
+	{
+		m_runTime = 2;
 		return true;
 	}
 
@@ -444,6 +453,124 @@ namespace Builder
 	}
 
 
+	bool AppFb::calculate_DAMPER_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_del");
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		CHECK_UNSIGNED_INT16(i_del)
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 0;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:
+			m_runTime = 3;		// for signed int input
+			break;
+
+		case 2:
+			m_runTime = 19;		// for float input
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MEM_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 0;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:
+			m_runTime = 9;		// for signed int input
+			break;
+
+		case 2:
+			m_runTime = 16;		// for float input
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool AppFb::calculate_MATH_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 0;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:			// add_si
+		case 2:			// sub_si
+		case 3:			// mul_si
+		case 4:			// div_si
+			m_runTime = 2;
+			break;
+
+		case 5:			// add_fp
+		case 6:			// sub_fp
+		case 8:			// div_fb
+			m_runTime = 8;
+			break;
+
+		case 7:			// mul_fp
+			m_runTime = 6;
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
+
 	bool AppFb::calculate_SCALE_paramValues()
 	{
 		QStringList requiredParams;
@@ -509,8 +636,10 @@ namespace Builder
 					SCALE_FP_SI = 8,
 					SCALE_16UI_FP = 9;
 
-		if (iConf == SCALE_16UI_16UI || iConf == SCALE_16UI_SI ||
-			iConf == SCALE_SI_16UI || iConf == SCALE_SI_SI)
+		if (iConf == SCALE_16UI_16UI ||
+			iConf == SCALE_16UI_SI ||
+			iConf == SCALE_SI_16UI ||
+			iConf == SCALE_SI_SI)
 		{
 			// k1 & k2 are Signed Integer
 			//
@@ -575,6 +704,15 @@ namespace Builder
 
 			default:
 				assert(false);
+			}
+
+			if (x2 - x1 == 0)
+			{
+				// Values of parameters '%1.%2' and '%1.%3' should not be equal.
+				//
+				m_log->errALC5054(caption(), x1Param.caption(), x2Param.caption(), guid());
+
+				return false;
 			}
 
 			const int MULTIPLIER = 32768;
@@ -665,6 +803,15 @@ namespace Builder
 
 			default:
 				assert(false);
+			}
+
+			if (x2 - x1 == 0)
+			{
+				// Values of parameters '%1.%2' and '%1.%3' should not be equal.
+				//
+				m_log->errALC5054(caption(), x1Param.caption(), x2Param.caption(), guid());
+
+				return false;
 			}
 
 			double k1 = (y2 - y1) / (x2 - x1);
@@ -960,80 +1107,6 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_DAMPER_paramValues()
-	{
-		QStringList requiredParams;
-
-		requiredParams.append("i_del");
-		requiredParams.append("i_conf");
-
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
-
-		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-
-		CHECK_UNSIGNED_INT16(i_del)
-		CHECK_UNSIGNED_INT(i_conf)
-
-		m_runTime = 0;
-
-		switch(i_conf.unsignedIntValue())
-		{
-		case 1:
-			m_runTime = 3;		// for signed int input
-			break;
-
-		case 2:
-			m_runTime = 19;		// for float input
-			break;
-
-		default:
-			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
-
-			return false;
-		}
-
-		return true;
-	}
-
-
-	bool AppFb::calculate_MEM_paramValues()
-	{
-		QStringList requiredParams;
-
-		requiredParams.append("i_conf");
-
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
-
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-
-		CHECK_UNSIGNED_INT(i_conf)
-
-		m_runTime = 0;
-
-		switch(i_conf.unsignedIntValue())
-		{
-		case 1:
-			m_runTime = 9;		// for signed int input
-			break;
-
-		case 2:
-			m_runTime = 16;		// for float input
-			break;
-
-		default:
-			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
-			return false;
-		}
-
-		return true;
-	}
-
-
 	bool AppFb::calculate_FUNC_paramValues()
 	{
 		QStringList requiredParams;
@@ -1228,7 +1301,31 @@ namespace Builder
 
 	bool AppFb::calculate_LATCH_paramValues()
 	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
 		m_runTime = 2;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:			// latch_front_fp, latch_front_si
+		case 2:			// latch_decay_fp, latch_decay_si
+		case 3:			// latch_state_fp, latch_state_si
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
 
 		return true;
 	}
