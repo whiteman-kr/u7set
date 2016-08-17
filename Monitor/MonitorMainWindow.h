@@ -59,6 +59,7 @@ protected slots:
 protected:
 	void slot_signalSnapshot();
 	void slot_findSignal();
+	void slot_historyChanged(bool enableBack, bool enableForward);
 
 	// Properties
 	//

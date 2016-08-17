@@ -5,6 +5,7 @@
 #include "SchemaManager.h"
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/MonitorSchema.h"
 
 //
 //
@@ -23,10 +24,20 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	createActions();
 
+	// --
+	//
 	connect(schemaView(), &VFrame30::SchemaView::signal_schemaChanged, this, [this](VFrame30::Schema* schema)
 		{
 			emit this->signal_schemaChanged(this, schema);
 		});
+
+	// --
+	//
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_setSchema, this, &MonitorSchemaWidget::slot_setSchema);
+
+	// Init history
+	//
+	m_backHistory.push_back(currentHistoryState());
 
 	return;
 }
@@ -103,24 +114,140 @@ std::vector<std::shared_ptr<VFrame30::SchemaItem>> MonitorSchemaWidget::itemsUnd
 	return result;
 }
 
-QString MonitorSchemaWidget::schemaId() const
+bool MonitorSchemaWidget::canBackHistory() const
 {
-	if (schema() == nullptr)
-	{
-		return QString();
-	}
-
-	return schema()->schemaID();
+	bool enableBack = m_backHistory.size() > 1;
+	return enableBack;
 }
 
-QString MonitorSchemaWidget::caption() const
+bool MonitorSchemaWidget::canForwardHistory() const
 {
-	if (schema() == nullptr)
+	bool enableForward = !m_forwardHistory.empty();
+	return enableForward;
+}
+
+void MonitorSchemaWidget::historyBack()
+{
+	qDebug() << "MonitorSchemaWidget::historyBack()";
+
+	if (m_backHistory.empty() == true)
 	{
-		return QString();
+		return;
 	}
 
-	return schema()->caption();
+	SchemaHistoryItem currentView = m_backHistory.back();
+	m_backHistory.pop_back();
+
+	assert(currentView.m_schemaId == schemaId());	// Save current state
+	currentView = currentHistoryState();
+
+	m_forwardHistory.push_front(currentView);
+
+	if (m_backHistory.empty() == true)
+	{
+		return;
+	}
+
+	SchemaHistoryItem& restoreItem = m_backHistory.back();
+	restoreState(restoreItem);
+
+	emitHistoryChanged();
+
+	return;
+}
+
+void MonitorSchemaWidget::historyForward()
+{
+	qDebug() << "MonitorSchemaWidget::historyForward()";
+
+	if (m_forwardHistory.empty() == true)
+	{
+		return;
+	}
+
+	// save current state
+	//
+	SchemaHistoryItem& currentView = m_backHistory.back();
+	assert(currentView.m_schemaId == schemaId());
+	currentView = currentHistoryState();
+
+	// switch history
+	//
+	SchemaHistoryItem hi = m_forwardHistory.front();
+	m_forwardHistory.pop_front();
+
+	m_backHistory.push_back(hi);
+
+	restoreState(hi);
+
+	emitHistoryChanged();
+
+	return;
+}
+
+void MonitorSchemaWidget::resetHistory()
+{
+	qDebug() << "MonitorSchemaWidget::resetHistory()";
+
+	m_backHistory.clear();
+	m_backHistory.push_back(currentHistoryState());
+
+	m_forwardHistory.clear();
+
+	emitHistoryChanged();
+
+	return;
+}
+
+void MonitorSchemaWidget::restoreState(const SchemaHistoryItem& historyState)
+{
+	if (m_schemaManager == nullptr)
+	{
+		assert(m_schemaManager);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(historyState.m_schemaId);
+
+	if (schema == nullptr)
+	{
+		// and there is no startSchemaId (((
+		// Just create an empty schema
+		//
+		schema = std::make_shared<VFrame30::MonitorSchema>();
+		schema->setSchemaID(historyState.m_schemaId);
+		schema->setCaption(historyState.m_schemaId + " not found");
+	}
+
+	// --
+	//
+	setSchema(schema, false);
+	setZoom(historyState.m_zoom, false);
+
+	horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
+	verticalScrollBar()->setValue(historyState.m_vertScrollValue);
+
+	schemaView()->repaint();
+
+	return;
+}
+
+SchemaHistoryItem MonitorSchemaWidget::currentHistoryState() const
+{
+	SchemaHistoryItem hi;
+
+	hi.m_schemaId = schemaId();
+	hi.m_zoom = zoom();
+	hi.m_horzScrollValue = horizontalScrollBar()->value();
+	hi.m_vertScrollValue = verticalScrollBar()->value();
+
+	return hi;
+}
+
+void MonitorSchemaWidget::emitHistoryChanged()
+{
+	emit signal_historyChanged(canBackHistory(), canForwardHistory());
+	return;
 }
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
@@ -211,5 +338,90 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	return;
 }
 
+void MonitorSchemaWidget::slot_setSchema(QString schemaId)
+{
+	if (m_schemaManager == nullptr)
+	{
+		assert(m_schemaManager);
+		return;
+	}
 
+	// --
+	//
+	m_forwardHistory.clear();
 
+	// save current state to the history
+	//
+	if (m_backHistory.empty() == false)
+	{
+		SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
+
+		assert(currentHistoryItem.m_schemaId == this->schemaId());
+
+		currentHistoryItem = currentHistoryState();
+	}
+
+	// --
+	//
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+
+	if (schema == nullptr)
+	{
+		// and there is no startSchemaId (((
+		// Just create an empty schema
+		//
+		schema = std::make_shared<VFrame30::MonitorSchema>();
+		schema->setSchemaID("EMPTYSCHEMA");
+		schema->setCaption("Empty Schema");
+	}
+
+	// --
+	//
+	setSchema(schema, false);
+	setZoom(100.0, true);
+
+	// --
+	//
+	SchemaHistoryItem hi = currentHistoryState();
+	m_backHistory.push_back(hi);
+
+	// --
+	//
+	emitHistoryChanged();
+
+	return;
+}
+
+QString MonitorSchemaWidget::schemaId() const
+{
+	if (schema() == nullptr)
+	{
+		return QString();
+	}
+
+	return schema()->schemaID();
+}
+
+QString MonitorSchemaWidget::caption() const
+{
+	if (schema() == nullptr)
+	{
+		return QString();
+	}
+
+	return schema()->caption();
+}
+
+MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView()
+{
+	MonitorSchemaView* result = dynamic_cast<MonitorSchemaView*>(schemaView());
+	assert(result);
+	return result;
+}
+
+const MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView() const
+{
+	const MonitorSchemaView* result = dynamic_cast<const MonitorSchemaView*>(schemaView());
+	assert(result);
+	return result;
+}

@@ -501,7 +501,7 @@ namespace Hardware
 
         //qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
-        return QString::number(result);
+		return QString::number(result, 16);
     }
 
     QString ModuleFirmware::storeHash64(int frameIndex, int offset, QString dataString)
@@ -518,7 +518,7 @@ namespace Hardware
 		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
 		setData64(frameIndex, offset, result);
 
-        return QString::number(result);
+		return QString::number(result, 16);
 
 		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
