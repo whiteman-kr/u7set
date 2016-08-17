@@ -164,6 +164,18 @@ namespace Builder
 		void errALC5040(QString connectionID);												// Connection with ID '%1' is not found.
 		void errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid);				// Signal '%1' exists in LM '%2'. No receivers needed.
 		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid);		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+		void errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid);			// Value of parameter '%1.%2' must be greater or equal to 0.
+		void errALC5044(QString fbCaption, int opcode, QUuid itemUuid);						// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
+		void errALC5045(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Required parameter '%1' of AFB '%2' is missing.
+		void errALC5046(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type Unsigned Int.
+		void errALC5047(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.
+		void errALC5048(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.
+		void errALC5049(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
+		void errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Float.
+		void errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid);	// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			//	Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+		void wrnALC5053(QString fbCaption, QUuid itemUuid);									// Automatic sorting of XY points of FB '%1' has been performed
+		void errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			//	Parameters '%1.%2' and '%1.%3' should not be equal.
 
 		// EQP			Equipment issues						6000-6999
 		//

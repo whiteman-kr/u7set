@@ -2183,6 +2183,295 @@ namespace Builder
 				  arg(appSignalID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5043
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter '%1.%2' must be greater or equal to 0.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Value of specified parameter must be greater or equal to 0. Check parameter value.
+	///
+	void IssueLogger::errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5043,
+				  QString(tr("Value of parameter '%1.%2' must be greater or equal to 0.")).
+				  arg(fbCaption).arg(paramCaption));
+	}
+
+	/// IssueCode: ALC5044
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 functional block opcode
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Parameter's calculation for specified AFB is not implemented. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5044(QString fbCaption, int opcode, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5044,
+				  QString(tr("Parameter's calculation for AFB '%1' (opcode %2) is not implemented.")).
+				  arg(fbCaption).arg(opcode));
+	}
+
+	/// IssueCode: ALC5045
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required parameter '%1' of AFB '%2' is missing.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Required parameter of specified AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5045(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5045,
+				  QString(tr("Required parameter '%1' of AFB '%2' is missing.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5046
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter '%1' of AFB '%2' must have type Unsigned Int.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type Unsigned Int. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5046(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5046,
+				  QString(tr("Parameter '%1' of AFB '%2' must have type Unsigned Int.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5047
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type 16-bit Unsigned Int. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5047(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5047,
+				  QString(tr("Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5048
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type 32-bit Unsigned Int. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5048(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5048,
+				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5049
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type 32-bit Signed Int. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5049(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5049,
+				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5050
+	///
+	/// IssueType: Error
+	///
+	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Float.
+	///
+	/// Parameters:
+	///		%1 functional block parameter caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type 32-bit Float. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5050,
+				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Float.")).
+				  arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5051
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value %1 of parameter '%2' of AFB '%3' is incorrect.
+	///
+	/// Parameters:
+	///		%1 parameter value
+	///		%2 functional block parameter caption
+	///		%3 functional block caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Specified parameter must have type 32-bit Float. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5051,
+				  QString(tr("Value %1 of parameter '%2' of AFB '%3' is incorrect.")).
+				  arg(paramValue).arg(paramCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5052
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
+	///
+	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5052,
+				  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%1.%3'.")).
+				  arg(fbCaption).arg(param1).arg(fbCaption).arg(param2));
+	}
+
+	/// IssueCode: ALC5053
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Automatic sorting of XY points of FB '%1' has been performed.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 application logic item Uuid
+	///
+	/// Description:
+	///		Automatic sorting of XY points of FB '%1' has been performed. Check XY points values.
+	///
+	void IssueLogger::wrnALC5053(QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_WARNING(IssueType::AlCompiler,
+				  5053,
+				  QString(tr("Automatic sorting of XY points of FB '%1' has been performed.")).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5054
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Values of parameters '%1.%2' and '%1.%3' should not be equal.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Values of specified parameters should not be equal. Check parameters values.
+	///
+	void IssueLogger::errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5054,
+				  QString(tr("Values of parameters '%1.%2' and '%1.%3' should not be equal.")).
+				  arg(fbCaption).arg(param1).arg(param2));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

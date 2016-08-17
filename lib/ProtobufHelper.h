@@ -58,7 +58,7 @@ protected:
 	int m_bufferSize = 0;
 
 public:
-	bool bufferSize() const { return m_bufferSize; }
+	int bufferSize() const { return m_bufferSize; }
 	char* getBuffer() const { return m_buffer; }
 };
 
@@ -93,7 +93,7 @@ public:
 	bool serialize(ProtobufMessage* message);
 	bool finalize();
 
-	bool currentSize() const { return m_writeIndex; }
+	int currentSize() const { return m_writeIndex; }
 };
 
 

@@ -173,7 +173,7 @@ private:
 	void setSignalGroupID(int signalGroupID) { m_signalGroupID = signalGroupID; }
 	void setSignalInstanceID(int signalInstanceID) { m_signalInstanceID = signalInstanceID; }
 	void setChangesetID(int changesetID) { m_changesetID = changesetID; }
-	void setCheckedOut(int checkedOut) { m_checkedOut = checkedOut; }
+	void setCheckedOut(bool checkedOut) { m_checkedOut = checkedOut; }
 	void setUserID(int userID) { m_userID = userID; }
 	void setChannel(E::Channel channel) { m_channel = channel; }
 	void setCreated(const QDateTime& created) { m_created = created; }

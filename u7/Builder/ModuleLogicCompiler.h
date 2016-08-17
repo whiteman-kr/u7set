@@ -110,7 +110,6 @@ namespace Builder
 	protected:
 		AppLogicItem m_appLogicItem;
 
-
 	private:
 		QHash<QString, int> m_opNameToIndexMap;
 
@@ -218,7 +217,7 @@ namespace Builder
 		AppFbParamValuesArray m_paramValuesArray;
 
 		ModuleLogicCompiler* m_compiler = nullptr;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 
 		int m_runTime = 0;
 
