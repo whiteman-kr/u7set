@@ -1194,6 +1194,11 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		{
 			deviceObject = deviceObject->parent();
 
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
 			if (deviceObject->isController())
 			{
 				return deviceObject->toController();
@@ -1211,6 +1216,11 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		do
 		{
 			deviceObject = deviceObject->parent();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
 
 			if (deviceObject->isModule())
 			{
@@ -1230,6 +1240,11 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		{
 			deviceObject = deviceObject->parent();
 
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
 			if (deviceObject->isChassis())
 			{
 				return deviceObject->toChassis();
@@ -1248,6 +1263,11 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		{
 			deviceObject = deviceObject->parent();
 
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
 			if (deviceObject->isRack())
 			{
 				return deviceObject->toRack();
@@ -1265,6 +1285,11 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		do
 		{
 			deviceObject = deviceObject->parent();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
 
 			if (deviceObject->isSystem())
 			{
