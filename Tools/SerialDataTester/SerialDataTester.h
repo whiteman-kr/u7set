@@ -46,6 +46,9 @@ signals:
 	void stopBitsChanged(QSerialPort::StopBits newStopBits);
 
 private:
+	QBitArray bytesToBits(QByteArray bytes);
+	QByteArray bitsToBytes(QBitArray bits);
+
 	Ui::SerialDataTester *ui = nullptr;
 
 	QTimer* receiveTimeout;
@@ -73,6 +76,7 @@ private:
 	QString m_pathToSignalsXml;
 
 	QThread* m_PortThread;
+    QThread* m_ParserThread;
 
 	struct SignalData
 	{

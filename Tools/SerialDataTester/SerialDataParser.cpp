@@ -44,16 +44,27 @@ void SerialDataParser::parse(const QByteArray& receivedData)
 }
 
 void SerialDataParser::scanningSignaure()
-{
+{	
 	int bytesToCopy = 0;					// How many bytes we need to copy
 	int avaiableDataSize = m_dataSize;		// How many data received
 
-
 	do
 	{
+		qDebug() << "===================================";
+		qDebug() << "Scanning signature";
+		qDebug() << "m_dataSize: " << m_dataSize;
+		qDebug() << "m_bytesCount: " << m_bytesCount;
+
+//		if (m_bytesCount > 4)
+//			m_bytesCount = 0;
+
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
+
+		qDebug() << "BytesToCopy: " << bytesToCopy;
+
 		avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
 
+		qDebug() << "avaiableDataSize: " << avaiableDataSize;
 
 		if (avaiableDataSize < bytesToCopy)  // When our packet have amount of bytes, which is smaller than we need - record all of them into signature value
 		{
@@ -65,8 +76,10 @@ void SerialDataParser::scanningSignaure()
 
 		if (m_bytesCount == 4)  // If signature consist of 4 bytes, lets have a look
 		{
+
 			if (m_signature.uint32 == baseSignature) // If our signature is a beginning of the packet header
 			{
+				qDebug() << "Sig OK";
 				m_state = ReadingHeader; // Change current state
 				m_readPtr += bytesToCopy; // Move our packet pointer forward by recordered amount of bytes (WARNNG: it mmust be bytesToCopy value, in case of the packet beginning)
 				m_bytesCount = 0; // Reset signature bytes amount value
@@ -84,11 +97,21 @@ void SerialDataParser::scanningSignaure()
 		}
 	}
 	while(m_readPtr < m_buffer + m_dataSize);
+	//while (m_readPtr != nullptr);
+
+	qDebug() << "Done packetprocessing";
 }
 
 void SerialDataParser::readingHeader()
 {
+	qDebug() << "===================================";
+	qDebug() << "Reading header";
+	qDebug() << "m_bytesCount: " << m_bytesCount;
+
 	int bytesToCopy = 8 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
+
+	qDebug() << "bytesToCopy: " << bytesToCopy;
+
 	int avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
 
 	if (avaiableDataSize < bytesToCopy)  // When our packet have amount of bytes, which is smaller than we need - record all of them into signature value
@@ -101,11 +124,21 @@ void SerialDataParser::readingHeader()
 
 	if (m_bytesCount == 8)
 	{
+		qDebug() << "Head OK";
 		m_state = ReadingData;
 		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
 		m_packetData = new char[m_header.header.dataAmount];
+		qDebug() << "===================================";
 		readingData();
+	}
+	else
+	{
+		m_state = ScanningSignature;
+		m_readPtr++;
+		m_bytesCount = 0;
+		qDebug() << "===================================";
+		scanningSignaure();
 	}
 }
 
@@ -113,7 +146,7 @@ void SerialDataParser::readingData()
 {
 	qint16 dataAmount = m_header.header.dataAmount;
 
-	int bytesToCopy = (4 + dataAmount) - m_bytesCount;
+	int bytesToCopy = dataAmount;//(4 + dataAmount) - m_bytesCount;
 	int avaiableDataSize = m_dataSize - (m_readPtr - m_buffer);
 
 	if (avaiableDataSize < bytesToCopy)
@@ -130,8 +163,10 @@ void SerialDataParser::readingData()
 		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
 
-		QByteArray dataToSend;
-		dataToSend.fromRawData(m_packetData+4, m_bytesCount-(4+8)); // 4 - dataUID size, 8 - crc size
+		QByteArray dataToSend = m_packetData;
+		//dataToSend.fromRawData(m_packetData+4, m_bytesCount-(4+8)); // 4 - dataUID size, 8 - crc size
+
+		qDebug() << dataToSend;
 
 		QByteArray dataToCalculateCrc;
 		//quint64 crcFromPacket;
@@ -149,37 +184,37 @@ void SerialDataParser::readingData()
 		// Lets calculate crc!
 		//
 
-		char *dataForCrcPtr = dataToCalculateCrc.data();
+//		char *dataForCrcPtr = dataToCalculateCrc.data();
 
-		quint64 crc = 0;
-		for (int i=0; i<dataToCalculateCrc.size(); i++)
-		{
-			crc = m_crc_table[(crc ^ (dataForCrcPtr[i])) & 0xFF] ^ (crc >> 8);
-		}
-		crc = ~crc;
+//		quint64 crc = 0;
+//		for (int i=0; i<dataToCalculateCrc.size(); i++)
+//		{
+//			crc = m_crc_table[(crc ^ (dataForCrcPtr[i])) & 0xFF] ^ (crc >> 8);
+//		}
+//		crc = ~crc;
 
 		// Calculating ends here
 		//
 
-		if (crc == m_crcFromPacket.crc)
-		{
+		/*if (crc == m_crcFromPacket.crc)
+		{*/
 
-			emit packetProcessed(dataToSend);
+		emit packetProcessed(dataToSend);
 
-			qDebug() << m_header.header.version;
-			qDebug() << m_header.header.txid;
-			qDebug() << m_header.header.numerator;
-			qDebug() << m_header.header.dataAmount;
-			qDebug() << "=======================================";
-		}
+		qDebug() << m_header.header.version;
+		qDebug() << m_header.header.txid;
+		qDebug() << m_header.header.numerator;
+		qDebug() << m_header.header.dataAmount;
+		qDebug() << "=======================================";
+		/*}
 		else
 		{
 			qDebug() << "Wrong crc!";
-		}
+		}*/
 
 		if (m_dataSize - (m_readPtr - m_buffer) != 0)
 		{
-			scanningSignaure();
+		scanningSignaure();
 		}
 	}
 }

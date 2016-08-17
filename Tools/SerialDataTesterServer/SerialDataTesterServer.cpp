@@ -8,9 +8,19 @@
 #include <math.h>
 #include <QDebug>
 
+QByteArray bitsToBytes(QBitArray bits) {
+	QByteArray bytes;
+	bytes.resize(bits.count()/8);
+	bytes.fill(0);
+	// Convert from QBitArray to QByteArray
+	for(int b=0; b<bits.count(); ++b)
+		bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
+	return bytes;
+}
+
 SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::SerialDataTesterServer)
+    QDialog(parent),
+    ui(new Ui::SerialDataTesterServer)
 {
 	ui->setupUi(this);
 	for (QSerialPortInfo port : QSerialPortInfo::availablePorts())
@@ -125,6 +135,7 @@ void SerialDataTesterServer::startServer()
 
 void SerialDataTesterServer::parseFile()
 {
+	m_signalsFromXml.clear();
 	QFile slgnalsXmlFile(ui->pathToXml->text());
 	bool errorLoadingXml = false;
 
@@ -160,16 +171,16 @@ void SerialDataTesterServer::parseFile()
 		{
 			QXmlStreamAttributes attributes = xmlReader.attributes();
 
-			if(xmlReader.name() == "port")
+			if(xmlReader.name() == "PortInfo")
 			{
-				if (attributes.hasAttribute("PortInfoStrID")
-					&& attributes.hasAttribute("ID")
-					&& attributes.hasAttribute("DataID")
-					&& attributes.hasAttribute("Speed")
-					&& attributes.hasAttribute("Bits")
-					&& attributes.hasAttribute("StopBits")
-					&& attributes.hasAttribute("ParityControl")
-					&& attributes.hasAttribute("DataSize"))
+				if (attributes.hasAttribute("StrID")
+				        && attributes.hasAttribute("ID")
+				        && attributes.hasAttribute("DataID")
+				        && attributes.hasAttribute("Speed")
+				        && attributes.hasAttribute("Bits")
+				        && attributes.hasAttribute("StopBits")
+				        && attributes.hasAttribute("ParityControl")
+				        && attributes.hasAttribute("DataSize"))
 				{
 					m_dataSize = attributes.value("DataSize").toInt()/8;
 				}
@@ -178,16 +189,16 @@ void SerialDataTesterServer::parseFile()
 			if(xmlReader.name() == "Signal")
 			{
 
-				if(attributes.hasAttribute("SignalStrID")
-				   && attributes.hasAttribute("ExtStrID")
-				   && attributes.hasAttribute("Name")
-				   && attributes.hasAttribute("Type")
-				   && attributes.hasAttribute("Unit")
-				   && attributes.hasAttribute("DataSize")
-				   && attributes.hasAttribute("DataFormat")
-				   && attributes.hasAttribute("ByteOrder")
-				   && attributes.hasAttribute("Offset")
-				   && attributes.hasAttribute("BitNo"))
+				if(attributes.hasAttribute("StrID")
+				        && attributes.hasAttribute("ExtStrID")
+				        && attributes.hasAttribute("Name")
+				        && attributes.hasAttribute("Type")
+				        && attributes.hasAttribute("Unit")
+				        && attributes.hasAttribute("DataSize")
+				        && attributes.hasAttribute("DataFormat")
+				        && attributes.hasAttribute("ByteOrder")
+				        && attributes.hasAttribute("Offset")
+				        && attributes.hasAttribute("BitNo"))
 				{
 					currentSignal.strId  = attributes.value("SignalStrID").toString();
 					currentSignal.exStrId = attributes.value("ExtStrID").toString();
@@ -202,7 +213,7 @@ void SerialDataTesterServer::parseFile()
 
 					if (currentSignal.dataFormat == "discrete")
 					{
-						currentSignal.dataSize = 8;
+						currentSignal.dataSize = 1;
 					}
 					else
 					{
@@ -254,7 +265,138 @@ void SerialDataTesterServer::stopServer()
 
 void SerialDataTesterServer::sendPacket()
 {
-	m_data.fill(0, m_dataSize*8);
+	    m_serialPort->clear();
+
+		Signature sign;
+		HeaderUnion head;
+
+		sign.uint32 = 0x424D4C47;
+
+		head.hdr.version = 4;
+		head.hdr.id = 1;
+		head.hdr.num = 1;
+		head.hdr.amount = m_dataSize;
+
+		QByteArray dataToSend;
+		dataToSend.clear();
+
+		QBitArray generatedData;
+		generatedData.resize(m_dataSize*8);
+		generatedData.fill(0);
+
+		/*data.append(0x01);
+		data.append(0x4A);
+		data.append(0x30);
+		data.append(0x43);
+		data.append(0x45);
+		data.append(0x37);
+		data.append(0x01);*/
+
+		/*QBitArray bits;
+		bits.fill(0, 8);
+
+		bits.setBit(0, 1);
+		bits.setBit(1, 1);*/
+
+		qDebug() << "We transfer now: ";
+
+		for (SignalData signal : m_signalsFromXml)
+		{
+			// Get type of the signal
+			//
+
+			quint64 value;
+
+			if (signal.type == "Analog")
+			{
+				quint64 maxDataSize = pow(2, signal.dataSize*8);
+
+				value = qrand()%maxDataSize;
+
+				if (signal.dataSize == 16 && signal.dataFormat == "SignedInt")
+				{
+					value += qrand()%maxDataSize;
+				}
+
+				if (signal.dataSize == 32)
+				{
+					value*=qrand()%10000*qrand()%100;
+				}
+
+				if (signal.dataFormat == "Float")
+				{
+					int pos = 31; // declare variables
+					float f = qrand()%maxDataSize * 0.1;
+					int bit = 0;
+
+					qDebug() << signal.name << " " << f;
+
+					int *b = reinterpret_cast<int*>(&f);
+					for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
+					{
+					bit = ((*b >> binaryNumber)&1);
+					if (bit == 0)
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
+					else
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
+					pos--;
+					}
+				}
+				else
+				{
+					qDebug() << signal.name << " " << value;
+
+					for (int pos = 0; value>0; pos++)
+					{
+						if (value%2 == 0)
+						{
+							generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
+						}
+						else
+						{
+							generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
+						}
+						value/=2;
+					}
+				}
+			}
+			else
+			{
+				generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
+			}
+		}
+
+		qDebug() << "=====================+";
+
+		qDebug() << generatedData;
+
+		dataToSend.append(bitsToBytes(generatedData));
+
+		QByteArray bytes;
+		bytes.clear();
+		bytes.append(sign.bytes, 4);
+
+		qDebug() << bytes.size();
+
+		bytes.append(head.bytes, 8);
+
+		qDebug() << bytes.size();
+
+		bytes += dataToSend;
+
+		qDebug() << bytes.size();
+
+		m_serialPort->write(bytes, bytes.size());
+
+		bool ok = m_serialPort->flush();
+
+		if (ok == false)
+		{
+			QMessageBox::warning(this, "Error", m_serialPort->errorString());
+		}
+		stopServer();
+
+		/*m_data.fill(0, m_dataSize*8);
 	m_packet.clear();
 
 	for (SignalData signal : m_signalsFromXml)
@@ -412,5 +554,5 @@ void SerialDataTesterServer::sendPacket()
 	if (m_numberOfPacket == ui->countOfPackets->text().toInt())
 	{
 		stopServer();
-	}
+	}*/
 }

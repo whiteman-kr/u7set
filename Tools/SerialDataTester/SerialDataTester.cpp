@@ -171,21 +171,6 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// Calculate crc-64 table
 	//
 
-	/*const quint64 polynom = 0xd800000000000000ULL;	// CRC-64-ISO
-	quint64 tempValue;
-	for (int i=0; i<256; i++)
-	{
-		tempValue=i;
-		for (int j = 8; j>0; j--)
-		{
-			if (tempValue & 1)
-				tempValue = (tempValue >> 1) ^ polynom;
-			else
-				tempValue >>= 1;
-		}
-		m_crc_table[i] = tempValue;
-	}*/
-
 	m_parser = new SerialDataParser();
 
 	connect(m_reloadCfg, &QAction::triggered, this, &SerialDataTester::reloadConfig);
@@ -232,6 +217,10 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	m_portReceiver->moveToThread(m_PortThread);
 	m_PortThread->start();
 
+    m_ParserThread = new QThread(this);
+    m_parser->moveToThread(m_ParserThread);
+    m_ParserThread->start();
+
 	// Clean old packet data
 	//
 
@@ -242,29 +231,22 @@ SerialDataTester::~SerialDataTester()
 {
 	m_portReceiver->closePort();
 	m_PortThread->terminate();
+    m_ParserThread->terminate();
 
 	delete m_portReceiver;
 	delete ui;
 	delete m_PortThread;
 	delete m_parser;
+    delete m_ParserThread;
 }
 
 void SerialDataTester::parseFile()
 {
-	//int calculatedDataSize=0;
-
 	// Try to open signals xml to read signals
 	//
 
 	QFile slgnalsXmlFile(m_pathToSignalsXml);
 	bool errorLoadingXml = false;
-
-	/*if (slgnalsXmlFile.exists() == false)
-	{
-		QMessageBox::critical(this, tr("Critical error"), "File not found: " + m_pathToSignalsXml);
-		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
-		errorLoadingXml = true;
-	}*/
 
 	if (slgnalsXmlFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
 	{
@@ -385,13 +367,12 @@ void SerialDataTester::parseFile()
 						}
 					}
 
-					//m_dataSize = attributes.value("DataSize").toInt()/8;
-
 					if (!portExists)
 					{
 						QMessageBox::warning(this, tr("Critical error"), tr("XML file has port which was not detected or not exist on this machine. Programm will load last used settings"));
 						loadLastUsedSettings();
 					}
+					m_dataSize = attributes.value("DataSize").toInt()/8;
 				}
 				else
 				{
@@ -425,7 +406,7 @@ void SerialDataTester::parseFile()
 					currentSignal.offset = attributes.value("Offset").toInt();
 					currentSignal.bit = attributes.value("BitNo").toInt();
 
-					if (currentSignal.dataSize != 1 && currentSignal.dataSize != 16 && currentSignal.dataSize != 32)
+					if (currentSignal.dataSize != 1 && currentSignal.dataSize != 16 && currentSignal.dataSize != 32 && currentSignal.dataSize != 8)
 					{
 						QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Error reading size attribute on " + currentSignal.strId + ": wrong size")));
 						errorLoadingXml = true;
@@ -494,20 +475,6 @@ void SerialDataTester::parseFile()
 	// In case errors in xml-file show message
 	//
 
-	/*if (m_dataSize != calculatedDataSize)
-	{
-		QMessageBox::warning(this, tr("Warning"), tr(qPrintable("Packet size is not equal to summ of signals size: possible loss of data. Please, check the packet data amount, and sizes of each signal data.\nCalculated size: " + QString::number(calculatedDataSize) + "\nSetted size: " + QString::number(m_dataSize))));
-		m_dataSize = 0;
-		ui->signalsTable->clear();
-		ui->signalsTable->setRowCount(0);
-
-		ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
-		ui->signalsTable->setHorizontalHeaderItem(name, new QTableWidgetItem(tr("Name")));
-		ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
-		ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
-		ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
-		ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
-	}*/
 }
 
 void SerialDataTester::reloadConfig()
@@ -782,7 +749,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 			QBitArray dataArray;
 			dataArray.resize(m_dataSize*8);
 			dataArray.fill(0);
-			for(int currentByte=0; currentByte<receivedValues.count(); ++currentByte)
+			/*for(int currentByte=0; currentByte<receivedValues.count(); ++currentByte)
 			{
 				for(int currentBit=0; currentBit<8; ++currentBit)
 				{
@@ -790,11 +757,18 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 					allReceivedBitsArray.append(QString::number(dataArray.at(currentByte*8+currentBit)));
 				}
 				allReceivedBitsArray.append(" ");
-			}
+			}*/
+
+			dataArray = bytesToBits(receivedValues);
 
 			qDebug() << dataArray;
 
-			ui->statusBar->showMessage("Processed data: " + allReceivedBitsArray);
+			/*for (int currentBit = 0; currentBit < m_dataSize*8; currentBit++)
+			{
+				(dataArray.at(currentBit) == 1) ? allReceivedBitsArray.append("1") : allReceivedBitsArray.append("0");
+			}
+
+			ui->statusBar->showMessage("Processed data: " + allReceivedBitsArray);*/
 
 			for (SignalData signal : m_signalsFromXml)
 			{
@@ -807,7 +781,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 
 				signalValueBits.resize(signal.dataSize*8);
 				QString valueString;
-				for (int pos = signal.offset*8 + signal.bit; pos < signal.offset + signal.bit + signal.dataSize*8; pos ++)
+				for (int pos = signal.offset*8 + signal.bit; pos < signal.offset*8 + signal.bit + signal.dataSize; pos ++)
 				{
 					switch (dataArray.at(pos))
 					{
@@ -886,11 +860,11 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 
 void SerialDataTester::signalTimeout()
 {
-	for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
+	/*for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
 	{
 		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem(QString::number(0)));
 	}
-	ui->statusBar->showMessage("Signal timeout!");
+	ui->statusBar->showMessage("Signal timeout!");*/
 }
 
 void SerialDataTester::erasePacketData()
@@ -1063,4 +1037,24 @@ void SerialDataTester::stopReceiver()
 	//m_PortThread->terminate();
 	m_portReceiver->closePort();
 	ui->portStatus->setText("Closed");
+}
+
+QBitArray SerialDataTester::bytesToBits(QByteArray bytes)
+{
+	QBitArray bits(bytes.count()*8);
+	    // Convert from QByteArray to QBitArray
+	    for(int i=0; i<bytes.count(); ++i)
+			for(int b=0; b<8; ++b)
+				bits.setBit(i*8+b, bytes.at(i)&(1<<b));
+		return bits;
+}
+
+QByteArray SerialDataTester::bitsToBytes(QBitArray bits)
+{
+	QByteArray bytes;
+	    bytes.resize(bits.count()/8);
+		// Convert from QBitArray to QByteArray
+		for(int b=0; b<bits.count(); ++b)
+			bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
+		return bytes;
 }

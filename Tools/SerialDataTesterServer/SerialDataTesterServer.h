@@ -53,6 +53,32 @@ private:
 		int bit = 0;
 	};
 
+    union Signature
+    {
+        char bytes[4];
+        quint32 uint32;
+    };
+
+	struct Header
+    {
+        quint16 version;
+        quint16 id;
+        quint16 num;
+        quint16 amount;
+    };
+
+    union HeaderUnion
+    {
+		char bytes[8];
+        Header hdr;
+    };
+
+    union Data
+    {
+        char bytes[8];
+        quint32 uint32;
+    };
+
 	int m_numberOfPacket = 0;
 	int m_amountOfSignals = 0;
 
