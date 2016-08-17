@@ -24,6 +24,7 @@ protected:
 signals:
 	void signal_actionCloseTabUpdated(bool allowed);
 	void signal_schemaChanged(QString strId);
+	void signal_historyChanged(bool enableBack, bool enableForward);
 
 	// Slots
 	//

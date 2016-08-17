@@ -4,6 +4,7 @@
 
 class MonitorSchemaView;
 class SchemaManager;
+struct SchemaHistoryItem;
 
 namespace VFrame30
 {
@@ -34,12 +35,28 @@ protected:
 	// Methods
 	//
 public:
-	QString schemaId() const;
-	QString caption() const;
 
-	// Events
+	// History functions
+	//
+public:
+	bool canBackHistory() const;
+	bool canForwardHistory() const;
+
+	void historyBack();
+	void historyForward();
+
+	void resetHistory();
+
+	void restoreState(const SchemaHistoryItem& historyState);
+	SchemaHistoryItem currentHistoryState() const;
+
+	void emitHistoryChanged();
+
+	// --
 	//
 protected:
+
+private:
 
 	// Signals
 	//
@@ -49,20 +66,27 @@ signals:
 
 	void signal_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema);
 
+	void signal_historyChanged(bool enableBack, bool enableForward);
+
 	// Slots
 	//
-protected slots:
+public slots:
 	void contextMenuRequested(const QPoint &pos);
 
-public slots:
+	void signalContextMenu(const QStringList signalList);
+
 	void signalInfo(QString appSignalId);
+
+	void slot_setSchema(QString schemaId);
 
 	// Properties
 	//
 public:
-	//MonitorSchemaView* schemaView();
-	//const MonitorSchemaView* schemaView() const;
-	void signalContextMenu(const QStringList signalList);
+	QString schemaId() const;
+	QString caption() const;
+
+	MonitorSchemaView* monitorSchemaView();
+	const MonitorSchemaView* monitorSchemaView() const;
 
 	// Data
 	//
@@ -74,5 +98,19 @@ private:
 private:
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;
+
+	std::list<SchemaHistoryItem> m_backHistory;
+	std::list<SchemaHistoryItem> m_forwardHistory;
+};
+
+
+struct SchemaHistoryItem
+{
+	//SchemaHistoryItem(QString schemaId, double zoom, int horzScrollValue, int vertScrollValue);
+
+	QString m_schemaId;
+	double m_zoom = 100.0;
+	int m_horzScrollValue = 0;
+	int m_vertScrollValue = 0;
 };
 

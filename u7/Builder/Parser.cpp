@@ -803,7 +803,7 @@ namespace Builder
 		{
 			const AppLogicItem& li = lipair.second;
 
-			if (li.m_fblItem->isInputSignalElement())
+			if (li.m_fblItem->isInputSignalElement() == true)
 			{
 				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
@@ -814,7 +814,8 @@ namespace Builder
 				continue;
 			}
 
-			if (li.m_fblItem->isOutputSignalElement())
+			if (li.m_fblItem->isOutputSignalElement() == true ||
+				li.m_fblItem->isInOutSignalElement() == true)
 			{
 				VFrame30::SchemaItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);

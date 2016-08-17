@@ -51,6 +51,8 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 			m_closeTabAction->setEnabled(allowed);
 		});
 
+	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
+
 	connect(m_schemaListWidget, &SchemaListWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	// --
@@ -212,14 +214,14 @@ void MonitorMainWindow::createActions()
 	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
 	m_historyBack = new QAction(tr("Go Back"), this);
-	m_historyBack->setStatusTip(tr("Click to got back"));
+	m_historyBack->setStatusTip(tr("Click to go back"));
 	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
 	m_historyBack->setEnabled(false);
 	m_historyBack->setShortcut(QKeySequence::Back);
 	connect(m_historyBack, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyBack);
 
 	m_historyForward = new QAction(tr("Go Forward"), this);
-	m_historyForward->setStatusTip(tr("Click to got forward"));
+	m_historyForward->setStatusTip(tr("Click to go forward"));
 	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
 	m_historyForward->setEnabled(false);
 	m_historyForward->setShortcut(QKeySequence::Forward);
@@ -297,6 +299,8 @@ void MonitorMainWindow::createMenus()
 void MonitorMainWindow::createToolBars()
 {
 	m_toolBar = new QToolBar(this);
+	m_toolBar->setObjectName("MonitorMainToolBar");
+
 	m_toolBar->setMovable(false);
 	m_toolBar->setIconSize(QSize(28, 28));
 	m_toolBar->setStyleSheet("QToolBar{spacing:2px;padding:2px;}");
@@ -438,6 +442,22 @@ void MonitorMainWindow::slot_findSignal()
 {
 	DialogSignalSearch* dsi = new DialogSignalSearch(this);
 	dsi->show();
+	return;
+}
+
+void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
+{
+	if (m_historyBack == nullptr ||
+		m_historyForward == nullptr)
+	{
+		assert(m_historyBack);
+		assert(m_historyForward);
+
+		return;
+	}
+
+	m_historyBack->setEnabled(enableBack);
+	m_historyForward->setEnabled(enableForward);
 
 	return;
 }

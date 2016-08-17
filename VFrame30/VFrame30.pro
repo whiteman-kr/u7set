@@ -93,7 +93,6 @@ HEADERS += VFrame30Lib_global.h \
     VFrame30Library.h \
     HorzVertLinks.h \
 	../lib/TypesAndEnums.h \
-    FrameHistoryItem.h \
 	Configuration.h \
     VFrame30.h \
     ../lib/StreamedData.h \
@@ -145,7 +144,6 @@ SOURCES += \
     Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
-    FrameHistoryItem.cpp \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
