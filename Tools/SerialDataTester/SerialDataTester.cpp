@@ -630,7 +630,7 @@ void SerialDataTester::portError(QString error)
 
 	for (QAction* port : m_setPort->actions())
 	{
-		    port->setChecked(false);
+		port->setChecked(false);
 	}
 }
 
@@ -642,10 +642,13 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
 
+	bool packageCorrupted = false;
 
 	if (receivedValues.size() != 7)
 	{
 		qDebug() << "Wrong packet size!";
+		packageCorrupted = true;
+		ui->statusBar->showMessage("Data received: Packet error!");
 	}
 	else
 	{/*
@@ -671,7 +674,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 	quint64 packetCrc;
 	packet >> packetCrc;
 
-	bool packageCorrupted = false;
+
 
 	// Check calculated and received crc's
 	//
@@ -707,17 +710,19 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 		dataArray.resize(m_dataSize*8);
 		dataArray.fill(0);
 
-		/*for(int currentByte=0; currentByte<receivedValues.count(); ++currentByte)
-			{
-				for(int currentBit=0; currentBit<8; ++currentBit)
-				{
-					dataArray.setBit(currentByte*8+currentBit, receivedValues.at(currentByte)&(1<<(currentBit)));
-					allReceivedBitsArray.append(QString::number(dataArray.at(currentByte*8+currentBit)));
-				}
-				allReceivedBitsArray.append(" ");
-			}*/
+		QString dataVisualisation;
 
 		dataArray = bytesToBits(receivedValues);
+
+		for (int currentBit = 0; currentBit < dataArray.size(); currentBit++)
+		{
+			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0");
+
+			if ((currentBit+1) % 8 == 0)
+				dataVisualisation += " ";
+		}
+
+		ui->statusBar->showMessage("Data received: " + dataVisualisation);
 
 		qDebug() << "QBitArray data: " << dataArray;
 
@@ -806,7 +811,8 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 			//}
 		}
 
-		/*if (packageCorrupted)
+	}
+	if (packageCorrupted)
 	{
 		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
 	}
@@ -815,8 +821,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 		ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
 	}
 
-	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));*/
-	}
+	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
 }
 
 void SerialDataTester::signalTimeout()
