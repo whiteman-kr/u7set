@@ -294,7 +294,7 @@ void SerialDataTester::parseFile()
 						{
 							portExists = true;
 							port->setChecked(true);
-							m_portReceiver->setPort(attributes.value("PortInfoStrID").toString());
+							m_portReceiver->setPort(attributes.value("StrID").toString());
 							m_portReceiver->setBaud(attributes.value("Speed").toInt());
 							switch (attributes.value("Bits").toInt())
 							{
@@ -329,12 +329,12 @@ void SerialDataTester::parseFile()
 							}
 							default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Stop bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
 							}
-							ui->portName->setText(attributes.value("PortInfoStrID").toString());
+							ui->portName->setText(attributes.value("StrID").toString());
 							ui->baudRate->setText(attributes.value("Speed").toString());
 							ui->bits->setText(attributes.value("Bits").toString());
 							QSettings applicationSettings;
 
-							applicationSettings.setValue("port", attributes.value("PortInfoStrID").toString());
+							applicationSettings.setValue("port", attributes.value("StrID").toString());
 							applicationSettings.setValue("baud", attributes.value("Speed").toInt());
 							applicationSettings.setValue("bits", attributes.value("Bits").toInt());
 							applicationSettings.setValue("stopBits", attributes.value("StopBits").toInt());
@@ -627,6 +627,11 @@ void SerialDataTester::portError(QString error)
 {
 	QMessageBox::critical(this, tr("Critical error"), error);
 	ui->portName->setText("Error");
+
+	for (QAction* port : m_setPort->actions())
+	{
+		    port->setChecked(false);
+	}
 }
 
 void SerialDataTester::dataReceived(QByteArray receivedValues)
