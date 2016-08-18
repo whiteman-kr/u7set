@@ -182,7 +182,7 @@ void SerialDataTesterServer::parseFile()
 				        && attributes.hasAttribute("ParityControl")
 				        && attributes.hasAttribute("DataSize"))
 				{
-					m_dataSize = attributes.value("DataSize").toInt()/8;
+					m_dataSize = attributes.value("DataSize").toInt();
 				}
 			}
 
@@ -284,20 +284,6 @@ void SerialDataTesterServer::sendPacket()
 		generatedData.resize(m_dataSize*8);
 		generatedData.fill(0);
 
-		/*data.append(0x01);
-		data.append(0x4A);
-		data.append(0x30);
-		data.append(0x43);
-		data.append(0x45);
-		data.append(0x37);
-		data.append(0x01);*/
-
-		/*QBitArray bits;
-		bits.fill(0, 8);
-
-		bits.setBit(0, 1);
-		bits.setBit(1, 1);*/
-
 		qDebug() << "We transfer now: ";
 
 		for (SignalData signal : m_signalsFromXml)
@@ -363,6 +349,7 @@ void SerialDataTesterServer::sendPacket()
 			else
 			{
 				generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
+				qDebug() << signal.name << " Bits not included";
 			}
 		}
 
@@ -374,19 +361,33 @@ void SerialDataTesterServer::sendPacket()
 
 		QByteArray bytes;
 		bytes.clear();
+
+		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+
+		// Write down signature to packet (4 bytes);
+		//
+
 		bytes.append(sign.bytes, 4);
 
-		qDebug() << bytes.size();
+		// Write down header bytes (8 bytes);
+		//
 
 		bytes.append(head.bytes, 8);
 
-		qDebug() << bytes.size();
+		// Write down packet data
+		//
 
 		bytes += dataToSend;
 
-		qDebug() << bytes.size();
+		// Write packet to port
+		//
+
+		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
 
 		m_serialPort->write(bytes, bytes.size());
+
+		// Send data
+		//
 
 		bool ok = m_serialPort->flush();
 
