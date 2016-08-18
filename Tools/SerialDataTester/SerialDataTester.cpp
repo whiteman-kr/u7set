@@ -724,7 +724,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 
 		ui->statusBar->showMessage("Data received: " + dataVisualisation);
 
-		qDebug() << "QBitArray data: " << dataArray;
+		//qDebug() << "QBitArray data: " << dataArray;
 
 		/*for (int currentBit = 0; currentBit < m_dataSize*8; currentBit++)
 			{
@@ -756,12 +756,12 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 			std::reverse(valueString.begin(), valueString.end());
 			bool falseValue = false;
 			qint64 result = valueString.toInt(&falseValue, 2);
-			qDebug() << "Result: " << result;
+			//qDebug() << "Result: " << result;
 			QString resultString;
 			if (signal.dataFormat == "UnsignedInt")
 			{
 				resultString = QString::number(result);
-				qDebug() << "ResultString: " << resultString;
+			//	qDebug() << "ResultString: " << resultString;
 			}
 			if (signal.dataFormat == "SignedInt")
 			{
