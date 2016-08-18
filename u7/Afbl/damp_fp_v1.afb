@@ -3,7 +3,7 @@
     <AfbElement StrId="#damp_fp_v1">
         <Properties>
             <Caption>damp_fp</Caption>
-            <Version>1.0002</Version>
+            <Version>1.0005</Version>
             <Implementation Version="104" OpIndex="19"/>
             <Description>Damper Block with float data format</Description>
             <Category>Damper</Category>
@@ -13,19 +13,20 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
-            <AfbElementSignal OpName="i_track" Caption="track" Type="Discrete" OpIndex="7" Size="1"/>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="6" Size="32"/>
+            <AfbElementSignal OpName="i_track" Caption="track" Type="Discrete" OpIndex="8" Size="1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="12" Size="32"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="13" Size="32"/>
 
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="14" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="15" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="16" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="17" Size="1"/>
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="15" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="16" Size="1"/>
+            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="17" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="18" Size="1"/>
+            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="19" Size="1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>5</Value>
                 <Default>0</Default>
                 <LowLimit>0</LowLimit>
@@ -91,6 +92,18 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
+ <AfbElementParam OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
@@ -136,6 +149,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+
 
 	videoItemFblElement.adjustHeight();
 

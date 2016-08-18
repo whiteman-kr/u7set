@@ -18,6 +18,7 @@
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="8" Size="1"/>
+            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="12" Size="1"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
@@ -27,6 +28,18 @@
                 <HighLimit>5</HighLimit>
                 <Script>
                     <Changed></Changed>
+                </Script>
+            </AfbElementParam>      
+            <AfbElementParam OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
@@ -41,8 +54,43 @@
             </AfbElementParam>
         </Params>
         <CommonScript>
-            <Library></Library>
-            <AfterCreation></AfterCreation>
+            <Library>
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+            </Library>
+            <AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+            </AfterCreation>
         </CommonScript>
     </AfbElement>
 </ApplicationFunctionalBlocks>

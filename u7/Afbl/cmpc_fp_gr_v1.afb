@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmpc_fp_gr_v1">
         <Properties>
             <Caption>cmpc_fp_gr</Caption>
-            <Version>1.0001</Version>
+            <Version>1.0002</Version>
             <Implementation Version="108" OpIndex="12"/>
             <Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
             <Category>Compare</Category>
@@ -18,7 +18,7 @@
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="9" Size="1"/>
             
-            <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="10" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="10" Size="1"/>
         </OutputSignals>
         <Params>
            <AfbElementParam OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
@@ -57,7 +57,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
                 <Script>
@@ -105,7 +105,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}	
 	
-	createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
+	createOutput(videoItemFblElement, afbElement, "OutNan", "nan");
 
 	videoItemFblElement.adjustHeight();
 

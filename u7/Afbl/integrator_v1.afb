@@ -3,7 +3,7 @@
     <AfbElement StrId="#integrator_v1">
         <Properties>
             <Caption>integrator</Caption>
-            <Version>1.0001</Version>
+            <Version>1.0002</Version>
             <Implementation Version="1" OpIndex="29"/>
             <Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
             <Category>Other</Category>
@@ -24,7 +24,7 @@
             <AfbElementSignal OpName="o_max" Caption="max" Type="Discrete" OpIndex="22" Size="1"/>
             <AfbElementSignal OpName="o_min" Caption="min" Type="Discrete" OpIndex="23" Size="1"/>
 
-            <AfbElementSignal OpName="o_unordered" Caption="unordered" Type="Discrete" OpIndex="24" Size="1"/>
+            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="24" Size="1"/>
             <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="25" Size="1"/>
             <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="26" Size="1"/>
             <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="27" Size="1"/>
@@ -76,7 +76,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>                             
-            <AfbElementParam OpName="OutUnordered" Caption="OutUnordered" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+            <AfbElementParam OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
                 <Script>
@@ -173,7 +173,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
 
-	createOutput(videoItemFblElement, afbElement, "OutUnordered", "unordered");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");

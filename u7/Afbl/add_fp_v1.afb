@@ -26,10 +26,10 @@
         </OutputSignals>
         <Params>            
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>2</Value>
-                <Default>2</Default>
+                <Value>5</Value>
+                <Default>5</Default>
                 <LowLimit>1</LowLimit>
-                <HighLimit>2</HighLimit>
+                <HighLimit>8</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
