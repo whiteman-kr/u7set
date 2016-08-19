@@ -826,11 +826,11 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 
 void SerialDataTester::signalTimeout()
 {
-	/*for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
+	for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
 	{
 		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem(QString::number(0)));
 	}
-	ui->statusBar->showMessage("Signal timeout!");*/
+	ui->statusBar->showMessage("Signal timeout!");
 }
 
 void SerialDataTester::erasePacketData()

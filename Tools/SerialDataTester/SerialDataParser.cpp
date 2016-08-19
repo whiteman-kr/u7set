@@ -167,12 +167,6 @@ void SerialDataParser::readingData()
 
 		dataToSend.insert(0, m_packetData, bytesToCopy);
 
-		qDebug() << dataToSend.size();
-
-		if (dataToSend.size() != 7)
-		{
-			qDebug() << "That's it!";
-		}
 		//dataToSend.fromRawData(m_packetData+4, m_bytesCount-(4+8)); // 4 - dataUID size, 8 - crc size
 
 		//qDebug() << dataToSend;
