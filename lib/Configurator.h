@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSerialPort>
 #include "../lib/ModuleConfiguration.h"
+#include "../lib/OutputLog.h"
 
 class OutputLog;
 
@@ -74,8 +75,8 @@ struct CONF_HEADER_V1
 									// !!! ATTENTION !!!
 									// HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN
 
-	void dump(OutputLog& log);
-	void dumpFlagsState(OutputLog& log);
+        void dump(OutputLog *log);
+        void dumpFlagsState(OutputLog *log);
 	
 	void setCrc();
 	bool checkCrc();
@@ -175,8 +176,10 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog& log);
+        void dump(OutputLog *log);
 };
+
+
 #pragma pack(pop)
 
 typedef CONF_IDENTIFICATION_DATA_V1 CONF_IDENTIFICATION_DATA;	// Current version
@@ -191,7 +194,7 @@ class Configurator : public QObject
 	Q_OBJECT
 
 public:
-	Configurator(QString serialDevide, QObject* parent = nullptr);
+        Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
 	virtual ~Configurator();
 	
 protected:
@@ -205,16 +208,20 @@ protected:
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
+	void readConfigurationWorker(int param);
+	void writeConfigurationWorker(ModuleFirmware* conf);
+
 	// Slots
 	//
 public slots:
 	void setSettings(QString device, bool showDebugInfo);
 	void readConfiguration(int param);
-	void readConfigurationWorker(int param);
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+	void writeConfDataFile(const QString& fileName);
 	void writeConfData(ModuleFirmware* conf);
-	void readFirmware(QString fileName);
+	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
+	void cancelOperation();
 
 	// Signals
 	//
@@ -239,9 +246,13 @@ private:
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 
-    QSerialPort *m_serialPort;
+        QSerialPort *m_serialPort;
+
+        OutputLog* m_Log;
 
 	mutable QMutex mutex;			// m_device
+
+	bool m_cancelFlag = false;
 };
 
 

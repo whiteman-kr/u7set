@@ -11,8 +11,13 @@ Settings::Settings() :
 	m_serverUsername("u7"),
 	m_serverPassword("P2ssw0rd"),
 	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
-	m_expertMode(false)
-
+	m_expertMode(false),
+	#ifdef Q_OS_LINUX
+		m_configuratorSerialPort("ttyS0")
+	#endif
+	#ifdef Q_OS_WIN32
+		m_configuratorSerialPort("\\\\.\\COM3")
+	#endif
 {
 }
 
@@ -75,6 +80,8 @@ void Settings::writeUserScope() const
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
+
+	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
 
 	return;
 }
@@ -146,6 +153,8 @@ void Settings::loadUserScope()
 
 	m_infoMode = s.value("m_infoMode").toBool();
 
+	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
+
     return;
 }
 
@@ -158,6 +167,7 @@ void Settings::writeSystemScope() const
 	s.setValue("m_serverUsername", m_serverUsername);
 	s.setValue("m_serverPassword", m_serverPassword);
 	s.setValue("m_buildOutputPath", m_buildOutputPath);
+	s.setValue("m_configuratorSerialPort", m_configuratorSerialPort);
 
 	return;
 }
@@ -170,6 +180,7 @@ void Settings::loadSystemScope()
 	m_serverUsername = s.value("m_serverUsername", "u7").toString();
 	m_serverPassword = s.value("m_serverPassword", "P2ssw0rd").toString();
 	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
+	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
 
 	return;
 }

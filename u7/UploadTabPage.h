@@ -1,9 +1,13 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../lib/OutputLog.h"
+#include "../lib/ModuleConfiguration.h"
+#include "../lib/Configurator.h"
+#include "Builder/IssueLogger.h"
 
 class DbController;
 class QCheckBox;
+class QComboBox;
 
 
 //
@@ -22,68 +26,91 @@ public:
 	// Public methods
 	//
 public:
-	//static UploadTabPage* instance();
 
-	//bool isUploadingNow() const;
+	bool isUploading();
+	void findProjectBuilds();
 
-//	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
-//	void cancelUpload();
-
-protected:
-	void CreateActions();
-
-//	void writeOutputLog(const OutputLogItem& logItem);
+protected slots:
+	void configurationTypeChanged(const QString& s);
+	void findSubsystemsInBuild(int index);
+	void subsystemChanged(int index);
 
 signals:
+	void setCommunicationSettings(QString device, bool showDebugInfo);
+
+	void readConfiguration(int);
+	void readFirmware(QString fileName);
+
+	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+	void writeConfDataFile(const QString& fileName);
+	void eraseFlashMemory(int);
+	void cancelOperation();
 
 	// Events
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
-	//virtual void timerEvent(QTimerEvent* event) override;
+	virtual void timerEvent(QTimerEvent* pTimerEvent) override;
 
 public slots:
 	void projectOpened();
 	void projectClosed();
 
-//	void upload();
-//	void cancel();
+	void read();
+	void upload();
+	void erase();
+	void cancel();
+	void clearLog();
+	void settings();
 
-protected slots:
-//	void uploadWasStarted();
-//	void uploadWasFinished();
+	void disableControls();
+	void enableControls();
+	void communicationReadFinished();
+
+private:
+	void writeLog(const OutputLogItem& logItem);
 
 	// Data
 	//
 private:
-	QStackedWidget* m_stackedWidget = nullptr;
 
+	QSplitter* m_vsplitter = nullptr;
 
+	QListWidget* m_pBuildList = nullptr;
 
-	//static UploadTabPage* m_this;
+	QListWidget* m_pSubsystemList = nullptr;
 
-	//QTableWidget* m_taskTable = nullptr;
+	QComboBox* m_pConfigurationCombo = nullptr;
 
-//	QWidget* m_rightSideWidget = nullptr;
-//	QTextEdit* m_outputWidget = nullptr;
-//	QPushButton* m_buildButton = nullptr;
-//	QPushButton* m_cancelButton = nullptr;
+	QComboBox* m_pFileTypeCombo = nullptr;
 
-//	QSplitter* m_vsplitter = nullptr;
-//	QSplitter* m_hsplitter = nullptr;
+	QTextEdit* m_pLog = nullptr;
 
-//	QWidget* m_settingsWidget = nullptr;
-//	QCheckBox* m_debugCheckBox = nullptr;
+	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pConfigureButton = nullptr;
+	QPushButton* m_pEraseButton = nullptr;
 
-//	Builder::IssueLogger m_outputLog;
-//	int m_logTimerId = -1;
+	QPushButton* m_pSettingsButton = nullptr;
+	QPushButton* m_pClearLogButton = nullptr;
+	QPushButton* m_pCancelButton = nullptr;
 
-//	QFile m_logFile;
-//	static const char* m_buildLogFileName;
+	int m_logTimerId = -1;
 
-//	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
+	Configurator* m_pConfigurator = nullptr;
+	QThread* m_pConfigurationThread = nullptr;
 
-//	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schame items with issues
+	Builder::IssueLogger m_outputLog;
+
+	QString m_buildSearchPath;
+
+	QString m_currentBuild;
+	QString m_currentSubsystem;
+
+	int m_currentBuildIndex = -1;
+	int m_currentSubsystemIndex = -1;
+
+	bool m_uploading = false;
+
 };
 
 

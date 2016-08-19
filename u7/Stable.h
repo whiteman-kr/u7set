@@ -78,6 +78,7 @@
 
 #include <QSplitter>
 #include <QTextEdit>
+#include <QComboBox>
 
 #include <QMessageBox>
 #include <QInputDialog>

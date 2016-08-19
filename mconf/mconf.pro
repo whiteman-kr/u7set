@@ -22,6 +22,17 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
+# DESTDIR
+#
+win32 {
+        CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+        CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
 CONFIG += precompile_header
 
 DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
@@ -39,14 +50,14 @@ HEADERS += \
     ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
-    Configurator.h \
     DiagTabPage.h \
     ModuleConfigurator.h \
     SettingsForm.h \
         ../lib/Crc.h \
         ../lib/CUtils.h \
     ../lib/PropertyObject.h \
-    ../lib/Types.h
+    ../lib/Types.h \
+    ../lib/Configurator.h
 
 SOURCES += \
 	main.cpp \
@@ -58,12 +69,12 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
-    Configurator.cpp \
     DiagTabPage.cpp \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
     ../lib/Crc.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../lib/Configurator.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \
@@ -104,8 +115,7 @@ unix {
 #protobuf
 #
 win32 {
-        CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/debug -lprotobuf
-        CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/release -lprotobuf
+        LIBS += -L$$DESTDIR -lprotobuf
 
         INCLUDEPATH += ./../Protobuf
 }

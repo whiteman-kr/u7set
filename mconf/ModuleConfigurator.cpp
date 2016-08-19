@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ModuleConfigurator.h"
-#include "Configurator.h"
+#include "../lib/Configurator.h"
 #include "SettingsForm.h"
 #include "DiagTabPage.h"
 #include "ApplicationTabPage.h"
@@ -109,7 +109,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
 
-	m_pConfigurator = new Configurator(m_settings.serialPort());
+	m_pConfigurator = new Configurator(m_settings.serialPort(), &theLog);
 	m_pConfigurationThread = new QThread(this);
 	
 	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);

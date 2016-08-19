@@ -14,8 +14,6 @@ public:
 	
 signals:
 	
-public slots:
-	
 	// Properties
 	//
 protected:

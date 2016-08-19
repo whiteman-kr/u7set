@@ -10,228 +10,316 @@
 // UploadTabPage
 //
 //
-//UploadTabPage* UploadTabPage::m_this = nullptr;
-//const char* UploadTabPage::m_buildLogFileName = "buildlog.html";
 
 
 UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)//,
-	//m_builder(&m_outputLog)
 {
 	assert(dbcontroller != nullptr);
-
-	//	UploadTabPage::m_this = this;
 
 	//
 	// Controls
 	//
 
-	// Create Actions
+	//Left layout
 	//
-	CreateActions();
+	QVBoxLayout* pLeftLayout = new QVBoxLayout();
 
-	// US Widgets
+	pLeftLayout->addWidget(new QLabel(tr("Choose Configuration:")));
+	m_pConfigurationCombo = new QComboBox();
+	m_pConfigurationCombo->addItem(tr("Debug"), tr("debug"));
+	m_pConfigurationCombo->addItem(tr("Release"), tr("release"));
+	m_pConfigurationCombo->setCurrentIndex(0);
+	connect(m_pConfigurationCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::configurationTypeChanged);
+	pLeftLayout->addWidget(m_pConfigurationCombo);
+
+	pLeftLayout->addWidget(new QLabel(tr("Choose Build:")));
+	m_pBuildList = new QListWidget();
+	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::findSubsystemsInBuild);
+	pLeftLayout->addWidget(m_pBuildList);
+
+	pLeftLayout->addWidget(new QLabel(tr("Choose Subsystem:")));
+	m_pSubsystemList = new QListWidget();
+	connect(m_pSubsystemList, &QListWidget::currentRowChanged, this, &UploadTabPage::subsystemChanged);
+	pLeftLayout->addWidget(m_pSubsystemList);
+
+	pLeftLayout->addWidget(new QLabel(tr("Choose File Type:")));
+	m_pFileTypeCombo = new QComboBox();
+	m_pFileTypeCombo->addItem(tr("Application Logic (*.alb)"), tr("*.alb"));
+	m_pFileTypeCombo->addItem(tr("FSC Configuration (*.mcb)"), tr("*.mcb"));
+	m_pFileTypeCombo->addItem(tr("Tuning (*.tub)"), tr("*.tub"));
+	m_pFileTypeCombo->setCurrentIndex(0);
+	pLeftLayout->addWidget(m_pFileTypeCombo);
+
+	pLeftLayout->addStretch();
+
+	QWidget* pLeftWidget = new QWidget();
+	pLeftWidget->setLayout(pLeftLayout);
+
+	// Log
 	//
-	QLayout* layout = new QHBoxLayout();
+	m_pLog = new QTextEdit();
+	m_pLog->setReadOnly(true);
+	m_pLog->document()->setUndoRedoEnabled(false);
+	m_pLog->document()->setMaximumBlockCount(600);
 
-	QListWidget* stackedListWidget = new QListWidget();
-	stackedListWidget->addItem("Choose Build");
-	stackedListWidget->addItem("Upload");
+	// Buttons
+	//
+	QHBoxLayout* pButtonsLayout = new QHBoxLayout();
+	pButtonsLayout->addStretch();
 
-	m_stackedWidget = new QStackedWidget();
-	m_stackedWidget->addWidget(new QPushButton("Choose Build"));
-	m_stackedWidget->addWidget(new QPushButton("Upload"));
+	m_pReadButton = new QPushButton(tr("&Read"));
+	pButtonsLayout->addWidget(m_pReadButton);
 
-	connect(stackedListWidget, &QListWidget::currentRowChanged, m_stackedWidget, &QStackedWidget::setCurrentIndex);
+	m_pConfigureButton = new QPushButton(tr("&Configure"));
+	m_pConfigureButton->setEnabled(false);
+	pButtonsLayout->addWidget(m_pConfigureButton);
+
+	if (theSettings.isExpertMode() == true)
+	{
+		m_pEraseButton = new QPushButton(tr("&Erase"));
+		pButtonsLayout->addWidget(m_pEraseButton);
+	}
+
+	m_pCancelButton = new QPushButton(tr("Cancel"));
+	m_pCancelButton->setEnabled(false);
+	pButtonsLayout->addWidget(m_pCancelButton);
+
+	m_pClearLogButton = new QPushButton(tr("Clear Log"));
+	pButtonsLayout->addWidget(m_pClearLogButton);
+
+	m_pSettingsButton = new QPushButton(tr("&Settings..."));
+	pButtonsLayout->addWidget(m_pSettingsButton);
+
+	// Right layout
+	//
+	QVBoxLayout* pRightLayout = new QVBoxLayout();
+	pRightLayout->addWidget(m_pLog);
+	pRightLayout->addLayout(pButtonsLayout);
+
+	QWidget* pRightWidget = new QWidget();
+	pRightWidget->setLayout(pRightLayout);
 
 	// --
 	//
-	layout->addWidget(stackedListWidget);
-	layout->addWidget(m_stackedWidget);
+	m_vsplitter = new QSplitter();
 
-	setLayout(layout);
+	m_vsplitter->addWidget(pLeftWidget);
+	m_vsplitter->addWidget(pRightWidget);
 
+	m_vsplitter->setStretchFactor(0, 2);
+	m_vsplitter->setStretchFactor(1, 1);
 
+	m_vsplitter->restoreState(theSettings.m_UploadTabPageSplitterState);
 
-	// Right Side Widget
-	//
-//	m_rightSideWidget = new QWidget();
+	QHBoxLayout* pMainLayout = new QHBoxLayout(this);
 
-//	// Output windows
-//	//
-//	m_outputWidget = new QTextEdit();
-//	m_outputWidget->setReadOnly(true);
-//	m_outputWidget->document()->setUndoRedoEnabled(false);
-//	m_outputWidget->document()->setMaximumBlockCount(600);
+	pMainLayout->addWidget(m_vsplitter);
 
-//	m_buildButton = new QPushButton(tr("Build..."));
-//	m_cancelButton = new QPushButton(tr("Cancel"));
-
-//	QGridLayout* rightWidgetLayout = new QGridLayout();
-
-//	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 3);
-//	rightWidgetLayout->addWidget(m_buildButton, 1, 1);
-//	rightWidgetLayout->addWidget(m_cancelButton, 1, 2);
-
-//	rightWidgetLayout->setColumnStretch(0, 1);
-
-//	m_rightSideWidget->setLayout(rightWidgetLayout);
-
-//	// Left Side
-//	//
-//	m_vsplitter = new QSplitter(this);
-
-//	m_settingsWidget = new QWidget(m_vsplitter);
-//	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
-
-//	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
-//	m_debugCheckBox->setChecked(true);
-
-//	settingsWidgetLayout->addWidget(m_debugCheckBox);
-
-//	m_settingsWidget->setLayout(settingsWidgetLayout);
-
-//	// V Splitter
-//	//
-//	m_vsplitter->addWidget(m_settingsWidget);
-//	m_vsplitter->addWidget(m_rightSideWidget);
-
-//	m_vsplitter->setStretchFactor(0, 2);
-//	m_vsplitter->setStretchFactor(1, 1);
-
-//	m_vsplitter->restoreState(theSettings.m_UploadTabPageSplitterState);
-
-//	//
-//	// Layouts
-//	//
-//	QHBoxLayout* pMainLayout = new QHBoxLayout();
-
-//	pMainLayout->addWidget(m_vsplitter);
-
-//	setLayout(pMainLayout);
+	setLayout(pMainLayout);
 
 	// --
 	//
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &UploadTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &UploadTabPage::projectClosed);
 
-//	connect(m_buildButton, &QAbstractButton::clicked, this, &UploadTabPage::upload);
-//	connect(m_cancelButton, &QAbstractButton::clicked, this, &UploadTabPage::cancel);
-
-//	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &UploadTabPage::uploadWasStarted);
-//	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &UploadTabPage::uploadWasFinished);
-
-	////connect(m_buildButton, &QAbstractButton::clicked, this, &UploadTabPage::buildStarted);	// On button clicked event!!!
-	//connect(&m_builder, &Builder::Builder::buildFinished, this, &UploadTabPage::buildFinished);
-
-	// Output Log
-	//
-	//m_logTimerId = startTimer(10);
-
-	//m_outputLog.setHtmlFont("Verdana");
+	connect(m_pReadButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
+	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &UploadTabPage::upload);
+	if (m_pEraseButton != nullptr)
+	{
+		connect(m_pEraseButton, &QAbstractButton::clicked, this, &UploadTabPage::erase);
+	}
+	connect(m_pCancelButton, &QAbstractButton::clicked, this, &UploadTabPage::cancel);
+	connect(m_pClearLogButton, &QAbstractButton::clicked, this, &UploadTabPage::clearLog);
+	connect(m_pSettingsButton, &QAbstractButton::clicked, this, &UploadTabPage::settings);
 
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
+
+
+
+
+	// Logic
+	//
+	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
+
+	m_pConfigurator = new Configurator(theSettings.m_configuratorSerialPort, &m_outputLog);
+	m_pConfigurationThread = new QThread(this);
+
+	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
+
+	connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
+
+	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::writeConfDataFile);
+	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
+	connect(this, &UploadTabPage::cancelOperation, m_pConfigurator, &Configurator::cancelOperation);
+
+	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
+	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
+	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
+
+	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
+
+	m_pConfigurator->moveToThread(m_pConfigurationThread);
+
+	m_pConfigurationThread->start();
+
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.isExpertMode());
+
+	// Start Timer
+	//
+	m_logTimerId = startTimer(200);
+
+
 }
 
 UploadTabPage::~UploadTabPage()
 {
-//	UploadTabPage::m_this = nullptr;
+	if (m_logTimerId != -1)
+	{
+		killTimer(m_logTimerId);
+	}
 
-	//theSettings.m_UploadTabPageSplitterState = m_vsplitter->saveState();
-	//theSettings.writeUserScope();
+	if (m_pConfigurationThread != nullptr)
+	{
+		m_pConfigurationThread->exit();
+		m_pConfigurationThread->wait(10000);
+	}
+
+	theSettings.m_UploadTabPageSplitterState = m_vsplitter->saveState();
+	theSettings.writeUserScope();
 }
 
-//bool UploadTabPage::isUploadingNow() const
-//{
-//	return m_builder.isRunning();
-//}
-
-//const std::map<QUuid, OutputMessageLevel>* UploadTabPage::itemsIssues() const
-//{
-//	return &m_itemsIssues;
-//}
-
-//void UploadTabPage::cancelUpload()
-//{
-//	if (m_builder.isRunning() == true)
-//	{
-//		m_builder.stop();
-
-//		// wait for 20 seconds while bild stops
-//		//
-//		for (int i = 0; i < 2000 && m_builder.isRunning() == true; i++)
-//		{
-//			QThread::msleep(10);
-//		}
-
-//		if (m_builder.isRunning() == true)
-//		{
-//			qDebug() << "WARNING: Exit while the build thread is still running!";
-//		}
-//	}
-//}
-
-//UploadTabPage* UploadTabPage::instance()
-//{
-//	assert(m_this);
-//	return m_this;
-//}
-
-void UploadTabPage::CreateActions()
+bool UploadTabPage::isUploading()
 {
-//	m_addSystemAction = new QAction(tr("System"), this);
-//	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-//	m_addSystemAction->setEnabled(false);
-//	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
-
-	return;
+	return m_uploading;
 }
 
-//void UploadTabPage::writeOutputLog(const OutputLogItem& logItem)
-//{
-//	if (m_outputWidget == nullptr)
-//	{
-//		assert(m_outputWidget != nullptr);
-//		return;
-//	}
+void UploadTabPage::findProjectBuilds()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
 
-//	QString html = logItem.toHtml();
-//	m_outputWidget->append(html);
+	if (isUploading() == true)
+	{
+		return;
+	}
 
-//	return;
-//}
+	QString projectName = dbController()->currentProject().projectName();
+	if (projectName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QVariant data = m_pConfigurationCombo->currentData();
+	if (data.isNull() == true || data.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	QString configurationType = data.toString();
+	if (configurationType.isEmpty() == true)
+	{
+		assert(false);
+		return;
+	}
+
+	m_buildSearchPath = QString("%1%2%3-%4").arg(theSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName).arg(configurationType);
+
+	QStringList builds = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs|QDir::NoSymLinks);
+
+	m_pBuildList->clear();
+	m_pBuildList->addItems(builds);
+
+	m_pSubsystemList->clear();
+
+	if (m_currentBuildIndex != -1 && m_currentBuildIndex < m_pBuildList->count())
+	{
+		m_pBuildList->setCurrentRow(m_currentBuildIndex);
+	}
+}
+
+void UploadTabPage::configurationTypeChanged(const QString& s)
+{
+	Q_UNUSED(s);
+
+	findProjectBuilds();
+}
+
+void UploadTabPage::findSubsystemsInBuild(int index)
+{
+	Q_UNUSED(index);
+
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	QListWidgetItem* item = m_pBuildList->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	m_currentBuild = item->text();
+
+	m_currentBuildIndex = m_pBuildList->currentRow();
+
+	QString buildPath = m_buildSearchPath + QDir::separator() + m_currentBuild;
+
+	QStringList subsystems = QDir(buildPath).entryList(QStringList("*"),
+									 QDir::Dirs | QDir::NoSymLinks);
+
+	m_pSubsystemList->clear();
+
+	// add only directories that contain binary files
+	//
+
+	for (QString s : subsystems)
+	{
+		QDir subsystemPath = buildPath + QDir::separator() + s;
+
+		QStringList binaryFiles = QDir(subsystemPath).entryList(QStringList() << "*.mcb" << "*.alb" << "*.tub",
+										 QDir::Files| QDir::NoSymLinks);
+
+		if (binaryFiles.isEmpty() == false)
+		{
+			m_pSubsystemList->addItem(s);
+		}
+	}
+
+	if (m_currentSubsystemIndex != -1 && m_currentSubsystemIndex < m_pSubsystemList->count())
+	{
+		m_pSubsystemList->setCurrentRow(m_currentSubsystemIndex);
+	}
+}
+
+void UploadTabPage::subsystemChanged(int index)
+{
+	Q_UNUSED(index);
+
+	QListWidgetItem* item = m_pSubsystemList->currentItem();
+	if (item == nullptr)
+	{
+		m_pConfigureButton->setEnabled(false);
+		return;
+	}
+
+	m_pConfigureButton->setEnabled(true);
+	m_currentSubsystem = item->text();
+	m_currentSubsystemIndex = m_pSubsystemList->currentRow();
+}
 
 void UploadTabPage::closeEvent(QCloseEvent* e)
 {
 	e->accept();
 }
 
-//void UploadTabPage::timerEvent(QTimerEvent* event)
-//{
-
-//	if (event->timerId() == m_logTimerId &&
-//		m_outputLog.isEmpty() == false &&
-//		m_outputWidget != nullptr)
-//	{
-//		std::list<OutputLogItem> messages;
-
-//		for (int i = 0; i < 10 && m_outputLog.isEmpty() == false; i++)
-//		{
-//			messages.push_back(m_outputLog.popMessages());
-//		}
-
-//		for (auto m = messages.begin(); m != messages.end(); ++m)
-//		{
-//			writeOutputLog(*m);
-//		}
-
-//		return;
-//	}
-
-//	return;
-//}
 
 void UploadTabPage::projectOpened()
 {
@@ -241,88 +329,222 @@ void UploadTabPage::projectOpened()
 
 void UploadTabPage::projectClosed()
 {
+	m_pBuildList->clear();
+	m_pSubsystemList->clear();
+
 	this->setEnabled(false);
 	return;
 }
 
-//void UploadTabPage::upload()
-//{
-//	m_outputLog.clear();
-//	m_outputWidget->clear();
+void UploadTabPage::read()
+{
+	clearLog();
 
-//	// init build log file
-//	//
-//    QString logFileName = QDir::fromNativeSeparators(theSettings.buildOutputPath());
+	try
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
 
-//	if (logFileName.endsWith('/') == false)
-//	{
-//		logFileName += '/';
-//	}
-//	logFileName += m_buildLogFileName;
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
 
-//	if (m_logFile.isOpen() == true && m_logFile.fileName() == logFileName)
-//	{
-//		// it is ok, file is open and has right name
-//		//
-//	}
-//	else
-//	{
-//		if (m_logFile.isOpen())
-//		{
-//			m_logFile.close();
-//		}
+		m_outputLog.writeMessage("");
+		m_outputLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
 
-//		m_logFile.setFileName(logFileName);
-//		m_logFile.open(QIODevice::Append | QIODevice::Text);
-//	}
+		emit readFirmware(fileName);
 
-//	if (m_logFile.isOpen() == true)
-//	{
-//		LOG_MESSAGE((&m_outputLog), tr("Build log file: %1").arg(logFileName));
+	}
+	catch(QString message)
+	{
+		m_outputLog.writeError(message);
+		return;
+	}
+}
 
-//	}
-//	else
-//	{
-//		LOG_WARNING_OBSOLETE((&m_outputLog), Builder::IssueType::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
-//	}
+void UploadTabPage::upload()
+{
+	clearLog();
 
-//	// --
-//	//
-//	GlobalMessanger::instance()->fireBuildStarted();
+	QVariant d = m_pFileTypeCombo->currentData();
+	if (d.isNull() || d.isValid() == false)
+	{
+		return;
+	}
 
-//	bool debug = m_debugCheckBox->isChecked();
 
-//	m_builder.start(
-//		db()->currentProject().projectName(),
-//		db()->host(),
-//		db()->port(),
-//		db()->serverUsername(),
-//		db()->serverPassword(),
-//		db()->currentUser().username(),
-//		db()->currentUser().password(),
-//		debug);
+	QString fileType = d.toString();
 
-//	return;
-//}
+	QString searchPath = m_buildSearchPath + QDir::separator() + m_currentBuild + QDir::separator() + m_currentSubsystem;
 
-//void UploadTabPage::cancel()
-//{
-//	m_builder.stop();
-//}
+	QStringList files = QDir(searchPath).entryList(QStringList(fileType),
+															  QDir::Files|QDir::NoSymLinks);
 
-//void UploadTabPage::uploadWasStarted()
-//{
-//	m_buildButton->setEnabled(false);
-//	m_cancelButton->setEnabled(true);
-//}
+	if (files.isEmpty() == true)
+	{
+		QMessageBox::critical(this, tr("Build"), tr("No Output Bitstream files found in %1!").arg(searchPath));
+		return;
+	}
 
-//void UploadTabPage::uploadWasFinished()
-//{
-//	m_buildButton->setEnabled(true);
-//	m_cancelButton->setEnabled(false);
+	if (files.size() > 1)
+	{
+		QMessageBox::critical(this, tr("Build"), tr("More than one Output Bitstream file found in %1!").arg(searchPath));
+		return;
+	}
 
-//	m_itemsIssues.clear();
+	QString fileName = searchPath + QDir::separator() + files[0];
 
-//	return;
-//}
+	try
+	{
 
+		emit writeConfDataFile(fileName);
+	}
+	catch(QString message)
+	{
+		m_outputLog.writeError(message);
+		return;
+	}
+}
+
+void UploadTabPage::erase()
+{
+	if (theSettings.isExpertMode() == false)
+	{
+		return;
+	}
+
+	QMessageBox mb(this);
+	mb.setText(tr("Are you sure you want to erase the flash memory?"));
+	mb.setInformativeText(tr("All data will be lost."));
+	mb.addButton(tr("Cancel"), QMessageBox::RejectRole);
+	mb.addButton(tr("Erase"), QMessageBox::AcceptRole);
+
+	if (mb.exec() == QMessageBox::Rejected)
+	{
+		return;
+	}
+
+	try
+	{
+		// --
+		//
+		m_outputLog.writeMessage("");
+		m_outputLog.writeMessage(tr("Erasing flash memory..."));
+
+		// Read
+		//
+		//disableControls();
+
+		emit eraseFlashMemory(0);
+	}
+	catch(QString message)
+	{
+		m_outputLog.writeError(message);
+		return;
+	}
+
+}
+
+void UploadTabPage::cancel()
+{
+	emit cancelOperation();
+}
+
+void UploadTabPage::clearLog()
+{
+	if (m_pLog == nullptr)
+	{
+		assert(m_pLog != nullptr);
+		return;
+	}
+
+	m_pLog->clear();
+}
+
+
+void UploadTabPage::settings()
+{
+
+}
+
+void UploadTabPage::disableControls()
+{
+	m_uploading = true;
+
+	bool enable = false;
+
+	m_pReadButton->setEnabled(enable);
+	m_pConfigureButton->setEnabled(enable);
+	if (m_pEraseButton)
+	{
+		m_pEraseButton->setEnabled(enable);
+	}
+	m_pSettingsButton->setEnabled(enable);
+	m_pCancelButton->setEnabled(!enable);
+	m_pClearLogButton->setEnabled(enable);
+
+}
+
+void UploadTabPage::enableControls()
+{
+	m_uploading = false;
+
+	bool enable = true;
+
+	m_pReadButton->setEnabled(enable);
+	m_pConfigureButton->setEnabled(enable);
+	if (m_pEraseButton)
+	{
+		m_pEraseButton->setEnabled(enable);
+	}
+	m_pSettingsButton->setEnabled(enable);
+	m_pCancelButton->setEnabled(!enable);
+	m_pClearLogButton->setEnabled(enable);
+}
+
+void UploadTabPage::communicationReadFinished()
+{
+
+}
+
+
+void UploadTabPage::writeLog(const OutputLogItem& logItem)
+{
+	if (m_pLog == nullptr)
+	{
+		assert(m_pLog != nullptr);
+		return;
+	}
+
+	QString s = logItem.toHtml();
+	m_pLog->append(s);
+
+	return;
+}
+
+void UploadTabPage::timerEvent(QTimerEvent* pTimerEvent)
+{
+	if (pTimerEvent == nullptr)
+	{
+		assert(pTimerEvent != nullptr);
+		return;
+	}
+
+	if (pTimerEvent->timerId() == m_logTimerId &&
+		m_outputLog.isEmpty() == false &&
+		m_pLog != nullptr)
+	{
+		std::list<OutputLogItem> messages;
+		for (int i = 0; i < 30 && m_outputLog.isEmpty() == false; i++)
+		{
+			messages.push_back(m_outputLog.popMessages());
+		}
+
+		for (auto m = messages.begin(); m != messages.end(); ++m)
+		{
+			writeLog(*m);
+		}
+	}
+
+	return;
+}

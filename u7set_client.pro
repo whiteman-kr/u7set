@@ -7,5 +7,7 @@ SUBDIRS += qtpropertybrowser \
  	GetGitProjectVersion \
 	VFrame30 \
 	u7 \
-	Monitor
+	Monitor \
+	mconf
+
 

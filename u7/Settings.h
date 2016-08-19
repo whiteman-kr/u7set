@@ -121,6 +121,11 @@ public:
     QByteArray m_schemaItemPropertiesWindowGeometry;
     int m_schemaItemSplitterState = 0;
 
+	// Configurator properties
+	//
+	QString m_configuratorSerialPort;
+	QByteArray m_UploadTabPageSplitterState;
+
 private:
 	// --
 	//

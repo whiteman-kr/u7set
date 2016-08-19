@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg
+QT       += core gui widgets sql network xmlpatterns qml svg serialport
 
 TARGET = u7
 TEMPLATE = app
@@ -174,7 +174,8 @@ SOURCES +=\
     ../lib/DataProtocols.cpp \
     Builder/ModuleFirmwareWriter.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/Configurator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -278,7 +279,8 @@ HEADERS  += \
     ../lib/DataProtocols.h \
     Builder/ModuleFirmwareWriter.h \
     ../lib/HostAddressPort.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/Configurator.h
 
 FORMS    += \
     ChangesetDialog.ui \
