@@ -50,21 +50,21 @@ void SerialDataParser::scanningSignaure()
 
 	do
 	{
-		qDebug() << "===================================";
+		/*qDebug() << "===================================";
 		qDebug() << "Scanning signature";
 		qDebug() << "m_dataSize: " << m_dataSize;
-		qDebug() << "m_bytesCount: " << m_bytesCount;
+		qDebug() << "m_bytesCount: " << m_bytesCount;*/
 
 //		if (m_bytesCount > 4)
 //			m_bytesCount = 0;
 
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
-		qDebug() << "BytesToCopy: " << bytesToCopy;
+		//qDebug() << "BytesToCopy: " << bytesToCopy;
 
 		avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
 
-		qDebug() << "avaiableDataSize: " << avaiableDataSize;
+		//qDebug() << "avaiableDataSize: " << avaiableDataSize;
 
 		if (avaiableDataSize < bytesToCopy)  // When our packet have amount of bytes, which is smaller than we need - record all of them into signature value
 		{
@@ -79,7 +79,7 @@ void SerialDataParser::scanningSignaure()
 
 			if (m_signature.uint32 == baseSignature) // If our signature is a beginning of the packet header
 			{
-				qDebug() << "Sig OK";
+				//qDebug() << "Sig OK";
 				m_state = ReadingHeader; // Change current state
 				m_readPtr += bytesToCopy; // Move our packet pointer forward by recordered amount of bytes (WARNNG: it mmust be bytesToCopy value, in case of the packet beginning)
 				m_bytesCount = 0; // Reset signature bytes amount value
@@ -99,18 +99,18 @@ void SerialDataParser::scanningSignaure()
 	while(m_readPtr < m_buffer + m_dataSize);
 	//while (m_readPtr != nullptr);
 
-	qDebug() << "Done packetprocessing";
+	//qDebug() << "Done packetprocessing";
 }
 
 void SerialDataParser::readingHeader()
 {
-	qDebug() << "===================================";
+	/*qDebug() << "===================================";
 	qDebug() << "Reading header";
-	qDebug() << "m_bytesCount: " << m_bytesCount;
+	qDebug() << "m_bytesCount: " << m_bytesCount;*/
 
 	int bytesToCopy = 8 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
-	qDebug() << "bytesToCopy: " << bytesToCopy;
+	//qDebug() << "bytesToCopy: " << bytesToCopy;
 
 	int avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
 
@@ -124,12 +124,12 @@ void SerialDataParser::readingHeader()
 
 	if (m_bytesCount == 8)
 	{
-		qDebug() << "Head OK";
+		//qDebug() << "Head OK";
 		m_state = ReadingData;
 		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
 		m_packetData = new char[m_header.header.dataAmount];
-		qDebug() << "===================================";
+		//qDebug() << "===================================";
 		readingData();
 	}
 	else
@@ -137,7 +137,7 @@ void SerialDataParser::readingHeader()
 		m_state = ScanningSignature;
 		m_readPtr++;
 		m_bytesCount = 0;
-		qDebug() << "===================================";
+		//qDebug() << "===================================";
 		scanningSignaure();
 	}
 }
@@ -163,10 +163,19 @@ void SerialDataParser::readingData()
 		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
 
-		QByteArray dataToSend = m_packetData;
+		QByteArray dataToSend;
+
+		dataToSend.insert(0, m_packetData, bytesToCopy);
+
+		qDebug() << dataToSend.size();
+
+		if (dataToSend.size() != 7)
+		{
+			qDebug() << "That's it!";
+		}
 		//dataToSend.fromRawData(m_packetData+4, m_bytesCount-(4+8)); // 4 - dataUID size, 8 - crc size
 
-		qDebug() << dataToSend;
+		//qDebug() << dataToSend;
 
 		QByteArray dataToCalculateCrc;
 		//quint64 crcFromPacket;
@@ -201,11 +210,11 @@ void SerialDataParser::readingData()
 
 		emit packetProcessed(dataToSend);
 
-		qDebug() << m_header.header.version;
+		/*qDebug() << m_header.header.version;
 		qDebug() << m_header.header.txid;
 		qDebug() << m_header.header.numerator;
 		qDebug() << m_header.header.dataAmount;
-		qDebug() << "=======================================";
+		qDebug() << "=======================================";*/
 		/*}
 		else
 		{

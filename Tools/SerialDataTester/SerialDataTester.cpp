@@ -13,8 +13,8 @@
 #include <string>
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::SerialDataTester)
+    QMainWindow(parent),
+    ui(new Ui::SerialDataTester)
 {
 	ui->setupUi(this);
 
@@ -217,9 +217,9 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	m_portReceiver->moveToThread(m_PortThread);
 	m_PortThread->start();
 
-    m_ParserThread = new QThread(this);
-    m_parser->moveToThread(m_ParserThread);
-    m_ParserThread->start();
+	m_ParserThread = new QThread(this);
+	m_parser->moveToThread(m_ParserThread);
+	m_ParserThread->start();
 
 	// Clean old packet data
 	//
@@ -231,13 +231,13 @@ SerialDataTester::~SerialDataTester()
 {
 	m_portReceiver->closePort();
 	m_PortThread->terminate();
-    m_ParserThread->terminate();
+	m_ParserThread->terminate();
 
 	delete m_portReceiver;
 	delete ui;
 	delete m_PortThread;
 	delete m_parser;
-    delete m_ParserThread;
+	delete m_ParserThread;
 }
 
 void SerialDataTester::parseFile()
@@ -278,13 +278,13 @@ void SerialDataTester::parseFile()
 			if(xmlReader.name() == "PortInfo")
 			{
 				if (attributes.hasAttribute("StrID")
-					&& attributes.hasAttribute("ID")
-					&& attributes.hasAttribute("DataID")
-					&& attributes.hasAttribute("Speed")
-					&& attributes.hasAttribute("Bits")
-					&& attributes.hasAttribute("StopBits")
-					&& attributes.hasAttribute("ParityControl")
-					&& attributes.hasAttribute("DataSize"))
+				        && attributes.hasAttribute("ID")
+				        && attributes.hasAttribute("DataID")
+				        && attributes.hasAttribute("Speed")
+				        && attributes.hasAttribute("Bits")
+				        && attributes.hasAttribute("StopBits")
+				        && attributes.hasAttribute("ParityControl")
+				        && attributes.hasAttribute("DataSize"))
 				{
 					bool portExists = false;
 					for (QAction* port : m_setPort->actions())
@@ -294,47 +294,47 @@ void SerialDataTester::parseFile()
 						{
 							portExists = true;
 							port->setChecked(true);
-							m_portReceiver->setPort(attributes.value("PortInfoStrID").toString());
+							m_portReceiver->setPort(attributes.value("StrID").toString());
 							m_portReceiver->setBaud(attributes.value("Speed").toInt());
 							switch (attributes.value("Bits").toInt())
 							{
-								case 5: m_portReceiver->setDataBits(QSerialPort::Data5); break;
-								case 6: m_portReceiver->setDataBits(QSerialPort::Data6); break;
-								case 7: m_portReceiver->setDataBits(QSerialPort::Data7); break;
-								case 8: m_portReceiver->setDataBits(QSerialPort::Data8); break;
-								default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Data bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
+							case 5: m_portReceiver->setDataBits(QSerialPort::Data5); break;
+							case 6: m_portReceiver->setDataBits(QSerialPort::Data6); break;
+							case 7: m_portReceiver->setDataBits(QSerialPort::Data7); break;
+							case 8: m_portReceiver->setDataBits(QSerialPort::Data8); break;
+							default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Data bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
 							}
 
 							QString stopBitsMenuEntryName;
 
 							switch (attributes.value("StopBits").toInt())
 							{
-								case 1:
-								{
-									m_portReceiver->setStopBits(QSerialPort::OneStop);
-									stopBitsMenuEntryName = "One stop";
-									break;
-								}
-								case 2:
-								{
-									m_portReceiver->setStopBits(QSerialPort::TwoStop);
-									stopBitsMenuEntryName = "Two stop";
-									break;
-								}
-								case 3:
-								{
-									m_portReceiver->setStopBits(QSerialPort::OneAndHalfStop);
-									stopBitsMenuEntryName = "One and half stop";
-									break;
-								}
-								default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Stop bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
+							case 1:
+							{
+								m_portReceiver->setStopBits(QSerialPort::OneStop);
+								stopBitsMenuEntryName = "One stop";
+								break;
 							}
-							ui->portName->setText(attributes.value("PortInfoStrID").toString());
+							case 2:
+							{
+								m_portReceiver->setStopBits(QSerialPort::TwoStop);
+								stopBitsMenuEntryName = "Two stop";
+								break;
+							}
+							case 3:
+							{
+								m_portReceiver->setStopBits(QSerialPort::OneAndHalfStop);
+								stopBitsMenuEntryName = "One and half stop";
+								break;
+							}
+							default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Stop bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
+							}
+							ui->portName->setText(attributes.value("StrID").toString());
 							ui->baudRate->setText(attributes.value("Speed").toString());
 							ui->bits->setText(attributes.value("Bits").toString());
 							QSettings applicationSettings;
 
-							applicationSettings.setValue("port", attributes.value("PortInfoStrID").toString());
+							applicationSettings.setValue("port", attributes.value("StrID").toString());
 							applicationSettings.setValue("baud", attributes.value("Speed").toInt());
 							applicationSettings.setValue("bits", attributes.value("Bits").toInt());
 							applicationSettings.setValue("stopBits", attributes.value("StopBits").toInt());
@@ -372,7 +372,7 @@ void SerialDataTester::parseFile()
 						QMessageBox::warning(this, tr("Critical error"), tr("XML file has port which was not detected or not exist on this machine. Programm will load last used settings"));
 						loadLastUsedSettings();
 					}
-					m_dataSize = attributes.value("DataSize").toInt()/8;
+					m_dataSize = attributes.value("DataSize").toInt();
 				}
 				else
 				{
@@ -385,15 +385,15 @@ void SerialDataTester::parseFile()
 			{
 
 				if(attributes.hasAttribute("StrID")
-				   && attributes.hasAttribute("ExtStrID")
-				   && attributes.hasAttribute("Name")
-				   && attributes.hasAttribute("Type")
-				   && attributes.hasAttribute("Unit")
-				   && attributes.hasAttribute("DataSize")
-				   && attributes.hasAttribute("DataFormat")
-				   && attributes.hasAttribute("ByteOrder")
-				   && attributes.hasAttribute("Offset")
-				   && attributes.hasAttribute("BitNo"))
+				        && attributes.hasAttribute("ExtStrID")
+				        && attributes.hasAttribute("Name")
+				        && attributes.hasAttribute("Type")
+				        && attributes.hasAttribute("Unit")
+				        && attributes.hasAttribute("DataSize")
+				        && attributes.hasAttribute("DataFormat")
+				        && attributes.hasAttribute("ByteOrder")
+				        && attributes.hasAttribute("Offset")
+				        && attributes.hasAttribute("BitNo"))
 				{
 					currentSignal.strId  = attributes.value("StrID").toString();
 					currentSignal.exStrId = attributes.value("ExtStrID").toString();
@@ -423,7 +423,7 @@ void SerialDataTester::parseFile()
 						currentSignal.dataSize/=8;
 					}
 
-//					calculatedDataSize += currentSignal.dataSize;
+					//					calculatedDataSize += currentSignal.dataSize;
 
 					m_signalsFromXml.push_back(currentSignal);
 				}
@@ -564,30 +564,30 @@ void SerialDataTester::setBits(QAction *newBits)
 
 	switch (newBits->data().toInt())
 	{
-		case 5:
-		{
-			emit bitsChanged(QSerialPort::Data5);
-			applicationSettings.setValue("bits", QSerialPort::Data5);
-			break;
-		}
-		case 6:
-		{
-			emit bitsChanged(QSerialPort::Data6);
-			applicationSettings.setValue("bits", QSerialPort::Data6);
-			break;
-		}
-		case 7:
-		{
-			emit bitsChanged(QSerialPort::Data7);
-			applicationSettings.setValue("bits", QSerialPort::Data7);
-			break;
-		}
-		case 8:
-		{
-			emit bitsChanged(QSerialPort::Data8);
-			applicationSettings.setValue("bits", QSerialPort::Data8);
-			break;
-		}
+	case 5:
+	{
+		emit bitsChanged(QSerialPort::Data5);
+		applicationSettings.setValue("bits", QSerialPort::Data5);
+		break;
+	}
+	case 6:
+	{
+		emit bitsChanged(QSerialPort::Data6);
+		applicationSettings.setValue("bits", QSerialPort::Data6);
+		break;
+	}
+	case 7:
+	{
+		emit bitsChanged(QSerialPort::Data7);
+		applicationSettings.setValue("bits", QSerialPort::Data7);
+		break;
+	}
+	case 8:
+	{
+		emit bitsChanged(QSerialPort::Data8);
+		applicationSettings.setValue("bits", QSerialPort::Data8);
+		break;
+	}
 	}
 	ui->bits->setText(newBits->text());
 }
@@ -627,6 +627,11 @@ void SerialDataTester::portError(QString error)
 {
 	QMessageBox::critical(this, tr("Critical error"), error);
 	ui->portName->setText("Error");
+
+	for (QAction* port : m_setPort->actions())
+	{
+		port->setChecked(false);
+	}
 }
 
 void SerialDataTester::dataReceived(QByteArray receivedValues)
@@ -637,60 +642,16 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
 
-	qDebug() << "Received data: " << receivedValues;
+	bool packageCorrupted = false;
 
-	/*qDebug() << data.size();
-
-	quint32 signature;
-
-	for (int currentByte = 0; currentByte < data.size()-3; currentByte++)
+	if (receivedValues.size() != 7)
 	{
-		QDataStream str(&data, QIODevice::ReadOnly);
-
-		str.skipRawData(currentByte);
-
-		str >> signature;
-
-		if (signature == m_signature)
-		{
-			qDebug() << "OK!";
-		}
-	}*/
-
-	/*QDataStream packet(&data, QIODevice::ReadOnly);
-
-	// Read packet "head" and check signature with crc
-	//
-
-	quint32 signature;
-	packet >> signature;
-	ui->signature->setText(QString::number(signature, 16));
-
-	quint16 version;
-	packet >> version;
-
-	ui->version->setText(QString::number(version));
-
-	quint16 transmissionId;
-	packet >> transmissionId;
-
-	ui->transmissionId->setText(QString::number(transmissionId));
-
-	quint16 numerator;
-	packet >> numerator;
-
-	ui->numerator->setText(QString::number(numerator));
-
-	quint16 amount;
-	packet >> amount;
-
-	quint16 dataUniqueId;
-	packet >> dataUniqueId;
-
-	QByteArray receivedSignalWithCrc;
-	QByteArray receivedValues;
-	packet >> receivedSignalWithCrc;
-
+		qDebug() << "Wrong packet size!";
+		packageCorrupted = true;
+		ui->statusBar->showMessage("Data received: Packet error!");
+	}
+	else
+	{/*
 	// According to data amount read data from packet without
 	// crc
 	//
@@ -713,7 +674,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 	quint64 packetCrc;
 	packet >> packetCrc;
 
-	bool packageCorrupted = false;
+
 
 	// Check calculated and received crc's
 	//
@@ -738,115 +699,120 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 		else
 		{*/
 
-			// If signature and crc ok - start processing received packet
-			// First of all, transform byteArray to bitArray. We need it to read signal
-			// values.
-			//
+		// If signature and crc ok - start processing received packet
+		// First of all, transform byteArray to bitArray. We need it to read signal
+		// values.
+		//
 
-			int rowNumber = 0;
+		int rowNumber = 0;
 
-			QString allReceivedBitsArray;
-			QBitArray dataArray;
-			dataArray.resize(m_dataSize*8);
-			dataArray.fill(0);
-			/*for(int currentByte=0; currentByte<receivedValues.count(); ++currentByte)
-			{
-				for(int currentBit=0; currentBit<8; ++currentBit)
-				{
-					dataArray.setBit(currentByte*8+currentBit, receivedValues.at(currentByte)&(1<<(currentBit)));
-					allReceivedBitsArray.append(QString::number(dataArray.at(currentByte*8+currentBit)));
-				}
-				allReceivedBitsArray.append(" ");
-			}*/
+		QBitArray dataArray;
+		dataArray.resize(m_dataSize*8);
+		dataArray.fill(0);
 
-			dataArray = bytesToBits(receivedValues);
+		QString dataVisualisation;
 
-			qDebug() << dataArray;
+		dataArray = bytesToBits(receivedValues);
 
-			/*for (int currentBit = 0; currentBit < m_dataSize*8; currentBit++)
+		for (int currentBit = 0; currentBit < dataArray.size(); currentBit++)
+		{
+			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0");
+
+			if ((currentBit+1) % 8 == 0)
+				dataVisualisation += " ";
+		}
+
+		ui->statusBar->showMessage("Data received: " + dataVisualisation);
+
+		//qDebug() << "QBitArray data: " << dataArray;
+
+		/*for (int currentBit = 0; currentBit < m_dataSize*8; currentBit++)
 			{
 				(dataArray.at(currentBit) == 1) ? allReceivedBitsArray.append("1") : allReceivedBitsArray.append("0");
 			}
 
 			ui->statusBar->showMessage("Processed data: " + allReceivedBitsArray);*/
 
-			for (SignalData signal : m_signalsFromXml)
+		for (SignalData signal : m_signalsFromXml)
+		{
+
+			// Read data for every signal, and transform it to
+			// selected value (signedInt, unsignedInt, float)
+			//
+
+			QBitArray signalValueBits;
+
+			signalValueBits.resize(signal.dataSize*8);
+			QString valueString;
+			for (int pos = signal.offset*8 + signal.bit; pos < signal.offset*8 + signal.bit + signal.dataSize; pos ++)
 			{
-
-				// Read data for every signal, and transform it to
-				// selected value (signedInt, unsignedInt, float)
-				//
-
-				QBitArray signalValueBits;
-
-				signalValueBits.resize(signal.dataSize*8);
-				QString valueString;
-				for (int pos = signal.offset*8 + signal.bit; pos < signal.offset*8 + signal.bit + signal.dataSize; pos ++)
+				switch (dataArray.at(pos))
 				{
-					switch (dataArray.at(pos))
-					{
-						case 1: valueString.append("1"); break;
-						case 0: valueString.append("0"); break;
-					}
+				case 1: valueString.append("1"); break;
+				case 0: valueString.append("0"); break;
 				}
+			}
 
-				std::reverse(valueString.begin(), valueString.end());
-				bool falseValue = false;
-				qint64 result = valueString.toInt(&falseValue, 2);
-				QString resultString;
-				if (signal.dataFormat == "UnsignedInt")
+			std::reverse(valueString.begin(), valueString.end());
+			bool falseValue = false;
+			qint64 result = valueString.toInt(&falseValue, 2);
+			//qDebug() << "Result: " << result;
+			QString resultString;
+			if (signal.dataFormat == "UnsignedInt")
+			{
+				resultString = QString::number(result);
+			//	qDebug() << "ResultString: " << resultString;
+			}
+			if (signal.dataFormat == "SignedInt")
+			{
+				if (valueString[0] == '0')
 				{
 					resultString = QString::number(result);
 				}
-				if (signal.dataFormat == "SignedInt")
+				else
 				{
-					if (valueString[0] == '0')
-					{
-						resultString = QString::number(result);
-					}
-					else
-					{
-						result = result - pow (2, (signal.dataSize*8)-1);
-						resultString = QString::number(result * -1);
-					}
+					result = result - pow (2, (signal.dataSize*8)-1);
+					resultString = QString::number(result * -1);
 				}
-				if (signal.dataFormat == "Float")
+			}
+			if (signal.dataFormat == "Float")
+			{
+				float exponentCalculation = 0;
+
+				for (int bitPos = 8; bitPos>0; bitPos--)
 				{
-					float exponentCalculation = 0;
-
-					for (int bitPos = 8; bitPos>0; bitPos--)
-					{
-						(valueString[bitPos] == '1') ? exponentCalculation += pow(2, 8-bitPos) : exponentCalculation += 0;
-					}
-
-					if (exponentCalculation != 0)
-						exponentCalculation = pow(2, exponentCalculation - 127);
-					else
-						exponentCalculation = pow(2, -126);
-
-					float mantissa;
-
-					(exponentCalculation == 0) ? mantissa = 0 : mantissa = 1;
-
-					for (int bitPos = 9; bitPos < 32; bitPos++)
-					{
-						(valueString[bitPos] == '1') ? mantissa += pow(0.5, bitPos-8) : mantissa += 0;
-					}
-
-					int sign;
-
-					(valueString[0] == '1') ? sign = -1 : sign = 1;
-
-					resultString = QString::number( sign * exponentCalculation * mantissa );
-					//resultString = QString::number(result * 0.1);
+					(valueString[bitPos] == '1') ? exponentCalculation += pow(2, 8-bitPos) : exponentCalculation += 0;
 				}
-				ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
-				rowNumber++;
+
+				if (exponentCalculation != 0)
+					exponentCalculation = pow(2, exponentCalculation - 127);
+				else
+					exponentCalculation = pow(2, -126);
+
+				float mantissa;
+
+				(exponentCalculation == 0) ? mantissa = 0 : mantissa = 1;
+
+				for (int bitPos = 9; bitPos < 32; bitPos++)
+				{
+					(valueString[bitPos] == '1') ? mantissa += pow(0.5, bitPos-8) : mantissa += 0;
+				}
+
+				int sign;
+
+				(valueString[0] == '1') ? sign = -1 : sign = 1;
+
+				resultString = QString::number( sign * exponentCalculation * mantissa );
+				//resultString = QString::number(result * 0.1);
+			}
+			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
+			rowNumber++;
 			//}
-		//}
-	}
+			//}
+		}
 
-	/*if (packageCorrupted)
+	}
+	if (packageCorrupted)
 	{
 		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
 	}
@@ -855,7 +821,7 @@ void SerialDataTester::dataReceived(QByteArray receivedValues)
 		ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
 	}
 
-	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));*/
+	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
 }
 
 void SerialDataTester::signalTimeout()
@@ -902,34 +868,34 @@ void SerialDataTester::loadLastUsedSettings()
 	m_portReceiver->setBaud(baud);
 	switch (bits)
 	{
-		case 5: m_portReceiver->setDataBits(QSerialPort::Data5); break;
-		case 6: m_portReceiver->setDataBits(QSerialPort::Data6); break;
-		case 7: m_portReceiver->setDataBits(QSerialPort::Data7); break;
-		case 8: m_portReceiver->setDataBits(QSerialPort::Data8); break;
+	case 5: m_portReceiver->setDataBits(QSerialPort::Data5); break;
+	case 6: m_portReceiver->setDataBits(QSerialPort::Data6); break;
+	case 7: m_portReceiver->setDataBits(QSerialPort::Data7); break;
+	case 8: m_portReceiver->setDataBits(QSerialPort::Data8); break;
 	}
 
 	QString stopBitsMenuEntryName;
 
 	switch (stopBits)
 	{
-		case 1:
-		{
-			m_portReceiver->setStopBits(QSerialPort::OneStop);
-			stopBitsMenuEntryName = "One stop";
-			break;
-		}
-		case 2:
-		{
-			m_portReceiver->setStopBits(QSerialPort::TwoStop);
-			stopBitsMenuEntryName = "Two stop";
-			break;
-		}
-		case 3:
-		{
-			m_portReceiver->setStopBits(QSerialPort::OneAndHalfStop);
-			stopBitsMenuEntryName = "One and half stop";
-			break;
-		}
+	case 1:
+	{
+		m_portReceiver->setStopBits(QSerialPort::OneStop);
+		stopBitsMenuEntryName = "One stop";
+		break;
+	}
+	case 2:
+	{
+		m_portReceiver->setStopBits(QSerialPort::TwoStop);
+		stopBitsMenuEntryName = "Two stop";
+		break;
+	}
+	case 3:
+	{
+		m_portReceiver->setStopBits(QSerialPort::OneAndHalfStop);
+		stopBitsMenuEntryName = "One and half stop";
+		break;
+	}
 	}
 
 	for (QAction* portFromMenu : m_setPort->actions())
@@ -1042,19 +1008,19 @@ void SerialDataTester::stopReceiver()
 QBitArray SerialDataTester::bytesToBits(QByteArray bytes)
 {
 	QBitArray bits(bytes.count()*8);
-	    // Convert from QByteArray to QBitArray
-	    for(int i=0; i<bytes.count(); ++i)
-			for(int b=0; b<8; ++b)
-				bits.setBit(i*8+b, bytes.at(i)&(1<<b));
-		return bits;
+	// Convert from QByteArray to QBitArray
+	for(int i=0; i<bytes.count(); ++i)
+		for(int b=0; b<8; ++b)
+			bits.setBit(i*8+b, bytes.at(i)&(1<<b));
+	return bits;
 }
 
 QByteArray SerialDataTester::bitsToBytes(QBitArray bits)
 {
 	QByteArray bytes;
-	    bytes.resize(bits.count()/8);
-		// Convert from QBitArray to QByteArray
-		for(int b=0; b<bits.count(); ++b)
-			bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
-		return bytes;
+	bytes.resize(bits.count()/8);
+	// Convert from QBitArray to QByteArray
+	for(int b=0; b<bits.count(); ++b)
+		bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
+	return bytes;
 }

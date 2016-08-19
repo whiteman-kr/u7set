@@ -107,7 +107,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Current packet info</string>
+          <string>Last packet info</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>

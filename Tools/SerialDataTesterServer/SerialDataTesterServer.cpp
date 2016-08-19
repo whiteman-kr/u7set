@@ -65,6 +65,9 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 		crc_table[i] = tempValue;
 	}
 
+	ui->signature->setText("424D4C47");
+	ui->version->setText("1");
+
 	connect(ui->openFileButton, &QPushButton::clicked, this, &SerialDataTesterServer::setFile);
 	connect(m_timerForPackets, &QTimer::timeout, this, &SerialDataTesterServer::sendPacket);
 	connect(ui->startServerButton, &QPushButton::clicked, this, &SerialDataTesterServer::startServer);
@@ -182,7 +185,7 @@ void SerialDataTesterServer::parseFile()
 				        && attributes.hasAttribute("ParityControl")
 				        && attributes.hasAttribute("DataSize"))
 				{
-					m_dataSize = attributes.value("DataSize").toInt()/8;
+					m_dataSize = attributes.value("DataSize").toInt();
 				}
 			}
 
@@ -277,26 +280,16 @@ void SerialDataTesterServer::sendPacket()
 		head.hdr.num = 1;
 		head.hdr.amount = m_dataSize;
 
+		ui->transmissionId->setText(QString::number(head.hdr.id));
+		ui->numerator->setText(QString::number(head.hdr.num));
+		ui->dataAmount->setText(QString::number(head.hdr.amount));
+
 		QByteArray dataToSend;
 		dataToSend.clear();
 
 		QBitArray generatedData;
 		generatedData.resize(m_dataSize*8);
 		generatedData.fill(0);
-
-		/*data.append(0x01);
-		data.append(0x4A);
-		data.append(0x30);
-		data.append(0x43);
-		data.append(0x45);
-		data.append(0x37);
-		data.append(0x01);*/
-
-		/*QBitArray bits;
-		bits.fill(0, 8);
-
-		bits.setBit(0, 1);
-		bits.setBit(1, 1);*/
 
 		qDebug() << "We transfer now: ";
 
@@ -363,6 +356,7 @@ void SerialDataTesterServer::sendPacket()
 			else
 			{
 				generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
+				qDebug() << signal.name << " Bits not included";
 			}
 		}
 
@@ -370,23 +364,50 @@ void SerialDataTesterServer::sendPacket()
 
 		qDebug() << generatedData;
 
+		QString visualizeTransferringData;
+
+		for (int currentBit=0; currentBit<generatedData.size(); currentBit++)
+		{
+			visualizeTransferringData.append(generatedData.at(currentBit) == 1 ? "1" : "0");
+			if ((currentBit+1)%8 == 0)
+				visualizeTransferringData.append(" ");
+		}
+
 		dataToSend.append(bitsToBytes(generatedData));
+
+		ui->data->setText(visualizeTransferringData);
 
 		QByteArray bytes;
 		bytes.clear();
+
+		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+
+		// Write down signature to packet (4 bytes);
+		//
+
 		bytes.append(sign.bytes, 4);
 
-		qDebug() << bytes.size();
+		// Write down header bytes (8 bytes);
+		//
 
 		bytes.append(head.bytes, 8);
 
-		qDebug() << bytes.size();
+		// Write down packet data
+		//
 
 		bytes += dataToSend;
 
-		qDebug() << bytes.size();
+
+
+		// Write packet to port
+		//
+
+		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
 
 		m_serialPort->write(bytes, bytes.size());
+
+		// Send data
+		//
 
 		bool ok = m_serialPort->flush();
 
@@ -394,7 +415,11 @@ void SerialDataTesterServer::sendPacket()
 		{
 			QMessageBox::warning(this, "Error", m_serialPort->errorString());
 		}
-		stopServer();
+
+
+
+
+		//stopServer();
 
 		/*m_data.fill(0, m_dataSize*8);
 	m_packet.clear();
@@ -547,12 +572,12 @@ void SerialDataTesterServer::sendPacket()
 	{
 		QMessageBox::critical(this, tr("Critical error"), m_serialPort->errorString());
 	}
-
+*/
 	m_numberOfPacket++;
 	ui->packetNumber->setText(QString::number(m_numberOfPacket));
 
 	if (m_numberOfPacket == ui->countOfPackets->text().toInt())
 	{
 		stopServer();
-	}*/
+	}
 }
