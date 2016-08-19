@@ -634,13 +634,18 @@ void SerialDataTester::portError(QString error)
 	}
 }
 
-void SerialDataTester::dataReceived(QByteArray receivedValues)
+void SerialDataTester::dataReceived(QString version, QString trId, QString numerator, QByteArray receivedValues)
 {
 	// Reset timer
 	//
 
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
+
+	ui->version->setText(version);
+	ui->signature->setText("424D4C47");
+	ui->transmissionId->setText(trId);
+	ui->numerator->setText(numerator);
 
 	bool packageCorrupted = false;
 
@@ -830,6 +835,12 @@ void SerialDataTester::signalTimeout()
 	{
 		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem(QString::number(0)));
 	}
+
+	ui->signature->setText("No data");
+	ui->version->setText("No data");
+	ui->transmissionId->setText("No data");
+	ui->numerator->setText("No data");
+
 	ui->statusBar->showMessage("Signal timeout!");
 }
 

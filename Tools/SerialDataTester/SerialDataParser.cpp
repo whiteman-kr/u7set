@@ -202,7 +202,11 @@ void SerialDataParser::readingData()
 		/*if (crc == m_crcFromPacket.crc)
 		{*/
 
-		emit packetProcessed(dataToSend);
+		QString version = QString::number(m_header.header.version);
+		QString trId = QString::number(m_header.header.txid);
+		QString numerator = QString::number(m_header.header.numerator);
+
+		emit packetProcessed(version, trId, numerator, dataToSend);
 
 		/*qDebug() << m_header.header.version;
 		qDebug() << m_header.header.txid;
