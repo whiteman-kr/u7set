@@ -8,7 +8,6 @@ var WorkstationType = 6;
 var SoftwareType = 7;
 var SignalType = 8;
 
-var FamilyOTHERID =	0x0000;
 var FamilyLMID = 	0x1100;
 var FamilyAIMID = 	0x1200;
 var FamilyAOMID = 	0x1300;
@@ -17,25 +16,6 @@ var FamilyDOMID = 	0x1500;
 var FamilyAIFMID = 	0x1600;
 var FamilyOCMID = 	0x1700;
 var FamilyMPS17ID = 0x5100;
-
-var Analog = 0;
-var Discrete = 1;
-
-var Input = 0;
-var Output = 1;
-var Validity = 2;
-var Diagnostics = 3;
-
-var Mode_05V = 0;
-var Mode_420mA = 1;
-var Mode_10V = 2;
-var Mode_05mA = 3;
-
-var Mode_Optical = 0;
-var Mode_Serial = 1;
-
-var Mode_RS232 = 0;
-var Mode_RS485 = 1;
 
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
@@ -53,7 +33,8 @@ var Mode_RS485 = 1;
 //var configScriptVersion = 14;		// connectionCaption=>connectionID; strID=>equipmentID
 //var configScriptVersion = 15;		// added text description fields for every value
 //var configScriptVersion = 16;		// added dynamic custom module family
-var configScriptVersion = 17;		// LMNumber limit is 12
+//var configScriptVersion = 17;		// LMNumber limit is 12
+var configScriptVersion = 18;		// i/o modules scripts moved to ConfiurationScript in presets
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -147,6 +128,30 @@ function ipToString(ip)
 	var ip3 = (ip) & 0xff;
 	var result = ip0 + "." + ip1 + "." + ip2 + "." + ip3;
 	return result;
+}
+
+function truncate_to_int(x)
+{
+    if(x > 0)
+    {
+         return Math.floor(x);
+    }
+    else
+    {
+         return Math.ceil(x);
+    }
+ }
+ 
+function valToADC(val, lowLimit, highLimit, lowADC, highADC)
+{
+	if ((highLimit - lowLimit) == 0)
+	{
+		return 0;		// to exclude division by zero
+	}
+
+	var res = (highADC-lowADC) * (val-lowLimit) / (highLimit - lowLimit) + lowADC;
+
+    return Math.round(res);
 }
 
 function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -491,47 +496,19 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 			
 			var result = true;
             
-            if (ioModuleFamily == FamilyAIMID)
-            {
-                result = generate_aim(confFirmware, ioModule, LMNumber, frame, log, signalSet);
-            }
-            if (ioModuleFamily == FamilyAIFMID)
-            {
-                result = generate_aifm(confFirmware, ioModule, LMNumber, frame, log);
-            }
-            if (ioModuleFamily == FamilyAOMID)
-            {
-                result = generate_aom(confFirmware, ioModule, LMNumber, frame, log, signalSet);
-            }
-            if (ioModuleFamily == FamilyOCMID)
-            {
-                result = generate_ocm(confFirmware, ioModule, LMNumber, frame, log, opticModuleStorage);
-            }
-            if (ioModuleFamily == FamilyDIMID)
-            {
-                result = generate_dim(confFirmware, ioModule, LMNumber, frame, log);
-            }
-            if (ioModuleFamily == FamilyDOMID)
-            {
-                result = generate_dom(confFirmware, ioModule, LMNumber, frame, log);
-            }
-			
-			if (ioModuleFamily == FamilyMPS17ID)
-			{
-				var equipmentID = ioModule.propertyValue("EquipmentID");
-					
-				log.writeMessage("Generating configuration for MPS17: " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame);
-				confFirmware.writeLog("Generating configuration for MPS17: " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame + "\r\n");
+			var equipmentID = ioModule.propertyValue("EquipmentID");
+				
+			log.writeMessage("Generating configuration for " + ioModule.propertyValue("Caption") + ": " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame);
+			confFirmware.writeLog("Generating configuration for " + ioModule.propertyValue("Caption") + ": " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
-				var configScript = ioModule.propertyValue("ConfigurationScript");
-				if (configScript != "")
-				{
-					
-					//var funcStr = "(function f(confFirmware, ioModule, LMNumber, frame, log){   log.writeMessage(\"Hello\"); return true; })";
-					var funcStr = "(" + configScript + ")";
-					var funcVar = eval(funcStr);
-					result = funcVar(confFirmware, ioModule, LMNumber, frame, log);
-				}
+			var configScript = ioModule.propertyValue("ConfigurationScript");
+			if (configScript != "")
+			{
+				//var funcStr = "(function f(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){   log.writeMessage(\"Hello\"); return true; })";
+				//
+				var funcStr = "(" + configScript + ")";
+				var funcVar = eval(funcStr);
+				result = funcVar(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage);
 			}
 			
 			if (result == false)
@@ -758,8 +735,7 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
 	var txRxConfigFrame = lanConfigFrame + 3;
 	
-	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage, false/*modeOCM*/);
-	if (txWordsCount == -1)
+	if (generate_lmTxRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage) == false)
 	{
 		return false;
 	}
@@ -767,931 +743,6 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 	return true;
 }
 
-function truncate_to_int(x)
-{
-    if(x > 0)
-    {
-         return Math.floor(x);
-    }
-    else
-    {
-         return Math.ceil(x);
-    }
- }
- 
- function valToADC(val, lowLimit, highLimit, lowADC, highADC)
-{
-	if ((highLimit - lowLimit) == 0)
-	{
-		return 0;		// to exclude division by zero
-	}
-
-	var res = (highADC-lowADC) * (val-lowLimit) / (highLimit - lowLimit) + lowADC;
-
-    return Math.round(res);
-}
-
-// Generate configuration for module AIM
-//
-//
-function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AIM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for AIM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for AIM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-
-    var ptr = 0;
-    
-    var AIMSignalMaxCount = 64;
-	
-	var tsConstant = 100 * 0.000001;
-    
-    var defaultTf = valToADC(5000 * 0.000001 / tsConstant, 0, 65535, 0, 0xffff);
-    var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
-    var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
-    var defaultSpreadTolerance = Math.round((0xffff - 0) * 0.005);		// 2%
-    
-    var inController = module.jsFindChildObjectByMask(equipmentID + "_CTRLIN");
-    if (inController == null)
-    {
-		log.errCFG3004(equipmentID + "_CTRLIN", equipmentID);
-		return false;
-    }
-	
-    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
-    //
-
-	var channelAPlace = 0;
-	var channelASpreadTolerance = 0;
-	var channelAStrID = "";
-
-    for (var i = 0; i < AIMSignalMaxCount; i++)
-    {
-        // find a signal with Place = i
-        //
-        //var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
-		var signalStrId = inController.propertyValue("EquipmentID") + "_IN";
-		
-		var entry = Math.floor(i / 2) + 1;
-		if (entry < 10)
-		{
-			signalStrId = signalStrId + "0";
-		}
-		signalStrId = signalStrId + entry;
-		if ((i % 2) == 0)
-		{
-			signalStrId = signalStrId + "A";
-		}		
-		else
-		{
-			signalStrId = signalStrId + "B";
-		}
-		
-		var signal = signalSet.getSignalByEquipmentID(signalStrId);
-         
-        if (signal == null)
-        {
-            // Generate default values, there is no signal on this place
-            //
-			log.wrnCFG3007(signalStrId);
-			
-			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
-			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + defaultSpreadTolerance + "\r\n");
-            
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultTf", defaultTf) == false)          // InA Filtering time constant
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultHighBound", defaultHighBound) == false)         // InA High bound
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultLowBound", defaultLowBound) == false)          // InA Low Bound
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultSpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
-			{
-				return false;
-			}
-            ptr += 2;
-        }
-        else
-        {
-		
-			var tf = signal.filteringTime();
-			
-			if (tf < 1 * 100 * 0.000001 || tf > 65535 * 100 * 0.000001)
-			{
-				log.errCFG3010("FilteringTime", tf, 1 * 100 * 0.000001, 65535 * 100 * 0.000001, 6, signalStrId);
-				return false;
-			}
-			
-			tf = tf / tsConstant;
-			
-			var compareEqual = 0;
-			var compareLess = 1;
-			var compareMore = 2;
-            
-            var filternigTime = valToADC(tf, 0, 65535, 0, 0xffff);
-            
-			if (signal.highADC() < signal.lowADC())
-			{
-				// error
-				log.errCFG3013("HighADC", signal.highADC(), compareLess, "LowADC", signal.lowADC(), 0, signalStrId);
-				return false;
-			}
-			if (signal.highADC() == signal.lowADC())
-			{
-				// error
-				log.errCFG3013("HighADC", signal.highADC(), compareEqual, "LowADC", signal.lowADC(), 0, signalStrId);
-				return false;
-			}
-			if (signal.highEngeneeringUnits() == signal.lowEngeneeringUnits())
-			{
-				// error
-				log.errCFG3013("HighEngeneeringUnits", signal.highEngeneeringUnits(), compareEqual, "LowEngeneeringUnits", signal.lowEngeneeringUnits(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
-			if (signal.highValidRange() == signal.lowValidRange())
-			{
-				// error
-				log.errCFG3013("HighValidRange", signal.highValidRange(), compareEqual, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
-			if (signal.highEngeneeringUnits() > signal.lowEngeneeringUnits() && signal.highValidRange() < signal.lowValidRange())
-			{
-				// error
-				log.errCFG3013("HighValidRange", signal.highValidRange(), compareLess, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
-			if (signal.highEngeneeringUnits() < signal.lowEngeneeringUnits() && signal.highValidRange() > signal.lowValidRange())
-			{
-				// error
-				log.errCFG3013("HighValidRange", signal.highValidRange(), compareMore, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
-			
-			var highValidRangeADC = valToADC(signal.highValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
-			var lowValidRangeADC = valToADC(signal.lowValidRange(), signal.lowEngeneeringUnits(), signal.highEngeneeringUnits(), signal.lowADC(), signal.highADC());
-			
-			if (lowValidRangeADC < 0)
-			{
-				log.errCFG3010("calculated_lowValidRangeADC", lowValidRangeADC, 0, 65535, 0, signalStrId);
-				return false;
-			}
-			if (highValidRangeADC > 65535)
-			{
-				log.errCFG3010("calculated_highValidRangeADC", highValidRangeADC, 0, 65535, 0, signalStrId);
-				return false;
-			}
-
-			var spreadTolerance = Math.round((signal.spreadTolerance() * 0.01) * (highValidRangeADC - lowValidRangeADC));
-
-			if ((i & 1) == 0)
-			{
-				// this is A input
-				channelAPlace = i;
-				channelASpreadTolerance = spreadTolerance;
-				channelAStrID = signalStrId;
-			}
-			else
-			{
-				if (i == channelAPlace + 1)
-				{
-					// this is B input, next to saved A
-					if (spreadTolerance != channelASpreadTolerance)
-					{
-						log.errCFG3009(channelAStrID, channelASpreadTolerance, signalStrId, spreadTolerance, module.propertyValue("EquipmentID"));
-						return false;
-					}
-				}
-			}
-
-			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighValidRangeADC = " + highValidRangeADC +
-			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + lowValidRangeADC +
-			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + spreadTolerance + "\r\n");
-
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "FilternigTime", filternigTime) == false)          // InA Filtering time constant
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRangeADC", highValidRangeADC) == false)         // InA High bound
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRangeADC", lowValidRangeADC) == false)          // InA Low Bound
-			{
-				return false;
-			}
-            ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
-			{
-				return false;
-			}
-            ptr += 2;
-        }
-    }
-
-    // reserved
-    ptr += 120;
-   
-    // final crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;
-    
-    //reserved
-    ptr += 368;
-
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = false;
-    var dataReceiveEnableFlag = true;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 5;
-    var dataFramesQuantity = 0;
-    var txId = FamilyAIMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-    
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-    
-    return true;
-}
-
-// Generate configuration for module AIFM
-//
-//
-function generate_aifm(confFirmware, module, LMNumber, frame, log)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AIFM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], module.propertyValue("EquipmentID"));
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for AIFM: " + module.propertyValue("EquipmentID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for AIFM: " + module.propertyValue("EquipmentID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-	
-    var ptr = 0;
-    
- 
-    var inController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLIN");
-    if (inController == null)
-    {
-		log.errCFG3004(module.propertyValue("EquipmentID") + "_CTRLIN", module.propertyValue("EquipmentID"));
-		return false;
-    }
-	
-    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
-    //
-	
-	var aifmChannelCount = 3;
-
-	// CUR, FLU, FRQ
-	//
-	var koeffs = ["CUR", "FLU", "FRQ"];
-	
-	for (var k = 0; k < 3; k++)
-	{
-		for (var i = 0; i < aifmChannelCount; i++)
-		{
-			var signalID = inController.propertyValue("EquipmentID") + "_IN0" + (i + 1) + koeffs[k];
-			var signal = inController.jsFindChildObjectByMask(signalID);
-			var value = 1;
-			if (signal == null)
-			{
-				log.wrnCFG3005(signalID, inController.propertyValue("EquipmentID"));
-			}
-			else
-			{
-				if (signal.propertyExists("PowerCoefficient") == true)
-				{
-					value = signal.propertyValue("PowerCoefficient");
-				}
-				else
-				{
-					log.errCFG3000("PowerCoefficient", signal.propertyValue("EquipmentID"));
-					return false;
-				}
-			}
-			
-			var v = 0;
-			var mantissa = 0;
-			var exponent = 0;
-			if (signal != null)
-			{
-				v = signal.valueToMantExp1616(value);
-				mantissa =  v >> 16;
-				exponent = v & 0xffff;
-			}
-				
-			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
-	
-			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
-			{
-				return false;
-			}
-			
-			ptr += 2;
-			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
-			{
-				return false;
-			}
-			ptr += 2;
-		}
-	}
-	
-	// POWER, REACT, PERIOD
-	//
-	var modeNames = ["PERIOD", "POWER", "REACT"];
-	
-	var setPointCount = 5;
-	
-	for (var k = 0; k < 3; k++)
-	{
-		for (var i = 0; i < aifmChannelCount; i++)
-		{
-			for (var m = 0; m < 3; m++)
-			{
-				for (var p = 0; p < setPointCount; p++)
-				{
-					var signalID = inController.propertyValue("EquipmentID") + "_IN0" + (i + 1) + koeffs[k] + modeNames[m];
-					var signal = inController.jsFindChildObjectByMask(signalID);
-					var value = 1;
-					if (signal == null)
-					{
-						log.wrnCFG3005(signalID, inController.propertyValue("EquipmentID"));
-					}
-					else
-					{
-						var setPointName = "SetPoint0" + (p + 1);
-						
-						if (signal.propertyExists(setPointName) == true)
-						{
-							value = signal.propertyValue(setPointName);
-						}
-						else
-						{
-							log.errCFG3000(setPointName, signal.propertyValue("EquipmentID"));
-							return false;
-						}
-					}
-					
-					var v = 0;
-					var mantissa =  0;
-					var exponent = 0;
-					if (signal != null)
-					{
-						v = signal.valueToMantExp1616(value);
-						mantissa =  v >> 16;
-						exponent = v & 0xffff;
-					}	
-						
-					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
-			
-					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
-					{
-						return false;
-					}
-
-					ptr += 2;
-					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
-					{
-						return false;
-					}
-					ptr += 2;
-				}
-			}
-			ptr += 2; //reserved
-			ptr += 2; //reserved
-		}
-	}
-	
-	ptr = 632;
-	
-    // final crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;
-    
-    //reserved
-    ptr += 368;
-
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = true;
-    var dataReceiveEnableFlag = true;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 5;
-    var dataFramesQuantity = 1;
-    var txId = FamilyAIFMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-    
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-    
-    return true;
-
-}
-
-// Generate configuration for module AOM
-//
-//
-function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AOM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], module.propertyValue("EquipmentID"));
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for AOM: " + module.propertyValue("EquipmentID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for AOM: " + module.propertyValue("EquipmentID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-
-    var ptr = 0;
-    
-    var AOMWordCount = 4;                       // total words count
-    var AOMSignalsInWordCount = 8;              // signals in a word count
-    
-    var outController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLOUT");
-    if (outController == null)
-    {
-		log.errCFG3004(module.propertyValue("EquipmentID") + "_CTRLOUT", module.propertyValue("EquipmentID"));
-		return false;
-    }
-
-    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
-    //
-    var place = 0;
-    
-    for (var w = 0; w < AOMWordCount; w++)
-    {
-        var data = 0;
-        
-        for (var c = 0; c < AOMSignalsInWordCount; c++)
-        {
-            var mode = Mode_05V;    //default
-
-            //var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
-			var signalStrId = outController.propertyValue("EquipmentID") + "_OUT";
-			
-			var entry = place + 1;
-			if (entry < 10)
-			{
-				signalStrId = signalStrId + "0";
-			}
-			signalStrId = signalStrId + entry;
-		
-			var signal = signalSet.getSignalByEquipmentID(signalStrId);
-
-            if (signal == null)
-			{
-				log.wrnCFG3007(signalStrId);
-			}
-			else
-            {
-				var outputMode = signal.jsOutputMode();
-                if (outputMode < 0 || outputMode > Mode_05mA)
-                {
-					log.errCFG3002("Signal/OutputMode", outputMode, 0, Mode_05mA, signalStrId);
-					return false;
-                }
-
-                mode = outputMode;
-            }
-
-            
-            place++;
-            
-            var bit = c * 2;
-            data |= (mode << bit);
-        }
-        
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr + w * 2, "OutputModeFlags" + w, data) == false)
-		{
-			return false;
-		}
-		confFirmware.writeLog("    [" + frame + ":" + (ptr + w * 2) + "] data" + w + " = " + data + "\r\n");
-    }
-    
-    ptr += 120;
-    
-    // crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;    
-
-    // reserved
-    ptr += 880;
-    
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = true;
-    var dataReceiveEnableFlag = true;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 1;
-    var dataFramesQuantity = 1;
-    var txId = FamilyAOMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-
-    return true;
-
-}
-
-/*function findSignalByPlace(parent, place, type, func, signalSet, log)
-{
-    if (parent == null)
-    {
-        return null;
-    }
-	if (parent.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Class_Controller");
-		return null;
-	}
-
-    for (var j = 0; j < parent.childrenCount(); j++)
-    {
-        var s = parent.jsChild(j);
-                    
-        if (s.jsDeviceType() != SignalType)
-        {
-            continue;
-        }
-        if (s.jsType() != type)
-        {
-            continue;
-        }
-        if (s.jsFunction() != func)
-        {
-            continue;
-        }
-		
-		if (s.propertyValue("EquipmentID") == undefined)
-		{
-			log.errCFG3000("EquipmentID", "Class_Signal");
-			return null;
-		}
-
-		var eqipmentID = s.propertyValue("EquipmentID");
-		
-        if (s.jsPlace() == place)
-        {
-            signal = signalSet.getSignalByEquipmentID(eqipmentID);
-            if (signal == null)    
-            {
-				log.wrnCFG3007(eqipmentID);
-            }
-            return signal;
-        }
-    }
-    
-	log.wrnCFG3006(place, parent.propertyValue("EquipmentID"));
-    return null;
-}*/
-
-// Generate configuration for module OCM
-//
-//
-function generate_ocm(confFirmware, module, LMNumber, frame, log, opticModuleStorage)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_OCM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for OCM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for OCM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-	
-	var txRxConfigFrame = frame;
-	
-	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage, true/*modeOCM*/);
-	if (txWordsCount == -1)
-	{
-		return false;
-	}
-	
-    var ptr = 120;
-    
-    // crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;    
-
-    // reserved
-    ptr += 880;
-    
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = true;
-    var dataReceiveEnableFlag = true;
-	
-	var ocmFrameSize = 64;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 1;
-    var dataFramesQuantity = 0;
-	if (txWordsCount > 0)
-	{
-		dataFramesQuantity = Math.ceil(txWordsCount / ocmFrameSize);
-	}
-	confFirmware.writeLog("    txWordsCount = " + txWordsCount + "\r\n");
-	
-    var txId = FamilyOCMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-
-    return true;
-
-}
-
-// Generate configuration for module DIM
-//
-//
-function generate_dim(confFirmware, module, LMNumber, frame, log)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_DIM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for DIM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for DIM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-
-    var ptr = 120;
-    
-    // crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;    
-
-    // reserved
-    ptr += 880;
-    
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = false;
-    var dataReceiveEnableFlag = true;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 1;
-    var dataFramesQuantity = 0;
-    var txId = FamilyDIMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-
-    return true;
-
-}
-
-// Generate configuration for module DOM
-//
-//
-function generate_dom(confFirmware, module, LMNumber, frame, log)
-{
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_DOM");
-		return false;
-	}
-	
-	var equipmentID = module.propertyValue("EquipmentID");
-	
-	var checkProperties = ["Place", "ModuleVersion"];
-	for (var cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
-    log.writeMessage("Generating configuration for DOM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
-	confFirmware.writeLog("Generating configuration for DOM: " + equipmentID + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
-
-    var ptr = 120;
-    
-    // crc
-    var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;    
-
-    // reserved
-    ptr += 880;
-    
-    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
-    //
-    var dataTransmittingEnableFlag = true;
-    var dataReceiveEnableFlag = true;
-    
-    var flags = 0;
-    if (dataTransmittingEnableFlag == true)
-        flags |= 1;
-    if (dataReceiveEnableFlag == true)
-        flags |= 2;
-    
-    var configFramesQuantity = 1;
-    var dataFramesQuantity = 1;
-    var txId = FamilyDOMID + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
-	{
-		return false;
-	}
-    ptr += 8;
-
-    // assert if we not on the correct place
-    //
-    if (ptr != 1016)
-    {
-        ptr = 1016;
-    }
-
-    return true;
-
-}
 function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offset, log, flags, configFrames, dataFrames, txId)
 {
 	// TxRx Block's configuration structure
@@ -1750,10 +801,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 	var h0 = hashList.jsAt(0);
 	var h1 = hashList.jsAt(1);
-	
-	//var m1 = h0 & 0x7fff;
-	//var m2 = (h0 >> 16) & 0x7fff;
-	//var m3 = h1 & 0x7fff;
+
 	var m1 = 0x4200;
 	var m2 = h0 & 0x7fff;
 	var m3 = (h0 >> 16) & 0x7fff;
@@ -1900,17 +948,17 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 // function returns the amount of transmitting words
 //
-function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumber, opticModuleStorage, modeOCM)
+function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNumber, opticModuleStorage)
 {
 	if (module.propertyValue("EquipmentID") == undefined)
 	{
 		log.errCFG3000("EquipmentID", "Class_Module");
-		return -1;
+		return false;
 	}
 	if (module.propertyValue("OptoPortCount") == undefined)
 	{
 		log.errCFG3000("OptoPortCount", module.propertyValue("EquipmentID"));
-		return -1;
+		return false;
 	}
 	
 	var portCount = module.propertyValue("OptoPortCount");
@@ -1926,13 +974,13 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumb
 		if (controller == null)
 		{
 			log.errCFG3004(controllerID, module.propertyValue("EquipmentID"));
-			return -1;
+			return false;
 		}
 		
 		if (controller.propertyValue("EquipmentID") == undefined)
 		{
 			log.errCFG3000("EquipmentID", "Class_Controller");
-			return -1;
+			return false;
 		}
 		
 		var controllerEquipmentID = controller.propertyValue("EquipmentID");
@@ -1948,16 +996,8 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumb
 			continue;
 		}			
 		
-		if (optoPort.mode() == Mode_Optical)
-		{
-			confFirmware.writeLog("    OptoPort " + controllerEquipmentID + ": Opto connection ID = " + optoPort.equipmentID() + 
-				" (" + optoPort.connectionID() + ")\r\n");
-		}
-		else
-		{
-			confFirmware.writeLog("    OptoPort " + controllerEquipmentID + ": RS connection ID = " + optoPort.equipmentID() + 
-				" (" + optoPort.connectionID() + ")\r\n");
-		}
+		confFirmware.writeLog("    OptoPort " + controllerEquipmentID + ": connection ID = " + optoPort.equipmentID() + 
+			" (" + optoPort.connectionID() + ")\r\n");
 					
 		var ptr = 0 + p * 2;
 		var value = optoPort.txStartAddress();
@@ -1999,84 +1039,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, LMNumb
 			return false;
 		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
-				
-		if (modeOCM == true && optoPort.mode() == Mode_Serial)
-		{
-			ptr = 30 * 2 + p * 2;
-			value = optoPort.portID();	//???
-			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TX ID for RS-232/485 transmitter " + (p + 1), value) == false)
-			{
-				return false;
-			}
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
-					
-			ptr = 35 * 2 + p * 4;
-			value = optoPort.txDataID();	//???
-			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "RS-232/485 Data UID " + (p + 1), value) == false)
-			{
-				return false;
-			}
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
-				
-			//
-			// RS232/485_CFG
-			//
-				
-			var txEn = 0;	//1 - enabled
-			if (optoPort.enable() == true)
-			{
-				txEn = 1;
-			}
-			confFirmware.writeLog("    enabled = " + txEn + "\r\n");
-				
-			var txStandard = Mode_RS232;	//0 - rs232, 1 - rs485
-			if (optoPort.serialMode() == Mode_RS485)
-			{
-				txStandard = Mode_RS485;
-			}
-			
-			confFirmware.writeLog("    serialMode = " + txStandard + "\r\n");
-
-			ptr = 45 * 2;
-				
-			//bits 9..0
-			//
-			var txMode = (txEn << 1) | txStandard;
-			txMode <<= (p * 2);
-				
-			if (module.propertyValue("ModuleVersion") == 255)	// this is only for OCM version 255 (ACNF)
-			{
-				// bits 14..10
-				//
-				var txDuplex = 0;	//1 - enabled
-					
-				if (optoPort.enableDuplex() == true)
-				{
-					txDuplex = 1;
-				}
-				confFirmware.writeLog("    enableDuplex = " + txDuplex + "\r\n");
-				
-				txDuplex <<= 10;
-				txDuplex <<= p;
-				txMode |= txDuplex;
-			}
-				
-				
-			var allModes = confFirmware.data16(frame, ptr);
-			allModes |= txMode;
-			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "ModeFlags", allModes) == false)
-			{
-				return false;
-			}
-		}
 	} // p
 	
-	if (modeOCM == true)
-	{
-		var ptr = 45 * 2;
-		var allModes = confFirmware.data16(frame, ptr);
-		confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS mode configuration = " + allModes + "\r\n");
-	}
-	
-	return txWordsCount;
+	return true;
 }

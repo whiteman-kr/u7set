@@ -66,14 +66,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Buttons
 	//
 	QHBoxLayout* pButtonsLayout = new QHBoxLayout();
-	pButtonsLayout->addStretch();
 
 	m_pReadButton = new QPushButton(tr("&Read"));
 	pButtonsLayout->addWidget(m_pReadButton);
 
-	m_pConfigureButton = new QPushButton(tr("&Configure"));
-	m_pConfigureButton->setEnabled(false);
-	pButtonsLayout->addWidget(m_pConfigureButton);
 
 	if (theSettings.isExpertMode() == true)
 	{
@@ -90,6 +86,13 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
 	pButtonsLayout->addWidget(m_pSettingsButton);
+
+	pButtonsLayout->addStretch();
+
+	m_pConfigureButton = new QPushButton(tr("&Configure"));
+	m_pConfigureButton->setEnabled(false);
+	m_pConfigureButton->setDefault(true);
+	pButtonsLayout->addWidget(m_pConfigureButton);
 
 	// Right layout
 	//
