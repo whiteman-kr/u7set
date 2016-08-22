@@ -205,13 +205,15 @@ void CONF_SERVICE_DATA_V1::setFirmwareCrc(uint32_t value)
 //
 // CONF_IDENTIFICATION_DATA_V1
 //
-void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log)
+void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log) const
 {
 	if (log == nullptr)
 	{
 		assert(log);
 		return;
 	}
+
+	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
 
 	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
 	log->writeMessage("Configuration counter: " + QString().setNum(count));
@@ -277,13 +279,15 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration(Hardware::ModuleFirmwa
 //
 // CONF_IDENTIFICATION_DATA_V2
 //
-void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log)
+void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log) const
 {
 	if (log == nullptr)
 	{
 		assert(log);
 		return;
 	}
+
+	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
 
 	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
 	log->writeMessage("Configuration counter: " + QString().setNum(count));
@@ -292,7 +296,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log)
 	log->writeMessage("__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString());
 	log->writeMessage("__Host: " + QString(firstConfiguration.host));
 	log->writeMessage("__User: " + QString(firstConfiguration.userName));
-	log->writeMessage("__Build No: " + QString(firstConfiguration.buildNo));
+	log->writeMessage("__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0'));
 	log->writeMessage("__Build Config: " + QString(firstConfiguration.buildConfig));
 	log->writeMessage("__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString());
 
@@ -300,7 +304,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log)
 	log->writeMessage("__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString());
 	log->writeMessage("__Host: " + QString(lastConfiguration.host));
 	log->writeMessage("__User: " + QString(lastConfiguration.userName));
-	log->writeMessage("__Build No: " + QString(lastConfiguration.buildNo));
+	log->writeMessage("__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0'));
 	log->writeMessage("__Build Config: " + QString(lastConfiguration.buildConfig));
 	log->writeMessage("__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString());
 
@@ -715,7 +719,7 @@ bool Configurator::send(int moduleUartId,
         }
     }
 
-    qDebug()<<"Read "<<recBuffer.size();
+	//qDebug()<<"Read "<<recBuffer.size();
 
     if (recBuffer.size() != recSize)
 	{
@@ -889,42 +893,7 @@ void Configurator::readConfigurationWorker(int /*param*/)
                 // Ignoring all flags, CRC, etc
                 //
 
-                if (identificationData.size() != blockSize)
-                {
-					m_Log->writeMessage(tr("Identification block is empty."));
-                }
-                else
-                {
-					CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
-					if (pReadIdentificationStruct->marker == IdentificationStructMarker)
-					{
-						switch (pReadIdentificationStruct->version)
-						{
-						case 1:
-							{
-
-								CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct_v1 = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-								pReadIdentificationStruct_v1->dump(m_Log);
-							}
-							break;
-						case 2:
-							{
-
-								CONF_IDENTIFICATION_DATA_V2* pReadIdentificationStruct_v2 = reinterpret_cast<CONF_IDENTIFICATION_DATA_V2*>(identificationData.data());
-								pReadIdentificationStruct_v2->dump(m_Log);
-							}
-							break;
-						default:
-							m_Log->writeMessage(tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version));
-						}
-
-
-					}
-					else
-					{
-						m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
-					}
-                }
+				dumpIdentificationData(identificationData, blockSize);
             }
             break;
         default:
@@ -1239,6 +1208,41 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 	}
 
 	return;
+}
+
+void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize)
+{
+	if (identificationData.size() != blockSize)
+	{
+		m_Log->writeMessage(tr("Identification block is empty."));
+	}
+
+	const CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<const CONF_IDENTIFICATION_DATA*>(identificationData.data());
+	if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+	{
+		switch (pReadIdentificationStruct->version)
+		{
+		case 1:
+			{
+				const CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct_v1 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
+				pReadIdentificationStruct_v1->dump(m_Log);
+			}
+			break;
+		case 2:
+			{
+
+				const CONF_IDENTIFICATION_DATA_V2* pReadIdentificationStruct_v2 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V2*>(identificationData.data());
+				pReadIdentificationStruct_v2->dump(m_Log);
+			}
+			break;
+		default:
+			m_Log->writeMessage(tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version));
+		}
+	}
+	else
+	{
+		m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
+	}
 }
 
 
@@ -1686,6 +1690,11 @@ void Configurator::readFirmware(const QString& fileName)
 					}
 
 					assert(protocolVersion == readReceivedHeader.version);
+
+					if (i == 0)
+					{
+						dumpIdentificationData(readData, blockSize);
+					}
 
 					switch (protocolVersion)
 					{

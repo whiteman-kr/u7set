@@ -177,7 +177,7 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log);
+	void dump(OutputLog *log) const;
 
 	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
 	void createNextConfiguration(Hardware::ModuleFirmware* conf);
@@ -206,7 +206,7 @@ struct CONF_IDENTIFICATION_DATA_V2
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log);
+	void dump(OutputLog *log) const;
 
 	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
 	void createNextConfiguration(Hardware::ModuleFirmware* conf);
@@ -244,6 +244,8 @@ protected:
 
 	void readConfigurationWorker(int param);
 	void writeConfigurationWorker(ModuleFirmware* conf);
+
+	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
 
 	// Slots
 	//
