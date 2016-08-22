@@ -175,7 +175,8 @@ SOURCES +=\
     Builder/ModuleFirmwareWriter.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/Configurator.cpp
+    ../lib/Configurator.cpp \
+    DialogSettingsConfigurator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -280,7 +281,8 @@ HEADERS  += \
     Builder/ModuleFirmwareWriter.h \
     ../lib/HostAddressPort.h \
     ../lib/SignalProperties.h \
-    ../lib/Configurator.h
+    ../lib/Configurator.h \
+    DialogSettingsConfigurator.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -300,7 +302,8 @@ FORMS    += \
     SchemaLayersDialog.ui \
     SchemaPropertiesDialog.ui \
     SchemaItemPropertiesDialog.ui \
-    DialogChoosePreset.ui
+    DialogChoosePreset.ui \
+    DialogSettingsConfigurator.ui
 
 RESOURCES += \
 	Resources.qrc \

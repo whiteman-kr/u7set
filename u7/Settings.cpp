@@ -168,6 +168,7 @@ void Settings::writeSystemScope() const
 	s.setValue("m_serverPassword", m_serverPassword);
 	s.setValue("m_buildOutputPath", m_buildOutputPath);
 	s.setValue("m_configuratorSerialPort", m_configuratorSerialPort);
+	s.setValue("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo);
 
 	return;
 }
@@ -181,6 +182,7 @@ void Settings::loadSystemScope()
 	m_serverPassword = s.value("m_serverPassword", "P2ssw0rd").toString();
 	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
 	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
+	m_configuratorShowDebugInfo = s.value("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo).toBool();
 
 	return;
 }

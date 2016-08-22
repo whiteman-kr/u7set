@@ -32,6 +32,7 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
+	void fileTypeChanged(const QString& s);
 	void findSubsystemsInBuild(int index);
 	void subsystemChanged(int index);
 
@@ -105,6 +106,7 @@ private:
 
 	QString m_currentBuild;
 	QString m_currentSubsystem;
+	QString m_currentFileName;
 
 	int m_currentBuildIndex = -1;
 	int m_currentSubsystemIndex = -1;

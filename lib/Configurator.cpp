@@ -647,6 +647,11 @@ void Configurator::setSettings(QString device, bool showDebugInfo)
 {
 	this->setDevice(device);
 	this->setShowDebugInfo(showDebugInfo);
+
+	if (showDebugInfo == true)
+	{
+		this->m_Log->writeMessage(tr("Configurator serial port is %1.").arg(device));
+	}
 	return;
 }
 
@@ -663,7 +668,7 @@ void Configurator::readConfiguration(int param)
 
 void Configurator::readConfigurationWorker(int /*param*/)
 {
-	/*// Open port
+	// Open port
 	//
 	bool ok = openConnection();
 	if (ok == false)
@@ -825,7 +830,7 @@ void Configurator::readConfigurationWorker(int /*param*/)
 		m_Log->writeError(tr("CloseConnection failed with error "));
 	}
 
-	return;*/
+	return;
 }
 
 void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
