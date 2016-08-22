@@ -32,7 +32,7 @@ private slots:
 	void setBits(QAction* newBits);
 	void setStopBits(QAction* newStopBits);
 	void portError(QString error);
-	void dataReceived (QByteArray receivedValues);
+	void dataReceived (QString version, QString trId, QString numerator, QByteArray receivedValues);
 	void signalTimeout();
 	void erasePacketData();
 	void loadLastUsedSettings();

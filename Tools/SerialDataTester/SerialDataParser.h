@@ -12,7 +12,7 @@ public :
 	virtual ~SerialDataParser();
 
 signals:
-	void packetProcessed(QByteArray data);
+	void packetProcessed(QString version, QString trId, QString numerator, QByteArray data);
 
 public slots:
 	void parse(const QByteArray& receivedData);
