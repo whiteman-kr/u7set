@@ -839,7 +839,8 @@ namespace Builder
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log,
+										   buildWriter->buildInfo().id, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
@@ -860,7 +861,8 @@ namespace Builder
 			return false;
 		}
 
-		TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, tuningDataStorage, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, tuningDataStorage, m_log,
+									buildWriter->buildInfo().id, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = tunBuilder.build();
 

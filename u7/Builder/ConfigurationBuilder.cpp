@@ -50,7 +50,10 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet,
+											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
+											   IssueLogger *log, int buildNo, int changesetId, bool debug, QString projectName, QString userName,
+											   BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -58,6 +61,7 @@ namespace Builder
 		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
 		m_buildWriter(buildWriter),
+		m_buildNo(buildNo),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
@@ -182,7 +186,7 @@ namespace Builder
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, m_changesetId);
+		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
@@ -388,6 +392,11 @@ namespace Builder
 	IssueLogger *ConfigurationBuilder::log() const
 	{
 		return m_log;
+	}
+
+	int ConfigurationBuilder::buildNo() const
+	{
+		return m_buildNo;
 	}
 
 	int ConfigurationBuilder::changesetId() const

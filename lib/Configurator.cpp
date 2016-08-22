@@ -231,6 +231,141 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log)
 	return;
 }
 
+void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration(Hardware::ModuleFirmware* conf)
+{
+	Q_UNUSED(conf);
+
+	marker = IdentificationStructMarker;
+	version = CONF_IDENTIFICATION_DATA_V1::structVersion();
+	moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
+	count = 1;
+
+	//
+	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
+	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+
+//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	firstConfiguration.configuratorFactoryNo = 0;
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
+	strcpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data());
+
+	lastConfiguration = firstConfiguration;
+}
+
+void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration(Hardware::ModuleFirmware *conf)
+{
+	Q_UNUSED(conf);
+
+	// last configuration record
+	//
+	count ++;			// Incerement configartion counter
+
+	CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
+	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
+	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+
+//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	lastConfiguration.configuratorFactoryNo = 0;
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
+	strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
+
+	lastConfiguration = lastConfiguration;
+}
+
+//
+// CONF_IDENTIFICATION_DATA_V2
+//
+void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log)
+{
+	if (log == nullptr)
+	{
+		assert(log);
+		return;
+	}
+
+	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
+	log->writeMessage("Configuration counter: " + QString().setNum(count));
+
+	log->writeMessage("First time configured: ");
+	log->writeMessage("__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString());
+	log->writeMessage("__Host: " + QString(firstConfiguration.host));
+	log->writeMessage("__User: " + QString(firstConfiguration.userName));
+	log->writeMessage("__Build No: " + QString(firstConfiguration.buildNo));
+	log->writeMessage("__Build Config: " + QString(firstConfiguration.buildConfig));
+	log->writeMessage("__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString());
+
+	log->writeMessage("Last time configured: ");
+	log->writeMessage("__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString());
+	log->writeMessage("__Host: " + QString(lastConfiguration.host));
+	log->writeMessage("__User: " + QString(lastConfiguration.userName));
+	log->writeMessage("__Build No: " + QString(lastConfiguration.buildNo));
+	log->writeMessage("__Build Config: " + QString(lastConfiguration.buildConfig));
+	log->writeMessage("__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString());
+
+	return;
+}
+
+void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmware *conf)
+{
+	if (conf == nullptr)
+	{
+		assert(conf);
+		return;
+	}
+
+	marker = IdentificationStructMarker;
+	version = CONF_IDENTIFICATION_DATA_V2::structVersion();
+	moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
+	count = 1;
+
+	//
+	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
+	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
+	strcpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data());
+
+	firstConfiguration.buildNo = conf->buildNumber();
+
+	QString buildConfig = conf->buildConfig().right(sizeof(firstConfiguration.buildConfig) - 1);
+	strcpy_s(firstConfiguration.buildConfig, sizeof(firstConfiguration.buildConfig), buildConfig.toStdString().data());
+
+	QString userName = conf->userName().right(sizeof(firstConfiguration.userName) - 1);
+	strcpy_s(firstConfiguration.userName, sizeof(firstConfiguration.userName), userName.toStdString().data());
+
+	lastConfiguration = firstConfiguration;
+}
+
+void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmware *conf)
+{
+	if (conf == nullptr)
+	{
+		assert(conf);
+		return;
+	}
+
+	// last configuration record
+	//
+	count ++;			// Incerement configartion counter
+
+	CONF_IDENTIFICATION_DATA_V2::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V2::CONF_IDENTIFICATION_RECORD();
+	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
+	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
+	strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
+
+	lastConfiguration.buildNo = conf->buildNumber();
+
+	QString buildConfig = conf->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
+	strcpy_s(lastConfiguration.buildConfig, sizeof(lastConfiguration.buildConfig), buildConfig.toStdString().data());
+
+	QString userName = conf->userName().right(sizeof(lastConfiguration.userName) - 1);
+	strcpy_s(lastConfiguration.userName, sizeof(lastConfiguration.userName), userName.toStdString().data());
+}
+
 //
 // Configurator
 //
@@ -760,15 +895,35 @@ void Configurator::readConfigurationWorker(int /*param*/)
                 }
                 else
                 {
-                    CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-                    if (pReadIdentificationStruct->marker == IdentificationStructMarker)
-                    {
-						pReadIdentificationStruct->dump(m_Log);
-                    }
-                    else
-                    {
+					CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+					if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+					{
+						switch (pReadIdentificationStruct->version)
+						{
+						case 1:
+							{
+
+								CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct_v1 = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
+								pReadIdentificationStruct_v1->dump(m_Log);
+							}
+							break;
+						case 2:
+							{
+
+								CONF_IDENTIFICATION_DATA_V2* pReadIdentificationStruct_v2 = reinterpret_cast<CONF_IDENTIFICATION_DATA_V2*>(identificationData.data());
+								pReadIdentificationStruct_v2->dump(m_Log);
+							}
+							break;
+						default:
+							m_Log->writeMessage(tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version));
+						}
+
+
+					}
+					else
+					{
 						m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
-                    }
+					}
                 }
             }
             break;
@@ -878,7 +1033,6 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 
 				// Check if the connector in correct Uart
 				//
-#pragma message(Q_FUNC_INFO " DEBUG!!!!!!!!!!!!!!!!!!!!!!! Uncomment it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
 				if (moduleUartId != conf->uartId())
 				{
 					throw tr("Wrong UART, use %1h port.").arg(QString::number(conf->uartId(), 16));
@@ -948,49 +1102,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			identificationData.resize(blockSize);
 		}
 
-		CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-		if (pReadIdentificationStruct->marker != IdentificationStructMarker)
+		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
 		{
-			// This is the first configuration
-			//
+
+			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+			{
+				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+			}
+
+			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+			{
+				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+			}
+
 			memset(identificationData.data(), 0, identificationData.size());
 
-			pReadIdentificationStruct->marker = IdentificationStructMarker;
-			pReadIdentificationStruct->version = 1;
-			pReadIdentificationStruct->moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
-			pReadIdentificationStruct->count = 1;
-
+			// This is the first configuration
 			//
-			pReadIdentificationStruct->firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-			pReadIdentificationStruct->firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+			pReadIdentificationStruct->createFirstConfiguration(conf);
 
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-			pReadIdentificationStruct->firstConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-			QString hostName = QHostInfo::localHostName().right(sizeof(pReadIdentificationStruct->firstConfiguration.host) - 1);
-			strcpy_s(pReadIdentificationStruct->firstConfiguration.host, sizeof(pReadIdentificationStruct->firstConfiguration.host), hostName.toStdString().data());
-
-			pReadIdentificationStruct->lastConfiguration = pReadIdentificationStruct->firstConfiguration;
 		}
 		else
 		{
+			pReadIdentificationStruct->createNextConfiguration(conf);
 			//pReadIdentificationStruct->dump(m_Log);
 
-			// last configuration record
-			//
-			pReadIdentificationStruct->count ++;			// Incerement configartion counter
-
-			CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
-			lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-			lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
-
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-			lastConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-			QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-			strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
-
-			pReadIdentificationStruct->lastConfiguration = lastConfiguration;
 		}
 
 		// Set Crc to identificationData
@@ -1209,51 +1348,40 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
             identificationData.resize(blockSize);
         }
 		
-        CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-        if (pReadIdentificationStruct->marker != IdentificationStructMarker)
-        {
-            // This is the first configuration
-            //
-            memset(identificationData.data(), 0, identificationData.size());
+		// An empty firmware
+		//
+		Hardware::ModuleFirmware conf;
+		conf.init("Caption", "subsysId", 0, 0, 0, 0, "projectName", "service", 0, "data", 0, QStringList());
 
-            pReadIdentificationStruct->marker = IdentificationStructMarker;
-            pReadIdentificationStruct->version = 1;
-            pReadIdentificationStruct->moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
-            pReadIdentificationStruct->count = 1;
+		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
+		{
 
-            //
-            pReadIdentificationStruct->firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-            pReadIdentificationStruct->firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+			{
+				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+			}
 
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-            pReadIdentificationStruct->firstConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
+			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+			{
+				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+			}
 
-            QString hostName = QHostInfo::localHostName().right(sizeof(pReadIdentificationStruct->firstConfiguration.host) - 1);
-            strcpy_s(pReadIdentificationStruct->firstConfiguration.host, sizeof(pReadIdentificationStruct->firstConfiguration.host), hostName.toStdString().data());
+			memset(identificationData.data(), 0, identificationData.size());
 
-            pReadIdentificationStruct->lastConfiguration = pReadIdentificationStruct->firstConfiguration;
-        }
-        else
-        {
+			// This is the first configuration
+			//
+			pReadIdentificationStruct->createFirstConfiguration(&conf);
+
+		}
+		else
+		{
+			pReadIdentificationStruct->createNextConfiguration(&conf);
 			//pReadIdentificationStruct->dump(m_Log);
 
-            // last configuration record
-            //
-            pReadIdentificationStruct->count ++;			// Incerement configartion counter
-
-            CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
-            lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-            lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
-
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-            lastConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-            QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-            strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
-
-            pReadIdentificationStruct->lastConfiguration = lastConfiguration;
-        }
-
+		}
         // Set Crc to identificationData
         //
         Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
@@ -1376,7 +1504,10 @@ void Configurator::writeConfDataFile(const QString& fileName)
 	m_Log->writeMessage(tr("File %1 was loaded.").arg(fileName));
 
 	m_Log->writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
-	//m_outputLog.writeMessage(tr("Changeset: %1").arg(m_confFirmware.changeset()));
+	m_Log->writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
+	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
+	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
+	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	m_Log->writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
 	m_Log->writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
 	m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));

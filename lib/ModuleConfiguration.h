@@ -52,7 +52,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId, const QStringList& descriptionFields);
+		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName,
+				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields);
 		bool load(QString fileName, QString &errorCode);
 		bool isEmpty() const;
 
@@ -84,7 +85,7 @@ namespace Hardware
 	private:
 
 		bool load_version1(const QJsonObject& jConfig);
-		bool load_version2(const QJsonObject& jConfig);
+		bool load_version2_3(const QJsonObject& jConfig);
 
 		// Properties
 		//
@@ -98,7 +99,14 @@ namespace Hardware
 		int changesetId() const;
 		int fileVersion() const;
 		int maxFileVersion() const;
-        const QByteArray& log() const;
+
+		QString projectName() const;
+		QString userName() const;
+		int buildNumber() const;
+		QString buildConfig() const;
+
+		const QByteArray& log() const;
+
 
 		// Data
 		//
@@ -110,10 +118,13 @@ namespace Hardware
 		int m_frameSize = 0;
 		int m_changesetId = 0;
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 2;
+		int m_maxFileVersion = 3;
 
 		QString m_projectName;
 		QString m_userName;
+		int m_buildNumber = 0;
+		QString m_buildConfig;
+
 
 		// data description
 		//

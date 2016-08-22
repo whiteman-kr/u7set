@@ -358,7 +358,7 @@ namespace Builder
 		BuildInfo bi = m_buildResultWriter.buildInfo();
 
 		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.changeset, descriptionFields);
+						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset, descriptionFields);
 	}
 
 

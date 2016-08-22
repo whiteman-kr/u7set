@@ -153,7 +153,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
-	connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::writeConfDataFile);

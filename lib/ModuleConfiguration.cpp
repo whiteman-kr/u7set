@@ -1,4 +1,3 @@
-
 #include "../lib/ModuleConfiguration.h"
 #include "../lib/Crc.h"
 #include "../lib/CUtils.h"
@@ -45,7 +44,8 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId, const QStringList& descriptionFields)
+	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName,
+							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
@@ -54,6 +54,8 @@ namespace Hardware
 		m_frameSize = frameSize;
 		m_projectName = projectName;
 		m_userName = userName;
+		m_buildNumber = buildNumber;
+		m_buildConfig = buildConfig;
 		m_changesetId = changesetId;
 		m_fileVersion = maxFileVersion();
 
@@ -111,7 +113,8 @@ namespace Hardware
 		case 1:
 			return load_version1(jConfig);
 		case 2:
-			return load_version2(jConfig);
+		case 3:
+			return load_version2_3(jConfig);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
@@ -214,7 +217,7 @@ namespace Hardware
 
     }
 
-	bool ModuleFirmware::load_version2(const QJsonObject& jConfig)
+	bool ModuleFirmware::load_version2_3(const QJsonObject& jConfig)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -252,11 +255,23 @@ namespace Hardware
 		}
 		m_frameSize = (int)jConfig.value("frameSize").toDouble();
 
-		if (jConfig.value("frameStringWidth").isUndefined() == true)
+		if (jConfig.value("buildConfig").isUndefined() == true)
 		{
-			return false;
+			m_buildConfig.clear();
 		}
-		int frameStringWidth = (int)jConfig.value("frameStringWidth").toDouble();
+		else
+		{
+			m_buildConfig = jConfig.value("buildConfig").toString();
+		}
+
+		if (jConfig.value("buildNumber").isUndefined() == true)
+		{
+			m_buildNumber = 0;
+		}
+		else
+		{
+			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+		}
 
 		if (jConfig.value("changesetId").isUndefined() == true)
 		{
@@ -295,6 +310,9 @@ namespace Hardware
 			std::vector<quint8> frame;
 
 			frame.resize(m_frameSize);
+
+			QString firstString = jFrame.value("data0000").toString();
+			int frameStringWidth = firstString.split(' ').size();
 
 			int linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
 
@@ -610,6 +628,11 @@ namespace Hardware
         return static_cast<int>(m_frames.size());
 	}
 
+	int ModuleFirmware::changesetId() const
+	{
+		return m_changesetId;
+	}
+
 	int ModuleFirmware::fileVersion() const
 	{
 		return m_fileVersion;
@@ -619,6 +642,27 @@ namespace Hardware
 	{
 		return m_maxFileVersion;
 	}
+
+	QString ModuleFirmware::projectName() const
+	{
+		return m_projectName;
+	}
+
+	QString ModuleFirmware::userName() const
+	{
+		return m_userName;
+	}
+
+	int ModuleFirmware::buildNumber() const
+	{
+		return m_buildNumber;
+	}
+
+	QString ModuleFirmware::buildConfig() const
+	{
+		return m_buildConfig;
+	}
+
 
     const QByteArray& ModuleFirmware::log() const
     {
