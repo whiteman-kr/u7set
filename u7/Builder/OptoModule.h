@@ -147,7 +147,7 @@ namespace Hardware
 		Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
 		void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
 
-		bool manualSettings() const { return m_manualSettings; }
+		Q_INVOKABLE bool manualSettings() const { return m_manualSettings; }
 		void setManualSettings(bool manualSettings) { m_manualSettings = manualSettings; }
 
 		int manualTxSizeW() const { return m_manualTxSizeW; }
