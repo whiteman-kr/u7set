@@ -465,7 +465,7 @@ namespace Builder
 		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT32(i_del)
+		CHECK_SIGNED_INT32(i_del)
 		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 0;
