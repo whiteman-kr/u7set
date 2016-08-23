@@ -17,6 +17,7 @@ public:
 private slots:
 	void currentSerialPortChanged(const QString & text);
 	void showDebugInfoChanged(int state);
+	void verifyChanged(int state);
 	void expertModeChanged(int state);
 
 	virtual void accept() override;
@@ -28,6 +29,7 @@ private:
 	QLabel* m_pSerialPortLabel = nullptr;
 
 	QCheckBox* m_pShowDebugInfo = nullptr;
+	QCheckBox* m_pVerify = nullptr;
 	QCheckBox* m_pExpertMode = nullptr;
 
 	QPushButton* m_pOkButton = nullptr;

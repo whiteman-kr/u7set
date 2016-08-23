@@ -74,7 +74,7 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleFirmware::load(QString fileName, QString& errorCode)
+	bool ModuleFirmware::load(QString fileName, QString& errorCode, bool readDataFrames)
     {
 		errorCode.clear();
         m_frames.clear();
@@ -111,17 +111,17 @@ namespace Hardware
 		switch (m_fileVersion)
 		{
 		case 1:
-			return load_version1(jConfig);
+			return load_version1(jConfig, readDataFrames);
 		case 2:
 		case 3:
-			return load_version2_3(jConfig);
+			return load_version2_3(jConfig, readDataFrames);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
 	}
 
-	bool ModuleFirmware::load_version1(const QJsonObject &jConfig)
+	bool ModuleFirmware::load_version1(const QJsonObject &jConfig, bool readDataFrames)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -164,6 +164,14 @@ namespace Hardware
             return false;
         }
 		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+
+		//
+
+		if (readDataFrames == false)
+		{
+			return true;
+		}
+
 
 		if (jConfig.value("framesCount").isUndefined() == true)
         {
@@ -217,7 +225,7 @@ namespace Hardware
 
     }
 
-	bool ModuleFirmware::load_version2_3(const QJsonObject& jConfig)
+	bool ModuleFirmware::load_version2_3(const QJsonObject& jConfig, bool readDataFrames)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -278,6 +286,13 @@ namespace Hardware
 			return false;
 		}
 		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+
+		//
+
+		if (readDataFrames == false)
+		{
+			return true;
+		}
 
 		if (jConfig.value("framesCount").isUndefined() == true)
 		{

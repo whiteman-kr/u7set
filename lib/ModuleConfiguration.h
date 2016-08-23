@@ -54,7 +54,7 @@ namespace Hardware
 	public:
 		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName,
 				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields);
-		bool load(QString fileName, QString &errorCode);
+		bool load(QString fileName, QString &errorCode, bool readDataFrames);
 		bool isEmpty() const;
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
@@ -84,8 +84,8 @@ namespace Hardware
 
 	private:
 
-		bool load_version1(const QJsonObject& jConfig);
-		bool load_version2_3(const QJsonObject& jConfig);
+		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
+		bool load_version2_3(const QJsonObject& jConfig, bool readDataFrames);
 
 		// Properties
 		//

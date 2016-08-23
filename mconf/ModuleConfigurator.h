@@ -41,7 +41,7 @@ private slots:
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 signals:
-	void setCommunicationSettings(QString device, bool showDebugInfo);
+	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 	
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
