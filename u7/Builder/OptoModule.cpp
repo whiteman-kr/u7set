@@ -576,9 +576,15 @@ namespace Hardware
 				a++;
 			}
 
-			port->setTxStartAddress(txStartAddress);
-
-			txStartAddress += port->txDataSizeW();
+			if (port->manualSettings() == true)
+			{
+				port->setTxStartAddress(port->manualTxStartAddressW());
+			}
+			else
+			{
+				port->setTxStartAddress(txStartAddress);
+				txStartAddress += port->txDataSizeW();
+			}
 		}
 
 		if (txStartAddress > m_optoPortAppDataSize)
@@ -945,6 +951,11 @@ namespace Hardware
 						return false;
 					}
 
+					if (port->manualSettings() == true)
+					{
+						continue;
+					}
+
 					int txStartAddress =	module->optoInterfaceDataOffset() +
 											i * module->optoPortDataSize() +
 											module->optoPortAppDataOffset();
@@ -981,6 +992,11 @@ namespace Hardware
 						LOG_INTERNAL_ERROR(m_log);
 						assert(false);
 						return false;
+					}
+
+					if (port->manualSettings() == true)
+					{
+						continue;
 					}
 
 					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize

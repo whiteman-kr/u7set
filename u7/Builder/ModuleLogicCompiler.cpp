@@ -3780,7 +3780,7 @@ namespace Builder
 		QStringList file;
 		QString line = QString("------------------------------------------------------------------------------------------");
 
-		file.append(QString("Tuning information file\n").arg(m_lm->equipmentId()));
+		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentId()));
 		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentId()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
 		file.append(QString("LM number: %1\n").arg(lmNumber));

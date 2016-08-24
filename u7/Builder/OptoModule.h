@@ -75,10 +75,11 @@ namespace Hardware
 
 		// serial RS323/485 mode properies only
 		//
-		bool m_enable = true;
+		bool m_enableSerial = true;
 		bool m_enableDuplex = false;    // serial mode and OCMN only
 
 		bool m_manualSettings = false;
+		int m_manualTxStartAddressW = 0;
 		int m_manualTxSizeW = 0;
 		int m_manualRxSizeW = 0;
 
@@ -118,8 +119,8 @@ namespace Hardware
 		Q_INVOKABLE int txStartAddress() const { return m_txStartAddress; }
 		void setTxStartAddress(int address) { m_txStartAddress = address; }
 
-		Q_INVOKABLE bool enable() const { return m_enable; }
-		void setEnable(bool enable) { m_enable = enable; }
+		Q_INVOKABLE bool enableSerial() const { return m_enableSerial; }
+		void setEnableSerial(bool enable) { m_enableSerial = enable; }
 
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
@@ -149,6 +150,9 @@ namespace Hardware
 
 		Q_INVOKABLE bool manualSettings() const { return m_manualSettings; }
 		void setManualSettings(bool manualSettings) { m_manualSettings = manualSettings; }
+
+		int manualTxStartAddressW() const { return m_manualTxStartAddressW; }
+		void setManualTxStartAddressW(int manualTxStartAddressW) { m_manualTxStartAddressW = manualTxStartAddressW; }
 
 		int manualTxSizeW() const { return m_manualTxSizeW; }
 		void setManualTxSizeW(int manualTxSizeW) { m_manualTxSizeW = manualTxSizeW; }

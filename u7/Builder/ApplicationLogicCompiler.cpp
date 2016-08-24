@@ -322,10 +322,11 @@ namespace Builder
 				optoPort1->setPortID(portID);
 				optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
 				optoPort1->setSerialMode(connection->serialMode());
-				optoPort1->setEnable(connection->enable());
+				optoPort1->setEnableSerial(connection->enableSerial());
 				optoPort1->setEnableDuplex(connection->enableDuplex());
 
 				optoPort1->setManualSettings(connection->manualSettings());
+				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
 				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 
@@ -401,12 +402,14 @@ namespace Builder
 				optoPort1->setPortID(portID);
 				optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
 				optoPort1->setManualSettings(connection->manualSettings());
+				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
 				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 
 				optoPort2->setPortID(portID);
 				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
 				optoPort2->setManualSettings(connection->manualSettings());
+				optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
 				optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 
@@ -715,13 +718,13 @@ namespace Builder
 			str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
 			list.append(str);
 
-			str = QString(tr("Port ID:\t\t-")).arg(port->portID());
+			str = QString(tr("Port ID:\t\t-%1")).arg(port->portID());
 			list.append(str);
 
-			str = QString(tr("Linked port ID:\t\t-")).arg(port->linkedPortID());
+			str = QString(tr("Linked port ID:\t\t-%1")).arg(port->linkedPortID());
 			list.append(str);
 
-			str = QString(tr("Connection ID:\t\t-\n\n")).arg(port->connectionID());
+			str = QString(tr("Connection ID:\t\t-%1\n\n")).arg(port->connectionID());
 			list.append(str);
 
 			return;

@@ -354,7 +354,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
 	connection->setConnectionID("NewConnection");
 	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
 	connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
-    connection->setEnable(true);
+	connection->setEnableSerial(true);
 
     connections.add(connection);
 
