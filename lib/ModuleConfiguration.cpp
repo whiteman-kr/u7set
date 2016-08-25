@@ -119,6 +119,7 @@ namespace Hardware
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
+
 	}
 
 	bool ModuleFirmware::load_version1(const QJsonObject &jConfig, bool readDataFrames)
@@ -300,6 +301,14 @@ namespace Hardware
 		}
 		int framesCount = (int)jConfig.value("framesCount").toDouble();
 
+		std::vector<quint8> frameVec;
+		frameVec.resize(m_frameSize);
+
+		quint16* framePtr = (quint16*)frameVec.data();
+
+		int frameStringWidth = -1;
+		int linesCount = 0;
+
 		for (int v = 0; v < framesCount; v++)
 		{
 
@@ -322,22 +331,12 @@ namespace Hardware
 				return false;
 			}
 
-			std::vector<quint8> frame;
-
-			frame.resize(m_frameSize);
-
-			QString firstString = jFrame.value("data0000").toString();
-			int frameStringWidth = firstString.split(' ').size();
-
-			int linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
-
-			int dataPos = 0;
-
-			for (int l = 0; l < linesCount; l++)
+			if (frameStringWidth == -1)
 			{
-				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+				QString firstString = jFrame.value("data0000").toString();
 
-				if (jFrame.value(stringName).isUndefined() == true)
+				frameStringWidth = firstString.split(' ').size();
+				if (frameStringWidth == 0)
 				{
 					assert(false);
 
@@ -345,10 +344,30 @@ namespace Hardware
 					return false;
 				}
 
-				QString stringValue = jFrame.value(stringName).toString();
+				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
+			}
 
-				QStringList vl = stringValue.split(' ');
-				for (QString& s : vl)
+			int dataPos = 0;
+
+			quint16* ptr = framePtr;
+
+			for (int l = 0; l < linesCount; l++)
+			{
+				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+
+				QJsonValue v = jFrame.value(stringName);
+
+				if (v.isUndefined() == true)
+				{
+					assert(false);
+
+					m_frames.clear();
+					return false;
+				}
+
+				QString stringValue = v.toString();
+
+				for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
 				{
 					bool ok = false;
 					quint16 v = s.toUInt(&ok, 16);
@@ -361,29 +380,17 @@ namespace Hardware
 						return false;
 					}
 
-					frame[dataPos++] = v >> 8;
-					frame[dataPos++] = v & 0xff;
-
-					if (dataPos > m_frameSize)
+					if (dataPos >= m_frameSize / sizeof(quint16))
 					{
 						assert(false);
 						break;
 					}
+
+					*ptr++ = qToBigEndian(v);
 				}
 			}
 
-
-			/*QString ss;
-			qDebug()<<"Frame " << v;
-			qDebug()<<"FrameSize " << frame.size();
-			for (int i = 0; i < frame.size(); i++)
-			{
-				ss += QString::number(frame[i], 16) + " ";
-
-			}
-			qDebug() << ss;*/
-
-			m_frames.push_back(frame);
+			m_frames.push_back(frameVec);
 		}
 
 		return true;

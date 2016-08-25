@@ -142,7 +142,7 @@ namespace Hardware
 
 		QByteArray m_log;
 
-    };
+	};
 
 
 }
