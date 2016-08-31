@@ -187,6 +187,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(this, &SerialDataTester::stopBitsChanged, m_portReceiver, &PortReceiver::setStopBits);
 	connect(m_portReceiver, &PortReceiver::dataFromPort, m_parser, &SerialDataParser::parse);
 	connect(m_parser, &SerialDataParser::packetProcessed, this, &SerialDataTester::dataReceived);
+	connect(m_parser, &SerialDataParser::crcError, this, &SerialDataTester::crcError);
 	connect(receiveTimeout, &QTimer::timeout, this, &SerialDataTester::signalTimeout);
 	connect(m_erasePacketData, &QAction::triggered, this, &SerialDataTester::erasePacketData);
 	connect(m_loadDefaultSettings, &QAction::triggered, this, &SerialDataTester::loadLastUsedSettings);
@@ -634,7 +635,7 @@ void SerialDataTester::portError(QString error)
 	}
 }
 
-void SerialDataTester::dataReceived(QString version, QString trId, QString numerator, QByteArray receivedValues)
+void SerialDataTester::dataReceived(QString version, QString trId, QString numerator, QByteArray dataId, QByteArray receivedValues)
 {
 	// Reset timer
 	//
@@ -646,6 +647,8 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 	ui->signature->setText("424D4C47");
 	ui->transmissionId->setText(trId);
 	ui->numerator->setText(numerator);
+	ui->dataUniqueId->setText(dataId);
+	ui->crc->setText("OK");
 
 	bool packageCorrupted = false;
 
@@ -827,6 +830,29 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 	}
 
 	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
+}
+
+void SerialDataTester::crcError(QString version, QString trId, QString numerator, QByteArray dataId)
+{
+	receiveTimeout->stop();
+	receiveTimeout->start(5000);
+
+	ui->version->setText(version);
+	ui->signature->setText("424D4C47");
+	ui->transmissionId->setText(trId);
+	ui->numerator->setText(numerator);
+	ui->dataUniqueId->setText(dataId);
+
+	ui->crc->setText("ERR");
+	ui->statusBar->showMessage("Crc error!");
+
+	ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
+	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
+
+	for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
+	{
+		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem("CRC ERR"));
+	}
 }
 
 void SerialDataTester::signalTimeout()

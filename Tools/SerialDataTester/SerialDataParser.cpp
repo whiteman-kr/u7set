@@ -58,6 +58,9 @@ void SerialDataParser::scanningSignaure()
 //		if (m_bytesCount > 4)
 //			m_bytesCount = 0;
 
+		if (sizeof(m_signature.bytes) == 4)
+			m_bytesCount=0;
+
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
 		//qDebug() << "BytesToCopy: " << bytesToCopy;
@@ -74,12 +77,12 @@ void SerialDataParser::scanningSignaure()
 		memcpy(m_signature.bytes + m_bytesCount, m_readPtr, bytesToCopy); // Record setted amount of bytes
 		m_bytesCount += bytesToCopy; // Set signature bytes amount to our value (Now, signature has its own amount of byes + recordered amount of bytes)
 
+
 		if (m_bytesCount == 4)  // If signature consist of 4 bytes, lets have a look
 		{
 
 			if (m_signature.uint32 == baseSignature) // If our signature is a beginning of the packet header
 			{
-				//qDebug() << "Sig OK";
 				m_state = ReadingHeader; // Change current state
 				m_readPtr += bytesToCopy; // Move our packet pointer forward by recordered amount of bytes (WARNNG: it mmust be bytesToCopy value, in case of the packet beginning)
 				m_bytesCount = 0; // Reset signature bytes amount value
@@ -144,9 +147,11 @@ void SerialDataParser::readingHeader()
 
 void SerialDataParser::readingData()
 {
-	qint16 dataAmount = m_header.header.dataAmount;
+	qint16 dataAmount = m_header.header.dataAmount+8+4; // 8 - crc bytes and 4 - dataUniqueIdBytes
 
-	int bytesToCopy = dataAmount;//(4 + dataAmount) - m_bytesCount;
+	qDebug() << dataAmount;
+
+	int bytesToCopy = (dataAmount) - m_bytesCount;
 	int avaiableDataSize = m_dataSize - (m_readPtr - m_buffer);
 
 	if (avaiableDataSize < bytesToCopy)
@@ -160,28 +165,62 @@ void SerialDataParser::readingData()
 	if (m_bytesCount == dataAmount)
 	{
 		m_state = ScanningSignature;
-		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
+
+		QByteArray dataUniqueId;
+
+		dataUniqueId.insert(0, m_packetData, 4); // Read dataUniqueId
+		m_packetData+=4;
 
 		QByteArray dataToSend;
 
-		dataToSend.insert(0, m_packetData, bytesToCopy);
+		dataToSend.insert(0, m_packetData, m_header.header.dataAmount); // Read packet data
+		m_packetData += m_header.header.dataAmount;
+
+		CrcRepresentation crc;
+
+		QByteArray dataForCrc;
+		dataForCrc.append(m_header.bytes, 8);
+		dataForCrc.append(dataUniqueId, 4);
+		dataForCrc.append(dataToSend, dataToSend.size());
+
+		crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.size());
+
+		CrcRepresentation crcFromPacket;
+
+		memcpy(crcFromPacket.bytes, m_packetData, 8);
+
+		m_readPtr += bytesToCopy;
+
+		QString version = QString::number(m_header.header.version);
+		QString trId = QString::number(m_header.header.txid);
+		QString numerator = QString::number(m_header.header.numerator);
+
+		if (crc.uint64 != crcFromPacket.uint64)
+		{
+			qDebug() << "CRC error: " << crc.uint64 << ":::" << crcFromPacket.uint64;
+			emit crcError(version, trId, numerator, dataUniqueId);
+		}
+		else
+		{
+			emit packetProcessed(version, trId, numerator, dataUniqueId, dataToSend);
+		}
 
 		//dataToSend.fromRawData(m_packetData+4, m_bytesCount-(4+8)); // 4 - dataUID size, 8 - crc size
 
 		//qDebug() << dataToSend;
 
-		QByteArray dataToCalculateCrc;
+		//QByteArray dataToCalculateCrc;
 		//quint64 crcFromPacket;
 
-		dataToCalculateCrc.append(m_signature.uint32);
-		dataToCalculateCrc.append(m_header.header.version);
-		dataToCalculateCrc.append(m_header.header.txid);
-		dataToCalculateCrc.append(m_header.header.numerator);
-		dataToCalculateCrc.append(m_header.header.dataAmount);
+//		dataToCalculateCrc.append(m_signature.uint32);
+//		dataToCalculateCrc.append(m_header.header.version);
+//		dataToCalculateCrc.append(m_header.header.txid);
+//		dataToCalculateCrc.append(m_header.header.numerator);
+//		dataToCalculateCrc.append(m_header.header.dataAmount);
 
-		memcpy (dataToCalculateCrc.data() + dataToCalculateCrc.size()-1, m_packetData, m_header.header.dataAmount + 4);
-		memcpy (m_crcFromPacket.bytes, m_packetData + 4 + m_header.header.dataAmount, 8);
+//		memcpy (dataToCalculateCrc.data() + dataToCalculateCrc.size()-1, m_packetData, m_header.header.dataAmount + 4);
+//		memcpy (m_crcFromPacket.bytes, m_packetData + 4 + m_header.header.dataAmount, 8);
 
 
 		// Lets calculate crc!
@@ -202,11 +241,11 @@ void SerialDataParser::readingData()
 		/*if (crc == m_crcFromPacket.crc)
 		{*/
 
-		QString version = QString::number(m_header.header.version);
-		QString trId = QString::number(m_header.header.txid);
-		QString numerator = QString::number(m_header.header.numerator);
+//		QString version = QString::number(m_header.header.version);
+//		QString trId = QString::number(m_header.header.txid);
+//		QString numerator = QString::number(m_header.header.numerator);
 
-		emit packetProcessed(version, trId, numerator, dataToSend);
+//		emit packetProcessed(version, trId, numerator, dataToSend);
 
 		/*qDebug() << m_header.header.version;
 		qDebug() << m_header.header.txid;
@@ -219,7 +258,7 @@ void SerialDataParser::readingData()
 			qDebug() << "Wrong crc!";
 		}*/
 
-		if (m_dataSize - (m_readPtr - m_buffer) != 0)
+		if (m_dataSize - (m_readPtr - m_buffer) > 0)
 		{
 		scanningSignaure();
 		}

@@ -280,9 +280,7 @@ void SerialDataTesterServer::sendPacket()
 		head.hdr.num = 1;
 		head.hdr.amount = m_dataSize;
 
-		ui->transmissionId->setText(QString::number(head.hdr.id));
-		ui->numerator->setText(QString::number(head.hdr.num));
-		ui->dataAmount->setText(QString::number(head.hdr.amount));
+
 
 		QByteArray dataToSend;
 		dataToSend.clear();
@@ -380,7 +378,9 @@ void SerialDataTesterServer::sendPacket()
 		QByteArray bytes;
 		bytes.clear();
 
-		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+		bytes.reserve(12);
+
+		bytes.append("sdfgsdfhhasdfasdffgdsffgh");
 
 		// Write down signature to packet (4 bytes);
 		//
@@ -395,14 +395,38 @@ void SerialDataTesterServer::sendPacket()
 		// Write down packet data
 		//
 
-		bytes += dataToSend;
+		DataUniqueId dataID;
 
+		dataID.bytes[0] = '1';
+		dataID.bytes[1] = '1';
+		dataID.bytes[2] = '1';
+		dataID.bytes[3] = '1';
 
+		//bytes += dataID.bytes;
+		bytes.append(dataID.bytes, 4);
+		bytes.append(dataToSend, dataToSend.length());
+		//bytes += dataToSend;
+
+		QByteArray dataForCrc;
+
+		dataForCrc.append(head.bytes, 8);
+		dataForCrc.append(dataID.bytes, 4);
+		dataForCrc.append(dataToSend, dataToSend.length());
+
+		qDebug() << "dataForCRC: " << dataForCrc;
+
+		CrcRepresentation crc;
+		crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.length());
+
+		bytes.append(crc.bytes, 8);
+
+		qDebug() << crc.uint64;
+		qDebug() << "CRC: " << crc.bytes;
 
 		// Write packet to port
 		//
 
-		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+		//bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
 
 		m_serialPort->write(bytes, bytes.size());
 
@@ -416,8 +440,11 @@ void SerialDataTesterServer::sendPacket()
 			QMessageBox::warning(this, "Error", m_serialPort->errorString());
 		}
 
-
-
+		ui->transmissionId->setText(QString::number(head.hdr.id));
+		ui->numerator->setText(QString::number(head.hdr.num));
+		ui->dataAmount->setText(QString::number(head.hdr.amount));
+		ui->dataUniqueId->setText(QString::number(dataID.uint32));
+		ui->crc->setText(QString::number(crc.uint64));
 
 		//stopServer();
 
