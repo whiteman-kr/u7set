@@ -170,4 +170,11 @@ void SerialDataParser::readingData()
 			scanningSignaure();
 		}
 	}
+	else
+	{
+		m_state = ScanningSignature;
+		m_readPtr++;
+		m_bytesCount = 0;
+		scanningSignaure();
+	}
 }
