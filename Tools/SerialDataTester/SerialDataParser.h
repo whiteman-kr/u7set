@@ -30,7 +30,6 @@ private:
 	char* m_buffer = nullptr; // Pointer on the beginning of the received data
 	char* m_readPtr = nullptr;// Pointer, that point on place, where reading was stopped
 	int m_dataSize = 0; // Size of the received data
-	quint64 m_crc_table[256];
 
 #pragma pack(push, 1)
 
@@ -70,7 +69,7 @@ private:
 
 	Signature m_signature; // Value to store received bytes (Signature bytes)
 	HeaderUnion m_header;
-	char* m_packetData;
+	char* m_packetData = nullptr;
 	const quint32 baseSignature = 0x424D4C47; // Signature for compare
 	int m_bytesCount = 0; // Stores amount of writed down bytes in m_signature
 

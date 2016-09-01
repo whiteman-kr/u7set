@@ -52,7 +52,7 @@ private:
 
 	Ui::SerialDataTester *ui = nullptr;
 
-	QTimer* receiveTimeout;
+	QTimer* receiveTimeout = nullptr;
 
 	SettingsDialog* m_applicationSettingsDialog = nullptr;
 	PortReceiver* m_portReceiver = nullptr;
@@ -76,8 +76,8 @@ private:
 
 	QString m_pathToSignalsXml;
 
-	QThread* m_PortThread;
-    QThread* m_ParserThread;
+	QThread* m_PortThread = nullptr;
+	QThread* m_ParserThread = nullptr;
 
 	struct SignalData
 	{

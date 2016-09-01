@@ -426,7 +426,7 @@ void SerialDataTesterServer::sendPacket()
 		// Write packet to port
 		//
 
-		//bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
 
 		m_serialPort->write(bytes, bytes.size());
 
