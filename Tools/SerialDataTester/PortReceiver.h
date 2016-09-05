@@ -7,7 +7,7 @@ class PortReceiver : public QObject
 {
 	Q_OBJECT
 public:
-	explicit PortReceiver(QObject *parent = 0);
+	explicit PortReceiver(QObject* parent = 0);
 	virtual ~PortReceiver();
 
 signals:

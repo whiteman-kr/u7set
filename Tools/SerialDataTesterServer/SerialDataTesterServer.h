@@ -7,6 +7,8 @@
 #include <QSerialPortInfo>
 #include <QBitArray>
 
+#include "../../lib/Crc.h"
+
 namespace Ui {
 	class SerialDataTesterServer;
 }
@@ -73,11 +75,17 @@ private:
         Header hdr;
     };
 
-    union Data
-    {
-        char bytes[8];
-        quint32 uint32;
-    };
+	union DataUniqueId
+	{
+		char bytes[4];
+		quint32 uint32;
+	};
+
+	union CrcRepresentation
+	{
+		char bytes[8];
+		quint64 uint64;
+	};
 
 	int m_numberOfPacket = 0;
 	int m_amountOfSignals = 0;
