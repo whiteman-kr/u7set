@@ -10,12 +10,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	if (theFilters.load("ObjectFilters.xml") == false)
 	{
-		QMessageBox::critical(nullptr, QString("ObjectFilters.xml loading error"), theFilters.errorCode());
+		QMessageBox::critical(nullptr, QString("Error"), theFilters.errorCode());
 	}
 
-	if (theFilters.load("ObjectFiltersUser.xml") == false)
+	if (theUserFilters.load("ObjectFiltersUser.xml") == false)
 	{
-		QMessageBox::critical(nullptr, QString("ObjectFiltersUser.xml loading error"), theFilters.errorCode());
+		QMessageBox::critical(nullptr, QString("Error"), theFilters.errorCode());
 	}
 
 
@@ -39,6 +39,6 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowState = saveState();
 
 
-	//theFilters.save("ObjectFilters.xml", false);
-	//theFilters.save("ObjectFiltersUser.xml", true);
+	theFilters.save("ObjectFilters1.xml");
+	theUserFilters.save("ObjectFiltersUser1.xml");
 }

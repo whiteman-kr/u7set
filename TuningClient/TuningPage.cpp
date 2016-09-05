@@ -502,27 +502,28 @@ FilterButton::FilterButton(const QString& filterId, const QString& caption, QWid
 // TuningPage
 //
 
-TuningPage::TuningPage(const QString &filterId, QWidget *parent) :
+TuningPage::TuningPage(std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
 	QWidget(parent),
-	m_filterId(filterId)
+	m_tabFilter(tabFilter)
 {
 	// Top buttons
 	//
-	for (int i = 0; i < theFilters.filtersCount(); i++)
+	for (auto f : theFilters.filters)
 	{
-		ObjectFilter* f = theFilters.filter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->isButton() == false && f->isChild() == false)
+		if (f->isButton() == false)
 		{
 			continue;
 		}
 
-		if (m_filterId.isEmpty() || f->parentStrID().isEmpty() || f->parentStrID() == filterId)
+		FilterButton* button = new FilterButton(f->strID(), f->caption());
+		m_buttons.push_back(button);
+	}
+
+	// Child buttons
+	//
+	if (tabFilter != nullptr)
+	{
+		for(auto f : tabFilter->childFilters)
 		{
 			FilterButton* button = new FilterButton(f->strID(), f->caption());
 			m_buttons.push_back(button);

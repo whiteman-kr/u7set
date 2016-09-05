@@ -96,7 +96,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(const QString& filterId, QWidget *parent = 0);
+	explicit TuningPage(std::shared_ptr<ObjectFilter> tabFilter = nullptr, QWidget *parent = 0);
 
 signals:
 
@@ -129,7 +129,7 @@ private:
 
 	std::vector<int> m_objectsIndexes;
 
-	QString m_filterId;
+	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
 };
 
 #endif // TUNINGPAGE_H

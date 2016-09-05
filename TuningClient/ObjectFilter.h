@@ -29,11 +29,9 @@ public:
 	Q_ENUM(SignalType)
 
 public:
-	ObjectFilter();
+	ObjectFilter(FilterType filterType);
 
-	bool load(QXmlStreamReader& reader,
-				std::map<QString, std::shared_ptr<ObjectFilter>>& filtersMap,
-				std::vector<std::shared_ptr<ObjectFilter>>& filtersVector);
+	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer);
 
 
@@ -44,14 +42,8 @@ public:
 	QString strID() const;
 	void setStrID(const QString& value);
 
-	QString parentStrID() const;
-	void setParentStrID(const QString& value);
-
 	QString caption() const;
 	void setCaption(const QString& value);
-
-	bool user() const;
-	void setUser(bool value);
 
 	// Filters
 	//
@@ -76,13 +68,12 @@ public:
 	bool isButton() const;
 	bool isChild() const;
 
+	std::vector<std::shared_ptr<ObjectFilter>> childFilters;
+
 private:
 
 	QString m_strID;
-	QString m_parentStrID;
 	QString m_caption;
-
-	bool m_user = false;
 
 	// Filters
 	//
@@ -93,6 +84,8 @@ private:
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
+
+
 };
 
 
@@ -103,21 +96,18 @@ public:
 	ObjectFilterStorage();
 
 	bool load(const QString& fileName);
-	bool save(const QString& fileName, bool user);
+	bool save(const QString& fileName);
 
 	QString errorCode();
 
-	int filtersCount() const;
-	ObjectFilter* filter(int index);
-	ObjectFilter* filter(const QString& filterId);
+	std::vector<std::shared_ptr<ObjectFilter>> filters;
 
 private:
-	std::map<QString, std::shared_ptr<ObjectFilter>> m_filtersMap;
-	std::vector<std::shared_ptr<ObjectFilter>> m_filtersVector;
 
 	QString m_errorCode;
 };
 
 extern ObjectFilterStorage theFilters;
+extern ObjectFilterStorage theUserFilters;
 
 #endif // OBJECTFILTER_H

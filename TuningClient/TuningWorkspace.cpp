@@ -14,15 +14,8 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	std::vector<QTreeWidgetItem*> treeItems;
 
-	for (int i = 0; i < theFilters.filtersCount(); i++)
+	for (auto f : theFilters.filters)
 	{
-		ObjectFilter* f = theFilters.filter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
 		if (f->isTree() == false)
 		{
 			continue;
@@ -32,7 +25,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 		treeItems.push_back(item);
 
-		addChildTreeObjects(f, item);
+		addChildTreeObjects(f.get(), item);
 	}
 
 	if (treeItems.empty() == false)
@@ -57,31 +50,23 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	std::vector<std::pair<TuningPage*, QString>> tuningPages;
 
-	int nCount = theFilters.filtersCount();
-	for (int i = 0; i < nCount; i++)
+	for (auto f : theFilters.filters)
 	{
-		ObjectFilter* of = theFilters.filter(i);
-		if (of == nullptr)
-		{
-			assert(of);
-			continue;
-		}
-
-		if (of->isTab() == false)
+		if (f->isTab() == false)
 		{
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(of->strID());
+		TuningPage* tp = new TuningPage(f);
 
-		tuningPages.push_back(std::make_pair(tp, of->caption()));
+		tuningPages.push_back(std::make_pair(tp, f->caption()));
 	}
 
 	if (tuningPages.empty() == true)
 	{
 		// No tab pages, create only one page
 		//
-		m_tuningPage = new TuningPage("");
+		m_tuningPage = new TuningPage();
 		if (m_hSplitter != nullptr)
 		{
 			m_hSplitter->addWidget(m_tuningPage);
@@ -148,29 +133,12 @@ void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem*
 		return;
 	}
 
-	for (int i = 0; i < theFilters.filtersCount(); i++)
+	for (auto f : filter->childFilters)
 	{
-		ObjectFilter* f = theFilters.filter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->isChild() == false)
-		{
-			continue;
-		}
-
-		if (f->parentStrID() != filter->strID())
-		{
-			continue;
-		}
-
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
 
 		parent->addChild(item);
 
-		addChildTreeObjects(f, item);
+		addChildTreeObjects(f.get(), item);
 	}
 }

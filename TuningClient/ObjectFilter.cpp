@@ -5,14 +5,12 @@
 // ObjectFilter
 //
 
-ObjectFilter::ObjectFilter()
+ObjectFilter::ObjectFilter(FilterType filterType)
 {
-
+	m_filterType = filterType;
 }
 
-bool ObjectFilter::load(QXmlStreamReader& reader,
-		  std::map<QString, std::shared_ptr<ObjectFilter>>& filtersMap,
-			std::vector<std::shared_ptr<ObjectFilter>>& filtersVector)
+bool ObjectFilter::load(QXmlStreamReader& reader)
 {
 
 	if (reader.attributes().hasAttribute("StrID"))
@@ -20,21 +18,9 @@ bool ObjectFilter::load(QXmlStreamReader& reader,
 		setStrID(reader.attributes().value("StrID").toString());
 	}
 
-	qDebug()<<strID();
-
-	if (reader.attributes().hasAttribute("ParentStrID"))
-	{
-		setParentStrID(reader.attributes().value("ParentStrID").toString());
-	}
-
 	if (reader.attributes().hasAttribute("Caption"))
 	{
 		setCaption(reader.attributes().value("Caption").toString());
-	}
-
-	if (reader.attributes().hasAttribute("User"))
-	{
-		setUser(reader.attributes().value("User").toString() == "true" ? true : false);
 	}
 
 	if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
@@ -90,18 +76,14 @@ bool ObjectFilter::load(QXmlStreamReader& reader,
 		{
 			if (reader.name() == "ObjectFilter")
 			{
-				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>();
+				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
 
-				if (of->load(reader, filtersMap, filtersVector) == false)
+				if (of->load(reader) == false)
 				{
 					return false;
 				}
 
-				of->setParentStrID(strID());
-
-				of->setFilterType(ObjectFilter::FilterType::Child);
-				filtersMap[of->strID()] = of;
-				filtersVector.push_back(of);
+				childFilters.push_back(of);
 			}
 			else
 			{
@@ -117,19 +99,24 @@ bool ObjectFilter::load(QXmlStreamReader& reader,
 
 bool ObjectFilter::save(QXmlStreamWriter& writer)
 {
-	/*writer.writeAttribute("StrID", strID());
-	writer.writeAttribute("ParentStrID", parentStrID());
-	writer.writeAttribute("Caption", caption());
+	writer.writeStartElement("ObjectFilter");
 
-	writer.writeAttribute("User", user() ? "true" : "false");
+	writer.writeAttribute("StrID", strID());
+	writer.writeAttribute("Caption", caption());
 
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
 
 	writer.writeAttribute("FilterType", E::valueToString<FilterType>((int)filterType()));
-	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));*/
+	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
+	for (auto f : childFilters)
+	{
+		f->save(writer);
+	}
+
+	writer.writeEndElement();
 	return true;
 }
 
@@ -144,15 +131,6 @@ void ObjectFilter::setStrID(const QString& value)
 	m_strID = value;
 }
 
-QString ObjectFilter::parentStrID() const
-{
-	return m_parentStrID;
-}
-
-void ObjectFilter::setParentStrID(const QString& value)
-{
-	m_parentStrID = value;
-}
 
 QString ObjectFilter::caption() const
 {
@@ -164,15 +142,6 @@ void ObjectFilter::setCaption(const QString& value)
 	m_caption = value;
 }
 
-bool ObjectFilter::user() const
-{
-	return m_user;
-}
-
-void ObjectFilter::setUser(bool value)
-{
-	m_user = value;
-}
 
 QString ObjectFilter::customAppSignalIDMask() const
 {
@@ -253,9 +222,6 @@ bool ObjectFilter::isChild() const
 ObjectFilterStorage::ObjectFilterStorage()
 {
 
-	//std::shared_ptr<ObjectFilter> test1 = std::make_shared<ObjectFilter>();
-	//m_filters.push_back(test1);
-
 }
 
 bool ObjectFilterStorage::load(const QString& fileName)
@@ -263,8 +229,15 @@ bool ObjectFilterStorage::load(const QString& fileName)
 	m_errorCode.clear();
 
 	QFile f(fileName);
+
+	if (f.exists() == false)
+	{
+		return true;
+	}
+
 	if (f.open(QFile::ReadOnly) == false)
 	{
+		m_errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
 		return false;
 	}
 
@@ -288,7 +261,7 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 	// Read signals
 	//
-	ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
+	ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Child;
 
 	while (!reader.atEnd())
 	{
@@ -306,17 +279,14 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 		if (reader.name() == "ObjectFilter")
 		{
-			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>();
+			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
-			if (of->load(reader, m_filtersMap, m_filtersVector) == false)
+			if (of->load(reader) == false)
 			{
 				return false;
 			}
 
-			of->setFilterType(filterType);
-
-			m_filtersMap[of->strID()] = of;
-			m_filtersVector.push_back(of);
+			filters.push_back(of);
 
 			continue;
 		}
@@ -347,10 +317,10 @@ bool ObjectFilterStorage::load(const QString& fileName)
 	return !reader.hasError();
 }
 
-bool ObjectFilterStorage::save(const QString& fileName, bool user)
+bool ObjectFilterStorage::save(const QString& fileName)
 {
 	m_errorCode.clear();
-/*
+
 	// save data to XML
 	//
 	QByteArray data;
@@ -360,18 +330,28 @@ bool ObjectFilterStorage::save(const QString& fileName, bool user)
 	writer.writeStartDocument();
 
 	writer.writeStartElement("ObjectFilterStorage");
-	for (auto of : m_filtersVector)
-	{
-		if (of->user() != user)
-		{
-			continue;
-		}
 
-		writer.writeStartElement("ObjectFilter");
-		of->save(writer);
+	QList<std::pair<QString, ObjectFilter::FilterType>> records;
+	records.push_back(std::make_pair("Tree", ObjectFilter::FilterType::Tree));
+	records.push_back(std::make_pair("Tabs", ObjectFilter::FilterType::Tab));
+	records.push_back(std::make_pair("Buttons", ObjectFilter::FilterType::Button));
+
+	for (auto r : records)
+	{
+		writer.writeStartElement(r.first);
+		for (auto of : filters)
+		{
+			if (of->filterType() != r.second)
+			{
+				continue;
+			}
+
+			of->save(writer);
+		}
 		writer.writeEndElement();
 	}
-	writer.writeEndElement();
+
+	writer.writeEndElement();	// ObjectFilterStorage
 
 	writer.writeEndDocument();
 
@@ -383,7 +363,7 @@ bool ObjectFilterStorage::save(const QString& fileName, bool user)
 	}
 
 	f.write(data);
-*/
+
 	return true;
 
 }
@@ -394,35 +374,7 @@ QString ObjectFilterStorage::errorCode()
 
 }
 
-int ObjectFilterStorage::filtersCount() const
-{
-	return (int)m_filtersVector.size();
-
-}
-
-ObjectFilter* ObjectFilterStorage::filter(int index)
-{
-	if (index < 0 || index >= filtersCount())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return m_filtersVector[index].get();
-
-}
-
-ObjectFilter* ObjectFilterStorage::filter(const QString& filterId)
-{
-	auto it = m_filtersMap.find(filterId);
-	if (it == m_filtersMap.end())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return it->second.get();
-}
 
 
 ObjectFilterStorage theFilters;
+ObjectFilterStorage theUserFilters;

@@ -2,6 +2,7 @@
 #define STABLE_H
 
 #include <assert.h>
+#include <QObject>
 #include <QSplitter>
 #include <QTreeWidget>
 #include <QTabWidget>
