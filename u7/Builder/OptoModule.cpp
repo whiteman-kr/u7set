@@ -919,7 +919,7 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::calculatePortsTxStartAddresses()
+	bool OptoModuleStorage::calculatePortsAbsoulteTxStartAddresses()
 	{
 		bool result = true;
 
@@ -956,11 +956,11 @@ namespace Hardware
 						continue;
 					}
 
-					int txStartAddress =	module->optoInterfaceDataOffset() +
+					int absTxStartAddress =	module->optoInterfaceDataOffset() +
 											i * module->optoPortDataSize() +
 											module->optoPortAppDataOffset();
 
-					port->setTxStartAddress(txStartAddress);
+					port->setAbsTxStartAddress(absTxStartAddress);
 
 					i++;
 
@@ -981,7 +981,7 @@ namespace Hardware
 			{
 				// calculate tx addresses for ports of OCM module
 				//
-				int txStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
+				int absTxStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
 
 				int txDataSizeW = 0;
 
@@ -1001,9 +1001,9 @@ namespace Hardware
 
 					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
-					port->setTxStartAddress(txStartAddress);
+					port->setAbsTxStartAddress(absTxStartAddress);
 
-					txStartAddress += port->txDataSizeW();
+					absTxStartAddress += port->txDataSizeW();
 
 					txDataSizeW += port->txDataSizeW();
 

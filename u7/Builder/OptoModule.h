@@ -69,7 +69,8 @@ namespace Hardware
 		int m_rxStartAddress = 0;
 		int m_rxDataSizeW = 0;
 
-		int m_txStartAddress = 0;
+		int m_txStartAddress = 0;				// address of port's tx data relative from opto module appDataOffset
+		int m_absTxStartAddress = 0;		// absoulte address of port tx data in LM memory
 
 		quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
 
@@ -118,6 +119,9 @@ namespace Hardware
 
 		Q_INVOKABLE int txStartAddress() const { return m_txStartAddress; }
 		void setTxStartAddress(int address) { m_txStartAddress = address; }
+
+		int absTxStartAddress() { return m_absTxStartAddress; }
+		void setAbsTxStartAddress(int address) { m_absTxStartAddress = address; }
 
 		Q_INVOKABLE bool enableSerial() const { return m_enableSerial; }
 		void setEnableSerial(bool enable) { m_enableSerial = enable; }
@@ -287,7 +291,7 @@ namespace Hardware
 		QList<OptoModule*> getLmAssociatedOptoModules(const QString& lmStrID);
 
 		bool setPortsRxDataSizes();
-		bool calculatePortsTxStartAddresses();
+		bool calculatePortsAbsoulteTxStartAddresses();
 		bool calculatePortsRxStartAddresses();
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);

@@ -448,7 +448,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Dispose opto modules tx/rx buffers...")));
 
-		result = m_optoModuleStorage->calculatePortsTxStartAddresses();
+		result = m_optoModuleStorage->calculatePortsAbsoulteTxStartAddresses();
 
 		if (result == false)
 		{
