@@ -34,7 +34,7 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	ui->baudList->addItem(QString::number(QSerialPort::Baud19200));
 
 	ui->timeInterval->setRange(0, 10000);
-	ui->countOfPackets->setRange(0, 10000);
+	ui->countOfPackets->setRange(0, 100000);
 
 	QSettings applicationSettings;
 
@@ -268,188 +268,28 @@ void SerialDataTesterServer::stopServer()
 
 void SerialDataTesterServer::sendPacket()
 {
-	    m_serialPort->clear();
+	m_serialPort->clear();
 
-		Signature sign;
-		HeaderUnion head;
+	Signature sign;
+	HeaderUnion head;
 
-		sign.uint32 = 0x424D4C47;
+	sign.uint32 = 0x424D4C47;
 
-		head.hdr.version = 4;
-		head.hdr.id = 1;
-		head.hdr.num = 1;
-		head.hdr.amount = m_dataSize;
+	head.hdr.version = 4;
+	head.hdr.id = 1;
+	head.hdr.num = 1;
+	head.hdr.amount = m_dataSize;
 
 
 
-		QByteArray dataToSend;
-		dataToSend.clear();
+	QByteArray dataToSend;
+	dataToSend.clear();
 
-		QBitArray generatedData;
-		generatedData.resize(m_dataSize*8);
-		generatedData.fill(0);
+	QBitArray generatedData;
+	generatedData.resize(m_dataSize*8);
+	generatedData.fill(0);
 
-		qDebug() << "We transfer now: ";
-
-		for (SignalData signal : m_signalsFromXml)
-		{
-			// Get type of the signal
-			//
-
-			quint64 value;
-
-			if (signal.type == "Analog")
-			{
-				quint64 maxDataSize = pow(2, signal.dataSize*8);
-
-				value = qrand()%maxDataSize;
-
-				if (signal.dataSize == 16 && signal.dataFormat == "SignedInt")
-				{
-					value += qrand()%maxDataSize;
-				}
-
-				if (signal.dataSize == 32)
-				{
-					value*=qrand()%10000*qrand()%100;
-				}
-
-				if (signal.dataFormat == "Float")
-				{
-					int pos = 31; // declare variables
-					float f = qrand()%maxDataSize * 0.1;
-					int bit = 0;
-
-					qDebug() << signal.name << " " << f;
-
-					int *b = reinterpret_cast<int*>(&f);
-					for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
-					{
-					bit = ((*b >> binaryNumber)&1);
-					if (bit == 0)
-						generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
-					else
-						generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
-					pos--;
-					}
-				}
-				else
-				{
-					qDebug() << signal.name << " " << value;
-
-					for (int pos = 0; value>0; pos++)
-					{
-						if (value%2 == 0)
-						{
-							generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
-						}
-						else
-						{
-							generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
-						}
-						value/=2;
-					}
-				}
-			}
-			else
-			{
-				generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
-				qDebug() << signal.name << " Bits not included";
-			}
-		}
-
-		qDebug() << "=====================+";
-
-		qDebug() << generatedData;
-
-		QString visualizeTransferringData;
-
-		for (int currentBit=0; currentBit<generatedData.size(); currentBit++)
-		{
-			visualizeTransferringData.append(generatedData.at(currentBit) == 1 ? "1" : "0");
-			if ((currentBit+1)%8 == 0)
-				visualizeTransferringData.append(" ");
-		}
-
-		dataToSend.append(bitsToBytes(generatedData));
-
-		ui->data->setText(visualizeTransferringData);
-
-		QByteArray bytes;
-		bytes.clear();
-
-		bytes.reserve(12);
-
-		bytes.append("sdfgsdfhhasdfasdffgdsffgh");
-
-		// Write down signature to packet (4 bytes);
-		//
-
-		bytes.append(sign.bytes, 4);
-
-		// Write down header bytes (8 bytes);
-		//
-
-		bytes.append(head.bytes, 8);
-
-		// Write down packet data
-		//
-
-		DataUniqueId dataID;
-
-		dataID.bytes[0] = '1';
-		dataID.bytes[1] = '1';
-		dataID.bytes[2] = '1';
-		dataID.bytes[3] = '1';
-
-		//bytes += dataID.bytes;
-		bytes.append(dataID.bytes, 4);
-		bytes.append(dataToSend, dataToSend.length());
-		//bytes += dataToSend;
-
-		QByteArray dataForCrc;
-
-		dataForCrc.append(head.bytes, 8);
-		dataForCrc.append(dataID.bytes, 4);
-		dataForCrc.append(dataToSend, dataToSend.length());
-
-		qDebug() << "dataForCRC: " << dataForCrc;
-
-		CrcRepresentation crc;
-		crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.length());
-
-		bytes.append(crc.bytes, 8);
-
-		qDebug() << crc.uint64;
-		qDebug() << "CRC: " << crc.bytes;
-
-		// Write packet to port
-		//
-
-		bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
-
-		m_serialPort->write(bytes, bytes.size());
-
-		// Send data
-		//
-
-		bool ok = m_serialPort->flush();
-
-		if (ok == false)
-		{
-			QMessageBox::warning(this, "Error", m_serialPort->errorString());
-		}
-
-		ui->transmissionId->setText(QString::number(head.hdr.id));
-		ui->numerator->setText(QString::number(head.hdr.num));
-		ui->dataAmount->setText(QString::number(head.hdr.amount));
-		ui->dataUniqueId->setText(QString::number(dataID.uint32));
-		ui->crc->setText(QString::number(crc.uint64));
-
-		//stopServer();
-
-		/*m_data.fill(0, m_dataSize*8);
-	m_packet.clear();
+	qDebug() << "We transfer now: ";
 
 	for (SignalData signal : m_signalsFromXml)
 	{
@@ -458,18 +298,18 @@ void SerialDataTesterServer::sendPacket()
 
 		quint64 value;
 
-		if (signal.type == "analog")
+		if (signal.type == "Analog")
 		{
 			quint64 maxDataSize = pow(2, signal.dataSize*8);
 
 			value = qrand()%maxDataSize;
 
-			if (signal.dataSize == 2 && signal.dataFormat == "SignedInt")
+			if (signal.dataSize == 16 && signal.dataFormat == "SignedInt")
 			{
 				value += qrand()%maxDataSize;
 			}
 
-			if (signal.dataSize == 4)
+			if (signal.dataSize == 32)
 			{
 				value*=qrand()%10000*qrand()%100;
 			}
@@ -477,32 +317,35 @@ void SerialDataTesterServer::sendPacket()
 			if (signal.dataFormat == "Float")
 			{
 				int pos = 31; // declare variables
-				float f = value * 0.1;
+				float f = qrand()%maxDataSize * 0.1;
 				int bit = 0;
+
+				qDebug() << signal.name << " " << f;
 
 				int *b = reinterpret_cast<int*>(&f);
 				for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
 				{
-				bit = ((*b >> binaryNumber)&1);
-				if (bit == 0)
-					m_data.setBit(signal.offset + signal.bit + pos, 0);
-				else
-					m_data.setBit(signal.offset + signal.bit + pos, 1);
-				pos--;
+					bit = ((*b >> binaryNumber)&1);
+					if (bit == 0)
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
+					else
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
+					pos--;
 				}
 			}
 			else
 			{
+				qDebug() << signal.name << " " << value;
 
 				for (int pos = 0; value>0; pos++)
 				{
 					if (value%2 == 0)
 					{
-						m_data.setBit(signal.offset + signal.bit + pos, 0);
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 0);
 					}
 					else
 					{
-						m_data.setBit(signal.offset + signal.bit + pos, 1);
+						generatedData.setBit(signal.offset*8 + signal.bit + pos, 1);
 					}
 					value/=2;
 				}
@@ -510,96 +353,98 @@ void SerialDataTesterServer::sendPacket()
 		}
 		else
 		{
-			m_data.setBit(signal.offset + signal.bit, qrand()%2);
+			generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
+			qDebug() << signal.name << " Bits not included";
 		}
 	}
 
-	QByteArray recorderedValues;
-	recorderedValues.resize(m_dataSize);
+	qDebug() << "=====================+";
 
-	recorderedValues.fill(0);
+	qDebug() << generatedData;
 
-	for(int b=0; b<m_data.count();++b) {
-		recorderedValues[b/8] = (recorderedValues.at(b/8) | ((m_data[b]?1:0)<<((b%8))));
-	}
+	QString visualizeTransferringData;
 
-	m_dataAmount = m_dataSize;
-
-
-	QDataStream packetDataStream(&m_packet, QIODevice::WriteOnly);
-
-	quint32 signature;
-
-	if (m_numberOfPacket%45 == 0 && m_numberOfPacket != 0)
+	for (int currentBit=0; currentBit<generatedData.size(); currentBit++)
 	{
-		signature = 0x00000000;
-	}
-	else
-	{
-		signature = m_signature;
+		visualizeTransferringData.append(generatedData.at(currentBit) == 1 ? "1" : "0");
+		if ((currentBit+1)%8 == 0)
+			visualizeTransferringData.append(" ");
 	}
 
-	packetDataStream << signature;
-	ui->signature->setText(QString::number(signature, 16));
-	//}
+	dataToSend.append(bitsToBytes(generatedData));
 
-	QString stringData;
-	for (int currentBitPos = 0; currentBitPos < m_data.size(); currentBitPos++)
-	{
-		switch(m_data.at(currentBitPos))
-		{
-			case 0: stringData.append("0"); break;
-			case 1: stringData.append("1"); break;
-		}
-		if ((currentBitPos+1) % 8 == 0)
-		{
-			stringData.append(" ");
-		}
-	}
+	ui->data->setText(visualizeTransferringData);
 
-	packetDataStream << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << recorderedValues;
+	QByteArray bytes;
+	bytes.clear();
 
-	ui->version->setText(QString::number(m_version));
-	ui->transmissionId->setText(QString::number(m_Id));
-	ui->numerator->setText(QString::number(m_numerator));
-	ui->dataUniqueId->setText(QString::number(m_dataUniqueId));
-	ui->dataAmount->setText(QString::number(m_dataAmount));
-	ui->data->setText(stringData);
+	bytes.reserve(12);
 
-	qDebug() << m_data;
+	bytes.append("sdfgsdfhhasdfasdffgdsffgh");
 
-	ui->crc->setText("Calculated crc");
-
-	// Calculate CRC-64
+	// Write down signature to packet (4 bytes);
 	//
 
-	std::string dataToCalculateCrc = QString::fromLocal8Bit(recorderedValues).toStdString();
+	bytes.append(sign.bytes, 4);
 
-	char *crcData = &dataToCalculateCrc[0];
+	// Write down header bytes (8 bytes);
+	//
 
-	quint64 crc = 0;
-	for (int i=0; i<dataToCalculateCrc.size(); i++)
+	bytes.append(head.bytes, 8);
+
+	// Write down packet data
+	//
+
+	DataUniqueId dataID;
+
+	dataID.bytes[0] = '1';
+	dataID.bytes[1] = '1';
+	dataID.bytes[2] = '1';
+	dataID.bytes[3] = '1';
+
+	//bytes += dataID.bytes;
+	bytes.append(dataID.bytes, 4);
+	bytes.append(dataToSend, dataToSend.length());
+	//bytes += dataToSend;
+
+	QByteArray dataForCrc;
+
+	dataForCrc.append(head.bytes, 8);
+	dataForCrc.append(dataID.bytes, 4);
+	dataForCrc.append(dataToSend, dataToSend.length());
+
+	qDebug() << "dataForCRC: " << dataForCrc;
+
+	CrcRepresentation crc;
+	crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.length());
+
+	bytes.append(crc.bytes, 8);
+
+	qDebug() << crc.uint64;
+	qDebug() << "CRC: " << crc.bytes;
+
+	// Write packet to port
+	//
+
+	bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+
+	m_serialPort->write(bytes, bytes.size());
+
+	// Send data
+	//
+
+	bool ok = m_serialPort->flush();
+
+	if (ok == false)
 	{
-		crc = crc_table[(crc ^ (crcData[i])) & 0xFF] ^ (crc >> 8);
-	}
-	crc = ~crc;
-
-	if (m_numberOfPacket%30 == 0 && m_numberOfPacket != 0)
-	{
-		crc = 0;
-		ui->crc->setText("Error crc");
+		QMessageBox::warning(this, "Error", m_serialPort->errorString());
 	}
 
-	packetDataStream << crc;
-
-	m_serialPort->write(m_packet);
-	bool result = m_serialPort->flush();
-
-	if (result == false)
-	{
-		QMessageBox::critical(this, tr("Critical error"), m_serialPort->errorString());
-	}
-*/
+	ui->transmissionId->setText(QString::number(head.hdr.id));
+	ui->numerator->setText(QString::number(head.hdr.num));
+	ui->dataAmount->setText(QString::number(head.hdr.amount));
+	ui->dataUniqueId->setText(QString::number(dataID.uint32));
+	ui->crc->setText(QString::number(crc.uint64));
 	m_numberOfPacket++;
 	ui->packetNumber->setText(QString::number(m_numberOfPacket));
 

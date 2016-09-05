@@ -119,6 +119,7 @@ void SerialDataParser::readingData()
 	}
 
 	memcpy(m_packetData + m_bytesCount, m_readPtr, bytesToCopy);
+
 	m_bytesCount += bytesToCopy;
 
 	if (m_bytesCount == dataAmount)
@@ -167,6 +168,8 @@ void SerialDataParser::readingData()
 
 		if (m_dataSize - (m_readPtr - m_buffer) > 0)
 		{
+			m_state = ScanningSignature;
+			m_bytesCount = 0;
 			scanningSignaure();
 		}
 	}
