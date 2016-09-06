@@ -959,11 +959,19 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 				resultString = QString::number( sign * exponentCalculation * mantissa );
 			}
+
+			// After all processing actions, we have result, that wrote in resultString
+			//
+
 			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
 			rowNumber++;
 		}
 
 	}
+
+	// If our package corrupted - show message
+	//
+
 	if (packageCorrupted)
 	{
 		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
@@ -978,10 +986,17 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 void SerialDataTester::crcError(QString version, QString trId, QString numerator, QByteArray dataId)
 {
+	// This function will be called when crc error has been happen.
+	//
 
+	// Reset timer
+	//
 
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
+
+	// Write packet info to GUI information panel
+	//
 
 	ui->version->setText(version);
 	ui->signature->setText("424D4C47");
@@ -991,6 +1006,9 @@ void SerialDataTester::crcError(QString version, QString trId, QString numerator
 
 	ui->crc->setText("ERR");
 	ui->statusBar->showMessage("Crc error!");
+
+	// Count corrupted packets
+	//
 
 	ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
 	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
@@ -1015,6 +1033,9 @@ void SerialDataTester::signalTimeout()
 
 void SerialDataTester::erasePacketData()
 {
+	// This function will reset all packet data
+	//
+
 	ui->corruptedPackets->setText("0");
 	ui->totalPackets->setText("0");
 	ui->processedPackets->setText("0");
@@ -1122,48 +1143,46 @@ void SerialDataTester::loadLastUsedSettings()
 
 void SerialDataTester::startReceiver()
 {
+
+	// This function will open port and start receiver
+	//
+
 	bool errors = false;
 
 	m_portReceiver->openPort();
 
 	if (ui->portName->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("No port specified"));
-		errors = true;
-	}
-
-	if (QFile(m_pathToSignalsXml).exists() == false)
-	{
-		QMessageBox::critical(this, tr("Program start"), tr("No xml-file selected!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("No port specified"));
 		errors = true;
 	}
 
 	if (ui->baudRate->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong baud set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong baud set!"));
 		errors = true;
 	}
 
 	if (ui->bits->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong data bits set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong data bits set!"));
 		errors = true;
 	}
 
 	if (ui->stopBits->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong stop bits set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong stop bits set!"));
 		errors = true;
 	}
 
 	if (ui->portStatus->text() == "Opened")
 	{
-		QMessageBox::information(this, tr("Program start"), tr("Port already opened!"));
+		QMessageBox::information(this, tr("Start receiver"), tr("Port already opened!"));
 	}
 
 	if (ui->signalsTable->rowCount() == 0)
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("No signals detected! Read signals first!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("No signals detected! Read signals first!"));
 		errors = true;
 	}
 
