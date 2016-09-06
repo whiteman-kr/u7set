@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "../TuningService/TuningService.h"
+#include "TuningIPENService.h"
 
 
 class QLineEdit;
@@ -11,7 +11,7 @@ class AnalogSignalSetter : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, Tuning::TuningService* service, QWidget *parent = 0);
+	explicit AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningIPEN::TuningIPENService* service, QWidget *parent = 0);
 
 public slots:
 	void updateValue();
@@ -25,7 +25,7 @@ private:
 	double m_highLimit;
 	double m_lastSentValue;
 	bool m_validity = false;
-	Tuning::TuningService* m_service;
+	TuningIPEN::TuningIPENService* m_service = nullptr;
 	QLineEdit* m_input;
 	QLineEdit* m_currentValue;
 };

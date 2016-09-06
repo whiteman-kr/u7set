@@ -3,7 +3,7 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QHash>
-#include "../TuningService/TuningService.h"
+#include "TuningIPENService.h"
 
 class TripleChannelSignalsModel;
 
@@ -34,7 +34,7 @@ class SafetyChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject *parent = 0);
+	explicit SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -54,7 +54,7 @@ public slots:
 private:
 	Tuning::TuningDataSourceInfo& m_sourceInfo;
 	QVector<SignalState> m_states;
-	Tuning::TuningService* m_service;
+	TuningIPEN::TuningIPENService* m_service;
 	QHash<QString, int> signalIdMap;
 };
 

@@ -2,9 +2,11 @@
 
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/CfgServerLoader.h"
 #include "../AppDataService/AppSignalStateEx.h"
 #include "../TuningService/TuningSocket.h"
 #include "TuningDataSource.h"
+
 
 namespace Tuning
 {
@@ -28,6 +30,8 @@ namespace Tuning
 		AppSignals m_appSignals;
 		AppSignalStates m_appSignalStates;
 
+		CfgLoaderThread* m_cfgLoaderThread = nullptr;
+
 		Tuning::TuningSocketWorker* m_tuningSocket = nullptr;
 		SimpleThread* m_tuningSocketThread = nullptr;
 
@@ -38,6 +42,9 @@ namespace Tuning
 		void clear();
 
 		void allocateSignalsAndStates();
+
+		void runCfgLoaderThread();
+		void stopCfgLoaderThread();
 
 		void runTuningSocket();
 		void stopTuningSocket();
@@ -50,10 +57,14 @@ namespace Tuning
 		virtual void initialize() override;
 		virtual void shutdown() override;
 
+		void clearConfiguration();
+		void applyNewConfiguration();
+
 	private slots:
 		void onTimer();
 		void onReplyReady();
 		void onGetSignalState(QString appSignalID);
+		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	public slots:
 		void onSetSignalState(QString appSignalID, double value);

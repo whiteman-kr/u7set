@@ -90,17 +90,17 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	// run Tuning Service
 	//
-	Tuning::TuningIPENServiceWorker* worker = new Tuning::TuningIPENServiceWorker("Tuning Service", "", "", m_cfgPath + "/configuration.xml");
+	TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning Service", m_cfgPath + "/configuration.xml");
 
-	m_service = new Tuning::TuningService(worker);
+	m_service = new TuningIPEN::TuningIPENService(worker);
 
-	connect(m_service, &Tuning::TuningService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
+	connect(m_service, &TuningIPEN::TuningIPENService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 
 	m_logWriter = new LogWriter;
 	m_logThread = new QThread(this);
 	m_logWriter->moveToThread(m_logThread);
-	connect(m_service, &Tuning::TuningService::userRequest, m_logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
-	connect(m_service, &Tuning::TuningService::replyWithNoZeroFlags, m_logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
+	connect(m_service, &TuningIPEN::TuningIPENService::userRequest, m_logWriter, &LogWriter::onUserRequest, Qt::QueuedConnection);
+	connect(m_service, &TuningIPEN::TuningIPENService::replyWithNoZeroFlags, m_logWriter, &LogWriter::onReplyWithNoZeroFlags, Qt::QueuedConnection);
 
 	m_service->start();
 
@@ -188,12 +188,12 @@ AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<T
 	fl->addRow(label, setter);
 
 	connect(m_updateTimer, &QTimer::timeout, setter, &AnalogSignalSetter::updateValue);
-	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
+	connect(m_service, &TuningIPEN::TuningIPENService::signalStateReady, setter, &AnalogSignalSetter::setCurrentValue);
 
 	return setter;
 }
 
-DiscreteSignalSetter*TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id)
+DiscreteSignalSetter* TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id)
 {
 	auto setter = new DiscreteSignalSetter(id, label, m_service, this);
 
@@ -208,7 +208,7 @@ DiscreteSignalSetter*TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVecto
 	}
 
 	connect(m_updateTimer, &QTimer::timeout, setter, &DiscreteSignalSetter::updateValue);
-	connect(m_service, &Tuning::TuningService::signalStateReady, setter, &DiscreteSignalSetter::setCurrentValue);
+	connect(m_service, &TuningIPEN::TuningIPENService::signalStateReady, setter, &DiscreteSignalSetter::setCurrentValue);
 
 	return setter;
 }
@@ -356,8 +356,8 @@ void TuningMainWindow::onTuningServiceReady()
 	}
 	// ========== Status bar ==========
 
-	connect(m_service, &Tuning::TuningService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
-	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TuningMainWindow::updateSignalState);
+	connect(m_service, &TuningIPEN::TuningIPENService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
+	connect(m_service, &TuningIPEN::TuningIPENService::signalStateReady, this, &TuningMainWindow::updateSignalState);
 
 	// ========== Second tab ==========
 	QFont font = m_beamDoorsWidget->font();

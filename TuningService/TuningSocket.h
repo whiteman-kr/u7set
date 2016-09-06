@@ -119,11 +119,4 @@ namespace Tuning
 		bool getReply(SocketReply* reply);
 	};
 
-
-/*	class TuningSocket : public SimpleThread
-	{
-	public:
-		TuningSocket(const HostAddressPort& tuningIP);
-	};*/
-
 }

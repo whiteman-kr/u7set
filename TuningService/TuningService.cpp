@@ -48,25 +48,42 @@ namespace Tuning
 
 	bool TuningServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	{
+		QString str;
+
 		QByteArray cfgXmlData;
 
 		QFile file(fileName);
 
 		if (file.open(QIODevice::ReadOnly) == false)
 		{
+			str = QString("Error open configuration file: %1").arg(fileName);
+
+			qDebug() << C_STR(str);
+
 			return false;
 		}
+
+		bool result = true;
 
 		cfgXmlData = file.readAll();
 
 		XmlReadHelper xml(cfgXmlData);
 
-		bool result = true;
-
 		result &= m_tuningSettings.readFromXml(xml);
 		result &= readTuningDataSources(xml);
 
 		m_dataSources.buildIP2DataSourceMap();
+
+		if  (result == true)
+		{
+			str = QString("Configuration is loaded from file: %1").arg(fileName);
+		}
+		else
+		{
+			str = QString("Loading configuration error from file: %1").arg(fileName);
+		}
+
+		qDebug() << C_STR(str);
 
 		return result;
 	}
@@ -124,7 +141,15 @@ namespace Tuning
 
 	void TuningServiceWorker::initialize()
 	{
-		loadConfigurationFromFile(m_cfgFileName);
+		if (m_cfgFileName.isEmpty() == true)
+		{
+			runCfgLoaderThread();
+		}
+		else
+		{
+			loadConfigurationFromFile(m_cfgFileName);
+		}
+
 		allocateSignalsAndStates();
 
 		runTuningSocket();
@@ -152,7 +177,40 @@ namespace Tuning
 	{
 		m_timer.stop();
 
+		stopCfgLoaderThread();
 		stopTuningSocket();
+	}
+
+
+	void TuningServiceWorker::runCfgLoaderThread()
+	{
+		HostAddressPort ip1(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST);
+		HostAddressPort ip2(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST);
+
+		m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1, ip1, ip2);
+
+		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
+
+		m_cfgLoaderThread->start();
+		m_cfgLoaderThread->enableDownloadConfiguration();
+
+		QString str = QString("ConfigurationService communication thread is running, IP1 = %1, IP2 = %2").
+				arg(ip1.addressPortStr()).arg(ip2.addressPortStr());
+
+		qDebug() << C_STR(str);
+	}
+
+
+	void TuningServiceWorker::stopCfgLoaderThread()
+	{
+		if (m_cfgLoaderThread == nullptr)
+		{
+			return;
+		}
+
+		m_cfgLoaderThread->quit();
+
+		delete m_cfgLoaderThread;
 	}
 
 
@@ -171,6 +229,84 @@ namespace Tuning
 	{
 		m_tuningSocketThread->quitAndWait();		// m_tuningSocket delete inside
 		delete m_tuningSocketThread;
+	}
+
+
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+	{
+		qDebug() << "Configuration Ready!";
+
+		if (m_cfgLoaderThread == nullptr)
+		{
+			return;
+		}
+
+		// stop all AppDataChannelThreads and
+		// free all allocated resources
+		//
+		clearConfiguration();
+
+		bool result = true;
+
+		//result = readConfiguration(configurationXmlData);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+		{
+			QByteArray fileData;
+			QString errStr;
+
+			m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+			if (errStr.isEmpty() == false)
+			{
+				qDebug() << errStr;
+				continue;
+			}
+
+			result = true;
+
+/*			if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+			{
+				result &= readDataSources(fileData);			// fill m_appDataSources
+			}
+
+			if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
+			{
+				result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
+			}
+
+			if (result == true)
+			{
+				qDebug() << "Read file " << bfi.pathFileName << " OK";
+			}
+			else
+			{
+				qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+				break;
+			}*/
+		}
+
+		if (result == true)
+		{
+			applyNewConfiguration();
+		}
+	}
+
+
+	void TuningServiceWorker::clearConfiguration()
+	{
+
+	}
+
+
+	void TuningServiceWorker::applyNewConfiguration()
+	{
+
 	}
 
 

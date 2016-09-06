@@ -7,7 +7,7 @@
 #include <QMessageBox>
 
 
-AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, Tuning::TuningService* service, QWidget *parent) :
+AnalogSignalSetter::AnalogSignalSetter(QString signalId, double lowLimit, double highLimit, TuningIPEN::TuningIPENService* service, QWidget *parent) :
 	QWidget(parent),
 	m_signalId(signalId),
 	m_lowLimit(lowLimit),

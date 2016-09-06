@@ -1,16 +1,18 @@
-#include "TuningSocket.h"
+#include "TuningIPENSocket.h"
 #include "../lib/Types.h"
-#include "TuningService.h"
+#include "TuningIPENService.h"
 
-namespace Tuning
+namespace TuningIPEN
 {
+
+
 	// -------------------------------------------------------------------------
 	//
-	//	TuningSocketWorker class implementaton
+	//	TuningIPENSocketWorker class implementaton
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP, TuningService* tuningService) :
+	TuningIPENSocketWorker::TuningIPENSocketWorker(const HostAddressPort &tuningIP, TuningIPENService *tuningService) :
 		m_tuningIP(tuningIP),
 		m_tuningService(tuningService),
 		m_requests(50),
@@ -20,22 +22,22 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::clear()
+	void TuningIPENSocketWorker::clear()
 	{
 	}
 
 
-	void TuningSocketWorker::onThreadStarted()
+	void TuningIPENSocketWorker::onThreadStarted()
 	{
-		connect(&m_timer, &QTimer::timeout, this, &TuningSocketWorker::onTimer);
+		connect(&m_timer, &QTimer::timeout, this, &TuningIPENSocketWorker::onTimer);
 
-		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningSocketWorker::onSocketRequest);
-		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningSocketWorker::replyReady);
+		connect(&m_requests, &Queue<Tuning::SocketRequest>::queueNotEmpty, this, &TuningIPENSocketWorker::onSocketRequest);
+		connect(&m_replies, &Queue<Tuning::SocketReply>::queueNotEmpty, this, &TuningIPENSocketWorker::replyReady);
 
 		if (m_tuningService != nullptr)
 		{
-			connect(this, &TuningSocketWorker::userRequest, m_tuningService, &TuningService::userRequest);
-			connect(this, &TuningSocketWorker::replyWithNoZeroFlags, m_tuningService, &TuningService::replyWithNoZeroFlags);
+			connect(this, &TuningIPENSocketWorker::userRequest, m_tuningService, &TuningIPENService::userRequest);
+			connect(this, &TuningIPENSocketWorker::replyWithNoZeroFlags, m_tuningService, &TuningIPENService::replyWithNoZeroFlags);
 		}
 
 		m_timer.setInterval(1000);
@@ -43,14 +45,14 @@ namespace Tuning
 
 	}
 
-	void TuningSocketWorker::onThreadFinished()
+	void TuningIPENSocketWorker::onThreadFinished()
 	{
 		m_timer.stop();
 		closeSocket();
 	}
 
 
-	void TuningSocketWorker::closeSocket()
+	void TuningIPENSocketWorker::closeSocket()
 	{
 		if (m_socket != nullptr)
 		{
@@ -63,13 +65,13 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onTimer()
+	void TuningIPENSocketWorker::onTimer()
 	{
 		createAndBindSocket();
 	}
 
 
-	void TuningSocketWorker::createAndBindSocket()
+	void TuningIPENSocketWorker::createAndBindSocket()
 	{
 		if (m_socket == nullptr)
 		{
@@ -77,7 +79,7 @@ namespace Tuning
 
 			qDebug() << "DataChannel: listening socket created";
 
-			connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketWorker::onSocketReadyRead);
+			connect(m_socket, &QUdpSocket::readyRead, this, &TuningIPENSocketWorker::onSocketReadyRead);
 		}
 
 		if (m_socketBound == false)
@@ -93,7 +95,7 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onSocketReadyRead()
+	void TuningIPENSocketWorker::onSocketReadyRead()
 	{
 		if (m_socket == nullptr)
 		{
@@ -109,7 +111,7 @@ namespace Tuning
 		{
 			assert(false);
 			m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
-			qDebug() << "TuningSocketWorker: datagram too big";
+			qDebug() << "TuningIPENSocketWorker: datagram too big";
 			return;
 		}
 
@@ -118,11 +120,11 @@ namespace Tuning
 		if (result == -1)
 		{
 			closeSocket();
-			qDebug() << "TuningSocketWorker: read socket error";
+			qDebug() << "TuningIPENSocketWorker: read socket error";
 			return;
 		}
 
-		SocketReply* sr = m_replies.beginPush();
+		Tuning::SocketReply* sr = m_replies.beginPush();
 
 		sr->lmIP = from.toIPv4Address();
 
@@ -141,9 +143,9 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onSocketRequest()
+	void TuningIPENSocketWorker::onSocketRequest()
 	{
-		SocketRequest sr;
+		Tuning::SocketRequest sr;
 
 		m_requests.pop(&sr);
 
@@ -249,13 +251,13 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::sendRequest(const SocketRequest& socketRequest)
+	void TuningIPENSocketWorker::sendRequest(const Tuning::SocketRequest& socketRequest)
 	{
 		m_requests.push(&socketRequest);
 	}
 
 
-	bool TuningSocketWorker::getReply(SocketReply* reply)
+	bool TuningIPENSocketWorker::getReply(Tuning::SocketReply* reply)
 	{
 		return m_replies.pop(reply);
 	}

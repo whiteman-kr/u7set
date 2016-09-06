@@ -295,4 +295,70 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 }
 
 
+// -------------------------------------------------------------------------------------
+//
+// ArchivingServiceSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+const char* ArchivingServiceSettings::SECTION_NAME = "Settings";
+const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+
+
+bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	QString clientRequestIPStr;
+	int clientRequestPort = 0;
+	QString clientNetmaskStr;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
+
+	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
+	clientRequestNetmask.setAddress(clientNetmaskStr);
+
+	return result;
+}
+
+
+bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
+{
+	bool result = true;
+
+	xml.writeStartElement(SECTION_NAME);
+
+	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+
+	xml.writeEndElement();	// </Settings>
+
+	return result;
+}
+
+
+bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = false;
+
+	result = xml.findElement(SECTION_NAME);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
+
+	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+
+	return result;
+}
+
+
 
