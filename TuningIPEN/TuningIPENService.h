@@ -18,7 +18,6 @@ namespace TuningIPEN
 		Q_OBJECT
 
 	private:
-		QString m_cfgFileName;
 		TuningIPENService* m_tuningIPENService = nullptr;
 
 		TuningServiceSettings m_tuningSettings;
@@ -63,8 +62,8 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker(const QString& serviceStrID,
-							const QString& cfgFileName);
+		TuningIPENServiceWorker(const QString& serviceEquipmentID,
+							const QString& buildPath);
 
 		void setTuningService(TuningIPENService* tuningService) { m_tuningIPENService = tuningService; }
 

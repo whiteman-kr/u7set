@@ -28,9 +28,10 @@ private:
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
 
 public:
-	ArchivingServiceWorker(const QString& serviceStrID,
-					  const QString& cfgServiceIP1,
-					  const QString& cfgServiceIP2);
+	ArchivingServiceWorker(	const QString& serviceEquipmentID,
+							const QString& cfgServiceIP1,
+							const QString& cfgServiceIP2,
+							const QString& buildPath);
 	~ArchivingServiceWorker();
 
 	virtual void initialize() override;
@@ -38,7 +39,7 @@ public:
 
 	ServiceWorker* createInstance() override
 	{
-		return new ArchivingServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+		return new ArchivingServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 	}
 };
 

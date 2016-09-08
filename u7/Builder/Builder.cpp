@@ -998,7 +998,6 @@ namespace Builder
 
 				case E::SoftwareType::ConfigurationService:
 				case E::SoftwareType::ArchiveService:
-					assert(false);
 					//softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 

@@ -20,9 +20,13 @@ int main(int argc, char *argv[])
 	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
 	QString buildPath = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
 
-	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath + "/configuration.xml");
+	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath);
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Tuning Service", tuningServiceWorker);
 
-	return serviceStarter.exec();
+	int result = serviceStarter.exec();
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	return result;
 }

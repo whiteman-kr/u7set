@@ -15,8 +15,6 @@ private:
 
 	QString m_clientIPStr;
 
-	QString m_buildFolder;
-
 	void startCfgServerThread();
 	void stopCfgServerThread();
 
@@ -28,14 +26,14 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 public:
-	ConfigurationServiceWorker(const QString& serviceStrID, const QString& buildFolder, const QString& ipStr);
+	ConfigurationServiceWorker(const QString& serviceEquipmentID, const QString& buildFolder, const QString& ipStr);
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
 	ServiceWorker* createInstance() override
 	{
-		return new ConfigurationServiceWorker(serviceStrID(), m_buildFolder, m_clientIPStr);
+		return new ConfigurationServiceWorker(serviceEquipmentID(), buildPath(), m_clientIPStr);
 	}
 
 signals:

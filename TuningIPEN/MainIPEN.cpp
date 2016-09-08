@@ -17,7 +17,7 @@
 
 int main(int argc, char *argv[])
 {
-	QString cfgPath;
+	QString buildPath;
 
 	for(int i = 0; i < argc; i++)
 	{
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
 		if (arg.startsWith("-b="))
 		{
-			cfgPath = arg.mid(3);
+			buildPath = arg.mid(3);
 			continue;
 		}
 	}
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
-	TuningMainWindow w(cfgPath);
+	TuningMainWindow w(buildPath);
 	w.show();
 
 	int result =  a.exec();

@@ -11,18 +11,50 @@
 namespace Tuning
 {
 
-	class TuningService;
-
-
 	class TuningServiceWorker : public ServiceWorker
 	{
 		Q_OBJECT
 
-	protected:
-		QString m_cfgFileName;
-		TuningService* m_tuningService = nullptr;
+	public:
+		TuningServiceWorker(const QString& serviceEquipmentID,
+							const QString& cfgServiceIP1,
+							const QString& cfgServiceIP2,
+							const QString& buildPath);
 
+		~TuningServiceWorker();
+
+		void clear();
+
+		virtual TuningServiceWorker* createInstance() override;
+
+	signals:
+
+	public slots:
+
+	private:
+		virtual void initialize() override;
+		virtual void shutdown() override;
+
+		void runCfgLoaderThread();
+		void stopCfgLoaderThread();
+		void clearConfiguration();
+		void applyNewConfiguration();
+
+		bool loadConfigurationFromFile(const QString& fileName);
+		bool readTuningDataSources(XmlReadHelper& xml);
+
+		void allocateSignalsAndStates();
+
+		void runTuningSocket();
+		void stopTuningSocket();
+
+	private slots:
+		void onTimer();
+		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+	private:
 		TuningServiceSettings m_tuningSettings;
+
 		TuningDataSources m_dataSources;
 
 		QHash<QString, QString> m_signal2Source;
@@ -36,96 +68,5 @@ namespace Tuning
 		SimpleThread* m_tuningSocketThread = nullptr;
 
 		QTimer m_timer;
-
-		bool readTuningDataSources(XmlReadHelper& xml);
-
-		void clear();
-
-		void allocateSignalsAndStates();
-
-		void runCfgLoaderThread();
-		void stopCfgLoaderThread();
-
-		void runTuningSocket();
-		void stopTuningSocket();
-
-		void sendPeriodicReadRequests();
-		void sendPeriodicFrameRequest(TuningDataSource* source);
-		void testConnections();
-		void emitTuningDataSourcesStates();
-
-		virtual void initialize() override;
-		virtual void shutdown() override;
-
-		void clearConfiguration();
-		void applyNewConfiguration();
-
-	private slots:
-		void onTimer();
-		void onReplyReady();
-		void onGetSignalState(QString appSignalID);
-		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-
-	public slots:
-		void onSetSignalState(QString appSignalID, double value);
-
-	public:
-		TuningServiceWorker(const QString& serviceStrID,
-							const QString& cfgServiceIP1,
-							const QString& cfgServiceIP2,
-							const QString& cfgFileName);
-
-		void setTuningService(TuningService* tuningService) { m_tuningService = tuningService; }
-
-		~TuningServiceWorker();
-
-		virtual TuningServiceWorker* createInstance() override;
-
-		bool loadConfigurationFromFile(const QString& fileName);
-		void getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info);
-
-		virtual void requestPreprocessing(Tuning::SocketRequest& sr);
-		virtual void replyPreprocessing(Tuning::SocketReply& sr);
-
-	signals:
-		void tuningServiceReady();
-		void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-		void tuningDataSourceStateUpdate(TuningDataSourceState state);
 	};
-
-
-
-	class TuningService : public Service
-	{
-		Q_OBJECT
-
-	private:
-		TuningServiceWorker* m_tuningServiceWorker = nullptr;
-
-	public:
-		TuningService(TuningServiceWorker* worker);
-
-		void setTuningServiceWorker(TuningServiceWorker* tuningServiceWorker) { m_tuningServiceWorker = tuningServiceWorker; }
-
-		void getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info);
-
-		void setSignalState(QString appSignalID, double value);
-		void getSignalState(QString appSignalID);
-
-		friend class TuningServiceWorker;
-
-	signals:
-		void tuningServiceReady();
-		void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-		void tuningDataSourceStateUpdate(TuningDataSourceState state);
-
-		void userRequest(FotipFrame fotipFrame);
-		void replyWithNoZeroFlags(FotipFrame fotipFrame);
-
-		// for internal use only
-		//
-		void signal_setSignalState(QString appSignalID, double value);
-		void signal_getSignalState(QString appSignalID);
-	};
-
 }

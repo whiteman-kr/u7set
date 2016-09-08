@@ -12,9 +12,8 @@ namespace TuningIPEN
 
 
 	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceStrID,
-														const QString& cfgFileName) :
-		ServiceWorker(ServiceType::TuningService, serviceStrID, "", ""),
-		m_cfgFileName(cfgFileName),
+														const QString& buildPath) :
+		ServiceWorker(ServiceType::TuningService, serviceStrID, "", "", buildPath),
 		m_timer(this)
 	{
 	}
@@ -33,7 +32,7 @@ namespace TuningIPEN
 
 	TuningIPENServiceWorker* TuningIPENServiceWorker::createInstance()
 	{
-		TuningIPENServiceWorker* worker = new TuningIPENServiceWorker(serviceStrID(), m_cfgFileName);
+		TuningIPENServiceWorker* worker = new TuningIPENServiceWorker(serviceEquipmentID(), buildPath());
 
 		worker->setTuningService(m_tuningIPENService);
 
@@ -170,7 +169,7 @@ namespace TuningIPEN
 
 	void TuningIPENServiceWorker::initialize()
 	{
-		loadConfigurationFromFile(m_cfgFileName);
+		loadConfigurationFromFile(cfgFileName());
 
 		allocateSignalsAndStates();
 

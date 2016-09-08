@@ -195,9 +195,12 @@ class ServiceWorker : public SimpleThreadWorker
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
 
-	QString m_serviceStrID;
+	QString m_serviceEquipmentID;
 	QString m_cfgServiceIP1;
 	QString m_cfgServiceIP2;
+
+	QString m_buildPath;
+	QString m_cfgFileName;
 
 	Service* m_service = nullptr;
 
@@ -210,9 +213,12 @@ private:
 	Service& service() { assert(m_service != nullptr); return *m_service; }
 
 protected:
-	QString serviceStrID() const { return m_serviceStrID; }
+	QString serviceEquipmentID() const { return m_serviceEquipmentID; }
 	QString cfgServiceIP1() const { return m_cfgServiceIP1; }
 	QString cfgServiceIP2() const { return m_cfgServiceIP2; }
+
+	QString buildPath() const { return m_buildPath; }
+	QString cfgFileName() const { return m_cfgFileName; }
 
 	ServiceType serviceType() const { return m_serviceType; }
 
@@ -220,12 +226,12 @@ protected:
 
 public:
 	ServiceWorker(ServiceType serviceType,
-				  const QString& serviceStrID,
+				  const QString& serviceEquipmentID,
 				  const QString& cfgServiceIP1,
-				  const QString& cfgServiceIP2);
+				  const QString& cfgServiceIP2,
+				  const QString& buildPath);
 
 	virtual ~ServiceWorker();
-
 
 	virtual void initialize() { qDebug() << "Called ServiceWorker::initialize"; }
 	virtual void shutdown() { qDebug() << "Called ServiceWorker::shutdown"; }

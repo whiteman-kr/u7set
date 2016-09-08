@@ -10,9 +10,8 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP, TuningService* tuningService) :
+	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP) :
 		m_tuningIP(tuningIP),
-		m_tuningService(tuningService),
 		m_requests(50),
 		m_replies(50),
 		m_timer(this)
@@ -32,11 +31,11 @@ namespace Tuning
 		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningSocketWorker::onSocketRequest);
 		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningSocketWorker::replyReady);
 
-		if (m_tuningService != nullptr)
+	/*	if (m_tuningService != nullptr)
 		{
 			connect(this, &TuningSocketWorker::userRequest, m_tuningService, &TuningService::userRequest);
 			connect(this, &TuningSocketWorker::replyWithNoZeroFlags, m_tuningService, &TuningService::replyWithNoZeroFlags);
-		}
+		}*/
 
 		m_timer.setInterval(1000);
 		m_timer.start();

@@ -10,10 +10,11 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataServiceWorker::AppDataServiceWorker(const QString& serviceStrID,
-									 const QString& cfgServiceIP1,
-									 const QString& cfgServiceIP2) :
-	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
+AppDataServiceWorker::AppDataServiceWorker(	const QString& serviceStrID,
+											const QString& cfgServiceIP1,
+											const QString& cfgServiceIP2,
+											const QString& buildPath) :
+	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath),
 	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
@@ -37,7 +38,7 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1,
+	m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1,
 											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
 											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
 

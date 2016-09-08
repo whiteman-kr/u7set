@@ -67,7 +67,7 @@ signals:
 	void automaticModeChanged(bool newValue);
 
 public:
-	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
+	explicit TuningMainWindow(QString buildPath, QWidget *parent = 0);
 	~TuningMainWindow();
 
 	void onTuningServiceReady();

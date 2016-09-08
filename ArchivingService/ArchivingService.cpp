@@ -10,8 +10,9 @@
 
 ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceStrID,
 									 const QString& cfgServiceIP1,
-									 const QString& cfgServiceIP2) :
-	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2)
+									 const QString& cfgServiceIP2,
+									 const QString& buildPath) :
+	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath)
 {
 }
 
@@ -30,7 +31,7 @@ void ArchivingServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& servic
 
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1,
+	m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1,
 											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
 											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
 

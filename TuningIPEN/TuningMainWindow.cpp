@@ -49,7 +49,7 @@ Signal* findSignal(const QString& id, QVector<Tuning::TuningDataSourceInfo>& sou
 }
 
 
-TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
+TuningMainWindow::TuningMainWindow(QString buildPath, QWidget *parent) :
 	QMainWindow(parent),
 	m_updateTimer(new QTimer(this))
 {
@@ -78,19 +78,19 @@ TuningMainWindow::TuningMainWindow(QString cfgPath, QWidget *parent) :
 
 	statusBar();
 
-	if (cfgPath == "")
+	if (buildPath == "")
 	{
 		m_cfgPath = settings.value("ConfigurationPath").toString();
 	}
 	else
 	{
-		m_cfgPath = cfgPath;
+		m_cfgPath = buildPath;
 		settings.setValue("ConfigurationPath", m_cfgPath);
 	}
 
 	// run Tuning Service
 	//
-	TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning Service", m_cfgPath + "/configuration.xml");
+	TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning Service", buildPath);
 
 	m_service = new TuningIPEN::TuningIPENService(worker);
 

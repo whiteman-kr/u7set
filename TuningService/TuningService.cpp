@@ -12,12 +12,11 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningServiceWorker::TuningServiceWorker(const QString& serviceStrID,
+	TuningServiceWorker::TuningServiceWorker(const QString& serviceEquipmentID,
 											 const QString& cfgServiceIP1,
 											 const QString& cfgServiceIP2,
-											 const QString& cfgFileName) :
-		ServiceWorker(ServiceType::TuningService, serviceStrID, cfgServiceIP1, cfgServiceIP2),
-		m_cfgFileName(cfgFileName),
+											 const QString& buildPath) :
+		ServiceWorker(ServiceType::TuningService, serviceEquipmentID, cfgServiceIP1, cfgServiceIP2, buildPath),
 		m_timer(this)
 	{
 	}
@@ -36,13 +35,87 @@ namespace Tuning
 
 	TuningServiceWorker* TuningServiceWorker::createInstance()
 	{
-		TuningServiceWorker* worker = new TuningServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2(), m_cfgFileName);
-
-		worker->setTuningService(m_tuningService);
-
-		m_tuningService->setTuningServiceWorker(worker);
+		TuningServiceWorker* worker = new TuningServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 
 		return worker;
+	}
+
+
+	void TuningServiceWorker::initialize()
+	{
+		if (cfgFileName().isEmpty() == true)
+		{
+			runCfgLoaderThread();
+		}
+		else
+		{
+			bool result = loadConfigurationFromFile(cfgFileName());
+
+			if (result == true)
+			{
+				applyNewConfiguration();
+			}
+		}
+
+		connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
+
+		m_timer.setInterval(333);
+		m_timer.start();
+	}
+
+
+	void TuningServiceWorker::shutdown()
+	{
+		m_timer.stop();
+
+		stopCfgLoaderThread();
+		stopTuningSocket();
+	}
+
+
+	void TuningServiceWorker::runCfgLoaderThread()
+	{
+		HostAddressPort ip1(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST);
+		HostAddressPort ip2(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST);
+
+		m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1, ip1, ip2);
+
+		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
+
+		m_cfgLoaderThread->start();
+		m_cfgLoaderThread->enableDownloadConfiguration();
+
+		QString str = QString("ConfigurationService communication thread is running, IP1 = %1, IP2 = %2").
+				arg(ip1.addressPortStr()).arg(ip2.addressPortStr());
+
+		qDebug() << C_STR(str);
+	}
+
+
+	void TuningServiceWorker::stopCfgLoaderThread()
+	{
+		if (m_cfgLoaderThread == nullptr)
+		{
+			return;
+		}
+
+		m_cfgLoaderThread->quit();
+
+		delete m_cfgLoaderThread;
+	}
+
+
+	void TuningServiceWorker::clearConfiguration()
+	{
+
+	}
+
+
+	void TuningServiceWorker::applyNewConfiguration()
+	{
+		allocateSignalsAndStates();
+
+		runTuningSocket();
 	}
 
 
@@ -89,13 +162,6 @@ namespace Tuning
 	}
 
 
-	void TuningServiceWorker::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
-	{
-		m_dataSources.getTuningDataSourcesInfo(info);
-	}
-
-
-
 	bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml)
 	{
 		bool result = true;
@@ -139,96 +205,80 @@ namespace Tuning
 	}
 
 
-	void TuningServiceWorker::initialize()
+	void TuningServiceWorker::allocateSignalsAndStates()
 	{
-		if (m_cfgFileName.isEmpty() == true)
+		QVector<TuningDataSourceInfo> info;
+
+		m_dataSources.getTuningDataSourcesInfo(info);
+
+		// allocate Signals
+		//
+		m_appSignals.clear();
+		m_signal2Source.clear();
+
+		for(const TuningDataSourceInfo& source : info)
 		{
-			runCfgLoaderThread();
-		}
-		else
-		{
-			loadConfigurationFromFile(m_cfgFileName);
-		}
+			for(const Signal& signal : source.tuningSignals)
+			{
+				Signal* appSignal = new Signal();
 
-		allocateSignalsAndStates();
+				*appSignal = signal;
 
-		runTuningSocket();
+				m_appSignals.insert(appSignal->appSignalID(), appSignal);
 
-		if (m_tuningService != nullptr)
-		{
-			connect(this, &TuningServiceWorker::tuningServiceReady, m_tuningService, &TuningService::tuningServiceReady);
-			connect(this, &TuningServiceWorker::signalStateReady, m_tuningService, &TuningService::signalStateReady);
-			connect(this, &TuningServiceWorker::tuningDataSourceStateUpdate, m_tuningService, &TuningService::tuningDataSourceStateUpdate);
-
-			connect(m_tuningService, &TuningService::signal_getSignalState, this, &TuningServiceWorker::onGetSignalState);
-			connect(m_tuningService, &TuningService::signal_setSignalState, this, &TuningServiceWorker::onSetSignalState);
-		}
-
-		connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
-
-		m_timer.setInterval(333);
-		m_timer.start();
-
-		emit tuningServiceReady();
-	}
-
-
-	void TuningServiceWorker::shutdown()
-	{
-		m_timer.stop();
-
-		stopCfgLoaderThread();
-		stopTuningSocket();
-	}
-
-
-	void TuningServiceWorker::runCfgLoaderThread()
-	{
-		HostAddressPort ip1(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST);
-		HostAddressPort ip2(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST);
-
-		m_cfgLoaderThread = new CfgLoaderThread(serviceStrID(), 1, ip1, ip2);
-
-		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
-
-		m_cfgLoaderThread->start();
-		m_cfgLoaderThread->enableDownloadConfiguration();
-
-		QString str = QString("ConfigurationService communication thread is running, IP1 = %1, IP2 = %2").
-				arg(ip1.addressPortStr()).arg(ip2.addressPortStr());
-
-		qDebug() << C_STR(str);
-	}
-
-
-	void TuningServiceWorker::stopCfgLoaderThread()
-	{
-		if (m_cfgLoaderThread == nullptr)
-		{
-			return;
+				if (m_signal2Source.contains(appSignal->appSignalID()))
+				{
+					assert(false);
+					qDebug() << "Duplicate AppSignalID" << appSignal->appSignalID();
+				}
+				else
+				{
+					m_signal2Source.insert(appSignal->appSignalID(), source.lmEquipmentID);
+				}
+			}
 		}
 
-		m_cfgLoaderThread->quit();
+		int signalCount = m_appSignals.count();
 
-		delete m_cfgLoaderThread;
+		// allocate Signal states
+		//
+		m_appSignalStates.clear();
+
+		m_appSignalStates.setSize(signalCount);
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal* appSignal = m_appSignals[i];
+			AppSignalStateEx* appSignalState = m_appSignalStates[i];
+
+			appSignalState->setSignalParams(i, appSignal);
+		}
 	}
 
 
 	void TuningServiceWorker::runTuningSocket()
 	{
-		m_tuningSocket = new Tuning::TuningSocketWorker(m_tuningSettings.tuningDataIP, m_tuningService);
+	/*	m_tuningSocket = new Tuning::TuningSocketWorker(m_tuningSettings.tuningDataIP, m_tuningService);
 
 		connect(m_tuningSocket, &Tuning::TuningSocketWorker::replyReady, this, &TuningServiceWorker::onReplyReady);
 
 		m_tuningSocketThread = new SimpleThread(m_tuningSocket);
-		m_tuningSocketThread->start();
+		m_tuningSocketThread->start();*/
 	}
 
 
 	void TuningServiceWorker::stopTuningSocket()
 	{
-		m_tuningSocketThread->quitAndWait();		// m_tuningSocket delete inside
-		delete m_tuningSocketThread;
+/*		if (m_tuningSocketThread != nullptr)
+		{
+			m_tuningSocketThread->quitAndWait();		// m_tuningSocket delete inside
+			delete m_tuningSocketThread;
+		}*/
+	}
+
+
+	void TuningServiceWorker::onTimer()
+	{
 	}
 
 
@@ -241,9 +291,6 @@ namespace Tuning
 			return;
 		}
 
-		// stop all AppDataChannelThreads and
-		// free all allocated resources
-		//
 		clearConfiguration();
 
 		bool result = true;
@@ -298,18 +345,7 @@ namespace Tuning
 	}
 
 
-	void TuningServiceWorker::clearConfiguration()
-	{
-
-	}
-
-
-	void TuningServiceWorker::applyNewConfiguration()
-	{
-
-	}
-
-
+/*
 	void TuningServiceWorker::onSetSignalState(QString appSignalID, double value)
 	{
 		if (m_tuningSocket == nullptr)
@@ -377,273 +413,8 @@ namespace Tuning
 		requestPreprocessing(sr);
 
 		m_tuningSocket->sendRequest(sr);
-	}
+	}*/
 
 
-	void TuningServiceWorker::allocateSignalsAndStates()
-	{
-		QVector<TuningDataSourceInfo> info;
-
-		getTuningDataSourcesInfo(info);
-
-		// allocate Signals
-		//
-		m_appSignals.clear();
-		m_signal2Source.clear();
-
-		for(const TuningDataSourceInfo& source : info)
-		{
-			for(const Signal& signal : source.tuningSignals)
-			{
-				Signal* appSignal = new Signal();
-
-				*appSignal = signal;
-
-				m_appSignals.insert(appSignal->appSignalID(), appSignal);
-
-				if (m_signal2Source.contains(appSignal->appSignalID()))
-				{
-					assert(false);
-					qDebug() << "Duplicate AppSignalID" << appSignal->appSignalID();
-				}
-				else
-				{
-					m_signal2Source.insert(appSignal->appSignalID(), source.lmEquipmentID);
-				}
-			}
-		}
-
-		int signalCount = m_appSignals.count();
-
-		// allocate Signal states
-		//
-		m_appSignalStates.clear();
-
-		m_appSignalStates.setSize(signalCount);
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			Signal* appSignal = m_appSignals[i];
-			AppSignalStateEx* appSignalState = m_appSignalStates[i];
-
-			appSignalState->setSignalParams(i, appSignal);
-		}
-	}
-
-
-	void TuningServiceWorker::onTimer()
-	{
-		sendPeriodicReadRequests();
-
-		testConnections();
-
-		emitTuningDataSourcesStates();
-	}
-
-
-	void TuningServiceWorker::sendPeriodicReadRequests()
-	{
-		for(TuningDataSource* source : m_dataSources)
-		{
-			sendPeriodicFrameRequest(source);
-		}
-	}
-
-
-	void TuningServiceWorker::testConnections()
-	{
-		qint64 nowTime = QDateTime::currentMSecsSinceEpoch();
-
-		for(TuningDataSource* source : m_dataSources)
-		{
-			if (source == nullptr)
-			{
-				continue;
-			}
-
-			source->testConnection(nowTime);
-		}
-	}
-
-
-	void TuningServiceWorker::sendPeriodicFrameRequest(TuningDataSource* source)
-	{
-		if (m_tuningSocket == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		Tuning::SocketRequest sr;
-
-		sr.lmIP = source->lmAddress32();
-		sr.lmPort = source->lmPort();
-		sr.lmNumber = source->lmNumber();
-		sr.lmSubsystemID = source->lmSubsystemID();
-		sr.uniqueID = source->uniqueID();
-		sr.numerator = source->numerator();
-		sr.operation = Tuning::OperationCode::Read;
-		sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
-		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
-		sr.dataType = Tuning::DataType::Discrete;						//
-		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
-		sr.userRequest = false;
-
-		source->incNumerator();
-		source->setWaitReply();
-		source->nextFrameToRequest();
-		source->incSentRequestCount();
-
-		requestPreprocessing(sr);
-
-		m_tuningSocket->sendRequest(sr);
-	}
-
-
-	void TuningServiceWorker::onReplyReady()
-	{
-		if (m_tuningSocket == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		Tuning::SocketReply sr;
-
-		int count = 0;
-
-		while(count < 10)
-		{
-			bool result = m_tuningSocket->getReply(&sr);
-
-			if (result == false)
-			{
-				break;
-			}
-
-			replyPreprocessing(sr);
-
-			TuningDataSource* source = m_dataSources.getDataSourceByIP(sr.lmIP);
-
-			if (source == nullptr)
-			{
-				assert(false);
-			}
-			else
-			{
-				sr.frameNo = (sr.fotipHeader.startAddress - m_tuningSettings.tuningDataOffsetW) / m_tuningSettings.tuningRomFrameSizeW;
-
-				source->processReply(sr);
-
-				if (source->frameToRequest() != 0)
-				{
-					sendPeriodicFrameRequest(source);
-				}
-			}
-
-			count++;
-		}
-	}
-
-
-	void TuningServiceWorker::onGetSignalState(QString appSignalID)
-	{
-		if (m_signal2Source.contains(appSignalID) == false)
-		{
-			emit signalStateReady(appSignalID, 0, 0, 0, false);
-			return;
-		}
-
-		QString sourceID = m_signal2Source[appSignalID];
-
-		if (m_dataSources.contains(sourceID) == false)
-		{
-			emit signalStateReady(appSignalID, 0, 0, 0, false);
-			return;
-		}
-
-		TuningDataSource* source = m_dataSources[sourceID];
-
-		if (source == nullptr)
-		{
-			assert(false);
-			emit signalStateReady(appSignalID, 0, 0, 0, false);
-			return;
-		}
-
-		TuningSignalState tss;
-
-		bool result = source->getSignalState(appSignalID, &tss);
-
-		if (result == false)
-		{
-			emit signalStateReady(appSignalID, 0, 0, 0, false);
-			return;
-		}
-
-		emit signalStateReady(appSignalID, tss.currentValue, tss.lowLimit, tss.highLimit, tss.valid);
-	}
-
-
-	void TuningServiceWorker::emitTuningDataSourcesStates()
-	{
-		for(TuningDataSource* source : m_dataSources)
-		{
-			if (source == nullptr)
-			{
-				continue;
-			}
-
-			emit tuningDataSourceStateUpdate(source->getState());
-		}
-	}
-
-
-	void TuningServiceWorker::requestPreprocessing(Tuning::SocketRequest& sr)
-	{
-		Q_UNUSED(sr);
-	}
-
-
-	void TuningServiceWorker::replyPreprocessing(Tuning::SocketReply& sr)
-	{
-		Q_UNUSED(sr);
-	}
-
-
-	// -------------------------------------------------------------------------------------
-	//
-	// TuningService class implementation
-	//
-	// -------------------------------------------------------------------------------------
-
-	TuningService::TuningService(TuningServiceWorker* worker) :
-		Service(worker)
-	{
-		worker->setTuningService(this);
-	}
-
-
-	void TuningService::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
-	{
-		if (m_tuningServiceWorker == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		m_tuningServiceWorker->getTuningDataSourcesInfo(info);
-	}
-
-
-	void TuningService::setSignalState(QString appSignalID, double value)
-	{
-		emit signal_setSignalState(appSignalID, value);
-	}
-
-	void TuningService::getSignalState(QString appSignalID)
-	{
-		emit signal_getSignalState(appSignalID);
-	}
 
 }

@@ -69,7 +69,7 @@ namespace Tuning
 	};
 
 
-	class TuningService;
+//	class TuningService;
 
 
 	class TuningSocketWorker : public SimpleThreadWorker
@@ -78,7 +78,7 @@ namespace Tuning
 
 	private:
 		HostAddressPort m_tuningIP;
-		TuningService* m_tuningService = nullptr;
+		//TuningService* m_tuningService = nullptr;
 
 		QTimer m_timer;
 
@@ -112,7 +112,7 @@ namespace Tuning
 		void replyWithNoZeroFlags(FotipFrame fotipFrame);
 
 	public:
-		TuningSocketWorker(const HostAddressPort& tuningIP, TuningService* tuningService);
+		TuningSocketWorker(const HostAddressPort& tuningIP);
 
 		void sendRequest(const SocketRequest& socketRequest);
 
