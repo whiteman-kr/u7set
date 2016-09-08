@@ -40,6 +40,7 @@ namespace Tuning
 		void clearConfiguration();
 		void applyNewConfiguration();
 
+		bool readConfiguration(const QByteArray& fileData);
 		bool loadConfigurationFromFile(const QString& fileName);
 		bool readTuningDataSources(XmlReadHelper& xml);
 

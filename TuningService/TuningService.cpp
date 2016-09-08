@@ -30,6 +30,7 @@ namespace Tuning
 
 	void TuningServiceWorker::clear()
 	{
+		m_dataSources.clear();
 	}
 
 
@@ -43,7 +44,7 @@ namespace Tuning
 
 	void TuningServiceWorker::initialize()
 	{
-		if (cfgFileName().isEmpty() == true)
+		if (buildPath().isEmpty() == true)
 		{
 			runCfgLoaderThread();
 		}
@@ -119,6 +120,19 @@ namespace Tuning
 	}
 
 
+	bool TuningServiceWorker::readConfiguration(const QByteArray& fileData)
+	{
+		bool result = true;
+
+		XmlReadHelper xml(fileData);
+
+		result &= m_tuningSettings.readFromXml(xml);
+		result &= readTuningDataSources(xml);
+
+		return result;
+	}
+
+
 	bool TuningServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	{
 		QString str;
@@ -136,16 +150,11 @@ namespace Tuning
 			return false;
 		}
 
-		bool result = true;
-
 		cfgXmlData = file.readAll();
 
-		XmlReadHelper xml(cfgXmlData);
+		bool result = true;
 
-		result &= m_tuningSettings.readFromXml(xml);
-		result &= readTuningDataSources(xml);
-
-		m_dataSources.buildIP2DataSourceMap();
+		result = readConfiguration(cfgXmlData);
 
 		if  (result == true)
 		{
@@ -200,6 +209,8 @@ namespace Tuning
 
 			m_dataSources.insert(ds->lmEquipmentID(), ds);
 		}
+
+		m_dataSources.buildIP2DataSourceMap();
 
 		return result;
 	}

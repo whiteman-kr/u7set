@@ -176,7 +176,8 @@ SOURCES +=\
     ../lib/HostAddressPort.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Configurator.cpp \
-    DialogSettingsConfigurator.cpp
+    DialogSettingsConfigurator.cpp \
+    Builder/ArchivingServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -282,7 +283,8 @@ HEADERS  += \
     ../lib/HostAddressPort.h \
     ../lib/SignalProperties.h \
     ../lib/Configurator.h \
-    DialogSettingsConfigurator.h
+    DialogSettingsConfigurator.h \
+    Builder/ArchivingServiceCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \

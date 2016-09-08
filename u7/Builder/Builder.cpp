@@ -18,6 +18,7 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
+#include "ArchivingServiceCfgGenerator.h"
 
 #include <QBuffer>
 #include <functional>
@@ -997,8 +998,10 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::ConfigurationService:
+					break;
+
 				case E::SoftwareType::ArchiveService:
-					//softwareCfgGenerator = new SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
+					softwareCfgGenerator = new ArchivingServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				default:

@@ -10,11 +10,20 @@ class ArchivingServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
+public:
+	ArchivingServiceWorker(	const QString& serviceEquipmentID,
+							const QString& cfgServiceIP1,
+							const QString& cfgServiceIP2,
+							const QString& buildPath);
+	~ArchivingServiceWorker();
+
+	ServiceWorker* createInstance() override;
+
+	virtual void initialize() override;
+	virtual void shutdown() override;
+
+
 private:
-	ArchivingServiceSettings m_settings;
-
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
@@ -24,22 +33,14 @@ private:
 	void applyNewConfiguration();
 
 	bool readConfiguration(const QByteArray& fileData);
+	bool loadConfigurationFromFile(const QString& fileName);
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
 
-public:
-	ArchivingServiceWorker(	const QString& serviceEquipmentID,
-							const QString& cfgServiceIP1,
-							const QString& cfgServiceIP2,
-							const QString& buildPath);
-	~ArchivingServiceWorker();
+private:
+	ArchivingServiceSettings m_settings;
 
-	virtual void initialize() override;
-	virtual void shutdown() override;
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	ServiceWorker* createInstance() override
-	{
-		return new ArchivingServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-	}
 };
 

@@ -302,9 +302,18 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 // -------------------------------------------------------------------------------------
 
 const char* ArchivingServiceSettings::SECTION_NAME = "Settings";
+
 const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
 const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+
+const char* ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_IP = "AppDataServiceRequestIP";
+const char* ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_PORT = "AppDataServiceRequestPort";
+const char* ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_NETMASK = "AppDataServiceRequestNetmask";
+
+const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_IP = "DiagDataServiceRequestIP";
+const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_PORT = "DiagDataServiceRequestPort";
+const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK = "DiagDataServiceRequestNetmask";
 
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
@@ -322,6 +331,32 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientNetmaskStr);
 
+	//
+
+	QString appDataServiceRequestIPStr;
+	int appDataServiceRequestPort = 0;
+	QString appDataServiceNetmaskStr;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_APP_DATA_SERVICE_REQUEST_IP, &appDataServiceRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_APP_DATA_SERVICE_REQUEST_PORT, &appDataServiceRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_APP_DATA_SERVICE_REQUEST_NETMASK, &appDataServiceNetmaskStr, log);
+
+	appDataServiceRequestIP = HostAddressPort(appDataServiceRequestIPStr, appDataServiceRequestPort);
+	appDataServiceRequestNetmask.setAddress(appDataServiceNetmaskStr);
+
+	//
+
+	QString diagDataServiceRequestIPStr;
+	int diagDataServiceRequestPort = 0;
+	QString diagDataServiceNetmaskStr;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_DIAG_DATA_SERVICE_REQUEST_IP, &diagDataServiceRequestIPStr, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_DIAG_DATA_SERVICE_REQUEST_PORT, &diagDataServiceRequestPort, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK, &diagDataServiceNetmaskStr, log);
+
+	diagDataServiceRequestIP = HostAddressPort(diagDataServiceRequestIPStr, diagDataServiceRequestPort);
+	diagDataServiceRequestNetmask.setAddress(diagDataServiceNetmaskStr);
+
 	return result;
 }
 
@@ -334,6 +369,12 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+
+	xml.writeHostAddressPort(PROP_APP_DATA_SERVICE_REQUEST_IP, PROP_APP_DATA_SERVICE_REQUEST_PORT, appDataServiceRequestIP);
+	xml.writeHostAddress(PROP_APP_DATA_SERVICE_REQUEST_NETMASK, appDataServiceRequestNetmask);
+
+	xml.writeHostAddressPort(PROP_DIAG_DATA_SERVICE_REQUEST_IP, PROP_DIAG_DATA_SERVICE_REQUEST_PORT, diagDataServiceRequestIP);
+	xml.writeHostAddress(PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK, diagDataServiceRequestNetmask);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -353,9 +394,13 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	}
 
 	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
+	result &= xml.readHostAddressPort(PROP_APP_DATA_SERVICE_REQUEST_IP, PROP_APP_DATA_SERVICE_REQUEST_PORT, &appDataServiceRequestIP);
+	result &= xml.readHostAddress(PROP_APP_DATA_SERVICE_REQUEST_NETMASK, &appDataServiceRequestNetmask);
+
+	result &= xml.readHostAddressPort(PROP_DIAG_DATA_SERVICE_REQUEST_IP, PROP_DIAG_DATA_SERVICE_REQUEST_PORT, &diagDataServiceRequestIP);
+	result &= xml.readHostAddress(PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK, &diagDataServiceRequestNetmask);
 
 	return result;
 }

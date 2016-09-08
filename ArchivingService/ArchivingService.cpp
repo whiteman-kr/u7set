@@ -22,11 +22,46 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 }
 
 
-void ArchivingServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
+ServiceWorker* ArchivingServiceWorker::createInstance()
 {
-	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_settings.clientRequestIP.port());
+	return new ArchivingServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 }
+
+
+void ArchivingServiceWorker::initialize()
+{
+	// Service Main Function initialization
+	//
+	if (buildPath().isEmpty() == true)
+	{
+		runCfgLoaderThread();
+	}
+	else
+	{
+		bool result = loadConfigurationFromFile(cfgFileName());
+
+		if (result == true)
+		{
+			applyNewConfiguration();
+		}
+	}
+
+	qDebug() << "ArchivingServiceWorker initialized";
+}
+
+
+void ArchivingServiceWorker::shutdown()
+{
+	// Service Main Function deinitialization
+	//
+	clearConfiguration();
+
+	stopCfgLoaderThread();
+
+	qDebug() << "ArchivingServiceWorker stoped";
+}
+
+
 
 
 void ArchivingServiceWorker::runCfgLoaderThread()
@@ -44,37 +79,12 @@ void ArchivingServiceWorker::runCfgLoaderThread()
 
 void ArchivingServiceWorker::stopCfgLoaderThread()
 {
-	if (m_cfgLoaderThread == nullptr)
+	if (m_cfgLoaderThread != nullptr)
 	{
-		assert(false);
-		return;
+		m_cfgLoaderThread->quit();
+
+		delete m_cfgLoaderThread;
 	}
-
-	m_cfgLoaderThread->quit();
-
-	delete m_cfgLoaderThread;
-}
-
-
-void ArchivingServiceWorker::initialize()
-{
-	// Service Main Function initialization
-	//
-	runCfgLoaderThread();
-
-	qDebug() << "ArchivingServiceWorker initialized";
-}
-
-
-void ArchivingServiceWorker::shutdown()
-{
-	// Service Main Function deinitialization
-	//
-	clearConfiguration();
-
-	stopCfgLoaderThread();
-
-	qDebug() << "ArchivingServiceWorker stoped";
 }
 
 
@@ -139,6 +149,18 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 }
 
 
+void ArchivingServiceWorker::clearConfiguration()
+{
+	// free all resources allocated in onConfigurationReady
+	//
+}
+
+
+void ArchivingServiceWorker::applyNewConfiguration()
+{
+}
+
+
 bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
@@ -158,15 +180,48 @@ bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 }
 
 
-
-void ArchivingServiceWorker::clearConfiguration()
+bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 {
-	// free all resources allocated in onConfigurationReady
-	//
+	QString str;
+
+	QByteArray cfgXmlData;
+
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		str = QString("Error open configuration file: %1").arg(fileName);
+
+		qDebug() << C_STR(str);
+
+		return false;
+	}
+
+	bool result = true;
+
+	cfgXmlData = file.readAll();
+
+	result = readConfiguration(cfgXmlData);
+
+	if  (result == true)
+	{
+		str = QString("Configuration is loaded from file: %1").arg(fileName);
+	}
+	else
+	{
+		str = QString("Loading configuration error from file: %1").arg(fileName);
+	}
+
+	qDebug() << C_STR(str);
+
+	return result;
 }
 
 
-void ArchivingServiceWorker::applyNewConfiguration()
+void ArchivingServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 {
+	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_settings.clientRequestIP.port());
 }
+
 
