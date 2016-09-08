@@ -8,6 +8,7 @@ SUBDIRS += qtpropertybrowser \
 	VFrame30 \
 	u7 \
 	Monitor \
-	mconf
+	mconf \
+    TuningClient
 
 

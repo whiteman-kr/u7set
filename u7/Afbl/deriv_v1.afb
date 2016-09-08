@@ -3,7 +3,7 @@
     <AfbElement StrId="#deriv_v1">
         <Properties>
             <Caption>deriv</Caption>
-            <Version>1.0002</Version>
+            <Version>1.0004</Version>
             <Implementation Version="1" OpIndex="28"/>
             <Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
             <Category>Other</Category>
@@ -38,11 +38,11 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_td" Caption="Td" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_td" Caption="Td" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="SignedInt">
                 <Value>0</Value>
                 <Default>0</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
+                <LowLimit>0</LowLimit>
+                <HighLimit>2147483647</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>

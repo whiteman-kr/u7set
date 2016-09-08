@@ -605,7 +605,7 @@ void SerialDataTester::applicationExit()
 
 void SerialDataTester::setPort(QAction* newPort)
 {
-	// This function calling when we are changing current port without file reloading
+	// This function calling when we are changing current port
 	//
 
 	// Stop receiving before do something
@@ -644,7 +644,7 @@ void SerialDataTester::setPort(QAction* newPort)
 
 void SerialDataTester::setBaud(QAction* newBaud)
 {
-	// This function calling when we are changing current baud without file reloading
+	// This function calling when we are changing current baud
 	//
 
 	// Stop receiving before do something
@@ -683,7 +683,17 @@ void SerialDataTester::setBaud(QAction* newBaud)
 
 void SerialDataTester::setBits(QAction *newBits)
 {
+	// This function calling when we are changing current Data Bits
+	//
+
+	// Stop receiving before do something
+	//
+
 	this->stopReceiver();
+
+	// Deselect old Data Bits value
+	//
+
 	for (QAction* bits : m_setDataBits->actions())
 	{
 		if(bits->text() != newBits->text())
@@ -691,6 +701,9 @@ void SerialDataTester::setBits(QAction *newBits)
 			bits->setChecked(false);
 		}
 	}
+
+	// Actually, change Data Bits in settings
+	//
 
 	QSettings applicationSettings;
 
@@ -721,12 +734,26 @@ void SerialDataTester::setBits(QAction *newBits)
 		break;
 	}
 	}
+
+	// At last, write new Data Bits value to program info panel (Port info)
+	//
+
 	ui->bits->setText(newBits->text());
 }
 
 void SerialDataTester::setStopBits(QAction *newStopBits)
 {
+	// This function calling when we are changing current Stop Bits
+	//
+
+	// Stop receiving before do something
+	//
+
 	this->stopReceiver();
+
+	// Deselect old Stop Bits value
+	//
+
 	for (QAction* stopBits : m_setStopBits->actions())
 	{
 		if(stopBits->text() != newStopBits->text())
@@ -734,6 +761,9 @@ void SerialDataTester::setStopBits(QAction *newStopBits)
 			stopBits->setChecked(false);
 		}
 	}
+
+	// Actually, change Stop Bits in settings
+	//
 
 	QSettings applicationSettings;
 
@@ -752,11 +782,18 @@ void SerialDataTester::setStopBits(QAction *newStopBits)
 		emit stopBitsChanged(QSerialPort::TwoStop);
 		applicationSettings.setValue("stopBits", QSerialPort::TwoStop);
 	}
+
+	// At last, write new Stop Bits value to program info panel (Port info)
+	//
+
 	ui->stopBits->setText(newStopBits->text());
 }
 
 void SerialDataTester::portError(QString error)
 {
+	// This function shows up all port errors
+	//
+
 	QMessageBox::critical(this, tr("Critical error"), error);
 	ui->portName->setText("Error");
 
@@ -768,11 +805,17 @@ void SerialDataTester::portError(QString error)
 
 void SerialDataTester::dataReceived(QString version, QString trId, QString numerator, QByteArray dataId, QByteArray receivedValues)
 {
+	// Here we are receiving raw processed data without CRC and header headers from packet
+	//
+
 	// Reset timer
 	//
 
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
+
+	// Show up received header headers
+	//
 
 	ui->version->setText(version);
 	ui->signature->setText("424D4C47");
@@ -781,17 +824,33 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 	ui->dataUniqueId->setText(dataId);
 	ui->crc->setText("OK");
 
+	// This value will show us: corrupted package, or not
+	//
+
 	bool packageCorrupted = false;
 
-	if (receivedValues.size() != 7)
+	if (receivedValues.size() != m_dataSize)
 	{
+		// Here we are check received data size
+		//
+
 		qDebug() << "Wrong packet size!";
 		packageCorrupted = true;
 		ui->statusBar->showMessage("Data received: Packet error!");
 	}
 	else
 	{
+		// Here we will show all received values in table, but before we need
+		// pull them out from raw data and process them from binary to float, or int value
+		//
+
+		// Number of current table row
+		//
+
 		int rowNumber = 0;
+
+		// In this part, we show all received bytes in status line
+		//
 
 		QBitArray dataArray;
 		dataArray.resize(m_dataSize*8);
@@ -799,17 +858,25 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 		QString dataVisualisation;
 
+		// We are receiving already transformed data from bits to bytes.
+		// To show received bits, we need transform them back to bits
+		//
+
 		dataArray = bytesToBits(receivedValues);
 
-		for (int currentBit = 0; currentBit < dataArray.size(); currentBit++)
+		for (int currentBit = 0; currentBit < dataArray.size(); currentBit++) // Show every received bit
 		{
-			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0");
+			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0"); // Writing all received bits to string value
 
 			if ((currentBit+1) % 8 == 0)
 				dataVisualisation += " ";
 		}
 
 		ui->statusBar->showMessage("Data received: " + dataVisualisation);
+
+		// Ok, now we will use our signals vector to find every signal
+		// in received data array
+		//
 
 		for (SignalData signal : m_signalsFromXml)
 		{
@@ -818,10 +885,12 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 			// selected value (signedInt, unsignedInt, float)
 			//
 
-			QBitArray signalValueBits;
+			// As you can see, we read signal position (signal byte and offset) from vector,
+			// and by using this information, searching signal value in received data
+			//
 
-			signalValueBits.resize(signal.dataSize*8);
 			QString valueString;
+
 			for (int pos = signal.offset*8 + signal.bit; pos < signal.offset*8 + signal.bit + signal.dataSize; pos ++)
 			{
 				switch (dataArray.at(pos))
@@ -832,9 +901,16 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 			}
 
 			std::reverse(valueString.begin(), valueString.end());
+
+			// Transform selected binary value to
+			// our result (only for unsigned int)
+			//
+
 			bool falseValue = false;
 			qint64 result = valueString.toInt(&falseValue, 2);
+
 			QString resultString;
+
 			if (signal.dataFormat == "UnsignedInt")
 			{
 				resultString = QString::number(result);
@@ -853,6 +929,9 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 			}
 			if (signal.dataFormat == "Float")
 			{
+				// Processing received values according to IEEE 754 standard for floating point transaction
+				//
+
 				float exponentCalculation = 0;
 
 				for (int bitPos = 8; bitPos>0; bitPos--)
@@ -880,11 +959,19 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 				resultString = QString::number( sign * exponentCalculation * mantissa );
 			}
+
+			// After all processing actions, we have result, that wrote in resultString
+			//
+
 			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
 			rowNumber++;
 		}
 
 	}
+
+	// If our package corrupted - show message
+	//
+
 	if (packageCorrupted)
 	{
 		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
@@ -899,8 +986,17 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 void SerialDataTester::crcError(QString version, QString trId, QString numerator, QByteArray dataId)
 {
+	// This function will be called when crc error has been happen.
+	//
+
+	// Reset timer
+	//
+
 	receiveTimeout->stop();
 	receiveTimeout->start(5000);
+
+	// Write packet info to GUI information panel
+	//
 
 	ui->version->setText(version);
 	ui->signature->setText("424D4C47");
@@ -910,6 +1006,9 @@ void SerialDataTester::crcError(QString version, QString trId, QString numerator
 
 	ui->crc->setText("ERR");
 	ui->statusBar->showMessage("Crc error!");
+
+	// Count corrupted packets
+	//
 
 	ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
 	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
@@ -934,6 +1033,9 @@ void SerialDataTester::signalTimeout()
 
 void SerialDataTester::erasePacketData()
 {
+	// This function will reset all packet data
+	//
+
 	ui->corruptedPackets->setText("0");
 	ui->totalPackets->setText("0");
 	ui->processedPackets->setText("0");
@@ -947,6 +1049,9 @@ void SerialDataTester::erasePacketData()
 
 void SerialDataTester::loadLastUsedSettings()
 {
+	// This part just loads old used configuration from program settings
+	//
+
 	QSettings applicationSettings;
 
 	QString portName = applicationSettings.value("port").toString();
@@ -1038,55 +1143,51 @@ void SerialDataTester::loadLastUsedSettings()
 
 void SerialDataTester::startReceiver()
 {
+
+	// This function will open port and start receiver
+	//
+
 	bool errors = false;
 
 	m_portReceiver->openPort();
 
 	if (ui->portName->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("No port specified"));
-		errors = true;
-	}
-
-	if (QFile(m_pathToSignalsXml).exists() == false)
-	{
-		QMessageBox::critical(this, tr("Program start"), tr("No xml-file selected!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("No port specified"));
 		errors = true;
 	}
 
 	if (ui->baudRate->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong baud set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong baud set!"));
 		errors = true;
 	}
 
 	if (ui->bits->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong data bits set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong data bits set!"));
 		errors = true;
 	}
 
 	if (ui->stopBits->text() == "Error")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Wrong stop bits set!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("Wrong stop bits set!"));
 		errors = true;
 	}
 
 	if (ui->portStatus->text() == "Opened")
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("Port already opened!"));
-		errors = true;
+		QMessageBox::information(this, tr("Start receiver"), tr("Port already opened!"));
 	}
 
 	if (ui->signalsTable->rowCount() == 0)
 	{
-		QMessageBox::critical(this, tr("Program start"), tr("No signals detected! Read signals first!"));
+		QMessageBox::critical(this, tr("Start receiver"), tr("No signals detected! Read signals first!"));
 		errors = true;
 	}
 
 	if (errors == false)
 	{
-		//m_PortThread->start();
 		m_portReceiver->openPort();
 		ui->portStatus->setText("Opened");
 	}
@@ -1099,7 +1200,6 @@ void SerialDataTester::startReceiver()
 
 void SerialDataTester::stopReceiver()
 {
-	//m_PortThread->terminate();
 	m_portReceiver->closePort();
 	ui->portStatus->setText("Closed");
 }
@@ -1107,7 +1207,10 @@ void SerialDataTester::stopReceiver()
 QBitArray SerialDataTester::bytesToBits(QByteArray bytes)
 {
 	QBitArray bits(bytes.count()*8);
+
 	// Convert from QByteArray to QBitArray
+	//
+
 	for(int i=0; i<bytes.count(); ++i)
 		for(int b=0; b<8; ++b)
 			bits.setBit(i*8+b, bytes.at(i)&(1<<b));
@@ -1118,7 +1221,10 @@ QByteArray SerialDataTester::bitsToBytes(QBitArray bits)
 {
 	QByteArray bytes;
 	bytes.resize(bits.count()/8);
+
 	// Convert from QBitArray to QByteArray
+	//
+
 	for(int b=0; b<bits.count(); ++b)
 		bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
 	return bytes;
