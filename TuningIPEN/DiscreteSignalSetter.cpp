@@ -7,7 +7,7 @@
 #include <QMessageBox>
 
 
-DiscreteSignalSetter::DiscreteSignalSetter(QString signalId, QString label, Tuning::TuningService* service, QWidget *parent) :
+DiscreteSignalSetter::DiscreteSignalSetter(QString signalId, QString label, TuningIPEN::TuningIPENService* service, QWidget *parent) :
 	QWidget(parent),
 	m_signalId(signalId),
 	m_service(service),

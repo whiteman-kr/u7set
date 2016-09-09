@@ -99,3 +99,39 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 };
 
+
+class ArchivingServiceSettings
+{
+public:
+
+private:
+	static const char* SECTION_NAME;
+
+	static const char* PROP_CLIENT_REQUEST_IP;
+	static const char* PROP_CLIENT_REQUEST_PORT;
+	static const char* PROP_CLIENT_REQUEST_NETMASK;
+
+	static const char* PROP_APP_DATA_SERVICE_REQUEST_IP;
+	static const char* PROP_APP_DATA_SERVICE_REQUEST_PORT;
+	static const char* PROP_APP_DATA_SERVICE_REQUEST_NETMASK;
+
+	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_IP;
+	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_PORT;
+	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK;
+
+public:
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+
+	HostAddressPort appDataServiceRequestIP;
+	QHostAddress appDataServiceRequestNetmask;
+
+	HostAddressPort diagDataServiceRequestIP;
+	QHostAddress diagDataServiceRequestNetmask;
+
+	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
+	bool writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+};
+
+

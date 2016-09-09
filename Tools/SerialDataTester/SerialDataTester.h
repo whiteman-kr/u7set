@@ -32,7 +32,8 @@ private slots:
 	void setBits(QAction* newBits);
 	void setStopBits(QAction* newStopBits);
 	void portError(QString error);
-	void dataReceived (QString version, QString trId, QString numerator, QByteArray receivedValues);
+	void dataReceived (QString version, QString trId, QString numerator, QByteArray dataId, QByteArray receivedValues);
+	void crcError (QString version, QString trId, QString numerator, QByteArray dataId);
 	void signalTimeout();
 	void erasePacketData();
 	void loadLastUsedSettings();
@@ -51,7 +52,7 @@ private:
 
 	Ui::SerialDataTester *ui = nullptr;
 
-	QTimer* receiveTimeout;
+	QTimer* receiveTimeout = nullptr;
 
 	SettingsDialog* m_applicationSettingsDialog = nullptr;
 	PortReceiver* m_portReceiver = nullptr;
@@ -75,8 +76,8 @@ private:
 
 	QString m_pathToSignalsXml;
 
-	QThread* m_PortThread;
-    QThread* m_ParserThread;
+	QThread* m_PortThread = nullptr;
+	QThread* m_ParserThread = nullptr;
 
 	struct SignalData
 	{

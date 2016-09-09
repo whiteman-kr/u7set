@@ -151,14 +151,16 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pConfigurator = new Configurator(theSettings.m_configuratorSerialPort, &m_outputLog);
 	m_pConfigurationThread = new QThread(this);
 
+	m_pConfigurator->setVerify(theSettings.m_configuratorVerify);
+
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
 	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
+	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showConfDataFileInfo);
 	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::writeConfDataFile);
 	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
-	connect(this, &UploadTabPage::cancelOperation, m_pConfigurator, &Configurator::cancelOperation);
 
 	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
@@ -170,11 +172,11 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 
 	// Start Timer
 	//
-	m_logTimerId = startTimer(200);
+	m_logTimerId = startTimer(100);
 
 
 }
@@ -358,7 +360,8 @@ void UploadTabPage::subsystemChanged(int index)
 
 	m_currentFileName = searchPath + QDir::separator() + files[0];
 
-	m_outputLog.writeMessage(tr("File selected to upload: %1").arg(m_currentFileName));
+	emit showConfDataFileInfo(m_currentFileName);
+	//m_outputLog.writeMessage(tr("File selected to upload: %1").arg(m_currentFileName));
 }
 
 void UploadTabPage::closeEvent(QCloseEvent* e)
@@ -469,7 +472,7 @@ void UploadTabPage::erase()
 
 void UploadTabPage::cancel()
 {
-	emit cancelOperation();
+	m_pConfigurator->cancelOperation();
 }
 
 void UploadTabPage::clearLog()
@@ -492,7 +495,7 @@ void UploadTabPage::settings()
 		return;
 	}
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 }
 
 void UploadTabPage::disableControls()

@@ -39,7 +39,7 @@ private:
 	QWidget* m_reactivityWidget;
 	QWidget* m_automaticPowerRegulatorWidget;
 
-	Tuning::TuningService* m_service = nullptr;
+	TuningIPEN::TuningIPENService* m_service = nullptr;
 	QVector<Tuning::TuningDataSourceInfo> m_info;
 	QMap<QString, QLabel*> m_statusLabelMap;
 
@@ -67,7 +67,7 @@ signals:
 	void automaticModeChanged(bool newValue);
 
 public:
-	explicit TuningMainWindow(QString cfgPath, QWidget *parent = 0);
+	explicit TuningMainWindow(QString buildPath, QWidget *parent = 0);
 	~TuningMainWindow();
 
 	void onTuningServiceReady();

@@ -31,7 +31,7 @@ bool TripleChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	return false;
 }
 
-TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataSourceInfo>& sourceInfo, Tuning::TuningService* service, QObject* parent) :
+TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataSourceInfo>& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)
@@ -45,7 +45,7 @@ TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataS
 	connect(timer, &QTimer::timeout, this, &TripleChannelSignalsModel::updateSignalStates);
 	timer->start(200);
 
-	connect(m_service, &Tuning::TuningService::signalStateReady, this, &TripleChannelSignalsModel::updateSignalState);
+	connect(m_service, &TuningIPEN::TuningIPENService::signalStateReady, this, &TripleChannelSignalsModel::updateSignalState);
 }
 
 int TripleChannelSignalsModel::rowCount(const QModelIndex&) const

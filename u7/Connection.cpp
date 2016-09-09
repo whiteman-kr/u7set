@@ -19,6 +19,8 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
+		auto proptx1sa = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxStartAddress", true, Connection::port1ManualTxStartAddress, Connection::setPort1ManualTxStartAddress);
+		proptx1sa->setCategory(tr("ManualSettings"));
 		auto proptx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
 		proptx1wq->setCategory(tr("ManualSettings"));
 		auto proprx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
@@ -30,6 +32,8 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRsID", false, Connection::port1TxRsID, Connection::setPort1TxRsID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRsDataUID", false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
+		auto proptx2sa = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxStartAddress", true, Connection::port2ManualTxStartAddress, Connection::setPort2ManualTxStartAddress);
+		proptx2sa->setCategory(tr("ManualSettings"));
 		auto proptx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
 		proptx2wq->setCategory(tr("ManualSettings"));
 		auto proprx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
@@ -43,7 +47,7 @@ namespace Hardware
 
 		ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", false, Connection::mode, Connection::setMode);
 		ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", false, Connection::serialMode, Connection::setSerialMode);
-		ADD_PROPERTY_GETTER_SETTER(bool, "Enable", false, Connection::enable, Connection::setEnable);
+		ADD_PROPERTY_GETTER_SETTER(bool, "EnableSerial", false, Connection::enableSerial, Connection::setEnableSerial);
 		ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", false, Connection::enableDuplex, Connection::setEnableDuplex);
 
 		auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, "EnableManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
@@ -63,16 +67,19 @@ namespace Hardware
 		writer.writeAttribute("Port2EquipmentID", port2EquipmentID());
         writer.writeAttribute("SerialMode", QString::number(static_cast<int>(serialMode())));
         writer.writeAttribute("Mode", QString::number(static_cast<int>(mode())));
-        writer.writeAttribute("Enable", enable() ? "true" : "false");
+		writer.writeAttribute("Enable", enableSerial() ? "true" : "false");
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
         writer.writeAttribute("ManualSettings", manualSettings() ? "true" : "false");
         writer.writeAttribute("SignalList", signalList().join(';'));
 
         // Tx/Rx words quantity
         //
-        writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1ManualTxWordsQuantity()));
+		writer.writeAttribute("Port1TxStartAddress", QString::number(port1ManualTxStartAddress()));
+		writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1ManualTxWordsQuantity()));
         writer.writeAttribute("Port1RxWordsQuantity", QString::number(port1ManualRxWordsQuantity()));
-        writer.writeAttribute("Port2TxWordsQuantity", QString::number(port2ManualTxWordsQuantity()));
+
+		writer.writeAttribute("Port2TxStartAddress", QString::number(port2ManualTxStartAddress()));
+		writer.writeAttribute("Port2TxWordsQuantity", QString::number(port2ManualTxWordsQuantity()));
         writer.writeAttribute("Port2RxWordsQuantity", QString::number(port2ManualRxWordsQuantity()));
 
         return true;
@@ -113,7 +120,7 @@ namespace Hardware
 
         if (reader.attributes().hasAttribute("Enable"))
         {
-            setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
+			setEnableSerial(reader.attributes().value("Enable").toString() == "true" ? true : false);
         }
 
         if (reader.attributes().hasAttribute("EnableDuplex"))
@@ -134,7 +141,12 @@ namespace Hardware
         // Tx/Rx words quantity, may be overloaded later
         //
 
-        if (reader.attributes().hasAttribute("Port1TxWordsQuantity"))
+		if (reader.attributes().hasAttribute("Port1TxStartAddress"))
+		{
+			setPort1ManualTxStartAddress(reader.attributes().value("Port1TxStartAddress").toInt());
+		}
+
+		if (reader.attributes().hasAttribute("Port1TxWordsQuantity"))
         {
             setPort1ManualTxWordsQuantity(reader.attributes().value("Port1TxWordsQuantity").toInt());
         }
@@ -144,7 +156,12 @@ namespace Hardware
             setPort1ManualRxWordsQuantity(reader.attributes().value("Port1RxWordsQuantity").toInt());
         }
 
-        if (reader.attributes().hasAttribute("Port2TxWordsQuantity"))
+		if (reader.attributes().hasAttribute("Port2TxStartAddress"))
+		{
+			setPort2ManualTxStartAddress(reader.attributes().value("Port2TxStartAddress").toInt());
+		}
+
+		if (reader.attributes().hasAttribute("Port2TxWordsQuantity"))
         {
             setPort2ManualTxWordsQuantity(reader.attributes().value("Port2TxWordsQuantity").toInt());
         }
@@ -223,6 +240,16 @@ namespace Hardware
     // port1
     //
 
+	int Connection::port1ManualTxStartAddress() const
+	{
+		return m_port1TxStartAddress;
+	}
+
+	void Connection::setPort1ManualTxStartAddress(int value)
+	{
+		m_port1TxStartAddress = value;
+	}
+
     int Connection::port1ManualTxWordsQuantity() const
     {
         return m_port1ManualTxWordsQuantity;
@@ -292,7 +319,17 @@ namespace Hardware
     // port2
     //
 
-    int Connection::port2ManualTxWordsQuantity() const
+	int Connection::port2ManualTxStartAddress() const
+	{
+		return m_port2TxStartAddress;
+	}
+
+	void Connection::setPort2ManualTxStartAddress(int value)
+	{
+		m_port2TxStartAddress = value;
+	}
+
+	int Connection::port2ManualTxWordsQuantity() const
     {
         return m_port2ManualTxWordsQuantity;
     }
@@ -387,10 +424,11 @@ namespace Hardware
         {
             case OptoPort::Mode::Optical:
                 propertyVisibilityChanger("SerialMode", false);
-                propertyVisibilityChanger("Enable", false);
+				propertyVisibilityChanger("EnableSerial", false);
                 propertyVisibilityChanger("EnableDuplex", false);
 
 				propertyVisibilityChanger("Port2EquipmentID", true);
+				propertyVisibilityChanger("Port2TxStartAddress", true);
                 propertyVisibilityChanger("Port2TxWordsQuantity", true);
                 propertyVisibilityChanger("Port2RxWordsQuantity", true);
 
@@ -398,10 +436,11 @@ namespace Hardware
                 break;
             case OptoPort::Mode::Serial:
                 propertyVisibilityChanger("SerialMode", true);
-                propertyVisibilityChanger("Enable", true);
+				propertyVisibilityChanger("EnableSerial", true);
                 propertyVisibilityChanger("EnableDuplex", true);
 
 				propertyVisibilityChanger("Port2EquipmentID", false);
+				propertyVisibilityChanger("Port2TxStartAddress", false);
                 propertyVisibilityChanger("Port2TxWordsQuantity", false);
                 propertyVisibilityChanger("Port2RxWordsQuantity", false);
                 break;
@@ -410,14 +449,14 @@ namespace Hardware
         }
     }
 
-    bool Connection::enable() const
+	bool Connection::enableSerial() const
     {
-        return m_enable;
+		return m_enableSerial;
     }
 
-    void Connection::setEnable(bool value)
+	void Connection::setEnableSerial(bool value)
     {
-        m_enable = value;
+		m_enableSerial = value;
     }
 
     bool Connection::enableDuplex() const
@@ -549,7 +588,7 @@ namespace Hardware
         m_connections.clear();
     }
 
-	bool ConnectionStorage::setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
+	/*bool ConnectionStorage::setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
 							 int m_txRxOptoID, quint32 m_txRxOptoDataUID)
     {
 		return setOCMConnectionParams(portEquipmentID, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
@@ -585,7 +624,7 @@ namespace Hardware
 
         assert(false);
         return false;
-    }
+	}*/
 
 
     bool ConnectionStorage::load(DbController *db, QString& errorCode)

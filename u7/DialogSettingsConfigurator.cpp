@@ -53,6 +53,8 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 	}
 
 	ui->showDebugInfo->setChecked(theSettings.m_configuratorShowDebugInfo);
+	ui->verifyData->setChecked(theSettings.m_configuratorVerify);
+
 
 }
 
@@ -65,6 +67,7 @@ void DialogSettingsConfigurator::on_DialogSettingsConfigurator_accepted()
 {
 	theSettings.m_configuratorSerialPort = ui->serialPortCombo->currentText();
 	theSettings.m_configuratorShowDebugInfo = (ui->showDebugInfo->checkState() == Qt::Checked);
+	theSettings.m_configuratorVerify = (ui->verifyData->checkState() == Qt::Checked);
 
 	theSettings.writeSystemScope();
 

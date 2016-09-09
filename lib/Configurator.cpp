@@ -354,7 +354,6 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	//
 	count ++;			// Incerement configartion counter
 
-	CONF_IDENTIFICATION_DATA_V2::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V2::CONF_IDENTIFICATION_RECORD();
 	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
 	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
 
@@ -406,6 +405,16 @@ bool Configurator::showDebugInfo() const
 void Configurator::setShowDebugInfo(bool showDebugInfo)
 {
 	m_showDebugInfo = showDebugInfo;
+}
+
+bool Configurator::verify() const
+{
+	return m_verify;
+}
+
+void Configurator::setVerify(bool value)
+{
+	m_verify = value;
 }
 
 bool Configurator::openConnection()
@@ -707,19 +716,29 @@ bool Configurator::send(int moduleUartId,
     std::vector<quint8> recBuffer;
     int recSize = headerSize + expecetedDataBytes;
 
-	int recMaxTime = (1000 * recSize / 11520) + 200; // time needed to receive all packet + 200 ms
+	for (int tc = 0; tc < 100; tc++)
+	{
+		QThread::msleep(10);
 
-    while (m_serialPort->waitForReadyRead(recMaxTime))
-    {
-        QByteArray arr = m_serialPort->read(recSize);
+		QApplication::processEvents();
 
-        for (int i = 0; i < arr.size(); i++)
-        {
-            recBuffer.push_back(arr[i]);
-        }
-    }
+		if (m_serialPort->bytesAvailable() == 0)
+		{
+			continue;
+		}
 
-	//qDebug()<<"Read "<<recBuffer.size();
+		QByteArray arr = m_serialPort->readAll();
+
+		for (int i = 0; i < arr.size(); i++)
+		{
+			recBuffer.push_back(arr[i]);
+		}
+
+		if (recBuffer.size() >= recSize)
+		{
+			break;
+		}
+	}
 
     if (recBuffer.size() != recSize)
 	{
@@ -782,10 +801,11 @@ bool Configurator::send(int moduleUartId,
 	return true;
 }
 
-void Configurator::setSettings(QString device, bool showDebugInfo)
+void Configurator::setSettings(QString device, bool showDebugInfo, bool verify)
 {
 	this->setDevice(device);
 	this->setShowDebugInfo(showDebugInfo);
+	this->setVerify(verify);
 
 	if (showDebugInfo == true)
 	{
@@ -1123,6 +1143,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			throw tr("Communication error.");
 		}
 
+		if (verify() == true)
+		{
+			// Verify the written identificationData
+			//
+
+			m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
+
+			std::vector<quint8> readData;
+			CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+			if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+			{
+				throw tr("Communication error.");
+			}
+
+			if (identificationData.size() != readData.size())
+			{
+				throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
+			}
+			for (int v = 0; v < identificationData.size(); v++)
+			{
+				if (readData[v] != identificationData[v])
+				{
+					throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+				}
+			}
+		}
+
 		//
 		// WRITE CONFIGURATION command
 		//
@@ -1185,6 +1233,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					{
 						replyHeader.dumpFlagsState(m_Log);
 						throw tr("Communication error.");
+					}
+
+					if (verify() == true)
+					{
+						// Verify the written data
+						//
+
+						m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
+
+						std::vector<quint8> readData;
+						CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+						if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+						{
+							throw tr("Communication error.");
+						}
+
+						if (frameData.size() != readData.size())
+						{
+							throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+						}
+						for (int v = 0; v < frameData.size(); v++)
+						{
+							if (readData[v] != frameData[v])
+							{
+								throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+							}
+						}
 					}
 				}
 			}
@@ -1356,8 +1432,11 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 		
 		// An empty firmware
 		//
+
+		QString userName = QDir::home().dirName();
+
 		Hardware::ModuleFirmware conf;
-		conf.init("Caption", "subsysId", 0, 0, 0, 0, "projectName", "service", 0, "data", 0, QStringList());
+		conf.init("Caption", "subsysId", 0, 0, 0, 0, "projectName", userName, 0, "release", 0, QStringList());
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
@@ -1483,17 +1562,28 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 	return;
 }
 
+void Configurator::showConfDataFileInfo(const QString& fileName)
+{
+	processConfDataFile(fileName, false);
+}
+
 void Configurator::writeConfDataFile(const QString& fileName)
+{
+	processConfDataFile(fileName, true);
+}
+
+void Configurator::processConfDataFile(const QString& fileName, bool writeToFlash)
 {
 	emit communicationStarted();
 
 	Hardware::ModuleFirmware m_confFirmware;
 
-	m_Log->writeMessage(tr("Loading configuration file."));
+	m_Log->writeMessage(tr("//----------------------"));
+	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
 	QString errorCode;
 
-	bool result = m_confFirmware.load(fileName, errorCode);
+	bool result = m_confFirmware.load(fileName, errorCode, writeToFlash == true);
 
 	if (result == false)
 	{
@@ -1508,9 +1598,6 @@ void Configurator::writeConfDataFile(const QString& fileName)
 		return;
 	}
 
-
-	m_Log->writeMessage(tr("File %1 was loaded.").arg(fileName));
-
 	m_Log->writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
 	m_Log->writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
 	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
@@ -1520,7 +1607,10 @@ void Configurator::writeConfDataFile(const QString& fileName)
 	m_Log->writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
 	m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
-	writeConfigurationWorker(&m_confFirmware);
+	if (writeToFlash == true)
+	{
+		writeConfigurationWorker(&m_confFirmware);
+	}
 
 	emit communicationFinished();
 
@@ -1801,6 +1891,8 @@ void Configurator::readFirmware(const QString& fileName)
 
 void Configurator::eraseFlashMemory(int)
 {
+	m_cancelFlag = false;
+
 	emit communicationStarted();
 
 	// Open port
@@ -1904,6 +1996,13 @@ void Configurator::eraseFlashMemory(int)
 
 				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
 				{
+
+					if (m_cancelFlag == true)
+					{
+						m_Log->writeMessage("Memory erasing cancelled.");
+						break;
+					}
+
 					if (i == IdentificationFrameIndex)
 					{
 						m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i) + " - skip identification block.");

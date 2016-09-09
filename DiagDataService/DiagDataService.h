@@ -19,16 +19,17 @@ class DiagDataServiceWorker : public ServiceWorker
 private:
 
 public:
-	DiagDataServiceWorker(const QString& serviceStrID,
-					  const QString& cfgServiceIP1,
-					  const QString& cfgServiceIP2);
+	DiagDataServiceWorker(	const QString& serviceEquipmentID,
+							const QString& cfgServiceIP1,
+							const QString& cfgServiceIP2,
+							const QString& buildPath);
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
 	ServiceWorker* createInstance() override
 	{
-		return new DiagDataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+		return new DiagDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 	}
 };
 

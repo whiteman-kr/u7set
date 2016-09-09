@@ -45,7 +45,7 @@ bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	return false;
 }
 
-SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, Tuning::TuningService* service, QObject* parent) :
+SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)
@@ -69,7 +69,7 @@ SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInf
 	connect(timer, &QTimer::timeout, this, &SafetyChannelSignalsModel::updateSignalStates);
 	timer->start(200);
 
-	connect(m_service, &Tuning::TuningService::signalStateReady, this, &SafetyChannelSignalsModel::updateSignalState);
+	connect(m_service, &TuningIPEN::TuningIPENService::signalStateReady, this, &SafetyChannelSignalsModel::updateSignalState);
 }
 
 int SafetyChannelSignalsModel::rowCount(const QModelIndex&) const

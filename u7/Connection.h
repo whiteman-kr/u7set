@@ -39,6 +39,9 @@ namespace Hardware
 		//
 		//
 
+		int port1ManualTxStartAddress() const;
+		void setPort1ManualTxStartAddress(int value);
+
 		int port1ManualTxWordsQuantity() const;
 		void setPort1ManualTxWordsQuantity(int value);
 
@@ -60,6 +63,9 @@ namespace Hardware
 		//
 		//
 		//
+
+		int port2ManualTxStartAddress() const;
+		void setPort2ManualTxStartAddress(int value);
 
 		int port2ManualTxWordsQuantity() const;
 		void setPort2ManualTxWordsQuantity(int value);
@@ -89,8 +95,8 @@ namespace Hardware
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
 
-		bool enable() const;
-		void setEnable(bool value);
+		bool enableSerial() const;
+		void setEnableSerial(bool value);
 
 		bool enableDuplex() const;
 		void setEnableDuplex(bool value);
@@ -114,6 +120,7 @@ namespace Hardware
 			m_port1TxRxOptoDataUID = that.m_port1TxRxOptoDataUID;
 			m_port1TxRsID = that.m_port1TxRsID;
 			m_port1TxRsDataUID = that.m_port1TxRsDataUID;
+			m_port1TxStartAddress = that.m_port1TxStartAddress;
 
 			m_port2ManualTxWordsQuantity = that.m_port2ManualTxWordsQuantity;
 			m_port2ManualRxWordsQuantity = that.m_port2ManualRxWordsQuantity;
@@ -121,9 +128,10 @@ namespace Hardware
 			m_port2TxRxOptoDataUID = that.m_port2TxRxOptoDataUID;
 			m_port2TxRsID = that.m_port2TxRsID;
 			m_port2TxRsDataUID = that.m_port2TxRsDataUID;
+			m_port2TxStartAddress = that.m_port2TxStartAddress;
 
 			m_serialMode = that.m_serialMode;
-			m_enable = that.m_enable;
+			m_enableSerial = that.m_enableSerial;
 			m_enableDuplex = that.m_enableDuplex;
 			m_manualSettings = that.m_manualSettings;
 
@@ -137,6 +145,7 @@ namespace Hardware
 		int m_index = -1;
 		QString m_connectionID;
 
+		int m_port1TxStartAddress = 0;
 		QString m_port1EquipmentID;
 		int m_port1ManualTxWordsQuantity = 479;
 		int m_port1ManualRxWordsQuantity = 479;
@@ -145,6 +154,7 @@ namespace Hardware
 		int m_port1TxRsID = 0;
 		quint32 m_port1TxRsDataUID = 0;
 
+		int m_port2TxStartAddress = 0;
 		QString m_port2EquipmentID;
 		int m_port2ManualTxWordsQuantity = 479;
 		int m_port2ManualRxWordsQuantity = 479;
@@ -156,7 +166,7 @@ namespace Hardware
 		OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
 		OptoPort::Mode m_mode = OptoPort::Mode::Optical;
 
-		bool m_enable = false;
+		bool m_enableSerial = false;
 		bool m_enableDuplex = false;
 		bool m_manualSettings = false;
 
@@ -181,11 +191,11 @@ namespace Hardware
 
 		void clear();
 
-		bool setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
+		/*bool setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
 								 int m_txRxOptoID, quint32 m_txRxOptoDataUID);
 
 		bool setOCMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
-								 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);
+								 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);*/
 
 		bool load(DbController* db, QString &errorCode);
 		bool save(DbController* db);

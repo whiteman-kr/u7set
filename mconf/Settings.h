@@ -16,6 +16,9 @@ public:
 	bool showDebugInfo() const;
 	void setShowDebugInfo(bool value);
 
+	bool verify() const;
+	void setVerify(bool value);
+
 	bool expertMode() const;
 	void setExpertMode(bool value);
 
@@ -31,6 +34,7 @@ public:
 private:
 	QString m_serialPort;
 	bool m_showDebugInfo;
+	bool m_verify;
 	bool m_expertMode;
 
 	QString m_server;

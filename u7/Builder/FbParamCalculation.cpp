@@ -191,15 +191,15 @@ namespace Builder
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
-		requiredParams.append("i_counter");
+		//requiredParams.append("i_counter");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
+		//AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
 		CHECK_UNSIGNED_INT(i_conf);
-		CHECK_UNSIGNED_INT(i_counter);
+		//CHECK_UNSIGNED_INT(i_counter);
 
 		switch(i_conf.unsignedIntValue())
 		{

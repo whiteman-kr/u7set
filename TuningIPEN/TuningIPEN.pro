@@ -25,7 +25,6 @@ SOURCES +=\
 	../lib/Types.cpp \
 	../lib/ProtoSerialization.cpp \
 	../TuningService/TuningDataSource.cpp \
-	../TuningService/TuningService.cpp \
 	../lib/Service.cpp \
 	../lib/DataProtocols.cpp \
 	../lib/DataSource.cpp \
@@ -39,7 +38,6 @@ SOURCES +=\
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
 	../AppDataService/AppSignalStateEx.cpp \
-	../TuningService/TuningSocket.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
@@ -49,7 +47,8 @@ SOURCES +=\
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     DiscreteSignalSetter.cpp \
-    TripleChannelSignalsModel.cpp
+    TripleChannelSignalsModel.cpp \
+    TuningIPENSocket.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -63,7 +62,6 @@ HEADERS  += TuningMainWindow.h \
 	../lib/Types.h \
 	../lib/ProtoSerialization.h \
 	../TuningService/TuningDataSource.h \
-	../TuningService/TuningService.h \
 	../lib/Service.h \
 	../lib/DataProtocols.h \
 	../lib/DataSource.h \
@@ -76,7 +74,6 @@ HEADERS  += TuningMainWindow.h \
 	../lib/Signal.h \
 	SafetyChannelSignalsModel.h \
 	../AppDataService/AppSignalStateEx.h \
-	../TuningService/TuningSocket.h \
 	../lib/Crc.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
@@ -86,7 +83,8 @@ HEADERS  += TuningMainWindow.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     DiscreteSignalSetter.h \
-    TripleChannelSignalsModel.h
+    TripleChannelSignalsModel.h \
+    TuningIPENSocket.h
 
 include(../qtservice/src/qtservice.pri)
 

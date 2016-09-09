@@ -132,7 +132,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo());
+	emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo(), m_settings.verify());
 
 	// Start Timer
 	//
@@ -383,7 +383,7 @@ void ModuleConfigurator::settingsClicked()
 		m_settings = settingsForm.settings();
 		m_settings.save();
 
-		emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo());
+		emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo(), m_settings.verify());
 	}
 
 	return;

@@ -2933,7 +2933,7 @@ namespace Builder
 
 		// write data port txData identifier
 		//
-		cmd.movConstUInt32(port->txStartAddress(), port->txDataID());
+		cmd.movConstUInt32(port->absTxStartAddress(), port->txDataID());
 		cmd.setComment("txData ID");
 
 		m_code.append(cmd);
@@ -2958,7 +2958,7 @@ namespace Builder
 					continue;
 				}
 
-				int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+				int txSignalAddress = port->absTxStartAddress() + txSignal.address.offset();
 
 				cmd.mov32(txSignalAddress, s->ramAddr().offset());
 				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
@@ -3028,7 +3028,7 @@ namespace Builder
 				{
 					// txSignal.address.offset() the same for all signals in one word
 
-					int txSignalAddress = port->txStartAddress() + txSignal.address.offset();
+					int txSignalAddress = port->absTxStartAddress() + txSignal.address.offset();
 
 					// copy bit accumulator to opto interface buffer
 					//
@@ -3780,7 +3780,7 @@ namespace Builder
 		QStringList file;
 		QString line = QString("------------------------------------------------------------------------------------------");
 
-		file.append(QString("Tuning information file\n").arg(m_lm->equipmentId()));
+		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentId()));
 		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentId()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
 		file.append(QString("LM number: %1\n").arg(lmNumber));

@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "../TuningService/TuningService.h"
+#include "TuningIPENService.h"
 
 
 class QPushButton;
@@ -11,7 +11,7 @@ class DiscreteSignalSetter : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit DiscreteSignalSetter(QString signalId, QString label, Tuning::TuningService* service, QWidget *parent = 0);
+	explicit DiscreteSignalSetter(QString signalId, QString label, TuningIPEN::TuningIPENService* service, QWidget *parent = 0);
 
 public slots:
 	void updateValue();
@@ -23,7 +23,7 @@ signals:
 
 private:
 	QString m_signalId;
-	Tuning::TuningService* m_service;
-	QPushButton* m_button;
+	TuningIPEN::TuningIPENService* m_service = nullptr;
+	QPushButton* m_button = nullptr;
 };
 

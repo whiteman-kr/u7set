@@ -13,7 +13,7 @@ class SettingsDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit SettingsDialog(QWidget *parent = 0);
+	explicit SettingsDialog(QWidget* parent = 0);
 	virtual ~SettingsDialog();
 
 private slots:
@@ -25,9 +25,9 @@ signals:
 	void sendSettingsCreated();
 
 private:
-	Ui::SettingsDialog *ui = nullptr;
+	Ui::SettingsDialog* ui = nullptr;
 
-	QString m_pathToSignalsXml = "";
+	QString m_pathToSignalsXml;
 };
 
 #endif // SETTINGSDIALOG_H
