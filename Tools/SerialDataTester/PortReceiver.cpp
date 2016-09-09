@@ -73,7 +73,6 @@ void PortReceiver::closePort()
 
 void PortReceiver::dataReceived()
 {
-	//receivedData = m_serialPort->readAll();
 	QByteArray receivedData = m_serialPort->read(SerialParserBufferSize);
 
 	emit dataFromPort(receivedData);

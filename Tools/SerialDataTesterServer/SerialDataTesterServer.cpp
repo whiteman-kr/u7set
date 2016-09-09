@@ -34,7 +34,7 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	ui->baudList->addItem(QString::number(QSerialPort::Baud19200));
 
 	ui->timeInterval->setRange(0, 10000);
-	ui->countOfPackets->setRange(0, 100000);
+	ui->countOfPackets->setRange(0, 1000000);
 
 	QSettings applicationSettings;
 
@@ -88,9 +88,6 @@ void SerialDataTesterServer::setFile()
 
 void SerialDataTesterServer::startServer()
 {
-	if (ui->timeInterval->text().toInt() <= 10)
-		QMessageBox::warning(this, tr("Warning"), tr("Time interval is lower or equal 10: possible loss of data"));
-
 	m_serialPort = new QSerialPort(this);
 	m_serialPort->setPortName(ui->portsList->currentText());
 	m_serialPort->setBaudRate(ui->baudList->currentText().toInt());
@@ -289,7 +286,7 @@ void SerialDataTesterServer::sendPacket()
 	generatedData.resize(m_dataSize*8);
 	generatedData.fill(0);
 
-	qDebug() << "We transfer now: ";
+	//qDebug() << "We transfer now: ";
 
 	for (SignalData signal : m_signalsFromXml)
 	{
@@ -320,7 +317,7 @@ void SerialDataTesterServer::sendPacket()
 				float f = qrand()%maxDataSize * 0.1;
 				int bit = 0;
 
-				qDebug() << signal.name << " " << f;
+				//qDebug() << signal.name << " " << f;
 
 				int *b = reinterpret_cast<int*>(&f);
 				for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
@@ -335,7 +332,7 @@ void SerialDataTesterServer::sendPacket()
 			}
 			else
 			{
-				qDebug() << signal.name << " " << value;
+				//	qDebug() << signal.name << " " << value;
 
 				for (int pos = 0; value>0; pos++)
 				{
@@ -354,13 +351,13 @@ void SerialDataTesterServer::sendPacket()
 		else
 		{
 			generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
-			qDebug() << signal.name << " Bits not included";
+			//	qDebug() << signal.name << " Bits not included";
 		}
 	}
 
-	qDebug() << "=====================+";
+	//qDebug() << "=====================+";
 
-	qDebug() << generatedData;
+	//qDebug() << generatedData;
 
 	QString visualizeTransferringData;
 
@@ -380,7 +377,12 @@ void SerialDataTesterServer::sendPacket()
 
 	bytes.reserve(12);
 
-	bytes.append("sdfgsdfhhasdfasdffgdsffgh");
+	int amountOfRandomTrashBytes = qrand()%1001;
+
+	for (int i=0; i<amountOfRandomTrashBytes; i++)
+	{
+		bytes.append((char)qrand()%256);
+	}
 
 	// Write down signature to packet (4 bytes);
 	//
@@ -413,32 +415,37 @@ void SerialDataTesterServer::sendPacket()
 	dataForCrc.append(dataID.bytes, 4);
 	dataForCrc.append(dataToSend, dataToSend.length());
 
-	qDebug() << "dataForCRC: " << dataForCrc;
+	//	qDebug() << "dataForCRC: " << dataForCrc;
 
 	CrcRepresentation crc;
 	crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.length());
 
 	bytes.append(crc.bytes, 8);
 
-	qDebug() << crc.uint64;
-	qDebug() << "CRC: " << crc.bytes;
+	//	qDebug() << crc.uint64;
+	//	qDebug() << "CRC: " << crc.bytes;
 
 	// Write packet to port
 	//
 
-	bytes.append("hfgjkhdjghskjdhgklsdfghsdhgkjshdfkjghsldfg");
+	amountOfRandomTrashBytes = qrand()%1001;
 
-	m_serialPort->write(bytes, bytes.size());
+	for (int i=0; i<amountOfRandomTrashBytes; i++)
+	{
+		bytes.append((char)qrand()%256);
+	}
+	qDebug() << "Sent: " <<  m_serialPort->write(bytes, bytes.size()) << " bytes";
 
 	// Send data
 	//
 
-	bool ok = m_serialPort->flush();
+	//bool ok = m_serialPort->flush();
+	/*bool ok = m_serialPort->waitForBytesWritten(300);
 
 	if (ok == false)
 	{
 		QMessageBox::warning(this, "Error", m_serialPort->errorString());
-	}
+	}*/
 
 	ui->transmissionId->setText(QString::number(head.hdr.id));
 	ui->numerator->setText(QString::number(head.hdr.num));

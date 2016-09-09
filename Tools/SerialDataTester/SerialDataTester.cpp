@@ -126,6 +126,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	ui->signalsTable->setColumnCount(6);
 
 	ui->signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui->signalsTable->setEditTriggers(QAbstractItemView::EditTriggers(0));
 
 	ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
 	ui->signalsTable->setHorizontalHeaderItem(name, new QTableWidgetItem(tr("Name")));
@@ -163,8 +164,10 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// Create port receiver object
 	//
 
-	m_portReceiver = new PortReceiver();
-
+	m_PortThread = new QThread();
+	m_portReceiver = new PortReceiver(m_PortThread);
+	m_portReceiver->moveToThread(m_PortThread);
+	m_PortThread->start();
 	// Receiver timer, it will count 5 second after last received packet.
 	// When five seconds will pass - all packet data will be deleted from table.
 	//
@@ -175,7 +178,10 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// CRC sum. Data will be processed in SerialDataTester class.
 	//
 
-	m_parser = new SerialDataParser();
+	m_ParserThread = new QThread();
+	m_parser = new SerialDataParser(m_ParserThread);
+	m_parser->moveToThread(m_ParserThread);
+	m_ParserThread->start();
 
 	// Main configuration signals
 	//
@@ -225,18 +231,6 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 		QMessageBox::warning(this, tr("Program start"), tr("xml-file is corrupted or not exist! Program will load last used port with last used settings"));
 		loadLastUsedSettings();
 	}
-
-	// Place portReceiver in another
-	// thread
-	//
-
-	m_PortThread = new QThread();
-	m_portReceiver->moveToThread(m_PortThread);
-	m_PortThread->start();
-
-	m_ParserThread = new QThread();
-	m_parser->moveToThread(m_ParserThread);
-	m_ParserThread->start();
 
 	// Clean old packet data
 	//
@@ -864,7 +858,7 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 
 		dataArray = bytesToBits(receivedValues);
 
-		for (int currentBit = 0; currentBit < dataArray.size(); currentBit++) // Show every received bit
+		/*for (int currentBit = 0; currentBit < dataArray.size(); currentBit++) // Show every received bit
 		{
 			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0"); // Writing all received bits to string value
 
@@ -872,7 +866,7 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 				dataVisualisation += " ";
 		}
 
-		ui->statusBar->showMessage("Data received: " + dataVisualisation);
+		ui->statusBar->showMessage("Data received: " + dataVisualisation);*/
 
 		// Ok, now we will use our signals vector to find every signal
 		// in received data array
@@ -1190,11 +1184,6 @@ void SerialDataTester::startReceiver()
 	{
 		m_portReceiver->openPort();
 		ui->portStatus->setText("Opened");
-	}
-	else
-	{
-		QMessageBox::warning(this, tr("Program start"), tr("Program won't start until all errors will be fixed"));
-		ui->portStatus->setText("Closed");
 	}
 }
 
