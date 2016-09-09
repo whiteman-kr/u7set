@@ -84,6 +84,7 @@ public:
 	void clearSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int row) const { return m_signalSet.key(row); }
 	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int row) const { return m_signalSet[row]; }
@@ -102,6 +103,7 @@ public:
 	void saveSignal(Signal& signal);
 	void cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
+	void deleteSignals(const QSet<int>& signalIDs);
 	void deleteSignal(int signalID);
 
 signals:

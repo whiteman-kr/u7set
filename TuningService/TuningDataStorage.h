@@ -141,7 +141,7 @@ namespace Tuning
 		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
 
 		const QStringList& metadataFields();
-		const std::vector<QVariantList>& TuningData::metadata() const;
+		const std::vector<QVariantList>& metadata() const;
 	};
 
 

@@ -1338,6 +1338,15 @@ void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
 	loadSignals();
 }
 
+void SignalsModel::deleteSignals(const QSet<int>& signalIDs)
+{
+	foreach (const int signalID, signalIDs)
+	{
+		deleteSignal(signalID);
+	}
+	loadSignals();
+}
+
 void SignalsModel::deleteSignal(int signalID)
 {
 	ObjectState state;
@@ -1739,21 +1748,21 @@ void SignalsTabPage::deleteSignal()
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
-	QSet<int> deletedSignalGroupIDs;
+	QSet<int> deletedSignalIDs;
 	for (int i = 0; i < selection.count(); i++)
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 		int groupId = m_signalsModel->signal(row).signalGroupID();
 		if (groupId != 0)
 		{
-			deletedSignalGroupIDs.insert(groupId);
+			deletedSignalIDs.unite(m_signalsModel->getChannelSignalsID(groupId).toList().toSet());
 		}
 		else
 		{
-			m_signalsModel->deleteSignal(m_signalsModel->key(row));
+			deletedSignalIDs.insert(m_signalsModel->key(row));
 		}
 	}
-	m_signalsModel->deleteSignalGroups(deletedSignalGroupIDs);
+	m_signalsModel->deleteSignals(deletedSignalIDs);
 }
 
 void SignalsTabPage::undoSignalChanges()
