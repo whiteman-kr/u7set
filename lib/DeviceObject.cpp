@@ -165,6 +165,12 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 	bool DeviceObject::SaveData(Proto::Envelope* message) const
 	{
+		bool ok = SaveData(message, false);
+		return ok;
+	}
+
+	bool DeviceObject::SaveData(Proto::Envelope* message, bool saveTree) const
+	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
@@ -210,6 +216,19 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 			mutableDeviceObject->set_presetroot(m_presetRoot);
 			Proto::Write(mutableDeviceObject->mutable_presetname(), m_presetName);
 			Proto::Write(mutableDeviceObject->mutable_presetobjectuuid(), m_presetObjectUuid);
+		}
+
+		// Save children if it is necessary (can be in serialization for the clipboard)
+		//
+		if (saveTree == true)
+		{
+			for (std::shared_ptr<DeviceObject> child : m_children)
+			{
+				::Proto::Envelope* childMessage = mutableDeviceObject->add_children();
+				assert(childMessage);
+
+				child->SaveData(childMessage, saveTree);
+			}
 		}
 
 		return true;
@@ -273,7 +292,6 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 				assert(property->specific() == true);	// it's suppose to be specific property;
 
-
 				bool loadOk = Proto::loadProperty(p, property);
 
 				Q_UNUSED(loadOk);
@@ -315,6 +333,26 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 		}
 
+		// Load children if all tree was saved
+		//
+		m_children.clear();
+		m_children.reserve(deviceobject.children_size());
+
+		for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
+		{
+			const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
+
+			std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
+
+			if (child == nullptr)
+			{
+				assert(child);
+				continue;
+			}
+
+			m_children.push_back(child);
+		}
+
 		return true;
 	}
 
@@ -340,6 +378,26 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		pDeviceObject->LoadData(message);
 
 		return pDeviceObject;
+	}
+
+	bool DeviceObject::SaveObjectTree(Proto::Envelope* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		try
+		{
+			bool ok = this->SaveData(message, true);
+			return ok;
+		}
+		catch (...)
+		{
+			assert(false);
+			return false;
+		}
 	}
 
 	void DeviceObject::expandEquipmentId()
@@ -1397,35 +1455,42 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		return std::shared_ptr<DeviceObject>();
 	}
 
-	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
+	bool DeviceObject::canAddChild(DeviceObject* child) const
 	{
 		if (child->deviceType() == DeviceType::Software &&
 			deviceType() != DeviceType::Workstation &&
 			deviceType() != DeviceType::Root)
 		{
-			assert(false);
-			return;
+			return false;
 		}
 
 		if (deviceType() >= child->deviceType())
 		{
-			assert(deviceType() < child->deviceType());
-			return;
+			return false;
 		}
 
-		if (child->deviceType() == DeviceType::Workstation && deviceType() > DeviceType::Chassis)
+		if (child->deviceType() == DeviceType::Workstation &&
+			deviceType() > DeviceType::Chassis)
 		{
-			assert(false);
+			return false;
+		}
+
+		return true;
+	}
+
+	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
+	{
+		if (child.get() == nullptr)
+		{
+			assert(child);
 			return;
 		}
 
-//		if (child->deviceType() == DeviceType::Software &&
-//			deviceType() != DeviceType::Workstation &&
-//			deviceType() != DeviceType::Root)
-//		{
-//			assert(false);
-//			return;
-//		}
+		if (canAddChild(child.get()) == false)
+		{
+			assert(canAddChild(child.get()) == true);
+			return;
+		}
 
 		child->m_parent = this;
 		m_children.push_back(child);
@@ -1944,9 +2009,9 @@ R"DELIM({
 		qDebug() << "DeviceRoot::~DeviceSystem";
 	}
 
-	bool DeviceSystem::SaveData(Proto::Envelope* message) const
+	bool DeviceSystem::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2017,9 +2082,9 @@ R"DELIM({
 	{
 	}
 
-	bool DeviceRack::SaveData(Proto::Envelope* message) const
+	bool DeviceRack::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2092,9 +2157,9 @@ R"DELIM({
 	{
 	}
 
-	bool DeviceChassis::SaveData(Proto::Envelope* message) const
+	bool DeviceChassis::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2215,9 +2280,9 @@ R"DELIM({
 	{
 	}
 
-	bool DeviceModule::SaveData(Proto::Envelope* message) const
+	bool DeviceModule::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2377,9 +2442,9 @@ R"DELIM({
 	{
 	}
 
-	bool DeviceController::SaveData(Proto::Envelope* message) const
+	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2502,9 +2567,9 @@ static const QString valueBitCaption("ValueBit");
 	{
 	}
 
-	bool DeviceSignal::SaveData(Proto::Envelope* message) const
+	bool DeviceSignal::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2884,9 +2949,9 @@ static const QString valueBitCaption("ValueBit");
 	{
 	}
 
-	bool Workstation::SaveData(Proto::Envelope* message) const
+	bool Workstation::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);
@@ -2967,9 +3032,9 @@ static const QString valueBitCaption("ValueBit");
 	{
 	}
 
-	bool Software::SaveData(Proto::Envelope* message) const
+	bool Software::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
-		bool result = DeviceObject::SaveData(message);
+		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
 			assert(result);

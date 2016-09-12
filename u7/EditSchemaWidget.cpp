@@ -4759,7 +4759,7 @@ void EditSchemaWidget::editCut()
 	::Proto::EnvelopeSet message;
 	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
 	{
-		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
 	}
 
@@ -4809,10 +4809,10 @@ void EditSchemaWidget::editCopy()
 	// Save to protobuf message
 	//
 	::Proto::EnvelopeSet message;
-	message.mutable_schemaitems()->Reserve(static_cast<int>(selected.size()));
+	message.mutable_items()->Reserve(static_cast<int>(selected.size()));
 	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
 	{
-		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
 	}
 
@@ -4873,9 +4873,9 @@ void EditSchemaWidget::editPaste()
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
 		bool schemaItemAfbIsPresent = false;
 
-		for (int i = 0; i < message.schemaitems_size(); i++)
+		for (int i = 0; i < message.items_size(); i++)
 		{
-			const ::Proto::Envelope& schemaItemMessage = message.schemaitems(i);
+			const ::Proto::Envelope& schemaItemMessage = message.items(i);
 
 			VFrame30::SchemaItem* schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
 

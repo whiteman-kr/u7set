@@ -83,7 +83,10 @@ namespace Hardware
 		static DeviceObject* fromDbFile(const DbFile& file);
 
 	protected:
+		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
+		//
 		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
@@ -95,6 +98,10 @@ namespace Hardware
 		// Public methods
 		//
 	public:
+		// Save object with ALL children
+		//
+		bool SaveObjectTree(Proto::Envelope* message) const;
+
 		// Expand EquipmentIDTemplate for this and for all children
 		//
 		void expandEquipmentId();
@@ -181,6 +188,8 @@ namespace Hardware
 		std::shared_ptr<DeviceObject> childSharedPtr(QUuid uuid);
 		std::shared_ptr<DeviceObject> childSharedPtrByPresetUuid(QUuid presetObjectUuid);
 
+		bool canAddChild(DeviceObject* child) const;
+
 		void addChild(std::shared_ptr<DeviceObject> child);
 		void deleteChild(DeviceObject* child);
 		void deleteAllChildren();
@@ -265,8 +274,7 @@ namespace Hardware
 		bool m_presetRoot = false;			// This object is preset root
 		QString m_presetName;				// PresetName, if it is preset
 		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
-											// In preset edit mode this field has the same valie with m_uuid
-
+											// In preset edit mode this field has the same value with m_uuid
 	private:
 	};
 
@@ -308,7 +316,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -335,7 +343,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -362,7 +370,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -416,7 +424,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -471,7 +479,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -499,7 +507,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -588,7 +596,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
@@ -629,7 +637,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:

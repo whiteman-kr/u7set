@@ -1082,6 +1082,9 @@ bool EquipmentModel::isConfigurationMode() const
 // EquipmentView
 //
 //
+const char* EquipmentView::mimeType = "application/x-deviceobjecs";
+const char* EquipmentView::mimeTypeShortDescription = "application/x-deviceobjecs-sd";
+
 EquipmentView::EquipmentView(DbController* dbcontroller) :
 	m_dbController(dbcontroller)
 {
@@ -1142,6 +1145,22 @@ DbController* EquipmentView::db()
 
 void EquipmentView::addSystem()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
 	// Add new system to the root
 	//
 	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>(isPresetMode());
@@ -1150,7 +1169,7 @@ void EquipmentView::addSystem()
 	system->setCaption(tr("System"));
 	system->setPlace(0);
 
-	addDeviceObject(system);
+	addDeviceObject(system, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1158,13 +1177,31 @@ void EquipmentView::addSystem()
 
 void EquipmentView::addRack()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(isPresetMode());
 
 	rack->setEquipmentIdTemplate("$(PARENT)_RACKID");
 	rack->setCaption(tr("Rack"));
 	rack->setPlace(0);
 
-	addDeviceObject(rack);
+	addDeviceObject(rack, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1172,13 +1209,31 @@ void EquipmentView::addRack()
 
 void EquipmentView::addChassis()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(isPresetMode());
 
 	chassis->setEquipmentIdTemplate("$(PARENT)_CH$(PLACE)");
     chassis->setCaption(tr("Chassis"));
 	chassis->setPlace(-1);
 
-    addDeviceObject(chassis);
+	addDeviceObject(chassis, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1186,13 +1241,31 @@ void EquipmentView::addChassis()
 
 void EquipmentView::addModule()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(isPresetMode());
 
 	module->setEquipmentIdTemplate("$(PARENT)_MD$(PLACE)");
 	module->setCaption(tr("Module"));
 	module->setPlace(-1);
 
-	addDeviceObject(module);
+	addDeviceObject(module, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1200,12 +1273,30 @@ void EquipmentView::addModule()
 
 void EquipmentView::addController()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(isPresetMode());
 
 	controller->setEquipmentIdTemplate("$(PARENT)_CTRLXX");
 	controller->setCaption(tr("Controller"));
 
-	addDeviceObject(controller);
+	addDeviceObject(controller, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1213,12 +1304,30 @@ void EquipmentView::addController()
 
 void EquipmentView::addSignal()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> signal = std::make_shared<Hardware::DeviceSignal>(isPresetMode());
 
 	signal->setEquipmentIdTemplate("$(PARENT)_SIGNAL");
 	signal->setCaption(tr("Signal"));
 
-	addDeviceObject(signal);
+	addDeviceObject(signal, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1226,13 +1335,31 @@ void EquipmentView::addSignal()
 
 void EquipmentView::addWorkstation()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> workstation = std::make_shared<Hardware::Workstation>(isPresetMode());
 
 	workstation->setEquipmentIdTemplate("$(PARENT)_WS$(PLACE)");
 	workstation->setCaption(tr("Workstation"));
 	workstation->setPlace(0);
 
-	addDeviceObject(workstation);
+	addDeviceObject(workstation, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1240,13 +1367,31 @@ void EquipmentView::addWorkstation()
 
 void EquipmentView::addSoftware()
 {
+	QModelIndex parentModelIndex;		// current is root
+
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
 	std::shared_ptr<Hardware::DeviceObject> software = std::make_shared<Hardware::Software>(isPresetMode());
 
 	software->setEquipmentIdTemplate("$(PARENT)_SWNAME");
 	software->setCaption(tr("Software"));
 	software->setPlace(0);
 
-	addDeviceObject(software);
+	addDeviceObject(software, parentModelIndex, true);
 
 	emit updateState();
 	return;
@@ -1282,7 +1427,6 @@ void EquipmentView::addPreset()
 	}
 
 	return;
-
 }
 
 
@@ -1290,6 +1434,24 @@ void EquipmentView::addPresetRack()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
 		std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(true);
 
 		rack->setEquipmentIdTemplate("$(PARENT)_RACKID");
@@ -1299,7 +1461,7 @@ void EquipmentView::addPresetRack()
 		rack->setPresetRoot(true);
 		rack->setPresetName("PRESET_NAME");
 
-		addDeviceObject(rack);
+		addDeviceObject(rack, parentModelIndex, true);
 	}
 	else
 	{
@@ -1314,6 +1476,24 @@ void EquipmentView::addPresetChassis()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
         std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(true);
 
         chassis->setEquipmentIdTemplate("$(PARENT)_CHASSISID");
@@ -1323,7 +1503,7 @@ void EquipmentView::addPresetChassis()
         chassis->setPresetRoot(true);
         chassis->setPresetName("PRESET_NAME");
 
-        addDeviceObject(chassis);
+		addDeviceObject(chassis, parentModelIndex, true);
 	}
 	else
 	{
@@ -1337,6 +1517,24 @@ void EquipmentView::addPresetModule()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
 		std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(true);
 
 		module->setEquipmentIdTemplate("$(PARENT)_MD00");
@@ -1346,7 +1544,7 @@ void EquipmentView::addPresetModule()
 		module->setPresetRoot(true);
 		module->setPresetName("PRESET_NAME");
 
-		addDeviceObject(module);
+		addDeviceObject(module, parentModelIndex, true);
 	}
 	else
 	{
@@ -1360,6 +1558,24 @@ void EquipmentView::addPresetController()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
 		std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(true);
 
 		controller->setEquipmentIdTemplate("$(PARENT)_CRRLXXX");
@@ -1368,7 +1584,7 @@ void EquipmentView::addPresetController()
 		controller->setPresetRoot(true);
 		controller->setPresetName("PRESET_NAME");
 
-		addDeviceObject(controller);
+		addDeviceObject(controller, parentModelIndex, true);
 	}
 	else
 	{
@@ -1382,6 +1598,24 @@ void EquipmentView::addPresetWorkstation()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
 		std::shared_ptr<Hardware::DeviceObject> workstation = std::make_shared<Hardware::Workstation>(true);
 
 		workstation->setEquipmentIdTemplate("$(PARENT)_WS00");
@@ -1391,7 +1625,7 @@ void EquipmentView::addPresetWorkstation()
 		workstation->setPresetRoot(true);
 		workstation->setPresetName("PRESET_NAME");
 
-		addDeviceObject(workstation);
+		addDeviceObject(workstation, parentModelIndex, true);
 	}
 	else
 	{
@@ -1405,6 +1639,24 @@ void EquipmentView::addPresetSoftware()
 {
 	if (isPresetMode() == true)
 	{
+		QModelIndex parentModelIndex;		// current is root
+
+		QModelIndexList selected = selectionModel()->selectedRows();
+
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
+
+		// --
+		//
 		std::shared_ptr<Hardware::DeviceObject> software = std::make_shared<Hardware::Software>(true);
 
 		software->setEquipmentIdTemplate("$(PARENT)_SWNAME");
@@ -1414,7 +1666,7 @@ void EquipmentView::addPresetSoftware()
 		software->setPresetRoot(true);
 		software->setPresetName("PRESET_NAME");
 
-		addDeviceObject(software);
+		addDeviceObject(software, parentModelIndex, true);
 	}
 	else
 	{
@@ -1554,11 +1806,29 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 
 	// Add new device
 	//
-	addDeviceObject(device);
+	QModelIndex parentModelIndex;		// current is root
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
+	addDeviceObject(device, parentModelIndex, true);
+
 	return;
 }
 
-void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object)
+void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection)
 {
 	if (object == nullptr)
 	{
@@ -1598,33 +1868,33 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 	// Set Parent
 	//
 	Hardware::DeviceObject* parentObject = nullptr;
-	QModelIndex parentIndex;	// Currently it is root;
+	//QModelIndex parentIndex;	// Currently it is root;
 
 	if (isPresetMode() == true &&
 		object->preset() == true &&
 		object->presetRoot() == true)
 	{
-		parentObject = equipmentModel()->deviceObject(parentIndex);
+		parentObject = equipmentModel()->deviceObject(parentModelIndex);
 	}
 	else
 	{
-		QModelIndexList selected = selectionModel()->selectedRows();
+//		QModelIndexList selected = selectionModel()->selectedRows();
 
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
+//		if (selected.size() > 1)
+//		{
+//			// Don't know after which item insrt new object
+//			//
+//			return;
+//		}
 
-		if (selected.empty() == false)
-		{
-			parentIndex = selected[0];
-		}
+//		if (selected.empty() == false)
+//		{
+//			parentIndex = selected[0];
+//		}
 
 		// --
 		//
-		parentObject = equipmentModel()->deviceObject(parentIndex);
+		parentObject = equipmentModel()->deviceObject(parentModelIndex);
 		assert(parentObject);
 
 		if (object->deviceType() == Hardware::DeviceType::Software &&
@@ -1638,8 +1908,8 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 		{
 			// add the same item to the end of the the parent
 			//
-			parentIndex = parentIndex.parent();
-			parentObject = equipmentModel()->deviceObject(parentIndex);
+			parentModelIndex = parentModelIndex.parent();
+			parentObject = equipmentModel()->deviceObject(parentModelIndex);
 
 			assert(parentObject->deviceType() < object->deviceType());
 		}
@@ -1686,11 +1956,15 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	// Add new device to the model and select it
 	//
-	equipmentModel()->insertDeviceObject(object, parentIndex);
+	equipmentModel()->insertDeviceObject(object, parentModelIndex);
 
-	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object.get()), parentIndex);
+	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object.get()), parentModelIndex);
 
-	selectionModel()->clearSelection();
+	if (clearPrevSelection == true)
+	{
+		selectionModel()->clearSelection();
+	}
+
 	selectionModel()->select(objectModelIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 	setCurrentIndex(objectModelIndex);
 
@@ -1878,6 +2152,346 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds, refreshSignalList);
 
 	return;
+}
+
+void EquipmentView::copySelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty())
+	{
+		assert(false);		// How did we get here, action should be disabled
+		return;
+	}
+
+	// Check if all selected equipmnet has the same type
+	//
+	const Hardware::DeviceObject* firstDevice = equipmentModel()->deviceObject(selected.first());
+	assert(firstDevice);
+
+	Hardware::DeviceType type = firstDevice->deviceType();
+
+	std::vector<const Hardware::DeviceObject*> devices;
+	devices.reserve(selected.size());
+
+	for (const QModelIndex& mi : selected)
+	{
+		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		assert(device);
+
+		if (type != device->deviceType())
+		{
+			assert(false);
+			return;
+		}
+
+		devices.push_back(device);
+	}
+
+	// Read devices from the project database
+	//
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> latestDevices;
+	latestDevices.reserve(devices.size());
+
+	for (const Hardware::DeviceObject* device : devices)
+	{
+		std::shared_ptr<Hardware::DeviceObject> out;
+
+		bool result = db()->getDeviceTreeLatestVersion(device->fileInfo(), &out, this);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		assert(out);
+
+		latestDevices.push_back(out);
+	}
+
+	// Save devices to the clipboard
+	//
+	::Proto::EnvelopeSet message;
+
+	// Save the short description -- its done for quick understanding what is in the clipboard without reading all data
+	//
+	::Proto::EnvelopeSetShortDescription descriptionMessage;
+
+	descriptionMessage.set_projectdbversion(DbController::databaseVersion());
+	descriptionMessage.set_equipmenteditor(isConfigurationMode());
+	descriptionMessage.set_preseteditor(isPresetMode());
+
+	for (std::shared_ptr<Hardware::DeviceObject> device : latestDevices)
+	{
+		::Proto::Envelope* protoDevice = message.add_items();
+		device->SaveObjectTree(protoDevice);
+
+		descriptionMessage.add_classnamehash(protoDevice->classnamehash());
+	}
+
+	// Save objects (EnvelopeSet) to byte array
+	//
+	std::string dataString;
+	bool ok = message.SerializeToString(&dataString);
+
+	if (ok == false)
+	{
+		assert(ok);
+		return;
+	}
+
+	// Save short description (EnvelopeSetShortDescription) to byte array
+	//
+	std::string descriptionDataString;
+	ok = descriptionMessage.SerializeToString(&descriptionDataString);
+
+	if (ok == false)
+	{
+		assert(ok);
+		return;
+	}
+
+	// Set data to clipboard
+	//
+	QByteArray ba(dataString.data(), static_cast<int>(dataString.size()));
+	QByteArray descrba(descriptionDataString.data(), static_cast<int>(descriptionDataString.size()));
+
+
+	if (ba.isEmpty() == false &&
+		descrba.isEmpty() == false)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+
+		QMimeData* mime = new QMimeData();
+		mime->setData(EquipmentView::mimeType, ba);
+		mime->setData(EquipmentView::mimeTypeShortDescription, descrba);
+
+		clipboard->clear();
+		clipboard->setMimeData(mime);
+	}
+
+	return;
+}
+
+void EquipmentView::pasteDevices()
+{
+	bool pasetIsAllowed = canPaste();
+
+	if (pasetIsAllowed == false)
+	{
+		// How did we get here?
+		//
+		assert(pasetIsAllowed == true);
+		return;
+	}
+
+	// Check the clipboard content
+	//
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (mimeData == nullptr)
+	{
+		return;
+	}
+
+	QStringList hasFormats = mimeData->formats();
+
+	bool hasFullData = false;
+	bool hasShortDescription = false;
+
+	for (auto f : hasFormats)
+	{
+		if (f == EquipmentView::mimeType)
+		{
+			hasFullData = true;
+		}
+
+		if (f == EquipmentView::mimeTypeShortDescription)
+		{
+			hasShortDescription = true;
+		}
+	}
+
+	if (hasFullData == false ||
+		hasShortDescription == false)
+	{
+		return;
+	}
+
+	// Read short description for the clipboard content
+	//
+	QByteArray cbData = mimeData->data(EquipmentView::mimeType);
+
+	::Proto::EnvelopeSet message;
+	bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(),  tr("The Clipboard has been corrupted or has incompatible data format."));
+		return;
+	}
+
+	// --
+	//
+	QModelIndex parentModelIndex;		// current is root
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insrt new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
+
+	// Create objects andd add children
+	//
+
+	// function for setting new uuids
+	//
+	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
+		{
+			assert(object);
+			object->setUuid(QUuid::createUuid());
+
+			for (int i = 0; i < object->childrenCount(); i++)
+			{
+				setUuid(object->child(i));
+			}
+		};
+
+	selectionModel()->clearSelection();
+
+	for (int i = 0; i < message.items_size(); i++)
+	{
+		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::Create(message.items(i)));
+
+		if (object == nullptr)
+		{
+			QMessageBox::critical(this, qApp->applicationName(),  tr("The Clipboard has been corrupted or has incompatible data format. Object data parsing error."));
+			break;
+		}
+
+		setUuid(object.get());		// Set new guids to all objects
+
+		addDeviceObject(object, parentModelIndex, false);
+	}
+
+	emit updateState();
+
+	return;
+}
+
+bool EquipmentView::canPaste() const
+{
+	// Check the clipboard content
+	//
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (mimeData == nullptr)
+	{
+		return false;
+	}
+
+	QStringList hasFormats = mimeData->formats();
+
+	bool hasFullData = false;
+	bool hasShortDescription = false;
+
+	for (auto f : hasFormats)
+	{
+		if (f == EquipmentView::mimeType)
+		{
+			hasFullData = true;
+		}
+
+		if (f == EquipmentView::mimeTypeShortDescription)
+		{
+			hasShortDescription = true;
+		}
+	}
+
+	if (hasFullData == false ||
+		hasShortDescription == false)
+	{
+		return false;
+	}
+
+	// Read short description for the clipboard content
+	//
+	QByteArray cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
+
+	::Proto::EnvelopeSetShortDescription message;
+	bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Check if the copy was done from current mode, so copy possible only from editor to edir or preset editor to preset editor
+	//
+	if (isPresetMode() == true && message.preseteditor() == false)
+	{
+		return false;
+	}
+
+	if (isConfigurationMode() == true && message.equipmenteditor() == false)
+	{
+		return false;
+	}
+
+	// --
+	//
+	if (message.classnamehash().size() == 0)
+	{
+		assert(message.classnamehash().size() > 0);
+		return false;
+	}
+
+	quint32 classNameHash = message.classnamehash(0);		// get only first, suppose all of the have the same type
+
+	Hardware::DeviceObject* deviceObject = Hardware::DeviceObjectFactory.Create(classNameHash);
+
+	if (deviceObject == nullptr)
+	{
+		assert(deviceObject);
+		return false;
+	}
+
+	// Is it possible to insert it into current selection
+	//
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		return false;
+	}
+
+	const Hardware::DeviceObject* selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
+	assert(selectedDevice);
+
+	if (selectedDevice == nullptr)
+	{
+		assert(selectedDevice);
+		return false;
+	}
+
+	if (selectedDevice->canAddChild(deviceObject) == false)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -2301,12 +2915,12 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
-	qDebug();
-	qDebug() << "EquipmentView::updateDeviceFromPreset"
-			 << ", device: " << device->equipmentIdTemplate()
-			 << "(" << device->equipmentId() << ")"
-			 << ", " << device->caption()
-			 << ", place: " << device->place();
+//	qDebug();
+//	qDebug() << "EquipmentView::updateDeviceFromPreset"
+//			 << ", device: " << device->equipmentIdTemplate()
+//			 << "(" << device->equipmentId() << ")"
+//			 << ", " << device->caption()
+//			 << ", place: " << device->place();
 
 	updateDeviceList->push_back(device);
 
@@ -2547,21 +3161,26 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addPresetMenu->addAction(m_addPresetSoftwareAction);
 
 	// -----------------
-	m_equipmentView->addAction(m_SeparatorAction0);
+	m_equipmentView->addAction(m_separatorAction0);
 	m_equipmentView->addAction(m_inOutsToSignals);
 	m_equipmentView->addAction(m_showAppSignals);
 
 	// -----------------
-	m_equipmentView->addAction(m_SeparatorAction1);
+	m_equipmentView->addAction(m_separatorAction01);
+	m_equipmentView->addAction(m_copyObjectAction);
+	m_equipmentView->addAction(m_pasteObjectAction);
+
+	// -----------------
+	m_equipmentView->addAction(m_separatorAction1);
 	m_equipmentView->addAction(m_deleteObjectAction);
 	// -----------------
-	m_equipmentView->addAction(m_SeparatorAction2);
+	m_equipmentView->addAction(m_separatorAction2);
 	m_equipmentView->addAction(m_checkOutAction);
 	m_equipmentView->addAction(m_checkInAction);
 	m_equipmentView->addAction(m_undoChangesAction);
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
-	m_equipmentView->addAction(m_SeparatorAction3);
+	m_equipmentView->addAction(m_separatorAction3);
 	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
 	if (theSettings.useConnections())
@@ -2602,10 +3221,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_toolBar->addAction(m_addFromPresetAction);
 	m_toolBar->addAction(m_addNewPresetAction);
 
-	m_SeparatorActionA = new QAction(tr("Preset"), this);
-	m_SeparatorActionA->setSeparator(true);
+	m_separatorActionA = new QAction(tr("Preset"), this);
+	m_separatorActionA->setSeparator(true);
 
-	m_toolBar->addAction(m_SeparatorActionA);
+	m_toolBar->addAction(m_separatorActionA);
 	m_toolBar->addAction(m_refreshAction);
 
 	m_toolBar->addSeparator();
@@ -2628,6 +3247,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// --
 	//
+	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EquipmentTabPage::clipboardChanged);
+
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
 
@@ -2749,8 +3370,8 @@ void EquipmentTabPage::CreateActions()
 		connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
 
 	//-----------------------------------
-	m_SeparatorAction0 = new QAction(tr("Application Signals"), this);
-	m_SeparatorAction0->setSeparator(true);
+	m_separatorAction0 = new QAction(tr("Application Signals"), this);
+	m_separatorAction0->setSeparator(true);
 
 	m_inOutsToSignals = new QAction(tr("Add Inputs/Outs to App Signals"), this);
 	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
@@ -2764,16 +3385,34 @@ void EquipmentTabPage::CreateActions()
 	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, &EquipmentView::showAppSignals);
 
 	//-----------------------------------
-	m_SeparatorAction1 = new QAction(this);
-	m_SeparatorAction1->setSeparator(true);
+	m_separatorAction01 = new QAction(this);
+	m_separatorAction01->setSeparator(true);
 
-	m_deleteObjectAction = new QAction(tr("Delete Device"), this);
-	m_deleteObjectAction->setStatusTip(tr("Delete Device from the configuration..."));
+	m_copyObjectAction = new QAction(tr("Copy"), this);
+	m_copyObjectAction->setStatusTip(tr("Copy equipment to the clipboard..."));
+	m_copyObjectAction->setEnabled(false);
+	m_copyObjectAction->setShortcut(QKeySequence::Copy);
+	connect(m_copyObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::copySelectedDevices);
+
+	m_pasteObjectAction = new QAction(tr("Paste"), this);
+	m_pasteObjectAction->setStatusTip(tr("Paste equipment from the clipboard..."));
+	m_pasteObjectAction->setEnabled(false);
+	m_pasteObjectAction->setShortcut(QKeySequence::Paste);
+	connect(m_pasteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::pasteDevices);
+
+	//-----------------------------------
+	m_separatorAction1 = new QAction(this);
+	m_separatorAction1->setSeparator(true);
+
+	m_deleteObjectAction = new QAction(tr("Delete Equipment"), this);
+	m_deleteObjectAction->setStatusTip(tr("Delete equipment from the configuration..."));
 	m_deleteObjectAction->setEnabled(false);
+	m_deleteObjectAction->setShortcut(QKeySequence::Delete);
 	connect(m_deleteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::deleteSelectedDevices);
 
-	m_SeparatorAction2 = new QAction(this);
-	m_SeparatorAction2->setSeparator(true);
+	//-----------------------------------
+	m_separatorAction2 = new QAction(this);
+	m_separatorAction2->setSeparator(true);
 
 	m_checkOutAction = new QAction(tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out device for edit"));
@@ -2796,8 +3435,8 @@ void EquipmentTabPage::CreateActions()
 	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
 
 	//-----------------------------------
-	m_SeparatorAction3 = new QAction(this);
-	m_SeparatorAction3->setSeparator(true);
+	m_separatorAction3 = new QAction(this);
+	m_separatorAction3->setSeparator(true);
 
 	m_updateFromPresetAction = new QAction(tr("Update from Preset"), this);
 	m_updateFromPresetAction->setStatusTip(tr("Update from all object from preset"));
@@ -2888,6 +3527,8 @@ void EquipmentTabPage::setActionState()
 	assert(m_addSignalAction);
 	assert(m_addWorkstationAction);
 	assert(m_addSoftwareAction);
+	assert(m_copyObjectAction);
+	assert(m_pasteObjectAction);
 	assert(m_deleteObjectAction);
 	assert(m_checkOutAction);
 	assert(m_checkInAction);
@@ -2949,6 +3590,8 @@ void EquipmentTabPage::setActionState()
 	m_inOutsToSignals->setVisible(false);
 
 	m_showAppSignals->setEnabled(false);
+
+	m_copyObjectAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -3181,8 +3824,61 @@ void EquipmentTabPage::setActionState()
 		m_addPresetSoftwareAction->setEnabled(true);
 	}
 
+	// Copy to the clipboard
+	//
+	if (selectedIndexList.empty() == false)
+	{
+
+		bool allowCopyToClipboard = true;	// allow copy if all selected objects are the same type
+
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.first());
+		assert(device);
+
+		Hardware::DeviceType type = device->deviceType();
+
+		for (const QModelIndex& mi : selectedIndexList)
+		{
+			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+			assert(device);
+
+			// all selected objects must be the same type
+			//
+			if (type != device->deviceType())
+			{
+				allowCopyToClipboard = false;
+				break;
+			}
+
+			// In ConfigurationMode it is possible to copy only root items of preset items
+			//
+			if (isConfigurationMode() == true &&
+				device->preset() == true &&
+				device->presetRoot() == false)
+			{
+				allowCopyToClipboard = false;
+				break;
+			}
+		}
+
+		m_copyObjectAction->setEnabled(allowCopyToClipboard);
+	}
+
+	// Update paste
+	//
+	bool enablepaste = m_equipmentView->canPaste();
+	m_pasteObjectAction->setEnabled(enablepaste);
+
 	return;
 }
+
+void EquipmentTabPage::clipboardChanged()
+{
+	bool enablepaste = m_equipmentView->canPaste();
+	m_pasteObjectAction->setEnabled(enablepaste);
+
+	return;
+}
+
 
 void EquipmentTabPage::modeSwitched()
 {

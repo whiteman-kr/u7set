@@ -41,6 +41,7 @@ class FontParam;
 class SchemaPoint;
 class Envelope;
 class EnvelopeSet;
+class EnvelopeSetShortDescription;
 class Configuration;
 class AfbElementCollection;
 class AfbElementXml;
@@ -879,24 +880,24 @@ class EnvelopeSet : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.Envelope schemaItems = 1;
-  inline int schemaitems_size() const;
-  inline void clear_schemaitems();
-  static const int kSchemaItemsFieldNumber = 1;
-  inline const ::Proto::Envelope& schemaitems(int index) const;
-  inline ::Proto::Envelope* mutable_schemaitems(int index);
-  inline ::Proto::Envelope* add_schemaitems();
+  // repeated .Proto.Envelope items = 1;
+  inline int items_size() const;
+  inline void clear_items();
+  static const int kItemsFieldNumber = 1;
+  inline const ::Proto::Envelope& items(int index) const;
+  inline ::Proto::Envelope* mutable_items(int index);
+  inline ::Proto::Envelope* add_items();
   inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-      schemaitems() const;
+      items() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-      mutable_schemaitems();
+      mutable_items();
 
   // @@protoc_insertion_point(class_scope:Proto.EnvelopeSet)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > schemaitems_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > items_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -907,6 +908,121 @@ class EnvelopeSet : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static EnvelopeSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class EnvelopeSetShortDescription : public ::google::protobuf::Message {
+ public:
+  EnvelopeSetShortDescription();
+  virtual ~EnvelopeSetShortDescription();
+
+  EnvelopeSetShortDescription(const EnvelopeSetShortDescription& from);
+
+  inline EnvelopeSetShortDescription& operator=(const EnvelopeSetShortDescription& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const EnvelopeSetShortDescription& default_instance();
+
+  void Swap(EnvelopeSetShortDescription* other);
+
+  // implements Message ----------------------------------------------
+
+  EnvelopeSetShortDescription* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const EnvelopeSetShortDescription& from);
+  void MergeFrom(const EnvelopeSetShortDescription& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 projectdbversion = 1;
+  inline bool has_projectdbversion() const;
+  inline void clear_projectdbversion();
+  static const int kProjectdbversionFieldNumber = 1;
+  inline ::google::protobuf::uint32 projectdbversion() const;
+  inline void set_projectdbversion(::google::protobuf::uint32 value);
+
+  // repeated uint32 classnamehash = 2;
+  inline int classnamehash_size() const;
+  inline void clear_classnamehash();
+  static const int kClassnamehashFieldNumber = 2;
+  inline ::google::protobuf::uint32 classnamehash(int index) const;
+  inline void set_classnamehash(int index, ::google::protobuf::uint32 value);
+  inline void add_classnamehash(::google::protobuf::uint32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+      classnamehash() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+      mutable_classnamehash();
+
+  // optional bool equipmentEditor = 3;
+  inline bool has_equipmenteditor() const;
+  inline void clear_equipmenteditor();
+  static const int kEquipmentEditorFieldNumber = 3;
+  inline bool equipmenteditor() const;
+  inline void set_equipmenteditor(bool value);
+
+  // optional bool presetEditor = 4;
+  inline bool has_preseteditor() const;
+  inline void clear_preseteditor();
+  static const int kPresetEditorFieldNumber = 4;
+  inline bool preseteditor() const;
+  inline void set_preseteditor(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.EnvelopeSetShortDescription)
+ private:
+  inline void set_has_projectdbversion();
+  inline void clear_has_projectdbversion();
+  inline void set_has_equipmenteditor();
+  inline void clear_has_equipmenteditor();
+  inline void set_has_preseteditor();
+  inline void clear_has_preseteditor();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > classnamehash_;
+  ::google::protobuf::uint32 projectdbversion_;
+  bool equipmenteditor_;
+  bool preseteditor_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static EnvelopeSetShortDescription* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4930,6 +5046,18 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::Software* release_software();
   inline void set_allocated_software(::Proto::Software* software);
 
+  // repeated .Proto.Envelope children = 200;
+  inline int children_size() const;
+  inline void clear_children();
+  static const int kChildrenFieldNumber = 200;
+  inline const ::Proto::Envelope& children(int index) const;
+  inline ::Proto::Envelope* mutable_children(int index);
+  inline ::Proto::Envelope* add_children();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
+      children() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
+      mutable_children();
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   inline void set_has_uuid();
@@ -4993,9 +5121,10 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceSignal* signal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > children_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(20 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -7701,29 +7830,124 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
 
 // EnvelopeSet
 
-// repeated .Proto.Envelope schemaItems = 1;
-inline int EnvelopeSet::schemaitems_size() const {
-  return schemaitems_.size();
+// repeated .Proto.Envelope items = 1;
+inline int EnvelopeSet::items_size() const {
+  return items_.size();
 }
-inline void EnvelopeSet::clear_schemaitems() {
-  schemaitems_.Clear();
+inline void EnvelopeSet::clear_items() {
+  items_.Clear();
 }
-inline const ::Proto::Envelope& EnvelopeSet::schemaitems(int index) const {
-  return schemaitems_.Get(index);
+inline const ::Proto::Envelope& EnvelopeSet::items(int index) const {
+  return items_.Get(index);
 }
-inline ::Proto::Envelope* EnvelopeSet::mutable_schemaitems(int index) {
-  return schemaitems_.Mutable(index);
+inline ::Proto::Envelope* EnvelopeSet::mutable_items(int index) {
+  return items_.Mutable(index);
 }
-inline ::Proto::Envelope* EnvelopeSet::add_schemaitems() {
-  return schemaitems_.Add();
+inline ::Proto::Envelope* EnvelopeSet::add_items() {
+  return items_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-EnvelopeSet::schemaitems() const {
-  return schemaitems_;
+EnvelopeSet::items() const {
+  return items_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-EnvelopeSet::mutable_schemaitems() {
-  return &schemaitems_;
+EnvelopeSet::mutable_items() {
+  return &items_;
+}
+
+// -------------------------------------------------------------------
+
+// EnvelopeSetShortDescription
+
+// optional uint32 projectdbversion = 1;
+inline bool EnvelopeSetShortDescription::has_projectdbversion() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void EnvelopeSetShortDescription::set_has_projectdbversion() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void EnvelopeSetShortDescription::clear_has_projectdbversion() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void EnvelopeSetShortDescription::clear_projectdbversion() {
+  projectdbversion_ = 0u;
+  clear_has_projectdbversion();
+}
+inline ::google::protobuf::uint32 EnvelopeSetShortDescription::projectdbversion() const {
+  return projectdbversion_;
+}
+inline void EnvelopeSetShortDescription::set_projectdbversion(::google::protobuf::uint32 value) {
+  set_has_projectdbversion();
+  projectdbversion_ = value;
+}
+
+// repeated uint32 classnamehash = 2;
+inline int EnvelopeSetShortDescription::classnamehash_size() const {
+  return classnamehash_.size();
+}
+inline void EnvelopeSetShortDescription::clear_classnamehash() {
+  classnamehash_.Clear();
+}
+inline ::google::protobuf::uint32 EnvelopeSetShortDescription::classnamehash(int index) const {
+  return classnamehash_.Get(index);
+}
+inline void EnvelopeSetShortDescription::set_classnamehash(int index, ::google::protobuf::uint32 value) {
+  classnamehash_.Set(index, value);
+}
+inline void EnvelopeSetShortDescription::add_classnamehash(::google::protobuf::uint32 value) {
+  classnamehash_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+EnvelopeSetShortDescription::classnamehash() const {
+  return classnamehash_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+EnvelopeSetShortDescription::mutable_classnamehash() {
+  return &classnamehash_;
+}
+
+// optional bool equipmentEditor = 3;
+inline bool EnvelopeSetShortDescription::has_equipmenteditor() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void EnvelopeSetShortDescription::set_has_equipmenteditor() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void EnvelopeSetShortDescription::clear_has_equipmenteditor() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void EnvelopeSetShortDescription::clear_equipmenteditor() {
+  equipmenteditor_ = false;
+  clear_has_equipmenteditor();
+}
+inline bool EnvelopeSetShortDescription::equipmenteditor() const {
+  return equipmenteditor_;
+}
+inline void EnvelopeSetShortDescription::set_equipmenteditor(bool value) {
+  set_has_equipmenteditor();
+  equipmenteditor_ = value;
+}
+
+// optional bool presetEditor = 4;
+inline bool EnvelopeSetShortDescription::has_preseteditor() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void EnvelopeSetShortDescription::set_has_preseteditor() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void EnvelopeSetShortDescription::clear_has_preseteditor() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void EnvelopeSetShortDescription::clear_preseteditor() {
+  preseteditor_ = false;
+  clear_has_preseteditor();
+}
+inline bool EnvelopeSetShortDescription::preseteditor() const {
+  return preseteditor_;
+}
+inline void EnvelopeSetShortDescription::set_preseteditor(bool value) {
+  set_has_preseteditor();
+  preseteditor_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -12743,6 +12967,31 @@ inline void DeviceObject::set_allocated_software(::Proto::Software* software) {
   } else {
     clear_has_software();
   }
+}
+
+// repeated .Proto.Envelope children = 200;
+inline int DeviceObject::children_size() const {
+  return children_.size();
+}
+inline void DeviceObject::clear_children() {
+  children_.Clear();
+}
+inline const ::Proto::Envelope& DeviceObject::children(int index) const {
+  return children_.Get(index);
+}
+inline ::Proto::Envelope* DeviceObject::mutable_children(int index) {
+  return children_.Mutable(index);
+}
+inline ::Proto::Envelope* DeviceObject::add_children() {
+  return children_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
+DeviceObject::children() const {
+  return children_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
+DeviceObject::mutable_children() {
+  return &children_;
 }
 
 // -------------------------------------------------------------------
