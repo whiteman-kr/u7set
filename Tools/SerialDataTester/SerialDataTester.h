@@ -9,6 +9,16 @@
 #include <QPixmap>
 #include <QTimer>
 #include <QBitArray>
+#include <QMessageBox>
+#include <QXmlStreamReader>
+#include <QSettings>
+#include <QDir>
+#include <QFileDialog>
+#include <QSerialPortInfo>
+#include <QThread>
+#include <QDebug>
+#include <string>
+#include <QTableWidgetItem>
 
 namespace Ui {
 	class SerialDataTester;
@@ -106,6 +116,13 @@ private:
 	QVector<SignalData> m_signalsFromXml;
 	const quint32 m_signature = 0x424D4C47;
 	int m_dataSize = 0;
+
+	QVector<QTableWidgetItem*> strIds;
+	QVector<QTableWidgetItem*> names;
+	QVector<QTableWidgetItem*> offsets;
+	QVector<QTableWidgetItem*> bits;
+	QVector<QTableWidgetItem*> types;
+	QVector<QTableWidgetItem*> values;
 };
 
 #endif // SERIALDATATESTER_H

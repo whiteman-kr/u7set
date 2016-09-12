@@ -37,8 +37,8 @@ void SerialDataParser::scanningSignaure()
 
 	do
 	{
-		if (sizeof(m_signature.bytes) == 4)
-			m_bytesCount=0;
+		/*if (sizeof(m_signature.bytes) == 4)
+			m_bytesCount=0;*/
 
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
@@ -164,6 +164,9 @@ void SerialDataParser::readingData()
 
 		m_packetData -= m_header.header.dataAmount;
 		m_packetData -= 4;
+
+		free (m_packetData);
+		m_packetData = new char[SerialParserBufferSize];
 
 		m_readPtr += bytesToCopy;
 

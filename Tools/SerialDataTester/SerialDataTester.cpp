@@ -1,16 +1,6 @@
 #include "SerialDataTester.h"
-#include "SettingsDialog.h"
-#include "PortReceiver.h"
 #include "ui_SerialDataTester.h"
-#include <QMessageBox>
-#include <QXmlStreamReader>
-#include <QSettings>
-#include <QDir>
-#include <QFileDialog>
-#include <QSerialPortInfo>
-#include <QThread>
-#include <QDebug>
-#include <string>
+
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
     QMainWindow(parent),
@@ -254,6 +244,20 @@ SerialDataTester::~SerialDataTester()
 	delete m_PortThread;
 	delete m_parser;
 	delete m_ParserThread;
+
+	delete m_file;
+	delete m_settings;
+	delete m_reloadCfg;
+	delete m_changeSignalSettingsFile;
+	delete m_exit;
+	delete m_startReceiving;
+	delete m_stopReceiving;
+
+	delete m_settings;
+	delete m_setPort;
+	delete m_setBaud;
+	delete m_setDataBits;
+	delete m_setStopBits;
 }
 
 void SerialDataTester::parseFile()
@@ -505,6 +509,13 @@ void SerialDataTester::parseFile()
 					// Write new signal to vector
 
 					m_signalsFromXml.push_back(currentSignal);
+
+					strIds.push_back(new QTableWidgetItem(currentSignal.strId));
+					names.push_back(new QTableWidgetItem(currentSignal.name));
+					offsets.push_back(new QTableWidgetItem(QString::number(currentSignal.offset)));
+					bits.push_back(new QTableWidgetItem(QString::number(currentSignal.bit)));
+					types.push_back(new QTableWidgetItem(currentSignal.type));
+					values.push_back(new QTableWidgetItem(QString::number(0)));
 				}
 				else
 				{
@@ -527,6 +538,23 @@ void SerialDataTester::parseFile()
 
 	if (errorLoadingXml)
 	{
+		for (int currentSignal = 0; currentSignal < m_signalsFromXml.size(); currentSignal++)
+		{
+			delete strIds.at(currentSignal);
+			delete names.at(currentSignal);
+			delete offsets.at(currentSignal);
+			delete bits.at(currentSignal);
+			delete types.at(currentSignal);
+			delete values.at(currentSignal);
+		}
+
+		strIds.clear();
+		names.clear();
+		offsets.clear();
+		bits.clear();
+		types.clear();
+		values.clear();
+
 		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
 		m_signalsFromXml.clear();
 	}
@@ -545,12 +573,13 @@ void SerialDataTester::parseFile()
 	for (SignalData& signalData : m_signalsFromXml)
 	{
 		ui->signalsTable->setRowCount(numberOfSignalFromVector + 1);
-		ui->signalsTable->setItem(numberOfSignalFromVector, strId, new QTableWidgetItem(signalData.strId));
-		ui->signalsTable->setItem(numberOfSignalFromVector, name, new QTableWidgetItem(signalData.name));
-		ui->signalsTable->setItem(numberOfSignalFromVector, offset, new QTableWidgetItem(QString::number(signalData.offset)));
-		ui->signalsTable->setItem(numberOfSignalFromVector, bit, new QTableWidgetItem(QString::number(signalData.bit)));
-		ui->signalsTable->setItem(numberOfSignalFromVector, type, new QTableWidgetItem(signalData.type));
-		ui->signalsTable->setItem(numberOfSignalFromVector, value, new QTableWidgetItem(QString::number(0)));
+
+		ui->signalsTable->setItem(numberOfSignalFromVector, strId, strIds.at(numberOfSignalFromVector));
+		ui->signalsTable->setItem(numberOfSignalFromVector, name, names.at(numberOfSignalFromVector));
+		ui->signalsTable->setItem(numberOfSignalFromVector, offset, offsets.at(numberOfSignalFromVector));
+		ui->signalsTable->setItem(numberOfSignalFromVector, bit, bits.at(numberOfSignalFromVector));
+		ui->signalsTable->setItem(numberOfSignalFromVector, type, types.at(numberOfSignalFromVector));
+		ui->signalsTable->setItem(numberOfSignalFromVector, value, values.at(numberOfSignalFromVector));
 
 		numberOfSignalFromVector++;
 	}
@@ -572,7 +601,25 @@ void SerialDataTester::reloadConfig()
 	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
 
+	for (int currentSignal = 0; currentSignal < m_signalsFromXml.size(); currentSignal++)
+	{
+		delete strIds.at(currentSignal);
+		delete names.at(currentSignal);
+		delete offsets.at(currentSignal);
+		delete bits.at(currentSignal);
+		delete types.at(currentSignal);
+		delete values.at(currentSignal);
+	}
+
+	strIds.clear();
+	names.clear();
+	offsets.clear();
+	bits.clear();
+	types.clear();
+	values.clear();
+
 	m_signalsFromXml.clear();
+
 	parseFile();
 }
 
@@ -957,7 +1004,9 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 			// After all processing actions, we have result, that wrote in resultString
 			//
 
-			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
+			//ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
+			values.at(rowNumber)->setText(resultString);
+			//ui->signalsTable->setItem(rowNumber, value, values.at(rowNumber));
 			rowNumber++;
 		}
 
