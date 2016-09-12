@@ -123,6 +123,11 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	m_pShowDebugInfo->setText(tr("Show debug information"));
 	m_pShowDebugInfo->setChecked(m_settings.showDebugInfo());
 
+	m_pVerify = new QCheckBox();
+	m_pVerify->setText(tr("Verify written data"));
+	m_pVerify->setChecked(m_settings.verify());
+
+
 	// ExpertMode Check Box
 	//
 	m_pExpertMode = new QCheckBox();
@@ -172,16 +177,17 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	pLeftGridLayout->addWidget(m_pSerialPort, 0, 1, 1, 3);
 
 	pLeftGridLayout->addWidget(m_pShowDebugInfo, 1, 0, 1, 3);
-	pLeftGridLayout->addWidget(m_pExpertMode, 2, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pVerify, 2, 0, 1, 3);
+	pLeftGridLayout->addWidget(m_pExpertMode, 3, 0, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerLabel, 3, 0);
-	pLeftGridLayout->addWidget(m_pServer, 3, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerLabel, 4, 0);
+	pLeftGridLayout->addWidget(m_pServer, 4, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 4, 0);
-	pLeftGridLayout->addWidget(m_pServerUsername, 4, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 5, 0);
+	pLeftGridLayout->addWidget(m_pServerUsername, 5, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 5, 0);
-	pLeftGridLayout->addWidget(m_pServerPassword, 5, 1, 1, 3);
+	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 6, 0);
+	pLeftGridLayout->addWidget(m_pServerPassword, 6, 1, 1, 3);
 
 	pLeftLayout->addStretch();
 		
@@ -209,8 +215,9 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	connect(m_pSerialPort, &QComboBox::currentTextChanged, this, &SettingsForm::currentSerialPortChanged);
 	
 	connect(m_pShowDebugInfo, &QCheckBox::stateChanged, this, &SettingsForm::showDebugInfoChanged);
+	connect(m_pVerify, &QCheckBox::stateChanged, this, &SettingsForm::verifyChanged);
 	connect(m_pExpertMode, &QCheckBox::stateChanged, this, &SettingsForm::expertModeChanged);
-	
+
 	return;
 }
 
@@ -232,6 +239,11 @@ void SettingsForm::currentSerialPortChanged(const QString & text)
 void SettingsForm::showDebugInfoChanged(int state)
 {
 	m_settings.setShowDebugInfo(state == static_cast<int>(Qt::Checked));
+}
+
+void SettingsForm::verifyChanged(int state)
+{
+	m_settings.setVerify(state == static_cast<int>(Qt::Checked));
 }
 
 void SettingsForm::expertModeChanged(int state)

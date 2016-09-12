@@ -11,7 +11,9 @@ namespace Builder
 		Q_OBJECT
 	public:
 		TuningBuilder() = delete;
-		TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Tuning::TuningDataStorage *tuningDataStorage, IssueLogger* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
+		TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+					  Tuning::TuningDataStorage *tuningDataStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
+					  QString projectName, QString userName, BuildResultWriter* buildWriter);
 		virtual ~TuningBuilder();
 
 		bool build();
@@ -20,6 +22,7 @@ namespace Builder
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>& modules);
 		DbController* db();
 		OutputLog* log() const;
+		int buildNo() const;
 		int changesetId() const;
 		bool debug() const;
 		bool release() const;
@@ -36,6 +39,7 @@ namespace Builder
 		mutable IssueLogger* m_log = nullptr;
 		BuildResultWriter* m_buildWriter = nullptr;
 
+		int m_buildNo = 0;
 		int m_changesetId = 0;
 		int m_debug = false;
 		QString m_projectName;

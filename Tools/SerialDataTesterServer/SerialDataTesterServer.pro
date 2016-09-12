@@ -13,10 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    SerialDataTesterServer.cpp
+    SerialDataTesterServer.cpp \
+    ../../lib/Crc.cpp
 
 HEADERS  += \
-    SerialDataTesterServer.h
+    SerialDataTesterServer.h \
+    ../../lib/Crc.h
 
 FORMS    += \
     SerialDataTesterServer.ui

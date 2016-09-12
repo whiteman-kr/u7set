@@ -131,9 +131,10 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 	jObject.insert("uartId", uartId());
 	jObject.insert("frameSize", frameSize());
 	jObject.insert("framesCount", frameCount());
+	jObject.insert("buildNumber", m_buildNumber);
+	jObject.insert("buildConfig", m_buildConfig);
 	jObject.insert("changesetId", m_changesetId);
 	jObject.insert("fileVersion", fileVersion());
-	jObject.insert("frameStringWidth", frameStringWidth);
 
 	dest = QJsonDocument(jObject).toJson();
 
@@ -364,9 +365,12 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 //
 //
 
-ModuleFirmwareCollection::ModuleFirmwareCollection(const QString &projectName, const QString &userName, int changesetId):
+ModuleFirmwareCollection::ModuleFirmwareCollection(const QString &projectName, const QString &userName,
+												   int buildNo, bool debug, int changesetId):
 	m_projectName(projectName),
 	m_userName(userName),
+	m_buildNo(buildNo),
+	m_debug(debug),
 	m_changesetId(changesetId)
 {
 }
@@ -383,7 +387,8 @@ QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int 
 
 	if (newFirmware == true)
 	{
-		fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId, QStringList());
+		fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName,
+				m_buildNo, m_debug ? "debug" : "release", m_changesetId, QStringList());
 	}
 
 	QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);

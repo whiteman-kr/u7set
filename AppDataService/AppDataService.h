@@ -82,9 +82,10 @@ private:
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
 
 public:
-	AppDataServiceWorker(const QString& serviceStrID,
-					  const QString& cfgServiceIP1,
-					  const QString& cfgServiceIP2);
+	AppDataServiceWorker(	const QString& serviceEquipmentID,
+							const QString& cfgServiceIP1,
+							const QString& cfgServiceIP2,
+							const QString& buildPath);
 	~AppDataServiceWorker();
 
 	virtual void initialize() override;
@@ -92,7 +93,7 @@ public:
 
 	ServiceWorker* createInstance() override
 	{
-		return new AppDataServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+		return new AppDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 	}
 };
 

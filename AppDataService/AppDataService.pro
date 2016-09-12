@@ -166,6 +166,10 @@ unix {
 	LIBS += -lprotobuf
 }
 
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto
+
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
@@ -184,6 +188,3 @@ win32 {
 	    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
-DISTFILES += \
-    ../Proto/network.proto \
-    ../Proto/serialization.proto

@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
-
+#include "DialogSettingsConfigurator.h"
 
 //
 //
@@ -49,6 +49,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pFileTypeCombo->addItem(tr("FSC Configuration (*.mcb)"), tr("*.mcb"));
 	m_pFileTypeCombo->addItem(tr("Tuning (*.tub)"), tr("*.tub"));
 	m_pFileTypeCombo->setCurrentIndex(0);
+	connect(m_pFileTypeCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::fileTypeChanged);
 	pLeftLayout->addWidget(m_pFileTypeCombo);
 
 	pLeftLayout->addStretch();
@@ -66,14 +67,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Buttons
 	//
 	QHBoxLayout* pButtonsLayout = new QHBoxLayout();
-	pButtonsLayout->addStretch();
 
 	m_pReadButton = new QPushButton(tr("&Read"));
 	pButtonsLayout->addWidget(m_pReadButton);
 
-	m_pConfigureButton = new QPushButton(tr("&Configure"));
-	m_pConfigureButton->setEnabled(false);
-	pButtonsLayout->addWidget(m_pConfigureButton);
 
 	if (theSettings.isExpertMode() == true)
 	{
@@ -81,15 +78,22 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 		pButtonsLayout->addWidget(m_pEraseButton);
 	}
 
-	m_pCancelButton = new QPushButton(tr("Cancel"));
-	m_pCancelButton->setEnabled(false);
-	pButtonsLayout->addWidget(m_pCancelButton);
-
 	m_pClearLogButton = new QPushButton(tr("Clear Log"));
 	pButtonsLayout->addWidget(m_pClearLogButton);
 
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
 	pButtonsLayout->addWidget(m_pSettingsButton);
+
+	pButtonsLayout->addStretch();
+
+	m_pConfigureButton = new QPushButton(tr("&Configure"));
+	m_pConfigureButton->setEnabled(false);
+	m_pConfigureButton->setDefault(true);
+	pButtonsLayout->addWidget(m_pConfigureButton);
+
+	m_pCancelButton = new QPushButton(tr("Cancel"));
+	m_pCancelButton->setEnabled(false);
+	pButtonsLayout->addWidget(m_pCancelButton);
 
 	// Right layout
 	//
@@ -147,14 +151,16 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pConfigurator = new Configurator(theSettings.m_configuratorSerialPort, &m_outputLog);
 	m_pConfigurationThread = new QThread(this);
 
+	m_pConfigurator->setVerify(theSettings.m_configuratorVerify);
+
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
-	connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
+	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showConfDataFileInfo);
 	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::writeConfDataFile);
 	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
-	connect(this, &UploadTabPage::cancelOperation, m_pConfigurator, &Configurator::cancelOperation);
 
 	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
@@ -166,11 +172,11 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.isExpertMode());
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 
 	// Start Timer
 	//
-	m_logTimerId = startTimer(200);
+	m_logTimerId = startTimer(100);
 
 
 }
@@ -251,6 +257,14 @@ void UploadTabPage::configurationTypeChanged(const QString& s)
 	findProjectBuilds();
 }
 
+void UploadTabPage::fileTypeChanged(const QString& s)
+{
+	Q_UNUSED(s);
+
+	findProjectBuilds();
+}
+
+
 void UploadTabPage::findSubsystemsInBuild(int index)
 {
 	Q_UNUSED(index);
@@ -303,6 +317,10 @@ void UploadTabPage::subsystemChanged(int index)
 {
 	Q_UNUSED(index);
 
+	//clearLog();
+
+	m_currentFileName.clear();
+
 	QListWidgetItem* item = m_pSubsystemList->currentItem();
 	if (item == nullptr)
 	{
@@ -313,6 +331,37 @@ void UploadTabPage::subsystemChanged(int index)
 	m_pConfigureButton->setEnabled(true);
 	m_currentSubsystem = item->text();
 	m_currentSubsystemIndex = m_pSubsystemList->currentRow();
+
+
+	QVariant d = m_pFileTypeCombo->currentData();
+	if (d.isNull() || d.isValid() == false)
+	{
+		return;
+	}
+
+	QString fileType = d.toString();
+
+	QString searchPath = m_buildSearchPath + QDir::separator() + m_currentBuild + QDir::separator() + m_currentSubsystem;
+
+	QStringList files = QDir(searchPath).entryList(QStringList(fileType),
+															  QDir::Files|QDir::NoSymLinks);
+
+	if (files.isEmpty() == true)
+	{
+		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(searchPath));
+		return;
+	}
+
+	if (files.size() > 1)
+	{
+		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(searchPath));
+		return;
+	}
+
+	m_currentFileName = searchPath + QDir::separator() + files[0];
+
+	emit showConfDataFileInfo(m_currentFileName);
+	//m_outputLog.writeMessage(tr("File selected to upload: %1").arg(m_currentFileName));
 }
 
 void UploadTabPage::closeEvent(QCloseEvent* e)
@@ -364,40 +413,16 @@ void UploadTabPage::read()
 
 void UploadTabPage::upload()
 {
-	clearLog();
-
-	QVariant d = m_pFileTypeCombo->currentData();
-	if (d.isNull() || d.isValid() == false)
+	if (m_currentFileName.isEmpty())
 	{
+		m_outputLog.writeError(tr("No Output Bitstream File selected!"));
 		return;
 	}
-
-
-	QString fileType = d.toString();
-
-	QString searchPath = m_buildSearchPath + QDir::separator() + m_currentBuild + QDir::separator() + m_currentSubsystem;
-
-	QStringList files = QDir(searchPath).entryList(QStringList(fileType),
-															  QDir::Files|QDir::NoSymLinks);
-
-	if (files.isEmpty() == true)
-	{
-		QMessageBox::critical(this, tr("Build"), tr("No Output Bitstream files found in %1!").arg(searchPath));
-		return;
-	}
-
-	if (files.size() > 1)
-	{
-		QMessageBox::critical(this, tr("Build"), tr("More than one Output Bitstream file found in %1!").arg(searchPath));
-		return;
-	}
-
-	QString fileName = searchPath + QDir::separator() + files[0];
 
 	try
 	{
 
-		emit writeConfDataFile(fileName);
+		emit writeConfDataFile(m_currentFileName);
 	}
 	catch(QString message)
 	{
@@ -447,7 +472,7 @@ void UploadTabPage::erase()
 
 void UploadTabPage::cancel()
 {
-	emit cancelOperation();
+	m_pConfigurator->cancelOperation();
 }
 
 void UploadTabPage::clearLog()
@@ -464,7 +489,13 @@ void UploadTabPage::clearLog()
 
 void UploadTabPage::settings()
 {
+	DialogSettingsConfigurator dlg;
+	if (dlg.exec() == QDialog::Rejected)
+	{
+		return;
+	}
 
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 }
 
 void UploadTabPage::disableControls()

@@ -205,13 +205,15 @@ void CONF_SERVICE_DATA_V1::setFirmwareCrc(uint32_t value)
 //
 // CONF_IDENTIFICATION_DATA_V1
 //
-void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log)
+void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log) const
 {
 	if (log == nullptr)
 	{
 		assert(log);
 		return;
 	}
+
+	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
 
 	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
 	log->writeMessage("Configuration counter: " + QString().setNum(count));
@@ -229,6 +231,142 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log)
 	log->writeMessage("__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo));
 
 	return;
+}
+
+void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration(Hardware::ModuleFirmware* conf)
+{
+	Q_UNUSED(conf);
+
+	marker = IdentificationStructMarker;
+	version = CONF_IDENTIFICATION_DATA_V1::structVersion();
+	moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
+	count = 1;
+
+	//
+	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
+	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+
+//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	firstConfiguration.configuratorFactoryNo = 0;
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
+	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
+
+	lastConfiguration = firstConfiguration;
+}
+
+void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration(Hardware::ModuleFirmware *conf)
+{
+	Q_UNUSED(conf);
+
+	// last configuration record
+	//
+	count ++;			// Incerement configartion counter
+
+	CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
+	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
+	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+
+//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	lastConfiguration.configuratorFactoryNo = 0;
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
+	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
+
+	lastConfiguration = lastConfiguration;
+}
+
+//
+// CONF_IDENTIFICATION_DATA_V2
+//
+void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log) const
+{
+	if (log == nullptr)
+	{
+		assert(log);
+		return;
+	}
+
+	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
+
+	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
+	log->writeMessage("Configuration counter: " + QString().setNum(count));
+
+	log->writeMessage("First time configured: ");
+	log->writeMessage("__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString());
+	log->writeMessage("__Host: " + QString(firstConfiguration.host));
+	log->writeMessage("__User: " + QString(firstConfiguration.userName));
+	log->writeMessage("__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0'));
+	log->writeMessage("__Build Config: " + QString(firstConfiguration.buildConfig));
+	log->writeMessage("__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString());
+
+	log->writeMessage("Last time configured: ");
+	log->writeMessage("__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString());
+	log->writeMessage("__Host: " + QString(lastConfiguration.host));
+	log->writeMessage("__User: " + QString(lastConfiguration.userName));
+	log->writeMessage("__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0'));
+	log->writeMessage("__Build Config: " + QString(lastConfiguration.buildConfig));
+	log->writeMessage("__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString());
+
+	return;
+}
+
+void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmware *conf)
+{
+	if (conf == nullptr)
+	{
+		assert(conf);
+		return;
+	}
+
+	marker = IdentificationStructMarker;
+	version = CONF_IDENTIFICATION_DATA_V2::structVersion();
+	moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
+	count = 1;
+
+	//
+	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
+	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
+	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
+
+	firstConfiguration.buildNo = conf->buildNumber();
+
+	QString buildConfig = conf->buildConfig().right(sizeof(firstConfiguration.buildConfig) - 1);
+	strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
+
+	QString userName = conf->userName().right(sizeof(firstConfiguration.userName) - 1);
+	strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
+
+	lastConfiguration = firstConfiguration;
+}
+
+void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmware *conf)
+{
+	if (conf == nullptr)
+	{
+		assert(conf);
+		return;
+	}
+
+	// last configuration record
+	//
+	count ++;			// Incerement configartion counter
+
+	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
+	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+
+	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
+	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
+
+	lastConfiguration.buildNo = conf->buildNumber();
+
+	QString buildConfig = conf->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
+	strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
+
+	QString userName = conf->userName().right(sizeof(lastConfiguration.userName) - 1);
+	strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
 }
 
 //
@@ -267,6 +405,16 @@ bool Configurator::showDebugInfo() const
 void Configurator::setShowDebugInfo(bool showDebugInfo)
 {
 	m_showDebugInfo = showDebugInfo;
+}
+
+bool Configurator::verify() const
+{
+	return m_verify;
+}
+
+void Configurator::setVerify(bool value)
+{
+	m_verify = value;
 }
 
 bool Configurator::openConnection()
@@ -379,7 +527,7 @@ bool Configurator::openConnection()
 		m_Log->writeError(__FUNCTION__ + tr(" %1").arg(m_serialPort->errorString()));
 
 #ifdef Q_OS_LINUX
-        if (serialPort->error() == QSerialPort::PermissionError)
+		if (m_serialPort->error() == QSerialPort::PermissionError)
 		{
 			m_Log->writeMessage(tr("Add user to the dialout group by the following command:"));
 			m_Log->writeMessage(tr("sudo usermod -a -G dialout USER"));
@@ -568,19 +716,29 @@ bool Configurator::send(int moduleUartId,
     std::vector<quint8> recBuffer;
     int recSize = headerSize + expecetedDataBytes;
 
-	int recMaxTime = (1000 * recSize / 11520) + 200; // time needed to receive all packet + 200 ms
+	for (int tc = 0; tc < 100; tc++)
+	{
+		QThread::msleep(10);
 
-    while (m_serialPort->waitForReadyRead(recMaxTime))
-    {
-        QByteArray arr = m_serialPort->read(recSize);
+		QApplication::processEvents();
 
-        for (int i = 0; i < arr.size(); i++)
-        {
-            recBuffer.push_back(arr[i]);
-        }
-    }
+		if (m_serialPort->bytesAvailable() == 0)
+		{
+			continue;
+		}
 
-    qDebug()<<"Read "<<recBuffer.size();
+		QByteArray arr = m_serialPort->readAll();
+
+		for (int i = 0; i < arr.size(); i++)
+		{
+			recBuffer.push_back(arr[i]);
+		}
+
+		if (recBuffer.size() >= recSize)
+		{
+			break;
+		}
+	}
 
     if (recBuffer.size() != recSize)
 	{
@@ -643,10 +801,16 @@ bool Configurator::send(int moduleUartId,
 	return true;
 }
 
-void Configurator::setSettings(QString device, bool showDebugInfo)
+void Configurator::setSettings(QString device, bool showDebugInfo, bool verify)
 {
 	this->setDevice(device);
 	this->setShowDebugInfo(showDebugInfo);
+	this->setVerify(verify);
+
+	if (showDebugInfo == true)
+	{
+		this->m_Log->writeMessage(tr("Configurator serial port is %1.").arg(device));
+	}
 	return;
 }
 
@@ -663,7 +827,7 @@ void Configurator::readConfiguration(int param)
 
 void Configurator::readConfigurationWorker(int /*param*/)
 {
-	/*// Open port
+	// Open port
 	//
 	bool ok = openConnection();
 	if (ok == false)
@@ -749,22 +913,7 @@ void Configurator::readConfigurationWorker(int /*param*/)
                 // Ignoring all flags, CRC, etc
                 //
 
-                if (identificationData.size() != blockSize)
-                {
-					m_Log->writeMessage(tr("Identification block is empty."));
-                }
-                else
-                {
-                    CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-                    if (pReadIdentificationStruct->marker == IdentificationStructMarker)
-                    {
-						pReadIdentificationStruct->dump(m_Log);
-                    }
-                    else
-                    {
-						m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
-                    }
-                }
+				dumpIdentificationData(identificationData, blockSize);
             }
             break;
         default:
@@ -825,7 +974,7 @@ void Configurator::readConfigurationWorker(int /*param*/)
 		m_Log->writeError(tr("CloseConnection failed with error "));
 	}
 
-	return;*/
+	return;
 }
 
 void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
@@ -873,7 +1022,6 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 
 				// Check if the connector in correct Uart
 				//
-#pragma message(Q_FUNC_INFO " DEBUG!!!!!!!!!!!!!!!!!!!!!!! Uncomment it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
 				if (moduleUartId != conf->uartId())
 				{
 					throw tr("Wrong UART, use %1h port.").arg(QString::number(conf->uartId(), 16));
@@ -943,49 +1091,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			identificationData.resize(blockSize);
 		}
 
-		CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-		if (pReadIdentificationStruct->marker != IdentificationStructMarker)
+		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
 		{
-			// This is the first configuration
-			//
+
+			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+			{
+				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+			}
+
+			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+			{
+				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+			}
+
 			memset(identificationData.data(), 0, identificationData.size());
 
-			pReadIdentificationStruct->marker = IdentificationStructMarker;
-			pReadIdentificationStruct->version = 1;
-			pReadIdentificationStruct->moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
-			pReadIdentificationStruct->count = 1;
-
+			// This is the first configuration
 			//
-			pReadIdentificationStruct->firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-			pReadIdentificationStruct->firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+			pReadIdentificationStruct->createFirstConfiguration(conf);
 
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-			pReadIdentificationStruct->firstConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-			QString hostName = QHostInfo::localHostName().right(sizeof(pReadIdentificationStruct->firstConfiguration.host) - 1);
-			strcpy_s(pReadIdentificationStruct->firstConfiguration.host, sizeof(pReadIdentificationStruct->firstConfiguration.host), hostName.toStdString().data());
-
-			pReadIdentificationStruct->lastConfiguration = pReadIdentificationStruct->firstConfiguration;
 		}
 		else
 		{
+			pReadIdentificationStruct->createNextConfiguration(conf);
 			//pReadIdentificationStruct->dump(m_Log);
 
-			// last configuration record
-			//
-			pReadIdentificationStruct->count ++;			// Incerement configartion counter
-
-			CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
-			lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-			lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
-
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-			lastConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-			QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-			strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
-
-			pReadIdentificationStruct->lastConfiguration = lastConfiguration;
 		}
 
 		// Set Crc to identificationData
@@ -993,7 +1126,8 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 
 		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &std::vector<uint8_t>()) == false)
+		auto replyData = std::vector<uint8_t>();
+		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
 		{
 			throw tr("Communication error.");
 		}
@@ -1007,6 +1141,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 		{
 			replyIdentificationHeader.dumpFlagsState(m_Log);
 			throw tr("Communication error.");
+		}
+
+		if (verify() == true)
+		{
+			// Verify the written identificationData
+			//
+
+			m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
+
+			std::vector<quint8> readData;
+			CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+			if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+			{
+				throw tr("Communication error.");
+			}
+
+			if (identificationData.size() != readData.size())
+			{
+				throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
+			}
+			for (int v = 0; v < identificationData.size(); v++)
+			{
+				if (readData[v] != identificationData[v])
+				{
+					throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+				}
+			}
 		}
 
 		//
@@ -1054,7 +1216,8 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					// Write data
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					bool ok = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &std::vector<quint8>());
+					auto replyData = std::vector<uint8_t>();
+					bool ok = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyData);
 
 					if (ok == false)
 					{
@@ -1070,6 +1233,34 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					{
 						replyHeader.dumpFlagsState(m_Log);
 						throw tr("Communication error.");
+					}
+
+					if (verify() == true)
+					{
+						// Verify the written data
+						//
+
+						m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
+
+						std::vector<quint8> readData;
+						CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+						if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+						{
+							throw tr("Communication error.");
+						}
+
+						if (frameData.size() != readData.size())
+						{
+							throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+						}
+						for (int v = 0; v < frameData.size(); v++)
+						{
+							if (readData[v] != frameData[v])
+							{
+								throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+							}
+						}
 					}
 				}
 			}
@@ -1095,6 +1286,41 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 	}
 
 	return;
+}
+
+void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize)
+{
+	if (identificationData.size() != blockSize)
+	{
+		m_Log->writeMessage(tr("Identification block is empty."));
+	}
+
+	const CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<const CONF_IDENTIFICATION_DATA*>(identificationData.data());
+	if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+	{
+		switch (pReadIdentificationStruct->version)
+		{
+		case 1:
+			{
+				const CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct_v1 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
+				pReadIdentificationStruct_v1->dump(m_Log);
+			}
+			break;
+		case 2:
+			{
+
+				const CONF_IDENTIFICATION_DATA_V2* pReadIdentificationStruct_v2 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V2*>(identificationData.data());
+				pReadIdentificationStruct_v2->dump(m_Log);
+			}
+			break;
+		default:
+			m_Log->writeMessage(tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version));
+		}
+	}
+	else
+	{
+		m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
+	}
 }
 
 
@@ -1204,57 +1430,50 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
             identificationData.resize(blockSize);
         }
 		
-        CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-        if (pReadIdentificationStruct->marker != IdentificationStructMarker)
-        {
-            // This is the first configuration
-            //
-            memset(identificationData.data(), 0, identificationData.size());
+		// An empty firmware
+		//
 
-            pReadIdentificationStruct->marker = IdentificationStructMarker;
-            pReadIdentificationStruct->version = 1;
-            pReadIdentificationStruct->moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
-            pReadIdentificationStruct->count = 1;
+		QString userName = QDir::home().dirName();
 
-            //
-            pReadIdentificationStruct->firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-            pReadIdentificationStruct->firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+		Hardware::ModuleFirmware conf;
+		conf.init("Caption", "subsysId", 0, 0, 0, 0, "projectName", userName, 0, "release", 0, QStringList());
 
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-            pReadIdentificationStruct->firstConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
+		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
+		{
 
-            QString hostName = QHostInfo::localHostName().right(sizeof(pReadIdentificationStruct->firstConfiguration.host) - 1);
-            strcpy_s(pReadIdentificationStruct->firstConfiguration.host, sizeof(pReadIdentificationStruct->firstConfiguration.host), hostName.toStdString().data());
+			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+			{
+				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+			}
 
-            pReadIdentificationStruct->lastConfiguration = pReadIdentificationStruct->firstConfiguration;
-        }
-        else
-        {
+			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+			{
+				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+			}
+
+			memset(identificationData.data(), 0, identificationData.size());
+
+			// This is the first configuration
+			//
+			pReadIdentificationStruct->createFirstConfiguration(&conf);
+
+		}
+		else
+		{
+			pReadIdentificationStruct->createNextConfiguration(&conf);
 			//pReadIdentificationStruct->dump(m_Log);
 
-            // last configuration record
-            //
-            pReadIdentificationStruct->count ++;			// Incerement configartion counter
-
-            CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
-            lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-            lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
-
-#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
-            lastConfiguration.configuratorFactoryNo = m_configuratorfactoryNo;
-
-            QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-            strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
-
-            pReadIdentificationStruct->lastConfiguration = lastConfiguration;
-        }
-
+		}
         // Set Crc to identificationData
         //
         Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 				
         CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-        if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &std::vector<quint8>()) == false)
+		auto replyData = std::vector<uint8_t>();
+		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
         {
             throw tr("Communication error.");
         }
@@ -1300,7 +1519,8 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
                 // --
                 //
                 CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-                if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &std::vector<quint8>()) == false)
+				auto replyData = std::vector<uint8_t>();
+				if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &replyData) == false)
                 {
                     throw tr("Communication error.");
                 }
@@ -1342,17 +1562,28 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 	return;
 }
 
+void Configurator::showConfDataFileInfo(const QString& fileName)
+{
+	processConfDataFile(fileName, false);
+}
+
 void Configurator::writeConfDataFile(const QString& fileName)
+{
+	processConfDataFile(fileName, true);
+}
+
+void Configurator::processConfDataFile(const QString& fileName, bool writeToFlash)
 {
 	emit communicationStarted();
 
 	Hardware::ModuleFirmware m_confFirmware;
 
-	m_Log->writeMessage(tr("Loading configuration file."));
+	m_Log->writeMessage(tr("//----------------------"));
+	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
 	QString errorCode;
 
-	bool result = m_confFirmware.load(fileName, errorCode);
+	bool result = m_confFirmware.load(fileName, errorCode, writeToFlash == true);
 
 	if (result == false)
 	{
@@ -1367,16 +1598,19 @@ void Configurator::writeConfDataFile(const QString& fileName)
 		return;
 	}
 
-
-	m_Log->writeMessage(tr("File %1 was loaded.").arg(fileName));
-
 	m_Log->writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
-	//m_outputLog.writeMessage(tr("Changeset: %1").arg(m_confFirmware.changeset()));
+	m_Log->writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
+	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
+	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
+	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	m_Log->writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
 	m_Log->writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
 	m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
-	writeConfigurationWorker(&m_confFirmware);
+	if (writeToFlash == true)
+	{
+		writeConfigurationWorker(&m_confFirmware);
+	}
 
 	emit communicationFinished();
 
@@ -1551,6 +1785,11 @@ void Configurator::readFirmware(const QString& fileName)
 
 					assert(protocolVersion == readReceivedHeader.version);
 
+					if (i == 0)
+					{
+						dumpIdentificationData(readData, blockSize);
+					}
+
 					switch (protocolVersion)
 					{
 					case 1:
@@ -1652,6 +1891,8 @@ void Configurator::readFirmware(const QString& fileName)
 
 void Configurator::eraseFlashMemory(int)
 {
+	m_cancelFlag = false;
+
 	emit communicationStarted();
 
 	// Open port
@@ -1755,6 +1996,13 @@ void Configurator::eraseFlashMemory(int)
 
 				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
 				{
+
+					if (m_cancelFlag == true)
+					{
+						m_Log->writeMessage("Memory erasing cancelled.");
+						break;
+					}
+
 					if (i == IdentificationFrameIndex)
 					{
 						m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i) + " - skip identification block.");
@@ -1773,7 +2021,8 @@ void Configurator::eraseFlashMemory(int)
 					// --
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &std::vector<uint8_t>()) == false)
+					auto replyData = std::vector<uint8_t>();
+					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData) == false)
 					{
 						throw tr("Communication error.");
 					}

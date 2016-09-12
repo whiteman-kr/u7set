@@ -18,12 +18,14 @@ SOURCES += main.cpp\
         SerialDataTester.cpp \
     SettingsDialog.cpp \
     PortReceiver.cpp \
-    SerialDataParser.cpp
+    SerialDataParser.cpp \
+    ../../lib/Crc.cpp
 
 HEADERS  += SerialDataTester.h \
     SettingsDialog.h \
     PortReceiver.h \
-    SerialDataParser.h
+    SerialDataParser.h \
+    ../../lib/Crc.h
 
 FORMS    += SerialDataTester.ui \
     SettingsDialog.ui

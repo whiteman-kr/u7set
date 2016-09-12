@@ -191,15 +191,15 @@ namespace Builder
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
-		requiredParams.append("i_counter");
+		//requiredParams.append("i_counter");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
+		//AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
 		CHECK_UNSIGNED_INT(i_conf);
-		CHECK_UNSIGNED_INT(i_counter);
+		//CHECK_UNSIGNED_INT(i_counter);
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -465,7 +465,7 @@ namespace Builder
 		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT32(i_del)
+		CHECK_SIGNED_INT32(i_del)
 		CHECK_UNSIGNED_INT(i_conf)
 
 		m_runTime = 0;
@@ -585,7 +585,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_сonf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
 		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
 		AppFbParamValue& x1Param = m_paramValuesArray["x1"];
@@ -593,9 +593,9 @@ namespace Builder
 		AppFbParamValue& y1Param = m_paramValuesArray["y1"];
 		AppFbParamValue& y2Param = m_paramValuesArray["y2"];
 
-		CHECK_UNSIGNED_INT(i_сonf)
+		CHECK_UNSIGNED_INT(i_conf)
 
-		int iConf = i_сonf.unsignedIntValue();
+		int iConf = i_conf.unsignedIntValue();
 
 		m_runTime = 0;
 
@@ -622,7 +622,7 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_сonf.unsignedIntValue(), i_сonf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 			return false;
 		}
 
@@ -824,7 +824,7 @@ namespace Builder
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 		//
-		m_log->errALC5051(i_сonf.unsignedIntValue(), i_сonf.caption(), caption(), guid());
+		m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 
 		return false;
 	}

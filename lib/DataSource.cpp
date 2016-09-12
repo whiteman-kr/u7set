@@ -369,7 +369,9 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 
 		if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 		{
-			qDebug() << "Wrong DataID, packet processing skiped" << m_errorDataID;
+			QString msg  =QString("Wrong DataID (%1, waiting %2), packet processing skiped").arg(rupFrame.header.dataId).arg(m_lmDataID);
+
+			qDebug() << msg  << m_errorDataID;
 		}
 		return;
 	}

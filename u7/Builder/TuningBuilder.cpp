@@ -8,7 +8,9 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+								 Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int buildNo, int changesetId, bool debug,
+								 QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -16,6 +18,7 @@ namespace Builder
 		m_tuningDataStorage(tuningDataStorage),
 		m_log(log),
 		m_buildWriter(buildWriter),
+		m_buildNo(buildNo),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
@@ -46,7 +49,7 @@ namespace Builder
 			return false;
 		}
 
-		Hardware::ModuleFirmwareCollection firmwareCollection(m_projectName, m_userName, changesetId());
+		Hardware::ModuleFirmwareCollection firmwareCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
 		std::vector<Hardware::DeviceModule*> lmModules;
 		findLmModules(m_deviceRoot, lmModules);
@@ -219,6 +222,11 @@ namespace Builder
 	OutputLog* TuningBuilder::log() const
 	{
 		return m_log;
+	}
+
+	int TuningBuilder::buildNo() const
+	{
+		return m_buildNo;
 	}
 
 	int TuningBuilder::changesetId() const

@@ -23,7 +23,7 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int changesetId);
+		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int buildNo, bool debug, int changesetId);
 		virtual ~ModuleFirmwareCollection();
 
 		// Methods
@@ -45,7 +45,9 @@ namespace Hardware
 
 		QString m_projectName;
 		QString m_userName;
-		int m_changesetId;
+		int m_buildNo = 0;
+		bool m_debug = false;
+		int m_changesetId = 0;
 
 	};}
 

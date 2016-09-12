@@ -16,13 +16,13 @@ class BaseServiceWorker : public ServiceWorker
 {
 public:
 	BaseServiceWorker(const QString& serviceStrID, const QString& cfgServiceIP1, const QString& cfgServiceIP2) :
-		ServiceWorker(ServiceType::BaseService, serviceStrID, cfgServiceIP1, cfgServiceIP2)
+		ServiceWorker(ServiceType::BaseService, serviceStrID, cfgServiceIP1, cfgServiceIP2, "")
 	{
 	}
 
 	ServiceWorker* createInstance() override
 	{
-		return new BaseServiceWorker(serviceStrID(), cfgServiceIP1(), cfgServiceIP2());
+		return new BaseServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2());
 	}
 };
 

@@ -159,8 +159,9 @@ const uint16_t IdentificationStructMarker = 0xAC17;
 #pragma pack(push, 1)
 struct CONF_IDENTIFICATION_DATA_V1
 {
-	uint16_t marker;									// Struct marker, must be 0xAC17
-	uint16_t version;									// Struct version
+	uint16_t marker;									// Struct marker, must be 0xAC17, DO NOT MOVE THIS FIELD IN THE PACKET
+	uint16_t version;									// Struct version, DO NOT MOVE THIS FIELD IN THE PACKET
+
 	Uuid moduleUuid;									// Uniquie module identifier
 	uint32_t count;										// Configurations counter
 
@@ -176,13 +177,46 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-        void dump(OutputLog *log);
+	void dump(OutputLog *log) const;
+
+	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
+	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+
+	static int structVersion() {	return 1;	}
 };
 
+struct CONF_IDENTIFICATION_DATA_V2
+{
+	uint16_t marker;									// Struct marker, must be 0xAC17, DO NOT MOVE THIS FIELD IN THE PACKET
+	uint16_t version;									// Struct version, DO NOT MOVE THIS FIELD IN THE PACKET
+
+	Uuid moduleUuid;									// Uniquie module identifier
+	uint32_t count;										// Configurations counter
+
+	struct CONF_IDENTIFICATION_RECORD
+	{
+		Uuid configurationId;							// Uniquie configuration identifier
+		uint64_t date;									// Configuration date and time
+		char host[24];									// Host name of the first configuration
+		uint32_t buildNo;								// Build number
+		char buildConfig[10];							// Configuraton name, Debug/Release
+		char userName[32];								// User who had built the project
+	};
+
+	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
+	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
+
+	void dump(OutputLog *log) const;
+
+	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
+	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+
+	static int structVersion() {	return 2;	}
+};
 
 #pragma pack(pop)
 
-typedef CONF_IDENTIFICATION_DATA_V1 CONF_IDENTIFICATION_DATA;	// Current version
+typedef CONF_IDENTIFICATION_DATA_V2 CONF_IDENTIFICATION_DATA;	// Current version
 
 using namespace Hardware;
 
@@ -197,6 +231,8 @@ public:
         Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
 	virtual ~Configurator();
 	
+	void cancelOperation();
+
 protected:
 	bool openConnection();
 	bool closeConnection();
@@ -211,17 +247,22 @@ protected:
 	void readConfigurationWorker(int param);
 	void writeConfigurationWorker(ModuleFirmware* conf);
 
+	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
+
+	void processConfDataFile(const QString& fileName, bool writeToFlash);
 	// Slots
 	//
 public slots:
-	void setSettings(QString device, bool showDebugInfo);
+	void setSettings(QString device, bool showDebugInfo, bool verify);
 	void readConfiguration(int param);
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+
+	void showConfDataFileInfo(const QString& fileName);
 	void writeConfDataFile(const QString& fileName);
+
 	void writeConfData(ModuleFirmware* conf);
 	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
-	void cancelOperation();
 
 	// Signals
 	//
@@ -230,14 +271,17 @@ signals:
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
+public:
 	// Properties
 	//
-protected:
 	QString device() const;
 	void setDevice(const QString& device);
 
 	bool showDebugInfo() const;
 	void setShowDebugInfo(bool showDebugInfo);
+
+	bool verify() const;
+	void setVerify(bool value);
 
 	// Data
 	//
@@ -252,7 +296,9 @@ private:
 
 	mutable QMutex mutex;			// m_device
 
-	bool m_cancelFlag = false;
+	volatile bool m_cancelFlag = false;
+
+	bool m_verify = true;
 };
 
 

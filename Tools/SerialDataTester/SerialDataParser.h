@@ -2,20 +2,23 @@
 #include <QSerialPort>
 #include <QByteArray>
 
+#include "../../lib/Crc.h"
+
 const int SerialParserBufferSize = 1024;
 
 class SerialDataParser : public QObject
 {
 	Q_OBJECT
 public :
-	SerialDataParser();
+	explicit SerialDataParser(QObject* parent = 0);
 	virtual ~SerialDataParser();
 
 signals:
-	void packetProcessed(QByteArray data);
+	void packetProcessed(QString version, QString trId, QString numerator, QByteArray dataId, QByteArray data);
+	void crcError(QString version, QString trId, QString numerator, QByteArray dataId);
 
 public slots:
-	void parse(const QByteArray& receivedData);
+	void parse(const QByteArray receivedData);
 
 private slots:
 	void scanningSignaure();
@@ -27,7 +30,6 @@ private:
 	char* m_buffer = nullptr; // Pointer on the beginning of the received data
 	char* m_readPtr = nullptr;// Pointer, that point on place, where reading was stopped
 	int m_dataSize = 0; // Size of the received data
-	quint64 m_crc_table[256];
 
 #pragma pack(push, 1)
 
@@ -51,18 +53,23 @@ private:
 		Header header;
 	};
 
-	union CrcFromPacket
+	union DataUniqueId
+	{
+		char bytes[4];
+		quint32 uint32;
+	};
+
+	union CrcRepresentation
 	{
 		char bytes[8];
-		quint64 crc;
+		quint64 uint64;
 	};
 
 #pragma pack(pop)
 
 	Signature m_signature; // Value to store received bytes (Signature bytes)
 	HeaderUnion m_header;
-	CrcFromPacket m_crcFromPacket;
-	char* m_packetData;
+	char* m_packetData = nullptr;
 	const quint32 baseSignature = 0x424D4C47; // Signature for compare
 	int m_bytesCount = 0; // Stores amount of writed down bytes in m_signature
 
@@ -74,4 +81,5 @@ private:
 	};
 
 	State m_state = ScanningSignature;
+	bool lock = false;
 };

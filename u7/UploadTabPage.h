@@ -32,16 +32,18 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
+	void fileTypeChanged(const QString& s);
 	void findSubsystemsInBuild(int index);
 	void subsystemChanged(int index);
 
 signals:
-	void setCommunicationSettings(QString device, bool showDebugInfo);
+	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
 
 	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+	void showConfDataFileInfo(const QString& fileName);
 	void writeConfDataFile(const QString& fileName);
 	void eraseFlashMemory(int);
 	void cancelOperation();
@@ -105,6 +107,7 @@ private:
 
 	QString m_currentBuild;
 	QString m_currentSubsystem;
+	QString m_currentFileName;
 
 	int m_currentBuildIndex = -1;
 	int m_currentSubsystemIndex = -1;

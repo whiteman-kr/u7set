@@ -108,7 +108,9 @@ void CfgServer::readBuildXml()
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
 
-	qDebug() << "File " << m_buildXmlPathFileName << " has been read";
+	QString str = QString("File %1 has been read").arg(m_buildXmlPathFileName);
+
+	qDebug() << C_STR(str);
 }
 
 

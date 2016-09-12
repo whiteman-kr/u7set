@@ -10,6 +10,7 @@ Settings::Settings(void) :
 	m_serialPort("\\\\.\\COM3"),
 #endif
 	m_showDebugInfo(false),
+	m_verify(true),
 	m_expertMode(false),
 	m_server("127.0.0.1"),
 	m_serverUsername("u7"),
@@ -28,6 +29,7 @@ void Settings::save() const
 
 	s.setValue("m_serialPort", m_serialPort);
 	s.setValue("m_showDebugInfo", m_showDebugInfo);
+	s.setValue("m_verify", m_verify);
 	s.setValue("m_expertMode", m_expertMode);
 
 	s.setValue("m_server", m_server);
@@ -43,6 +45,7 @@ void Settings::load()
 
 	m_serialPort = s.value("m_serialPort").toString();
 	m_showDebugInfo = s.value("m_showDebugInfo").toBool();
+	m_verify = s.value("m_verify").toBool();
 	m_expertMode = s.value("m_expertMode").toBool();
 
 	m_server = s.value("m_server", "127.0.0.1").toString();
@@ -70,6 +73,16 @@ bool Settings::showDebugInfo() const
 void Settings::setShowDebugInfo(bool value)
 {
 	m_showDebugInfo = value;
+}
+
+bool Settings::verify() const
+{
+	return m_verify;
+}
+
+void Settings::setVerify(bool value)
+{
+	m_verify = value;
 }
 
 bool Settings::expertMode() const

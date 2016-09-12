@@ -69,16 +69,18 @@ namespace Hardware
 		int m_rxStartAddress = 0;
 		int m_rxDataSizeW = 0;
 
-		int m_txStartAddress = 0;
+		int m_txStartAddress = 0;				// address of port's tx data relative from opto module appDataOffset
+		int m_absTxStartAddress = 0;		// absoulte address of port tx data in LM memory
 
 		quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
 
 		// serial RS323/485 mode properies only
 		//
-		bool m_enable = true;
+		bool m_enableSerial = true;
 		bool m_enableDuplex = false;    // serial mode and OCMN only
 
 		bool m_manualSettings = false;
+		int m_manualTxStartAddressW = 0;
 		int m_manualTxSizeW = 0;
 		int m_manualRxSizeW = 0;
 
@@ -118,8 +120,11 @@ namespace Hardware
 		Q_INVOKABLE int txStartAddress() const { return m_txStartAddress; }
 		void setTxStartAddress(int address) { m_txStartAddress = address; }
 
-		Q_INVOKABLE bool enable() const { return m_enable; }
-		void setEnable(bool enable) { m_enable = enable; }
+		int absTxStartAddress() { return m_absTxStartAddress; }
+		void setAbsTxStartAddress(int address) { m_absTxStartAddress = address; }
+
+		Q_INVOKABLE bool enableSerial() const { return m_enableSerial; }
+		void setEnableSerial(bool enable) { m_enableSerial = enable; }
 
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
@@ -147,8 +152,11 @@ namespace Hardware
 		Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
 		void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
 
-		bool manualSettings() const { return m_manualSettings; }
+		Q_INVOKABLE bool manualSettings() const { return m_manualSettings; }
 		void setManualSettings(bool manualSettings) { m_manualSettings = manualSettings; }
+
+		int manualTxStartAddressW() const { return m_manualTxStartAddressW; }
+		void setManualTxStartAddressW(int manualTxStartAddressW) { m_manualTxStartAddressW = manualTxStartAddressW; }
 
 		int manualTxSizeW() const { return m_manualTxSizeW; }
 		void setManualTxSizeW(int manualTxSizeW) { m_manualTxSizeW = manualTxSizeW; }
@@ -283,7 +291,7 @@ namespace Hardware
 		QList<OptoModule*> getLmAssociatedOptoModules(const QString& lmStrID);
 
 		bool setPortsRxDataSizes();
-		bool calculatePortsTxStartAddresses();
+		bool calculatePortsAbsoulteTxStartAddresses();
 		bool calculatePortsRxStartAddresses();
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);

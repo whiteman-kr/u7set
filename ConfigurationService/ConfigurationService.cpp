@@ -11,8 +11,7 @@
 // ------------------------------------------------------------------------------------
 
 ConfigurationServiceWorker::ConfigurationServiceWorker(const QString &serviceStrID, const QString& buildFolder, const QString& ipStr) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceStrID, "", ""),
-	m_buildFolder(buildFolder),
+	ServiceWorker(ServiceType::ConfigurationService, serviceStrID, "", "", buildFolder),
 	m_clientIPStr(ipStr)
 {
 }
@@ -21,7 +20,7 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const QString &serviceStr
 void ConfigurationServiceWorker::startCfgServerThread()
 {
 	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST),
-											  new CfgServer(m_buildFolder));
+											  new CfgServer(buildPath()));
 
 	m_cfgServerThread->start();
 }

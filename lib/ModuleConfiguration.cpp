@@ -1,4 +1,3 @@
-
 #include "../lib/ModuleConfiguration.h"
 #include "../lib/Crc.h"
 #include "../lib/CUtils.h"
@@ -45,7 +44,8 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId, const QStringList& descriptionFields)
+	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName,
+							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
@@ -54,6 +54,8 @@ namespace Hardware
 		m_frameSize = frameSize;
 		m_projectName = projectName;
 		m_userName = userName;
+		m_buildNumber = buildNumber;
+		m_buildConfig = buildConfig;
 		m_changesetId = changesetId;
 		m_fileVersion = maxFileVersion();
 
@@ -72,7 +74,7 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleFirmware::load(QString fileName, QString& errorCode)
+	bool ModuleFirmware::load(QString fileName, QString& errorCode, bool readDataFrames)
     {
 		errorCode.clear();
         m_frames.clear();
@@ -109,16 +111,18 @@ namespace Hardware
 		switch (m_fileVersion)
 		{
 		case 1:
-			return load_version1(jConfig);
+			return load_version1(jConfig, readDataFrames);
 		case 2:
-			return load_version2(jConfig);
+		case 3:
+			return load_version2_3(jConfig, readDataFrames);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
+
 	}
 
-	bool ModuleFirmware::load_version1(const QJsonObject &jConfig)
+	bool ModuleFirmware::load_version1(const QJsonObject &jConfig, bool readDataFrames)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -161,6 +165,14 @@ namespace Hardware
             return false;
         }
 		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+
+		//
+
+		if (readDataFrames == false)
+		{
+			return true;
+		}
+
 
 		if (jConfig.value("framesCount").isUndefined() == true)
         {
@@ -214,7 +226,7 @@ namespace Hardware
 
     }
 
-	bool ModuleFirmware::load_version2(const QJsonObject& jConfig)
+	bool ModuleFirmware::load_version2_3(const QJsonObject& jConfig, bool readDataFrames)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -252,11 +264,23 @@ namespace Hardware
 		}
 		m_frameSize = (int)jConfig.value("frameSize").toDouble();
 
-		if (jConfig.value("frameStringWidth").isUndefined() == true)
+		if (jConfig.value("buildConfig").isUndefined() == true)
 		{
-			return false;
+			m_buildConfig.clear();
 		}
-		int frameStringWidth = (int)jConfig.value("frameStringWidth").toDouble();
+		else
+		{
+			m_buildConfig = jConfig.value("buildConfig").toString();
+		}
+
+		if (jConfig.value("buildNumber").isUndefined() == true)
+		{
+			m_buildNumber = 0;
+		}
+		else
+		{
+			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+		}
 
 		if (jConfig.value("changesetId").isUndefined() == true)
 		{
@@ -264,11 +288,26 @@ namespace Hardware
 		}
 		m_changesetId = (int)jConfig.value("changesetId").toDouble();
 
+		//
+
+		if (readDataFrames == false)
+		{
+			return true;
+		}
+
 		if (jConfig.value("framesCount").isUndefined() == true)
 		{
 			return false;
 		}
 		int framesCount = (int)jConfig.value("framesCount").toDouble();
+
+		std::vector<quint8> frameVec;
+		frameVec.resize(m_frameSize);
+
+		quint16* framePtr = (quint16*)frameVec.data();
+
+		int frameStringWidth = -1;
+		int linesCount = 0;
 
 		for (int v = 0; v < framesCount; v++)
 		{
@@ -292,19 +331,12 @@ namespace Hardware
 				return false;
 			}
 
-			std::vector<quint8> frame;
-
-			frame.resize(m_frameSize);
-
-			int linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
-
-			int dataPos = 0;
-
-			for (int l = 0; l < linesCount; l++)
+			if (frameStringWidth == -1)
 			{
-				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+				QString firstString = jFrame.value("data0000").toString();
 
-				if (jFrame.value(stringName).isUndefined() == true)
+				frameStringWidth = firstString.split(' ').size();
+				if (frameStringWidth == 0)
 				{
 					assert(false);
 
@@ -312,10 +344,30 @@ namespace Hardware
 					return false;
 				}
 
-				QString stringValue = jFrame.value(stringName).toString();
+				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
+			}
 
-				QStringList vl = stringValue.split(' ');
-				for (QString& s : vl)
+			int dataPos = 0;
+
+			quint16* ptr = framePtr;
+
+			for (int l = 0; l < linesCount; l++)
+			{
+				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+
+				QJsonValue v = jFrame.value(stringName);
+
+				if (v.isUndefined() == true)
+				{
+					assert(false);
+
+					m_frames.clear();
+					return false;
+				}
+
+				QString stringValue = v.toString();
+
+				for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
 				{
 					bool ok = false;
 					quint16 v = s.toUInt(&ok, 16);
@@ -328,29 +380,17 @@ namespace Hardware
 						return false;
 					}
 
-					frame[dataPos++] = v >> 8;
-					frame[dataPos++] = v & 0xff;
-
-					if (dataPos > m_frameSize)
+					if (dataPos >= m_frameSize / sizeof(quint16))
 					{
 						assert(false);
 						break;
 					}
+
+					*ptr++ = qToBigEndian(v);
 				}
 			}
 
-
-			/*QString ss;
-			qDebug()<<"Frame " << v;
-			qDebug()<<"FrameSize " << frame.size();
-			for (int i = 0; i < frame.size(); i++)
-			{
-				ss += QString::number(frame[i], 16) + " ";
-
-			}
-			qDebug() << ss;*/
-
-			m_frames.push_back(frame);
+			m_frames.push_back(frameVec);
 		}
 
 		return true;
@@ -610,6 +650,11 @@ namespace Hardware
         return static_cast<int>(m_frames.size());
 	}
 
+	int ModuleFirmware::changesetId() const
+	{
+		return m_changesetId;
+	}
+
 	int ModuleFirmware::fileVersion() const
 	{
 		return m_fileVersion;
@@ -619,6 +664,27 @@ namespace Hardware
 	{
 		return m_maxFileVersion;
 	}
+
+	QString ModuleFirmware::projectName() const
+	{
+		return m_projectName;
+	}
+
+	QString ModuleFirmware::userName() const
+	{
+		return m_userName;
+	}
+
+	int ModuleFirmware::buildNumber() const
+	{
+		return m_buildNumber;
+	}
+
+	QString ModuleFirmware::buildConfig() const
+	{
+		return m_buildConfig;
+	}
+
 
     const QByteArray& ModuleFirmware::log() const
     {

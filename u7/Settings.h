@@ -124,6 +124,8 @@ public:
 	// Configurator properties
 	//
 	QString m_configuratorSerialPort;
+	bool m_configuratorShowDebugInfo = false;
+	bool m_configuratorVerify = true;
 	QByteArray m_UploadTabPageSplitterState;
 
 private:

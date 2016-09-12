@@ -44,7 +44,9 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
+		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+							 Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
+							 QString projectName, QString userName, BuildResultWriter* buildWriter);
 		virtual ~ConfigurationBuilder();
 
 		bool build();
@@ -56,6 +58,7 @@ namespace Builder
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>& modules);
 		DbController* db();
 		IssueLogger* log() const;
+		int buildNo() const;
 		int changesetId() const;
 		bool debug() const;
 		bool release() const;
@@ -69,6 +72,7 @@ namespace Builder
 		mutable IssueLogger* m_log = nullptr;
 		BuildResultWriter* m_buildWriter = nullptr;
 
+		int m_buildNo = 0;
 		int m_changesetId = 0;
 		int m_debug = false;
 		QString m_projectName;

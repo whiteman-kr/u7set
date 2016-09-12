@@ -423,14 +423,20 @@ void Service::initLog()
 // -------------------------------------------------------------------------------------
 
 ServiceWorker::ServiceWorker(ServiceType serviceType,
-							 const QString& serviceStrID,
+							 const QString& serviceEquipmentID,
 							 const QString& cfgServiceIP1,
-							 const QString& cfgServiceIP2) :
+							 const QString& cfgServiceIP2,
+							 const QString &buildPath) :
 	m_serviceType(serviceType),
-	m_serviceStrID(serviceStrID),
+	m_serviceEquipmentID(serviceEquipmentID),
 	m_cfgServiceIP1(cfgServiceIP1),
-	m_cfgServiceIP2(cfgServiceIP2)
+	m_cfgServiceIP2(cfgServiceIP2),
+	m_buildPath(buildPath)
 {
+	if (m_buildPath.isEmpty() == false)
+	{
+		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
+	}
 }
 
 
