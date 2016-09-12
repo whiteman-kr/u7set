@@ -31,7 +31,9 @@ private:
 	UnitList m_unitInfo;
 
 	AppSignals m_appSignals;
-	AppDataSources m_appDataSources;
+
+	AppDataSources m_appDataSources;				// all data sources
+	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
 
 	AppSignalStates m_signalStates;
 

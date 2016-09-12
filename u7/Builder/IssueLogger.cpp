@@ -2558,6 +2558,37 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
+	/// Title: Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.
+	///
+	/// Parameters:
+	///		%1 First LM equipmentID
+	///		%2 Second LM equipmentID
+	///		%3 duplicate IP address
+	///		%4 First LM Uuid
+	///		%5 Second LM Uuid
+	///
+	/// Description:
+	///		Ethernet adapters of specified LMs has duplicate IP address. Change IP addresses of adapters to unique values.
+	///
+	void IssueLogger::errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lm1Uuid);
+		addItemsIssues(OutputMessageLevel::Error, lm2Uuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6003,
+				  tr("Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.")
+				  .arg(lm1)
+				  .arg(lm2)
+				  .arg(ipAddress)
+				  );
+	}
+
+
+	/// IssueCode: EQP6100
+	///
+	/// IssueType: Error
+	///
 	/// Title: Unknown software type (Software object StrID '%1').
 	///
 	/// Parameters:
@@ -2571,7 +2602,7 @@ namespace Builder
 		addItemsIssues(OutputMessageLevel::Error, uuid);
 
 		LOG_ERROR(IssueType::Equipment,
-				  6003,
+				  6100,
 				  tr("Unknown software type (Software object StrID '%1').")
 				  .arg(softwareObjectStrId)
 				  );

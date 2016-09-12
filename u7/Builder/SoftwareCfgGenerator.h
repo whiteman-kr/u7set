@@ -45,6 +45,28 @@ namespace Builder
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
 
+	public:
+		SoftwareCfgGenerator(	DbController* db,
+								Hardware::Software* software,
+								SignalSet* signalSet,
+								Hardware::EquipmentSet* equipment,
+								BuildResultWriter* buildResultWriter);
+
+		bool run();
+
+		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		static bool writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
+		static bool writeSchemasList(DbController* db,
+									 BuildResultWriter* buildResultWriter,
+									 int parentFileId,
+									 QString fileExtension,
+									 QString subDir,
+									 QString group,
+									 IssueLogger* log);
+
+		virtual bool generateConfiguration() = 0;
+
+		static const int LM_ETHERNET_ADAPTERS_COUNT = 3;
 		static const int LM_ETHERNET_ADAPTER1 = 1;
 		static const int LM_ETHERNET_ADAPTER2 = 2;
 		static const int LM_ETHERNET_ADAPTER3 = 3;
@@ -65,6 +87,8 @@ namespace Builder
 			static const char* PROP_DIAG_DATA_IP;
 			static const char* PROP_DIAG_DATA_PORT;
 			static const char* PROP_DIAG_DATA_SERVICE_ID;
+
+			static const char* LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
 
 			int adapterNo;		// LM_ETHERNET_ADAPTER* values
 			QString adapterID;
@@ -90,27 +114,5 @@ namespace Builder
 
 			bool getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adapterNo, IssueLogger* log);
 		};
-
-
-	public:
-		SoftwareCfgGenerator(	DbController* db,
-								Hardware::Software* software,
-								SignalSet* signalSet,
-								Hardware::EquipmentSet* equipment,
-								BuildResultWriter* buildResultWriter);
-
-		bool run();
-
-		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
-		static bool writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
-		static bool writeSchemasList(DbController* db,
-									 BuildResultWriter* buildResultWriter,
-									 int parentFileId,
-									 QString fileExtension,
-									 QString subDir,
-									 QString group,
-									 IssueLogger* log);
-
-		virtual bool generateConfiguration() = 0;
 	};
 }

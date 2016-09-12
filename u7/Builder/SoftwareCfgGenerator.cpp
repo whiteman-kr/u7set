@@ -491,6 +491,8 @@ namespace Builder
 	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_PORT = "DiagDataPort";
 	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID = "DiagDataServiceID";
 
+	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR = "_ETHERNET0%1";
+
 	bool SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
 	{
 		if (log == nullptr)
@@ -516,7 +518,7 @@ namespace Builder
 
 		adapterNo = adptrNo;
 
-		QString suffix = QString("_ETHERNET0%1").arg(adapterNo);
+		QString suffix = QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(adapterNo);
 
 		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix, log);
 

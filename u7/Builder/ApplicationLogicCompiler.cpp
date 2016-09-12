@@ -1,4 +1,5 @@
 #include "ApplicationLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
 
 namespace Builder
 {
@@ -107,6 +108,8 @@ namespace Builder
 			if (checkAppSignals() == false) break;
 
 			if (checkOptoConnections() == false) break;
+
+			if (checkLmIpAddresses() == false) break;
 
 			if (compileModulesLogicsPass1() == false) break;
 
@@ -424,6 +427,115 @@ namespace Builder
 		if (result == true)
 		{
 			LOG_SUCCESS(m_log, QString(tr("Ok")));
+		}
+
+		return result;
+	}
+
+
+	bool ApplicationLogicCompiler::checkLmIpAddresses()
+	{
+		LOG_EMPTY_LINE(m_log);
+
+		LOG_MESSAGE(m_log, QString(tr("Check LM's ethernet adapters IP addresses...")));
+
+		bool result = true;
+
+		QHash<QString, Hardware::DeviceModule*> ip2Modules;
+
+		for(Hardware::DeviceModule* lm : m_lm)
+		{
+			if (lm == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				assert(false);
+				return false;
+			}
+
+			for(int i = 0; i < SoftwareCfgGenerator::LM_ETHERNET_ADAPTERS_COUNT; i++)
+			{
+				SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties lmNetProperties;
+
+				int ethernetAdapterNo = SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1 + i;
+
+				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
+
+
+				switch(ethernetAdapterNo)
+				{
+				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1:
+					// tuning data adapter
+					//
+					if (lmNetProperties.tuningEnable == true)
+					{
+						lmNetProperties.tuningIP = lmNetProperties.tuningIP.trimmed();
+
+						if (ip2Modules.contains(lmNetProperties.tuningIP) == true)
+						{
+							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
+
+							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lmNetProperties.tuningIP, lm);
+						}
+					}
+					break;
+
+				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER2:
+				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER3:
+					// appllication and diagnostics data adapters
+					//
+					if (lmNetProperties.appDataEnable == true)
+					{
+						lmNetProperties.appDataIP = lmNetProperties.appDataIP.trimmed();
+
+						if (ip2Modules.contains(lmNetProperties.appDataIP) == true)
+						{
+							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
+
+							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lmNetProperties.appDataIP, lm);
+						}
+					}
+
+					if (lmNetProperties.diagDataEnable == true)
+					{
+						lmNetProperties.diagDataIP = lmNetProperties.diagDataIP.trimmed();
+
+						if (ip2Modules.contains(lmNetProperties.diagDataIP) == true)
+						{
+							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
+
+							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lmNetProperties.diagDataIP, lm);
+						}
+					}
+
+					break;
+
+				default:
+					assert(false);
+				}
+			}
+		}
+
+		if (result == true)
+		{
+			LOG_OK(m_log);
 		}
 
 		return result;

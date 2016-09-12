@@ -65,7 +65,7 @@ private:
 
 	const QVector<QString>& appSignalIDs() const;
 	const AppSignals& appSignals() const;
-	const AppDataSources& appDataSources() const;
+	const AppDataSourcesIP& appDataSources() const;
 	const UnitList& units() const;
 
 	bool getAppSignalStateState(Hash hash, AppSignalState& state);
@@ -97,7 +97,7 @@ class TcpAppDataServerThread : public Tcp::ServerThread
 {
 private:
 	QVector<QString> m_appSignalIDs;
-	const AppDataSources& m_appDataSources;
+	const AppDataSourcesIP& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const AppSignalStates& m_appSignalStates;
 	const UnitList& m_units;
@@ -107,7 +107,7 @@ private:
 public:
 	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 							TcpAppDataServer* server,
-							const AppDataSources& appDataSources,
+							const AppDataSourcesIP& appDataSources,
 							const AppSignals& appSignals,
 							const AppSignalStates& appSignalStates,
 							const UnitList& units);
@@ -116,7 +116,7 @@ public:
 	int appSignalIDsCount() const { return m_appSignalIDs.count(); }
 
 	const AppSignals& appSignals() const { return m_appSignals; }
-	const AppDataSources& appDataSources() const { return  m_appDataSources; }
+	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }
 	const UnitList& units() const { return m_units; }
 
 	bool getAppSignalState(Hash hash, AppSignalState& state);

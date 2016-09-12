@@ -71,7 +71,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
 															tcpAppDataSever,
-															m_appDataSources,
+															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
 															m_unitInfo);
@@ -226,6 +226,7 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 	bool result = true;
 
 	m_appDataSources.clear();
+	m_enabledAppDataSources.clear();
 
 	while (1)
 	{
@@ -258,9 +259,18 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			continue;
 		}
 
-		m_appDataSources.insert(dataSource->lmAddress32(), dataSource);
+		// dataSource->lmAdapterID() is unique for all data sources
+		//
+		m_appDataSources.insert(dataSource->lmAdapterID(), dataSource);
 
-		qDebug() << "DataSource: " << dataSource->lmEquipmentID() << "channel " << dataSource->lmChannel();
+		qDebug() << "DataSource: " << dataSource->lmAdapterID();
+
+		if (dataSource->lmDataEnable() == true)
+		{
+			// dataSource->lmAddress32() is unique for enabled datasources
+			//
+			m_enabledAppDataSources.insert(dataSource->lmAddress32(), dataSource);
+		}
 	}
 
 	return result;
@@ -402,7 +412,7 @@ void AppDataServiceWorker::clearConfiguration()
 	m_unitInfo.clear();
 
 	m_appSignals.clear();
-	m_appDataSources.clear();
+	m_enabledAppDataSources.clear();
 	m_signalStates.clear();
 }
 
@@ -430,7 +440,7 @@ void AppDataServiceWorker::initDataChannelThreads()
 
 		// add AppDataSources to channel
 		//
-		for(DataSource* dataSource : m_appDataSources)
+		for(DataSource* dataSource : m_enabledAppDataSources)
 		{
 			if (dataSource->lmDataType() == DataSource::DataType::App &&
 				dataSource->lmChannel() == channel)
