@@ -1828,18 +1828,18 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	return;
 }
 
-void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection)
+QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection)
 {
 	if (object == nullptr)
 	{
 		assert(object != nullptr);
-		return;
+		return QModelIndex();
 	}
 
 	if (isPresetMode() == true && object->preset() == false)
 	{
 		assert(false);
-		return;
+		return QModelIndex();
 	}
 
 	// Set new id, recusively to all children
@@ -1901,7 +1901,7 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 			(parentObject->deviceType() != Hardware::DeviceType::Workstation && parentObject->deviceType() != Hardware::DeviceType::Software))
 		{
 			assert(false);
-			return;
+			return QModelIndex();
 		}
 
 		if (parentObject->deviceType() == object->deviceType())
@@ -1918,7 +1918,7 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 			(object->deviceType() == Hardware::DeviceType::Workstation && parentObject->deviceType() > Hardware::DeviceType::Chassis))
 		{
 			assert(parentObject->deviceType() <= object->deviceType());
-			return;
+			return QModelIndex();
 		}
 	}
 
@@ -1932,7 +1932,7 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 	if (allowed == false)
 	{
 		QMessageBox::critical(this, tr("Error"), tr("It is not allowed to add child, error message: %1").arg(errorMessage));
-		return;
+		return QModelIndex();
 	}
 
 	//  Set presetName, parent object should contain it
@@ -1951,11 +1951,13 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	if (result == false)
 	{
-		return;
+		return QModelIndex();
 	}
 
 	// Add new device to the model and select it
 	//
+	object->deleteAllChildren();	// if there are any children they will be added to the model by reading project database
+
 	equipmentModel()->insertDeviceObject(object, parentModelIndex);
 
 	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object.get()), parentModelIndex);
@@ -1966,9 +1968,13 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 	}
 
 	selectionModel()->select(objectModelIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
-	setCurrentIndex(objectModelIndex);
 
-	return;
+	if (clearPrevSelection == true)
+	{
+		setCurrentIndex(objectModelIndex);
+	}
+
+	return objectModelIndex;
 }
 
 void EquipmentView::addInOutsToSignals()
@@ -2369,6 +2375,7 @@ void EquipmentView::pasteDevices()
 		};
 
 	selectionModel()->clearSelection();
+	QModelIndex lastModelIndex;
 
 	for (int i = 0; i < message.items_size(); i++)
 	{
@@ -2382,9 +2389,16 @@ void EquipmentView::pasteDevices()
 
 		setUuid(object.get());		// Set new guids to all objects
 
-		addDeviceObject(object, parentModelIndex, false);
+		lastModelIndex = addDeviceObject(object, parentModelIndex, false);
 	}
 
+	if (lastModelIndex.isValid() == true)
+	{
+		selectionModel()->setCurrentIndex(lastModelIndex, QItemSelectionModel::NoUpdate);
+	}
+
+	// --
+	//
 	emit updateState();
 
 	return;
@@ -3840,6 +3854,14 @@ void EquipmentTabPage::setActionState()
 		{
 			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
 			assert(device);
+
+			// System can be very big so forbid it's copying
+			//
+			if (device->isSystem() == true)
+			{
+				allowCopyToClipboard = false;
+				break;
+			}
 
 			// all selected objects must be the same type
 			//

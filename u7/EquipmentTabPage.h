@@ -151,7 +151,7 @@ public slots:
 	void choosePreset(Hardware::DeviceType type);
 
 	void addPresetToConfiguration(const DbFileInfo& fileInfo);
-	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
+	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
 
 	void addInOutsToSignals();
 	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
