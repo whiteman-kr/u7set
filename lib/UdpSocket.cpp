@@ -211,7 +211,7 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 
 	if (sent == -1)
 	{
-		assert(false);
+		//assert(false);
 	}
 
 	m_requestNo++;
@@ -737,7 +737,6 @@ void UdpServerSocket::onSocketReadyRead()
 
 	if (recevedDataSize == -1)
 	{
-		assert(false);
 		return;
 	}
 
