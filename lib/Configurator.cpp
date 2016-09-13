@@ -250,7 +250,7 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration(Hardware::ModuleFirmw
 	firstConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strcpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data());
+	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -271,7 +271,7 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration(Hardware::ModuleFirmwa
 	lastConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
+	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration = lastConfiguration;
 }
@@ -329,15 +329,15 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strcpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data());
+	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	firstConfiguration.buildNo = conf->buildNumber();
 
 	QString buildConfig = conf->buildConfig().right(sizeof(firstConfiguration.buildConfig) - 1);
-	strcpy_s(firstConfiguration.buildConfig, sizeof(firstConfiguration.buildConfig), buildConfig.toStdString().data());
+	strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
 
 	QString userName = conf->userName().right(sizeof(firstConfiguration.userName) - 1);
-	strcpy_s(firstConfiguration.userName, sizeof(firstConfiguration.userName), userName.toStdString().data());
+	strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -358,15 +358,15 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strcpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data());
+	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration.buildNo = conf->buildNumber();
 
 	QString buildConfig = conf->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
-	strcpy_s(lastConfiguration.buildConfig, sizeof(lastConfiguration.buildConfig), buildConfig.toStdString().data());
+	strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
 
 	QString userName = conf->userName().right(sizeof(lastConfiguration.userName) - 1);
-	strcpy_s(lastConfiguration.userName, sizeof(lastConfiguration.userName), userName.toStdString().data());
+	strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
 }
 
 //
@@ -527,7 +527,7 @@ bool Configurator::openConnection()
 		m_Log->writeError(__FUNCTION__ + tr(" %1").arg(m_serialPort->errorString()));
 
 #ifdef Q_OS_LINUX
-        if (serialPort->error() == QSerialPort::PermissionError)
+		if (m_serialPort->error() == QSerialPort::PermissionError)
 		{
 			m_Log->writeMessage(tr("Add user to the dialout group by the following command:"));
 			m_Log->writeMessage(tr("sudo usermod -a -G dialout USER"));
@@ -1126,7 +1126,8 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 
 		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &std::vector<uint8_t>()) == false)
+		auto replyData = std::vector<uint8_t>();
+		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
 		{
 			throw tr("Communication error.");
 		}
@@ -1215,7 +1216,8 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					// Write data
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					bool ok = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &std::vector<quint8>());
+					auto replyData = std::vector<uint8_t>();
+					bool ok = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyData);
 
 					if (ok == false)
 					{
@@ -1470,7 +1472,8 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
         Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 				
         CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-        if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &std::vector<quint8>()) == false)
+		auto replyData = std::vector<uint8_t>();
+		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
         {
             throw tr("Communication error.");
         }
@@ -1516,7 +1519,8 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
                 // --
                 //
                 CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-                if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &std::vector<quint8>()) == false)
+				auto replyData = std::vector<uint8_t>();
+				if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &replyData) == false)
                 {
                     throw tr("Communication error.");
                 }
@@ -2017,7 +2021,8 @@ void Configurator::eraseFlashMemory(int)
 					// --
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &std::vector<uint8_t>()) == false)
+					auto replyData = std::vector<uint8_t>();
+					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData) == false)
 					{
 						throw tr("Communication error.");
 					}

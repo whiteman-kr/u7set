@@ -2,17 +2,19 @@
 #include <assert.h>
 #include <QDebug>
 
-SerialDataParser::SerialDataParser()
+SerialDataParser::SerialDataParser(QObject *parent) : QThread(parent)
 {
 	m_buffer = new char[SerialParserBufferSize];
+	m_packetData = new char[SerialParserBufferSize];
 }
 
 SerialDataParser::~SerialDataParser()
 {
-	delete m_buffer;
+	delete[] m_buffer;
+	delete[] m_packetData;
 }
 
-void SerialDataParser::parse(const QByteArray& receivedData)
+void SerialDataParser::parse(const QByteArray receivedData)
 {
 	memcpy(m_buffer, receivedData.constData(), receivedData.size()); // Make pointer on the packet beginning
 
@@ -35,9 +37,6 @@ void SerialDataParser::scanningSignaure()
 
 	do
 	{
-		if (sizeof(m_signature.bytes) == 4)
-			m_bytesCount=0;
-
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
 		avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
@@ -47,7 +46,7 @@ void SerialDataParser::scanningSignaure()
 			bytesToCopy = avaiableDataSize;
 		}
 
-		memcpy(m_signature.bytes + m_bytesCount, m_readPtr, bytesToCopy); // Record setted amount of bytes
+		memcpy(m_signature.bytes + m_bytesCount, m_readPtr, bytesToCopy); // Record amount of bytes
 		m_bytesCount += bytesToCopy; // Set signature bytes amount to our value (Now, signature has its own amount of byes + recordered amount of bytes)
 
 
@@ -64,7 +63,10 @@ void SerialDataParser::scanningSignaure()
 			else
 			{
 				m_bytesCount = 0; // In case of wrong signature - just reset it is own bytes amount
-				m_readPtr++; // Move pointer by one byte
+				if (m_readPtr < m_buffer + m_dataSize)
+				{
+					m_readPtr++; // Move pointer by one byte
+				}
 			}
 		}
 		else
@@ -73,6 +75,10 @@ void SerialDataParser::scanningSignaure()
 		}
 	}
 	while(m_readPtr < m_buffer + m_dataSize);
+
+	free (m_buffer);
+	m_buffer = new char[SerialParserBufferSize];
+
 }
 
 void SerialDataParser::readingHeader()
@@ -94,15 +100,17 @@ void SerialDataParser::readingHeader()
 		m_state = ReadingData;
 		m_readPtr += bytesToCopy;
 		m_bytesCount = 0;
-		m_packetData = new char[m_header.header.dataAmount];
+
 		readingData();
 	}
 	else
 	{
 		m_state = ScanningSignature;
-		m_readPtr++;
+		if (m_readPtr < m_buffer + m_dataSize)
+		{
+			m_readPtr++; // Move pointer by one byte
+		}
 		m_bytesCount = 0;
-		scanningSignaure();
 	}
 }
 
@@ -150,6 +158,12 @@ void SerialDataParser::readingData()
 
 		memcpy(crcFromPacket.bytes, m_packetData, 8);
 
+		m_packetData -= m_header.header.dataAmount;
+		m_packetData -= 4;
+
+		free (m_packetData);
+		m_packetData = new char[SerialParserBufferSize];
+
 		m_readPtr += bytesToCopy;
 
 		QString version = QString::number(m_header.header.version);
@@ -166,18 +180,20 @@ void SerialDataParser::readingData()
 			emit packetProcessed(version, trId, numerator, dataUniqueId, dataToSend);
 		}
 
-		if (m_dataSize - (m_readPtr - m_buffer) > 0)
+		m_state = ScanningSignature;
+
+		if (m_readPtr < m_buffer + m_dataSize)
 		{
-			m_state = ScanningSignature;
-			m_bytesCount = 0;
-			scanningSignaure();
+			m_readPtr++; // Move pointer by one byte
 		}
 	}
 	else
 	{
 		m_state = ScanningSignature;
-		m_readPtr++;
+		if (m_readPtr < m_buffer + m_dataSize)
+		{
+			m_readPtr++; // Move pointer by one byte
+		}
 		m_bytesCount = 0;
-		scanningSignaure();
 	}
 }

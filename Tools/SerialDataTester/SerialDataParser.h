@@ -1,16 +1,18 @@
 #pragma once
 #include <QSerialPort>
 #include <QByteArray>
+#include <QThread>
+#include <QTimer>
 
 #include "../../lib/Crc.h"
 
 const int SerialParserBufferSize = 1024;
 
-class SerialDataParser : public QObject
+class SerialDataParser : public QThread
 {
 	Q_OBJECT
 public :
-	SerialDataParser();
+	explicit SerialDataParser(QObject* parent = 0);
 	virtual ~SerialDataParser();
 
 signals:
@@ -18,7 +20,7 @@ signals:
 	void crcError(QString version, QString trId, QString numerator, QByteArray dataId);
 
 public slots:
-	void parse(const QByteArray& receivedData);
+	void parse(const QByteArray receivedData);
 
 private slots:
 	void scanningSignaure();
@@ -81,4 +83,5 @@ private:
 	};
 
 	State m_state = ScanningSignature;
+	bool lock = false;
 };

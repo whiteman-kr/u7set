@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QDebug>
 
-PortReceiver::PortReceiver(QObject *parent) : QObject(parent)
+PortReceiver::PortReceiver(QObject *parent) : QThread(parent)
 {
 
 	QSettings applicationSettings;
@@ -30,30 +30,26 @@ PortReceiver::~PortReceiver()
 
 void PortReceiver::setPort(const QString &port)
 {
-	m_serialPort->close();
 	m_serialPort->setPortName(port);
-	//openPort();
+	emit portClosed();
 }
 
 void PortReceiver::setBaud(const int& baud)
 {
-	m_serialPort->close();
 	m_serialPort->setBaudRate(baud);
-	//openPort();
+	emit portClosed();
 }
 
 void PortReceiver::setDataBits(const QSerialPort::DataBits &dataBits)
 {
-	m_serialPort->close();
 	m_serialPort->setDataBits(dataBits);
-	//openPort();
+	emit portClosed();
 }
 
 void PortReceiver::setStopBits(const QSerialPort::StopBits& stopBits)
 {
-	m_serialPort->close();
 	m_serialPort->setStopBits(stopBits);
-	//openPort();
+	emit portClosed();
 }
 
 void PortReceiver::openPort()
@@ -63,17 +59,22 @@ void PortReceiver::openPort()
 	if (m_serialPort->isOpen() == false)
 	{
 		emit portError("Serial Port: " + m_serialPort->errorString());
+		emit portClosed();
 	}
 }
 
 void PortReceiver::closePort()
 {
-	m_serialPort->close();
+	if (m_serialPort->isOpen())
+	{
+		m_serialPort->close();
+	}
+
+	emit portClosed();
 }
 
 void PortReceiver::dataReceived()
 {
-	//receivedData = m_serialPort->readAll();
 	QByteArray receivedData = m_serialPort->read(SerialParserBufferSize);
 
 	emit dataFromPort(receivedData);
