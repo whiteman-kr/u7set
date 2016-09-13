@@ -263,7 +263,6 @@ SerialDataTester::~SerialDataTester()
 	delete m_startReceiving;
 	delete m_stopReceiving;
 
-//	delete m_settings;
 	delete m_setPort;
 	delete m_setBaud;
 	delete m_setDataBits;
@@ -600,17 +599,6 @@ void SerialDataTester::reloadConfig()
 	// This function just reloading configuration from file
 	//
 
-	ui->signalsTable->clear();
-
-	ui->signalsTable->setRowCount(0);
-
-	ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
-	ui->signalsTable->setHorizontalHeaderItem(name, new QTableWidgetItem(tr("Name")));
-	ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
-	ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
-	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
-	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
-
 	for (int currentSignal = 0; currentSignal < m_signalsFromXml.size(); currentSignal++)
 	{
 		delete strIds.at(currentSignal);
@@ -620,6 +608,10 @@ void SerialDataTester::reloadConfig()
 		delete types.at(currentSignal);
 		delete values.at(currentSignal);
 	}
+
+	ui->signalsTable->clearContents();
+
+	ui->signalsTable->setRowCount(0);
 
 	strIds.clear();
 	names.clear();
