@@ -94,7 +94,6 @@ namespace Builder
 			if (ok == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("isAnyCheckedOut Error."));
-				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
@@ -102,7 +101,6 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  tr("There are some checked out objects. Please check in all objects before building release version."));
-				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
@@ -126,8 +124,6 @@ namespace Builder
 
 			if (ok == false)
 			{
-				//LOG_ERROR(m_log, Builder::IssueType::NotDefined, tr("Error"));
-				QThread::currentThread()->requestInterruption();
 				break;
 			}
 			else
@@ -165,10 +161,6 @@ namespace Builder
 			//
 			// SignalSet
 			//
-
-			//auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
-			//auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
-
 			SignalSet signalSet;
 
 			if (loadSignals(&db, &signalSet, equipmentSet) == false)
@@ -188,8 +180,6 @@ namespace Builder
 
 			if (ok == false)
 			{
-				//LOG_ERROR(m_log, Builder::IssueType::NotDefined, tr("Error"));
-				QThread::currentThread()->requestInterruption();
 				break;
 			}
 			else
@@ -243,9 +233,10 @@ namespace Builder
 			//
 			AppLogicData appLogicData;
 
-			parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, &signalSet, lastChangesetId);
+			ok = parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, &signalSet, lastChangesetId);
 
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
@@ -255,9 +246,10 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &tuningDataStorage, &buildWriter);
+			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &tuningDataStorage, &buildWriter);
 
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
@@ -265,9 +257,10 @@ namespace Builder
 			//
 			// Generate SCADA software configurations
 			//
-			generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
+			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
 
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
@@ -280,18 +273,11 @@ namespace Builder
 
 			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
-
-			if (ok == false)
-			{
-//				LOG_ERROR(m_log, Builder::IssueType::NotDefined, tr("Error"));
-				QThread::currentThread()->requestInterruption();
-				break;
-			}
-
 
 			//
 			// Tuning parameters
@@ -301,14 +287,9 @@ namespace Builder
 
 			ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
 
-			if (QThread::currentThread()->isInterruptionRequested() == true)
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
-				break;
-			}
-
-			if (ok == false)
-			{
-				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
@@ -326,6 +307,12 @@ namespace Builder
 		m_log->swapItemsIssues(&schemaItemsIssues);
 
 		GlobalMessanger::instance()->swapSchemaIssues(schemaItemsIssues);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			m_log->clear();		// Log can contain thouthands of messages, if it some kind iof "same ids" error
+			LOG_ERROR_OBSOLETE(m_log, "", tr("The build was canceled."));
+		}
 
 		// We've done, exit
 		//
@@ -345,11 +332,6 @@ namespace Builder
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
 			return false;
-		}
-
-		if (parent->deviceType() == Hardware::DeviceType::System)
-		{
-			LOG_MESSAGE(m_log, tr("Getting system %1...").arg(parent->caption()));
 		}
 
 		// --
@@ -382,13 +364,17 @@ namespace Builder
 
 		for (DbFileInfo& fi : files)
 		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
 			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
 			{
-				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
 				continue;
 			}
 
-			std::shared_ptr<DbFile> file;
+			LOG_MESSAGE(m_log, tr("Getting equipment object, fileid: %1, details: %2").arg(fi.fileId()).arg(fi.details()));
 
 			if (release() == true)
 			{
@@ -396,44 +382,17 @@ namespace Builder
 			}
 			else
 			{
-				ok = db->getLatestVersion(fi, &file, nullptr);
-			}
+				std::shared_ptr<Hardware::DeviceObject> device;
+				ok = db->getDeviceTreeLatestVersion(fi, &device, nullptr);
 
-			if (file == nullptr || ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Cannot get %1 instance.").arg(fi.fileName()));
-				return false;
-			}
+				if (ok == false ||
+					device.get() == nullptr)
+				{
+					LOG_ERROR_OBSOLETE(m_log, "", tr("Failed to load equipment, fileid: %1").arg(fi.fileId()));
+					continue;
+				}
 
-			Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
-
-			if (object == nullptr)
-			{
-				return false;
-			}
-			else
-			{
-				assert(object);
-			}
-
-			object->setFileInfo(fi);
-
-			std::shared_ptr<Hardware::DeviceObject> sp(object);
-
-			parent->addChild(sp);
-		}
-
-		files.clear();
-
-		for (int i = 0 ; i < parent->childrenCount(); i++)
-		{
-			std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
-
-			ok = getEquipment(db, child.get());
-
-			if (ok == false)
-			{
-				return false;
+				parent->addChild(device);
 			}
 		}
 
@@ -479,6 +438,11 @@ namespace Builder
 		if (device == nullptr)
 		{
 			assert(device);
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
 			return false;
 		}
 
@@ -901,8 +865,6 @@ namespace Builder
 
 		if (result == false)
 		{
-			//LOG_ERROR(m_log, tr("Error"));	// Error must be logged and described where it was found
-			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
@@ -935,7 +897,6 @@ namespace Builder
 		if (result == false)
 		{
 			LOG_MESSAGE(m_log, tr("Application Logic compilation was finished with errors"));
-			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
@@ -1025,7 +986,6 @@ namespace Builder
 		if (result == false)
 		{
 			LOG_MESSAGE(m_log, tr("Sofware configuration generation was finished with errors"));
-			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{

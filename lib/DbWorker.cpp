@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QSqlDriver>
 #include <QSqlError>
+#include <QSqlRecord>
 #include <QDebug>
 
 #include "../lib/DbWorker.h"
@@ -2126,7 +2127,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 	return;
 }
 
-void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables
 	//
@@ -2169,6 +2170,12 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 		return;
 	}
 
+	QTime timerObject;
+	timerObject.start();
+
+	out->clear();
+	out->reserve(q.size());
+
 	while (q.next())
 	{
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
@@ -2177,6 +2184,8 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 
 		out->push_back(file);
 	}
+
+	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
 
 	return;
 }
@@ -4249,25 +4258,76 @@ bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool
 
 bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
 {
-	file->setFileId(q.value("FileID").toInt());
-	file->setDeleted(q.value("Deleted").toBool());
-	file->setFileName(q.value("Name").toString());
-	file->setParentId(q.value("ParentID").toInt());
-	file->setChangeset(q.value("ChangesetID").toInt());
-	file->setCreated(q.value("Created").toString());
-	file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+static thread_local bool columnIndexesInitialized = false;
+static thread_local int fileIdNo = -1;
+static thread_local int deletedNo = -1;
+static thread_local int nameNo = -1;
+static thread_local int parentIdNo = -1;
+static thread_local int changesetIdNo = -1;
+static thread_local int createdNo = -1;
+static thread_local int checkOutTimeNo = -1;
+static thread_local int checkedOutNo = -1;
+static thread_local int actionNo = -1;
+static thread_local int userIdNo = -1;
+static thread_local int detailsNo = -1;
+static thread_local int dataNo = -1;
 
-	bool checkedOut = q.value("CheckedOut").toBool();
+    if (columnIndexesInitialized == false)
+	{
+		columnIndexesInitialized = true;
+
+		QSqlRecord record = q.record();
+
+		fileIdNo = record.indexOf("FileID");
+		deletedNo = record.indexOf("Deleted");
+		nameNo = record.indexOf("Name");
+		parentIdNo = record.indexOf("ParentID");
+		changesetIdNo = record.indexOf("ChangesetID");
+		createdNo = record.indexOf("Created");
+		checkOutTimeNo = record.indexOf("CheckOutTime");
+		checkedOutNo = record.indexOf("CheckedOut");
+		actionNo = record.indexOf("Action");
+		userIdNo = record.indexOf("UserID");
+		detailsNo = record.indexOf("Details");
+		dataNo = record.indexOf("Data");
+
+		if (fileIdNo == -1 ||
+		    deletedNo == -1 ||
+		    nameNo == -1 ||
+		    parentIdNo == -1 ||
+		    changesetIdNo == -1 ||
+		    createdNo == -1 ||
+		    checkOutTimeNo == -1 ||
+		    checkedOutNo == -1 ||
+		    actionNo == -1 ||
+		    userIdNo == -1 ||
+		    detailsNo == -1 ||
+		    dataNo == -1)
+		{
+			assert(false);
+			return false;
+		}
+	}
+
+	file->setFileId(q.value(fileIdNo).toInt());
+	file->setDeleted(q.value(deletedNo).toBool());
+	file->setFileName(q.value(nameNo).toString());
+	file->setParentId(q.value(parentIdNo).toInt());
+	file->setChangeset(q.value(changesetIdNo).toInt());
+	file->setCreated(q.value(createdNo).toString());
+	file->setLastCheckIn(q.value(checkOutTimeNo).toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+
+	bool checkedOut = q.value(checkedOutNo).toBool();
 	file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
 
-	int action = q.value("Action").toInt();
+	int action = q.value(actionNo).toInt();
 	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-	file->setUserId(q.value("UserID").toInt());
+	file->setUserId(q.value(userIdNo).toInt());
 
-	file->setDetails(q.value("Details").toString());
+	file->setDetails(q.value(detailsNo).toString());
 
-	QByteArray data = q.value("Data").toByteArray();
+	QByteArray data = q.value(dataNo).toByteArray();
 	file->swapData(data);
 
 	return true;

@@ -192,11 +192,12 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 		m_outputLog.isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
-		std::list<OutputLogItem> messages;
+		std::vector<OutputLogItem> messages;
+		messages.reserve(20);
 
-		for (int i = 0; i < 10 && m_outputLog.isEmpty() == false; i++)
+		if (m_outputLog.isEmpty() == false)
 		{
-			messages.push_back(m_outputLog.popMessages());
+			m_outputLog.popMessages(&messages, 20);
 		}
 
 		for (auto m = messages.begin(); m != messages.end(); ++m)
