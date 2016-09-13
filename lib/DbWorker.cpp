@@ -1410,7 +1410,7 @@ WHERE
 						}
 
 						QByteArray data = getFileQuery.value(0).toByteArray();
-						Hardware::DeviceObject* device = Hardware::DeviceObject::Create(data);
+						std::shared_ptr<Hardware::DeviceObject> device = Hardware::DeviceObject::Create(data);
 
 						if (device == nullptr)
 						{

@@ -218,10 +218,9 @@ namespace Builder
 
 			// Parse file
 			//
-			VFrame30::Schema* schemaRawPtr = VFrame30::Schema::Create(file->data());
-			std::shared_ptr<VFrame30::Schema> schema(schemaRawPtr);
+			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 
-			if (schemaRawPtr == false)
+			if (schema == nullptr)
 			{
 				log->errCMN0010(f.fileName());
 				returnResult = false;

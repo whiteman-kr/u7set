@@ -86,15 +86,15 @@ namespace VFrame30
 
 		for (int i = 0; i < layer.items().size(); i++)
 		{
-			SchemaItem* pItem = SchemaItem::Create(layer.items(i));
+			std::shared_ptr<SchemaItem> item = SchemaItem::Create(layer.items(i));
 			
-			if (pItem == nullptr)
+			if (item == nullptr)
 			{
-				assert(pItem != nullptr);
+				assert(item != nullptr);
 				continue;
 			}
 			
-			Items.push_back(std::shared_ptr<SchemaItem>(pItem));
+			Items.push_back(item);
 		}
 
 		if (layer.items().size() != (int)Items.size())
@@ -106,7 +106,7 @@ namespace VFrame30
 		return true;
 	}
 
-	SchemaLayer* SchemaLayer::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<SchemaLayer> SchemaLayer::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//
@@ -117,17 +117,17 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		SchemaLayer* pLayer = VideoLayerFactory.Create(classNameHash);
+		std::shared_ptr<SchemaLayer> layer = VideoLayerFactory.Create(classNameHash);
 
-		if (pLayer == nullptr)
+		if (layer == nullptr)
 		{
-			assert(pLayer != nullptr);
+			assert(layer != nullptr);
 			return nullptr;
 		}
 
-		pLayer->LoadData(message);
+		layer->LoadData(message);
 
-		return pLayer;
+		return layer;
 	}
 
 	// Methods

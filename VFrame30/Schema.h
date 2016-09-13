@@ -42,7 +42,7 @@ namespace VFrame30
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должен прочитаться
 		//
-		static Schema* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<Schema> CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//

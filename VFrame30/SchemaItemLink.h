@@ -9,13 +9,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLink>;
-#endif
-
-	private:
-		SchemaItemLink(void);
 	public:
+		SchemaItemLink(void);
 		explicit SchemaItemLink(SchemaUnit unit);
 		virtual ~SchemaItemLink(void);
 

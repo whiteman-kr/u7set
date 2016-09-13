@@ -149,9 +149,9 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 	{
 	}
 
-	DeviceObject* DeviceObject::fromDbFile(const DbFile& file)
+	std::shared_ptr<DeviceObject> DeviceObject::fromDbFile(const DbFile& file)
 	{
-		DeviceObject* object = DeviceObject::Create(file.data());
+		std::shared_ptr<DeviceObject> object = DeviceObject::Create(file.data());
 
 		if (object == nullptr)
 		{
@@ -356,7 +356,7 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		return true;
 	}
 
-	DeviceObject* DeviceObject::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<DeviceObject> DeviceObject::CreateObject(const Proto::Envelope& message)
 	{
 		// This func can create only one instance
 		//
@@ -367,17 +367,17 @@ static const QString presetNameCaption("PresetName");	// Optimization
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		DeviceObject* pDeviceObject = DeviceObjectFactory.Create(classNameHash);
+		std::shared_ptr<DeviceObject> deviceObject = DeviceObjectFactory.Create(classNameHash);
 
-		if (pDeviceObject == nullptr)
+		if (deviceObject.get() == nullptr)
 		{
-			assert(pDeviceObject);
-			return nullptr;
+			assert(deviceObject);
+			return deviceObject;
 		}
 
-		pDeviceObject->LoadData(message);
+		deviceObject->LoadData(message);
 
-		return pDeviceObject;
+		return deviceObject;
 	}
 
 	bool DeviceObject::SaveObjectTree(Proto::Envelope* message) const

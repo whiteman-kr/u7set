@@ -2921,14 +2921,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				VFrame30::SchemaItem* newItemRawPtr = VFrame30::SchemaItem::Create(data);
-				if (newItemRawPtr == nullptr)
+				std::shared_ptr<VFrame30::SchemaItem> newItem = VFrame30::SchemaItem::Create(data);
+
+				if (newItem == nullptr)
 				{
-					assert(newItemRawPtr != nullptr);
+					assert(newItem != nullptr);
 					return;
 				}
-
-				std::shared_ptr<VFrame30::SchemaItem> newItem(newItemRawPtr);
 
 				newItem->setNewGuid();
 
@@ -4877,12 +4876,12 @@ void EditSchemaWidget::editPaste()
 		{
 			const ::Proto::Envelope& schemaItemMessage = message.items(i);
 
-			VFrame30::SchemaItem* schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
+			std::shared_ptr<VFrame30::SchemaItem> schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
 
 			if (schemaItem != nullptr)
 			{
 				schemaItem->setNewGuid();
-				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
+				itemList.push_back(schemaItem);
 			}
 
 			if (schemaItem->isSchemaItemAfb() == true)

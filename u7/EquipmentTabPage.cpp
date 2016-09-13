@@ -365,18 +365,17 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 			continue;
 		}
 
-		Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
-		assert(object);
+		std::shared_ptr<Hardware::DeviceObject> object = Hardware::DeviceObject::Create(file->data());
 
 		if (object == nullptr)
 		{
+			assert(object);
 			continue;
 		}
 
 		object->setFileInfo(fi);
 
-		std::shared_ptr<Hardware::DeviceObject> sp(object);
-		parentObject->addChild(sp);
+		parentObject->addChild(object);
 	}
 
 	sortDeviceObject(parentObject, m_sortColumn, m_sortOrder);
@@ -2077,10 +2076,9 @@ void EquipmentView::addInOutsToSignals()
 
 			equipmentDevice->Save(bytes);	// save and restore to keep equpment version after expanding strid
 
-			Hardware::DeviceObject* newObject = Hardware::DeviceObject::Create(bytes);
-			std::shared_ptr<Hardware::DeviceObject> newObjectSp(newObject);
+			std::shared_ptr<Hardware::DeviceObject> newObject = Hardware::DeviceObject::Create(bytes);
 
-			equipmentDevices.push_front(newObjectSp);
+			equipmentDevices.push_front(newObject);
 		}
 
 		equipmentDevice = equipmentDevice->parent();
@@ -2474,7 +2472,7 @@ bool EquipmentView::canPaste() const
 
 	quint32 classNameHash = message.classnamehash(0);		// get only first, suppose all of the have the same type
 
-	Hardware::DeviceObject* deviceObject = Hardware::DeviceObjectFactory.Create(classNameHash);
+	std::shared_ptr<Hardware::DeviceObject> deviceObject = Hardware::DeviceObjectFactory.Create(classNameHash);
 
 	if (deviceObject == nullptr)
 	{
@@ -2500,7 +2498,7 @@ bool EquipmentView::canPaste() const
 		return false;
 	}
 
-	if (selectedDevice->canAddChild(deviceObject) == false)
+	if (selectedDevice->canAddChild(deviceObject.get()) == false)
 	{
 		return false;
 	}

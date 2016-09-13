@@ -80,7 +80,7 @@ namespace Hardware
 		//
 		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
 
-		static DeviceObject* fromDbFile(const DbFile& file);
+		static std::shared_ptr<DeviceObject> fromDbFile(const DbFile& file);
 
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
@@ -93,7 +93,7 @@ namespace Hardware
 		// Use this function only while serialization, as when object is created is not fully initialized
 		// and must be read before use
 		//
-		static DeviceObject* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<DeviceObject> CreateObject(const Proto::Envelope& message);
 
 		// Public methods
 		//

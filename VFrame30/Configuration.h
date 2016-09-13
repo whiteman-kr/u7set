@@ -29,7 +29,7 @@ namespace VFrame30
 	private:
 		// Use this func ONLY for serialization
 		//
-		static Configuration* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<Configuration> CreateObject(const Proto::Envelope& message);
 
 		// Properties and Datas
 		//

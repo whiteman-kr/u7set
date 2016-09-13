@@ -44,33 +44,32 @@ std::shared_ptr<VFrame30::Schema>  SchemaManager::loadSchema(QString schemaId)
 		return std::shared_ptr<VFrame30::Schema>();
 	}
 
-	VFrame30::Schema* rawSchema = VFrame30::Schema::Create(data);
-	std::shared_ptr<VFrame30::Schema> schema(rawSchema);
+	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(data);;
 
-	if (rawSchema == nullptr)
+	if (schema == nullptr)
 	{
-		return std::shared_ptr<VFrame30::Schema>();
+		return schema;
 	}
 
-	if (rawSchema->isLogicSchema() == true)
+	if (schema->isLogicSchema() == true)
 	{
-		qDebug() << "rawSchema->isLogicSchema()";
+		qDebug() << "schema->isLogicSchema()";
 	}
 
-	if (rawSchema->isMonitorSchema() == true)
+	if (schema->isMonitorSchema() == true)
 	{
-		qDebug() << "rawSchema->isMonitorSchema()";
+		qDebug() << "schema->isMonitorSchema()";
 	}
 
 	// Add schema to map
 	//
-	if (rawSchema->schemaID() != schemaId)
+	if (schema->schemaID() != schemaId)
 	{
 		// FileRecord ID attribute has one SchemaID and file contains other SchemaID, womething wrong!!!
 		//
 		qDebug() << "FileRecord ID attribute has one SchemaID and file contains other SchemaID, womething wrong!!!"
 				 << " File ID: " << schemaId
-				 << " SchemaFileID: " << rawSchema->schemaID();
+				 << " SchemaFileID: " << schema->schemaID();
 
 		return std::shared_ptr<VFrame30::Schema>();
 	}
