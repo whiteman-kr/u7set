@@ -154,10 +154,9 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// Create port receiver object
 	//
 
-	m_PortThread = new QThread();
-	m_portReceiver = new PortReceiver(m_PortThread);
-	m_portReceiver->moveToThread(m_PortThread);
-	m_PortThread->start();
+	m_portReceiver = new PortReceiver();
+	m_portReceiver->start();
+
 	// Receiver timer, it will count 5 second after last received packet.
 	// When five seconds will pass - all packet data will be deleted from table.
 	//
@@ -168,10 +167,8 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// CRC sum. Data will be processed in SerialDataTester class.
 	//
 
-	m_ParserThread = new QThread();
-	m_parser = new SerialDataParser(m_ParserThread);
-	m_parser->moveToThread(m_ParserThread);
-	m_ParserThread->start();
+	m_parser = new SerialDataParser();
+	m_parser->start();
 
 	// Main configuration signals
 	//
@@ -197,6 +194,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(this, &SerialDataTester::baudChanged, m_portReceiver, &PortReceiver::setBaud);								// Baud changed signal from SerialDataTester class
 	connect(this, &SerialDataTester::bitsChanged, m_portReceiver, &PortReceiver::setDataBits);							// Data bits changed signal from SerialDataTester class
 	connect(this, &SerialDataTester::stopBitsChanged, m_portReceiver, &PortReceiver::setStopBits);						// Stop bits changed signal from SerialDataTester class
+	connect(m_portReceiver, &PortReceiver::portClosed, this, &SerialDataTester::portClosed);
 
 	// Packet parser control signals
 	//
@@ -235,15 +233,27 @@ SerialDataTester::~SerialDataTester()
 
 	m_portReceiver->closePort();
 
-	m_PortThread->quit();
+	m_parser->terminate();
 
-	m_ParserThread->quit();
+	while (m_parser->isFinished() == false) {};
+
+	if (m_parser->isFinished() == false)
+	{
+		qDebug() << "Error: can not finish parser";
+	}
+
+	m_portReceiver->terminate();
+
+	while (m_portReceiver->isFinished() == false) {};
+
+	if (m_portReceiver->isFinished() == false)
+	{
+		qDebug() << "Error: can not finish port receiver";
+	}
 
 	delete m_portReceiver;
 	delete ui;
-	delete m_PortThread;
 	delete m_parser;
-	delete m_ParserThread;
 
 	delete m_file;
 	delete m_settings;
@@ -253,7 +263,7 @@ SerialDataTester::~SerialDataTester()
 	delete m_startReceiving;
 	delete m_stopReceiving;
 
-	delete m_settings;
+//	delete m_settings;
 	delete m_setPort;
 	delete m_setBaud;
 	delete m_setDataBits;
@@ -663,6 +673,10 @@ void SerialDataTester::setPort(QAction* newPort)
 		{
 			port->setChecked(false);
 		}
+		else
+		{
+			port->setChecked(true);
+		}
 	}
 
 	// Actually, change port in Port Receiver
@@ -702,6 +716,10 @@ void SerialDataTester::setBaud(QAction* newBaud)
 		{
 			baud->setChecked(false);
 		}
+		else
+		{
+			baud->setChecked(true);
+		}
 	}
 
 	// Actually, change baud in Port Receiver
@@ -740,6 +758,10 @@ void SerialDataTester::setBits(QAction *newBits)
 		if(bits->text() != newBits->text())
 		{
 			bits->setChecked(false);
+		}
+		else
+		{
+			bits->setChecked(true);
 		}
 	}
 
@@ -800,6 +822,10 @@ void SerialDataTester::setStopBits(QAction *newStopBits)
 		if(stopBits->text() != newStopBits->text())
 		{
 			stopBits->setChecked(false);
+		}
+		else
+		{
+			stopBits->setChecked(true);
 		}
 	}
 
@@ -897,27 +923,11 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 		dataArray.resize(m_dataSize*8);
 		dataArray.fill(0);
 
-		QString dataVisualisation;
-
 		// We are receiving already transformed data from bits to bytes.
 		// To show received bits, we need transform them back to bits
 		//
 
 		dataArray = bytesToBits(receivedValues);
-
-		/*for (int currentBit = 0; currentBit < dataArray.size(); currentBit++) // Show every received bit
-		{
-			dataVisualisation.append(dataArray.at(currentBit) == 1 ? "1" : "0"); // Writing all received bits to string value
-
-			if ((currentBit+1) % 8 == 0)
-				dataVisualisation += " ";
-		}
-
-		ui->statusBar->showMessage("Data received: " + dataVisualisation);*/
-
-		// Ok, now we will use our signals vector to find every signal
-		// in received data array
-		//
 
 		for (SignalData signal : m_signalsFromXml)
 		{
@@ -1004,9 +1014,7 @@ void SerialDataTester::dataReceived(QString version, QString trId, QString numer
 			// After all processing actions, we have result, that wrote in resultString
 			//
 
-			//ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
 			values.at(rowNumber)->setText(resultString);
-			//ui->signalsTable->setItem(rowNumber, value, values.at(rowNumber));
 			rowNumber++;
 		}
 
@@ -1061,7 +1069,7 @@ void SerialDataTester::signalTimeout()
 {
 	for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
 	{
-		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem(QString::number(0)));
+		values.at(currentRow)->setText("0");
 	}
 
 	ui->signature->setText("No data");
@@ -1239,7 +1247,11 @@ void SerialDataTester::startReceiver()
 void SerialDataTester::stopReceiver()
 {
 	m_portReceiver->closePort();
-	ui->portStatus->setText("Closed");
+}
+
+void SerialDataTester::portClosed()
+{
+	ui->portStatus->setText("closed");
 }
 
 QBitArray SerialDataTester::bytesToBits(QByteArray bytes)

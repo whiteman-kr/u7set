@@ -49,6 +49,7 @@ private slots:
 	void loadLastUsedSettings();
 	void startReceiver();
 	void stopReceiver();
+	void portClosed();
 
 signals:
 	void portChanged(QString newPortName);
@@ -85,9 +86,6 @@ private:
 	QAction* m_readXmlFile = nullptr;
 
 	QString m_pathToSignalsXml;
-
-	QThread* m_PortThread = nullptr;
-	QThread* m_ParserThread = nullptr;
 
 	struct SignalData
 	{

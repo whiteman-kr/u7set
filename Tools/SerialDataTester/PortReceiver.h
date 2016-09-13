@@ -2,8 +2,9 @@
 #define PORTRECEIVER_H
 
 #include <QSerialPort>
+#include <QThread>
 
-class PortReceiver : public QObject
+class PortReceiver : public QThread
 {
 	Q_OBJECT
 public:
@@ -13,6 +14,7 @@ public:
 signals:
 	void portError(QString error);
 	void dataFromPort(QByteArray data);
+	void portClosed();
 
 private slots:
 	void dataReceived();
