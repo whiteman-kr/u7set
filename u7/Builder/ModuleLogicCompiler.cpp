@@ -3080,22 +3080,6 @@ namespace Builder
 
 		quint32 txDataID = port->txDataID();
 
-		// REMOVE AFTER CFG CHANGES !!!!!!
-
-		Hardware::OptoPort* linkedPort = m_optoModuleStorage->getOptoPort(port->linkedPortID());
-
-		if (linkedPort == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-		else
-		{
-			txDataID = linkedPort->txDataID();
-		}
-
-		//
-
 		// write data port txData identifier
 		//
 		cmd.movConstUInt32(port->absTxStartAddress(), txDataID);
