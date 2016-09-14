@@ -28,7 +28,8 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 16;		// added dynamic custom module family
 //var configScriptVersion = 17;		// LMNumber limit is 12
 //var configScriptVersion = 18;		// i/o modules scripts moved to ConfiurationScript in presets
-var configScriptVersion = 19;		// i/o modules family checking has been removed
+//var configScriptVersion = 19;		// i/o modules family checking has been removed
+var configScriptVersion = 20;		// DataUID for LM modules is taken from linked port
 
 
 function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -1015,14 +1016,24 @@ function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNu
 			return false;
 		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-				
+		
+		var dataUID = 0;
+		if (optoPort.isLinked() == true)
+		{
+			var linkedPort = optoPort.linkedPortID();
+			var linkedOptoPort = opticModuleStorage.jsGetOptoPort(linkedPort);
+			if (linkedOptoPort != null)
+			{
+				dataUID = linkedOptoPort.txDataID();
+			}
+		}
+		
 		ptr = 20 * 2 + p * 4;
-		value = optoPort.txDataID();
-		if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), value) == false)
+		if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), dataUID) == false)
 		{
 			return false;
 		}
-		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + "\r\n");
 	} // p
 	
 	return true;

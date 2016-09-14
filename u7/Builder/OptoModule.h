@@ -97,10 +97,10 @@ namespace Hardware
 
 		Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
 
-		QString linkedPortID() const { return m_linkedPortID; }
+		Q_INVOKABLE QString linkedPortID() const { return m_linkedPortID; }
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
 
-		bool isLinked() const { return !m_linkedPortID.isEmpty(); }
+		Q_INVOKABLE bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
 		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
 		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
