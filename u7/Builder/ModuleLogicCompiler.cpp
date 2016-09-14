@@ -1830,6 +1830,12 @@ namespace Builder
 					continue;
 				}
 
+				if (connectedPinParent->isReceiver())
+				{
+					result &= genearateWriteReceiverToFbCode(*appFb, inPin, connectedPinParent->logicReceiver(), connectedPinGuid);
+					continue;
+				}
+
 				QUuid signalGuid;
 
 				if (connectedPinParent->isSignal())
@@ -2080,13 +2086,108 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const AppFb &fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
+	{
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+
+		if (connection == nullptr)
+		{
+			// Receiver is linked to unknown opto connection '%1'.
+			//
+			m_log->errALC5025(receiver.connectionId(), receiver.guid());
+			return false;
+		}
+
+		quint16 fbType = fb.opcode();
+		quint16 fbInstance = fb.instance();
+		quint16 fbParamNo = inPin.afbOperandIndex();
+
+		LogicAfbSignal afbSignal;
+
+		if (fb.getAfbSignalByIndex(fbParamNo, &afbSignal) == false)
+		{
+			return false;
+		}
+
+		Command cmd;
+
+		if (receiver.isOutputPin(receiverPinGuid) == true)
+		{
+			Address16 rxAddress;
+
+			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
+														receiver.appSignalId(),
+														m_lm->equipmentId(),
+														receiver.guid(),
+														rxAddress) == false)
+			{
+				return false;
+			}
+
+			Signal* srcSignal = m_signals->getSignal(receiver.appSignalId());
+
+			if (srcSignal == nullptr)
+			{
+				// Signal identifier '%1' is not found.
+				//
+				m_log->errALC5000(receiver.appSignalId(), receiver.guid());
+				return false;
+			}
+
+			if (checkSignalsCompatibility(*srcSignal, receiver.guid(), fb, afbSignal) == false)
+			{
+				return false;
+			}
+
+			QString str;
+
+			str = QString(tr("%1 >> %2 => %3.%4")).arg(receiver.connectionId()).arg(receiver.appSignalId()).
+													arg(fb.caption()).arg(afbSignal.caption());
+
+			if (afbSignal.isAnalog())
+			{
+				cmd.writeFuncBlock32(fbType, fbInstance, fbParamNo, rxAddress.offset(), fb.caption());
+			}
+			else
+			{
+				if (afbSignal.isDiscrete())
+				{
+					cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, rxAddress.offset(), rxAddress.bit(), fb.caption());
+				}
+				else
+				{
+					assert(false);		// unknown type of signal
+					return false;
+				}
+			}
+
+			cmd.setComment(str);
+			m_code.append(cmd);
+
+			return true;
+		}
+
+		if (receiver.isValidityPin(receiverPinGuid))
+		{
+			assert(false);	 // is not implemented now
+			return true;
+		}
+
+		LOG_INTERNAL_ERROR(m_log);
+
+		assert(false);		// unknown pin type
+
+		return false;
+	}
+
+
 	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
 		if (connection == nullptr)
 		{
-			// // Receiver is linked to unknown opto connection '%1'.
+			// Receiver is linked to unknown opto connection '%1'.
 			//
 			m_log->errALC5025(receiver.connectionId(), receiver.guid());
 			return false;
@@ -2106,13 +2207,13 @@ namespace Builder
 
 		if (receiver.isOutputPin(pinGuid) == true)
 		{
-			Address16 srcAddress;
+			Address16 rxAddress;
 
 			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
 																 receiver.appSignalId(),
 																 m_lm->equipmentId(),
 																 receiver.guid(),
-																 srcAddress) == false)
+																 rxAddress) == false)
 			{
 				return false;
 			}
@@ -2123,11 +2224,11 @@ namespace Builder
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(receiver.appSignalId(), appSignal.guid());
+				m_log->errALC5000(receiver.appSignalId(), receiver.guid());
 				return false;
 			}
 
-			if (checkSignalsCompatibility(srcSignal, receiver.guid(), destSignal, appSignal.guid()) == false)
+			if (checkSignalsCompatibility(*srcSignal, receiver.guid(), *destSignal, appSignal.guid()) == false)
 			{
 				return false;
 			}
@@ -2138,14 +2239,14 @@ namespace Builder
 
 			if (destSignal->isAnalog())
 			{
-				cmd.mov32(destSignal->ramAddr().offset(), srcAddress.offset());
+				cmd.mov32(destSignal->ramAddr().offset(), rxAddress.offset());
 			}
 			else
 			{
 				if (destSignal->isDiscrete())
 				{
 					cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
-							   srcAddress.offset(), srcAddress.bit());
+							   rxAddress.offset(), rxAddress.bit());
 				}
 				else
 				{
@@ -2175,55 +2276,48 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal* srcSignal, QUuid srcSignalUuid, const Signal* destSignal, QUuid destSignalUuid)
+	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)
 	{
-		if (srcSignal == nullptr ||
-			destSignal == nullptr)
+		if (srcSignal.isDiscrete())
 		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (srcSignal->isDiscrete())
-		{
-			if (destSignal->isAnalog())
+			if (destSignal.isAnalog())
 			{
 				// Discrete signal '%1' is connected to analog signal '%2'.
 				//
-				m_log->errALC5037(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				m_log->errALC5037(srcSignal.appSignalID(), srcSignalUuid, destSignal.appSignalID(), destSignalUuid);
 				return false;
 			}
 
-			assert(destSignal->isDiscrete());
+			assert(destSignal.isDiscrete());
 
 			// Both signals are discret
 
 			return true;
 		}
 
-		if (srcSignal->isAnalog())
+		if (srcSignal.isAnalog())
 		{
-			if (destSignal->isDiscrete())
+			if (destSignal.isDiscrete())
 			{
 				// Analog signal '%1' is connected to discrete signal '%2'.
 				//
-				m_log->errALC5036(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				m_log->errALC5036(srcSignal.appSignalID(), srcSignalUuid, destSignal.appSignalID(), destSignalUuid);
 				return false;
 			}
 
-			if (srcSignal->dataFormat() != destSignal->dataFormat())
+			if (srcSignal.dataFormat() != destSignal.dataFormat())
 			{
 				// Signals '%1' and '%2' have different data format.
 				//
-				m_log->errALC5038(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				m_log->errALC5038(srcSignal.appSignalID(), srcSignalUuid, destSignal.appSignalID(), destSignalUuid);
 				return false;
 			}
 
-			if (srcSignal->dataSize() != destSignal->dataSize())
+			if (srcSignal.dataSize() != destSignal.dataSize())
 			{
 				// Signals '%1' and '%2' have different data size.
 				//
-				m_log->errALC5039(srcSignal->appSignalID(), srcSignalUuid, destSignal->appSignalID(), destSignalUuid);
+				m_log->errALC5039(srcSignal.appSignalID(), srcSignalUuid, destSignal.appSignalID(), destSignalUuid);
 				return false;
 			}
 
@@ -2234,6 +2328,59 @@ namespace Builder
 
 		return false;
 	}
+
+
+	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const AppFb& fb, const LogicAfbSignal& afbSignal)
+	{
+		if (srcSignal.isDiscrete())
+		{
+			if (afbSignal.isAnalog())
+			{
+				// Discrete signal '%1' is connected to analog input '%2.%3'.
+				//
+				m_log->errALC5007(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				return false;
+			}
+
+			// Both signals are discret
+			return true;
+		}
+
+		if (srcSignal.isAnalog())
+		{
+			if (afbSignal.isDiscrete())
+			{
+				// Analog signal '%1' is connected to discrete input '%2.%3'.
+				//
+				m_log->errALC5010(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				return false;
+			}
+
+			if (srcSignal.dataFormat() != afbSignal.dataFormat())
+			{
+				// Signal '%1' is connected to input '%2.%3' with uncompatible data format.
+				//
+				m_log->errALC5008(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				return false;
+			}
+
+			if (srcSignal.dataSize() != afbSignal.size())
+			{
+				// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
+				//
+				m_log->errALC5009(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				return false;
+			}
+
+			return true;
+		}
+
+		assert(false);		// unknown signal type
+
+		return false;
+	}
+
+
 
 
 	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
@@ -2931,9 +3078,27 @@ namespace Builder
 		m_code.append(comment);
 		m_code.newLine();
 
+		quint32 txDataID = port->txDataID();
+
+		// REMOVE AFTER CFG CHANGES !!!!!!
+
+		Hardware::OptoPort* linkedPort = m_optoModuleStorage->getOptoPort(port->linkedPortID());
+
+		if (linkedPort == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+		else
+		{
+			txDataID = linkedPort->txDataID();
+		}
+
+		//
+
 		// write data port txData identifier
 		//
-		cmd.movConstUInt32(port->absTxStartAddress(), port->txDataID());
+		cmd.movConstUInt32(port->absTxStartAddress(), txDataID);
 		cmd.setComment("txData ID");
 
 		m_code.append(cmd);
