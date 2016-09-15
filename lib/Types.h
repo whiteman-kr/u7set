@@ -107,6 +107,7 @@ public:
 		ArchiveService = 9003,
 		TuningService = 9004,
 		DiagDataService = 9005,
+		TuningClient = 9006,
 	};
 	Q_ENUM(SoftwareType)
 

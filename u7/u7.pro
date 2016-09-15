@@ -177,7 +177,8 @@ SOURCES +=\
     ../lib/SignalProperties.cpp \
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
-    Builder/ArchivingServiceCfgGenerator.cpp
+    Builder/ArchivingServiceCfgGenerator.cpp \
+    Builder/TuningClientCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -284,7 +285,8 @@ HEADERS  += \
     ../lib/SignalProperties.h \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
-    Builder/ArchivingServiceCfgGenerator.h
+    Builder/ArchivingServiceCfgGenerator.h \
+    Builder/TuningClientCfgGenerator.h
 
 FORMS    += \
     ChangesetDialog.ui \
