@@ -1238,8 +1238,9 @@ void SignalsModel::saveSignal(Signal& signal)
 	emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1));
 }
 
-void SignalsModel::cloneSignals(const QSet<int>& signalIDs)
+QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 {
+	QList<int> resultSignalIDs;
 	m_signalSet.buildID2IndexMap();
 
 	auto idMaker = [](QString prefix, QString id) {
@@ -1307,7 +1308,7 @@ void SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		if (prefixNumerator >= 1000)
 		{
 			assert(false);
-			return;
+			return QList<int>();
 		}
 
 		QVector<Signal> groupSignals(groupSignalIDs.count());
@@ -1321,8 +1322,13 @@ void SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		}
 
 		dbController()->addSignal(type, &groupSignals, m_parentWindow);
+		for (int i = 0; i < groupSignals.count(); i++)
+		{
+			resultSignalIDs.push_back(groupSignals[i].ID());
+		}
 	}
 	loadSignals();
+	return resultSignalIDs;
 }
 
 void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
@@ -1731,6 +1737,7 @@ void SignalsTabPage::cloneSignal()
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
+
 	QSet<int> clonedSignalIDs;
 	for (int i = 0; i < selection.count(); i++)
 	{
@@ -1738,7 +1745,16 @@ void SignalsTabPage::cloneSignal()
 		int id = m_signalsModel->key(row);
 		clonedSignalIDs.insert(id);
 	}
-	m_signalsModel->cloneSignals(clonedSignalIDs);
+
+	m_selectedRowsSignalID = m_signalsModel->cloneSignals(clonedSignalIDs);
+	if (!m_selectedRowsSignalID.isEmpty())
+	{
+		m_focusedCellSignalID = m_selectedRowsSignalID[0];
+	}
+
+	m_signalsView->clearSelection();
+
+	restoreSelection();
 }
 
 void SignalsTabPage::deleteSignal()
@@ -1881,6 +1897,8 @@ void SignalsTabPage::restoreSelection()
 
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
+
+	m_signalsView->scrollTo(currentProxyIndex);
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)
