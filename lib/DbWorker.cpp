@@ -1785,6 +1785,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	}
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	q.prepare("SELECT * FROM get_file_list(:userid, :parentid, :filter);");
 	q.bindValue(":userid", currentUser().userId());
@@ -1864,6 +1865,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 	request += "]);";
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -1930,6 +1932,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		// request
 		//
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		q.prepare("SELECT * FROM add_file(:userid, :filename, :parentid, :filedata, :details);");
 
@@ -2024,6 +2027,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 				.arg(file.fileId());
 
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 
@@ -2101,6 +2105,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -2157,11 +2162,15 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 
 	// request, result is a list of DbFile
 	//
+	QTime timerObject;
+	timerObject.start();
+
 	QString request = QString("SELECT * FROM get_latest_file_tree_version(%1, %2);")
 			.arg(currentUser().userId())
 			.arg(parentFileInfo.fileId());
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -2170,22 +2179,32 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 		return;
 	}
 
-	QTime timerObject;
-	timerObject.start();
-
 	out->clear();
 	out->reserve(q.size());
+
+//	qint64 memoryAllocationEllpased = 0;
+//	qint64 updateFileEllpased = 0;
+//	qint64 pushBackEllpased = 0;
+
 
 	while (q.next())
 	{
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
+		//QElapsedTimer updateFileTimer;
+		//updateFileTimer.start();
+
 		db_updateFile(q, file.get());
+
+		//updateFileEllpased += updateFileTimer.nsecsElapsed();
 
 		out->push_back(file);
 	}
 
 	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
+//	qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
+//	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+//	qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;
 }
@@ -2243,6 +2262,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 			.arg(filesArray);
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -2300,7 +2320,6 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 	//
 	for (unsigned int i = 0; i < files->size(); i++)
 	{
-
 		const DbFileInfo& fi = files->at(i);
 
 		// Set progress value here
@@ -2319,6 +2338,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -2402,6 +2422,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 
@@ -2464,7 +2485,6 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 	//
 	for (unsigned int i = 0; i < files->size(); i++)
 	{
-
 		const DbFileInfo& fi = files->at(i);
 
 		// Set progress value here
@@ -2484,6 +2504,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 				.arg(changesetId);
 
 		QSqlQuery q(db);
+		q.setForwardOnly(true);
 
 		bool result = q.exec(request);
 		if (result == false)
@@ -2563,6 +2584,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	// request
 	//
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -2651,6 +2673,7 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 	// request
 	//
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -2736,6 +2759,7 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 	// request
 	//
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -2821,6 +2845,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	// request
 	//
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 
@@ -2884,6 +2909,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 			.arg(fileInfo->fileId());
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -2937,6 +2963,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 			.arg(file->fileId());
 
 	QSqlQuery q(db);
+	q.setForwardOnly(true);
 
 	bool result = q.exec(request);
 	if (result == false)
@@ -2950,7 +2977,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 		DbChangesetInfo ci;
 
 		ci.setChangeset(q.value("ChangesetID").toInt());
-		ci.setDate(q.value("CheckInTime").toString());
+		ci.setDate(q.value("CheckInTime").toDateTime());
 		ci.setComment(q.value("Comment").toString());
 		ci.setUserId(q.value("UserID").toInt());
 		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
@@ -3280,9 +3307,9 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setUserID(q.value(5).toInt());
 	s.setChannel(static_cast<E::Channel>(q.value(6).toInt()));
 	s.setType(static_cast<E::SignalType>(q.value(7).toInt()));
-	s.setCreated(q.value(8).toString());
+	s.setCreated(q.value(8).toDateTime());
 	s.setDeleted(q.value(9).toBool());
-	s.setInstanceCreated(q.value(10).toString());
+	s.setInstanceCreated(q.value(10).toDateTime());
 	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
 	s.setAppSignalID(q.value(12).toString());
 	s.setCustomAppSignalID(q.value(13).toString());
@@ -4272,11 +4299,11 @@ static thread_local int userIdNo = -1;
 static thread_local int detailsNo = -1;
 static thread_local int dataNo = -1;
 
+	QSqlRecord record = q.record();
+
     if (columnIndexesInitialized == false)
 	{
 		columnIndexesInitialized = true;
-
-		QSqlRecord record = q.record();
 
 		fileIdNo = record.indexOf("FileID");
 		deletedNo = record.indexOf("Deleted");
@@ -4309,26 +4336,23 @@ static thread_local int dataNo = -1;
 		}
 	}
 
-	file->setFileId(q.value(fileIdNo).toInt());
-	file->setDeleted(q.value(deletedNo).toBool());
-	file->setFileName(q.value(nameNo).toString());
-	file->setParentId(q.value(parentIdNo).toInt());
-	file->setChangeset(q.value(changesetIdNo).toInt());
-	file->setCreated(q.value(createdNo).toString());
-	file->setLastCheckIn(q.value(checkOutTimeNo).toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+	file->setFileId(record.value(fileIdNo).toInt());
+	file->setDeleted(record.value(deletedNo).toBool());
+	file->setFileName(record.value(nameNo).toString());
+	file->setParentId(record.value(parentIdNo).toInt());
+	file->setChangeset(record.value(changesetIdNo).toInt());
+	file->setCreated(record.value(createdNo).toDateTime());
+	file->setLastCheckIn(record.value(checkOutTimeNo).toDateTime());		// setLastCheckIn BUT TIME IS CheckOutTime
 
-	bool checkedOut = q.value(checkedOutNo).toBool();
+	bool checkedOut = record.value(checkedOutNo).toBool();
 	file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
 
-	int action = q.value(actionNo).toInt();
+	int action = record.value(actionNo).toInt();
 	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-	file->setUserId(q.value(userIdNo).toInt());
-
-	file->setDetails(q.value(detailsNo).toString());
-
-	QByteArray data = q.value(dataNo).toByteArray();
-	file->swapData(data);
+	file->setUserId(record.value(userIdNo).toInt());
+	file->setDetails(record.value(detailsNo).toString());
+	file->swapData(record.value(dataNo).toByteArray());
 
 	return true;
 }
@@ -4360,7 +4384,7 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	fileInfo->setFileName(q.value(2).toString());
 	fileInfo->setParentId(q.value(3).toInt());
 	fileInfo->setChangeset(q.value(4).toInt());
-	fileInfo->setCreated(q.value(5).toString());
+	fileInfo->setCreated(q.value(5).toDateTime());
 	fileInfo->setSize(q.value(6).toInt());
 	fileInfo->setState(q.value(7).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 	//fileInfo->setCheckoutTime(q.value(8).toString());

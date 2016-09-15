@@ -651,6 +651,7 @@ message DeviceObject
 	optional bool presetRoot = 33 [default = false];
 	optional wstring presetName = 34;
 	optional Uuid presetObjectUuid = 35;
+	optional int32 childCountHint = 36 [default = 0];	// Hint for calling m_children.reserve()
 
 	// Derived from Hardware::DeviceObject
 	//

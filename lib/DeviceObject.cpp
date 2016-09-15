@@ -183,6 +183,7 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 		Proto::Write(mutableDeviceObject->mutable_caption(), m_caption);
 
 		mutableDeviceObject->set_place(m_place);
+		mutableDeviceObject->set_childcounthint(static_cast<int>(m_children.size()));
 
 		if (m_childRestriction.isEmpty() == false)
 		{
@@ -250,6 +251,12 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 		Proto::Read(deviceobject.equipmentid(), &m_equipmentId);
 		Proto::Read(deviceobject.caption(), &m_caption);
 		m_place = deviceobject.place();
+
+		size_t childCountHint = deviceobject.childcounthint();
+		if (childCountHint != 0)
+		{
+			m_children.reserve(childCountHint);
+		}
 
 		if (deviceobject.has_childrestriction() == true)
 		{

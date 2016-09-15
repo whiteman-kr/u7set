@@ -21,7 +21,9 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
+#include "../lib/PlainObjectHeap.h"
 
+//extern poh::PlainObjectHeap thePropertyObjectHeap;
 
 class PropertyObject;
 
@@ -702,7 +704,7 @@ public:
 private:
 	void checkLimits()
 	{
-		if (lowLimit().isValid() == true)
+		if (m_lowLimit.isValid() == true)
 		{
 			assert(m_lowLimit.type() == m_value.type());
 
@@ -712,7 +714,7 @@ private:
 			}
 		}
 
-		if (highLimit().isValid() == true)
+		if (m_highLimit.isValid() == true)
 		{
 			assert(m_highLimit.type() == m_value.type());
 
@@ -724,11 +726,10 @@ private:
 	}
 
 public:
-
 	void setLimits(const QVariant& low, const QVariant& high)
 	{
-		setLowLimit(low);
-		setHighLimit(high);
+		m_lowLimit = low;
+		m_highLimit = high;
 	}
 
 	const QVariant& lowLimit() const
@@ -1015,6 +1016,7 @@ public:
 			return nullptr;
 		}
 
+		//std::shared_ptr<PropertyValue<TYPE>> property = thePropertyObjectHeap.alloc<PropertyValue<TYPE>>();
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		uint hash = qHash(caption);
@@ -1039,6 +1041,7 @@ public:
 											 const QString& category,
 											 bool visible)
 	{
+		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
 
 		uint hash = qHash(caption);
