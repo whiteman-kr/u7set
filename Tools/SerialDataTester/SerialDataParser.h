@@ -21,6 +21,7 @@ signals:
 
 public slots:
 	void parse(const QByteArray receivedData);
+	void setDataAmountInPacket(const int amount);
 
 private slots:
 	void scanningSignaure();
@@ -83,5 +84,6 @@ private:
 	};
 
 	State m_state = ScanningSignature;
-	bool lock = false;
+
+	int m_dataAmountInPacket = 0;
 };

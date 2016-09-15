@@ -30,6 +30,11 @@ void SerialDataParser::parse(const QByteArray receivedData)
 	}
 }
 
+void SerialDataParser::setDataAmountInPacket(const int amount)
+{
+	m_dataAmountInPacket = amount;
+}
+
 void SerialDataParser::scanningSignaure()
 {	
 	int bytesToCopy = 0;					// How many bytes we need to copy
@@ -46,9 +51,12 @@ void SerialDataParser::scanningSignaure()
 			bytesToCopy = avaiableDataSize;
 		}
 
+		//assert(bytesToCopy != 0);
+		//assert(avaiableDataSize != 0);
+		//assert(bytesToCopy < 5);
+
 		memcpy(m_signature.bytes + m_bytesCount, m_readPtr, bytesToCopy); // Record amount of bytes
 		m_bytesCount += bytesToCopy; // Set signature bytes amount to our value (Now, signature has its own amount of byes + recordered amount of bytes)
-
 
 		if (m_bytesCount == 4)  // If signature consist of 4 bytes, lets have a look
 		{
@@ -92,6 +100,9 @@ void SerialDataParser::readingHeader()
 		bytesToCopy = avaiableDataSize;
 	}
 
+	assert(bytesToCopy < 9);
+	assert(bytesToCopy >= 0);
+
 	memcpy(m_header.bytes + m_bytesCount, m_readPtr, bytesToCopy);
 	m_bytesCount += bytesToCopy;
 
@@ -105,26 +116,30 @@ void SerialDataParser::readingHeader()
 	}
 	else
 	{
-		m_state = ScanningSignature;
-		if (m_readPtr < m_buffer + m_dataSize)
-		{
-			m_readPtr++; // Move pointer by one byte
-		}
-		m_bytesCount = 0;
+		m_readPtr += bytesToCopy; // Move pointer by one byte
 	}
 }
 
 void SerialDataParser::readingData()
 {
-	qint16 dataAmount = m_header.header.dataAmount+12; // 8 - crc bytes and 4 - dataUniqueIdBytes
+	qint16 dataAmount = m_dataAmountInPacket+12; // 8 - crc bytes and 4 - dataUniqueIdBytes
+
+	if (dataAmount < 0)
+	{
+		return;
+	}
 
 	int bytesToCopy = (dataAmount) - m_bytesCount;
+
 	int avaiableDataSize = m_dataSize - (m_readPtr - m_buffer);
 
 	if (avaiableDataSize < bytesToCopy)
 	{
 		bytesToCopy = avaiableDataSize;
 	}
+
+	assert (bytesToCopy >= 0);
+	assert (bytesToCopy <= m_dataAmountInPacket+12);
 
 	memcpy(m_packetData + m_bytesCount, m_readPtr, bytesToCopy);
 
@@ -161,9 +176,6 @@ void SerialDataParser::readingData()
 		m_packetData -= m_header.header.dataAmount;
 		m_packetData -= 4;
 
-		free (m_packetData);
-		m_packetData = new char[SerialParserBufferSize];
-
 		m_readPtr += bytesToCopy;
 
 		QString version = QString::number(m_header.header.version);
@@ -189,11 +201,6 @@ void SerialDataParser::readingData()
 	}
 	else
 	{
-		m_state = ScanningSignature;
-		if (m_readPtr < m_buffer + m_dataSize)
-		{
-			m_readPtr++; // Move pointer by one byte
-		}
-		m_bytesCount = 0;
+		m_readPtr+=bytesToCopy;
 	}
 }
