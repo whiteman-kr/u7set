@@ -570,20 +570,21 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->equipmentID() == "TEST_R1_CH01_MD12_OPTOPORT01")
-			{
-				int a = 0;
-				a++;
-			}
-
 			if (port->manualSettings() == true)
 			{
 				port->setTxStartAddress(port->manualTxStartAddressW());
 			}
 			else
 			{
-				port->setTxStartAddress(txStartAddress);
-				txStartAddress += port->txDataSizeW();
+				if (isLM())
+				{
+					port->setTxStartAddress(0);					// in LM opto ports txStartAddress always 0
+				}
+				else
+				{
+					port->setTxStartAddress(txStartAddress);
+					txStartAddress += port->txDataSizeW();
+				}
 			}
 		}
 
@@ -940,7 +941,7 @@ namespace Hardware
 			{
 				// calculate tx addresses for ports of LM module
 				//
-				int i = 0;
+				int portNo = 0;
 
 				for(OptoPort* port : portsList)
 				{
@@ -951,27 +952,40 @@ namespace Hardware
 						return false;
 					}
 
-					if (port->manualSettings() == true)
-					{
-						continue;
-					}
-
 					int absTxStartAddress =	module->optoInterfaceDataOffset() +
-											i * module->optoPortDataSize() +
+											portNo * module->optoPortDataSize() +
 											module->optoPortAppDataOffset();
 
-					port->setAbsTxStartAddress(absTxStartAddress);
-
-					i++;
-
-					if (port->txDataSizeW() > module->optoPortAppDataSize())
+					if (port->manualSettings() == true)
 					{
-						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
-						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
-						result = false;
-						break;
+						absTxStartAddress += port->manualTxStartAddressW();
+
+						port->setAbsTxStartAddress(absTxStartAddress);
+
+						if (port->manualTxStartAddressW() + port->txDataSizeW() > module->optoPortAppDataSize())
+						{
+							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
 					}
+					else
+					{
+						port->setAbsTxStartAddress(absTxStartAddress);
+
+						if (port->txDataSizeW() > module->optoPortAppDataSize())
+						{
+							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
+					}
+
+					portNo++;
 				}
 
 				continue;
@@ -996,24 +1010,38 @@ namespace Hardware
 
 					if (port->manualSettings() == true)
 					{
-						continue;
+						absTxStartAddress += port->manualTxStartAddressW();
+
+						port->setAbsTxStartAddress(absTxStartAddress);
+
+						if (port->manualTxStartAddressW() + port->txDataSizeW() > module->optoPortAppDataSize())
+						{
+							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
+
 					}
-
-					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
-					//
-					port->setAbsTxStartAddress(absTxStartAddress);
-
-					absTxStartAddress += port->txDataSizeW();
-
-					txDataSizeW += port->txDataSizeW();
-
-					if (txDataSizeW > module->optoPortAppDataSize())
+					else
 					{
-						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
-						result = false;
-						break;
+						port->setAbsTxStartAddress(absTxStartAddress);
+
+						absTxStartAddress += port->txDataSizeW();
+
+						txDataSizeW += port->txDataSizeW();
+
+						if (txDataSizeW > module->optoPortAppDataSize())
+						{
+							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+							//
+							m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), module->equipmentID(), module->optoPortAppDataSize());
+							result = false;
+							break;
+						}
 					}
 				}
 

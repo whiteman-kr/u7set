@@ -9,7 +9,7 @@
 
 AppSignalStateEx::AppSignalStateEx()
 {
-	m_state.flags.all = 0;
+	m_current.flags.all = 0;
 }
 
 
@@ -34,74 +34,67 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 
-void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double value)
+void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 {
-	bool writeStateChanges = false;
+	bool updateStoredState = false;
+
+	// update current state
+	//
+	m_current.time = time;
+	m_current.flags.valid = validity;
+	m_current.value = value;
 
 	if (m_initialized == false)
 	{
 		m_initialized = true;
-		writeStateChanges = true;
+		m_stored = m_current;			// also init stored state before value testings
+		updateStoredState = true;
 	}
-	else
+
+	if (validity == VALID_STATE)
 	{
-		if (m_state.flags.valid != flags.valid)
+		// current state is Valid
+		//
+		if (m_isDiscreteSignal == true)
 		{
-			writeStateChanges = true;		// changes of signal validity always write
+			if (m_stored.value != m_current.value)
+			{
+				updateStoredState = true;
+			}
 		}
 		else
 		{
-			if (flags.valid)
+			// is analog signal
+			//
+			if (fabs(m_stored.value - m_current.value) > m_absAperture)
 			{
-				// current state is Valid
-				//
-				if (m_isDiscreteSignal == true)
-				{
-					// is discrete signal
-					//
-					if (static_cast<int>(m_state.value) != static_cast<int>(value))
-					{
-						writeStateChanges = true;
-					}
-				}
-				else
-				{
-					// is analog signal
-					//
-					if (fabs(value - m_state.value) > m_absAperture)
-					{
-						writeStateChanges = true;
-					}
+				updateStoredState = true;
+			}
 
-					if (value > m_highLimit)
-					{
-						flags.overflow = 1;
-					}
+			if (value > m_highLimit)
+			{
+				m_current.flags.overflow = 1;
+			}
 
-					if (value < m_lowLimit)
-					{
-						flags.underflow = 1;
-					}
-
-					if (flags.all != m_state.flags.all)
-					{
-						writeStateChanges = true;
-					}
-				}
+			if (value < m_lowLimit)
+			{
+				m_current.flags.underflow = 1;
 			}
 		}
 	}
 
-	if (writeStateChanges)
+	if (m_stored.flags.all != m_current.flags.all)
 	{
-		m_state.time = time;
+		updateStoredState = true;		// changes of signal flags always write
+	}
 
-		m_state.flags = flags;
-		m_state.value = value;
+	if (updateStoredState)
+	{
+		// update stored state
+		//
+		m_stored = m_current;
 
-		qDebug() << "State changes " << m_signal->appSignalID() << " val = " << m_state.value  << " flags = " << m_state.flags.all;
-		// <<
-		 //"reg " << m_signal->regValueAddr().offset() << ":" << m_signal->regValueAddr().bit();
+		//qDebug() << "State changes " << m_signal->appSignalID() << " val = " << m_current.value  << " flags = " << m_current.flags.all;
 	}
 }
 
@@ -204,7 +197,7 @@ bool AppSignalStates::getState(Hash hash, AppSignalState& state) const
 	{
 		const AppSignalStateEx* stateEx = m_hash2State[hash];
 
-		state = stateEx->m_state;
+		state = stateEx->m_current;
 
 		return true;
 	}

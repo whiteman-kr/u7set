@@ -2472,6 +2472,25 @@ namespace Builder
 				  arg(fbCaption).arg(param1).arg(param2));
 	}
 
+	/// IssueCode: ALC5055
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Optical connection '%1' is configured manually.
+	///
+	/// Parameters:
+	///		%1 Optical connection ID
+	///
+	/// Description:
+	///		Note, that optical connection has manual settings.
+	///
+	void IssueLogger::wrnALC5055(QString connectionID)
+	{
+		LOG_WARNING(IssueType::AlCompiler,
+				  5055,
+				  QString(tr("Optical connection '%1' is configured manually.")).arg(connectionID));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

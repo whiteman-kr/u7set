@@ -8,7 +8,8 @@
 struct AppSignalStateEx
 {
 private:
-	AppSignalState m_state;
+	AppSignalState m_current;
+	AppSignalState m_stored;
 
 	// paramters needed to update state
 	//
@@ -26,9 +27,9 @@ public:
 	AppSignalStateEx();
 
 	void setSignalParams(int index, Signal* signal);
-	void setState(Times time, AppSignalStateFlags flags, double value);
+	void setState(Times time, quint32 validity, double value);
 
-	void invalidate() { m_state.flags.all = 0; }
+	void invalidate() { m_current.flags.all = 0; }
 
 	QString appSignalID();
 

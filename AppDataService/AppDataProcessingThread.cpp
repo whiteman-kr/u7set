@@ -55,7 +55,7 @@ void AppDataProcessingWorker::parseRupData()
 {
 	m_parsedRupDataCount++;
 
-	if ((m_parsedRupDataCount % 200) == 0)
+	if ((m_parsedRupDataCount % 500) == 0)
 	{
 		qDebug() << "Parced" << m_parsedRupDataCount;
 	}
@@ -72,16 +72,18 @@ void AppDataProcessingWorker::parseRupData()
 		return;
 	}
 
+	quint32 validity = 0;
+	double value = 0;
+	bool result = true;
+
 	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
 	{
-		double value = 0;
-
 		if (parseInfo.valueAddr.offset() == -1)
 		{
 			continue;
 		}
 
-		bool result = getDoubleValue(parseInfo, value);
+		result = getDoubleValue(parseInfo, value);
 
 		if (result == false)
 		{
@@ -89,15 +91,12 @@ void AppDataProcessingWorker::parseRupData()
 			continue;
 		}
 
-		AppSignalStateFlags flags;
-
-		flags.all = 0;
-
-		result = getValidity(parseInfo, flags);
+		result = getValidity(parseInfo, validity);
 
 		if (result == false)
 		{
 			m_validityParsingErrorCount++;
+			continue;
 		}
 
 		AppSignalStateEx* signalState = m_signalStates[parseInfo.index];
@@ -108,7 +107,7 @@ void AppDataProcessingWorker::parseRupData()
 			continue;
 		}
 
-		signalState->setState(m_rupData.time, flags, value);
+		signalState->setState(m_rupData.time, validity, value);
 	}
 }
 
@@ -167,7 +166,7 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		else
 		{
 			qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
-			//assert(false);
+			assert(false);
 			return false;
 		}
 	}
@@ -176,7 +175,7 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 }
 
 
-bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, AppSignalStateFlags& flags)
+bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, quint32& validity)
 {
 	// get signal validity from m_rupData.data buffer using parseInfo
 	//
@@ -184,15 +183,16 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, AppS
 
 	if (validityOffset == BAD_ADDRESS)
 	{
-		flags.valid = 1;				// no validity flags in reg buffer
+		validity = VALID_STATE;				// no validity flags in reg buffer
 		return true;
 	}
 
-	validityOffset *= 2;				// offset in Words => offset in Bytes
+	validityOffset *= 2;					// offset in Words => offset in Bytes
 
 	if (validityOffset >= m_rupData.dataSize)
 	{
 		assert(false);
+		validity = INVALID_STATE;
 		return false;
 	}
 
@@ -203,7 +203,7 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, AppS
 		rawValue = qFromBigEndian<quint16>(rawValue);
 	}
 
-	flags.valid = (rawValue >> parseInfo.validityAddr.bit()) & 0x0001;
+	validity = static_cast<quint32>((rawValue >> parseInfo.validityAddr.bit()) & 0x0001);
 
 	return true;
 }

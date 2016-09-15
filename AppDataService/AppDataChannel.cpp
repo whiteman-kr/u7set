@@ -202,10 +202,6 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 
 	time.system = currentTime;
 
-	AppSignalStateFlags flags;
-
-	flags.valid = INVALID_STATE;
-
 	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
 	{
 		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
@@ -216,11 +212,11 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 			continue;
 		}
 
-		signalState->setState(time, flags, 0);
+		signalState->setState(time, INVALID_STATE, 0);
 	}
 
 	HostAddressPort addr(dataSourceIP, 0);
-	qDebug() << "Invalidate signals for source" << addr.addressStr();
+	qDebug() << "Invalidate signals of source" << addr.addressStr();
 }
 
 

@@ -30,7 +30,7 @@ private:
 
 	void parseRupData();
 	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
-	bool getValidity(const SignalParseInfo& parseInfo, AppSignalStateFlags& flags);
+	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
 
 public:
 	AppDataProcessingWorker(int number, RupDataQueue& rupDataQueue,

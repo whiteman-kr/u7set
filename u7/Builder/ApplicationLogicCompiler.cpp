@@ -281,6 +281,11 @@ namespace Builder
 		{
 			std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
 
+			if (connection->manualSettings() == true)
+			{
+				m_log->wrnALC5055(connection->connectionID());
+			}
+
 			quint16 portID = connection->getID();
 
 			Hardware::OptoPort* optoPort1 = nullptr;
