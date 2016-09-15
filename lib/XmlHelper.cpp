@@ -119,6 +119,10 @@ void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value)
 	writeStringAttribute(name, QString::number(value));
 }
 
+void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value, int decimalPlaces)
+{
+	writeStringAttribute(name, QString::number(value, 'f', decimalPlaces));
+}
 
 void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
 {
