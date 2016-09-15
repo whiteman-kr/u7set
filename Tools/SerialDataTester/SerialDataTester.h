@@ -56,6 +56,7 @@ signals:
 	void baudChanged(int newPortBaud);
 	void bitsChanged(QSerialPort::DataBits newBits);
 	void stopBitsChanged(QSerialPort::StopBits newStopBits);
+	void dataAmountInPacketChanged(int amount);
 
 private:
 	QBitArray bytesToBits(QByteArray bytes);

@@ -44,6 +44,8 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	ui->portsList->setCurrentText(applicationSettings.value("currentPort").toString());
 	ui->baudList->setCurrentText(applicationSettings.value("currentBaud").toString());
 
+	ui->countOfPackets->setEnabled(false);
+
 	m_timerForPackets = new QTimer(this);
 
 	ui->stopServerButton->setEnabled(false);
@@ -72,6 +74,7 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	connect(m_timerForPackets, &QTimer::timeout, this, &SerialDataTesterServer::sendPacket);
 	connect(ui->startServerButton, &QPushButton::clicked, this, &SerialDataTesterServer::startServer);
 	connect(ui->stopServerButton, &QPushButton::clicked, this, &SerialDataTesterServer::stopServer);
+	connect(ui->usePackets, &QCheckBox::clicked, this, &SerialDataTesterServer::usePacketAmount);
 }
 
 SerialDataTesterServer::~SerialDataTesterServer()
@@ -248,16 +251,20 @@ void SerialDataTesterServer::parseFile()
 
 void SerialDataTesterServer::stopServer()
 {
+	// Just stopping server: close serial port and stop timer. After that unlock all UI
+	//
+
 	m_serialPort->close();
+	m_timerForPackets->stop();
+
 	ui->portStatus->setText("Closed");
 	ui->baud->setText("No data");
 	ui->port->setText("No data");
-	m_timerForPackets->stop();
 	ui->pathToXml->setEnabled(true);
 	ui->portsList->setEnabled(true);
 	ui->baudList->setEnabled(true);
 	ui->timeInterval->setEnabled(true);
-	ui->countOfPackets->setEnabled(true);
+	ui->countOfPackets->setEnabled(ui->usePackets->isChecked());
 	ui->startServerButton->setEnabled(true);
 	ui->openFileButton->setEnabled(true);
 	ui->stopServerButton->setEnabled(false);
@@ -265,28 +272,40 @@ void SerialDataTesterServer::stopServer()
 
 void SerialDataTesterServer::sendPacket()
 {
+	// First of all - clear port
+	//
+
 	m_serialPort->clear();
 
+	// Create signature and write down data to structure
+	//
+
 	Signature sign;
-	HeaderUnion head;
 
 	sign.uint32 = 0x424D4C47;
+
+	// Create header, and write down data to header
+	//
+
+	HeaderUnion head;
 
 	head.hdr.version = 4;
 	head.hdr.id = 1;
 	head.hdr.num = 1;
 	head.hdr.amount = m_dataSize;
 
-
+	// Now, start data processing. First of all we need create data array,
+	// where we can store
 
 	QByteArray dataToSend;
 	dataToSend.clear();
 
+	// Now, create bit array, where we will record our values
+	//
+
 	QBitArray generatedData;
 	generatedData.resize(m_dataSize*8);
 	generatedData.fill(0);
-
-	//qDebug() << "We transfer now: ";
 
 	for (SignalData signal : m_signalsFromXml)
 	{
@@ -313,11 +332,9 @@ void SerialDataTesterServer::sendPacket()
 
 			if (signal.dataFormat == "Float")
 			{
-				int pos = 31; // declare variables
+				int pos = 31;
 				float f = qrand()%maxDataSize * 0.1;
 				int bit = 0;
-
-				//qDebug() << signal.name << " " << f;
 
 				int *b = reinterpret_cast<int*>(&f);
 				for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
@@ -332,8 +349,6 @@ void SerialDataTesterServer::sendPacket()
 			}
 			else
 			{
-				//	qDebug() << signal.name << " " << value;
-
 				for (int pos = 0; value>0; pos++)
 				{
 					if (value%2 == 0)
@@ -351,13 +366,8 @@ void SerialDataTesterServer::sendPacket()
 		else
 		{
 			generatedData.setBit(signal.offset*8 + signal.bit, qrand()%2);
-			//	qDebug() << signal.name << " Bits not included";
 		}
 	}
-
-	//qDebug() << "=====================+";
-
-	//qDebug() << generatedData;
 
 	QString visualizeTransferringData;
 
@@ -404,10 +414,8 @@ void SerialDataTesterServer::sendPacket()
 	dataID.bytes[2] = '1';
 	dataID.bytes[3] = '1';
 
-	//bytes += dataID.bytes;
 	bytes.append(dataID.bytes, 4);
 	bytes.append(dataToSend, dataToSend.length());
-	//bytes += dataToSend;
 
 	QByteArray dataForCrc;
 
@@ -415,15 +423,10 @@ void SerialDataTesterServer::sendPacket()
 	dataForCrc.append(dataID.bytes, 4);
 	dataForCrc.append(dataToSend, dataToSend.length());
 
-	//	qDebug() << "dataForCRC: " << dataForCrc;
-
 	CrcRepresentation crc;
 	crc.uint64 = Crc::crc64(dataForCrc, dataForCrc.length());
 
 	bytes.append(crc.bytes, 8);
-
-	//	qDebug() << crc.uint64;
-	//	qDebug() << "CRC: " << crc.bytes;
 
 	// Write packet to port
 	//
@@ -439,14 +442,6 @@ void SerialDataTesterServer::sendPacket()
 	// Send data
 	//
 
-	//bool ok = m_serialPort->flush();
-	/*bool ok = m_serialPort->waitForBytesWritten(300);
-
-	if (ok == false)
-	{
-		QMessageBox::warning(this, "Error", m_serialPort->errorString());
-	}*/
-
 	ui->transmissionId->setText(QString::number(head.hdr.id));
 	ui->numerator->setText(QString::number(head.hdr.num));
 	ui->dataAmount->setText(QString::number(head.hdr.amount));
@@ -455,8 +450,13 @@ void SerialDataTesterServer::sendPacket()
 	m_numberOfPacket++;
 	ui->packetNumber->setText(QString::number(m_numberOfPacket));
 
-	if (m_numberOfPacket == ui->countOfPackets->text().toInt())
+	if (m_numberOfPacket == ui->countOfPackets->text().toInt() && ui->usePackets->isChecked())
 	{
 		stopServer();
 	}
+}
+
+void SerialDataTesterServer::usePacketAmount()
+{
+	ui->countOfPackets->setEnabled(ui->usePackets->isChecked());
 }

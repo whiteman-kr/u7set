@@ -19,6 +19,7 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
+#include "TuningClientCfgGenerator.h"
 
 #include <QBuffer>
 #include <functional>
@@ -995,6 +996,10 @@ namespace Builder
 
 				case E::SoftwareType::TuningService:
 					softwareCfgGenerator = new TuningServiceCfgGenerator(db, subsystems, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
+					break;
+
+				case E::SoftwareType::TuningClient:
+					softwareCfgGenerator = new TuningClientCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				case E::SoftwareType::ConfigurationService:

@@ -27,6 +27,7 @@ private slots:
 	void stopServer();
 	void parseFile();
 	void sendPacket();
+	void usePacketAmount();
 
 private:
 	Ui::SerialDataTesterServer *ui = nullptr;
