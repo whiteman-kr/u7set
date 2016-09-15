@@ -66,7 +66,6 @@ protected:
 };
 
 
-
 class DataSource : public QObject
 {
 public:
@@ -148,6 +147,8 @@ protected:
 	qint64 m_errorDataID = 0;
 
 	bool m_dataProcessingEnabled = true;
+
+	qint64 m_lastPacketTime = 0;
 
 	//
 
@@ -261,4 +262,7 @@ public:
 
 	bool getDataSourceState(Network::DataSourceState* protoState) const;
 	bool setDataSourceState(const Network::DataSourceState& protoState);
+
+	qint64 lastPacketTime() const { return m_lastPacketTime; }
+	qint64 setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 };

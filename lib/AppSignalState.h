@@ -25,6 +25,9 @@ union AppSignalStateFlags
 	quint32 all;
 };
 
+const quint32 VALID_STATE = 1;
+const quint32 INVALID_STATE = 0;
+
 
 struct AppSignalState
 {

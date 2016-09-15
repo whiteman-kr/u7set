@@ -81,7 +81,6 @@ SOURCES += main.cpp \
     ../lib/XmlHelper.cpp \
     AppDataService.cpp \
     ../lib/Queue.cpp \
-    ../lib/DataChannel.cpp \
     ../lib/DataProtocols.cpp \
     AppDataChannel.cpp \
     AppDataSource.cpp \
@@ -127,7 +126,6 @@ HEADERS += \
     AppDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../lib/DataChannel.h \
     AppDataChannel.h \
     AppDataSource.h \
     ../lib/OrderedHash.h \

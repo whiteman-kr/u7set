@@ -414,6 +414,9 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 	{
 		m_receivedPacketCount++;
 
+		m_lastPacketTime = QDateTime::currentMSecsSinceEpoch();
+		m_state = DataSourceState::receiveData;
+
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
 		QDateTime plantTime;

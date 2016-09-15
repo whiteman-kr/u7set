@@ -16,6 +16,42 @@ namespace Builder
 	{
 		Q_OBJECT
 
+	public:
+		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+								 Hardware::EquipmentSet* equipmentSet,
+								 Hardware::OptoModuleStorage* optoModuleStorage,
+								 Hardware::ConnectionStorage* connections,
+								 SignalSet* signalSet,
+								 Afb::AfbElementCollection* afblSet,
+								 AppLogicData* appLogicData,
+								 Tuning::TuningDataStorage* tuningDataStorage,
+								 BuildResultWriter* buildResultWriter,
+								 IssueLogger* log);
+
+		~ApplicationLogicCompiler();
+
+		bool run();
+
+	private:
+		void findLMs();
+		void findLM(Hardware::DeviceObject* startFromDevice);
+
+		bool checkAppSignals();
+		bool checkOptoConnections();
+		bool checkLmIpAddresses();
+		bool compileModulesLogicsPass1();
+		bool compileModulesLogicsPass2();
+		bool disposeOptoModulesTxRxBuffers();
+
+		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode);
+
+		bool writeOptoConnectionsReport();
+		bool writeOptoModulesReport();
+
+		void writeOptoPortInfo(Hardware::OptoPort *port, QStringList& list);
+
+		void clear();
+
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
@@ -36,40 +72,6 @@ namespace Builder
 
 		QString msg;
 
-	private:
-		void findLMs();
-		void findLM(Hardware::DeviceObject* startFromDevice);
-
-		bool checkAppSignals();
-		bool checkOptoConnections();
-		bool compileModulesLogicsPass1();
-		bool compileModulesLogicsPass2();
-		bool disposeOptoModulesTxRxBuffers();
-
-		bool writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode);
-
-		bool writeOptoConnectionsReport();
-		bool writeOptoModulesReport();
-
-		void writeOptoPortInfo(Hardware::OptoPort *port, QStringList& list);
-
-		void clear();
-
-	public:
-		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
-								 Hardware::EquipmentSet* equipmentSet,
-								 Hardware::OptoModuleStorage* optoModuleStorage,
-								 Hardware::ConnectionStorage* connections,
-								 SignalSet* signalSet,
-								 Afb::AfbElementCollection* afblSet,
-								 AppLogicData* appLogicData,
-								 Tuning::TuningDataStorage* tuningDataStorage,
-								 BuildResultWriter* buildResultWriter,
-								 IssueLogger* log);
-
-		~ApplicationLogicCompiler();
-
-		bool run();
 
 		friend class ModuleLogicCompiler;
 	};

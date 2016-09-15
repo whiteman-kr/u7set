@@ -269,7 +269,7 @@ const AppSignals& TcpAppDataServer::appSignals() const
 }
 
 
-const AppDataSources& TcpAppDataServer::appDataSources() const
+const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
 {
 	return m_thread->appDataSources();
 }
@@ -291,7 +291,7 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 {
 	m_getDataSourcesInfoReply.Clear();
 
-	const AppDataSources& dataSources = appDataSources();
+	const AppDataSourcesIP& dataSources = appDataSources();
 
 	for(const DataSource* source : dataSources)
 	{
@@ -309,8 +309,7 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest()
 {
 	m_getDataSourcesStatesReply.Clear();
 
-	const AppDataSources& dataSources = appDataSources();
-
+	const AppDataSourcesIP& dataSources = appDataSources();
 
 	for (const DataSource* source : dataSources)
 	{
@@ -352,7 +351,6 @@ void TcpAppDataServer::onGetUnitsRequest()
 }
 
 
-
 // -------------------------------------------------------------------------------
 //
 // TcpAppDataServerThread class implementation
@@ -361,7 +359,7 @@ void TcpAppDataServer::onGetUnitsRequest()
 
 TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 												TcpAppDataServer* server,
-												const AppDataSources& appDataSources,
+												const AppDataSourcesIP& appDataSources,
 												const AppSignals& appSignals,
 												const AppSignalStates& appSignalStates,
 												const UnitList& units) :

@@ -34,8 +34,6 @@ void AppDataProcessingWorker::slot_rupDataQueueIsNotEmpty()
 {
 	int count = 0;
 
-//	static int ctr = 0;
-
 	do
 	{
 		bool result = m_rupDataQueue.pop(&m_rupData);
@@ -48,17 +46,8 @@ void AppDataProcessingWorker::slot_rupDataQueueIsNotEmpty()
 		parseRupData();
 
 		count++;
-
-/*		ctr++;
-
-		if ((ctr % 200) == 0)
-		{
-			qDebug() << "Queue size" << m_rupDataQueue.getSize();
-		}*/
 	}
 	while(count < 500);
-
-
 }
 
 

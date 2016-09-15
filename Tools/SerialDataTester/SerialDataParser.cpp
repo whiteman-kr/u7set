@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <QDebug>
 
-SerialDataParser::SerialDataParser(QObject *parent) : QObject(parent)
+SerialDataParser::SerialDataParser(QObject *parent) : QThread(parent)
 {
 	m_buffer = new char[SerialParserBufferSize];
 	m_packetData = new char[SerialParserBufferSize];
@@ -37,9 +37,6 @@ void SerialDataParser::scanningSignaure()
 
 	do
 	{
-		if (sizeof(m_signature.bytes) == 4)
-			m_bytesCount=0;
-
 		bytesToCopy = 4 - m_bytesCount;		// How many data recorded to signature (in case, when packet was not received sucsessfuly - m_bytesCount will be not 0)
 
 		avaiableDataSize = m_dataSize - (m_readPtr - m_buffer); // How much data currently avaiable
@@ -114,7 +111,6 @@ void SerialDataParser::readingHeader()
 			m_readPtr++; // Move pointer by one byte
 		}
 		m_bytesCount = 0;
-		//scanningSignaure();
 	}
 }
 
@@ -165,6 +161,9 @@ void SerialDataParser::readingData()
 		m_packetData -= m_header.header.dataAmount;
 		m_packetData -= 4;
 
+		free (m_packetData);
+		m_packetData = new char[SerialParserBufferSize];
+
 		m_readPtr += bytesToCopy;
 
 		QString version = QString::number(m_header.header.version);
@@ -196,6 +195,5 @@ void SerialDataParser::readingData()
 			m_readPtr++; // Move pointer by one byte
 		}
 		m_bytesCount = 0;
-		//scanningSignaure();
 	}
 }

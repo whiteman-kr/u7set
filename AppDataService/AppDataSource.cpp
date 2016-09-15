@@ -32,5 +32,5 @@ void AppDataSources::clear()
 		delete dataSource;
 	}
 
-	HashedVector<quint32, AppDataSource*>::clear();
+	HashedVector<QString, AppDataSource*>::clear();
 }

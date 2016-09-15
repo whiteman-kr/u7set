@@ -24,6 +24,8 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 	m_index = index;
 	m_signal = signal;
 
+	m_isDiscreteSignal = signal->isDiscrete();
+
 	m_aperture = signal->aperture();
 	m_lowLimit = signal->lowEngeneeringUnits();
 	m_highLimit = signal->highEngeneeringUnits();
@@ -38,51 +40,53 @@ void AppSignalStateEx::setState(Times time, AppSignalStateFlags flags, double va
 
 	if (m_initialized == false)
 	{
-		writeStateChanges = true;
 		m_initialized = true;
+		writeStateChanges = true;
 	}
 	else
 	{
 		if (m_state.flags.valid != flags.valid)
 		{
-			writeStateChanges = true;		// changes of signal validity always writing
+			writeStateChanges = true;		// changes of signal validity always write
 		}
-
-		if (flags.valid)
+		else
 		{
-			// current state is Valid
-			//
-			if (m_isDiscreteSignal)
+			if (flags.valid)
 			{
-				// is discrete signal
+				// current state is Valid
 				//
-				if (static_cast<int>(value) != static_cast<int>(m_state.value))
+				if (m_isDiscreteSignal == true)
 				{
-					writeStateChanges = true;
+					// is discrete signal
+					//
+					if (static_cast<int>(m_state.value) != static_cast<int>(value))
+					{
+						writeStateChanges = true;
+					}
 				}
-			}
-			else
-			{
-				// is analog signal
-				//
-				if (fabs(value - m_state.value) > m_absAperture)
+				else
 				{
-					writeStateChanges = true;
-				}
+					// is analog signal
+					//
+					if (fabs(value - m_state.value) > m_absAperture)
+					{
+						writeStateChanges = true;
+					}
 
-				if (value > m_highLimit)
-				{
-					flags.overflow = 1;
-				}
+					if (value > m_highLimit)
+					{
+						flags.overflow = 1;
+					}
 
-				if (value < m_lowLimit)
-				{
-					flags.underflow = 1;
-				}
+					if (value < m_lowLimit)
+					{
+						flags.underflow = 1;
+					}
 
-				if (flags.all != m_state.flags.all)
-				{
-					writeStateChanges = true;
+					if (flags.all != m_state.flags.all)
+					{
+						writeStateChanges = true;
+					}
 				}
 			}
 		}

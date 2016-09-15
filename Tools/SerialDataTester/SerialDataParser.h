@@ -1,12 +1,14 @@
 #pragma once
 #include <QSerialPort>
 #include <QByteArray>
+#include <QThread>
+#include <QTimer>
 
 #include "../../lib/Crc.h"
 
 const int SerialParserBufferSize = 1024;
 
-class SerialDataParser : public QObject
+class SerialDataParser : public QThread
 {
 	Q_OBJECT
 public :
