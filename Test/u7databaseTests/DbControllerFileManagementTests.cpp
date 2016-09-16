@@ -1144,7 +1144,7 @@ void DbControllerFileTests::getLatestFileVersionTest()
 void DbControllerFileTests::getLatestTreeVersionTest()
 {
 	qRegisterMetaType<DbFileInfo>("DbFileInfo");
-	std::list<std::shared_ptr<DbFile>> result;
+	std::vector<std::shared_ptr<DbFile>> result;
 
 	QSqlDatabase db = QSqlDatabase::database();
 
