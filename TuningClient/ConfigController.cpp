@@ -234,6 +234,54 @@ Tcp::ConnectionState ConfigController::getConnectionState() const
 	return result;
 }
 
+bool ConfigController::getObjectFilters()
+{
+	QByteArray data;
+	QString errorStr;
+	if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
+	{
+		QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
+		qDebug()<< completeErrorMessage;
+		return false;
+	}
+	else
+	{
+		if (theFilters.load(data, &errorStr) == false)
+		{
+			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
+			qDebug()<< completeErrorMessage;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool ConfigController::getTuningSignals()
+{
+	QByteArray data;
+	QString errorStr;
+	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
+	{
+		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
+		qDebug()<< completeErrorMessage;
+
+		return false;
+	}
+	else
+	{
+		if (theObjects.load(data, &errorStr) == false)
+		{
+			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
+			qDebug()<< completeErrorMessage;
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void ConfigController::start()
 {
 	if (m_cfgLoaderThread == nullptr)
@@ -313,57 +361,34 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	qDebug() << "TUNS1 (id, ip, port): " << readSettings.tuns1.equipmentId() << ", " << readSettings.tuns1.ip() << ", " << readSettings.tuns1.port();
 	qDebug() << "TUNS2 (id, ip, port): " << readSettings.tuns2.equipmentId() << ", " << readSettings.tuns2.ip() << ", " << readSettings.tuns2.port();
 
-	// Get all files
-	//
+	bool updateFilters = false;
+	bool updateSignals = false;
+
+	QMutexLocker locker(&m_mutex);
+
+	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
-		QMutexLocker locker(&m_mutex);
-
-		for (const Builder::BuildFileInfo& f: buildFileInfoArray)
+		if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
 		{
-			if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
+			if (m_md5Filters != f.md5)
 			{
-				QByteArray data;
-				QString errorStr;
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
-				{
-					QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
-					qDebug()<< completeErrorMessage;
-				}
-				else
-				{
-					if (theFilters.load(data, &errorStr) == false)
-					{
-						QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
-						qDebug()<< completeErrorMessage;
-					}
-				}
+				updateFilters = true;
+				m_md5Filters = f.md5;
 			}
-
-			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
+		}
+		if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
+		{
+			if (m_md5Signals != f.md5)
 			{
-				QByteArray data;
-				QString errorStr;
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
-				{
-					QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(readSettings.errorMessage);
-					qDebug()<< completeErrorMessage;
-				}
-				else
-				{
-					if (theObjects.load(data, &errorStr) == false)
-					{
-						QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-						qDebug()<< completeErrorMessage;
-					}
-				}
+				updateSignals = true;
+				m_md5Signals = f.md5;
 			}
 		}
 	}
 
 	// Emit signal to inform everybody about new configuration
 	//
-
-	emit configurationArrived(readSettings);
+	emit configurationArrived(updateFilters, updateSignals);
 
 	return;
 }
@@ -461,9 +486,3 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 
 	return outSetting->errorMessage.isEmpty();
 }
-
-/*std::vector<ConfigSchema> MonitorConfigController::schemas() const
-{
-	QMutexLocker locker(&m_mutex);
-	return m_schemas;
-}*/

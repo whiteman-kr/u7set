@@ -100,11 +100,14 @@ public:
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
-	void clear();
-
-	std::vector<std::shared_ptr<ObjectFilter>> filters;
+	int filterCount();
+	const std::shared_ptr<ObjectFilter> filter_const(int index);
 
 private:
+
+	QMutex m_mutex;
+
+	std::vector<std::shared_ptr<ObjectFilter>> m_filters;
 };
 
 extern ObjectFilterStorage theFilters;

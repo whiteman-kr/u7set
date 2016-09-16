@@ -58,10 +58,13 @@ public:
 	bool getFileById(const QString& id, QByteArray* fileData);
 
 	Tcp::ConnectionState getConnectionState() const;
+
+	bool getObjectFilters();
+	bool getTuningSignals();
 	// signals
 	//
 signals:
-	void configurationArrived(ConfigSettings configuration);
+	void configurationArrived(bool updateFilters, bool updateSignals);
 
 	// slots
 	//
@@ -88,7 +91,10 @@ private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	mutable QMutex m_mutex;
-	//std::vector<ConfigSchema> m_schemas;
+
+
+	QString m_md5Filters;
+	QString m_md5Signals;
 };
 
 

@@ -11,15 +11,18 @@ class ObjectManager
 public:
 	ObjectManager();
 
-	int objectsCount() const;
-	TuningObject *object(int index);
+	int objectsCount();
+	const std::shared_ptr<TuningObject> const_object(int index);
 
 	//bool load(const QString& fileName);
 
 	bool load(const QByteArray& data, QString *errorCode);
 
 private:
-	std::vector<TuningObject> m_objects;
+
+	QMutex m_mutex;
+
+	std::vector<std::shared_ptr<TuningObject>> m_objects;
 
 };
 
