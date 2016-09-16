@@ -10,6 +10,8 @@
 
 namespace poh
 {
+	/*
+
 	// LineStorage
 	//
 	template <typename TYPE, int ObjectCount>
@@ -260,7 +262,7 @@ namespace poh
 			return allocatedMemory;
 		}
 
-		void deallocate(TYPE* ptr, std::size_t /*n*/)
+		void deallocate(TYPE* ptr, std::size_t)
 		{
 			m_storage->freeMemory(ptr);
 		}
@@ -333,5 +335,5 @@ namespace poh
 	//private:
 		std::map<size_t, std::shared_ptr<StorageBase>> m_storage;
 	};
-
+*/
 }
