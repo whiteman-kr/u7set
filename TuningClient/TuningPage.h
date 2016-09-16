@@ -11,7 +11,7 @@ class TuningItemModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	TuningItemModel(QObject *parent);
+	TuningItemModel(int tuningPageIndex, QObject *parent);
 public:
 
 
@@ -91,12 +91,12 @@ private:
 };
 
 
-
 class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(std::shared_ptr<ObjectFilter> tabFilter = nullptr, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
+	~TuningPage();
 
 signals:
 
@@ -130,6 +130,9 @@ private:
 	std::vector<int> m_objectsIndexes;
 
 	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
+
+	int m_tuningPageIndex = 0;
+
 };
 
 #endif // TUNINGPAGE_H

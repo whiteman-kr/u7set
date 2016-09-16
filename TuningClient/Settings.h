@@ -3,6 +3,13 @@
 
 #include "../lib/HostAddressPort.h"
 
+class TuningPageSettings
+{
+public:
+	int m_columnCount = 0;
+	std::vector<int> m_columnsIndexes;
+	std::vector<int> m_columnsWidth;
+};
 
 class Settings
 {
@@ -25,6 +32,11 @@ public:
 
 	QByteArray m_mainWindowSplitterState;
 
+
+	// Tuning pages settings
+	//
+	std::vector<TuningPageSettings> m_tuningPageSettings;
+
 private:
 
 	QString m_instanceStrId;
@@ -34,6 +46,7 @@ private:
 
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
+
 
 	QMutex m;
 

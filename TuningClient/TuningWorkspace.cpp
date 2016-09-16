@@ -58,6 +58,8 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	std::vector<std::pair<TuningPage*, QString>> tuningPages;
 
+	int tuningPageIndex = 0;
+
 	count = theFilters.filterCount();
 	for (int i = 0; i < count; i++)
 	{
@@ -73,7 +75,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(f);
+		TuningPage* tp = new TuningPage(tuningPageIndex++, f);
 
 		tuningPages.push_back(std::make_pair(tp, f->caption()));
 	}
@@ -82,7 +84,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	{
 		// No tab pages, create only one page
 		//
-		m_tuningPage = new TuningPage();
+		m_tuningPage = new TuningPage(tuningPageIndex, nullptr);
 		if (m_hSplitter != nullptr)
 		{
 			m_hSplitter->addWidget(m_tuningPage);
@@ -115,7 +117,6 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 			m_tab->addTab(tp, tabName);
 		}
 	}
-
 
 	// Restore splitter size
 	//
