@@ -1270,7 +1270,9 @@ namespace Builder
 
 			// Read Appliaction logic files
 			//
-			std::shared_ptr<VFrame30::LogicSchema> ls(dynamic_cast<VFrame30::LogicSchema*>(VFrame30::Schema::Create(file.get()->data())));
+			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+
+			std::shared_ptr<VFrame30::LogicSchema> ls = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema);
 
 			if (ls == nullptr)
 			{

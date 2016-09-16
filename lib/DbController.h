@@ -62,7 +62,7 @@ public:
 
 	bool getLatestVersion(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
-	bool getLatestTreeVersion(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getLatestTreeVersion(const DbFileInfo& file, std::vector<std::shared_ptr<DbFile> >* out, QWidget* parentWidget);
 	bool getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
@@ -144,7 +144,7 @@ signals:
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 
 	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
-	void signal_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
+	void signal_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out);
 
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);

@@ -618,7 +618,7 @@ bool DbController::getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFi
 	return true;
 }
 
-bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -1110,7 +1110,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	// Emit signal end wait for complete
 	//
-	std::list<std::shared_ptr<DbFile>> files;
+	std::vector<std::shared_ptr<DbFile>> files;
 
 	emit signal_getLatestTreeVersion(file, &files);
 

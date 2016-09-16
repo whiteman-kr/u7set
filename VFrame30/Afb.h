@@ -294,7 +294,7 @@ private:
 	private:
 		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
 		//
-		static AfbElement* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<AfbElement> CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//

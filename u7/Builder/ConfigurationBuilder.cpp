@@ -341,13 +341,11 @@ namespace Builder
 
 				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!");
 					return false;
 				}
 
 				if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output log file for") + f.subsysId() + ", " + f.caption() + "!");
 					return false;
 				}
 			}

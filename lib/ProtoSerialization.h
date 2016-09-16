@@ -214,7 +214,7 @@ namespace Proto
 			}
 		}
 
-		static VFrameType* Create(const wchar_t* fileName)
+		static std::shared_ptr<VFrameType> Create(const wchar_t* fileName)
 		{
 			std::wstring wfnstr(fileName);
 			std::string fnstr(wfnstr.begin(), wfnstr.end());
@@ -227,7 +227,7 @@ namespace Proto
 
 			return Create(input);
 		}
-		static VFrameType* Create(std::fstream& stream)
+		static std::shared_ptr<VFrameType> Create(std::fstream& stream)
 		{
 			if (stream.bad() == true)
 			{
@@ -242,12 +242,12 @@ namespace Proto
 				return nullptr;
 			}
 
-			VFrameType* pNewItem = VFrameType::CreateObject(message);
-			assert(pNewItem != nullptr);
+			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
+			assert(newItem != nullptr);
 
-			return pNewItem;
+			return newItem;
 		}
-		static VFrameType* Create(const Proto::StreamedData& data)
+		static std::shared_ptr<VFrameType> Create(const Proto::StreamedData& data)
 		{
 			Proto::Envelope message;
 
@@ -257,12 +257,12 @@ namespace Proto
 				return nullptr;
 			}
 
-			VFrameType* pNewItem = VFrameType::CreateObject(message);
-			assert(pNewItem != nullptr);
+			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
+			assert(newItem != nullptr);
 
-			return pNewItem;
+			return newItem;
 		}
-		static VFrameType* Create(const QByteArray& data)
+		static std::shared_ptr<VFrameType> Create(const QByteArray& data)
 		{
 			Proto::Envelope message;
 
@@ -272,12 +272,12 @@ namespace Proto
 				return nullptr;
 			}
 
-			VFrameType* pNewItem = VFrameType::CreateObject(message);
-			assert(pNewItem != nullptr);
+			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
+			assert(newItem != nullptr);
 
-			return pNewItem;
+			return newItem;
 		}
-		static VFrameType* Create(const Proto::Envelope& message)
+		static std::shared_ptr<VFrameType> Create(const Proto::Envelope& message)
 		{
 			// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
 			// must be defined in VFrameType

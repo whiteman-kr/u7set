@@ -22,14 +22,9 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<FblItemRect>;
-#endif
-
-	protected:
+	public:
 		FblItemRect(void);
 		FblItemRect(SchemaUnit itemunit);
-	public:
 		virtual ~FblItemRect(void);
 
 		// Serialization

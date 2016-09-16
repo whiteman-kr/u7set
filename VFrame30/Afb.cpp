@@ -1409,10 +1409,10 @@ namespace Afb
 //		return true;
 	}
 
-	AfbElement* AfbElement::CreateObject(const Proto::Envelope& /*message*/)
+	std::shared_ptr<AfbElement> AfbElement::CreateObject(const Proto::Envelope& /*message*/)
 	{
 		assert(false);
-		return nullptr;
+		return std::shared_ptr<AfbElement>();
 
 //		// ��� ������� ����� ��������� ������ ���� ���������
 //		//

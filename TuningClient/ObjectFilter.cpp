@@ -224,9 +224,13 @@ ObjectFilterStorage::ObjectFilterStorage()
 
 }
 
-bool ObjectFilterStorage::load(const QString& fileName)
+bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
 {
-	m_errorCode.clear();
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
 
 	QFile f(fileName);
 
@@ -237,25 +241,37 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 	if (f.open(QFile::ReadOnly) == false)
 	{
-		m_errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
+		*errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
 		return false;
 	}
 
 	QByteArray data = f.readAll();
+
+	return load(data, errorCode);
+
+}
+
+bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
+{
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
 
 	QXmlStreamReader reader(data);
 
 	if (reader.readNextStartElement() == false)
 	{
 		reader.raiseError(QObject::tr("Failed to load root element."));
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
 	if (reader.name() != "ObjectFilterStorage")
 	{
 		reader.raiseError(QObject::tr("The file is not an ObjectFilterStorage file."));
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
@@ -310,7 +326,7 @@ bool ObjectFilterStorage::load(const QString& fileName)
 		}
 
 		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
@@ -319,8 +335,6 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 bool ObjectFilterStorage::save(const QString& fileName)
 {
-	m_errorCode.clear();
-
 	// save data to XML
 	//
 	QByteArray data;
@@ -368,13 +382,10 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-QString ObjectFilterStorage::errorCode()
+void ObjectFilterStorage::clear()
 {
-	return m_errorCode;
-
+	filters.clear();
 }
-
-
 
 ObjectFilterStorage theFilters;
 ObjectFilterStorage theUserFilters;

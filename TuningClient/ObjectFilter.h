@@ -95,16 +95,16 @@ class ObjectFilterStorage
 public:
 	ObjectFilterStorage();
 
-	bool load(const QString& fileName);
+	bool load(const QByteArray& data, QString *errorCode);
+
+	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
-	QString errorCode();
+	void clear();
 
 	std::vector<std::shared_ptr<ObjectFilter>> filters;
 
 private:
-
-	QString m_errorCode;
 };
 
 extern ObjectFilterStorage theFilters;

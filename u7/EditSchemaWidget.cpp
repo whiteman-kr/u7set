@@ -2921,14 +2921,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				VFrame30::SchemaItem* newItemRawPtr = VFrame30::SchemaItem::Create(data);
-				if (newItemRawPtr == nullptr)
+				std::shared_ptr<VFrame30::SchemaItem> newItem = VFrame30::SchemaItem::Create(data);
+
+				if (newItem == nullptr)
 				{
-					assert(newItemRawPtr != nullptr);
+					assert(newItem != nullptr);
 					return;
 				}
-
-				std::shared_ptr<VFrame30::SchemaItem> newItem(newItemRawPtr);
 
 				newItem->setNewGuid();
 
@@ -4626,7 +4625,6 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
-
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 
 	if (selected.size() != 1)
@@ -4638,12 +4636,25 @@ void EditSchemaWidget::f2Key()
 	assert(item);
 
 	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-	if (itemSignal == nullptr)
+	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+
+	if (itemSignal == nullptr &&
+		itemReceiver == nullptr)
 	{
 		return;
 	}
 
-	QString appSignalId = itemSignal->appSignalIds();
+	QString appSignalId;
+
+	if (itemSignal != nullptr)
+	{
+		appSignalId = itemSignal->appSignalIds();
+	}
+
+	if (itemReceiver != nullptr)
+	{
+		appSignalId = itemReceiver->appSignalId();
+	}
 
 	// Show input dialog
 	//
@@ -4665,7 +4676,15 @@ void EditSchemaWidget::f2Key()
 	{
 		// Set value
 		//
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+		if (itemSignal != nullptr)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+		}
+
+		if (itemReceiver != nullptr)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+		}
 
 		editSchemaView()->update();
 	}
@@ -4759,7 +4778,7 @@ void EditSchemaWidget::editCut()
 	::Proto::EnvelopeSet message;
 	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
 	{
-		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
 	}
 
@@ -4809,10 +4828,10 @@ void EditSchemaWidget::editCopy()
 	// Save to protobuf message
 	//
 	::Proto::EnvelopeSet message;
-	message.mutable_schemaitems()->Reserve(static_cast<int>(selected.size()));
+	message.mutable_items()->Reserve(static_cast<int>(selected.size()));
 	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
 	{
-		::Proto::Envelope* protoSchemaItem = message.add_schemaitems();
+		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
 	}
 
@@ -4873,16 +4892,16 @@ void EditSchemaWidget::editPaste()
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
 		bool schemaItemAfbIsPresent = false;
 
-		for (int i = 0; i < message.schemaitems_size(); i++)
+		for (int i = 0; i < message.items_size(); i++)
 		{
-			const ::Proto::Envelope& schemaItemMessage = message.schemaitems(i);
+			const ::Proto::Envelope& schemaItemMessage = message.items(i);
 
-			VFrame30::SchemaItem* schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
+			std::shared_ptr<VFrame30::SchemaItem> schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
 
 			if (schemaItem != nullptr)
 			{
 				schemaItem->setNewGuid();
-				itemList.push_back(std::shared_ptr<VFrame30::SchemaItem>(schemaItem));
+				itemList.push_back(schemaItem);
 			}
 
 			if (schemaItem->isSchemaItemAfb() == true)
@@ -4991,7 +5010,6 @@ void EditSchemaWidget::editPaste()
 
 	// Paste text to SchemaItemRect
 	//
-
 	bool allItemsAreRects = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
@@ -5009,7 +5027,6 @@ void EditSchemaWidget::editPaste()
 
 	// Paste appSignalID to SchemaItemSignal
 	//
-
 	bool allItemsAreSignals = true;
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
@@ -5024,6 +5041,24 @@ void EditSchemaWidget::editPaste()
 		mimeData->text().startsWith('#') == true)
 	{
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+	}
+
+	// Paste appSignalID to VFrame30::SchemaItemReceiver
+	//
+	bool allItemsAreReceivers = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) == nullptr)
+		{
+			allItemsAreReceivers = false;
+			break;
+		}
+	}
+
+	if (allItemsAreReceivers == true &&
+		mimeData->text().startsWith('#') == true)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
 	}
 
 	return;
@@ -5241,6 +5276,26 @@ void EditSchemaWidget::clipboardDataChanged()
 	}
 
 	if (allItemsAreSignals == true &&
+		mimeData->hasText() == true &&
+		mimeData->text().startsWith('#') == true)
+	{
+		m_editPasteAction->setEnabled(true);
+		return;
+	}
+
+	// if Any SchemaItemReceiver is selected and AppSignalID is in the clipboard
+	//
+	bool allItemsAreReceivers = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) == nullptr)
+		{
+			allItemsAreReceivers = false;
+			break;
+		}
+	}
+
+	if (allItemsAreReceivers == true &&
 		mimeData->hasText() == true &&
 		mimeData->text().startsWith('#') == true)
 	{

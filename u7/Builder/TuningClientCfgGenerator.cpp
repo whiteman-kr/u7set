@@ -170,7 +170,7 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 		return false;
 	}
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", objectFilters);
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "", objectFilters);
 
 	if (buildFile == nullptr)
 	{
@@ -226,7 +226,7 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	xmlWriter.writeEndElement();
 	xmlWriter.writeEndDocument();
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.xml", data);
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.xml", CFG_FILE_ID_TUNING_SIGNALS, "", data);
 
 	if (buildFile == nullptr)
 	{

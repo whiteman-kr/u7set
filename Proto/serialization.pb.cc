@@ -41,6 +41,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* EnvelopeSet_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   EnvelopeSet_reflection_ = NULL;
+const ::google::protobuf::Descriptor* EnvelopeSetShortDescription_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  EnvelopeSetShortDescription_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Configuration_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Configuration_reflection_ = NULL;
@@ -302,7 +305,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(Envelope));
   EnvelopeSet_descriptor_ = file->message_type(6);
   static const int EnvelopeSet_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSet, schemaitems_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSet, items_),
   };
   EnvelopeSet_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -315,7 +318,25 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(EnvelopeSet));
-  Configuration_descriptor_ = file->message_type(7);
+  EnvelopeSetShortDescription_descriptor_ = file->message_type(7);
+  static const int EnvelopeSetShortDescription_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, projectdbversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, classnamehash_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, equipmenteditor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, preseteditor_),
+  };
+  EnvelopeSetShortDescription_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      EnvelopeSetShortDescription_descriptor_,
+      EnvelopeSetShortDescription::default_instance_,
+      EnvelopeSetShortDescription_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnvelopeSetShortDescription, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(EnvelopeSetShortDescription));
+  Configuration_descriptor_ = file->message_type(8);
   static const int Configuration_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Configuration, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Configuration, strid_),
@@ -336,7 +357,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Configuration));
-  AfbElementCollection_descriptor_ = file->message_type(8);
+  AfbElementCollection_descriptor_ = file->message_type(9);
   static const int AfbElementCollection_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbElementCollection, elements_),
   };
@@ -351,7 +372,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbElementCollection));
-  AfbElementXml_descriptor_ = file->message_type(9);
+  AfbElementXml_descriptor_ = file->message_type(10);
   static const int AfbElementXml_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbElementXml, data_),
   };
@@ -366,7 +387,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbElementXml));
-  FblElement_descriptor_ = file->message_type(10);
+  FblElement_descriptor_ = file->message_type(11);
   static const int FblElement_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElement, strid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElement, caption_),
@@ -389,7 +410,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblElement));
-  AfbSignal_descriptor_ = file->message_type(11);
+  AfbSignal_descriptor_ = file->message_type(12);
   static const int AfbSignal_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, type_),
@@ -409,7 +430,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbSignal));
-  AfbParam_descriptor_ = file->message_type(12);
+  AfbParam_descriptor_ = file->message_type(13);
   static const int AfbParam_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, visible_),
@@ -437,7 +458,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbParam));
-  Schema_descriptor_ = file->message_type(13);
+  Schema_descriptor_ = file->message_type(14);
   static const int Schema_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Schema, schemaid_),
@@ -461,7 +482,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Schema));
-  LogicSchema_descriptor_ = file->message_type(14);
+  LogicSchema_descriptor_ = file->message_type(15);
   static const int LogicSchema_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, equipmentids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LogicSchema, counter_),
@@ -477,7 +498,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(LogicSchema));
-  SchemaLayer_descriptor_ = file->message_type(15);
+  SchemaLayer_descriptor_ = file->message_type(16);
   static const int SchemaLayer_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaLayer, name_),
@@ -497,7 +518,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaLayer));
-  SchemaItem_descriptor_ = file->message_type(16);
+  SchemaItem_descriptor_ = file->message_type(17);
   static const int SchemaItem_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, isstatic_),
@@ -536,7 +557,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItem));
-  PosRectImpl_descriptor_ = file->message_type(17);
+  PosRectImpl_descriptor_ = file->message_type(18);
   static const int PosRectImpl_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosRectImpl, leftdocpt_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosRectImpl, topdocpt_),
@@ -554,7 +575,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PosRectImpl));
-  PosLineImpl_descriptor_ = file->message_type(18);
+  PosLineImpl_descriptor_ = file->message_type(19);
   static const int PosLineImpl_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosLineImpl, startxdocpt_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosLineImpl, startydocpt_),
@@ -572,7 +593,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PosLineImpl));
-  PosConnectionImpl_descriptor_ = file->message_type(19);
+  PosConnectionImpl_descriptor_ = file->message_type(20);
   static const int PosConnectionImpl_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosConnectionImpl, points_),
   };
@@ -587,7 +608,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PosConnectionImpl));
-  SchemaItemRect_descriptor_ = file->message_type(20);
+  SchemaItemRect_descriptor_ = file->message_type(21);
   static const int SchemaItemRect_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemRect, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemRect, linecolor_),
@@ -611,7 +632,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemRect));
-  SchemaItemLine_descriptor_ = file->message_type(21);
+  SchemaItemLine_descriptor_ = file->message_type(22);
   static const int SchemaItemLine_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLine, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLine, linecolor_),
@@ -627,7 +648,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLine));
-  SchemaItemPath_descriptor_ = file->message_type(22);
+  SchemaItemPath_descriptor_ = file->message_type(23);
   static const int SchemaItemPath_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPath, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPath, linecolor_),
@@ -643,7 +664,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemPath));
-  FblConnectionPoint_descriptor_ = file->message_type(23);
+  FblConnectionPoint_descriptor_ = file->message_type(24);
   static const int FblConnectionPoint_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, point_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, dirrection_),
@@ -663,7 +684,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblConnectionPoint));
-  FblItem_descriptor_ = file->message_type(24);
+  FblItem_descriptor_ = file->message_type(25);
   static const int FblItem_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItem, points_),
   };
@@ -678,7 +699,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItem));
-  FblItemRect_descriptor_ = file->message_type(25);
+  FblItemRect_descriptor_ = file->message_type(26);
   static const int FblItemRect_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, linecolor_),
@@ -697,7 +718,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemRect));
-  FblItemLine_descriptor_ = file->message_type(26);
+  FblItemLine_descriptor_ = file->message_type(27);
   static const int FblItemLine_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, linecolor_),
@@ -713,7 +734,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemLine));
-  SchemaItemSignalColumn_descriptor_ = file->message_type(27);
+  SchemaItemSignalColumn_descriptor_ = file->message_type(28);
   static const int SchemaItemSignalColumn_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, data_),
@@ -730,7 +751,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignalColumn));
-  SchemaItemSignal_descriptor_ = file->message_type(28);
+  SchemaItemSignal_descriptor_ = file->message_type(29);
   static const int SchemaItemSignal_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, appsignalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, precision_),
@@ -748,7 +769,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignal));
-  SchemaItemInput_descriptor_ = file->message_type(29);
+  SchemaItemInput_descriptor_ = file->message_type(30);
   static const int SchemaItemInput_offsets_[1] = {
   };
   SchemaItemInput_reflection_ =
@@ -762,7 +783,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInput));
-  SchemaItemOutput_descriptor_ = file->message_type(30);
+  SchemaItemOutput_descriptor_ = file->message_type(31);
   static const int SchemaItemOutput_offsets_[1] = {
   };
   SchemaItemOutput_reflection_ =
@@ -776,7 +797,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemOutput));
-  SchemaItemInOut_descriptor_ = file->message_type(31);
+  SchemaItemInOut_descriptor_ = file->message_type(32);
   static const int SchemaItemInOut_offsets_[1] = {
   };
   SchemaItemInOut_reflection_ =
@@ -790,7 +811,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInOut));
-  SchemaItemLink_descriptor_ = file->message_type(32);
+  SchemaItemLink_descriptor_ = file->message_type(33);
   static const int SchemaItemLink_offsets_[1] = {
   };
   SchemaItemLink_reflection_ =
@@ -804,7 +825,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLink));
-  SchemaItemAfb_descriptor_ = file->message_type(33);
+  SchemaItemAfb_descriptor_ = file->message_type(34);
   static const int SchemaItemAfb_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, params_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, afbstrid_),
@@ -823,7 +844,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemAfb));
-  SchemaItemConst_descriptor_ = file->message_type(34);
+  SchemaItemConst_descriptor_ = file->message_type(35);
   static const int SchemaItemConst_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, intvalue_),
@@ -841,7 +862,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConst));
-  SchemaItemConnection_descriptor_ = file->message_type(35);
+  SchemaItemConnection_descriptor_ = file->message_type(36);
   static const int SchemaItemConnection_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConnection, connectionid_),
   };
@@ -856,7 +877,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConnection));
-  SchemaItemTransmitter_descriptor_ = file->message_type(36);
+  SchemaItemTransmitter_descriptor_ = file->message_type(37);
   static const int SchemaItemTransmitter_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemTransmitter, pincount_),
   };
@@ -871,7 +892,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemTransmitter));
-  SchemaItemReceiver_descriptor_ = file->message_type(37);
+  SchemaItemReceiver_descriptor_ = file->message_type(38);
   static const int SchemaItemReceiver_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, showvalidity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, appsignalid_),
@@ -887,8 +908,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemReceiver));
-  DeviceObject_descriptor_ = file->message_type(38);
-  static const int DeviceObject_offsets_[20] = {
+  DeviceObject_descriptor_ = file->message_type(39);
+  static const int DeviceObject_offsets_[22] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
@@ -900,6 +921,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetroot_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetname_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetobjectuuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, childcounthint_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, root_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, system_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, rack_),
@@ -909,6 +931,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, signal_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, workstation_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, software_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, children_),
   };
   DeviceObject_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -921,7 +944,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceObject));
-  DeviceRoot_descriptor_ = file->message_type(39);
+  DeviceRoot_descriptor_ = file->message_type(40);
   static const int DeviceRoot_offsets_[1] = {
   };
   DeviceRoot_reflection_ =
@@ -935,7 +958,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRoot));
-  DeviceSystem_descriptor_ = file->message_type(40);
+  DeviceSystem_descriptor_ = file->message_type(41);
   static const int DeviceSystem_offsets_[1] = {
   };
   DeviceSystem_reflection_ =
@@ -949,7 +972,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSystem));
-  DeviceRack_descriptor_ = file->message_type(41);
+  DeviceRack_descriptor_ = file->message_type(42);
   static const int DeviceRack_offsets_[1] = {
   };
   DeviceRack_reflection_ =
@@ -963,7 +986,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRack));
-  DeviceChassis_descriptor_ = file->message_type(42);
+  DeviceChassis_descriptor_ = file->message_type(43);
   static const int DeviceChassis_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceChassis, type_),
   };
@@ -978,7 +1001,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
-  DeviceModule_descriptor_ = file->message_type(43);
+  DeviceModule_descriptor_ = file->message_type(44);
   static const int DeviceModule_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, typeobsolete_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configurationscript_),
@@ -995,7 +1018,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceModule));
-  DeviceController_descriptor_ = file->message_type(44);
+  DeviceController_descriptor_ = file->message_type(45);
   static const int DeviceController_offsets_[1] = {
   };
   DeviceController_reflection_ =
@@ -1009,7 +1032,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceController));
-  DeviceSignal_descriptor_ = file->message_type(45);
+  DeviceSignal_descriptor_ = file->message_type(46);
   static const int DeviceSignal_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, obsoletetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, byteorder_),
@@ -1034,7 +1057,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSignal));
-  Workstation_descriptor_ = file->message_type(46);
+  Workstation_descriptor_ = file->message_type(47);
   static const int Workstation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, type_),
   };
@@ -1049,7 +1072,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Workstation));
-  Software_descriptor_ = file->message_type(47);
+  Software_descriptor_ = file->message_type(48);
   static const int Software_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, type_),
   };
@@ -1064,7 +1087,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Software));
-  ModuleConfiguration_descriptor_ = file->message_type(48);
+  ModuleConfiguration_descriptor_ = file->message_type(49);
   static const int ModuleConfiguration_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
@@ -1081,7 +1104,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfiguration));
-  ModuleConfigurationValue_descriptor_ = file->message_type(49);
+  ModuleConfigurationValue_descriptor_ = file->message_type(50);
   static const int ModuleConfigurationValue_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, value_),
@@ -1097,7 +1120,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfigurationValue));
-  Property_descriptor_ = file->message_type(50);
+  Property_descriptor_ = file->message_type(51);
   static const int Property_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, value_),
@@ -1113,7 +1136,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Property));
-  Address16_descriptor_ = file->message_type(51);
+  Address16_descriptor_ = file->message_type(52);
   static const int Address16_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, offset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, bit_),
@@ -1129,7 +1152,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
-  AppSignal_descriptor_ = file->message_type(52);
+  AppSignal_descriptor_ = file->message_type(53);
   static const int AppSignal_offsets_[56] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signalgroupid_),
@@ -1199,7 +1222,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
-  AppSignalState_descriptor_ = file->message_type(53);
+  AppSignalState_descriptor_ = file->message_type(54);
   static const int AppSignalState_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -1249,6 +1272,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     Envelope_descriptor_, &Envelope::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     EnvelopeSet_descriptor_, &EnvelopeSet::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    EnvelopeSetShortDescription_descriptor_, &EnvelopeSetShortDescription::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Configuration_descriptor_, &Configuration::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1362,6 +1387,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete Envelope_reflection_;
   delete EnvelopeSet::default_instance_;
   delete EnvelopeSet_reflection_;
+  delete EnvelopeSetShortDescription::default_instance_;
+  delete EnvelopeSetShortDescription_reflection_;
   delete Configuration::default_instance_;
   delete Configuration_reflection_;
   delete AfbElementCollection::default_instance_;
@@ -1479,200 +1506,205 @@ void protobuf_AddDesc_serialization_2eproto() {
     "schema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemalay"
     "er\030e \001(\0132\022.Proto.SchemaLayer\022%\n\nfbleleme"
     "nt\030f \001(\0132\021.Proto.FblElement\022+\n\rconfigura"
-    "tion\030g \001(\0132\024.Proto.Configuration\"3\n\013Enve"
-    "lopeSet\022$\n\013schemaItems\030\001 \003(\0132\017.Proto.Env"
-    "elope\"\361\001\n\rConfiguration\022\031\n\004uuid\030\001 \002(\0132\013."
-    "Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstrin"
-    "g\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022!\n\tva"
-    "riables\030\004 \002(\0132\016.Proto.wstring\022\037\n\007globals"
-    "\030\005 \002(\0132\016.Proto.wstring\022\037\n\nschemasIDs\030d \003"
-    "(\0132\013.Proto.Uuid\022 \n\007schemas\030e \003(\0132\017.Proto"
-    ".Envelope\">\n\024AfbElementCollection\022&\n\010ele"
-    "ments\030\001 \003(\0132\024.Proto.AfbElementXml\"\035\n\rAfb"
-    "ElementXml\022\014\n\004data\030\001 \002(\014\"\233\002\n\nFblElement\022"
-    "\035\n\005strID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007captio"
-    "n\030\003 \002(\0132\016.Proto.wstring\022\016\n\006opcode\030\004 \002(\r\022"
-    "\025\n\006hasRam\030\005 \001(\010:\005false\022\033\n\rrequiredStart\030"
-    "\006 \001(\010:\004true\022 \n\006inputs\030\013 \003(\0132\020.Proto.AfbS"
-    "ignal\022!\n\007outputs\030\014 \003(\0132\020.Proto.AfbSignal"
-    "\022\037\n\006params\030\r \003(\0132\017.Proto.AfbParam\022#\n\013des"
-    "cription\030\016 \001(\0132\016.Proto.wstring\"\304\001\n\tAfbSi"
-    "gnal\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\"\n"
-    "\004type\030\002 \002(\0162\024.Proto.FblSignalType\022\027\n\014ope"
-    "randIndex\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006o"
-    "pName\030\005 \001(\0132\016.Proto.wstring\022(\n\ndataForma"
-    "t\030\006 \001(\0162\024.Proto.FblDataFormat\"\273\003\n\010AfbPar"
-    "am\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\017\n\007v"
-    "isible\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n"
-    "\004size\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010:\005fa"
-    "lse\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchangedScrip"
-    "t\030\014 \001(\0132\016.Proto.wstring\022\036\n\005value\030\r \001(\0132\017"
-    ".Proto.qvariant\022%\n\014defaultvalue\030\016 \001(\0132\017."
-    "Proto.qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.Proto"
-    ".qvariant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto.qva"
-    "riant\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstring\022\"\n"
-    "\004type\030\022 \001(\0162\024.Proto.FblSignalType\022(\n\ndat"
-    "aFormat\030\023 \001(\0162\024.Proto.FblDataFormat\"\276\002\n\006"
-    "Schema\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022 \n\010sch"
-    "emaID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003"
-    " \002(\0132\016.Proto.wstring\022\r\n\005width\030\004 \002(\001\022\016\n\006h"
-    "eight\030\005 \002(\001\022\037\n\004unit\030\006 \002(\0162\021.Proto.Schema"
-    "Unit\022\037\n\020excludeFromBuild\030\007 \001(\010:\005false\022\037\n"
-    "\006layers\030d \003(\0132\017.Proto.Envelope\022)\n\004afbs\030e"
-    " \002(\0132\033.Proto.AfbElementCollection\022)\n\014log"
-    "ic_schema\030\310\001 \001(\0132\022.Proto.LogicSchema\"G\n\013"
-    "LogicSchema\022$\n\014equipmentids\030\001 \003(\0132\016.Prot"
-    "o.wstring\022\022\n\007counter\030\002 \001(\005:\0010\"\224\001\n\013Schema"
-    "Layer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004name"
-    "\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile\030\003 \002(\010\022"
-    "\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017 "
-    "\003(\0132\017.Proto.Envelope\"\342\007\n\nSchemaItem\022\031\n\004u"
-    "uid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStatic\030\002 \002(\010"
-    "\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021.P"
-    "roto.SchemaUnit\022\032\n\013acceptClick\030\005 \001(\010:\005fa"
-    "lse\022#\n\013clickScript\030\006 \001(\0132\016.Proto.wstring"
-    "\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.PosRectImp"
-    "l\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLineIm"
-    "pl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.Proto.Po"
-    "sConnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.Proto"
-    ".FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.Proto.Fb"
-    "lItemRect\022\'\n\013FblItemLine\030l \001(\0132\022.Proto.F"
-    "blItemLine\022#\n\004Rect\030t \001(\0132\025.Proto.SchemaI"
-    "temRect\022#\n\004Line\030u \001(\0132\025.Proto.SchemaItem"
-    "Line\022#\n\004Path\030v \001(\0132\025.Proto.SchemaItemPat"
-    "h\022\'\n\006Signal\030| \001(\0132\027.Proto.SchemaItemSign"
-    "al\022+\n\013InputSignal\030} \001(\0132\026.Proto.SchemaIt"
-    "emInput\022-\n\014OutputSignal\030~ \001(\0132\027.Proto.Sc"
-    "hemaItemOutput\022#\n\004Link\030\177 \001(\0132\025.Proto.Sch"
-    "emaItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.Schema"
-    "ItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Proto.Sche"
-    "maItemConst\0224\n\016ConnectionItem\030\202\001 \001(\0132\033.P"
-    "roto.SchemaItemConnection\0226\n\017Transmitter"
-    "Item\030\203\001 \001(\0132\034.Proto.SchemaItemTransmitte"
-    "r\0220\n\014ReceiverItem\030\204\001 \001(\0132\031.Proto.SchemaI"
-    "temReceiver\022,\n\013InOutSignal\030\205\001 \001(\0132\026.Prot"
-    "o.SchemaItemInOut\"[\n\013PosRectImpl\022\021\n\tleft"
-    "DocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidthDo"
-    "cPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013PosLin"
-    "eImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYDocP"
-    "t\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocPt\030"
-    "\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030\001 \003"
-    "(\0132\022.Proto.SchemaPoint\"\353\001\n\016SchemaItemRec"
-    "t\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\t"
-    "fillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto.ws"
-    "tring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\0132\020"
-    ".Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010drawre"
-    "ct\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001(\005:\0014\022\026\n\t"
-    "vertAlign\030\n \001(\005:\003128\"3\n\016SchemaItemLine\022\016"
-    "\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"3\n\016Sch"
-    "emaItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor"
-    "\030\002 \002(\r\"\324\001\n\022FblConnectionPoint\022!\n\005point\030\001"
-    " \001(\0132\022.Proto.SchemaPoint\022/\n\ndirrection\030\002"
-    " \001(\0162\033.Proto.ConnectionDirrection\022\031\n\004uui"
-    "d\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 \001"
-    "(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\022\"\n\rassociatedI"
-    "os\030\006 \003(\0132\013.Proto.Uuid\"4\n\007FblItem\022)\n\006poin"
-    "ts\030\001 \003(\0132\031.Proto.FblConnectionPoint\"v\n\013F"
-    "blItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030"
-    "\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 "
-    "\002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013F"
-    "blItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030"
-    "\002 \002(\r\"R\n\026SchemaItemSignalColumn\022\021\n\005width"
-    "\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:\0010\022\024\n\thorzAlign"
-    "\030\003 \001(\005:\0011\"\231\001\n\020SchemaItemSignal\022$\n\014appSig"
-    "nalIDs\030\001 \003(\0132\016.Proto.wstring\022\024\n\tprecisio"
-    "n\030\002 \001(\005:\0012\022\031\n\014analogFormat\030\003 \001(\005:\003102\022.\n"
-    "\007columns\030\004 \003(\0132\035.Proto.SchemaItemSignalC"
-    "olumn\"\021\n\017SchemaItemInput\"\022\n\020SchemaItemOu"
-    "tput\"\021\n\017SchemaItemInOut\"\020\n\016SchemaItemLin"
-    "k\"\241\001\n\rSchemaItemAfb\022\037\n\006params\030\002 \003(\0132\017.Pr"
-    "oto.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.w"
-    "string\022\024\n\tprecision\030\004 \001(\005:\0012\022(\n\nafbeleme"
-    "nt\030\005 \001(\0132\024.Proto.AfbElementXml\022\r\n\005label\030"
-    "\006 \001(\t\"d\n\017SchemaItemConst\022\017\n\004type\030\001 \001(\005:\001"
-    "0\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001"
-    "(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\",\n\024SchemaIte"
-    "mConnection\022\024\n\014connectionid\030\001 \001(\t\",\n\025Sch"
-    "emaItemTransmitter\022\023\n\010pinCount\030\001 \001(\005:\0011\""
-    "E\n\022SchemaItemReceiver\022\032\n\014showValidity\030\001 "
-    "\001(\010:\004true\022\023\n\013appSignalId\030\002 \001(\t\"\302\005\n\014Devic"
-    "eObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013eq"
-    "uipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007capti"
-    "on\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestric"
-    "tion\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001("
-    "\005:\0010\022\"\n\032specific_properties_struct\030\006 \001(\t"
-    "\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n"
-    "\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010"
-    ":\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstr"
-    "ing\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uu"
-    "id\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006S"
-    "ystem\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack"
-    "\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001"
-    "(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\013"
-    "2\023.Proto.DeviceModule\022+\n\nController\030i \001("
-    "\0132\027.Proto.DeviceController\022#\n\006Signal\030j \001"
-    "(\0132\023.Proto.DeviceSignal\022\'\n\013Workstation\030k"
-    " \001(\0132\022.Proto.Workstation\022!\n\010Software\030l \001"
-    "(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Dev"
-    "iceSystem\"\014\n\nDeviceRack\" \n\rDeviceChassis"
-    "\022\017\n\004type\030\001 \001(\005:\0010\"X\n\014DeviceModule\022\027\n\014typ"
-    "eObsolete\030\001 \001(\005:\0010\022\033\n\023configurationScrip"
-    "t\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001(\005\"\022\n\020DeviceCon"
-    "troller\"\376\001\n\014DeviceSignal\022\027\n\014obsoletetype"
-    "\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006forma"
-    "t\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validityO"
-    "ffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026"
-    "\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005"
-    ":\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\001"
-    "0\022\025\n\nmemoryArea\030\013 \001(\005:\0010\"\036\n\013Workstation\022"
-    "\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001"
-    "(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_d"
-    "escription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto"
-    ".ModuleConfigurationValue\022\016\n\004name\030\003 \001(\t:"
-    "\000\"7\n\030ModuleConfigurationValue\022\014\n\004name\030\001 "
-    "\002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001"
-    " \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddress16\022\022\n\006offs"
-    "et\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"\336\t\n\tAppSig"
-    "nal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsignalGroupID\030\002 \001(\005\022\030"
-    "\n\020signalInstanceID\030\003 \001(\005\022\023\n\013changesetID\030"
-    "\004 \001(\005\022\022\n\ncheckedOut\030\005 \001(\010\022\016\n\006userID\030\006 \001("
-    "\005\022\030\n\020subsystemChannel\030\007 \001(\005\022\014\n\004type\030\010 \001("
-    "\005\022\017\n\007created\030\t \001(\003\022\017\n\007deleted\030\n \001(\010\022\027\n\017i"
-    "nstanceCreated\030\013 \001(\003\022\026\n\016instanceAction\030\014"
-    " \001(\005\022\023\n\013appSignalID\030\r \001(\t\022\031\n\021customAppSi"
-    "gnalID\030\016 \001(\t\022\017\n\007caption\030\017 \001(\t\022\022\n\ndataFor"
-    "mat\030\020 \001(\005\022\020\n\010dataSize\030\021 \001(\005\022\016\n\006lowADC\030\022 "
-    "\001(\005\022\017\n\007highADC\030\023 \001(\005\022\033\n\023lowEngeneeringUn"
-    "its\030\024 \001(\001\022\034\n\024highEngeneeringUnits\030\025 \001(\001\022"
-    "\016\n\006unitID\030\026 \001(\005\022\022\n\nadjustment\030\027 \001(\001\022\025\n\rl"
-    "owValidRange\030\030 \001(\001\022\026\n\016highValidRange\030\031 \001"
-    "(\001\022\026\n\016unbalanceLimit\030\032 \001(\001\022\025\n\rinputLowLi"
-    "mit\030\033 \001(\001\022\026\n\016inputHighLimit\030\034 \001(\001\022\023\n\013inp"
-    "utUnitID\030\035 \001(\005\022\025\n\rinputSensorID\030\036 \001(\005\022\026\n"
-    "\016outputLowLimit\030\037 \001(\001\022\027\n\017outputHighLimit"
-    "\030  \001(\001\022\024\n\014outputUnitID\030! \001(\005\022\022\n\noutputMo"
-    "de\030\" \001(\005\022\026\n\016outputSensorID\030# \001(\005\022\017\n\007acqu"
-    "ire\030$ \001(\010\022\022\n\ncalculated\030% \001(\010\022\023\n\013normalS"
-    "tate\030& \001(\005\022\025\n\rdecimalPlaces\030\' \001(\005\022\020\n\010ape"
-    "rture\030( \001(\001\022\021\n\tinOutType\030) \001(\005\022\023\n\013equipm"
-    "entID\030* \001(\t\022\025\n\rfilteringTime\030+ \001(\001\022\027\n\017sp"
-    "readTolerance\030, \001(\001\022\021\n\tbyteOrder\030- \001(\005\022\024"
-    "\n\014enableTuning\030. \001(\010\022\032\n\022tuningDefaultVal"
-    "ue\030/ \001(\001\022\014\n\004hash\0300 \001(\004\022\033\n\022regValueAddrOf"
-    "fset\030\310\001 \001(\005\022\030\n\017regValueAddrBit\030\311\001 \001(\005\022\036\n"
-    "\025regValidityAddrOffset\030\312\001 \001(\005\022\033\n\022regVali"
-    "dityAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrOffset"
-    "\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026\n\rram"
-    "AddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210"
-    "\001\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005va"
-    "lue\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystem"
-    "Time\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001(\022:\0010\022\024\n\tp"
-    "lantTime\030\006 \001(\022:\0010*3\n\nSchemaUnit\022\013\n\007Displ"
-    "ay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connec"
-    "tionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n"
-    "\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001"
-    "*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSi"
-    "gnedInt\020\001\022\t\n\005Float\020\002", 8300);
+    "tion\030g \001(\0132\024.Proto.Configuration\"-\n\013Enve"
+    "lopeSet\022\036\n\005items\030\001 \003(\0132\017.Proto.Envelope\""
+    "}\n\033EnvelopeSetShortDescription\022\030\n\020projec"
+    "tdbversion\030\001 \001(\r\022\025\n\rclassnamehash\030\002 \003(\r\022"
+    "\027\n\017equipmentEditor\030\003 \001(\010\022\024\n\014presetEditor"
+    "\030\004 \001(\010\"\361\001\n\rConfiguration\022\031\n\004uuid\030\001 \002(\0132\013"
+    ".Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstri"
+    "ng\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022!\n\tv"
+    "ariables\030\004 \002(\0132\016.Proto.wstring\022\037\n\007global"
+    "s\030\005 \002(\0132\016.Proto.wstring\022\037\n\nschemasIDs\030d "
+    "\003(\0132\013.Proto.Uuid\022 \n\007schemas\030e \003(\0132\017.Prot"
+    "o.Envelope\">\n\024AfbElementCollection\022&\n\010el"
+    "ements\030\001 \003(\0132\024.Proto.AfbElementXml\"\035\n\rAf"
+    "bElementXml\022\014\n\004data\030\001 \002(\014\"\233\002\n\nFblElement"
+    "\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007capti"
+    "on\030\003 \002(\0132\016.Proto.wstring\022\016\n\006opcode\030\004 \002(\r"
+    "\022\025\n\006hasRam\030\005 \001(\010:\005false\022\033\n\rrequiredStart"
+    "\030\006 \001(\010:\004true\022 \n\006inputs\030\013 \003(\0132\020.Proto.Afb"
+    "Signal\022!\n\007outputs\030\014 \003(\0132\020.Proto.AfbSigna"
+    "l\022\037\n\006params\030\r \003(\0132\017.Proto.AfbParam\022#\n\013de"
+    "scription\030\016 \001(\0132\016.Proto.wstring\"\304\001\n\tAfbS"
+    "ignal\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\""
+    "\n\004type\030\002 \002(\0162\024.Proto.FblSignalType\022\027\n\014op"
+    "erandIndex\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006"
+    "opName\030\005 \001(\0132\016.Proto.wstring\022(\n\ndataForm"
+    "at\030\006 \001(\0162\024.Proto.FblDataFormat\"\273\003\n\010AfbPa"
+    "ram\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\017\n\007"
+    "visible\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017"
+    "\n\004size\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010:\005f"
+    "alse\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchangedScri"
+    "pt\030\014 \001(\0132\016.Proto.wstring\022\036\n\005value\030\r \001(\0132"
+    "\017.Proto.qvariant\022%\n\014defaultvalue\030\016 \001(\0132\017"
+    ".Proto.qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.Prot"
+    "o.qvariant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto.qv"
+    "ariant\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstring\022\""
+    "\n\004type\030\022 \001(\0162\024.Proto.FblSignalType\022(\n\nda"
+    "taFormat\030\023 \001(\0162\024.Proto.FblDataFormat\"\276\002\n"
+    "\006Schema\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022 \n\010sc"
+    "hemaID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030"
+    "\003 \002(\0132\016.Proto.wstring\022\r\n\005width\030\004 \002(\001\022\016\n\006"
+    "height\030\005 \002(\001\022\037\n\004unit\030\006 \002(\0162\021.Proto.Schem"
+    "aUnit\022\037\n\020excludeFromBuild\030\007 \001(\010:\005false\022\037"
+    "\n\006layers\030d \003(\0132\017.Proto.Envelope\022)\n\004afbs\030"
+    "e \002(\0132\033.Proto.AfbElementCollection\022)\n\014lo"
+    "gic_schema\030\310\001 \001(\0132\022.Proto.LogicSchema\"G\n"
+    "\013LogicSchema\022$\n\014equipmentids\030\001 \003(\0132\016.Pro"
+    "to.wstring\022\022\n\007counter\030\002 \001(\005:\0010\"\224\001\n\013Schem"
+    "aLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004nam"
+    "e\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile\030\003 \002(\010"
+    "\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017"
+    " \003(\0132\017.Proto.Envelope\"\342\007\n\nSchemaItem\022\031\n\004"
+    "uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStatic\030\002 \002("
+    "\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021."
+    "Proto.SchemaUnit\022\032\n\013acceptClick\030\005 \001(\010:\005f"
+    "alse\022#\n\013clickScript\030\006 \001(\0132\016.Proto.wstrin"
+    "g\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.PosRectIm"
+    "pl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLineI"
+    "mpl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.Proto.P"
+    "osConnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.Prot"
+    "o.FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.Proto.F"
+    "blItemRect\022\'\n\013FblItemLine\030l \001(\0132\022.Proto."
+    "FblItemLine\022#\n\004Rect\030t \001(\0132\025.Proto.Schema"
+    "ItemRect\022#\n\004Line\030u \001(\0132\025.Proto.SchemaIte"
+    "mLine\022#\n\004Path\030v \001(\0132\025.Proto.SchemaItemPa"
+    "th\022\'\n\006Signal\030| \001(\0132\027.Proto.SchemaItemSig"
+    "nal\022+\n\013InputSignal\030} \001(\0132\026.Proto.SchemaI"
+    "temInput\022-\n\014OutputSignal\030~ \001(\0132\027.Proto.S"
+    "chemaItemOutput\022#\n\004Link\030\177 \001(\0132\025.Proto.Sc"
+    "hemaItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.Schem"
+    "aItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Proto.Sch"
+    "emaItemConst\0224\n\016ConnectionItem\030\202\001 \001(\0132\033."
+    "Proto.SchemaItemConnection\0226\n\017Transmitte"
+    "rItem\030\203\001 \001(\0132\034.Proto.SchemaItemTransmitt"
+    "er\0220\n\014ReceiverItem\030\204\001 \001(\0132\031.Proto.Schema"
+    "ItemReceiver\022,\n\013InOutSignal\030\205\001 \001(\0132\026.Pro"
+    "to.SchemaItemInOut\"[\n\013PosRectImpl\022\021\n\tlef"
+    "tDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidthD"
+    "ocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013PosLi"
+    "neImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYDoc"
+    "Pt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocPt"
+    "\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030\001 "
+    "\003(\0132\022.Proto.SchemaPoint\"\353\001\n\016SchemaItemRe"
+    "ct\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n"
+    "\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto.w"
+    "string\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\0132"
+    "\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010drawr"
+    "ect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001(\005:\0014\022\026\n"
+    "\tvertAlign\030\n \001(\005:\003128\"3\n\016SchemaItemLine\022"
+    "\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"3\n\016Sc"
+    "hemaItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColo"
+    "r\030\002 \002(\r\"\324\001\n\022FblConnectionPoint\022!\n\005point\030"
+    "\001 \001(\0132\022.Proto.SchemaPoint\022/\n\ndirrection\030"
+    "\002 \001(\0162\033.Proto.ConnectionDirrection\022\031\n\004uu"
+    "id\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 "
+    "\001(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\022\"\n\rassociated"
+    "Ios\030\006 \003(\0132\013.Proto.Uuid\"4\n\007FblItem\022)\n\006poi"
+    "nts\030\001 \003(\0132\031.Proto.FblConnectionPoint\"v\n\013"
+    "FblItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor"
+    "\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004"
+    " \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013"
+    "FblItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor"
+    "\030\002 \002(\r\"R\n\026SchemaItemSignalColumn\022\021\n\005widt"
+    "h\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:\0010\022\024\n\thorzAlig"
+    "n\030\003 \001(\005:\0011\"\231\001\n\020SchemaItemSignal\022$\n\014appSi"
+    "gnalIDs\030\001 \003(\0132\016.Proto.wstring\022\024\n\tprecisi"
+    "on\030\002 \001(\005:\0012\022\031\n\014analogFormat\030\003 \001(\005:\003102\022."
+    "\n\007columns\030\004 \003(\0132\035.Proto.SchemaItemSignal"
+    "Column\"\021\n\017SchemaItemInput\"\022\n\020SchemaItemO"
+    "utput\"\021\n\017SchemaItemInOut\"\020\n\016SchemaItemLi"
+    "nk\"\241\001\n\rSchemaItemAfb\022\037\n\006params\030\002 \003(\0132\017.P"
+    "roto.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Proto."
+    "wstring\022\024\n\tprecision\030\004 \001(\005:\0012\022(\n\nafbelem"
+    "ent\030\005 \001(\0132\024.Proto.AfbElementXml\022\r\n\005label"
+    "\030\006 \001(\t\"d\n\017SchemaItemConst\022\017\n\004type\030\001 \001(\005:"
+    "\0010\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 "
+    "\001(\001:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\",\n\024SchemaIt"
+    "emConnection\022\024\n\014connectionid\030\001 \001(\t\",\n\025Sc"
+    "hemaItemTransmitter\022\023\n\010pinCount\030\001 \001(\005:\0011"
+    "\"E\n\022SchemaItemReceiver\022\032\n\014showValidity\030\001"
+    " \001(\010:\004true\022\023\n\013appSignalId\030\002 \001(\t\"\201\006\n\014Devi"
+    "ceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013e"
+    "quipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007capt"
+    "ion\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestri"
+    "ction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001"
+    "(\005:\0010\022\"\n\032specific_properties_struct\030\006 \001("
+    "\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025"
+    "\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001("
+    "\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wst"
+    "ring\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.U"
+    "uid\022\031\n\016childCountHint\030$ \001(\005:\0010\022\037\n\004Root\030d"
+    " \001(\0132\021.Proto.DeviceRoot\022#\n\006System\030e \001(\0132"
+    "\023.Proto.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Pro"
+    "to.DeviceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.D"
+    "eviceChassis\022#\n\006Module\030h \001(\0132\023.Proto.Dev"
+    "iceModule\022+\n\nController\030i \001(\0132\027.Proto.De"
+    "viceController\022#\n\006Signal\030j \001(\0132\023.Proto.D"
+    "eviceSignal\022\'\n\013Workstation\030k \001(\0132\022.Proto"
+    ".Workstation\022!\n\010Software\030l \001(\0132\017.Proto.S"
+    "oftware\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Envel"
+    "ope\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDev"
+    "iceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\001"
+    "0\"X\n\014DeviceModule\022\027\n\014typeObsolete\030\001 \001(\005:"
+    "\0010\022\033\n\023configurationScript\030\002 \001(\t\022\022\n\nmodul"
+    "eType\030\003 \001(\005\"\022\n\020DeviceController\"\376\001\n\014Devi"
+    "ceSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyt"
+    "eOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004si"
+    "ze\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026"
+    "\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 "
+    "\001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001("
+    "\005:\0010\022\023\n\010function\030\n \001(\005:\0010\022\025\n\nmemoryArea\030"
+    "\013 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010"
+    "\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleC"
+    "onfiguration\022\032\n\022struct_description\030\001 \001(\t"
+    "\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigura"
+    "tionValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfi"
+    "gurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002"
+    "(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 "
+    "\002(\t\"0\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003"
+    "bit\030\002 \002(\005:\002-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022"
+    "\025\n\rsignalGroupID\030\002 \001(\005\022\030\n\020signalInstance"
+    "ID\030\003 \001(\005\022\023\n\013changesetID\030\004 \001(\005\022\022\n\nchecked"
+    "Out\030\005 \001(\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemCh"
+    "annel\030\007 \001(\005\022\014\n\004type\030\010 \001(\005\022\017\n\007created\030\t \001"
+    "(\003\022\017\n\007deleted\030\n \001(\010\022\027\n\017instanceCreated\030\013"
+    " \001(\003\022\026\n\016instanceAction\030\014 \001(\005\022\023\n\013appSigna"
+    "lID\030\r \001(\t\022\031\n\021customAppSignalID\030\016 \001(\t\022\017\n\007"
+    "caption\030\017 \001(\t\022\022\n\ndataFormat\030\020 \001(\005\022\020\n\010dat"
+    "aSize\030\021 \001(\005\022\016\n\006lowADC\030\022 \001(\005\022\017\n\007highADC\030\023"
+    " \001(\005\022\033\n\023lowEngeneeringUnits\030\024 \001(\001\022\034\n\024hig"
+    "hEngeneeringUnits\030\025 \001(\001\022\016\n\006unitID\030\026 \001(\005\022"
+    "\022\n\nadjustment\030\027 \001(\001\022\025\n\rlowValidRange\030\030 \001"
+    "(\001\022\026\n\016highValidRange\030\031 \001(\001\022\026\n\016unbalanceL"
+    "imit\030\032 \001(\001\022\025\n\rinputLowLimit\030\033 \001(\001\022\026\n\016inp"
+    "utHighLimit\030\034 \001(\001\022\023\n\013inputUnitID\030\035 \001(\005\022\025"
+    "\n\rinputSensorID\030\036 \001(\005\022\026\n\016outputLowLimit\030"
+    "\037 \001(\001\022\027\n\017outputHighLimit\030  \001(\001\022\024\n\014output"
+    "UnitID\030! \001(\005\022\022\n\noutputMode\030\" \001(\005\022\026\n\016outp"
+    "utSensorID\030# \001(\005\022\017\n\007acquire\030$ \001(\010\022\022\n\ncal"
+    "culated\030% \001(\010\022\023\n\013normalState\030& \001(\005\022\025\n\rde"
+    "cimalPlaces\030\' \001(\005\022\020\n\010aperture\030( \001(\001\022\021\n\ti"
+    "nOutType\030) \001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\rf"
+    "ilteringTime\030+ \001(\001\022\027\n\017spreadTolerance\030, "
+    "\001(\001\022\021\n\tbyteOrder\030- \001(\005\022\024\n\014enableTuning\030."
+    " \001(\010\022\032\n\022tuningDefaultValue\030/ \001(\001\022\014\n\004hash"
+    "\0300 \001(\004\022\033\n\022regValueAddrOffset\030\310\001 \001(\005\022\030\n\017r"
+    "egValueAddrBit\030\311\001 \001(\005\022\036\n\025regValidityAddr"
+    "Offset\030\312\001 \001(\005\022\033\n\022regValidityAddrBit\030\313\001 \001"
+    "(\005\022\033\n\022ioBufferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBuf"
+    "ferAddrBit\030\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001("
+    "\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210\001\n\016AppSignalStat"
+    "e\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005"
+    "flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024\n"
+    "\tlocalTime\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\001"
+    "0*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimet"
+    "er\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t"
+    "\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n"
+    "\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataForma"
+    "t\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Flo"
+    "at\020\002", 8484);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1682,6 +1714,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaPoint::default_instance_ = new SchemaPoint();
   Envelope::default_instance_ = new Envelope();
   EnvelopeSet::default_instance_ = new EnvelopeSet();
+  EnvelopeSetShortDescription::default_instance_ = new EnvelopeSetShortDescription();
   Configuration::default_instance_ = new Configuration();
   AfbElementCollection::default_instance_ = new AfbElementCollection();
   AfbElementXml::default_instance_ = new AfbElementXml();
@@ -1736,6 +1769,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaPoint::default_instance_->InitAsDefaultInstance();
   Envelope::default_instance_->InitAsDefaultInstance();
   EnvelopeSet::default_instance_->InitAsDefaultInstance();
+  EnvelopeSetShortDescription::default_instance_->InitAsDefaultInstance();
   Configuration::default_instance_->InitAsDefaultInstance();
   AfbElementCollection::default_instance_->InitAsDefaultInstance();
   AfbElementXml::default_instance_->InitAsDefaultInstance();
@@ -3726,7 +3760,7 @@ void Envelope::Swap(Envelope* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int EnvelopeSet::kSchemaItemsFieldNumber;
+const int EnvelopeSet::kItemsFieldNumber;
 #endif  // !_MSC_VER
 
 EnvelopeSet::EnvelopeSet()
@@ -3779,7 +3813,7 @@ EnvelopeSet* EnvelopeSet::New() const {
 }
 
 void EnvelopeSet::Clear() {
-  schemaitems_.Clear();
+  items_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -3790,17 +3824,17 @@ bool EnvelopeSet::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.Envelope schemaItems = 1;
+      // repeated .Proto.Envelope items = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_schemaItems:
+         parse_items:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_schemaitems()));
+                input, add_items()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_schemaItems;
+        if (input->ExpectTag(10)) goto parse_items;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3823,10 +3857,10 @@ bool EnvelopeSet::MergePartialFromCodedStream(
 
 void EnvelopeSet::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.Envelope schemaItems = 1;
-  for (int i = 0; i < this->schemaitems_size(); i++) {
+  // repeated .Proto.Envelope items = 1;
+  for (int i = 0; i < this->items_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->schemaitems(i), output);
+      1, this->items(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -3837,11 +3871,11 @@ void EnvelopeSet::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* EnvelopeSet::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.Envelope schemaItems = 1;
-  for (int i = 0; i < this->schemaitems_size(); i++) {
+  // repeated .Proto.Envelope items = 1;
+  for (int i = 0; i < this->items_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->schemaitems(i), target);
+        1, this->items(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3854,12 +3888,12 @@ void EnvelopeSet::SerializeWithCachedSizes(
 int EnvelopeSet::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.Envelope schemaItems = 1;
-  total_size += 1 * this->schemaitems_size();
-  for (int i = 0; i < this->schemaitems_size(); i++) {
+  // repeated .Proto.Envelope items = 1;
+  total_size += 1 * this->items_size();
+  for (int i = 0; i < this->items_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->schemaitems(i));
+        this->items(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -3887,7 +3921,7 @@ void EnvelopeSet::MergeFrom(const ::google::protobuf::Message& from) {
 
 void EnvelopeSet::MergeFrom(const EnvelopeSet& from) {
   GOOGLE_CHECK_NE(&from, this);
-  schemaitems_.MergeFrom(from.schemaitems_);
+  items_.MergeFrom(from.items_);
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -3905,15 +3939,15 @@ void EnvelopeSet::CopyFrom(const EnvelopeSet& from) {
 
 bool EnvelopeSet::IsInitialized() const {
 
-  for (int i = 0; i < schemaitems_size(); i++) {
-    if (!this->schemaitems(i).IsInitialized()) return false;
+  for (int i = 0; i < items_size(); i++) {
+    if (!this->items(i).IsInitialized()) return false;
   }
   return true;
 }
 
 void EnvelopeSet::Swap(EnvelopeSet* other) {
   if (other != this) {
-    schemaitems_.Swap(&other->schemaitems_);
+    items_.Swap(&other->items_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -3925,6 +3959,338 @@ void EnvelopeSet::Swap(EnvelopeSet* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = EnvelopeSet_descriptor_;
   metadata.reflection = EnvelopeSet_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int EnvelopeSetShortDescription::kProjectdbversionFieldNumber;
+const int EnvelopeSetShortDescription::kClassnamehashFieldNumber;
+const int EnvelopeSetShortDescription::kEquipmentEditorFieldNumber;
+const int EnvelopeSetShortDescription::kPresetEditorFieldNumber;
+#endif  // !_MSC_VER
+
+EnvelopeSetShortDescription::EnvelopeSetShortDescription()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void EnvelopeSetShortDescription::InitAsDefaultInstance() {
+}
+
+EnvelopeSetShortDescription::EnvelopeSetShortDescription(const EnvelopeSetShortDescription& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void EnvelopeSetShortDescription::SharedCtor() {
+  _cached_size_ = 0;
+  projectdbversion_ = 0u;
+  equipmenteditor_ = false;
+  preseteditor_ = false;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+EnvelopeSetShortDescription::~EnvelopeSetShortDescription() {
+  SharedDtor();
+}
+
+void EnvelopeSetShortDescription::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void EnvelopeSetShortDescription::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* EnvelopeSetShortDescription::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return EnvelopeSetShortDescription_descriptor_;
+}
+
+const EnvelopeSetShortDescription& EnvelopeSetShortDescription::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+EnvelopeSetShortDescription* EnvelopeSetShortDescription::default_instance_ = NULL;
+
+EnvelopeSetShortDescription* EnvelopeSetShortDescription::New() const {
+  return new EnvelopeSetShortDescription;
+}
+
+void EnvelopeSetShortDescription::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    projectdbversion_ = 0u;
+    equipmenteditor_ = false;
+    preseteditor_ = false;
+  }
+  classnamehash_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool EnvelopeSetShortDescription::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 projectdbversion = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &projectdbversion_)));
+          set_has_projectdbversion();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_classnamehash;
+        break;
+      }
+
+      // repeated uint32 classnamehash = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_classnamehash:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 1, 16, input, this->mutable_classnamehash())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, this->mutable_classnamehash())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_classnamehash;
+        if (input->ExpectTag(24)) goto parse_equipmentEditor;
+        break;
+      }
+
+      // optional bool equipmentEditor = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_equipmentEditor:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &equipmenteditor_)));
+          set_has_equipmenteditor();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_presetEditor;
+        break;
+      }
+
+      // optional bool presetEditor = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_presetEditor:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &preseteditor_)));
+          set_has_preseteditor();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void EnvelopeSetShortDescription::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 projectdbversion = 1;
+  if (has_projectdbversion()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->projectdbversion(), output);
+  }
+
+  // repeated uint32 classnamehash = 2;
+  for (int i = 0; i < this->classnamehash_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(
+      2, this->classnamehash(i), output);
+  }
+
+  // optional bool equipmentEditor = 3;
+  if (has_equipmenteditor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->equipmenteditor(), output);
+  }
+
+  // optional bool presetEditor = 4;
+  if (has_preseteditor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->preseteditor(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* EnvelopeSetShortDescription::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 projectdbversion = 1;
+  if (has_projectdbversion()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->projectdbversion(), target);
+  }
+
+  // repeated uint32 classnamehash = 2;
+  for (int i = 0; i < this->classnamehash_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteUInt32ToArray(2, this->classnamehash(i), target);
+  }
+
+  // optional bool equipmentEditor = 3;
+  if (has_equipmenteditor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->equipmenteditor(), target);
+  }
+
+  // optional bool presetEditor = 4;
+  if (has_preseteditor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->preseteditor(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int EnvelopeSetShortDescription::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 projectdbversion = 1;
+    if (has_projectdbversion()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->projectdbversion());
+    }
+
+    // optional bool equipmentEditor = 3;
+    if (has_equipmenteditor()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool presetEditor = 4;
+    if (has_preseteditor()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  // repeated uint32 classnamehash = 2;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->classnamehash_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt32Size(this->classnamehash(i));
+    }
+    total_size += 1 * this->classnamehash_size() + data_size;
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void EnvelopeSetShortDescription::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const EnvelopeSetShortDescription* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const EnvelopeSetShortDescription*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void EnvelopeSetShortDescription::MergeFrom(const EnvelopeSetShortDescription& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  classnamehash_.MergeFrom(from.classnamehash_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_projectdbversion()) {
+      set_projectdbversion(from.projectdbversion());
+    }
+    if (from.has_equipmenteditor()) {
+      set_equipmenteditor(from.equipmenteditor());
+    }
+    if (from.has_preseteditor()) {
+      set_preseteditor(from.preseteditor());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void EnvelopeSetShortDescription::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void EnvelopeSetShortDescription::CopyFrom(const EnvelopeSetShortDescription& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool EnvelopeSetShortDescription::IsInitialized() const {
+
+  return true;
+}
+
+void EnvelopeSetShortDescription::Swap(EnvelopeSetShortDescription* other) {
+  if (other != this) {
+    std::swap(projectdbversion_, other->projectdbversion_);
+    classnamehash_.Swap(&other->classnamehash_);
+    std::swap(equipmenteditor_, other->equipmenteditor_);
+    std::swap(preseteditor_, other->preseteditor_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata EnvelopeSetShortDescription::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = EnvelopeSetShortDescription_descriptor_;
+  metadata.reflection = EnvelopeSetShortDescription_reflection_;
   return metadata;
 }
 
@@ -15156,6 +15522,7 @@ const int DeviceObject::kPresetFieldNumber;
 const int DeviceObject::kPresetRootFieldNumber;
 const int DeviceObject::kPresetNameFieldNumber;
 const int DeviceObject::kPresetObjectUuidFieldNumber;
+const int DeviceObject::kChildCountHintFieldNumber;
 const int DeviceObject::kRootFieldNumber;
 const int DeviceObject::kSystemFieldNumber;
 const int DeviceObject::kRackFieldNumber;
@@ -15165,6 +15532,7 @@ const int DeviceObject::kControllerFieldNumber;
 const int DeviceObject::kSignalFieldNumber;
 const int DeviceObject::kWorkstationFieldNumber;
 const int DeviceObject::kSoftwareFieldNumber;
+const int DeviceObject::kChildrenFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceObject::DeviceObject()
@@ -15208,6 +15576,7 @@ void DeviceObject::SharedCtor() {
   presetroot_ = false;
   presetname_ = NULL;
   presetobjectuuid_ = NULL;
+  childcounthint_ = 0;
   root_ = NULL;
   system_ = NULL;
   rack_ = NULL;
@@ -15298,6 +15667,7 @@ void DeviceObject::Clear() {
     if (has_presetobjectuuid()) {
       if (presetobjectuuid_ != NULL) presetobjectuuid_->::Proto::Uuid::Clear();
     }
+    childcounthint_ = 0;
     if (has_root()) {
       if (root_ != NULL) root_->::Proto::DeviceRoot::Clear();
     }
@@ -15310,11 +15680,11 @@ void DeviceObject::Clear() {
     if (has_chassis()) {
       if (chassis_ != NULL) chassis_->::Proto::DeviceChassis::Clear();
     }
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_module()) {
       if (module_ != NULL) module_->::Proto::DeviceModule::Clear();
     }
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_controller()) {
       if (controller_ != NULL) controller_->::Proto::DeviceController::Clear();
     }
@@ -15329,6 +15699,7 @@ void DeviceObject::Clear() {
     }
   }
   properties_.Clear();
+  children_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -15498,6 +15869,22 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(288)) goto parse_childCountHint;
+        break;
+      }
+
+      // optional int32 childCountHint = 36 [default = 0];
+      case 36: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_childCountHint:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &childcounthint_)));
+          set_has_childcounthint();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectTag(802)) goto parse_Root;
         break;
       }
@@ -15624,6 +16011,21 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(1602)) goto parse_children;
+        break;
+      }
+
+      // repeated .Proto.Envelope children = 200;
+      case 200: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_children:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_children()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(1602)) goto parse_children;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -15712,6 +16114,11 @@ void DeviceObject::SerializeWithCachedSizes(
       35, this->presetobjectuuid(), output);
   }
 
+  // optional int32 childCountHint = 36 [default = 0];
+  if (has_childcounthint()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(36, this->childcounthint(), output);
+  }
+
   // optional .Proto.DeviceRoot Root = 100;
   if (has_root()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -15764,6 +16171,12 @@ void DeviceObject::SerializeWithCachedSizes(
   if (has_software()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       108, this->software(), output);
+  }
+
+  // repeated .Proto.Envelope children = 200;
+  for (int i = 0; i < this->children_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      200, this->children(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -15848,6 +16261,11 @@ void DeviceObject::SerializeWithCachedSizes(
         35, this->presetobjectuuid(), target);
   }
 
+  // optional int32 childCountHint = 36 [default = 0];
+  if (has_childcounthint()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(36, this->childcounthint(), target);
+  }
+
   // optional .Proto.DeviceRoot Root = 100;
   if (has_root()) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -15909,6 +16327,13 @@ void DeviceObject::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         108, this->software(), target);
+  }
+
+  // repeated .Proto.Envelope children = 200;
+  for (int i = 0; i < this->children_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        200, this->children(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -15990,6 +16415,13 @@ int DeviceObject::ByteSize() const {
           this->presetobjectuuid());
     }
 
+    // optional int32 childCountHint = 36 [default = 0];
+    if (has_childcounthint()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->childcounthint());
+    }
+
     // optional .Proto.DeviceRoot Root = 100;
     if (has_root()) {
       total_size += 2 +
@@ -16018,6 +16450,8 @@ int DeviceObject::ByteSize() const {
           this->chassis());
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .Proto.DeviceModule Module = 104;
     if (has_module()) {
       total_size += 2 +
@@ -16025,8 +16459,6 @@ int DeviceObject::ByteSize() const {
           this->module());
     }
 
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .Proto.DeviceController Controller = 105;
     if (has_controller()) {
       total_size += 2 +
@@ -16064,6 +16496,14 @@ int DeviceObject::ByteSize() const {
         this->properties(i));
   }
 
+  // repeated .Proto.Envelope children = 200;
+  total_size += 2 * this->children_size();
+  for (int i = 0; i < this->children_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->children(i));
+  }
+
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -16090,6 +16530,7 @@ void DeviceObject::MergeFrom(const ::google::protobuf::Message& from) {
 void DeviceObject::MergeFrom(const DeviceObject& from) {
   GOOGLE_CHECK_NE(&from, this);
   properties_.MergeFrom(from.properties_);
+  children_.MergeFrom(from.children_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
@@ -16123,6 +16564,9 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_presetobjectuuid()) {
       mutable_presetobjectuuid()->::Proto::Uuid::MergeFrom(from.presetobjectuuid());
     }
+    if (from.has_childcounthint()) {
+      set_childcounthint(from.childcounthint());
+    }
     if (from.has_root()) {
       mutable_root()->::Proto::DeviceRoot::MergeFrom(from.root());
     }
@@ -16135,11 +16579,11 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_chassis()) {
       mutable_chassis()->::Proto::DeviceChassis::MergeFrom(from.chassis());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_module()) {
       mutable_module()->::Proto::DeviceModule::MergeFrom(from.module());
     }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_controller()) {
       mutable_controller()->::Proto::DeviceController::MergeFrom(from.controller());
     }
@@ -16192,6 +16636,9 @@ bool DeviceObject::IsInitialized() const {
   if (has_presetobjectuuid()) {
     if (!this->presetobjectuuid().IsInitialized()) return false;
   }
+  for (int i = 0; i < children_size(); i++) {
+    if (!this->children(i).IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -16208,6 +16655,7 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(presetroot_, other->presetroot_);
     std::swap(presetname_, other->presetname_);
     std::swap(presetobjectuuid_, other->presetobjectuuid_);
+    std::swap(childcounthint_, other->childcounthint_);
     std::swap(root_, other->root_);
     std::swap(system_, other->system_);
     std::swap(rack_, other->rack_);
@@ -16217,6 +16665,7 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(signal_, other->signal_);
     std::swap(workstation_, other->workstation_);
     std::swap(software_, other->software_);
+    children_.Swap(&other->children_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
