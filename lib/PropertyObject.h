@@ -21,7 +21,7 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
-#include "../lib/PlainObjectHeap.h"
+//#include "../lib/PlainObjectHeap.h"
 
 //extern poh::PlainObjectHeap thePropertyObjectHeap;
 
