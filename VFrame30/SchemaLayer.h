@@ -25,7 +25,7 @@ namespace VFrame30
 
 	private:
 		// Use this func only while serialization, cause during obejcet creation it isnotfully initialized
-		static SchemaLayer* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<SchemaLayer> CreateObject(const Proto::Envelope& message);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

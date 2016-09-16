@@ -77,7 +77,7 @@ namespace VFrame30
 		m_schemas.clear();
 		for (int i = 0; i < configuration.schemas().size(); i++)
 		{
-			Schema* schema = Schema::Create(configuration.schemas(i));
+			std::shared_ptr<Schema> schema = Schema::Create(configuration.schemas(i));
 
 			if (schema == nullptr)
 			{
@@ -85,13 +85,13 @@ namespace VFrame30
 				continue;
 			}
 
-			m_schemas.push_back(std::shared_ptr<Schema>(schema));
+			m_schemas.push_back(schema);
 		}
 
 		return true;
 	}
 
-	Configuration* Configuration::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<Configuration> Configuration::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//
@@ -103,16 +103,16 @@ namespace VFrame30
 
 		//quint32 classNameHash = message.classnamehash();
 
-		Configuration* pConfiguration = new Configuration();
-		bool result = pConfiguration->LoadData(message);
+		std::shared_ptr<Configuration> configuration = std::make_shared<Configuration>();
+
+		bool result = configuration->LoadData(message);
 
 		if (result == false)
 		{
-			delete pConfiguration;
-			return nullptr;
+			return std::shared_ptr<Configuration>();
 		}
 
-		return pConfiguration;
+		return configuration;
 	}
 
 
