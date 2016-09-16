@@ -1,11 +1,17 @@
 #include "TuningObject.h"
 
 TuningObject::TuningObject()
+	:
+	  m_value(0.0),
+	  m_lowLimit(0.0),
+	  m_highLimit(0.0),
+	  m_decimalPlaces(0),
+	  m_valid(false),
+	  m_underflow(false),
+	  m_overflow(false),
+	  m_analog(false)
 {
-	m_value = 0;
-	m_valid = false;
-	m_underflow = false;
-	m_overflow = false;
+
 
 }
 
@@ -78,6 +84,36 @@ QVariant TuningObject::value() const
 void TuningObject::setValue(const QVariant& value)
 {
 	m_value = value;
+}
+
+double TuningObject::lowLimit() const
+{
+	return m_lowLimit;
+}
+
+void TuningObject::setLowLimit(double value)
+{
+	m_lowLimit = value;
+}
+
+double TuningObject::highLimit() const
+{
+	return m_highLimit;
+}
+
+void TuningObject::setHighLimit(double value)
+{
+	m_highLimit = value;
+}
+
+int TuningObject::decimalPlaces() const
+{
+	return m_decimalPlaces;
+}
+
+void TuningObject::setDecimalPlaces(int value)
+{
+	m_decimalPlaces = value;
 }
 
 bool TuningObject::valid() const

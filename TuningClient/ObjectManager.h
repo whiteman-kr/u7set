@@ -14,8 +14,13 @@ public:
 	int objectsCount() const;
 	TuningObject *object(int index);
 
+	//bool load(const QString& fileName);
+
+	bool load(const QByteArray& data, QString *errorCode);
+
 private:
 	std::vector<TuningObject> m_objects;
+
 };
 
 extern ObjectManager theObjects;

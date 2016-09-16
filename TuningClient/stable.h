@@ -1,7 +1,9 @@
 #ifndef STABLE_H
 #define STABLE_H
 
+#include <memory>
 #include <assert.h>
+
 #include <QObject>
 #include <QSplitter>
 #include <QTreeWidget>
@@ -23,6 +25,11 @@
 #include <QXmlStreamWriter>
 #include <QFile>
 #include <QDebug>
-#include <memory>
+#include <QLabel>
+#include <QStatusBar>
+#include <QApplication>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QDomDocument>
 
 #endif // STABLE_H
