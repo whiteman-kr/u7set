@@ -203,3 +203,53 @@ AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* f
 	Hash h = ::calcHash(appSignalId);
 	return signalState(h, found);
 }
+
+int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result)
+{
+	if (result == nullptr)
+	{
+		assert(result);
+		return 0;
+	}
+
+	int found = 0;
+	result->reserve(appSignalHashes.size());
+
+	QMutexLocker l(&m_statesMutex);
+
+	for (const Hash& signalHash : appSignalHashes)
+	{
+		AppSignalState state;
+		state.flags.valid = false;
+
+		auto foundState = m_states.find(signalHash);
+
+		if (foundState != m_states.end())
+		{
+			state = foundState->second;
+			found ++;
+		}
+
+		result->push_back(state);
+	}
+
+	assert(appSignalHashes.size() == result->size());
+
+	return found;
+}
+
+int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result)
+{
+	std::vector<Hash> appSignalHashes;
+	appSignalHashes.reserve(appSignalIds.size());
+
+	for (const QString& id : appSignalIds)
+	{
+		Hash h = ::calcHash(id);
+		appSignalHashes.push_back(h);
+	}
+
+	assert(appSignalIds.size() == appSignalHashes.size());
+
+	return signalState(appSignalHashes, result);
+}
