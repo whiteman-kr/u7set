@@ -213,6 +213,8 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 	}
 
 	int found = 0;
+
+	result->clear();
 	result->reserve(appSignalHashes.size());
 
 	QMutexLocker l(&m_statesMutex);
