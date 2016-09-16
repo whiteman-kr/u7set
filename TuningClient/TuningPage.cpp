@@ -156,6 +156,46 @@ int TuningItemModel::rowCount(const QModelIndex &parent) const
 
 QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 {
+	if (role == Qt::BackgroundRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex == Value)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+	}
+
+	if (role == Qt::ForegroundRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex == Value)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
+
+	}
+
+	if (role == Qt::FontRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		//if (displayIndex == Value)
+		//{
+			QFont f = QFont("Arial", 10);
+			f.setBold(true);
+			return f;
+		//}
+	}
+
 	if (role == Qt::DisplayRole)
 	{
 		int row = index.row();
@@ -261,11 +301,6 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		{
 			return (o->overflow() == true) ? tr("Yes") : tr("No");
 		}
-
-
-
-
-		return QVariant();
 	}
 	return QVariant();
 }
