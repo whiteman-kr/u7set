@@ -174,7 +174,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		//QString str = QString("%1:%2").arg(row).arg(col);
 		//qDebug()<<str;
 
-		TuningObject* o = theObjects.object(row);
+		const std::shared_ptr<TuningObject> o = theObjects.const_object(row);
 		if (o == nullptr)
 		{
 			assert(o);
@@ -508,8 +508,16 @@ TuningPage::TuningPage(std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent)
 {
 	// Top buttons
 	//
-	for (auto f : theFilters.filters)
+	int count = theFilters.filterCount();
+	for (int i = 0; i < count; i++)
 	{
+		const std::shared_ptr<ObjectFilter> f = theFilters.filter_const(i);
+		if (f == nullptr)
+		{
+			assert(f);
+			continue;
+		}
+
 		if (f->isButton() == false)
 		{
 			continue;

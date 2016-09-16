@@ -151,6 +151,7 @@ namespace Builder
 		md5Generator.addData(&m_file);
 
 		m_info.md5 = QString(md5Generator.result().toHex());
+
 	}
 
 
@@ -183,7 +184,7 @@ namespace Builder
 
 	bool BuildFile::write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log)
 	{
-		if (open(buildResult, true, log) == false)
+		if (open(buildResult, false, log) == false)
 		{
 			return false;
 		}
