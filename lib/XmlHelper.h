@@ -31,6 +31,7 @@ public:
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
 	void writeDoubleAttribute(const QString& name, double value);
+	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);

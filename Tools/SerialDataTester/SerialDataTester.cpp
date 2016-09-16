@@ -134,19 +134,11 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	QSettings applicationSettings;
 	if (applicationSettings.value("port").isNull())
 	{
-		if (QSerialPortInfo::availablePorts().count() == 0)
-		{
-			QMessageBox::critical(this, tr("Serial Data Tester"), tr("No ports detected! Program will not work until ports would be detected"));
-		}
-		else
-		{
-			QMessageBox::warning(this, tr("First time start"), tr("Look like you started programm for the first time. Select default settings before use it"));
+		m_applicationSettingsDialog->exec();
 
-			m_applicationSettingsDialog->exec();
+		applicationSettings.setValue("bits", QSerialPort::Data8);
+		applicationSettings.setValue("stopBits", QSerialPort::TwoStop);
 
-			applicationSettings.setValue("bits", QSerialPort::Data8);
-			applicationSettings.setValue("stopBits", QSerialPort::TwoStop);
-		}
 	}
 
 	delete m_applicationSettingsDialog;
@@ -202,6 +194,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(m_portReceiver, &PortReceiver::dataFromPort, m_parser, &SerialDataParser::parse);							// Send received data from Port Received to Packet parser
 	connect(m_parser, &SerialDataParser::packetProcessed, this, &SerialDataTester::dataReceived);						// Packet parser signal for packet to be processed
 	connect(m_parser, &SerialDataParser::crcError, this, &SerialDataTester::crcError);									// Packet parser signal for CRC calculation error
+	connect(this, &SerialDataTester::dataAmountInPacketChanged, m_parser, &SerialDataParser::setDataAmountInPacket);	// Data amount in packet (CRC and header not included)
 
 	// If xml-file exists in application stored setting, we will parse it
 	//
@@ -251,8 +244,9 @@ SerialDataTester::~SerialDataTester()
 		qDebug() << "Error: can not finish port receiver";
 	}
 
-	delete m_portReceiver;
 	delete ui;
+
+	delete m_portReceiver;
 	delete m_parser;
 
 	delete m_file;
@@ -356,6 +350,15 @@ void SerialDataTester::parseFile()
 							//
 
 							m_dataSize = attributes.value("DataSize").toInt();
+
+							// IMPORTANT
+							//
+							// Data amount in packet must be sent to parser, because by using this
+							// value, parser will read this data amount. In case of wrong (or corrupted) data amount
+							// value of received packet - program will break. To avoid this, we will
+							// transfer needed data amount from xml-file
+
+							emit dataAmountInPacketChanged(m_dataSize);
 
 							// Send port data bits to Port Receiver
 							//
@@ -1267,7 +1270,7 @@ QByteArray SerialDataTester::bitsToBytes(QBitArray bits)
 	// Convert from QBitArray to QByteArray
 	//
 
-	for(int b=0; b<bits.count(); ++b)
+	for(int b=0; b<bits.count(); b++)
 		bytes[b/8] = ( bytes.at(b/8) | ((bits[b]?1:0)<<(b%8)));
 	return bytes;
 }

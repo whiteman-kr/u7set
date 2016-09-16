@@ -264,5 +264,5 @@ public:
 	bool setDataSourceState(const Network::DataSourceState& protoState);
 
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
-	qint64 setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
+	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 };

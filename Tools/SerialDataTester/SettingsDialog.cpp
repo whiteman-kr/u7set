@@ -11,20 +11,22 @@
 #include <QDebug>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::SettingsDialog)
+    QDialog(parent),
+    ui(new Ui::SettingsDialog)
 {
 	ui->setupUi(this);
 
-	for (QSerialPortInfo port : QSerialPortInfo::availablePorts())
+	if (QSerialPortInfo::availablePorts().size() == 0)
 	{
-		ui->comPortSelectionBox->addItem(port.portName());
+		ui->comPortSelectionBox->addItem("Empty");
 	}
-
-	/*for (quint32 baudRate : QSerialPortInfo::standardBaudRates())
+	else
 	{
-		ui->portBaudBox->addItem(QString::number(baudRate));
-	}*/
+		for (QSerialPortInfo port : QSerialPortInfo::availablePorts())
+		{
+			ui->comPortSelectionBox->addItem(port.portName());
+		}
+	}
 
 	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud115200));
 	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud57600));

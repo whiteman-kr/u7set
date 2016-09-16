@@ -101,7 +101,7 @@ public:
 	bool checkoutSignal(int index, QString& message);
 	bool editSignals(QVector<int> ids);
 	void saveSignal(Signal& signal);
-	void cloneSignals(const QSet<int>& signalIDs);
+	QList<int> cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignals(const QSet<int>& signalIDs);
 	void deleteSignal(int signalID);
