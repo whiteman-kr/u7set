@@ -14,7 +14,7 @@ SnapshotItemSorter::SnapshotItemSorter(int column, Qt::SortOrder order):
 {
 }
 
-bool SnapshotItemSorter::sortFunction(const SnapshotItem &o1, const SnapshotItem &o2, int column, Qt::SortOrder order) const
+bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem& o2, int column, Qt::SortOrder order) const
 {
 	bool found = false;
 
@@ -206,7 +206,7 @@ SnapshotItemModel::SnapshotItemModel(QObject* parent)
 
 }
 
-void SnapshotItemModel::setSignals(const std::vector<SnapshotItem> &signalsTable)
+void SnapshotItemModel::setSignals(std::vector<SnapshotItem>* signalsTable)
 {
 	if (rowCount() > 0)
 	{
@@ -219,27 +219,25 @@ void SnapshotItemModel::setSignals(const std::vector<SnapshotItem> &signalsTable
 		endRemoveRows();
 	}
 
-	if (signalsTable.empty() == true)
+	if (signalsTable->empty() == true)
 	{
 		return;
 	}
 
 	//
 
-	beginInsertRows(QModelIndex(), 0, (int)signalsTable.size() - 1);
+	beginInsertRows(QModelIndex(), 0, static_cast<int>(signalsTable->size()) - 1);
 
-	m_signalsTable = signalsTable;
+	std::swap(m_signalsTable, *signalsTable);
 
-	insertRows(0, (int)signalsTable.size());
+	insertRows(0, static_cast<int>(m_signalsTable.size()));
 
 	endInsertRows();
-
 }
 
 std::vector<int> SnapshotItemModel::columnsIndexes() const
 {
 	return m_columnsIndexes;
-
 }
 
 void SnapshotItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
@@ -305,12 +303,15 @@ void SnapshotItemModel::updateStates(int from, int to)
 	}
 
 	std::vector<Hash> requestHashes;
+	requestHashes.reserve(to - from);
+
 	std::vector<AppSignalState> requestStates;
 
 	for (int i = from; i <= to; i++)
 	{
 		requestHashes.push_back(m_signalsTable[i].first);
 	}
+
 	int count = theSignals.signalState(requestHashes, &requestStates);
 
 	if (count != requestHashes.size() || count != requestStates.size())
@@ -375,8 +376,7 @@ void SnapshotItemModel::sort(int column, Qt::SortOrder order)
 		emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 	}
 
-
-
+	return;
 }
 
 QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
@@ -443,7 +443,8 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		//
 
 		bool found = false;
-		const Signal& s = theSignals.signal(m_signalsTable[row].first, &found);
+		Signal s = theSignals.signal(m_signalsTable[row].first, &found);
+
 		if (found == false)
 		{
 			assert(false);
@@ -454,16 +455,18 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		{
 			if (state.flags.valid == true)
 			{
-				if (s.isDiscrete())
+				if (s.isDiscrete() == true)
 				{
-					return ((int)state.value == s.normalState()) ? tr("No") : tr("Yes");
+					return static_cast<int>(state.value) == 0 ? "0" : "1";
 				}
-				if (s.isAnalog())
+
+				if (s.isAnalog() == true)
 				{
 					QString str = QString::number(state.value, 'f', s.decimalPlaces());
+
 					if (state.flags.underflow == true)
 					{
-						str += tr(" [Underflow");
+						str += tr(" [Underflow]");
 					}
 
 					return str;
@@ -471,7 +474,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			}
 			else
 			{
-				return tr("???");
+				return tr("?");
 			}
 		}
 
@@ -503,10 +506,12 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		if (displayIndex == Type)
 		{
 			QString str = E::valueToString<E::SignalType>(s.type());
-			if (s.isAnalog())
+
+			if (s.isAnalog() == true)
 			{
 				str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(s.dataFormat()));
 			}
+
 			str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));
 
 			return str;
@@ -514,6 +519,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 		return QVariant();
 	}
+
 	return QVariant();
 }
 
@@ -671,7 +677,7 @@ void DialogSignalSnapshot::fillSignals()
 		filteredTable.push_back(std::make_pair(s.hash(), AppSignalState()));
 	}
 
-	m_model->setSignals(filteredTable);
+	m_model->setSignals(&filteredTable);
 }
 
 void DialogSignalSnapshot::on_buttonColumns_clicked()

@@ -23,10 +23,10 @@ public:
 	  }
 
 	  bool sortFunction(const SnapshotItem& o1, const SnapshotItem& o2, int column, Qt::SortOrder order) const;
+
 private:
 	  int m_column = -1;
 	  Qt::SortOrder m_order = Qt::AscendingOrder;
-
 };
 
 
@@ -39,7 +39,7 @@ public:
 
 public:
 
-	void setSignals(const std::vector<SnapshotItem> &signalsTable);
+	void setSignals(std::vector<SnapshotItem>* signalsTable);
 
 	std::vector<int> columnsIndexes() const;
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
@@ -78,7 +78,6 @@ public:
 		AnalogOutput,
 		DiscreteInput,
 		DiscreteOutput
-
 	};
 
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -92,7 +91,6 @@ protected:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
 
 private:
 
