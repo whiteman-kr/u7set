@@ -8,13 +8,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLine>;
-#endif
-
-	private:
-		SchemaItemLine(void);
 	public:
+		SchemaItemLine(void);
 		explicit SchemaItemLine(SchemaUnit unit);
 		virtual ~SchemaItemLine(void);
 

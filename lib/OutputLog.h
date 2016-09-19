@@ -82,6 +82,7 @@ public:
 
 	bool isEmpty() const;
 	OutputLogItem popMessages();
+	void popMessages(std::vector<OutputLogItem>* out, int maxCount);
 
 	void startStrLogging();
 	QString finishStrLogging();

@@ -77,7 +77,7 @@ namespace VFrame30
 		// Use this func only for serialization, while creting new object it is not fully initialized
 		// and must be read from somewhere
 		//
-		static SchemaItem* CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<SchemaItem> CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
 		//

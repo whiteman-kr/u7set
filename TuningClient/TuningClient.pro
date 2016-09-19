@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg
+QT       += core gui widgets sql network xmlpatterns qml svg xml
 
 
 TARGET = TuningClient
@@ -63,7 +63,16 @@ SOURCES += main.cpp\
     TuningPage.cpp \
     TuningObject.cpp \
     Settings.cpp \
-    TuningWorkspace.cpp
+    TuningWorkspace.cpp \
+    ConfigController.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../lib/CfgServerLoader.cpp \
+    ../lib/BuildInfo.cpp \
+    ../lib/SimpleThread.cpp \
+    ../lib/Tcp.cpp \
+    ../lib/TcpFileTransfer.cpp \
+    ../lib/Crc.cpp \
+    ../lib/SocketIO.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -72,7 +81,16 @@ HEADERS  += MainWindow.h \
     TuningPage.h \
     TuningObject.h \
     Settings.h \
-    TuningWorkspace.h
+    TuningWorkspace.h \
+    ConfigController.h \
+    ../lib/HostAddressPort.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/BuildInfo.h \
+    ../lib/SimpleThread.h \
+    ../lib/Tcp.h \
+    ../lib/TcpFileTransfer.h \
+    ../lib/Crc.h \
+    ../lib/SocketIO.h
 
 FORMS    +=
 

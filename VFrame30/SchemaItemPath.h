@@ -8,13 +8,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemPath>;
-#endif
-
-	private:
-		SchemaItemPath(void);
 	public:
+		SchemaItemPath(void);
 		explicit SchemaItemPath(SchemaUnit unit);
 		virtual ~SchemaItemPath(void);
 

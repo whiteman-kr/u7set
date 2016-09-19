@@ -36,6 +36,7 @@ QString OutputLogItem::toText() const
 QString OutputLogItem::toHtml() const
 {
 	QString result;
+	result.reserve(1024);
 
 	QString color;
 	switch (m_level)
@@ -290,6 +291,27 @@ OutputLogItem OutputLog::popMessages()
 	m_messages.pop_front();
 
 	return logItem;
+}
+
+void OutputLog::popMessages(std::vector<OutputLogItem>* out, int maxCount)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return;
+	}
+
+	QMutexLocker locker(&m_mutex);
+
+	while (maxCount > 0 && m_messages.empty() == false)
+	{
+		out->push_back(m_messages.front());
+		m_messages.pop_front();
+
+		maxCount --;
+	}
+
+	return;
 }
 
 void OutputLog::startStrLogging()

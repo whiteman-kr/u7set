@@ -5,6 +5,7 @@
 #include "SchemaManager.h"
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/MonitorSchema.h"
 
 //
@@ -273,7 +274,21 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				const QStringList& signalList = schemaItemSignal->appSignalIdList();
 
 				signalContextMenu(signalList);
+				break;
 			}
+
+			VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+
+			if (schemaItemReceiver != nullptr)
+			{
+				QStringList signalList;
+				QString s = schemaItemReceiver->appSignalId();
+				signalList.push_back(s);
+
+				signalContextMenu(signalList);
+				break;
+			}
+
 		}
 	}
 

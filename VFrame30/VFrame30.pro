@@ -128,7 +128,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     SchemaItemConnection.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/Factory.h
 
 SOURCES += \
     Settings.cpp \

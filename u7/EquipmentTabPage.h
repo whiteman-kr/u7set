@@ -151,10 +151,14 @@ public slots:
 	void choosePreset(Hardware::DeviceType type);
 
 	void addPresetToConfiguration(const DbFileInfo& fileInfo);
-	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
+	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
 
 	void addInOutsToSignals();
 	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
+
+	void copySelectedDevices();
+	void pasteDevices();
+	bool canPaste() const;
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
@@ -182,6 +186,10 @@ protected:
 	//
 private:
 	DbController* m_dbController;
+
+public:
+	static const char* mimeType;					// = "application/x-deviceobjecs";
+	static const char* mimeTypeShortDescription;	// = "application/x-deviceobjecs-sd";
 };
 
 //
@@ -215,6 +223,8 @@ public slots:
 	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
 	void setActionState();
+	void clipboardChanged();
+
 	void modeSwitched();
     void editConnections();
 
@@ -259,23 +269,27 @@ private:
 		QAction* m_addPresetWorkstationAction = nullptr;
 		QAction* m_addPresetSoftwareAction = nullptr;
 
-	QAction* m_SeparatorActionA = nullptr;
+	QAction* m_separatorActionA = nullptr;
 
 	//----------------------------------
-	QAction* m_SeparatorAction0 = nullptr;
+	QAction* m_separatorAction0 = nullptr;
 	QAction* m_inOutsToSignals = nullptr;
 	QAction* m_showAppSignals = nullptr;
 	//----------------------------------
-	QAction* m_SeparatorAction1 = nullptr;
+	QAction* m_separatorAction01 = nullptr;
+	QAction* m_copyObjectAction = nullptr;
+	QAction* m_pasteObjectAction = nullptr;
+	//----------------------------------
+	QAction* m_separatorAction1 = nullptr;
 	QAction* m_deleteObjectAction = nullptr;
 	//----------------------------------
-	QAction* m_SeparatorAction2 = nullptr;
+	QAction* m_separatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
-	QAction* m_SeparatorAction3 = nullptr;
+	QAction* m_separatorAction3 = nullptr;
 	QAction* m_updateFromPresetAction = nullptr;
 	QAction* m_switchModeAction = nullptr;
     QAction* m_connectionsAction = nullptr;

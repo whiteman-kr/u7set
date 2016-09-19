@@ -5,6 +5,7 @@
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
+#include "ConfigController.h"
 
 
 namespace Ui {
@@ -20,10 +21,24 @@ public:
 	~MainWindow();
 
 private:
+	ConfigController m_configController;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
+	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarConnectionStatistics = nullptr;
+	QLabel* m_statusBarConnectionState = nullptr;
 
+	int m_updateStatusBarTimerId = -1;
+
+private slots:
+	void slot_configurationArrived(bool updateFilters, bool updateSignals);
+
+
+private:
+	void createStatusBar();
+
+	virtual void timerEvent(QTimerEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

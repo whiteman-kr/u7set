@@ -106,13 +106,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemInput>;
-#endif
-
-	private:
-		SchemaItemInput(void);
 	public:
+		SchemaItemInput(void);
 		explicit SchemaItemInput(SchemaUnit unit);
 		virtual ~SchemaItemInput(void);
 
@@ -137,13 +132,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemOutput>;
-#endif
-
-	private:
-		SchemaItemOutput(void);
 	public:
+		SchemaItemOutput(void);
 		explicit SchemaItemOutput(SchemaUnit unit);
 		virtual ~SchemaItemOutput(void);
 
@@ -167,13 +157,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemInOut>;
-#endif
-
-	private:
-		SchemaItemInOut(void);
 	public:
+		SchemaItemInOut(void);
 		explicit SchemaItemInOut(SchemaUnit unit);
 		virtual ~SchemaItemInOut(void);
 

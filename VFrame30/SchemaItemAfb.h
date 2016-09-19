@@ -11,13 +11,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<SchemaItemAfb>;
-#endif
-
-	private:
-		SchemaItemAfb(void);
 	public:
+		SchemaItemAfb(void);
 		explicit SchemaItemAfb(SchemaUnit unit);
 		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg);
 

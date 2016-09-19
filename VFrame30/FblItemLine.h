@@ -9,14 +9,9 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemaItem>::DerivedType<FblItemLine>;
-#endif
-
-	protected:
+	public:
 		FblItemLine(void);
 		FblItemLine(SchemaUnit itemunit);
-	public:
 		virtual ~FblItemLine(void);
 		
 	public:

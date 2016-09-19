@@ -30,6 +30,15 @@ public:
 	QVariant value() const;
 	void setValue(const QVariant& value);
 
+	double lowLimit() const;
+	void setLowLimit(double value);
+
+	double highLimit() const;
+	void setHighLimit(double value);
+
+	int decimalPlaces() const;
+	void setDecimalPlaces(int value);
+
 	bool valid() const;
 	void setValid(bool value);
 
@@ -48,13 +57,18 @@ private:
 	QString m_caption;
 	QString m_units;
 
-	bool m_analog;
+	bool m_analog = false;
 
 	QVariant m_value;
 
-	bool m_valid;
-	bool m_underflow;
-	bool m_overflow;
+	double m_lowLimit = 0;
+	double m_highLimit = 0;
+
+	int m_decimalPlaces = 0;
+
+	bool m_valid = 0;
+	bool m_underflow = 0;
+	bool m_overflow = 0;
 };
 
 

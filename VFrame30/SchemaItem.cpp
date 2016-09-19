@@ -89,7 +89,7 @@ namespace VFrame30
 		return true;
 	}
 
-	SchemaItem* SchemaItem::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<SchemaItem> SchemaItem::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//
@@ -100,7 +100,7 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		SchemaItem* schemaItem = SchemaItemFactory.Create(classNameHash);
+		std::shared_ptr<SchemaItem> schemaItem = SchemaItemFactory.Create(classNameHash);
 
 		if (schemaItem == nullptr)
 		{

@@ -224,9 +224,13 @@ ObjectFilterStorage::ObjectFilterStorage()
 
 }
 
-bool ObjectFilterStorage::load(const QString& fileName)
+bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
 {
-	m_errorCode.clear();
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
 
 	QFile f(fileName);
 
@@ -237,25 +241,41 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 	if (f.open(QFile::ReadOnly) == false)
 	{
-		m_errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
+		*errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
 		return false;
 	}
 
 	QByteArray data = f.readAll();
+
+	return load(data, errorCode);
+
+}
+
+bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
+{
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
+
+	QMutexLocker l(&m_mutex);
+
+	m_filters.clear();
 
 	QXmlStreamReader reader(data);
 
 	if (reader.readNextStartElement() == false)
 	{
 		reader.raiseError(QObject::tr("Failed to load root element."));
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
 	if (reader.name() != "ObjectFilterStorage")
 	{
 		reader.raiseError(QObject::tr("The file is not an ObjectFilterStorage file."));
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
@@ -286,7 +306,7 @@ bool ObjectFilterStorage::load(const QString& fileName)
 				return false;
 			}
 
-			filters.push_back(of);
+			m_filters.push_back(of);
 
 			continue;
 		}
@@ -310,7 +330,7 @@ bool ObjectFilterStorage::load(const QString& fileName)
 		}
 
 		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-		m_errorCode = reader.errorString();
+		*errorCode = reader.errorString();
 		return !reader.hasError();
 	}
 
@@ -319,7 +339,8 @@ bool ObjectFilterStorage::load(const QString& fileName)
 
 bool ObjectFilterStorage::save(const QString& fileName)
 {
-	m_errorCode.clear();
+
+	QMutexLocker l(&m_mutex);
 
 	// save data to XML
 	//
@@ -339,7 +360,7 @@ bool ObjectFilterStorage::save(const QString& fileName)
 	for (auto r : records)
 	{
 		writer.writeStartElement(r.first);
-		for (auto of : filters)
+		for (auto of : m_filters)
 		{
 			if (of->filterType() != r.second)
 			{
@@ -368,12 +389,22 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-QString ObjectFilterStorage::errorCode()
+int ObjectFilterStorage::filterCount()
 {
-	return m_errorCode;
-
+	QMutexLocker l(&m_mutex);
+	return m_filters.size();
 }
 
+const std::shared_ptr<ObjectFilter> ObjectFilterStorage::filter_const(int index)
+{
+	QMutexLocker l(&m_mutex);
+	if (index < 0 || index >= m_filters.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	return m_filters[index];
+}
 
 
 ObjectFilterStorage theFilters;

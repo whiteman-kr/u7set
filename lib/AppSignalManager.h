@@ -49,6 +49,10 @@ public:
 	AppSignalState signalState(Hash signalHash, bool* found = nullptr);
 	AppSignalState signalState(const QString& appSignalId, bool* found = nullptr);
 
+	int signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result);
+	int signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result);
+
+
 private:
 	mutable QMutex m_unitsMutex;
 	std::map<int, QString> m_units;

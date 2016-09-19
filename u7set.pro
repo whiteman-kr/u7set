@@ -22,6 +22,5 @@ SUBDIRS += qtservice \
     TuningService \
     AppDataService \
     DiagDataService \
-    TuningIPEN \
-    mconf
-
+    mconf \
+    TuningClient

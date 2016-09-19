@@ -23,7 +23,7 @@ public:
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
 	}
 
-	BaseClass* Create(quint32 classHash)
+	std::shared_ptr<BaseClass> Create(quint32 classHash)
 	{
 		auto it = factories.find(classHash);
 		if (it == factories.end())
@@ -43,16 +43,17 @@ public:
 		virtual ~BaseType()
 		{
 		}
-		virtual BaseClass* Create() const = 0;
+		virtual std::shared_ptr<BaseClass> Create() const = 0;
 	};
 	
 	template<typename DerivedClass>
 	class DerivedType : public BaseType
 	{
 	public:
-		virtual BaseClass* Create() const
+		virtual std::shared_ptr<BaseClass> Create() const
 		{
-			return new DerivedClass();
+			std::shared_ptr<BaseClass> ptr = std::make_shared<DerivedClass>();
+			return ptr;
 		}
 	};
 

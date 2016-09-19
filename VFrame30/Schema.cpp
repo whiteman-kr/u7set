@@ -99,15 +99,15 @@ namespace VFrame30
 
 		for (int i = 0; i < schema.layers().size(); i++)
 		{
-			SchemaLayer* pLayer = SchemaLayer::Create(schema.layers(i));
+			std::shared_ptr<SchemaLayer> layer = SchemaLayer::Create(schema.layers(i));
 			
-			if (pLayer == nullptr)
+			if (layer == nullptr)
 			{
-				assert(pLayer);
+				assert(layer);
 				continue;
 			}
 			
-			Layers.push_back(std::shared_ptr<SchemaLayer>(pLayer));
+			Layers.push_back(layer);
 		}
 
 		if (schema.layers().size() != (int)Layers.size())
@@ -124,7 +124,7 @@ namespace VFrame30
 		return true;
 	}
 
-	Schema* Schema::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<Schema> Schema::CreateObject(const Proto::Envelope& message)
 	{
 		// This function can create only one instance
 		//
@@ -135,7 +135,7 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		Schema* schema = SchemaFactory.Create(classNameHash);
+		std::shared_ptr<Schema> schema = SchemaFactory.Create(classNameHash);
 
 		if (schema == nullptr)
 		{
