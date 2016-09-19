@@ -153,7 +153,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -229,7 +229,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -264,7 +264,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -535,7 +535,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1307,7 +1307,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 

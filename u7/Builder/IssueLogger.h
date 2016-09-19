@@ -180,9 +180,9 @@ namespace Builder
 
 		// EQP			Equipment issues						6000-6999
 		//
-		void errEQP6000(QString deviceStrId, QUuid deviceUuid);
-		void errEQP6001(QString deviceStrId, QUuid deviceUuid1, QUuid deviceUuid2);
-		void errEQP6002(QUuid deviceUuid, QString deviceStrId1, QString deviceStrId2);
+		void errEQP6000(QString equipmemtId, QUuid equpmentUuid);
+		void errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2);
+		void errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2);
 		void errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid);		//	Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.
 
 		// Subset of EQP -- Generation Software Configuration

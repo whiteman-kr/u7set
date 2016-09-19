@@ -532,11 +532,11 @@ public:
 	typename QVector<VALUE>::iterator end() { return QVector<VALUE>::end(); }
 	typename QVector<VALUE>::const_iterator end() const { return QVector<VALUE>::end(); }
 
-	VALUE& operator[](int i) { return QVector<VALUE>::operator [](i); }
-	const VALUE& operator[](int i) const { return QVector<VALUE>::operator [](i); }
+	VALUE& operator[](int i);
+	const VALUE& operator[](int i) const;
 
-	VALUE& operator[](const KEY& key) { return (*this)[m_map.value(key)]; }
-	const VALUE& operator[](const KEY& key) const {  return (*this)[m_map[key]]; }
+	VALUE& operator[](const KEY& key);
+	const VALUE& operator[](const KEY& key) const;
 
 	int indexOf(const KEY& key)
 	{
@@ -569,3 +569,36 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 	this->append(value);
 	m_map.insert(key, this->size() - 1);
 }
+
+
+template <typename KEY, typename VALUE>
+VALUE& HashedVector<KEY, VALUE>::operator[](int i)
+{
+	assert(i >= 0 && i < count());
+	return QVector<VALUE>::operator [](i);
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE& HashedVector<KEY, VALUE>::operator[](int i) const
+{
+	assert(i >= 0 && i < count());
+	return QVector<VALUE>::operator [](i);
+}
+
+
+template <typename KEY, typename VALUE>
+VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
+{
+	assert(m_map.contains(key) == true);
+	return (*this)[m_map.value(key)];
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
+{
+	assert(m_map.contains(key) == true);
+	return (*this)[m_map[key]];
+}
+

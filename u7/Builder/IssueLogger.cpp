@@ -2508,14 +2508,14 @@ namespace Builder
 	///		Property Place for Chassis, Rack, Module, Controller, Signal, Workstation or Software cannot be less then 0.
 	///	By default in most cases property Place is -1 to make user to set the correct value.
 	///
-	void IssueLogger::errEQP6000(QString deviceStrId, QUuid deviceUuid)
+	void IssueLogger::errEQP6000(QString equipmemtId, QUuid equpmentUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, deviceUuid);
+		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6000,
 				  tr("Property Place is less then 0 (Equipment object '%1').")
-				  .arg(deviceStrId)
+				  .arg(equipmemtId)
 				  );
 	}
 
@@ -2523,24 +2523,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Two or more equipment objects have the same StrID '%1'.
+	/// Title: Two or more equipment objects have the same EquipmentID '%1'.
 	///
 	/// Parameters:
-	///		%1 Equipmnet object StrID
+	///		%1 Equipment object ID
 	///
 	/// Description:
-	///		Error may occur if two or more equipment objects have the same StrID.
-	/// All equipmnet objects must have unique StrID.
+	///		Error may occur if two or more equipment objects have the same EquipmentID.
+	///     All equipment objects must have unique EquipmentID.
 	///
-	void IssueLogger::errEQP6001(QString deviceStrId, QUuid deviceUuid1, QUuid deviceUuid2)
+	void IssueLogger::errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2)
 	{
-		addItemsIssues(OutputMessageLevel::Error, deviceUuid1);
-		addItemsIssues(OutputMessageLevel::Error, deviceUuid2);
+		addItemsIssues(OutputMessageLevel::Error, equipmentUuid1);
+		addItemsIssues(OutputMessageLevel::Error, equipmentUuid2);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6001,
-				  tr("Two or more equipment objects have the same StrID '%1'.")
-				  .arg(deviceStrId)
+				  tr("Two or more equipment objects have the same EquipmentID '%1'.")
+				  .arg(equipmemtId)
 				  );
 	}
 
@@ -2552,24 +2552,24 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 Equipmnet objects Uuid
-	///		%2 Equipmnet object StrID 1
-	///		%2 Equipmnet object StrID 2
+	///		%2 Equipmnet object ID 1
+	///		%2 Equipmnet object ID 2
 	///
 	/// Description:
 	///		Error may occur if two or more equipment objects have the same Uuid.
 	/// All equipmnet objects must have unique Uuid. In some cases it can be an internal
 	/// software error and it shoud be reported to developers.
 	///
-	void IssueLogger::errEQP6002(QUuid deviceUuid, QString deviceStrId1, QString deviceStrId2)
+	void IssueLogger::errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2)
 	{
-		addItemsIssues(OutputMessageLevel::Error, deviceUuid);
+		addItemsIssues(OutputMessageLevel::Error, equipmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6002,
 				  tr("Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3')")
-				  .arg(deviceUuid.toString())
-				  .arg(deviceStrId1)
-				  .arg(deviceStrId2)
+				  .arg(equipmentUuid.toString())
+				  .arg(equipmentId1)
+				  .arg(equipmentId2)
 				  );
 	}
 
