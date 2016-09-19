@@ -35,6 +35,8 @@ public:
 
 	std::vector<Signal> signalList() const;
 
+	std::vector<Hash> signalHashes() const;
+
 	bool signal(const QString& appSignalId, Signal* out) const;
 	bool signal(Hash signalHash, Signal* out) const;
 

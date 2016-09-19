@@ -61,6 +61,13 @@ protected:
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
 
+	void tcpSignalClient_signalParamAndUnitsArrived();
+	void tcpSignalClient_connectionReset();
+
+signals:
+	void signalParamAndUnitsArrived();
+	void connectionReset();
+
 	// Properties
 	//
 protected:

@@ -10,38 +10,59 @@ namespace Ui {
 class DialogSignalSnapshot;
 }
 
+typedef std::pair<Hash, AppSignalState> SnapshotItem;
+
+class SnapshotItemSorter
+{
+public:
+	  SnapshotItemSorter(int column, Qt::SortOrder order);
+
+	  bool operator()(const SnapshotItem& o1, const SnapshotItem& o2) const
+	  {
+		  return sortFunction(o1, o2, m_column, m_order);
+	  }
+
+	  bool sortFunction(const SnapshotItem& o1, const SnapshotItem& o2, int column, Qt::SortOrder order) const;
+private:
+	  int m_column = -1;
+	  Qt::SortOrder m_order = Qt::AscendingOrder;
+
+};
+
+
 class SnapshotItemModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
 	SnapshotItemModel(QObject *parent);
+
 public:
 
+	void setSignals(const std::vector<SnapshotItem> &signalsTable);
 
-	void setSignals(const std::vector<Signal*>& signalList);
-
-	std::vector<int> columnsIndexes();
+	std::vector<int> columnsIndexes() const;
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
-	QStringList columnsNames();
+	int columnIndex(int index) const;
+	QStringList columnsNames() const;
 
-	void update();
+	Hash signalHash(int index) const;
 
-	const Signal* signal(int index);
+	void updateStates(int from, int to);
 
 public:
 
 	enum DialogSignalSnapshotColumns
 	{
-		SignalID = 0,
+		SignalID = 0,		// Signal Param Columns
 		EquipmentID,
 		AppSignalID,
 		Caption,
 		Units,
 		Type,
 
-		SystemTime,
+		SystemTime,			// Signal State Columns
 		LocalTime,
 		PlantTime,
 		Value,
@@ -60,43 +81,26 @@ public:
 
 	};
 
-
-protected:
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-	QModelIndex parent(const QModelIndex &index) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+
+	void sort(int column, Qt::SortOrder order) override;
+
+protected:
+	QModelIndex parent(const QModelIndex &index) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 
 private:
-	std::vector<Signal*> m_signals;
+
+	std::vector<std::pair<Hash, AppSignalState>> m_signalsTable;
+
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 
-};
-
-class SnapshotItemProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	SnapshotItemProxyModel(SnapshotItemModel* sourceModel, QObject* parent = 0);
-
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-
-	void setSignalTypeFilter(int signalType);
-	void setSignalIdFilter(QStringList strIds);
-	void refreshFilters();
-
-	const Signal* signal(const QModelIndex &mi);
-
-private:
-	SnapshotItemModel* m_sourceModel = nullptr;
-	int m_signalType = SnapshotItemModel::All;
-	QStringList m_strIdMasks;
 };
 
 class DialogSignalSnapshot : public QDialog
@@ -122,8 +126,17 @@ private slots:
 
 	void on_buttonMaskInfo_clicked();
 
+	void sortIndicatorChanged(int logicalIndex, Qt::SortOrder order);
+
+	void tcpSignalClient_signalParamAndUnitsArrived();
+
+	void tcpSignalClient_connectionReset();
+
+
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
+
+	void maskChanged();
 
 	void fillSignals();
 
@@ -133,12 +146,13 @@ private:
 	QCompleter* m_completer = nullptr;
 
 	SnapshotItemModel *m_model = nullptr;
-	SnapshotItemProxyModel *m_proxyModel = nullptr;
 
 	int m_updateStateTimerId = -1;
 
-	std::vector<Signal> m_signals;
+	std::vector<Hash> m_signalsHashes;
 
+	int m_signalType = SnapshotItemModel::All;
+	QStringList m_strIdMasks;
 
 };
 

@@ -242,10 +242,10 @@
        </item>
       </layout>
      </item>
-     <item>
-      <widget class="QTableView" name="tableView"/>
-     </item>
     </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTableView" name="tableView"/>
    </item>
   </layout>
  </widget>
