@@ -24,6 +24,17 @@ void Settings::StoreUser()
 
 	s.setValue("MainWindow/Splitter/state", m_mainWindowSplitterState);
 
+	s.setValue("TuningPageSettingsCount", m_tuningPageSettings.size());
+	for (int i = 0; i < m_tuningPageSettings.size(); i++)
+	{
+		s.setValue(QString("TuningPageSettings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);
+		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
+		{
+			s.setValue(QString("TuningPageSettings%1/columnWidth/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsWidth[c]);
+			s.setValue(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
+		}
+	}
+
 }
 
 void Settings::RestoreUser()
@@ -37,6 +48,21 @@ void Settings::RestoreUser()
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
 	m_mainWindowSplitterState = s.value("MainWindow/Splitter/state").toByteArray();
+
+	int tuningPageSettingsCount = s.value("TuningPageSettingsCount", 0).toInt();
+	m_tuningPageSettings.resize(tuningPageSettingsCount);
+
+	for (int i = 0; i < tuningPageSettingsCount; i++)
+	{
+		m_tuningPageSettings[i].m_columnCount = s.value(QString("TuningPageSettings%1/columnCount").arg(i), 0).toInt();
+		m_tuningPageSettings[i].m_columnsWidth.resize(m_tuningPageSettings[i].m_columnCount);
+		m_tuningPageSettings[i].m_columnsIndexes.resize(m_tuningPageSettings[i].m_columnCount);
+		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
+		{
+			m_tuningPageSettings[i].m_columnsWidth[c] = s.value(QString("TuningPageSettings%1/columnWidth/%2").arg(i).arg(c), 100).toInt();
+			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
+		}
+	}
 }
 
 QString Settings::instanceStrId()

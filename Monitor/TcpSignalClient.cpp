@@ -158,12 +158,17 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 	if (m_getSignalListStartReply.totalitemcount() == 0 ||
 		m_getSignalListStartReply.partcount() == 0)
 	{
+		// There is no signals, useless but can be
+		//
 		assert(m_getSignalListStartReply.totalitemcount() == 0);
 		assert(m_getSignalListStartReply.partcount() == 0);
+
+		m_signalList.clear();
 
 		// request params
 		//
 		requestSignalParam(0);
+		return;
 	}
 
 	m_signalList.clear();

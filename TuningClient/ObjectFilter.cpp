@@ -259,6 +259,10 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		return false;
 	}
 
+	QMutexLocker l(&m_mutex);
+
+	m_filters.clear();
+
 	QXmlStreamReader reader(data);
 
 	if (reader.readNextStartElement() == false)
@@ -302,7 +306,7 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 				return false;
 			}
 
-			filters.push_back(of);
+			m_filters.push_back(of);
 
 			continue;
 		}
@@ -335,6 +339,9 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 bool ObjectFilterStorage::save(const QString& fileName)
 {
+
+	QMutexLocker l(&m_mutex);
+
 	// save data to XML
 	//
 	QByteArray data;
@@ -353,7 +360,7 @@ bool ObjectFilterStorage::save(const QString& fileName)
 	for (auto r : records)
 	{
 		writer.writeStartElement(r.first);
-		for (auto of : filters)
+		for (auto of : m_filters)
 		{
 			if (of->filterType() != r.second)
 			{
@@ -382,10 +389,23 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-void ObjectFilterStorage::clear()
+int ObjectFilterStorage::filterCount()
 {
-	filters.clear();
+	QMutexLocker l(&m_mutex);
+	return m_filters.size();
 }
+
+const std::shared_ptr<ObjectFilter> ObjectFilterStorage::filter_const(int index)
+{
+	QMutexLocker l(&m_mutex);
+	if (index < 0 || index >= m_filters.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	return m_filters[index];
+}
+
 
 ObjectFilterStorage theFilters;
 ObjectFilterStorage theUserFilters;

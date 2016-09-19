@@ -4,15 +4,22 @@ ObjectManager::ObjectManager()
 {
 }
 
-int ObjectManager::objectsCount() const
+int ObjectManager::objectsCount()
 {
+	QMutexLocker l(&m_mutex);
 	return (int)m_objects.size();
 
 }
 
-TuningObject* ObjectManager::object(int index)
+const std::shared_ptr<TuningObject> ObjectManager::const_object(int index)
 {
-	return &m_objects[index];
+	QMutexLocker l(&m_mutex);
+	if (index < 0 || index >= m_objects.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	return m_objects[index];
 }
 
 bool ObjectManager::load(const QByteArray& data, QString *errorCode)
@@ -22,6 +29,10 @@ bool ObjectManager::load(const QByteArray& data, QString *errorCode)
 		assert(errorCode);
 		return false;
 	}
+
+	QMutexLocker l(&m_mutex);
+
+	m_objects.clear();
 
 	QXmlStreamReader reader(data);
 
@@ -57,55 +68,55 @@ bool ObjectManager::load(const QByteArray& data, QString *errorCode)
 
 		if (reader.name() == "TuningSignal")
 		{
-			TuningObject object;
+			std::shared_ptr<TuningObject> object = std::make_shared<TuningObject>();
 
 			if (reader.attributes().hasAttribute("AppSignalID"))
 			{
-				object.setAppSignalID(reader.attributes().value("AppSignalID").toString());
+				object->setAppSignalID(reader.attributes().value("AppSignalID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("CustomAppSignalID"))
 			{
-				object.setCustomAppSignalID(reader.attributes().value("CustomAppSignalID").toString());
+				object->setCustomAppSignalID(reader.attributes().value("CustomAppSignalID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("EquipmentID"))
 			{
-				object.setEquipmentID(reader.attributes().value("EquipmentID").toString());
+				object->setEquipmentID(reader.attributes().value("EquipmentID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("Caption"))
 			{
-				object.setCaption(reader.attributes().value("Caption").toString());
+				object->setCaption(reader.attributes().value("Caption").toString());
 			}
 
 			if (reader.attributes().hasAttribute("Type"))
 			{
 				QString t = reader.attributes().value("Type").toString();
-				object.setAnalog(t == "A");
+				object->setAnalog(t == "A");
 			}
 
 			if (reader.attributes().hasAttribute("DecimalPlaces"))
 			{
-				object.setDecimalPlaces(reader.attributes().value("DecimalPlaces").toString().toInt());
+				object->setDecimalPlaces(reader.attributes().value("DecimalPlaces").toString().toInt());
 			}
 
 			if (reader.attributes().hasAttribute("DefaultValue"))
 			{
 				QString v = reader.attributes().value("DefaultValue").toString();
-				object.setValue(v.toDouble());
+				object->setValue(v.toDouble());
 			}
 
 			if (reader.attributes().hasAttribute("LowLimit"))
 			{
 				QString v = reader.attributes().value("LowLimit").toString();
-				object.setLowLimit(v.toDouble());
+				object->setLowLimit(v.toDouble());
 			}
 
 			if (reader.attributes().hasAttribute("HighLimit"))
 			{
 				QString v = reader.attributes().value("HighLimit").toString();
-				object.setHighLimit(v.toDouble());
+				object->setHighLimit(v.toDouble());
 			}
 
 

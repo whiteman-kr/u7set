@@ -32,7 +32,7 @@ private:
 	int m_updateStatusBarTimerId = -1;
 
 private slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(bool updateFilters, bool updateSignals);
 
 
 private:

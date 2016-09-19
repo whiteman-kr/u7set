@@ -4354,7 +4354,8 @@ static thread_local int dataNo = -1;
 
 	file->setUserId(record.value(userIdNo).toInt());
 	file->setDetails(record.value(detailsNo).toString());
-	file->swapData(record.value(dataNo).toByteArray());
+	QByteArray data = record.value(dataNo).toByteArray();
+	file->swapData(data);
 
 	return true;
 }

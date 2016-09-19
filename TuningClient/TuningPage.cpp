@@ -1,3 +1,4 @@
+#include "Settings.h"
 #include "TuningPage.h"
 
 //
@@ -6,7 +7,7 @@
 
 using namespace std;
 
-TuningItemModel::TuningItemModel(QObject* parent)
+TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
 	:QAbstractItemModel(parent)
 {
 	// Fill column names
@@ -23,8 +24,14 @@ TuningItemModel::TuningItemModel(QObject* parent)
 	m_columnsNames<<tr("Underflow");
 	m_columnsNames<<tr("Overflow");
 
+	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+	if (pageSettings == nullptr)
+	{
+		assert(pageSettings);
+		return;
+	}
 
-	//if (theSettings.m_signalSnapshotColumnCount == 0)
+	if (pageSettings->m_columnCount == 0)
 	{
 		m_columnsIndexes.push_back(SignalID);
 		m_columnsIndexes.push_back(EquipmentID);
@@ -32,20 +39,15 @@ TuningItemModel::TuningItemModel(QObject* parent)
 		m_columnsIndexes.push_back(Units);
 		m_columnsIndexes.push_back(Type);
 
-		//m_columnsIndexes.push_back(LocalTime);
 		m_columnsIndexes.push_back(Value);
 		m_columnsIndexes.push_back(Valid);
 		m_columnsIndexes.push_back(Underflow);
 		m_columnsIndexes.push_back(Overflow);
 	}
-	/*else
+	else
 	{
-		const int* begin = reinterpret_cast<int*>(theSettings.m_signalSnapshotColumns.data());
-		const int* end = begin + theSettings.m_signalSnapshotColumnCount;
-
-		std::vector<int> buffer(begin, end);
-		m_columnsIndexes = buffer;
-	}*/
+		m_columnsIndexes  = pageSettings->m_columnsIndexes;
+	}
 
 }
 
@@ -154,6 +156,46 @@ int TuningItemModel::rowCount(const QModelIndex &parent) const
 
 QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 {
+	if (role == Qt::BackgroundRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex == Value)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+	}
+
+	if (role == Qt::ForegroundRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex == Value)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
+
+	}
+
+	if (role == Qt::FontRole)
+	{
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		//if (displayIndex == Value)
+		//{
+			QFont f = QFont("Arial", 10);
+			f.setBold(true);
+			return f;
+		//}
+	}
+
 	if (role == Qt::DisplayRole)
 	{
 		int row = index.row();
@@ -174,7 +216,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		//QString str = QString("%1:%2").arg(row).arg(col);
 		//qDebug()<<str;
 
-		TuningObject* o = theObjects.object(row);
+		const std::shared_ptr<TuningObject> o = theObjects.const_object(row);
 		if (o == nullptr)
 		{
 			assert(o);
@@ -259,11 +301,6 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		{
 			return (o->overflow() == true) ? tr("Yes") : tr("No");
 		}
-
-
-
-
-		return QVariant();
 	}
 	return QVariant();
 }
@@ -502,14 +539,36 @@ FilterButton::FilterButton(const QString& filterId, const QString& caption, QWid
 // TuningPage
 //
 
-TuningPage::TuningPage(std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
+	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
 	m_tabFilter(tabFilter)
 {
+	// Reserve place for tuning page settings and copy existing
+	//
+	if (theSettings.m_tuningPageSettings.size() <= m_tuningPageIndex)
+	{
+		std::vector<TuningPageSettings> m_tuningPageSettings2 = theSettings.m_tuningPageSettings;
+
+		theSettings.m_tuningPageSettings.resize(m_tuningPageIndex + 1);
+		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
+		{
+			theSettings.m_tuningPageSettings[i] = m_tuningPageSettings2[i];
+		}
+	}
+
 	// Top buttons
 	//
-	for (auto f : theFilters.filters)
+	int count = theFilters.filterCount();
+	for (int i = 0; i < count; i++)
 	{
+		const std::shared_ptr<ObjectFilter> f = theFilters.filter_const(i);
+		if (f == nullptr)
+		{
+			assert(f);
+			continue;
+		}
+
 		if (f->isButton() == false)
 		{
 			continue;
@@ -577,7 +636,7 @@ TuningPage::TuningPage(std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent)
 	//
 	// crete models
 	//
-	m_model = new TuningItemModel(this);
+	m_model = new TuningItemModel(m_tuningPageIndex, this);
 
 
 	for (int i = 0; i < theObjects.objectsCount(); i++)
@@ -596,5 +655,36 @@ TuningPage::TuningPage(std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent)
 	m_objectList->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	//m_objectList->setSortingEnabled(true);
 	//m_objectList->sortByColumn(0, Qt::AscendingOrder);
+
+	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+	if (pageSettings == nullptr)
+	{
+		assert(pageSettings);
+		return;
+	}
+
+	for (int i = 0; i < pageSettings->m_columnCount; i++)
+	{
+		m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
+	}
+}
+
+TuningPage::~TuningPage()
+{
+	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[m_tuningPageIndex];
+	if (pageSettings == nullptr)
+	{
+		assert(pageSettings);
+		return;
+	}
+
+	pageSettings->m_columnsIndexes = m_model->columnsIndexes();
+	pageSettings->m_columnCount = (int)pageSettings->m_columnsIndexes.size();
+
+	pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
+	for (int i = 0; i < pageSettings->m_columnCount; i++)
+	{
+		pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
+	}
 
 }

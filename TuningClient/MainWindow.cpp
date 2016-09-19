@@ -94,14 +94,35 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MainWindow::slot_configurationArrived(bool updateFilters, bool updateSignals)
 {
+	if (updateFilters == false && updateSignals == false)
+	{
+		return;
+	}
+
 	if (m_tuningWorkspace != nullptr)
 	{
+		QMessageBox::warning(this, "Warning", "Program configuration was changed and will be reloaded.");
+
 		delete m_tuningWorkspace;
 		m_tuningWorkspace = nullptr;
+	}
 
-		QMessageBox::warning(this, "Warning", "Configuration will be reloaded.");
+	if (updateFilters == true)
+	{
+		if (m_configController.getObjectFilters() == false)
+		{
+
+		}
+	}
+
+	if (updateSignals == true)
+	{
+		if (m_configController.getTuningSignals() == false)
+		{
+
+		}
 	}
 
 	m_tuningWorkspace = new TuningWorkspace(this);
