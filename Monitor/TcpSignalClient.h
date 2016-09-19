@@ -66,6 +66,10 @@ protected:
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
+signals:
+	void signalParamAndUnitsArrived();
+	void connectionReset();
+
 private:
 	int m_startStateTimerId = -1;
 	MonitorConfigController* m_cfgController = nullptr;

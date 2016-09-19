@@ -25,6 +25,9 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	m_tcpClientThread = new SimpleThread(m_tcpSignalClient);
 	m_tcpClientThread->start();
 
+	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
+	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
+
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager);
@@ -460,6 +463,16 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 	m_historyForward->setEnabled(enableForward);
 
 	return;
+}
+
+void MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived()
+{
+	emit signalParamAndUnitsArrived();
+}
+
+void MonitorMainWindow::tcpSignalClient_connectionReset()
+{
+	emit connectionReset();
 }
 
 

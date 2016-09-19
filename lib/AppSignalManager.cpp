@@ -90,6 +90,21 @@ std::vector<Signal> AppSignalManager::signalList() const
 	return result;
 }
 
+std::vector<Hash> AppSignalManager::signalHashes() const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	for (auto& s : m_signals)
+	{
+		result.push_back(s.first);
+	}
+
+	return result;
+}
+
 bool AppSignalManager::signal(const QString& appSignalId, Signal* out) const
 {
 	Hash h = ::calcHash(appSignalId);
@@ -213,6 +228,8 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 	}
 
 	int found = 0;
+
+	result->clear();
 	result->reserve(appSignalHashes.size());
 
 	QMutexLocker l(&m_statesMutex);

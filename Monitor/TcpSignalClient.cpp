@@ -55,6 +55,8 @@ void TcpSignalClient::onConnection()
 void TcpSignalClient::onDisconnection()
 {
 	qDebug() << "TcpSignalClient::onDisconnection";
+
+	emit connectionReset();
 }
 
 void TcpSignalClient::onReplyTimeout()
@@ -370,6 +372,8 @@ void TcpSignalClient::processUnits(const QByteArray& data)
 	theSignals.setUnits(units);
 
 	qDebug() << "TcpSignalClient::processUnits UnitsCount: " << units.size();
+
+	emit signalParamAndUnitsArrived();
 
 	resetToGetState();				// Switch to next get
 
