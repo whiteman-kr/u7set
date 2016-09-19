@@ -445,7 +445,7 @@ void SerialDataTesterServer::sendPacket()
 	ui->transmissionId->setText(QString::number(head.hdr.id));
 	ui->numerator->setText(QString::number(head.hdr.num));
 	ui->dataAmount->setText(QString::number(head.hdr.amount));
-	ui->dataUniqueId->setText(QString::number(dataID.uint32));
+	ui->dataUniqueId->setText(dataID.bytes);
 	ui->crc->setText(QString::number(crc.uint64));
 	m_numberOfPacket++;
 	ui->packetNumber->setText(QString::number(m_numberOfPacket));
