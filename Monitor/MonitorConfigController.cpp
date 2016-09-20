@@ -34,6 +34,36 @@ HostAddressPort ConfigConnection::address() const
 void ConfigSchema::setFromBuildFileInfo(const Builder::BuildFileInfo& f)
 {
 	strId = f.ID;
+
+	QString details = f.getMetadata("Details");
+	if (details.isEmpty() == true)
+	{
+		return;
+	}
+
+	QJsonDocument document = QJsonDocument::fromJson(details.toUtf8());
+	if (document.isEmpty() == true || document.isNull() == true || document.isObject() == false)
+	{
+		return;
+	}
+
+	QJsonObject jDetails = document.object();
+	if (jDetails.isEmpty() == true)
+	{
+		return;
+	}
+
+	QJsonValue jValue = jDetails.value("Caption");
+	if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
+	{
+		caption = jValue.toString();
+	}
+
+	QJsonArray array = jDetails.value("Signals").toArray();
+	for (int i = 0; i < array.size(); i++)
+	{
+		appSignals.insert(array[i].toString());
+	}
 }
 
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)

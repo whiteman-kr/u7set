@@ -882,6 +882,7 @@ namespace VFrame30
 		//
 		jsonObject.insert("Version", QJsonValue(1));
 		jsonObject.insert("SchemaID", QJsonValue(schema->schemaID()));
+		jsonObject.insert("Caption", QJsonValue(schema->caption()));
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
 		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));

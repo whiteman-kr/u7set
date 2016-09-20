@@ -112,7 +112,7 @@ namespace Builder
 	}
 
 
-	QString BuildFileInfo::getMetadata(const QString& key)
+	QString BuildFileInfo::getMetadata(const QString& key) const
 	{
 		if (metadata.contains(key))
 		{

@@ -45,8 +45,6 @@ public:
 
 public:
 
-	void setSignals(std::vector<SnapshotItem>* signalsTable);
-
 	std::vector<int> columnsIndexes() const;
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
@@ -55,7 +53,19 @@ public:
 
 	Hash signalHash(int index) const;
 
+	Signal signalParam(Hash hash, bool* found) const;
+
+	void setSignals(std::vector<SnapshotItem>* signalsTable);
+
 	void updateStates(int from, int to);
+
+	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+
+	void sort(int column, Qt::SortOrder order) override;
 
 public:
 
@@ -86,16 +96,9 @@ public:
 		DiscreteOutput
 	};
 
-	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-	void sort(int column, Qt::SortOrder order) override;
-
-	Signal signalParam(Hash hash, bool* found) const;
-
 protected:
 	QModelIndex parent(const QModelIndex &index) const override;
+
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -121,7 +124,9 @@ public:
 
 private slots:
 	void on_buttonColumns_clicked();
+
 	void on_DialogSignalSnapshot_finished(int result);
+
 	void prepareContextMenu(const QPoint& pos);
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
@@ -177,9 +182,15 @@ private:
 
 	int m_updateStateTimerId = -1;
 
+	// Dialog data
+
 	std::vector<Hash> m_signalsHashes;
 
+	// Filtering parameters
+
 	SnapshotItemModel::TypeFilter m_signalType = SnapshotItemModel::TypeFilter::All;
+
+	static MaskType m_maskType;
 
 	QStringList m_strIdMasks;
 
@@ -187,7 +198,6 @@ private:
 
 	static Qt::SortOrder m_sortOrder;
 
-	static MaskType m_maskType;
 
 };
 

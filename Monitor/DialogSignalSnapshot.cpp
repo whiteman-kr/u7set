@@ -366,13 +366,9 @@ void SnapshotItemModel::sort(int column, Qt::SortOrder order)
 
 	int sortColumnIndex = m_columnsIndexes[column];
 
-	//
-	// Fill the states map for sorting
-	//
-
 	std::sort(m_signalsTable.begin(), m_signalsTable.end(), SnapshotItemSorter(sortColumnIndex, order, this));
 
-	if (rowCount() > 0)
+	if (m_signalsTable.empty() == false)
 	{
 		emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 	}
@@ -598,6 +594,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->tableView->setModel(m_model);
 	ui->tableView->verticalHeader()->hide();
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
 	ui->tableView->setSortingEnabled(true);
@@ -754,7 +751,7 @@ void DialogSignalSnapshot::fillSignals()
 		if (currentSchemaStrId.isEmpty() == false)
 		{
 			bool result = false;
-			QString strId = s.customAppSignalID().trimmed();
+			QString strId = s.appSignalID().trimmed();
 			for (QString appSignal : schemaAppSignals)
 			{
 				if (appSignal == strId)
