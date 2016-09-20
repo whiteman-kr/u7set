@@ -92,7 +92,7 @@ message GetDataSourcesInfoReply
 }
 
 
-// Getting Data Sources states
+// Getting Application Data Sources states
 //
 
 message AppDataSourceState
@@ -111,6 +111,7 @@ message AppDataSourceState
     optional int64 errorDataID = 12;
     optional uint64 receivedDataID = 13;
     optional bool processingSkiped = 14;
+    optional int32 state = 15;			    // receive, noData, stopped
 }
 
 
@@ -165,6 +166,26 @@ message GetServiceInfoReply
 {
     required int32 error = 1 [default = 0];
     required ServiceInfo serviceInfo = 2;
+}
+
+
+// Getting Tuning Data Sources States
+//
+
+message TuningDataSourceState
+{
+    optional uint64 id = 1;			    // unique id
+    optional int64 uptime = 2;			    // time from start of data receiving
+    optional int64 receivedDataSize = 3;	    //
+    optional double dataReceivingRate = 4;	    // bytes/sec
+    optional bool respond = 5;
+}
+
+
+message GetTuningDataSourcesStatesReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated TuningDataSourceState tuningDataSourcesStates = 2;
 }
 
 

@@ -3113,7 +3113,6 @@ namespace Builder
 				cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
 
 				m_code.append(cmd);
-
 			}
 
 			m_code.newLine();
