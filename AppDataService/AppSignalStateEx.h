@@ -31,7 +31,9 @@ public:
 
 	void invalidate() { m_current.flags.all = 0; }
 
-	QString appSignalID();
+	Hash hash() const;
+
+	QString appSignalID() const;
 
 	friend class AppSignalStates;
 };
@@ -60,7 +62,8 @@ public:
 
 	void buidlHash2State();
 
-	bool getState(Hash hash, AppSignalState& state) const;
+	bool getCurrentState(Hash hash, AppSignalState& state) const;
+	bool getStoredState(Hash hash, AppSignalState& state) const;
 };
 
 
