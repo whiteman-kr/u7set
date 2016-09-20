@@ -435,7 +435,7 @@ void MonitorMainWindow::debug()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-	DialogSignalSnapshot* dss = new DialogSignalSnapshot(this);
+	DialogSignalSnapshot* dss = new DialogSignalSnapshot(&m_configController, this);
 	dss->show();
 
 	return;

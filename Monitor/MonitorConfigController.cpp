@@ -489,6 +489,38 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 //	return outSetting->errorMessage.isEmpty();
 }
 
+std::vector<ConfigSchema> MonitorConfigController::schemasParams() const
+{
+	QMutexLocker locker(&m_mutex);
+
+	std::vector<ConfigSchema> result;
+	result.resize(m_schemas.size());
+
+	int index = 0;
+	for (auto s : m_schemas)
+	{
+		result[index].strId = s.strId;
+		result[index].caption = s.caption;
+		index++;
+	}
+
+	return result;
+}
+
+std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schemaId)
+{
+	for (auto s : m_schemas)
+	{
+		if (s.strId == schemaId)
+		{
+			return s.appSignals;
+		}
+	}
+
+	return std::set<QString>();
+}
+
+
 std::vector<ConfigSchema> MonitorConfigController::schemas() const
 {
 	QMutexLocker locker(&m_mutex);

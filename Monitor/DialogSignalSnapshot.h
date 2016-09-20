@@ -5,6 +5,7 @@
 #include <QAbstractItemModel>
 #include "../lib/AppSignalManager.h"
 #include "DialogColumns.h"
+#include "MonitorConfigController.h"
 
 namespace Ui {
 class DialogSignalSnapshot;
@@ -12,10 +13,12 @@ class DialogSignalSnapshot;
 
 typedef std::pair<Hash, AppSignalState> SnapshotItem;
 
+class SnapshotItemModel;
+
 class SnapshotItemSorter
 {
 public:
-	  SnapshotItemSorter(int column, Qt::SortOrder order);
+	  SnapshotItemSorter(int column, Qt::SortOrder order, SnapshotItemModel* model);
 
 	  bool operator()(const SnapshotItem& o1, const SnapshotItem& o2) const
 	  {
@@ -26,7 +29,10 @@ public:
 
 private:
 	  int m_column = -1;
+
 	  Qt::SortOrder m_order = Qt::AscendingOrder;
+
+	  SnapshotItemModel* m_model = nullptr;
 };
 
 
@@ -53,7 +59,7 @@ public:
 
 public:
 
-	enum DialogSignalSnapshotColumns
+	enum class DialogSignalSnapshotColumns
 	{
 		SignalID = 0,		// Signal Param Columns
 		EquipmentID,
@@ -71,7 +77,7 @@ public:
 		Overflow,
 	};
 
-	enum TypeFilter
+	enum class TypeFilter
 	{
 		All = 0,
 		AnalogInput,
@@ -86,6 +92,8 @@ public:
 
 	void sort(int column, Qt::SortOrder order) override;
 
+	Signal signalParam(Hash hash, bool* found) const;
+
 protected:
 	QModelIndex parent(const QModelIndex &index) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -95,6 +103,8 @@ protected:
 private:
 
 	std::vector<std::pair<Hash, AppSignalState>> m_signalsTable;
+
+	std::map<Hash, Signal> m_signalsParamCache;
 
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
@@ -106,7 +116,7 @@ class DialogSignalSnapshot : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalSnapshot(QWidget *parent = 0);
+	explicit DialogSignalSnapshot(MonitorConfigController* configController, QWidget *parent = 0);
 	~DialogSignalSnapshot();
 
 private slots:
@@ -124,12 +134,15 @@ private slots:
 
 	void on_buttonMaskInfo_clicked();
 
-	void sortIndicatorChanged(int logicalIndex, Qt::SortOrder order);
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
 	void tcpSignalClient_signalParamAndUnitsArrived();
 
 	void tcpSignalClient_connectionReset();
 
+	void configController_configurationArrived(ConfigSettings configuration);
+
+	void on_schemaCombo_currentIndexChanged(const QString &arg1);
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -138,6 +151,8 @@ private:
 
 	void fillSignals();
 
+	void fillSchemas();
+
 private:
 	Ui::DialogSignalSnapshot *ui;
 
@@ -145,12 +160,19 @@ private:
 
 	SnapshotItemModel *m_model = nullptr;
 
+	MonitorConfigController* m_configController = nullptr;
+
 	int m_updateStateTimerId = -1;
 
 	std::vector<Hash> m_signalsHashes;
 
-	int m_signalType = SnapshotItemModel::All;
+	SnapshotItemModel::TypeFilter m_signalType = SnapshotItemModel::TypeFilter::All;
+
 	QStringList m_strIdMasks;
+
+	static int m_sortColumn;
+
+	static Qt::SortOrder m_sortOrder;
 
 };
 

@@ -89,6 +89,9 @@ private:
 
 	// Public properties
 public:
+
+	std::vector<ConfigSchema> schemasParams() const;
+	std::set<QString> schemaAppSignals(const QString& schemaId);
 	std::vector<ConfigSchema> schemas() const;
 
 	// Data section

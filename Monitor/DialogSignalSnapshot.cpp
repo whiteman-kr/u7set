@@ -8,9 +8,10 @@
 #include "MonitorCentralWidget.h"
 #include "Stable.h"
 
-SnapshotItemSorter::SnapshotItemSorter(int column, Qt::SortOrder order):
+SnapshotItemSorter::SnapshotItemSorter(int column, Qt::SortOrder order, SnapshotItemModel *model):
 	m_column(column),
-	m_order(order)
+	m_order(order),
+	m_model(model)
 {
 }
 
@@ -18,13 +19,13 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 {
 	bool found = false;
 
-	const Signal& s1 = theSignals.signal(o1.first, &found);
+	Signal s1 = m_model->signalParam(o1.first, &found);
 	if (found == false)
 	{
 		return false;
 	}
 
-	const Signal& s2 = theSignals.signal(o2.first, &found);
+	Signal s2 = m_model->signalParam(o2.first, &found);
 	if (found == false)
 	{
 		return false;
@@ -38,37 +39,37 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	switch (column)
 	{
-	case SnapshotItemModel::SignalID:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::SignalID:
 	{
 		v1 = s1.customAppSignalID();
 		v2 = s2.customAppSignalID();
 	}
 		break;
-	case SnapshotItemModel::EquipmentID:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::EquipmentID:
 	{
 		v1 = s1.equipmentID();
 		v2 = s2.equipmentID();
 	}
 		break;
-	case SnapshotItemModel::AppSignalID:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::AppSignalID:
 	{
 		v1 = s1.appSignalID();
 		v2 = s2.appSignalID();
 	}
 		break;
-	case SnapshotItemModel::Caption:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Caption:
 	{
 		v1 = s1.caption();
 		v2 = s2.caption();
 	}
 		break;
-	case SnapshotItemModel::Units:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Units:
 	{
 		v1 = s1.unitID();
 		v2 = s2.unitID();
 	}
 		break;
-	case SnapshotItemModel::Type:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Type:
 	{
 		if (s1.type() == s2.type())
 		{
@@ -91,25 +92,25 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 	}
 		break;
 
-	case SnapshotItemModel::SystemTime:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::SystemTime:
 	{
 		v1 = st1.time.system;
 		v2 = st2.time.system;
 	}
 		break;
-	case SnapshotItemModel::LocalTime:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::LocalTime:
 	{
 		v1 = st1.time.local;
 		v2 = st2.time.local;
 	}
 		break;
-	case SnapshotItemModel::PlantTime:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::PlantTime:
 	{
 		v1 = st1.time.plant;
 		v2 = st2.time.plant;
 	}
 		break;
-	case SnapshotItemModel::Value:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Value:
 	{
 		if (s1.isAnalog() == s2.isAnalog())
 		{
@@ -123,19 +124,19 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 		}
 	}
 		break;
-	case SnapshotItemModel::Valid:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Valid:
 	{
 		v1 = st1.flags.valid;
 		v2 = st2.flags.valid;
 	}
 		break;
-	case SnapshotItemModel::Underflow:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Underflow:
 	{
 		v1 = st1.flags.underflow;
 		v2 = st2.flags.underflow;
 	}
 		break;
-	case SnapshotItemModel::Overflow:
+	case SnapshotItemModel::DialogSignalSnapshotColumns::Overflow:
 	{
 		v1 = st1.flags.overflow;
 		v2 = st2.flags.overflow;
@@ -184,16 +185,16 @@ SnapshotItemModel::SnapshotItemModel(QObject* parent)
 
 	if (theSettings.m_signalSnapshotColumnCount == 0)
 	{
-		m_columnsIndexes.push_back(SignalID);
-		m_columnsIndexes.push_back(Caption);
-		m_columnsIndexes.push_back(Units);
-		m_columnsIndexes.push_back(Type);
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::SignalID));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Caption));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Units));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Type));
 
-		m_columnsIndexes.push_back(LocalTime);
-		m_columnsIndexes.push_back(Value);
-		m_columnsIndexes.push_back(Valid);
-		m_columnsIndexes.push_back(Underflow);
-		m_columnsIndexes.push_back(Overflow);
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::LocalTime));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Value));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Valid));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Underflow));
+		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Overflow));
 	}
 	else
 	{
@@ -369,7 +370,7 @@ void SnapshotItemModel::sort(int column, Qt::SortOrder order)
 	// Fill the states map for sorting
 	//
 
-	std::sort(m_signalsTable.begin(), m_signalsTable.end(), SnapshotItemSorter(sortColumnIndex, order));
+	std::sort(m_signalsTable.begin(), m_signalsTable.end(), SnapshotItemSorter(sortColumnIndex, order, this));
 
 	if (rowCount() > 0)
 	{
@@ -397,7 +398,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		int displayIndex = m_columnsIndexes[col];
+		DialogSignalSnapshotColumns displayIndex = static_cast<DialogSignalSnapshotColumns>(m_columnsIndexes[col]);
 
 		//
 		// State
@@ -405,35 +406,35 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 		const AppSignalState& state = m_signalsTable[row].second;
 
-		if (displayIndex == SystemTime)
+		if (displayIndex == DialogSignalSnapshotColumns::SystemTime)
 		{
 			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.system);
 			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 		}
 
-		if (displayIndex == LocalTime)
+		if (displayIndex == DialogSignalSnapshotColumns::LocalTime)
 		{
 			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.local);
 			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 		}
 
-		if (displayIndex == PlantTime)
+		if (displayIndex == DialogSignalSnapshotColumns::PlantTime)
 		{
 			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.plant);
 			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 		}
 
-		if (displayIndex == Valid)
+		if (displayIndex == DialogSignalSnapshotColumns::Valid)
 		{
 			return (state.flags.valid == true) ? tr("Yes") : tr("No");
 		}
 
-		if (displayIndex == Underflow)
+		if (displayIndex == DialogSignalSnapshotColumns::Underflow)
 		{
 			return (state.flags.underflow == true) ? tr("Yes") : tr("No");
 		}
 
-		if (displayIndex == Overflow)
+		if (displayIndex == DialogSignalSnapshotColumns::Overflow)
 		{
 			return (state.flags.overflow == true) ? tr("Yes") : tr("No");
 		}
@@ -443,7 +444,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		//
 
 		bool found = false;
-		Signal s = theSignals.signal(m_signalsTable[row].first, &found);
+		Signal s = signalParam(m_signalsTable[row].first, &found);
 
 		if (found == false)
 		{
@@ -451,7 +452,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		if (displayIndex == Value)
+		if (displayIndex == DialogSignalSnapshotColumns::Value)
 		{
 			if (state.flags.valid == true)
 			{
@@ -469,6 +470,11 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 						str += tr(" [Underflow]");
 					}
 
+					if (state.flags.overflow == true)
+					{
+						str += tr(" [Overflow]");
+					}
+
 					return str;
 				}
 			}
@@ -478,32 +484,32 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			}
 		}
 
-		if (displayIndex == SignalID)
+		if (displayIndex == DialogSignalSnapshotColumns::SignalID)
 		{
 			return s.customAppSignalID();
 		}
 
-		if (displayIndex == EquipmentID)
+		if (displayIndex == DialogSignalSnapshotColumns::EquipmentID)
 		{
 			return s.equipmentID();
 		}
 
-		if (displayIndex == AppSignalID)
+		if (displayIndex == DialogSignalSnapshotColumns::AppSignalID)
 		{
 			return s.appSignalID();
 		}
 
-		if (displayIndex == Caption)
+		if (displayIndex == DialogSignalSnapshotColumns::Caption)
 		{
 			return s.caption();
 		}
 
-		if (displayIndex == Units)
+		if (displayIndex == DialogSignalSnapshotColumns::Units)
 		{
 			return theSignals.units(s.unitID());
 		}
 
-		if (displayIndex == Type)
+		if (displayIndex == DialogSignalSnapshotColumns::Type)
 		{
 			QString str = E::valueToString<E::SignalType>(s.type());
 
@@ -540,12 +546,36 @@ QVariant SnapshotItemModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
+Signal SnapshotItemModel::signalParam(Hash hash, bool* found) const
+{
+	if (found == nullptr)
+	{
+		assert(found);
+		return Signal();
+	}
+
+	*found = false;
+
+	Signal s1 = theSignals.signal(hash, found);
+	if (*found == false)
+	{
+		return Signal();
+	}
+
+	return s1;
+}
+
 //
 //DialogSignalSnapshot
 //
 
-DialogSignalSnapshot::DialogSignalSnapshot(QWidget *parent) :
+int DialogSignalSnapshot::m_sortColumn = 0;
+
+Qt::SortOrder DialogSignalSnapshot::m_sortOrder = Qt::AscendingOrder;
+
+DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_configController(configController),
 	ui(new Ui::DialogSignalSnapshot)
 {
 	ui->setupUi(this);
@@ -575,14 +605,16 @@ DialogSignalSnapshot::DialogSignalSnapshot(QWidget *parent) :
 	ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::prepareContextMenu);
 
-	ui->typeCombo->addItem(tr("All signals"), SnapshotItemModel::All);
-	ui->typeCombo->addItem(tr("Analog Input signals"), SnapshotItemModel::AnalogInput);
-	ui->typeCombo->addItem(tr("Analog Output signals"), SnapshotItemModel::AnalogOutput);
-	ui->typeCombo->addItem(tr("Discrete Input signals"), SnapshotItemModel::DiscreteInput);
-	ui->typeCombo->addItem(tr("Discrete Output signals"), SnapshotItemModel::DiscreteOutput);
+	ui->typeCombo->addItem(tr("All signals"), static_cast<int>(SnapshotItemModel::TypeFilter::All));
+	ui->typeCombo->addItem(tr("Analog Input signals"), static_cast<int>(SnapshotItemModel::TypeFilter::AnalogInput));
+	ui->typeCombo->addItem(tr("Analog Output signals"), static_cast<int>(SnapshotItemModel::TypeFilter::AnalogOutput));
+	ui->typeCombo->addItem(tr("Discrete Input signals"), static_cast<int>(SnapshotItemModel::TypeFilter::DiscreteInput));
+	ui->typeCombo->addItem(tr("Discrete Output signals"), static_cast<int>(SnapshotItemModel::TypeFilter::DiscreteOutput));
 	ui->typeCombo->blockSignals(true);
 	ui->typeCombo->setCurrentIndex(theSettings.m_signalSnapshotSignalType);
 	ui->typeCombo->blockSignals(false);
+
+	fillSchemas();
 
 	m_completer = new QCompleter(theSettings.m_signalSnapshotMaskList, this);
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -594,6 +626,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(QWidget *parent) :
 
 	connect(theMonitorMainWindow, &MonitorMainWindow::signalParamAndUnitsArrived, this, &DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived);
 	connect(theMonitorMainWindow, &MonitorMainWindow::connectionReset, this, &DialogSignalSnapshot::tcpSignalClient_connectionReset);
+
+	connect(m_configController, &MonitorConfigController::configurationArrived, this, &DialogSignalSnapshot::configController_configurationArrived);
 
 	// get signals
 	//
@@ -617,6 +651,23 @@ void DialogSignalSnapshot::fillSignals()
 
 	filteredTable.reserve(m_signalsHashes.size());
 
+	// Get current schema's App Signals
+	//
+	QString currentSchemaStrId;
+	QVariant data = ui->schemaCombo->currentData();
+	if (data.isValid() == true)
+	{
+		currentSchemaStrId = data.toString();
+	}
+
+	std::set<QString> schemaAppSignals;
+	if (currentSchemaStrId.isEmpty() == false)
+	{
+		schemaAppSignals = m_configController->schemaAppSignals(currentSchemaStrId);
+	}
+
+	// Fill signals
+	//
 	for (const Hash& hash : m_signalsHashes)
 	{
 		bool found = false;
@@ -628,25 +679,25 @@ void DialogSignalSnapshot::fillSignals()
 
 		switch (m_signalType)
 		{
-		case SnapshotItemModel::AnalogInput:
+		case SnapshotItemModel::TypeFilter::AnalogInput:
 			if (s.isAnalog() == false || s.isInput() == false)
 			{
 				continue;
 			}
 			break;
-		case SnapshotItemModel::AnalogOutput:
+		case SnapshotItemModel::TypeFilter::AnalogOutput:
 			if (s.isAnalog() == false || s.isOutput() == false)
 			{
 				continue;
 			}
 			break;
-		case SnapshotItemModel::DiscreteInput:
+		case SnapshotItemModel::TypeFilter::DiscreteInput:
 			if (s.isDiscrete() == false || s.isInput() == false)
 			{
 				continue;
 			}
 			break;
-		case SnapshotItemModel::DiscreteOutput:
+		case SnapshotItemModel::TypeFilter::DiscreteOutput:
 			if (s.isDiscrete() == false || s.isOutput() == false)
 			{
 				continue;
@@ -674,11 +725,62 @@ void DialogSignalSnapshot::fillSignals()
 			}
 		}
 
+		if (currentSchemaStrId.isEmpty() == false)
+		{
+			bool result = false;
+			QString strId = s.customAppSignalID().trimmed();
+			for (QString appSignal : schemaAppSignals)
+			{
+				if (appSignal == strId)
+				{
+					result = true;
+					break;
+				}
+			}
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
 		filteredTable.push_back(std::make_pair(s.hash(), AppSignalState()));
 	}
 
 	m_model->setSignals(&filteredTable);
+
+	ui->tableView->sortByColumn(m_sortColumn, m_sortOrder);
 }
+
+void DialogSignalSnapshot::fillSchemas()
+{
+	// Fill schemas
+	//
+	QString currentStrId;
+
+	QVariant data = ui->schemaCombo->currentData();
+	if (data.isValid() == true)
+	{
+		currentStrId = data.toString();
+	}
+
+	ui->schemaCombo->clear();
+	ui->schemaCombo->addItem("All Schemas", "");
+
+	int index = 0;
+	std::vector<ConfigSchema> schemasParams = m_configController->schemasParams();
+	for (auto schema : schemasParams)
+	{
+		ui->schemaCombo->addItem(schema.strId + " - " + schema.caption, schema.strId);
+
+		if (currentStrId == schema.strId)
+		{
+			ui->schemaCombo->setCurrentIndex(index);
+		}
+
+		index++;
+	}
+}
+
 
 void DialogSignalSnapshot::on_buttonColumns_clicked()
 {
@@ -739,7 +841,7 @@ void DialogSignalSnapshot::prepareContextMenu(const QPoint& pos)
 	}
 
 	bool found = false;
-	const Signal& s = theSignals.signal(hash, &found);
+	const Signal& s = m_model->signalParam(hash, &found);
 
 	if (found == false)
 	{
@@ -760,7 +862,16 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			// Update only visible dynamic items
 			//
 			int from = ui->tableView->rowAt(0);
-			int to = ui->tableView->rowAt(ui->tableView->height());
+			int to = ui->tableView->rowAt(ui->tableView->height() - ui->tableView->horizontalHeader()->height());
+
+			if (from == -1)
+			{
+				from = 0;
+			}
+			if (to == -1)
+			{
+				to = m_model->rowCount() - 1;
+			}
 
 			// Update signal states
 			//
@@ -772,7 +883,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			{
 				 int displayIndex = m_model->columnIndex(col);
 
-				 if (displayIndex >= SnapshotItemModel::SystemTime)
+				 if (displayIndex >= static_cast<int>(SnapshotItemModel::DialogSignalSnapshotColumns::SystemTime))
 				 {
 					 for (int row = from; row <= to; row++)
 					 {
@@ -849,7 +960,7 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 	}
 
 	bool found = false;
-	const Signal& s = theSignals.signal(hash, &found);
+	const Signal& s = m_model->signalParam(hash, &found);
 
 	if (found == false)
 	{
@@ -859,9 +970,12 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 	cw->currentTab()->signalInfo(s.appSignalID());
 }
 
-void DialogSignalSnapshot::sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
+void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
-	m_model->sort(logicalIndex, order);
+	m_sortColumn = column;
+	m_sortOrder = order;
+
+	m_model->sort(column, order);
 }
 
 void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
@@ -870,7 +984,7 @@ void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
 
 	// Get signal type
 	//
-	m_signalType = ui->typeCombo->currentData().toInt();
+	m_signalType = static_cast<SnapshotItemModel::TypeFilter>(ui->typeCombo->currentData().toInt());
 	fillSignals();
 }
 
@@ -901,5 +1015,16 @@ void DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived()
 void DialogSignalSnapshot::tcpSignalClient_connectionReset()
 {
 	m_signalsHashes.clear();
+	fillSignals();
+}
+
+void DialogSignalSnapshot::configController_configurationArrived(ConfigSettings /*configuration*/)
+{
+	fillSchemas();
+	fillSignals();
+}
+
+void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(const QString&/* arg1*/)
+{
 	fillSignals();
 }
