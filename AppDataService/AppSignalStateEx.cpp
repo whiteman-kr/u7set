@@ -31,6 +31,11 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 	m_highLimit = signal->highEngeneeringUnits();
 
 	m_absAperture = fabs(m_highLimit - m_lowLimit) * (m_aperture / 100.0);
+
+	Hash hash = calcHash(signal->appSignalID());
+
+	m_current.hash = hash;
+	m_stored.hash = hash;
 }
 
 
@@ -99,7 +104,15 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 }
 
 
-QString AppSignalStateEx::appSignalID()
+Hash AppSignalStateEx::hash() const
+{
+	assert(m_current.hash == m_stored.hash);
+
+	return m_current.hash;
+}
+
+
+QString AppSignalStateEx::appSignalID() const
 {
 	if (m_signal == nullptr)
 	{
@@ -178,20 +191,21 @@ void AppSignalStates::buidlHash2State()
 	{
 		AppSignalStateEx& state = m_appSignalState[i];
 
-		if (state.m_signal == nullptr)
+		Hash hash = state.hash();
+
+		if (m_hash2State.contains(hash))
 		{
-			assert(false);
-			continue;
+			assert(false);			// collision !
 		}
-
-		Hash hash = calcHash(state.m_signal->appSignalID());
-
-		m_hash2State.insert(hash, &state);
+		else
+		{
+			m_hash2State.insert(hash, &state);
+		}
 	}
 }
 
 
-bool AppSignalStates::getState(Hash hash, AppSignalState& state) const
+bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
 	{
@@ -199,11 +213,31 @@ bool AppSignalStates::getState(Hash hash, AppSignalState& state) const
 
 		state = stateEx->m_current;
 
+		assert(state.hash == hash);
+
 		return true;
 	}
 
 	return false;
 }
+
+
+bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
+{
+	if (m_hash2State.contains(hash))
+	{
+		const AppSignalStateEx* stateEx = m_hash2State[hash];
+
+		state = stateEx->m_stored;
+
+		assert(state.hash == hash);
+
+		return true;
+	}
+
+	return false;
+}
+
 
 
 // -------------------------------------------------------------------------------

@@ -234,7 +234,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		Proto::AppSignalState* protoAppSignalState = m_getAppSignalStateReply.add_appsignalstates();
 
-		appSignalState.setProtoAppSignalState(hash, protoAppSignalState);
+		appSignalState.setProtoAppSignalState(protoAppSignalState);
 	}
 
 	sendReply(m_getAppSignalStateReply);
@@ -393,5 +393,5 @@ void TcpAppDataServerThread::buildAppSignalIDs()
 
 bool TcpAppDataServerThread::getAppSignalState(Hash hash, AppSignalState& state)
 {
-	return m_appSignalStates.getState(hash, state);
+	return m_appSignalStates.getCurrentState(hash, state);
 }

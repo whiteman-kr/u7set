@@ -1,13 +1,15 @@
 #include "../lib/AppSignalState.h"
 
 
-void AppSignalState::setProtoAppSignalState(Hash hash, Proto::AppSignalState* protoState)
+void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)
 	{
 		assert(false);
 		return;
 	}
+
+	assert(hash != 0);
 
 	protoState->set_hash(hash);
 	protoState->set_value(value);
@@ -27,6 +29,9 @@ Hash AppSignalState::getProtoAppSignalState(const Proto::AppSignalState* protoSt
 		return 0 ;
 	}
 
+	assert(hash != 0);
+
+	hash = protoState->hash();
 	value = protoState->value();
 	flags.all = protoState->flags();
 
@@ -34,5 +39,5 @@ Hash AppSignalState::getProtoAppSignalState(const Proto::AppSignalState* protoSt
 	time.local = protoState->localtime();
 	time.plant = protoState->planttime();
 
-	return protoState->hash();
+	return hash;
 }
