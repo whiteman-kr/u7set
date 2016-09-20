@@ -41,7 +41,7 @@ namespace Builder
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);
 
-		QString getMetadata(const QString& key);
+		QString getMetadata(const QString& key) const;
 	};
 
 }
