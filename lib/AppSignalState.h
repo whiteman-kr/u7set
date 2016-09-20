@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QDateTime>
 #include "../Proto/serialization.pb.h"
 #include "../lib/Hash.h"
 
@@ -10,6 +11,10 @@ struct Times
 	qint64	system = 0;
 	qint64	local = 0;
 	qint64	plant = 0;
+
+	QDateTime systemToDateTime() const;
+	QDateTime localToDateTime() const;
+	QDateTime plantToDateTime() const;
 };
 
 

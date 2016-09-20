@@ -137,8 +137,6 @@ void MonitorMainWindow::saveWindowState()
 
 void MonitorMainWindow::restoreWindowState()
 {
-	theSettings.loadUserScope();
-
 	move(theSettings.m_mainWindowPos);
 	restoreGeometry(theSettings.m_mainWindowGeometry);
 	restoreState(theSettings.m_mainWindowState);

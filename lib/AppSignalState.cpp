@@ -1,6 +1,21 @@
 #include "../lib/AppSignalState.h"
 
 
+QDateTime Times::systemToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(system);
+}
+
+QDateTime Times::localToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(local);
+}
+
+QDateTime Times::plantToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(plant);
+}
+
 void AppSignalState::setProtoAppSignalState(Hash hash, Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)

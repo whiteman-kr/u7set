@@ -69,7 +69,7 @@ public:
 
 public:
 
-	enum class DialogSignalSnapshotColumns
+	enum class Columns
 	{
 		SignalID = 0,		// Signal Param Columns
 		EquipmentID,
@@ -197,8 +197,6 @@ private:
 	static int m_sortColumn;
 
 	static Qt::SortOrder m_sortOrder;
-
-
 };
 
 #endif // DIALOGSIGNALSNAPSHOT_H

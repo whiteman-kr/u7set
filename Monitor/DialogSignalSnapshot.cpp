@@ -17,6 +17,12 @@ SnapshotItemSorter::SnapshotItemSorter(int column, Qt::SortOrder order, Snapshot
 
 bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem& o2, int column, Qt::SortOrder order) const
 {
+	if (m_model == nullptr)
+	{
+		assert(m_model);
+		return false;
+	}
+
 	bool found = false;
 
 	Signal s1 = m_model->signalParam(o1.first, &found);
@@ -39,108 +45,108 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	switch (column)
 	{
-	case SnapshotItemModel::DialogSignalSnapshotColumns::SignalID:
-	{
-		v1 = s1.customAppSignalID();
-		v2 = s2.customAppSignalID();
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::EquipmentID:
-	{
-		v1 = s1.equipmentID();
-		v2 = s2.equipmentID();
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::AppSignalID:
-	{
-		v1 = s1.appSignalID();
-		v2 = s2.appSignalID();
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Caption:
-	{
-		v1 = s1.caption();
-		v2 = s2.caption();
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Units:
-	{
-		v1 = s1.unitID();
-		v2 = s2.unitID();
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Type:
-	{
-		if (s1.type() == s2.type())
+	case SnapshotItemModel::Columns::SignalID:
 		{
-			if (s1.dataFormat() == s2.dataFormat())
+			v1 = s1.customAppSignalID();
+			v2 = s2.customAppSignalID();
+		}
+		break;
+	case SnapshotItemModel::Columns::EquipmentID:
+		{
+			v1 = s1.equipmentID();
+			v2 = s2.equipmentID();
+		}
+		break;
+	case SnapshotItemModel::Columns::AppSignalID:
+		{
+			v1 = s1.appSignalID();
+			v2 = s2.appSignalID();
+		}
+		break;
+	case SnapshotItemModel::Columns::Caption:
+		{
+			v1 = s1.caption();
+			v2 = s2.caption();
+		}
+		break;
+	case SnapshotItemModel::Columns::Units:
+		{
+			v1 = s1.unitID();
+			v2 = s2.unitID();
+		}
+		break;
+	case SnapshotItemModel::Columns::Type:
+		{
+			if (s1.type() == s2.type())
 			{
-				v1 = s1.inOutTypeInt();
-				v2 = s2.inOutTypeInt();
+				if (s1.dataFormat() == s2.dataFormat())
+				{
+					v1 = s1.inOutTypeInt();
+					v2 = s2.inOutTypeInt();
+				}
+				else
+				{
+					v1 = s1.dataFormatInt();
+					v2 = s2.dataFormatInt();
+				}
 			}
 			else
 			{
-				v1 = s1.dataFormatInt();
-				v2 = s2.dataFormatInt();
+				v1 = s1.typeInt();
+				v2 = s2.typeInt();
 			}
 		}
-		else
-		{
-			v1 = s1.typeInt();
-			v2 = s2.typeInt();
-		}
-	}
 		break;
 
-	case SnapshotItemModel::DialogSignalSnapshotColumns::SystemTime:
-	{
-		v1 = st1.time.system;
-		v2 = st2.time.system;
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::LocalTime:
-	{
-		v1 = st1.time.local;
-		v2 = st2.time.local;
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::PlantTime:
-	{
-		v1 = st1.time.plant;
-		v2 = st2.time.plant;
-	}
-		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Value:
-	{
-		if (s1.isAnalog() == s2.isAnalog())
+	case SnapshotItemModel::Columns::SystemTime:
 		{
-		   v1 = st1.value;
-		   v2 = st2.value;
+			v1 = st1.time.system;
+			v2 = st2.time.system;
 		}
-		else
+		break;
+	case SnapshotItemModel::Columns::LocalTime:
 		{
-			v1 = s1.isAnalog();
-			v2 = s2.isAnalog();
+			v1 = st1.time.local;
+			v2 = st2.time.local;
 		}
-	}
 		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Valid:
-	{
-		v1 = st1.flags.valid;
-		v2 = st2.flags.valid;
-	}
+	case SnapshotItemModel::Columns::PlantTime:
+		{
+			v1 = st1.time.plant;
+			v2 = st2.time.plant;
+		}
 		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Underflow:
-	{
-		v1 = st1.flags.underflow;
-		v2 = st2.flags.underflow;
-	}
+	case SnapshotItemModel::Columns::Value:
+		{
+			if (s1.isAnalog() == s2.isAnalog())
+			{
+				v1 = st1.value;
+				v2 = st2.value;
+			}
+			else
+			{
+				v1 = s1.isAnalog();
+				v2 = s2.isAnalog();
+			}
+		}
 		break;
-	case SnapshotItemModel::DialogSignalSnapshotColumns::Overflow:
-	{
-		v1 = st1.flags.overflow;
-		v2 = st2.flags.overflow;
-	}
+	case SnapshotItemModel::Columns::Valid:
+		{
+			v1 = st1.flags.valid;
+			v2 = st2.flags.valid;
+		}
+		break;
+	case SnapshotItemModel::Columns::Underflow:
+		{
+			v1 = st1.flags.underflow;
+			v2 = st2.flags.underflow;
+		}
+		break;
+	case SnapshotItemModel::Columns::Overflow:
+		{
+			v1 = st1.flags.overflow;
+			v2 = st2.flags.overflow;
+		}
 		break;
 	default:
 		assert(false);
@@ -163,48 +169,48 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 //
 
 SnapshotItemModel::SnapshotItemModel(QObject* parent)
-	:QAbstractItemModel(parent)
+	: QAbstractItemModel(parent)
 {
 	// Fill column names
+	//
+	m_columnsNames << tr("Signal ID");
+	m_columnsNames << tr("Equipment ID");
+	m_columnsNames << tr("App Signal ID");
+	m_columnsNames << tr("Caption");
+	m_columnsNames << tr("Units");
+	m_columnsNames << tr("Type");
 
-	m_columnsNames<<tr("Signal ID");
-	m_columnsNames<<tr("Equipment ID");
-	m_columnsNames<<tr("App Signal ID");
-	m_columnsNames<<tr("Caption");
-	m_columnsNames<<tr("Units");
-	m_columnsNames<<tr("Type");
-
-	m_columnsNames<<tr("System Time");
-	m_columnsNames<<tr("Local Time");
-	m_columnsNames<<tr("Plant Time");
-	m_columnsNames<<tr("Value");
-	m_columnsNames<<tr("Valid");
-	m_columnsNames<<tr("Underflow");
-	m_columnsNames<<tr("Overflow");
+	m_columnsNames << tr("System Time");
+	m_columnsNames << tr("Local Time");
+	m_columnsNames << tr("Plant Time");
+	m_columnsNames << tr("Value");
+	m_columnsNames << tr("Valid");
+	m_columnsNames << tr("Underflow");
+	m_columnsNames << tr("Overflow");
 
 
-	if (theSettings.m_signalSnapshotColumnCount == 0)
+	if (theSettings.m_signalSnapshotColumns.isEmpty() == true)
 	{
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::SignalID));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Caption));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Units));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Type));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::SignalID));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Caption));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Units));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Type));
 
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::LocalTime));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Value));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Valid));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Underflow));
-		m_columnsIndexes.push_back(static_cast<int>(DialogSignalSnapshotColumns::Overflow));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::LocalTime));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Value));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Valid));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Underflow));
+		m_columnsIndexes.push_back(static_cast<int>(Columns::Overflow));
 	}
 	else
 	{
-		const int* begin = reinterpret_cast<int*>(theSettings.m_signalSnapshotColumns.data());
-		const int* end = begin + theSettings.m_signalSnapshotColumnCount;
+		m_columnsIndexes.clear();
+		m_columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
 
-		std::vector<int> buffer(begin, end);
-		m_columnsIndexes = buffer;
+		m_columnsIndexes = theSettings.m_signalSnapshotColumns.toStdVector();
 	}
 
+	return;
 }
 
 void SnapshotItemModel::setSignals(std::vector<SnapshotItem>* signalsTable)
@@ -261,7 +267,6 @@ void SnapshotItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 	insertColumns(0, (int)m_columnsIndexes.size());
 
 	endInsertColumns();
-
 }
 
 int SnapshotItemModel::columnIndex(int index) const
@@ -287,8 +292,8 @@ Hash SnapshotItemModel::signalHash(int index) const
 		assert(false);
 		return 0;
 	}
-	return m_signalsTable[index].first;
 
+	return m_signalsTable[index].first;
 }
 
 void SnapshotItemModel::updateStates(int from, int to)
@@ -327,6 +332,8 @@ void SnapshotItemModel::updateStates(int from, int to)
 		m_signalsTable[i].second = requestStates[state];
 		state++;
 	}
+
+	return;
 }
 
 QModelIndex SnapshotItemModel::index(int row, int column, const QModelIndex &parent) const
@@ -394,45 +401,42 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		DialogSignalSnapshotColumns displayIndex = static_cast<DialogSignalSnapshotColumns>(m_columnsIndexes[col]);
+		Columns displayIndex = static_cast<Columns>(m_columnsIndexes[col]);
 
 		//
 		// State
 		//
-
 		const AppSignalState& state = m_signalsTable[row].second;
 
-		if (displayIndex == DialogSignalSnapshotColumns::SystemTime)
+		switch (displayIndex)
 		{
-			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.system);
-			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::LocalTime)
-		{
-			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.local);
-			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::PlantTime)
-		{
-			QDateTime time = QDateTime::fromMSecsSinceEpoch(state.time.plant);
-			return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Valid)
-		{
-			return (state.flags.valid == true) ? tr("Yes") : tr("No");
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Underflow)
-		{
-			return (state.flags.underflow == true) ? tr("Yes") : tr("No");
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Overflow)
-		{
-			return (state.flags.overflow == true) ? tr("Yes") : tr("No");
+		case Columns::SystemTime:
+			{
+				QDateTime time = state.time.systemToDateTime();
+				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+			}
+		case Columns::LocalTime:
+			{
+				QDateTime time = state.time.localToDateTime();
+				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+			}
+		case Columns::PlantTime:
+			{
+				QDateTime time = state.time.plantToDateTime();
+				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+			}
+		case Columns::Valid:
+			{
+				return (state.flags.valid == true) ? tr("") : tr("no");
+			}
+		case Columns::Underflow:
+			{
+				return (state.flags.underflow == true) ? tr("yes") : tr("");
+			}
+		case Columns::Overflow:
+			{
+				return (state.flags.overflow == true) ? tr("yes") : tr("");
+			}
 		}
 
 		//
@@ -448,79 +452,85 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		if (displayIndex == DialogSignalSnapshotColumns::Value)
+		switch (displayIndex)
 		{
-			if (state.flags.valid == true)
+		case Columns::Value:
 			{
-				if (s.isDiscrete() == true)
+				if (state.flags.valid == true)
 				{
-					return static_cast<int>(state.value) == 0 ? "0" : "1";
+					if (s.isDiscrete() == true)
+					{
+						return static_cast<int>(state.value) == 0 ? "0" : "1";
+					}
+
+					if (s.isAnalog() == true)
+					{
+						QString str = QString::number(state.value, 'f', s.decimalPlaces());
+
+						if (state.flags.underflow == true)
+						{
+							str += tr(" [UF]");
+						}
+
+						if (state.flags.overflow == true)
+						{
+							str += tr(" [OF]");
+						}
+
+						return str;
+					}
+
+					assert(false);
 				}
+
+				return tr("?");
+			}
+
+		case Columns::SignalID:
+			{
+				return s.customAppSignalID();
+			}
+
+		case Columns::EquipmentID:
+			{
+				return s.equipmentID();
+			}
+
+		case Columns::AppSignalID:
+			{
+				return s.appSignalID();
+			}
+
+		case Columns::Caption:
+			{
+				return s.caption();
+			}
+
+		case Columns::Units:
+			{
+				return theSignals.units(s.unitID());
+			}
+
+		case Columns::Type:
+			{
+				QString str = E::valueToString<E::SignalType>(s.type());
 
 				if (s.isAnalog() == true)
 				{
-					QString str = QString::number(state.value, 'f', s.decimalPlaces());
-
-					if (state.flags.underflow == true)
-					{
-						str += tr(" [Underflow]");
-					}
-
-					if (state.flags.overflow == true)
-					{
-						str += tr(" [Overflow]");
-					}
-
-					return str;
+					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(s.dataFormat()));
 				}
-			}
-			else
-			{
-				return tr("?");
-			}
-		}
 
-		if (displayIndex == DialogSignalSnapshotColumns::SignalID)
-		{
-			return s.customAppSignalID();
-		}
+				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));
 
-		if (displayIndex == DialogSignalSnapshotColumns::EquipmentID)
-		{
-			return s.equipmentID();
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::AppSignalID)
-		{
-			return s.appSignalID();
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Caption)
-		{
-			return s.caption();
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Units)
-		{
-			return theSignals.units(s.unitID());
-		}
-
-		if (displayIndex == DialogSignalSnapshotColumns::Type)
-		{
-			QString str = E::valueToString<E::SignalType>(s.type());
-
-			if (s.isAnalog() == true)
-			{
-				str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(s.dataFormat()));
+				return str;
 			}
 
-			str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));
-
-			return str;
+		default:
+			assert(false);
 		}
 
 		return QVariant();
-	}
+	} // End of if (role == Qt::DisplayRole)
 
 	return QVariant();
 }
@@ -586,6 +596,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 		restoreGeometry(theSettings.m_signalSnapshotGeometry);
 	}
 
+	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 	// crete models
 	//
@@ -597,6 +608,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
+	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
 	ui->tableView->setSortingEnabled(true);
 
 	connect(ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogSignalSnapshot::sortIndicatorChanged);
@@ -819,11 +831,7 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 {
 	Q_UNUSED(result);
 
-	std::vector<int> columnIndexes = m_model->columnsIndexes();
-	theSettings.m_signalSnapshotColumnCount = (int)columnIndexes.size();
-
-	theSettings.m_signalSnapshotColumns = QByteArray(reinterpret_cast<const char*>(columnIndexes.data()), (int)columnIndexes.size() * sizeof(int));
-
+	theSettings.m_signalSnapshotColumns = QVector<int>::fromStdVector(m_model->columnsIndexes());
 	theSettings.m_signalSnapshotSignalType = ui->typeCombo->currentIndex();
 
 	// Save window position
@@ -891,6 +899,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			{
 				from = 0;
 			}
+
 			if (to == -1)
 			{
 				to = m_model->rowCount() - 1;
@@ -906,7 +915,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			{
 				 int displayIndex = m_model->columnIndex(col);
 
-				 if (displayIndex >= static_cast<int>(SnapshotItemModel::DialogSignalSnapshotColumns::SystemTime))
+				 if (displayIndex >= static_cast<int>(SnapshotItemModel::Columns::SystemTime))
 				 {
 					 for (int row = from; row <= to; row++)
 					 {

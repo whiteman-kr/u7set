@@ -1,6 +1,7 @@
 #include "Settings.h"
-#include "QStandardPaths"
-#include "QDir"
+#include <QStandardPaths>
+#include <QDir>
+#include <QSettings>
 #include "../lib/SocketIO.h"
 
 Settings theSettings;
@@ -12,6 +13,7 @@ Settings::Settings() :
 	m_configuratorIpAddress2("127.0.0.1"),
 	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST)
 {
+	 qRegisterMetaTypeStreamOperators<QList<int>>("QList<int>");
 }
 
 Settings::~Settings()
@@ -65,11 +67,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
 	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
-	s.setValue("DialogSignalSnapshot/columnCount", m_signalSnapshotColumnCount);
-	s.setValue("DialogSignalSnapshot/columns", m_signalSnapshotColumns);
+	s.setValue("DialogSignalSnapshot/columns", QVariant::fromValue<QList<int>>(m_signalSnapshotColumns.toList()));
 	s.setValue("DialogSignalSnapshot/type", m_signalSnapshotSignalType);
 	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
-
 
 	return;
 }
@@ -88,8 +88,7 @@ void Settings::loadUserScope()
 
 	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
 	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
-	m_signalSnapshotColumnCount = s.value("DialogSignalSnapshot/columnCount").toInt();
-	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").toByteArray();
+	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").value<QList<int>>().toVector();
 	m_signalSnapshotSignalType = s.value("DialogSignalSnapshot/type").toInt();
 	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 
