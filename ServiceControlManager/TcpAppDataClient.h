@@ -5,7 +5,9 @@
 #include "../lib/Hash.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/Signal.h"
+#include "../lib/AppDataSource.h"
 #include "../Proto/network.pb.h"
+
 
 class QTimer;
 
@@ -14,7 +16,7 @@ class TcpAppDataClient : public Tcp::Client
 	Q_OBJECT
 
 private:
-	QHash<quint64, DataSource*> m_dataSources;		// id => DataSource
+	QHash<quint64, AppDataSource*> m_appDataSources;		// id => AppDataSource
 
 	QVector<Hash> m_signalHahes;
 	QVector<Signal> m_signalParams;
@@ -28,7 +30,7 @@ private:
 	//
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 
-	Network::GetDataSourcesStatesReply m_getDataSourcesStatesReply;
+	Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStatesReply;
 
 	Network::GetSignalListStartReply m_getSignalListStartReply;
 
@@ -102,7 +104,7 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-	QList<DataSource*> dataSources() { return m_dataSources.values(); }
+	QList<AppDataSource*> dataSources() { return m_appDataSources.values(); }
 	const QVector<Signal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
 	QString unit(int id) { return m_unitList.contains(id) ? m_unitList.value(id) : tr("Unknown unit ID = %1").arg(id); }

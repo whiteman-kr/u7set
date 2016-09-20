@@ -257,11 +257,8 @@ public:
 
 	const QStringList& associatedSignals() const { return m_associatedSignals; }
 
-	bool getDataSourceInfo(Network::DataSourceInfo* protoInfo) const;
-	bool setDataSourceInfo(const Network::DataSourceInfo& protoInfo);
-
-	bool getDataSourceState(Network::DataSourceState* protoState) const;
-	bool setDataSourceState(const Network::DataSourceState& protoState);
+	bool getInfo(Network::DataSourceInfo* protoInfo) const;
+	bool setInfo(const Network::DataSourceInfo& protoInfo);
 
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }

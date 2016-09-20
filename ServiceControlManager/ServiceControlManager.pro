@@ -84,7 +84,8 @@ SOURCES += MainWindow.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/AppDataSource.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -114,7 +115,8 @@ HEADERS  += MainWindow.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/AppDataSource.h
 
 FORMS    +=
 

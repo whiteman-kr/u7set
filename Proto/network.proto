@@ -95,11 +95,11 @@ message GetDataSourcesInfoReply
 // Getting Data Sources states
 //
 
-message DataSourceState
+message AppDataSourceState
 {
     optional uint64 id = 1;			    // unique id
-    optional int64 uptime = 2;
-    optional int64 receivedDataSize = 3;
+    optional int64 uptime = 2;			    // time from start of data receiving
+    optional int64 receivedDataSize = 3;	    //
     optional double dataReceivingRate = 4;	    // bytes/sec
     optional int64 receivedFramesCount = 5;
     optional bool processingEnabled = 6;
@@ -108,13 +108,16 @@ message DataSourceState
     optional int64 errorFramesQuantity = 9;
     optional int64 errorFrameNo = 10;
     optional int64 lostedPackets = 11;
+    optional int64 errorDataID = 12;
+    optional uint64 receivedDataID = 13;
+    optional bool processingSkiped = 14;
 }
 
 
-message GetDataSourcesStatesReply
+message GetAppDataSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
-    repeated DataSourceState dataSourcesStates = 2;
+    repeated AppDataSourceState appDataSourcesStates = 2;
 }
 
 

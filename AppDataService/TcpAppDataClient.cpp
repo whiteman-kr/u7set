@@ -130,7 +130,7 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 	{
 		DataSource* source = new DataSource();
 
-		source->setDataSourceInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+		source->setInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
 
 		if (m_dataSources.contains(source->ID()))
 		{

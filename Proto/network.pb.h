@@ -45,8 +45,8 @@ class GetAppSignalStateReply;
 class DataSourceInfo;
 class GetDataSourcesInfoRequest;
 class GetDataSourcesInfoReply;
-class DataSourceState;
-class GetDataSourcesStatesReply;
+class AppDataSourceState;
+class GetAppDataSourcesStatesReply;
 class GetUnitsRequest;
 class Unit;
 class GetUnitsReply;
@@ -1195,14 +1195,14 @@ class GetDataSourcesInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class DataSourceState : public ::google::protobuf::Message {
+class AppDataSourceState : public ::google::protobuf::Message {
  public:
-  DataSourceState();
-  virtual ~DataSourceState();
+  AppDataSourceState();
+  virtual ~AppDataSourceState();
 
-  DataSourceState(const DataSourceState& from);
+  AppDataSourceState(const AppDataSourceState& from);
 
-  inline DataSourceState& operator=(const DataSourceState& from) {
+  inline AppDataSourceState& operator=(const AppDataSourceState& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1216,17 +1216,17 @@ class DataSourceState : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const DataSourceState& default_instance();
+  static const AppDataSourceState& default_instance();
 
-  void Swap(DataSourceState* other);
+  void Swap(AppDataSourceState* other);
 
   // implements Message ----------------------------------------------
 
-  DataSourceState* New() const;
+  AppDataSourceState* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const DataSourceState& from);
-  void MergeFrom(const DataSourceState& from);
+  void CopyFrom(const AppDataSourceState& from);
+  void MergeFrom(const AppDataSourceState& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1326,7 +1326,28 @@ class DataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 lostedpackets() const;
   inline void set_lostedpackets(::google::protobuf::int64 value);
 
-  // @@protoc_insertion_point(class_scope:Network.DataSourceState)
+  // optional int64 errorDataID = 12;
+  inline bool has_errordataid() const;
+  inline void clear_errordataid();
+  static const int kErrorDataIDFieldNumber = 12;
+  inline ::google::protobuf::int64 errordataid() const;
+  inline void set_errordataid(::google::protobuf::int64 value);
+
+  // optional uint64 receivedDataID = 13;
+  inline bool has_receiveddataid() const;
+  inline void clear_receiveddataid();
+  static const int kReceivedDataIDFieldNumber = 13;
+  inline ::google::protobuf::uint64 receiveddataid() const;
+  inline void set_receiveddataid(::google::protobuf::uint64 value);
+
+  // optional bool processingSkiped = 14;
+  inline bool has_processingskiped() const;
+  inline void clear_processingskiped();
+  static const int kProcessingSkipedFieldNumber = 14;
+  inline bool processingskiped() const;
+  inline void set_processingskiped(bool value);
+
+  // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
   inline void clear_has_id();
@@ -1350,6 +1371,12 @@ class DataSourceState : public ::google::protobuf::Message {
   inline void clear_has_errorframeno();
   inline void set_has_lostedpackets();
   inline void clear_has_lostedpackets();
+  inline void set_has_errordataid();
+  inline void clear_has_errordataid();
+  inline void set_has_receiveddataid();
+  inline void clear_has_receiveddataid();
+  inline void set_has_processingskiped();
+  inline void clear_has_processingskiped();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1363,28 +1390,31 @@ class DataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errorframesquantity_;
   ::google::protobuf::int64 errorframeno_;
   ::google::protobuf::int64 lostedpackets_;
+  ::google::protobuf::int64 errordataid_;
+  ::google::protobuf::uint64 receiveddataid_;
   bool processingenabled_;
+  bool processingskiped_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static DataSourceState* default_instance_;
+  static AppDataSourceState* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class GetDataSourcesStatesReply : public ::google::protobuf::Message {
+class GetAppDataSourcesStatesReply : public ::google::protobuf::Message {
  public:
-  GetDataSourcesStatesReply();
-  virtual ~GetDataSourcesStatesReply();
+  GetAppDataSourcesStatesReply();
+  virtual ~GetAppDataSourcesStatesReply();
 
-  GetDataSourcesStatesReply(const GetDataSourcesStatesReply& from);
+  GetAppDataSourcesStatesReply(const GetAppDataSourcesStatesReply& from);
 
-  inline GetDataSourcesStatesReply& operator=(const GetDataSourcesStatesReply& from) {
+  inline GetAppDataSourcesStatesReply& operator=(const GetAppDataSourcesStatesReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1398,17 +1428,17 @@ class GetDataSourcesStatesReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetDataSourcesStatesReply& default_instance();
+  static const GetAppDataSourcesStatesReply& default_instance();
 
-  void Swap(GetDataSourcesStatesReply* other);
+  void Swap(GetAppDataSourcesStatesReply* other);
 
   // implements Message ----------------------------------------------
 
-  GetDataSourcesStatesReply* New() const;
+  GetAppDataSourcesStatesReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetDataSourcesStatesReply& from);
-  void MergeFrom(const GetDataSourcesStatesReply& from);
+  void CopyFrom(const GetAppDataSourcesStatesReply& from);
+  void MergeFrom(const GetAppDataSourcesStatesReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1438,26 +1468,26 @@ class GetDataSourcesStatesReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Network.DataSourceState dataSourcesStates = 2;
-  inline int datasourcesstates_size() const;
-  inline void clear_datasourcesstates();
-  static const int kDataSourcesStatesFieldNumber = 2;
-  inline const ::Network::DataSourceState& datasourcesstates(int index) const;
-  inline ::Network::DataSourceState* mutable_datasourcesstates(int index);
-  inline ::Network::DataSourceState* add_datasourcesstates();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >&
-      datasourcesstates() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
-      mutable_datasourcesstates();
+  // repeated .Network.AppDataSourceState appDataSourcesStates = 2;
+  inline int appdatasourcesstates_size() const;
+  inline void clear_appdatasourcesstates();
+  static const int kAppDataSourcesStatesFieldNumber = 2;
+  inline const ::Network::AppDataSourceState& appdatasourcesstates(int index) const;
+  inline ::Network::AppDataSourceState* mutable_appdatasourcesstates(int index);
+  inline ::Network::AppDataSourceState* add_appdatasourcesstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState >&
+      appdatasourcesstates() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState >*
+      mutable_appdatasourcesstates();
 
-  // @@protoc_insertion_point(class_scope:Network.GetDataSourcesStatesReply)
+  // @@protoc_insertion_point(class_scope:Network.GetAppDataSourcesStatesReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState > datasourcesstates_;
+  ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState > appdatasourcesstates_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
@@ -1468,7 +1498,7 @@ class GetDataSourcesStatesReply : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetDataSourcesStatesReply* default_instance_;
+  static GetAppDataSourcesStatesReply* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -3058,299 +3088,365 @@ GetDataSourcesInfoReply::mutable_datasourceinfo() {
 
 // -------------------------------------------------------------------
 
-// DataSourceState
+// AppDataSourceState
 
 // optional uint64 id = 1;
-inline bool DataSourceState::has_id() const {
+inline bool AppDataSourceState::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DataSourceState::set_has_id() {
+inline void AppDataSourceState::set_has_id() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DataSourceState::clear_has_id() {
+inline void AppDataSourceState::clear_has_id() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void DataSourceState::clear_id() {
+inline void AppDataSourceState::clear_id() {
   id_ = GOOGLE_ULONGLONG(0);
   clear_has_id();
 }
-inline ::google::protobuf::uint64 DataSourceState::id() const {
+inline ::google::protobuf::uint64 AppDataSourceState::id() const {
   return id_;
 }
-inline void DataSourceState::set_id(::google::protobuf::uint64 value) {
+inline void AppDataSourceState::set_id(::google::protobuf::uint64 value) {
   set_has_id();
   id_ = value;
 }
 
 // optional int64 uptime = 2;
-inline bool DataSourceState::has_uptime() const {
+inline bool AppDataSourceState::has_uptime() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DataSourceState::set_has_uptime() {
+inline void AppDataSourceState::set_has_uptime() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DataSourceState::clear_has_uptime() {
+inline void AppDataSourceState::clear_has_uptime() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DataSourceState::clear_uptime() {
+inline void AppDataSourceState::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
   clear_has_uptime();
 }
-inline ::google::protobuf::int64 DataSourceState::uptime() const {
+inline ::google::protobuf::int64 AppDataSourceState::uptime() const {
   return uptime_;
 }
-inline void DataSourceState::set_uptime(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_uptime(::google::protobuf::int64 value) {
   set_has_uptime();
   uptime_ = value;
 }
 
 // optional int64 receivedDataSize = 3;
-inline bool DataSourceState::has_receiveddatasize() const {
+inline bool AppDataSourceState::has_receiveddatasize() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DataSourceState::set_has_receiveddatasize() {
+inline void AppDataSourceState::set_has_receiveddatasize() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DataSourceState::clear_has_receiveddatasize() {
+inline void AppDataSourceState::clear_has_receiveddatasize() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DataSourceState::clear_receiveddatasize() {
+inline void AppDataSourceState::clear_receiveddatasize() {
   receiveddatasize_ = GOOGLE_LONGLONG(0);
   clear_has_receiveddatasize();
 }
-inline ::google::protobuf::int64 DataSourceState::receiveddatasize() const {
+inline ::google::protobuf::int64 AppDataSourceState::receiveddatasize() const {
   return receiveddatasize_;
 }
-inline void DataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
   set_has_receiveddatasize();
   receiveddatasize_ = value;
 }
 
 // optional double dataReceivingRate = 4;
-inline bool DataSourceState::has_datareceivingrate() const {
+inline bool AppDataSourceState::has_datareceivingrate() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void DataSourceState::set_has_datareceivingrate() {
+inline void AppDataSourceState::set_has_datareceivingrate() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void DataSourceState::clear_has_datareceivingrate() {
+inline void AppDataSourceState::clear_has_datareceivingrate() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void DataSourceState::clear_datareceivingrate() {
+inline void AppDataSourceState::clear_datareceivingrate() {
   datareceivingrate_ = 0;
   clear_has_datareceivingrate();
 }
-inline double DataSourceState::datareceivingrate() const {
+inline double AppDataSourceState::datareceivingrate() const {
   return datareceivingrate_;
 }
-inline void DataSourceState::set_datareceivingrate(double value) {
+inline void AppDataSourceState::set_datareceivingrate(double value) {
   set_has_datareceivingrate();
   datareceivingrate_ = value;
 }
 
 // optional int64 receivedFramesCount = 5;
-inline bool DataSourceState::has_receivedframescount() const {
+inline bool AppDataSourceState::has_receivedframescount() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void DataSourceState::set_has_receivedframescount() {
+inline void AppDataSourceState::set_has_receivedframescount() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void DataSourceState::clear_has_receivedframescount() {
+inline void AppDataSourceState::clear_has_receivedframescount() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void DataSourceState::clear_receivedframescount() {
+inline void AppDataSourceState::clear_receivedframescount() {
   receivedframescount_ = GOOGLE_LONGLONG(0);
   clear_has_receivedframescount();
 }
-inline ::google::protobuf::int64 DataSourceState::receivedframescount() const {
+inline ::google::protobuf::int64 AppDataSourceState::receivedframescount() const {
   return receivedframescount_;
 }
-inline void DataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
   set_has_receivedframescount();
   receivedframescount_ = value;
 }
 
 // optional bool processingEnabled = 6;
-inline bool DataSourceState::has_processingenabled() const {
+inline bool AppDataSourceState::has_processingenabled() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void DataSourceState::set_has_processingenabled() {
+inline void AppDataSourceState::set_has_processingenabled() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void DataSourceState::clear_has_processingenabled() {
+inline void AppDataSourceState::clear_has_processingenabled() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void DataSourceState::clear_processingenabled() {
+inline void AppDataSourceState::clear_processingenabled() {
   processingenabled_ = false;
   clear_has_processingenabled();
 }
-inline bool DataSourceState::processingenabled() const {
+inline bool AppDataSourceState::processingenabled() const {
   return processingenabled_;
 }
-inline void DataSourceState::set_processingenabled(bool value) {
+inline void AppDataSourceState::set_processingenabled(bool value) {
   set_has_processingenabled();
   processingenabled_ = value;
 }
 
 // optional int64 processedPacketCount = 7;
-inline bool DataSourceState::has_processedpacketcount() const {
+inline bool AppDataSourceState::has_processedpacketcount() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void DataSourceState::set_has_processedpacketcount() {
+inline void AppDataSourceState::set_has_processedpacketcount() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void DataSourceState::clear_has_processedpacketcount() {
+inline void AppDataSourceState::clear_has_processedpacketcount() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void DataSourceState::clear_processedpacketcount() {
+inline void AppDataSourceState::clear_processedpacketcount() {
   processedpacketcount_ = GOOGLE_LONGLONG(0);
   clear_has_processedpacketcount();
 }
-inline ::google::protobuf::int64 DataSourceState::processedpacketcount() const {
+inline ::google::protobuf::int64 AppDataSourceState::processedpacketcount() const {
   return processedpacketcount_;
 }
-inline void DataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
   set_has_processedpacketcount();
   processedpacketcount_ = value;
 }
 
 // optional int64 errorProtocolVersion = 8;
-inline bool DataSourceState::has_errorprotocolversion() const {
+inline bool AppDataSourceState::has_errorprotocolversion() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void DataSourceState::set_has_errorprotocolversion() {
+inline void AppDataSourceState::set_has_errorprotocolversion() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void DataSourceState::clear_has_errorprotocolversion() {
+inline void AppDataSourceState::clear_has_errorprotocolversion() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void DataSourceState::clear_errorprotocolversion() {
+inline void AppDataSourceState::clear_errorprotocolversion() {
   errorprotocolversion_ = GOOGLE_LONGLONG(0);
   clear_has_errorprotocolversion();
 }
-inline ::google::protobuf::int64 DataSourceState::errorprotocolversion() const {
+inline ::google::protobuf::int64 AppDataSourceState::errorprotocolversion() const {
   return errorprotocolversion_;
 }
-inline void DataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
   set_has_errorprotocolversion();
   errorprotocolversion_ = value;
 }
 
 // optional int64 errorFramesQuantity = 9;
-inline bool DataSourceState::has_errorframesquantity() const {
+inline bool AppDataSourceState::has_errorframesquantity() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void DataSourceState::set_has_errorframesquantity() {
+inline void AppDataSourceState::set_has_errorframesquantity() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void DataSourceState::clear_has_errorframesquantity() {
+inline void AppDataSourceState::clear_has_errorframesquantity() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void DataSourceState::clear_errorframesquantity() {
+inline void AppDataSourceState::clear_errorframesquantity() {
   errorframesquantity_ = GOOGLE_LONGLONG(0);
   clear_has_errorframesquantity();
 }
-inline ::google::protobuf::int64 DataSourceState::errorframesquantity() const {
+inline ::google::protobuf::int64 AppDataSourceState::errorframesquantity() const {
   return errorframesquantity_;
 }
-inline void DataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
   set_has_errorframesquantity();
   errorframesquantity_ = value;
 }
 
 // optional int64 errorFrameNo = 10;
-inline bool DataSourceState::has_errorframeno() const {
+inline bool AppDataSourceState::has_errorframeno() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void DataSourceState::set_has_errorframeno() {
+inline void AppDataSourceState::set_has_errorframeno() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void DataSourceState::clear_has_errorframeno() {
+inline void AppDataSourceState::clear_has_errorframeno() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void DataSourceState::clear_errorframeno() {
+inline void AppDataSourceState::clear_errorframeno() {
   errorframeno_ = GOOGLE_LONGLONG(0);
   clear_has_errorframeno();
 }
-inline ::google::protobuf::int64 DataSourceState::errorframeno() const {
+inline ::google::protobuf::int64 AppDataSourceState::errorframeno() const {
   return errorframeno_;
 }
-inline void DataSourceState::set_errorframeno(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_errorframeno(::google::protobuf::int64 value) {
   set_has_errorframeno();
   errorframeno_ = value;
 }
 
 // optional int64 lostedPackets = 11;
-inline bool DataSourceState::has_lostedpackets() const {
+inline bool AppDataSourceState::has_lostedpackets() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void DataSourceState::set_has_lostedpackets() {
+inline void AppDataSourceState::set_has_lostedpackets() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void DataSourceState::clear_has_lostedpackets() {
+inline void AppDataSourceState::clear_has_lostedpackets() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void DataSourceState::clear_lostedpackets() {
+inline void AppDataSourceState::clear_lostedpackets() {
   lostedpackets_ = GOOGLE_LONGLONG(0);
   clear_has_lostedpackets();
 }
-inline ::google::protobuf::int64 DataSourceState::lostedpackets() const {
+inline ::google::protobuf::int64 AppDataSourceState::lostedpackets() const {
   return lostedpackets_;
 }
-inline void DataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
+inline void AppDataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
   set_has_lostedpackets();
   lostedpackets_ = value;
 }
 
+// optional int64 errorDataID = 12;
+inline bool AppDataSourceState::has_errordataid() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void AppDataSourceState::set_has_errordataid() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void AppDataSourceState::clear_has_errordataid() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void AppDataSourceState::clear_errordataid() {
+  errordataid_ = GOOGLE_LONGLONG(0);
+  clear_has_errordataid();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errordataid() const {
+  return errordataid_;
+}
+inline void AppDataSourceState::set_errordataid(::google::protobuf::int64 value) {
+  set_has_errordataid();
+  errordataid_ = value;
+}
+
+// optional uint64 receivedDataID = 13;
+inline bool AppDataSourceState::has_receiveddataid() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void AppDataSourceState::set_has_receiveddataid() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void AppDataSourceState::clear_has_receiveddataid() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void AppDataSourceState::clear_receiveddataid() {
+  receiveddataid_ = GOOGLE_ULONGLONG(0);
+  clear_has_receiveddataid();
+}
+inline ::google::protobuf::uint64 AppDataSourceState::receiveddataid() const {
+  return receiveddataid_;
+}
+inline void AppDataSourceState::set_receiveddataid(::google::protobuf::uint64 value) {
+  set_has_receiveddataid();
+  receiveddataid_ = value;
+}
+
+// optional bool processingSkiped = 14;
+inline bool AppDataSourceState::has_processingskiped() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void AppDataSourceState::set_has_processingskiped() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void AppDataSourceState::clear_has_processingskiped() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void AppDataSourceState::clear_processingskiped() {
+  processingskiped_ = false;
+  clear_has_processingskiped();
+}
+inline bool AppDataSourceState::processingskiped() const {
+  return processingskiped_;
+}
+inline void AppDataSourceState::set_processingskiped(bool value) {
+  set_has_processingskiped();
+  processingskiped_ = value;
+}
+
 // -------------------------------------------------------------------
 
-// GetDataSourcesStatesReply
+// GetAppDataSourcesStatesReply
 
 // optional int32 error = 1 [default = 0];
-inline bool GetDataSourcesStatesReply::has_error() const {
+inline bool GetAppDataSourcesStatesReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetDataSourcesStatesReply::set_has_error() {
+inline void GetAppDataSourcesStatesReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetDataSourcesStatesReply::clear_has_error() {
+inline void GetAppDataSourcesStatesReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetDataSourcesStatesReply::clear_error() {
+inline void GetAppDataSourcesStatesReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 GetDataSourcesStatesReply::error() const {
+inline ::google::protobuf::int32 GetAppDataSourcesStatesReply::error() const {
   return error_;
 }
-inline void GetDataSourcesStatesReply::set_error(::google::protobuf::int32 value) {
+inline void GetAppDataSourcesStatesReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
 
-// repeated .Network.DataSourceState dataSourcesStates = 2;
-inline int GetDataSourcesStatesReply::datasourcesstates_size() const {
-  return datasourcesstates_.size();
+// repeated .Network.AppDataSourceState appDataSourcesStates = 2;
+inline int GetAppDataSourcesStatesReply::appdatasourcesstates_size() const {
+  return appdatasourcesstates_.size();
 }
-inline void GetDataSourcesStatesReply::clear_datasourcesstates() {
-  datasourcesstates_.Clear();
+inline void GetAppDataSourcesStatesReply::clear_appdatasourcesstates() {
+  appdatasourcesstates_.Clear();
 }
-inline const ::Network::DataSourceState& GetDataSourcesStatesReply::datasourcesstates(int index) const {
-  return datasourcesstates_.Get(index);
+inline const ::Network::AppDataSourceState& GetAppDataSourcesStatesReply::appdatasourcesstates(int index) const {
+  return appdatasourcesstates_.Get(index);
 }
-inline ::Network::DataSourceState* GetDataSourcesStatesReply::mutable_datasourcesstates(int index) {
-  return datasourcesstates_.Mutable(index);
+inline ::Network::AppDataSourceState* GetAppDataSourcesStatesReply::mutable_appdatasourcesstates(int index) {
+  return appdatasourcesstates_.Mutable(index);
 }
-inline ::Network::DataSourceState* GetDataSourcesStatesReply::add_datasourcesstates() {
-  return datasourcesstates_.Add();
+inline ::Network::AppDataSourceState* GetAppDataSourcesStatesReply::add_appdatasourcesstates() {
+  return appdatasourcesstates_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >&
-GetDataSourcesStatesReply::datasourcesstates() const {
-  return datasourcesstates_;
+inline const ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState >&
+GetAppDataSourcesStatesReply::appdatasourcesstates() const {
+  return appdatasourcesstates_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceState >*
-GetDataSourcesStatesReply::mutable_datasourcesstates() {
-  return &datasourcesstates_;
+inline ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState >*
+GetAppDataSourcesStatesReply::mutable_appdatasourcesstates() {
+  return &appdatasourcesstates_;
 }
 
 // -------------------------------------------------------------------

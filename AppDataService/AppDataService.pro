@@ -83,7 +83,6 @@ SOURCES += main.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     AppDataChannel.cpp \
-    AppDataSource.cpp \
     AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
@@ -95,7 +94,8 @@ SOURCES += main.cpp \
     ../u7/Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/AppDataSource.cpp
 
 HEADERS += \
 	Stable.h \
@@ -127,7 +127,6 @@ HEADERS += \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     AppDataChannel.h \
-    AppDataSource.h \
     ../lib/OrderedHash.h \
     AppDataServiceTypes.h \
     AppDataProcessingThread.h \
@@ -140,7 +139,8 @@ HEADERS += \
     ../u7/Builder/IssueLogger.h \
     TcpAppDataClient.h \
     ../lib/Crc.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/AppDataSource.h
 
 include(../qtservice/src/qtservice.pri)
 

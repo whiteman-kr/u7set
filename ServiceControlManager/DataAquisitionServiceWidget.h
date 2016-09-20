@@ -1,10 +1,11 @@
 #ifndef DATAAQUISITIONSERVICEWIDGET_H
 #define DATAAQUISITIONSERVICEWIDGET_H
 
-#include "BaseServiceStateWidget.h"
-#include "../lib/OrderedHash.h"
 #include <QAbstractTableModel>
-#include "../lib/DataSource.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/AppDataSource.h"
+#include "BaseServiceStateWidget.h"
+
 
 class QTableView;
 class TcpAppDataClient;
@@ -29,7 +30,7 @@ public slots:
 
 private:
 	TcpAppDataClient* m_clientSocket;
-	QList<DataSource*> m_dataSource;
+	QList<AppDataSource*> m_dataSource;
 };
 
 class SignalStateModel : public QAbstractTableModel

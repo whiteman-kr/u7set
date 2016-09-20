@@ -440,12 +440,12 @@ void AppDataServiceWorker::initDataChannelThreads()
 
 		// add AppDataSources to channel
 		//
-		for(DataSource* dataSource : m_enabledAppDataSources)
+		for(AppDataSource* appDataSource : m_enabledAppDataSources)
 		{
-			if (dataSource->lmDataType() == DataSource::DataType::App &&
-				dataSource->lmChannel() == channel)
+			if (appDataSource->lmDataType() == DataSource::DataType::App &&
+				appDataSource->lmChannel() == channel)
 			{
-				m_appDataChannelThread[channel]->addDataSource(dataSource);
+				m_appDataChannelThread[channel]->addDataSource(appDataSource);
 			}
 		}
 

@@ -53,12 +53,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetDataSourcesInfoReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetDataSourcesInfoReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* DataSourceState_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* AppDataSourceState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  DataSourceState_reflection_ = NULL;
-const ::google::protobuf::Descriptor* GetDataSourcesStatesReply_descriptor_ = NULL;
+  AppDataSourceState_reflection_ = NULL;
+const ::google::protobuf::Descriptor* GetAppDataSourcesStatesReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  GetDataSourcesStatesReply_reflection_ = NULL;
+  GetAppDataSourcesStatesReply_reflection_ = NULL;
 const ::google::protobuf::Descriptor* GetUnitsRequest_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetUnitsRequest_reflection_ = NULL;
@@ -271,47 +271,50 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetDataSourcesInfoReply));
-  DataSourceState_descriptor_ = file->message_type(11);
-  static const int DataSourceState_offsets_[11] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, id_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, uptime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, receiveddatasize_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, datareceivingrate_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, receivedframescount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, processingenabled_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, processedpacketcount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorprotocolversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorframesquantity_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, errorframeno_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, lostedpackets_),
+  AppDataSourceState_descriptor_ = file->message_type(11);
+  static const int AppDataSourceState_offsets_[14] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, uptime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, receiveddatasize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, datareceivingrate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, receivedframescount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, processingenabled_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, processedpacketcount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, errorprotocolversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, errorframesquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, errorframeno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, lostedpackets_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, errordataid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, receiveddataid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, processingskiped_),
   };
-  DataSourceState_reflection_ =
+  AppDataSourceState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      DataSourceState_descriptor_,
-      DataSourceState::default_instance_,
-      DataSourceState_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceState, _unknown_fields_),
+      AppDataSourceState_descriptor_,
+      AppDataSourceState::default_instance_,
+      AppDataSourceState_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(DataSourceState));
-  GetDataSourcesStatesReply_descriptor_ = file->message_type(12);
-  static const int GetDataSourcesStatesReply_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, error_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, datasourcesstates_),
+      sizeof(AppDataSourceState));
+  GetAppDataSourcesStatesReply_descriptor_ = file->message_type(12);
+  static const int GetAppDataSourcesStatesReply_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppDataSourcesStatesReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppDataSourcesStatesReply, appdatasourcesstates_),
   };
-  GetDataSourcesStatesReply_reflection_ =
+  GetAppDataSourcesStatesReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      GetDataSourcesStatesReply_descriptor_,
-      GetDataSourcesStatesReply::default_instance_,
-      GetDataSourcesStatesReply_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetDataSourcesStatesReply, _unknown_fields_),
+      GetAppDataSourcesStatesReply_descriptor_,
+      GetAppDataSourcesStatesReply::default_instance_,
+      GetAppDataSourcesStatesReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppDataSourcesStatesReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppDataSourcesStatesReply, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(GetDataSourcesStatesReply));
+      sizeof(GetAppDataSourcesStatesReply));
   GetUnitsRequest_descriptor_ = file->message_type(13);
   static const int GetUnitsRequest_offsets_[1] = {
   };
@@ -447,9 +450,9 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetDataSourcesInfoReply_descriptor_, &GetDataSourcesInfoReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    DataSourceState_descriptor_, &DataSourceState::default_instance());
+    AppDataSourceState_descriptor_, &AppDataSourceState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    GetDataSourcesStatesReply_descriptor_, &GetDataSourcesStatesReply::default_instance());
+    GetAppDataSourcesStatesReply_descriptor_, &GetAppDataSourcesStatesReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetUnitsRequest_descriptor_, &GetUnitsRequest::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -489,10 +492,10 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete GetDataSourcesInfoRequest_reflection_;
   delete GetDataSourcesInfoReply::default_instance_;
   delete GetDataSourcesInfoReply_reflection_;
-  delete DataSourceState::default_instance_;
-  delete DataSourceState_reflection_;
-  delete GetDataSourcesStatesReply::default_instance_;
-  delete GetDataSourcesStatesReply_reflection_;
+  delete AppDataSourceState::default_instance_;
+  delete AppDataSourceState_reflection_;
+  delete GetAppDataSourcesStatesReply::default_instance_;
+  delete GetAppDataSourcesStatesReply_reflection_;
   delete GetUnitsRequest::default_instance_;
   delete GetUnitsRequest_reflection_;
   delete Unit::default_instance_;
@@ -539,29 +542,31 @@ void protobuf_AddDesc_network_2eproto() {
     "\n\010lmDataID\030\016 \001(\004\"\033\n\031GetDataSourcesInfoRe"
     "quest\"\\\n\027GetDataSourcesInfoReply\022\020\n\005erro"
     "r\030\001 \001(\005:\0010\022/\n\016dataSourceInfo\030\002 \003(\0132\027.Net"
-    "work.DataSourceInfo\"\240\002\n\017DataSourceState\022"
-    "\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receivedD"
-    "ataSize\030\003 \001(\003\022\031\n\021dataReceivingRate\030\004 \001(\001"
-    "\022\033\n\023receivedFramesCount\030\005 \001(\003\022\031\n\021process"
-    "ingEnabled\030\006 \001(\010\022\034\n\024processedPacketCount"
-    "\030\007 \001(\003\022\034\n\024errorProtocolVersion\030\010 \001(\003\022\033\n\023"
-    "errorFramesQuantity\030\t \001(\003\022\024\n\014errorFrameN"
-    "o\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\"b\n\031GetDat"
-    "aSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0223\n"
-    "\021dataSourcesStates\030\002 \003(\0132\030.Network.DataS"
-    "ourceState\"\021\n\017GetUnitsRequest\" \n\004Unit\022\n\n"
-    "\002id\030\001 \001(\005\022\014\n\004unit\030\002 \001(\t\"\?\n\rGetUnitsReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\022\034\n\005units\030\002 \003(\0132\r.Netw"
-    "ork.Unit\"\027\n\025GetServiceInfoRequest\"\364\001\n\013Se"
-    "rviceInfo\022\017\n\004type\030\001 \001(\005:\0010\022\027\n\014majorVersi"
-    "on\030\002 \001(\005:\0010\022\027\n\014minorVersion\030\003 \001(\005:\0010\022\022\n\007"
-    "buildNo\030\004 \001(\005:\0010\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006upti"
-    "me\030\006 \001(\003:\0010\022\027\n\014serviceState\030\007 \001(\005:\0010\022\030\n\r"
-    "serviceUptime\030\010 \001(\003:\0010\022\032\n\017clientRequestI"
-    "P\030\t \001(\r:\0010\022\034\n\021clientRequestPort\030\n \001(\005:\0010"
-    "\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001 \002(\005:\001"
-    "0\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.Service"
-    "Info", 1844);
+    "work.DataSourceInfo\"\352\002\n\022AppDataSourceSta"
+    "te\022\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receiv"
+    "edDataSize\030\003 \001(\003\022\031\n\021dataReceivingRate\030\004 "
+    "\001(\001\022\033\n\023receivedFramesCount\030\005 \001(\003\022\031\n\021proc"
+    "essingEnabled\030\006 \001(\010\022\034\n\024processedPacketCo"
+    "unt\030\007 \001(\003\022\034\n\024errorProtocolVersion\030\010 \001(\003\022"
+    "\033\n\023errorFramesQuantity\030\t \001(\003\022\024\n\014errorFra"
+    "meNo\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\022\023\n\013err"
+    "orDataID\030\014 \001(\003\022\026\n\016receivedDataID\030\r \001(\004\022\030"
+    "\n\020processingSkiped\030\016 \001(\010\"k\n\034GetAppDataSo"
+    "urcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0229\n\024ap"
+    "pDataSourcesStates\030\002 \003(\0132\033.Network.AppDa"
+    "taSourceState\"\021\n\017GetUnitsRequest\" \n\004Unit"
+    "\022\n\n\002id\030\001 \001(\005\022\014\n\004unit\030\002 \001(\t\"\?\n\rGetUnitsRe"
+    "ply\022\020\n\005error\030\001 \001(\005:\0010\022\034\n\005units\030\002 \003(\0132\r.N"
+    "etwork.Unit\"\027\n\025GetServiceInfoRequest\"\364\001\n"
+    "\013ServiceInfo\022\017\n\004type\030\001 \001(\005:\0010\022\027\n\014majorVe"
+    "rsion\030\002 \001(\005:\0010\022\027\n\014minorVersion\030\003 \001(\005:\0010\022"
+    "\022\n\007buildNo\030\004 \001(\005:\0010\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006u"
+    "ptime\030\006 \001(\003:\0010\022\027\n\014serviceState\030\007 \001(\005:\0010\022"
+    "\030\n\rserviceUptime\030\010 \001(\003:\0010\022\032\n\017clientReque"
+    "stIP\030\t \001(\r:\0010\022\034\n\021clientRequestPort\030\n \001(\005"
+    ":\0010\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001 \002("
+    "\005:\0010\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.Serv"
+    "iceInfo", 1927);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -575,8 +580,8 @@ void protobuf_AddDesc_network_2eproto() {
   DataSourceInfo::default_instance_ = new DataSourceInfo();
   GetDataSourcesInfoRequest::default_instance_ = new GetDataSourcesInfoRequest();
   GetDataSourcesInfoReply::default_instance_ = new GetDataSourcesInfoReply();
-  DataSourceState::default_instance_ = new DataSourceState();
-  GetDataSourcesStatesReply::default_instance_ = new GetDataSourcesStatesReply();
+  AppDataSourceState::default_instance_ = new AppDataSourceState();
+  GetAppDataSourcesStatesReply::default_instance_ = new GetAppDataSourcesStatesReply();
   GetUnitsRequest::default_instance_ = new GetUnitsRequest();
   Unit::default_instance_ = new Unit();
   GetUnitsReply::default_instance_ = new GetUnitsReply();
@@ -594,8 +599,8 @@ void protobuf_AddDesc_network_2eproto() {
   DataSourceInfo::default_instance_->InitAsDefaultInstance();
   GetDataSourcesInfoRequest::default_instance_->InitAsDefaultInstance();
   GetDataSourcesInfoReply::default_instance_->InitAsDefaultInstance();
-  DataSourceState::default_instance_->InitAsDefaultInstance();
-  GetDataSourcesStatesReply::default_instance_->InitAsDefaultInstance();
+  AppDataSourceState::default_instance_->InitAsDefaultInstance();
+  GetAppDataSourcesStatesReply::default_instance_->InitAsDefaultInstance();
   GetUnitsRequest::default_instance_->InitAsDefaultInstance();
   Unit::default_instance_->InitAsDefaultInstance();
   GetUnitsReply::default_instance_->InitAsDefaultInstance();
@@ -3742,34 +3747,37 @@ void GetDataSourcesInfoReply::Swap(GetDataSourcesInfoReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int DataSourceState::kIdFieldNumber;
-const int DataSourceState::kUptimeFieldNumber;
-const int DataSourceState::kReceivedDataSizeFieldNumber;
-const int DataSourceState::kDataReceivingRateFieldNumber;
-const int DataSourceState::kReceivedFramesCountFieldNumber;
-const int DataSourceState::kProcessingEnabledFieldNumber;
-const int DataSourceState::kProcessedPacketCountFieldNumber;
-const int DataSourceState::kErrorProtocolVersionFieldNumber;
-const int DataSourceState::kErrorFramesQuantityFieldNumber;
-const int DataSourceState::kErrorFrameNoFieldNumber;
-const int DataSourceState::kLostedPacketsFieldNumber;
+const int AppDataSourceState::kIdFieldNumber;
+const int AppDataSourceState::kUptimeFieldNumber;
+const int AppDataSourceState::kReceivedDataSizeFieldNumber;
+const int AppDataSourceState::kDataReceivingRateFieldNumber;
+const int AppDataSourceState::kReceivedFramesCountFieldNumber;
+const int AppDataSourceState::kProcessingEnabledFieldNumber;
+const int AppDataSourceState::kProcessedPacketCountFieldNumber;
+const int AppDataSourceState::kErrorProtocolVersionFieldNumber;
+const int AppDataSourceState::kErrorFramesQuantityFieldNumber;
+const int AppDataSourceState::kErrorFrameNoFieldNumber;
+const int AppDataSourceState::kLostedPacketsFieldNumber;
+const int AppDataSourceState::kErrorDataIDFieldNumber;
+const int AppDataSourceState::kReceivedDataIDFieldNumber;
+const int AppDataSourceState::kProcessingSkipedFieldNumber;
 #endif  // !_MSC_VER
 
-DataSourceState::DataSourceState()
+AppDataSourceState::AppDataSourceState()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void DataSourceState::InitAsDefaultInstance() {
+void AppDataSourceState::InitAsDefaultInstance() {
 }
 
-DataSourceState::DataSourceState(const DataSourceState& from)
+AppDataSourceState::AppDataSourceState(const AppDataSourceState& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void DataSourceState::SharedCtor() {
+void AppDataSourceState::SharedCtor() {
   _cached_size_ = 0;
   id_ = GOOGLE_ULONGLONG(0);
   uptime_ = GOOGLE_LONGLONG(0);
@@ -3782,40 +3790,43 @@ void DataSourceState::SharedCtor() {
   errorframesquantity_ = GOOGLE_LONGLONG(0);
   errorframeno_ = GOOGLE_LONGLONG(0);
   lostedpackets_ = GOOGLE_LONGLONG(0);
+  errordataid_ = GOOGLE_LONGLONG(0);
+  receiveddataid_ = GOOGLE_ULONGLONG(0);
+  processingskiped_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-DataSourceState::~DataSourceState() {
+AppDataSourceState::~AppDataSourceState() {
   SharedDtor();
 }
 
-void DataSourceState::SharedDtor() {
+void AppDataSourceState::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void DataSourceState::SetCachedSize(int size) const {
+void AppDataSourceState::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* DataSourceState::descriptor() {
+const ::google::protobuf::Descriptor* AppDataSourceState::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return DataSourceState_descriptor_;
+  return AppDataSourceState_descriptor_;
 }
 
-const DataSourceState& DataSourceState::default_instance() {
+const AppDataSourceState& AppDataSourceState::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-DataSourceState* DataSourceState::default_instance_ = NULL;
+AppDataSourceState* AppDataSourceState::default_instance_ = NULL;
 
-DataSourceState* DataSourceState::New() const {
-  return new DataSourceState;
+AppDataSourceState* AppDataSourceState::New() const {
+  return new AppDataSourceState;
 }
 
-void DataSourceState::Clear() {
+void AppDataSourceState::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     id_ = GOOGLE_ULONGLONG(0);
     uptime_ = GOOGLE_LONGLONG(0);
@@ -3830,12 +3841,15 @@ void DataSourceState::Clear() {
     errorframesquantity_ = GOOGLE_LONGLONG(0);
     errorframeno_ = GOOGLE_LONGLONG(0);
     lostedpackets_ = GOOGLE_LONGLONG(0);
+    errordataid_ = GOOGLE_LONGLONG(0);
+    receiveddataid_ = GOOGLE_ULONGLONG(0);
+    processingskiped_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool DataSourceState::MergePartialFromCodedStream(
+bool AppDataSourceState::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -4012,6 +4026,54 @@ bool DataSourceState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(96)) goto parse_errorDataID;
+        break;
+      }
+
+      // optional int64 errorDataID = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errorDataID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errordataid_)));
+          set_has_errordataid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(104)) goto parse_receivedDataID;
+        break;
+      }
+
+      // optional uint64 receivedDataID = 13;
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_receivedDataID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &receiveddataid_)));
+          set_has_receiveddataid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(112)) goto parse_processingSkiped;
+        break;
+      }
+
+      // optional bool processingSkiped = 14;
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_processingSkiped:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &processingskiped_)));
+          set_has_processingskiped();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -4032,7 +4094,7 @@ bool DataSourceState::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void DataSourceState::SerializeWithCachedSizes(
+void AppDataSourceState::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional uint64 id = 1;
   if (has_id()) {
@@ -4089,13 +4151,28 @@ void DataSourceState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(11, this->lostedpackets(), output);
   }
 
+  // optional int64 errorDataID = 12;
+  if (has_errordataid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(12, this->errordataid(), output);
+  }
+
+  // optional uint64 receivedDataID = 13;
+  if (has_receiveddataid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(13, this->receiveddataid(), output);
+  }
+
+  // optional bool processingSkiped = 14;
+  if (has_processingskiped()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(14, this->processingskiped(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
 }
 
-::google::protobuf::uint8* DataSourceState::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* AppDataSourceState::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional uint64 id = 1;
   if (has_id()) {
@@ -4152,6 +4229,21 @@ void DataSourceState::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(11, this->lostedpackets(), target);
   }
 
+  // optional int64 errorDataID = 12;
+  if (has_errordataid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(12, this->errordataid(), target);
+  }
+
+  // optional uint64 receivedDataID = 13;
+  if (has_receiveddataid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(13, this->receiveddataid(), target);
+  }
+
+  // optional bool processingSkiped = 14;
+  if (has_processingskiped()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(14, this->processingskiped(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -4159,7 +4251,7 @@ void DataSourceState::SerializeWithCachedSizes(
   return target;
 }
 
-int DataSourceState::ByteSize() const {
+int AppDataSourceState::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -4238,6 +4330,25 @@ int DataSourceState::ByteSize() const {
           this->lostedpackets());
     }
 
+    // optional int64 errorDataID = 12;
+    if (has_errordataid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errordataid());
+    }
+
+    // optional uint64 receivedDataID = 13;
+    if (has_receiveddataid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->receiveddataid());
+    }
+
+    // optional bool processingSkiped = 14;
+    if (has_processingskiped()) {
+      total_size += 1 + 1;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -4250,10 +4361,10 @@ int DataSourceState::ByteSize() const {
   return total_size;
 }
 
-void DataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
+void AppDataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const DataSourceState* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const DataSourceState*>(
+  const AppDataSourceState* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const AppDataSourceState*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -4262,7 +4373,7 @@ void DataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void DataSourceState::MergeFrom(const DataSourceState& from) {
+void AppDataSourceState::MergeFrom(const AppDataSourceState& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_id()) {
@@ -4300,28 +4411,37 @@ void DataSourceState::MergeFrom(const DataSourceState& from) {
     if (from.has_lostedpackets()) {
       set_lostedpackets(from.lostedpackets());
     }
+    if (from.has_errordataid()) {
+      set_errordataid(from.errordataid());
+    }
+    if (from.has_receiveddataid()) {
+      set_receiveddataid(from.receiveddataid());
+    }
+    if (from.has_processingskiped()) {
+      set_processingskiped(from.processingskiped());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void DataSourceState::CopyFrom(const ::google::protobuf::Message& from) {
+void AppDataSourceState::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DataSourceState::CopyFrom(const DataSourceState& from) {
+void AppDataSourceState::CopyFrom(const AppDataSourceState& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DataSourceState::IsInitialized() const {
+bool AppDataSourceState::IsInitialized() const {
 
   return true;
 }
 
-void DataSourceState::Swap(DataSourceState* other) {
+void AppDataSourceState::Swap(AppDataSourceState* other) {
   if (other != this) {
     std::swap(id_, other->id_);
     std::swap(uptime_, other->uptime_);
@@ -4334,17 +4454,20 @@ void DataSourceState::Swap(DataSourceState* other) {
     std::swap(errorframesquantity_, other->errorframesquantity_);
     std::swap(errorframeno_, other->errorframeno_);
     std::swap(lostedpackets_, other->lostedpackets_);
+    std::swap(errordataid_, other->errordataid_);
+    std::swap(receiveddataid_, other->receiveddataid_);
+    std::swap(processingskiped_, other->processingskiped_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata DataSourceState::GetMetadata() const {
+::google::protobuf::Metadata AppDataSourceState::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = DataSourceState_descriptor_;
-  metadata.reflection = DataSourceState_reflection_;
+  metadata.descriptor = AppDataSourceState_descriptor_;
+  metadata.reflection = AppDataSourceState_reflection_;
   return metadata;
 }
 
@@ -4352,70 +4475,70 @@ void DataSourceState::Swap(DataSourceState* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int GetDataSourcesStatesReply::kErrorFieldNumber;
-const int GetDataSourcesStatesReply::kDataSourcesStatesFieldNumber;
+const int GetAppDataSourcesStatesReply::kErrorFieldNumber;
+const int GetAppDataSourcesStatesReply::kAppDataSourcesStatesFieldNumber;
 #endif  // !_MSC_VER
 
-GetDataSourcesStatesReply::GetDataSourcesStatesReply()
+GetAppDataSourcesStatesReply::GetAppDataSourcesStatesReply()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void GetDataSourcesStatesReply::InitAsDefaultInstance() {
+void GetAppDataSourcesStatesReply::InitAsDefaultInstance() {
 }
 
-GetDataSourcesStatesReply::GetDataSourcesStatesReply(const GetDataSourcesStatesReply& from)
+GetAppDataSourcesStatesReply::GetAppDataSourcesStatesReply(const GetAppDataSourcesStatesReply& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void GetDataSourcesStatesReply::SharedCtor() {
+void GetAppDataSourcesStatesReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-GetDataSourcesStatesReply::~GetDataSourcesStatesReply() {
+GetAppDataSourcesStatesReply::~GetAppDataSourcesStatesReply() {
   SharedDtor();
 }
 
-void GetDataSourcesStatesReply::SharedDtor() {
+void GetAppDataSourcesStatesReply::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void GetDataSourcesStatesReply::SetCachedSize(int size) const {
+void GetAppDataSourcesStatesReply::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* GetDataSourcesStatesReply::descriptor() {
+const ::google::protobuf::Descriptor* GetAppDataSourcesStatesReply::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return GetDataSourcesStatesReply_descriptor_;
+  return GetAppDataSourcesStatesReply_descriptor_;
 }
 
-const GetDataSourcesStatesReply& GetDataSourcesStatesReply::default_instance() {
+const GetAppDataSourcesStatesReply& GetAppDataSourcesStatesReply::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-GetDataSourcesStatesReply* GetDataSourcesStatesReply::default_instance_ = NULL;
+GetAppDataSourcesStatesReply* GetAppDataSourcesStatesReply::default_instance_ = NULL;
 
-GetDataSourcesStatesReply* GetDataSourcesStatesReply::New() const {
-  return new GetDataSourcesStatesReply;
+GetAppDataSourcesStatesReply* GetAppDataSourcesStatesReply::New() const {
+  return new GetAppDataSourcesStatesReply;
 }
 
-void GetDataSourcesStatesReply::Clear() {
+void GetAppDataSourcesStatesReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
   }
-  datasourcesstates_.Clear();
+  appdatasourcesstates_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool GetDataSourcesStatesReply::MergePartialFromCodedStream(
+bool GetAppDataSourcesStatesReply::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -4432,21 +4555,21 @@ bool GetDataSourcesStatesReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_dataSourcesStates;
+        if (input->ExpectTag(18)) goto parse_appDataSourcesStates;
         break;
       }
 
-      // repeated .Network.DataSourceState dataSourcesStates = 2;
+      // repeated .Network.AppDataSourceState appDataSourcesStates = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_dataSourcesStates:
+         parse_appDataSourcesStates:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_datasourcesstates()));
+                input, add_appdatasourcesstates()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_dataSourcesStates;
+        if (input->ExpectTag(18)) goto parse_appDataSourcesStates;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -4467,17 +4590,17 @@ bool GetDataSourcesStatesReply::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void GetDataSourcesStatesReply::SerializeWithCachedSizes(
+void GetAppDataSourcesStatesReply::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // repeated .Network.DataSourceState dataSourcesStates = 2;
-  for (int i = 0; i < this->datasourcesstates_size(); i++) {
+  // repeated .Network.AppDataSourceState appDataSourcesStates = 2;
+  for (int i = 0; i < this->appdatasourcesstates_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->datasourcesstates(i), output);
+      2, this->appdatasourcesstates(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -4486,18 +4609,18 @@ void GetDataSourcesStatesReply::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* GetDataSourcesStatesReply::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* GetAppDataSourcesStatesReply::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // repeated .Network.DataSourceState dataSourcesStates = 2;
-  for (int i = 0; i < this->datasourcesstates_size(); i++) {
+  // repeated .Network.AppDataSourceState appDataSourcesStates = 2;
+  for (int i = 0; i < this->appdatasourcesstates_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->datasourcesstates(i), target);
+        2, this->appdatasourcesstates(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -4507,7 +4630,7 @@ void GetDataSourcesStatesReply::SerializeWithCachedSizes(
   return target;
 }
 
-int GetDataSourcesStatesReply::ByteSize() const {
+int GetAppDataSourcesStatesReply::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -4519,12 +4642,12 @@ int GetDataSourcesStatesReply::ByteSize() const {
     }
 
   }
-  // repeated .Network.DataSourceState dataSourcesStates = 2;
-  total_size += 1 * this->datasourcesstates_size();
-  for (int i = 0; i < this->datasourcesstates_size(); i++) {
+  // repeated .Network.AppDataSourceState appDataSourcesStates = 2;
+  total_size += 1 * this->appdatasourcesstates_size();
+  for (int i = 0; i < this->appdatasourcesstates_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->datasourcesstates(i));
+        this->appdatasourcesstates(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -4538,10 +4661,10 @@ int GetDataSourcesStatesReply::ByteSize() const {
   return total_size;
 }
 
-void GetDataSourcesStatesReply::MergeFrom(const ::google::protobuf::Message& from) {
+void GetAppDataSourcesStatesReply::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const GetDataSourcesStatesReply* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const GetDataSourcesStatesReply*>(
+  const GetAppDataSourcesStatesReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GetAppDataSourcesStatesReply*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -4550,9 +4673,9 @@ void GetDataSourcesStatesReply::MergeFrom(const ::google::protobuf::Message& fro
   }
 }
 
-void GetDataSourcesStatesReply::MergeFrom(const GetDataSourcesStatesReply& from) {
+void GetAppDataSourcesStatesReply::MergeFrom(const GetAppDataSourcesStatesReply& from) {
   GOOGLE_CHECK_NE(&from, this);
-  datasourcesstates_.MergeFrom(from.datasourcesstates_);
+  appdatasourcesstates_.MergeFrom(from.appdatasourcesstates_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_error()) {
       set_error(from.error());
@@ -4561,38 +4684,38 @@ void GetDataSourcesStatesReply::MergeFrom(const GetDataSourcesStatesReply& from)
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void GetDataSourcesStatesReply::CopyFrom(const ::google::protobuf::Message& from) {
+void GetAppDataSourcesStatesReply::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void GetDataSourcesStatesReply::CopyFrom(const GetDataSourcesStatesReply& from) {
+void GetAppDataSourcesStatesReply::CopyFrom(const GetAppDataSourcesStatesReply& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool GetDataSourcesStatesReply::IsInitialized() const {
+bool GetAppDataSourcesStatesReply::IsInitialized() const {
 
   return true;
 }
 
-void GetDataSourcesStatesReply::Swap(GetDataSourcesStatesReply* other) {
+void GetAppDataSourcesStatesReply::Swap(GetAppDataSourcesStatesReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
-    datasourcesstates_.Swap(&other->datasourcesstates_);
+    appdatasourcesstates_.Swap(&other->appdatasourcesstates_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata GetDataSourcesStatesReply::GetMetadata() const {
+::google::protobuf::Metadata GetAppDataSourcesStatesReply::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = GetDataSourcesStatesReply_descriptor_;
-  metadata.reflection = GetDataSourcesStatesReply_reflection_;
+  metadata.descriptor = GetAppDataSourcesStatesReply_descriptor_;
+  metadata.reflection = GetAppDataSourcesStatesReply_reflection_;
   return metadata;
 }
 

@@ -3,6 +3,7 @@
 #include "AppDataServiceTypes.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/DataChannel.h"
+#include "AppSignalStateEx.h"
 
 
 class AppDataProcessingWorker : public SimpleThreadWorker

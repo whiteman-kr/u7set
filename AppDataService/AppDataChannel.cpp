@@ -31,7 +31,7 @@ void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStat
 
 	// scan DataSources
 	//
-	for(DataSource* dataSource : m_dataSources)
+	for(DataSource* dataSource : m_appDataSources)
 	{
 		if (dataSource == nullptr)
 		{
@@ -81,28 +81,28 @@ void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStat
 }
 
 
-void AppDataChannel::addDataSource(DataSource* dataSource)
+void AppDataChannel::addDataSource(AppDataSource* appDataSource)
 {
-	if (dataSource == nullptr)
+	if (appDataSource == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	if (dataSource->lmDataType() != m_dataType ||
-		dataSource->lmChannel() != m_channel)
+	if (appDataSource->lmDataType() != m_dataType ||
+		appDataSource->lmChannel() != m_channel)
 	{
 		assert(false);
 		return;
 	}
 
-	if (m_dataSources.contains(dataSource->lmAddress32()))
+	if (m_appDataSources.contains(appDataSource->lmAddress32()))
 	{
 		assert(false);
 		return;
 	}
 
-	m_dataSources.insert(dataSource->lmAddress32(), dataSource);
+	m_appDataSources.insert(appDataSource->lmAddress32(), appDataSource);
 }
 
 
@@ -170,7 +170,7 @@ void AppDataChannel::checkDataSourcesDataReceiving()
 {
 	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
-	for(DataSource* dataSource : m_dataSources)
+	for(DataSource* dataSource : m_appDataSources)
 	{
 		if (dataSource == nullptr)
 		{
@@ -266,9 +266,9 @@ void AppDataChannel::onSocketReadyRead()
 
 	quint32 ip = from.toIPv4Address();
 
-	if (m_dataSources.contains(ip))
+	if (m_appDataSources.contains(ip))
 	{
-		DataSource* dataSource = m_dataSources[ip];
+		DataSource* dataSource = m_appDataSources[ip];
 
 		if (dataSource != nullptr)
 		{
@@ -315,11 +315,11 @@ void AppDataChannelThread::prepare(AppSignals& appSignals, AppSignalStates* sign
 
 
 
-void AppDataChannelThread::addDataSource(DataSource* dataSource)
+void AppDataChannelThread::addDataSource(AppDataSource* appDataSource)
 {
 	if (m_appDataChannel != nullptr)
 	{
-		m_appDataChannel->addDataSource(dataSource);
+		m_appDataChannel->addDataSource(appDataSource);
 	}
 	else
 	{

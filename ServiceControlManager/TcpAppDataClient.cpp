@@ -21,12 +21,12 @@ TcpAppDataClient::~TcpAppDataClient()
 
 void TcpAppDataClient::clearDataSources()
 {
-	for(DataSource* source : m_dataSources)
+	for(DataSource* source : m_appDataSources)
 	{
 		delete source;
 	}
 
-	m_dataSources.clear();
+	m_appDataSources.clear();
 }
 
 
@@ -149,18 +149,18 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 
 	for(int i = 0; i < sourcesCount; i++)
 	{
-		DataSource* source = new DataSource();
+		AppDataSource* source = new AppDataSource();
 
-		source->setDataSourceInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+		source->setInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
 
-		if (m_dataSources.contains(source->ID()))
+		if (m_appDataSources.contains(source->ID()))
 		{
 			assert(false);
 			delete source;
 			continue;
 		}
 
-		m_dataSources.insert(source->ID(), source);
+		m_appDataSources.insert(source->ID(), source);
 	}
 
 	emit dataSourcesInfoLoaded();
@@ -171,7 +171,7 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 
 void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getAppDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 
 	if (result == false)
 	{
@@ -179,26 +179,26 @@ void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint3
 		return;
 	}
 
-	if (m_getDataSourcesStatesReply.error() != TO_INT(NetworkError::Success))
+	if (m_getAppDataSourcesStatesReply.error() != TO_INT(NetworkError::Success))
 	{
 		assert(false);
 		return;
 	}
 
-	int statesCount = m_getDataSourcesStatesReply.datasourcesstates_size();
+	int statesCount = m_getAppDataSourcesStatesReply.appdatasourcesstates_size();
 
 	for(int i = 0; i < statesCount; i++)
 	{
-		auto id = m_getDataSourcesStatesReply.datasourcesstates(i).id();
-		if (!m_dataSources.contains(id))
+		auto id = m_getAppDataSourcesStatesReply.appdatasourcesstates(i).id();
+		if (!m_appDataSources.contains(id))
 		{
-			assert(m_dataSources.contains(id));
+			assert(m_appDataSources.contains(id));
 			continue;
 		}
 
-		DataSource* source = m_dataSources.value(id);
+		AppDataSource* source = m_appDataSources.value(id);
 
-		source->setDataSourceState(m_getDataSourcesStatesReply.datasourcesstates(i));
+		source->setState(m_getAppDataSourcesStatesReply.appdatasourcesstates(i));
 	}
 
 	emit dataSoursesStateUpdated();

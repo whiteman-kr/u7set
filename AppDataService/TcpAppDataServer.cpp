@@ -296,7 +296,7 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 	for(const DataSource* source : dataSources)
 	{
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
-		source->getDataSourceInfo(protoInfo);
+		source->getInfo(protoInfo);
 	}
 
 	m_getDataSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
@@ -307,19 +307,19 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 
 void TcpAppDataServer::onGetDataSourcesStatesRequest()
 {
-	m_getDataSourcesStatesReply.Clear();
+	m_getAppDataSourcesStatesReply.Clear();
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for (const DataSource* source : dataSources)
+	for (const AppDataSource* source : dataSources)
 	{
-		Network::DataSourceState* state = m_getDataSourcesStatesReply.add_datasourcesstates();
-		source->getDataSourceState(state);
+		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
+		source->getState(state);
 	}
 
-	m_getDataSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+	m_getAppDataSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
 
-	sendReply(m_getDataSourcesStatesReply);
+	sendReply(m_getAppDataSourcesStatesReply);
 }
 
 

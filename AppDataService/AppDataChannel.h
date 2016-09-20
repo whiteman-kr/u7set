@@ -17,7 +17,7 @@ public:
 	virtual ~AppDataChannel();
 
 	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
-	void addDataSource(DataSource* dataSource);
+	void addDataSource(AppDataSource* appDataSource);
 
 private:
 	virtual void onThreadStarted() override;
@@ -41,7 +41,7 @@ private:
 	DataSource::DataType m_dataType;
 	int m_channel = 0;
 	HostAddressPort m_dataReceivingIP;
-	HashedVector<quint32, DataSource*> m_dataSources;			// allocated and freed in AppDataService
+	HashedVector<quint32, AppDataSource*> m_appDataSources;			// allocated and freed in AppDataService
 	HashedVector<quint32, quint32> m_unknownDataSources;
 
 	// AppDataChannel sockets
@@ -72,6 +72,6 @@ public:
 	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP);
 
 	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
-	void addDataSource(DataSource* dataSource);
+	void addDataSource(AppDataSource* appDataSource);
 };
 

@@ -460,7 +460,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 }
 
 
-bool DataSource::getDataSourceInfo(Network::DataSourceInfo* protoInfo) const
+bool DataSource::getInfo(Network::DataSourceInfo* protoInfo) const
 {
 	if (protoInfo == nullptr)
 	{
@@ -487,7 +487,7 @@ bool DataSource::getDataSourceInfo(Network::DataSourceInfo* protoInfo) const
 }
 
 
-bool DataSource::setDataSourceInfo(const Network::DataSourceInfo& protoInfo)
+bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
 {
 	m_id = protoInfo.id();
 	m_lmEquipmentID = QString::fromStdString(protoInfo.equipmentid());
@@ -510,42 +510,3 @@ bool DataSource::setDataSourceInfo(const Network::DataSourceInfo& protoInfo)
 }
 
 
-bool DataSource::getDataSourceState(Network::DataSourceState* protoState) const
-{
-	if (protoState == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	protoState->set_id(m_id);
-	protoState->set_uptime(m_uptime);
-	protoState->set_receiveddatasize(m_receivedDataSize);
-	protoState->set_datareceivingrate(m_dataReceivingRate);
-	protoState->set_receivedframescount(m_receivedFramesCount);
-	protoState->set_processingenabled(m_dataProcessingEnabled);
-	protoState->set_processedpacketcount(m_receivedPacketCount);
-	protoState->set_errorprotocolversion(m_errorProtocolVersion);
-	protoState->set_errorframesquantity(m_errorFramesQuantity);
-	protoState->set_errorframeno(m_errorFrameNo);
-	protoState->set_lostedpackets(m_lostedPackets);
-
-	return true;
-}
-
-bool DataSource::setDataSourceState(const Network::DataSourceState& protoState)
-{
-	m_id = protoState.id();
-	m_uptime = protoState.uptime();
-	m_receivedDataSize = protoState.receiveddatasize();
-	m_dataReceivingRate = protoState.datareceivingrate();
-	m_receivedFramesCount = protoState.receivedframescount();
-	m_dataProcessingEnabled = protoState.processingenabled();
-	m_receivedPacketCount = protoState.processedpacketcount();
-	m_errorProtocolVersion = protoState.errorprotocolversion();
-	m_errorFramesQuantity = protoState.errorframesquantity();
-	m_errorFrameNo = protoState.errorframeno();
-	m_lostedPackets = protoState.lostedpackets();
-
-	return true;
-}
