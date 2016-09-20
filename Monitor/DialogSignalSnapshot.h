@@ -144,6 +144,8 @@ private slots:
 
 	void on_schemaCombo_currentIndexChanged(const QString &arg1);
 
+	void on_comboMaskType_currentIndexChanged(int index);
+
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -154,6 +156,17 @@ private:
 	void fillSchemas();
 
 private:
+
+
+	enum class MaskType
+	{
+		AppSignalId,
+		CustomAppSignalId,
+		EquipmentId
+	};
+
+private:
+
 	Ui::DialogSignalSnapshot *ui;
 
 	QCompleter* m_completer = nullptr;
@@ -173,6 +186,8 @@ private:
 	static int m_sortColumn;
 
 	static Qt::SortOrder m_sortOrder;
+
+	static MaskType m_maskType;
 
 };
 

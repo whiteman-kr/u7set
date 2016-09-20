@@ -573,6 +573,8 @@ int DialogSignalSnapshot::m_sortColumn = 0;
 
 Qt::SortOrder DialogSignalSnapshot::m_sortOrder = Qt::AscendingOrder;
 
+DialogSignalSnapshot::MaskType DialogSignalSnapshot::m_maskType = DialogSignalSnapshot::MaskType::AppSignalId;
+
 DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_configController(configController),
@@ -620,6 +622,11 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 
 	ui->editMask->setCompleter(m_completer);
+
+	ui->comboMaskType->addItem("AppSignalId");
+	ui->comboMaskType->addItem("CustomAppSignalId");
+	ui->comboMaskType->addItem("EquipmentId");
+	ui->comboMaskType->setCurrentIndex(static_cast<int>(m_maskType));
 
 	connect(ui->editMask, &QLineEdit::textEdited, [=](){m_completer->complete();});
 	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editMask, &QLineEdit::setText);
@@ -708,7 +715,26 @@ void DialogSignalSnapshot::fillSignals()
 		if (m_strIdMasks.isEmpty() == false)
 		{
 			bool result = false;
-			QString strId = s.customAppSignalID().trimmed();
+			QString strId;
+			switch (m_maskType)
+			{
+			case MaskType::AppSignalId:
+				{
+					strId = s.appSignalID().trimmed();
+				}
+				break;
+			case MaskType::CustomAppSignalId:
+				{
+					strId = s.customAppSignalID().trimmed();
+				}
+				break;
+			case MaskType::EquipmentId:
+				{
+					strId = s.equipmentID().trimmed();
+				}
+				break;
+			}
+
 			for (QString idMask : m_strIdMasks)
 			{
 				QRegExp rx(idMask.trimmed());
@@ -1002,7 +1028,11 @@ void DialogSignalSnapshot::on_editMask_returnPressed()
 
 void DialogSignalSnapshot::on_buttonMaskInfo_clicked()
 {
-	QMessageBox::information(this, tr("Signal Snapshot"), tr("A mask contains '*' and '?' symbols.\r\nSeveral masks separated by ';' can be entered."));
+	QMessageBox::information(this, tr("Signal Snapshot"), tr("A mask contains '*' and '?' symbols. '*' symbol means any set of symbols on its place, "
+															 "'?' symbol means one symbol on ist place. Several masks separated by ';' can be entered.\r\n\r\n"
+															 "Examples:\r\n\r\n#SF001P014* (mask for AppSignalId),\r\n"
+															 "T?30T01? (mask for CustomAppSignalId),\r\n"
+															 "#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment Id)."));
 }
 
 void DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived()
@@ -1026,5 +1056,18 @@ void DialogSignalSnapshot::configController_configurationArrived(ConfigSettings 
 
 void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(const QString&/* arg1*/)
 {
+	fillSignals();
+}
+
+void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
+{
+	m_maskType = static_cast<MaskType>(index);
+
+	QString mask = ui->editMask->text();
+	if (mask.isEmpty() == true)
+	{
+		return;
+	}
+
 	fillSignals();
 }
