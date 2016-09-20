@@ -1,6 +1,21 @@
 #include "../lib/AppSignalState.h"
 
 
+QDateTime Times::systemToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(system);
+}
+
+QDateTime Times::localToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(local);
+}
+
+QDateTime Times::plantToDateTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(plant);
+}
+
 void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)
@@ -19,7 +34,6 @@ void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
 	protoState->set_localtime(time.local);
 	protoState->set_planttime(time.plant);
 }
-
 
 Hash AppSignalState::getProtoAppSignalState(const Proto::AppSignalState* protoState)
 {

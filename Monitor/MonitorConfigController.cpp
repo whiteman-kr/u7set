@@ -539,7 +539,7 @@ std::vector<ConfigSchema> MonitorConfigController::schemasParams() const
 
 std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schemaId)
 {
-	for (auto s : m_schemas)
+	for (const ConfigSchema& s : m_schemas)
 	{
 		if (s.strId == schemaId)
 		{
