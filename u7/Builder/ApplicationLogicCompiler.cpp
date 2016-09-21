@@ -366,15 +366,6 @@ namespace Builder
 					continue;
 				}
 
-				if (m_optoModuleStorage->isCompatiblePorts(optoPort1, optoPort2) == false)
-				{
-					// Opto ports '%1' and '%2' are not compatible (connection '%3').
-					//
-					m_log->errALC5018(connection->port1EquipmentID(), connection->port2EquipmentID(), connection->connectionID());
-					result = false;
-					continue;
-				}
-
 				Hardware::OptoModule* m1 = m_optoModuleStorage->getOptoModule(optoPort1);
 				Hardware::OptoModule* m2 = m_optoModuleStorage->getOptoModule(optoPort2);
 
