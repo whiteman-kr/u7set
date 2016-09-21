@@ -4637,56 +4637,85 @@ void EditSchemaWidget::f2Key()
 
 	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
 
-	if (itemSignal == nullptr &&
-		itemReceiver == nullptr)
+	if (itemRect != nullptr)
 	{
+		QString text = itemRect->text();
+
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set text");
+		inputDialog.setLabelText(tr("Text:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+		inputDialog.setTextValue(text);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			text != newValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+			editSchemaView()->update();
+		}
+
 		return;
 	}
 
-	QString appSignalId;
-
-	if (itemSignal != nullptr)
+	if (itemSignal != nullptr || itemReceiver != nullptr)
 	{
-		appSignalId = itemSignal->appSignalIds();
-	}
+		QString appSignalId;
 
-	if (itemReceiver != nullptr)
-	{
-		appSignalId = itemReceiver->appSignalId();
-	}
-
-	// Show input dialog
-	//
-	QInputDialog inputDialog(this);
-
-	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-	inputDialog.setWindowTitle("Set AppSignalID");
-	inputDialog.setLabelText(tr("AppSignalID:"));
-	inputDialog.setTextEchoMode(QLineEdit::Normal);
-	inputDialog.resize(400, inputDialog.height());
-	inputDialog.setTextValue(appSignalId);
-
-	int inputDialogRecult = inputDialog.exec();
-	QString newValue = inputDialog.textValue();
-
-	if (inputDialogRecult == QDialog::Accepted &&
-		newValue.isNull() == false &&
-		appSignalId != newValue)
-	{
-		// Set value
-		//
 		if (itemSignal != nullptr)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+			appSignalId = itemSignal->appSignalIds();
 		}
 
 		if (itemReceiver != nullptr)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+			appSignalId = itemReceiver->appSignalId();
 		}
 
-		editSchemaView()->update();
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set AppSignalID");
+		inputDialog.setLabelText(tr("AppSignalID:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+		inputDialog.setTextValue(appSignalId);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			appSignalId != newValue)
+		{
+			// Set value
+			//
+			if (itemSignal != nullptr)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+			}
+
+			if (itemReceiver != nullptr)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+			}
+
+			editSchemaView()->update();
+		}
+
+		return;
 	}
 
 	return;
