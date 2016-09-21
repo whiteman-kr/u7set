@@ -40,8 +40,8 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 	const AppSignalState& st1 = o1.second;
 	const AppSignalState& st2 = o2.second;
 
-	static QVariant v1;
-	static QVariant v2;
+	QVariant v1;
+	QVariant v2;
 
 	switch (column)
 	{
@@ -575,12 +575,6 @@ Signal SnapshotItemModel::signalParam(Hash hash, bool* found) const
 //DialogSignalSnapshot
 //
 
-int DialogSignalSnapshot::m_sortColumn = 0;
-
-Qt::SortOrder DialogSignalSnapshot::m_sortOrder = Qt::AscendingOrder;
-
-DialogSignalSnapshot::MaskType DialogSignalSnapshot::m_maskType = DialogSignalSnapshot::MaskType::AppSignalId;
-
 DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_configController(configController),
@@ -616,12 +610,12 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::prepareContextMenu);
 
+	ui->typeCombo->blockSignals(true);
 	ui->typeCombo->addItem(tr("All signals"), static_cast<int>(SnapshotItemModel::TypeFilter::All));
 	ui->typeCombo->addItem(tr("Analog Input signals"), static_cast<int>(SnapshotItemModel::TypeFilter::AnalogInput));
 	ui->typeCombo->addItem(tr("Analog Output signals"), static_cast<int>(SnapshotItemModel::TypeFilter::AnalogOutput));
 	ui->typeCombo->addItem(tr("Discrete Input signals"), static_cast<int>(SnapshotItemModel::TypeFilter::DiscreteInput));
 	ui->typeCombo->addItem(tr("Discrete Output signals"), static_cast<int>(SnapshotItemModel::TypeFilter::DiscreteOutput));
-	ui->typeCombo->blockSignals(true);
 	ui->typeCombo->setCurrentIndex(theSettings.m_signalSnapshotSignalType);
 	ui->typeCombo->blockSignals(false);
 
@@ -632,10 +626,12 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 
 	ui->editMask->setCompleter(m_completer);
 
+	ui->comboMaskType->blockSignals(true);
 	ui->comboMaskType->addItem("AppSignalId");
 	ui->comboMaskType->addItem("CustomAppSignalId");
 	ui->comboMaskType->addItem("EquipmentId");
-	ui->comboMaskType->setCurrentIndex(static_cast<int>(m_maskType));
+	ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
+	ui->comboMaskType->blockSignals(false);
 
 	connect(ui->editMask, &QLineEdit::textEdited, [=](){m_completer->complete();});
 	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editMask, &QLineEdit::setText);
@@ -725,7 +721,7 @@ void DialogSignalSnapshot::fillSignals()
 		{
 			bool result = false;
 			QString strId;
-			switch (m_maskType)
+			switch (theSettings.m_signalSnapshotMaskType)
 			{
 			case MaskType::AppSignalId:
 				{
@@ -783,7 +779,7 @@ void DialogSignalSnapshot::fillSignals()
 
 	m_model->setSignals(&filteredTable);
 
-	ui->tableView->sortByColumn(m_sortColumn, m_sortOrder);
+	ui->tableView->sortByColumn(theSettings.m_signalSnapshotSortColumn, theSettings.m_signalSnapshotSortOrder);
 }
 
 void DialogSignalSnapshot::fillSchemas()
@@ -1004,8 +1000,8 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
-	m_sortColumn = column;
-	m_sortOrder = order;
+	theSettings.m_signalSnapshotSortColumn = column;
+	theSettings.m_signalSnapshotSortOrder = order;
 
 	m_model->sort(column, order);
 }
@@ -1067,7 +1063,7 @@ void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(const QString&/* a
 
 void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
 {
-	m_maskType = static_cast<MaskType>(index);
+	theSettings.m_signalSnapshotMaskType = static_cast<MaskType>(index);
 
 	QString mask = ui->editMask->text();
 	if (mask.isEmpty() == true)

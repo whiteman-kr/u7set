@@ -2,6 +2,7 @@
 
 #include <QMutex>
 #include <../lib/SocketIO.h>
+#include "DialogSignalSnapshot.h"
 
 class Settings
 {
@@ -67,6 +68,9 @@ public:
 	QVector<int> m_signalSnapshotColumns;
 	int m_signalSnapshotSignalType = 0;
 	QStringList m_signalSnapshotMaskList;
+	DialogSignalSnapshot::MaskType m_signalSnapshotMaskType = DialogSignalSnapshot::MaskType::AppSignalId;
+	int m_signalSnapshotSortColumn = 0;
+	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
 
 
 private:
