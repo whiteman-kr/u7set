@@ -22,7 +22,9 @@ private:
 
 	bool writeSettings();
 	bool writeObjectFilters();
+	bool writeSchemasDetails();
 	bool writeTuningSignals();
+
 	void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
 	template <typename TYPE>

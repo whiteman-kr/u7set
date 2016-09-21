@@ -61,25 +61,6 @@ private:
 
 };
 
-class TuningItemProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	TuningItemProxyModel(TuningItemModel* sourceModel, QObject* parent = 0);
-
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-
-	void setObjectIdFilter(QStringList strIds);
-	void refreshFilters();
-
-	int objectIndex(const QModelIndex &mi);
-
-private:
-	TuningItemModel* m_sourceModel = nullptr;
-	QStringList m_strIdMasks;
-};
-
 class FilterButton : public QPushButton
 {
 public:
@@ -95,7 +76,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, ObjectFilter* tabFilter, QWidget *parent = 0);
 	~TuningPage();
 
 signals:
@@ -125,11 +106,10 @@ private:
 	QComboBox* m_maskTypeCombo = nullptr;
 
 	TuningItemModel *m_model = nullptr;
-	TuningItemProxyModel *m_proxyModel = nullptr;
 
 	std::vector<int> m_objectsIndexes;
 
-	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
+	ObjectFilter* m_tabFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 

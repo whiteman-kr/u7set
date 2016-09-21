@@ -17,7 +17,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	int count = theFilters.filterCount();
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<ObjectFilter> f = theFilters.filter_const(i);
+		ObjectFilter* f = theFilters.filter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -33,7 +33,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 		treeItems.push_back(item);
 
-		addChildTreeObjects(f.get(), item);
+		addChildTreeObjects(f, item);
 	}
 
 	if (treeItems.empty() == false)
@@ -63,7 +63,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	count = theFilters.filterCount();
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<ObjectFilter> f = theFilters.filter_const(i);
+		ObjectFilter* f = theFilters.filter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -150,12 +150,19 @@ void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem*
 		return;
 	}
 
-	for (auto f : filter->childFilters)
+	for (int i = 0; i < filter->childFiltersCount(); i++)
 	{
+		ObjectFilter* f = filter->childFilter(i);
+		if (f == nullptr)
+		{
+			assert(f);
+			continue;
+		}
+
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
 
 		parent->addChild(item);
 
-		addChildTreeObjects(f.get(), item);
+		addChildTreeObjects(f, item);
 	}
 }

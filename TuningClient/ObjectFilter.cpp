@@ -1,5 +1,6 @@
 #include "ObjectFilter.h"
 #include "../lib/Types.h"
+#include "ObjectManager.h"
 
 //
 // ObjectFilter
@@ -83,7 +84,7 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 					return false;
 				}
 
-				childFilters.push_back(of);
+				m_childFilters.push_back(of);
 			}
 			else
 			{
@@ -111,7 +112,7 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("FilterType", E::valueToString<FilterType>((int)filterType()));
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
-	for (auto f : childFilters)
+	for (auto f : m_childFilters)
 	{
 		f->save(writer);
 	}
@@ -173,6 +174,16 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 	m_appSignalIDMask = value;
 }
 
+QStringList ObjectFilter::appSignalIds() const
+{
+	return m_appSignalIds;
+}
+
+void ObjectFilter::setAppSignalIds(const QStringList& value)
+{
+	m_appSignalIds = value;
+}
+
 ObjectFilter::FilterType ObjectFilter::filterType() const
 {
 	return m_filterType;
@@ -211,6 +222,28 @@ bool ObjectFilter::isButton() const
 bool ObjectFilter::isChild() const
 {
 	return filterType() == FilterType::Child;
+}
+
+void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
+{
+	m_childFilters.push_back(child);
+}
+
+int ObjectFilter::childFiltersCount()
+{
+	return static_cast<int>(m_childFilters.size());
+
+}
+
+ObjectFilter* ObjectFilter::childFilter(int index)
+{
+	if (index <0 || index >= m_childFilters.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return m_childFilters[index].get();
 }
 
 
@@ -258,8 +291,6 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		assert(errorCode);
 		return false;
 	}
-
-	QMutexLocker l(&m_mutex);
 
 	m_filters.clear();
 
@@ -339,9 +370,6 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 bool ObjectFilterStorage::save(const QString& fileName)
 {
-
-	QMutexLocker l(&m_mutex);
-
 	// save data to XML
 	//
 	QByteArray data;
@@ -391,19 +419,175 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 int ObjectFilterStorage::filterCount()
 {
-	QMutexLocker l(&m_mutex);
-	return m_filters.size();
+	return static_cast<int>(m_filters.size());
 }
 
-const std::shared_ptr<ObjectFilter> ObjectFilterStorage::filter_const(int index)
+ObjectFilter* ObjectFilterStorage::filter(int index)
 {
-	QMutexLocker l(&m_mutex);
 	if (index < 0 || index >= m_filters.size())
 	{
 		assert(false);
 		return nullptr;
 	}
-	return m_filters[index];
+	return m_filters[index].get();
+}
+
+int ObjectFilterStorage::schemaDetailsCount()
+{
+	return static_cast<int>(m_schemasDetails.size());
+}
+
+SchemaDetails ObjectFilterStorage::schemaDetails(int index)
+{
+	if (index < 0 || index >= m_schemasDetails.size())
+	{
+		assert(false);
+		return SchemaDetails();
+	}
+	return m_schemasDetails[index];
+}
+
+
+bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *errorCode)
+{
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
+
+	m_schemasDetails.clear();
+
+	QXmlStreamReader reader(data);
+
+	if (reader.readNextStartElement() == false)
+	{
+		reader.raiseError(QObject::tr("Failed to load root element."));
+		*errorCode = reader.errorString();
+		return !reader.hasError();
+	}
+
+	if (reader.name() != "Schemas")
+	{
+		reader.raiseError(QObject::tr("The file is not an SchemasDetails file."));
+		*errorCode = reader.errorString();
+		return !reader.hasError();
+	}
+
+	// Read signals
+	//
+	while (!reader.atEnd())
+	{
+		QXmlStreamReader::TokenType t = reader.readNext();
+
+		if (t == QXmlStreamReader::TokenType::Characters)
+		{
+			continue;
+		}
+
+		if (t != QXmlStreamReader::TokenType::StartElement)
+		{
+			continue;
+		}
+
+		if (reader.name() == "Schema")
+		{
+			if (reader.attributes().hasAttribute("Details"))
+			{
+				QString details = reader.attributes().value("Details").toString();
+				if (details.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QJsonDocument document = QJsonDocument::fromJson(details.toUtf8());
+				if (document.isEmpty() == true || document.isNull() == true || document.isObject() == false)
+				{
+					continue;
+				}
+
+				QJsonObject jDetails = document.object();
+				if (jDetails.isEmpty() == true)
+				{
+					continue;
+				}
+
+				SchemaDetails sd;
+
+				QJsonValue jValue = jDetails.value("SchemaID");
+				if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
+				{
+					sd.m_strId = jValue.toString();
+				}
+
+
+				jValue = jDetails.value("Caption");
+				if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
+				{
+					sd.m_caption = jValue.toString();
+				}
+
+				QJsonArray array = jDetails.value("Signals").toArray();
+				sd.m_appSignals.reserve(array.size());
+				for (int i = 0; i < array.size(); i++)
+				{
+					sd.m_appSignals.push_back(array[i].toString());
+				}
+
+				m_schemasDetails.push_back(sd);
+			}
+
+			continue;
+		}
+
+		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+		*errorCode = reader.errorString();
+		return !reader.hasError();
+	}
+
+	return !reader.hasError();
+
+}
+
+void ObjectFilterStorage::createAutomaticFilters()
+{
+	// Filter for EquipmentId
+	//
+	std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+	ofEquipment->setStrID("AUTOFILTER_EQUIPMENT");
+	ofEquipment->setCaption("Filter by EquipmentId");
+
+	for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
+	{
+		 TuningSource ts = theObjects.tuningSource(i);
+
+		 std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+		 ofTs->setEquipmentIDMask(ts.m_equipmentId);
+		 ofTs->setStrID(ts.m_equipmentId);
+		 ofTs->setCaption(ts.m_equipmentId);
+
+		 ofEquipment->addChild(ofTs);
+	}
+
+	m_filters.push_back(ofEquipment);
+
+	// Filter for Schema
+	//
+	std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+	ofSchema->setStrID("AUTOFILTER_SCHEMA");
+	ofSchema->setCaption("Filter by Schema");
+
+	for (auto s : m_schemasDetails)
+	{
+		std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+		ofTs->setAppSignalIds(s.m_appSignals);
+		ofTs->setStrID(s.m_strId);
+		ofTs->setCaption(s.m_caption);
+
+		ofSchema->addChild(ofTs);
+	}
+
+	m_filters.push_back(ofSchema);
 }
 
 

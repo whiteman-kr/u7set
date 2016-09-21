@@ -60,11 +60,12 @@ public:
 	Tcp::ConnectionState getConnectionState() const;
 
 	bool getObjectFilters();
+	bool getSchemasDetails();
 	bool getTuningSignals();
 	// signals
 	//
 signals:
-	void configurationArrived(bool updateFilters, bool updateSignals);
+	void configurationArrived(bool updateFilters, bool updateSchemas, bool updateSignals);
 
 	// slots
 	//
@@ -80,8 +81,6 @@ private:
 
 	// Public properties
 public:
-	//std::vector<ConfigSchema> schemas() const;
-
 	// Data section
 	//
 private:
@@ -94,6 +93,7 @@ private:
 
 
 	QString m_md5Filters;
+	QString m_md5Schemas;
 	QString m_md5Signals;
 };
 

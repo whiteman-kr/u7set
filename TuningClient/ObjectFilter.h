@@ -3,6 +3,14 @@
 
 #include "Stable.h"
 
+struct SchemaDetails
+{
+	QString m_caption;
+	QString m_strId;
+	QStringList m_appSignals;
+
+};
+
 class ObjectFilter : public QObject
 {
 	Q_OBJECT
@@ -56,6 +64,9 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
+	QStringList appSignalIds() const;
+	void setAppSignalIds(const QStringList& value);
+
 	FilterType filterType() const;
 	void setFilterType(FilterType value);
 
@@ -68,7 +79,10 @@ public:
 	bool isButton() const;
 	bool isChild() const;
 
-	std::vector<std::shared_ptr<ObjectFilter>> childFilters;
+	void addChild(std::shared_ptr<ObjectFilter> child);
+
+	int childFiltersCount();
+	ObjectFilter* childFilter(int index);
 
 private:
 
@@ -81,10 +95,12 @@ private:
 	QString m_customAppSignalIDMask;
 	QString m_equipmentIDMask;
 	QString m_appSignalIDMask;
+	QStringList m_appSignalIds;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
 
+	std::vector<std::shared_ptr<ObjectFilter>> m_childFilters;
 
 };
 
@@ -96,18 +112,25 @@ public:
 	ObjectFilterStorage();
 
 	bool load(const QByteArray& data, QString *errorCode);
+	bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
 
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
+
+
 	int filterCount();
-	const std::shared_ptr<ObjectFilter> filter_const(int index);
+	ObjectFilter *filter(int index);
+
+	int schemaDetailsCount();
+	SchemaDetails schemaDetails(int index);
+
+	void createAutomaticFilters();
 
 private:
 
-	QMutex m_mutex;
-
 	std::vector<std::shared_ptr<ObjectFilter>> m_filters;
+	std::vector<SchemaDetails> m_schemasDetails;
 };
 
 extern ObjectFilterStorage theFilters;
