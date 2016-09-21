@@ -94,9 +94,9 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::slot_configurationArrived(bool updateFilters, bool updateSignals)
+void MainWindow::slot_configurationArrived(bool updateFilters, bool updateSchemas, bool updateSignals)
 {
-	if (updateFilters == false && updateSignals == false)
+	if (updateFilters == false && updateSignals == false && updateSchemas == false)
 	{
 		return;
 	}
@@ -117,6 +117,14 @@ void MainWindow::slot_configurationArrived(bool updateFilters, bool updateSignal
 		}
 	}
 
+	if (updateSchemas == true)
+	{
+		if (m_configController.getSchemasDetails() == false)
+		{
+
+		}
+	}
+
 	if (updateSignals == true)
 	{
 		if (m_configController.getTuningSignals() == false)
@@ -124,6 +132,8 @@ void MainWindow::slot_configurationArrived(bool updateFilters, bool updateSignal
 
 		}
 	}
+
+	theFilters.createAutomaticFilters();
 
 	m_tuningWorkspace = new TuningWorkspace(this);
 	setCentralWidget(m_tuningWorkspace);

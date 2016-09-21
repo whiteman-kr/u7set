@@ -31,5 +31,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QDomDocument>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 #endif // STABLE_H

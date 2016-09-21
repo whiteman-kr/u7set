@@ -11,18 +11,36 @@ int ObjectManager::objectsCount()
 
 }
 
-const std::shared_ptr<TuningObject> ObjectManager::const_object(int index)
+TuningObject ObjectManager::object(int index)
 {
 	QMutexLocker l(&m_mutex);
 	if (index < 0 || index >= m_objects.size())
 	{
 		assert(false);
-		return nullptr;
+		return TuningObject();
 	}
 	return m_objects[index];
 }
 
-bool ObjectManager::load(const QByteArray& data, QString *errorCode)
+int ObjectManager::tuningSourcesCount()
+{
+	QMutexLocker l(&m_mutex);
+	return static_cast<int>(m_tuningSources.size());
+}
+
+TuningSource ObjectManager::tuningSource(int index)
+{
+	QMutexLocker l(&m_mutex);
+	if (index < 0 || index >= m_tuningSources.size())
+	{
+		assert(false);
+		return TuningSource();
+	}
+	return m_tuningSources[index];
+}
+
+
+bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -68,55 +86,55 @@ bool ObjectManager::load(const QByteArray& data, QString *errorCode)
 
 		if (reader.name() == "TuningSignal")
 		{
-			std::shared_ptr<TuningObject> object = std::make_shared<TuningObject>();
+			TuningObject object;
 
 			if (reader.attributes().hasAttribute("AppSignalID"))
 			{
-				object->setAppSignalID(reader.attributes().value("AppSignalID").toString());
+				object.setAppSignalID(reader.attributes().value("AppSignalID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("CustomAppSignalID"))
 			{
-				object->setCustomAppSignalID(reader.attributes().value("CustomAppSignalID").toString());
+				object.setCustomAppSignalID(reader.attributes().value("CustomAppSignalID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("EquipmentID"))
 			{
-				object->setEquipmentID(reader.attributes().value("EquipmentID").toString());
+				object.setEquipmentID(reader.attributes().value("EquipmentID").toString());
 			}
 
 			if (reader.attributes().hasAttribute("Caption"))
 			{
-				object->setCaption(reader.attributes().value("Caption").toString());
+				object.setCaption(reader.attributes().value("Caption").toString());
 			}
 
 			if (reader.attributes().hasAttribute("Type"))
 			{
 				QString t = reader.attributes().value("Type").toString();
-				object->setAnalog(t == "A");
+				object.setAnalog(t == "A");
 			}
 
 			if (reader.attributes().hasAttribute("DecimalPlaces"))
 			{
-				object->setDecimalPlaces(reader.attributes().value("DecimalPlaces").toString().toInt());
+				object.setDecimalPlaces(reader.attributes().value("DecimalPlaces").toString().toInt());
 			}
 
 			if (reader.attributes().hasAttribute("DefaultValue"))
 			{
 				QString v = reader.attributes().value("DefaultValue").toString();
-				object->setValue(v.toDouble());
+				object.setValue(v.toDouble());
 			}
 
 			if (reader.attributes().hasAttribute("LowLimit"))
 			{
 				QString v = reader.attributes().value("LowLimit").toString();
-				object->setLowLimit(v.toDouble());
+				object.setLowLimit(v.toDouble());
 			}
 
 			if (reader.attributes().hasAttribute("HighLimit"))
 			{
 				QString v = reader.attributes().value("HighLimit").toString();
-				object->setHighLimit(v.toDouble());
+				object.setHighLimit(v.toDouble());
 			}
 
 
@@ -130,10 +148,26 @@ bool ObjectManager::load(const QByteArray& data, QString *errorCode)
 		return !reader.hasError();
 	}
 
+	// Create Tuning sources
+	//
+	m_tuningSources.clear();
+
+	std::map<QString, int> sourcesExistingMap;
+
+	for (auto o : m_objects)
+	{
+		if (sourcesExistingMap.find(o.equipmentID()) == sourcesExistingMap.end())
+		{
+			TuningSource ts;
+			ts.m_equipmentId = o.equipmentID();
+
+			sourcesExistingMap[o.equipmentID()] = 0;
+			m_tuningSources.push_back(ts);
+
+		}
+	}
+
 	return !reader.hasError();
-
-
-
 }
 
 ObjectManager theObjects;

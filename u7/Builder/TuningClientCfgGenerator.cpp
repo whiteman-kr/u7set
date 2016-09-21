@@ -34,10 +34,19 @@ bool TuningClientCfgGenerator::generateConfiguration()
 		return false;
 	}
 
+
+	IssueLogger* log = m_buildResultWriter->log();
+	if (log == nullptr)
+	{
+		assert(log);
+		return false;
+	}
+
 	bool result = true;
 
 	result &= writeSettings();
 	result &= writeObjectFilters();
+	result &= writeSchemasDetails();
 	result &= writeTuningSignals();
 
 	return result;
@@ -187,6 +196,46 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 
 }
 
+bool TuningClientCfgGenerator::writeSchemasDetails()
+{
+	QByteArray data;
+	XmlWriteHelper xmlWriter(&data);
+
+	xmlWriter.setAutoFormatting(true);
+	xmlWriter.writeStartDocument();
+	xmlWriter.writeStartElement("Schemas");
+
+	for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+	{
+		xmlWriter.writeStartElement("Schema");
+		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
+		{
+			xmlWriter.writeEndElement();
+		});
+
+		xmlWriter.writeStringAttribute("Details", schemaFile.details);
+	}
+
+	xmlWriter.writeEndElement();
+
+	xmlWriter.writeEndDocument();
+
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.xml", CFG_FILE_ID_SCHEMAS_DETAILS, "", data);
+
+	if (buildFile == nullptr)
+	{
+		QString errorStr = tr("TuningClient configuration error %1, can't add file SchemasDetails.xml")
+				.arg(m_software->equipmentIdTemplate());
+
+		m_log->writeError(errorStr);
+		return false;
+	}
+
+	m_cfgXml->addLinkToFile(buildFile);
+
+	return true;
+}
+
 bool TuningClientCfgGenerator::writeTuningSignals()
 {
 	QByteArray data;
@@ -199,18 +248,18 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	int count = m_signalSet->count();
 	for (int i = 0; i < count; i++)
 	{
-		xmlWriter.writeStartElement("TuningSignal");
-		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-		{
-			xmlWriter.writeEndElement();
-		});
-
 		const Signal& s = (*m_signalSet)[i];
 
 		if (s.enableTuning() == false)
 		{
 			continue;
 		}
+
+		xmlWriter.writeStartElement("TuningSignal");
+		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
+		{
+			xmlWriter.writeEndElement();
+		});
 
 		xmlWriter.writeStringAttribute("AppSignalID", s.appSignalID());
 		xmlWriter.writeStringAttribute("CustomAppSignalID", s.customAppSignalID());
@@ -224,6 +273,7 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	}
 
 	xmlWriter.writeEndElement();
+
 	xmlWriter.writeEndDocument();
 
 	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.xml", CFG_FILE_ID_TUNING_SIGNALS, "", data);

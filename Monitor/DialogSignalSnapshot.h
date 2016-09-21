@@ -160,7 +160,7 @@ private:
 
 	void fillSchemas();
 
-private:
+public:
 
 
 	enum class MaskType
@@ -190,13 +190,7 @@ private:
 
 	SnapshotItemModel::TypeFilter m_signalType = SnapshotItemModel::TypeFilter::All;
 
-	static MaskType m_maskType;
-
 	QStringList m_strIdMasks;
-
-	static int m_sortColumn;
-
-	static Qt::SortOrder m_sortOrder;
 };
 
 #endif // DIALOGSIGNALSNAPSHOT_H

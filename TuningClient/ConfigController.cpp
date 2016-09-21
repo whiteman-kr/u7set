@@ -257,6 +257,30 @@ bool ConfigController::getObjectFilters()
 	return true;
 }
 
+bool ConfigController::getSchemasDetails()
+{
+	QByteArray data;
+	QString errorStr;
+	if (getFileBlockedById(CFG_FILE_ID_SCHEMAS_DETAILS, &data, &errorStr) == false)
+	{
+		QString completeErrorMessage = tr("getFileBlockedById: Get SchemasDetails.xml file error: %1").arg(errorStr);
+		qDebug()<< completeErrorMessage;
+
+		return false;
+	}
+	else
+	{
+		if (theFilters.loadSchemasDetails(data, &errorStr) == false)
+		{
+			QString completeErrorMessage = tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
+			qDebug()<< completeErrorMessage;
+
+			return false;
+		}
+	}
+
+	return true;}
+
 bool ConfigController::getTuningSignals()
 {
 	QByteArray data;
@@ -270,7 +294,7 @@ bool ConfigController::getTuningSignals()
 	}
 	else
 	{
-		if (theObjects.load(data, &errorStr) == false)
+		if (theObjects.loadSignals(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
 			qDebug()<< completeErrorMessage;
@@ -362,6 +386,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	qDebug() << "TUNS2 (id, ip, port): " << readSettings.tuns2.equipmentId() << ", " << readSettings.tuns2.ip() << ", " << readSettings.tuns2.port();
 
 	bool updateFilters = false;
+	bool updateSchemas = false;
 	bool updateSignals = false;
 
 	QMutexLocker locker(&m_mutex);
@@ -376,6 +401,14 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				m_md5Filters = f.md5;
 			}
 		}
+		if (f.ID == CFG_FILE_ID_SCHEMAS_DETAILS)
+		{
+			if (m_md5Schemas != f.md5)
+			{
+				updateSchemas = true;
+				m_md5Schemas = f.md5;
+			}
+		}
 		if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
 		{
 			if (m_md5Signals != f.md5)
@@ -388,7 +421,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(updateFilters, updateSignals);
+	emit configurationArrived(updateFilters, updateSchemas, updateSignals);
 
 	return;
 }
