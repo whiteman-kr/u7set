@@ -24,7 +24,7 @@ void Settings::StoreUser()
 
 	s.setValue("MainWindow/Splitter/state", m_mainWindowSplitterState);
 
-	s.setValue("TuningPageSettingsCount", m_tuningPageSettings.size());
+	s.setValue("TuningPageSettingsCount", static_cast<uint>(m_tuningPageSettings.size()));
 	for (int i = 0; i < m_tuningPageSettings.size(); i++)
 	{
 		s.setValue(QString("TuningPageSettings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);

@@ -43,7 +43,7 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 	QVariant v1;
 	QVariant v2;
 
-	switch (column)
+	switch (static_cast<SnapshotItemModel::Columns>(column))
 	{
 	case SnapshotItemModel::Columns::SignalID:
 		{
