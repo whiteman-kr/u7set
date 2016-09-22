@@ -26,6 +26,10 @@ public:
 
 public:
 
+	int m_requestInterval = 100;
+
+	//
+
 	QPoint m_mainWindowPos;
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
