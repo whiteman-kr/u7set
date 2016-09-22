@@ -44,7 +44,7 @@ private:
     bool askForSaveChanged();
     bool checkUniqueConnections();
     bool saveChanges();
-    void updateButtons(bool checkOut);
+	void updateButtons();
 	bool continueWithDuplicateCaptions();
 
 protected:
@@ -62,6 +62,10 @@ private slots:
     void on_m_Undo_clicked();
 	void reject();
 
+	void on_m_list_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+
+	void on_m_list_itemSelectionChanged();
+
 private:
     Ui::DialogConnectionsEditor *ui;
 
@@ -71,6 +75,8 @@ private:
     DbController* m_dbController;
 
     Hardware::ConnectionStorage connections;
+
+	bool m_checkedOut = false;
 };
 
 #endif // DIALOGCONNECTIONSEDITOR_H
