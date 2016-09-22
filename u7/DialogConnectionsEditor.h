@@ -62,9 +62,9 @@ private slots:
     void on_m_Undo_clicked();
 	void reject();
 
-	void on_m_list_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-
 	void on_m_list_itemSelectionChanged();
+
+	void on_m_Apply_clicked();
 
 private:
     Ui::DialogConnectionsEditor *ui;
@@ -78,5 +78,7 @@ private:
 
 	bool m_checkedOut = false;
 };
+
+extern DialogConnectionsEditor* theDialogConnectionsEditor;
 
 #endif // DIALOGCONNECTIONSEDITOR_H

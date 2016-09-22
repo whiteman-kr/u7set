@@ -161,6 +161,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     ui->setupUi(this);
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
     setWindowTitle(tr("Optical Connections Editor"));
 
     QStringList l;
@@ -192,7 +194,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
 DialogConnectionsEditor::~DialogConnectionsEditor()
 {
-    delete ui;
+	theDialogConnectionsEditor = nullptr;
+	delete ui;
 }
 
 void DialogConnectionsEditor::fillConnectionsList()
@@ -453,6 +456,22 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
     m_modified = true;
 }
 
+void DialogConnectionsEditor::on_m_Apply_clicked()
+{
+	if (continueWithDuplicateCaptions() == false)
+	{
+		return;
+	}
+
+	if (m_modified == true)
+	{
+		if (saveChanges() == false)
+		{
+			return;
+		}
+	}
+}
+
 void DialogConnectionsEditor::on_m_OK_clicked()
 {
 	if (continueWithDuplicateCaptions() == false)
@@ -588,3 +607,6 @@ void DialogConnectionsEditor::on_m_list_itemSelectionChanged()
 {
 	updateButtons();
 }
+
+DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
+

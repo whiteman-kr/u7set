@@ -394,8 +394,15 @@ void MainWindow::runConnectionsEditor()
         return;
     }
 
-    DialogConnectionsEditor d(dbController(), this);
-	d.exec();
+	if (theDialogConnectionsEditor == nullptr)
+	{
+		theDialogConnectionsEditor = new DialogConnectionsEditor(dbController(), this);
+		theDialogConnectionsEditor->show();
+	}
+	else
+	{
+		theDialogConnectionsEditor->activateWindow();
+	}
 }
 
 void MainWindow::runRS232SignalListEditor()
