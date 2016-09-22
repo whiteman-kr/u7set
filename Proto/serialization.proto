@@ -293,6 +293,7 @@ message Schema
 	// Derived from Schema
 	//
 	optional LogicSchema logic_schema = 200;
+	optional UfbSchema ufb_schema = 201;
 }
 
 
@@ -305,6 +306,17 @@ message LogicSchema
 {
 	repeated wstring equipmentids = 1;
 	optional int32 counter = 2 [default = 0];
+}
+
+//
+//
+// UfbSchema
+//
+//
+message UfbSchema
+{
+    optional string description = 1;
+	optional int32 version = 2 [default = 1];
 }
 
 

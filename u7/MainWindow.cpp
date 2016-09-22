@@ -52,8 +52,11 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
 
-	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(AlFileExtension, dbController(), AlFileName, nullptr);
-	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(MvsFileExtension, dbController(), MvsFileName, nullptr);
+	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema, VFrame30::UfbSchema>(dbController(), nullptr,
+																					   ::AlFileExtension, ::AlFileName, tr("Control"),
+																					   ::UfbFileExtension, ::UfblFileName, tr("UFB Library"));
+
+	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(dbController(), nullptr, ::MvsFileExtension, ::MvsFileName, tr("Control"));
 
 	getCentralWidget()->addTabPage(m_projectsTab, tr("&Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("&Equipment"));

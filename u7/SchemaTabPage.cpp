@@ -229,9 +229,6 @@ SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
 
 	// --
 	//
-	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPage::projectOpened);
-	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPage::projectClosed);
-
 	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
 	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
 	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
@@ -275,6 +272,11 @@ void SchemaControlTabPage::addFile()
 		defaultId = "APPSCHEMAID";
 	}
 
+	if (schema->isUfbSchema() == true)
+	{
+		defaultId = "USERFUNCTIONALBLOCKID";
+	}
+
 	if (schema->isMonitorSchema() == true)
 	{
 		defaultId = "MONITORSCHEMAID";
@@ -310,8 +312,16 @@ void SchemaControlTabPage::addFile()
 	{
 		// A3 Landscape
 		//
-		schema->setDocWidth(420.0 / 25.4);
-		schema->setDocHeight(297.0 / 25.4);
+		if (schema->isUfbSchema() == true)
+		{
+			schema->setDocWidth(297.0 / 25.4);
+			schema->setDocHeight(210.0 / 25.4);
+		}
+		else
+		{
+			schema->setDocWidth(420.0 / 25.4);
+			schema->setDocHeight(297.0 / 25.4);
+		}
 	}
 
 	// Show dialog to edit schema properties
@@ -336,7 +346,7 @@ void SchemaControlTabPage::addFile()
 
 	db()->addFiles(&addFilesList, parentFile().fileId(), this);
 
-	// Add file to the FileModel and select them
+	// Add file to the FileModel and select it
 	//
 	std::shared_ptr<DbFileInfo> file = std::make_shared<DbFileInfo>(*vfFile.get());
 

@@ -1,6 +1,7 @@
 #include "CreateSchemaDialog.h"
 #include "ui_CreateSchemaDialog.h"
 #include "../VFrame30/Settings.h"
+#include "../VFrame30/LogicSchema.h"
 
 CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent) :
 	QDialog(parent),
@@ -14,9 +15,14 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	//
 	QString idLable = "ID";
 
-	if (isLogicSchema() == true)
+	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
 	{
 		idLable = "AppSchemaID";
+	}
+
+	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
+	{
+		idLable = "UserFunctionalBlock ID";
 	}
 
 	if (isMonitorSchema() == true)
