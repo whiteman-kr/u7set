@@ -1,6 +1,7 @@
 #include "ObjectFilter.h"
 #include "../lib/Types.h"
 #include "ObjectManager.h"
+#include "Settings.h"
 
 //
 // ObjectFilter
@@ -551,43 +552,50 @@ bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 void ObjectFilterStorage::createAutomaticFilters()
 {
-	// Filter for EquipmentId
-	//
-	std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-	ofEquipment->setStrID("AUTOFILTER_EQUIPMENT");
-	ofEquipment->setCaption("Filter by EquipmentId");
-
-	for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
+	if (theSettings.filterByEquipment() == true)
 	{
-		 TuningSource ts = theObjects.tuningSource(i);
+		// Filter for EquipmentId
+		//
+		std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		ofEquipment->setStrID("AUTOFILTER_EQUIPMENT");
+		ofEquipment->setCaption("Filter by EquipmentId");
 
-		 std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
-		 ofTs->setEquipmentIDMask(ts.m_equipmentId);
-		 ofTs->setStrID(ts.m_equipmentId);
-		 ofTs->setCaption(ts.m_equipmentId);
+		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
+		{
+			TuningSource ts = theObjects.tuningSource(i);
 
-		 ofEquipment->addChild(ofTs);
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			ofTs->setEquipmentIDMask(ts.m_equipmentId);
+			ofTs->setStrID(ts.m_equipmentId);
+			ofTs->setCaption(ts.m_equipmentId);
+
+			ofEquipment->addChild(ofTs);
+		}
+
+		m_filters.push_back(ofEquipment);
 	}
 
-	m_filters.push_back(ofEquipment);
-
-	// Filter for Schema
-	//
-	std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-	ofSchema->setStrID("AUTOFILTER_SCHEMA");
-	ofSchema->setCaption("Filter by Schema");
-
-	for (auto s : m_schemasDetails)
+	if (theSettings.filterBySchema() == true)
 	{
-		std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
-		ofTs->setAppSignalIds(s.m_appSignals);
-		ofTs->setStrID(s.m_strId);
-		ofTs->setCaption(s.m_caption);
 
-		ofSchema->addChild(ofTs);
+		// Filter for Schema
+		//
+		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		ofSchema->setStrID("AUTOFILTER_SCHEMA");
+		ofSchema->setCaption("Filter by Schema");
+
+		for (auto s : m_schemasDetails)
+		{
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			ofTs->setAppSignalIds(s.m_appSignals);
+			ofTs->setStrID(s.m_strId);
+			ofTs->setCaption(s.m_caption);
+
+			ofSchema->addChild(ofTs);
+		}
+
+		m_filters.push_back(ofSchema);
 	}
-
-	m_filters.push_back(ofSchema);
 }
 
 

@@ -12,6 +12,32 @@ Settings::Settings():
 
 }
 
+void Settings::StoreSystem()
+{
+	QSettings s;
+
+	s.setValue("m_instanceStrId", m_instanceStrId);
+
+	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
+	s.setValue("m_configuratorPort1", m_configuratorPort1);
+
+	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
+	s.setValue("m_configuratorPort2", m_configuratorPort2);
+}
+
+void Settings::RestoreSystem()
+{
+	QSettings s;
+
+	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
+
+	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+}
+
 void Settings::StoreUser()
 {
 	QSettings s;
@@ -34,6 +60,9 @@ void Settings::StoreUser()
 			s.setValue(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
 		}
 	}
+
+	s.setValue("Filters/filterByEquipment", m_filterByEquipment);
+	s.setValue("Filters/filterBySchema", m_filterBySchema);
 
 }
 
@@ -63,6 +92,10 @@ void Settings::RestoreUser()
 			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
 		}
 	}
+
+	m_filterByEquipment = s.value("Filters/filterByEquipment", m_filterByEquipment).toBool();
+	m_filterBySchema = s.value("Filters/filterBySchema", m_filterBySchema).toBool();
+
 }
 
 QString Settings::instanceStrId()
@@ -71,16 +104,54 @@ QString Settings::instanceStrId()
 	return m_instanceStrId;
 }
 
+void Settings::setInstanceId(const QString& value)
+{
+	QMutexLocker l(&m);
+	m_instanceStrId = value;
+}
+
 HostAddressPort Settings::configuratorAddress1()
 {
 	QMutexLocker l(&m);
 	return HostAddressPort(m_configuratorIpAddress1, m_configuratorPort1);
 }
 
+void Settings::setConfiguratorAddress1(const QString& address, int port)
+{
+	m_configuratorIpAddress1 = address;
+	m_configuratorPort1 = port;
+}
+
 HostAddressPort Settings::configuratorAddress2()
 {
 	QMutexLocker l(&m);
 	return HostAddressPort(m_configuratorIpAddress2, m_configuratorPort2);
+}
+
+void Settings::setConfiguratorAddress2(const QString& address, int port)
+{
+	m_configuratorIpAddress2 = address;
+	m_configuratorPort2 = port;
+}
+
+bool Settings::filterByEquipment() const
+{
+	return m_filterByEquipment;
+}
+
+void Settings::setFilterByEquipment(bool value)
+{
+	m_filterByEquipment = value;
+}
+
+bool Settings::filterBySchema() const
+{
+	return m_filterBySchema;
+}
+
+void Settings::setFilterBySchema(bool value)
+{
+	m_filterBySchema = value;
 }
 
 Settings theSettings;
