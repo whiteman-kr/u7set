@@ -224,8 +224,6 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 	{
 		ui->labelCaption->setText("");
 		ui->labelDescription->setPlainText("");
-		ui->labelInputCount->setText("");
-		ui->labelOutputCount->setText("");
 
 		ui->btnOk->setEnabled(false);
 	}
@@ -241,8 +239,6 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 
         ui->labelCaption->setText(e->caption() + tr(", version ") + e->version());
 		ui->labelDescription->setPlainText(e->description());
-		ui->labelInputCount->setText(QString::number(e->inputSignals().size()));
-		ui->labelOutputCount->setText(QString::number(e->outputSignals().size()));
 
 		ui->btnOk->setEnabled(true);
 	}
