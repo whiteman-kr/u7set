@@ -62,6 +62,12 @@ namespace Hardware
 		propManual->setCategory(tr("Manual Settings"));
 
 		ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", false, Connection::mode, Connection::setMode);
+
+		auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, "Disable DataID Control", true, Connection::disableDataID, Connection::setDisableDataID);
+		propDisableDataID->setCategory(tr("Miscellaneous"));
+
+		auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, "Generate connection VHD file", true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
+		propGenerateVHD->setCategory(tr("Miscellaneous"));
 	}
 
     Connection::Connection(const Connection& that):Connection()
@@ -81,6 +87,8 @@ namespace Hardware
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
         writer.writeAttribute("ManualSettings", manualSettings() ? "true" : "false");
         writer.writeAttribute("SignalList", signalList().join(';'));
+		writer.writeAttribute("DisableDataID", disableDataID() ? "true" : "false");
+		writer.writeAttribute("GenerateVHDFile", generateVHDFile() ? "true" : "false");
 
         // Tx/Rx words quantity
         //
@@ -147,6 +155,16 @@ namespace Hardware
         {
             setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
         }
+
+		if (reader.attributes().hasAttribute("DisableDataID"))
+		{
+			setDisableDataID(reader.attributes().value("DisableDataID").toString() == "true" ? true : false);
+		}
+
+		if (reader.attributes().hasAttribute("GenerateVHDFile"))
+		{
+			setGenerateVHDFile(reader.attributes().value("GenerateVHDFile").toString() == "true" ? true : false);
+		}
 
         // Tx/Rx words quantity, may be overloaded later
         //
@@ -498,6 +516,26 @@ namespace Hardware
     {
         m_signalList = value;
     }
+
+	bool Connection::disableDataID() const
+	{
+		return m_disableDataID;
+	}
+
+	void Connection::setDisableDataID(bool value)
+	{
+		m_disableDataID = value;
+	}
+
+	bool Connection::generateVHDFile() const
+	{
+		return m_generateVHDFile;
+	}
+
+	void Connection::setGenerateVHDFile(bool value)
+	{
+		m_generateVHDFile = value;
+	}
 
 
     //

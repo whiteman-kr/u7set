@@ -107,6 +107,12 @@ namespace Hardware
 		QStringList signalList() const;
 		void setSignalList(const QStringList& value);
 
+		bool disableDataID() const;
+		void setDisableDataID(bool value);
+
+		bool generateVHDFile() const;
+		void setGenerateVHDFile(bool value);
+
 		Hardware::Connection& operator = (const Hardware::Connection& that)
 		{
 			m_index = that.m_index;
@@ -134,6 +140,9 @@ namespace Hardware
 			m_enableSerial = that.m_enableSerial;
 			m_enableDuplex = that.m_enableDuplex;
 			m_manualSettings = that.m_manualSettings;
+
+			m_disableDataID = that.m_disableDataID;
+			m_generateVHDFile = that.m_generateVHDFile;
 
 			setMode(that.mode());
 			setSignalList(that.signalList());
@@ -169,6 +178,9 @@ namespace Hardware
 		bool m_enableSerial = false;
 		bool m_enableDuplex = false;
 		bool m_manualSettings = false;
+
+		bool m_disableDataID = false;
+		bool m_generateVHDFile = false;
 
 		QStringList m_signalList;
 	};
