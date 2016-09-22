@@ -166,17 +166,16 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     setWindowTitle(tr("Optical Connections Editor"));
 
     QStringList l;
-    l << tr("ID");
 	l << tr("ConnectionID");
 	l << tr("Port1 EquipmentID");
 	l << tr("Port2 EquipmentID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
-    ui->m_list->setColumnWidth(il++, 50);
     ui->m_list->setColumnWidth(il++, 100);
     ui->m_list->setColumnWidth(il++, 250);
     ui->m_list->setColumnWidth(il++, 250);
+	ui->m_list->setSortingEnabled(true);
 
     QString errorCode;
 
@@ -190,10 +189,29 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
 	updateButtons();
     fillConnectionsList();
+
+	for (int i = 0; i < ui->m_list->columnCount(); i++)
+	{
+		ui->m_list->resizeColumnToContents(i);
+	}
+
+	ui->m_list->sortByColumn(theSettings.m_connectionEditorSortColumn, theSettings.m_connectionEditorSortOrder);
+
+	connect(ui->m_list->header(), &QHeaderView::sortIndicatorChanged, this, &DialogConnectionsEditor::sortIndicatorChanged);
+
+
+	if (theSettings.m_connectionEditorWindowPos.x() != -1 && theSettings.m_connectionEditorWindowPos.y() != -1)
+	{
+		move(theSettings.m_connectionEditorWindowPos);
+		restoreGeometry(theSettings.m_connectionEditorWindowGeometry);
+	}
 }
 
 DialogConnectionsEditor::~DialogConnectionsEditor()
 {
+	theSettings.m_connectionEditorWindowPos = pos();
+	theSettings.m_connectionEditorWindowGeometry = saveGeometry();
+
 	theDialogConnectionsEditor = nullptr;
 	delete ui;
 }
@@ -216,7 +234,7 @@ void DialogConnectionsEditor::fillConnectionsList()
 			continue;
 		}
 
-        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
 													connection->connectionID() <<
 													connection->port1EquipmentID() <<
 													connection->port2EquipmentID());
@@ -369,7 +387,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
 
     connections.add(connection);
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
 												connection->connectionID() <<
 												connection->port1EquipmentID() <<
 												connection->port2EquipmentID());
@@ -608,5 +626,12 @@ void DialogConnectionsEditor::on_m_list_itemSelectionChanged()
 	updateButtons();
 }
 
+void DialogConnectionsEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	theSettings.m_connectionEditorSortColumn = column;
+	theSettings.m_connectionEditorSortOrder = order;
+}
+
 DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
+
 

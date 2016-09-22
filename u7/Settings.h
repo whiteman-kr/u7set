@@ -109,7 +109,14 @@ public:
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
 
-    //Connection properties
+	//Connection editor
+	//
+	QPoint m_connectionEditorWindowPos;
+	QByteArray m_connectionEditorWindowGeometry;
+	int m_connectionEditorSortColumn;
+	Qt::SortOrder m_connectionEditorSortOrder;
+
+	//Connection properties
     //
     QPoint m_connectionPropertiesWindowPos;
     QByteArray m_connectionPropertiesWindowGeometry;

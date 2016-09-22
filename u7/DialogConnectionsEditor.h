@@ -65,6 +65,7 @@ private slots:
 	void on_m_list_itemSelectionChanged();
 
 	void on_m_Apply_clicked();
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
 private:
     Ui::DialogConnectionsEditor *ui;
