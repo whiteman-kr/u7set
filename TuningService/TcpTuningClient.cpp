@@ -46,9 +46,13 @@ namespace Tuning
 
 		for(int i = 0; i < count; i++)
 		{
-			Tuning::TuningDataSource source;
+			Tuning::TuningSource source;
 
 			source.setInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+
+			QString str = QString("Tuning source '%1', %2").arg(source.lmAdapterID()).arg(source.lmAddressStr());
+
+			qDebug() << C_STR(str);
 		}
 	}
 

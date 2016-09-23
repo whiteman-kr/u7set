@@ -12,6 +12,17 @@ namespace Tuning
 
 	struct TuningSignalState;
 
+
+	struct TuningSignalState
+	{
+		double currentValue = 0;
+		double lowLimit = 0;
+		double highLimit = 0;
+
+		bool valid = false;
+	};
+
+
 	class TuningFramesData
 	{
 	public:

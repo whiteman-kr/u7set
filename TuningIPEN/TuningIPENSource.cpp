@@ -1,7 +1,7 @@
-#include "TuningDataSource.h"
+#include "TuningIPENSource.h"
 
 
-namespace Tuning
+namespace TuningIPEN
 {
 
 	// -------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	TuningDataSource::TuningDataSource()
+	TuningSource::TuningSource()
 	{
 		m_lmDataType = DataSource::DataType::Tuning;
 
@@ -18,7 +18,7 @@ namespace Tuning
 	}
 
 
-	TuningDataSource::~TuningDataSource()
+	TuningSource::~TuningSource()
 	{
 		if (m_deleteTuningData == true)
 		{
@@ -27,7 +27,7 @@ namespace Tuning
 	}
 
 
-	void TuningDataSource::setTuningData(TuningData* tuningData)
+	void TuningSource::setTuningData(Tuning::TuningData* tuningData)
 	{
 		if (tuningData == nullptr)
 		{
@@ -39,11 +39,11 @@ namespace Tuning
 	}
 
 
-	void TuningDataSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
+	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
 	{
 		if (m_tuningData == nullptr)
 		{
-			TuningData td(lmEquipmentID(), 0, 0);
+			Tuning::TuningData td(lmEquipmentID(), 0, 0);
 			td.writeToXml(xml);
 			return;
 		}
@@ -52,11 +52,11 @@ namespace Tuning
 	}
 
 
-	bool TuningDataSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
+	bool TuningSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
 	{
 		assert(m_tuningData == nullptr);
 
-		m_tuningData = new TuningData();
+		m_tuningData = new Tuning::TuningData();
 
 		m_deleteTuningData = true;
 
@@ -67,7 +67,7 @@ namespace Tuning
 	}
 
 
-	void TuningDataSource::getTuningDataSourceInfo(TuningDataSourceInfo& info)
+	void TuningSource::getTuningDataSourceInfo(TuningSourceInfo& info)
 	{
 		info.channel = m_lmChannel;
 		info.dataType = m_lmDataType;
@@ -108,7 +108,7 @@ namespace Tuning
 	}
 
 
-	int TuningDataSource::nextFrameToRequest()
+	int TuningSource::nextFrameToRequest()
 	{
 		if (m_tuningData != nullptr)
 		{
@@ -130,25 +130,25 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	TuningDataSources::~TuningDataSources()
+	TuningSources::~TuningSources()
 	{
 		clear();
 	}
 
 
-	void TuningDataSources::clear()
+	void TuningSources::clear()
 	{
-		for(TuningDataSource* ds : *this)
+		for(TuningSource* ds : *this)
 		{
 			delete ds;
 		}
 
-		QHash<QString, TuningDataSource*>::clear();
-		m_ip2DataSource.clear();
+		QHash<QString, TuningSource*>::clear();
+		m_ip2Source.clear();
 	}
 
 
-	void TuningDataSources::getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info)
+	void TuningSources::getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info)
 	{
 		info.clear();
 
@@ -156,7 +156,7 @@ namespace Tuning
 
 		int index = 0;
 
-		for(TuningDataSource* source : (*this))
+		for(TuningSource* source : (*this))
 		{
 			if (source == nullptr)
 			{
@@ -177,27 +177,27 @@ namespace Tuning
 	}
 
 
-	void TuningDataSources::buildIP2DataSourceMap()
+	void TuningSources::buildIP2DataSourceMap()
 	{
-		for(TuningDataSource* source : *this)
+		for(TuningSource* source : *this)
 		{
-			m_ip2DataSource.insert(source->lmAddress32(), source);
+			m_ip2Source.insert(source->lmAddress32(), source);
 		}
 	}
 
 
-	TuningDataSource* TuningDataSources::getDataSourceByIP(quint32 ip)
+	TuningSource* TuningSources::getDataSourceByIP(quint32 ip)
 	{
-		if (m_ip2DataSource.contains(ip))
+		if (m_ip2Source.contains(ip))
 		{
-			return m_ip2DataSource[ip];
+			return m_ip2Source[ip];
 		}
 
 		return nullptr;
 	}
 
 
-	void TuningDataSource::processReply(const Tuning::SocketReply& reply)
+	void TuningSource::processReply(const Tuning::SocketReply& reply)
 	{
 		m_receivedRepyCount++;
 
@@ -224,7 +224,7 @@ namespace Tuning
 	}
 
 
-	void TuningDataSource::testConnection(qint64 nowTime)
+	void TuningSource::testConnection(qint64 nowTime)
 	{
 		if (nowTime - m_lastReplyTime > 2000)		// connection timeout == 2 seconds
 		{
@@ -233,7 +233,7 @@ namespace Tuning
 	}
 
 
-	bool TuningDataSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
+	bool TuningSource::getSignalState(const QString& appSignalID, Tuning::TuningSignalState* tss)
 	{
 		if (tss == nullptr)
 		{
@@ -257,7 +257,7 @@ namespace Tuning
 	}
 
 
-	bool TuningDataSource::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
+	bool TuningSource::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -268,7 +268,7 @@ namespace Tuning
 	}
 
 
-	quint64 TuningDataSource::uniqueID()
+	quint64 TuningSource::uniqueID()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -280,9 +280,9 @@ namespace Tuning
 	}
 
 
-	TuningDataSourceState TuningDataSource::getState()
+	TuningSourceState TuningSource::getState()
 	{
-		TuningDataSourceState state;
+		TuningSourceState state;
 
 		state.lmEquipmentID = m_lmEquipmentID;
 		state.hasConnection = m_hasConnection;

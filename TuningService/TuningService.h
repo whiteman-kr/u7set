@@ -5,7 +5,7 @@
 #include "../lib/CfgServerLoader.h"
 #include "../AppDataService/AppSignalStateEx.h"
 #include "../TuningService/TuningSocket.h"
-#include "TuningDataSource.h"
+#include "TuningSource.h"
 #include "TcpTuningServer.h"
 
 namespace Tuning
@@ -59,7 +59,7 @@ namespace Tuning
 
 	private:
 		TuningServiceSettings m_tuningSettings;
-		TuningDataSources m_tuningSources;
+		TuningSources m_tuningSources;
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

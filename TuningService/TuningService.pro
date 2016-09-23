@@ -38,7 +38,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/ServiceSettings.cpp \
-    TuningDataSource.cpp \
     ../lib/Queue.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/DeviceObject.cpp \
@@ -58,7 +57,8 @@ SOURCES += \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     TcpTuningServer.cpp \
-    TcpTuningClient.cpp
+    TcpTuningClient.cpp \
+    TuningSource.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -77,7 +77,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/XmlHelper.h \
     ../lib/ServiceSettings.h \
-    TuningDataSource.h \
     ../lib/Queue.h \
     ../lib/DeviceHelper.h \
     ../lib/DeviceObject.h \
@@ -96,7 +95,8 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     TcpTuningServer.h \
-    TcpTuningClient.h
+    TcpTuningClient.h \
+    TuningSource.h
 
 include(../qtservice/src/qtservice.pri)
 

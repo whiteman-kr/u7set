@@ -82,7 +82,7 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/HostAddressPort.cpp \
     ../TuningService/TcpTuningClient.cpp \
-    ../TuningService/TuningDataSource.cpp \
+    ../TuningService/TuningSource.cpp \
     ../lib/PropertyObject.cpp \
     ../lib/Signal.cpp \
     ../TuningService/TuningDataStorage.cpp \
@@ -115,7 +115,7 @@ HEADERS  += MainWindow.h \
     ../Proto/serialization.pb.h \
     ../lib/HostAddressPort.h \
     ../TuningService/TcpTuningClient.h \
-    ../TuningService/TuningDataSource.h \
+    ../TuningService/TuningSource.h \
     ../lib/PropertyObject.h \
     ../lib/Signal.h \
     ../TuningService/TuningDataStorage.h \

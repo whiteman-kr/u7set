@@ -4,7 +4,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/DataSource.h"
 #include "../lib/Service.h"
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 #include "../TuningService/TuningService.h"
 #include "TuningIPENService.h"
 
@@ -40,7 +40,7 @@ private:
 	QWidget* m_automaticPowerRegulatorWidget;
 
 	TuningIPEN::TuningIPENService* m_service = nullptr;
-	QVector<Tuning::TuningDataSourceInfo> m_info;
+	QVector<TuningIPEN::TuningSourceInfo> m_info;
 	QMap<QString, QLabel*> m_statusLabelMap;
 
 	QScrollBar* m_scrollBar;
@@ -48,8 +48,8 @@ private:
 	QThread* m_logThread;
 	LogWriter* m_logWriter;
 
-	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
-	DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id);
+	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
+	DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id);
 
 	bool loadConfigurationFromFile(const QString& fileName);
 	bool readTuningDataSources(XmlReadHelper& xml);
@@ -58,7 +58,7 @@ public slots:
 	void updateSignalStates();
 
 	void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-	void updateDataSourceStatus(Tuning::TuningDataSourceState state);
+	void updateDataSourceStatus(TuningIPEN::TuningSourceState state);
 
 	void applyNewScrollBarValue();
 

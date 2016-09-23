@@ -118,7 +118,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENServiceWorker::getTuningDataSourcesInfo(QVector<Tuning::TuningDataSourceInfo>& info)
+	void TuningIPENServiceWorker::getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info)
 	{
 		m_dataSources.getTuningDataSourcesInfo(info);
 	}
@@ -150,7 +150,7 @@ namespace TuningIPEN
 				return false;
 			}
 
-			Tuning::TuningDataSource* ds = new Tuning::TuningDataSource();
+			TuningIPEN::TuningSource* ds = new TuningIPEN::TuningSource();
 
 			result &= ds->readFromXml(xml);
 
@@ -240,7 +240,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::TuningDataSource* source = m_dataSources[sourceID];
+		TuningIPEN::TuningSource* source = m_dataSources[sourceID];
 
 		if (source == nullptr)
 		{
@@ -292,7 +292,7 @@ namespace TuningIPEN
 
 	void TuningIPENServiceWorker::allocateSignalsAndStates()
 	{
-		QVector<Tuning::TuningDataSourceInfo> info;
+		QVector<TuningIPEN::TuningSourceInfo> info;
 
 		getTuningDataSourcesInfo(info);
 
@@ -301,7 +301,7 @@ namespace TuningIPEN
 		m_appSignals.clear();
 		m_signal2Source.clear();
 
-		for(const Tuning::TuningDataSourceInfo& source : info)
+		for(const TuningIPEN::TuningSourceInfo& source : info)
 		{
 			for(const Signal& signal : source.tuningSignals)
 			{
@@ -353,7 +353,7 @@ namespace TuningIPEN
 
 	void TuningIPENServiceWorker::sendPeriodicReadRequests()
 	{
-		for(Tuning::TuningDataSource* source : m_dataSources)
+		for(TuningIPEN::TuningSource* source : m_dataSources)
 		{
 			sendPeriodicFrameRequest(source);
 		}
@@ -364,7 +364,7 @@ namespace TuningIPEN
 	{
 		qint64 nowTime = QDateTime::currentMSecsSinceEpoch();
 
-		for(Tuning::TuningDataSource* source : m_dataSources)
+		for(TuningIPEN::TuningSource* source : m_dataSources)
 		{
 			if (source == nullptr)
 			{
@@ -376,7 +376,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENServiceWorker::sendPeriodicFrameRequest(Tuning::TuningDataSource* source)
+	void TuningIPENServiceWorker::sendPeriodicFrameRequest(TuningIPEN::TuningSource* source)
 	{
 		if (m_tuningSocket == nullptr)
 		{
@@ -433,7 +433,7 @@ namespace TuningIPEN
 
 			replyPreprocessing(sr);
 
-			Tuning::TuningDataSource* source = m_dataSources.getDataSourceByIP(sr.lmIP);
+			TuningIPEN::TuningSource* source = m_dataSources.getDataSourceByIP(sr.lmIP);
 
 			if (source == nullptr)
 			{
@@ -472,7 +472,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::TuningDataSource* source = m_dataSources[sourceID];
+		TuningIPEN::TuningSource* source = m_dataSources[sourceID];
 
 		if (source == nullptr)
 		{
@@ -497,7 +497,7 @@ namespace TuningIPEN
 
 	void TuningIPENServiceWorker::emitTuningDataSourcesStates()
 	{
-		for(Tuning::TuningDataSource* source : m_dataSources)
+		for(TuningIPEN::TuningSource* source : m_dataSources)
 		{
 			if (source == nullptr)
 			{
@@ -522,7 +522,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENService::getTuningDataSourcesInfo(QVector<Tuning::TuningDataSourceInfo>& info)
+	void TuningIPENService::getTuningDataSourcesInfo(QVector<TuningIPEN::TuningSourceInfo>& info)
 	{
 		if (m_tuningServiceWorker == nullptr)
 		{

@@ -75,9 +75,9 @@ namespace Tuning
 	{
 		m_getTuningSourcesInfoReply.Clear();
 
-		const TuningDataSources& tuningSrcs = tuningSources();
+		const TuningSources& tuningSrcs = tuningSources();
 
-		for(const TuningDataSource* source : tuningSrcs)
+		for(const TuningSource* source : tuningSrcs)
 		{
 			Network::DataSourceInfo* protoInfo = m_getTuningSourcesInfoReply.add_datasourceinfo();
 			source->getInfo(protoInfo);
@@ -94,7 +94,7 @@ namespace Tuning
 	}
 
 
-	TuningDataSources& TcpTuningServer::tuningSources()
+	TuningSources& TcpTuningServer::tuningSources()
 	{
 		return m_thread->tuningSources();
 	}
@@ -108,7 +108,7 @@ namespace Tuning
 
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort& listenAddressPort,
 							TcpTuningServer* server,
-							TuningDataSources& tuningSources) :
+							TuningSources& tuningSources) :
 		Tcp::ServerThread(listenAddressPort, server),
 		m_tuningSources(tuningSources)
 	{
@@ -116,7 +116,7 @@ namespace Tuning
 	}
 
 
-	TuningDataSources& TcpTuningServerThread::tuningSources()
+	TuningSources& TcpTuningServerThread::tuningSources()
 	{
 		return 	m_tuningSources;
 	}
