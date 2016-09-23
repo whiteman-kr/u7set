@@ -842,12 +842,12 @@ void ObjectFilterStorage::createAutomaticFilters()
 
 		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
 		{
-			TuningSource ts = theObjects.tuningSource(i);
+			QString ts = theObjects.tuningSourceEquipmentId(i);
 
 			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
-			ofTs->setEquipmentIDMask(ts.m_equipmentId);
-			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts.m_equipmentId);
-			ofTs->setCaption(ts.m_equipmentId);
+			ofTs->setEquipmentIDMask(ts);
+			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
+			ofTs->setCaption(ts);
 			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofEquipment->addChild(ofTs);

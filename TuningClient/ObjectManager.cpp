@@ -25,18 +25,19 @@ TuningObject ObjectManager::object(int index)
 int ObjectManager::tuningSourcesCount()
 {
 	QMutexLocker l(&m_mutex);
-	return static_cast<int>(m_tuningSources.size());
+	return static_cast<int>(m_tuningSourcesList.size());
 }
 
-TuningSource ObjectManager::tuningSource(int index)
+QString ObjectManager::tuningSourceEquipmentId(int index)
 {
 	QMutexLocker l(&m_mutex);
-	if (index < 0 || index >= m_tuningSources.size())
+	if (index < 0 || index >= m_tuningSourcesList.size())
 	{
 		assert(false);
-		return TuningSource();
+		return QString();
 	}
-	return m_tuningSources[index];
+
+	return m_tuningSourcesList[index];
 }
 
 
@@ -150,25 +151,17 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 
 	// Create Tuning sources
 	//
-	m_tuningSources.clear();
-
-	std::map<QString, int> sourcesExistingMap;
+	m_tuningSourcesList.clear();
 
 	for (auto o : m_objects)
 	{
-		if (sourcesExistingMap.find(o.equipmentID()) == sourcesExistingMap.end())
+		if (m_tuningSourcesList.indexOf(o.equipmentID()) == -1)
 		{
-			TuningSource ts;
-			ts.m_equipmentId = o.equipmentID();
-
-			sourcesExistingMap[o.equipmentID()] = 0;
-			m_tuningSources.push_back(ts);
+			m_tuningSourcesList.append(o.equipmentID());
 
 		}
 	}
 
 	return !reader.hasError();
 }
-
-ObjectManager theObjects;
 

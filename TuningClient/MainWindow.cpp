@@ -27,13 +27,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	// TcpSignalClient
 	//
 	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-	m_tcpTuningClient = new TcpTuningClient(&m_configController, fakeAddress, fakeAddress);
+	theTcpTuningClient = new TcpTuningClient(&m_configController, fakeAddress, fakeAddress);
 
-	m_tcpClientThread = new SimpleThread(m_tcpTuningClient);
+	m_tcpClientThread = new SimpleThread(theTcpTuningClient);
 	m_tcpClientThread->start();
 
-	connect(m_tcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
-	connect(m_tcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
+	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
 
 	//
 
@@ -141,13 +141,13 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-	if  (event->timerId() == m_updateStatusBarTimerId && m_tcpTuningClient != nullptr)
+	if  (event->timerId() == m_updateStatusBarTimerId && theTcpTuningClient != nullptr)
 	{
 		assert(m_statusBarConnectionState);
 		assert(m_statusBarConnectionStatistics);
 
 		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState tuningClientState =  m_tcpTuningClient->getConnectionState();
+		Tcp::ConnectionState tuningClientState =  theTcpTuningClient->getConnectionState();
 
 		// State
 		//

@@ -15,8 +15,14 @@ public:
 	explicit DialogTuningSources(QWidget *parent = 0);
 	~DialogTuningSources();
 
+protected:
+	void timerEvent(QTimerEvent* event);
+
+
 private:
 	Ui::DialogTuningSources *ui;
+
+	int m_updateStateTimerId = -1;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

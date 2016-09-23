@@ -32,7 +32,6 @@ private:
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
-	TcpTuningClient* m_tcpTuningClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
