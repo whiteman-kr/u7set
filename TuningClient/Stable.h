@@ -37,5 +37,6 @@
 #include <QAction>
 #include <QMenu>
 #include <QMenuBar>
+#include <QButtonGroup>
 
 #endif // STABLE_H

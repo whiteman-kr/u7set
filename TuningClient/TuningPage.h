@@ -63,12 +63,21 @@ private:
 
 class FilterButton : public QPushButton
 {
+	Q_OBJECT
 public:
-	FilterButton(const QString& filterId, const QString& caption, QWidget* parent = nullptr);
+	FilterButton(Hash hash, const QString& caption, QWidget* parent = nullptr);
+
+	Hash filterHash();
 
 private:
-	QString m_filterId;
+	Hash m_filterHash;
 	QString m_caption;
+
+private slots:
+	void slot_toggled(bool checked);
+
+signals:
+	void filterButtonClicked(Hash hash);
 };
 
 
@@ -79,15 +88,21 @@ public:
 	explicit TuningPage(int tuningPageIndex, ObjectFilter* tabFilter, QWidget *parent = 0);
 	~TuningPage();
 
+	void fillObjectsList();
+
 signals:
 
+private slots:
+	void slot_filterButtonClicked(Hash hash);
+
 public slots:
+	void slot_filterTreeChanged(Hash hash);
 
 private:
 
 	QTableView* m_objectList = nullptr;
 
-	std::vector<FilterButton*> m_buttons;
+	QButtonGroup *m_filterButtonGroup = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
@@ -109,7 +124,11 @@ private:
 
 	std::vector<int> m_objectsIndexes;
 
+	ObjectFilter* m_treeFilter = nullptr;
+
 	ObjectFilter* m_tabFilter = nullptr;
+
+	ObjectFilter* m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 
