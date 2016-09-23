@@ -86,7 +86,7 @@ namespace Tuning
 			if (m_socketBound == true)
 			{
 				QString str = QString("DataChannel: socket bound on %1 - OK").arg(m_tuningIP.addressPortStr());
-				qDebug() << str;
+				qDebug() << C_STR(str);
 			}
 		}
 	}

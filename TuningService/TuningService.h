@@ -6,7 +6,7 @@
 #include "../AppDataService/AppSignalStateEx.h"
 #include "../TuningService/TuningSocket.h"
 #include "TuningDataSource.h"
-
+#include "TcpTuningServer.h"
 
 namespace Tuning
 {
@@ -40,14 +40,18 @@ namespace Tuning
 		void clearConfiguration();
 		void applyNewConfiguration();
 
-		bool readConfiguration(const QByteArray& fileData);
+		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
 		bool readTuningDataSources(XmlReadHelper& xml);
 
 		void allocateSignalsAndStates();
 
+		void runTcpTuningServerThread();
+		void stopTcpTuningServerThread();
+
 		void runTuningSocket();
 		void stopTuningSocket();
+
 
 	private slots:
 		void onTimer();
@@ -55,15 +59,11 @@ namespace Tuning
 
 	private:
 		TuningServiceSettings m_tuningSettings;
-
-		TuningDataSources m_dataSources;
-
-		QHash<QString, QString> m_signal2Source;
-
-		AppSignals m_appSignals;
-		AppSignalStates m_appSignalStates;
+		TuningDataSources m_tuningSources;
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
+
+		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
 		Tuning::TuningSocketWorker* m_tuningSocket = nullptr;
 		SimpleThread* m_tuningSocketThread = nullptr;

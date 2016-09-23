@@ -8,7 +8,7 @@
 #include "DialogTuningSources.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-	m_configController(theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
+	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
 	QMainWindow(parent)
 {
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)

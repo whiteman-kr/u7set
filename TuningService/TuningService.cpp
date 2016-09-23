@@ -30,7 +30,7 @@ namespace Tuning
 
 	void TuningServiceWorker::clear()
 	{
-		m_dataSources.clear();
+		m_tuningSources.clear();
 	}
 
 
@@ -67,10 +67,11 @@ namespace Tuning
 
 	void TuningServiceWorker::shutdown()
 	{
+		clearConfiguration();
+
 		m_timer.stop();
 
 		stopCfgLoaderThread();
-		stopTuningSocket();
 	}
 
 
@@ -108,26 +109,65 @@ namespace Tuning
 
 	void TuningServiceWorker::clearConfiguration()
 	{
-
+		stopTcpTuningServerThread();
+		stopTuningSocket();
 	}
 
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
-		allocateSignalsAndStates();
+		//allocateSignalsAndStates();
 
 		runTuningSocket();
+		runTcpTuningServerThread();
 	}
 
 
-	bool TuningServiceWorker::readConfiguration(const QByteArray& fileData)
+	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		bool result = true;
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer();
 
-		XmlReadHelper xml(fileData);
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_tuningSettings.clientRequestIP,
+															tcpTuningSever,
+															m_tuningSources);
+		m_tcpTuningServerThread->start();
+	}
+
+
+	void TuningServiceWorker::stopTcpTuningServerThread()
+	{
+		if (m_tcpTuningServerThread != nullptr)
+		{
+			m_tcpTuningServerThread->quitAndWait();
+
+			delete m_tcpTuningServerThread;
+
+			m_tcpTuningServerThread = nullptr;
+		}
+	}
+
+
+	bool TuningServiceWorker::readConfiguration(const QByteArray& cfgXmlData)
+	{
+		QString str;
+
+		XmlReadHelper xml(cfgXmlData);
+
+		bool result = true;
 
 		result &= m_tuningSettings.readFromXml(xml);
 		result &= readTuningDataSources(xml);
+
+		if  (result == true)
+		{
+			str = QString("Configuration is loaded successful");
+		}
+		else
+		{
+			str = QString("Loading configuration error");
+		}
+
+		qDebug() << C_STR(str);
 
 		return result;
 	}
@@ -175,7 +215,7 @@ namespace Tuning
 	{
 		bool result = true;
 
-		m_dataSources.clear();
+		m_tuningSources.clear();
 
 		result = xml.findElement("TuningLMs");
 
@@ -207,10 +247,10 @@ namespace Tuning
 				break;
 			}
 
-			m_dataSources.insert(ds->lmEquipmentID(), ds);
+			m_tuningSources.insert(ds->lmEquipmentID(), ds);
 		}
 
-		m_dataSources.buildIP2DataSourceMap();
+		m_tuningSources.buildIP2DataSourceMap();
 
 		return result;
 	}
@@ -220,9 +260,9 @@ namespace Tuning
 	{
 		QVector<TuningDataSourceInfo> info;
 
-		m_dataSources.getTuningDataSourcesInfo(info);
+		m_tuningSources.getTuningDataSourcesInfo(info);
 
-		// allocate Signals
+/*		// allocate Signals
 		//
 		m_appSignals.clear();
 		m_signal2Source.clear();
@@ -263,28 +303,31 @@ namespace Tuning
 			AppSignalStateEx* appSignalState = m_appSignalStates[i];
 
 			appSignalState->setSignalParams(i, appSignal);
-		}
+		}*/
 	}
 
 
 	void TuningServiceWorker::runTuningSocket()
 	{
-	/*	m_tuningSocket = new Tuning::TuningSocketWorker(m_tuningSettings.tuningDataIP, m_tuningService);
+		TuningSocketWorker* tuningSocket = new TuningSocketWorker(m_tuningSettings.tuningDataIP);
 
-		connect(m_tuningSocket, &Tuning::TuningSocketWorker::replyReady, this, &TuningServiceWorker::onReplyReady);
+		m_tuningSocketThread = new SimpleThread(tuningSocket);
+		m_tuningSocketThread->start();
 
-		m_tuningSocketThread = new SimpleThread(m_tuningSocket);
-		m_tuningSocketThread->start();*/
+//		connect(m_tuningSocket, &TuningSocketWorker::replyReady, this, &TuningServiceWorker::onReplyReady);
 	}
 
 
 	void TuningServiceWorker::stopTuningSocket()
 	{
-/*		if (m_tuningSocketThread != nullptr)
+		if (m_tuningSocketThread != nullptr)
 		{
 			m_tuningSocketThread->quitAndWait();		// m_tuningSocket delete inside
+
 			delete m_tuningSocketThread;
-		}*/
+
+			m_tuningSocketThread = nullptr;
+		}
 	}
 
 
@@ -295,8 +338,6 @@ namespace Tuning
 
 	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 	{
-		qDebug() << "Configuration Ready!";
-
 		if (m_cfgLoaderThread == nullptr)
 		{
 			return;
@@ -306,54 +347,17 @@ namespace Tuning
 
 		bool result = true;
 
-		//result = readConfiguration(configurationXmlData);
+		result = readConfiguration(configurationXmlData);
 
 		if (result == false)
 		{
 			return;
 		}
 
-		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
-		{
-			QByteArray fileData;
-			QString errStr;
-
-			m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
-
-			if (errStr.isEmpty() == false)
-			{
-				qDebug() << errStr;
-				continue;
-			}
-
-			result = true;
-
-/*			if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
-			{
-				result &= readDataSources(fileData);			// fill m_appDataSources
-			}
-
-			if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
-			{
-				result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
-			}
-
-			if (result == true)
-			{
-				qDebug() << "Read file " << bfi.pathFileName << " OK";
-			}
-			else
-			{
-				qDebug() << "Read file " << bfi.pathFileName << " ERROR";
-				break;
-			}*/
-		}
-
-		if (result == true)
-		{
-			applyNewConfiguration();
-		}
+		applyNewConfiguration();
 	}
+
+
 
 
 /*

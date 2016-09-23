@@ -14,10 +14,10 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	std::vector<QTreeWidgetItem*> treeItems;
 
-	int count = theFilters.filterCount();
+	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.filter(i);
+		ObjectFilter* f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -30,6 +30,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
+		item->setData(0, Qt::UserRole, f->hash());
 
 		treeItems.push_back(item);
 
@@ -47,6 +48,8 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 			m_filterTree->addTopLevelItem(item);
 		}
 
+		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
+
 		// Create splitter control
 		//
 		m_hSplitter = new QSplitter();
@@ -60,10 +63,10 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	int tuningPageIndex = 0;
 
-	count = theFilters.filterCount();
+	count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.filter(i);
+		ObjectFilter* f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -77,6 +80,9 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 		TuningPage* tp = new TuningPage(tuningPageIndex++, f);
 
+
+		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
+
 		tuningPages.push_back(std::make_pair(tp, f->caption()));
 	}
 
@@ -85,6 +91,9 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 		// No tab pages, create only one page
 		//
 		m_tuningPage = new TuningPage(tuningPageIndex, nullptr);
+
+		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
+
 		if (m_hSplitter != nullptr)
 		{
 			m_hSplitter->addWidget(m_tuningPage);
@@ -160,9 +169,22 @@ void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem*
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-
+		item->setData(0, Qt::UserRole, f->hash());
 		parent->addChild(item);
 
 		addChildTreeObjects(f, item);
 	}
+}
+
+void TuningWorkspace::slot_treeSelectionChanged()
+{
+	QTreeWidgetItem* item = m_filterTree->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	Hash filterHash = item->data(0, Qt::UserRole).value<Hash>();
+
+	emit filterSelectionChanged(filterHash);
 }

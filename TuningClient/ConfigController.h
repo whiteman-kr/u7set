@@ -49,7 +49,7 @@ class ConfigController : public QObject
 public:
 	ConfigController() = delete;
 
-	ConfigController(HostAddressPort address1, HostAddressPort address2);
+	ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2);
 	virtual ~ConfigController();
 
 	// Methods
@@ -95,6 +95,7 @@ private:
 
 	mutable QMutex m_mutex;
 
+	QWidget* m_parent = nullptr;
 
 	QString m_md5Filters;
 	QString m_md5Schemas;
