@@ -29,9 +29,16 @@ extern const char* const DvsFileName;			// Diagnostics Video Schemas
 extern const char* const McFileName;			// Modules Configurations
 
 extern const char* const AlFileExtension;		// Application Logic schema file extnesion
+extern const char* const AlTemplExtension;		// Application Logic schema template file extnesion
+
 extern const char* const UfbFileExtension;		// User Functional Block schema file extnesion
+extern const char* const UfbTemplExtension;		// User Functional Block template file extnesion
+
 extern const char* const MvsFileExtension;		// Monitor schema file extnesion
+extern const char* const MvsTemplExtension;		// Monitor schema template file extnesion
+
 extern const char* const DvsFileExtension;		// Diagnostics schema file extnesion
+extern const char* const DvsTemplExtension;		// Diagnostics schema template file extnesion
 
 
 //

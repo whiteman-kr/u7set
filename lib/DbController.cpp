@@ -1750,6 +1750,11 @@ int DbController::afblFileId() const
 	return m_worker->afblFileId();
 }
 
+int DbController::ufblFileId() const
+{
+	return m_worker->ufblFileId();
+}
+
 int DbController::alFileId() const
 {
 	return m_worker->alFileId();

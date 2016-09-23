@@ -230,6 +230,7 @@ public:
 
 	int rootFileId() const;		// Root file
 	int afblFileId() const;		// Application Functional Block Library
+	int ufblFileId() const;		// User Functional Block Library
 	int alFileId() const;		// Application Logic
 	int hcFileId() const;		// Hardware Configuration
 	int hpFileId() const;		// Hadware Presets

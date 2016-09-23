@@ -21,6 +21,7 @@ namespace VFrame30
 		setDocHeight(mm2in(210));
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
+		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
 
 		return;
 	}

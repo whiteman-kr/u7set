@@ -58,12 +58,15 @@ public:
 	virtual ~SchemasTabPage();
 
 	template<typename SchemaType>
-	static SchemasTabPage* create(DbController* dbcontroller, QWidget* parent, QString fileExt, QString parentFileName, QString caption);
+	static SchemasTabPage* create(
+			DbController* dbcontroller,	QWidget* parent,
+			QString fileExt, QString parentFileName, QString templFileExt, QString caption);
 
 	template<typename SchemaType1, typename SchemaType2>
-	static SchemasTabPage* create(DbController* dbcontroller, QWidget* parent,
-								  QString fileExt1, QString parentFileName1, QString caption1,
-								  QString fileExt2, QString parentFileName2, QString caption2);
+	static SchemasTabPage* create(
+			DbController* dbcontroller, QWidget* parent,
+			QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
+			QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2);
 
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
@@ -82,7 +85,9 @@ protected:
 // Create MainTab!!!
 //
 template<typename SchemaType>
-SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* parent, QString fileExt, QString parentFileName, QString caption)
+SchemasTabPage* SchemasTabPage::create(
+		DbController* dbcontroller,	QWidget* parent,
+		QString fileExt, QString parentFileName, QString templFileExt, QString caption)
 {
 	static_assert(std::is_base_of<VFrame30::Schema, SchemaType>::value, "Base class must be VFrame30::Schema");
 	assert(dbcontroller != nullptr);
@@ -99,7 +104,9 @@ SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* pare
 
 	// Add control page
 	//
-	SchemaControlTabPage* controlTabPage = new SchemaControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
+	SchemaControlTabPage* controlTabPage =
+			new SchemaControlTabPage(fileExt, dbcontroller, parentFileName, templFileExt, createFunc);
+
 	p->m_tabWidget->addTab(controlTabPage, caption);
 
 	return p;
@@ -107,8 +114,8 @@ SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* pare
 
 template<typename SchemaType1, typename SchemaType2>
 SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* parent,
-									   QString fileExt1, QString parentFileName1, QString caption1,
-									   QString fileExt2, QString parentFileName2, QString caption2)
+		QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
+		QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2)
 {
 	static_assert(std::is_base_of<VFrame30::Schema, SchemaType1>::value, "Base class must be VFrame30::Schema");
 	static_assert(std::is_base_of<VFrame30::Schema, SchemaType2>::value, "Base class must be VFrame30::Schema");
@@ -133,10 +140,15 @@ SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* pare
 
 	// Add control page
 	//
-	SchemaControlTabPage* controlTabPage1 = new SchemaControlTabPage(fileExt1, dbcontroller, parentFileName1, createFunc1);
+
+	SchemaControlTabPage* controlTabPage1 =
+			new SchemaControlTabPage(fileExt1, dbcontroller, parentFileName1, templFileExt1, createFunc1);
+
 	p->m_tabWidget->addTab(controlTabPage1, caption1);
 
-	SchemaControlTabPage* controlTabPage2 = new SchemaControlTabPage(fileExt2, dbcontroller, parentFileName2, createFunc2);
+	SchemaControlTabPage* controlTabPage2 =
+			new SchemaControlTabPage(fileExt2, dbcontroller, parentFileName2, templFileExt2, createFunc2);
+
 	p->m_tabWidget->addTab(controlTabPage2, caption2);
 
 	return p;
@@ -153,9 +165,10 @@ class SchemaControlTabPage : public QWidget, public HasDbController
 {
     Q_OBJECT
 public:
-	SchemaControlTabPage(const QString& fileExt,
+	SchemaControlTabPage(QString fileExt,
 						 DbController* db,
-						 const QString& parentFileName,
+						 QString parentFileName,
+						 QString templateFileExtension,
 						 std::function<VFrame30::Schema*()> createSchemaFunc);
 
 	virtual ~SchemaControlTabPage();
@@ -190,6 +203,7 @@ public:
 private:
 	std::function<VFrame30::Schema*()> m_createSchemaFunc;
 	SchemaFileView* m_filesView;
+	QString m_templateFileExtension;
 };
 
 

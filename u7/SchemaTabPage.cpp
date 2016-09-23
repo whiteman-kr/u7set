@@ -171,33 +171,25 @@ void SchemasTabPage::projectClosed()
 	//
 	assert(m_tabWidget);
 
-	QWidget* controlTab = nullptr;
-	std::list<QWidget*> tabsToDelete;
-
-	for (int i = 0; i < m_tabWidget->count(); i++)
+	for (int i = m_tabWidget->count() - 1; i >= 0; i--)
 	{
 		QWidget* tabPage = m_tabWidget->widget(i);
 
-		if (dynamic_cast<SchemaControlTabPage*>(tabPage) != nullptr)
+		if (dynamic_cast<SchemaControlTabPage*>(tabPage) == nullptr)
 		{
-			controlTab = tabPage;
+			int tabIndex = m_tabWidget->indexOf(tabPage);
+			assert(tabIndex != -1);
+
+			if (tabIndex != -1)
+			{
+				m_tabWidget->removeTab(i);
+				delete tabPage;
+			}
 		}
-		else
-		{
-			tabsToDelete.push_back(tabPage);
-		}
-	}
-
-	m_tabWidget->clear();
-
-	m_tabWidget->addTab(controlTab, tr("Control"));
-
-	for (auto widget : tabsToDelete)
-	{
-		delete widget;
 	}
 
 	this->setEnabled(false);
+	return;
 }
 
 
@@ -206,11 +198,13 @@ void SchemasTabPage::projectClosed()
 // SchemaControlTabPage
 //
 //
-SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
+SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 										   DbController* db,
-										   const QString& parentFileName,
+										   QString parentFileName,
+										   QString templateFileExtension,
 										   std::function<VFrame30::Schema*()> createSchemaFunc) :
 		HasDbController(db),
+		m_templateFileExtension(templateFileExtension),
 		m_createSchemaFunc(createSchemaFunc)
 {
 	// Create actions
@@ -220,7 +214,7 @@ SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
 	// Create controls
 	//
 	m_filesView = new SchemaFileView(db, parentFileName);
-	m_filesView->filesModel().setFilter(fileExt);
+	m_filesView->filesModel().setFilter("." + fileExt);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 	pMainLayout->addWidget(m_filesView);
@@ -326,7 +320,8 @@ void SchemaControlTabPage::addFile()
 
 	// Show dialog to edit schema properties
 	//
-	CreateSchemaDialog propertiesDialog(schema, this);
+	CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
+
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -338,7 +333,7 @@ void SchemaControlTabPage::addFile()
 	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
-	vfFile->setFileName(schema->schemaID() + "." + m_filesView->filesModel().filter());
+	vfFile->setFileName(schema->schemaID() + m_filesView->filesModel().filter());
 	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
