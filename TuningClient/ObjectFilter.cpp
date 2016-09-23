@@ -12,7 +12,7 @@ ObjectFilter::ObjectFilter(FilterType filterType)
 	m_filterType = filterType;
 }
 
-bool ObjectFilter::load(QXmlStreamReader& reader)
+bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>>& filtersMap)
 {
 
 	if (reader.attributes().hasAttribute("StrID"))
@@ -68,7 +68,6 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		}
 	}
 
-
 	QXmlStreamReader::TokenType t;
 	do
 	{
@@ -80,10 +79,22 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 			{
 				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
 
-				if (of->load(reader) == false)
+				if (of->load(reader, filtersMap) == false)
 				{
 					return false;
 				}
+
+				of->setStrID(m_strID + "_" + of->strID());
+
+				if (filtersMap.find(of->hash()) != filtersMap.end())
+				{
+					reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
+					return false;
+				}
+
+				filtersMap[of->hash()] = of;
+
+				of->setParent(this);
 
 				m_childFilters.push_back(of);
 			}
@@ -110,7 +121,6 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
 
-	writer.writeAttribute("FilterType", E::valueToString<FilterType>((int)filterType()));
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
 	for (auto f : m_childFilters)
@@ -131,8 +141,13 @@ QString ObjectFilter::strID() const
 void ObjectFilter::setStrID(const QString& value)
 {
 	m_strID = value;
+	m_hash = ::calcHash(value);
 }
 
+Hash ObjectFilter::hash() const
+{
+	return m_hash;
+}
 
 QString ObjectFilter::caption() const
 {
@@ -147,32 +162,75 @@ void ObjectFilter::setCaption(const QString& value)
 
 QString ObjectFilter::customAppSignalIDMask() const
 {
-	return m_customAppSignalIDMask;
+	QString result;
+	for (auto s : m_customAppSignalIDMasks)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
 }
 
 void ObjectFilter::setCustomAppSignalIDMask(const QString& value)
 {
-	m_customAppSignalIDMask = value;
+	if (value.isEmpty() == true)
+	{
+		m_customAppSignalIDMasks.clear();
+	}
+	else
+	{
+		m_customAppSignalIDMasks = value.split(';');
+	}
+
 }
 
 QString ObjectFilter::equipmentIDMask() const
 {
-	return m_equipmentIDMask;
+	QString result;
+	for (auto s : m_equipmentIDMasks)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
 }
 
 void ObjectFilter::setEquipmentIDMask(const QString& value)
 {
-	m_equipmentIDMask = value;
+	if (value.isEmpty() == true)
+	{
+		m_equipmentIDMasks.clear();
+	}
+	else
+	{
+		m_equipmentIDMasks = value.split(';');
+	}
 }
 
 QString ObjectFilter::appSignalIDMask() const
 {
-	return m_appSignalIDMask;
+	QString result;
+	for (auto s : m_appSignalIDMasks)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
 }
 
 void ObjectFilter::setAppSignalIDMask(const QString& value)
 {
-	m_appSignalIDMask = value;
+	if (value.isEmpty() == true)
+	{
+		m_appSignalIDMasks.clear();
+	}
+	else
+	{
+		m_appSignalIDMasks = value.split(';');
+	}
 }
 
 QStringList ObjectFilter::appSignalIds() const
@@ -204,6 +262,37 @@ void ObjectFilter::setSignalType(SignalType value)
 {
 	m_signalType = value;
 }
+
+ObjectFilter* ObjectFilter::parent() const
+{
+	return m_parent;
+}
+
+void ObjectFilter::setParent(ObjectFilter* value)
+{
+	m_parent = value;
+}
+
+bool ObjectFilter::allowAll() const
+{
+	return m_allowAll;
+}
+
+void ObjectFilter::setAllowAll(bool value)
+{
+	m_allowAll = value;
+}
+
+bool ObjectFilter::denyAll() const
+{
+	return m_denyAll;
+}
+
+void ObjectFilter::setDenyAll(bool value)
+{
+	m_denyAll = value;
+}
+
 
 bool ObjectFilter::isTree() const
 {
@@ -247,6 +336,140 @@ ObjectFilter* ObjectFilter::childFilter(int index)
 	return m_childFilters[index].get();
 }
 
+
+bool ObjectFilter::match(const TuningObject& object)
+{
+	if (allowAll() == true)
+	{
+		return true;
+	}
+	if (denyAll() == true)
+	{
+		return false;
+	}
+
+	if (signalType() == ObjectFilter::SignalType::Analog && object.analog() == false)
+	{
+		return false;
+	}
+	if (signalType() == ObjectFilter::SignalType::Discrete && object.analog() == true)
+	{
+		return false;
+	}
+
+	// Mask for equipmentID
+	//
+
+	if (m_equipmentIDMasks.isEmpty() == false)
+	{
+
+		QString s = object.equipmentID();
+
+		bool result = false;
+
+		for (QString m : m_equipmentIDMasks)
+		{
+			if (m.isEmpty() == true)
+			{
+				continue;
+			}
+			QRegExp rx(m.trimmed());
+			rx.setPatternSyntax(QRegExp::Wildcard);
+			if (rx.exactMatch(s))
+			{
+				result = true;
+				break;
+			}
+		}
+		if (result == false)
+		{
+			return false;
+		}
+	}
+
+	// Mask for appSignalId
+	//
+
+	if (m_appSignalIDMasks.isEmpty() == false)
+	{
+
+		QString s = object.appSignalID();
+
+		bool result = false;
+
+		for (QString m : m_appSignalIDMasks)
+		{
+			if (m.isEmpty() == true)
+			{
+				continue;
+			}
+			QRegExp rx(m.trimmed());
+			rx.setPatternSyntax(QRegExp::Wildcard);
+			if (rx.exactMatch(s))
+			{
+				result = true;
+				break;
+			}
+		}
+		if (result == false)
+		{
+			return false;
+		}
+	}
+
+	// List of appSignalId
+	//
+	if (m_appSignalIds.isEmpty() == false)
+	{
+		QString s = object.appSignalID();
+
+		bool result = false;
+
+		for (auto id : m_appSignalIds)
+		{
+			if (id == s)
+			{
+				result = true;
+				break;
+			}
+		}
+		if (result == false)
+		{
+			return false;
+		}
+	}
+
+	// Mask for customAppSignalID
+	//
+
+	if (m_customAppSignalIDMasks.isEmpty() == false)
+	{
+		QString s = object.customAppSignalID();
+
+		bool result = false;
+
+		for (QString m : m_customAppSignalIDMasks)
+		{
+			if (m.isEmpty() == true)
+			{
+				continue;
+			}
+			QRegExp rx(m.trimmed());
+			rx.setPatternSyntax(QRegExp::Wildcard);
+			if (rx.exactMatch(s))
+			{
+				result = true;
+				break;
+			}
+		}
+		if (result == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 
 
 //
@@ -293,7 +516,8 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		return false;
 	}
 
-	m_filters.clear();
+	m_filtersMap.clear();
+	m_topFilters.clear();
 
 	QXmlStreamReader reader(data);
 
@@ -333,12 +557,21 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		{
 			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
-			if (of->load(reader) == false)
+			if (of->load(reader, m_filtersMap) == false)
 			{
+				*errorCode = reader.errorString();
 				return false;
 			}
 
-			m_filters.push_back(of);
+			if (m_filtersMap.find(of->hash()) != m_filtersMap.end())
+			{
+				reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
+				*errorCode = reader.errorString();
+				return false;
+			}
+
+			m_filtersMap[of->hash()] = of;
+			m_topFilters.push_back(of->hash());
 
 			continue;
 		}
@@ -389,14 +622,21 @@ bool ObjectFilterStorage::save(const QString& fileName)
 	for (auto r : records)
 	{
 		writer.writeStartElement(r.first);
-		for (auto of : m_filters)
+		for (auto of : m_topFilters)
 		{
-			if (of->filterType() != r.second)
+			ObjectFilter* f = m_filtersMap[of].get();
+			if (f == nullptr)
+			{
+				assert(f);
+				return false;
+			}
+
+			if (f->filterType() != r.second)
 			{
 				continue;
 			}
 
-			of->save(writer);
+			f->save(writer);
 		}
 		writer.writeEndElement();
 	}
@@ -418,19 +658,34 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-int ObjectFilterStorage::filterCount()
+int ObjectFilterStorage::topFilterCount()
 {
-	return static_cast<int>(m_filters.size());
+	return static_cast<int>(m_topFilters.size());
 }
 
-ObjectFilter* ObjectFilterStorage::filter(int index)
+ObjectFilter* ObjectFilterStorage::topFilter(int index)
 {
-	if (index < 0 || index >= m_filters.size())
+	if (index < 0 || index >= m_topFilters.size())
 	{
 		assert(false);
 		return nullptr;
 	}
-	return m_filters[index].get();
+
+	Hash hash = m_topFilters[index];
+
+	return filter(hash);
+}
+
+ObjectFilter* ObjectFilterStorage::filter(Hash hash)
+{
+	auto it = m_filtersMap.find(hash);
+	if (it == m_filtersMap.end())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return it->second.get();
 }
 
 int ObjectFilterStorage::schemaDetailsCount()
@@ -552,13 +807,38 @@ bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 void ObjectFilterStorage::createAutomaticFilters()
 {
+	if (theSettings.filterBySchema() == true)
+	{
+		// Filter for Schema
+		//
+		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
+		ofSchema->setCaption("Filter by Schema");
+		ofSchema->setDenyAll(true);
+
+		for (auto s : m_schemasDetails)
+		{
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			ofTs->setAppSignalIds(s.m_appSignals);
+			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
+			ofTs->setCaption(s.m_caption);
+			m_filtersMap[ofTs->hash()] = ofTs;
+
+			ofSchema->addChild(ofTs);
+		}
+
+		m_filtersMap[ofSchema->hash()] = ofSchema;
+		m_topFilters.insert(m_topFilters.begin(), ofSchema->hash());
+	}
+
 	if (theSettings.filterByEquipment() == true)
 	{
 		// Filter for EquipmentId
 		//
 		std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-		ofEquipment->setStrID("AUTOFILTER_EQUIPMENT");
+		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption("Filter by EquipmentId");
+		ofEquipment->setDenyAll(true);
 
 		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
 		{
@@ -566,38 +846,50 @@ void ObjectFilterStorage::createAutomaticFilters()
 
 			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
 			ofTs->setEquipmentIDMask(ts.m_equipmentId);
-			ofTs->setStrID(ts.m_equipmentId);
+			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts.m_equipmentId);
 			ofTs->setCaption(ts.m_equipmentId);
+			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofEquipment->addChild(ofTs);
 		}
 
-		m_filters.push_back(ofEquipment);
+		m_filtersMap[ofEquipment->hash()] = ofEquipment;
+		m_topFilters.insert(m_topFilters.begin(), ofEquipment->hash());
 	}
 
-	if (theSettings.filterBySchema() == true)
+	// Root Filter for All in tree
+	//
+	bool createRootFilter = false;
+	for (auto tf : m_topFilters)
 	{
-
-		// Filter for Schema
-		//
-		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-		ofSchema->setStrID("AUTOFILTER_SCHEMA");
-		ofSchema->setCaption("Filter by Schema");
-
-		for (auto s : m_schemasDetails)
+		ObjectFilter* f = filter(tf);
+		if (f->isTree())
 		{
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
-			ofTs->setAppSignalIds(s.m_appSignals);
-			ofTs->setStrID(s.m_strId);
-			ofTs->setCaption(s.m_caption);
-
-			ofSchema->addChild(ofTs);
+			createRootFilter = true;
+			break;
 		}
+	}
+	if (createRootFilter == true)
+	{
+		std::shared_ptr<ObjectFilter> ofRoot = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		ofRoot->setStrID("%AUTOFILTER%_ROOT");
+		ofRoot->setCaption("All objects");
+		ofRoot->setAllowAll(true);
 
-		m_filters.push_back(ofSchema);
+		/*for (auto tf : m_topFilters)
+		{
+			ObjectFilter* f = filter(tf);
+			if (f->isTree())
+			{
+				ofRoot->addChild(m_filtersMap[tf]);
+				f->setParent(ofRoot.get());
+			}
+		}*/
+
+		m_filtersMap[ofRoot->hash()] = ofRoot;
+		m_topFilters.insert(m_topFilters.begin(), ofRoot->hash());
 	}
 }
-
 
 ObjectFilterStorage theFilters;
 ObjectFilterStorage theUserFilters;

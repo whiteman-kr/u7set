@@ -5,6 +5,7 @@
 
 class TuningWorkspace : public QWidget
 {
+	Q_OBJECT
 public:
 	TuningWorkspace(QWidget* parent = nullptr);
 	~TuningWorkspace();
@@ -15,8 +16,13 @@ public:
 
 	TuningPage* m_tuningPage = nullptr;
 
-
 	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
+
+private slots:
+	void slot_treeSelectionChanged();
+
+signals:
+	void filterSelectionChanged(Hash hash);
 
 };
 

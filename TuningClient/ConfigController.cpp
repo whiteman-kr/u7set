@@ -38,7 +38,8 @@ HostAddressPort ConfigConnection::address() const
 // ConfigController
 //
 
-ConfigController::ConfigController(HostAddressPort address1, HostAddressPort address2)
+ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, HostAddressPort address2)
+	:m_parent(parent)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
@@ -241,7 +242,7 @@ bool ConfigController::getObjectFilters()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
-		qDebug()<< completeErrorMessage;
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
 	else
@@ -249,7 +250,7 @@ bool ConfigController::getObjectFilters()
 		if (theFilters.load(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
-			qDebug()<< completeErrorMessage;
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
 	}
@@ -264,8 +265,7 @@ bool ConfigController::getSchemasDetails()
 	if (getFileBlockedById(CFG_FILE_ID_SCHEMAS_DETAILS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get SchemasDetails.xml file error: %1").arg(errorStr);
-		qDebug()<< completeErrorMessage;
-
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
 	else
@@ -273,8 +273,7 @@ bool ConfigController::getSchemasDetails()
 		if (theFilters.loadSchemasDetails(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
-			qDebug()<< completeErrorMessage;
-
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
 	}
@@ -288,8 +287,7 @@ bool ConfigController::getTuningSignals()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
-		qDebug()<< completeErrorMessage;
-
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
 	else
@@ -297,8 +295,7 @@ bool ConfigController::getTuningSignals()
 		if (theObjects.loadSignals(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-			qDebug()<< completeErrorMessage;
-
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
 	}

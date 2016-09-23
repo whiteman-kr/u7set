@@ -2,6 +2,8 @@
 #define OBJECTFILTER_H
 
 #include "Stable.h"
+#include "TuningObject.h"
+#include "../lib/Hash.h"
 
 struct SchemaDetails
 {
@@ -39,8 +41,10 @@ public:
 public:
 	ObjectFilter(FilterType filterType);
 
-	bool load(QXmlStreamReader& reader);
+	bool load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>> &filtersMap);
 	bool save(QXmlStreamWriter& writer);
+
+	bool match(const TuningObject &object);
 
 
 
@@ -49,6 +53,8 @@ public:
 	//
 	QString strID() const;
 	void setStrID(const QString& value);
+
+	Hash hash() const;
 
 	QString caption() const;
 	void setCaption(const QString& value);
@@ -73,6 +79,15 @@ public:
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
 
+	ObjectFilter* parent() const;
+	void setParent(ObjectFilter* value);
+
+	bool allowAll() const;
+	void setAllowAll(bool value);
+
+	bool denyAll() const;
+	void setDenyAll(bool value);
+
 public:
 	bool isTree() const;
 	bool isTab() const;
@@ -89,18 +104,25 @@ private:
 	QString m_strID;
 	QString m_caption;
 
+	bool m_allowAll = false;
+	bool m_denyAll = false;
+
+	Hash m_hash = 0;
+
 	// Filters
 	//
 
-	QString m_customAppSignalIDMask;
-	QString m_equipmentIDMask;
-	QString m_appSignalIDMask;
+	QStringList m_customAppSignalIDMasks;
+	QStringList m_equipmentIDMasks;
+	QStringList m_appSignalIDMasks;
 	QStringList m_appSignalIds;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
 
 	std::vector<std::shared_ptr<ObjectFilter>> m_childFilters;
+
+	ObjectFilter* m_parent = nullptr;
 
 };
 
@@ -117,10 +139,10 @@ public:
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
+	int topFilterCount();
+	ObjectFilter *topFilter(int index);
 
-
-	int filterCount();
-	ObjectFilter *filter(int index);
+	ObjectFilter *filter(Hash hash);
 
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
@@ -129,7 +151,8 @@ public:
 
 private:
 
-	std::vector<std::shared_ptr<ObjectFilter>> m_filters;
+	std::map<Hash, std::shared_ptr<ObjectFilter>> m_filtersMap;
+	std::vector<Hash> m_topFilters;
 	std::vector<SchemaDetails> m_schemasDetails;
 };
 
