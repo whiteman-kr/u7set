@@ -1,15 +1,29 @@
 #include "DataAquisitionServiceWidget.h"
 #include "TcpAppDataClient.h"
 #include <QTableView>
+#include <QAction>
+#include <QHeaderView>
 
 const int DSC_CAPTION = 0,
 DSC_IP = 1,
 DSC_PORT = 2,
 DSC_PART_COUNT = 3,
-DSC_STATE = 4,
-DSC_UPTIME = 5,
-DSC_RECEIVED = 6,
-DSC_SPEED = 7;
+DSC_CHANNEL = 4,
+DSC_DATA_TYPE = 5,
+DSC_EQUIPMENT_ID = 6,
+DSC_MODULE_NUMBER = 7,
+DSC_MODULE_TYPE = 8,
+DSC_SUBSYSTEM_ID = 9,
+DSC_SUBSYSTEM_CAPTION = 10,
+DSC_ADAPTER_ID = 11,
+DSC_ENABLE_DATA = 12,
+DSC_DATA_ID = 13,
+DSC_FIRST_STATE_COLUMN = 14,
+DSC_STATE = 14,
+DSC_UPTIME = 15,
+DSC_RECEIVED = 16,
+DSC_SPEED = 17,
+DSC_COUNT = 18;
 
 const char* const dataSourceColumnStr[] =
 {
@@ -17,6 +31,16 @@ const char* const dataSourceColumnStr[] =
 	"IP",
 	"Port",
 	"Part count",
+	"Channel",
+	"Data type",
+	"Equipment ID",
+	"Module number",
+	"Module type",
+	"Subsystem ID",
+	"Subsystem caption",
+	"Adapter ID",
+	"Enable data",
+	"Data ID",
 	"State",
 	"Uptime",
 	"Received",
@@ -25,12 +49,26 @@ const char* const dataSourceColumnStr[] =
 
 const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSourceColumnStr[0]);
 
+const QVector<int> defaultSourceColumnVisibility =
+{
+	DSC_CAPTION,
+	DSC_IP,
+	DSC_PORT,
+	DSC_PART_COUNT,
+	DSC_STATE,
+	DSC_UPTIME,
+	DSC_RECEIVED,
+	DSC_SPEED
+};
+
 
 const int SC_ID = 0,
 SC_CAPTION = 1,
+SC_FIRST_STATE_COLUMN = 2,
 SC_VALUE = 2,
 SC_VALID = 3,
-SC_UNIT = 4;
+SC_UNIT = 4,
+SC_COUNT = 5;
 
 const char* const signalColumnStr[] =
 {
@@ -49,6 +87,7 @@ DataSourcesStateModel::DataSourcesStateModel(TcpAppDataClient* clientSocket, QOb
 	QAbstractTableModel(parent),
 	m_clientSocket(clientSocket)
 {
+	static_assert(DSC_COUNT == DATA_SOURCE_COLUMN_COUNT, "Data source column count error");
 }
 
 DataSourcesStateModel::~DataSourcesStateModel()
@@ -64,6 +103,7 @@ int DataSourcesStateModel::columnCount(const QModelIndex&) const
 {
 	return DATA_SOURCE_COLUMN_COUNT;
 }
+
 
 QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 {
@@ -81,7 +121,17 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 			case DSC_IP: return d.lmAddressStr();
 			case DSC_PORT: return d.lmPort();
 			case DSC_PART_COUNT: return d.partCount();
-			case DSC_STATE: return d.state();
+			case DSC_CHANNEL: return d.lmChannel();
+			case DSC_DATA_TYPE: return d.lmDataTypeStr();
+			case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
+			case DSC_MODULE_NUMBER: return d.lmNumber();
+			case DSC_MODULE_TYPE: return d.lmModuleType();
+			case DSC_SUBSYSTEM_ID: return d.lmSubsystemID();
+			case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
+			case DSC_ADAPTER_ID: return d.lmAdapterID();
+			case DSC_ENABLE_DATA: return d.lmDataEnable();
+			case DSC_DATA_ID: return d.lmDataID();
+			case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(d.state()));
 			case DSC_UPTIME:
 			{
 				auto time = d.uptime();
@@ -116,6 +166,16 @@ QVariant DataSourcesStateModel::headerData(int section, Qt::Orientation orientat
 	return QAbstractTableModel::headerData(section, orientation, role);
 }
 
+void DataSourcesStateModel::updateData(int firstRow, int lastRow, int firstColumn, int lastColumn)
+{
+	emit dataChanged(index(firstRow, firstColumn), index(lastRow, lastColumn), QVector<int>() << Qt::DisplayRole);
+}
+
+void DataSourcesStateModel::updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
+}
+
 void DataSourcesStateModel::invalidateData()
 {
 	beginResetModel();
@@ -133,11 +193,6 @@ void DataSourcesStateModel::reloadList()
 	endResetModel();
 }
 
-void DataSourcesStateModel::updateStateColumns()
-{
-	emit dataChanged(index(0, DSC_STATE), index(rowCount() - 1, DSC_SPEED));
-}
-
 
 DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
 	BaseServiceStateWidget(ip, portIndex, parent)
@@ -151,12 +206,41 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 	m_dataSourcesView->setModel(m_dataSourcesStateModel);
 
 	connect(m_clientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
-	connect(m_clientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, this, &DataAquisitionServiceWidget::updateSourceInfo);
+	connect(m_clientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &DataAquisitionServiceWidget::updateSourceStateColumns);
 	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
 
-	m_dataSourcesView->resizeColumnsToContents();
-
 	addTab(m_dataSourcesView, tr("Data Sources"));
+
+	QSettings settings;
+	QHeaderView* horizontalHeader = m_dataSourcesView->horizontalHeader();
+	horizontalHeader->setDefaultSectionSize(100);
+	for (int i = 0; i < DSC_COUNT; i++)
+	{
+		m_dataSourcesView->setColumnWidth(i, settings.value(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[i]).replace("/", "|")).replace("\n", " "),
+															m_dataSourcesView->columnWidth(i)).toInt());
+	}
+
+	// Data Source columns actions
+	m_sourceTableHeadersContextMenuActions = new QActionGroup(this);
+	m_sourceTableHeadersContextMenuActions->setExclusive(false);
+	QAction* columnAction = m_sourceTableHeadersContextMenuActions->addAction("All columns");
+	columnAction->setCheckable(true);
+	columnAction->setChecked(settings.value("DataAquisitionServiceWidget/SourceColumnVisibility/All columns", true).toBool());
+
+	for (int i = 0; i < DSC_COUNT; i++)
+	{
+		columnAction = m_sourceTableHeadersContextMenuActions->addAction(QString(dataSourceColumnStr[i]).replace("\n", " "));
+		columnAction->setCheckable(true);
+		bool checked = settings.value(QString("DataAquisitionServiceWidget/SourceColumnVisibility/%1").arg(QString(dataSourceColumnStr[i]).replace("/", "|")).replace("\n", " "),
+									  defaultSourceColumnVisibility.contains(i)).toBool();
+		columnAction->setChecked(checked);
+		m_dataSourcesView->setColumnHidden(i, !checked);
+	}
+
+	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
+	horizontalHeader->addActions(m_sourceTableHeadersContextMenuActions->actions());
+	connect(m_sourceTableHeadersContextMenuActions, &QActionGroup::triggered, this, &DataAquisitionServiceWidget::changeSourceColumnVisibility);
+	connect(horizontalHeader, &QHeaderView::sectionResized, this, &DataAquisitionServiceWidget::saveSourceColumnWidth);
 
 	// Signals
 	m_signalStateModel = new SignalStateModel(m_clientSocket, this);
@@ -164,8 +248,7 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 	m_signalsView->setModel(m_signalStateModel);
 
 	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
-	connect(m_clientSocket, &TcpAppDataClient::appSignalsStateUpdated, m_signalStateModel, &SignalStateModel::updateStateColumns);
-	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, this, &DataAquisitionServiceWidget::updateSignalInfo);
+	connect(m_clientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &DataAquisitionServiceWidget::updateSignalStateColumns);
 	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
 
 	addTab(m_signalsView, tr("Signals"));
@@ -186,17 +269,38 @@ DataAquisitionServiceWidget::~DataAquisitionServiceWidget()
 
 void DataAquisitionServiceWidget::updateSourceInfo()
 {
-	m_dataSourcesView->resizeColumnToContents(DSC_CAPTION);
-	m_dataSourcesView->resizeColumnToContents(DSC_IP);
-	m_dataSourcesView->resizeColumnToContents(DSC_PORT);
-	m_dataSourcesView->resizeColumnToContents(DSC_PART_COUNT);
+	m_dataSourcesStateModel->updateData(m_dataSourcesView->indexAt(QPoint(0, 0)),
+										m_dataSourcesView->indexAt(QPoint(m_dataSourcesView->width(), m_dataSourcesView->height())));
 }
 
 void DataAquisitionServiceWidget::updateSignalInfo()
 {
-	m_signalsView->resizeColumnToContents(SC_ID);
-	m_signalsView->resizeColumnToContents(SC_CAPTION);
-	m_signalsView->resizeColumnToContents(SC_UNIT);
+	m_signalStateModel->updateData(m_signalsView->indexAt(QPoint(0, 0)),
+								   m_signalsView->indexAt(QPoint(m_signalsView->width(), m_signalsView->height())));
+}
+
+void DataAquisitionServiceWidget::updateSourceStateColumns()
+{
+	if (m_dataSourcesView->columnAt(m_dataSourcesView->width()) < DSC_FIRST_STATE_COLUMN)
+	{
+		return;
+	}
+	m_dataSourcesStateModel->updateData(m_dataSourcesView->rowAt(0),
+								   m_dataSourcesView->rowAt(m_dataSourcesView->height()),
+								   std::max(m_dataSourcesView->columnAt(0), DSC_FIRST_STATE_COLUMN),
+								   m_dataSourcesView->columnAt(m_dataSourcesView->width()));
+}
+
+void DataAquisitionServiceWidget::updateSignalStateColumns()
+{
+	if (m_signalsView->columnAt(m_signalsView->width()) < SC_FIRST_STATE_COLUMN)
+	{
+		return;
+	}
+	m_signalStateModel->updateData(m_signalsView->rowAt(0),
+								   m_signalsView->rowAt(m_signalsView->height()),
+								   std::max(m_signalsView->columnAt(0), SC_FIRST_STATE_COLUMN),
+								   m_signalsView->columnAt(m_signalsView->width()));
 }
 
 void DataAquisitionServiceWidget::checkVisibility()
@@ -210,6 +314,51 @@ void DataAquisitionServiceWidget::checkVisibility()
 	{
 		m_dataSourcesStateModel->setActive(false);
 	}*/
+}
+
+void DataAquisitionServiceWidget::saveSourceColumnWidth(int index)
+{
+	QSettings settings;
+	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), m_dataSourcesView->columnWidth(index));
+}
+
+void DataAquisitionServiceWidget::saveSourceColumnVisibility(int index, bool visible)
+{
+	QSettings settings;
+	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnVisibility/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), visible);
+}
+
+void DataAquisitionServiceWidget::changeSourceColumnVisibility(QAction* action)
+{
+	int actionIndex = m_sourceTableHeadersContextMenuActions->actions().indexOf(action);
+	if (actionIndex == 0)
+	{
+		for (int i = 0; i < DSC_COUNT; i++)
+		{
+			if (!action->isChecked())
+			{
+				saveSourceColumnWidth(i);
+			}
+			saveSourceColumnVisibility(i, action->isChecked());
+			m_dataSourcesView->setColumnHidden(i, !action->isChecked());
+			m_sourceTableHeadersContextMenuActions->actions()[i + 1]->setChecked(action->isChecked());
+		}
+	}
+	else
+	{
+		if (!action->isChecked())
+		{
+			saveSourceColumnWidth(actionIndex - 1);
+		}
+		saveSourceColumnVisibility(actionIndex - 1, action->isChecked());
+		m_dataSourcesView->setColumnHidden(actionIndex - 1, !action->isChecked());
+	}
+	if (m_dataSourcesView->horizontalHeader()->hiddenSectionCount() == DSC_COUNT)
+	{
+		m_dataSourcesView->showColumn(DSC_CAPTION);
+		m_sourceTableHeadersContextMenuActions->actions()[DSC_CAPTION + 1]->setChecked(true);
+		saveSourceColumnVisibility(DSC_CAPTION, true);
+	}
 }
 
 SignalStateModel::SignalStateModel(TcpAppDataClient* clientSocket, QObject* parent) :
@@ -288,6 +437,16 @@ QVariant SignalStateModel::headerData(int section, Qt::Orientation orientation, 
 	return QAbstractTableModel::headerData(section, orientation, role);
 }
 
+void SignalStateModel::updateData(int firstRow, int lastRow, int firstColumn, int lastColumn)
+{
+	emit dataChanged(index(firstRow, firstColumn), index(lastRow, lastColumn), QVector<int>() << Qt::DisplayRole);
+}
+
+void SignalStateModel::updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
+}
+
 void SignalStateModel::invalidateData()
 {
 	beginResetModel();
@@ -298,9 +457,4 @@ void SignalStateModel::reloadList()
 {
 	beginResetModel();
 	endResetModel();
-}
-
-void SignalStateModel::updateStateColumns()
-{
-	emit dataChanged(index(0, SC_VALUE), index(rowCount() - 1, SC_VALID));
 }

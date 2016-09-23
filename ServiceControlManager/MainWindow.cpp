@@ -15,6 +15,7 @@
 #include "ServiceTableModel.h"
 #include "../lib/UdpSocket.h"
 #include <functional>
+#include <QHeaderView>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -25,12 +26,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	qRegisterMetaType<Network::ServiceInfo>("ServiceInformation");
 
 	m_serviceTable->setModel(m_serviceModel);
-	connect(m_serviceModel, &ServiceTableModel::dataChanged, m_serviceTable, &QTableView::resizeColumnsToContents);
-	connect(m_serviceModel, &ServiceTableModel::serviceStateChanged, m_serviceTable, &QTableView::resizeRowToContents);
-	connect(m_serviceModel, &ServiceTableModel::rowsAboutToBeInserted, m_serviceTable, &QTableView::resizeColumnsToContents);
 	connect(m_serviceTable, &QTableView::doubleClicked, m_serviceModel, &ServiceTableModel::openServiceStatusWidget);
-	m_serviceTable->resizeColumnsToContents();
 	setCentralWidget(m_serviceTable);
+
+	m_serviceTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_serviceTable->fontMetrics().height() * 1.4 * 3));
+	m_serviceTable->horizontalHeader()->setDefaultSectionSize(250);
+
+	m_serviceTable->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
 	m_trayIcon->setIcon(windowIcon());
 	m_trayIcon->show();

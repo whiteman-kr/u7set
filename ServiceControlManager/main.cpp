@@ -2,6 +2,8 @@
 #include <QtSingleApplication>
 #include <QTranslator>
 #include <QSettings>
+#include <stdlib.h>
+#include <google/protobuf/stubs/common.h>
 //#include "version.h"
 
 #include "../lib/SocketIO.h"
@@ -69,6 +71,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.connect(&a, &QtSingleApplication::messageReceived, &w, &MainWindow::openEditor);
     w.showMaximized();
+
+	atexit(google::protobuf::ShutdownProtobufLibrary);
 
     return a.exec();
 }

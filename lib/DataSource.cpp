@@ -99,7 +99,6 @@ DataSource::~DataSource()
 	delete [] m_framesData;
 }
 
-
 quint64 DataSource::generateID() const
 {
 	if (m_lmAdapterID.isEmpty())
@@ -121,7 +120,7 @@ quint64 DataSource::generateID() const
 
 void DataSource::stop()
 {
-	setState(DataSourceState::stopped);
+	setState(E::DataSourceState::Stopped);
 	m_dataReceivingRate = 0;
 	m_receivedDataSize = 0;
 }
@@ -129,7 +128,7 @@ void DataSource::stop()
 
 void DataSource::resume()
 {
-	setState(DataSourceState::noData);
+	setState(E::DataSourceState::NoData);
 }
 
 
@@ -165,14 +164,14 @@ void DataSource::setStatistics(const DataSourceStatistics& dss)
 {
 	Q_ASSERT(dss.ID == m_id);
 
-	m_state = static_cast<DataSourceState>(dss.state);
+	m_state = static_cast<E::DataSourceState>(dss.state);
 	m_uptime = dss.uptime;
 	m_receivedDataSize = dss.receivedDataSize;
 	m_dataReceivingRate = dss.dataReceivingRate;
 }
 
 
-QString DataSource::dataTypeToString(DataType dataType)
+QString DataSource::dataTypeToString(DataType dataType) const
 {
 	switch(dataType)
 	{
@@ -420,7 +419,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 		m_receivedPacketCount++;
 
 		m_lastPacketTime = QDateTime::currentMSecsSinceEpoch();
-		m_state = DataSourceState::receiveData;
+		m_state = E::DataSourceState::ReceiveData;
 
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 

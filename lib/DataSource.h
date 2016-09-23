@@ -10,14 +10,6 @@
 #include "../Proto/network.pb.h"
 
 
-enum DataSourceState
-{
-	noData = 0,
-	receiveData = 1,
-	stopped = 2
-};
-
-
 struct RupData
 {
 	quint32 sourceIP;
@@ -132,7 +124,7 @@ protected:
 
 	// dynamic state information
 	//
-	DataSourceState m_state = DataSourceState::noData;
+	E::DataSourceState m_state = E::DataSourceState::NoData;
 	qint64 m_uptime = 0;
 	qint64 m_receivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
@@ -174,6 +166,7 @@ public:
 	void setLmChannel(int channel) { m_lmChannel = channel; }
 
 	DataType lmDataType() const { return m_lmDataType; }
+	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }
 	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
@@ -218,7 +211,7 @@ public:
 	quint32 partCount() const { return m_partCount; }
 	QString name() const { return m_name; }
 
-	DataSourceState state() const { return m_state; }
+	E::DataSourceState state() const { return m_state; }
 	quint64 uptime() const { return m_uptime; }
 	quint64 receivedDataSize() const { return m_receivedDataSize; }
 	double dataReceivingRate() const { return m_dataReceivingRate; }
@@ -227,7 +220,7 @@ public:
 	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
 	void partCount(quint32 partCount) { m_partCount = partCount; }
 
-	void setState(DataSourceState state) { m_state = state; }
+	void setState(E::DataSourceState state) { m_state = state; }
 
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
@@ -241,7 +234,7 @@ public:
 	void stop();
 	void resume();
 
-	QString dataTypeToString(DataType lmDataType);
+	QString dataTypeToString(DataType lmDataType) const;
 	DataType stringToDataType(const QString& dataTypeStr);
 
 	void writeToXml(XmlWriteHelper& xml);
