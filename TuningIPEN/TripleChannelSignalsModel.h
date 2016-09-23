@@ -46,7 +46,7 @@ class TripleChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit TripleChannelSignalsModel(QVector<Tuning::TuningDataSourceInfo>& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
+	explicit TripleChannelSignalsModel(QVector<TuningIPEN::TuningSourceInfo>& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -70,7 +70,7 @@ public slots:
 	void changeDiscreteSignal(const QModelIndex& currentIndex);
 
 private:
-	QVector<Tuning::TuningDataSourceInfo>& m_sourceInfo;
+	QVector<TuningIPEN::TuningSourceInfo>& m_sourceInfo;
 	TuningIPEN::TuningIPENService* m_service;
 	QHash<QString, int> m_idToChannelMap;
 	SourceState m_sourceStates[3];

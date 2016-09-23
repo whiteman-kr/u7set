@@ -2,7 +2,7 @@
 
 #include "../lib/Tcp.h"
 #include "../Proto/network.pb.h"
-#include "TuningDataSource.h"
+#include "TuningSource.h"
 
 namespace Tuning
 {
@@ -36,7 +36,7 @@ namespace Tuning
 		void onGetTuningSourcesInfoRequest();
 		void onGetTuningSourcesStateRequest();
 
-		TuningDataSources& tuningSources();
+		TuningSources& tuningSources();
 
 	private:
 		TcpTuningServerThread* m_thread = nullptr;
@@ -57,12 +57,12 @@ namespace Tuning
 	public:
 		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
 								TcpTuningServer* server,
-								TuningDataSources& tuningSources);
+								TuningSources& tuningSources);
 
-		TuningDataSources& tuningSources();
+		TuningSources& tuningSources();
 
 	private:
-		TuningDataSources& m_tuningSources;
+		TuningSources& m_tuningSources;
 	};
 
 }

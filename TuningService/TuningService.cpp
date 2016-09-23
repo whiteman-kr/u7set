@@ -237,7 +237,7 @@ namespace Tuning
 				return false;
 			}
 
-			TuningDataSource* ds = new TuningDataSource();
+			TuningSource* ds = new TuningSource();
 
 			result &= ds->readFromXml(xml);
 
@@ -258,9 +258,9 @@ namespace Tuning
 
 	void TuningServiceWorker::allocateSignalsAndStates()
 	{
-		QVector<TuningDataSourceInfo> info;
+		/*QVector<TuningSourceInfo> info;
 
-		m_tuningSources.getTuningDataSourcesInfo(info);
+		m_tuningSources.getTuningDataSourcesInfo(info);*/
 
 /*		// allocate Signals
 		//

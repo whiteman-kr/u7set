@@ -2,7 +2,7 @@
 
 #include "SoftwareCfgGenerator.h"
 #include "../TuningService/TuningDataStorage.h"
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 
 namespace Builder
 {
