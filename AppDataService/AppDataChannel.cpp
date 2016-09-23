@@ -178,9 +178,9 @@ void AppDataChannel::checkDataSourcesDataReceiving()
 			continue;
 		}
 
-		if (dataSource->state() == DataSourceState::receiveData && (currentTime - dataSource->lastPacketTime()) > PACKET_TIMEOUT)
+		if (dataSource->state() == E::DataSourceState::ReceiveData && (currentTime - dataSource->lastPacketTime()) > PACKET_TIMEOUT)
 		{
-			dataSource->setState(DataSourceState::noData);
+			dataSource->setState(E::DataSourceState::NoData);
 			
 			invalidateDataSourceSignals(dataSource->lmAddress32(), currentTime);
 		}
