@@ -34,5 +34,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QAction>
+#include <QMenu>
+#include <QMenuBar>
 
 #endif // STABLE_H

@@ -72,6 +72,11 @@ void Settings::writeUserScope() const
     s.setValue("Connection/geometry", m_connectionPropertiesWindowGeometry);
     s.setValue("Connection/Splitter/state", m_connectionSplitterState);
 
+	s.setValue("ConnectionEditor/pos", m_connectionEditorWindowPos);
+	s.setValue("ConnectionEditor/geometry", m_connectionEditorWindowGeometry);
+	s.setValue("ConnectionEditor/sortColumn", m_connectionEditorSortColumn);
+	s.setValue("ConnectionEditor/sortOrder", static_cast<int>(m_connectionEditorSortOrder));
+
 	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
 	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
@@ -127,6 +132,11 @@ void Settings::loadUserScope()
 	}
 
     //
+
+	m_connectionEditorWindowPos = s.value("ConnectionEditor/pos", QPoint(-1, -1)).toPoint();
+	m_connectionEditorWindowGeometry = s.value("ConnectionEditor/geometry").toByteArray();
+	m_connectionEditorSortColumn = s.value("ConnectionEditor/sortColumn").toInt();
+	m_connectionEditorSortOrder = static_cast<Qt::SortOrder>(s.value("ConnectionEditor/sortOrder").toInt());
 
     m_connectionPropertiesWindowPos = s.value("Connection/pos", QPoint(-1, -1)).toPoint();
     m_connectionPropertiesWindowGeometry = s.value("Connection/geometry").toByteArray();

@@ -35,6 +35,10 @@ struct ConfigSettings
 	ConfigConnection tuns1;				// Tuning Service connection params
 	ConfigConnection tuns2;				// Tuning Service connection params
 
+	bool updateFilters = false;
+	bool updateSchemas = false;
+	bool updateSignals = false;
+
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
 
@@ -65,7 +69,7 @@ public:
 	// signals
 	//
 signals:
-	void configurationArrived(bool updateFilters, bool updateSchemas, bool updateSignals);
+	void configurationArrived(ConfigSettings settings);
 
 	// slots
 	//

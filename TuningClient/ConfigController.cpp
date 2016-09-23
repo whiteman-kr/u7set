@@ -385,9 +385,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	qDebug() << "TUNS1 (id, ip, port): " << readSettings.tuns1.equipmentId() << ", " << readSettings.tuns1.ip() << ", " << readSettings.tuns1.port();
 	qDebug() << "TUNS2 (id, ip, port): " << readSettings.tuns2.equipmentId() << ", " << readSettings.tuns2.ip() << ", " << readSettings.tuns2.port();
 
-	bool updateFilters = false;
-	bool updateSchemas = false;
-	bool updateSignals = false;
+	readSettings.updateFilters = false;
+	readSettings.updateSchemas = false;
+	readSettings.updateSignals = false;
 
 	QMutexLocker locker(&m_mutex);
 
@@ -397,7 +397,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (m_md5Filters != f.md5)
 			{
-				updateFilters = true;
+				readSettings.updateFilters = true;
 				m_md5Filters = f.md5;
 			}
 		}
@@ -405,7 +405,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (m_md5Schemas != f.md5)
 			{
-				updateSchemas = true;
+				readSettings.updateSchemas = true;
 				m_md5Schemas = f.md5;
 			}
 		}
@@ -413,7 +413,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (m_md5Signals != f.md5)
 			{
-				updateSignals = true;
+				readSettings.updateSignals = true;
 				m_md5Signals = f.md5;
 			}
 		}
@@ -421,7 +421,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(updateFilters, updateSchemas, updateSignals);
+	emit configurationArrived(readSettings);
 
 	return;
 }

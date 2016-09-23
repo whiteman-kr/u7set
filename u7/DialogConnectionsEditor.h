@@ -44,7 +44,7 @@ private:
     bool askForSaveChanged();
     bool checkUniqueConnections();
     bool saveChanges();
-    void updateButtons(bool checkOut);
+	void updateButtons();
 	bool continueWithDuplicateCaptions();
 
 protected:
@@ -62,6 +62,11 @@ private slots:
     void on_m_Undo_clicked();
 	void reject();
 
+	void on_m_list_itemSelectionChanged();
+
+	void on_m_Apply_clicked();
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
+
 private:
     Ui::DialogConnectionsEditor *ui;
 
@@ -71,6 +76,10 @@ private:
     DbController* m_dbController;
 
     Hardware::ConnectionStorage connections;
+
+	bool m_checkedOut = false;
 };
+
+extern DialogConnectionsEditor* theDialogConnectionsEditor;
 
 #endif // DIALOGCONNECTIONSEDITOR_H

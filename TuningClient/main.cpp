@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain("radiy.com");
 
 	theSettings.RestoreUser();
+	theSettings.RestoreSystem();
 
 	MainWindow *w = new MainWindow();
 	w->show();

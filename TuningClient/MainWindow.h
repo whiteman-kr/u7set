@@ -5,6 +5,7 @@
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
+#include "TcpTuningClient.h"
 #include "ConfigController.h"
 
 
@@ -21,24 +22,43 @@ public:
 	~MainWindow();
 
 private:
+	void createActions();
+	void createMenu();
+	void createStatusBar();
+
+
+private:
 	ConfigController m_configController;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
-	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarConnectionState = nullptr;
+	TcpTuningClient* m_tcpTuningClient = nullptr;
+	SimpleThread* m_tcpClientThread = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
 
 private slots:
-	void slot_configurationArrived(bool updateFilters, bool updateSchemas, bool updateSignals);
+	void slot_configurationArrived(ConfigSettings settings);
+	void slot_tuningSourcesArrived();
+	void slot_tuningConnectionFailed();
 
+	void exit();
+	void showSettings();
+	void showTuningSources();
 
 private:
-	void createStatusBar();
 
 	virtual void timerEvent(QTimerEvent* event) override;
+
+	QAction* m_pExitAction = nullptr;
+	QAction* m_pSettingsAction = nullptr;
+	QAction* m_pTuningSourcesAction = nullptr;
+	QAction* m_pLogAction = nullptr;
+	QAction* m_pAboutAction = nullptr;
+
+	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarConnectionStatistics = nullptr;
+	QLabel* m_statusBarConnectionState = nullptr;
 };
 
 #endif // MAINWINDOW_H

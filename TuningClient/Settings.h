@@ -19,12 +19,29 @@ public:
 	void StoreUser();
 	void RestoreUser();
 
-	QString instanceStrId();
+	void StoreSystem();
+	void RestoreSystem();
 
+	QString instanceStrId();
+	void setInstanceId(const QString& value);
+
+	void setConfiguratorAddress1(const QString& address, int port);
 	HostAddressPort configuratorAddress1();
+
+	void setConfiguratorAddress2(const QString& address, int port);
 	HostAddressPort configuratorAddress2();
 
+	bool filterByEquipment() const;
+	void setFilterByEquipment(bool value);
+
+	bool filterBySchema() const;
+	void setFilterBySchema(bool value);
+
 public:
+
+	int m_requestInterval = 100;
+
+	//
 
 	QPoint m_mainWindowPos;
 	QByteArray m_mainWindowGeometry;
@@ -47,6 +64,8 @@ private:
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
 
+	bool m_filterByEquipment = true;
+	bool m_filterBySchema = true;
 
 	QMutex m;
 
