@@ -281,26 +281,54 @@ void DataAquisitionServiceWidget::updateSignalInfo()
 
 void DataAquisitionServiceWidget::updateSourceStateColumns()
 {
-	if (m_dataSourcesView->columnAt(m_dataSourcesView->width()) < DSC_FIRST_STATE_COLUMN)
+	int firstRow = m_dataSourcesView->rowAt(0);
+	int lastRow = m_dataSourcesView->rowAt(m_signalsView->height());
+	if (lastRow == -1)
+	{
+		lastRow = m_dataSourcesStateModel->rowCount() - 1;
+	}
+
+	int firstColumn = m_dataSourcesView->columnAt(0);
+	int lastColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
+	if (lastColumn == -1)
+	{
+		lastColumn = m_dataSourcesStateModel->columnCount() - 1;
+	}
+	if (lastColumn < DSC_FIRST_STATE_COLUMN)
 	{
 		return;
 	}
-	m_dataSourcesStateModel->updateData(m_dataSourcesView->rowAt(0),
-								   m_dataSourcesView->rowAt(m_dataSourcesView->height()),
-								   std::max(m_dataSourcesView->columnAt(0), DSC_FIRST_STATE_COLUMN),
-								   m_dataSourcesView->columnAt(m_dataSourcesView->width()));
+
+	m_dataSourcesStateModel->updateData(firstRow,
+										lastRow,
+										std::max(firstColumn, DSC_FIRST_STATE_COLUMN),
+										lastColumn);
 }
 
 void DataAquisitionServiceWidget::updateSignalStateColumns()
 {
-	if (m_signalsView->columnAt(m_signalsView->width()) < SC_FIRST_STATE_COLUMN)
+	int firstRow = m_signalsView->rowAt(0);
+	int lastColumn = m_signalsView->columnAt(m_signalsView->width());
+	if (lastColumn == -1)
+	{
+		lastColumn = m_signalStateModel->columnCount() - 1;
+	}
+
+	int firstColumn = m_signalsView->columnAt(0);
+	if (lastColumn < SC_FIRST_STATE_COLUMN)
 	{
 		return;
 	}
-	m_signalStateModel->updateData(m_signalsView->rowAt(0),
-								   m_signalsView->rowAt(m_signalsView->height()),
-								   std::max(m_signalsView->columnAt(0), SC_FIRST_STATE_COLUMN),
-								   m_signalsView->columnAt(m_signalsView->width()));
+	int lastRow = m_signalsView->rowAt(m_signalsView->height());
+	if (lastRow == -1)
+	{
+		lastRow = m_signalStateModel->rowCount() - 1;
+	}
+
+	m_signalStateModel->updateData(firstRow,
+								   lastRow,
+								   std::max(firstColumn, SC_FIRST_STATE_COLUMN),
+								   lastColumn);
 }
 
 void DataAquisitionServiceWidget::checkVisibility()
