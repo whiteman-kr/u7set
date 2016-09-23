@@ -80,6 +80,7 @@ message DataSourceInfo
     optional uint64 lmDataID = 14;
 }
 
+
 message GetDataSourcesInfoRequest
 {
 }
@@ -169,10 +170,14 @@ message GetServiceInfoReply
 }
 
 
-// Getting Tuning Data Sources States
+// Getting Tuning Sources States
 //
 
-message TuningDataSourceState
+message GetTuningSourcesStates
+{
+}
+
+message TuningSourceState
 {
     optional uint64 id = 1;			    // unique id
     optional int64 uptime = 2;			    // time from start of data receiving
@@ -182,10 +187,10 @@ message TuningDataSourceState
 }
 
 
-message GetTuningDataSourcesStatesReply
+message GetTuningSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
-    repeated TuningDataSourceState tuningDataSourcesStates = 2;
+    repeated TuningSourceState tuningDataSourcesStates = 2;
 }
 
 

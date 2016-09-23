@@ -56,7 +56,9 @@ SOURCES += \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc
+    ../Proto/serialization.pb.cc \
+    TcpTuningServer.cpp \
+    TcpTuningClient.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -92,7 +94,9 @@ HEADERS += \
     ../u7/Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h
+    ../Proto/serialization.pb.h \
+    TcpTuningServer.h \
+    TcpTuningClient.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -131,3 +135,7 @@ win32 {
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto

@@ -80,7 +80,17 @@ SOURCES += \
     ../lib/Crc.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../TuningService/TcpTuningClient.cpp \
+    ../TuningService/TuningDataSource.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/Signal.cpp \
+    ../TuningService/TuningDataStorage.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/Types.cpp \
+    ../lib/OutputLog.cpp \
+    ../lib/ProtoSerialization.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -103,7 +113,17 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../TuningService/TcpTuningClient.h \
+    ../TuningService/TuningDataSource.h \
+    ../lib/PropertyObject.h \
+    ../lib/Signal.h \
+    ../TuningService/TuningDataStorage.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbStruct.h \
+    ../lib/Types.h \
+    ../lib/OutputLog.h \
+    ../lib/ProtoSerialization.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -58,7 +58,7 @@ private:
 private:
 	// Cache protobug messages
 	//
-	::Network::TuningDataSourceState m_getSignalListStartReply;
+	::Network::TuningSourceState m_getSignalListStartReply;
 
 	::Network::GetSignalListNextRequest m_getSignalListNextRequest;
 	::Network::GetSignalListNextReply m_getSignalListNextReply;

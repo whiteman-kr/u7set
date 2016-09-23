@@ -8,33 +8,35 @@
 #include "ClientSocket.h"
 #include "../lib/ProtoUdp.h"
 #include "../lib/Tcp.h"
+#include "../TuningService/TcpTuningClient.h"
+
 
 namespace Ui {
 class MainWindow;
 }
 
+/*
+class MyClient : public Tcp::Client
+{
+	Q_OBJECT
 
-//class MyClient : public Tcp::Client
-//{
-//	Q_OBJECT
+private:
+	QTimer m_timer;
+	QByteArray m_data;
 
-//private:
-//	QTimer m_timer;
-//	QByteArray m_data;
-
-//	void onTimer();
+	void onTimer();
 
 //	void sendRandomRequest();
 
-//public:
-//	MyClient();
+public:
+	MyClient();
 
-//	virtual void onClientThreadStarted() override;
+	virtual void onClientThreadStarted() override;
 
-//	virtual void onConnection() override;
+	virtual void onConnection() override;
 
-//	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
-//};
+	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+};*/
 
 
 class MainWindow : public QMainWindow
@@ -56,6 +58,9 @@ signals:
 
 private:
     Ui::MainWindow *ui;
+
+	SimpleThread* m_thread = nullptr;
+
 
 /*    UdpSocketThread m_clientSocketThread;
 

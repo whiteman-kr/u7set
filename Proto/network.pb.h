@@ -53,8 +53,9 @@ class GetUnitsReply;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
-class TuningDataSourceState;
-class GetTuningDataSourcesStatesReply;
+class GetTuningSourcesStates;
+class TuningSourceState;
+class GetTuningSourcesStatesReply;
 
 // ===================================================================
 
@@ -2116,14 +2117,14 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TuningDataSourceState : public ::google::protobuf::Message {
+class GetTuningSourcesStates : public ::google::protobuf::Message {
  public:
-  TuningDataSourceState();
-  virtual ~TuningDataSourceState();
+  GetTuningSourcesStates();
+  virtual ~GetTuningSourcesStates();
 
-  TuningDataSourceState(const TuningDataSourceState& from);
+  GetTuningSourcesStates(const GetTuningSourcesStates& from);
 
-  inline TuningDataSourceState& operator=(const TuningDataSourceState& from) {
+  inline GetTuningSourcesStates& operator=(const GetTuningSourcesStates& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2137,17 +2138,89 @@ class TuningDataSourceState : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TuningDataSourceState& default_instance();
+  static const GetTuningSourcesStates& default_instance();
 
-  void Swap(TuningDataSourceState* other);
+  void Swap(GetTuningSourcesStates* other);
 
   // implements Message ----------------------------------------------
 
-  TuningDataSourceState* New() const;
+  GetTuningSourcesStates* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TuningDataSourceState& from);
-  void MergeFrom(const TuningDataSourceState& from);
+  void CopyFrom(const GetTuningSourcesStates& from);
+  void MergeFrom(const GetTuningSourcesStates& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStates)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetTuningSourcesStates* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TuningSourceState : public ::google::protobuf::Message {
+ public:
+  TuningSourceState();
+  virtual ~TuningSourceState();
+
+  TuningSourceState(const TuningSourceState& from);
+
+  inline TuningSourceState& operator=(const TuningSourceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSourceState& default_instance();
+
+  void Swap(TuningSourceState* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSourceState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSourceState& from);
+  void MergeFrom(const TuningSourceState& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2205,7 +2278,7 @@ class TuningDataSourceState : public ::google::protobuf::Message {
   inline bool respond() const;
   inline void set_respond(bool value);
 
-  // @@protoc_insertion_point(class_scope:Network.TuningDataSourceState)
+  // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_id();
   inline void clear_has_id();
@@ -2234,18 +2307,18 @@ class TuningDataSourceState : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static TuningDataSourceState* default_instance_;
+  static TuningSourceState* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class GetTuningDataSourcesStatesReply : public ::google::protobuf::Message {
+class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
  public:
-  GetTuningDataSourcesStatesReply();
-  virtual ~GetTuningDataSourcesStatesReply();
+  GetTuningSourcesStatesReply();
+  virtual ~GetTuningSourcesStatesReply();
 
-  GetTuningDataSourcesStatesReply(const GetTuningDataSourcesStatesReply& from);
+  GetTuningSourcesStatesReply(const GetTuningSourcesStatesReply& from);
 
-  inline GetTuningDataSourcesStatesReply& operator=(const GetTuningDataSourcesStatesReply& from) {
+  inline GetTuningSourcesStatesReply& operator=(const GetTuningSourcesStatesReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2259,17 +2332,17 @@ class GetTuningDataSourcesStatesReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetTuningDataSourcesStatesReply& default_instance();
+  static const GetTuningSourcesStatesReply& default_instance();
 
-  void Swap(GetTuningDataSourcesStatesReply* other);
+  void Swap(GetTuningSourcesStatesReply* other);
 
   // implements Message ----------------------------------------------
 
-  GetTuningDataSourcesStatesReply* New() const;
+  GetTuningSourcesStatesReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetTuningDataSourcesStatesReply& from);
-  void MergeFrom(const GetTuningDataSourcesStatesReply& from);
+  void CopyFrom(const GetTuningSourcesStatesReply& from);
+  void MergeFrom(const GetTuningSourcesStatesReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2299,26 +2372,26 @@ class GetTuningDataSourcesStatesReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
+  // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
   inline int tuningdatasourcesstates_size() const;
   inline void clear_tuningdatasourcesstates();
   static const int kTuningDataSourcesStatesFieldNumber = 2;
-  inline const ::Network::TuningDataSourceState& tuningdatasourcesstates(int index) const;
-  inline ::Network::TuningDataSourceState* mutable_tuningdatasourcesstates(int index);
-  inline ::Network::TuningDataSourceState* add_tuningdatasourcesstates();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningDataSourceState >&
+  inline const ::Network::TuningSourceState& tuningdatasourcesstates(int index) const;
+  inline ::Network::TuningSourceState* mutable_tuningdatasourcesstates(int index);
+  inline ::Network::TuningSourceState* add_tuningdatasourcesstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >&
       tuningdatasourcesstates() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningDataSourceState >*
+  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >*
       mutable_tuningdatasourcesstates();
 
-  // @@protoc_insertion_point(class_scope:Network.GetTuningDataSourcesStatesReply)
+  // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStatesReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Network::TuningDataSourceState > tuningdatasourcesstates_;
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState > tuningdatasourcesstates_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
@@ -2329,7 +2402,7 @@ class GetTuningDataSourcesStatesReply : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetTuningDataSourcesStatesReply* default_instance_;
+  static GetTuningSourcesStatesReply* default_instance_;
 };
 // ===================================================================
 
@@ -4145,166 +4218,170 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
 
 // -------------------------------------------------------------------
 
-// TuningDataSourceState
+// GetTuningSourcesStates
+
+// -------------------------------------------------------------------
+
+// TuningSourceState
 
 // optional uint64 id = 1;
-inline bool TuningDataSourceState::has_id() const {
+inline bool TuningSourceState::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TuningDataSourceState::set_has_id() {
+inline void TuningSourceState::set_has_id() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TuningDataSourceState::clear_has_id() {
+inline void TuningSourceState::clear_has_id() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TuningDataSourceState::clear_id() {
+inline void TuningSourceState::clear_id() {
   id_ = GOOGLE_ULONGLONG(0);
   clear_has_id();
 }
-inline ::google::protobuf::uint64 TuningDataSourceState::id() const {
+inline ::google::protobuf::uint64 TuningSourceState::id() const {
   return id_;
 }
-inline void TuningDataSourceState::set_id(::google::protobuf::uint64 value) {
+inline void TuningSourceState::set_id(::google::protobuf::uint64 value) {
   set_has_id();
   id_ = value;
 }
 
 // optional int64 uptime = 2;
-inline bool TuningDataSourceState::has_uptime() const {
+inline bool TuningSourceState::has_uptime() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TuningDataSourceState::set_has_uptime() {
+inline void TuningSourceState::set_has_uptime() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TuningDataSourceState::clear_has_uptime() {
+inline void TuningSourceState::clear_has_uptime() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TuningDataSourceState::clear_uptime() {
+inline void TuningSourceState::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
   clear_has_uptime();
 }
-inline ::google::protobuf::int64 TuningDataSourceState::uptime() const {
+inline ::google::protobuf::int64 TuningSourceState::uptime() const {
   return uptime_;
 }
-inline void TuningDataSourceState::set_uptime(::google::protobuf::int64 value) {
+inline void TuningSourceState::set_uptime(::google::protobuf::int64 value) {
   set_has_uptime();
   uptime_ = value;
 }
 
 // optional int64 receivedDataSize = 3;
-inline bool TuningDataSourceState::has_receiveddatasize() const {
+inline bool TuningSourceState::has_receiveddatasize() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TuningDataSourceState::set_has_receiveddatasize() {
+inline void TuningSourceState::set_has_receiveddatasize() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TuningDataSourceState::clear_has_receiveddatasize() {
+inline void TuningSourceState::clear_has_receiveddatasize() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TuningDataSourceState::clear_receiveddatasize() {
+inline void TuningSourceState::clear_receiveddatasize() {
   receiveddatasize_ = GOOGLE_LONGLONG(0);
   clear_has_receiveddatasize();
 }
-inline ::google::protobuf::int64 TuningDataSourceState::receiveddatasize() const {
+inline ::google::protobuf::int64 TuningSourceState::receiveddatasize() const {
   return receiveddatasize_;
 }
-inline void TuningDataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
+inline void TuningSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
   set_has_receiveddatasize();
   receiveddatasize_ = value;
 }
 
 // optional double dataReceivingRate = 4;
-inline bool TuningDataSourceState::has_datareceivingrate() const {
+inline bool TuningSourceState::has_datareceivingrate() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void TuningDataSourceState::set_has_datareceivingrate() {
+inline void TuningSourceState::set_has_datareceivingrate() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void TuningDataSourceState::clear_has_datareceivingrate() {
+inline void TuningSourceState::clear_has_datareceivingrate() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void TuningDataSourceState::clear_datareceivingrate() {
+inline void TuningSourceState::clear_datareceivingrate() {
   datareceivingrate_ = 0;
   clear_has_datareceivingrate();
 }
-inline double TuningDataSourceState::datareceivingrate() const {
+inline double TuningSourceState::datareceivingrate() const {
   return datareceivingrate_;
 }
-inline void TuningDataSourceState::set_datareceivingrate(double value) {
+inline void TuningSourceState::set_datareceivingrate(double value) {
   set_has_datareceivingrate();
   datareceivingrate_ = value;
 }
 
 // optional bool respond = 5;
-inline bool TuningDataSourceState::has_respond() const {
+inline bool TuningSourceState::has_respond() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void TuningDataSourceState::set_has_respond() {
+inline void TuningSourceState::set_has_respond() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void TuningDataSourceState::clear_has_respond() {
+inline void TuningSourceState::clear_has_respond() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void TuningDataSourceState::clear_respond() {
+inline void TuningSourceState::clear_respond() {
   respond_ = false;
   clear_has_respond();
 }
-inline bool TuningDataSourceState::respond() const {
+inline bool TuningSourceState::respond() const {
   return respond_;
 }
-inline void TuningDataSourceState::set_respond(bool value) {
+inline void TuningSourceState::set_respond(bool value) {
   set_has_respond();
   respond_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// GetTuningDataSourcesStatesReply
+// GetTuningSourcesStatesReply
 
 // optional int32 error = 1 [default = 0];
-inline bool GetTuningDataSourcesStatesReply::has_error() const {
+inline bool GetTuningSourcesStatesReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetTuningDataSourcesStatesReply::set_has_error() {
+inline void GetTuningSourcesStatesReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetTuningDataSourcesStatesReply::clear_has_error() {
+inline void GetTuningSourcesStatesReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetTuningDataSourcesStatesReply::clear_error() {
+inline void GetTuningSourcesStatesReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 GetTuningDataSourcesStatesReply::error() const {
+inline ::google::protobuf::int32 GetTuningSourcesStatesReply::error() const {
   return error_;
 }
-inline void GetTuningDataSourcesStatesReply::set_error(::google::protobuf::int32 value) {
+inline void GetTuningSourcesStatesReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
 
-// repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
-inline int GetTuningDataSourcesStatesReply::tuningdatasourcesstates_size() const {
+// repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
+inline int GetTuningSourcesStatesReply::tuningdatasourcesstates_size() const {
   return tuningdatasourcesstates_.size();
 }
-inline void GetTuningDataSourcesStatesReply::clear_tuningdatasourcesstates() {
+inline void GetTuningSourcesStatesReply::clear_tuningdatasourcesstates() {
   tuningdatasourcesstates_.Clear();
 }
-inline const ::Network::TuningDataSourceState& GetTuningDataSourcesStatesReply::tuningdatasourcesstates(int index) const {
+inline const ::Network::TuningSourceState& GetTuningSourcesStatesReply::tuningdatasourcesstates(int index) const {
   return tuningdatasourcesstates_.Get(index);
 }
-inline ::Network::TuningDataSourceState* GetTuningDataSourcesStatesReply::mutable_tuningdatasourcesstates(int index) {
+inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::mutable_tuningdatasourcesstates(int index) {
   return tuningdatasourcesstates_.Mutable(index);
 }
-inline ::Network::TuningDataSourceState* GetTuningDataSourcesStatesReply::add_tuningdatasourcesstates() {
+inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::add_tuningdatasourcesstates() {
   return tuningdatasourcesstates_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningDataSourceState >&
-GetTuningDataSourcesStatesReply::tuningdatasourcesstates() const {
+inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >&
+GetTuningSourcesStatesReply::tuningdatasourcesstates() const {
   return tuningdatasourcesstates_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Network::TuningDataSourceState >*
-GetTuningDataSourcesStatesReply::mutable_tuningdatasourcesstates() {
+inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >*
+GetTuningSourcesStatesReply::mutable_tuningdatasourcesstates() {
   return &tuningdatasourcesstates_;
 }
 

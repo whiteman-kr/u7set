@@ -77,12 +77,15 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetServiceInfoReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetServiceInfoReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TuningDataSourceState_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* GetTuningSourcesStates_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  TuningDataSourceState_reflection_ = NULL;
-const ::google::protobuf::Descriptor* GetTuningDataSourcesStatesReply_descriptor_ = NULL;
+  GetTuningSourcesStates_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TuningSourceState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  GetTuningDataSourcesStatesReply_reflection_ = NULL;
+  TuningSourceState_reflection_ = NULL;
+const ::google::protobuf::Descriptor* GetTuningSourcesStatesReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  GetTuningSourcesStatesReply_reflection_ = NULL;
 
 }  // namespace
 
@@ -422,41 +425,55 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoReply));
-  TuningDataSourceState_descriptor_ = file->message_type(19);
-  static const int TuningDataSourceState_offsets_[5] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, id_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, uptime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, receiveddatasize_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, datareceivingrate_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, respond_),
+  GetTuningSourcesStates_descriptor_ = file->message_type(19);
+  static const int GetTuningSourcesStates_offsets_[1] = {
   };
-  TuningDataSourceState_reflection_ =
+  GetTuningSourcesStates_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      TuningDataSourceState_descriptor_,
-      TuningDataSourceState::default_instance_,
-      TuningDataSourceState_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningDataSourceState, _unknown_fields_),
+      GetTuningSourcesStates_descriptor_,
+      GetTuningSourcesStates::default_instance_,
+      GetTuningSourcesStates_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStates, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStates, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TuningDataSourceState));
-  GetTuningDataSourcesStatesReply_descriptor_ = file->message_type(20);
-  static const int GetTuningDataSourcesStatesReply_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningDataSourcesStatesReply, error_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningDataSourcesStatesReply, tuningdatasourcesstates_),
+      sizeof(GetTuningSourcesStates));
+  TuningSourceState_descriptor_ = file->message_type(20);
+  static const int TuningSourceState_offsets_[5] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, uptime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, receiveddatasize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, datareceivingrate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, respond_),
   };
-  GetTuningDataSourcesStatesReply_reflection_ =
+  TuningSourceState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      GetTuningDataSourcesStatesReply_descriptor_,
-      GetTuningDataSourcesStatesReply::default_instance_,
-      GetTuningDataSourcesStatesReply_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningDataSourcesStatesReply, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningDataSourcesStatesReply, _unknown_fields_),
+      TuningSourceState_descriptor_,
+      TuningSourceState::default_instance_,
+      TuningSourceState_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(GetTuningDataSourcesStatesReply));
+      sizeof(TuningSourceState));
+  GetTuningSourcesStatesReply_descriptor_ = file->message_type(21);
+  static const int GetTuningSourcesStatesReply_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, tuningdatasourcesstates_),
+  };
+  GetTuningSourcesStatesReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      GetTuningSourcesStatesReply_descriptor_,
+      GetTuningSourcesStatesReply::default_instance_,
+      GetTuningSourcesStatesReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(GetTuningSourcesStatesReply));
 }
 
 namespace {
@@ -508,9 +525,11 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetServiceInfoReply_descriptor_, &GetServiceInfoReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TuningDataSourceState_descriptor_, &TuningDataSourceState::default_instance());
+    GetTuningSourcesStates_descriptor_, &GetTuningSourcesStates::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    GetTuningDataSourcesStatesReply_descriptor_, &GetTuningDataSourcesStatesReply::default_instance());
+    TuningSourceState_descriptor_, &TuningSourceState::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    GetTuningSourcesStatesReply_descriptor_, &GetTuningSourcesStatesReply::default_instance());
 }
 
 }  // namespace
@@ -554,10 +573,12 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete ServiceInfo_reflection_;
   delete GetServiceInfoReply::default_instance_;
   delete GetServiceInfoReply_reflection_;
-  delete TuningDataSourceState::default_instance_;
-  delete TuningDataSourceState_reflection_;
-  delete GetTuningDataSourcesStatesReply::default_instance_;
-  delete GetTuningDataSourcesStatesReply_reflection_;
+  delete GetTuningSourcesStates::default_instance_;
+  delete GetTuningSourcesStates_reflection_;
+  delete TuningSourceState::default_instance_;
+  delete TuningSourceState_reflection_;
+  delete GetTuningSourcesStatesReply::default_instance_;
+  delete GetTuningSourcesStatesReply_reflection_;
 }
 
 void protobuf_AddDesc_network_2eproto() {
@@ -616,13 +637,13 @@ void protobuf_AddDesc_network_2eproto() {
     "\022\032\n\017clientRequestIP\030\t \001(\r:\0010\022\034\n\021clientRe"
     "questPort\030\n \001(\005:\0010\"R\n\023GetServiceInfoRepl"
     "y\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo\030\002 \002(\013"
-    "2\024.Network.ServiceInfo\"y\n\025TuningDataSour"
-    "ceState\022\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020r"
-    "eceivedDataSize\030\003 \001(\003\022\031\n\021dataReceivingRa"
-    "te\030\004 \001(\001\022\017\n\007respond\030\005 \001(\010\"t\n\037GetTuningDa"
-    "taSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\022\?"
-    "\n\027tuningDataSourcesStates\030\002 \003(\0132\036.Networ"
-    "k.TuningDataSourceState", 2183);
+    "2\024.Network.ServiceInfo\"\030\n\026GetTuningSourc"
+    "esStates\"u\n\021TuningSourceState\022\n\n\002id\030\001 \001("
+    "\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receivedDataSize\030\003 "
+    "\001(\003\022\031\n\021dataReceivingRate\030\004 \001(\001\022\017\n\007respon"
+    "d\030\005 \001(\010\"l\n\033GetTuningSourcesStatesReply\022\020"
+    "\n\005error\030\001 \001(\005:\0010\022;\n\027tuningDataSourcesSta"
+    "tes\030\002 \003(\0132\032.Network.TuningSourceState", 2197);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -644,8 +665,9 @@ void protobuf_AddDesc_network_2eproto() {
   GetServiceInfoRequest::default_instance_ = new GetServiceInfoRequest();
   ServiceInfo::default_instance_ = new ServiceInfo();
   GetServiceInfoReply::default_instance_ = new GetServiceInfoReply();
-  TuningDataSourceState::default_instance_ = new TuningDataSourceState();
-  GetTuningDataSourcesStatesReply::default_instance_ = new GetTuningDataSourcesStatesReply();
+  GetTuningSourcesStates::default_instance_ = new GetTuningSourcesStates();
+  TuningSourceState::default_instance_ = new TuningSourceState();
+  GetTuningSourcesStatesReply::default_instance_ = new GetTuningSourcesStatesReply();
   GetSignalListStartRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListStartReply::default_instance_->InitAsDefaultInstance();
   GetSignalListNextRequest::default_instance_->InitAsDefaultInstance();
@@ -665,8 +687,9 @@ void protobuf_AddDesc_network_2eproto() {
   GetServiceInfoRequest::default_instance_->InitAsDefaultInstance();
   ServiceInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoReply::default_instance_->InitAsDefaultInstance();
-  TuningDataSourceState::default_instance_->InitAsDefaultInstance();
-  GetTuningDataSourcesStatesReply::default_instance_->InitAsDefaultInstance();
+  GetTuningSourcesStates::default_instance_->InitAsDefaultInstance();
+  TuningSourceState::default_instance_->InitAsDefaultInstance();
+  GetTuningSourcesStatesReply::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_network_2eproto);
 }
 
@@ -6476,28 +6499,184 @@ void GetServiceInfoReply::Swap(GetServiceInfoReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TuningDataSourceState::kIdFieldNumber;
-const int TuningDataSourceState::kUptimeFieldNumber;
-const int TuningDataSourceState::kReceivedDataSizeFieldNumber;
-const int TuningDataSourceState::kDataReceivingRateFieldNumber;
-const int TuningDataSourceState::kRespondFieldNumber;
 #endif  // !_MSC_VER
 
-TuningDataSourceState::TuningDataSourceState()
+GetTuningSourcesStates::GetTuningSourcesStates()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void TuningDataSourceState::InitAsDefaultInstance() {
+void GetTuningSourcesStates::InitAsDefaultInstance() {
 }
 
-TuningDataSourceState::TuningDataSourceState(const TuningDataSourceState& from)
+GetTuningSourcesStates::GetTuningSourcesStates(const GetTuningSourcesStates& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void TuningDataSourceState::SharedCtor() {
+void GetTuningSourcesStates::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GetTuningSourcesStates::~GetTuningSourcesStates() {
+  SharedDtor();
+}
+
+void GetTuningSourcesStates::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void GetTuningSourcesStates::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* GetTuningSourcesStates::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return GetTuningSourcesStates_descriptor_;
+}
+
+const GetTuningSourcesStates& GetTuningSourcesStates::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+GetTuningSourcesStates* GetTuningSourcesStates::default_instance_ = NULL;
+
+GetTuningSourcesStates* GetTuningSourcesStates::New() const {
+  return new GetTuningSourcesStates;
+}
+
+void GetTuningSourcesStates::Clear() {
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool GetTuningSourcesStates::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      return true;
+    }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
+  }
+  return true;
+#undef DO_
+}
+
+void GetTuningSourcesStates::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* GetTuningSourcesStates::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int GetTuningSourcesStates::ByteSize() const {
+  int total_size = 0;
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GetTuningSourcesStates::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const GetTuningSourcesStates* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GetTuningSourcesStates*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void GetTuningSourcesStates::MergeFrom(const GetTuningSourcesStates& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void GetTuningSourcesStates::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetTuningSourcesStates::CopyFrom(const GetTuningSourcesStates& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetTuningSourcesStates::IsInitialized() const {
+
+  return true;
+}
+
+void GetTuningSourcesStates::Swap(GetTuningSourcesStates* other) {
+  if (other != this) {
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata GetTuningSourcesStates::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = GetTuningSourcesStates_descriptor_;
+  metadata.reflection = GetTuningSourcesStates_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int TuningSourceState::kIdFieldNumber;
+const int TuningSourceState::kUptimeFieldNumber;
+const int TuningSourceState::kReceivedDataSizeFieldNumber;
+const int TuningSourceState::kDataReceivingRateFieldNumber;
+const int TuningSourceState::kRespondFieldNumber;
+#endif  // !_MSC_VER
+
+TuningSourceState::TuningSourceState()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void TuningSourceState::InitAsDefaultInstance() {
+}
+
+TuningSourceState::TuningSourceState(const TuningSourceState& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void TuningSourceState::SharedCtor() {
   _cached_size_ = 0;
   id_ = GOOGLE_ULONGLONG(0);
   uptime_ = GOOGLE_LONGLONG(0);
@@ -6507,37 +6686,37 @@ void TuningDataSourceState::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-TuningDataSourceState::~TuningDataSourceState() {
+TuningSourceState::~TuningSourceState() {
   SharedDtor();
 }
 
-void TuningDataSourceState::SharedDtor() {
+void TuningSourceState::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void TuningDataSourceState::SetCachedSize(int size) const {
+void TuningSourceState::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* TuningDataSourceState::descriptor() {
+const ::google::protobuf::Descriptor* TuningSourceState::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return TuningDataSourceState_descriptor_;
+  return TuningSourceState_descriptor_;
 }
 
-const TuningDataSourceState& TuningDataSourceState::default_instance() {
+const TuningSourceState& TuningSourceState::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-TuningDataSourceState* TuningDataSourceState::default_instance_ = NULL;
+TuningSourceState* TuningSourceState::default_instance_ = NULL;
 
-TuningDataSourceState* TuningDataSourceState::New() const {
-  return new TuningDataSourceState;
+TuningSourceState* TuningSourceState::New() const {
+  return new TuningSourceState;
 }
 
-void TuningDataSourceState::Clear() {
+void TuningSourceState::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     id_ = GOOGLE_ULONGLONG(0);
     uptime_ = GOOGLE_LONGLONG(0);
@@ -6549,7 +6728,7 @@ void TuningDataSourceState::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool TuningDataSourceState::MergePartialFromCodedStream(
+bool TuningSourceState::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -6650,7 +6829,7 @@ bool TuningDataSourceState::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void TuningDataSourceState::SerializeWithCachedSizes(
+void TuningSourceState::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional uint64 id = 1;
   if (has_id()) {
@@ -6683,7 +6862,7 @@ void TuningDataSourceState::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* TuningDataSourceState::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TuningSourceState::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional uint64 id = 1;
   if (has_id()) {
@@ -6717,7 +6896,7 @@ void TuningDataSourceState::SerializeWithCachedSizes(
   return target;
 }
 
-int TuningDataSourceState::ByteSize() const {
+int TuningSourceState::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -6764,10 +6943,10 @@ int TuningDataSourceState::ByteSize() const {
   return total_size;
 }
 
-void TuningDataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
+void TuningSourceState::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const TuningDataSourceState* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TuningDataSourceState*>(
+  const TuningSourceState* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TuningSourceState*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -6776,7 +6955,7 @@ void TuningDataSourceState::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void TuningDataSourceState::MergeFrom(const TuningDataSourceState& from) {
+void TuningSourceState::MergeFrom(const TuningSourceState& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_id()) {
@@ -6798,24 +6977,24 @@ void TuningDataSourceState::MergeFrom(const TuningDataSourceState& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void TuningDataSourceState::CopyFrom(const ::google::protobuf::Message& from) {
+void TuningSourceState::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void TuningDataSourceState::CopyFrom(const TuningDataSourceState& from) {
+void TuningSourceState::CopyFrom(const TuningSourceState& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool TuningDataSourceState::IsInitialized() const {
+bool TuningSourceState::IsInitialized() const {
 
   return true;
 }
 
-void TuningDataSourceState::Swap(TuningDataSourceState* other) {
+void TuningSourceState::Swap(TuningSourceState* other) {
   if (other != this) {
     std::swap(id_, other->id_);
     std::swap(uptime_, other->uptime_);
@@ -6828,11 +7007,11 @@ void TuningDataSourceState::Swap(TuningDataSourceState* other) {
   }
 }
 
-::google::protobuf::Metadata TuningDataSourceState::GetMetadata() const {
+::google::protobuf::Metadata TuningSourceState::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TuningDataSourceState_descriptor_;
-  metadata.reflection = TuningDataSourceState_reflection_;
+  metadata.descriptor = TuningSourceState_descriptor_;
+  metadata.reflection = TuningSourceState_reflection_;
   return metadata;
 }
 
@@ -6840,61 +7019,61 @@ void TuningDataSourceState::Swap(TuningDataSourceState* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int GetTuningDataSourcesStatesReply::kErrorFieldNumber;
-const int GetTuningDataSourcesStatesReply::kTuningDataSourcesStatesFieldNumber;
+const int GetTuningSourcesStatesReply::kErrorFieldNumber;
+const int GetTuningSourcesStatesReply::kTuningDataSourcesStatesFieldNumber;
 #endif  // !_MSC_VER
 
-GetTuningDataSourcesStatesReply::GetTuningDataSourcesStatesReply()
+GetTuningSourcesStatesReply::GetTuningSourcesStatesReply()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void GetTuningDataSourcesStatesReply::InitAsDefaultInstance() {
+void GetTuningSourcesStatesReply::InitAsDefaultInstance() {
 }
 
-GetTuningDataSourcesStatesReply::GetTuningDataSourcesStatesReply(const GetTuningDataSourcesStatesReply& from)
+GetTuningSourcesStatesReply::GetTuningSourcesStatesReply(const GetTuningSourcesStatesReply& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void GetTuningDataSourcesStatesReply::SharedCtor() {
+void GetTuningSourcesStatesReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-GetTuningDataSourcesStatesReply::~GetTuningDataSourcesStatesReply() {
+GetTuningSourcesStatesReply::~GetTuningSourcesStatesReply() {
   SharedDtor();
 }
 
-void GetTuningDataSourcesStatesReply::SharedDtor() {
+void GetTuningSourcesStatesReply::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void GetTuningDataSourcesStatesReply::SetCachedSize(int size) const {
+void GetTuningSourcesStatesReply::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* GetTuningDataSourcesStatesReply::descriptor() {
+const ::google::protobuf::Descriptor* GetTuningSourcesStatesReply::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return GetTuningDataSourcesStatesReply_descriptor_;
+  return GetTuningSourcesStatesReply_descriptor_;
 }
 
-const GetTuningDataSourcesStatesReply& GetTuningDataSourcesStatesReply::default_instance() {
+const GetTuningSourcesStatesReply& GetTuningSourcesStatesReply::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-GetTuningDataSourcesStatesReply* GetTuningDataSourcesStatesReply::default_instance_ = NULL;
+GetTuningSourcesStatesReply* GetTuningSourcesStatesReply::default_instance_ = NULL;
 
-GetTuningDataSourcesStatesReply* GetTuningDataSourcesStatesReply::New() const {
-  return new GetTuningDataSourcesStatesReply;
+GetTuningSourcesStatesReply* GetTuningSourcesStatesReply::New() const {
+  return new GetTuningSourcesStatesReply;
 }
 
-void GetTuningDataSourcesStatesReply::Clear() {
+void GetTuningSourcesStatesReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
   }
@@ -6903,7 +7082,7 @@ void GetTuningDataSourcesStatesReply::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool GetTuningDataSourcesStatesReply::MergePartialFromCodedStream(
+bool GetTuningSourcesStatesReply::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -6924,7 +7103,7 @@ bool GetTuningDataSourcesStatesReply::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
+      // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -6955,14 +7134,14 @@ bool GetTuningDataSourcesStatesReply::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void GetTuningDataSourcesStatesReply::SerializeWithCachedSizes(
+void GetTuningSourcesStatesReply::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
+  // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
   for (int i = 0; i < this->tuningdatasourcesstates_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->tuningdatasourcesstates(i), output);
@@ -6974,14 +7153,14 @@ void GetTuningDataSourcesStatesReply::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* GetTuningDataSourcesStatesReply::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* GetTuningSourcesStatesReply::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
+  // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
   for (int i = 0; i < this->tuningdatasourcesstates_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -6995,7 +7174,7 @@ void GetTuningDataSourcesStatesReply::SerializeWithCachedSizes(
   return target;
 }
 
-int GetTuningDataSourcesStatesReply::ByteSize() const {
+int GetTuningSourcesStatesReply::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -7007,7 +7186,7 @@ int GetTuningDataSourcesStatesReply::ByteSize() const {
     }
 
   }
-  // repeated .Network.TuningDataSourceState tuningDataSourcesStates = 2;
+  // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
   total_size += 1 * this->tuningdatasourcesstates_size();
   for (int i = 0; i < this->tuningdatasourcesstates_size(); i++) {
     total_size +=
@@ -7026,10 +7205,10 @@ int GetTuningDataSourcesStatesReply::ByteSize() const {
   return total_size;
 }
 
-void GetTuningDataSourcesStatesReply::MergeFrom(const ::google::protobuf::Message& from) {
+void GetTuningSourcesStatesReply::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const GetTuningDataSourcesStatesReply* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const GetTuningDataSourcesStatesReply*>(
+  const GetTuningSourcesStatesReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GetTuningSourcesStatesReply*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -7038,7 +7217,7 @@ void GetTuningDataSourcesStatesReply::MergeFrom(const ::google::protobuf::Messag
   }
 }
 
-void GetTuningDataSourcesStatesReply::MergeFrom(const GetTuningDataSourcesStatesReply& from) {
+void GetTuningSourcesStatesReply::MergeFrom(const GetTuningSourcesStatesReply& from) {
   GOOGLE_CHECK_NE(&from, this);
   tuningdatasourcesstates_.MergeFrom(from.tuningdatasourcesstates_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -7049,24 +7228,24 @@ void GetTuningDataSourcesStatesReply::MergeFrom(const GetTuningDataSourcesStates
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void GetTuningDataSourcesStatesReply::CopyFrom(const ::google::protobuf::Message& from) {
+void GetTuningSourcesStatesReply::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void GetTuningDataSourcesStatesReply::CopyFrom(const GetTuningDataSourcesStatesReply& from) {
+void GetTuningSourcesStatesReply::CopyFrom(const GetTuningSourcesStatesReply& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool GetTuningDataSourcesStatesReply::IsInitialized() const {
+bool GetTuningSourcesStatesReply::IsInitialized() const {
 
   return true;
 }
 
-void GetTuningDataSourcesStatesReply::Swap(GetTuningDataSourcesStatesReply* other) {
+void GetTuningSourcesStatesReply::Swap(GetTuningSourcesStatesReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
     tuningdatasourcesstates_.Swap(&other->tuningdatasourcesstates_);
@@ -7076,11 +7255,11 @@ void GetTuningDataSourcesStatesReply::Swap(GetTuningDataSourcesStatesReply* othe
   }
 }
 
-::google::protobuf::Metadata GetTuningDataSourcesStatesReply::GetMetadata() const {
+::google::protobuf::Metadata GetTuningSourcesStatesReply::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = GetTuningDataSourcesStatesReply_descriptor_;
-  metadata.reflection = GetTuningDataSourcesStatesReply_reflection_;
+  metadata.descriptor = GetTuningSourcesStatesReply_descriptor_;
+  metadata.reflection = GetTuningSourcesStatesReply_reflection_;
   return metadata;
 }
 

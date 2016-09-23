@@ -1,3 +1,3 @@
 #include "PropertyObject.h"
 
-poh::PlainObjectHeap thePropertyObjectHeap;
+//poh::PlainObjectHeap thePropertyObjectHeap;
