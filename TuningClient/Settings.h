@@ -50,6 +50,15 @@ public:
 	QByteArray m_mainWindowSplitterState;
 
 
+	// Property Editor Options
+	//
+	QPoint m_multiLinePropertyEditorWindowPos;
+	QByteArray m_multiLinePropertyEditorGeometry;
+
+	int m_presetPropertiesSplitterState;
+	QPoint m_presetPropertiesWindowPos;
+	QByteArray m_presetPropertiesWindowGeometry;
+
 	// Tuning pages settings
 	//
 	std::vector<TuningPageSettings> m_tuningPageSettings;

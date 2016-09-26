@@ -6,6 +6,7 @@
 #include "DialogSettings.h"
 #include "ObjectFilter.h"
 #include "DialogTuningSources.h"
+#include "DialogPresetEditor.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -34,6 +35,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
 	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+
+
+	QString errorCode;
+	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
+	{
+		QMessageBox::critical(this, "Error", tr("Failed to load user filters: %1").arg(errorCode));
+	}
 
 	//
 
@@ -66,6 +74,13 @@ void MainWindow::createActions()
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
+
+
+	m_pPresetEditorAction = new QAction(tr("Preset Editor..."), this);
+	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
+	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
+	m_pPresetEditorAction->setEnabled(true);
+	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -103,6 +118,7 @@ void MainWindow::createMenu()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
+	pToolsMenu->addAction(m_pPresetEditorAction);
 	pToolsMenu->addAction(m_pTuningSourcesAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
@@ -239,6 +255,18 @@ void MainWindow::showSettings()
 	d.exec();
 }
 
+void MainWindow::runPresetEditor()
+{
+	ObjectFilterStorage editFilters = theUserFilters;
+
+	DialogPresetEditor d(&editFilters, this);
+	if (d.exec() == QDialog::Accepted)
+	{
+		theUserFilters = editFilters;
+		theUserFilters.save("UserFilters.xml");
+		emit filtersUpdated();
+	}
+}
 
 void MainWindow::showTuningSources()
 {

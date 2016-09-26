@@ -20,6 +20,7 @@ TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
 	m_columnsNames<<tr("Type");
 
 	m_columnsNames<<tr("Value");
+	m_columnsNames<<tr("Default");
 	m_columnsNames<<tr("Valid");
 	m_columnsNames<<tr("Underflow");
 	m_columnsNames<<tr("Overflow");
@@ -40,6 +41,7 @@ TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
 		m_columnsIndexes.push_back(Type);
 
 		m_columnsIndexes.push_back(Value);
+		m_columnsIndexes.push_back(Default);
 		m_columnsIndexes.push_back(Valid);
 		m_columnsIndexes.push_back(Underflow);
 		m_columnsIndexes.push_back(Overflow);
@@ -170,6 +172,13 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
 		}
+
+		if (displayIndex == Default)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::gray);
+			return QBrush(color);
+		}
 	}
 
 	if (role == Qt::ForegroundRole)
@@ -184,12 +193,18 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			return QBrush(color);
 		}
 
+		if (displayIndex == Default)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
 	}
 
 	if (role == Qt::FontRole)
 	{
-		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
+		//int col = index.column();
+		//int displayIndex = m_columnsIndexes[col];
 
 		//if (displayIndex == Value)
 		//{
@@ -197,6 +212,19 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			f.setBold(true);
 			return f;
 		//}
+	}
+
+	if (role == Qt::TextAlignmentRole)
+	{
+
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex >= Value)
+		{
+			return Qt::AlignCenter;
+		}
+		return Qt::AlignLeft + Qt::AlignVCenter;
 	}
 
 	if (role == Qt::DisplayRole)
@@ -284,6 +312,17 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 		}
 
+		if (displayIndex == Default)
+		{
+			if (o.analog())
+			{
+				return tr("0.0");
+			}
+			else
+			{
+				return tr("No");
+			}
+		}
 
 		if (displayIndex == Valid)
 		{
@@ -378,7 +417,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i);
+		ObjectFilter* f = theFilters.topFilter(i).get();
 		if (f == nullptr)
 		{
 			assert(f);
@@ -437,7 +476,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 		//
 		buttons[0]->blockSignals(true);
 		buttons[0]->setChecked(true);
-		m_buttonFilter = theFilters.filter(buttons[0]->filterHash());
+		m_buttonFilter = theFilters.filter(buttons[0]->filterHash()).get();
 		buttons[0]->blockSignals(false);
 
 	}
@@ -450,10 +489,12 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	//
 	m_maskTypeCombo = new QComboBox();
 	m_maskEdit = new QLineEdit();
-	m_maskButton = new QPushButton("Apply");
+	m_maskButton = new QPushButton("Apply Mask");
 
-	m_applyButton = new QPushButton("Apply");
-	m_restoreButton = new QPushButton("Restore");
+	m_setValueButton = new QPushButton("Set Value");
+	m_setOnButton = new QPushButton("Set all to On");
+	m_setOffButton = new QPushButton("Set all to Off");
+	m_setToDefaultButton = new QPushButton("Set to Defaults");
 
 	m_bottomLayout = new QHBoxLayout();
 
@@ -461,8 +502,10 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	m_bottomLayout->addWidget(m_maskEdit);
 	m_bottomLayout->addWidget(m_maskButton);
 	m_bottomLayout->addStretch();
-	m_bottomLayout->addWidget(m_applyButton);
-	m_bottomLayout->addWidget(m_restoreButton);
+	m_bottomLayout->addWidget(m_setValueButton);
+	m_bottomLayout->addWidget(m_setOnButton);
+	m_bottomLayout->addWidget(m_setOffButton);
+	m_bottomLayout->addWidget(m_setToDefaultButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -541,7 +584,8 @@ void TuningPage::fillObjectsList()
 					result = false;
 					break;
 				}
-				treeFilter = treeFilter->parent();
+
+				treeFilter = theFilters.filter(treeFilter->parentHash()).get();
 			}
 			if (result == false)
 			{
@@ -575,7 +619,7 @@ void TuningPage::slot_filterButtonClicked(Hash hash)
 {
 	qDebug()<<"Filter button clicked: "<<hash;
 
-	m_buttonFilter = theFilters.filter(hash);
+	m_buttonFilter = theFilters.filter(hash).get();
 
 	if (m_buttonFilter == nullptr)
 	{
@@ -591,7 +635,7 @@ void TuningPage::slot_filterTreeChanged(Hash hash)
 {
 	qDebug()<<"Filter tree clicked: "<<hash;
 
-	m_treeFilter = theFilters.filter(hash);
+	m_treeFilter = theFilters.filter(hash).get();
 
 	if (m_treeFilter == nullptr)
 	{

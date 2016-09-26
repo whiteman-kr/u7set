@@ -7,9 +7,68 @@
 // ObjectFilter
 //
 
-ObjectFilter::ObjectFilter(FilterType filterType)
+ObjectFilter::ObjectFilter()
+{
+	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, ObjectFilter::strID, ObjectFilter::setStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, ObjectFilter::caption, ObjectFilter::setCaption);
+	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, ObjectFilter::signalType, ObjectFilter::setSignalType);
+
+	/*auto propHash = ADD_PROPERTY_GETTER(Hash, "Hash", true, ObjectFilter::hash);
+	propHash->setCategory("Debug");
+
+	auto propParentHash = ADD_PROPERTY_GETTER(Hash, "ParentHash", true, ObjectFilter::parentHash);
+	propParentHash->setCategory("Debug");*/
+
+	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, ObjectFilter::filterType);
+	propFilterType->setCategory("Debug");
+
+	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, ObjectFilter::customAppSignalIDMask, ObjectFilter::setCustomAppSignalIDMask);
+	propMask->setCategory("Masks");
+
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalMasks", true, ObjectFilter::appSignalIDMask, ObjectFilter::setAppSignalIDMask);
+	propMask->setCategory("Masks");
+
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
+	propMask->setCategory("Masks");
+
+	auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIds, ObjectFilter::setAppSignalIds);
+	propSignals->setCategory("Signals");
+
+}
+
+ObjectFilter::ObjectFilter(FilterType filterType):ObjectFilter()
 {
 	m_filterType = filterType;
+}
+
+ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
+{
+	m_strID = That.m_strID;
+	m_caption = That.m_caption;
+
+	m_allowAll = That.m_allowAll;
+	m_denyAll = That.m_allowAll;
+
+	m_hash = That.m_hash;
+
+	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
+	m_equipmentIDMasks = That.m_equipmentIDMasks;
+	m_appSignalIDMasks = That.m_appSignalIDMasks;
+	m_appSignalIds = That.m_appSignalIds;
+
+	m_filterType = That.m_filterType;
+	m_signalType = That.m_signalType;
+
+	m_parentHash = That.m_parentHash;
+
+	for (auto f : That.m_childFilters)
+	{
+		ObjectFilter* fi = f.get();
+
+		std::shared_ptr<ObjectFilter> fiCopy = std::make_shared<ObjectFilter>(*fi);
+
+		addChild(fiCopy);
+	}
 }
 
 bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>>& filtersMap)
@@ -107,10 +166,10 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 				}
 
 				filtersMap[of->hash()] = of;
+				of->setParentHash(hash());
 
-				of->setParent(this);
+				addChild(of);
 
-				m_childFilters.push_back(of);
 			}
 			else
 			{
@@ -269,12 +328,31 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 	}
 }
 
-QStringList ObjectFilter::appSignalIds() const
+QString ObjectFilter::appSignalIds() const
 {
-	return m_appSignalIds;
+	QString result;
+	for (auto s : m_appSignalIds)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
 }
 
-void ObjectFilter::setAppSignalIds(const QStringList& value)
+void ObjectFilter::setAppSignalIds(const QString &value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_appSignalIds.clear();
+	}
+	else
+	{
+		m_appSignalIds = value.split(';');
+	}
+}
+
+void ObjectFilter::setAppSignalIdsList(const QStringList& value)
 {
 	m_appSignalIds = value;
 }
@@ -299,14 +377,14 @@ void ObjectFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
-ObjectFilter* ObjectFilter::parent() const
+Hash ObjectFilter::parentHash() const
 {
-	return m_parent;
+	return m_parentHash;
 }
 
-void ObjectFilter::setParent(ObjectFilter* value)
+void ObjectFilter::setParentHash(Hash value)
 {
-	m_parent = value;
+	m_parentHash = value;
 }
 
 bool ObjectFilter::allowAll() const
@@ -348,6 +426,29 @@ bool ObjectFilter::isButton() const
 void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
 {
 	m_childFilters.push_back(child);
+}
+
+void ObjectFilter::removeChild(std::shared_ptr<ObjectFilter> child)
+{
+	int index = -1;
+
+	for (auto it : m_childFilters)
+	{
+		index++;
+		if (it->hash() == child->hash())
+		{
+			break;
+		}
+	}
+
+	if (index != -1)
+	{
+		m_childFilters.erase(m_childFilters.begin() + index);
+		return;
+	}
+
+	assert(false);
+	return;
 }
 
 int ObjectFilter::childFiltersCount()
@@ -510,6 +611,22 @@ bool ObjectFilter::match(const TuningObject& object)
 ObjectFilterStorage::ObjectFilterStorage()
 {
 
+}
+
+ObjectFilterStorage::ObjectFilterStorage(const ObjectFilterStorage& That)
+{
+	m_topFilters = That.m_topFilters;
+	m_schemasDetails = That.m_schemasDetails;
+
+	for (auto f : That.m_filtersMap)
+	{
+		// create objects copies
+		//
+		Hash hash = f.first;
+		ObjectFilter* filter = f.second.get();
+
+		m_filtersMap[hash] = std::make_shared<ObjectFilter>(*filter);
+	}
 }
 
 bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
@@ -676,7 +793,7 @@ int ObjectFilterStorage::topFilterCount()
 	return static_cast<int>(m_topFilters.size());
 }
 
-ObjectFilter* ObjectFilterStorage::topFilter(int index)
+std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index)
 {
 	if (index < 0 || index >= m_topFilters.size())
 	{
@@ -689,7 +806,79 @@ ObjectFilter* ObjectFilterStorage::topFilter(int index)
 	return filter(hash);
 }
 
-ObjectFilter* ObjectFilterStorage::filter(Hash hash)
+bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> filter)
+{
+	return addFilter(nullptr, filter);
+}
+
+bool ObjectFilterStorage::addFilter(ObjectFilter* parent, const std::shared_ptr<ObjectFilter> filter)
+{
+	if (m_filtersMap.find(filter->hash()) != m_filtersMap.end())
+	{
+		assert(false);
+		return false;
+	}
+
+	m_filtersMap[filter->hash()] = filter;
+
+	if (parent != nullptr)
+	{
+		filter->setParentHash(parent->hash());
+		parent->addChild(filter);
+	}
+	else
+	{
+		m_topFilters.push_back(filter->hash());
+	}
+
+	return true;
+}
+
+bool ObjectFilterStorage::removeFilter(Hash hash)
+{
+	if (m_filtersMap.find(hash) == m_filtersMap.end())
+	{
+		assert(false);
+		return false;
+	}
+
+	std::shared_ptr<ObjectFilter> f = m_filtersMap[hash];
+
+	if (f->parentHash() != 0)
+	{
+		// remove this filter from parent
+		//
+		std::shared_ptr<ObjectFilter> p = filter(f->parentHash());
+		if (p == nullptr)
+		{
+			assert(p);
+			return false;
+		}
+
+		p->removeChild(f);
+	}
+
+	//remove it from top filters
+
+	auto it = std::find(m_topFilters.begin(), m_topFilters.end(), hash);
+	if (it != m_topFilters.end())
+	{
+		m_topFilters.erase(it);
+	}
+
+	// remove it from map
+
+	auto fptr = m_filtersMap.find(hash);
+	if (fptr != m_filtersMap.end())
+	{
+		m_filtersMap.erase(fptr);
+	}
+
+	return true;
+
+}
+
+std::shared_ptr<ObjectFilter> ObjectFilterStorage::filter(Hash hash)
 {
 	auto it = m_filtersMap.find(hash);
 	if (it == m_filtersMap.end())
@@ -698,7 +887,7 @@ ObjectFilter* ObjectFilterStorage::filter(Hash hash)
 		return nullptr;
 	}
 
-	return it->second.get();
+	return it->second;
 }
 
 int ObjectFilterStorage::schemaDetailsCount()
@@ -832,7 +1021,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		for (auto s : m_schemasDetails)
 		{
 			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-			ofTs->setAppSignalIds(s.m_appSignals);
+			ofTs->setAppSignalIdsList(s.m_appSignals);
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
 			ofTs->setCaption(s.m_caption);
 			m_filtersMap[ofTs->hash()] = ofTs;
@@ -875,7 +1064,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 	bool createRootFilter = false;
 	for (auto tf : m_topFilters)
 	{
-		ObjectFilter* f = filter(tf);
+		std::shared_ptr<ObjectFilter> f = filter(tf);
 		if (f->isTree())
 		{
 			createRootFilter = true;
@@ -888,16 +1077,6 @@ void ObjectFilterStorage::createAutomaticFilters()
 		ofRoot->setStrID("%AUTOFILTER%_ROOT");
 		ofRoot->setCaption("All objects");
 		ofRoot->setAllowAll(true);
-
-		/*for (auto tf : m_topFilters)
-		{
-			ObjectFilter* f = filter(tf);
-			if (f->isTree())
-			{
-				ofRoot->addChild(m_filtersMap[tf]);
-				f->setParent(ofRoot.get());
-			}
-		}*/
 
 		m_filtersMap[ofRoot->hash()] = ofRoot;
 		m_topFilters.insert(m_topFilters.begin(), ofRoot->hash());
