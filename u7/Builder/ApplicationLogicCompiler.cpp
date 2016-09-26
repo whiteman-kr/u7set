@@ -866,6 +866,11 @@ namespace Builder
 			return false;
 		}
 
+		if (outPort->txAnalogSignalsCount() + outPort->txDiscreteSignalsCount() == 0)
+		{
+			return true;
+		}
+
 		QString outPortID = outPort->equipmentID().toLower();
 		QString inPortID = inPort->equipmentID().toLower();
 
@@ -923,7 +928,7 @@ namespace Builder
 		// declaration section
 
 		list.append("library ieee;");
-		list.append("use ieee.std_logic_1164.all;\n");
+		list.append("use ieee.std_logic_1164.all;");
 		list.append("use ieee.numeric_std.all;\n");
 
 		str = QString("entity %1 is port\n\t(\n").arg(inPortID);
