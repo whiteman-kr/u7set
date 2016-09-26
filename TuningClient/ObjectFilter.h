@@ -24,9 +24,7 @@ public:
 	{
 		Tree,
 		Tab,
-		Button,
-		Child
-
+		Button
 	};
 	Q_ENUM(FilterType)
 
@@ -92,7 +90,6 @@ public:
 	bool isTree() const;
 	bool isTab() const;
 	bool isButton() const;
-	bool isChild() const;
 
 	void addChild(std::shared_ptr<ObjectFilter> child);
 

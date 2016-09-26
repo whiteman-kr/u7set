@@ -75,9 +75,23 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 
 		if (t == QXmlStreamReader::StartElement)
 		{
-			if (reader.name() == "ObjectFilter")
+			QString tagName = reader.name().toString();
+
+			if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 			{
-				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+				ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
+
+				if (tagName == "Tab")
+				{
+					filterType = ObjectFilter::FilterType::Tab;
+				}
+
+				if (tagName == "Button")
+				{
+					filterType = ObjectFilter::FilterType::Button;
+				}
+
+				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
 				if (of->load(reader, filtersMap) == false)
 				{
@@ -112,7 +126,29 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 
 bool ObjectFilter::save(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("ObjectFilter");
+	if (isTree() == true)
+	{
+		writer.writeStartElement("Tree");
+	}
+	else
+	{
+		if (isTab())
+		{
+			writer.writeStartElement("Tab");
+		}
+		else
+		{
+			if (isButton())
+			{
+				writer.writeStartElement("Button");
+			}
+			else
+			{
+				assert(false);
+				return false;
+			}
+		}
+	}
 
 	writer.writeAttribute("StrID", strID());
 	writer.writeAttribute("Caption", caption());
@@ -307,11 +343,6 @@ bool ObjectFilter::isTab() const
 bool ObjectFilter::isButton() const
 {
 	return filterType() == FilterType::Button;
-}
-
-bool ObjectFilter::isChild() const
-{
-	return filterType() == FilterType::Child;
 }
 
 void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
@@ -537,7 +568,7 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 	// Read signals
 	//
-	ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Child;
+
 
 	while (!reader.atEnd())
 	{
@@ -553,8 +584,22 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 			continue;
 		}
 
-		if (reader.name() == "ObjectFilter")
+		QString tagName = reader.name().toString();
+
+		if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 		{
+			ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
+
+			if (tagName == "Tab")
+			{
+				filterType = ObjectFilter::FilterType::Tab;
+			}
+
+			if (tagName == "Button")
+			{
+				filterType = ObjectFilter::FilterType::Button;
+			}
+
 			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
 			if (of->load(reader, m_filtersMap) == false)
@@ -573,24 +618,6 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 			m_filtersMap[of->hash()] = of;
 			m_topFilters.push_back(of->hash());
 
-			continue;
-		}
-
-		if (reader.name() == "Tree")
-		{
-			filterType = ObjectFilter::FilterType::Tree;
-			continue;
-		}
-
-		if (reader.name() == "Tabs")
-		{
-			filterType = ObjectFilter::FilterType::Tab;
-			continue;
-		}
-
-		if (reader.name() == "Buttons")
-		{
-			filterType = ObjectFilter::FilterType::Button;
 			continue;
 		}
 
@@ -614,32 +641,18 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 	writer.writeStartElement("ObjectFilterStorage");
 
-	QList<std::pair<QString, ObjectFilter::FilterType>> records;
-	records.push_back(std::make_pair("Tree", ObjectFilter::FilterType::Tree));
-	records.push_back(std::make_pair("Tabs", ObjectFilter::FilterType::Tab));
-	records.push_back(std::make_pair("Buttons", ObjectFilter::FilterType::Button));
-
-	for (auto r : records)
+	for (auto of : m_topFilters)
 	{
-		writer.writeStartElement(r.first);
-		for (auto of : m_topFilters)
+		ObjectFilter* f = m_filtersMap[of].get();
+		if (f == nullptr)
 		{
-			ObjectFilter* f = m_filtersMap[of].get();
-			if (f == nullptr)
-			{
-				assert(f);
-				return false;
-			}
-
-			if (f->filterType() != r.second)
-			{
-				continue;
-			}
-
-			f->save(writer);
+			assert(f);
+			return false;
 		}
-		writer.writeEndElement();
+
+		f->save(writer);
 	}
+	writer.writeEndElement();
 
 	writer.writeEndElement();	// ObjectFilterStorage
 
@@ -818,7 +831,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 
 		for (auto s : m_schemasDetails)
 		{
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 			ofTs->setAppSignalIds(s.m_appSignals);
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
 			ofTs->setCaption(s.m_caption);
@@ -844,7 +857,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		{
 			QString ts = theObjects.tuningSourceEquipmentId(i);
 
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
