@@ -50,6 +50,7 @@ class AfbSignal;
 class AfbParam;
 class Schema;
 class LogicSchema;
+class UfbSchema;
 class SchemaLayer;
 class SchemaItem;
 class PosRectImpl;
@@ -2034,6 +2035,15 @@ class Schema : public ::google::protobuf::Message {
   inline ::Proto::LogicSchema* release_logic_schema();
   inline void set_allocated_logic_schema(::Proto::LogicSchema* logic_schema);
 
+  // optional .Proto.UfbSchema ufb_schema = 201;
+  inline bool has_ufb_schema() const;
+  inline void clear_ufb_schema();
+  static const int kUfbSchemaFieldNumber = 201;
+  inline const ::Proto::UfbSchema& ufb_schema() const;
+  inline ::Proto::UfbSchema* mutable_ufb_schema();
+  inline ::Proto::UfbSchema* release_ufb_schema();
+  inline void set_allocated_ufb_schema(::Proto::UfbSchema* ufb_schema);
+
   // @@protoc_insertion_point(class_scope:Proto.Schema)
  private:
   inline void set_has_uuid();
@@ -2054,6 +2064,8 @@ class Schema : public ::google::protobuf::Message {
   inline void clear_has_afbs();
   inline void set_has_logic_schema();
   inline void clear_has_logic_schema();
+  inline void set_has_ufb_schema();
+  inline void clear_has_ufb_schema();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2067,9 +2079,10 @@ class Schema : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
   ::Proto::LogicSchema* logic_schema_;
+  ::Proto::UfbSchema* ufb_schema_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -2172,6 +2185,103 @@ class LogicSchema : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static LogicSchema* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class UfbSchema : public ::google::protobuf::Message {
+ public:
+  UfbSchema();
+  virtual ~UfbSchema();
+
+  UfbSchema(const UfbSchema& from);
+
+  inline UfbSchema& operator=(const UfbSchema& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const UfbSchema& default_instance();
+
+  void Swap(UfbSchema* other);
+
+  // implements Message ----------------------------------------------
+
+  UfbSchema* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const UfbSchema& from);
+  void MergeFrom(const UfbSchema& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string description = 1;
+  inline bool has_description() const;
+  inline void clear_description();
+  static const int kDescriptionFieldNumber = 1;
+  inline const ::std::string& description() const;
+  inline void set_description(const ::std::string& value);
+  inline void set_description(const char* value);
+  inline void set_description(const char* value, size_t size);
+  inline ::std::string* mutable_description();
+  inline ::std::string* release_description();
+  inline void set_allocated_description(::std::string* description);
+
+  // optional int32 version = 2 [default = 1];
+  inline bool has_version() const;
+  inline void clear_version();
+  static const int kVersionFieldNumber = 2;
+  inline ::google::protobuf::int32 version() const;
+  inline void set_version(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.UfbSchema)
+ private:
+  inline void set_has_description();
+  inline void clear_has_description();
+  inline void set_has_version();
+  inline void clear_has_version();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* description_;
+  ::google::protobuf::int32 version_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static UfbSchema* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -9470,6 +9580,44 @@ inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schem
   }
 }
 
+// optional .Proto.UfbSchema ufb_schema = 201;
+inline bool Schema::has_ufb_schema() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Schema::set_has_ufb_schema() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Schema::clear_has_ufb_schema() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Schema::clear_ufb_schema() {
+  if (ufb_schema_ != NULL) ufb_schema_->::Proto::UfbSchema::Clear();
+  clear_has_ufb_schema();
+}
+inline const ::Proto::UfbSchema& Schema::ufb_schema() const {
+  return ufb_schema_ != NULL ? *ufb_schema_ : *default_instance_->ufb_schema_;
+}
+inline ::Proto::UfbSchema* Schema::mutable_ufb_schema() {
+  set_has_ufb_schema();
+  if (ufb_schema_ == NULL) ufb_schema_ = new ::Proto::UfbSchema;
+  return ufb_schema_;
+}
+inline ::Proto::UfbSchema* Schema::release_ufb_schema() {
+  clear_has_ufb_schema();
+  ::Proto::UfbSchema* temp = ufb_schema_;
+  ufb_schema_ = NULL;
+  return temp;
+}
+inline void Schema::set_allocated_ufb_schema(::Proto::UfbSchema* ufb_schema) {
+  delete ufb_schema_;
+  ufb_schema_ = ufb_schema;
+  if (ufb_schema) {
+    set_has_ufb_schema();
+  } else {
+    clear_has_ufb_schema();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // LogicSchema
@@ -9519,6 +9667,102 @@ inline ::google::protobuf::int32 LogicSchema::counter() const {
 inline void LogicSchema::set_counter(::google::protobuf::int32 value) {
   set_has_counter();
   counter_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// UfbSchema
+
+// optional string description = 1;
+inline bool UfbSchema::has_description() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void UfbSchema::set_has_description() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void UfbSchema::clear_has_description() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void UfbSchema::clear_description() {
+  if (description_ != &::google::protobuf::internal::kEmptyString) {
+    description_->clear();
+  }
+  clear_has_description();
+}
+inline const ::std::string& UfbSchema::description() const {
+  return *description_;
+}
+inline void UfbSchema::set_description(const ::std::string& value) {
+  set_has_description();
+  if (description_ == &::google::protobuf::internal::kEmptyString) {
+    description_ = new ::std::string;
+  }
+  description_->assign(value);
+}
+inline void UfbSchema::set_description(const char* value) {
+  set_has_description();
+  if (description_ == &::google::protobuf::internal::kEmptyString) {
+    description_ = new ::std::string;
+  }
+  description_->assign(value);
+}
+inline void UfbSchema::set_description(const char* value, size_t size) {
+  set_has_description();
+  if (description_ == &::google::protobuf::internal::kEmptyString) {
+    description_ = new ::std::string;
+  }
+  description_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* UfbSchema::mutable_description() {
+  set_has_description();
+  if (description_ == &::google::protobuf::internal::kEmptyString) {
+    description_ = new ::std::string;
+  }
+  return description_;
+}
+inline ::std::string* UfbSchema::release_description() {
+  clear_has_description();
+  if (description_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = description_;
+    description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void UfbSchema::set_allocated_description(::std::string* description) {
+  if (description_ != &::google::protobuf::internal::kEmptyString) {
+    delete description_;
+  }
+  if (description) {
+    set_has_description();
+    description_ = description;
+  } else {
+    clear_has_description();
+    description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 version = 2 [default = 1];
+inline bool UfbSchema::has_version() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void UfbSchema::set_has_version() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void UfbSchema::clear_has_version() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void UfbSchema::clear_version() {
+  version_ = 1;
+  clear_has_version();
+}
+inline ::google::protobuf::int32 UfbSchema::version() const {
+  return version_;
+}
+inline void UfbSchema::set_version(::google::protobuf::int32 value) {
+  set_has_version();
+  version_ = value;
 }
 
 // -------------------------------------------------------------------

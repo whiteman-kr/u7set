@@ -238,6 +238,12 @@ int DbWorker::afblFileId() const
 	return m_afblFileId;
 }
 
+int DbWorker::ufblFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_ufblFileId;
+}
+
 int DbWorker::alFileId() const
 {
 	QMutexLocker m(&m_mutex);
@@ -814,6 +820,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	m_mutex.lock();
 	m_afblFileId = -1;
+	m_ufblFileId = -1;
 	m_alFileId = -1;
 	m_hcFileId = -1;
 	m_hpFileId = -1;
@@ -836,7 +843,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	for (const DbFileInfo& fi : systemFiles)
 	{
-		if (fi.fileName() == AfblFileName)
+		if (fi.fileName() == ::AfblFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_afblFileId = fi.fileId();
@@ -844,7 +851,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == AlFileName)
+		if (fi.fileName() == ::UfblFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_ufblFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
+
+		if (fi.fileName() == ::AlFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_alFileId = fi.fileId();
@@ -852,7 +867,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == HcFileName)
+		if (fi.fileName() == ::HcFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hcFileId = fi.fileId();
@@ -860,7 +875,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == HpFileName)
+		if (fi.fileName() == ::HpFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hpFileId = fi.fileId();
@@ -868,7 +883,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == MvsFileName)
+		if (fi.fileName() == ::MvsFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mvsFileId = fi.fileId();
@@ -876,7 +891,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DvsFileName)
+		if (fi.fileName() == ::DvsFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_dvsFileId = fi.fileId();
@@ -884,7 +899,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == McFileName)
+		if (fi.fileName() == ::McFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mcFileId = fi.fileId();
@@ -896,6 +911,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	m_mutex.lock();
 	result = m_afblFileId != -1;
+	result &= m_ufblFileId != -1;
 	result &= m_alFileId != -1;
 	result &= m_hcFileId != -1;
 	result &= m_hpFileId != -1;
@@ -913,6 +929,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		// Lock is nit necessare, we will crash anyway!
 		//
 		assert(m_afblFileId != -1);
+		assert(m_ufblFileId != -1);
 		assert(m_alFileId != -1);
 		assert(m_hcFileId != -1);
 		assert(m_hpFileId != -1);
@@ -1803,6 +1820,8 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 		emitError(tr("Can't get file list. Error: ") +  q.lastError().text());
 		return;
 	}
+
+	files->reserve(q.size());
 
 	while (q.next())
 	{

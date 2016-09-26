@@ -402,6 +402,21 @@ namespace VFrame30
 		points.unique();
 	}
 
+	void PosConnectionImpl::RemoveUnwantedPoints()
+	{
+		SchemaPoint firstPoint = points.front();
+		SchemaPoint lastPoint = points.back();
+
+		if (firstPoint.X == lastPoint.X || firstPoint.Y == lastPoint.Y)
+		{
+			while (points.size() != 1)
+			{
+				points.pop_back();
+			}
+			points.push_back(lastPoint);
+		}
+	}
+
 	void PosConnectionImpl::DeleteAllPoints()
 	{
 		points.clear();

@@ -1,22 +1,31 @@
 #include "CreateSchemaDialog.h"
 #include "ui_CreateSchemaDialog.h"
+#include "../lib/DbController.h"
 #include "../VFrame30/Settings.h"
+#include "../VFrame30/LogicSchema.h"
 
-CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, QWidget* parent) :
+CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateSchemaDialog),
 	m_schema(schema)
 {
 	assert(m_schema.get() != nullptr);
+	assert(db);
+
 	ui->setupUi(this);
 
 	// Set StrID label
 	//
 	QString idLable = "ID";
 
-	if (isLogicSchema() == true)
+	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
 	{
 		idLable = "AppSchemaID";
+	}
+
+	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
+	{
+		idLable = "UserFunctionalBlock ID";
 	}
 
 	if (isMonitorSchema() == true)
@@ -33,67 +42,15 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	ui->strIdLabel->setText(idLable);
 
-	// Set height and width lables, append px, in or mm
-	//
-	QString units;
-
-	if (schema->unit() == VFrame30::SchemaUnit::Display)
-	{
-		units = tr(", px");
-	}
-	else
-	{
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
-		{
-			units = tr(", in");
-		}
-
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter)
-		{
-			units = tr(", mm");
-		}
-	}
-
-	ui->widthLabel->setText(ui->widthLabel->text() + units);
-	ui->heigtLabel->setText(ui->heigtLabel->text() + units);
 
 	// Set height and width
 	//
-	ui->strdIdEdit->setText(m_schema->schemaID());
-	ui->captionEdit->setText(m_schema->caption());
+	ui->strdIdEdit->setText(schema->schemaID());
+	ui->captionEdit->setText(schema->caption());
 
-	double w = 0;
-	double h = 0;
-	double precision = 0;
-
-	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
-	{
-		w = m_schema->docWidth();
-		h = m_schema->docHeight();
-		precision = 0;
-	}
-	else
-	{
-		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
-
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
-		{
-			w = m_schema->docWidth();
-			h = m_schema->docHeight();
-			precision = 4;
-		}
-		else
-		{
-			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
-
-			w = m_schema->docWidth() * 25.4;
-			h = m_schema->docHeight() * 25.4;
-			precision = 2;
-		}
-	}
-
-	ui->widthEdit->setText(QString::number(w, 'f', precision));
-	ui->heightEdit->setText(QString::number(h, 'f', precision));
+	// Set width/height
+	//
+	setWidthHeight(m_schema.get());
 
 	// LogicSchame Equipment ID
 	//
@@ -111,6 +68,44 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	}
 
 	setWindowTitle(tr("Schema Properties"));
+
+	// Fill Template combo box
+	//
+
+	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1));		// -1 means Blnk, any othe number is DbFileID
+
+	std::vector<DbFileInfo> templates;
+
+	bool ok = db->getFileList(&templates, tempateParentFileId, templateFileExtension, true, parent);
+
+	if (ok == true)
+	{
+		// read files
+		//
+		m_templates.reserve(templates.size());
+
+		db->getLatestVersion(templates, &m_templates, this);
+
+		for (std::shared_ptr<DbFile> f : m_templates)
+		{
+			std::shared_ptr<VFrame30::Schema> schemaTemplate =  VFrame30::Schema::Create(f->data());
+
+			// Check if type the sane
+			//
+			if (schemaTemplate->inherits(schema->metaObject()->className()) == false)
+			{
+				assert(schemaTemplate->inherits(schema->metaObject()->className()) == true);
+				continue;
+			}
+
+			ui->templateComboBox->addItem(schemaTemplate->caption(), QVariant(f->fileId()));
+		}
+	}
+
+	// --
+	//
+	connect(ui->templateComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this, &CreateSchemaDialog::templateChanged);
 
 	return;
 }
@@ -191,31 +186,43 @@ void CreateSchemaDialog::accept()
 
 	// Assign values to the schema
 	//
-	m_schema->setSchemaID(strID);
-	m_schema->setCaption(caption);
-
-	if (m_schema->unit() == VFrame30::SchemaUnit::Display)
+	if (m_templateSchema == nullptr)
 	{
-		m_schema->setDocWidth(width);
-		m_schema->setDocHeight(height);
-	}
-	else
-	{
-		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
-
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		// Template Blank is selected
+		//
+		if (m_schema->unit() == VFrame30::SchemaUnit::Display)
 		{
 			m_schema->setDocWidth(width);
 			m_schema->setDocHeight(height);
 		}
 		else
 		{
-			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
+			assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
 
-			m_schema->setDocWidth(width / 25.4);
-			m_schema->setDocHeight(height / 25.4);
+			if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+			{
+				m_schema->setDocWidth(width);
+				m_schema->setDocHeight(height);
+			}
+			else
+			{
+				assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
+
+				m_schema->setDocWidth(width / 25.4);
+				m_schema->setDocHeight(height / 25.4);
+			}
 		}
 	}
+	else
+	{
+		Proto::Envelope data;
+
+		m_templateSchema->Save(&data);
+		m_schema->Load(data);
+	}
+
+	m_schema->setSchemaID(strID);
+	m_schema->setCaption(caption);
 
 	if (isLogicSchema() == true)
 	{
@@ -223,6 +230,116 @@ void CreateSchemaDialog::accept()
 	}
 
 	QDialog::accept();
+}
+
+void CreateSchemaDialog::templateChanged(int index)
+{
+	int dbFileId = ui->templateComboBox->itemData(index).toInt();
+
+	if (dbFileId == -1)
+	{
+		m_templateSchema.reset();
+
+		ui->widthEdit->setEnabled(true);
+		ui->heightEdit->setEnabled(true);
+
+		setWidthHeight(m_schema.get());
+
+		return;
+	}
+
+	// read template from DB and in it width/height
+	//
+	ui->widthEdit->setEnabled(false);
+	ui->heightEdit->setEnabled(false);
+
+	for (std::shared_ptr<DbFile> tf : m_templates)
+	{
+		if (tf->fileId() == dbFileId)
+		{
+			m_templateSchema = VFrame30::Schema::Create(tf->data());
+
+			if (m_templateSchema == nullptr)
+			{
+				assert(m_templateSchema);
+				break;
+			}
+
+			setWidthHeight(m_templateSchema.get());
+			break;
+		}
+	}
+
+	return;
+}
+
+void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
+{
+	// Set height and width lables, append px, in or mm
+	//
+	QString units;
+
+	if (schema->unit() == VFrame30::SchemaUnit::Display)
+	{
+		units = tr(", px");
+	}
+	else
+	{
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			units = tr(", in");
+		}
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter)
+		{
+			units = tr(", mm");
+		}
+	}
+
+	if (ui->widthLabel->text().endsWith(units) == false)
+	{
+		ui->widthLabel->setText(ui->widthLabel->text() + units);
+	}
+
+	if (ui->heigtLabel->text().endsWith(units) == false)
+	{
+		ui->heigtLabel->setText(ui->heigtLabel->text() + units);
+	}
+
+	double w = 0;
+	double h = 0;
+	double precision = 0;
+
+	if (schema->unit() == VFrame30::SchemaUnit::Display)
+	{
+		w = schema->docWidth();
+		h = schema->docHeight();
+		precision = 0;
+	}
+	else
+	{
+		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
+
+		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		{
+			w = schema->docWidth();
+			h = schema->docHeight();
+			precision = 4;
+		}
+		else
+		{
+			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
+
+			w = schema->docWidth() * 25.4;
+			h = schema->docHeight() * 25.4;
+			precision = 2;
+		}
+	}
+
+	ui->widthEdit->setText(QString::number(w, 'f', precision));
+	ui->heightEdit->setText(QString::number(h, 'f', precision));
+
+	return;
 }
 
 bool CreateSchemaDialog::isLogicSchema() const

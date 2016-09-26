@@ -293,6 +293,7 @@ message Schema
 	// Derived from Schema
 	//
 	optional LogicSchema logic_schema = 200;
+	optional UfbSchema ufb_schema = 201;
 }
 
 
@@ -305,6 +306,17 @@ message LogicSchema
 {
 	repeated wstring equipmentids = 1;
 	optional int32 counter = 2 [default = 0];
+}
+
+//
+//
+// UfbSchema
+//
+//
+message UfbSchema
+{
+    optional string description = 1;
+	optional int32 version = 2 [default = 1];
 }
 
 
@@ -371,6 +383,7 @@ message SchemaItem
 	optional SchemaItemTransmitter TransmitterItem = 131;	// +ConnectionItem, FblItemRect
 	optional SchemaItemReceiver ReceiverItem = 132;			// +ConnectionItem, FblItemRect
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
+	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 }
 
 //
@@ -628,6 +641,20 @@ message SchemaItemReceiver
     optional bool showValidity = 1 [default = true];
 	optional string appSignalId = 2;
 }
+
+//
+//
+// SchemaItemUfb
+//
+//
+message SchemaItemUfb
+{
+    optional string ufbSchemaId = 1;
+	optional string ufbCaption = 2;
+	optional int32 ufbVersion = 3 [default = -1];
+	optional string label = 6;
+}
+
 
 //------------------------------------------------------------------------------------------
 //

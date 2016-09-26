@@ -54,6 +54,7 @@ public:
 
     int rootFileId() const;
     int afblFileId() const;
+	int ufblFileId() const;
     int alFileId() const;
     int hcFileId() const;
     int hpFileId() const;
@@ -196,6 +197,7 @@ private:
     DbProject m_currentProject;
 
     int m_afblFileId = -1;	// Application Functional Block Library
+	int m_ufblFileId = -1;	// User Functional Block Libabry
     int m_alFileId = -1;	// Application Logic
     int m_hcFileId = -1;	// Hardware Configuration
     int m_hpFileId = -1;	// Hardware Presets
