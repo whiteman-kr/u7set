@@ -33,7 +33,7 @@ void setFontRecursive(QWidget* parentWidget, const QFont& font)
 }
 
 
-Signal* findSignal(const QString& id, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector)
+Signal* findSignal(const QString& id, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector)
 {
 	for (auto& sourceInfo : sourceInfoVector)
 	{
@@ -171,7 +171,7 @@ TuningMainWindow::~TuningMainWindow()
 }
 
 
-AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
+AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit)
 {
 	double lowLimit = 0;
 
@@ -193,7 +193,7 @@ AnalogSignalSetter* TuningMainWindow::addAnalogSetter(QFormLayout* fl, QVector<T
 	return setter;
 }
 
-DiscreteSignalSetter* TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVector<Tuning::TuningDataSourceInfo>& sourceInfoVector, QString label, QString id)
+DiscreteSignalSetter* TuningMainWindow::addDiscreteSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id)
 {
 	auto setter = new DiscreteSignalSetter(id, label, m_service, this);
 
@@ -251,7 +251,7 @@ void TuningMainWindow::updateSignalState(QString /*appSignalID*/, double /*curre
 {
 }
 
-void TuningMainWindow::updateDataSourceStatus(Tuning::TuningDataSourceState state)
+void TuningMainWindow::updateDataSourceStatus(TuningIPEN::TuningSourceState state)
 {
 	if (m_statusLabelMap.contains(state.lmEquipmentID))
 	{
@@ -316,7 +316,7 @@ void TuningMainWindow::onTuningServiceReady()
 	// ========== First tab ==========
 	for (int index = 0; index < m_info.count(); index++)
 	{
-		Tuning::TuningDataSourceInfo& sourceInfo = m_info[index];
+		TuningIPEN::TuningSourceInfo& sourceInfo = m_info[index];
 		int place = 0;
 		for (; place < m_setOfSignalsScram->count(); place++)
 		{
@@ -348,7 +348,7 @@ void TuningMainWindow::onTuningServiceReady()
 	// ========== Status bar ==========
 	for (int i = 0; i < sourceIndexes.count(); i++)
 	{
-		Tuning::TuningDataSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
+		TuningIPEN::TuningSourceInfo& sourceInfo = m_info[sourceIndexes[i]];
 		QLabel* newLabel = new QLabel(sourceInfo.lmCaption + ": " + sourceInfo.lmAddressPort.addressStr(), this);
 		statusBar()->addWidget(newLabel);
 

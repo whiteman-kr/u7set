@@ -146,6 +146,14 @@ public:
 	};
 	Q_ENUM(Channel)
 
+	enum class DataSourceState
+	{
+		NoData = 0,
+		ReceiveData = 1,
+		Stopped = 2
+	};
+	Q_ENUM(DataSourceState)
+
 public:
 	// Convert enum value (not index) to QString
 	//

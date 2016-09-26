@@ -10,6 +10,7 @@
 class QTableView;
 class TcpAppDataClient;
 class SimpleThread;
+class QActionGroup;
 
 class DataSourcesStateModel : public QAbstractTableModel
 {
@@ -23,10 +24,12 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
+	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
+	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
 public slots:
 	void invalidateData();
 	void reloadList();
-	void updateStateColumns();
 
 private:
 	TcpAppDataClient* m_clientSocket;
@@ -45,10 +48,12 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
+	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
+	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
 public slots:
 	void invalidateData();
 	void reloadList();
-	void updateStateColumns();
 
 private:
 	TcpAppDataClient* m_clientSocket;
@@ -63,19 +68,29 @@ public:
 
 public slots:
 	void updateSourceInfo();
+	void updateSourceStateColumns();
 
 	void updateSignalInfo();
+	void updateSignalStateColumns();
 
 	void checkVisibility();
+
+	void changeSourceColumnVisibility(QAction* action);
 
 private:
 	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;
 	QTableView* m_dataSourcesView = nullptr;
 	QTableView* m_signalsView = nullptr;
+	QActionGroup* m_sourceTableHeadersContextMenuActions = nullptr;
 
 	TcpAppDataClient* m_clientSocket;
 	SimpleThread* m_appDataClientTread;
+
+	void saveSourceColumnVisibility(int index, bool visible);
+
+private slots:
+	void saveSourceColumnWidth(int index);
 };
 
 #endif // DATAAQUISITIONSERVICEWIDGET_H

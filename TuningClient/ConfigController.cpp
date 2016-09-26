@@ -38,7 +38,8 @@ HostAddressPort ConfigConnection::address() const
 // ConfigController
 //
 
-ConfigController::ConfigController(HostAddressPort address1, HostAddressPort address2)
+ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, HostAddressPort address2)
+	:m_parent(parent)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
@@ -241,7 +242,7 @@ bool ConfigController::getObjectFilters()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
-		qDebug()<< completeErrorMessage;
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
 	else
@@ -249,13 +250,35 @@ bool ConfigController::getObjectFilters()
 		if (theFilters.load(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
-			qDebug()<< completeErrorMessage;
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
 	}
 
 	return true;
 }
+
+bool ConfigController::getSchemasDetails()
+{
+	QByteArray data;
+	QString errorStr;
+	if (getFileBlockedById(CFG_FILE_ID_SCHEMAS_DETAILS, &data, &errorStr) == false)
+	{
+		QString completeErrorMessage = tr("getFileBlockedById: Get SchemasDetails.xml file error: %1").arg(errorStr);
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+		return false;
+	}
+	else
+	{
+		if (theFilters.loadSchemasDetails(data, &errorStr) == false)
+		{
+			QString completeErrorMessage = tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+			return false;
+		}
+	}
+
+	return true;}
 
 bool ConfigController::getTuningSignals()
 {
@@ -264,17 +287,15 @@ bool ConfigController::getTuningSignals()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
-		qDebug()<< completeErrorMessage;
-
+		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
 	else
 	{
-		if (theObjects.load(data, &errorStr) == false)
+		if (theObjects.loadSignals(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-			qDebug()<< completeErrorMessage;
-
+			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
 	}
@@ -361,8 +382,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	qDebug() << "TUNS1 (id, ip, port): " << readSettings.tuns1.equipmentId() << ", " << readSettings.tuns1.ip() << ", " << readSettings.tuns1.port();
 	qDebug() << "TUNS2 (id, ip, port): " << readSettings.tuns2.equipmentId() << ", " << readSettings.tuns2.ip() << ", " << readSettings.tuns2.port();
 
-	bool updateFilters = false;
-	bool updateSignals = false;
+	readSettings.updateFilters = false;
+	readSettings.updateSchemas = false;
+	readSettings.updateSignals = false;
 
 	QMutexLocker locker(&m_mutex);
 
@@ -372,15 +394,23 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (m_md5Filters != f.md5)
 			{
-				updateFilters = true;
+				readSettings.updateFilters = true;
 				m_md5Filters = f.md5;
+			}
+		}
+		if (f.ID == CFG_FILE_ID_SCHEMAS_DETAILS)
+		{
+			if (m_md5Schemas != f.md5)
+			{
+				readSettings.updateSchemas = true;
+				m_md5Schemas = f.md5;
 			}
 		}
 		if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
 		{
 			if (m_md5Signals != f.md5)
 			{
-				updateSignals = true;
+				readSettings.updateSignals = true;
 				m_md5Signals = f.md5;
 			}
 		}
@@ -388,7 +418,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(updateFilters, updateSignals);
+	emit configurationArrived(readSettings);
 
 	return;
 }

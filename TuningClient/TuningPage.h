@@ -61,33 +61,23 @@ private:
 
 };
 
-class TuningItemProxyModel : public QSortFilterProxyModel
+class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	TuningItemProxyModel(TuningItemModel* sourceModel, QObject* parent = 0);
+	FilterButton(Hash hash, const QString& caption, QWidget* parent = nullptr);
 
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-
-	void setObjectIdFilter(QStringList strIds);
-	void refreshFilters();
-
-	int objectIndex(const QModelIndex &mi);
+	Hash filterHash();
 
 private:
-	TuningItemModel* m_sourceModel = nullptr;
-	QStringList m_strIdMasks;
-};
-
-class FilterButton : public QPushButton
-{
-public:
-	FilterButton(const QString& filterId, const QString& caption, QWidget* parent = nullptr);
-
-private:
-	QString m_filterId;
+	Hash m_filterHash;
 	QString m_caption;
+
+private slots:
+	void slot_toggled(bool checked);
+
+signals:
+	void filterButtonClicked(Hash hash);
 };
 
 
@@ -95,18 +85,24 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, ObjectFilter* tabFilter, QWidget *parent = 0);
 	~TuningPage();
+
+	void fillObjectsList();
 
 signals:
 
+private slots:
+	void slot_filterButtonClicked(Hash hash);
+
 public slots:
+	void slot_filterTreeChanged(Hash hash);
 
 private:
 
 	QTableView* m_objectList = nullptr;
 
-	std::vector<FilterButton*> m_buttons;
+	QButtonGroup *m_filterButtonGroup = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
@@ -125,11 +121,14 @@ private:
 	QComboBox* m_maskTypeCombo = nullptr;
 
 	TuningItemModel *m_model = nullptr;
-	TuningItemProxyModel *m_proxyModel = nullptr;
 
 	std::vector<int> m_objectsIndexes;
 
-	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
+	ObjectFilter* m_treeFilter = nullptr;
+
+	ObjectFilter* m_tabFilter = nullptr;
+
+	ObjectFilter* m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 

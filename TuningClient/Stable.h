@@ -31,5 +31,12 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QDomDocument>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QAction>
+#include <QMenu>
+#include <QMenuBar>
+#include <QButtonGroup>
 
 #endif // STABLE_H

@@ -71,6 +71,10 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalSnapshot/type", m_signalSnapshotSignalType);
 	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
 
+	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType));
+	s.setValue("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn);
+	s.setValue("DialogSignalSnapshot/sortOrder", static_cast<int>(m_signalSnapshotSortOrder));
+
 	return;
 }
 void Settings::loadUserScope()
@@ -91,6 +95,9 @@ void Settings::loadUserScope()
 	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").value<QList<int>>().toVector();
 	m_signalSnapshotSignalType = s.value("DialogSignalSnapshot/type").toInt();
 	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
+	m_signalSnapshotMaskType = static_cast<DialogSignalSnapshot::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
+	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();
+	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
 
 	return;
 }

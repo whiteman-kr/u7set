@@ -65,14 +65,17 @@ void TuningItemModel::setObjectsIndexes(const std::vector<int>& objectsIndexes)
 	}
 
 	//
+	if (objectsIndexes.size() > 0)
+	{
 
-	beginInsertRows(QModelIndex(), 0, (int)objectsIndexes.size());
+		beginInsertRows(QModelIndex(), 0, (int)objectsIndexes.size() - 1);
 
-	m_objectsIndexes = objectsIndexes;
+		m_objectsIndexes = objectsIndexes;
 
-	insertRows(0, (int)objectsIndexes.size());
+		insertRows(0, (int)objectsIndexes.size());
 
-	endInsertRows();
+		endInsertRows();
+	}
 
 }
 
@@ -216,43 +219,38 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		//QString str = QString("%1:%2").arg(row).arg(col);
 		//qDebug()<<str;
 
-		const std::shared_ptr<TuningObject> o = theObjects.const_object(row);
-		if (o == nullptr)
-		{
-			assert(o);
-			return QVariant();
-		}
+		TuningObject o = theObjects.object(m_objectsIndexes[row]);
 
 		int displayIndex = m_columnsIndexes[col];
 
 		if (displayIndex == SignalID)
 		{
-			return o->customAppSignalID();
+			return o.customAppSignalID();
 		}
 
 		if (displayIndex == EquipmentID)
 		{
-			return o->equipmentID();
+			return o.equipmentID();
 		}
 
 		if (displayIndex == AppSignalID)
 		{
-			return o->appSignalID();
+			return o.appSignalID();
 		}
 
 		if (displayIndex == Caption)
 		{
-			return o->caption();
+			return o.caption();
 		}
 
 		if (displayIndex == Units)
 		{
-			return o->units();
+			return o.units();
 		}
 
 		if (displayIndex == Type)
 		{
-			return o->analog() ? "Analog" : "Discrete";
+			return o.analog() ? "Analog" : "Discrete";
 		}
 
 		//
@@ -289,17 +287,17 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
 		if (displayIndex == Valid)
 		{
-			return (o->valid() == true) ? tr("Yes") : tr("No");
+			return (o.valid() == true) ? tr("Yes") : tr("No");
 		}
 
 		if (displayIndex == Underflow)
 		{
-			return (o->underflow() == true) ? tr("Yes") : tr("No");
+			return (o.underflow() == true) ? tr("Yes") : tr("No");
 		}
 
 		if (displayIndex == Overflow)
 		{
-			return (o->overflow() == true) ? tr("Yes") : tr("No");
+			return (o.overflow() == true) ? tr("Yes") : tr("No");
 		}
 	}
 	return QVariant();
@@ -323,223 +321,38 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 }
 
 //
-//SnapshotItemModel
-//
-TuningItemProxyModel::TuningItemProxyModel(TuningItemModel *sourceModel, QObject *parent) :
-	QSortFilterProxyModel(parent),
-	m_sourceModel(sourceModel)
-{
-	setSourceModel(sourceModel);
-}
-
-bool TuningItemProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
-{
-	/*const Signal* s = m_sourceModel->signal(source_row);
-	if (s == nullptr)
-	{
-		assert(s);
-		return false;
-	}
-
-	if (m_strIdMasks.isEmpty() == false)
-	{
-		QString strId = s->customAppSignalID().trimmed();
-		for (QString idMask : m_strIdMasks)
-		{
-			QRegExp rx(idMask.trimmed());
-			rx.setPatternSyntax(QRegExp::Wildcard);
-			if (rx.exactMatch(strId))
-			{
-				return true;
-			}
-		}
-		return false;
-	}*/
-
-	return true;
-}
-
-bool TuningItemProxyModel::lessThan(const QModelIndex &left,
-									   const QModelIndex &right) const
-{
-	 /*const Signal* s1 = m_sourceModel->signal(left.row());
-	 const Signal* s2 = m_sourceModel->signal(right.row());
-
-	 if (s1 == nullptr || s2 == nullptr)
-	 {
-		 assert(false);
-		 return false;
-	 }
-
-	 std::vector<int> ci = m_sourceModel->columnsIndexes();
-
-	 int sc = sortColumn();
-	 if (sc < 0 || sc >= ci.size())
-	 {
-		assert(false);
-		return false;
-	 }
-
-	 static AppSignalState st1;
-	 static AppSignalState st2;
-
-	 int c = ci[sc];
-	 if (c >= SnapshotItemModel::SystemTime)
-	 {
-		 st1 = theSignals.signalState(s1->appSignalID());
-		 st2 = theSignals.signalState(s2->appSignalID());
-	 }
-
-	 QVariant v1;
-	 QVariant v2;
-
-
-	 switch (c)
-	 {
-	 case SnapshotItemModel::SignalID:
-	 {
-		 v1 = s1->customAppSignalID();
-		 v2 = s2->customAppSignalID();
-	 }
-		 break;
-	 case SnapshotItemModel::EquipmentID:
-	 {
-		 v1 = s1->equipmentID();
-		 v2 = s2->equipmentID();
-	 }
-		 break;
-	 case SnapshotItemModel::AppSignalID:
-	 {
-		 v1 = s1->appSignalID();
-		 v2 = s2->appSignalID();
-	 }
-		 break;
-	 case SnapshotItemModel::Caption:
-	 {
-		 v1 = s1->caption();
-		 v2 = s2->caption();
-	 }
-		 break;
-	 case SnapshotItemModel::Units:
-	 {
-		 v1 = s1->unitID();
-		 v2 = s2->unitID();
-	 }
-		 break;
-	 case SnapshotItemModel::Type:
-	 {
-		 if (s1->type() == s2->type())
-		 {
-			 if (s1->dataFormat() == s2->dataFormat())
-			 {
-				 v1 = s1->inOutTypeInt();
-				 v2 = s2->inOutTypeInt();
-			 }
-			 else
-			 {
-				 v1 = s1->dataFormatInt();
-				 v2 = s2->dataFormatInt();
-			 }
-		 }
-		 else
-		 {
-			 v1 = s1->typeInt();
-			 v2 = s2->typeInt();
-		 }
-	 }
-		 break;
-	 case SnapshotItemModel::SystemTime:
-	 {
-		 v1 = st1.time.system;
-		 v2 = st2.time.system;
-	 }
-		 break;
-	 case SnapshotItemModel::LocalTime:
-	 {
-		 v1 = st1.time.local;
-		 v2 = st2.time.local;
-	 }
-		 break;
-	 case SnapshotItemModel::PlantTime:
-	 {
-		 v1 = st1.time.plant;
-		 v2 = st2.time.plant;
-	 }
-		 break;
-	 case SnapshotItemModel::Value:
-	 {
-		 if (s1->isAnalog() == s2->isAnalog())
-		 {
-			v1 = st1.value;
-			v2 = st2.value;
-		 }
-		 else
-		 {
-			 v1 = s1->isAnalog();
-			 v2 = s2->isAnalog();
-		 }
-	 }
-		 break;
-	 case SnapshotItemModel::Valid:
-	 {
-		 v1 = st1.flags.valid;
-		 v2 = st2.flags.valid;
-	 }
-		 break;
-	 case SnapshotItemModel::Underflow:
-	 {
-		 v1 = st1.flags.underflow;
-		 v2 = st2.flags.underflow;
-	 }
-		 break;
-	 case SnapshotItemModel::Overflow:
-	 {
-		 v1 = st1.flags.overflow;
-		 v2 = st2.flags.overflow;
-	 }
-		 break;
-	 default:
-		 assert(false);
-		 return false;
-	 }
-
-	 if (v1 == v2)
-	 {
-		 return s1->customAppSignalID() < s2->customAppSignalID();
-	 }
-
-	 return v1 < v2;
-	 */
-	return true;
-
-}
-
-
-void TuningItemProxyModel::refreshFilters()
-{
-	invalidateFilter();
-}
-
-int TuningItemProxyModel::objectIndex(const QModelIndex& mi)
-{
-	return m_sourceModel->objectIndex(mapToSource(mi).row());
-}
-
-//
 // TuningPage
 //
-FilterButton::FilterButton(const QString& filterId, const QString& caption, QWidget* parent)
+FilterButton::FilterButton(Hash hash, const QString& caption, QWidget* parent)
 	:QPushButton(caption, parent)
 {
-	m_filterId = filterId;
+	m_filterHash = hash;
 	m_caption = caption;
+
+	setCheckable(true);
+
+	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
+}
+
+Hash FilterButton::filterHash()
+{
+	return m_filterHash;
+}
+
+void FilterButton::slot_toggled(bool checked)
+{
+	if (checked == true)
+	{
+		emit filterButtonClicked(m_filterHash);
+	}
+
 }
 
 //
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
 	m_tabFilter(tabFilter)
@@ -557,12 +370,15 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 		}
 	}
 
+
+	std::vector<FilterButton*> buttons;
+
 	// Top buttons
 	//
-	int count = theFilters.filterCount();
+	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<ObjectFilter> f = theFilters.filter_const(i);
+		ObjectFilter* f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -574,30 +390,56 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f->strID(), f->caption());
-		m_buttons.push_back(button);
+		FilterButton* button = new FilterButton(f->hash(), f->caption());
+		buttons.push_back(button);
+
+		connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
 	}
 
 	// Child buttons
 	//
 	if (tabFilter != nullptr)
 	{
-		for(auto f : tabFilter->childFilters)
+		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
 		{
-			FilterButton* button = new FilterButton(f->strID(), f->caption());
-			m_buttons.push_back(button);
+			ObjectFilter* f = tabFilter->childFilter(i);
+			if (f == nullptr)
+			{
+				assert(f);
+				continue;
+			}
+
+			FilterButton* button = new FilterButton(f->hash(), f->caption());
+			buttons.push_back(button);
+
+			connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
+
 		}
 	}
 
-	if (m_buttons.empty() == false)
+	if (buttons.empty() == false)
 	{
+		m_filterButtonGroup = new QButtonGroup(this);
+
+		m_filterButtonGroup->setExclusive(true);
+
 		m_buttonsLayout = new QHBoxLayout();
 
-		for (auto b: m_buttons)
+		for (auto b: buttons)
 		{
+			m_filterButtonGroup->addButton(b);
 			m_buttonsLayout->addWidget(b);
 		}
+
 		m_buttonsLayout->addStretch();
+
+		// Set the first button checked
+		//
+		buttons[0]->blockSignals(true);
+		buttons[0]->setChecked(true);
+		m_buttonFilter = theFilters.filter(buttons[0]->filterHash());
+		buttons[0]->blockSignals(false);
+
 	}
 
 	// Object List
@@ -634,21 +476,10 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 
 	// Models and data
 	//
-	// crete models
-	//
 	m_model = new TuningItemModel(m_tuningPageIndex, this);
 
 
-	for (int i = 0; i < theObjects.objectsCount(); i++)
-	{
-		m_objectsIndexes.push_back(i);
-	}
-
-	m_model->setObjectsIndexes(m_objectsIndexes);
-
-	m_proxyModel = new TuningItemProxyModel(m_model, this);
-
-	m_objectList->setModel(m_proxyModel);
+	m_objectList->setModel(m_model);
 	m_objectList->verticalHeader()->hide();
 	m_objectList->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
 	m_objectList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
@@ -667,6 +498,8 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 	{
 		m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
 	}
+
+	fillObjectsList();
 }
 
 TuningPage::~TuningPage()
@@ -686,5 +519,85 @@ TuningPage::~TuningPage()
 	{
 		pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
 	}
+}
 
+void TuningPage::fillObjectsList()
+{
+	m_objectsIndexes.clear();
+
+	for (int i = 0; i < theObjects.objectsCount(); i++)
+	{
+		TuningObject o = theObjects.object(i);
+
+		if (m_treeFilter != nullptr)
+		{
+			bool result = true;
+
+			ObjectFilter* treeFilter = m_treeFilter;
+			while (treeFilter != nullptr)
+			{
+				if (treeFilter->match(o) == false)
+				{
+					result = false;
+					break;
+				}
+				treeFilter = treeFilter->parent();
+			}
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
+		if (m_tabFilter != nullptr)
+		{
+			if (m_tabFilter->match(o) == false)
+			{
+				continue;
+			}
+		}
+
+		if (m_buttonFilter != nullptr)
+		{
+			if (m_buttonFilter->match(o) == false)
+			{
+				continue;
+			}
+		}
+
+		m_objectsIndexes.push_back(i);
+	}
+
+	m_model->setObjectsIndexes(m_objectsIndexes);
+}
+
+void TuningPage::slot_filterButtonClicked(Hash hash)
+{
+	qDebug()<<"Filter button clicked: "<<hash;
+
+	m_buttonFilter = theFilters.filter(hash);
+
+	if (m_buttonFilter == nullptr)
+	{
+		assert(m_buttonFilter);
+		return;
+	}
+
+	fillObjectsList();
+
+}
+
+void TuningPage::slot_filterTreeChanged(Hash hash)
+{
+	qDebug()<<"Filter tree clicked: "<<hash;
+
+	m_treeFilter = theFilters.filter(hash);
+
+	if (m_treeFilter == nullptr)
+	{
+		assert(m_treeFilter);
+		return;
+	}
+
+	fillObjectsList();
 }

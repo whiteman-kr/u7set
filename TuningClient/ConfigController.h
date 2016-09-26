@@ -35,6 +35,10 @@ struct ConfigSettings
 	ConfigConnection tuns1;				// Tuning Service connection params
 	ConfigConnection tuns2;				// Tuning Service connection params
 
+	bool updateFilters = false;
+	bool updateSchemas = false;
+	bool updateSignals = false;
+
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
 
@@ -45,7 +49,7 @@ class ConfigController : public QObject
 public:
 	ConfigController() = delete;
 
-	ConfigController(HostAddressPort address1, HostAddressPort address2);
+	ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2);
 	virtual ~ConfigController();
 
 	// Methods
@@ -60,11 +64,12 @@ public:
 	Tcp::ConnectionState getConnectionState() const;
 
 	bool getObjectFilters();
+	bool getSchemasDetails();
 	bool getTuningSignals();
 	// signals
 	//
 signals:
-	void configurationArrived(bool updateFilters, bool updateSignals);
+	void configurationArrived(ConfigSettings settings);
 
 	// slots
 	//
@@ -80,8 +85,6 @@ private:
 
 	// Public properties
 public:
-	//std::vector<ConfigSchema> schemas() const;
-
 	// Data section
 	//
 private:
@@ -92,8 +95,10 @@ private:
 
 	mutable QMutex m_mutex;
 
+	QWidget* m_parent = nullptr;
 
 	QString m_md5Filters;
+	QString m_md5Schemas;
 	QString m_md5Signals;
 };
 

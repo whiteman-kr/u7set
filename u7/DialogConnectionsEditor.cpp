@@ -161,20 +161,21 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     ui->setupUi(this);
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
     setWindowTitle(tr("Optical Connections Editor"));
 
     QStringList l;
-    l << tr("ID");
 	l << tr("ConnectionID");
 	l << tr("Port1 EquipmentID");
 	l << tr("Port2 EquipmentID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
-    ui->m_list->setColumnWidth(il++, 50);
     ui->m_list->setColumnWidth(il++, 100);
     ui->m_list->setColumnWidth(il++, 250);
     ui->m_list->setColumnWidth(il++, 250);
+	ui->m_list->setSortingEnabled(true);
 
     QString errorCode;
 
@@ -184,13 +185,35 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
         return;
     }
 
-    updateButtons(connections.isCheckedOut(db()));
+	m_checkedOut = connections.isCheckedOut(db());
+
+	updateButtons();
     fillConnectionsList();
+
+	for (int i = 0; i < ui->m_list->columnCount(); i++)
+	{
+		ui->m_list->resizeColumnToContents(i);
+	}
+
+	ui->m_list->sortByColumn(theSettings.m_connectionEditorSortColumn, theSettings.m_connectionEditorSortOrder);
+
+	connect(ui->m_list->header(), &QHeaderView::sortIndicatorChanged, this, &DialogConnectionsEditor::sortIndicatorChanged);
+
+
+	if (theSettings.m_connectionEditorWindowPos.x() != -1 && theSettings.m_connectionEditorWindowPos.y() != -1)
+	{
+		move(theSettings.m_connectionEditorWindowPos);
+		restoreGeometry(theSettings.m_connectionEditorWindowGeometry);
+	}
 }
 
 DialogConnectionsEditor::~DialogConnectionsEditor()
 {
-    delete ui;
+	theSettings.m_connectionEditorWindowPos = pos();
+	theSettings.m_connectionEditorWindowGeometry = saveGeometry();
+
+	theDialogConnectionsEditor = nullptr;
+	delete ui;
 }
 
 void DialogConnectionsEditor::fillConnectionsList()
@@ -211,7 +234,7 @@ void DialogConnectionsEditor::fillConnectionsList()
 			continue;
 		}
 
-        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
 													connection->connectionID() <<
 													connection->port1EquipmentID() <<
 													connection->port2EquipmentID());
@@ -261,15 +284,21 @@ bool DialogConnectionsEditor::saveChanges()
     return true;
 }
 
-void DialogConnectionsEditor::updateButtons(bool checkOut)
+void DialogConnectionsEditor::updateButtons()
 {
-    ui->m_Add->setEnabled(checkOut == true);
-    ui->m_Edit->setEnabled(checkOut == true);
-    ui->m_Remove->setEnabled(checkOut == true);
-    ui->m_checkIn->setEnabled(checkOut == true);
-    ui->m_checkOut->setEnabled(checkOut == false);
-    ui->m_Undo->setEnabled(checkOut == true);
-    ui->m_OK->setEnabled(checkOut == true);
+	int selectedCount = ui->m_list->selectedItems().size();
+
+	bool editingEnabled = m_checkedOut == true && selectedCount > 0;
+
+	ui->m_Add->setEnabled(m_checkedOut == true);
+	ui->m_Edit->setEnabled(editingEnabled == true);
+	ui->m_Remove->setEnabled(editingEnabled == true);
+
+	ui->m_checkIn->setEnabled(m_checkedOut == true);
+	ui->m_checkOut->setEnabled(m_checkedOut == false);
+	ui->m_Undo->setEnabled(m_checkedOut == true);
+
+	ui->m_OK->setEnabled(m_checkedOut == true);
 }
 
 bool DialogConnectionsEditor::continueWithDuplicateCaptions()
@@ -358,7 +387,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
 
     connections.add(connection);
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
 												connection->connectionID() <<
 												connection->port1EquipmentID() <<
 												connection->port2EquipmentID());
@@ -445,6 +474,22 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
     m_modified = true;
 }
 
+void DialogConnectionsEditor::on_m_Apply_clicked()
+{
+	if (continueWithDuplicateCaptions() == false)
+	{
+		return;
+	}
+
+	if (m_modified == true)
+	{
+		if (saveChanges() == false)
+		{
+			return;
+		}
+	}
+}
+
 void DialogConnectionsEditor::on_m_OK_clicked()
 {
 	if (continueWithDuplicateCaptions() == false)
@@ -501,7 +546,9 @@ void DialogConnectionsEditor::on_m_checkOut_clicked()
         return;
     }
 
-    updateButtons(true);
+	m_checkedOut = true;
+
+	updateButtons();
 }
 
 
@@ -536,7 +583,9 @@ void DialogConnectionsEditor::on_m_checkIn_clicked()
         return;
     }
 
-    updateButtons(false);
+	m_checkedOut = false;
+
+	updateButtons();
 }
 
 void DialogConnectionsEditor::on_m_Undo_clicked()
@@ -555,7 +604,9 @@ void DialogConnectionsEditor::on_m_Undo_clicked()
 
     m_modified = false;
 
-    updateButtons(false);
+	m_checkedOut = false;
+
+	updateButtons();
 
     QString errorCode;
 
@@ -569,3 +620,18 @@ void DialogConnectionsEditor::on_m_Undo_clicked()
 
     fillConnectionsList();
 }
+
+void DialogConnectionsEditor::on_m_list_itemSelectionChanged()
+{
+	updateButtons();
+}
+
+void DialogConnectionsEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	theSettings.m_connectionEditorSortColumn = column;
+	theSettings.m_connectionEditorSortOrder = order;
+}
+
+DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
+
+

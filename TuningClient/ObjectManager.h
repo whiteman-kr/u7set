@@ -3,6 +3,8 @@
 
 #include "Stable.h"
 #include "TuningObject.h"
+#include "../Proto/network.pb.h"
+#include "../Lib/Hash.h"
 
 
 
@@ -12,17 +14,23 @@ public:
 	ObjectManager();
 
 	int objectsCount();
-	const std::shared_ptr<TuningObject> const_object(int index);
+	TuningObject object(int index);
 
-	//bool load(const QString& fileName);
+	int tuningSourcesCount();
+	QString tuningSourceEquipmentId(int index);
 
-	bool load(const QByteArray& data, QString *errorCode);
+	bool loadSignals(const QByteArray& data, QString *errorCode);
+
 
 private:
 
 	QMutex m_mutex;
 
-	std::vector<std::shared_ptr<TuningObject>> m_objects;
+	QStringList m_tuningSourcesList;
+
+	//std::map<quint64, TuningSource> m_tuningSourcesMap;
+
+	std::vector<TuningObject> m_objects;
 
 };
 

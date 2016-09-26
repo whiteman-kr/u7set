@@ -20,11 +20,13 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
 		auto proptx1sa = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxStartAddress", true, Connection::port1ManualTxStartAddress, Connection::setPort1ManualTxStartAddress);
-		proptx1sa->setCategory(tr("ManualSettings"));
+		proptx1sa->setCategory(tr("Manual Settings"));
+
 		auto proptx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
-		proptx1wq->setCategory(tr("ManualSettings"));
+		proptx1wq->setCategory(tr("Manual Settings"));
+
 		auto proprx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
-		proprx1wq->setCategory(tr("ManualSettings"));
+		proprx1wq->setCategory(tr("Manual Settings"));
 
 		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRxOptoID", false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRxOptoDataUID", false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
@@ -33,11 +35,13 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRsDataUID", false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
 		auto proptx2sa = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxStartAddress", true, Connection::port2ManualTxStartAddress, Connection::setPort2ManualTxStartAddress);
-		proptx2sa->setCategory(tr("ManualSettings"));
+		proptx2sa->setCategory(tr("Manual Settings"));
+
 		auto proptx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
-		proptx2wq->setCategory(tr("ManualSettings"));
+		proptx2wq->setCategory(tr("Manual Settings"));
+
 		auto proprx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
-		proprx2wq->setCategory(tr("ManualSettings"));
+		proprx2wq->setCategory(tr("Manual Settings"));
 
 		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRxOptoID", false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRxOptoDataUID", false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
@@ -45,14 +49,26 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRsID", false, Connection::port2TxRsID, Connection::setPort2TxRsID);
 		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRsDataUID", false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-		ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", false, Connection::mode, Connection::setMode);
-		ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", false, Connection::serialMode, Connection::setSerialMode);
-		ADD_PROPERTY_GETTER_SETTER(bool, "EnableSerial", false, Connection::enableSerial, Connection::setEnableSerial);
-		ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", false, Connection::enableDuplex, Connection::setEnableDuplex);
+		auto propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, "EnableSerial", false, Connection::enableSerial, Connection::setEnableSerial);
+		propEnableSerial->setCategory(tr("Serial Communications (OCM)"));
+
+		auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", false, Connection::serialMode, Connection::setSerialMode);
+		propSerialMode->setCategory(tr("Serial Communications (OCM)"));
+
+		auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", false, Connection::enableDuplex, Connection::setEnableDuplex);
+		propEnableDuplex->setCategory(tr("Serial Communications (OCM)"));
 
 		auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, "EnableManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
-		propManual->setCategory(tr("ManualSettings"));
-    }
+		propManual->setCategory(tr("Manual Settings"));
+
+		ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", false, Connection::mode, Connection::setMode);
+
+		auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, "Disable DataID Control", true, Connection::disableDataID, Connection::setDisableDataID);
+		propDisableDataID->setCategory(tr("Miscellaneous"));
+
+		auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, "Generate connection VHD file", true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
+		propGenerateVHD->setCategory(tr("Miscellaneous"));
+	}
 
     Connection::Connection(const Connection& that):Connection()
     {
@@ -71,6 +87,8 @@ namespace Hardware
         writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
         writer.writeAttribute("ManualSettings", manualSettings() ? "true" : "false");
         writer.writeAttribute("SignalList", signalList().join(';'));
+		writer.writeAttribute("DisableDataID", disableDataID() ? "true" : "false");
+		writer.writeAttribute("GenerateVHDFile", generateVHDFile() ? "true" : "false");
 
         // Tx/Rx words quantity
         //
@@ -137,6 +155,16 @@ namespace Hardware
         {
             setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
         }
+
+		if (reader.attributes().hasAttribute("DisableDataID"))
+		{
+			setDisableDataID(reader.attributes().value("DisableDataID").toString() == "true" ? true : false);
+		}
+
+		if (reader.attributes().hasAttribute("GenerateVHDFile"))
+		{
+			setGenerateVHDFile(reader.attributes().value("GenerateVHDFile").toString() == "true" ? true : false);
+		}
 
         // Tx/Rx words quantity, may be overloaded later
         //
@@ -488,6 +516,26 @@ namespace Hardware
     {
         m_signalList = value;
     }
+
+	bool Connection::disableDataID() const
+	{
+		return m_disableDataID;
+	}
+
+	void Connection::setDisableDataID(bool value)
+	{
+		m_disableDataID = value;
+	}
+
+	bool Connection::generateVHDFile() const
+	{
+		return m_generateVHDFile;
+	}
+
+	void Connection::setGenerateVHDFile(bool value)
+	{
+		m_generateVHDFile = value;
+	}
 
 
     //

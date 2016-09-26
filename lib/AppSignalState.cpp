@@ -43,9 +43,10 @@ Hash AppSignalState::getProtoAppSignalState(const Proto::AppSignalState* protoSt
 		return 0 ;
 	}
 
+	hash = protoState->hash();
+
 	assert(hash != 0);
 
-	hash = protoState->hash();
 	value = protoState->value();
 	flags.all = protoState->flags();
 

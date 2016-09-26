@@ -1,5 +1,5 @@
 #include "TripleChannelSignalsModel.h"
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 #include "../TuningService/TuningService.h"
 #include <cmath>
 #include <QMessageBox>
@@ -31,7 +31,7 @@ bool TripleChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	return false;
 }
 
-TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<Tuning::TuningDataSourceInfo>& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
+TripleChannelSignalsModel::TripleChannelSignalsModel(QVector<TuningIPEN::TuningSourceInfo>& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)

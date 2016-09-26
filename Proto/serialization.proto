@@ -383,6 +383,7 @@ message SchemaItem
 	optional SchemaItemTransmitter TransmitterItem = 131;	// +ConnectionItem, FblItemRect
 	optional SchemaItemReceiver ReceiverItem = 132;			// +ConnectionItem, FblItemRect
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
+	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 }
 
 //
@@ -640,6 +641,20 @@ message SchemaItemReceiver
     optional bool showValidity = 1 [default = true];
 	optional string appSignalId = 2;
 }
+
+//
+//
+// SchemaItemUfb
+//
+//
+message SchemaItemUfb
+{
+    optional string ufbSchemaId = 1;
+	optional string ufbCaption = 2;
+	optional int32 ufbVersion = 3 [default = -1];
+	optional string label = 6;
+}
+
 
 //------------------------------------------------------------------------------------------
 //

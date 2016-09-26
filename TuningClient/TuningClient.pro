@@ -72,7 +72,13 @@ SOURCES += main.cpp\
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Crc.cpp \
-    ../lib/SocketIO.cpp
+    ../lib/SocketIO.cpp \
+    DialogSettings.cpp \
+    DialogTuningSources.cpp \
+    TcpTuningClient.cpp \
+    ../Proto/network.pb.cc \
+    ../lib/AppSignalState.cpp \
+    ../Proto/serialization.pb.cc
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -90,9 +96,17 @@ HEADERS  += MainWindow.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
     ../lib/Crc.h \
-    ../lib/SocketIO.h
+    ../lib/SocketIO.h \
+    DialogSettings.h \
+    DialogTuningSources.h \
+    TcpTuningClient.h \
+    ../Proto/network.pb.h \
+    ../lib/AppSignalState.h \
+    ../Proto/serialization.pb.h
 
-FORMS    +=
+FORMS    += \
+    DialogSettings.ui \
+    DialogTuningSources.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

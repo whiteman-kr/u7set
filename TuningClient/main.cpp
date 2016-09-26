@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain("radiy.com");
 
 	theSettings.RestoreUser();
+	theSettings.RestoreSystem();
 
 	MainWindow *w = new MainWindow();
 	w->show();
@@ -96,6 +97,8 @@ int main(int argc, char *argv[])
 	delete w;
 
 	theSettings.StoreUser();
+
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;
 }

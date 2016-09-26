@@ -1,13 +1,14 @@
 #pragma once
 
 #include "../lib/DataSource.h"
-#include "TuningDataStorage.h"
-#include "TuningSocket.h"
+#include "../lib/Signal.h"
+#include "../TuningService/TuningDataStorage.h"
 
-namespace Tuning
+
+namespace TuningIPEN
 {
 
-	class TuningDataSourceInfo
+	class TuningSourceInfo
 	{
 	public:
 		int channel = 0;
@@ -23,7 +24,7 @@ namespace Tuning
 	};
 
 
-	class TuningDataSourceState
+	class TuningSourceState
 	{
 	public:
 		QString lmEquipmentID;
@@ -36,20 +37,11 @@ namespace Tuning
 	};
 
 
-	struct TuningSignalState
-	{
-		double currentValue = 0;
-		double lowLimit = 0;
-		double highLimit = 0;
 
-		bool valid = false;
-	};
-
-
-	class TuningDataSource : public DataSource
+	class TuningSource : public DataSource
 	{
 	private:
-		TuningData* m_tuningData = nullptr;
+		Tuning::TuningData* m_tuningData = nullptr;
 
 		bool m_deleteTuningData = false;
 
@@ -68,15 +60,15 @@ namespace Tuning
 		FotipHeaderFlags m_fotipFlags;
 
 	public:
-		TuningDataSource();
-		~TuningDataSource();
+		TuningSource();
+		~TuningSource();
 
-		void setTuningData(TuningData* tuningData);
+		void setTuningData(Tuning::TuningData* tuningData);
 
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
-		void getTuningDataSourceInfo(TuningDataSourceInfo& info);
+		void getTuningDataSourceInfo(TuningSourceInfo& info);
 
 		quint16 numerator() const { return m_numerator; }
 		void incNumerator() { m_numerator++; }
@@ -89,12 +81,12 @@ namespace Tuning
 
 		void processReply(const Tuning::SocketReply& reply);
 
-		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
+		bool getSignalState(const QString& appSignalID, Tuning::TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
 
 		quint64 uniqueID();
 
-		TuningDataSourceState getState();
+		TuningSourceState getState();
 
 		void incSentRequestCount() { m_sentRequestCount++; }
 
@@ -102,20 +94,20 @@ namespace Tuning
 	};
 
 
-	class TuningDataSources : public QHash<QString, TuningDataSource*>
+	class TuningSources : public QHash<QString, TuningSource*>
 	{
-		QHash<quint32, TuningDataSource*> m_ip2DataSource;
+		QHash<quint32, TuningSource*> m_ip2Source;
 
 	public:
-		~TuningDataSources();
+		~TuningSources();
 
 		void clear();
 
-		void getTuningDataSourcesInfo(QVector<TuningDataSourceInfo>& info);
+		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);
 
 		void buildIP2DataSourceMap();
 
-		TuningDataSource* getDataSourceByIP(quint32 ip);
+		TuningSource* getDataSourceByIP(quint32 ip);
 	};
 
 }

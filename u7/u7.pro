@@ -167,7 +167,7 @@ SOURCES +=\
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
-    ../TuningService/TuningDataSource.cpp \
+    ../TuningService/TuningSource.cpp \
     DialogChoosePreset.cpp \
     ../lib/WUtils.cpp \
     ../TuningService/TuningDataStorage.cpp \
@@ -276,7 +276,7 @@ HEADERS  += \
     ../lib/Queue.h \
     ../lib/ProtobufHelper.h \
     UploadTabPage.h \
-    ../TuningService/TuningDataSource.h \
+    ../TuningService/TuningSource.h \
     DialogChoosePreset.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/DataProtocols.h \

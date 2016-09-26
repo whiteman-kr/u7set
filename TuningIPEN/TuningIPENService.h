@@ -3,15 +3,15 @@
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
 #include "../AppDataService/AppSignalStateEx.h"
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 #include "TuningIPENSocket.h"
+#include "TuningIPENSource.h"
 
 
 namespace TuningIPEN
 {
 
 	class TuningIPENService;
-
 
 	class TuningIPENServiceWorker : public ServiceWorker
 	{
@@ -21,7 +21,7 @@ namespace TuningIPEN
 		TuningIPENService* m_tuningIPENService = nullptr;
 
 		TuningServiceSettings m_tuningSettings;
-		Tuning::TuningDataSources m_dataSources;
+		TuningSources m_dataSources;
 
 		QHash<QString, QString> m_signal2Source;
 
@@ -43,7 +43,7 @@ namespace TuningIPEN
 		void stopTuningSocket();
 
 		void sendPeriodicReadRequests();
-		void sendPeriodicFrameRequest(Tuning::TuningDataSource* source);
+		void sendPeriodicFrameRequest(TuningIPEN::TuningSource* source);
 		void testConnections();
 		void emitTuningDataSourcesStates();
 
@@ -72,12 +72,12 @@ namespace TuningIPEN
 		virtual TuningIPENServiceWorker* createInstance() override;
 
 		bool loadConfigurationFromFile(const QString& fileName);
-		void getTuningDataSourcesInfo(QVector<Tuning::TuningDataSourceInfo>& info);
+		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);
 
 	signals:
 		void tuningServiceReady();
 		void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-		void tuningDataSourceStateUpdate(Tuning::TuningDataSourceState state);
+		void tuningDataSourceStateUpdate(TuningSourceState state);
 	};
 
 
@@ -93,7 +93,7 @@ namespace TuningIPEN
 
 		void setTuningServiceWorker(TuningIPENServiceWorker* tuningServiceWorker) { m_tuningServiceWorker = tuningServiceWorker; }
 
-		void getTuningDataSourcesInfo(QVector<Tuning::TuningDataSourceInfo>& info);
+		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);
 
 		void setSignalState(QString appSignalID, double value);
 		void getSignalState(QString appSignalID);
@@ -103,7 +103,7 @@ namespace TuningIPEN
 	signals:
 		void tuningServiceReady();
 		void signalStateReady(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-		void tuningDataSourceStateUpdate(Tuning::TuningDataSourceState state);
+		void tuningDataSourceStateUpdate(TuningSourceState state);
 
 		void userRequest(FotipFrame fotipFrame);
 		void replyWithNoZeroFlags(FotipFrame fotipFrame);

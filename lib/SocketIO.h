@@ -370,6 +370,13 @@ const quint32 ADS_GET_DATA_SOURCES_STATES = 0x1402;
 
 const int ADS_GET_DATA_SOURCES_STATES_MAX = 1000;
 
+
+// Tuning Sources info/state communication, Port PORT_TUNING_SERVICE_CLIENT_REQUEST
+//
+const quint32 TDS_GET_TUNING_SOURCES_INFO = 0x1501;
+const quint32 TDS_GET_TUNING_SOURCES_STATES = 0x1502;
+
+
 // Getting application signals Units
 //
 const quint32 ADS_GET_UNITS = 0x1500;

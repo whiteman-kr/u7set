@@ -3927,8 +3927,16 @@ void EquipmentTabPage::editConnections()
         return;
     }
 
-    DialogConnectionsEditor d(dbController(), this);
-    d.exec();
+	if (theDialogConnectionsEditor == nullptr)
+	{
+		theDialogConnectionsEditor = new DialogConnectionsEditor(dbController(), this);
+		theDialogConnectionsEditor->show();
+	}
+	else
+	{
+		theDialogConnectionsEditor->activateWindow();
+	}
+
 }
 
 //void EquipmentTabPage::moduleConfiguration()

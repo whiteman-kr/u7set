@@ -38,7 +38,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/ServiceSettings.cpp \
-    TuningDataSource.cpp \
     ../lib/Queue.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/DeviceObject.cpp \
@@ -56,7 +55,10 @@ SOURCES += \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc
+    ../Proto/serialization.pb.cc \
+    TcpTuningServer.cpp \
+    TcpTuningClient.cpp \
+    TuningSource.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -75,7 +77,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/XmlHelper.h \
     ../lib/ServiceSettings.h \
-    TuningDataSource.h \
     ../lib/Queue.h \
     ../lib/DeviceHelper.h \
     ../lib/DeviceObject.h \
@@ -92,7 +93,10 @@ HEADERS += \
     ../u7/Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h
+    ../Proto/serialization.pb.h \
+    TcpTuningServer.h \
+    TcpTuningClient.h \
+    TuningSource.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -131,3 +135,7 @@ win32 {
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto

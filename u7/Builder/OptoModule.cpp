@@ -953,8 +953,7 @@ namespace Hardware
 					}
 
 					int absTxStartAddress =	module->optoInterfaceDataOffset() +
-											portNo * module->optoPortDataSize() +
-											module->optoPortAppDataOffset();
+											portNo * module->optoPortDataSize();
 
 					if (port->manualSettings() == true)
 					{
@@ -995,7 +994,7 @@ namespace Hardware
 			{
 				// calculate tx addresses for ports of OCM module
 				//
-				int absTxStartAddress = module->optoInterfaceDataOffset() + module->optoPortAppDataOffset();
+				int absTxStartAddress = module->optoInterfaceDataOffset();
 
 				int txDataSizeW = 0;
 
@@ -1101,8 +1100,7 @@ namespace Hardware
 					}
 
 					int rxStartAddress =	module->optoInterfaceDataOffset() +
-											i * module->optoPortDataSize() +
-											module->optoPortAppDataOffset();
+											i * module->optoPortDataSize();
 
 					port->setRxStartAddress(rxStartAddress);
 
