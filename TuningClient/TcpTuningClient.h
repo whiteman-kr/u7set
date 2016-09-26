@@ -9,6 +9,8 @@
 
 struct TuningSource
 {
+	// info
+
 	quint64 m_id = 0;
 	QString m_equipmentId;
 	QString m_caption;
@@ -24,6 +26,8 @@ struct TuningSource
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = 0;
 	quint64 m_lmDataID = 0;
+
+	// state
 
 	qint64 m_uptime = 0;
 	qint64 m_receivedDataSize = 0;

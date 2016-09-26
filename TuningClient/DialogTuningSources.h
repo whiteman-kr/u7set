@@ -18,6 +18,37 @@ public:
 protected:
 	void timerEvent(QTimerEvent* event);
 
+private slots:
+	void slot_tuningSourcesArrived();
+
+private:
+	void update(bool refreshOnly);
+
+
+	enum class Columns
+	{
+		Id,
+		EquipmentId,
+		Caption,
+		DataType,
+		Ip,
+		Port,
+		Channel,
+		SubsystemID,
+		Subsystem,
+		LmNumber,
+		LmModuleType,
+		LmAdapterID,
+		LmDataEnable,
+		LmDataID,
+
+		Uptime,
+		ReceivedDataSize,
+		DataReceivingRate,
+		Respond,
+
+		ColumnCount
+	};
 
 private:
 	Ui::DialogTuningSources *ui;
