@@ -49,7 +49,7 @@ public:
 	// File management
 	//
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
-	bool getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, bool removeDeleted, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
 
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
@@ -230,6 +230,7 @@ public:
 
 	int rootFileId() const;		// Root file
 	int afblFileId() const;		// Application Functional Block Library
+	int ufblFileId() const;		// User Functional Block Library
 	int alFileId() const;		// Application Logic
 	int hcFileId() const;		// Hardware Configuration
 	int hpFileId() const;		// Hadware Presets

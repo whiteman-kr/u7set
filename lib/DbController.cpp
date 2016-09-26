@@ -373,7 +373,7 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, boo
 	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, bool removeDeleted, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -1748,6 +1748,11 @@ int DbController::rootFileId() const
 int DbController::afblFileId() const
 {
 	return m_worker->afblFileId();
+}
+
+int DbController::ufblFileId() const
+{
+	return m_worker->ufblFileId();
 }
 
 int DbController::alFileId() const

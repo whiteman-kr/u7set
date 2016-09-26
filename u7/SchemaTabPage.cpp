@@ -171,33 +171,25 @@ void SchemasTabPage::projectClosed()
 	//
 	assert(m_tabWidget);
 
-	QWidget* controlTab = nullptr;
-	std::list<QWidget*> tabsToDelete;
-
-	for (int i = 0; i < m_tabWidget->count(); i++)
+	for (int i = m_tabWidget->count() - 1; i >= 0; i--)
 	{
 		QWidget* tabPage = m_tabWidget->widget(i);
 
-		if (dynamic_cast<SchemaControlTabPage*>(tabPage) != nullptr)
+		if (dynamic_cast<SchemaControlTabPage*>(tabPage) == nullptr)
 		{
-			controlTab = tabPage;
+			int tabIndex = m_tabWidget->indexOf(tabPage);
+			assert(tabIndex != -1);
+
+			if (tabIndex != -1)
+			{
+				m_tabWidget->removeTab(i);
+				delete tabPage;
+			}
 		}
-		else
-		{
-			tabsToDelete.push_back(tabPage);
-		}
-	}
-
-	m_tabWidget->clear();
-
-	m_tabWidget->addTab(controlTab, tr("Control"));
-
-	for (auto widget : tabsToDelete)
-	{
-		delete widget;
 	}
 
 	this->setEnabled(false);
+	return;
 }
 
 
@@ -206,11 +198,13 @@ void SchemasTabPage::projectClosed()
 // SchemaControlTabPage
 //
 //
-SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
+SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 										   DbController* db,
-										   const QString& parentFileName,
+										   QString parentFileName,
+										   QString templateFileExtension,
 										   std::function<VFrame30::Schema*()> createSchemaFunc) :
 		HasDbController(db),
+		m_templateFileExtension(templateFileExtension),
 		m_createSchemaFunc(createSchemaFunc)
 {
 	// Create actions
@@ -220,7 +214,7 @@ SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
 	// Create controls
 	//
 	m_filesView = new SchemaFileView(db, parentFileName);
-	m_filesView->filesModel().setFilter(fileExt);
+	m_filesView->filesModel().setFilter("." + fileExt);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 	pMainLayout->addWidget(m_filesView);
@@ -229,9 +223,6 @@ SchemaControlTabPage::SchemaControlTabPage(const QString& fileExt,
 
 	// --
 	//
-	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPage::projectOpened);
-	//connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPage::projectClosed);
-
 	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
 	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
 	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
@@ -275,6 +266,11 @@ void SchemaControlTabPage::addFile()
 		defaultId = "APPSCHEMAID";
 	}
 
+	if (schema->isUfbSchema() == true)
+	{
+		defaultId = "USERFUNCTIONALBLOCKID";
+	}
+
 	if (schema->isMonitorSchema() == true)
 	{
 		defaultId = "MONITORSCHEMAID";
@@ -310,13 +306,22 @@ void SchemaControlTabPage::addFile()
 	{
 		// A3 Landscape
 		//
-		schema->setDocWidth(420.0 / 25.4);
-		schema->setDocHeight(297.0 / 25.4);
+		if (schema->isUfbSchema() == true)
+		{
+			schema->setDocWidth(297.0 / 25.4);
+			schema->setDocHeight(210.0 / 25.4);
+		}
+		else
+		{
+			schema->setDocWidth(420.0 / 25.4);
+			schema->setDocHeight(297.0 / 25.4);
+		}
 	}
 
 	// Show dialog to edit schema properties
 	//
-	CreateSchemaDialog propertiesDialog(schema, this);
+	CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
+
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -328,7 +333,7 @@ void SchemaControlTabPage::addFile()
 	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
-	vfFile->setFileName(schema->schemaID() + "." + m_filesView->filesModel().filter());
+	vfFile->setFileName(schema->schemaID() + m_filesView->filesModel().filter());
 	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
@@ -336,7 +341,7 @@ void SchemaControlTabPage::addFile()
 
 	db()->addFiles(&addFilesList, parentFile().fileId(), this);
 
-	// Add file to the FileModel and select them
+	// Add file to the FileModel and select it
 	//
 	std::shared_ptr<DbFileInfo> file = std::make_shared<DbFileInfo>(*vfFile.get());
 
@@ -845,7 +850,6 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	// ToolBar
 	//
 	m_toolBar = new QToolBar(this);
-
 	m_toolBar->setOrientation(Qt::Vertical);
 
 	m_toolBar->addAction(m_schemaWidget->m_fileAction);
@@ -856,15 +860,29 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
 	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
 
-	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
-	m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
-	m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
-	m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
-	m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
-	m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
-	m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
-	m_toolBar->addAction(m_schemaWidget->m_addReceiver);
+	if (schema->isLogicSchema() == true)
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
+		m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
+		m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
+		m_toolBar->addAction(m_schemaWidget->m_addReceiver);
+		m_toolBar->addAction(m_schemaWidget->m_addUfbAction);
+	}
+
+	if (schema->isUfbSchema())
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
+		m_toolBar->addAction(m_schemaWidget->m_addFblElementAction);
+	}
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_schemaWidget->m_orderAction);

@@ -420,7 +420,8 @@ protected slots:
 
 	void clipboardDataChanged();
 
-	void addFblElement();
+	void addFblElement();			// Add Application Functional Block
+	void addUfbElement();			// Add User Functional Block
 
 	void onLeftKey();
 	void onRightKey();
@@ -455,6 +456,7 @@ public:
 	const EditSchemaView* editSchemaView() const;
 
 	bool isLogicSchema() const;
+	bool isUfbSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;
@@ -581,6 +583,7 @@ private:
 		QAction* m_addLinkAction = nullptr;
 		QAction* m_addTransmitter = nullptr;
 		QAction* m_addReceiver = nullptr;
+		QAction* m_addUfbAction = nullptr;
 
 	// Edit
 	//

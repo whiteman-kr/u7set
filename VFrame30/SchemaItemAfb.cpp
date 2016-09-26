@@ -38,25 +38,9 @@ namespace VFrame30
 		//
 		updateAfbElement(fblElement, errorMsg);
 
-//		const std::vector<Afb::AfbSignal>& inputSignals = fblElement.inputSignals();
-//		for (const Afb::AfbSignal& s : inputSignals)
-//		{
-//			addInput(s);
-//		}
-
-//		const std::vector<Afb::AfbSignal>& outputSignals = fblElement.outputSignals();
-//		for (const Afb::AfbSignal& s : outputSignals)
-//		{
-//			addOutput(s);
-//		}
-
 		addSpecificParamProperties();
 
-//		QString afterCreationScript = fblElement.afterCreationScript();
-//		if (afterCreationScript.isEmpty() == false)
-//		{
-//			executeScript(afterCreationScript, fblElement, errorMsg);
-//		}
+		return;
 	}
 
 	SchemaItemAfb::~SchemaItemAfb(void)
@@ -219,17 +203,6 @@ namespace VFrame30
 			p->setPen(Qt::darkGray);
 			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
 		}
-
-		// Draw line under caption
-		//
-
-//		QPen captionLinePen(lineColor());
-//		captionLinePen.setWidthF(0.0);		// Don't use getter!
-
-//		p->setPen(captionLinePen);
-
-//		p->drawLine(QPointF(r.left(), topDocPt() + m_font.drawSize() * 1.5),
-//					QPointF(r.left() + r.width(), topDocPt() + m_font.drawSize() * 1.5));
 
 		return;
 	}
