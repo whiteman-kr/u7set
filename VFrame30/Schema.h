@@ -109,6 +109,7 @@ namespace VFrame30
 		void setExcludeFromBuild(bool value);
 
 		bool isLogicSchema() const;
+		bool isUfbSchema() const;
 		bool isMonitorSchema() const;
 		bool isDiagSchema() const;
 

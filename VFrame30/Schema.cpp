@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "Schema.h"
 #include "LogicSchema.h"
+#include "UfbSchema.h"
 #include "MonitorSchema.h"
 #include "DiagSchema.h"
 #include "FblItem.h"
@@ -801,6 +802,11 @@ namespace VFrame30
 	bool Schema::isLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
+	}
+
+	bool Schema::isUfbSchema() const
+	{
+		return dynamic_cast<const VFrame30::UfbSchema*>(this) != nullptr;
 	}
 
 	bool Schema::isMonitorSchema() const

@@ -95,6 +95,7 @@
         <file>Upgrade0093.sql</file>
         <file>Upgrade0094.sql</file>
         <file>Upgrade0095.sql</file>
+        <file>Upgrade0096.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

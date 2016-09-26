@@ -64,6 +64,13 @@ void Settings::StoreUser()
 	s.setValue("Filters/filterByEquipment", m_filterByEquipment);
 	s.setValue("Filters/filterBySchema", m_filterBySchema);
 
+	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
+	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
+
+	s.setValue("PresetProperties/Splitter/state", m_presetPropertiesSplitterState);
+	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
+	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
+
 }
 
 void Settings::RestoreUser()
@@ -96,6 +103,12 @@ void Settings::RestoreUser()
 	m_filterByEquipment = s.value("Filters/filterByEquipment", m_filterByEquipment).toBool();
 	m_filterBySchema = s.value("Filters/filterBySchema", m_filterBySchema).toBool();
 
+	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
+	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
+
+	m_presetPropertiesSplitterState = s.value("PresetProperties/Splitter/state").toInt();
+	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
+	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 }
 
 QString Settings::instanceStrId()

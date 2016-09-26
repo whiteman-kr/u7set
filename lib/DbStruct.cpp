@@ -5,18 +5,27 @@
 #include <QFileInfo>
 #include <QDebug>
 
-const char* const rootFileName = "$root$";		// root file name
-const char* const AfblFileName = "AFBL";		// Application Functional Block Library
-const char* const AlFileName = "AL";			// Application Logic Schemas
-const char* const HcFileName = "HC";			// Hardware Configuratiun
-const char* const HpFileName = "HP";			// Hardware Presets
-const char* const MvsFileName = "MVS";			// Monitor Video Schemas
-const char* const DvsFileName = "DVS";			// Diagnostics Video Schemas
-const char* const McFileName = "MC";			// Module Configuration
+const char* const rootFileName = "$root$";			// root file name
+const char* const AfblFileName = "AFBL";			// Application Functional Block Library
+const char* const UfblFileName = "UFBL";			// User Functional Block Library
+const char* const AlFileName = "AL";				// Application Logic Schemas
+const char* const HcFileName = "HC";				// Hardware Configuratiun
+const char* const HpFileName = "HP";				// Hardware Presets
+const char* const MvsFileName = "MVS";				// Monitor Video Schemas
+const char* const DvsFileName = "DVS";				// Diagnostics Video Schemas
+const char* const McFileName = "MC";				// Module Configuration
 
-const char* const AlFileExtension = "als";		// Application Logic schema file extnesion
-const char* const MvsFileExtension = "mvs";		// Monitor schema file extnesion
-const char* const DvsFileExtension = "dvs";		// Diagnostics schema file extnesion
+const char* const AlFileExtension = "als";			// Application Logic schema file extnesion
+const char* const AlTemplExtension = "templ_als";	// Application Logic schema template file extnesion
+
+const char* const UfbFileExtension = "ufb";			// User Functional Block schema file extnesion
+const char* const UfbTemplExtension = "templ_ufb";	// User Functional Block template file extnesion
+
+const char* const MvsFileExtension = "mvs";			// Monitor schema file extnesion
+const char* const MvsTemplExtension = "templ_mvs";	// Monitor schema template file extnesion
+
+const char* const DvsFileExtension = "dvs";			// Diagnostics schema file extnesion
+const char* const DvsTemplExtension = "templ_dvs";	// Diagnostics schema template file extnesion
 
 //
 //

@@ -38,6 +38,7 @@ public:
 		Type,
 
 		Value,
+		Default,
 		Valid,
 		Underflow,
 		Overflow,
@@ -110,9 +111,13 @@ private:
 
 	QHBoxLayout* m_bottomLayout = nullptr;
 
-	QPushButton* m_applyButton = nullptr;
+	QPushButton* m_setValueButton = nullptr;
 
-	QPushButton* m_restoreButton = nullptr;
+	QPushButton* m_setOnButton = nullptr;
+
+	QPushButton* m_setOffButton = nullptr;
+
+	QPushButton* m_setToDefaultButton = nullptr;
 
 	QPushButton* m_maskButton = nullptr;
 

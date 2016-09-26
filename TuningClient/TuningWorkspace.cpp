@@ -17,7 +17,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i);
+		ObjectFilter* f = theFilters.topFilter(i).get();
 		if (f == nullptr)
 		{
 			assert(f);
@@ -66,7 +66,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i);
+		ObjectFilter* f = theFilters.topFilter(i).get();
 		if (f == nullptr)
 		{
 			assert(f);

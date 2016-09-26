@@ -2,6 +2,7 @@
 #define STABLE_H
 
 #include <memory>
+#include <algorithm>
 #include <assert.h>
 
 #include <QObject>
@@ -38,5 +39,6 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QButtonGroup>
+#include <QUuid>
 
 #endif // STABLE_H

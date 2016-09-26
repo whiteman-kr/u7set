@@ -6,6 +6,7 @@
 #include "DialogSettings.h"
 #include "ObjectFilter.h"
 #include "DialogTuningSources.h"
+#include "DialogPresetEditor.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -27,13 +28,20 @@ MainWindow::MainWindow(QWidget *parent) :
 	// TcpSignalClient
 	//
 	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-	m_tcpTuningClient = new TcpTuningClient(&m_configController, fakeAddress, fakeAddress);
+	theTcpTuningClient = new TcpTuningClient(&m_configController, fakeAddress, fakeAddress);
 
-	m_tcpClientThread = new SimpleThread(m_tcpTuningClient);
+	m_tcpClientThread = new SimpleThread(theTcpTuningClient);
 	m_tcpClientThread->start();
 
-	connect(m_tcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
-	connect(m_tcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
+	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+
+
+	QString errorCode;
+	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
+	{
+		QMessageBox::critical(this, "Error", tr("Failed to load user filters: %1").arg(errorCode));
+	}
 
 	//
 
@@ -66,6 +74,13 @@ void MainWindow::createActions()
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
+
+
+	m_pPresetEditorAction = new QAction(tr("Preset Editor..."), this);
+	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
+	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
+	m_pPresetEditorAction->setEnabled(true);
+	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -103,6 +118,7 @@ void MainWindow::createMenu()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
+	pToolsMenu->addAction(m_pPresetEditorAction);
 	pToolsMenu->addAction(m_pTuningSourcesAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
@@ -141,13 +157,13 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-	if  (event->timerId() == m_updateStatusBarTimerId && m_tcpTuningClient != nullptr)
+	if  (event->timerId() == m_updateStatusBarTimerId && theTcpTuningClient != nullptr)
 	{
 		assert(m_statusBarConnectionState);
 		assert(m_statusBarConnectionStatistics);
 
 		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState tuningClientState =  m_tcpTuningClient->getConnectionState();
+		Tcp::ConnectionState tuningClientState =  theTcpTuningClient->getConnectionState();
 
 		// State
 		//
@@ -239,6 +255,18 @@ void MainWindow::showSettings()
 	d.exec();
 }
 
+void MainWindow::runPresetEditor()
+{
+	ObjectFilterStorage editFilters = theUserFilters;
+
+	DialogPresetEditor d(&editFilters, this);
+	if (d.exec() == QDialog::Accepted)
+	{
+		theUserFilters = editFilters;
+		theUserFilters.save("UserFilters.xml");
+		emit filtersUpdated();
+	}
+}
 
 void MainWindow::showTuningSources()
 {

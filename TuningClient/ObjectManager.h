@@ -3,15 +3,10 @@
 
 #include "Stable.h"
 #include "TuningObject.h"
+#include "../Proto/network.pb.h"
+#include "../lib/Hash.h"
 
 
-
-class TuningSource
-{
-public:
-	QString m_equipmentId;
-
-};
 
 class ObjectManager
 {
@@ -22,15 +17,19 @@ public:
 	TuningObject object(int index);
 
 	int tuningSourcesCount();
-	TuningSource tuningSource(int index);
+	QString tuningSourceEquipmentId(int index);
 
 	bool loadSignals(const QByteArray& data, QString *errorCode);
+
 
 private:
 
 	QMutex m_mutex;
 
-	std::vector<TuningSource> m_tuningSources;
+	QStringList m_tuningSourcesList;
+
+	//std::map<quint64, TuningSource> m_tuningSourcesMap;
+
 	std::vector<TuningObject> m_objects;
 
 };
