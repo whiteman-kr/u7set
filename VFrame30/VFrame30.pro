@@ -130,7 +130,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemConnection.h \
     ../lib/HostAddressPort.h \
     ../lib/Factory.h \
-    UfbSchema.h
+    UfbSchema.h \
+    SchemaItemUfb.h
 
 SOURCES += \
     Settings.cpp \
@@ -177,7 +178,8 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     SchemaItemConnection.cpp \
     ../lib/HostAddressPort.cpp \
-    UfbSchema.cpp
+    UfbSchema.cpp \
+    SchemaItemUfb.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

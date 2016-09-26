@@ -1820,6 +1820,8 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 		return;
 	}
 
+	files->reserve(q.size());
+
 	while (q.next())
 	{
 		DbFileInfo fileInfo;

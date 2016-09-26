@@ -37,6 +37,9 @@ namespace VFrame30
 		static const QString text;
 		static const QString label;
 
+		static const QString ufbSchemaId;
+		static const QString ufbSchemaVersion;
+
 		static const QString width;
 		static const QString height;
 

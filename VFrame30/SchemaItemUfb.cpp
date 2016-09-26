@@ -1,53 +1,57 @@
 #include "Stable.h"
-#include "SchemaItemAfb.h"
+#include "SchemaItemUfb.h"
 #include "Schema.h"
 
 namespace VFrame30
 {
-	SchemaItemAfb::SchemaItemAfb(void) :
-		SchemaItemAfb(SchemaUnit::Inch)
+	SchemaItemUfb::SchemaItemUfb(void) :
+		SchemaItemUfb(SchemaUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit) :
+	SchemaItemUfb::SchemaItemUfb(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
-		precisionProp->setCategory(PropertyNames::functionalCategory);
+		auto schemaIdProp = ADD_PROPERTY_GETTER(QString, PropertyNames::ufbSchemaId, true, SchemaItemUfb::ufbSchemaId());
+		auto versionProp = ADD_PROPERTY_GETTER(int, PropertyNames::ufbSchemaVersion, true, SchemaItemUfb::ufbSchemaVersion);
 
-		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
-		labelProp->setCategory(PropertyNames::functionalCategory);
+		schemaIdProp->setCategory(PropertyNames::functionalCategory);
+		versionProp->setCategory(PropertyNames::functionalCategory);
 	}
 
-	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg) :
-		FblItemRect(unit),
-		m_afbElement(fblElement)
+	SchemaItemUfb::SchemaItemUfb(SchemaUnit unit, const UfbSchema* ufbSchema, QString* errorMsg) :
+		FblItemRect(unit)
 	{
 		assert(errorMsg);
 
-		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
-		precisionProp->setCategory(PropertyNames::functionalCategory);
+		assert(ufbSchema);
+		if (ufbSchema == nullptr)
+		{
+			errorMsg = tr("Pointer to UfbSchema is nullptr.");
+			return;
+		}
 
-		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
-		labelProp->setCategory(PropertyNames::functionalCategory);
+		auto schemaIdProp = ADD_PROPERTY_GETTER(QString, PropertyNames::ufbSchemaId, true, SchemaItemUfb::ufbSchemaId());
+		auto versionProp = ADD_PROPERTY_GETTER(int, PropertyNames::ufbSchemaVersion, true, SchemaItemUfb::ufbSchemaVersion);
+
+		schemaIdProp->setCategory(PropertyNames::functionalCategory);
+		versionProp->setCategory(PropertyNames::functionalCategory);
 
 		// Create input output signals in VFrame30::FblEtem
 		//
-		updateAfbElement(fblElement, errorMsg);
-
-		addSpecificParamProperties();
+		updateElement(ufbSchema, errorMsg);
 
 		return;
 	}
 
-	SchemaItemAfb::~SchemaItemAfb(void)
+	SchemaItemUfb::~SchemaItemUfb(void)
 	{
 	}
 
-	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
+	void SchemaItemUfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -108,90 +112,6 @@ namespace VFrame30
 		p->setPen(textColor());
 		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
-		// Draw params
-		//
-		text.clear();
-		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
-		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
-
-		const std::vector<Afb::AfbParam>& params = m_afbElement.params();
-
-		for (size_t i = 0; i < params.size(); i++)
-		{
-			const Afb::AfbParam& param = params[i];
-
-			if (param.visible() == false)
-			{
-				continue;
-			}
-
-			QString paramValue;
-			switch (param.type())
-			{
-				case Afb::AfbSignalType::Analog:
-					{
-						QVariant a = propertyValue(param.caption());
-
-						switch (param.dataFormat())
-						{
-							case Afb::AfbDataFormat::UnsignedInt:
-								paramValue = a.toString();
-								break;
-
-							case Afb::AfbDataFormat::SignedInt:
-								paramValue = a.toString();
-								break;
-
-							case Afb::AfbDataFormat::Float:
-
-								paramValue.setNum(a.toDouble(), 'f', precision());
-
-								while(paramValue.endsWith('0'))
-								{
-									paramValue.chop(1);
-								}
-
-								if (paramValue.endsWith('.'))
-								{
-									paramValue.chop(1);
-								}
-								break;
-
-							default:
-								assert(false);
-						}
-					}
-					break;
-
-				case Afb::AfbSignalType::Discrete:
-					{
-						QVariant d = property(param.caption().toStdString().c_str());
-						paramValue = d.toString();
-					}
-					break;
-				default:
-					assert(false);
-			}
-
-			// Param string LOWERCASED
-			//
-			QString paramStr = QString("%1: %2")
-				.arg(param.caption())
-				.arg(paramValue).toLower();
-
-			if (text.isEmpty() == true)
-			{
-				text = paramStr;
-			}
-			else
-			{
-				text.append(QString("\n%1").arg(paramStr));
-			}
-		}
-
-		p->setPen(textColor());
-		DrawHelper::DrawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
-
 		// Draw Label
 		//
 		if (drawParam->infoMode() == true)
@@ -204,12 +124,23 @@ namespace VFrame30
 			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
 		}
 
+		// Draw line under caption
+		//
+
+//		QPen captionLinePen(lineColor());
+//		captionLinePen.setWidthF(0.0);		// Don't use getter!
+
+//		p->setPen(captionLinePen);
+
+//		p->drawLine(QPointF(r.left(), topDocPt() + m_font.drawSize() * 1.5),
+//					QPointF(r.left() + r.width(), topDocPt() + m_font.drawSize() * 1.5));
+
 		return;
 	}
 
 	// Serialization
 	//
-	bool SchemaItemAfb::SaveData(Proto::Envelope* message) const
+	bool SchemaItemUfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
@@ -221,17 +152,15 @@ namespace VFrame30
 	
 		// --
 		//
-		Proto::SchemaItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
+		Proto::SchemaItemUfb* ufbpb = message->mutable_schemaitem()->mutable_ufb();
 
-		vifble->set_precision(m_precision);
-		m_afbElement.saveToXml(vifble->mutable_afbelement());
-
-		vifble->set_label(m_label.toStdString());
+		ufbpb->set_precision(m_precision);
+		ufbpb->set_label(m_label.toStdString());
 
 		return true;
 	}
 
-	bool SchemaItemAfb::LoadData(const Proto::Envelope& message)
+	bool SchemaItemUfb::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemaitem() == false)
 		{
@@ -249,22 +178,19 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_afb() == false)
+		if (message.schemaitem().has_ufb() == false)
 		{
-			assert(message.schemaitem().has_afb());
+			assert(message.schemaitem().has_ufb());
 			return false;
 		}
 		
-		const Proto::SchemaItemAfb& vifble = message.schemaitem().afb();
+		const Proto::SchemaItemUfb& ufbpb = message.schemaitem().ufb();
 		
-		m_precision = vifble.precision();
+		m_precision = ufbpb.precision();
 
-		QString errorMsg;
-		bool ok = m_afbElement.loadFromXml(vifble.afbelement(), errorMsg);
-
-		if (vifble.has_label() == true)
+		if (ufbpb.has_label() == true)
 		{
-			m_label = QString::fromStdString(vifble.label());
+			m_label = QString::fromStdString(ufbpb.label());
 		}
 
 		// Add afb properties to class meta object
@@ -405,7 +331,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaItemAfb::updateAfbElement(const Afb::AfbElement& sourceAfb, QString* errorMessage)
+	bool SchemaItemUfb::updateElement(const UfbSchema* ufbSchema, QString* errorMessage)
 	{
 		if (errorMessage == nullptr)
 		{
@@ -712,42 +638,25 @@ namespace VFrame30
 		return m_afbElement.params();
 	}
 
-	int SchemaItemAfb::precision() const
+	QString SchemaItemUfb::ufbSchemaId() const
 	{
-		return m_precision;
+		return m_ufbSchemaId;
 	}
 
-	void SchemaItemAfb::setPrecision(int value)
+	void SchemaItemUfb::setUfbSchemaId(const QString& value)
 	{
-		if (value < 0)
-		{
-			value = 0;
-		}
+		m_ufbSchemaId = value;
+		return;
+	}
 
-		if (value > 24)
-		{
-			value = 24;
-		}
+	int SchemaItemUfb::ufbSchemaVersion() const
+	{
+		return m_version;
+	}
 
-		m_precision = value;
-
-		// Set new precsion to all dynamic properties
-		//
-		for (Afb::AfbParam& p : m_afbElement.params())
-		{
-			if (p.user() == false)
-			{
-				continue;
-			}
-
-			auto prop = this->propertyByCaption(p.caption());
-
-			if (prop.get() != nullptr && prop->specific() == true)
-			{
-				prop->setPrecision(m_precision);
-			}
-		}
-
+	void SchemaItemUfb::setUfbSchemaVersion(int value)
+	{
+		m_version = value;
 		return;
 	}
 

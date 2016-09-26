@@ -29,6 +29,9 @@ const QString PropertyNames::textColor("TextColor");
 const QString PropertyNames::text("Text");
 const QString PropertyNames::label("Label");
 
+const QString PropertyNames::ufbSchemaId("UFBSchemaID");
+const QString PropertyNames::ufbSchemaVersion("UFBSchemaVersion");
+
 const QString PropertyNames::width("Width");
 const QString PropertyNames::height("Height");
 
