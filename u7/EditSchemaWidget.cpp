@@ -3465,6 +3465,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					itemPos->GetPointList().front() != itemPos->GetPointList().back())
 				)
 			{
+				itemPos->RemoveUnwantedPoints();
+
 				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
 			}
 		}

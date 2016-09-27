@@ -242,8 +242,6 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 
 	resetToGetTuningState();
 
-	emit tuningSourcesArrived();
-
 	return;
 }
 

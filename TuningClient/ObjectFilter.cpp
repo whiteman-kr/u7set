@@ -7,12 +7,64 @@
 // ObjectFilter
 //
 
-ObjectFilter::ObjectFilter(FilterType filterType)
+ObjectFilter::ObjectFilter()
+{
+	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, ObjectFilter::strID, ObjectFilter::setStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, ObjectFilter::caption, ObjectFilter::setCaption);
+	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, ObjectFilter::signalType, ObjectFilter::setSignalType);
+
+	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, ObjectFilter::filterType);
+	propFilterType->setCategory("Debug");
+
+	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, ObjectFilter::customAppSignalIDMask, ObjectFilter::setCustomAppSignalIDMask);
+	propMask->setCategory("Masks");
+
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalMasks", true, ObjectFilter::appSignalIDMask, ObjectFilter::setAppSignalIDMask);
+	propMask->setCategory("Masks");
+
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
+	propMask->setCategory("Masks");
+
+	auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIdsCR, ObjectFilter::setAppSignalIdsCR);
+	propSignals->setCategory("Signals");
+
+	auto propFolder = ADD_PROPERTY_GETTER_SETTER(bool, "Folder", true, ObjectFilter::folder, ObjectFilter::setFolder);
+	propFolder->setCategory("Options");
+}
+
+ObjectFilter::ObjectFilter(FilterType filterType):ObjectFilter()
 {
 	m_filterType = filterType;
 }
 
-bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>>& filtersMap)
+ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
+{
+	m_strID = That.m_strID;
+	m_caption = That.m_caption;
+
+	m_allowAll = That.m_allowAll;
+
+	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
+	m_equipmentIDMasks = That.m_equipmentIDMasks;
+	m_appSignalIDMasks = That.m_appSignalIDMasks;
+	m_appSignalIds = That.m_appSignalIds;
+
+	m_filterType = That.m_filterType;
+	m_signalType = That.m_signalType;
+
+	m_folder = That.m_folder;
+
+	for (auto f : That.m_childFilters)
+	{
+		ObjectFilter* fi = f.get();
+
+		std::shared_ptr<ObjectFilter> fiCopy = std::make_shared<ObjectFilter>(*fi);
+
+		addChild(fiCopy);
+	}
+}
+
+bool ObjectFilter::load(QXmlStreamReader& reader)
 {
 
 	if (reader.attributes().hasAttribute("StrID"))
@@ -38,6 +90,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 	if (reader.attributes().hasAttribute("AppSignalIDMask"))
 	{
 		setAppSignalIDMask(reader.attributes().value("AppSignalIDMask").toString());
+	}
+
+	if (reader.attributes().hasAttribute("AppSignalIDs"))
+	{
+		setAppSignalIdsCSV(reader.attributes().value("AppSignalIDs").toString());
 	}
 
 	if (reader.attributes().hasAttribute("SignalType"))
@@ -68,6 +125,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 		}
 	}
 
+	if (reader.attributes().hasAttribute("Folder"))
+	{
+		setFolder(reader.attributes().value("Folder").toString() == "true");
+	}
+
 	QXmlStreamReader::TokenType t;
 	do
 	{
@@ -75,28 +137,31 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 
 		if (t == QXmlStreamReader::StartElement)
 		{
-			if (reader.name() == "ObjectFilter")
+			QString tagName = reader.name().toString();
+
+			if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 			{
-				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+				ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
 
-				if (of->load(reader, filtersMap) == false)
+				if (tagName == "Tab")
+				{
+					filterType = ObjectFilter::FilterType::Tab;
+				}
+
+				if (tagName == "Button")
+				{
+					filterType = ObjectFilter::FilterType::Button;
+				}
+
+				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
+
+				if (of->load(reader) == false)
 				{
 					return false;
 				}
 
-				of->setStrID(m_strID + "_" + of->strID());
+				addChild(of);
 
-				if (filtersMap.find(of->hash()) != filtersMap.end())
-				{
-					reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
-					return false;
-				}
-
-				filtersMap[of->hash()] = of;
-
-				of->setParent(this);
-
-				m_childFilters.push_back(of);
 			}
 			else
 			{
@@ -112,7 +177,29 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 
 bool ObjectFilter::save(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("ObjectFilter");
+	if (isTree() == true)
+	{
+		writer.writeStartElement("Tree");
+	}
+	else
+	{
+		if (isTab())
+		{
+			writer.writeStartElement("Tab");
+		}
+		else
+		{
+			if (isButton())
+			{
+				writer.writeStartElement("Button");
+			}
+			else
+			{
+				assert(false);
+				return false;
+			}
+		}
+	}
 
 	writer.writeAttribute("StrID", strID());
 	writer.writeAttribute("Caption", caption());
@@ -120,8 +207,11 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
+	writer.writeAttribute("AppSignalIDs", appSignalIdsCSV());
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
+
+	writer.writeAttribute("Folder", folder() ? "true" : "false");
 
 	for (auto f : m_childFilters)
 	{
@@ -141,12 +231,6 @@ QString ObjectFilter::strID() const
 void ObjectFilter::setStrID(const QString& value)
 {
 	m_strID = value;
-	m_hash = ::calcHash(value);
-}
-
-Hash ObjectFilter::hash() const
-{
-	return m_hash;
 }
 
 QString ObjectFilter::caption() const
@@ -233,12 +317,61 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 	}
 }
 
-QStringList ObjectFilter::appSignalIds() const
+
+QString ObjectFilter::appSignalIdsCR() const
+{
+	QString result;
+	for (auto s : m_appSignalIds)
+	{
+		result += s + '\n';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void ObjectFilter::setAppSignalIdsCR(const QString &value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_appSignalIds.clear();
+	}
+	else
+	{
+		m_appSignalIds = value.split('\n');
+	}
+}
+
+QString ObjectFilter::appSignalIdsCSV() const
+{
+	QString result;
+	for (auto s : m_appSignalIds)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void ObjectFilter::setAppSignalIdsCSV(const QString &value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_appSignalIds.clear();
+	}
+	else
+	{
+		m_appSignalIds = value.split(';');
+	}
+}
+
+QStringList ObjectFilter::appSignalIdsList() const
 {
 	return m_appSignalIds;
 }
 
-void ObjectFilter::setAppSignalIds(const QStringList& value)
+void ObjectFilter::setAppSignalIdsList(const QStringList& value)
 {
 	m_appSignalIds = value;
 }
@@ -263,14 +396,9 @@ void ObjectFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
-ObjectFilter* ObjectFilter::parent() const
+ObjectFilter* ObjectFilter::parentFilter() const
 {
-	return m_parent;
-}
-
-void ObjectFilter::setParent(ObjectFilter* value)
-{
-	m_parent = value;
+	return m_parentFilter;
 }
 
 bool ObjectFilter::allowAll() const
@@ -283,14 +411,14 @@ void ObjectFilter::setAllowAll(bool value)
 	m_allowAll = value;
 }
 
-bool ObjectFilter::denyAll() const
+bool ObjectFilter::folder() const
 {
-	return m_denyAll;
+	return m_folder;
 }
 
-void ObjectFilter::setDenyAll(bool value)
+void ObjectFilter::setFolder(bool value)
 {
-	m_denyAll = value;
+	m_folder = value;
 }
 
 
@@ -309,14 +437,33 @@ bool ObjectFilter::isButton() const
 	return filterType() == FilterType::Button;
 }
 
-bool ObjectFilter::isChild() const
-{
-	return filterType() == FilterType::Child;
-}
-
 void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
 {
+	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
+}
+
+void ObjectFilter::removeChild(std::shared_ptr<ObjectFilter> child)
+{
+	int index = -1;
+
+	for (auto it : m_childFilters)
+	{
+		index++;
+		if (it.get() == child.get())
+		{
+			break;
+		}
+	}
+
+	if (index == -1)
+	{
+		assert(false);
+	}
+	else
+	{
+		m_childFilters.erase(m_childFilters.begin() + index);
+	}
 }
 
 int ObjectFilter::childFiltersCount()
@@ -325,7 +472,7 @@ int ObjectFilter::childFiltersCount()
 
 }
 
-ObjectFilter* ObjectFilter::childFilter(int index)
+std::shared_ptr<ObjectFilter> ObjectFilter::childFilter(int index)
 {
 	if (index <0 || index >= m_childFilters.size())
 	{
@@ -333,7 +480,7 @@ ObjectFilter* ObjectFilter::childFilter(int index)
 		return nullptr;
 	}
 
-	return m_childFilters[index].get();
+	return m_childFilters[index];
 }
 
 
@@ -343,9 +490,9 @@ bool ObjectFilter::match(const TuningObject& object)
 	{
 		return true;
 	}
-	if (denyAll() == true)
+	if (folder() == true)
 	{
-		return false;
+		return true;
 	}
 
 	if (signalType() == ObjectFilter::SignalType::Analog && object.analog() == false)
@@ -481,6 +628,22 @@ ObjectFilterStorage::ObjectFilterStorage()
 
 }
 
+ObjectFilterStorage::ObjectFilterStorage(const ObjectFilterStorage& That)
+{
+	m_topFilters.clear();
+
+	m_schemasDetails = That.m_schemasDetails;
+
+	for (auto f : That.m_topFilters)
+	{
+		// create objects copies
+		//
+		ObjectFilter* filter = f.get();
+
+		m_topFilters.push_back(std::make_shared<ObjectFilter>(*filter));
+	}
+}
+
 bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
 {
 	if (errorCode == nullptr)
@@ -516,7 +679,6 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		return false;
 	}
 
-	m_filtersMap.clear();
 	m_topFilters.clear();
 
 	QXmlStreamReader reader(data);
@@ -537,7 +699,7 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 	// Read signals
 	//
-	ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Child;
+
 
 	while (!reader.atEnd())
 	{
@@ -553,44 +715,32 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 			continue;
 		}
 
-		if (reader.name() == "ObjectFilter")
+		QString tagName = reader.name().toString();
+
+		if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 		{
+			ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
+
+			if (tagName == "Tab")
+			{
+				filterType = ObjectFilter::FilterType::Tab;
+			}
+
+			if (tagName == "Button")
+			{
+				filterType = ObjectFilter::FilterType::Button;
+			}
+
 			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
-			if (of->load(reader, m_filtersMap) == false)
+			if (of->load(reader) == false)
 			{
 				*errorCode = reader.errorString();
 				return false;
 			}
 
-			if (m_filtersMap.find(of->hash()) != m_filtersMap.end())
-			{
-				reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
-				*errorCode = reader.errorString();
-				return false;
-			}
+			m_topFilters.push_back(of);
 
-			m_filtersMap[of->hash()] = of;
-			m_topFilters.push_back(of->hash());
-
-			continue;
-		}
-
-		if (reader.name() == "Tree")
-		{
-			filterType = ObjectFilter::FilterType::Tree;
-			continue;
-		}
-
-		if (reader.name() == "Tabs")
-		{
-			filterType = ObjectFilter::FilterType::Tab;
-			continue;
-		}
-
-		if (reader.name() == "Buttons")
-		{
-			filterType = ObjectFilter::FilterType::Button;
 			continue;
 		}
 
@@ -614,32 +764,17 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 	writer.writeStartElement("ObjectFilterStorage");
 
-	QList<std::pair<QString, ObjectFilter::FilterType>> records;
-	records.push_back(std::make_pair("Tree", ObjectFilter::FilterType::Tree));
-	records.push_back(std::make_pair("Tabs", ObjectFilter::FilterType::Tab));
-	records.push_back(std::make_pair("Buttons", ObjectFilter::FilterType::Button));
-
-	for (auto r : records)
+	for (auto f : m_topFilters)
 	{
-		writer.writeStartElement(r.first);
-		for (auto of : m_topFilters)
+		if (f == nullptr)
 		{
-			ObjectFilter* f = m_filtersMap[of].get();
-			if (f == nullptr)
-			{
-				assert(f);
-				return false;
-			}
-
-			if (f->filterType() != r.second)
-			{
-				continue;
-			}
-
-			f->save(writer);
+			assert(f);
+			return false;
 		}
-		writer.writeEndElement();
+
+		f->save(writer);
 	}
+	writer.writeEndElement();
 
 	writer.writeEndElement();	// ObjectFilterStorage
 
@@ -658,12 +793,12 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-int ObjectFilterStorage::topFilterCount()
+int ObjectFilterStorage::topFilterCount() const
 {
 	return static_cast<int>(m_topFilters.size());
 }
 
-ObjectFilter* ObjectFilterStorage::topFilter(int index)
+std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index) const
 {
 	if (index < 0 || index >= m_topFilters.size())
 	{
@@ -671,21 +806,46 @@ ObjectFilter* ObjectFilterStorage::topFilter(int index)
 		return nullptr;
 	}
 
-	Hash hash = m_topFilters[index];
-
-	return filter(hash);
+	return m_topFilters[index];
 }
 
-ObjectFilter* ObjectFilterStorage::filter(Hash hash)
+bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> filter)
 {
-	auto it = m_filtersMap.find(hash);
-	if (it == m_filtersMap.end())
+	if (filter == nullptr)
 	{
-		assert(false);
-		return nullptr;
+		assert(filter);
+		return false;
 	}
 
-	return it->second.get();
+	m_topFilters.push_back(filter);
+	return true;
+}
+
+bool ObjectFilterStorage::removeFilter(std::shared_ptr<ObjectFilter> filter)
+{
+	if (filter->parentFilter() != nullptr)
+	{
+		// remove this filter from parent
+		//
+		ObjectFilter* parentFilter = filter->parentFilter();
+		parentFilter->removeChild(filter);
+	}
+	else
+	{
+		//remove it from top filters
+		//
+		auto it = std::find(m_topFilters.begin(), m_topFilters.end(), filter);
+		if (it == m_topFilters.end())
+		{
+			assert(false);
+		}
+		else
+		{
+			m_topFilters.erase(it);
+		}
+	}
+
+	return true;
 }
 
 int ObjectFilterStorage::schemaDetailsCount()
@@ -814,21 +974,19 @@ void ObjectFilterStorage::createAutomaticFilters()
 		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
 		ofSchema->setCaption("Filter by Schema");
-		ofSchema->setDenyAll(true);
+		ofSchema->setFolder(true);
 
 		for (auto s : m_schemasDetails)
 		{
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
-			ofTs->setAppSignalIds(s.m_appSignals);
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+			ofTs->setAppSignalIdsList(s.m_appSignals);
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
 			ofTs->setCaption(s.m_caption);
-			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofSchema->addChild(ofTs);
 		}
 
-		m_filtersMap[ofSchema->hash()] = ofSchema;
-		m_topFilters.insert(m_topFilters.begin(), ofSchema->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofSchema);
 	}
 
 	if (theSettings.filterByEquipment() == true)
@@ -838,31 +996,28 @@ void ObjectFilterStorage::createAutomaticFilters()
 		std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption("Filter by EquipmentId");
-		ofEquipment->setDenyAll(true);
+		ofEquipment->setFolder(true);
 
 		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
 		{
 			QString ts = theObjects.tuningSourceEquipmentId(i);
 
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Child);
+			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
-			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofEquipment->addChild(ofTs);
 		}
 
-		m_filtersMap[ofEquipment->hash()] = ofEquipment;
-		m_topFilters.insert(m_topFilters.begin(), ofEquipment->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofEquipment);
 	}
 
 	// Root Filter for All in tree
 	//
 	bool createRootFilter = false;
-	for (auto tf : m_topFilters)
+	for (auto f : m_topFilters)
 	{
-		ObjectFilter* f = filter(tf);
 		if (f->isTree())
 		{
 			createRootFilter = true;
@@ -876,18 +1031,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		ofRoot->setCaption("All objects");
 		ofRoot->setAllowAll(true);
 
-		/*for (auto tf : m_topFilters)
-		{
-			ObjectFilter* f = filter(tf);
-			if (f->isTree())
-			{
-				ofRoot->addChild(m_filtersMap[tf]);
-				f->setParent(ofRoot.get());
-			}
-		}*/
-
-		m_filtersMap[ofRoot->hash()] = ofRoot;
-		m_topFilters.insert(m_topFilters.begin(), ofRoot->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofRoot);
 	}
 }
 

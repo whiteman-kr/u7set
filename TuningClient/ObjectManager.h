@@ -4,8 +4,7 @@
 #include "Stable.h"
 #include "TuningObject.h"
 #include "../Proto/network.pb.h"
-#include "../Lib/Hash.h"
-
+#include "../lib/Hash.h"
 
 
 class ObjectManager

@@ -20,6 +20,7 @@ TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
 	m_columnsNames<<tr("Type");
 
 	m_columnsNames<<tr("Value");
+	m_columnsNames<<tr("Default");
 	m_columnsNames<<tr("Valid");
 	m_columnsNames<<tr("Underflow");
 	m_columnsNames<<tr("Overflow");
@@ -40,6 +41,7 @@ TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
 		m_columnsIndexes.push_back(Type);
 
 		m_columnsIndexes.push_back(Value);
+		m_columnsIndexes.push_back(Default);
 		m_columnsIndexes.push_back(Valid);
 		m_columnsIndexes.push_back(Underflow);
 		m_columnsIndexes.push_back(Overflow);
@@ -170,6 +172,13 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
 		}
+
+		if (displayIndex == Default)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::gray);
+			return QBrush(color);
+		}
 	}
 
 	if (role == Qt::ForegroundRole)
@@ -184,12 +193,18 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			return QBrush(color);
 		}
 
+		if (displayIndex == Default)
+		{
+			//int displayIndex = m_columnsIndexes[col];
+			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
 	}
 
 	if (role == Qt::FontRole)
 	{
-		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
+		//int col = index.column();
+		//int displayIndex = m_columnsIndexes[col];
 
 		//if (displayIndex == Value)
 		//{
@@ -197,6 +212,19 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			f.setBold(true);
 			return f;
 		//}
+	}
+
+	if (role == Qt::TextAlignmentRole)
+	{
+
+		int col = index.column();
+		int displayIndex = m_columnsIndexes[col];
+
+		if (displayIndex >= Value)
+		{
+			return Qt::AlignCenter;
+		}
+		return Qt::AlignLeft + Qt::AlignVCenter;
 	}
 
 	if (role == Qt::DisplayRole)
@@ -284,6 +312,17 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 		}
 
+		if (displayIndex == Default)
+		{
+			if (o.analog())
+			{
+				return tr("0.0");
+			}
+			else
+			{
+				return tr("No");
+			}
+		}
 
 		if (displayIndex == Valid)
 		{
@@ -323,10 +362,10 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 //
 // TuningPage
 //
-FilterButton::FilterButton(Hash hash, const QString& caption, QWidget* parent)
+FilterButton::FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent)
 	:QPushButton(caption, parent)
 {
-	m_filterHash = hash;
+	m_filter = filter;
 	m_caption = caption;
 
 	setCheckable(true);
@@ -334,16 +373,16 @@ FilterButton::FilterButton(Hash hash, const QString& caption, QWidget* parent)
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
 
-Hash FilterButton::filterHash()
+std::shared_ptr<ObjectFilter> FilterButton::filter()
 {
-	return m_filterHash;
+	return m_filter;
 }
 
 void FilterButton::slot_toggled(bool checked)
 {
 	if (checked == true)
 	{
-		emit filterButtonClicked(m_filterHash);
+		emit filterButtonClicked(m_filter);
 	}
 
 }
@@ -352,7 +391,7 @@ void FilterButton::slot_toggled(bool checked)
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
 	m_tabFilter(tabFilter)
@@ -378,7 +417,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i);
+		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -390,7 +429,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f->hash(), f->caption());
+		FilterButton* button = new FilterButton(f, f->caption());
 		buttons.push_back(button);
 
 		connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
@@ -402,14 +441,14 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	{
 		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
 		{
-			ObjectFilter* f = tabFilter->childFilter(i);
+			std::shared_ptr<ObjectFilter> f = tabFilter->childFilter(i);
 			if (f == nullptr)
 			{
 				assert(f);
 				continue;
 			}
 
-			FilterButton* button = new FilterButton(f->hash(), f->caption());
+			FilterButton* button = new FilterButton(f, f->caption());
 			buttons.push_back(button);
 
 			connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
@@ -437,7 +476,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 		//
 		buttons[0]->blockSignals(true);
 		buttons[0]->setChecked(true);
-		m_buttonFilter = theFilters.filter(buttons[0]->filterHash());
+		m_buttonFilter = buttons[0]->filter();
 		buttons[0]->blockSignals(false);
 
 	}
@@ -450,10 +489,12 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	//
 	m_maskTypeCombo = new QComboBox();
 	m_maskEdit = new QLineEdit();
-	m_maskButton = new QPushButton("Apply");
+	m_maskButton = new QPushButton("Apply Mask");
 
-	m_applyButton = new QPushButton("Apply");
-	m_restoreButton = new QPushButton("Restore");
+	m_setValueButton = new QPushButton("Set Value");
+	m_setOnButton = new QPushButton("Set all to On");
+	m_setOffButton = new QPushButton("Set all to Off");
+	m_setToDefaultButton = new QPushButton("Set to Defaults");
 
 	m_bottomLayout = new QHBoxLayout();
 
@@ -461,8 +502,10 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	m_bottomLayout->addWidget(m_maskEdit);
 	m_bottomLayout->addWidget(m_maskButton);
 	m_bottomLayout->addStretch();
-	m_bottomLayout->addWidget(m_applyButton);
-	m_bottomLayout->addWidget(m_restoreButton);
+	m_bottomLayout->addWidget(m_setValueButton);
+	m_bottomLayout->addWidget(m_setOnButton);
+	m_bottomLayout->addWidget(m_setOffButton);
+	m_bottomLayout->addWidget(m_setToDefaultButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -531,9 +574,14 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr)
 		{
+			if (m_treeFilter->folder() == true)
+			{
+				continue;
+			}
+
 			bool result = true;
 
-			ObjectFilter* treeFilter = m_treeFilter;
+			ObjectFilter* treeFilter = m_treeFilter.get();
 			while (treeFilter != nullptr)
 			{
 				if (treeFilter->match(o) == false)
@@ -541,7 +589,8 @@ void TuningPage::fillObjectsList()
 					result = false;
 					break;
 				}
-				treeFilter = treeFilter->parent();
+
+				treeFilter = treeFilter->parentFilter();
 			}
 			if (result == false)
 			{
@@ -571,33 +620,34 @@ void TuningPage::fillObjectsList()
 	m_model->setObjectsIndexes(m_objectsIndexes);
 }
 
-void TuningPage::slot_filterButtonClicked(Hash hash)
+void TuningPage::slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter)
 {
-	qDebug()<<"Filter button clicked: "<<hash;
-
-	m_buttonFilter = theFilters.filter(hash);
-
-	if (m_buttonFilter == nullptr)
+	if (filter == nullptr)
 	{
-		assert(m_buttonFilter);
+		assert(filter);
 		return;
 	}
+
+	qDebug()<<"Filter button clicked: "<<filter->caption();
+
+	m_buttonFilter = filter;
 
 	fillObjectsList();
 
 }
 
-void TuningPage::slot_filterTreeChanged(Hash hash)
+void TuningPage::slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter)
 {
-	qDebug()<<"Filter tree clicked: "<<hash;
-
-	m_treeFilter = theFilters.filter(hash);
-
-	if (m_treeFilter == nullptr)
+	if (filter == nullptr)
 	{
-		assert(m_treeFilter);
+		assert(filter);
 		return;
 	}
+
+	qDebug()<<"Filter tree clicked: "<<filter->caption();
+
+	m_treeFilter = filter;
+
 
 	fillObjectsList();
 }

@@ -16,6 +16,7 @@ namespace VFrame30
 
 		virtual void AddPoint(double x, double y) = 0;
 		virtual void RemoveSamePoints() = 0;
+		virtual void RemoveUnwantedPoints() = 0;
 		virtual void DeleteAllPoints() = 0;
 		virtual void DeleteLastPoint() = 0;
 
@@ -96,6 +97,7 @@ namespace VFrame30
 		virtual void SetPointList(const std::list<SchemaPoint>& points) override;
 		virtual void AddPoint(double x, double y) override;
 		virtual void RemoveSamePoints() override;
+		virtual void RemoveUnwantedPoints() override;
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
 

@@ -78,7 +78,12 @@ SOURCES += main.cpp\
     TcpTuningClient.cpp \
     ../Proto/network.pb.cc \
     ../lib/AppSignalState.cpp \
-    ../Proto/serialization.pb.cc
+    ../Proto/serialization.pb.cc \
+    DialogPresetEditor.cpp \
+    DialogPresetProperties.cpp \
+    ../lib/PropertyEditor.cpp \
+    ../lib/PropertyEditorDialog.cpp \
+    ../lib/PropertyObject.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -102,11 +107,21 @@ HEADERS  += MainWindow.h \
     TcpTuningClient.h \
     ../Proto/network.pb.h \
     ../lib/AppSignalState.h \
-    ../Proto/serialization.pb.h
+    ../Proto/serialization.pb.h \
+    DialogPresetEditor.h \
+    DialogPresetProperties.h \
+    ../lib/PropertyEditor.h \
+    ../lib/PropertyEditorDialog.h \
+    ../lib/PropertyObject.h
 
 FORMS    += \
     DialogSettings.ui \
-    DialogTuningSources.ui
+    DialogTuningSources.ui \
+    DialogPresetEditor.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
+
+# QtPropertyBrowser
+#
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)

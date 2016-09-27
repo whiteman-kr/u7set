@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include "../lib/PropertyObject.h"
+#include "../lib/PropertyEditor.h"
+#include "../lib/PropertyEditorDialog.h"
 
 class PropertyEditorDialog : public QDialog
 {
