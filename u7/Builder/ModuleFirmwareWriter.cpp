@@ -42,14 +42,15 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 		int dataPos = 0;
 
+		QByteArray str;
+		str.resize(5 * frameStringWidth - 1);
+		str.fill(' ');
+
+		char buf[10];
+
 		for (int l = 0; l < linesCount; l++)
 		{
 
-			//QJsonArray array;
-			//for (size_t j = 0; j < frame.size(); j++)
-				//array.push_back(QJsonValue(frame[j]));
-
-			QString str;
 			for (int i = 0; i < frameStringWidth; i++)
 			{
 				quint16 value = ((quint16)frame[dataPos++] << 8);
@@ -60,20 +61,28 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 				}
 
 				value |= frame[dataPos++];
-				str += QString().number(value, 16).rightJustified(4, '0');
+
+				//str += QString().number(value, 16).rightJustified(4, '0');
+
+				_itoa_s(value, buf, sizeof(buf), 16);
+
+				int len = static_cast<int>(strlen(buf));
+
+				memset(str.data() + i * 5, '0', 4);
+				memcpy(str.data() + i * 5 + (4 - len), buf, len);
 
 				if (dataPos >= dataSize)
 				{
 					break;
 				}
 
-				if (i < frameStringWidth - 1)
+				/*if (i < frameStringWidth - 1)
 				{
 					str += " ";
-				}
+				}*/
 			}
 
-			jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str));
+			jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
 		}
 		jFrame.insert("frameIndex", i);
 
@@ -91,7 +100,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 			QJsonObject jDescription;
 
 			int channel = channelDescription.first;
-			std::vector<QVariantList>& descriptionItems = channelDescription.second;
+			const std::vector<QVariantList>& descriptionItems = channelDescription.second;
 
 			int diIndex = 0;
 			for (auto di : descriptionItems)
@@ -111,12 +120,12 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 					jDescriptionItem.insert(m_descriptionFields[l++], v.toString());
 				}
 
-				jDescription.insert("desc" + QString().number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
+				jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
 			}
 
 			if (descriptionItems.empty() == false)
 			{
-				jObject.insert("z_description_channel_" + QString().number(channel).rightJustified(2, '0'), jDescription);
+				jObject.insert("z_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
 			}
 		}
 	}
