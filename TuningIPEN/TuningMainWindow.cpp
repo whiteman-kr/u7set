@@ -353,7 +353,7 @@ void TuningMainWindow::onTuningServiceReady()
 		statusBar()->addWidget(newLabel);
 
 		m_statusLabelMap.insert(sourceInfo.lmEquipmentID, newLabel);
-	}
+		}
 	// ========== Status bar ==========
 
 	connect(m_service, &TuningIPEN::TuningIPENService::tuningDataSourceStateUpdate, this, &TuningMainWindow::updateDataSourceStatus);
