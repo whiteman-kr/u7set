@@ -7,7 +7,6 @@
 #include "../lib/Hash.h"
 
 
-
 class ObjectManager
 {
 public:

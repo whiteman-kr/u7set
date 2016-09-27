@@ -362,10 +362,10 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 //
 // TuningPage
 //
-FilterButton::FilterButton(Hash hash, const QString& caption, QWidget* parent)
+FilterButton::FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent)
 	:QPushButton(caption, parent)
 {
-	m_filterHash = hash;
+	m_filter = filter;
 	m_caption = caption;
 
 	setCheckable(true);
@@ -373,16 +373,16 @@ FilterButton::FilterButton(Hash hash, const QString& caption, QWidget* parent)
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
 
-Hash FilterButton::filterHash()
+std::shared_ptr<ObjectFilter> FilterButton::filter()
 {
-	return m_filterHash;
+	return m_filter;
 }
 
 void FilterButton::slot_toggled(bool checked)
 {
 	if (checked == true)
 	{
-		emit filterButtonClicked(m_filterHash);
+		emit filterButtonClicked(m_filter);
 	}
 
 }
@@ -391,7 +391,7 @@ void FilterButton::slot_toggled(bool checked)
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
 	m_tabFilter(tabFilter)
@@ -417,7 +417,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i).get();
+		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -429,7 +429,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f->hash(), f->caption());
+		FilterButton* button = new FilterButton(f, f->caption());
 		buttons.push_back(button);
 
 		connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
@@ -441,14 +441,14 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 	{
 		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
 		{
-			ObjectFilter* f = tabFilter->childFilter(i);
+			std::shared_ptr<ObjectFilter> f = tabFilter->childFilter(i);
 			if (f == nullptr)
 			{
 				assert(f);
 				continue;
 			}
 
-			FilterButton* button = new FilterButton(f->hash(), f->caption());
+			FilterButton* button = new FilterButton(f, f->caption());
 			buttons.push_back(button);
 
 			connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
@@ -476,7 +476,7 @@ TuningPage::TuningPage(int tuningPageIndex, ObjectFilter *tabFilter, QWidget *pa
 		//
 		buttons[0]->blockSignals(true);
 		buttons[0]->setChecked(true);
-		m_buttonFilter = theFilters.filter(buttons[0]->filterHash()).get();
+		m_buttonFilter = buttons[0]->filter();
 		buttons[0]->blockSignals(false);
 
 	}
@@ -574,9 +574,14 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr)
 		{
+			if (m_treeFilter->folder() == true)
+			{
+				continue;
+			}
+
 			bool result = true;
 
-			ObjectFilter* treeFilter = m_treeFilter;
+			ObjectFilter* treeFilter = m_treeFilter.get();
 			while (treeFilter != nullptr)
 			{
 				if (treeFilter->match(o) == false)
@@ -585,7 +590,7 @@ void TuningPage::fillObjectsList()
 					break;
 				}
 
-				treeFilter = theFilters.filter(treeFilter->parentHash()).get();
+				treeFilter = treeFilter->parentFilter();
 			}
 			if (result == false)
 			{
@@ -615,33 +620,34 @@ void TuningPage::fillObjectsList()
 	m_model->setObjectsIndexes(m_objectsIndexes);
 }
 
-void TuningPage::slot_filterButtonClicked(Hash hash)
+void TuningPage::slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter)
 {
-	qDebug()<<"Filter button clicked: "<<hash;
-
-	m_buttonFilter = theFilters.filter(hash).get();
-
-	if (m_buttonFilter == nullptr)
+	if (filter == nullptr)
 	{
-		assert(m_buttonFilter);
+		assert(filter);
 		return;
 	}
+
+	qDebug()<<"Filter button clicked: "<<filter->caption();
+
+	m_buttonFilter = filter;
 
 	fillObjectsList();
 
 }
 
-void TuningPage::slot_filterTreeChanged(Hash hash)
+void TuningPage::slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter)
 {
-	qDebug()<<"Filter tree clicked: "<<hash;
-
-	m_treeFilter = theFilters.filter(hash).get();
-
-	if (m_treeFilter == nullptr)
+	if (filter == nullptr)
 	{
-		assert(m_treeFilter);
+		assert(filter);
 		return;
 	}
+
+	qDebug()<<"Filter tree clicked: "<<filter->caption();
+
+	m_treeFilter = filter;
+
 
 	fillObjectsList();
 }

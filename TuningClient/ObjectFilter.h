@@ -42,7 +42,7 @@ public:
 	ObjectFilter(FilterType filterType);
 	ObjectFilter(const ObjectFilter& That);
 
-	bool load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>> &filtersMap);
+	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer);
 
 	bool match(const TuningObject &object);
@@ -54,8 +54,6 @@ public:
 	//
 	QString strID() const;
 	void setStrID(const QString& value);
-
-	Hash hash() const;
 
 	QString caption() const;
 	void setCaption(const QString& value);
@@ -71,8 +69,13 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	QString appSignalIds() const;
-	void setAppSignalIds(const QString& value);
+	QString appSignalIdsCR() const;
+	void setAppSignalIdsCR(const QString& value);
+
+	QString appSignalIdsCSV() const;
+	void setAppSignalIdsCSV(const QString& value);
+
+	QStringList appSignalIdsList() const;
 	void setAppSignalIdsList(const QStringList& value);
 
 	FilterType filterType() const;
@@ -81,14 +84,13 @@ public:
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
 
-	Hash parentHash() const;
-	void setParentHash(Hash value);
+	ObjectFilter* parentFilter() const;
 
 	bool allowAll() const;
 	void setAllowAll(bool value);
 
-	bool denyAll() const;
-	void setDenyAll(bool value);
+	bool folder() const;
+	void setFolder(bool value);
 
 public:
 	bool isTree() const;
@@ -100,7 +102,7 @@ public:
 	void removeChild(std::shared_ptr<ObjectFilter> child);
 
 	int childFiltersCount();
-	ObjectFilter* childFilter(int index);
+	std::shared_ptr<ObjectFilter> childFilter(int index);
 
 private:
 
@@ -108,16 +110,14 @@ private:
 	QString m_caption;
 
 	bool m_allowAll = false;
-	bool m_denyAll = false;
-
-	Hash m_hash = 0;
+	bool m_folder = false;
 
 	// Filters
 	//
-
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
+
 	QStringList m_appSignalIds;
 
 	FilterType m_filterType = FilterType::Tree;
@@ -125,7 +125,7 @@ private:
 
 	std::vector<std::shared_ptr<ObjectFilter>> m_childFilters;
 
-	Hash m_parentHash = 0;
+	ObjectFilter* m_parentFilter = nullptr;
 
 };
 
@@ -143,15 +143,12 @@ public:
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
-	int topFilterCount();
-	std::shared_ptr<ObjectFilter> topFilter(int index);
+	int topFilterCount() const;
+	std::shared_ptr<ObjectFilter> topFilter(int index) const;
 
 	bool addTopFilter(const std::shared_ptr<ObjectFilter> filter);
-	bool addFilter(ObjectFilter* parent, const std::shared_ptr<ObjectFilter> filter);
 
-	bool removeFilter(Hash hash);
-
-	std::shared_ptr<ObjectFilter> filter(Hash hash);
+	bool removeFilter(std::shared_ptr<ObjectFilter> filter);
 
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
@@ -160,11 +157,13 @@ public:
 
 private:
 
-	std::map<Hash, std::shared_ptr<ObjectFilter>> m_filtersMap;
-	std::vector<Hash> m_topFilters;
+	std::vector<std::shared_ptr<ObjectFilter>> m_topFilters;
 
 	std::vector<SchemaDetails> m_schemasDetails;
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<ObjectFilter>)
+
 
 extern ObjectFilterStorage theFilters;
 extern ObjectFilterStorage theUserFilters;
