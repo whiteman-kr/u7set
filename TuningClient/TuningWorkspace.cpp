@@ -17,7 +17,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	int count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i).get();
+		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -30,7 +30,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-		item->setData(0, Qt::UserRole, f->hash());
+		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 
 		treeItems.push_back(item);
 
@@ -66,7 +66,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	count = theFilters.topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = theFilters.topFilter(i).get();
+		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -145,7 +145,7 @@ TuningWorkspace::~TuningWorkspace()
 }
 
 
-void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem* parent)
+void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent)
 {
 	if (filter == nullptr)
 	{
@@ -161,7 +161,7 @@ void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem*
 
 	for (int i = 0; i < filter->childFiltersCount(); i++)
 	{
-		ObjectFilter* f = filter->childFilter(i);
+		std::shared_ptr<ObjectFilter> f = filter->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -169,7 +169,7 @@ void TuningWorkspace::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem*
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-		item->setData(0, Qt::UserRole, f->hash());
+		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 		parent->addChild(item);
 
 		addChildTreeObjects(f, item);
@@ -184,7 +184,7 @@ void TuningWorkspace::slot_treeSelectionChanged()
 		return;
 	}
 
-	Hash filterHash = item->data(0, Qt::UserRole).value<Hash>();
+	std::shared_ptr<ObjectFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
 
-	emit filterSelectionChanged(filterHash);
+	emit filterSelectionChanged(filter);
 }

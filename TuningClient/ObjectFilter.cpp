@@ -13,12 +13,6 @@ ObjectFilter::ObjectFilter()
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, ObjectFilter::caption, ObjectFilter::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, ObjectFilter::signalType, ObjectFilter::setSignalType);
 
-	/*auto propHash = ADD_PROPERTY_GETTER(Hash, "Hash", true, ObjectFilter::hash);
-	propHash->setCategory("Debug");
-
-	auto propParentHash = ADD_PROPERTY_GETTER(Hash, "ParentHash", true, ObjectFilter::parentHash);
-	propParentHash->setCategory("Debug");*/
-
 	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, ObjectFilter::filterType);
 	propFilterType->setCategory("Debug");
 
@@ -49,8 +43,6 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_allowAll = That.m_allowAll;
 	m_denyAll = That.m_allowAll;
 
-	m_hash = That.m_hash;
-
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
@@ -59,7 +51,6 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_filterType = That.m_filterType;
 	m_signalType = That.m_signalType;
 
-	m_parentHash = That.m_parentHash;
 
 	for (auto f : That.m_childFilters)
 	{
@@ -71,7 +62,7 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	}
 }
 
-bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr<ObjectFilter>>& filtersMap)
+bool ObjectFilter::load(QXmlStreamReader& reader)
 {
 
 	if (reader.attributes().hasAttribute("StrID"))
@@ -152,21 +143,12 @@ bool ObjectFilter::load(QXmlStreamReader& reader, std::map<Hash, std::shared_ptr
 
 				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
-				if (of->load(reader, filtersMap) == false)
+				if (of->load(reader) == false)
 				{
 					return false;
 				}
 
 				of->setStrID(m_strID + "_" + of->strID());
-
-				if (filtersMap.find(of->hash()) != filtersMap.end())
-				{
-					reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
-					return false;
-				}
-
-				filtersMap[of->hash()] = of;
-				of->setParentHash(hash());
 
 				addChild(of);
 
@@ -236,12 +218,6 @@ QString ObjectFilter::strID() const
 void ObjectFilter::setStrID(const QString& value)
 {
 	m_strID = value;
-	m_hash = ::calcHash(value);
-}
-
-Hash ObjectFilter::hash() const
-{
-	return m_hash;
 }
 
 QString ObjectFilter::caption() const
@@ -377,14 +353,9 @@ void ObjectFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
-Hash ObjectFilter::parentHash() const
+ObjectFilter* ObjectFilter::parentFilter() const
 {
-	return m_parentHash;
-}
-
-void ObjectFilter::setParentHash(Hash value)
-{
-	m_parentHash = value;
+	return m_parentFilter;
 }
 
 bool ObjectFilter::allowAll() const
@@ -425,6 +396,7 @@ bool ObjectFilter::isButton() const
 
 void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
 {
+	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
 }
 
@@ -435,20 +407,20 @@ void ObjectFilter::removeChild(std::shared_ptr<ObjectFilter> child)
 	for (auto it : m_childFilters)
 	{
 		index++;
-		if (it->hash() == child->hash())
+		if (it.get() == child.get())
 		{
 			break;
 		}
 	}
 
-	if (index != -1)
+	if (index == -1)
+	{
+		assert(false);
+	}
+	else
 	{
 		m_childFilters.erase(m_childFilters.begin() + index);
-		return;
 	}
-
-	assert(false);
-	return;
 }
 
 int ObjectFilter::childFiltersCount()
@@ -457,7 +429,7 @@ int ObjectFilter::childFiltersCount()
 
 }
 
-ObjectFilter* ObjectFilter::childFilter(int index)
+std::shared_ptr<ObjectFilter> ObjectFilter::childFilter(int index)
 {
 	if (index <0 || index >= m_childFilters.size())
 	{
@@ -465,7 +437,7 @@ ObjectFilter* ObjectFilter::childFilter(int index)
 		return nullptr;
 	}
 
-	return m_childFilters[index].get();
+	return m_childFilters[index];
 }
 
 
@@ -615,17 +587,15 @@ ObjectFilterStorage::ObjectFilterStorage()
 
 ObjectFilterStorage::ObjectFilterStorage(const ObjectFilterStorage& That)
 {
-	m_topFilters = That.m_topFilters;
 	m_schemasDetails = That.m_schemasDetails;
 
-	for (auto f : That.m_filtersMap)
+	for (auto f : That.m_topFilters)
 	{
 		// create objects copies
 		//
-		Hash hash = f.first;
-		ObjectFilter* filter = f.second.get();
+		ObjectFilter* filter = f.get();
 
-		m_filtersMap[hash] = std::make_shared<ObjectFilter>(*filter);
+		m_topFilters.push_back(std::make_shared<ObjectFilter>(*filter));
 	}
 }
 
@@ -664,7 +634,6 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		return false;
 	}
 
-	m_filtersMap.clear();
 	m_topFilters.clear();
 
 	QXmlStreamReader reader(data);
@@ -719,21 +688,13 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
 
-			if (of->load(reader, m_filtersMap) == false)
+			if (of->load(reader) == false)
 			{
 				*errorCode = reader.errorString();
 				return false;
 			}
 
-			if (m_filtersMap.find(of->hash()) != m_filtersMap.end())
-			{
-				reader.raiseError(QObject::tr("string identifier '%1' of the filter is not unque.").arg(of->strID()));
-				*errorCode = reader.errorString();
-				return false;
-			}
-
-			m_filtersMap[of->hash()] = of;
-			m_topFilters.push_back(of->hash());
+			m_topFilters.push_back(of);
 
 			continue;
 		}
@@ -758,9 +719,8 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 	writer.writeStartElement("ObjectFilterStorage");
 
-	for (auto of : m_topFilters)
+	for (auto f : m_topFilters)
 	{
-		ObjectFilter* f = m_filtersMap[of].get();
 		if (f == nullptr)
 		{
 			assert(f);
@@ -801,93 +761,46 @@ std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index)
 		return nullptr;
 	}
 
-	Hash hash = m_topFilters[index];
-
-	return filter(hash);
+	return m_topFilters[index];
 }
 
 bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> filter)
 {
-	return addFilter(nullptr, filter);
-}
-
-bool ObjectFilterStorage::addFilter(ObjectFilter* parent, const std::shared_ptr<ObjectFilter> filter)
-{
-	if (m_filtersMap.find(filter->hash()) != m_filtersMap.end())
+	if (filter == nullptr)
 	{
-		assert(false);
+		assert(filter);
 		return false;
 	}
 
-	m_filtersMap[filter->hash()] = filter;
-
-	if (parent != nullptr)
-	{
-		filter->setParentHash(parent->hash());
-		parent->addChild(filter);
-	}
-	else
-	{
-		m_topFilters.push_back(filter->hash());
-	}
-
+	m_topFilters.push_back(filter);
 	return true;
 }
 
-bool ObjectFilterStorage::removeFilter(Hash hash)
+bool ObjectFilterStorage::removeFilter(std::shared_ptr<ObjectFilter> filter)
 {
-	if (m_filtersMap.find(hash) == m_filtersMap.end())
-	{
-		assert(false);
-		return false;
-	}
-
-	std::shared_ptr<ObjectFilter> f = m_filtersMap[hash];
-
-	if (f->parentHash() != 0)
+	if (filter->parentFilter() != nullptr)
 	{
 		// remove this filter from parent
 		//
-		std::shared_ptr<ObjectFilter> p = filter(f->parentHash());
-		if (p == nullptr)
+		ObjectFilter* parentFilter = filter->parentFilter();
+		parentFilter->removeChild(filter);
+	}
+	else
+	{
+		//remove it from top filters
+		//
+		auto it = std::find(m_topFilters.begin(), m_topFilters.end(), filter);
+		if (it == m_topFilters.end())
 		{
-			assert(p);
-			return false;
+			assert(false);
 		}
-
-		p->removeChild(f);
-	}
-
-	//remove it from top filters
-
-	auto it = std::find(m_topFilters.begin(), m_topFilters.end(), hash);
-	if (it != m_topFilters.end())
-	{
-		m_topFilters.erase(it);
-	}
-
-	// remove it from map
-
-	auto fptr = m_filtersMap.find(hash);
-	if (fptr != m_filtersMap.end())
-	{
-		m_filtersMap.erase(fptr);
+		else
+		{
+			m_topFilters.erase(it);
+		}
 	}
 
 	return true;
-
-}
-
-std::shared_ptr<ObjectFilter> ObjectFilterStorage::filter(Hash hash)
-{
-	auto it = m_filtersMap.find(hash);
-	if (it == m_filtersMap.end())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return it->second;
 }
 
 int ObjectFilterStorage::schemaDetailsCount()
@@ -1024,13 +937,11 @@ void ObjectFilterStorage::createAutomaticFilters()
 			ofTs->setAppSignalIdsList(s.m_appSignals);
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
 			ofTs->setCaption(s.m_caption);
-			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofSchema->addChild(ofTs);
 		}
 
-		m_filtersMap[ofSchema->hash()] = ofSchema;
-		m_topFilters.insert(m_topFilters.begin(), ofSchema->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofSchema);
 	}
 
 	if (theSettings.filterByEquipment() == true)
@@ -1050,21 +961,18 @@ void ObjectFilterStorage::createAutomaticFilters()
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
-			m_filtersMap[ofTs->hash()] = ofTs;
 
 			ofEquipment->addChild(ofTs);
 		}
 
-		m_filtersMap[ofEquipment->hash()] = ofEquipment;
-		m_topFilters.insert(m_topFilters.begin(), ofEquipment->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofEquipment);
 	}
 
 	// Root Filter for All in tree
 	//
 	bool createRootFilter = false;
-	for (auto tf : m_topFilters)
+	for (auto f : m_topFilters)
 	{
-		std::shared_ptr<ObjectFilter> f = filter(tf);
 		if (f->isTree())
 		{
 			createRootFilter = true;
@@ -1078,8 +986,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		ofRoot->setCaption("All objects");
 		ofRoot->setAllowAll(true);
 
-		m_filtersMap[ofRoot->hash()] = ofRoot;
-		m_topFilters.insert(m_topFilters.begin(), ofRoot->hash());
+		m_topFilters.insert(m_topFilters.begin(), ofRoot);
 	}
 }
 

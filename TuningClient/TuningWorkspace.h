@@ -16,13 +16,13 @@ public:
 
 	TuningPage* m_tuningPage = nullptr;
 
-	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
+	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent);
 
 private slots:
 	void slot_treeSelectionChanged();
 
 signals:
-	void filterSelectionChanged(Hash hash);
+	void filterSelectionChanged(std::shared_ptr<ObjectFilter> filter);
 
 };
 

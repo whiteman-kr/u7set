@@ -15,7 +15,7 @@ class DialogPresetEditor : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogPresetEditor(ObjectFilterStorage* filters, QWidget *parent = 0);
+	explicit DialogPresetEditor(ObjectFilterStorage* filterStorage, QWidget *parent = 0);
 	~DialogPresetEditor();
 
 private slots:
@@ -37,7 +37,7 @@ private slots:
 	void on_m_presetsTree_doubleClicked(const QModelIndex &index);
 
 private:
-	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
+	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
 
 
 private:
@@ -46,7 +46,7 @@ private:
 
 	bool m_modified = false;
 
-	ObjectFilterStorage* m_filters;
+	ObjectFilterStorage* m_filterStorage;
 };
 
 #endif // DIALOGPRESETEDITOR_H
