@@ -65,7 +65,7 @@ namespace Tuning
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
-		Tuning::TuningSocketWorker* m_tuningSocket = nullptr;
+		TuningSocketWorker* m_tuningSocket = nullptr;
 		SimpleThread* m_tuningSocketThread = nullptr;
 
 		QTimer m_timer;

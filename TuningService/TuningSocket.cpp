@@ -4,67 +4,171 @@
 
 namespace Tuning
 {
+
+	// -------------------------------------------------------------------------
+	//
+	//	TuningSocketRequestQueue class implementaton
+	//
+	// -------------------------------------------------------------------------
+
+	TuningSocketRequestQueue::TuningSocketRequestQueue(quint32 tuningSourceIP) :
+		Queue<TuningSocketRequest>(1000),
+		m_tuningSourceIP(tuningSourceIP)
+	{
+	}
+
+
+	bool TuningSocketRequestQueue::push(const TuningSocketRequest* ptr)
+	{
+		bool result = Queue<TuningSocketRequest>::push(ptr);
+
+		if (result == true)
+		{
+			emit request(m_tuningSourceIP);
+			return true;
+		}
+
+		return false;
+	}
+
+
+	bool TuningSocketRequestQueue::isWaitingForAck() const
+	{
+		return m_waitingForAk;
+	}
+
+
+	void TuningSocketRequestQueue::stopWaiting()
+	{
+		m_waitingForAk = false;
+		m_waitCount = 0;
+	}
+
+
+	void TuningSocketRequestQueue::requestIsSent()
+	{
+		assert(m_waitingForAk == false);
+
+		m_waitingForAk = true;
+		m_waitCount = 0;
+	}
+
+
+	void TuningSocketRequestQueue::incWaitCount()
+	{
+		assert(m_waitingForAk == true);
+
+		m_waitCount++;
+	}
+
+
+	int TuningSocketRequestQueue::waitCount() const
+	{
+		return m_waitCount;
+	}
+
+
 	// -------------------------------------------------------------------------
 	//
 	//	TuningSocketWorker class implementaton
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP) :
+	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP, const TuningSources& tuningSources) :
 		m_tuningIP(tuningIP),
-		m_requests(50),
-		m_replies(50),
-		m_timer(this)
+		m_timer100ms(this),
+		m_timer1s(this)
 	{
+		for(const TuningSource* tuningSource : tuningSources)
+		{
+			if (tuningSource == nullptr)
+			{
+				assert(false);
+			}
+
+			// fill KEYs only!
+			// queues really is allocated in createRequestQueues()
+			//
+			m_requestQueues.insert(tuningSource->lmAddress32(), nullptr);
+		}
+	}
+
+
+	TuningSocketWorker::~TuningSocketWorker()
+	{
+	}
+
+
+	void TuningSocketWorker::sendRequest(const TuningSocketRequest &socketRequest)
+	{
+		TuningSocketRequestQueue* queue = m_requestQueues.value(socketRequest.lmIP, nullptr);
+
+		if (queue == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		queue->push(&socketRequest);
 	}
 
 
 	void TuningSocketWorker::clear()
 	{
+		for(TuningSocketRequestQueue* queue : m_requestQueues)
+		{
+			if (queue != nullptr)
+			{
+				delete queue;
+			}
+		}
+
+		m_requestQueues.clear();
 	}
 
 
 	void TuningSocketWorker::onThreadStarted()
 	{
-		connect(&m_timer, &QTimer::timeout, this, &TuningSocketWorker::onTimer);
+		createRequestQueues();
 
-		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningSocketWorker::onSocketRequest);
-		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningSocketWorker::replyReady);
-
-	/*	if (m_tuningService != nullptr)
-		{
-			connect(this, &TuningSocketWorker::userRequest, m_tuningService, &TuningService::userRequest);
-			connect(this, &TuningSocketWorker::replyWithNoZeroFlags, m_tuningService, &TuningService::replyWithNoZeroFlags);
-		}*/
-
-		m_timer.setInterval(1000);
-		m_timer.start();
-
+		startTimers();
 	}
 
 	void TuningSocketWorker::onThreadFinished()
 	{
-		m_timer.stop();
+		m_timer100ms.stop();
+		m_timer1s.stop();
+
 		closeSocket();
+
+		clear();
 	}
 
 
-	void TuningSocketWorker::closeSocket()
+	void TuningSocketWorker::createRequestQueues()
 	{
-		if (m_socket != nullptr)
+		QList<quint32> tuningSourcesIPs = m_requestQueues.keys();
+
+		for(quint32 tuningSourceIP : tuningSourcesIPs)
 		{
-			m_socket->close();
-			delete m_socket;
-			m_socket = nullptr;
-		}
+			TuningSocketRequestQueue* requestQueue = new TuningSocketRequestQueue(tuningSourceIP);
 
-		m_socketBound = false;
+			m_requestQueues.insert(tuningSourceIP, requestQueue);
+
+			connect(requestQueue, &TuningSocketRequestQueue::request, this, &TuningSocketWorker::onRequest);
+		}
 	}
 
 
-	void TuningSocketWorker::onTimer()
+	void TuningSocketWorker::startTimers()
 	{
-		createAndBindSocket();
+		connect(&m_timer1s, &QTimer::timeout, this, &TuningSocketWorker::onTimer1s);
+		m_timer1s.setInterval(1000);
+		m_timer1s.start();
+
+		connect(&m_timer100ms, &QTimer::timeout, this, &TuningSocketWorker::onTimer100ms);
+		m_timer100ms.setInterval(100);
+		m_timer100ms.start();
 	}
 
 
@@ -92,59 +196,100 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onSocketReadyRead()
+	void TuningSocketWorker::closeSocket()
 	{
-		if (m_socket == nullptr)
+		if (m_socket != nullptr)
 		{
-			assert(false);
-			return;
+			m_socket->close();
+			delete m_socket;
+			m_socket = nullptr;
 		}
 
-		QHostAddress from;
-
-		qint64 size = m_socket->pendingDatagramSize();
-
-		if (size > sizeof(m_ackFrame))
-		{
-			assert(false);
-			m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
-			qDebug() << "TuningSocketWorker: datagram too big";
-			return;
-		}
-
-		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
-
-		if (result == -1)
-		{
-			closeSocket();
-			qDebug() << "TuningSocketWorker: read socket error";
-			return;
-		}
-
-		SocketReply* sr = m_replies.beginPush();
-
-		sr->lmIP = from.toIPv4Address();
-
-		memcpy(&sr->fotipHeader, &m_ackFrame.fotip.header, sizeof(FotipHeader));
-		memcpy(sr->fotipData, m_ackFrame.fotip.data, FOTIP_TX_RX_DATA_SIZE);
-		memcpy(sr->fotipComparisonResult, m_ackFrame.fotip.comparisonResult, FOTIP_COMPARISON_RESULT_SIZE);
-
-		if (m_ackFrame.fotip.header.flags.all != 0)
-		{
-			emit replyWithNoZeroFlags(m_ackFrame.fotip);
-
-			qDebug() << QString("FOTIP Flags == 0x%1").arg(QString::number(m_ackFrame.fotip.header.flags.all, 16));
-		}
-
-		m_replies.completePush();
+		m_socketBound = false;
 	}
 
 
-	void TuningSocketWorker::onSocketRequest()
+	void TuningSocketWorker::onTimer100ms()
 	{
+		for(TuningSocketRequestQueue* queue : m_requestQueues)
+		{
+			if (queue == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (queue->isEmpty())
+			{
+				continue;
+			}
+
+			// Queue is not empty
+			//
+
+			if (queue->isWaitingForAck())
+			{
+				queue->incWaitCount();
+
+				if (queue->waitCount() < MAX_WAIT_COUNT)
+				{
+					continue;			// continue wait
+				}
+
+				//
+				// TO DO: send NoRespond to TuningSources
+				//
+
+				queue->stopWaiting();
+			}
+
+			TuningSocketRequest request;
+
+			queue->pop(&request);
+
+			//
+			// TO DO: send request in socket
+			//
+
+			queue->requestIsSent();
+		}
+	}
+
+
+	void TuningSocketWorker::onTimer1s()
+	{
+		createAndBindSocket();
+	}
+
+
+	void TuningSocketWorker::onRequest(quint32 tuningSourceIP)
+	{
+		TuningSocketRequestQueue* queue = m_requestQueues.value(tuningSourceIP, nullptr);
+
+		if (queue == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		if (queue->isWaitingForAck() || queue->isEmpty())
+		{
+			return;
+		}
+
+		TuningSocketRequest request;
+
+		bool result = queue->pop(&request);
+
+		if (result == false)
+		{
+			assert(false);
+			return;
+		}
+
 		SocketRequest sr;
 
-		m_requests.pop(&sr);
+/*		m_requests.pop(&sr);
 
 		if (m_socketBound == false)
 		{
@@ -244,19 +389,69 @@ namespace Tuning
 		if (result == -1)
 		{
 			qDebug() << "Socket write error";
-		}
+		}*/
 	}
 
 
-	void TuningSocketWorker::sendRequest(const SocketRequest& socketRequest)
+
+
+
+	void TuningSocketWorker::onSocketReadyRead()
 	{
-		m_requests.push(&socketRequest);
+		if (m_socket == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		QHostAddress from;
+
+		qint64 size = m_socket->pendingDatagramSize();
+
+		if (size > sizeof(m_ackFrame))
+		{
+			assert(false);
+			m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
+			qDebug() << "TuningSocketWorker: datagram too big";
+			return;
+		}
+
+		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&m_ackFrame), sizeof(m_ackFrame), &from);
+
+		if (result == -1)
+		{
+			closeSocket();
+			qDebug() << "TuningSocketWorker: read socket error";
+			return;
+		}
+/*
+		SocketReply* sr = m_replies.beginPush();
+
+		sr->lmIP = from.toIPv4Address();
+
+		memcpy(&sr->fotipHeader, &m_ackFrame.fotip.header, sizeof(FotipHeader));
+		memcpy(sr->fotipData, m_ackFrame.fotip.data, FOTIP_TX_RX_DATA_SIZE);
+		memcpy(sr->fotipComparisonResult, m_ackFrame.fotip.comparisonResult, FOTIP_COMPARISON_RESULT_SIZE);
+
+		if (m_ackFrame.fotip.header.flags.all != 0)
+		{
+			emit replyWithNoZeroFlags(m_ackFrame.fotip);
+
+			qDebug() << QString("FOTIP Flags == 0x%1").arg(QString::number(m_ackFrame.fotip.header.flags.all, 16));
+		}
+
+		m_replies.completePush();*/
 	}
+
+
+
+
 
 
 	bool TuningSocketWorker::getReply(SocketReply* reply)
 	{
-		return m_replies.pop(reply);
+		return true;
+		//return m_replies.pop(reply);
 	}
 
 }

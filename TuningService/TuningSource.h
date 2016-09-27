@@ -35,6 +35,9 @@ namespace Tuning
 		FotipHeaderFlags flags;
 	};*/
 
+/*	class TuningData;
+	class TuningSignalState;*/
+
 
 	class TuningSource : public DataSource
 	{
@@ -77,7 +80,7 @@ namespace Tuning
 		void setWaitReply() { m_waiReply = true; }
 		void resetWaitReply() { m_waiReply = false; }
 
-		void processReply(const Tuning::SocketReply& reply);
+		void processReply(const SocketReply& reply);
 
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);

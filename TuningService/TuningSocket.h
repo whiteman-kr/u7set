@@ -7,6 +7,7 @@
 #include "../lib/DataProtocols.h"
 #include "../lib/Queue.h"
 
+
 namespace Tuning
 {
 	enum OperationCode
@@ -20,24 +21,6 @@ namespace Tuning
 		AnalogSignedInt = 1300,
 		AnalogFloat = 1500,
 		Discrete = 1700
-	};
-
-	struct SocketRequest
-	{
-		quint32 lmIP;
-		int lmPort;
-		int lmNumber;
-		int lmSubsystemID;
-		quint64 uniqueID;
-		quint16 numerator;
-		OperationCode operation;
-		int startAddressW;
-		int frameSizeW;
-		DataType dataType;
-		int romSizeW;
-		bool userRequest;			// true - user request, false - atomatic periodic request
-
-		char fotipData[FOTIP_TX_RX_DATA_SIZE];
 	};
 
 
@@ -69,54 +52,124 @@ namespace Tuning
 	};
 
 
-//	class TuningService;
+	struct SocketRequest
+	{
+		quint32 lmIP;
+		int lmPort;
+		int lmNumber;
+		int lmSubsystemID;
+		quint64 uniqueID;
+		quint16 numerator;
+		OperationCode operation;
+		int startAddressW;
+		int frameSizeW;
+		DataType dataType;
+		int romSizeW;
+		bool userRequest;			// true - user request, false - atomatic periodic request
+
+		char fotipData[FOTIP_TX_RX_DATA_SIZE];
+	};
+
+
+	struct TuningSocketRequest
+	{
+		quint32 lmIP;
+		int lmPort;
+		int lmNumber;
+		int lmSubsystemID;
+		quint64 uniqueID;
+		quint16 numerator;
+		OperationCode operation;
+		int startAddressW;
+		int frameSizeW;
+		DataType dataType;
+		int romSizeW;
+		bool userRequest;			// true - user request, false - atomatic periodic request
+	};
+
+
+	class TuningSocketRequestQueue : public Queue<TuningSocketRequest>
+	{
+		Q_OBJECT
+
+	public:
+		TuningSocketRequestQueue(quint32 tuningSourceIP);
+
+		virtual bool push(const TuningSocketRequest* ptr) override;
+
+		bool isWaitingForAck() const;
+		void stopWaiting();
+
+		void requestIsSent();
+
+		void incWaitCount();
+		int waitCount() const;
+
+	signals:
+		void request(quint32 tuningSourceIP);
+
+	private:
+		quint32 m_tuningSourceIP;
+		bool m_waitingForAk = false;
+		int m_waitCount = 0;
+	};
+
+
+	class TuningSources;
 
 
 	class TuningSocketWorker : public SimpleThreadWorker
 	{
 		Q_OBJECT
 
-	private:
-		HostAddressPort m_tuningIP;
-		//TuningService* m_tuningService = nullptr;
+	public:
+		TuningSocketWorker(const HostAddressPort& tuningIP, const TuningSources& tuningSources);
+		~TuningSocketWorker();
 
-		QTimer m_timer;
+		void sendRequest(const TuningSocketRequest& socketRequest);
+
+		bool getReply(SocketReply* reply);
+
+	signals:
+		/*void replyReady();
+
+		void userRequest(FotipFrame fotipFrame);
+		void replyWithNoZeroFlags(FotipFrame fotipFrame);*/
+
+	private:
+		void clear();
+
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		void createRequestQueues();
+		void startTimers();
+
+		void createAndBindSocket();
+		void closeSocket();
+
+	private slots:
+		void onTimer100ms();
+		void onTimer1s();
+
+		void onRequest(quint32 tuningSourceIP);
+		void onSocketReadyRead();
+
+	private:
+		const int MAX_WAIT_COUNT = 10;
+
+		HostAddressPort m_tuningIP;
+
+		QHash<quint32, TuningSocketRequestQueue*> m_requestQueues;
+
+		QTimer m_timer100ms;
+		QTimer m_timer1s;
 
 		QUdpSocket* m_socket = nullptr;
 		bool m_socketBound = false;
 
 		RupFotipFrame m_ackFrame;
 		RupFotipFrame m_reqFrame;
-
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
-
-		virtual void onTimer();
-
-		void createAndBindSocket();
-		void closeSocket();
-		void onSocketReadyRead();
-
-		void clear();
-
-		Queue<SocketRequest> m_requests;
-		Queue<SocketReply> m_replies;
-
-	private slots:
-		void onSocketRequest();
-
-	signals:
-		void replyReady();
-
-		void userRequest(FotipFrame fotipFrame);
-		void replyWithNoZeroFlags(FotipFrame fotipFrame);
-
-	public:
-		TuningSocketWorker(const HostAddressPort& tuningIP);
-
-		void sendRequest(const SocketRequest& socketRequest);
-
-		bool getReply(SocketReply* reply);
 	};
 
 }
