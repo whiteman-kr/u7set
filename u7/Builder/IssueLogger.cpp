@@ -1200,7 +1200,7 @@ namespace Builder
 	///		Multichannel schema can contain single channel branch, all signals (inputs/outputs/intermediate) in the branch
 	/// must be from the same channel.
 	///
-	void IssueLogger::errALP4033(QString schema, const QString& appSignalId, const QUuid& itemUuid)
+	void IssueLogger::errALP4033(QString schema, QString appSignalId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
@@ -1209,6 +1209,58 @@ namespace Builder
 				  tr("Single channel branch contains signals (%1) from different channels (LogicSchema '%2').")
 				  .arg(appSignalId)
 				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4034
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 LogicSchemaID
+	///		%3 SchemaItem description
+	///
+	/// Description:
+	///		Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').
+	///
+	void IssueLogger::errALP4034(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4034,
+				  tr("Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').")
+				  .arg(appSignalId)
+				  .arg(schema)
+				  .arg(schemaItem));
+	}
+
+	/// IssueCode: ALP4035
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 LogicSchemaID
+	///		%3 SchemaItem description
+	///
+	/// Description:
+	///		Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').
+	///
+	void IssueLogger::errALP4035(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4035,
+				  tr("Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').")
+				  .arg(appSignalId)
+				  .arg(schema)
+				  .arg(schemaItem));
 	}
 
 
