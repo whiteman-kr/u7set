@@ -25,9 +25,11 @@ ObjectFilter::ObjectFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIds, ObjectFilter::setAppSignalIds);
+	auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIdsCR, ObjectFilter::setAppSignalIdsCR);
 	propSignals->setCategory("Signals");
 
+	auto propFolder = ADD_PROPERTY_GETTER_SETTER(bool, "Folder", true, ObjectFilter::folder, ObjectFilter::setFolder);
+	propFolder->setCategory("Options");
 }
 
 ObjectFilter::ObjectFilter(FilterType filterType):ObjectFilter()
@@ -41,7 +43,6 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_caption = That.m_caption;
 
 	m_allowAll = That.m_allowAll;
-	m_denyAll = That.m_allowAll;
 
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
@@ -51,6 +52,7 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_filterType = That.m_filterType;
 	m_signalType = That.m_signalType;
 
+	m_folder = That.m_folder;
 
 	for (auto f : That.m_childFilters)
 	{
@@ -90,6 +92,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		setAppSignalIDMask(reader.attributes().value("AppSignalIDMask").toString());
 	}
 
+	if (reader.attributes().hasAttribute("AppSignalIDs"))
+	{
+		setAppSignalIdsCSV(reader.attributes().value("AppSignalIDs").toString());
+	}
+
 	if (reader.attributes().hasAttribute("SignalType"))
 	{
 		QString v = reader.attributes().value("SignalType").toString();
@@ -116,6 +123,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 				}
 			}
 		}
+	}
+
+	if (reader.attributes().hasAttribute("Folder"))
+	{
+		setFolder(reader.attributes().value("Folder").toString() == "true");
 	}
 
 	QXmlStreamReader::TokenType t;
@@ -147,8 +159,6 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 				{
 					return false;
 				}
-
-				of->setStrID(m_strID + "_" + of->strID());
 
 				addChild(of);
 
@@ -197,8 +207,11 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
+	writer.writeAttribute("AppSignalIDs", appSignalIdsCSV());
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
+
+	writer.writeAttribute("Folder", folder() ? "true" : "false");
 
 	for (auto f : m_childFilters)
 	{
@@ -304,7 +317,32 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 	}
 }
 
-QString ObjectFilter::appSignalIds() const
+
+QString ObjectFilter::appSignalIdsCR() const
+{
+	QString result;
+	for (auto s : m_appSignalIds)
+	{
+		result += s + '\n';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void ObjectFilter::setAppSignalIdsCR(const QString &value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_appSignalIds.clear();
+	}
+	else
+	{
+		m_appSignalIds = value.split('\n');
+	}
+}
+
+QString ObjectFilter::appSignalIdsCSV() const
 {
 	QString result;
 	for (auto s : m_appSignalIds)
@@ -316,7 +354,7 @@ QString ObjectFilter::appSignalIds() const
 	return result;
 }
 
-void ObjectFilter::setAppSignalIds(const QString &value)
+void ObjectFilter::setAppSignalIdsCSV(const QString &value)
 {
 	if (value.isEmpty() == true)
 	{
@@ -326,6 +364,11 @@ void ObjectFilter::setAppSignalIds(const QString &value)
 	{
 		m_appSignalIds = value.split(';');
 	}
+}
+
+QStringList ObjectFilter::appSignalIdsList() const
+{
+	return m_appSignalIds;
 }
 
 void ObjectFilter::setAppSignalIdsList(const QStringList& value)
@@ -368,14 +411,14 @@ void ObjectFilter::setAllowAll(bool value)
 	m_allowAll = value;
 }
 
-bool ObjectFilter::denyAll() const
+bool ObjectFilter::folder() const
 {
-	return m_denyAll;
+	return m_folder;
 }
 
-void ObjectFilter::setDenyAll(bool value)
+void ObjectFilter::setFolder(bool value)
 {
-	m_denyAll = value;
+	m_folder = value;
 }
 
 
@@ -447,9 +490,9 @@ bool ObjectFilter::match(const TuningObject& object)
 	{
 		return true;
 	}
-	if (denyAll() == true)
+	if (folder() == true)
 	{
-		return false;
+		return true;
 	}
 
 	if (signalType() == ObjectFilter::SignalType::Analog && object.analog() == false)
@@ -587,6 +630,8 @@ ObjectFilterStorage::ObjectFilterStorage()
 
 ObjectFilterStorage::ObjectFilterStorage(const ObjectFilterStorage& That)
 {
+	m_topFilters.clear();
+
 	m_schemasDetails = That.m_schemasDetails;
 
 	for (auto f : That.m_topFilters)
@@ -748,12 +793,12 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-int ObjectFilterStorage::topFilterCount()
+int ObjectFilterStorage::topFilterCount() const
 {
 	return static_cast<int>(m_topFilters.size());
 }
 
-std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index)
+std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index) const
 {
 	if (index < 0 || index >= m_topFilters.size())
 	{
@@ -929,7 +974,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
 		ofSchema->setCaption("Filter by Schema");
-		ofSchema->setDenyAll(true);
+		ofSchema->setFolder(true);
 
 		for (auto s : m_schemasDetails)
 		{
@@ -951,7 +996,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption("Filter by EquipmentId");
-		ofEquipment->setDenyAll(true);
+		ofEquipment->setFolder(true);
 
 		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
 		{

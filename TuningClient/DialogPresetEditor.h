@@ -5,10 +5,12 @@
 #include "ObjectFilter.h"
 #include "ObjectManager.h"
 #include "TuningObject.h"
+#include "TuningPage.h"
 
 namespace Ui {
 class DialogPresetEditor;
 }
+
 
 class DialogPresetEditor : public QDialog
 {
@@ -37,12 +39,25 @@ private slots:
 	void on_m_presetsTree_doubleClicked(const QModelIndex &index);
 
 private:
+
+	enum class TreeItemType
+	{
+		Filter,
+		Signal
+	};
+
+	bool isFilter(QTreeWidgetItem* item);
+	bool isSignal(QTreeWidgetItem* item);
+
 	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
+
+	void setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter);
 
 
 private:
 	Ui::DialogPresetEditor *ui;
 
+	TuningItemModel *m_model = nullptr;
 
 	bool m_modified = false;
 

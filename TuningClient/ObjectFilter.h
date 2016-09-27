@@ -69,8 +69,13 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	QString appSignalIds() const;
-	void setAppSignalIds(const QString& value);
+	QString appSignalIdsCR() const;
+	void setAppSignalIdsCR(const QString& value);
+
+	QString appSignalIdsCSV() const;
+	void setAppSignalIdsCSV(const QString& value);
+
+	QStringList appSignalIdsList() const;
 	void setAppSignalIdsList(const QStringList& value);
 
 	FilterType filterType() const;
@@ -84,8 +89,8 @@ public:
 	bool allowAll() const;
 	void setAllowAll(bool value);
 
-	bool denyAll() const;
-	void setDenyAll(bool value);
+	bool folder() const;
+	void setFolder(bool value);
 
 public:
 	bool isTree() const;
@@ -105,14 +110,14 @@ private:
 	QString m_caption;
 
 	bool m_allowAll = false;
-	bool m_denyAll = false;
+	bool m_folder = false;
 
 	// Filters
 	//
-
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
+
 	QStringList m_appSignalIds;
 
 	FilterType m_filterType = FilterType::Tree;
@@ -138,8 +143,8 @@ public:
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
-	int topFilterCount();
-	std::shared_ptr<ObjectFilter> topFilter(int index);
+	int topFilterCount() const;
+	std::shared_ptr<ObjectFilter> topFilter(int index) const;
 
 	bool addTopFilter(const std::shared_ptr<ObjectFilter> filter);
 

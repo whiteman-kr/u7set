@@ -574,6 +574,11 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr)
 		{
+			if (m_treeFilter->folder() == true)
+			{
+				continue;
+			}
+
 			bool result = true;
 
 			ObjectFilter* treeFilter = m_treeFilter.get();

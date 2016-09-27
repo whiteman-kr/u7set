@@ -44,6 +44,9 @@ private slots:
 	void slot_tuningSourcesArrived();
 	void slot_tuningConnectionFailed();
 
+public slots:
+	void slot_filtersUpdated();
+
 	void exit();
 	void showSettings();
 	void runPresetEditor();
@@ -52,6 +55,9 @@ private slots:
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
+
+	void removeWorkspace();
+	void createWorkspace();
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
