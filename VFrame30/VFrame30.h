@@ -9,6 +9,7 @@
 
 #include "Schema.h"
 #include "LogicSchema.h"
+#include "UfbSchema.h"
 #include "MonitorSchema.h"
 #include "DiagSchema.h"
 #include "WiringSchema.h"

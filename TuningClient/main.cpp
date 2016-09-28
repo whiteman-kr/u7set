@@ -98,5 +98,7 @@ int main(int argc, char *argv[])
 
 	theSettings.StoreUser();
 
+	google::protobuf::ShutdownProtobufLibrary();
+
 	return result;
 }

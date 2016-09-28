@@ -27,11 +27,21 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_tcpClientThread->start();*/
 
 //	runFscDataSources();
+
+	Tuning::TcpTuningClient* tuningClient = new Tuning::TcpTuningClient(HostAddressPort("192.168.14.87", 13333));
+
+	m_thread = new SimpleThread(tuningClient);
+
+	m_thread->start();
 }
 
 
 MainWindow::~MainWindow()
 {
+	m_thread->quitAndWait();
+
+	delete m_thread;
+
 	/*m_tcpClientThread->quit();
 
 	delete m_tcpClientThread;*/
@@ -132,3 +142,6 @@ void MainWindow::onAckReceived(UdpRequest udpRequest)
 		break;
 	}
 }
+
+
+

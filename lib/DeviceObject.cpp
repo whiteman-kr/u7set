@@ -10,7 +10,8 @@
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QMetaProperty>
-
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
 
 namespace Hardware
 {
@@ -161,6 +162,20 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 		object->setFileInfo(file);
 		return object;
+	}
+
+	std::vector<std::shared_ptr<DeviceObject>> DeviceObject::fromDbFiles(std::vector<std::shared_ptr<DbFile>> files)
+	{
+		std::vector<std::shared_ptr<DeviceObject>> result;
+		result.reserve(files.size());
+
+		for (const std::shared_ptr<DbFile>& f : files)
+		{
+			std::shared_ptr<DeviceObject> object = fromDbFile(*f.get());
+			result.push_back(object);
+		}
+
+		return result;
 	}
 
 	bool DeviceObject::SaveData(Proto::Envelope* message) const
@@ -342,22 +357,69 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 		// Load children if all tree was saved
 		//
-		m_children.clear();
-		m_children.reserve(deviceobject.children_size());
+//		m_children.clear();
+//		m_children.reserve(deviceobject.children_size());
 
-		for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
+//		for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
+//		{
+//			const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
+
+//			std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
+
+//			if (child == nullptr)
+//			{
+//				assert(child);
+//				continue;
+//			}
+
+//			m_children.push_back(child);
+//		}
+
+		if (this->isRack() == true && deviceobject.children_size() > 0)
 		{
-			const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
+			// Multithread reading
+			//
+			std::vector<QFuture<std::shared_ptr<DeviceObject>>> threadFuncs;
+			threadFuncs.reserve(deviceobject.children_size());
 
-			std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
-
-			if (child == nullptr)
+			for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
 			{
-				assert(child);
-				continue;
+				const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
+
+				QFuture<std::shared_ptr<DeviceObject>> f = QtConcurrent::run(DeviceObject::CreateObject, childMessage);
+
+				threadFuncs.push_back(f);
 			}
 
-			m_children.push_back(child);
+			for (QFuture<std::shared_ptr<DeviceObject>>& f : threadFuncs)
+			{
+				std::shared_ptr<DeviceObject> child = f.result();
+
+				if (child == nullptr)
+				{
+					assert(child);
+					continue;
+				}
+
+				m_children.push_back(child);
+			}
+		}
+		else
+		{
+			for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
+			{
+				const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
+
+				std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
+
+				if (child == nullptr)
+				{
+					assert(child);
+					continue;
+				}
+
+				m_children.push_back(child);
+			}
 		}
 
 		return true;
@@ -2419,7 +2481,9 @@ R"DELIM({
 
 		return	family == FamilyType::AIM ||
 				family == FamilyType::DIM ||
-				family == FamilyType::AIFM;
+				family == FamilyType::AIFM ||
+				family == FamilyType::MPS17 ||
+				family == FamilyType::BVK4;
 	}
 
 	bool DeviceModule::isOutputModule() const

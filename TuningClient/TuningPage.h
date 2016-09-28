@@ -11,9 +11,11 @@ class TuningItemModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	void Init();
+	TuningItemModel(QObject *parent);
 	TuningItemModel(int tuningPageIndex, QObject *parent);
+	~TuningItemModel();
 public:
-
 
 	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
 
@@ -26,11 +28,13 @@ public:
 
 	int objectIndex(int index);
 
+	void setFont(const QString& fontName, int fontSize, bool fontBold);
+
 public:
 
 	enum TuningPageColumns
 	{
-		SignalID = 0,
+		CustomAppSignalID = 0,
 		EquipmentID,
 		AppSignalID,
 		Caption,
@@ -38,6 +42,7 @@ public:
 		Type,
 
 		Value,
+		Default,
 		Valid,
 		Underflow,
 		Overflow,
@@ -59,16 +64,27 @@ private:
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 
+	QFont* m_font = nullptr;
+
 };
 
 class FilterButton : public QPushButton
 {
+	Q_OBJECT
 public:
-	FilterButton(const QString& filterId, const QString& caption, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent = nullptr);
+
+	std::shared_ptr<ObjectFilter> filter();
 
 private:
-	QString m_filterId;
+	std::shared_ptr<ObjectFilter> m_filter;
 	QString m_caption;
+
+private slots:
+	void slot_toggled(bool checked);
+
+signals:
+	void filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
 };
 
 
@@ -76,18 +92,24 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, ObjectFilter* tabFilter, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
 	~TuningPage();
+
+	void fillObjectsList();
 
 signals:
 
+private slots:
+	void slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
+
 public slots:
+	void slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter);
 
 private:
 
 	QTableView* m_objectList = nullptr;
 
-	std::vector<FilterButton*> m_buttons;
+	QButtonGroup *m_filterButtonGroup = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
@@ -95,9 +117,13 @@ private:
 
 	QHBoxLayout* m_bottomLayout = nullptr;
 
-	QPushButton* m_applyButton = nullptr;
+	QPushButton* m_setValueButton = nullptr;
 
-	QPushButton* m_restoreButton = nullptr;
+	QPushButton* m_setOnButton = nullptr;
+
+	QPushButton* m_setOffButton = nullptr;
+
+	QPushButton* m_setToDefaultButton = nullptr;
 
 	QPushButton* m_maskButton = nullptr;
 
@@ -109,7 +135,11 @@ private:
 
 	std::vector<int> m_objectsIndexes;
 
-	ObjectFilter* m_tabFilter = nullptr;
+	std::shared_ptr<ObjectFilter> m_treeFilter = nullptr;
+
+	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
+
+	std::shared_ptr<ObjectFilter> m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 

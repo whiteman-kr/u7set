@@ -10,6 +10,7 @@
 #include "ChooseAfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
+#include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
 #include "../VFrame30/SchemaItemPath.h"
@@ -1819,7 +1820,7 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemConst>(schema()->unit()));
 			});
 
-	m_addFblElementAction = new QAction(tr("FBL Element"), this);
+	m_addFblElementAction = new QAction(tr("App Functional Block"), this);
 	m_addFblElementAction->setEnabled(true);
 	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
 	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemaWidget::addFblElement);
@@ -1851,6 +1852,10 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit()));
 			});
 
+	m_addUfbAction = new QAction(tr("User Functional Block"), this);
+	m_addUfbAction->setEnabled(true);
+	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
+	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
 	//
 	// Edit
@@ -2131,14 +2136,28 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addTextAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
-		m_addMenu->addAction(m_addLinkAction);
-		m_addMenu->addAction(m_addInputSignalAction);
-		m_addMenu->addAction(m_addOutputSignalAction);
-		m_addMenu->addAction(m_addInOutSignalAction);
-		m_addMenu->addAction(m_addConstantAction);
-		m_addMenu->addAction(m_addFblElementAction);
-		m_addMenu->addAction(m_addTransmitter);
-		m_addMenu->addAction(m_addReceiver);
+
+		if (isLogicSchema() == true)
+		{
+			m_addMenu->addAction(m_addLinkAction);
+			m_addMenu->addAction(m_addInputSignalAction);
+			m_addMenu->addAction(m_addOutputSignalAction);
+			m_addMenu->addAction(m_addInOutSignalAction);
+			m_addMenu->addAction(m_addConstantAction);
+			m_addMenu->addAction(m_addFblElementAction);
+			m_addMenu->addAction(m_addTransmitter);
+			m_addMenu->addAction(m_addReceiver);
+			m_addMenu->addAction(m_addUfbAction);
+		}
+
+		if (isUfbSchema() == true)
+		{
+			m_addMenu->addAction(m_addLinkAction);
+			m_addMenu->addAction(m_addInputSignalAction);
+			m_addMenu->addAction(m_addOutputSignalAction);
+			m_addMenu->addAction(m_addConstantAction);
+			m_addMenu->addAction(m_addFblElementAction);
+		}
 
 	m_editMenu = new QMenu(this);
 	m_editAction->setMenu(m_editMenu);
@@ -3327,6 +3346,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+				newPoints = removeUnwantedPoints(newPoints);
+
 				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 			}
 			else
@@ -3347,6 +3368,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 				}
 			}
@@ -3387,6 +3410,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 				else
@@ -3398,6 +3423,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 			}
@@ -3421,6 +3448,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+						newPoints = removeUnwantedPoints(newPoints);
+
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 					else
@@ -3432,6 +3461,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+						newPoints = removeUnwantedPoints(newPoints);
+
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 				}
@@ -3443,9 +3474,15 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		{
 			if (itemPos->GetPointList().size() > 2 ||
 					(itemPos->GetPointList().size() == 2 &&
-					itemPos->GetPointList().front() != itemPos->GetPointList().back())
-				)
+					itemPos->GetPointList().front() != itemPos->GetPointList().back()))
 			{
+				const std::list<VFrame30::SchemaPoint>& pointList = itemPos->GetPointList();
+
+				std::list<VFrame30::SchemaPoint> newPoints = removeUnwantedPoints(pointList);
+
+				itemPos->SetPointList(newPoints);
+				assert(itemPos->GetPointList().size() >= 2);
+
 				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
 			}
 		}
@@ -3948,8 +3985,12 @@ const EditSchemaView* EditSchemaWidget::editSchemaView() const
 
 bool EditSchemaWidget::isLogicSchema() const
 {
-	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema().get());
-	return logicSchema != nullptr;
+	return schema()->isLogicSchema();
+}
+
+bool EditSchemaWidget::isUfbSchema() const
+{
+	return schema()->isUfbSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
@@ -4277,6 +4318,41 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	}
 
 	return docPoint;
+}
+
+std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const
+{
+	std::vector<VFrame30::SchemaPoint> result = source;
+
+	// To do filter
+	//
+//	void PosConnectionImpl::RemoveUnwantedPoints()
+//	{
+//		SchemaPoint firstPoint = points.front();
+//		SchemaPoint lastPoint = points.back();
+
+//		if (std::abs(firstPoint.X - lastPoint.X) < 0.000001 ||
+//			std::abs(firstPoint.Y - lastPoint.Y) < 0.000001)
+//		{
+//			while (points.size() != 1)
+//			{
+//				points.pop_back();
+//			}
+
+//			points.push_back(lastPoint);
+//		}
+//	}
+
+	return result;
+}
+
+std::list<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const
+{
+	std::vector<VFrame30::SchemaPoint> sourceVector(source.begin(), source.end());
+	sourceVector = removeUnwantedPoints(sourceVector);
+
+	std::list<VFrame30::SchemaPoint> result(sourceVector.begin(), sourceVector.end());
+	return result;
 }
 
 bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
@@ -4637,56 +4713,85 @@ void EditSchemaWidget::f2Key()
 
 	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
 
-	if (itemSignal == nullptr &&
-		itemReceiver == nullptr)
+	if (itemRect != nullptr)
 	{
+		QString text = itemRect->text();
+
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set text");
+		inputDialog.setLabelText(tr("Text:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+		inputDialog.setTextValue(text);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			text != newValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+			editSchemaView()->update();
+		}
+
 		return;
 	}
 
-	QString appSignalId;
-
-	if (itemSignal != nullptr)
+	if (itemSignal != nullptr || itemReceiver != nullptr)
 	{
-		appSignalId = itemSignal->appSignalIds();
-	}
+		QString appSignalId;
 
-	if (itemReceiver != nullptr)
-	{
-		appSignalId = itemReceiver->appSignalId();
-	}
-
-	// Show input dialog
-	//
-	QInputDialog inputDialog(this);
-
-	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-	inputDialog.setWindowTitle("Set AppSignalID");
-	inputDialog.setLabelText(tr("AppSignalID:"));
-	inputDialog.setTextEchoMode(QLineEdit::Normal);
-	inputDialog.resize(400, inputDialog.height());
-	inputDialog.setTextValue(appSignalId);
-
-	int inputDialogRecult = inputDialog.exec();
-	QString newValue = inputDialog.textValue();
-
-	if (inputDialogRecult == QDialog::Accepted &&
-		newValue.isNull() == false &&
-		appSignalId != newValue)
-	{
-		// Set value
-		//
 		if (itemSignal != nullptr)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+			appSignalId = itemSignal->appSignalIds();
 		}
 
 		if (itemReceiver != nullptr)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+			appSignalId = itemReceiver->appSignalId();
 		}
 
-		editSchemaView()->update();
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set AppSignalID");
+		inputDialog.setLabelText(tr("AppSignalID:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+		inputDialog.setTextValue(appSignalId);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			appSignalId != newValue)
+		{
+			// Set value
+			//
+			if (itemSignal != nullptr)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+			}
+
+			if (itemReceiver != nullptr)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+			}
+
+			editSchemaView()->update();
+		}
+
+		return;
 	}
 
 	return;
@@ -5348,6 +5453,114 @@ void EditSchemaWidget::addFblElement()
 	}
 
 	return;
+}
+
+void EditSchemaWidget::addUfbElement()
+{
+	// Get User Functional Block List
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Get UFBs latest version from the DB
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	ok = db()->getLatestVersion(fileList, &files, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Parse files, create actual UFBs
+	//
+	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
+	ufbs.reserve(files.size());
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		std::shared_ptr<VFrame30::Schema> s = VFrame30::Schema::Create(f->data());
+
+		if (s == nullptr)
+		{
+			assert(s);
+			continue;
+		}
+
+		if (s->isUfbSchema() == false)
+		{
+			assert(s->isUfbSchema() == true);
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::UfbSchema> u =  std::dynamic_pointer_cast<VFrame30::UfbSchema>(s);
+		if (u == nullptr)
+		{
+			assert(u);
+			continue;
+		}
+
+		ufbs.push_back(u);
+
+		qDebug() << u->schemaID() << " " << u->version();
+	}
+
+
+	// Choose User Functional Block
+	//
+
+	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
+
+	std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
+	if (selectedUfb == nullptr)
+	{
+		return;
+	}
+
+	// Add Ufb
+	//
+
+//	QString errorMsg;
+//	addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), *(afb.get()), &errorMsg));
+
+//	if (errorMsg.isEmpty() == false)
+//	{
+//		QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+//	}
+
+
+
+//	// --
+//	//
+//	ChooseAfbDialog* dialog = new ChooseAfbDialog(afbs, this);
+
+//	if (dialog->exec() == QDialog::Accepted)
+//	{
+//		int index = dialog->index();
+
+//		if (index < 0 || static_cast<size_t>(index) >= afbs.size())
+//		{
+//			assert(false);
+//			return;
+//		}
+
+//		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
+
+//		QString errorMsg;
+//		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
+
+//		if (errorMsg.isEmpty() == false)
+//		{
+//			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+//		}
+//	}
+
+//	return;
 }
 
 void EditSchemaWidget::onLeftKey()

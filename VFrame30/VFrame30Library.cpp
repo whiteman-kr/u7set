@@ -3,6 +3,7 @@
 #include "Schema.h"
 #include "DiagSchema.h"
 #include "LogicSchema.h"
+#include "UfbSchema.h"
 #include "MonitorSchema.h"
 #include "WiringSchema.h"
 #include "SchemaLayer.h"
@@ -33,6 +34,7 @@ namespace VFrame30
 		//
 		SchemaFactory.Register<DiagSchema>();
 		SchemaFactory.Register<LogicSchema>();
+		SchemaFactory.Register<UfbSchema>();
 		SchemaFactory.Register<MonitorSchema>();
 		SchemaFactory.Register<WiringSchema>();
 

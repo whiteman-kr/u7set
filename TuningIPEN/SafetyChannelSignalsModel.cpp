@@ -1,6 +1,6 @@
 #include "SafetyChannelSignalsModel.h"
 #include "TripleChannelSignalsModel.h"
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 #include "../TuningService/TuningService.h"
 #include <cmath>
 #include <QMessageBox>
@@ -45,7 +45,7 @@ bool SafetyChannelSignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel
 	return false;
 }
 
-SafetyChannelSignalsModel::SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
+SafetyChannelSignalsModel::SafetyChannelSignalsModel(TuningIPEN::TuningSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_sourceInfo(sourceInfo),
 	m_service(service)

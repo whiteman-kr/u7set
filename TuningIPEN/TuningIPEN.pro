@@ -24,7 +24,7 @@ SOURCES +=\
 	../Proto/serialization.pb.cc \
 	../lib/Types.cpp \
 	../lib/ProtoSerialization.cpp \
-	../TuningService/TuningDataSource.cpp \
+        ../TuningService/TuningSource.cpp \
 	../lib/Service.cpp \
 	../lib/DataProtocols.cpp \
 	../lib/DataSource.cpp \
@@ -48,7 +48,8 @@ SOURCES +=\
     ../Proto/network.pb.cc \
     DiscreteSignalSetter.cpp \
     TripleChannelSignalsModel.cpp \
-    TuningIPENSocket.cpp
+    TuningIPENSocket.cpp \
+    TuningIPENSource.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -61,7 +62,7 @@ HEADERS  += TuningMainWindow.h \
 	../Proto/serialization.pb.h \
 	../lib/Types.h \
 	../lib/ProtoSerialization.h \
-	../TuningService/TuningDataSource.h \
+        ../TuningService/TuningSource.h \
 	../lib/Service.h \
 	../lib/DataProtocols.h \
 	../lib/DataSource.h \
@@ -84,7 +85,8 @@ HEADERS  += TuningMainWindow.h \
     ../Proto/network.pb.h \
     DiscreteSignalSetter.h \
     TripleChannelSignalsModel.h \
-    TuningIPENSocket.h
+    TuningIPENSocket.h \
+    TuningIPENSource.h
 
 include(../qtservice/src/qtservice.pri)
 

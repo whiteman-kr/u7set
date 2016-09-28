@@ -131,7 +131,7 @@ namespace Builder
 				}
 			}
 
-			Tuning::TuningDataSource ds;
+			Tuning::TuningSource ds;
 
 			ds.setLmChannel(lmChannel);
 			ds.setLmDataType(DataSource::DataType::Tuning);

@@ -34,7 +34,7 @@ class SafetyChannelSignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SafetyChannelSignalsModel(Tuning::TuningDataSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
+	explicit SafetyChannelSignalsModel(TuningIPEN::TuningSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -52,7 +52,7 @@ public slots:
 	void changeDiscreteSignal(const QModelIndex& index);
 
 private:
-	Tuning::TuningDataSourceInfo& m_sourceInfo;
+	TuningIPEN::TuningSourceInfo& m_sourceInfo;
 	QVector<SignalState> m_states;
 	TuningIPEN::TuningIPENService* m_service;
 	QHash<QString, int> signalIdMap;

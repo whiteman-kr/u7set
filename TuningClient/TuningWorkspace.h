@@ -5,9 +5,17 @@
 
 class TuningWorkspace : public QWidget
 {
+	Q_OBJECT
 public:
 	TuningWorkspace(QWidget* parent = nullptr);
 	~TuningWorkspace();
+
+
+private:
+	void fillFilters(std::vector<QTreeWidgetItem*>& treeItems, const ObjectFilterStorage& filterStorage);
+	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent);
+
+private:
 
 	QTreeWidget* m_filterTree = nullptr;
 	QSplitter* m_hSplitter = nullptr;
@@ -15,8 +23,11 @@ public:
 
 	TuningPage* m_tuningPage = nullptr;
 
+private slots:
+	void slot_treeSelectionChanged();
 
-	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
+signals:
+	void filterSelectionChanged(std::shared_ptr<ObjectFilter> filter);
 
 };
 

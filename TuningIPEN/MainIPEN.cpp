@@ -1,6 +1,6 @@
 #include "TuningMainWindow.h"
 #include <QApplication>
-#include "../TuningService/TuningDataSource.h"
+#include "../TuningService/TuningSource.h"
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	qRegisterMetaType<Tuning::TuningDataSourceState>("TuningDataSourceState");
+	qRegisterMetaType<TuningIPEN::TuningSourceState>("TuningDataSourceState");
 	qRegisterMetaType<FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);

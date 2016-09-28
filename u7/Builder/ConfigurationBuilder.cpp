@@ -50,10 +50,11 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet,
+	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
 											   IssueLogger *log, int buildNo, int changesetId, bool debug, QString projectName, QString userName,
 											   BuildResultWriter* buildWriter):
+		m_buildWorkerThread(buildWorkerThread),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -188,6 +189,9 @@ namespace Builder
 
 		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
+		QJSValue jsThread = jsEngine.newQObject(m_buildWorkerThread);
+		QQmlEngine::setObjectOwnership(m_buildWorkerThread, QQmlEngine::CppOwnership);
+
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
@@ -217,6 +221,7 @@ namespace Builder
 
 		QJSValueList args;
 
+		args << jsThread;
 		args << jsRoot;
 		args << jsConfCollection;
 		args << jsLog;

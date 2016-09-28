@@ -32,25 +32,35 @@ private:
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
-	TcpTuningClient* m_tcpTuningClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
+
+signals:
+	void filtersUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
 	void slot_tuningSourcesArrived();
 	void slot_tuningConnectionFailed();
 
+public slots:
+	void slot_filtersUpdated();
+
 	void exit();
 	void showSettings();
+	void runPresetEditor();
 	void showTuningSources();
 
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
+	void removeWorkspace();
+	void createWorkspace();
+
 	QAction* m_pExitAction = nullptr;
+	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pLogAction = nullptr;

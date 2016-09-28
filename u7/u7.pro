@@ -167,7 +167,7 @@ SOURCES +=\
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
-    ../TuningService/TuningDataSource.cpp \
+    ../TuningService/TuningSource.cpp \
     DialogChoosePreset.cpp \
     ../lib/WUtils.cpp \
     ../TuningService/TuningDataStorage.cpp \
@@ -276,7 +276,7 @@ HEADERS  += \
     ../lib/Queue.h \
     ../lib/ProtobufHelper.h \
     UploadTabPage.h \
-    ../TuningService/TuningDataSource.h \
+    ../TuningService/TuningSource.h \
     DialogChoosePreset.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/DataProtocols.h \
@@ -339,7 +339,11 @@ DISTFILES += \
     Afbl/file2pgsql.exe \
     Afbl/tct_off_v1.afb \
     Afbl/tct_on_v1.afb \
-    Afbl/tct_vibr_v1.afb
+    Afbl/tct_vibr_v1.afb \
+    Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
+    Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
+    Ufbl/file2pgsql.exe \
+    Ufbl/_convert_all.bat
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

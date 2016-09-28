@@ -119,6 +119,8 @@ namespace Builder
 
 			if (writeOptoModulesReport() == false) break;
 
+			if (writeOptoVhdFiles() == false) break;
+
 			if (compileModulesLogicsPass2() == false) break;
 
 			result = true;
@@ -806,6 +808,222 @@ namespace Builder
 		return true;
 	}
 
+
+	bool ApplicationLogicCompiler::writeOptoVhdFiles()
+	{
+		int count = m_connections->count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		QStringList list;
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<Hardware::Connection> cn = m_connections->get(i);
+
+			if (cn == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (cn->generateVHDFile() == false)
+			{
+				continue;
+			}
+
+			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
+			{
+				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPort* p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+
+				writeOptoVhdFile(cn->connectionID(), p1, p2);
+				writeOptoVhdFile(cn->connectionID(), p2, p1);
+			}
+			else
+			{
+//				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+//				writeOptoVhdFile(cn->connectionID(), p1);
+			}
+		}
+
+		return true;
+	}
+
+
+	bool ApplicationLogicCompiler::writeOptoVhdFile(const QString& connectionID, Hardware::OptoPort* outPort, Hardware::OptoPort* inPort)
+	{
+		if (outPort == nullptr || inPort == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (outPort->txAnalogSignalsCount() + outPort->txDiscreteSignalsCount() == 0)
+		{
+			return true;
+		}
+
+		QString outPortID = outPort->equipmentID().toLower();
+		QString inPortID = inPort->equipmentID().toLower();
+
+		QString fileName = QString("%1.vhd").arg(inPortID);
+		QStringList list;
+		QString str;
+
+		int inBusWidth = outPort->txDataSizeW() * sizeof(quint16) * 16;
+
+		quint32 dataID = outPort->txDataID();
+
+		QVector<Hardware::OptoPort::TxSignal> txAnalogs = outPort->txAnalogSignals();
+		QVector<Hardware::OptoPort::TxSignal> txDiscretes = outPort->txDiscreteSignals();
+
+		list.append("--");
+		list.append("-- This file has been generated automatically by RPCT software");
+		list.append("--");
+
+		BuildInfo bi = m_resultWriter->buildInfo();
+
+		str = QString("-- Project:\t%1").arg(bi.project);
+		list.append(str);
+
+		str = QString("-- Build No:\t%1").arg(bi.id);
+		list.append(str);
+
+		str = QString("-- Build type:\t%1").arg(bi.release == true ? "Release" : "Debug");
+		list.append(str);
+
+		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		list.append(str);
+
+		str = QString("-- User:\t%1").arg(bi.user);
+		list.append(str);
+
+		str = QString("-- Host:\t%1").arg(bi.workstation);
+		list.append(str);
+
+		list.append("--");
+
+		str = QString("-- Connection ID:\t%1").arg(connectionID);
+		list.append(str);
+
+		str = QString("-- Opto port ID:\t%1").arg(inPort->equipmentID());
+		list.append(str);
+
+		str = QString("-- Rx data size:\t%1 bytes").arg(outPort->txDataSizeW() * sizeof(quint16));
+		list.append(str);
+
+		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		list.append(str);
+
+		list.append("--\n");
+
+		// declaration section
+
+		list.append("library ieee;");
+		list.append("use ieee.std_logic_1164.all;");
+		list.append("use ieee.numeric_std.all;\n");
+
+		str = QString("entity %1 is port\n\t(\n").arg(inPortID);
+		list.append(str);
+
+		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");
+		list.append(str);
+
+		str = QString("\t\trx_data_id : out std_logic_vector(32-1 downto 0);\n");
+		list.append(str);
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txAnalog :  txAnalogs)
+			{
+				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
+						arg(txAnalog.appSignalID.remove("#")).
+						arg(txAnalog.sizeBit);
+
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txDiscrete :  txDiscretes)
+			{
+				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete.appSignalID.remove("#"));
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		str = QString("\t\t%1 : in std_logic_vector(%2-1 downto 0)").arg(outPortID).arg(inBusWidth);
+		list.append(str);
+
+		str = QString("\t);\nend %1;\n").arg(inPortID);
+		list.append(str);
+
+		// architecture section
+
+		str = QString("architecture arch of %1 is").arg(inPortID);
+		list.append(str);
+
+		str = QString("\tsignal in_data : std_logic_vector(%1-1 downto 0);").arg(inBusWidth);
+		list.append(str);
+
+		str = QString("begin").arg(inPortID).arg(inPortID);
+		list.append(str);
+
+		str = QString("\tin_data <= %1;\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
+		list.append(str);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n").arg(dataID);
+		list.append(str);
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txAnalog :  txAnalogs)
+			{
+				str = QString("\t%1 <= in_data(%2-1 downto %3);").
+						arg(txAnalog.appSignalID.remove("#")).
+						arg(txAnalog.address.offset() * 16 + txAnalog.sizeBit).
+						arg(txAnalog.address.offset() * 16);
+
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::OptoPort::TxSignal& txDiscrete :  txDiscretes)
+			{
+				str = QString("\t%1 <= in_data(%2);").
+						arg(txDiscrete.appSignalID.remove("#")).
+						arg(txDiscrete.address.offset() * 16 + txDiscrete.address.bit());
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		list.append("end arch;");
+
+		m_resultWriter->addFile("Opto-vhd", fileName, list);
+
+		return true;
+	}
 
 
 	void ApplicationLogicCompiler::writeOptoPortInfo(Hardware::OptoPort* port, QStringList& list)

@@ -272,7 +272,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(this, &db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -792,9 +792,10 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::modulesConfiguration(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
 	{
-		if (db == nullptr ||
+		if (buildWorkerThread == nullptr ||
+			db == nullptr ||
 			deviceRoot == nullptr ||
 			signalSet == nullptr ||
 			subsystems == nullptr ||
@@ -805,7 +806,7 @@ namespace Builder
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log,
+		ConfigurationBuilder cfgBuilder = {buildWorkerThread, db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log,
 										   buildWriter->buildInfo().id, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
@@ -1104,6 +1105,11 @@ namespace Builder
 	bool BuildWorkerThread::release() const
 	{
 		return !m_debug;
+	}
+
+	bool BuildWorkerThread::jsIsInterruptRequested()
+	{
+		return QThread::currentThread()->isInterruptionRequested();
 	}
 
 	// ------------------------------------------------------------------------
