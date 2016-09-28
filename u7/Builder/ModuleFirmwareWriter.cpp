@@ -42,14 +42,17 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 		int dataPos = 0;
 
+		const int numCharsCount = 4;					// number of symbols in number "0000" (4)
+		const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+
 		QByteArray str;
-		str.resize(5 * frameStringWidth - 1);
-		str.fill(' ');
+		str.resize(recCharsCount * frameStringWidth - 1);
 
 		char buf[10];
 
 		for (int l = 0; l < linesCount; l++)
 		{
+			str.fill(' ');
 
 			for (int i = 0; i < frameStringWidth; i++)
 			{
@@ -62,24 +65,18 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 				value |= frame[dataPos++];
 
-				//str += QString().number(value, 16).rightJustified(4, '0');
-
 				_itoa_s(value, buf, sizeof(buf), 16);
 
 				int len = static_cast<int>(strlen(buf));
 
-				memset(str.data() + i * 5, '0', 4);
-				memcpy(str.data() + i * 5 + (4 - len), buf, len);
+				memset(str.data() + i * recCharsCount, '0', numCharsCount);
+				memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
 
 				if (dataPos >= dataSize)
 				{
+					str[i * recCharsCount + numCharsCount] = 0;
 					break;
 				}
-
-				/*if (i < frameStringWidth - 1)
-				{
-					str += " ";
-				}*/
 			}
 
 			jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
