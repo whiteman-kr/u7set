@@ -81,7 +81,7 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
+		bool modulesConfiguration(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
 
 		// Generate Tuning configuration
 		//
@@ -148,6 +148,8 @@ namespace Builder
 		void setDebug(bool value);
 
 		bool release() const;
+
+		Q_INVOKABLE bool jsIsInterruptRequested();
 
 		// Data
 		//

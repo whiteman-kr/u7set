@@ -386,6 +386,8 @@ namespace Hardware
 						break;
 					}
 
+					dataPos++;
+
 					*ptr++ = qToBigEndian(v);
 				}
 			}

@@ -61,24 +61,27 @@ DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filterStorage, QWidg
 
 	// Objects
 
-/*	m_model = new TuningItemModel(m_tuningPageIndex, this);
+	m_model = new TuningItemModel(this);
 
 	ui->m_signalsTable->setModel(m_model);
 
 	ui->m_signalsTable->verticalHeader()->hide();
 	ui->m_signalsTable->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+	ui->m_signalsTable->verticalHeader()->setDefaultSectionSize(16);
 	ui->m_signalsTable->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	ui->m_signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
-	fillObjectsList();*/
+	fillObjectsList();
+
+	ui->m_signalsTable->resizeColumnsToContents();
 }
 
 DialogPresetEditor::~DialogPresetEditor()
 {
 	delete ui;
 }
-/*
-void TuningPage::fillObjectsList()
+
+void DialogPresetEditor::fillObjectsList()
 {
 	m_objectsIndexes.clear();
 
@@ -86,7 +89,7 @@ void TuningPage::fillObjectsList()
 	{
 		TuningObject o = theObjects.object(i);
 
-		if (m_treeFilter != nullptr)
+/*		if (m_treeFilter != nullptr)
 		{
 			if (m_treeFilter->folder() == true)
 			{
@@ -126,13 +129,13 @@ void TuningPage::fillObjectsList()
 			{
 				continue;
 			}
-		}
+		}*/
 
 		m_objectsIndexes.push_back(i);
 	}
 
 	m_model->setObjectsIndexes(m_objectsIndexes);
-}*/
+}
 
 bool DialogPresetEditor::isFilter(QTreeWidgetItem* item)
 {

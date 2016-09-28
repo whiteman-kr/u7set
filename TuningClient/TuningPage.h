@@ -11,9 +11,11 @@ class TuningItemModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	void Init();
+	TuningItemModel(QObject *parent);
 	TuningItemModel(int tuningPageIndex, QObject *parent);
+	~TuningItemModel();
 public:
-
 
 	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
 
@@ -26,11 +28,13 @@ public:
 
 	int objectIndex(int index);
 
+	void setFont(const QString& fontName, int fontSize, bool fontBold);
+
 public:
 
 	enum TuningPageColumns
 	{
-		SignalID = 0,
+		CustomAppSignalID = 0,
 		EquipmentID,
 		AppSignalID,
 		Caption,
@@ -59,6 +63,8 @@ private:
 	std::vector<int> m_objectsIndexes;
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
+
+	QFont* m_font = nullptr;
 
 };
 

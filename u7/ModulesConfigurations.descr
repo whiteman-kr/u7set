@@ -29,23 +29,24 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 17;		// LMNumber limit is 12
 //var configScriptVersion = 18;		// i/o modules scripts moved to ConfiurationScript in presets
 //var configScriptVersion = 19;		// i/o modules family checking has been removed
-var configScriptVersion = 20;		// DataUID for LM modules is taken from linked port
+//var configScriptVersion = 21;		// DataUID for LM modules is taken from linked port
+var configScriptVersion = 22;		// added buildThread parameter to interrupt build
 
 
-function(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function(buildThread, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration");
     log.writeMessage("Configuration script version is " + configScriptVersion);
 
     var result = true;
 
-    result = module_lm_1(root, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+    result = module_lm_1(buildThread, root, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
     }
 
-    result = module_lm_1_statistics(root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+    result = module_lm_1_statistics(buildThread, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
@@ -149,7 +150,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC)
     return Math.round(res);
 }
 
-function module_lm_1(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function module_lm_1(buildThread, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -170,19 +171,22 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
 
         if (device.propertyValue("ModuleFamily") == FamilyLMID)
         {
-            log.writeMessage("Generating configuration for LM-1: " + device.propertyValue("EquipmentID"));
-
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+            return generate_lm_1_rev3(buildThread, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
         }
         return true;
     }
 
     for (var i = 0; i < device.childrenCount(); i++)
-    {
+	{
+		if (buildThread.jsIsInterruptRequested() == true)
+		{
+			return true;
+		}
+	
         var child = device.jsChild(i);
-        if (module_lm_1(child, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
+        if (module_lm_1(buildThread, child, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -191,7 +195,7 @@ function module_lm_1(device, root, confCollection, log, signalSet, subsystemStor
     return true;
 }
 
-function module_lm_1_statistics(device, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function module_lm_1_statistics(buildThread, device, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -212,8 +216,6 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 		
         if (device.propertyValue("ModuleFamily") == FamilyLMID)
         {
-            log.writeMessage("Generating statistics for LM-1: " + device.propertyValue("EquipmentID"));
-
             var checkProperties = ["SubsystemID", "LMNumber", "ConfigFrameSize", "ConfigFrameCount"];
 			for (var cp = 0; cp < checkProperties.length; cp++)
 			{
@@ -262,8 +264,13 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 
     for (var i = 0; i < device.childrenCount(); i++)
     {
+		if (buildThread.jsIsInterruptRequested() == true)
+		{
+			return true;
+		}
+
         var child = device.jsChild(i);
-        if (module_lm_1_statistics(child, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
+        if (module_lm_1_statistics(buildThread, child, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -275,7 +282,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 // Generate configuration for module LM-1
 //
 //
-function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function generate_lm_1_rev3(buildThread, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
 	if (module.propertyValue("EquipmentID") == undefined)
 	{
@@ -450,6 +457,11 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
 
     for (var i = 0; i < parent.childrenCount(); i++)
     {
+		if (buildThread.jsIsInterruptRequested() == true)
+		{
+			return true;
+		}
+
         var ioModule = parent.jsChild(i);
 		
 		if (ioModule.jsDeviceType() != ModuleType)
@@ -486,7 +498,6 @@ function generate_lm_1_rev3(module, root, confCollection, log, signalSet, subsys
            
 		var equipmentID = ioModule.propertyValue("EquipmentID");
 				
-		log.writeMessage("Generating configuration for " + ioModule.propertyValue("Caption") + ": " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame);
 		confFirmware.writeLog("Generating configuration for " + ioModule.propertyValue("Caption") + ": " + equipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
 		var configScript = ioModule.propertyValue("ConfigurationScript");
