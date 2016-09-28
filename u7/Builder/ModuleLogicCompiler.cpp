@@ -6062,9 +6062,9 @@ namespace Builder
 
 		//*dynamic_cast<Signal*>(this) = *signal;
 
-		// believe that all input signals have already been computed
+		// believe that all input and tuning signals have already been computed
 		//
-		if (m_signal->isInput())
+		if (m_signal->isInput() || (m_signal->isInternal() && m_signal->enableTuning()))
 		{
 			setComputed();
 		}
