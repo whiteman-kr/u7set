@@ -370,6 +370,9 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
+	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
+	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
+
 	bool getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 
 public:
