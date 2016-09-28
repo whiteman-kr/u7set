@@ -56,8 +56,9 @@ namespace Afb
 			DEAD_ZONE = 24,
 			POL = 25,
 			DER = 26,
+			MISMATCH = 27,
 			First = LOGIC,
-			Last = DER,
+			Last = MISMATCH,
 		};
 
 		AfbType();

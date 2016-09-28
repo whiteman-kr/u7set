@@ -123,6 +123,8 @@ namespace Afb
 				return "POL";
 			case Type::DER:
 				return "DER";
+			case Type::MISMATCH:
+				return "MISMATCH";
 			default:
 				assert(false);
 				return "UNKNOWN";
