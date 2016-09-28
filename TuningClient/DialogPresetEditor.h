@@ -53,6 +53,8 @@ private:
 
 	void setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter);
 
+	void fillObjectsList();
+
 
 private:
 	Ui::DialogPresetEditor *ui;
@@ -62,6 +64,8 @@ private:
 	bool m_modified = false;
 
 	ObjectFilterStorage* m_filterStorage;
+
+	std::vector<int> m_objectsIndexes;
 };
 
 #endif // DIALOGPRESETEDITOR_H

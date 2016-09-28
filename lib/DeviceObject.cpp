@@ -2419,7 +2419,9 @@ R"DELIM({
 
 		return	family == FamilyType::AIM ||
 				family == FamilyType::DIM ||
-				family == FamilyType::AIFM;
+				family == FamilyType::AIFM ||
+				family == FamilyType::MPS17 ||
+				family == FamilyType::BVK4;
 	}
 
 	bool DeviceModule::isOutputModule() const
