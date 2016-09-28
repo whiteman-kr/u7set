@@ -1,6 +1,7 @@
 #include "../lib/DbController.h"
 
 #include <QDebug>
+#include <QtConcurrent/QtConcurrent>
 
 DbController::DbController() :
 	m_worker(nullptr),
@@ -1125,6 +1126,15 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 	//
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> objectsMap;	// key is fileId
 
+	std::list<QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>>> threads;
+
+	QTime t;
+	t.start();
+
+	const size_t fileCountPerThread = 2048;
+	std::vector<std::shared_ptr<DbFile>> threadFiles;
+	threadFiles.reserve(fileCountPerThread);
+
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->fileId() == hcFileId() || f->fileId() == hpFileId())
@@ -1136,7 +1146,34 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		}
 		else
 		{
-			std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+			threadFiles.push_back(f);
+
+			if (threadFiles.size() >= fileCountPerThread)
+			{
+				QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread =
+						QtConcurrent::run(Hardware::DeviceObject::fromDbFiles, threadFiles);
+
+				threads.push_back(thread);
+
+				threadFiles.clear();
+			}
+		}
+	}
+
+	if (threadFiles.empty() == false)
+	{
+		QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread = QtConcurrent::run(Hardware::DeviceObject::fromDbFiles, threadFiles);
+		threads.push_back(thread);
+
+		threadFiles.clear();
+	}
+
+	for (QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>>& future : threads)
+	{
+		std::vector<std::shared_ptr<Hardware::DeviceObject>> v = future.result();
+
+		for (std::shared_ptr<Hardware::DeviceObject>& object : v)
+		{
 			objectsMap[object->fileInfo().fileId()] = object;
 		}
 	}
@@ -1173,6 +1210,8 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		assert(rootWasFound == true);
 		return false;
 	}
+
+	qDebug() << "DbController::getDeviceTreeLatestVersion parse " << files.size() << "objects, time " << t.elapsed();
 
 	return ok;
 }
