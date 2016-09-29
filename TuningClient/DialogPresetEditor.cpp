@@ -324,7 +324,7 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 
 		// Delete the first selected preset
 		//
-		QTreeWidgetItem* item = selectedPresets.takeFirst();
+		QTreeWidgetItem* item = selectedPresets[0];
 		if (item == nullptr)
 		{
 			assert(item);
@@ -338,18 +338,18 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 			return;
 		}
 
-		qDebug()<<"Removing preset: "<<filter->caption();
-
 		if (m_filterStorage->removeFilter(filter) == true)
 		{
 			QTreeWidgetItem* parent = item->parent();
 			if (parent != nullptr)
 			{
-				parent->takeChild(parent->indexOfChild(item));
+				QTreeWidgetItem* deleteItem = parent->takeChild(parent->indexOfChild(item));
+				delete deleteItem;
 			}
 			else
 			{
-				ui->m_presetsTree->takeTopLevelItem(ui->m_presetsTree->indexOfTopLevelItem(item));
+				QTreeWidgetItem* deleteItem = ui->m_presetsTree->takeTopLevelItem(ui->m_presetsTree->indexOfTopLevelItem(item));
+				delete deleteItem;
 			}
 		}
 		else
@@ -399,7 +399,8 @@ void DialogPresetEditor::on_m_remove_clicked()
 			return;
 		}
 
-		parentItem->takeChild(parentItem->indexOfChild(item));
+		QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
+		delete deleteItem;
 	}
 }
 
