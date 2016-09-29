@@ -47,7 +47,8 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
-	m_appSignalIds = That.m_appSignalIds;
+
+	m_signalValues = That.m_signalValues;
 
 	m_filterType = That.m_filterType;
 	m_signalType = That.m_signalType;
@@ -98,10 +99,10 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		setAppSignalIDMask(reader.attributes().value("AppSignalIDMask").toString());
 	}
 
-	if (reader.attributes().hasAttribute("AppSignalIDs"))
+	/*if (reader.attributes().hasAttribute("AppSignalIDs"))
 	{
 		setAppSignalIdsCSV(reader.attributes().value("AppSignalIDs").toString());
-	}
+	}*/
 
 	if (reader.attributes().hasAttribute("SignalType"))
 	{
@@ -213,7 +214,7 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
-	writer.writeAttribute("AppSignalIDs", appSignalIdsCSV());
+	//writer.writeAttribute("AppSignalIDs", appSignalIdsCSV());
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
@@ -324,63 +325,16 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 }
 
 
-QString ObjectFilter::appSignalIdsCR() const
+std::vector <ObjectFilterValue> ObjectFilter::signalValues() const
 {
-	QString result;
-	for (auto s : m_appSignalIds)
-	{
-		result += s + '\n';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
+	return m_signalValues;
 }
 
-void ObjectFilter::setAppSignalIdsCR(const QString &value)
+void ObjectFilter::setValues(const std::vector <ObjectFilterValue>& values)
 {
-	if (value.isEmpty() == true)
-	{
-		m_appSignalIds.clear();
-	}
-	else
-	{
-		m_appSignalIds = value.split('\n');
-	}
+	m_signalValues = values;
 }
 
-QString ObjectFilter::appSignalIdsCSV() const
-{
-	QString result;
-	for (auto s : m_appSignalIds)
-	{
-		result += s + ';';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
-}
-
-void ObjectFilter::setAppSignalIdsCSV(const QString &value)
-{
-	if (value.isEmpty() == true)
-	{
-		m_appSignalIds.clear();
-	}
-	else
-	{
-		m_appSignalIds = value.split(';');
-	}
-}
-
-QStringList ObjectFilter::appSignalIdsList() const
-{
-	return m_appSignalIds;
-}
-
-void ObjectFilter::setAppSignalIdsList(const QStringList& value)
-{
-	m_appSignalIds = value;
-}
 
 ObjectFilter::FilterType ObjectFilter::filterType() const
 {
@@ -572,15 +526,15 @@ bool ObjectFilter::match(const TuningObject& object)
 
 	// List of appSignalId
 	//
-	if (m_appSignalIds.isEmpty() == false)
+	if (m_signalValues.empty() == false)
 	{
 		QString s = object.appSignalID();
 
 		bool result = false;
 
-		for (auto id : m_appSignalIds)
+		for (const ObjectFilterValue& v : m_signalValues)
 		{
-			if (id == s)
+			if (v.appSignalId == s)
 			{
 				result = true;
 				break;
@@ -973,8 +927,9 @@ bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 void ObjectFilterStorage::createAutomaticFilters()
 {
-	if (theSettings.filterBySchema() == true)
+	/*if (theSettings.filterBySchema() == true)
 	{
+
 		// Filter for Schema
 		//
 		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
@@ -993,7 +948,7 @@ void ObjectFilterStorage::createAutomaticFilters()
 		}
 
 		m_topFilters.insert(m_topFilters.begin(), ofSchema);
-	}
+	}*/
 
 	if (theSettings.filterByEquipment() == true)
 	{
