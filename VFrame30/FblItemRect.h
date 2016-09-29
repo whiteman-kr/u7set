@@ -127,6 +127,9 @@ namespace VFrame30
 
 		DECLARE_FONT_PROPERTIES(Font);
 
+		QString label() const;
+		void setLabel(const QString& value);
+
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.
 		// We need these variables in case we call functions and do not have schema pointer.
@@ -140,6 +143,8 @@ namespace VFrame30
 		QRgb m_fillColor;
 		QRgb m_textColor;
 		FontParam m_font;
+
+		QString m_label;
 	};
 }
 

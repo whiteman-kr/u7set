@@ -15,6 +15,8 @@ namespace VFrame30
 	class SchemaLayer;
 	class SchemaItemAfb;
 	class SchemaItemSignal;
+
+	class FblItemRect;
 }
 
 
@@ -159,6 +161,10 @@ namespace VFrame30
 	public:
 		bool IsStatic() const;
 		bool IsDynamic() const;
+
+		bool isFblItemRect() const;
+		FblItemRect* toFblItemRect();
+		const FblItemRect* toFblItemRect() const;
 
 		virtual bool IsFblItem() const;
 

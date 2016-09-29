@@ -74,6 +74,7 @@ class SchemaItemConst;
 class SchemaItemConnection;
 class SchemaItemTransmitter;
 class SchemaItemReceiver;
+class SchemaItemUfb;
 class DeviceObject;
 class DeviceRoot;
 class DeviceSystem;
@@ -2695,6 +2696,15 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemInOut* release_inoutsignal();
   inline void set_allocated_inoutsignal(::Proto::SchemaItemInOut* inoutsignal);
 
+  // optional .Proto.SchemaItemUfb ufb = 134;
+  inline bool has_ufb() const;
+  inline void clear_ufb();
+  static const int kUfbFieldNumber = 134;
+  inline const ::Proto::SchemaItemUfb& ufb() const;
+  inline ::Proto::SchemaItemUfb* mutable_ufb();
+  inline ::Proto::SchemaItemUfb* release_ufb();
+  inline void set_allocated_ufb(::Proto::SchemaItemUfb* ufb);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItem)
  private:
   inline void set_has_uuid();
@@ -2747,6 +2757,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_receiveritem();
   inline void set_has_inoutsignal();
   inline void clear_has_inoutsignal();
+  inline void set_has_ufb();
+  inline void clear_has_ufb();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2775,9 +2787,10 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemTransmitter* transmitteritem_;
   ::Proto::SchemaItemReceiver* receiveritem_;
   ::Proto::SchemaItemInOut* inoutsignal_;
+  ::Proto::SchemaItemUfb* ufb_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(25 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3777,6 +3790,18 @@ class FblItemRect : public ::google::protobuf::Message {
   inline ::Proto::FontParam* release_font();
   inline void set_allocated_font(::Proto::FontParam* font);
 
+  // optional string label = 6;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 6;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
   // @@protoc_insertion_point(class_scope:Proto.FblItemRect)
  private:
   inline void set_has_weight();
@@ -3789,6 +3814,8 @@ class FblItemRect : public ::google::protobuf::Message {
   inline void clear_has_textcolor();
   inline void set_has_font();
   inline void clear_has_font();
+  inline void set_has_label();
+  inline void clear_has_label();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3796,10 +3823,11 @@ class FblItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 linecolor_;
   ::google::protobuf::uint32 fillcolor_;
   ::Proto::FontParam* font_;
+  ::std::string* label_;
   ::google::protobuf::uint32 textcolor_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4501,17 +4529,17 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline ::Proto::AfbElementXml* release_afbelement();
   inline void set_allocated_afbelement(::Proto::AfbElementXml* afbelement);
 
-  // optional string label = 6;
-  inline bool has_label() const;
-  inline void clear_label();
-  static const int kLabelFieldNumber = 6;
-  inline const ::std::string& label() const;
-  inline void set_label(const ::std::string& value);
-  inline void set_label(const char* value);
-  inline void set_label(const char* value, size_t size);
-  inline ::std::string* mutable_label();
-  inline ::std::string* release_label();
-  inline void set_allocated_label(::std::string* label);
+  // optional string deprecated_label = 6;
+  inline bool has_deprecated_label() const;
+  inline void clear_deprecated_label();
+  static const int kDeprecatedLabelFieldNumber = 6;
+  inline const ::std::string& deprecated_label() const;
+  inline void set_deprecated_label(const ::std::string& value);
+  inline void set_deprecated_label(const char* value);
+  inline void set_deprecated_label(const char* value, size_t size);
+  inline ::std::string* mutable_deprecated_label();
+  inline ::std::string* release_deprecated_label();
+  inline void set_allocated_deprecated_label(::std::string* deprecated_label);
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemAfb)
  private:
@@ -4521,15 +4549,15 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline void clear_has_precision();
   inline void set_has_afbelement();
   inline void clear_has_afbelement();
-  inline void set_has_label();
-  inline void clear_has_label();
+  inline void set_has_deprecated_label();
+  inline void clear_has_deprecated_label();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
   ::Proto::AfbElementXml* afbelement_;
-  ::std::string* label_;
+  ::std::string* deprecated_label_;
   ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
@@ -4919,6 +4947,133 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemReceiver* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemUfb : public ::google::protobuf::Message {
+ public:
+  SchemaItemUfb();
+  virtual ~SchemaItemUfb();
+
+  SchemaItemUfb(const SchemaItemUfb& from);
+
+  inline SchemaItemUfb& operator=(const SchemaItemUfb& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemUfb& default_instance();
+
+  void Swap(SchemaItemUfb* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemUfb* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemUfb& from);
+  void MergeFrom(const SchemaItemUfb& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string ufbSchemaId = 1;
+  inline bool has_ufbschemaid() const;
+  inline void clear_ufbschemaid();
+  static const int kUfbSchemaIdFieldNumber = 1;
+  inline const ::std::string& ufbschemaid() const;
+  inline void set_ufbschemaid(const ::std::string& value);
+  inline void set_ufbschemaid(const char* value);
+  inline void set_ufbschemaid(const char* value, size_t size);
+  inline ::std::string* mutable_ufbschemaid();
+  inline ::std::string* release_ufbschemaid();
+  inline void set_allocated_ufbschemaid(::std::string* ufbschemaid);
+
+  // optional string ufbCaption = 2;
+  inline bool has_ufbcaption() const;
+  inline void clear_ufbcaption();
+  static const int kUfbCaptionFieldNumber = 2;
+  inline const ::std::string& ufbcaption() const;
+  inline void set_ufbcaption(const ::std::string& value);
+  inline void set_ufbcaption(const char* value);
+  inline void set_ufbcaption(const char* value, size_t size);
+  inline ::std::string* mutable_ufbcaption();
+  inline ::std::string* release_ufbcaption();
+  inline void set_allocated_ufbcaption(::std::string* ufbcaption);
+
+  // optional int32 ufbVersion = 3 [default = -1];
+  inline bool has_ufbversion() const;
+  inline void clear_ufbversion();
+  static const int kUfbVersionFieldNumber = 3;
+  inline ::google::protobuf::int32 ufbversion() const;
+  inline void set_ufbversion(::google::protobuf::int32 value);
+
+  // optional string label = 6;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 6;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemUfb)
+ private:
+  inline void set_has_ufbschemaid();
+  inline void clear_has_ufbschemaid();
+  inline void set_has_ufbcaption();
+  inline void clear_has_ufbcaption();
+  inline void set_has_ufbversion();
+  inline void clear_has_ufbversion();
+  inline void set_has_label();
+  inline void clear_has_label();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* ufbschemaid_;
+  ::std::string* ufbcaption_;
+  ::std::string* label_;
+  ::google::protobuf::int32 ufbversion_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemUfb* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -10827,6 +10982,44 @@ inline void SchemaItem::set_allocated_inoutsignal(::Proto::SchemaItemInOut* inou
   }
 }
 
+// optional .Proto.SchemaItemUfb ufb = 134;
+inline bool SchemaItem::has_ufb() const {
+  return (_has_bits_[0] & 0x02000000u) != 0;
+}
+inline void SchemaItem::set_has_ufb() {
+  _has_bits_[0] |= 0x02000000u;
+}
+inline void SchemaItem::clear_has_ufb() {
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline void SchemaItem::clear_ufb() {
+  if (ufb_ != NULL) ufb_->::Proto::SchemaItemUfb::Clear();
+  clear_has_ufb();
+}
+inline const ::Proto::SchemaItemUfb& SchemaItem::ufb() const {
+  return ufb_ != NULL ? *ufb_ : *default_instance_->ufb_;
+}
+inline ::Proto::SchemaItemUfb* SchemaItem::mutable_ufb() {
+  set_has_ufb();
+  if (ufb_ == NULL) ufb_ = new ::Proto::SchemaItemUfb;
+  return ufb_;
+}
+inline ::Proto::SchemaItemUfb* SchemaItem::release_ufb() {
+  clear_has_ufb();
+  ::Proto::SchemaItemUfb* temp = ufb_;
+  ufb_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_ufb(::Proto::SchemaItemUfb* ufb) {
+  delete ufb_;
+  ufb_ = ufb;
+  if (ufb) {
+    set_has_ufb();
+  } else {
+    clear_has_ufb();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -11771,6 +11964,76 @@ inline void FblItemRect::set_allocated_font(::Proto::FontParam* font) {
   }
 }
 
+// optional string label = 6;
+inline bool FblItemRect::has_label() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void FblItemRect::set_has_label() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void FblItemRect::clear_has_label() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void FblItemRect::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& FblItemRect::label() const {
+  return *label_;
+}
+inline void FblItemRect::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void FblItemRect::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void FblItemRect::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* FblItemRect::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* FblItemRect::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void FblItemRect::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // FblItemLine
@@ -12130,73 +12393,73 @@ inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbe
   }
 }
 
-// optional string label = 6;
-inline bool SchemaItemAfb::has_label() const {
+// optional string deprecated_label = 6;
+inline bool SchemaItemAfb::has_deprecated_label() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void SchemaItemAfb::set_has_label() {
+inline void SchemaItemAfb::set_has_deprecated_label() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void SchemaItemAfb::clear_has_label() {
+inline void SchemaItemAfb::clear_has_deprecated_label() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void SchemaItemAfb::clear_label() {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    label_->clear();
+inline void SchemaItemAfb::clear_deprecated_label() {
+  if (deprecated_label_ != &::google::protobuf::internal::kEmptyString) {
+    deprecated_label_->clear();
   }
-  clear_has_label();
+  clear_has_deprecated_label();
 }
-inline const ::std::string& SchemaItemAfb::label() const {
-  return *label_;
+inline const ::std::string& SchemaItemAfb::deprecated_label() const {
+  return *deprecated_label_;
 }
-inline void SchemaItemAfb::set_label(const ::std::string& value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void SchemaItemAfb::set_deprecated_label(const ::std::string& value) {
+  set_has_deprecated_label();
+  if (deprecated_label_ == &::google::protobuf::internal::kEmptyString) {
+    deprecated_label_ = new ::std::string;
   }
-  label_->assign(value);
+  deprecated_label_->assign(value);
 }
-inline void SchemaItemAfb::set_label(const char* value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void SchemaItemAfb::set_deprecated_label(const char* value) {
+  set_has_deprecated_label();
+  if (deprecated_label_ == &::google::protobuf::internal::kEmptyString) {
+    deprecated_label_ = new ::std::string;
   }
-  label_->assign(value);
+  deprecated_label_->assign(value);
 }
-inline void SchemaItemAfb::set_label(const char* value, size_t size) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void SchemaItemAfb::set_deprecated_label(const char* value, size_t size) {
+  set_has_deprecated_label();
+  if (deprecated_label_ == &::google::protobuf::internal::kEmptyString) {
+    deprecated_label_ = new ::std::string;
   }
-  label_->assign(reinterpret_cast<const char*>(value), size);
+  deprecated_label_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* SchemaItemAfb::mutable_label() {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline ::std::string* SchemaItemAfb::mutable_deprecated_label() {
+  set_has_deprecated_label();
+  if (deprecated_label_ == &::google::protobuf::internal::kEmptyString) {
+    deprecated_label_ = new ::std::string;
   }
-  return label_;
+  return deprecated_label_;
 }
-inline ::std::string* SchemaItemAfb::release_label() {
-  clear_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SchemaItemAfb::release_deprecated_label() {
+  clear_has_deprecated_label();
+  if (deprecated_label_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = label_;
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = deprecated_label_;
+    deprecated_label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void SchemaItemAfb::set_allocated_label(::std::string* label) {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    delete label_;
+inline void SchemaItemAfb::set_allocated_deprecated_label(::std::string* deprecated_label) {
+  if (deprecated_label_ != &::google::protobuf::internal::kEmptyString) {
+    delete deprecated_label_;
   }
-  if (label) {
-    set_has_label();
-    label_ = label;
+  if (deprecated_label) {
+    set_has_deprecated_label();
+    deprecated_label_ = deprecated_label;
   } else {
-    clear_has_label();
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_deprecated_label();
+    deprecated_label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -12485,6 +12748,242 @@ inline void SchemaItemReceiver::set_allocated_appsignalid(::std::string* appsign
   } else {
     clear_has_appsignalid();
     appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemUfb
+
+// optional string ufbSchemaId = 1;
+inline bool SchemaItemUfb::has_ufbschemaid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemUfb::set_has_ufbschemaid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemUfb::clear_has_ufbschemaid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemUfb::clear_ufbschemaid() {
+  if (ufbschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    ufbschemaid_->clear();
+  }
+  clear_has_ufbschemaid();
+}
+inline const ::std::string& SchemaItemUfb::ufbschemaid() const {
+  return *ufbschemaid_;
+}
+inline void SchemaItemUfb::set_ufbschemaid(const ::std::string& value) {
+  set_has_ufbschemaid();
+  if (ufbschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    ufbschemaid_ = new ::std::string;
+  }
+  ufbschemaid_->assign(value);
+}
+inline void SchemaItemUfb::set_ufbschemaid(const char* value) {
+  set_has_ufbschemaid();
+  if (ufbschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    ufbschemaid_ = new ::std::string;
+  }
+  ufbschemaid_->assign(value);
+}
+inline void SchemaItemUfb::set_ufbschemaid(const char* value, size_t size) {
+  set_has_ufbschemaid();
+  if (ufbschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    ufbschemaid_ = new ::std::string;
+  }
+  ufbschemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemUfb::mutable_ufbschemaid() {
+  set_has_ufbschemaid();
+  if (ufbschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    ufbschemaid_ = new ::std::string;
+  }
+  return ufbschemaid_;
+}
+inline ::std::string* SchemaItemUfb::release_ufbschemaid() {
+  clear_has_ufbschemaid();
+  if (ufbschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = ufbschemaid_;
+    ufbschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemUfb::set_allocated_ufbschemaid(::std::string* ufbschemaid) {
+  if (ufbschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete ufbschemaid_;
+  }
+  if (ufbschemaid) {
+    set_has_ufbschemaid();
+    ufbschemaid_ = ufbschemaid;
+  } else {
+    clear_has_ufbschemaid();
+    ufbschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string ufbCaption = 2;
+inline bool SchemaItemUfb::has_ufbcaption() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemUfb::set_has_ufbcaption() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemUfb::clear_has_ufbcaption() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemUfb::clear_ufbcaption() {
+  if (ufbcaption_ != &::google::protobuf::internal::kEmptyString) {
+    ufbcaption_->clear();
+  }
+  clear_has_ufbcaption();
+}
+inline const ::std::string& SchemaItemUfb::ufbcaption() const {
+  return *ufbcaption_;
+}
+inline void SchemaItemUfb::set_ufbcaption(const ::std::string& value) {
+  set_has_ufbcaption();
+  if (ufbcaption_ == &::google::protobuf::internal::kEmptyString) {
+    ufbcaption_ = new ::std::string;
+  }
+  ufbcaption_->assign(value);
+}
+inline void SchemaItemUfb::set_ufbcaption(const char* value) {
+  set_has_ufbcaption();
+  if (ufbcaption_ == &::google::protobuf::internal::kEmptyString) {
+    ufbcaption_ = new ::std::string;
+  }
+  ufbcaption_->assign(value);
+}
+inline void SchemaItemUfb::set_ufbcaption(const char* value, size_t size) {
+  set_has_ufbcaption();
+  if (ufbcaption_ == &::google::protobuf::internal::kEmptyString) {
+    ufbcaption_ = new ::std::string;
+  }
+  ufbcaption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemUfb::mutable_ufbcaption() {
+  set_has_ufbcaption();
+  if (ufbcaption_ == &::google::protobuf::internal::kEmptyString) {
+    ufbcaption_ = new ::std::string;
+  }
+  return ufbcaption_;
+}
+inline ::std::string* SchemaItemUfb::release_ufbcaption() {
+  clear_has_ufbcaption();
+  if (ufbcaption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = ufbcaption_;
+    ufbcaption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemUfb::set_allocated_ufbcaption(::std::string* ufbcaption) {
+  if (ufbcaption_ != &::google::protobuf::internal::kEmptyString) {
+    delete ufbcaption_;
+  }
+  if (ufbcaption) {
+    set_has_ufbcaption();
+    ufbcaption_ = ufbcaption;
+  } else {
+    clear_has_ufbcaption();
+    ufbcaption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 ufbVersion = 3 [default = -1];
+inline bool SchemaItemUfb::has_ufbversion() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemUfb::set_has_ufbversion() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemUfb::clear_has_ufbversion() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemUfb::clear_ufbversion() {
+  ufbversion_ = -1;
+  clear_has_ufbversion();
+}
+inline ::google::protobuf::int32 SchemaItemUfb::ufbversion() const {
+  return ufbversion_;
+}
+inline void SchemaItemUfb::set_ufbversion(::google::protobuf::int32 value) {
+  set_has_ufbversion();
+  ufbversion_ = value;
+}
+
+// optional string label = 6;
+inline bool SchemaItemUfb::has_label() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemUfb::set_has_label() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemUfb::clear_has_label() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemUfb::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& SchemaItemUfb::label() const {
+  return *label_;
+}
+inline void SchemaItemUfb::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItemUfb::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItemUfb::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemUfb::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* SchemaItemUfb::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemUfb::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
