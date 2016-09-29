@@ -2950,14 +2950,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 				newItem->setNewGuid();
 
-				if (newItem->isSchemaItemAfb() == true
-					&& logicSchema != nullptr)
+				if (newItem->isFblItemRect() == true)
 				{
-					auto schemaItemAfb = newItem->toSchemaItemAfb();
-					assert(schemaItemAfb);
+					VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
+					assert(fblItemRect);
 
 					int counterValue = logicSchema->nextCounterValue();
-					schemaItemAfb->setLabel(logicSchema->schemaID() + "_" + QString::number(counterValue));
+					fblItemRect->setLabel(logicSchema->schemaID() + "_" + QString::number(counterValue));
 				}
 
 				newItem->MoveItem(xdif, ydif);
@@ -4083,20 +4082,20 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	editSchemaView()->m_newItem = newItem;
 
-	// If items is SchemaItemAfb and this is LogicSchema, set lavel to it
+	// If items is SchemaItemAfb and this is LogicSchema, set label to it
 	//
 	if (schema()->isLogicSchema() == true &&
-		newItem->isSchemaItemAfb() == true)
+		newItem->isFblItemRect() == true)
 	{
 		auto logicSchema = schema()->toLogicSchema();
 		assert(logicSchema);
 
-		auto schemaItemAfb = newItem->toSchemaItemAfb();
-		assert(schemaItemAfb);
+		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
+		assert(fblItemRect);
 
 		int counterValue = logicSchema->nextCounterValue();
 
-		schemaItemAfb->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+		fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
 	}
 
 	// --
@@ -5012,16 +5011,19 @@ void EditSchemaWidget::editPaste()
 			if (schemaItem->isSchemaItemAfb() == true)
 			{
 				schemaItemAfbIsPresent = true;
+			}
 
-				// If items is SchemaItemAfb and this is LogicSchema, set lavel to it
+			if (schemaItem->isFblItemRect() == true)
+			{
+				// If items is FblItemRect and this is LogicSchema, set label to it
 				//
 				if (logicSchema != nullptr)
 				{
-					auto schemaItemAfb = schemaItem->toSchemaItemAfb();
-					assert(schemaItemAfb);
+					VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
+					assert(fblItemRect);
 
 					int counterValue = logicSchema->nextCounterValue();
-					schemaItemAfb->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+					fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
 				}
 			}
 		}

@@ -316,6 +316,21 @@ namespace VFrame30
 		return !m_static;
 	}
 
+	bool SchemaItem::isFblItemRect() const
+	{
+		return dynamic_cast<const FblItemRect*>(this) != nullptr;
+	}
+
+	FblItemRect* SchemaItem::toFblItemRect()
+	{
+		return dynamic_cast<FblItemRect*>(this);
+	}
+
+	const FblItemRect* SchemaItem::toFblItemRect() const
+	{
+		return dynamic_cast<const FblItemRect*>(this);
+	}
+
 	bool SchemaItem::IsFblItem() const
 	{
 		return false;

@@ -17,9 +17,6 @@ namespace VFrame30
 	{
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
-
-		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
-		labelProp->setCategory(PropertyNames::functionalCategory);
 	}
 
 	SchemaItemAfb::SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg) :
@@ -30,9 +27,6 @@ namespace VFrame30
 
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
-
-		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
-		labelProp->setCategory(PropertyNames::functionalCategory);
 
 		// Create input output signals in VFrame30::FblEtem
 		//
@@ -226,8 +220,6 @@ namespace VFrame30
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
-		vifble->set_label(m_label.toStdString());
-
 		return true;
 	}
 
@@ -261,11 +253,6 @@ namespace VFrame30
 
 		QString errorMsg;
 		bool ok = m_afbElement.loadFromXml(vifble.afbelement(), errorMsg);
-
-		if (vifble.has_label() == true)
-		{
-			m_label = QString::fromStdString(vifble.label());
-		}
 
 		// Add afb properties to class meta object
 		//
@@ -750,15 +737,4 @@ namespace VFrame30
 
 		return;
 	}
-
-	QString SchemaItemAfb::label() const
-	{
-		return m_label;
-	}
-
-	void SchemaItemAfb::setLabel(const QString& value)
-	{
-		m_label = value;
-	}
-
 }

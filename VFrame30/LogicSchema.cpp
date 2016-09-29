@@ -103,15 +103,15 @@ namespace VFrame30
 
 			for (std::shared_ptr<SchemaItem> item : layer->Items)
 			{
-				if (item->isSchemaItemAfb() == true)
+				if (item->isFblItemRect() == true)
 				{
-					SchemaItemAfb* schemaItemAfb = item->toSchemaItemAfb();
-					assert(schemaItemAfb);
+					VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
+					assert(fblItemRect);
 
-					if (schemaItemAfb->label().isEmpty() == true)
+					if (fblItemRect->label().isEmpty() == true)
 					{
 						int labelCounter = this->nextCounterValue();
-						schemaItemAfb->setLabel(schemaID() + "_" + QString::number(labelCounter));
+						fblItemRect->setLabel(schemaID() + "_" + QString::number(labelCounter));
 					}
 				}
 			}
