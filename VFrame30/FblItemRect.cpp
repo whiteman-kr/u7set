@@ -26,6 +26,9 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::appearanceCategory, true, FblItemRect::getFontBold, FblItemRect::setFontBold);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::appearanceCategory, true, FblItemRect::getFontItalic, FblItemRect::setFontItalic);
 
+		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
+		labelProp->setCategory(PropertyNames::functionalCategory);
+
 		// --
 		//
 		setItemUnit(unit);
@@ -85,6 +88,8 @@ namespace VFrame30
 
 		m_font.SaveData(itemMessage->mutable_font());
 
+		itemMessage->set_label(m_label.toStdString());
+
 		return true;
 	}
 
@@ -124,6 +129,8 @@ namespace VFrame30
 		m_textColor = itemMessage.textcolor();
 
 		m_font.LoadData(itemMessage.font());
+
+		m_label = QString::fromStdString(itemMessage.label());
 
 		return true;
 	}
@@ -833,6 +840,16 @@ namespace VFrame30
 	void FblItemRect::setTextColor(QRgb color)
 	{
 		m_textColor = color;
+	}
+
+	QString FblItemRect::label() const
+	{
+		return m_label;
+	}
+
+	void FblItemRect::setLabel(const QString& value)
+	{
+		m_label = value;
 	}
 }
 

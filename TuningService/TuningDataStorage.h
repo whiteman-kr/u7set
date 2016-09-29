@@ -10,9 +10,6 @@
 namespace Tuning
 {
 
-	struct TuningSignalState;
-
-
 	struct TuningSignalState
 	{
 		double currentValue = 0;
@@ -68,7 +65,7 @@ namespace Tuning
 		void setFrameData(int frameNo, const char* fotipData);
 
 		bool getSignalState(const Signal* signal, TuningSignalState* tss);
-		bool setSignalState(const Signal* signal, double value, Tuning::SocketRequest* sr);
+		bool setSignalState(const Signal* signal, double value, SocketRequest* sr);
 	};
 
 

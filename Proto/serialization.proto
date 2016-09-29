@@ -510,6 +510,7 @@ message FblItemRect
 	required uint32 fillColor = 3;
 	required uint32 textColor = 4;
 	required FontParam font = 5;
+	optional string label = 6;
 }
 
 
@@ -595,7 +596,7 @@ message SchemaItemAfb
 	optional wstring afbStrid = 3;					// NOT USED anymore, keep it for a while, RPCT-812
 	optional int32 precision = 4 [default = 2];
 	optional AfbElementXml afbelement = 5;			// RPCT-812
-	optional string label = 6;
+	optional string deprecated_label = 6;			// Don't use 6 anymore
 }
 
 //
