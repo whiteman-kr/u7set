@@ -7,7 +7,8 @@
 
 using namespace std;
 
-void TuningItemModel::Init()
+TuningItemModel::TuningItemModel(QObject* parent)
+  :QAbstractItemModel(parent)
 {
 	// Fill column names
 
@@ -23,51 +24,6 @@ void TuningItemModel::Init()
 	m_columnsNames<<tr("Valid");
 	m_columnsNames<<tr("Underflow");
 	m_columnsNames<<tr("Overflow");
-}
-
-
-TuningItemModel::TuningItemModel(QObject* parent)
-  :QAbstractItemModel(parent)
-{
-	Init();
-
-	m_columnsIndexes.push_back(CustomAppSignalID);
-	m_columnsIndexes.push_back(EquipmentID);
-	m_columnsIndexes.push_back(Caption);
-	m_columnsIndexes.push_back(Value);
-}
-
-
-TuningItemModel::TuningItemModel(int tuningPageIndex, QObject* parent)
-	:QAbstractItemModel(parent)
-{
-	Init();
-
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (pageSettings->m_columnCount == 0)
-	{
-		m_columnsIndexes.push_back(CustomAppSignalID);
-		m_columnsIndexes.push_back(EquipmentID);
-		m_columnsIndexes.push_back(Caption);
-		m_columnsIndexes.push_back(Units);
-		m_columnsIndexes.push_back(Type);
-
-		m_columnsIndexes.push_back(Value);
-		m_columnsIndexes.push_back(Default);
-		m_columnsIndexes.push_back(Valid);
-		m_columnsIndexes.push_back(Underflow);
-		m_columnsIndexes.push_back(Overflow);
-	}
-	else
-	{
-		m_columnsIndexes  = pageSettings->m_columnsIndexes;
-	}
 }
 
 TuningItemModel::~TuningItemModel()
@@ -136,16 +92,16 @@ void TuningItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 
 }
 
-QStringList TuningItemModel::columnsNames()
+/*QStringList TuningItemModel::columnsNames()
 {
 	return m_columnsNames;
 }
+*/
 
-
-void TuningItemModel::update()
+/*void TuningItemModel::update()
 {
 	emit QAbstractItemModel::dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-}
+}*/
 
 int TuningItemModel::objectIndex(int index)
 {
@@ -164,6 +120,11 @@ void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBo
 		delete m_font;
 	}
 	m_font = new QFont(fontName, fontSize, fontBold);
+}
+
+void TuningItemModel::addColumn(TuningPageColumns column)
+{
+	m_columnsIndexes.push_back(column);
 }
 
 QModelIndex TuningItemModel::index(int row, int column, const QModelIndex &parent) const
@@ -197,42 +158,12 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 {
 	if (role == Qt::BackgroundRole)
 	{
-		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
-
-		if (displayIndex == Value)
-		{
-			//int displayIndex = m_columnsIndexes[col];
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-
-		if (displayIndex == Default)
-		{
-			//int displayIndex = m_columnsIndexes[col];
-			QColor color = QColor(Qt::gray);
-			return QBrush(color);
-		}
+		return backColor(index);
 	}
 
 	if (role == Qt::ForegroundRole)
 	{
-		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
-
-		if (displayIndex == Value)
-		{
-			//int displayIndex = m_columnsIndexes[col];
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
-
-		if (displayIndex == Default)
-		{
-			//int displayIndex = m_columnsIndexes[col];
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
+		return foregroundColor(index);
 	}
 
 	if (m_font != nullptr && role == Qt::FontRole)
@@ -368,6 +299,19 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
+QBrush TuningItemModel::backColor(const QModelIndex& index) const
+{
+	Q_UNUSED(index);
+	return QBrush();
+}
+
+QBrush TuningItemModel::foregroundColor(const QModelIndex& index) const
+{
+	Q_UNUSED(index);
+	return QBrush();
+}
+
+
 QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
@@ -384,6 +328,87 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 
 	return QVariant();
 }
+
+//
+// TuningItemModelMain
+//
+
+
+TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QObject* parent)
+	:TuningItemModel(parent)
+{
+	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+	if (pageSettings == nullptr)
+	{
+		assert(pageSettings);
+		return;
+	}
+
+	if (pageSettings->m_columnCount == 0)
+	{
+		addColumn(CustomAppSignalID);
+		addColumn(EquipmentID);
+		addColumn(Caption);
+		addColumn(Units);
+		addColumn(Type);
+
+		addColumn(Value);
+		addColumn(Default);
+		addColumn(Valid);
+		addColumn(Underflow);
+		addColumn(Overflow);
+	}
+	else
+	{
+		m_columnsIndexes  = pageSettings->m_columnsIndexes;
+	}
+}
+
+QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
+{
+	int col = index.column();
+	int displayIndex = m_columnsIndexes[col];
+
+	if (displayIndex == Value)
+	{
+		//int displayIndex = m_columnsIndexes[col];
+		QColor color = QColor(Qt::red);
+		return QBrush(color);
+	}
+
+	if (displayIndex == Default)
+	{
+		//int displayIndex = m_columnsIndexes[col];
+		QColor color = QColor(Qt::gray);
+		return QBrush(color);
+	}
+
+	return QBrush();
+}
+
+QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
+{
+	int col = index.column();
+	int displayIndex = m_columnsIndexes[col];
+
+	if (displayIndex == Value)
+	{
+		//int displayIndex = m_columnsIndexes[col];
+		QColor color = QColor(Qt::white);
+		return QBrush(color);
+	}
+
+	if (displayIndex == Default)
+	{
+		//int displayIndex = m_columnsIndexes[col];
+		QColor color = QColor(Qt::white);
+		return QBrush(color);
+	}
+
+	return QBrush();
+
+}
+
 
 //
 // TuningPage
@@ -545,8 +570,8 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 
 	// Models and data
 	//
-	m_model = new TuningItemModel(m_tuningPageIndex, this);
-	m_model->setFont("Ms Sans Serif", 10, true);
+	m_model = new TuningItemModelMain(m_tuningPageIndex, this);
+	//m_model->setFont("Ms Sans Serif", 10, true);
 
 
 	m_objectList->setModel(m_model);

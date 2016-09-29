@@ -11,24 +11,8 @@ class TuningItemModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	void Init();
 	TuningItemModel(QObject *parent);
-	TuningItemModel(int tuningPageIndex, QObject *parent);
 	~TuningItemModel();
-public:
-
-	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
-
-	std::vector<int> columnsIndexes();
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
-
-	QStringList columnsNames();
-
-	void update();
-
-	int objectIndex(int index);
-
-	void setFont(const QString& fontName, int fontSize, bool fontBold);
 
 public:
 
@@ -48,6 +32,21 @@ public:
 		Overflow,
 	};
 
+public:
+	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
+
+	std::vector<int> columnsIndexes();
+	void setColumnsIndexes(std::vector<int> columnsIndexes);
+
+	//QStringList columnsNames();
+
+	//void update();
+
+	int objectIndex(int index);
+
+	void setFont(const QString& fontName, int fontSize, bool fontBold);
+
+	void addColumn(TuningPageColumns column);
 
 protected:
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -55,16 +54,30 @@ protected:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+	virtual QBrush backColor(const QModelIndex& index) const;
+	virtual QBrush foregroundColor(const QModelIndex& index) const;
 
 private:
 	std::vector<int> m_objectsIndexes;
 	QStringList m_columnsNames;
-	std::vector<int> m_columnsIndexes;
 
 	QFont* m_font = nullptr;
+
+protected:
+	std::vector<int> m_columnsIndexes;
+
+};
+
+class TuningItemModelMain : public TuningItemModel
+{
+public:
+	TuningItemModelMain(int tuningPageIndex, QObject* parent);
+
+protected:
+	virtual QBrush backColor(const QModelIndex& index) const override;
+	virtual QBrush foregroundColor(const QModelIndex& index) const override;
 
 };
 
@@ -131,7 +144,7 @@ private:
 
 	QComboBox* m_maskTypeCombo = nullptr;
 
-	TuningItemModel *m_model = nullptr;
+	TuningItemModelMain *m_model = nullptr;
 
 	std::vector<int> m_objectsIndexes;
 
