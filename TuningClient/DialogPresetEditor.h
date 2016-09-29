@@ -41,6 +41,10 @@ private slots:
 
 	void on_m_signalTypeCombo_currentIndexChanged(int index);
 
+private slots:
+
+	void slot_signalsUpdated();
+
 private:
 
 	enum class TreeItemType

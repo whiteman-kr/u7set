@@ -82,6 +82,10 @@ public:
 	std::vector <ObjectFilterValue> signalValues() const;
 	void setValues(const std::vector <ObjectFilterValue>& values);
 
+	bool valueExists(const QString& appSignalId);
+	void addValue(const ObjectFilterValue& value);
+	void removeValue(const QString& appSignalId);
+
 	FilterType filterType() const;
 	void setFilterType(FilterType value);
 

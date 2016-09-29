@@ -25,9 +25,6 @@ ObjectFilter::ObjectFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	//auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIdsCR, ObjectFilter::setAppSignalIdsCR);
-	//propSignals->setCategory("Signals");
-
 	auto propFolder = ADD_PROPERTY_GETTER_SETTER(bool, "Folder", true, ObjectFilter::folder, ObjectFilter::setFolder);
 	propFolder->setCategory("Options");
 }
@@ -99,11 +96,6 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		setAppSignalIDMask(reader.attributes().value("AppSignalIDMask").toString());
 	}
 
-	/*if (reader.attributes().hasAttribute("AppSignalIDs"))
-	{
-		setAppSignalIdsCSV(reader.attributes().value("AppSignalIDs").toString());
-	}*/
-
 	if (reader.attributes().hasAttribute("SignalType"))
 	{
 		QString v = reader.attributes().value("SignalType").toString();
@@ -137,14 +129,68 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		setFolder(reader.attributes().value("Folder").toString() == "true");
 	}
 
+	int recurseLevel = 0;		//recurseLevel 1 = "Values", recurseLevel 2 = "Value"
+
 	QXmlStreamReader::TokenType t;
 	do
 	{
 		t = reader.readNext();
 
+		if (t == QXmlStreamReader::EndElement && recurseLevel > 0)
+		{
+			// This is end element of "Value" or "Values", read next element
+			//
+			recurseLevel--;
+			t = reader.readNext();
+		}
+
 		if (t == QXmlStreamReader::StartElement)
 		{
 			QString tagName = reader.name().toString();
+
+
+			if (tagName == "Values")
+			{
+				recurseLevel++;
+
+				continue;
+			}
+
+			if (tagName == "Value")
+			{
+				recurseLevel++;
+
+				ObjectFilterValue ofv;
+
+				if (reader.attributes().hasAttribute("AppSignalId"))
+				{
+					ofv.appSignalId = reader.attributes().value("AppSignalId").toString();
+				}
+
+				if (reader.attributes().hasAttribute("Caption"))
+				{
+					ofv.caption = reader.attributes().value("Caption").toString();
+				}
+
+				if (reader.attributes().hasAttribute("Analog"))
+				{
+					ofv.analog = reader.attributes().value("Analog").toString() == "true";
+				}
+
+				if (reader.attributes().hasAttribute("Value"))
+				{
+					ofv.value = reader.attributes().value("Value").toDouble();
+				}
+
+				if (reader.attributes().hasAttribute("DecimalPlaces"))
+				{
+					ofv.decimalPlaces = reader.attributes().value("DecimalPlaces").toInt();
+				}
+
+				m_signalValues.push_back(ofv);
+
+				continue;
+			}
 
 			if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 			{
@@ -169,12 +215,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 
 				addChild(of);
 
+				continue;
 			}
-			else
-			{
-				reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-				return false;
-			}
+
+			reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+			return false;
 		}
 	}while (t != QXmlStreamReader::EndElement);
 
@@ -214,11 +259,27 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
-	//writer.writeAttribute("AppSignalIDs", appSignalIdsCSV());
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
 	writer.writeAttribute("Folder", folder() ? "true" : "false");
+
+	writer.writeStartElement("Values");
+	for (const ObjectFilterValue& v : m_signalValues)
+	{
+		writer.writeStartElement("Value");
+		writer.writeAttribute("AppSignalId", v.appSignalId);
+		writer.writeAttribute("Caption", v.caption);
+		writer.writeAttribute("Analog", v.analog ? "true" : "false");
+		writer.writeAttribute("Value", QString::number(v.value, 'f', v.decimalPlaces));
+		if (v.analog == true)
+		{
+			writer.writeAttribute("DecimalPlaces", QString::number(v.decimalPlaces));
+		}
+		writer.writeEndElement();
+	}
+	writer.writeEndElement();
+
 
 	for (auto f : m_childFilters)
 	{
@@ -335,6 +396,52 @@ void ObjectFilter::setValues(const std::vector <ObjectFilterValue>& values)
 	m_signalValues = values;
 }
 
+bool ObjectFilter::valueExists(const QString& appSignalId)
+{
+	for (const ObjectFilterValue& ofv : m_signalValues)
+	{
+		if (ofv.appSignalId == appSignalId)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+void ObjectFilter::addValue(const ObjectFilterValue& value)
+{
+	if (valueExists(value.appSignalId) == true)
+	{
+		assert(false);
+		return;
+	}
+
+	m_signalValues.push_back(value);
+}
+
+void ObjectFilter::removeValue(const QString& appSignalId)
+{
+	int index = -1;
+
+	for (const ObjectFilterValue& ofv : m_signalValues)
+	{
+		index++;
+
+		if (ofv.appSignalId == appSignalId)
+		{
+			break;
+		}
+	}
+
+	if (index == -1)
+	{
+		assert(false);
+		return;
+	}
+
+	m_signalValues.erase(m_signalValues.begin() + index);
+}
 
 ObjectFilter::FilterType ObjectFilter::filterType() const
 {
