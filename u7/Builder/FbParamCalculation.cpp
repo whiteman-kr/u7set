@@ -106,6 +106,14 @@ namespace Builder
 			result = calculate_INT_paramValues();
 			break;
 
+		case Afb::AfbType::COMP:			// opcode 18
+			result = calculate_COMP_paramValues();
+			break;
+
+		case Afb::AfbType::MATH_FP:			// opcode 19
+			result = calculate_MATH_FP_paramValues();
+			break;
+
 		case Afb::AfbType::DPCOMP:			// opcode 20
 			result = calculate_DPCOMP_paramValues();
 			break;
@@ -126,12 +134,16 @@ namespace Builder
 			result = calculate_DEAD_ZONE_paramValues();
 			break;
 
-		case Afb::AfbType::POL:				// opcode 27
+		case Afb::AfbType::POL:				// opcode 25
 			result = calculate_POL_paramValues();
 			break;
 
-		case Afb::AfbType::DER:				// opcode 28
+		case Afb::AfbType::DER:				// opcode 26
 			result = calculate_DER_paramValues();
+			break;
+
+		case Afb::AfbType::MISMATCH:		// opcode 27
+			result = calculate_MISMATCH_paramValues();
 			break;
 
 		default:
@@ -1210,6 +1222,18 @@ namespace Builder
 	}
 
 
+	bool AppFb::calculate_COMP_paramValues()
+	{
+		return true;
+	}
+
+
+	bool AppFb::calculate_MATH_FP_paramValues()
+	{
+		return true;
+	}
+
+
 	bool AppFb::calculate_DPCOMP_paramValues()
 	{
 		m_runTime = 2;
@@ -1510,4 +1534,42 @@ namespace Builder
 		return true;
 	}
 
+
+	bool AppFb::calculate_MISMATCH_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_conf_n");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf_n = m_paramValuesArray["i_conf_n"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+		CHECK_UNSIGNED_INT(i_conf_n);
+
+		// i_conf must have value 0 or 1
+		//
+		if (i_conf.unsignedIntValue() >= 2)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		// i_conf_n must have value from 2 to 4
+		//
+		if (i_conf_n.unsignedIntValue() < 2 || i_conf_n.unsignedIntValue() > 4)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf_n.unsignedIntValue(), i_conf_n.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
 }

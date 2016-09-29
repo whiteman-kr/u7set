@@ -219,6 +219,9 @@ namespace Tuning
 				continue;
 			}
 
+
+			// TO DO !!!! MOVE THIS CONDITION DOWN !!!
+
 			if (queue->isEmpty())
 			{
 				continue;

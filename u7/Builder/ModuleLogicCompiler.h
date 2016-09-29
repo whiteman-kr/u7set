@@ -242,6 +242,8 @@ namespace Builder
 		bool calculate_MEM_paramValues();
 		bool calculate_FUNC_paramValues();
 		bool calculate_INT_paramValues();
+		bool calculate_COMP_paramValues();
+		bool calculate_MATH_FP_paramValues();
 		bool calculate_DPCOMP_paramValues();
 		bool calculate_MUX_paramValues();
 		bool calculate_LATCH_paramValues();
@@ -249,6 +251,7 @@ namespace Builder
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_POL_paramValues();
 		bool calculate_DER_paramValues();
+		bool calculate_MISMATCH_paramValues();
 
 		//
 
