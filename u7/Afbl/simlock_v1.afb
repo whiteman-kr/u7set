@@ -3,7 +3,7 @@
     <AfbElement StrId="#simlock_v1">
         <Properties>
             <Caption>simlock</Caption>
-            <Version>1.1</Version>
+            <Version>1.0002</Version>
             <Implementation Version="104" OpIndex="5"/>
             <Description>Locking and simulation module</Description>
             <Category>Logic</Category>
@@ -13,12 +13,12 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="UnsignedInt" OpIndex="0" Size="16"/>
-            <AfbElementSignal OpName="i_set" Caption="sim" Type="Analog" DataFormat="UnsignedInt" OpIndex="1" Size="16"/>
-            <AfbElementSignal OpName="i_reset" Caption="block" Type="Analog" DataFormat="UnsignedInt" OpIndex="2" Size="16"/>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Discrete" OpIndex="0" Size="16"/>
+            <AfbElementSignal OpName="i_set" Caption="sim" Type="Discrete" OpIndex="1" Size="16"/>
+            <AfbElementSignal OpName="i_reset" Caption="block" Type="Discrete" OpIndex="2" Size="16"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="UnsignedInt" OpIndex="4" Size="16"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="4" Size="16"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">

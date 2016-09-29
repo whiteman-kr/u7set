@@ -25,8 +25,8 @@ ObjectFilter::ObjectFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIdsCR, ObjectFilter::setAppSignalIdsCR);
-	propSignals->setCategory("Signals");
+	//auto propSignals = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalIds", true, ObjectFilter::appSignalIdsCR, ObjectFilter::setAppSignalIdsCR);
+	//propSignals->setCategory("Signals");
 
 	auto propFolder = ADD_PROPERTY_GETTER_SETTER(bool, "Folder", true, ObjectFilter::folder, ObjectFilter::setFolder);
 	propFolder->setCategory("Options");
@@ -62,6 +62,12 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 
 		addChild(fiCopy);
 	}
+}
+
+ObjectFilter::~ObjectFilter()
+{
+	qDebug()<<"Deleting filter: "<<caption();
+
 }
 
 bool ObjectFilter::load(QXmlStreamReader& reader)
@@ -809,7 +815,7 @@ std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index) const
 	return m_topFilters[index];
 }
 
-bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> filter)
+bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> &filter)
 {
 	if (filter == nullptr)
 	{
@@ -821,7 +827,7 @@ bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> filte
 	return true;
 }
 
-bool ObjectFilterStorage::removeFilter(std::shared_ptr<ObjectFilter> filter)
+bool ObjectFilterStorage::removeFilter(const std::shared_ptr<ObjectFilter> &filter)
 {
 	if (filter->parentFilter() != nullptr)
 	{

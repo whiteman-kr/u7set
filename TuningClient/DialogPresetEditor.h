@@ -9,6 +9,8 @@
 
 namespace Ui {
 class DialogPresetEditor;
+
+
 }
 
 
@@ -35,8 +37,9 @@ private slots:
 
 	void on_m_remove_clicked();
 
-
 	void on_m_presetsTree_doubleClicked(const QModelIndex &index);
+
+	void on_m_signalTypeCombo_currentIndexChanged(int index);
 
 private:
 
@@ -44,6 +47,13 @@ private:
 	{
 		Filter,
 		Signal
+	};
+
+	enum class SignalType
+	{
+		All,
+		Analog,
+		Discrete
 	};
 
 	bool isFilter(QTreeWidgetItem* item);
