@@ -3,7 +3,7 @@
     <AfbElement StrId="#mismatch_fp_v1">
         <Properties>
             <Caption>mismatch_fp</Caption>
-            <Version>1.0002</Version>
+            <Version>1.0003</Version>
 	  <Implementation Version="0" OpIndex="22"/>
             <Description>Analog mismatch block</Description>
             <Category>Other</Category>
@@ -51,6 +51,15 @@ function(videoItemFblElement, afbElement)
 	return;
 }
 		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_ust" Caption="MaxMismatch" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
@@ -164,15 +173,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 	videoItemFblElement.adjustHeight();
 
 	return true;
-}
-
-function createOutputUnconditional(videoItemFblElement, afbElement, signalCaption)
-{
-	var s = afbElement.getAfbSignalByCaption(signalCaption);
-	if (s != null)
-	{
-		videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-	}
 }
 
 function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
