@@ -916,6 +916,10 @@ namespace Builder
 				result &= copyAifmDataToRegBuf(module);
 				break;
 
+			case Hardware::DeviceModule::FamilyType::MPS17:
+				result &= copyMps17DataToRegBuf(module);
+				break;
+
 			default:
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Unknown input module %1 family type")).arg(module.device->equipmentIdTemplate()));
 
@@ -1136,6 +1140,22 @@ namespace Builder
 	{
 		LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->equipmentIdTemplate()));
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::copyMps17DataToRegBuf(const Module& module)
+	{
+		m_code.comment(QString(tr("Copying MPS17 data place %2 to RegBuf")).arg(module.place));
+		m_code.newLine();
+
+		Command cmd;
+
+		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
+		m_code.append(cmd);
+
+		m_code.newLine();
 
 		return true;
 	}
@@ -4438,6 +4458,14 @@ namespace Builder
 						continue;
 					}
 
+					// analog signal
+					//
+
+					if (deviceSignal->size() == 32)
+					{
+						continue;			// 16->32 bit scaling not needed
+					}
+
 					AppItem* appItem = nullptr;
 
 					switch(signal->inOutType())
@@ -5053,6 +5081,9 @@ namespace Builder
 								break;
 
 							case Hardware::DeviceModule::FamilyType::LM:
+								break;
+
+							case Hardware::DeviceModule::FamilyType::MPS17:
 								break;
 
 							default:
