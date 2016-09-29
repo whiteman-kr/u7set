@@ -65,7 +65,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 				value |= frame[dataPos++];
 
-				_itoa_s(value, buf, sizeof(buf), 16);
+				snprintf(buf, sizeof(buf), "%hx", value);
 
 				int len = static_cast<int>(strlen(buf));
 

@@ -66,7 +66,7 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 
 ObjectFilter::~ObjectFilter()
 {
-	qDebug()<<"Deleting filter: "<<caption();
+	//qDebug()<<"Deleting filter: "<<caption();
 
 }
 
