@@ -37,6 +37,7 @@ private:
 	int m_updateStatusBarTimerId = -1;
 
 signals:
+	void signalsUpdated();
 	void filtersUpdated();
 
 private slots:
@@ -70,5 +71,7 @@ private:
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
 };
+
+extern MainWindow* theMainWindow;
 
 #endif // MAINWINDOW_H
