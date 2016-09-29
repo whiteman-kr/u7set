@@ -2481,8 +2481,8 @@ R"DELIM({
 
 		return	family == FamilyType::AIM ||
 				family == FamilyType::DIM ||
-				family == FamilyType::AIFM;
-				//family == FamilyType::MPS17 ||
+				family == FamilyType::AIFM ||
+				family == FamilyType::MPS17;
 				//family == FamilyType::BVK4;
 	}
 

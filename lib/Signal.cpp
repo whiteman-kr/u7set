@@ -89,7 +89,10 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (m_type == E::SignalType::Analog)
 	{
-		m_dataFormat = E::DataFormat::Float;
+		m_dataFormat = deviceSignal.format();
+
+		assert(m_dataFormat == E::DataFormat::Float || m_dataFormat == E::DataFormat::SignedInt);
+
 		m_dataSize = 32;
 	}
 	else
