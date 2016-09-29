@@ -7,7 +7,7 @@
 class SignalProperties : public PropertyObject
 {
 private:
-	Signal& m_signal;
+	Signal m_signal;
 
 	void initProperties();
 

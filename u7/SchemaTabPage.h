@@ -42,6 +42,59 @@ signals:
 protected:
 };
 
+
+//
+//
+// SchemaControlTabPage
+//
+//
+class SchemaControlTabPage : public QWidget, public HasDbController
+{
+	Q_OBJECT
+public:
+	SchemaControlTabPage(QString fileExt,
+						 DbController* db,
+						 QString parentFileName,
+						 QString templateFileExtension,
+						 std::function<VFrame30::Schema*()> createSchemaFunc);
+
+	virtual ~SchemaControlTabPage();
+
+public:
+	VFrame30::Schema* createSchema() const;
+
+protected:
+	void CreateActions();
+
+signals:
+
+protected slots:
+	void addFile();
+	void deleteFile(std::vector<DbFileInfo> files);
+
+	void checkIn(std::vector<DbFileInfo> files);
+	void undoChanges(std::vector<DbFileInfo> files);
+
+	void openFiles(std::vector<DbFileInfo> files);
+	void viewFiles(std::vector<DbFileInfo> files);
+
+	void refreshFiles();
+
+	// Properties
+	//
+public:
+	const DbFileInfo& parentFile() const;
+
+	// Data
+	//
+private:
+	std::function<VFrame30::Schema*()> m_createSchemaFunc;
+	SchemaFileView* m_filesView;
+	QString m_templateFileExtension;
+};
+
+
+
 //
 //
 // SchemasTabPage
@@ -153,58 +206,6 @@ SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* pare
 
 	return p;
 }
-
-
-
-//
-//
-// SchemaControlTabPage
-//
-//
-class SchemaControlTabPage : public QWidget, public HasDbController
-{
-    Q_OBJECT
-public:
-	SchemaControlTabPage(QString fileExt,
-						 DbController* db,
-						 QString parentFileName,
-						 QString templateFileExtension,
-						 std::function<VFrame30::Schema*()> createSchemaFunc);
-
-	virtual ~SchemaControlTabPage();
-
-public:
-	VFrame30::Schema* createSchema() const;
-
-protected:
-    void CreateActions();
-
-signals:
-
-protected slots:
-    void addFile();
-    void deleteFile(std::vector<DbFileInfo> files);
-
-	void checkIn(std::vector<DbFileInfo> files);
-	void undoChanges(std::vector<DbFileInfo> files);
-
-    void openFiles(std::vector<DbFileInfo> files);
-    void viewFiles(std::vector<DbFileInfo> files);
-
-    void refreshFiles();
-
-    // Properties
-    //
-public:
-    const DbFileInfo& parentFile() const;
-
-    // Data
-    //
-private:
-	std::function<VFrame30::Schema*()> m_createSchemaFunc;
-	SchemaFileView* m_filesView;
-	QString m_templateFileExtension;
-};
 
 
 //
