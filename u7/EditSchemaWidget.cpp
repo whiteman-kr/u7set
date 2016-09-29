@@ -3346,6 +3346,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+				newPoints = removeUnwantedPoints(newPoints);
+
 				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 			}
 			else
@@ -3366,6 +3368,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 				}
 			}
@@ -3406,6 +3410,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 				else
@@ -3417,6 +3423,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+					newPoints = removeUnwantedPoints(newPoints);
+
 					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 			}
@@ -3440,6 +3448,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+						newPoints = removeUnwantedPoints(newPoints);
+
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 					else
@@ -3451,6 +3461,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
+						newPoints = removeUnwantedPoints(newPoints);
+
 						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 				}
@@ -3462,10 +3474,14 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		{
 			if (itemPos->GetPointList().size() > 2 ||
 					(itemPos->GetPointList().size() == 2 &&
-					itemPos->GetPointList().front() != itemPos->GetPointList().back())
-				)
+					itemPos->GetPointList().front() != itemPos->GetPointList().back()))
 			{
-				itemPos->RemoveUnwantedPoints();
+				const std::list<VFrame30::SchemaPoint>& pointList = itemPos->GetPointList();
+
+				std::list<VFrame30::SchemaPoint> newPoints = removeUnwantedPoints(pointList);
+
+				itemPos->SetPointList(newPoints);
+				assert(itemPos->GetPointList().size() >= 2);
 
 				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
 			}
@@ -4302,6 +4318,41 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	}
 
 	return docPoint;
+}
+
+std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const
+{
+	std::vector<VFrame30::SchemaPoint> result = source;
+
+	// To do filter
+	//
+//	void PosConnectionImpl::RemoveUnwantedPoints()
+//	{
+//		SchemaPoint firstPoint = points.front();
+//		SchemaPoint lastPoint = points.back();
+
+//		if (std::abs(firstPoint.X - lastPoint.X) < 0.000001 ||
+//			std::abs(firstPoint.Y - lastPoint.Y) < 0.000001)
+//		{
+//			while (points.size() != 1)
+//			{
+//				points.pop_back();
+//			}
+
+//			points.push_back(lastPoint);
+//		}
+//	}
+
+	return result;
+}
+
+std::list<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const
+{
+	std::vector<VFrame30::SchemaPoint> sourceVector(source.begin(), source.end());
+	sourceVector = removeUnwantedPoints(sourceVector);
+
+	std::list<VFrame30::SchemaPoint> result(sourceVector.begin(), sourceVector.end());
+	return result;
 }
 
 bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)

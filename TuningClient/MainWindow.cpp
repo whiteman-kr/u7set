@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
 	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
 
+	connect(this, &MainWindow::filtersUpdated, this, &MainWindow::slot_filtersUpdated);
 
 	QString errorCode;
 	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
@@ -187,6 +188,24 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
+void MainWindow::removeWorkspace()
+{
+	if (m_tuningWorkspace != nullptr)
+	{
+		QMessageBox::warning(this, "Warning", "Program configuration has been changed and will be updated.");
+
+		delete m_tuningWorkspace;
+		m_tuningWorkspace = nullptr;
+	}
+
+}
+
+void MainWindow::createWorkspace()
+{
+	m_tuningWorkspace = new TuningWorkspace(this);
+	setCentralWidget(m_tuningWorkspace);
+}
+
 void MainWindow::slot_configurationArrived(ConfigSettings settings)
 {
 	if (settings.updateFilters == false && settings.updateSignals == false && settings.updateSchemas == false)
@@ -194,13 +213,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		return;
 	}
 
-	if (m_tuningWorkspace != nullptr)
-	{
-		QMessageBox::warning(this, "Warning", "Program configuration was changed and will be reloaded.");
-
-		delete m_tuningWorkspace;
-		m_tuningWorkspace = nullptr;
-	}
+	removeWorkspace();
 
 	if (settings.updateFilters == true)
 	{
@@ -228,9 +241,15 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
 	theFilters.createAutomaticFilters();
 
-	m_tuningWorkspace = new TuningWorkspace(this);
-	setCentralWidget(m_tuningWorkspace);
+	createWorkspace();
 
+	return;
+}
+
+void MainWindow::slot_filtersUpdated()
+{
+	removeWorkspace();
+	createWorkspace();
 	return;
 }
 

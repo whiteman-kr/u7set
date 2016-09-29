@@ -1709,20 +1709,36 @@ namespace Builder
 						//
 						Signal* signal = m_signalSet->getSignal(appSignalId);
 
-						if (signal == nullptr ||
-							signal->lm().get() == nullptr ||
-							signal->lm()->equipmentId() != equipmentId)
+						if (signal == nullptr)
+						{
+							allSignalsFromThisChannel = false;
+							m_log->errALP4034(schema->schemaID(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							continue;
+						}
+
+						if (signal->lm() == nullptr)
+						{
+							allSignalsFromThisChannel = false;
+							m_log->errALP4035(schema->schemaID(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							continue;
+						}
+
+						if (signal->lm()->equipmentId() != equipmentId)
 						{
 							allSignalsFromThisChannel = false;
 
 							if (lmEquipmnetId.isEmpty() == true)
 							{
+								// The first occurance LM, init lmEquipmnetId
+								//
 								lmEquipmnetId = signal->lm()->equipmentId();
 							}
 							else
 							{
 								if (lmEquipmnetId != signal->lm()->equipmentId())
 								{
+									// Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
+									//
 									m_log->errALP4033(schema->schemaID(), appSignalId, signalElement->guid());
 								}
 							}

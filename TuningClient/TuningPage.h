@@ -11,9 +11,11 @@ class TuningItemModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	void Init();
+	TuningItemModel(QObject *parent);
 	TuningItemModel(int tuningPageIndex, QObject *parent);
+	~TuningItemModel();
 public:
-
 
 	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
 
@@ -26,11 +28,13 @@ public:
 
 	int objectIndex(int index);
 
+	void setFont(const QString& fontName, int fontSize, bool fontBold);
+
 public:
 
 	enum TuningPageColumns
 	{
-		SignalID = 0,
+		CustomAppSignalID = 0,
 		EquipmentID,
 		AppSignalID,
 		Caption,
@@ -60,25 +64,27 @@ private:
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 
+	QFont* m_font = nullptr;
+
 };
 
 class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(Hash hash, const QString& caption, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent = nullptr);
 
-	Hash filterHash();
+	std::shared_ptr<ObjectFilter> filter();
 
 private:
-	Hash m_filterHash;
+	std::shared_ptr<ObjectFilter> m_filter;
 	QString m_caption;
 
 private slots:
 	void slot_toggled(bool checked);
 
 signals:
-	void filterButtonClicked(Hash hash);
+	void filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
 };
 
 
@@ -86,7 +92,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, ObjectFilter* tabFilter, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -94,10 +100,10 @@ public:
 signals:
 
 private slots:
-	void slot_filterButtonClicked(Hash hash);
+	void slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
 
 public slots:
-	void slot_filterTreeChanged(Hash hash);
+	void slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter);
 
 private:
 
@@ -129,11 +135,11 @@ private:
 
 	std::vector<int> m_objectsIndexes;
 
-	ObjectFilter* m_treeFilter = nullptr;
+	std::shared_ptr<ObjectFilter> m_treeFilter = nullptr;
 
-	ObjectFilter* m_tabFilter = nullptr;
+	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
 
-	ObjectFilter* m_buttonFilter = nullptr;
+	std::shared_ptr<ObjectFilter> m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 

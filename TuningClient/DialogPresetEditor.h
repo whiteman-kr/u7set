@@ -5,17 +5,19 @@
 #include "ObjectFilter.h"
 #include "ObjectManager.h"
 #include "TuningObject.h"
+#include "TuningPage.h"
 
 namespace Ui {
 class DialogPresetEditor;
 }
+
 
 class DialogPresetEditor : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogPresetEditor(ObjectFilterStorage* filters, QWidget *parent = 0);
+	explicit DialogPresetEditor(ObjectFilterStorage* filterStorage, QWidget *parent = 0);
 	~DialogPresetEditor();
 
 private slots:
@@ -37,16 +39,33 @@ private slots:
 	void on_m_presetsTree_doubleClicked(const QModelIndex &index);
 
 private:
-	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
+
+	enum class TreeItemType
+	{
+		Filter,
+		Signal
+	};
+
+	bool isFilter(QTreeWidgetItem* item);
+	bool isSignal(QTreeWidgetItem* item);
+
+	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
+
+	void setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter);
+
+	void fillObjectsList();
 
 
 private:
 	Ui::DialogPresetEditor *ui;
 
+	TuningItemModel *m_model = nullptr;
 
 	bool m_modified = false;
 
-	ObjectFilterStorage* m_filters;
+	ObjectFilterStorage* m_filterStorage;
+
+	std::vector<int> m_objectsIndexes;
 };
 
 #endif // DIALOGPRESETEDITOR_H

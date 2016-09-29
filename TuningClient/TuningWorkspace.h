@@ -10,19 +10,24 @@ public:
 	TuningWorkspace(QWidget* parent = nullptr);
 	~TuningWorkspace();
 
+
+private:
+	void fillFilters(std::vector<QTreeWidgetItem*>& treeItems, const ObjectFilterStorage& filterStorage);
+	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent);
+
+private:
+
 	QTreeWidget* m_filterTree = nullptr;
 	QSplitter* m_hSplitter = nullptr;
 	QTabWidget* m_tab = nullptr;
 
 	TuningPage* m_tuningPage = nullptr;
 
-	void addChildTreeObjects(ObjectFilter *filter, QTreeWidgetItem* parent);
-
 private slots:
 	void slot_treeSelectionChanged();
 
 signals:
-	void filterSelectionChanged(Hash hash);
+	void filterSelectionChanged(std::shared_ptr<ObjectFilter> filter);
 
 };
 

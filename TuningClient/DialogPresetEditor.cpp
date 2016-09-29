@@ -2,18 +2,34 @@
 #include "DialogPresetProperties.h"
 #include "ui_DialogPresetEditor.h"
 
-DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filters, QWidget *parent) :
+
+//
+//
+//
+
+DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filterStorage, QWidget *parent) :
 	QDialog(parent),
-	m_filters(filters),
+	m_filterStorage(filterStorage),
 	ui(new Ui::DialogPresetEditor)
 {
 	ui->setupUi(this);
 
+	ui->m_presetsTree->setExpandsOnDoubleClick(false);
 
-	int count = m_filters->topFilterCount();
+	QStringList headerLabels;
+	headerLabels<<"Caption";
+	headerLabels<<"Type";
+	headerLabels<<"AppSignalID";
+	headerLabels<<"AppSignalCaption";
+	headerLabels<<"Value";
+
+	ui->m_presetsTree->setColumnCount(headerLabels.size());
+	ui->m_presetsTree->setHeaderLabels(headerLabels);
+
+	int count = m_filterStorage->topFilterCount();
 	for (int i = 0; i < count; i++)
 	{
-		ObjectFilter* f = m_filters->topFilter(i).get();
+		std::shared_ptr<ObjectFilter> f = m_filterStorage->topFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -25,13 +41,39 @@ DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filters, QWidget *pa
 			continue;
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-		item->setData(0, Qt::UserRole, f->hash());
-
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		setTreeItemText(item, f.get());
+		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
+		item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 		addChildTreeObjects(f, item);
 
 		ui->m_presetsTree->addTopLevelItem(item);
 	}
+
+	ui->m_presetsTree->expandAll();
+
+	for (int i = 0; i < ui->m_presetsTree->columnCount(); i++)
+	{
+		ui->m_presetsTree->resizeColumnToContents(i);
+	}
+
+
+
+	// Objects
+
+	m_model = new TuningItemModel(this);
+
+	ui->m_signalsTable->setModel(m_model);
+
+	ui->m_signalsTable->verticalHeader()->hide();
+	ui->m_signalsTable->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+	ui->m_signalsTable->verticalHeader()->setDefaultSectionSize(16);
+	ui->m_signalsTable->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	ui->m_signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+
+	fillObjectsList();
+
+	ui->m_signalsTable->resizeColumnsToContents();
 }
 
 DialogPresetEditor::~DialogPresetEditor()
@@ -39,7 +81,85 @@ DialogPresetEditor::~DialogPresetEditor()
 	delete ui;
 }
 
-void DialogPresetEditor::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetItem* parent)
+void DialogPresetEditor::fillObjectsList()
+{
+	m_objectsIndexes.clear();
+
+	for (int i = 0; i < theObjects.objectsCount(); i++)
+	{
+		TuningObject o = theObjects.object(i);
+
+/*		if (m_treeFilter != nullptr)
+		{
+			if (m_treeFilter->folder() == true)
+			{
+				continue;
+			}
+
+			bool result = true;
+
+			ObjectFilter* treeFilter = m_treeFilter.get();
+			while (treeFilter != nullptr)
+			{
+				if (treeFilter->match(o) == false)
+				{
+					result = false;
+					break;
+				}
+
+				treeFilter = treeFilter->parentFilter();
+			}
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
+		if (m_tabFilter != nullptr)
+		{
+			if (m_tabFilter->match(o) == false)
+			{
+				continue;
+			}
+		}
+
+		if (m_buttonFilter != nullptr)
+		{
+			if (m_buttonFilter->match(o) == false)
+			{
+				continue;
+			}
+		}*/
+
+		m_objectsIndexes.push_back(i);
+	}
+
+	m_model->setObjectsIndexes(m_objectsIndexes);
+}
+
+bool DialogPresetEditor::isFilter(QTreeWidgetItem* item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return false;
+	}
+	TreeItemType type = static_cast<TreeItemType>(item->data(1, Qt::UserRole).toInt());
+	return (type == TreeItemType::Filter);
+}
+
+bool DialogPresetEditor::isSignal(QTreeWidgetItem* item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return false;
+	}
+	TreeItemType type = static_cast<TreeItemType>(item->data(1, Qt::UserRole).toInt());
+	return (type == TreeItemType::Signal);
+}
+
+void DialogPresetEditor::addChildTreeObjects(const std::shared_ptr<ObjectFilter>& filter, QTreeWidgetItem* parent)
 {
 	if (filter == nullptr)
 	{
@@ -55,37 +175,92 @@ void DialogPresetEditor::addChildTreeObjects(ObjectFilter* filter, QTreeWidgetIt
 
 	for (int i = 0; i < filter->childFiltersCount(); i++)
 	{
-		ObjectFilter* f = filter->childFilter(i);
+		std::shared_ptr<ObjectFilter> f = filter->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
 			continue;
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-		item->setData(0, Qt::UserRole, f->hash());
-		parent->addChild(item);
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		setTreeItemText(item, f.get());
+		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
+		item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 
 		addChildTreeObjects(f, item);
+
+		parent->addChild(item);
 	}
+}
+
+void DialogPresetEditor::setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter)
+{
+	if (item == nullptr || filter == nullptr)
+	{
+		assert(item);
+		assert(filter);
+		return;
+	}
+
+	QStringList l;
+	l << filter->caption();
+	l.append(filter->folder() ? tr("Folder") : tr("Preset"));
+
+	int i = 0;
+	for (auto s : l)
+	{
+		item->setText(i++, s);
+	}
+
+	// remove all signal items
+	//
+	int childCount = item->childCount();
+	for (int i = childCount - 1; i >= 0; i--)
+	{
+		QTreeWidgetItem* childItem = item->child(i);
+		if (childItem == nullptr)
+		{
+			assert(childItem);
+			return;
+		}
+
+		if (isSignal(childItem) == false)
+		{
+			continue;
+		}
+
+		item->takeChild(i);
+	}
+
+	//add signal items
+	//
+	QStringList apsList = filter->appSignalIdsList();
+
+	QList<QTreeWidgetItem*> children;
+	for (auto aps : apsList)
+	{
+		QStringList l;
+		l.push_back("-");
+		l.push_back("Signal");
+		l.push_back(aps);
+		l.push_back("Caption");
+		l.push_back(tr("0/Yes"));
+
+		QTreeWidgetItem* childItem = new QTreeWidgetItem(l);
+		childItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Signal));
+
+		children.push_back(childItem);
+	}
+
+	item->addChildren(children);
 }
 
 void DialogPresetEditor::on_m_addPreset_clicked()
 {
 	QTreeWidgetItem* parentItem = ui->m_presetsTree->currentItem();
-
-	Hash hash = 0;
-
-	if (parentItem != nullptr)
+	if (parentItem != nullptr && isFilter(parentItem) == false)
 	{
-		hash = parentItem->data(0, Qt::UserRole).value<Hash>();
-	}
-
-	ObjectFilter* parentFilter = nullptr;
-
-	if (hash != 0)
-	{
-		parentFilter = m_filters->filter(hash).get();
+		return;
 	}
 
 	std::shared_ptr<ObjectFilter> newFilter = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
@@ -94,36 +269,23 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 	newFilter->setStrID(uid.toString());
 	newFilter->setCaption("New Filter");
 
-	bool result = false;
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	setTreeItemText(item, newFilter.get());
+	item->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+	item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 
-	if (parentFilter != nullptr)
+	if (parentItem != nullptr)
 	{
-		// this is child filter
-		result = m_filters->addFilter(parentFilter, newFilter);
-	}
-	else
-	{
-		result = m_filters->addTopFilter(newFilter);
-	}
+		std::shared_ptr<ObjectFilter> parentFilter = parentItem->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
+		parentFilter->addChild(newFilter);
 
-
-	if (result == false)
-	{
-		QMessageBox::critical(this, "Error", tr("Failed to add filter: hash %1 is not unique").arg(newFilter->hash()));
-		return;
-	}
-
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<newFilter->caption());
-	item->setData(0, Qt::UserRole, newFilter->hash());
-
-	if (parentItem == nullptr)
-
-	{
-		ui->m_presetsTree->addTopLevelItem(item);
-	}
-	else
-	{
 		parentItem->addChild(item);
+		parentItem->setExpanded(true);
+	}
+	else
+	{
+		m_filterStorage->addTopFilter(newFilter);
+		ui->m_presetsTree->addTopLevelItem(item);
 	}
 
 	m_modified = true;
@@ -132,19 +294,17 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 void DialogPresetEditor::on_m_editPreset_clicked()
 {
 	QTreeWidgetItem* item = ui->m_presetsTree->currentItem();
-
 	if (item == nullptr)
 	{
 		return;
 	}
 
-	Hash hash = item->data(0, Qt::UserRole).value<Hash>();
-	if (hash == 0)
+	if (isFilter(item) == false)
 	{
 		return;
 	}
 
-	std::shared_ptr<ObjectFilter> filter = m_filters->filter(hash);
+	std::shared_ptr<ObjectFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
 	if (filter == nullptr)
 	{
 		assert(filter);
@@ -154,7 +314,7 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 	DialogPresetProperties d(filter, this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		item->setText(0, filter->caption());
+		setTreeItemText(item, filter.get());
 
 		m_modified = true;
 	}
@@ -163,19 +323,33 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 void DialogPresetEditor::on_m_removePreset_clicked()
 {
 	QTreeWidgetItem* item = ui->m_presetsTree->currentItem();
-
 	if (item == nullptr)
 	{
 		return;
 	}
 
-	Hash hash = item->data(0, Qt::UserRole).value<Hash>();
-	if (hash == 0)
+	if (isFilter(item) == false)
 	{
 		return;
 	}
 
-	if (m_filters->removeFilter(hash) == true)
+	std::shared_ptr<ObjectFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	if (QMessageBox::warning(this, tr("Remove Preset"),
+							 tr("Are you sure you want to remove preset %1?")
+							 .arg(filter->caption()),
+							 QMessageBox::StandardButton::Yes,
+							 QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
+	{
+		return;
+	}
+
+	if (m_filterStorage->removeFilter(filter) == true)
 	{
 		QTreeWidgetItem* parent = item->parent();
 		if (parent != nullptr)
@@ -188,7 +362,7 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 		}
 	}
 
-
+	m_modified = true;
 }
 
 void DialogPresetEditor::on_m_moveUp_clicked()
