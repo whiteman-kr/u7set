@@ -14,6 +14,14 @@ struct SchemaDetails
 
 };
 
+struct ObjectFilterValue
+{
+	QString appSignalId;
+	QString caption;
+	bool analog = false;
+	double value = 0;
+};
+
 class ObjectFilter : public PropertyObject
 {
 	Q_OBJECT
@@ -41,6 +49,7 @@ public:
 	ObjectFilter();
 	ObjectFilter(FilterType filterType);
 	ObjectFilter(const ObjectFilter& That);
+	~ObjectFilter();
 
 	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer);
@@ -146,9 +155,9 @@ public:
 	int topFilterCount() const;
 	std::shared_ptr<ObjectFilter> topFilter(int index) const;
 
-	bool addTopFilter(const std::shared_ptr<ObjectFilter> filter);
+	bool addTopFilter(const std::shared_ptr<ObjectFilter>& filter);
 
-	bool removeFilter(std::shared_ptr<ObjectFilter> filter);
+	bool removeFilter(const std::shared_ptr<ObjectFilter>& filter);
 
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
@@ -163,6 +172,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<ObjectFilter>)
+Q_DECLARE_METATYPE(ObjectFilterValue)
 
 
 extern ObjectFilterStorage theFilters;

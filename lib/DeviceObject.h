@@ -81,7 +81,7 @@ namespace Hardware
 		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
 
 		static std::shared_ptr<DeviceObject> fromDbFile(const DbFile& file);
-		static std::vector<std::shared_ptr<DeviceObject>> DeviceObject::fromDbFiles(std::vector<std::shared_ptr<DbFile>> files);
+		static std::vector<std::shared_ptr<DeviceObject>> fromDbFiles(std::vector<std::shared_ptr<DbFile>> files);
 
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData

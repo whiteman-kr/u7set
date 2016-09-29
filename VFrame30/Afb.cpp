@@ -105,10 +105,6 @@ namespace Afb
 				return "FUNC";
 			case Type::INT:
 				return "INT";
-			case Type::COMP:
-				return "COMP";
-			case Type::MATH_FP:
-				return "MATH_FP";
 			case Type::DPCOMP:
 				return "DPCOMP";
 			case Type::MUX:

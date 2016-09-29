@@ -47,8 +47,6 @@ namespace Afb
 			SCALE_P = 15,
 			FUNC = 16,
 			INT = 17,
-			COMP = 18,
-			MATH_FP = 19,
 			DPCOMP = 20,
 			MUX = 21,
 			LATCH = 22,
