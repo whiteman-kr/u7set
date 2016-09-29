@@ -242,8 +242,6 @@ namespace Builder
 		bool calculate_MEM_paramValues();
 		bool calculate_FUNC_paramValues();
 		bool calculate_INT_paramValues();
-		bool calculate_COMP_paramValues();
-		bool calculate_MATH_FP_paramValues();
 		bool calculate_DPCOMP_paramValues();
 		bool calculate_MUX_paramValues();
 		bool calculate_LATCH_paramValues();

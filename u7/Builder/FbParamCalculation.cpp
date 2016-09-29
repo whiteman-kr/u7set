@@ -106,14 +106,6 @@ namespace Builder
 			result = calculate_INT_paramValues();
 			break;
 
-		case Afb::AfbType::COMP:			// opcode 18
-			result = calculate_COMP_paramValues();
-			break;
-
-		case Afb::AfbType::MATH_FP:			// opcode 19
-			result = calculate_MATH_FP_paramValues();
-			break;
-
 		case Afb::AfbType::DPCOMP:			// opcode 20
 			result = calculate_DPCOMP_paramValues();
 			break;
@@ -1222,18 +1214,6 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_COMP_paramValues()
-	{
-		return true;
-	}
-
-
-	bool AppFb::calculate_MATH_FP_paramValues()
-	{
-		return true;
-	}
-
-
 	bool AppFb::calculate_DPCOMP_paramValues()
 	{
 		m_runTime = 2;
@@ -1550,14 +1530,25 @@ namespace Builder
 		CHECK_UNSIGNED_INT(i_conf);
 		CHECK_UNSIGNED_INT(i_conf_n);
 
-		// i_conf must have value 0 or 1
+		// i_conf must have value 1 (SI) or 2 (FP)
 		//
-		if (i_conf.unsignedIntValue() >= 2)
+		if (i_conf.unsignedIntValue() == 1)
 		{
-			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
-			return false;
+			m_runTime = 5;		// SI
+		}
+		else
+		{
+			if (i_conf.unsignedIntValue() == 2)
+			{
+				m_runTime = 20;		// FP
+			}
+			else
+			{
+				// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+				//
+				m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+				return false;
+			}
 		}
 
 		// i_conf_n must have value from 2 to 4
