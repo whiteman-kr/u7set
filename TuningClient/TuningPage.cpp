@@ -465,10 +465,10 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 
 	// Top buttons
 	//
-	int count = theFilters.topFilterCount();
+	int count = theFilters.m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
+		std::shared_ptr<ObjectFilter> f = theFilters.m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -627,7 +627,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr)
 		{
-			if (m_treeFilter->folder() == true)
+			if (m_treeFilter->isEmpty() == true)
 			{
 				continue;
 			}

@@ -41,16 +41,28 @@ private slots:
 
 	void on_m_signalTypeCombo_currentIndexChanged(int index);
 
-private slots:
+	void on_m_presetsTree_itemSelectionChanged();
+
+	void on_m_setValue_clicked();
+
+	void on_m_applyMask_clicked();
+
+	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
 
 	void slot_signalsUpdated();
-
 private:
 
 	enum class TreeItemType
 	{
 		Filter,
 		Signal
+	};
+
+	enum class MaskType
+	{
+		AppSignalID,
+		CustomAppSignalID,
+		EquipmentID
 	};
 
 	enum class SignalType
@@ -65,9 +77,14 @@ private:
 
 	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
 
-	void setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter);
+	void setFilterItemText(QTreeWidgetItem* item, ObjectFilter* filter);
+	void setSignalItemText(QTreeWidgetItem* item, const ObjectValue& value);
 
 	void fillObjectsList();
+
+	std::shared_ptr<ObjectFilter> selectedFilter(QTreeWidgetItem** item);
+
+	void getSelectedCount(int& selectedPresets, int& selectedSignals);
 
 
 private:
