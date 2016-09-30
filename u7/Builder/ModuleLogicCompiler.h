@@ -494,6 +494,11 @@ namespace Builder
 		int m_lmALPPhaseTime = 1000;
 		int m_lmIDRPhaseTime = 2500;
 
+		QString m_lmSubsystemID;
+		int m_lmSubsystemKey = 0;
+		int m_lmNumber = 0;
+		int m_lmChannel = 0;
+
 		// LM's calculated memory offsets and sizes
 		//
 
@@ -546,6 +551,7 @@ namespace Builder
 	private:
 
 		bool getLMIntProperty(const QString& name, int* value);
+		bool getLMStrProperty(const QString& name, QString *value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 

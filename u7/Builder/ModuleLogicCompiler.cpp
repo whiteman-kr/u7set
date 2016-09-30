@@ -357,9 +357,25 @@ namespace Builder
 
 		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
 
+		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
+		result &= getLMIntProperty("LMNumber", &m_lmNumber);
+		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Loading LMs settings... Ok")));
+		}
+
+		// chek LM subsystem ID
+		//
+		m_lmSubsystemKey = m_appLogicCompiler.m_subsystems->ssKey(m_lmSubsystemID);
+
+		if (m_lmSubsystemKey == -1)
+		{
+			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+			//
+			m_log->errALC5056(m_lmSubsystemID, m_lm->equipmentId());
+			return false;
 		}
 
 		return result;
@@ -3867,26 +3883,10 @@ namespace Builder
 	{
 		bool result = true;
 
-		QString subsysId;
-		QString lmEduipmentID;
-		int lmNumber = 0;
-
-		result &= DeviceHelper::getStrProperty(m_lm, "EquipmentID", &lmEduipmentID, m_log);
-		result &= DeviceHelper::getStrProperty(m_lm, "SubsystemID", &subsysId, m_log);
-		result &= DeviceHelper::getIntProperty(m_lm, "LMNumber", &lmNumber, m_log);
-
-		if (result == false)
-		{
-			return false;
-		}
-
 		m_code.generateBinCode();
 
-		QString lmCaption = "LM-1";
-
-		m_appLogicCompiler.writeBinCodeForLm(subsysId, lmEduipmentID, lmCaption, lmNumber,
-														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
-
+		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentId(), m_lm->caption(),
+														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
@@ -3897,7 +3897,7 @@ namespace Builder
 
 		m_code.getMifCode(mifCode);
 
-		BuildFile* buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.mif").arg(lmCaption).arg(lmNumber), mifCode);
+		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mif").arg(m_lm->caption()).arg(m_lmNumber), mifCode);
 
 		if (buildFile == nullptr)
 		{
@@ -3908,7 +3908,7 @@ namespace Builder
 
 		m_code.getAsmCode(asmCode);
 
-		buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.asm").arg(lmCaption).arg(lmNumber), asmCode);
+		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").arg(m_lm->caption()).arg(m_lmNumber), asmCode);
 
 		if (buildFile == nullptr)
 		{
@@ -3919,19 +3919,17 @@ namespace Builder
 
 		m_memoryMap.getFile(memFile);
 
-		buildFile = m_resultWriter->addFile(subsysId, QString("%1-%2.mem").arg(lmCaption).arg(lmNumber), memFile);
+		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mem").arg(m_lm->caption()).arg(m_lmNumber), memFile);
 
 		if (buildFile == nullptr)
 		{
 			result = false;
 		}
 
-		writeTuningInfoFile(lmCaption, subsysId, lmNumber);
+		result &= writeTuningInfoFile(m_lm->caption(), m_lmSubsystemID, m_lmNumber);
 
 		//
-
-		writeLMCodeTestFile();
-
+		// writeLMCodeTestFile();
 		//
 
 		return result;
@@ -5426,6 +5424,12 @@ namespace Builder
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{
 		return DeviceHelper::getIntProperty(m_lm, name, value, m_log);
+	}
+
+
+	bool ModuleLogicCompiler::getLMStrProperty(const QString& name, QString *value)
+	{
+		return DeviceHelper::getStrProperty(m_lm, name, value, m_log);
 	}
 
 
