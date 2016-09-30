@@ -249,6 +249,7 @@ namespace Builder
 		bool calculate_DEAD_ZONE_paramValues();
 		bool calculate_POL_paramValues();
 		bool calculate_DER_paramValues();
+		bool calculate_MISMATCH_paramValues();
 
 		//
 
@@ -584,6 +585,8 @@ namespace Builder
 		bool copyDimDataToRegBuf(const Module& module);
 		bool copyAimDataToRegBuf(const Module& module);
 		bool copyAifmDataToRegBuf(const Module& module);
+		bool copyMps17DataToRegBuf(const Module& module);
+
 
 		bool initOutModulesAppLogicDataInRegBuf();
 		bool initDOMAppLogicDataInRegBuf(const Module& module);

@@ -237,6 +237,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		{
 
 		}
+		emit signalsUpdated();
 	}
 
 	theFilters.createAutomaticFilters();
@@ -299,3 +300,5 @@ void MainWindow::showTuningSources()
 		theDialogTuningSources->activateWindow();
 	}
 }
+
+MainWindow* theMainWindow = nullptr;

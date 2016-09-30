@@ -89,14 +89,14 @@ int main(int argc, char *argv[])
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
 
-	MainWindow *w = new MainWindow();
-	w->show();
+	theMainWindow = new MainWindow();
+	theMainWindow->show();
 
 	int result = a.exec();
 
-	delete w;
-
 	theSettings.StoreUser();
+
+	delete theMainWindow;
 
 	google::protobuf::ShutdownProtobufLibrary();
 

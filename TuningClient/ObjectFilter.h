@@ -19,6 +19,7 @@ struct ObjectFilterValue
 	QString appSignalId;
 	QString caption;
 	bool analog = false;
+	int decimalPlaces = 0;
 	double value = 0;
 };
 
@@ -78,14 +79,12 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	QString appSignalIdsCR() const;
-	void setAppSignalIdsCR(const QString& value);
+	std::vector <ObjectFilterValue> signalValues() const;
+	void setValues(const std::vector <ObjectFilterValue>& values);
 
-	QString appSignalIdsCSV() const;
-	void setAppSignalIdsCSV(const QString& value);
-
-	QStringList appSignalIdsList() const;
-	void setAppSignalIdsList(const QStringList& value);
+	bool valueExists(const QString& appSignalId);
+	void addValue(const ObjectFilterValue& value);
+	void removeValue(const QString& appSignalId);
 
 	FilterType filterType() const;
 	void setFilterType(FilterType value);
@@ -127,7 +126,7 @@ private:
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
-	QStringList m_appSignalIds;
+	std::vector <ObjectFilterValue> m_signalValues;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
