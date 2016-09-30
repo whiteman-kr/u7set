@@ -4323,24 +4323,72 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
 
-	// To do filter
+	int pairsAmountWhichArePlacedInSameXCoord = 0;			// Pairs of points amount by X coordinate
+	int pairsAmountWhichArePlacedInSameYCoord = 0;			// Pairs of points amount by Y coordinate
+
+	int currentPoint = 0;									// Index of current point to process
+
+	// In cycle we are processing current point with previous point
 	//
-//	void PosConnectionImpl::RemoveUnwantedPoints()
-//	{
-//		SchemaPoint firstPoint = points.front();
-//		SchemaPoint lastPoint = points.back();
 
-//		if (std::abs(firstPoint.X - lastPoint.X) < 0.000001 ||
-//			std::abs(firstPoint.Y - lastPoint.Y) < 0.000001)
-//		{
-//			while (points.size() != 1)
-//			{
-//				points.pop_back();
-//			}
+	for (currentPoint = 1; currentPoint < result.size(); currentPoint++)
+	{
+		if (std::abs(VFrame30::SchemaPoint(result.at(currentPoint)).X - VFrame30::SchemaPoint(result.at(currentPoint-1)).X) < 0.0000001)
+		{
+			pairsAmountWhichArePlacedInSameXCoord++;
+		}
+		else
+		{
+			// Remove points only if we have more than two values with same
+			// X coordinates
+			//
 
-//			points.push_back(lastPoint);
-//		}
-//	}
+			if (pairsAmountWhichArePlacedInSameXCoord > 1)
+			{
+				result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameXCoord), result.begin() + currentPoint - 1);
+				currentPoint--;
+			}
+
+			pairsAmountWhichArePlacedInSameXCoord = 0;
+		}
+
+		if (std::abs(VFrame30::SchemaPoint(result.at(currentPoint)).Y - VFrame30::SchemaPoint(result.at(currentPoint-1)).Y) < 0.0000001)
+		{
+			pairsAmountWhichArePlacedInSameYCoord++;
+		}
+		else
+		{
+			// Remove points only if we have more than two values with same
+			// X coordinates
+			//
+
+			if (pairsAmountWhichArePlacedInSameYCoord > 1)
+			{
+				result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameYCoord), result.begin() + currentPoint - 1);
+				currentPoint--;
+			}
+
+			pairsAmountWhichArePlacedInSameYCoord = 0;
+		}
+	}
+
+	// If some points with same coordinate values are placed at the end of
+	// the line, we must remove them!
+	//
+
+	if (pairsAmountWhichArePlacedInSameXCoord > 1 ||
+	        pairsAmountWhichArePlacedInSameYCoord > 1)
+	{
+		if (pairsAmountWhichArePlacedInSameYCoord > 1)
+		{
+			result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameYCoord), result.begin() + currentPoint - 1);
+		}
+
+		if (pairsAmountWhichArePlacedInSameXCoord > 1)
+		{
+			result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameXCoord), result.begin() + currentPoint - 1);
+		}
+	}
 
 	return result;
 }
