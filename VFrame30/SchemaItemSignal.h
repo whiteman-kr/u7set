@@ -50,6 +50,9 @@ namespace VFrame30
 
 		void createColumnProperties();
 
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
 		// Properties
 		//
 	public:
@@ -163,8 +166,6 @@ namespace VFrame30
 		virtual ~SchemaItemInOut(void);
 
 		virtual QString buildName() const override;
-
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Serialization
 		//

@@ -610,6 +610,8 @@ message SchemaItemConst
 	optional int32 intValue = 2 [default = 0];
 	optional double floatValue = 3 [default = 0.0];
 	optional int32 precision = 4 [default = 2];
+	optional int32 horzAlign = 5  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 6  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
 }
 
 //

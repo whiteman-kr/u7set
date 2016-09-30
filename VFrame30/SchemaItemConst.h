@@ -39,6 +39,9 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
+	protected:
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
 		// Public Methods
 		//
 	public:
@@ -64,6 +67,12 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
+		E::HorzAlign horzAlign() const;
+		void setHorzAlign(E::HorzAlign align);
+
+		E::VertAlign vertAlign() const;
+		void setVertAlign(E::VertAlign align);
+
 		// Data
 		//
 	private:
@@ -71,6 +80,9 @@ namespace VFrame30
 		int m_intValue = 0;
 		double m_floatValue = 0.0;
 		int m_precision = 2;
+
+		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
+		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 	};
 
 }
