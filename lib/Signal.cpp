@@ -91,7 +91,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	{
 		m_dataFormat = deviceSignal.format();
 
-		assert(m_dataFormat == E::DataFormat::Float || m_dataFormat == E::DataFormat::SignedInt);
+		assert(m_dataFormat == E::DataFormat::Float || m_dataFormat == E::DataFormat::SignedInt || m_dataFormat == E::DataFormat::UnsignedInt);
 
 		m_dataSize = 32;
 	}
@@ -1113,7 +1113,7 @@ void SignalSet::buildID2IndexMap()
 
 		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
 		{
-			assert(false);
+			assert(false && "There are two signals with same AppSignalID");
 		}
 		else
 		{
