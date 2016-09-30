@@ -654,6 +654,28 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return;
 	}
 
+	double SchemaItemSignal::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		int linesCount = m_appSignalIds.size();
+		if (linesCount == 0)
+		{
+			linesCount = 1;
+		}
+
+		return linesCount * gridSize * pinGridStep;
+	}
+
+	double SchemaItemSignal::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		return m_cachedGridSize * 10;
+	}
 
 	QString SchemaItemSignal::appSignalIds() const
 	{
@@ -1036,18 +1058,6 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	QString SchemaItemInOut::buildName() const
 	{
 		return QString("Input/Output (%1)").arg(appSignalIds());
-	}
-
-	double SchemaItemInOut::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
-	{
-		// Cache values
-		//
-		m_cachedGridSize = gridSize;
-		m_cachedPinGridStep = pinGridStep;
-
-		// --
-		//
-		return m_cachedGridSize * 10;
 	}
 
 	// Serialization

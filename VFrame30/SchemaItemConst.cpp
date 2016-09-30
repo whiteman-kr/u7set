@@ -23,6 +23,9 @@ namespace VFrame30
 		valFloatProp->setCategory(PropertyNames::functionalCategory);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
 
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemConst::horzAlign, SchemaItemConst::setHorzAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemConst::vertAlign, SchemaItemConst::setVertAlign);
+
 		setPrecision(precision());		// This function will set Presion for valueFloat property
 
 		// --
@@ -54,6 +57,9 @@ namespace VFrame30
 		constitem->set_floatvalue(m_floatValue);
 		constitem->set_precision(m_precision);
 
+		constitem->set_horzalign(static_cast<int32_t>(m_horzAlign));
+		constitem->set_vertalign(static_cast<int32_t>(m_vertAlign));
+
 		return true;
 	}
 
@@ -81,6 +87,9 @@ namespace VFrame30
 		m_precision = constitem.precision();
 
 		setPrecision(m_precision);		// This function will set Presion for valueFloat property
+
+		m_horzAlign = static_cast<E::HorzAlign>(constitem.horzalign());
+		m_vertAlign = static_cast<E::VertAlign>(constitem.vertalign());
 
 		return true;
 	}
@@ -138,9 +147,21 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
 
 		return;
+	}
+
+	double SchemaItemConst::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		return m_cachedGridSize * 7;
 	}
 
 	QString SchemaItemConst::valueToString() const
@@ -237,6 +258,27 @@ namespace VFrame30
 		}
 
 		prop->setPrecision(m_precision);
+	}
+
+	// Align propertis
+	//
+	E::HorzAlign SchemaItemConst::horzAlign() const
+	{
+		return m_horzAlign;
+	}
+	void SchemaItemConst::setHorzAlign(E::HorzAlign align)
+	{
+		m_horzAlign = align;
+	}
+
+	E::VertAlign SchemaItemConst::vertAlign() const
+	{
+		return m_vertAlign;
+	}
+
+	void SchemaItemConst::setVertAlign(E::VertAlign align)
+	{
+		m_vertAlign = align;
 	}
 
 }
