@@ -1115,21 +1115,11 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmEquipmentID, QString lmCaption, int channel, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
 			ASSERT_RETURN_FALSE
-		}
-
-		int subsysID = m_subsystems->ssKey(subsysStrID);
-
-		if (subsysID == -1)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
-
-			return false;
 		}
 
 		bool result = true;
@@ -1138,7 +1128,7 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields);
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, metadataFields);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount, metadataFields);
 
 		if (multichannelFile != nullptr)
 		{
@@ -1150,7 +1140,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result = multichannelFile->setChannelData(channel, frameSize, frameCount, binCode, metadata);
+			result = multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
 		}
 		else
 		{
