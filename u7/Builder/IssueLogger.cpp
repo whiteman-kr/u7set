@@ -2544,6 +2544,28 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5056
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+	///
+	/// Parameters:
+	///		%1 Subsystem ID
+	///		%2 LM's equipment ID
+	///
+	/// Description:
+	///		SubsystemID assigned in LM is not found in subsystem list. Check LM's SubsystemID property.
+	///
+	void IssueLogger::errALC5056(QString subsystemID, QString lmEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5056,
+				  QString(tr("SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.")).
+				  arg(subsystemID).arg(lmEquipmentID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

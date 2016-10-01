@@ -3,7 +3,7 @@
 #include "Settings.h"
 
 DialogSettings::DialogSettings(QWidget *parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSettings)
 {
 	ui->setupUi(this);

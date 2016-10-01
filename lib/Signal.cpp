@@ -1113,7 +1113,7 @@ void SignalSet::buildID2IndexMap()
 
 		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
 		{
-			assert(false);
+			assert(false && "There are at least two signals with same AppSignalID");
 		}
 		else
 		{

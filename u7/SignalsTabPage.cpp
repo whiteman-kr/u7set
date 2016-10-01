@@ -103,6 +103,8 @@ const char* Columns[] =
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
+const int DEFAULT_COLUMN_WIDTH = 75;
+
 const QVector<int> defaultColumnVisibility =
 {
 	SC_STR_ID,
@@ -1434,7 +1436,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	m_signalsView->verticalHeader()->setFixedWidth(75);
+	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -2003,6 +2005,7 @@ void SignalsTabPage::resetSignalIdFilter()
 void SignalsTabPage::changeColumnVisibility(QAction* action)
 {
 	int actionIndex = m_tableHeadersContextMenuActions->actions().indexOf(action);
+	int columnIndex = actionIndex - 1;
 	if (actionIndex == 0)
 	{
 		for (int i = 0; i < COLUMNS_COUNT; i++)
@@ -2020,10 +2023,20 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 	{
 		if (!action->isChecked())
 		{
-			saveColumnWidth(actionIndex - 1);
+			saveColumnWidth(columnIndex);
 		}
-		saveColumnVisibility(actionIndex - 1, action->isChecked());
-		m_signalsView->setColumnHidden(actionIndex - 1, !action->isChecked());
+		saveColumnVisibility(columnIndex, action->isChecked());
+		m_signalsView->setColumnHidden(columnIndex, !action->isChecked());
+		if (action->isChecked() && m_signalsView->columnWidth(columnIndex) == 0)
+		{
+			QSettings settings;
+			int newValue = settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[columnIndex]).replace("/", "|")).replace("\n", " "), DEFAULT_COLUMN_WIDTH).toInt();
+			if (newValue == 0)
+			{
+				newValue = DEFAULT_COLUMN_WIDTH;
+			}
+			m_signalsView->setColumnWidth(columnIndex, newValue);
+		}
 	}
 	if (m_signalsView->horizontalHeader()->hiddenSectionCount() == COLUMNS_COUNT)
 	{
