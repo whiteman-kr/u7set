@@ -153,6 +153,10 @@ public slots:
     void slot_isAnyCheckedOut(bool* checkedOut);
     void slot_lastChangesetId(int* lastChangesetId);
 
+	// Next value in global counter, use for creating signals, etc with unique identifiers
+	//
+	void slot_nextCounterValue(int* counter);
+
     // Service
     //
     bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);

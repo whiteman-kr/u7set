@@ -1883,7 +1883,6 @@ static const QString presetNameCaption("PresetName");	// Optimization
 
 		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
 		//
-
 		QString parentId = "";
 		for (std::pair<const DeviceObject*, QString>& dp : devices)
 		{

@@ -122,6 +122,10 @@ public:
 	bool isAnyCheckedOut(bool* result);
 	bool lastChangesetId(int* result);
 
+	// Next value in global counter, use for creating signals, etc with unique identifiers
+	//
+	bool nextCounterValue(int* counter);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -191,6 +195,10 @@ signals:
 	//
 	void signal_isAnyCheckedOut(bool* checkedOut);
 	void signal_lastChangesetId(int* lastChangesetId);
+
+	// Next value in global counter, use for creating signals, etc with unique identifiers
+	//
+	void signal_nextCounterValue(int* counter);
 
 	//
 	// Service functions

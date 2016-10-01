@@ -80,6 +80,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_isAnyCheckedOut, m_worker, &DbWorker::slot_isAnyCheckedOut);
 	connect(this, &DbController::signal_lastChangesetId, m_worker, &DbWorker::slot_lastChangesetId);
 
+	connect(this, &DbController::signal_nextCounterValue, m_worker, &DbWorker::slot_nextCounterValue);
+
 	m_thread.start();
 }
 
@@ -1628,7 +1630,30 @@ bool DbController::lastChangesetId(int* result)
 	ok = waitForComplete(nullptr, tr("Getting last ChangesetId"));
 
 	return ok;
+}
 
+bool DbController::nextCounterValue(int* counter)
+{
+	if (counter == nullptr)
+	{
+		assert(counter != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_nextCounterValue(counter);
+
+	ok = waitForComplete(nullptr, tr("Getting next counter value"));
+
+	return ok;
 }
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
