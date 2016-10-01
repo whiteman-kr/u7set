@@ -4513,6 +4513,19 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 						}
 					}
 				}
+
+				if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+				{
+					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+					assert(itemReceiver);
+
+					const QString& appSignal = itemReceiver->appSignalId();
+
+					if (appSignal.isEmpty() == false)
+					{
+						signalStrIds << appSignal;
+					}
+				}
 			}
 
 			if (signalStrIds.empty() == false)
@@ -4558,7 +4571,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	// Add new Application Logic signal
 	//
-	if (isLogicSchema())
+	if (isLogicSchema() == true)
 	{
 		if (selectedItems().size() == 1)
 		{
