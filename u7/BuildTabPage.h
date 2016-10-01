@@ -34,8 +34,6 @@ public:
 protected:
 	void CreateActions();
 
-	void writeOutputLog(const OutputLogItem& logItem);
-
 signals:
 
 	// Events
@@ -55,6 +53,8 @@ protected slots:
 	void buildWasStarted();
 	void buildWasFinished();
 
+	void hideWaringsStateChanged(int state);
+
 	// Data
 	//
 private:
@@ -71,7 +71,9 @@ private:
 	QSplitter* m_hsplitter = nullptr;
 
 	QWidget* m_settingsWidget = nullptr;
+
 	QCheckBox* m_debugCheckBox = nullptr;
+	QCheckBox* m_hideWarningsCheckBox = nullptr;
 
 	Builder::IssueLogger m_outputLog;
 	int m_logTimerId = -1;

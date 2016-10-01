@@ -1178,6 +1178,8 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		}
 	}
 
+	assert(objectsMap.size() == files.size());
+
 	// 2.2 Set child to items
 	//
 	bool rootWasFound = false;

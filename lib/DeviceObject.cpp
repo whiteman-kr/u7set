@@ -2048,12 +2048,12 @@ R"DELIM({
 	DeviceRoot::DeviceRoot(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		qDebug() << "DeviceRoot::DeviceRoot";
+		qDebug() << "DeviceRoot::DeviceRoot ThreadId: " << QThread::currentThreadId();
 	}
 
 	DeviceRoot::~DeviceRoot()
 	{
-		qDebug() << "DeviceRoot::~DeviceRoot";
+		qDebug() << "DeviceRoot::~DeviceRoot ThreadId: " << QThread::currentThreadId();
 	}
 
 	DeviceType DeviceRoot::deviceType() const
@@ -3176,6 +3176,27 @@ static const QString valueBitCaption("ValueBit");
 	EquipmentSet::EquipmentSet(std::shared_ptr<DeviceObject> root)
 	{
 		set(root);
+	}
+
+	EquipmentSet::~EquipmentSet()
+	{
+		// Release m_root in separate thrtead, if it is posiible
+		//
+		m_deviceTable.clear();	// Clear it first because it also holds m_root
+
+		if (m_root.use_count() == 1)
+		{
+			std::shared_ptr<Hardware::DeviceObject> equipmentSharedPointer = m_root;
+			m_root.reset();
+
+			QtConcurrent::run(
+				[](std::shared_ptr<Hardware::DeviceObject> deviceObject)
+				{
+					deviceObject.reset();
+				},
+				equipmentSharedPointer);
+		}
+
 	}
 
 	void EquipmentSet::set(std::shared_ptr<DeviceObject> root)

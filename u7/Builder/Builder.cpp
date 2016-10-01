@@ -22,6 +22,7 @@
 #include "TuningClientCfgGenerator.h"
 
 #include <QBuffer>
+#include <QtConcurrent/QtConcurrent>
 #include <functional>
 
 
@@ -143,6 +144,7 @@ namespace Builder
 			LOG_SUCCESS(m_log, tr("Ok"));
 
 			Hardware::EquipmentSet equipmentSet(deviceRoot);
+			deviceRoot.reset();		// Use equipmentSet.root() instead
 
 			//
 			// Check same Uuids and same StrIds
@@ -150,7 +152,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Checking for same Uuids and StrIds"));
 
-			ok = checkUuidAndStrId(deviceRoot.get());
+			ok = checkUuidAndStrId(equipmentSet.root());
 
 			if (ok == false)
 			{
@@ -272,7 +274,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ok = modulesConfiguration(this, &db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(this, &db, equipmentSet.root(), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -286,7 +288,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-			ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
+			ok = tuningParameters(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)

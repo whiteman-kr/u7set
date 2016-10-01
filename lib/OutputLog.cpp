@@ -36,7 +36,6 @@ QString OutputLogItem::toText() const
 QString OutputLogItem::toHtml() const
 {
 	QString result;
-	result.reserve(1024);
 
 	QString color;
 	switch (m_level)
@@ -62,8 +61,8 @@ QString OutputLogItem::toHtml() const
 	if (m_message.isEmpty())
 	{
 		result = QString("<font face=\"%1\" size=\"4\" color=#C0C0C0>%2|</font>")
-					.arg(m_htmlFont)
-					.arg(m_no, 4, 10, QChar('0'));
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'));
 	}
 	else
 	{

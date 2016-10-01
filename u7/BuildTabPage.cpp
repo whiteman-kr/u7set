@@ -38,8 +38,10 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	m_outputWidget = new QTextEdit();
 	m_outputWidget->setReadOnly(true);
+	m_outputWidget->setLineWrapMode(QTextEdit::NoWrap);
+	m_outputWidget->setAutoFormatting(QTextEdit::AutoNone);
 	m_outputWidget->document()->setUndoRedoEnabled(false);
-	m_outputWidget->document()->setMaximumBlockCount(600);
+	m_outputWidget->document()->setMaximumBlockCount(6000);
 
 	m_buildButton = new QPushButton(tr("Build..."));
 	m_cancelButton = new QPushButton(tr("Cancel"));
@@ -63,8 +65,13 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
 	m_debugCheckBox->setChecked(true);
-
 	settingsWidgetLayout->addWidget(m_debugCheckBox);
+
+	m_hideWarningsCheckBox = new QCheckBox(tr("Hide warnings"), m_settingsWidget);
+	m_hideWarningsCheckBox->setChecked(theSettings.hideWarnings());
+	settingsWidgetLayout->addWidget(m_hideWarningsCheckBox);
+
+	settingsWidgetLayout->addStretch();
 
 	m_settingsWidget->setLayout(settingsWidgetLayout);
 
@@ -97,6 +104,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &BuildTabPage::buildWasStarted);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &BuildTabPage::buildWasFinished);
+
+	connect(m_hideWarningsCheckBox, &QCheckBox::stateChanged, this, &BuildTabPage::hideWaringsStateChanged);
 
 	////connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
 	//connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
@@ -166,20 +175,6 @@ void BuildTabPage::CreateActions()
 	return;
 }
 
-void BuildTabPage::writeOutputLog(const OutputLogItem& logItem)
-{
-	if (m_outputWidget == nullptr)
-	{
-		assert(m_outputWidget != nullptr);
-		return;
-	}
-
-	QString html = logItem.toHtml();
-	m_outputWidget->append(html);
-
-	return;
-}
-
 void BuildTabPage::closeEvent(QCloseEvent* e)
 {
 	e->accept();
@@ -187,23 +182,41 @@ void BuildTabPage::closeEvent(QCloseEvent* e)
 
 void BuildTabPage::timerEvent(QTimerEvent* event)
 {
-
 	if (event->timerId() == m_logTimerId &&
 		m_outputLog.isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
+		bool hideWarnings = theSettings.hideWarnings();
+
 		std::vector<OutputLogItem> messages;
 		messages.reserve(20);
 
 		if (m_outputLog.isEmpty() == false)
 		{
-			m_outputLog.popMessages(&messages, 20);
+			m_outputLog.popMessages(&messages, 40);
 		}
 
-		for (auto m = messages.begin(); m != messages.end(); ++m)
+		QString outputMessagesBuffer;
+		outputMessagesBuffer.reserve(128000);
+
+		for (size_t i = 0; i < messages.size(); i++)
 		{
-			writeOutputLog(*m);
+			const OutputLogItem& m = messages[i];
+
+			if (hideWarnings == true && m.m_level == OutputMessageLevel::Warning)
+			{
+				continue;
+			}
+
+			outputMessagesBuffer.append(m.toHtml());
+
+			if (i != messages.size() - 1)
+			{
+				outputMessagesBuffer += QLatin1String("<br>");
+			}
 		}
+
+		m_outputWidget->append(outputMessagesBuffer);
 
 		return;
 	}
@@ -302,5 +315,11 @@ void BuildTabPage::buildWasFinished()
 	m_itemsIssues.clear();
 
 	return;
+}
+
+void BuildTabPage::hideWaringsStateChanged(int state)
+{
+	bool hideWarning = (static_cast<Qt::CheckState>(state) == Qt::CheckState::Checked);
+	theSettings.setHideWarnings(hideWarning);
 }
 
