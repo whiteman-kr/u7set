@@ -101,9 +101,6 @@ public:
 
 	TuningFilter* parentFilter() const;
 
-	bool allowAll() const;
-	void setAllowAll(bool value);
-
 	bool isEmpty() const;
 
 public:
@@ -129,8 +126,6 @@ private:
 
 	QString m_strID;
 	QString m_caption;
-
-	bool m_allowAll = false;
 
 	// Filters
 	//

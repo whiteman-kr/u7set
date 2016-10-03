@@ -253,6 +253,8 @@ bool ConfigController::getObjectFilters()
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
+
+		theFilters.m_root->setCaption(tr("All Filters"));
 	}
 
 	return true;

@@ -51,8 +51,6 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_strID = That.m_strID;
 	m_caption = That.m_caption;
 
-	m_allowAll = That.m_allowAll;
-
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
@@ -497,15 +495,6 @@ TuningFilter* TuningFilter::parentFilter() const
 	return m_parentFilter;
 }
 
-bool TuningFilter::allowAll() const
-{
-	return m_allowAll;
-}
-
-void TuningFilter::setAllowAll(bool value)
-{
-	m_allowAll = value;
-}
 
 bool TuningFilter::isEmpty() const
 {
@@ -602,10 +591,6 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 
 bool TuningFilter::match(const TuningObject& object)
 {
-	if (allowAll() == true)
-	{
-		return true;
-	}
 	if (isEmpty() == true)
 	{
 		return true;

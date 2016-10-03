@@ -15,6 +15,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	std::vector<QTreeWidgetItem*> treeItems;
 
 	fillFilters(treeItems, theFilters);
+
 	fillFilters(treeItems, theUserFilters);
 
 	if (treeItems.empty() == false)
@@ -23,9 +24,16 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 		//
 		m_filterTree = new QTreeWidget();
 
+		QStringList headerLabels;
+		headerLabels<<"Caption";
+
+		m_filterTree->setColumnCount(headerLabels.size());
+		m_filterTree->setHeaderLabels(headerLabels);
+
 		for (auto item : treeItems)
 		{
 			m_filterTree->addTopLevelItem(item);
+			item->setExpanded(true);
 		}
 
 		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
@@ -128,27 +136,26 @@ TuningWorkspace::~TuningWorkspace()
 
 void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, TuningFilterStorage& filterStorage)
 {
-	for (int i = 0; i < filterStorage.m_root->childFiltersCount(); i++)
+	std::shared_ptr<TuningFilter> f = filterStorage.m_root;
+	if (f == nullptr)
 	{
-		std::shared_ptr<TuningFilter> f = filterStorage.m_root->childFilter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			return;
-		}
-
-		if (f->isTree() == false)
-		{
-			continue;
-		}
-
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-		treeItems.push_back(item);
-
-		addChildTreeObjects(f, item);
+		assert(f);
+		return;
 	}
+
+	if (f->childFiltersCount() == 0)
+	{
+		return;
+	}
+
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
+	item->setData(0, Qt::UserRole, QVariant::fromValue(f));
+
+	addChildTreeObjects(f, item);
+
+	treeItems.push_back(item);
+
+
 
 }
 
