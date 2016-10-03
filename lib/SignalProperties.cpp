@@ -129,15 +129,19 @@ void SignalProperties::initProperties()
 		highDACProperty->setCategory(signalProcessingCategory);
 
 		auto lowEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, lowEngeneeringUnitsCaption, true, Signal::lowEngeneeringUnits, Signal::setLowEngeneeringUnits, m_signal);
+		lowEngeneeringUnitsProperty->setPrecision(m_signal.decimalPlaces());
 		lowEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
 
 		auto highEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, highEngeneeringUnitsCaption, true, Signal::highEngeneeringUnits, Signal::setHighEngeneeringUnits, m_signal);
+		highEngeneeringUnitsProperty->setPrecision(m_signal.decimalPlaces());
 		highEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
 
 		auto lowValidRangeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, lowValidRangeCaption, true, Signal::lowValidRange, Signal::setLowValidRange, m_signal);
+		lowValidRangeProperty->setPrecision(m_signal.decimalPlaces());
 		lowValidRangeProperty->setCategory(signalProcessingCategory);
 
 		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange, m_signal);
+		highValidRangeProperty->setPrecision(m_signal.decimalPlaces());
 		highValidRangeProperty->setCategory(signalProcessingCategory);
 
 		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
