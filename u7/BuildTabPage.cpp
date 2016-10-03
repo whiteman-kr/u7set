@@ -54,17 +54,27 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_nextIssueButton = new QPushButton(tr("Next Issue <F6>"));
 	m_nextIssueButton->setShortcut(Qt::Key_F6);
 
+	m_findTextEdit = new QLineEdit();
+	m_findTextEdit->setPlaceholderText("Find Text");
+	m_findTextEdit->setMinimumWidth(300);
+
+	m_findTextButton = new QPushButton(tr("Search <F3>"));
+	m_findTextButton->setShortcut(Qt::Key_F3);
+
 	QGridLayout* rightWidgetLayout = new QGridLayout();
 
-	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 5);
+	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 8);
 
 	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 0);
 	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 1);
 
-	rightWidgetLayout->setColumnStretch(2, 100);
+	rightWidgetLayout->addWidget(m_findTextEdit, 1, 2, 1, 2);
+	rightWidgetLayout->addWidget(m_findTextButton, 1, 4);
 
-	rightWidgetLayout->addWidget(m_buildButton, 1, 3);
-	rightWidgetLayout->addWidget(m_cancelButton, 1, 4);
+	rightWidgetLayout->setColumnStretch(5, 100);
+
+	rightWidgetLayout->addWidget(m_buildButton, 1, 6);
+	rightWidgetLayout->addWidget(m_cancelButton, 1, 7);
 
 	rightWidgetLayout->setColumnStretch(0, 1);
 
@@ -123,6 +133,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_prevIssueButton, &QPushButton::clicked, this, &BuildTabPage::prevIssue);
 	connect(m_nextIssueButton, &QPushButton::clicked, this, &BuildTabPage::nextIssue);
+
+	connect(m_findTextEdit, &QLineEdit::returnPressed, this, &BuildTabPage::search);
+	connect(m_findTextButton, &QPushButton::clicked, this, &BuildTabPage::search);
 
 	////connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
 	//connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
@@ -471,6 +484,44 @@ void BuildTabPage::nextIssue()
 		m_lastNavIsPrevIssue = false;
 		m_lastNavIsNextIssue = true;
 		m_lastNavCursor = m_outputWidget->textCursor();
+	}
+
+	return;
+}
+
+void BuildTabPage::search()
+{
+	assert(m_findTextEdit);
+	assert(m_outputWidget);
+
+	// Get search text
+	//
+	QString searchText = m_findTextEdit->text();
+
+	if (searchText.isEmpty() == true)
+	{
+		m_findTextEdit->setFocus();
+		return;
+	}
+
+	// Find
+	//
+	bool found = m_outputWidget->find(searchText);
+
+	if (found == false)
+	{
+		// Try to find one more time from the documnet start
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(searchText);
+	}
+
+	if (found == true)
+	{
+		m_outputWidget->setFocus();
 	}
 
 	return;
