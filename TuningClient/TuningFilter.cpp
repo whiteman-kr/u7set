@@ -961,10 +961,10 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 				}
 
 				QJsonArray array = jDetails.value("Signals").toArray();
-				sd.m_appSignals.reserve(array.size());
+				sd.m_appSignalIDs.reserve(array.size());
 				for (int i = 0; i < array.size(); i++)
 				{
-					sd.m_appSignals.push_back(array[i].toString());
+					sd.m_appSignalIDs.push_back(array[i].toString());
 				}
 
 				m_schemasDetails.push_back(sd);
@@ -993,18 +993,18 @@ void TuningFilterStorage::createAutomaticFilters()
 		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
 		ofSchema->setCaption("Schemas");
 
-		for (auto s : m_schemasDetails)
+		for (const SchemaDetails& schemasDetails : m_schemasDetails)
 		{
 			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
-			for (auto s : s.m_appSignals)
+			for (const QString& appSignalID : schemasDetails.m_appSignalIDs)
 			{
 				TuningFilterValue ofv;
-				ofv.appSignalId = s;
+				ofv.appSignalId = appSignalID;
 				ofTs->addValue(ofv);
 			}
 
-			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
-			ofTs->setCaption(s.m_caption);
+			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_strId);
+			ofTs->setCaption(schemasDetails.m_caption);
 
 			ofSchema->addChild(ofTs);
 		}
