@@ -178,7 +178,8 @@ SOURCES +=\
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
     Builder/ArchivingServiceCfgGenerator.cpp \
-    Builder/TuningClientCfgGenerator.cpp
+    Builder/TuningClientCfgGenerator.cpp \
+    ChooseUfbDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -286,7 +287,8 @@ HEADERS  += \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Builder/ArchivingServiceCfgGenerator.h \
-    Builder/TuningClientCfgGenerator.h
+    Builder/TuningClientCfgGenerator.h \
+    ChooseUfbDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -307,7 +309,8 @@ FORMS    += \
     SchemaPropertiesDialog.ui \
     SchemaItemPropertiesDialog.ui \
     DialogChoosePreset.ui \
-    DialogSettingsConfigurator.ui
+    DialogSettingsConfigurator.ui \
+    ChooseUfbDialog.ui
 
 RESOURCES += \
 	Resources.qrc \
