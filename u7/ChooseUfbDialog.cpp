@@ -1,13 +1,13 @@
 #include "ChooseUfbDialog.h"
 #include "ui_ChooseUfbDialog.h"
 
-ChooseUfbDialog::ChooseUfbDialog(QWidget *parent, std::vector<std::shared_ptr<VFrame30::UfbSchema> > *ufbs) :
+ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::ChooseUfbDialog)
 {
 	ui->setupUi(this);
 
-	m_ufbs = *ufbs;
+	m_ufbs = ufbs;
 
 	ui->ufbElements->setHeaderLabel(tr("Caption"));
 	ui->ufbElements->setSortingEnabled(true);
@@ -39,26 +39,29 @@ void ChooseUfbDialog::fillTree()
 
 	QString searchMask = ui->quickSearch->text();
 
-	QList<QTreeWidgetItem *> items;
+	QList<QTreeWidgetItem*> items;
 
 	ui->ufbElements->clear();
-	QTreeWidgetItem *allSection = new QTreeWidgetItem(QStringList(QString("All")));
+	QTreeWidgetItem* allSection = new QTreeWidgetItem(QStringList(QString("All")));
+
 	ui->ufbElements->insertTopLevelItem(0, allSection);
 
-	if (searchMask.isEmpty())
+	if (searchMask.isEmpty() == true)
 	{
 		for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
 		{
-			items.append(new QTreeWidgetItem(allSection, QStringList(ufb.get()->caption())));
+			items.append(new QTreeWidgetItem(allSection, QStringList(ufb->caption())));
 		}
 	}
 	else
 	{
 		for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
 		{
-			if (ufb.get()->caption().contains(searchMask, Qt::CaseSensitive))
+			bool found = ufb->caption().contains(searchMask, Qt::CaseInsensitive);
+
+			if (found == true)
 			{
-				items.append(new QTreeWidgetItem(allSection, QStringList(ufb.get()->caption())));
+				items.append(new QTreeWidgetItem(allSection, QStringList(ufb->caption())));
 			}
 		}
 
@@ -66,22 +69,28 @@ void ChooseUfbDialog::fillTree()
 	}
 }
 
-void ChooseUfbDialog::itemSelected(QTreeWidgetItem *item, int column)
+void ChooseUfbDialog::itemSelected(QTreeWidgetItem* item, int column)
 {
 	Q_UNUSED(column);
 
-	int index = 0;
-
 	for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
 	{
-		if (ufb.get()->caption() == item->text(0))
+		if (ufb->caption() == item->text(0))
 		{
-			selectedUfb = index;
+			m_selectedUfb = ufb;
 
-			ui->caption->setText(ufb.get()->caption());
-			ui->description->setPlainText(ufb.get()->description());
+			ui->caption->setText(ufb->caption());
+			ui->description->setPlainText(ufb->description());
 			ui->ok->setEnabled(true);
+
+			break;
 		}
-		index++;
 	}
+
+	return;
+}
+
+std::shared_ptr<VFrame30::UfbSchema> ChooseUfbDialog::result()
+{
+	return m_selectedUfb;
 }
