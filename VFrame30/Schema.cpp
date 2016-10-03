@@ -843,6 +843,7 @@ namespace VFrame30
 	{
 		m_version = src.m_version;
 		m_schemaId = src.m_schemaId;
+		m_caption = src.m_caption;
 		m_signals = std::move(src.m_signals);
 		m_labels = std::move(src.m_labels);
 		m_guids = std::move(src.m_guids);
@@ -947,21 +948,30 @@ namespace VFrame30
 				//
 				m_schemaId = jsonObject.value(QLatin1String("SchemaID")).toString();
 
+				// Caption
+				//
+				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
+
 				// Signals
 				//
 				m_signals.clear();
 
 				QStringList signalsStrings = jsonObject.value(QLatin1String("Signals")).toVariant().toStringList();
 
-				std::for_each(signalsStrings.begin(), signalsStrings.end(), [this](const QString& str){	m_signals.insert(str);});
+				for (const QString& str : signalsStrings)
+				{
+					m_signals.insert(str);
+				};
 
 				// Labels
 				//
 				m_labels.clear();
-
 				QStringList labelList = jsonObject.value(QLatin1String("Labels")).toVariant().toStringList();
 
-				std::for_each(labelList.begin(), labelList.end(), [this](const QString& str){	m_labels.insert(str);});
+				for (const QString& str : labelList)
+				{
+					m_labels.insert(str);
+				}
 
 				// ItemGuids
 				//

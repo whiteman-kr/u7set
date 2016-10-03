@@ -89,6 +89,7 @@ void Settings::writeUserScope() const
 	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
 
 	s.setValue("m_hideWarnings", m_hideWarnings);
+	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
 	return;
 }
@@ -127,7 +128,6 @@ void Settings::loadUserScope()
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
-
 	if (m_loginCompleter.isEmpty() == true)
 	{
 		m_loginCompleter << "Administrator";
@@ -168,6 +168,7 @@ void Settings::loadUserScope()
 	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
 
 	m_hideWarnings = s.value("m_hideWarnings").toBool();
+	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
 
     return;
 }
@@ -316,3 +317,12 @@ void Settings::setHideWarnings(bool value)
 }
 
 
+const QStringList& Settings::buildSearchCompleter() const
+{
+	return m_buildSerachCompleter;
+}
+
+QStringList& Settings::buildSearchCompleter()
+{
+	return m_buildSerachCompleter;
+}

@@ -4,7 +4,7 @@
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
 #include <QTextBlock>
-
+#include <QCompleter>
 
 //
 //
@@ -57,6 +57,10 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_findTextEdit = new QLineEdit();
 	m_findTextEdit->setPlaceholderText("Find Text");
 	m_findTextEdit->setMinimumWidth(300);
+
+	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
+	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findTextEdit->setCompleter(searchCompleter);
 
 	m_findTextButton = new QPushButton(tr("Search <F3>"));
 	m_findTextButton->setShortcut(Qt::Key_F3);
@@ -502,6 +506,21 @@ void BuildTabPage::search()
 	{
 		m_findTextEdit->setFocus();
 		return;
+	}
+
+	// Update completer
+	//
+	if (theSettings.buildSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
+	{
+		theSettings.buildSearchCompleter() << searchText;
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
+		assert(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.buildSearchCompleter());
+		}
 	}
 
 	// Find
