@@ -558,7 +558,7 @@ namespace Hardware
 
         m_connections.push_back(connection);
 
-        int i = 0;
+		int i = 1;
         for (auto c : m_connections)
         {
             c->setIndex(i++);
@@ -587,7 +587,7 @@ namespace Hardware
 
         if (result == true)
         {
-            int i = 0;
+			int i = 1;
             for (auto c : m_connections)
             {
                 c->setIndex(i++);

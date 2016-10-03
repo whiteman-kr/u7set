@@ -293,7 +293,9 @@ namespace ExtWidgets
 		void clearProperties();
 
 		void setExpertMode(bool expertMode);
-		void setEditingEnabled(bool editingEnabled);
+
+		bool readOnly() const;
+		void setReadOnly(bool readOnly);
 
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
@@ -327,7 +329,7 @@ namespace ExtWidgets
 
 	private:
 		bool m_expertMode = false;
-		bool m_editingEnabled = true;
+		bool m_readOnly = false;
 	};
 
 }

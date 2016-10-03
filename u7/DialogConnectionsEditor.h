@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QItemDelegate>
+#include <QCompleter>
 #include "../lib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
@@ -11,7 +12,7 @@
 class DialogConnectionsPropertyEditor : public PropertyEditorDialog
 {
 public:
-    DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections);
+	DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections, bool readOnly);
     ~DialogConnectionsPropertyEditor();
 
 private:
@@ -47,8 +48,19 @@ private:
 	void updateButtons();
 	bool continueWithDuplicateCaptions();
 
+	void setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection);
+
 protected:
     virtual void closeEvent(QCloseEvent* e);
+
+private:
+
+	enum class MaskType
+	{
+		ConnectionID,
+		Port1EquipmentID,
+		Port2EquipmentID
+	};
 
 private slots:
     void on_m_Add_clicked();
@@ -67,10 +79,22 @@ private slots:
 	void on_m_Apply_clicked();
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
+	void on_m_mask_returnPressed();
+
+	void on_m_applyMask_clicked();
+
+	void on_m_maskType_currentIndexChanged(int index);
+
+	void on_m_Export_clicked();
+
 private:
     Ui::DialogConnectionsEditor *ui;
 
     bool m_modified = false;
+
+	QCompleter* m_completer = nullptr;
+
+	QStringList m_masks;
 
     DbController* db();
     DbController* m_dbController;

@@ -15,27 +15,67 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QTreeWidget" name="m_list">
-         <property name="rootIsDecorated">
-          <bool>false</bool>
-         </property>
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QComboBox" name="m_maskType"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_mask"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_applyMask">
+             <property name="text">
+              <string>Mask</string>
+             </property>
+             <property name="autoDefault">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTreeWidget" name="m_list">
+           <property name="rootIsDecorated">
+            <bool>false</bool>
+           </property>
+           <column>
+            <property name="text">
+             <string notr="true">1</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QPushButton" name="m_Add">
            <property name="text">
             <string>Add</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -44,12 +84,18 @@
            <property name="text">
             <string>Edit</string>
            </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="m_Remove">
            <property name="text">
             <string>Remove</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -77,6 +123,9 @@
          <property name="text">
           <string>Check Out</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -84,12 +133,25 @@
          <property name="text">
           <string>Check In</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="m_Undo">
          <property name="text">
           <string>Undo</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_Export">
+         <property name="text">
+          <string>Export...</string>
          </property>
         </widget>
        </item>
@@ -111,6 +173,9 @@
          <property name="text">
           <string>Apply</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -118,12 +183,18 @@
          <property name="text">
           <string>OK</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="m_Cancel">
          <property name="text">
           <string>Cancel</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
