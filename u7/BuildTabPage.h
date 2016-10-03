@@ -5,10 +5,13 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/OutputLog.h"
 #include <QTextCursor>
+#include <QLineEdit>
 
 class DbController;
 class QCheckBox;
 class QTextEdit;
+class QPushButton;
+class QSplitter;
 
 //
 //
@@ -60,6 +63,8 @@ protected slots:
 	void prevIssue();
 	void nextIssue();
 
+	void search();
+
 	// Data
 	//
 private:
@@ -68,6 +73,9 @@ private:
 
 	QPushButton* m_prevIssueButton = nullptr;
 	QPushButton* m_nextIssueButton = nullptr;
+
+	QLineEdit* m_findTextEdit = nullptr;
+	QPushButton* m_findTextButton = nullptr;
 
 	QPushButton* m_buildButton = nullptr;
 	QPushButton* m_cancelButton = nullptr;
