@@ -88,6 +88,8 @@ void Settings::writeUserScope() const
 
 	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
 
+	s.setValue("m_hideWarnings", m_hideWarnings);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -164,6 +166,8 @@ void Settings::loadUserScope()
 	m_infoMode = s.value("m_infoMode").toBool();
 
 	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
+
+	m_hideWarnings = s.value("m_hideWarnings").toBool();
 
     return;
 }
@@ -300,4 +304,15 @@ void Settings::setInfoMode(bool value)
 {
 	m_infoMode = value;
 }
+
+bool Settings::hideWarnings() const
+{
+	return m_hideWarnings;
+}
+
+void Settings::setHideWarnings(bool value)
+{
+	m_hideWarnings = value;
+}
+
 

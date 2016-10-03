@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
+#include <QTextBlock>
 
 
 //
@@ -38,17 +39,32 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	m_outputWidget = new QTextEdit();
 	m_outputWidget->setReadOnly(true);
+	m_outputWidget->setLineWrapMode(QTextEdit::NoWrap);
+	m_outputWidget->setAutoFormatting(QTextEdit::AutoNone);
 	m_outputWidget->document()->setUndoRedoEnabled(false);
-	m_outputWidget->document()->setMaximumBlockCount(600);
 
-	m_buildButton = new QPushButton(tr("Build..."));
+	m_buildButton = new QPushButton(tr("Build... <F7>"));
+
 	m_cancelButton = new QPushButton(tr("Cancel"));
+	m_cancelButton->setEnabled(false);
+
+	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
+	m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);
+
+	m_nextIssueButton = new QPushButton(tr("Next Issue <F6>"));
+	m_nextIssueButton->setShortcut(Qt::Key_F6);
 
 	QGridLayout* rightWidgetLayout = new QGridLayout();
 
-	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 3);
-	rightWidgetLayout->addWidget(m_buildButton, 1, 1);
-	rightWidgetLayout->addWidget(m_cancelButton, 1, 2);
+	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 5);
+
+	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 0);
+	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 1);
+
+	rightWidgetLayout->setColumnStretch(2, 100);
+
+	rightWidgetLayout->addWidget(m_buildButton, 1, 3);
+	rightWidgetLayout->addWidget(m_cancelButton, 1, 4);
 
 	rightWidgetLayout->setColumnStretch(0, 1);
 
@@ -63,8 +79,13 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
 	m_debugCheckBox->setChecked(true);
-
 	settingsWidgetLayout->addWidget(m_debugCheckBox);
+
+	m_hideWarningsCheckBox = new QCheckBox(tr("Hide warnings"), m_settingsWidget);
+	m_hideWarningsCheckBox->setChecked(theSettings.hideWarnings());
+	settingsWidgetLayout->addWidget(m_hideWarningsCheckBox);
+
+	settingsWidgetLayout->addStretch();
 
 	m_settingsWidget->setLayout(settingsWidgetLayout);
 
@@ -98,6 +119,11 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &BuildTabPage::buildWasStarted);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &BuildTabPage::buildWasFinished);
 
+	connect(m_hideWarningsCheckBox, &QCheckBox::stateChanged, this, &BuildTabPage::hideWaringsStateChanged);
+
+	connect(m_prevIssueButton, &QPushButton::clicked, this, &BuildTabPage::prevIssue);
+	connect(m_nextIssueButton, &QPushButton::clicked, this, &BuildTabPage::nextIssue);
+
 	////connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
 	//connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
 
@@ -114,8 +140,6 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 BuildTabPage::~BuildTabPage()
 {
-//	BuildTabPage::m_this = nullptr;
-
 	theSettings.m_buildTabPageSplitterState = m_vsplitter->saveState();
 	theSettings.writeUserScope();
 }
@@ -166,20 +190,6 @@ void BuildTabPage::CreateActions()
 	return;
 }
 
-void BuildTabPage::writeOutputLog(const OutputLogItem& logItem)
-{
-	if (m_outputWidget == nullptr)
-	{
-		assert(m_outputWidget != nullptr);
-		return;
-	}
-
-	QString html = logItem.toHtml();
-	m_outputWidget->append(html);
-
-	return;
-}
-
 void BuildTabPage::closeEvent(QCloseEvent* e)
 {
 	e->accept();
@@ -187,23 +197,41 @@ void BuildTabPage::closeEvent(QCloseEvent* e)
 
 void BuildTabPage::timerEvent(QTimerEvent* event)
 {
-
 	if (event->timerId() == m_logTimerId &&
 		m_outputLog.isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
+		bool hideWarnings = theSettings.hideWarnings();
+
 		std::vector<OutputLogItem> messages;
 		messages.reserve(20);
 
 		if (m_outputLog.isEmpty() == false)
 		{
-			m_outputLog.popMessages(&messages, 20);
+			m_outputLog.popMessages(&messages, 40);
 		}
 
-		for (auto m = messages.begin(); m != messages.end(); ++m)
+		QString outputMessagesBuffer;
+		outputMessagesBuffer.reserve(128000);
+
+		for (size_t i = 0; i < messages.size(); i++)
 		{
-			writeOutputLog(*m);
+			const OutputLogItem& m = messages[i];
+
+			if (hideWarnings == true && m.m_level == OutputMessageLevel::Warning)
+			{
+				continue;
+			}
+
+			outputMessagesBuffer.append(m.toHtml());
+
+			if (i != messages.size() - 1)
+			{
+				outputMessagesBuffer += QLatin1String("<br>");
+			}
 		}
+
+		m_outputWidget->append(outputMessagesBuffer);
 
 		return;
 	}
@@ -300,6 +328,150 @@ void BuildTabPage::buildWasFinished()
 	m_cancelButton->setEnabled(false);
 
 	m_itemsIssues.clear();
+
+	return;
+}
+
+void BuildTabPage::hideWaringsStateChanged(int state)
+{
+	bool hideWarning = (static_cast<Qt::CheckState>(state) == Qt::CheckState::Checked);
+	theSettings.setHideWarnings(hideWarning);
+}
+
+void BuildTabPage::prevIssue()
+{
+	assert(m_outputWidget);
+
+	QString regExpVal;
+	if (theSettings.hideWarnings() == true)
+	{
+		regExpVal = "\\bERR\\b";
+	}
+	else
+	{
+		regExpVal = "\\b(ERR|WRN)\\b";
+	}
+
+	//  --
+	//
+	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) &&
+		m_outputWidget->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::StartOfLine);
+		m_outputWidget->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find issue
+	//
+	QRegExp rx(regExpVal);
+	bool found = m_outputWidget->find(rx, QTextDocument::FindBackward);
+
+	if (found == false)
+	{
+		// Try to find one more time from the end
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::End);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(rx, QTextDocument::FindBackward);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::PreviousCharacter);
+		m_outputWidget->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_outputWidget->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_outputWidget->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = true;
+		m_lastNavIsNextIssue = false;
+		m_lastNavCursor = m_outputWidget->textCursor();
+	}
+
+	return;
+}
+
+void BuildTabPage::nextIssue()
+{
+	assert(m_outputWidget);
+
+	QString regExpVal;
+	if (theSettings.hideWarnings() == true)
+	{
+		regExpVal = "\\bERR\\b";
+	}
+	else
+	{
+		regExpVal = "\\b(ERR|WRN)\\b";
+	}
+
+	//  --
+	//
+	if (m_lastNavIsPrevIssue == true &&
+		m_outputWidget->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::EndOfLine);
+		m_outputWidget->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find Issue
+	//
+	QRegExp rx(regExpVal);
+	bool found = m_outputWidget->find(rx);
+
+	if (found == false)
+	{
+		// Try to find one more time from the beginning
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(rx);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.clearSelection();
+		m_outputWidget->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_outputWidget->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_outputWidget->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = false;
+		m_lastNavIsNextIssue = true;
+		m_lastNavCursor = m_outputWidget->textCursor();
+	}
 
 	return;
 }

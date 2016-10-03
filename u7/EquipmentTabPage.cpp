@@ -8,6 +8,7 @@
 #include "DialogConnectionsEditor.h"
 #include "DialogChoosePreset.h"
 #include "GlobalMessanger.h"
+#include "SignalsTabPage.h"
 
 #include <QPalette>
 #include <QtTreePropertyBrowser>
@@ -2158,6 +2159,48 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 	return;
 }
 
+void EquipmentView::addAppSignal()
+{
+	qDebug() << "void EquipmentView::addAppSignal()";
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+
+	if (module == nullptr || module->isLM() == false)
+	{
+		assert(module);
+		return;
+	}
+
+	QStringList equipmentIdList;
+	equipmentIdList << module->equipmentId();
+
+	int counter = 0;
+	bool ok = db()->nextCounterValue(&counter);
+	if (ok == false)
+	{
+		return;
+	}
+
+	SignalsTabPage::createSignal(db(),
+								 equipmentIdList,
+								 counter,
+								 module->equipmentId(),
+								 module->equipmentId(),
+								 this);
+	return;
+}
+
 void EquipmentView::copySelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3176,6 +3219,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_separatorAction0);
 	m_equipmentView->addAction(m_inOutsToSignals);
 	m_equipmentView->addAction(m_showAppSignals);
+	m_equipmentView->addAction(m_addAppSignal);
 
 	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
@@ -3396,6 +3440,11 @@ void EquipmentTabPage::CreateActions()
 	m_showAppSignals->setEnabled(false);
 	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, &EquipmentView::showAppSignals);
 
+	m_addAppSignal = new QAction(tr("Add Appliaction Signal"), this);
+	m_addAppSignal->setStatusTip(tr("Add new application signal to device"));
+	m_addAppSignal->setEnabled(false);
+	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
+
 	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
 	m_separatorAction01->setSeparator(true);
@@ -3554,6 +3603,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addPresetSoftwareAction);
 	assert(m_inOutsToSignals);
 	assert(m_showAppSignals);
+	assert(m_addAppSignal);
 
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
@@ -3603,6 +3653,9 @@ void EquipmentTabPage::setActionState()
 
 	m_showAppSignals->setEnabled(false);
 
+	m_addAppSignal->setEnabled(false);
+	m_addAppSignal->setVisible(false);
+
 	m_copyObjectAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -3631,6 +3684,12 @@ void EquipmentTabPage::setActionState()
 		{
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);
+		}
+
+		if (module != nullptr && module->isLM())
+		{
+			m_addAppSignal->setEnabled(true);
+			m_addAppSignal->setVisible(true);
 		}
 	}
 

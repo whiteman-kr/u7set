@@ -57,6 +57,9 @@ public:
 	bool infoMode() const;
 	void setInfoMode(bool value);
 
+	bool hideWarnings() const;
+	void setHideWarnings(bool value);
+
 	// Data
 	//
 public:
@@ -151,6 +154,7 @@ private:
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;
+	bool m_hideWarnings = false;
 
 };
 

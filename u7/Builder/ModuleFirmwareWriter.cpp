@@ -346,7 +346,7 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 		int channel = channelNumbersAndSize[i].first;
 		if (channel < LMNumber_Min || channel > LMNumber_Max)
 		{
-			log->errINT1000(QString("ModuleFirmware::storeChannelData error, LM number %1: Wrong channel number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
+			log->errINT1000(QString("ModuleFirmware::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
 			return false;
 		}
 

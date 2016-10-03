@@ -54,6 +54,9 @@
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
             <widget class="QPushButton" name="m_add">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -61,6 +64,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="m_remove">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>&lt;</string>
              </property>
@@ -96,6 +102,9 @@
             <layout class="QGridLayout" name="gridLayout">
              <item row="3" column="3">
               <widget class="QPushButton" name="m_setCurrent">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Set Current</string>
                </property>
@@ -103,6 +112,9 @@
              </item>
              <item row="2" column="1">
               <widget class="QPushButton" name="m_moveUp">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Move Up</string>
                </property>
@@ -117,6 +129,9 @@
              </item>
              <item row="4" column="0">
               <widget class="QPushButton" name="m_removePreset">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Remove Preset</string>
                </property>
@@ -124,6 +139,9 @@
              </item>
              <item row="3" column="0">
               <widget class="QPushButton" name="m_editPreset">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Edit Preset...</string>
                </property>
@@ -131,6 +149,9 @@
              </item>
              <item row="3" column="1">
               <widget class="QPushButton" name="m_moveDown">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Move Down</string>
                </property>

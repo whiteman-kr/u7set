@@ -175,10 +175,11 @@ namespace Builder
 		void errALC5049(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
 		void errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Float.
 		void errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid);	// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			//	Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 		void wrnALC5053(QString fbCaption, QUuid itemUuid);									// Automatic sorting of XY points of FB '%1' has been performed
-		void errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			//	Parameters '%1.%2' and '%1.%3' should not be equal.
-		void wrnALC5055(QString connectionID);														//	Optical connection '%1' is configured manually.
+		void errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Parameters '%1.%2' and '%1.%3' should not be equal.
+		void wrnALC5055(QString connectionID);														// Optical connection '%1' is configured manually.
+		void errALC5056(QString subsystemID, QString lmEquipmentID);							// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 
 		// EQP			Equipment issues						6000-6999
 		//

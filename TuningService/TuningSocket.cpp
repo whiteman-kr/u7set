@@ -396,9 +396,6 @@ namespace Tuning
 	}
 
 
-
-
-
 	void TuningSocketWorker::onSocketReadyRead()
 	{
 		if (m_socket == nullptr)
@@ -445,10 +442,6 @@ namespace Tuning
 
 		m_replies.completePush();*/
 	}
-
-
-
-
 
 
 	bool TuningSocketWorker::getReply(SocketReply* reply)

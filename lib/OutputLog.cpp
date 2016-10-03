@@ -36,44 +36,53 @@ QString OutputLogItem::toText() const
 QString OutputLogItem::toHtml() const
 {
 	QString result;
-	result.reserve(1024);
-
-	QString color;
-	switch (m_level)
-	{
-	case OutputMessageLevel::Message:
-		color = "black";
-		break;
-	case OutputMessageLevel::Success:
-		color = "green";
-		break;
-	case OutputMessageLevel::Warning:
-		color = "#F87217";
-		break;
-	case OutputMessageLevel::Error:
-		color = "red";
-		break;
-
-	default:
-		assert(false);
-		color = "black";
-	}
 
 	if (m_message.isEmpty())
 	{
 		result = QString("<font face=\"%1\" size=\"4\" color=#C0C0C0>%2|</font>")
-					.arg(m_htmlFont)
-					.arg(m_no, 4, 10, QChar('0'));
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'));
+
+		return result;
 	}
-	else
+
+	switch (m_level)
 	{
+	case OutputMessageLevel::Message:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
-						 "<font face=\"%1\" size=\"4\" color=%4>%5</font>")
+						 "<font face=\"%1\" size=\"4\" color=black>%4</font>")
 				 .arg(m_htmlFont)
 				 .arg(m_no, 4, 10, QChar('0'))
 				 .arg(m_time.toString("hh:mm:ss:zzz   "))
-				 .arg(color)
 				 .arg(m_message);
+		break;
+	case OutputMessageLevel::Success:
+		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
+						 "<font face=\"%1\" size=\"4\" color=green>%4</font>")
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'))
+				 .arg(m_time.toString("hh:mm:ss:zzz   "))
+				 .arg(m_message);
+		break;
+	case OutputMessageLevel::Warning:
+		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
+						 "<font face=\"%1\" size=\"4\" color=#F87217>WRN %4</font>")
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'))
+				 .arg(m_time.toString("hh:mm:ss:zzz   "))
+				 .arg(m_message);
+		break;
+	case OutputMessageLevel::Error:
+		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
+						 "<font face=\"%1\" size=\"4\" color=red>ERR %4</font>")
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'))
+				 .arg(m_time.toString("hh:mm:ss:zzz   "))
+				 .arg(m_message);
+		break;
+
+	default:
+		assert(false);
 	}
 
 	return result;

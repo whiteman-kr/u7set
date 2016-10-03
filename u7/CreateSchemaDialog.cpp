@@ -71,7 +71,6 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Fill Template combo box
 	//
-
 	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1));		// -1 means Blnk, any othe number is DbFileID
 
 	std::vector<DbFileInfo> templates;
@@ -80,14 +79,27 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	if (ok == true)
 	{
+		// Sort files
+		//
+		std::sort(templates.begin(), templates.end(),
+			[](const DbFileInfo& f1, const DbFileInfo& f2)
+			{
+				return f1.fileName() < f2.fileName();
+			});
+
 		// read files
 		//
 		m_templates.reserve(templates.size());
 
 		db->getLatestVersion(templates, &m_templates, this);
 
-		for (std::shared_ptr<DbFile> f : m_templates)
+		int defultIndex = -1;
+		for (size_t i = 0; i < m_templates.size(); i++)
 		{
+			std::shared_ptr<DbFile> f = m_templates[i];
+
+			qDebug() << f->fileName();
+
 			std::shared_ptr<VFrame30::Schema> schemaTemplate =  VFrame30::Schema::Create(f->data());
 
 			// Check if type the sane
@@ -99,6 +111,22 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			}
 
 			ui->templateComboBox->addItem(schemaTemplate->caption(), QVariant(f->fileId()));
+
+			if (defultIndex == -1 &&
+				f->fileName().startsWith(QLatin1String("Default."), Qt::CaseInsensitive) == true)
+			{
+				defultIndex = static_cast<int>(i);
+			}
+		}
+
+		if (defultIndex != -1)
+		{
+			// Set current selection to item with "Default." file name
+			// ComboBox also has "Blank" item, so + 1 is required as defultIndex is an index in file vector
+			//
+			ui->templateComboBox->setCurrentIndex(defultIndex + 1);
+
+			templateChanged(defultIndex + 1);
 		}
 	}
 

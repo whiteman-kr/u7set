@@ -142,6 +142,7 @@ namespace VFrame30
 	void SchemaItemConnection::setConnectionId(const QString& value)
 	{
 		m_connectionId = value;
+		m_connectionId = m_connectionId.trimmed();
 	}
 
 
@@ -515,6 +516,7 @@ namespace VFrame30
 	void SchemaItemReceiver::setAppSignalId(const QString& value)
 	{
 		m_appSignalId = value;
+		m_appSignalId = m_appSignalId.trimmed();
 	}
 
 	bool SchemaItemReceiver::showValidity() const

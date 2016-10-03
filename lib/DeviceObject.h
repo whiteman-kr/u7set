@@ -673,6 +673,7 @@ namespace Hardware
 	public:
 		EquipmentSet() = default;
 		EquipmentSet(std::shared_ptr<DeviceObject> root);
+		~EquipmentSet();
 
 	public:
 		void set(std::shared_ptr<DeviceObject> root);

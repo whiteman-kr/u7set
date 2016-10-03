@@ -3,13 +3,14 @@
 #include "ui_DialogPresetEditor.h"
 
 #include "MainWindow.h"
+#include "DialogInputValue.h"
 
 //
 //
 //
 
 DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filterStorage, QWidget *parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_filterStorage(filterStorage),
 	ui(new Ui::DialogPresetEditor)
 {
@@ -30,23 +31,19 @@ DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filterStorage, QWidg
 	ui->m_presetsTree->setHeaderLabels(headerLabels);
 	ui->m_presetsTree->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
-	int count = m_filterStorage->topFilterCount();
-	for (int i = 0; i < count; i++)
+	// Add presets to tree
+	//
+	for (int i = 0; i < m_filterStorage->m_root->childFiltersCount(); i++)
 	{
-		std::shared_ptr<ObjectFilter> f = m_filterStorage->topFilter(i);
+		std::shared_ptr<ObjectFilter> f = m_filterStorage->m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
-			continue;
-		}
-
-		if (f->isTree() == false)
-		{
-			continue;
+			return;
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
-		setTreeItemText(item, f.get());
+		setFilterItemText(item, f.get());
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 		item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 		addChildTreeObjects(f, item);
@@ -70,15 +67,22 @@ DialogPresetEditor::DialogPresetEditor(ObjectFilterStorage *filterStorage, QWidg
 	ui->m_signalTypeCombo->setCurrentIndex(0);
 	ui->m_signalTypeCombo->blockSignals(false);
 
-	// Objects
+	// Objects Masks
 	//
+	ui->m_maskTypeCombo->blockSignals(true);
+	ui->m_maskTypeCombo->addItem("AppSignalID", static_cast<int>(MaskType::AppSignalID));
+	ui->m_maskTypeCombo->addItem("CustomAppSignalID", static_cast<int>(MaskType::CustomAppSignalID));
+	ui->m_maskTypeCombo->addItem("EquipmentID", static_cast<int>(MaskType::EquipmentID));
+	ui->m_maskTypeCombo->setCurrentIndex(0);
+	ui->m_maskTypeCombo->blockSignals(false);
 
+	// Objects and model
+	//
 	m_model = new TuningItemModel(this);
 	m_model->addColumn(TuningItemModel::TuningPageColumns::CustomAppSignalID);
 	m_model->addColumn(TuningItemModel::TuningPageColumns::AppSignalID);
 	m_model->addColumn(TuningItemModel::TuningPageColumns::EquipmentID);
 	m_model->addColumn(TuningItemModel::TuningPageColumns::Caption);
-	//m_model->addColumn(TuningItemModel::TuningPageColumns::Value);
 
 	ui->m_signalsTable->setModel(m_model);
 
@@ -112,6 +116,17 @@ void DialogPresetEditor::fillObjectsList()
 		signalType = static_cast<SignalType>(data.toInt());
 	}
 
+	MaskType maskType = MaskType::AppSignalID;
+	data = ui->m_maskTypeCombo->currentData();
+	if (data.isNull() == false && data.isValid() == true)
+	{
+		maskType = static_cast<MaskType>(data.toInt());
+	}
+
+	QString mask = ui->m_mask->text().trimmed();
+	QRegExp rx(mask);
+	rx.setPatternSyntax(QRegExp::Wildcard);
+
 	for (int i = 0; i < theObjects.objectsCount(); i++)
 	{
 		TuningObject o = theObjects.object(i);
@@ -126,10 +141,101 @@ void DialogPresetEditor::fillObjectsList()
 			continue;
 		}
 
+		if (mask.isEmpty() == false)
+		{
+			switch (maskType)
+			{
+			case MaskType::AppSignalID:
+				{
+					if (rx.exactMatch(o.appSignalID()) == false)
+					{
+						continue;
+					}
+				}
+				break;
+			case MaskType::CustomAppSignalID:
+				{
+					if (rx.exactMatch(o.customAppSignalID()) == false)
+					{
+						continue;
+					}
+				}
+				break;
+			case MaskType::EquipmentID:
+				{
+					if (rx.exactMatch(o.equipmentID()) == false)
+					{
+						continue;
+					}
+				}
+				break;
+			}
+		}
+
 		m_objectsIndexes.push_back(i);
 	}
 
 	m_model->setObjectsIndexes(m_objectsIndexes);
+}
+
+std::shared_ptr<ObjectFilter> DialogPresetEditor::selectedFilter(QTreeWidgetItem** item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return nullptr;
+	}
+
+	*item = nullptr;
+
+	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
+	if (selectedItems.empty() == true)
+	{
+		return nullptr;
+	}
+
+	QTreeWidgetItem* selectedItem = selectedItems[0];
+
+	while (selectedItem != nullptr && isFilter(selectedItem) == false)
+	{
+		selectedItem = selectedItem->parent();
+	}
+
+	if (selectedItem == nullptr)
+	{
+		return nullptr;
+	}
+
+	std::shared_ptr<ObjectFilter> filter = selectedItem->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return nullptr;
+	}
+
+	*item = selectedItem;
+
+	return filter;
+
+}
+
+void DialogPresetEditor::getSelectedCount(int& selectedPresets, int& selectedSignals)
+{
+	selectedPresets = 0;
+	selectedSignals = 0;
+
+	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
+	for (auto item : selectedItems)
+	{
+		if (isFilter(item) == true)
+		{
+			selectedPresets++;
+		}
+		if (isSignal(item) == true)
+		{
+			selectedSignals++;
+		}
+	}
 }
 
 bool DialogPresetEditor::isFilter(QTreeWidgetItem* item)
@@ -168,6 +274,8 @@ void DialogPresetEditor::addChildTreeObjects(const std::shared_ptr<ObjectFilter>
 		return;
 	}
 
+	// Add child presets
+	//
 	for (int i = 0; i < filter->childFiltersCount(); i++)
 	{
 		std::shared_ptr<ObjectFilter> f = filter->childFilter(i);
@@ -178,7 +286,7 @@ void DialogPresetEditor::addChildTreeObjects(const std::shared_ptr<ObjectFilter>
 		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
-		setTreeItemText(item, f.get());
+		setFilterItemText(item, f.get());
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 		item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 
@@ -187,21 +295,16 @@ void DialogPresetEditor::addChildTreeObjects(const std::shared_ptr<ObjectFilter>
 		parent->addChild(item);
 	}
 
-	//add signal items
+	//Add values
 	//
-	std::vector<ObjectFilterValue> values = filter->signalValues();
+	std::vector<ObjectValue> values = filter->signalValues();
 
 	QList<QTreeWidgetItem*> children;
-	for (const ObjectFilterValue& ofv : values)
+	for (const ObjectValue& ofv : values)
 	{
-		QStringList l;
-		l.push_back("-");
-		l.push_back("Signal");
-		l.push_back(ofv.appSignalId);
-		l.push_back(ofv.caption);
-		l.push_back(QString::number(ofv.value, 'f', ofv.decimalPlaces));
 
-		QTreeWidgetItem* childItem = new QTreeWidgetItem(l);
+		QTreeWidgetItem* childItem = new QTreeWidgetItem();
+		setSignalItemText(childItem, ofv);
 		childItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Signal));
 		childItem->setData(2, Qt::UserRole, QVariant::fromValue(ofv));
 
@@ -211,7 +314,7 @@ void DialogPresetEditor::addChildTreeObjects(const std::shared_ptr<ObjectFilter>
 	parent->addChildren(children);
 }
 
-void DialogPresetEditor::setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter)
+void DialogPresetEditor::setFilterItemText(QTreeWidgetItem* item, ObjectFilter* filter)
 {
 	if (item == nullptr || filter == nullptr)
 	{
@@ -222,7 +325,39 @@ void DialogPresetEditor::setTreeItemText(QTreeWidgetItem* item, ObjectFilter* fi
 
 	QStringList l;
 	l << filter->caption();
-	l.append(filter->folder() ? tr("Folder") : tr("Preset"));
+	l.append(tr("Preset"));
+
+	int i = 0;
+	for (auto s : l)
+	{
+		item->setText(i++, s);
+	}
+}
+
+void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const ObjectValue& value)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	QStringList l;
+	l.push_back("-");
+	l.push_back("Signal");
+	l.push_back(value.appSignalId);
+	l.push_back(value.caption);
+	if (value.useValue == true)
+	{
+		if (value.analog == false)
+		{
+			l.push_back(value.value == 0 ? tr("No") : tr("Yes"));
+		}
+		else
+		{
+			l.push_back(QString::number(value.value, 'f', value.decimalPlaces));
+		}
+	}
 
 	int i = 0;
 	for (auto s : l)
@@ -233,35 +368,35 @@ void DialogPresetEditor::setTreeItemText(QTreeWidgetItem* item, ObjectFilter* fi
 
 void DialogPresetEditor::on_m_addPreset_clicked()
 {
-	QTreeWidgetItem* parentItem = ui->m_presetsTree->currentItem();
-	if (parentItem != nullptr && isFilter(parentItem) == false)
-	{
-		return;
-	}
-
 	std::shared_ptr<ObjectFilter> newFilter = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
 
 	QUuid uid = QUuid::createUuid();
 	newFilter->setStrID(uid.toString());
 	newFilter->setCaption("New Filter");
 
-	QTreeWidgetItem* item = new QTreeWidgetItem();
-	setTreeItemText(item, newFilter.get());
-	item->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
-	item->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
+	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
+	setFilterItemText(newPresetItem, newFilter.get());
+	newPresetItem->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+	newPresetItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
 
-	if (parentItem != nullptr)
+	QTreeWidgetItem* parentItem = nullptr;
+	std::shared_ptr<ObjectFilter> parentFilter = selectedFilter(&parentItem);
+
+	if (parentItem == nullptr || parentFilter == nullptr)
 	{
-		std::shared_ptr<ObjectFilter> parentFilter = parentItem->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
-		parentFilter->addChild(newFilter);
-
-		parentItem->addChild(item);
-		parentItem->setExpanded(true);
+		// no item was selected, add top level item
+		//
+		m_filterStorage->m_root->addChild(newFilter);
+		ui->m_presetsTree->addTopLevelItem(newPresetItem);
 	}
 	else
 	{
-		m_filterStorage->addTopFilter(newFilter);
-		ui->m_presetsTree->addTopLevelItem(item);
+		// an item was selected, add child item
+		//
+		parentFilter->addChild(newFilter);
+
+		parentItem->addChild(newPresetItem);
+		parentItem->setExpanded(true);
 	}
 
 	m_modified = true;
@@ -269,28 +404,18 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 
 void DialogPresetEditor::on_m_editPreset_clicked()
 {
-	QTreeWidgetItem* item = ui->m_presetsTree->currentItem();
-	if (item == nullptr)
+	QTreeWidgetItem* editItem = nullptr;
+	std::shared_ptr<ObjectFilter> editFilter = selectedFilter(&editItem);
+
+	if (editItem == nullptr || editFilter == nullptr)
 	{
 		return;
 	}
 
-	if (isFilter(item) == false)
-	{
-		return;
-	}
-
-	std::shared_ptr<ObjectFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	DialogPresetProperties d(filter, this);
+	DialogPresetProperties d(editFilter, this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		setTreeItemText(item, filter.get());
+		setFilterItemText(editItem, editFilter.get());
 
 		m_modified = true;
 	}
@@ -340,23 +465,26 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 			return;
 		}
 
-		if (m_filterStorage->removeFilter(filter) == true)
+		QTreeWidgetItem* parentItem = item->parent();
+		if (parentItem == nullptr)
 		{
-			QTreeWidgetItem* parent = item->parent();
-			if (parent != nullptr)
-			{
-				QTreeWidgetItem* deleteItem = parent->takeChild(parent->indexOfChild(item));
-				delete deleteItem;
-			}
-			else
-			{
-				QTreeWidgetItem* deleteItem = ui->m_presetsTree->takeTopLevelItem(ui->m_presetsTree->indexOfTopLevelItem(item));
-				delete deleteItem;
-			}
+			m_filterStorage->m_root->removeChild(filter);
+
+			QTreeWidgetItem* deleteItem = ui->m_presetsTree->takeTopLevelItem(ui->m_presetsTree->indexOfTopLevelItem(item));
+			delete deleteItem;
 		}
 		else
 		{
-			assert(false);
+			ObjectFilter* parentFilter = filter->parentFilter();
+			if (parentFilter == nullptr)
+			{
+				assert(parentFilter);
+				return;
+			}
+			parentFilter->removeChild(filter);
+
+			QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
+			delete deleteItem;
 		}
 
 		m_modified = true;
@@ -385,9 +513,9 @@ void DialogPresetEditor::on_m_add_clicked()
 		}
 	}
 
-	if (selectedPresets.isEmpty() == true)
+	if (selectedPresets.size() != 1)
 	{
-		QMessageBox::critical(this, "Error", "Select a preset to add signals!");
+		QMessageBox::critical(this, "Error", "Select one preset to add signals!");
 		return;
 	}
 
@@ -418,7 +546,7 @@ void DialogPresetEditor::on_m_add_clicked()
 			continue;
 		}
 
-		ObjectFilterValue ofv;
+		ObjectValue ofv;
 		ofv.appSignalId = o.appSignalID();
 		ofv.caption = o.caption();
 		ofv.analog = o.analog();
@@ -431,14 +559,8 @@ void DialogPresetEditor::on_m_add_clicked()
 			ofv.value = o.value().toDouble();
 		}
 
-		QStringList l;
-		l.push_back("-");
-		l.push_back("Signal");
-		l.push_back(ofv.appSignalId);
-		l.push_back(ofv.caption);
-		l.push_back(QString::number(ofv.value, 'f', ofv.decimalPlaces));
-
-		QTreeWidgetItem* childItem = new QTreeWidgetItem(l);
+		QTreeWidgetItem* childItem = new QTreeWidgetItem();
+		setSignalItemText(childItem, ofv);
 		childItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Signal));
 		childItem->setData(2, Qt::UserRole, QVariant::fromValue(ofv));
 
@@ -486,7 +608,7 @@ void DialogPresetEditor::on_m_remove_clicked()
 			return;
 		}
 
-		ObjectFilterValue ofv = item->data(2, Qt::UserRole).value<ObjectFilterValue>();
+		ObjectValue ofv = item->data(2, Qt::UserRole).value<ObjectValue>();
 		filter->removeValue(ofv.appSignalId);
 
 		QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
@@ -497,7 +619,20 @@ void DialogPresetEditor::on_m_remove_clicked()
 void DialogPresetEditor::on_m_presetsTree_doubleClicked(const QModelIndex &index)
 {
 	Q_UNUSED(index);
-	on_m_editPreset_clicked();
+	int presetsCount = 0;
+	int signalsCount = 0;
+
+	getSelectedCount(presetsCount, signalsCount);
+
+	if (presetsCount == 1 && signalsCount == 0)
+	{
+		on_m_editPreset_clicked();
+	}
+
+	if (presetsCount == 0 && signalsCount > 0)
+	{
+		on_m_setValue_clicked();
+	}
 }
 
 void DialogPresetEditor::on_m_signalTypeCombo_currentIndexChanged(int index)
@@ -506,7 +641,126 @@ void DialogPresetEditor::on_m_signalTypeCombo_currentIndexChanged(int index)
 	fillObjectsList();
 }
 
+void DialogPresetEditor::on_m_presetsTree_itemSelectionChanged()
+{
+	int presetsCount = 0;
+	int signalsCount = 0;
+
+	getSelectedCount(presetsCount, signalsCount);
+
+	ui->m_editPreset->setEnabled(presetsCount == 1 && signalsCount == 0);
+	ui->m_removePreset->setEnabled(presetsCount > 0 && signalsCount == 0);
+
+	ui->m_add->setEnabled(presetsCount == 1 && signalsCount == 0);
+	ui->m_remove->setEnabled(presetsCount == 0 && signalsCount > 0);
+
+	ui->m_setValue->setEnabled(presetsCount == 0 && signalsCount > 0);
+}
+
+void DialogPresetEditor::on_m_setValue_clicked()
+{
+	bool first = true;
+	ObjectValue firstValue;
+
+	bool sameValue = true;
+
+	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
+	for (auto item : selectedItems)
+	{
+		if (isSignal(item) == false)
+		{
+			continue;
+		}
+
+		ObjectValue ov = item->data(2, Qt::UserRole).value<ObjectValue>();
+
+		if (first == true)
+		{
+			firstValue = ov;
+			first = false;
+		}
+		else
+		{
+			if (ov.analog != firstValue.analog)
+			{
+				QMessageBox::warning(this, "Preset Editor", "Please select signals of same type (analog or discrete).");
+				return;
+			}
+
+			if (ov.value != firstValue.value)
+			{
+				sameValue = false;
+			}
+		}
+	}
+
+	DialogInputValue d(firstValue.analog, firstValue.value, sameValue, firstValue.decimalPlaces);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems)
+	{
+		if (isSignal(item) == false)
+		{
+			continue;
+		}
+
+		QTreeWidgetItem* parentItem = item->parent();
+		if (parentItem == nullptr)
+		{
+			assert(parentItem);
+			return;
+		}
+
+		if (isFilter(parentItem) == false)
+		{
+			assert(false);
+			return;
+		}
+
+		std::shared_ptr<ObjectFilter> filter = parentItem->data(0, Qt::UserRole).value<std::shared_ptr<ObjectFilter>>();
+		if (filter == nullptr)
+		{
+			assert(filter);
+			return;
+		}
+
+		ObjectValue ov = item->data(2, Qt::UserRole).value<ObjectValue>();
+		ov.useValue = true;
+		ov.value = d.value();
+
+		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
+		setSignalItemText(item, ov);
+
+		filter->setValue(ov.appSignalId, ov.value);
+	}
+
+	m_modified = true;
+
+}
+
+void DialogPresetEditor::on_m_applyMask_clicked()
+{
+	fillObjectsList();
+}
+
+void DialogPresetEditor::on_m_signalsTable_doubleClicked(const QModelIndex &index)
+{
+	int presetsCount = 0;
+	int signalsCount = 0;
+
+	getSelectedCount(presetsCount, signalsCount);
+
+	if (presetsCount == 1 && signalsCount == 0)
+	{
+		on_m_add_clicked();
+	}
+}
+
 void DialogPresetEditor::slot_signalsUpdated()
 {
 	fillObjectsList();
 }
+

@@ -4513,6 +4513,19 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 						}
 					}
 				}
+
+				if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+				{
+					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+					assert(itemReceiver);
+
+					const QString& appSignal = itemReceiver->appSignalId();
+
+					if (appSignal.isEmpty() == false)
+					{
+						signalStrIds << appSignal;
+					}
+				}
 			}
 
 			if (signalStrIds.empty() == false)
@@ -4558,7 +4571,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	// Add new Application Logic signal
 	//
-	if (isLogicSchema())
+	if (isLogicSchema() == true)
 	{
 		if (selectedItems().size() == 1)
 		{
@@ -4712,6 +4725,7 @@ void EditSchemaWidget::f2Key()
 
 	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+	VFrame30::SchemaItemTransmitter* itemTransmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
 	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
 
 	if (itemRect != nullptr)
@@ -4786,6 +4800,39 @@ void EditSchemaWidget::f2Key()
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
 			}
+
+			editSchemaView()->update();
+		}
+
+		return;
+	}
+
+	if (itemTransmitter != nullptr)
+	{
+		QString connectionId = itemTransmitter->connectionId();
+
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set ConnectionID");
+		inputDialog.setLabelText(tr("ConnectionID:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+
+		inputDialog.setTextValue(connectionId);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			connectionId != newValue)
+		{
+			// Set value
+			//
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
 
 			editSchemaView()->update();
 		}

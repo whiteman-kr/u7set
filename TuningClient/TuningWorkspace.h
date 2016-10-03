@@ -12,7 +12,7 @@ public:
 
 
 private:
-	void fillFilters(std::vector<QTreeWidgetItem*>& treeItems, const ObjectFilterStorage& filterStorage);
+	void fillFilters(std::vector<QTreeWidgetItem*>& treeItems, ObjectFilterStorage& filterStorage);
 	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent);
 
 private:

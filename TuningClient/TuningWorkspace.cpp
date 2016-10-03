@@ -43,10 +43,10 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 	int tuningPageIndex = 0;
 
-	int count = theFilters.topFilterCount();
+	int count = theFilters.m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<ObjectFilter> f = theFilters.topFilter(i);
+		std::shared_ptr<ObjectFilter> f = theFilters.m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -126,16 +126,15 @@ TuningWorkspace::~TuningWorkspace()
 
 
 
-void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, const ObjectFilterStorage& filterStorage)
+void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, ObjectFilterStorage& filterStorage)
 {
-	int count = filterStorage.topFilterCount();
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < filterStorage.m_root->childFiltersCount(); i++)
 	{
-		std::shared_ptr<ObjectFilter> f = filterStorage.topFilter(i);
+		std::shared_ptr<ObjectFilter> f = filterStorage.m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
-			continue;
+			return;
 		}
 
 		if (f->isTree() == false)
@@ -150,6 +149,7 @@ void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, cons
 
 		addChildTreeObjects(f, item);
 	}
+
 }
 
 void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<ObjectFilter> filter, QTreeWidgetItem* parent)
@@ -172,6 +172,11 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<ObjectFilter> fi
 		if (f == nullptr)
 		{
 			assert(f);
+			continue;
+		}
+
+		if (f->isTree() == false)
+		{
 			continue;
 		}
 
