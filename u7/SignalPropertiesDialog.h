@@ -35,6 +35,7 @@ signals:
 public slots:
 	void checkAndSaveSignal();
 	void saveDialogSettings();
+	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
 	void checkoutSignal(QList<std::shared_ptr<PropertyObject>> objects);
 	void saveLastEditedSignalProperties();
 
