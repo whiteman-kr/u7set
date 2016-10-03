@@ -128,7 +128,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	QVBoxLayout* vl = new QVBoxLayout;
 	ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
 
-	connect(pe, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::checkoutSignal);
+	connect(pe, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
@@ -259,6 +259,11 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 			QMessageBox::critical(this, "Could not save signal", "Error: Discrete signal has not UnsignedInt DataFormat");
 			return;
 		}
+		if (signal.isAnalog() && signal.dataFormat() == E::UnsignedInt)
+		{
+			QMessageBox::critical(this, "Could not save signal", "Error: Analog signal has UnsignedInt DataFormat");
+			return;
+		}
 	}
 
 	// Save
@@ -299,6 +304,27 @@ void SignalPropertiesDialog::saveDialogSettings()
 {
 	QSettings settings;
 	settings.setValue("SignalPropertiesDialog/geometry", geometry());
+}
+
+void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
+{
+	checkoutSignal(objects);
+	for (std::shared_ptr<PropertyObject> object : objects)
+	{
+		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
+
+		Signal& signal = signalProperites->signal();
+
+		if (signal.isDiscrete() && signal.dataFormat() != E::UnsignedInt)
+		{
+			signal.setDataFormat(E::UnsignedInt);
+		}
+
+		if (signal.isAnalog() && signal.dataFormat() == E::UnsignedInt)
+		{
+			signal.setDataFormat(E::SignedInt);
+		}
+	}
 }
 
 void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject> > objects)

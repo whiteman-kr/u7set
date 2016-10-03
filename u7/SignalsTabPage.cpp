@@ -1435,6 +1435,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
+	m_signalsView->setSortingEnabled(true);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
@@ -2053,8 +2054,13 @@ void SignalsTabPage::showError(QString message)
 
 void SignalsTabPage::saveColumnWidth(int index)
 {
+	int width = m_signalsView->columnWidth(index);
+	if (width == 0)
+	{
+		return;
+	}
 	QSettings settings;
-	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), m_signalsView->columnWidth(index));
+	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), width);
 }
 
 void SignalsTabPage::saveColumnVisibility(int index, bool visible)
