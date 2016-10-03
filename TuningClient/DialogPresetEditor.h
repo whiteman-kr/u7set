@@ -2,7 +2,7 @@
 #define DIALOGPRESETEDITOR_H
 
 #include <QDialog>
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 #include "ObjectManager.h"
 #include "TuningObject.h"
 #include "TuningPage.h"
@@ -19,7 +19,7 @@ class DialogPresetEditor : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogPresetEditor(ObjectFilterStorage* filterStorage, QWidget *parent = 0);
+	explicit DialogPresetEditor(TuningFilterStorage* filterStorage, QWidget *parent = 0);
 	~DialogPresetEditor();
 
 private slots:
@@ -75,14 +75,14 @@ private:
 	bool isFilter(QTreeWidgetItem* item);
 	bool isSignal(QTreeWidgetItem* item);
 
-	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
+	void addChildTreeObjects(const std::shared_ptr<TuningFilter> &filter, QTreeWidgetItem* parent);
 
-	void setFilterItemText(QTreeWidgetItem* item, ObjectFilter* filter);
-	void setSignalItemText(QTreeWidgetItem* item, const ObjectValue& value);
+	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
+	void setSignalItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
 
 	void fillObjectsList();
 
-	std::shared_ptr<ObjectFilter> selectedFilter(QTreeWidgetItem** item);
+	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
 
 	void getSelectedCount(int& selectedPresets, int& selectedSignals);
 
@@ -94,7 +94,7 @@ private:
 
 	bool m_modified = false;
 
-	ObjectFilterStorage* m_filterStorage;
+	TuningFilterStorage* m_filterStorage;
 
 	std::vector<int> m_objectsIndexes;
 };

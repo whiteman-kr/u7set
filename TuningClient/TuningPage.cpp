@@ -413,7 +413,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 //
 // TuningPage
 //
-FilterButton::FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent)
+FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent)
 	:QPushButton(caption, parent)
 {
 	m_filter = filter;
@@ -424,7 +424,7 @@ FilterButton::FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& 
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
 
-std::shared_ptr<ObjectFilter> FilterButton::filter()
+std::shared_ptr<TuningFilter> FilterButton::filter()
 {
 	return m_filter;
 }
@@ -442,7 +442,7 @@ void FilterButton::slot_toggled(bool checked)
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
 	m_tabFilter(tabFilter)
@@ -468,7 +468,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 	int count = theFilters.m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<ObjectFilter> f = theFilters.m_root->childFilter(i);
+		std::shared_ptr<TuningFilter> f = theFilters.m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -492,7 +492,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFil
 	{
 		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
 		{
-			std::shared_ptr<ObjectFilter> f = tabFilter->childFilter(i);
+			std::shared_ptr<TuningFilter> f = tabFilter->childFilter(i);
 			if (f == nullptr)
 			{
 				assert(f);
@@ -634,7 +634,7 @@ void TuningPage::fillObjectsList()
 
 			bool result = true;
 
-			ObjectFilter* treeFilter = m_treeFilter.get();
+			TuningFilter* treeFilter = m_treeFilter.get();
 			while (treeFilter != nullptr)
 			{
 				if (treeFilter->match(o) == false)
@@ -673,7 +673,7 @@ void TuningPage::fillObjectsList()
 	m_model->setObjectsIndexes(m_objectsIndexes);
 }
 
-void TuningPage::slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter)
+void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{
@@ -689,7 +689,7 @@ void TuningPage::slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter)
 
 }
 
-void TuningPage::slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter)
+void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{
