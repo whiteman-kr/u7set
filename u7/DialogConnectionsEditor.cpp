@@ -404,6 +404,53 @@ bool DialogConnectionsEditor::continueWithDuplicateCaptions()
 			return false;
 		}
 	}
+
+	// Check for valid symbols in connection IDS
+	//
+	QStringList badList;
+
+	for (int i = 0; i < connections.count(); i++)
+	{
+		Hardware::Connection* c = connections.get(i).get();
+		if (c->mode() != Hardware::OptoPort::Mode::Optical)
+		{
+			continue;
+		}
+
+		QRegExp rx("^[A-Za-z0-9_]+$");
+		if (rx.exactMatch(c->connectionID()) == false)
+		{
+			badList.push_back(c->connectionID());
+		}
+	}
+
+	if (badList.empty() == false)
+	{
+		QString badString;
+		int badCount = 0;
+
+		for (auto b : badList)
+		{
+			badString += tr("'%1'\r\n").arg(b);
+
+			if (badCount >= 10)
+			{
+				badString += tr("and %1 more connections.\r\n").arg(badList.size() - badCount);
+				break;
+			}
+
+			badCount++;
+		}
+
+		QString s = QString("Invalid symbols were found in column ConnectionID:\r\n\r\n%1\r\nConnectionID can contain only letters, numbers and '_' symbol."
+							".\r\n\r\nAre you sure you want to continue?").arg(badString);
+
+		if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+
 	return true;
 }
 
