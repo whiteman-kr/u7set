@@ -1,5 +1,7 @@
 #include "AppDataChannel.h"
 #include "../lib/AppSignalState.h"
+#include "../lib/WUtils.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -117,6 +119,8 @@ void AppDataChannel::onThreadStarted()
 	
 	m_timer1s.setInterval(1000);
 	m_timer1s.start();
+
+	qDebug() << "Ideal thread count:" << QThread::idealThreadCount();
 }
 
 
@@ -231,6 +235,15 @@ void AppDataChannel::onTimer1s()
 {
 	createAndBindSocket();
 	checkDataSourcesDataReceiving();
+
+	if (m_receivedCount != 0)
+	{
+		qDebug() << "Receive per second " << m_receivedCount << "losted " << m_lostedFramesCount;
+
+		m_receivedCount = 0;
+
+		m_lostedFramesCount = 0;
+	}
 }
 
 
@@ -244,25 +257,64 @@ void AppDataChannel::onSocketReadyRead()
 
 	QHostAddress from;
 
-	qint64 size = m_socket->pendingDatagramSize();
-
-	if (size > sizeof(m_rupFrame))
+	for(int i =0; i < 1000; i++)
 	{
-		assert(false);
-		m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
-		qDebug() << "DataChannel: datagram too big";
-		return;
+		qint64 size = m_socket->pendingDatagramSize();
+
+		if (size == -1)
+		{
+			break;
+		}
+
+		if (size > sizeof(m_rupFrame))
+		{
+			assert(false);
+			m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
+			qDebug() << "DataChannel: datagram too big";
+			return;
+		}
+
+		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
+
+		m_receivedCount++;
+
+		if (result == -1)
+		{
+			closeSocket();
+			qDebug() << "DataChannel: read socket error";
+		}
+
+		quint32 headerNumerator = (quint32)reverseUint16(m_rupFrame.header.numerator);
+
+		if (m_firstRupFrame == true)
+		{
+			m_rupFrameNumerator = headerNumerator;
+
+			m_rupFrameNumerator++;
+
+			m_firstRupFrame = false;
+		}
+		else
+		{
+			if (m_rupFrameNumerator != headerNumerator)
+			{
+				if (m_rupFrameNumerator < headerNumerator)
+				{
+					m_lostedFramesCount += headerNumerator - m_rupFrameNumerator;
+				}
+				else
+				{
+					m_lostedFramesCount += 65535 - m_rupFrameNumerator + headerNumerator;
+				}
+
+				m_rupFrameNumerator = headerNumerator;
+			}
+
+			m_rupFrameNumerator++;
+		}
 	}
 
-	qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
-
-	if (result == -1)
-	{
-		closeSocket();
-		qDebug() << "DataChannel: read socket error";
-	}
-
-	assert(result == sizeof(m_rupFrame));
+//	assert(result == sizeof(m_rupFrame));
 
 	quint32 ip = from.toIPv4Address();
 

@@ -53,6 +53,13 @@ private:
 	RupDataQueue m_rupDataQueue;
 	QTimer m_timer1s;
 
+	bool m_firstRupFrame = true;
+	quint16 m_rupFrameNumerator = 0;
+
+	quint32 m_lostedFramesCount = 0;
+
+	int m_receivedCount = 0;
+
 	// AppDataChannel parsing
 	//
 	SourceParseInfoMap m_sourceParseInfoMap;		// source ip => QVector<SignalParseInfo> map
