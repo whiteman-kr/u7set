@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::critical(this, "Error", tr("Failed to load user filters: %1").arg(errorCode));
 	}
 
+	theUserFilters.m_root->setCaption(tr("User Presets"));
+
 	//
 
 	m_updateStatusBarTimerId = startTimer(100);

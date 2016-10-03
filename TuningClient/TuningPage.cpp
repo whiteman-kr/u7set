@@ -627,11 +627,6 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr)
 		{
-			if (m_treeFilter->isEmpty() == true)
-			{
-				continue;
-			}
-
 			bool result = true;
 
 			TuningFilter* treeFilter = m_treeFilter.get();

@@ -53,15 +53,6 @@ private:
 protected:
     virtual void closeEvent(QCloseEvent* e);
 
-private:
-
-	enum class MaskType
-	{
-		ConnectionID,
-		Port1EquipmentID,
-		Port2EquipmentID
-	};
-
 private slots:
     void on_m_Add_clicked();
     void on_m_Remove_clicked();
@@ -81,11 +72,9 @@ private slots:
 
 	void on_m_mask_returnPressed();
 
-	void on_m_applyMask_clicked();
-
-	void on_m_maskType_currentIndexChanged(int index);
-
 	void on_m_Export_clicked();
+
+	void on_m_search_clicked();
 
 private:
     Ui::DialogConnectionsEditor *ui;
