@@ -10,7 +10,7 @@ struct SchemaDetails
 {
 	QString m_caption;
 	QString m_strId;
-	QStringList m_appSignals;
+	QStringList m_appSignalIDs;
 
 };
 

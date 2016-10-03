@@ -43,7 +43,6 @@ private:
 
     void fillConnectionsList();
     bool askForSaveChanged();
-    bool checkUniqueConnections();
     bool saveChanges();
 	void updateButtons();
 	bool continueWithDuplicateCaptions();
