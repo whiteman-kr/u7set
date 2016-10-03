@@ -155,6 +155,7 @@ public slots:
 
 	void addInOutsToSignals();
 	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
+	void addAppSignal();
 
 	void copySelectedDevices();
 	void pasteDevices();
@@ -275,6 +276,7 @@ private:
 	QAction* m_separatorAction0 = nullptr;
 	QAction* m_inOutsToSignals = nullptr;
 	QAction* m_showAppSignals = nullptr;
+	QAction* m_addAppSignal = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;

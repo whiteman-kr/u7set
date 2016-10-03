@@ -14,16 +14,17 @@ struct SchemaDetails
 
 };
 
-struct ObjectFilterValue
+struct TuningFilterValue
 {
 	QString appSignalId;
 	QString caption;
+	bool useValue = false;
 	bool analog = false;
 	int decimalPlaces = 0;
 	double value = 0;
 };
 
-class ObjectFilter : public PropertyObject
+class TuningFilter : public PropertyObject
 {
 	Q_OBJECT
 
@@ -32,6 +33,7 @@ public:
 	//
 	enum class FilterType
 	{
+		Root,
 		Tree,
 		Tab,
 		Button
@@ -47,10 +49,12 @@ public:
 	Q_ENUM(SignalType)
 
 public:
-	ObjectFilter();
-	ObjectFilter(FilterType filterType);
-	ObjectFilter(const ObjectFilter& That);
-	~ObjectFilter();
+	TuningFilter();
+	TuningFilter(const TuningFilter& That);
+	TuningFilter(FilterType filterType);
+	~TuningFilter();
+
+	TuningFilter& operator= (const TuningFilter& That);
 
 	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer);
@@ -79,11 +83,14 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	std::vector <ObjectFilterValue> signalValues() const;
-	void setValues(const std::vector <ObjectFilterValue>& values);
+	std::vector <TuningFilterValue> signalValues() const;
+	void setValues(const std::vector <TuningFilterValue>& values);
+
+	void setValue(const QString& appSignalId, double value);
 
 	bool valueExists(const QString& appSignalId);
-	void addValue(const ObjectFilterValue& value);
+	void addValue(const TuningFilterValue& value);
+
 	void removeValue(const QString& appSignalId);
 
 	FilterType filterType() const;
@@ -92,33 +99,33 @@ public:
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
 
-	ObjectFilter* parentFilter() const;
+	TuningFilter* parentFilter() const;
 
-	bool allowAll() const;
-	void setAllowAll(bool value);
-
-	bool folder() const;
-	void setFolder(bool value);
+	bool isEmpty() const;
 
 public:
+	bool isRoot() const;
 	bool isTree() const;
 	bool isTab() const;
 	bool isButton() const;
 
-	void addChild(std::shared_ptr<ObjectFilter> child);
+	void addTopChild(std::shared_ptr<TuningFilter> child);
+	void addChild(std::shared_ptr<TuningFilter> child);
 
-	void removeChild(std::shared_ptr<ObjectFilter> child);
+	void removeChild(std::shared_ptr<TuningFilter> child);
 
-	int childFiltersCount();
-	std::shared_ptr<ObjectFilter> childFilter(int index);
+	void removeAllChildren();
+
+	int childFiltersCount() const;
+	std::shared_ptr<TuningFilter> childFilter(int index) const;
+
+private:
+	void copy(const TuningFilter& That);
 
 private:
 
 	QString m_strID;
 	QString m_caption;
-
-	bool m_allowAll = false;
-	bool m_folder = false;
 
 	// Filters
 	//
@@ -126,24 +133,24 @@ private:
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
-	std::vector <ObjectFilterValue> m_signalValues;
+	std::vector <TuningFilterValue> m_signalValues;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
 
-	std::vector<std::shared_ptr<ObjectFilter>> m_childFilters;
+	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
 
-	ObjectFilter* m_parentFilter = nullptr;
+	TuningFilter* m_parentFilter = nullptr;
 
 };
 
 
 
-class ObjectFilterStorage
+class TuningFilterStorage
 {
 public:
-	ObjectFilterStorage();
-	ObjectFilterStorage(const ObjectFilterStorage& That);
+	TuningFilterStorage();
+	TuningFilterStorage(const TuningFilterStorage& That);
 
 	bool load(const QByteArray& data, QString *errorCode);
 	bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
@@ -151,30 +158,23 @@ public:
 	bool load(const QString& fileName, QString *errorCode);
 	bool save(const QString& fileName);
 
-	int topFilterCount() const;
-	std::shared_ptr<ObjectFilter> topFilter(int index) const;
-
-	bool addTopFilter(const std::shared_ptr<ObjectFilter>& filter);
-
-	bool removeFilter(const std::shared_ptr<ObjectFilter>& filter);
-
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
 
 	void createAutomaticFilters();
 
-private:
+	std::shared_ptr<TuningFilter> m_root = nullptr;
 
-	std::vector<std::shared_ptr<ObjectFilter>> m_topFilters;
+private:
 
 	std::vector<SchemaDetails> m_schemasDetails;
 };
 
-Q_DECLARE_METATYPE(std::shared_ptr<ObjectFilter>)
-Q_DECLARE_METATYPE(ObjectFilterValue)
+Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
+Q_DECLARE_METATYPE(TuningFilterValue)
 
 
-extern ObjectFilterStorage theFilters;
-extern ObjectFilterStorage theUserFilters;
+extern TuningFilterStorage theFilters;
+extern TuningFilterStorage theUserFilters;
 
 #endif // OBJECTFILTER_H

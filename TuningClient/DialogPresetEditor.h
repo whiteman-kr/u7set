@@ -2,7 +2,7 @@
 #define DIALOGPRESETEDITOR_H
 
 #include <QDialog>
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 #include "ObjectManager.h"
 #include "TuningObject.h"
 #include "TuningPage.h"
@@ -19,7 +19,7 @@ class DialogPresetEditor : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogPresetEditor(ObjectFilterStorage* filterStorage, QWidget *parent = 0);
+	explicit DialogPresetEditor(TuningFilterStorage* filterStorage, QWidget *parent = 0);
 	~DialogPresetEditor();
 
 private slots:
@@ -41,16 +41,28 @@ private slots:
 
 	void on_m_signalTypeCombo_currentIndexChanged(int index);
 
-private slots:
+	void on_m_presetsTree_itemSelectionChanged();
+
+	void on_m_setValue_clicked();
+
+	void on_m_applyMask_clicked();
+
+	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
 
 	void slot_signalsUpdated();
-
 private:
 
 	enum class TreeItemType
 	{
 		Filter,
 		Signal
+	};
+
+	enum class MaskType
+	{
+		AppSignalID,
+		CustomAppSignalID,
+		EquipmentID
 	};
 
 	enum class SignalType
@@ -63,11 +75,16 @@ private:
 	bool isFilter(QTreeWidgetItem* item);
 	bool isSignal(QTreeWidgetItem* item);
 
-	void addChildTreeObjects(const std::shared_ptr<ObjectFilter> &filter, QTreeWidgetItem* parent);
+	void addChildTreeObjects(const std::shared_ptr<TuningFilter> &filter, QTreeWidgetItem* parent);
 
-	void setTreeItemText(QTreeWidgetItem* item, ObjectFilter* filter);
+	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
+	void setSignalItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
 
 	void fillObjectsList();
+
+	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
+
+	void getSelectedCount(int& selectedPresets, int& selectedSignals);
 
 
 private:
@@ -77,7 +94,7 @@ private:
 
 	bool m_modified = false;
 
-	ObjectFilterStorage* m_filterStorage;
+	TuningFilterStorage* m_filterStorage;
 
 	std::vector<int> m_objectsIndexes;
 };

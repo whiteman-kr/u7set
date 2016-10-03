@@ -59,7 +59,6 @@ CONFIG(release, debug|release) {
 SOURCES += main.cpp\
         MainWindow.cpp \
     ObjectManager.cpp \
-    ObjectFilter.cpp \
     TuningPage.cpp \
     TuningObject.cpp \
     Settings.cpp \
@@ -83,11 +82,12 @@ SOURCES += main.cpp\
     DialogPresetProperties.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    ../lib/PropertyObject.cpp
+    ../lib/PropertyObject.cpp \
+    DialogInputValue.cpp \
+    TuningFilter.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
-    ObjectFilter.h \
     Stable.h \
     TuningPage.h \
     TuningObject.h \
@@ -112,12 +112,15 @@ HEADERS  += MainWindow.h \
     DialogPresetProperties.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
-    ../lib/PropertyObject.h
+    ../lib/PropertyObject.h \
+    DialogInputValue.h \
+    TuningFilter.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogPresetEditor.ui
+    DialogPresetEditor.ui \
+    DialogInputValue.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

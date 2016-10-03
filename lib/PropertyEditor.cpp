@@ -1543,7 +1543,7 @@ namespace ExtWidgets
             //
             QString description = p->description().isEmpty() ? p->caption() : p->description();
 
-			if (p->readOnly() == true || m_editingEnabled == false)
+			if (p->readOnly() == true || m_readOnly == true)
             {
                 description = QString("[ReadOnly] ") + description;
             }
@@ -1652,7 +1652,7 @@ namespace ExtWidgets
 
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
-			subProperty->setEnabled(m_editingEnabled && value->readOnly() == false);
+			subProperty->setEnabled(m_readOnly == false && value->readOnly() == false);
             m_propertyVariantManager->setProperty(subProperty, value);
             m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
 
@@ -1752,9 +1752,14 @@ namespace ExtWidgets
 		m_expertMode = expertMode;
 	}
 
-	void PropertyEditor::setEditingEnabled(bool editingEnabled)
+	bool PropertyEditor::readOnly() const
 	{
-		m_editingEnabled = editingEnabled;
+		return m_readOnly;
+	}
+
+	void PropertyEditor::setReadOnly(bool readOnly)
+	{
+		m_readOnly = readOnly;
 	}
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)

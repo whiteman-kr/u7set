@@ -3,7 +3,7 @@
 #include "TcpTuningClient.h"
 
 DialogTuningSources::DialogTuningSources(QWidget *parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTuningSources)
 {
 	setAttribute(Qt::WA_DeleteOnClose);

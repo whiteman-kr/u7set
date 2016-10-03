@@ -113,6 +113,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 96", ":/DatabaseUpgrade/Upgrade0096.sql"},
 	{"Upgrade to version 97", ":/DatabaseUpgrade/Upgrade0097.sql"},
 	{"Upgrade to version 98", ":/DatabaseUpgrade/Upgrade0098.sql"},
+	{"Upgrade to version 99", ":/DatabaseUpgrade/Upgrade0099.sql"},
 };
 
 
@@ -4135,6 +4136,44 @@ void DbWorker::slot_lastChangesetId(int* lastChangesetId)
 
 	q.next();
 	*lastChangesetId = q.value(0).toInt();
+
+	return;
+}
+
+void DbWorker::slot_nextCounterValue(int* counter)
+{
+	AUTO_COMPLETE
+
+	if (counter == nullptr)
+	{
+		assert(counter != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return;
+	}
+
+	QString request = "SELECT * FROM nextval('global_counter');";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	q.next();
+	*counter = q.value(0).toInt();
 
 	return;
 }

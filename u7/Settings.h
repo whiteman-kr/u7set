@@ -57,6 +57,9 @@ public:
 	bool infoMode() const;
 	void setInfoMode(bool value);
 
+	bool hideWarnings() const;
+	void setHideWarnings(bool value);
+
 	// Data
 	//
 public:
@@ -115,6 +118,7 @@ public:
 	QByteArray m_connectionEditorWindowGeometry;
 	int m_connectionEditorSortColumn;
 	Qt::SortOrder m_connectionEditorSortOrder;
+	QStringList m_connectionEditorMasks;
 
 	//Connection properties
     //
@@ -151,6 +155,7 @@ private:
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;
+	bool m_hideWarnings = false;
 
 };
 

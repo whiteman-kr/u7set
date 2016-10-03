@@ -77,6 +77,8 @@ void Settings::writeUserScope() const
 	s.setValue("ConnectionEditor/sortColumn", m_connectionEditorSortColumn);
 	s.setValue("ConnectionEditor/sortOrder", static_cast<int>(m_connectionEditorSortOrder));
 
+	s.setValue("ConnectionEditor/masks", m_connectionEditorMasks);
+
 	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
 	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
@@ -87,6 +89,8 @@ void Settings::writeUserScope() const
 	s.setValue("m_infoMode", m_infoMode);
 
 	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
+
+	s.setValue("m_hideWarnings", m_hideWarnings);
 
 	return;
 }
@@ -137,6 +141,7 @@ void Settings::loadUserScope()
 	m_connectionEditorWindowGeometry = s.value("ConnectionEditor/geometry").toByteArray();
 	m_connectionEditorSortColumn = s.value("ConnectionEditor/sortColumn").toInt();
 	m_connectionEditorSortOrder = static_cast<Qt::SortOrder>(s.value("ConnectionEditor/sortOrder").toInt());
+	m_connectionEditorMasks = s.value("ConnectionEditor/masks").toStringList();
 
     m_connectionPropertiesWindowPos = s.value("Connection/pos", QPoint(-1, -1)).toPoint();
     m_connectionPropertiesWindowGeometry = s.value("Connection/geometry").toByteArray();
@@ -164,6 +169,8 @@ void Settings::loadUserScope()
 	m_infoMode = s.value("m_infoMode").toBool();
 
 	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
+
+	m_hideWarnings = s.value("m_hideWarnings").toBool();
 
     return;
 }
@@ -300,4 +307,15 @@ void Settings::setInfoMode(bool value)
 {
 	m_infoMode = value;
 }
+
+bool Settings::hideWarnings() const
+{
+	return m_hideWarnings;
+}
+
+void Settings::setHideWarnings(bool value)
+{
+	m_hideWarnings = value;
+}
+
 

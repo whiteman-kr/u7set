@@ -8,7 +8,7 @@
 //
 
 DialogPresetProperties::DialogPresetProperties(std::shared_ptr<PropertyObject> object, QWidget *parent)
-	:PropertyEditorDialog(object, parent)
+	:PropertyEditorDialog(object, parent, false)
 {
 	setWindowTitle(tr("Preset Properties"));
 

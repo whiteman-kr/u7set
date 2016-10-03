@@ -1,4 +1,4 @@
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 #include "../lib/Types.h"
 #include "ObjectManager.h"
 #include "Settings.h"
@@ -7,39 +7,49 @@
 // ObjectFilter
 //
 
-ObjectFilter::ObjectFilter()
+TuningFilter::TuningFilter()
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, ObjectFilter::strID, ObjectFilter::setStrID);
-	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, ObjectFilter::caption, ObjectFilter::setCaption);
-	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, ObjectFilter::signalType, ObjectFilter::setSignalType);
+	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, TuningFilter::strID, TuningFilter::setStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
+	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, ObjectFilter::filterType);
+	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, TuningFilter::filterType);
 	propFilterType->setCategory("Debug");
 
-	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, ObjectFilter::customAppSignalIDMask, ObjectFilter::setCustomAppSignalIDMask);
+	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
 
-	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalMasks", true, ObjectFilter::appSignalIDMask, ObjectFilter::setAppSignalIDMask);
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalMasks", true, TuningFilter::appSignalIDMask, TuningFilter::setAppSignalIDMask);
 	propMask->setCategory("Masks");
 
-	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, ObjectFilter::equipmentIDMask, ObjectFilter::setEquipmentIDMask);
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	auto propFolder = ADD_PROPERTY_GETTER_SETTER(bool, "Folder", true, ObjectFilter::folder, ObjectFilter::setFolder);
-	propFolder->setCategory("Options");
 }
 
-ObjectFilter::ObjectFilter(FilterType filterType):ObjectFilter()
+TuningFilter::TuningFilter(const TuningFilter& That)
+	:TuningFilter()
+{
+	copy(That);
+}
+
+TuningFilter::TuningFilter(FilterType filterType)
+	:TuningFilter()
 {
 	m_filterType = filterType;
 }
 
-ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
+TuningFilter& TuningFilter::operator=(const TuningFilter& That)
+{
+	copy(That);
+
+	return *this;
+}
+
+void TuningFilter::copy(const TuningFilter& That)
 {
 	m_strID = That.m_strID;
 	m_caption = That.m_caption;
-
-	m_allowAll = That.m_allowAll;
 
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
@@ -50,25 +60,23 @@ ObjectFilter::ObjectFilter(const ObjectFilter& That):ObjectFilter()
 	m_filterType = That.m_filterType;
 	m_signalType = That.m_signalType;
 
-	m_folder = That.m_folder;
-
 	for (auto f : That.m_childFilters)
 	{
-		ObjectFilter* fi = f.get();
+		TuningFilter* fi = f.get();
 
-		std::shared_ptr<ObjectFilter> fiCopy = std::make_shared<ObjectFilter>(*fi);
+		std::shared_ptr<TuningFilter> fiCopy = std::make_shared<TuningFilter>(*fi);
 
 		addChild(fiCopy);
 	}
 }
 
-ObjectFilter::~ObjectFilter()
+TuningFilter::~TuningFilter()
 {
 	//qDebug()<<"Deleting filter: "<<caption();
 
 }
 
-bool ObjectFilter::load(QXmlStreamReader& reader)
+bool TuningFilter::load(QXmlStreamReader& reader)
 {
 
 	if (reader.attributes().hasAttribute("StrID"))
@@ -124,11 +132,6 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 		}
 	}
 
-	if (reader.attributes().hasAttribute("Folder"))
-	{
-		setFolder(reader.attributes().value("Folder").toString() == "true");
-	}
-
 	int recurseLevel = 0;		//recurseLevel 1 = "Values", recurseLevel 2 = "Value"
 
 	QXmlStreamReader::TokenType t;
@@ -160,7 +163,7 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 			{
 				recurseLevel++;
 
-				ObjectFilterValue ofv;
+				TuningFilterValue ofv;
 
 				if (reader.attributes().hasAttribute("AppSignalId"))
 				{
@@ -170,6 +173,11 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 				if (reader.attributes().hasAttribute("Caption"))
 				{
 					ofv.caption = reader.attributes().value("Caption").toString();
+				}
+
+				if (reader.attributes().hasAttribute("UseValue"))
+				{
+					ofv.useValue = reader.attributes().value("UseValue").toString() == "true";
 				}
 
 				if (reader.attributes().hasAttribute("Analog"))
@@ -194,19 +202,19 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 
 			if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
 			{
-				ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
+				TuningFilter::FilterType filterType = TuningFilter::FilterType::Tree;
 
 				if (tagName == "Tab")
 				{
-					filterType = ObjectFilter::FilterType::Tab;
+					filterType = TuningFilter::FilterType::Tab;
 				}
 
 				if (tagName == "Button")
 				{
-					filterType = ObjectFilter::FilterType::Button;
+					filterType = TuningFilter::FilterType::Button;
 				}
 
-				std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
+				std::shared_ptr<TuningFilter> of = std::make_shared<TuningFilter>(filterType);
 
 				if (of->load(reader) == false)
 				{
@@ -227,28 +235,35 @@ bool ObjectFilter::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool ObjectFilter::save(QXmlStreamWriter& writer)
+bool TuningFilter::save(QXmlStreamWriter& writer)
 {
-	if (isTree() == true)
+	if (isRoot() == true)
 	{
-		writer.writeStartElement("Tree");
+		writer.writeStartElement("Root");
 	}
 	else
 	{
-		if (isTab())
+		if (isTree() == true)
 		{
-			writer.writeStartElement("Tab");
+			writer.writeStartElement("Tree");
 		}
 		else
 		{
-			if (isButton())
+			if (isTab())
 			{
-				writer.writeStartElement("Button");
+				writer.writeStartElement("Tab");
 			}
 			else
 			{
-				assert(false);
-				return false;
+				if (isButton())
+				{
+					writer.writeStartElement("Button");
+				}
+				else
+				{
+					assert(false);
+					return false;
+				}
 			}
 		}
 	}
@@ -262,14 +277,13 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
-	writer.writeAttribute("Folder", folder() ? "true" : "false");
-
 	writer.writeStartElement("Values");
-	for (const ObjectFilterValue& v : m_signalValues)
+	for (const TuningFilterValue& v : m_signalValues)
 	{
 		writer.writeStartElement("Value");
 		writer.writeAttribute("AppSignalId", v.appSignalId);
 		writer.writeAttribute("Caption", v.caption);
+		writer.writeAttribute("UseValue", v.useValue ? "true" : "false");
 		writer.writeAttribute("Analog", v.analog ? "true" : "false");
 		writer.writeAttribute("Value", QString::number(v.value, 'f', v.decimalPlaces));
 		if (v.analog == true)
@@ -291,28 +305,28 @@ bool ObjectFilter::save(QXmlStreamWriter& writer)
 }
 
 
-QString ObjectFilter::strID() const
+QString TuningFilter::strID() const
 {
 	return m_strID;
 }
 
-void ObjectFilter::setStrID(const QString& value)
+void TuningFilter::setStrID(const QString& value)
 {
 	m_strID = value;
 }
 
-QString ObjectFilter::caption() const
+QString TuningFilter::caption() const
 {
 	return m_caption;
 }
 
-void ObjectFilter::setCaption(const QString& value)
+void TuningFilter::setCaption(const QString& value)
 {
 	m_caption = value;
 }
 
 
-QString ObjectFilter::customAppSignalIDMask() const
+QString TuningFilter::customAppSignalIDMask() const
 {
 	QString result;
 	for (auto s : m_customAppSignalIDMasks)
@@ -324,7 +338,7 @@ QString ObjectFilter::customAppSignalIDMask() const
 	return result;
 }
 
-void ObjectFilter::setCustomAppSignalIDMask(const QString& value)
+void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 {
 	if (value.isEmpty() == true)
 	{
@@ -337,7 +351,7 @@ void ObjectFilter::setCustomAppSignalIDMask(const QString& value)
 
 }
 
-QString ObjectFilter::equipmentIDMask() const
+QString TuningFilter::equipmentIDMask() const
 {
 	QString result;
 	for (auto s : m_equipmentIDMasks)
@@ -349,7 +363,7 @@ QString ObjectFilter::equipmentIDMask() const
 	return result;
 }
 
-void ObjectFilter::setEquipmentIDMask(const QString& value)
+void TuningFilter::setEquipmentIDMask(const QString& value)
 {
 	if (value.isEmpty() == true)
 	{
@@ -361,7 +375,7 @@ void ObjectFilter::setEquipmentIDMask(const QString& value)
 	}
 }
 
-QString ObjectFilter::appSignalIDMask() const
+QString TuningFilter::appSignalIDMask() const
 {
 	QString result;
 	for (auto s : m_appSignalIDMasks)
@@ -373,7 +387,7 @@ QString ObjectFilter::appSignalIDMask() const
 	return result;
 }
 
-void ObjectFilter::setAppSignalIDMask(const QString& value)
+void TuningFilter::setAppSignalIDMask(const QString& value)
 {
 	if (value.isEmpty() == true)
 	{
@@ -386,19 +400,32 @@ void ObjectFilter::setAppSignalIDMask(const QString& value)
 }
 
 
-std::vector <ObjectFilterValue> ObjectFilter::signalValues() const
+std::vector <TuningFilterValue> TuningFilter::signalValues() const
 {
 	return m_signalValues;
 }
 
-void ObjectFilter::setValues(const std::vector <ObjectFilterValue>& values)
+void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
 {
 	m_signalValues = values;
 }
 
-bool ObjectFilter::valueExists(const QString& appSignalId)
+void TuningFilter::setValue(const QString& appSignalId, double value)
 {
-	for (const ObjectFilterValue& ofv : m_signalValues)
+	for (TuningFilterValue& ofv : m_signalValues)
+	{
+		if (ofv.appSignalId == appSignalId)
+		{
+			ofv.useValue = true;
+			ofv.value = value;
+			return;
+		}
+	}
+}
+
+bool TuningFilter::valueExists(const QString& appSignalId)
+{
+	for (const TuningFilterValue& ofv : m_signalValues)
 	{
 		if (ofv.appSignalId == appSignalId)
 		{
@@ -409,7 +436,7 @@ bool ObjectFilter::valueExists(const QString& appSignalId)
 }
 
 
-void ObjectFilter::addValue(const ObjectFilterValue& value)
+void TuningFilter::addValue(const TuningFilterValue& value)
 {
 	if (valueExists(value.appSignalId) == true)
 	{
@@ -420,11 +447,11 @@ void ObjectFilter::addValue(const ObjectFilterValue& value)
 	m_signalValues.push_back(value);
 }
 
-void ObjectFilter::removeValue(const QString& appSignalId)
+void TuningFilter::removeValue(const QString& appSignalId)
 {
 	int index = -1;
 
-	for (const ObjectFilterValue& ofv : m_signalValues)
+	for (const TuningFilterValue& ofv : m_signalValues)
 	{
 		index++;
 
@@ -443,74 +470,79 @@ void ObjectFilter::removeValue(const QString& appSignalId)
 	m_signalValues.erase(m_signalValues.begin() + index);
 }
 
-ObjectFilter::FilterType ObjectFilter::filterType() const
+TuningFilter::FilterType TuningFilter::filterType() const
 {
 	return m_filterType;
 }
 
-void ObjectFilter::setFilterType(FilterType value)
+void TuningFilter::setFilterType(FilterType value)
 {
 	m_filterType = value;
 }
 
-ObjectFilter::SignalType ObjectFilter::signalType() const
+TuningFilter::SignalType TuningFilter::signalType() const
 {
 	return m_signalType;
 }
 
-void ObjectFilter::setSignalType(SignalType value)
+void TuningFilter::setSignalType(SignalType value)
 {
 	m_signalType = value;
 }
 
-ObjectFilter* ObjectFilter::parentFilter() const
+TuningFilter* TuningFilter::parentFilter() const
 {
 	return m_parentFilter;
 }
 
-bool ObjectFilter::allowAll() const
+
+bool TuningFilter::isEmpty() const
 {
-	return m_allowAll;
+	if (m_signalType == SignalType::All &&
+			m_signalValues.empty() == true &&
+			m_appSignalIDMasks.empty() == true &&
+			m_customAppSignalIDMasks.empty() == true &&
+			m_equipmentIDMasks.empty() == true)
+	{
+		return true;
+	}
+
+	return false;
 }
 
-void ObjectFilter::setAllowAll(bool value)
+bool TuningFilter::isRoot() const
 {
-	m_allowAll = value;
+	return filterType() == FilterType::Root;
 }
 
-bool ObjectFilter::folder() const
-{
-	return m_folder;
-}
-
-void ObjectFilter::setFolder(bool value)
-{
-	m_folder = value;
-}
-
-
-bool ObjectFilter::isTree() const
+bool TuningFilter::isTree() const
 {
 	return filterType() == FilterType::Tree;
 }
 
-bool ObjectFilter::isTab() const
+bool TuningFilter::isTab() const
 {
 	return filterType() == FilterType::Tab;
 }
 
-bool ObjectFilter::isButton() const
+bool TuningFilter::isButton() const
 {
 	return filterType() == FilterType::Button;
 }
 
-void ObjectFilter::addChild(std::shared_ptr<ObjectFilter> child)
+void TuningFilter::addTopChild(std::shared_ptr<TuningFilter> child)
+{
+	child->m_parentFilter = this;
+	m_childFilters.insert(m_childFilters.begin(), child);
+}
+
+void TuningFilter::addChild(std::shared_ptr<TuningFilter> child)
 {
 	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
 }
 
-void ObjectFilter::removeChild(std::shared_ptr<ObjectFilter> child)
+void TuningFilter::removeChild(std::shared_ptr<TuningFilter> child)
 {
 	int index = -1;
 
@@ -533,13 +565,19 @@ void ObjectFilter::removeChild(std::shared_ptr<ObjectFilter> child)
 	}
 }
 
-int ObjectFilter::childFiltersCount()
+void TuningFilter::removeAllChildren()
+{
+	m_childFilters.clear();
+
+}
+
+int TuningFilter::childFiltersCount() const
 {
 	return static_cast<int>(m_childFilters.size());
 
 }
 
-std::shared_ptr<ObjectFilter> ObjectFilter::childFilter(int index)
+std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 {
 	if (index <0 || index >= m_childFilters.size())
 	{
@@ -551,22 +589,18 @@ std::shared_ptr<ObjectFilter> ObjectFilter::childFilter(int index)
 }
 
 
-bool ObjectFilter::match(const TuningObject& object)
+bool TuningFilter::match(const TuningObject& object)
 {
-	if (allowAll() == true)
-	{
-		return true;
-	}
-	if (folder() == true)
+	if (isEmpty() == true)
 	{
 		return true;
 	}
 
-	if (signalType() == ObjectFilter::SignalType::Analog && object.analog() == false)
+	if (signalType() == TuningFilter::SignalType::Analog && object.analog() == false)
 	{
 		return false;
 	}
-	if (signalType() == ObjectFilter::SignalType::Discrete && object.analog() == true)
+	if (signalType() == TuningFilter::SignalType::Discrete && object.analog() == true)
 	{
 		return false;
 	}
@@ -639,7 +673,7 @@ bool ObjectFilter::match(const TuningObject& object)
 
 		bool result = false;
 
-		for (const ObjectFilterValue& v : m_signalValues)
+		for (const TuningFilterValue& v : m_signalValues)
 		{
 			if (v.appSignalId == s)
 			{
@@ -690,28 +724,22 @@ bool ObjectFilter::match(const TuningObject& object)
 // ObjectFilterStorage
 //
 
-ObjectFilterStorage::ObjectFilterStorage()
+TuningFilterStorage::TuningFilterStorage()
 {
+	m_root = std::make_shared<TuningFilter>();
+	m_root->setStrID("\\");
+	m_root->setCaption("\\");
+	m_root->setFilterType(TuningFilter::FilterType::Root);
 
 }
 
-ObjectFilterStorage::ObjectFilterStorage(const ObjectFilterStorage& That)
+TuningFilterStorage::TuningFilterStorage(const TuningFilterStorage& That)
 {
-	m_topFilters.clear();
-
+	m_root = std::make_shared<TuningFilter>(*That.m_root.get());
 	m_schemasDetails = That.m_schemasDetails;
-
-	for (auto f : That.m_topFilters)
-	{
-		// create objects copies
-		//
-		ObjectFilter* filter = f.get();
-
-		m_topFilters.push_back(std::make_shared<ObjectFilter>(*filter));
-	}
 }
 
-bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
+bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -738,7 +766,7 @@ bool ObjectFilterStorage::load(const QString& fileName, QString* errorCode)
 
 }
 
-bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
+bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -746,7 +774,7 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 		return false;
 	}
 
-	m_topFilters.clear();
+	m_root->removeAllChildren();
 
 	QXmlStreamReader reader(data);
 
@@ -784,29 +812,13 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 
 		QString tagName = reader.name().toString();
 
-		if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
+		if (tagName == "Root")
 		{
-			ObjectFilter::FilterType filterType = ObjectFilter::FilterType::Tree;
-
-			if (tagName == "Tab")
-			{
-				filterType = ObjectFilter::FilterType::Tab;
-			}
-
-			if (tagName == "Button")
-			{
-				filterType = ObjectFilter::FilterType::Button;
-			}
-
-			std::shared_ptr<ObjectFilter> of = std::make_shared<ObjectFilter>(filterType);
-
-			if (of->load(reader) == false)
+			if (m_root->load(reader) == false)
 			{
 				*errorCode = reader.errorString();
 				return false;
 			}
-
-			m_topFilters.push_back(of);
 
 			continue;
 		}
@@ -819,7 +831,7 @@ bool ObjectFilterStorage::load(const QByteArray& data, QString* errorCode)
 	return !reader.hasError();
 }
 
-bool ObjectFilterStorage::save(const QString& fileName)
+bool TuningFilterStorage::save(const QString& fileName)
 {
 	// save data to XML
 	//
@@ -831,16 +843,8 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 	writer.writeStartElement("ObjectFilterStorage");
 
-	for (auto f : m_topFilters)
-	{
-		if (f == nullptr)
-		{
-			assert(f);
-			return false;
-		}
+	m_root->save(writer);
 
-		f->save(writer);
-	}
 	writer.writeEndElement();
 
 	writer.writeEndElement();	// ObjectFilterStorage
@@ -860,67 +864,13 @@ bool ObjectFilterStorage::save(const QString& fileName)
 
 }
 
-int ObjectFilterStorage::topFilterCount() const
-{
-	return static_cast<int>(m_topFilters.size());
-}
 
-std::shared_ptr<ObjectFilter> ObjectFilterStorage::topFilter(int index) const
-{
-	if (index < 0 || index >= m_topFilters.size())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return m_topFilters[index];
-}
-
-bool ObjectFilterStorage::addTopFilter(const std::shared_ptr<ObjectFilter> &filter)
-{
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return false;
-	}
-
-	m_topFilters.push_back(filter);
-	return true;
-}
-
-bool ObjectFilterStorage::removeFilter(const std::shared_ptr<ObjectFilter> &filter)
-{
-	if (filter->parentFilter() != nullptr)
-	{
-		// remove this filter from parent
-		//
-		ObjectFilter* parentFilter = filter->parentFilter();
-		parentFilter->removeChild(filter);
-	}
-	else
-	{
-		//remove it from top filters
-		//
-		auto it = std::find(m_topFilters.begin(), m_topFilters.end(), filter);
-		if (it == m_topFilters.end())
-		{
-			assert(false);
-		}
-		else
-		{
-			m_topFilters.erase(it);
-		}
-	}
-
-	return true;
-}
-
-int ObjectFilterStorage::schemaDetailsCount()
+int TuningFilterStorage::schemaDetailsCount()
 {
 	return static_cast<int>(m_schemasDetails.size());
 }
 
-SchemaDetails ObjectFilterStorage::schemaDetails(int index)
+SchemaDetails TuningFilterStorage::schemaDetails(int index)
 {
 	if (index < 0 || index >= m_schemasDetails.size())
 	{
@@ -931,7 +881,7 @@ SchemaDetails ObjectFilterStorage::schemaDetails(int index)
 }
 
 
-bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *errorCode)
+bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -1032,45 +982,49 @@ bool ObjectFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void ObjectFilterStorage::createAutomaticFilters()
+void TuningFilterStorage::createAutomaticFilters()
 {
-	/*if (theSettings.filterBySchema() == true)
+	if (theSettings.filterBySchema() == true)
 	{
 
 		// Filter for Schema
 		//
-		std::shared_ptr<ObjectFilter> ofSchema = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
-		ofSchema->setCaption("Filter by Schema");
-		ofSchema->setFolder(true);
+		ofSchema->setCaption("Schemas");
 
 		for (auto s : m_schemasDetails)
 		{
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-			ofTs->setAppSignalIdsList(s.m_appSignals);
+			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
+			for (auto s : s.m_appSignals)
+			{
+				TuningFilterValue ofv;
+				ofv.appSignalId = s;
+				ofTs->addValue(ofv);
+			}
+
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + s.m_strId);
 			ofTs->setCaption(s.m_caption);
 
 			ofSchema->addChild(ofTs);
 		}
 
-		m_topFilters.insert(m_topFilters.begin(), ofSchema);
-	}*/
+		m_root->addTopChild(ofSchema);
+	}
 
 	if (theSettings.filterByEquipment() == true)
 	{
 		// Filter for EquipmentId
 		//
-		std::shared_ptr<ObjectFilter> ofEquipment = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
-		ofEquipment->setCaption("Filter by EquipmentId");
-		ofEquipment->setFolder(true);
+		ofEquipment->setCaption("Equipment");
 
 		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
 		{
 			QString ts = theObjects.tuningSourceEquipmentId(i);
 
-			std::shared_ptr<ObjectFilter> ofTs = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
+			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
@@ -1078,30 +1032,10 @@ void ObjectFilterStorage::createAutomaticFilters()
 			ofEquipment->addChild(ofTs);
 		}
 
-		m_topFilters.insert(m_topFilters.begin(), ofEquipment);
+		m_root->addTopChild(ofEquipment);
 	}
 
-	// Root Filter for All in tree
-	//
-	bool createRootFilter = false;
-	for (auto f : m_topFilters)
-	{
-		if (f->isTree())
-		{
-			createRootFilter = true;
-			break;
-		}
-	}
-	if (createRootFilter == true)
-	{
-		std::shared_ptr<ObjectFilter> ofRoot = std::make_shared<ObjectFilter>(ObjectFilter::FilterType::Tree);
-		ofRoot->setStrID("%AUTOFILTER%_ROOT");
-		ofRoot->setCaption("All objects");
-		ofRoot->setAllowAll(true);
-
-		m_topFilters.insert(m_topFilters.begin(), ofRoot);
-	}
 }
 
-ObjectFilterStorage theFilters;
-ObjectFilterStorage theUserFilters;
+TuningFilterStorage theFilters;
+TuningFilterStorage theUserFilters;
