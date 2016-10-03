@@ -187,7 +187,25 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
 	ui->m_list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    QString errorCode;
+	// MaskType and completer
+	//
+	ui->m_maskType->blockSignals(true);
+	ui->m_maskType->addItem("Connection ID", static_cast<int>(MaskType::ConnectionID));
+	ui->m_maskType->addItem("Port1 EquipmentID", static_cast<int>(MaskType::Port1EquipmentID));
+	ui->m_maskType->addItem("Port2 EquipmentID", static_cast<int>(MaskType::Port2EquipmentID));
+	ui->m_maskType->setCurrentIndex(theSettings.m_connectionEditorMaskType);
+	ui->m_maskType->blockSignals(false);
+
+	m_completer = new QCompleter(theSettings.m_connectionEditorMasks, this);
+	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+	ui->m_mask->setCompleter(m_completer);
+
+	connect(ui->m_mask, &QLineEdit::textEdited, [=](){m_completer->complete();});
+	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->m_mask, &QLineEdit::setText);
+
+	// Load connections
+	//
+	QString errorCode;
 
     if (connections.load(db(), errorCode) == false)
     {
@@ -230,6 +248,15 @@ void DialogConnectionsEditor::fillConnectionsList()
 {
     ui->m_list->clear();
 
+
+	MaskType maskType = MaskType::ConnectionID;
+
+	QVariant data = ui->m_maskType->currentData();
+	if (data.isValid() == true && data.isNull() == false)
+	{
+		maskType = static_cast<MaskType>(data.toInt());
+	}
+
     for (int i = 0; i < connections.count(); i++)
     {
         std::shared_ptr<Hardware::Connection> connection = connections.get(i);
@@ -243,6 +270,41 @@ void DialogConnectionsEditor::fillConnectionsList()
 		{
 			continue;
 		}
+
+		if (m_masks.empty() == false)
+		{
+			QString s;
+			bool result = false;
+			for (QString mask : m_masks)
+			{
+				QRegExp rx(mask.trimmed());
+				rx.setPatternSyntax(QRegExp::Wildcard);
+
+				switch (maskType)
+				{
+				case MaskType::ConnectionID:
+					s = connection->connectionID();
+					break;
+				case MaskType::Port1EquipmentID:
+					s = connection->port1EquipmentID();
+					break;
+				case MaskType::Port2EquipmentID:
+					s = connection->port2EquipmentID();
+					break;
+				}
+
+				if (rx.exactMatch(s))
+				{
+					result = true;
+					break;
+				}
+			}
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		setConnectionText(item, connection.get());
@@ -688,3 +750,52 @@ void DialogConnectionsEditor::sortIndicatorChanged(int column, Qt::SortOrder ord
 DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
 
 
+
+void DialogConnectionsEditor::on_m_mask_returnPressed()
+{
+
+	on_m_applyMask_clicked();
+}
+
+void DialogConnectionsEditor::on_m_applyMask_clicked()
+{
+
+	// Get mask
+	//
+	QString maskText = ui->m_mask->text();
+
+	if (maskText.isEmpty() == false)
+	{
+		m_masks = maskText.split(';');
+
+		for (auto mask : m_masks)
+		{
+			// Save filter history
+			//
+			if (theSettings.m_connectionEditorMasks.contains(mask) == false)
+			{
+				theSettings.m_connectionEditorMasks.append(mask);
+
+				QStringListModel* model = dynamic_cast<QStringListModel*>(m_completer->model());
+				if (model == nullptr)
+				{
+					assert(model);
+					return;
+				}
+				model->setStringList(theSettings.m_connectionEditorMasks);
+			}
+		}
+	}
+	else
+	{
+		m_masks.clear();
+	}
+
+	fillConnectionsList();
+}
+
+void DialogConnectionsEditor::on_m_maskType_currentIndexChanged(int index)
+{
+	theSettings.m_connectionEditorMaskType = index;
+	fillConnectionsList();
+}
