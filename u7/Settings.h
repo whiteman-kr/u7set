@@ -118,6 +118,7 @@ public:
 	QByteArray m_connectionEditorWindowGeometry;
 	int m_connectionEditorSortColumn;
 	Qt::SortOrder m_connectionEditorSortOrder;
+	QStringList m_connectionEditorMasks;
 
 	//Connection properties
     //

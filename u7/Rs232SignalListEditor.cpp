@@ -251,14 +251,15 @@ void Rs232SignalListEditor::editConnection()
 		return;
 	}
 
+	bool readOnly = m_checkIn->isEnabled() == false;
+
 	// Create an object copy and pass it to the property editor
 	//
 
 	std::shared_ptr<Hardware::Connection> editConnection = std::make_shared<Hardware::Connection>();
 	*editConnection = *connection;
 
-	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &m_connections);
-	pd->setWindowTitle(tr("Connection properties"));
+	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &m_connections, readOnly);
 
 	if (pd->exec() == QDialog::Accepted)
 	{

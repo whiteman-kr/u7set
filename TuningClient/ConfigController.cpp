@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "Settings.h"
 #include "ConfigController.h"
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 #include "ObjectManager.h"
 #include "../lib/ServiceSettings.h"
 
@@ -253,6 +253,8 @@ bool ConfigController::getObjectFilters()
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
+
+		theFilters.m_root->setCaption(tr("All Filters"));
 	}
 
 	return true;

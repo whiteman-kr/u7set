@@ -9,7 +9,7 @@
 class PropertyEditorDialog : public QDialog
 {
 public:
-    PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget *parent);
+	PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget *parent, bool readOnly);
     ~PropertyEditorDialog();
 
 

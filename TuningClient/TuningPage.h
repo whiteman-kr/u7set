@@ -3,7 +3,7 @@
 
 #include "Stable.h"
 #include "ObjectManager.h"
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 
 
 class TuningItemModel : public QAbstractItemModel
@@ -85,19 +85,19 @@ class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<ObjectFilter> filter, const QString& caption, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent = nullptr);
 
-	std::shared_ptr<ObjectFilter> filter();
+	std::shared_ptr<TuningFilter> filter();
 
 private:
-	std::shared_ptr<ObjectFilter> m_filter;
+	std::shared_ptr<TuningFilter> m_filter;
 	QString m_caption;
 
 private slots:
 	void slot_toggled(bool checked);
 
 signals:
-	void filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
+	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 };
 
 
@@ -105,7 +105,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<ObjectFilter> tabFilter, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -113,10 +113,10 @@ public:
 signals:
 
 private slots:
-	void slot_filterButtonClicked(std::shared_ptr<ObjectFilter> filter);
+	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
 public slots:
-	void slot_filterTreeChanged(std::shared_ptr<ObjectFilter> filter);
+	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
 
 private:
 
@@ -148,11 +148,11 @@ private:
 
 	std::vector<int> m_objectsIndexes;
 
-	std::shared_ptr<ObjectFilter> m_treeFilter = nullptr;
+	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
 
-	std::shared_ptr<ObjectFilter> m_tabFilter = nullptr;
+	std::shared_ptr<TuningFilter> m_tabFilter = nullptr;
 
-	std::shared_ptr<ObjectFilter> m_buttonFilter = nullptr;
+	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
 

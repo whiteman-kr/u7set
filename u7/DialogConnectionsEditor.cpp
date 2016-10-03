@@ -3,6 +3,7 @@
 #include "../lib/PropertyEditorDialog.h"
 #include "Settings.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 //
 //
@@ -10,10 +11,16 @@
 //
 //
 
-DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage *connections)
-    :PropertyEditorDialog(object, parent)
+DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage *connections, bool readOnly)
+	:PropertyEditorDialog(object, parent, readOnly)
 {
-	setWindowTitle(tr("Connection Properties"));
+	QString windowTitle = tr("Connection Properties");
+
+	if (readOnly == true)
+	{
+		windowTitle += tr(" [Read only]");
+	}
+	setWindowTitle(windowTitle);
 
 	m_connections = connections;
 
@@ -152,8 +159,8 @@ void DialogConnectionsPropertyEditor::saveSettings()
 //
 //
 
-DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QWidget *parent) :
-	QDialog(parent),
+DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QWidget *parent)
+	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogConnectionsEditor),
 	m_dbController(pDbController)
 {
@@ -166,18 +173,33 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     setWindowTitle(tr("Optical Connections Editor"));
 
     QStringList l;
+	l << tr("№");
 	l << tr("ConnectionID");
 	l << tr("Port1 EquipmentID");
 	l << tr("Port2 EquipmentID");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
+	ui->m_list->setColumnWidth(il++, 50);
     ui->m_list->setColumnWidth(il++, 100);
     ui->m_list->setColumnWidth(il++, 250);
     ui->m_list->setColumnWidth(il++, 250);
 	ui->m_list->setSortingEnabled(true);
 
-    QString errorCode;
+	ui->m_list->setSelectionMode(QAbstractItemView::SingleSelection);
+
+	// Mask and completer
+	//
+	m_completer = new QCompleter(theSettings.m_connectionEditorMasks, this);
+	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+	ui->m_mask->setCompleter(m_completer);
+
+	connect(ui->m_mask, &QLineEdit::textEdited, [=](){m_completer->complete();});
+	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->m_mask, &QLineEdit::setText);
+
+	// Load connections
+	//
+	QString errorCode;
 
     if (connections.load(db(), errorCode) == false)
     {
@@ -234,11 +256,46 @@ void DialogConnectionsEditor::fillConnectionsList()
 			continue;
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
-													connection->connectionID() <<
-													connection->port1EquipmentID() <<
-													connection->port2EquipmentID());
-        item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
+		if (m_masks.empty() == false)
+		{
+			QString s;
+			bool result = false;
+			for (QString mask : m_masks)
+			{
+				if (connection->connectionID().contains(mask, Qt::CaseInsensitive))
+				{
+					result = true;
+					break;
+				}
+				if (connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive))
+				{
+					result = true;
+					break;
+				}
+				if (connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive))
+				{
+					result = true;
+					break;
+				}
+				QString numIndex = QString::number(connection->index()).rightJustified(4, '0');
+				if (numIndex.contains(mask))
+				{
+					result = true;
+					break;
+				}
+
+			}
+			if (result == false)
+			{
+				continue;
+			}
+		}
+
+
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		setConnectionText(item, connection.get());
+
+		item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
     }
 }
@@ -291,13 +348,16 @@ void DialogConnectionsEditor::updateButtons()
 	bool editingEnabled = m_checkedOut == true && selectedCount > 0;
 
 	ui->m_Add->setEnabled(m_checkedOut == true);
-	ui->m_Edit->setEnabled(editingEnabled == true);
+
+	ui->m_Edit->setText(m_checkedOut == true ? tr("Edit") : tr("View"));
+	ui->m_Edit->setEnabled(selectedCount > 0);
 	ui->m_Remove->setEnabled(editingEnabled == true);
 
 	ui->m_checkIn->setEnabled(m_checkedOut == true);
 	ui->m_checkOut->setEnabled(m_checkedOut == false);
 	ui->m_Undo->setEnabled(m_checkedOut == true);
 
+	ui->m_Apply->setEnabled(m_checkedOut == true);
 	ui->m_OK->setEnabled(m_checkedOut == true);
 }
 
@@ -347,6 +407,24 @@ bool DialogConnectionsEditor::continueWithDuplicateCaptions()
 	return true;
 }
 
+void DialogConnectionsEditor::setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection)
+{
+	if (item == nullptr || connection == nullptr)
+	{
+		assert(item);
+		assert(connection);
+		return;
+	}
+
+	int c = 0;
+	QString numString = QString::number(connection->index()).rightJustified(4, '0');
+	item->setText(c++, numString);
+	item->setText(c++, connection->connectionID());
+	item->setText(c++, connection->port1EquipmentID());
+	item->setText(c++, connection->port2EquipmentID());
+
+}
+
 void DialogConnectionsEditor::closeEvent(QCloseEvent* e)
 {
 	if (continueWithDuplicateCaptions() == false)
@@ -372,8 +450,6 @@ DbController* DialogConnectionsEditor::db()
 
 void DialogConnectionsEditor::on_m_Add_clicked()
 {
-    int index = ui->m_list->topLevelItemCount();
-
     std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
     if (connection == nullptr)
     {
@@ -387,17 +463,17 @@ void DialogConnectionsEditor::on_m_Add_clicked()
 
     connections.add(connection);
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() <<
-												connection->connectionID() <<
-												connection->port1EquipmentID() <<
-												connection->port2EquipmentID());
-    item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
-    ui->m_list->insertTopLevelItem(index, item);
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	setConnectionText(item, connection.get());
+	item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
+
+	ui->m_list->addTopLevelItem(item);
 
     // Select the created element
     //
-    ui->m_list->clearSelection();
-    ui->m_list->selectionModel()->select(ui->m_list->model()->index (index, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	ui->m_list->clearSelection();
+	ui->m_list->scrollToItem(item);
+	item->setSelected(true);
 
     m_modified = true;
 }
@@ -410,9 +486,9 @@ void DialogConnectionsEditor::on_m_Edit_clicked()
         return;
     }
 
-    // Remember index that was selected
-    //
-    int selectedIndex = ui->m_list->indexOfTopLevelItem(items[0]);
+	bool readOnly = ui->m_checkIn->isEnabled() == false;
+
+	QTreeWidgetItem* editItem = items[0];
 
     std::shared_ptr<Hardware::Connection> connection = items[0]->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
     if (connection == nullptr)
@@ -427,16 +503,16 @@ void DialogConnectionsEditor::on_m_Edit_clicked()
     std::shared_ptr<Hardware::Connection> editConnection = std::make_shared<Hardware::Connection>();
     *editConnection = *connection;
 
-    DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &connections);
+	DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &connections, readOnly);
 
-    if (pd->exec() == QDialog::Accepted)
+	if (pd->exec() == QDialog::Accepted && readOnly == false)
     {
         // If properties were edited, update the object from its copy
         //
         *connection = *editConnection;
 
-        fillConnectionsList();
-        ui->m_list->selectionModel()->select(ui->m_list->model()->index (selectedIndex, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		setConnectionText(editItem, connection.get());
+
         m_modified = true;
     }
 }
@@ -449,13 +525,6 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
         return;
     }
 
-    // Remember index that was selected
-    //
-    int selectedIndex = ui->m_list->indexOfTopLevelItem(items[0]);
-    if (selectedIndex > 0)
-    {
-        selectedIndex--;
-    }
 
     std::shared_ptr<Hardware::Connection> connection = items[0]->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
     if (connection == nullptr)
@@ -463,13 +532,47 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
         assert(connection);
         return;
     }
+
+	if (QMessageBox::warning(this, tr("Delete"), tr("Are you sure you want to delete the connection '%1'?").arg(connection->connectionID()),
+							 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
     connections.remove(connection);
 
-    fillConnectionsList();
-    if (ui->m_list->topLevelItemCount() > 0 && selectedIndex >= 0)
+	// Remove the tree item
+	//
+
+	int deleteIndex = ui->m_list->indexOfTopLevelItem(items[0]);
+
+	QTreeWidgetItem* deleteItem = ui->m_list->takeTopLevelItem(deleteIndex);
+	delete deleteItem;
+
+	// Select the item above deleted
+	//
+
+	ui->m_list->clearSelection();
+
+	int selectedIndex = deleteIndex - 1;
+	if (ui->m_list->topLevelItemCount() > 0 && selectedIndex >= 0)
     {
-        ui->m_list->selectionModel()->select(ui->m_list->model()->index (selectedIndex, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		ui->m_list->selectionModel()->select(ui->m_list->model()->index (selectedIndex, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		ui->m_list->scrollToItem(ui->m_list->topLevelItem(selectedIndex));
     }
+
+	// Refresh all text, because index was changed
+	//
+
+	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
+
+		std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+
+		setConnectionText(item, connection.get());
+
+	}
 
     m_modified = true;
 }
@@ -532,10 +635,8 @@ void DialogConnectionsEditor::reject()
 void DialogConnectionsEditor::on_m_list_doubleClicked(const QModelIndex &index)
 {
     Q_UNUSED(index);
-    if (ui->m_Edit->isEnabled() == true)
-    {
-        on_m_Edit_clicked();
-    }
+
+	on_m_Edit_clicked();
 }
 
 void DialogConnectionsEditor::on_m_checkOut_clicked()
@@ -635,3 +736,143 @@ void DialogConnectionsEditor::sortIndicatorChanged(int column, Qt::SortOrder ord
 DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
 
 
+
+void DialogConnectionsEditor::on_m_mask_returnPressed()
+{
+	on_m_search_clicked();
+}
+
+
+
+void DialogConnectionsEditor::on_m_Export_clicked()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
+													"./",
+													tr("Text files (*.txt);; All files (*.*)"));
+
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+
+	if (file.open(QFile::WriteOnly) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Failed to create file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream textStream(&file);
+
+	textStream << tr("Radiy Platform Configuration Tool\r\n");
+	textStream << qApp->applicationName() << tr(" v") << qApp->applicationVersion() << "\r\n";
+
+	textStream << "\r\n";
+
+	textStream << tr("Project Name:\t") << db()->currentProject().projectName() << "\r\n";
+	textStream << tr("User Name:\t") << db()->currentUser().username() << "\r\n";
+
+	textStream << "\r\n";
+
+
+
+	textStream << tr("Generated at:\t") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") << "\r\n";
+
+	textStream << "\r\n";
+
+	int count = ui->m_list->topLevelItemCount();
+
+	textStream << tr("Connections count: ") << count << "\r\n\r\n";
+
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+		if (connection == nullptr)
+		{
+			assert(connection);
+			return;
+		}
+
+		textStream << tr("------------ Connection ") << connection->index() << tr(" ------------\r\n\r\n");
+		textStream << tr("ConnectionID: ") << connection->connectionID() << "\r\n\r\n";
+		textStream << tr("Port1 EquipmentID: ") << connection->port1EquipmentID() << "\r\n";
+		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID() << "\r\n";
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+		{
+			textStream << tr("Port mode: Optical")<<"\r\n";
+		}
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		{
+			textStream << tr("Port mode: Serial") << "\r\n";
+
+			textStream << tr("Serial mode enabled: ") << (connection->enableSerial() == true ? tr("Yes") : tr("No")) <<"\r\n";
+
+			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
+
+		}
+
+		if (connection->manualSettings() == true)
+		{
+			textStream << tr("\r\nManual settings:\r\n");
+			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity()<<"\r\n";
+
+			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity()<<"\r\n";
+		}
+
+		textStream<<"\r\n";
+	}
+
+	textStream.flush();
+
+	file.close();
+}
+
+void DialogConnectionsEditor::on_m_search_clicked()
+{
+	// Get mask
+	//
+	QString maskText = ui->m_mask->text();
+
+	if (maskText.isEmpty() == false)
+	{
+		m_masks = maskText.split(';');
+
+		for (auto mask : m_masks)
+		{
+			// Save filter history
+			//
+			if (theSettings.m_connectionEditorMasks.contains(mask) == false)
+			{
+				theSettings.m_connectionEditorMasks.append(mask);
+
+				QStringListModel* model = dynamic_cast<QStringListModel*>(m_completer->model());
+				if (model == nullptr)
+				{
+					assert(model);
+					return;
+				}
+				model->setStringList(theSettings.m_connectionEditorMasks);
+			}
+		}
+	}
+	else
+	{
+		m_masks.clear();
+	}
+
+	fillConnectionsList();
+}
