@@ -4,7 +4,7 @@
 #include <QDesktopWidget>
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "ObjectFilter.h"
+#include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogPresetEditor.h"
 
@@ -277,7 +277,7 @@ void MainWindow::showSettings()
 
 void MainWindow::runPresetEditor()
 {
-	ObjectFilterStorage editFilters = theUserFilters;
+	TuningFilterStorage editFilters = theUserFilters;
 
 	DialogPresetEditor d(&editFilters, this);
 	if (d.exec() == QDialog::Accepted)
