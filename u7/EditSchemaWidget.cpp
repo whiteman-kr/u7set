@@ -8,6 +8,7 @@
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
 #include "ChooseAfbDialog.h"
+#include "ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "../VFrame30/UfbSchema.h"
@@ -20,7 +21,6 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "SignalsTabPage.h"
-
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -4331,7 +4331,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 	// In cycle we are processing current point with previous point
 	//
 
-	for (currentPoint = 1; currentPoint < result.size(); currentPoint++)
+	for (currentPoint = 1; currentPoint < (int)result.size(); currentPoint++)
 	{
 		if (std::abs(VFrame30::SchemaPoint(result.at(currentPoint)).X - VFrame30::SchemaPoint(result.at(currentPoint-1)).X) < 0.0000001)
 		{
@@ -4339,7 +4339,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 		}
 		else
 		{
-			// Remove points only if we have more than two values with same
+			// Remove points only if we have more than one pair with same
 			// X coordinates
 			//
 
@@ -4358,7 +4358,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 		}
 		else
 		{
-			// Remove points only if we have more than two values with same
+			// Remove points only if we have more than one pair with same
 			// X coordinates
 			//
 
@@ -4372,7 +4372,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 		}
 	}
 
-	// If some points with same coordinate values are placed at the end of
+	// If some pairs with same coordinate values are placed at the end of
 	// the line, we must remove them!
 	//
 
@@ -5507,6 +5507,7 @@ void EditSchemaWidget::addFblElement()
 
 void EditSchemaWidget::addUfbElement()
 {
+
 	// Get User Functional Block List
 	//
 	std::vector<DbFileInfo> fileList;
@@ -5564,13 +5565,38 @@ void EditSchemaWidget::addUfbElement()
 	// Choose User Functional Block
 	//
 
+	ChooseUfbDialog *dialog = new ChooseUfbDialog(0, &ufbs);
+
 	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
 
-	std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
+	/*std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
 	if (selectedUfb == nullptr)
 	{
 		return;
+	}*/
+
+	if (dialog->exec() == QDialog::Accepted)
+	{
+		int index = dialog->selectedUfb;
+
+		assert (index >= 0);
+		assert (index < (int)ufbs.size());
+
+		std::shared_ptr<VFrame30::UfbSchema> ufb = ufbs[index];
+
+		qDebug() << "You selected" << ufb.get()->caption();
+
+		//QString errorMsg;
+
+		//addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(ufb.get()), &errorMsg));
+
+		//if (errorMsg.isEmpty() == false)
+		//{
+		//	QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		//}
 	}
+
+	return;
 
 	// Add Ufb
 	//
