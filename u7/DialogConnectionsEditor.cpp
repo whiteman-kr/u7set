@@ -188,15 +188,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
 	ui->m_list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	// MaskType and completer
+	// Mask and completer
 	//
-	ui->m_maskType->blockSignals(true);
-	ui->m_maskType->addItem("Connection ID", static_cast<int>(MaskType::ConnectionID));
-	ui->m_maskType->addItem("Port1 EquipmentID", static_cast<int>(MaskType::Port1EquipmentID));
-	ui->m_maskType->addItem("Port2 EquipmentID", static_cast<int>(MaskType::Port2EquipmentID));
-	ui->m_maskType->setCurrentIndex(theSettings.m_connectionEditorMaskType);
-	ui->m_maskType->blockSignals(false);
-
 	m_completer = new QCompleter(theSettings.m_connectionEditorMasks, this);
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	ui->m_mask->setCompleter(m_completer);
@@ -249,15 +242,6 @@ void DialogConnectionsEditor::fillConnectionsList()
 {
     ui->m_list->clear();
 
-
-	MaskType maskType = MaskType::ConnectionID;
-
-	QVariant data = ui->m_maskType->currentData();
-	if (data.isValid() == true && data.isNull() == false)
-	{
-		maskType = static_cast<MaskType>(data.toInt());
-	}
-
     for (int i = 0; i < connections.count(); i++)
     {
         std::shared_ptr<Hardware::Connection> connection = connections.get(i);
@@ -278,27 +262,28 @@ void DialogConnectionsEditor::fillConnectionsList()
 			bool result = false;
 			for (QString mask : m_masks)
 			{
-				QRegExp rx(mask.trimmed());
-				rx.setPatternSyntax(QRegExp::Wildcard);
-
-				switch (maskType)
-				{
-				case MaskType::ConnectionID:
-					s = connection->connectionID();
-					break;
-				case MaskType::Port1EquipmentID:
-					s = connection->port1EquipmentID();
-					break;
-				case MaskType::Port2EquipmentID:
-					s = connection->port2EquipmentID();
-					break;
-				}
-
-				if (rx.exactMatch(s))
+				if (connection->connectionID().contains(mask, Qt::CaseInsensitive))
 				{
 					result = true;
 					break;
 				}
+				if (connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive))
+				{
+					result = true;
+					break;
+				}
+				if (connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive))
+				{
+					result = true;
+					break;
+				}
+				QString numIndex = QString::number(connection->index()).rightJustified(4, '0');
+				if (numIndex.contains(mask))
+				{
+					result = true;
+					break;
+				}
+
 			}
 			if (result == false)
 			{
@@ -754,13 +739,110 @@ DialogConnectionsEditor* theDialogConnectionsEditor = nullptr;
 
 void DialogConnectionsEditor::on_m_mask_returnPressed()
 {
-
-	on_m_applyMask_clicked();
+	on_m_search_clicked();
 }
 
-void DialogConnectionsEditor::on_m_applyMask_clicked()
-{
 
+
+void DialogConnectionsEditor::on_m_Export_clicked()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
+													"./",
+													tr("Text files (*.txt);; All files (*.*)"));
+
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+
+	if (file.open(QFile::WriteOnly) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Failed to create file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream textStream(&file);
+
+	textStream << tr("Radiy Platform Configuration Tool\r\n");
+	textStream << qApp->applicationName() << tr(" v") << qApp->applicationVersion() << "\r\n";
+
+	textStream << "\r\n";
+
+	textStream << tr("Project Name:\t") << db()->currentProject().projectName() << "\r\n";
+	textStream << tr("User Name:\t") << db()->currentUser().username() << "\r\n";
+
+	textStream << "\r\n";
+
+
+
+	textStream << tr("Generated at:\t") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") << "\r\n";
+
+	textStream << "\r\n";
+
+	int count = ui->m_list->topLevelItemCount();
+
+	textStream << tr("Connections count: ") << count << "\r\n\r\n";
+
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+		if (connection == nullptr)
+		{
+			assert(connection);
+			return;
+		}
+
+		textStream << tr("------------ Connection ") << connection->index() << tr(" ------------\r\n\r\n");
+		textStream << tr("ConnectionID: ") << connection->connectionID() << "\r\n\r\n";
+		textStream << tr("Port1 EquipmentID: ") << connection->port1EquipmentID() << "\r\n";
+		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID() << "\r\n";
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+		{
+			textStream << tr("Port mode: Optical")<<"\r\n";
+		}
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		{
+			textStream << tr("Port mode: Serial") << "\r\n";
+
+			textStream << tr("Serial mode enabled: ") << (connection->enableSerial() == true ? tr("Yes") : tr("No")) <<"\r\n";
+
+			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
+
+		}
+
+		if (connection->manualSettings() == true)
+		{
+			textStream << tr("\r\nManual settings:\r\n");
+			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity()<<"\r\n";
+
+			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity()<<"\r\n";
+		}
+
+		textStream<<"\r\n";
+	}
+
+	textStream.flush();
+
+	file.close();
+}
+
+void DialogConnectionsEditor::on_m_search_clicked()
+{
 	// Get mask
 	//
 	QString maskText = ui->m_mask->text();
@@ -793,101 +875,4 @@ void DialogConnectionsEditor::on_m_applyMask_clicked()
 	}
 
 	fillConnectionsList();
-}
-
-void DialogConnectionsEditor::on_m_maskType_currentIndexChanged(int index)
-{
-	theSettings.m_connectionEditorMaskType = index;
-	fillConnectionsList();
-}
-
-void DialogConnectionsEditor::on_m_Export_clicked()
-{
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
-													"./",
-													tr("Text files (*.txt);; All files (*.*)"));
-
-	if (fileName.isNull() == true)
-	{
-		return;
-	}
-
-	QFile file(fileName);
-
-	if (file.open(QFile::WriteOnly) == false)
-	{
-		QMessageBox::critical(this, tr("Error"), tr("Failed to create file %1!").arg(fileName));
-		return;
-	}
-
-	QTextStream textStream(&file);
-
-	textStream << tr("Radiy Platform Configuration Tool\r\n");
-	textStream << qApp->applicationName() <<tr(" v") + qApp->applicationVersion()<<"\r\n";
-
-	textStream << "\r\n";
-
-	textStream << tr("Project Name:\t") << db()->currentProject().projectName()<<"\r\n";
-	textStream << tr("User Name:\t") << db()->currentUser().username()<<"\r\n";
-
-	textStream << "\r\n";
-
-	int count = ui->m_list->topLevelItemCount();
-
-	textStream << tr("Connections count: ") << count << "\r\n\r\n";
-
-	for (int i = 0; i < count; i++)
-	{
-		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
-		if (item == nullptr)
-		{
-			assert(item);
-			return;
-		}
-
-		std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-		if (connection == nullptr)
-		{
-			assert(connection);
-			return;
-		}
-
-		textStream << tr("------------ Connection ") << connection->index() << tr(" ------------\r\n\r\n");
-		textStream << tr("ConnectionID: ") << connection->connectionID()<<"\r\n\r\n";
-		textStream << tr("Port1 EquipmentID: ") << connection->port1EquipmentID()<<"\r\n";
-		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID()<<"\r\n";
-
-		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
-		{
-			textStream << tr("Port mode: Optical")<<"\r\n";
-		}
-
-		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
-		{
-			textStream << tr("Port mode: Serial")<<"\r\n";
-
-			textStream << tr("Serial mode enabled: ") << (connection->enableSerial() == true ? tr("Yes") : tr("No")) <<"\r\n";
-
-			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
-
-		}
-
-		if (connection->manualSettings() == true)
-		{
-			textStream << tr("\r\nManual settings:\r\n");
-			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress()<<"\r\n";
-			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity()<<"\r\n";
-			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity()<<"\r\n";
-
-			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress()<<"\r\n";
-			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity()<<"\r\n";
-			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity()<<"\r\n";
-		}
-
-		textStream<<"\r\n";
-	}
-
-	textStream.flush();
-
-	file.close();
 }
