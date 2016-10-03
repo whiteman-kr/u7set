@@ -207,19 +207,30 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 		m_templateFileExtension(templateFileExtension),
 		m_createSchemaFunc(createSchemaFunc)
 {
-	// Create actions
-	//
-	CreateActions();
-
 	// Create controls
 	//
 	m_filesView = new SchemaFileView(db, parentFileName);
 	m_filesView->filesModel().setFilter("." + fileExt);
 
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addWidget(m_filesView);
+	m_searchEdit = new QLineEdit(this);
+	m_searchEdit->setPlaceholderText(tr("Search Text"));
+	m_searchEdit->setMinimumWidth(400);
 
-	setLayout(pMainLayout);
+	m_searchButton = new QPushButton(tr("Search <F3>"));
+	m_searchButton->setShortcut(Qt::Key_F3);
+
+	QGridLayout* layout = new QGridLayout(this);
+	layout->addWidget(m_filesView, 0, 0, 1, 6);
+	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
+	layout->addWidget(m_searchButton, 1, 2, 1, 1);
+	layout->setColumnStretch(4, 100);
+
+	setLayout(layout);
+
+	m_searchAction = new QAction(tr("Edit search"), this);
+	m_searchAction->setShortcut(QKeySequence::Find);
+
+	this->addAction(m_searchAction);
 
 	// --
 	//
@@ -229,6 +240,8 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
 	connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
 	connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
+
+	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPage::ctrlF);
 
 	return;
 }
@@ -241,10 +254,6 @@ SchemaControlTabPage::~SchemaControlTabPage()
 VFrame30::Schema* SchemaControlTabPage::createSchema() const
 {
 	return m_createSchemaFunc();
-}
-
-void SchemaControlTabPage::CreateActions()
-{
 }
 
 void SchemaControlTabPage::addFile()
@@ -809,6 +818,15 @@ void SchemaControlTabPage::refreshFiles()
 {
 	assert(m_filesView);
 	m_filesView->refreshFiles();
+	return;
+}
+
+void SchemaControlTabPage::ctrlF()
+{
+	assert(m_searchEdit);
+	m_searchEdit->setFocus();
+	m_searchEdit->selectAll();
+
 	return;
 }
 

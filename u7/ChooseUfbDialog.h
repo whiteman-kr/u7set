@@ -15,19 +15,21 @@ class ChooseUfbDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ChooseUfbDialog(QWidget *parent = 0, std::vector<std::shared_ptr<VFrame30::UfbSchema>> *ufbs = nullptr);
+	explicit ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent = 0);
 	~ChooseUfbDialog();
 
 private:
 	void fillTree();
-	void itemSelected(QTreeWidgetItem *item, int column);
+	void itemSelected(QTreeWidgetItem* item, int column);
 
 public:
-	int selectedUfb = 0;
+	std::shared_ptr<VFrame30::UfbSchema> result();
 
 private:
 	Ui::ChooseUfbDialog *ui;
-	std::vector<std::shared_ptr<VFrame30::UfbSchema> > m_ufbs;
+	std::vector<std::shared_ptr<VFrame30::UfbSchema>> m_ufbs;
+
+	std::shared_ptr<VFrame30::UfbSchema> m_selectedUfb;
 };
 
 #endif // CHOOSEUFBDIALOG_H

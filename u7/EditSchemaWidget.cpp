@@ -4323,70 +4323,68 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
 
-	int pairsAmountWhichArePlacedInSameXCoord = 0;			// Pairs of points amount by X coordinate
-	int pairsAmountWhichArePlacedInSameYCoord = 0;			// Pairs of points amount by Y coordinate
+	int sameXPosCount = 0;			// Pairs of points amount by X coordinate
+	int sameYPosCount = 0;			// Pairs of points amount by Y coordinate
 
-	int currentPoint = 0;									// Index of current point to process
+	size_t currentPointIndex = 0;	// Index of current point to process
 
 	// In cycle we are processing current point with previous point
 	//
-
-	for (currentPoint = 1; currentPoint < (int)result.size(); currentPoint++)
+	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
 	{
-		if (std::abs(VFrame30::SchemaPoint(result.at(currentPoint)).X - VFrame30::SchemaPoint(result.at(currentPoint-1)).X) < 0.0000001)
+		VFrame30::SchemaPoint curPoint = result.at(currentPointIndex);
+		VFrame30::SchemaPoint prevPoint = result.at(currentPointIndex - 1);
+
+		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
 		{
-			pairsAmountWhichArePlacedInSameXCoord++;
+			sameXPosCount ++;
 		}
 		else
 		{
 			// Remove points only if we have more than one pair with same
 			// X coordinates
 			//
-
-			if (pairsAmountWhichArePlacedInSameXCoord > 1)
+			if (sameXPosCount > 1)
 			{
-				result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameXCoord), result.begin() + currentPoint - 1);
-				currentPoint--;
+				result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
+				currentPointIndex--;
 			}
 
-			pairsAmountWhichArePlacedInSameXCoord = 0;
+			sameXPosCount = 0;
 		}
 
-		if (std::abs(VFrame30::SchemaPoint(result.at(currentPoint)).Y - VFrame30::SchemaPoint(result.at(currentPoint-1)).Y) < 0.0000001)
+		if (std::abs(curPoint.Y - prevPoint.Y) < 0.0000001)
 		{
-			pairsAmountWhichArePlacedInSameYCoord++;
+			sameYPosCount++;
 		}
 		else
 		{
 			// Remove points only if we have more than one pair with same
 			// X coordinates
 			//
-
-			if (pairsAmountWhichArePlacedInSameYCoord > 1)
+			if (sameYPosCount > 1)
 			{
-				result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameYCoord), result.begin() + currentPoint - 1);
-				currentPoint--;
+				result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
+				currentPointIndex--;
 			}
 
-			pairsAmountWhichArePlacedInSameYCoord = 0;
+			sameYPosCount = 0;
 		}
 	}
 
 	// If some pairs with same coordinate values are placed at the end of
 	// the line, we must remove them!
 	//
-
-	if (pairsAmountWhichArePlacedInSameXCoord > 1 ||
-	        pairsAmountWhichArePlacedInSameYCoord > 1)
+	if (sameXPosCount > 1 || sameYPosCount > 1)
 	{
-		if (pairsAmountWhichArePlacedInSameYCoord > 1)
+		if (sameYPosCount > 1)
 		{
-			result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameYCoord), result.begin() + currentPoint - 1);
+			result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
 		}
 
-		if (pairsAmountWhichArePlacedInSameXCoord > 1)
+		if (sameXPosCount > 1)
 		{
-			result.erase(result.begin() + (currentPoint - pairsAmountWhichArePlacedInSameXCoord), result.begin() + currentPoint - 1);
+			result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
 		}
 	}
 
@@ -5611,8 +5609,7 @@ void EditSchemaWidget::addUfbElement()
 
 	// Choose User Functional Block
 	//
-
-	ChooseUfbDialog *dialog = new ChooseUfbDialog(0, &ufbs);
+	ChooseUfbDialog dialog(ufbs, this);
 
 	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
 
@@ -5622,16 +5619,12 @@ void EditSchemaWidget::addUfbElement()
 		return;
 	}*/
 
-	if (dialog->exec() == QDialog::Accepted)
+	if (dialog.exec() == QDialog::Accepted)
 	{
-		int index = dialog->selectedUfb;
+		std::shared_ptr<VFrame30::UfbSchema> ufb = dialog.result();
+		assert(ufb);
 
-		assert (index >= 0);
-		assert (index < (int)ufbs.size());
-
-		std::shared_ptr<VFrame30::UfbSchema> ufb = ufbs[index];
-
-		qDebug() << "You selected" << ufb.get()->caption();
+		qDebug() << "UserFunctionalBlock selected " << ufb->caption();
 
 		//QString errorMsg;
 
