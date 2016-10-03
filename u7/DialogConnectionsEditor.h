@@ -85,6 +85,8 @@ private slots:
 
 	void on_m_maskType_currentIndexChanged(int index);
 
+	void on_m_Export_clicked();
+
 private:
     Ui::DialogConnectionsEditor *ui;
 

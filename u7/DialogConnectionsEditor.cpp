@@ -3,6 +3,7 @@
 #include "../lib/PropertyEditorDialog.h"
 #include "Settings.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 //
 //
@@ -798,4 +799,95 @@ void DialogConnectionsEditor::on_m_maskType_currentIndexChanged(int index)
 {
 	theSettings.m_connectionEditorMaskType = index;
 	fillConnectionsList();
+}
+
+void DialogConnectionsEditor::on_m_Export_clicked()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
+													"./",
+													tr("Text files (*.txt);; All files (*.*)"));
+
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+
+	if (file.open(QFile::WriteOnly) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Failed to create file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream textStream(&file);
+
+	textStream << tr("Radiy Platform Configuration Tool\r\n");
+	textStream << qApp->applicationName() <<tr(" v") + qApp->applicationVersion()<<"\r\n";
+
+	textStream << "\r\n";
+
+	textStream << tr("Project Name:\t") << db()->currentProject().projectName()<<"\r\n";
+	textStream << tr("User Name:\t") << db()->currentUser().username()<<"\r\n";
+
+	textStream << "\r\n";
+
+	int count = ui->m_list->topLevelItemCount();
+
+	textStream << tr("Connections count: ") << count << "\r\n\r\n";
+
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+		if (connection == nullptr)
+		{
+			assert(connection);
+			return;
+		}
+
+		textStream << tr("------------ Connection ") << connection->index() << tr(" ------------\r\n\r\n");
+		textStream << tr("ConnectionID: ") << connection->connectionID()<<"\r\n\r\n";
+		textStream << tr("Port1 EquipmentID: ") << connection->port1EquipmentID()<<"\r\n";
+		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID()<<"\r\n";
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+		{
+			textStream << tr("Port mode: Optical")<<"\r\n";
+		}
+
+		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		{
+			textStream << tr("Port mode: Serial")<<"\r\n";
+
+			textStream << tr("Serial mode enabled: ") << (connection->enableSerial() == true ? tr("Yes") : tr("No")) <<"\r\n";
+
+			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
+
+		}
+
+		if (connection->manualSettings() == true)
+		{
+			textStream << tr("\r\nManual settings:\r\n");
+			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity()<<"\r\n";
+
+			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress()<<"\r\n";
+			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity()<<"\r\n";
+			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity()<<"\r\n";
+		}
+
+		textStream<<"\r\n";
+	}
+
+	textStream.flush();
+
+	file.close();
 }
