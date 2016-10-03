@@ -11,7 +11,7 @@
 class DialogConnectionsPropertyEditor : public PropertyEditorDialog
 {
 public:
-    DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections);
+	DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections, bool readOnly);
     ~DialogConnectionsPropertyEditor();
 
 private:
@@ -46,6 +46,8 @@ private:
     bool saveChanges();
 	void updateButtons();
 	bool continueWithDuplicateCaptions();
+
+	void setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);

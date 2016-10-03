@@ -4069,7 +4069,7 @@ void EquipmentTabPage::setProperties()
 	}
 
 	m_propertyEditor->setExpertMode(isPresetMode() || theSettings.isExpertMode());
-	m_propertyEditor->setEditingEnabled(checkedOutList.isEmpty() == false);
+	m_propertyEditor->setReadOnly(checkedOutList.isEmpty() == true);
 
 	// Set objects to the PropertyEditor
 	//

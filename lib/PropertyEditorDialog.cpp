@@ -5,8 +5,8 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 
-PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget* parent)
-    :QDialog(parent)
+PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget* parent, bool readOnly)
+	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
     m_object = object;
 
@@ -16,6 +16,8 @@ PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> objec
     connect(buttonBox, &QDialogButtonBox::rejected, this, &PropertyEditorDialog::reject);
 
     pe = new ExtWidgets::PropertyEditor(this);
+
+	pe->setReadOnly(readOnly);
 
     QList<std::shared_ptr<PropertyObject>> objList;
     objList.push_back(object);
@@ -58,7 +60,13 @@ bool PropertyEditorDialog::onPropertiesChanged(std::shared_ptr<PropertyObject> o
 
 void PropertyEditorDialog::onOk()
 {
-    if (onPropertiesChanged(m_object) == true)
+	if (pe->readOnly() == true)
+	{
+		accept();
+		return;
+	}
+
+	if (onPropertiesChanged(m_object) == true)
     {
         accept();
     }

@@ -748,6 +748,8 @@ void DialogPresetEditor::on_m_applyMask_clicked()
 
 void DialogPresetEditor::on_m_signalsTable_doubleClicked(const QModelIndex &index)
 {
+	Q_UNUSED(index);
+
 	int presetsCount = 0;
 	int signalsCount = 0;
 
