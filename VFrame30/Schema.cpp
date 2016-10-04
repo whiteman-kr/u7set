@@ -935,8 +935,6 @@ namespace VFrame30
 		if (versionInt == -1 ||
 			version.type() != QJsonValue::Double)
 		{
-			assert(versionInt != -1);
-			assert(version.type() == QJsonValue::Double);
 			return false;
 		}
 
