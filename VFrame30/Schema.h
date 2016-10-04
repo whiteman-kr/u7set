@@ -155,13 +155,16 @@ namespace VFrame30
 		bool parseDetails(const QString& details);
 
 	public:
-		// If add new members, add it to move construnctor;
+		// WARNING !!!! If add any new members, add them to the move construnctor;
 		//
 		int m_version = 0;
 		QString m_schemaId;
+		QString m_caption;
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QUuid> m_guids;
+		// WARNING !!!! If add any new members, add them to the move construnctor;
+		//
 	};
 
 

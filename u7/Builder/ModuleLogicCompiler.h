@@ -355,7 +355,7 @@ namespace Builder
 		bool isInternal() const { return m_signal->isInternal(); }
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
-		bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const { return m_signal->isCompatibleDataFormat(afbDataFormat); }
+		bool isCompatibleDataFormat(E::DataFormat afbDataFormat) const { return m_signal->isCompatibleDataFormat(afbDataFormat); }
 
 		const Signal& constSignal() { return *m_signal; }
 

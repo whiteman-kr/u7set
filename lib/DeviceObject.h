@@ -54,6 +54,48 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
+	// Property names
+	//
+	class PropertyNames
+	{
+	public:
+		PropertyNames() = delete;
+
+	public:
+		static const QString fileId;
+		static const QString uuid;
+		static const QString equipmentIdTemplate;
+		static const QString equipmentId;
+		static const QString caption;
+		static const QString childRestriction;
+		static const QString place;
+		static const QString specificProperties;
+		static const QString preset;
+		static const QString presetRoot;
+		static const QString presetName;
+		static const QString presetObjectUuid;
+
+		static const QString type;
+		static const QString function;
+		static const QString byteOrder;
+		static const QString format;
+		static const QString memoryArea;
+		static const QString size;
+
+		static const QString validityOffset;
+		static const QString validityBit;
+		static const QString valueOffset;
+		static const QString valueBit;
+
+		static const QString appSignalLowAdc;
+		static const QString appSignalHighAdc;
+		static const QString appSignalLowEngUnits;
+		static const QString appSignalHighEngUnits;
+		static const QString appSignalDataFormat;
+
+		static const QString categoryAppSignal;
+	};
+
 	// Forward declarations
 	//
 	class DeviceSignal;
@@ -174,6 +216,8 @@ namespace Hardware
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
+
+		void setExpertToProperty(const QString& property, bool expert);
 
 		// Children care
 		//
@@ -501,7 +545,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-
 	public:
 		explicit DeviceSignal(bool preset = false);
 		virtual ~DeviceSignal();
@@ -561,6 +604,21 @@ namespace Hardware
 		bool isAnalogSignal() const;
 		bool isDiscreteSignal() const;
 
+		int appSignalLowAdc() const;
+		void setAppSignalLowAdc(int value);
+
+		int appSignalHighAdc() const;
+		void setAppSignalHighAdc(int value);
+
+		double appSignalLowEngUnits() const;
+		void setAppSignalLowEngUnits(double value);
+
+		double appSignalHighEngUnits() const;
+		void setAppSignalHighEngUnits(double value);
+
+		E::AppSignalDataFormat appSignalDataFormat() const;
+		void setAppSignalDataFormat(E::AppSignalDataFormat value);
+
 		// Data
 		//
 	private:
@@ -580,6 +638,13 @@ namespace Hardware
 		int m_valueOffset = 0;
 		int m_valueBit = 0;
 
+		// Signals for creating Analog AppSignals
+		//
+		int m_appSignalLowAdc = 0;
+		int m_appSignalHighAdc = 65535;
+		double m_appSignalLowEngUnits = 0.0;
+		double m_appSignalHighEngUnits = 100.0;
+		E::AppSignalDataFormat m_appSignalDataFormat = E::AppSignalDataFormat::Float32;
 	};
 
 	//
@@ -691,6 +756,7 @@ namespace Hardware
 		std::shared_ptr<DeviceObject> m_root;
 		QHash<QString, std::shared_ptr<DeviceObject>> m_deviceTable;
 	};
+
 
 	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 

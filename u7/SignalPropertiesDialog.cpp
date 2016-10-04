@@ -147,10 +147,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 		if (signalProperties->signal().isDiscrete())
 		{
-			if (signalProperties->signal().dataFormat() != E::UnsignedInt)
+			if (signalProperties->signal().dataFormat() != E::DataFormat::UnsignedInt)
 			{
 				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
-				signalProperties->signal().setDataFormat(E::UnsignedInt);
+				signalProperties->signal().setDataFormat(E::DataFormat::UnsignedInt);
 			}
 			if (signalProperties->signal().dataSize() != 1)
 			{
@@ -254,12 +254,12 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
 			return;
 		}
-		if (signal.isDiscrete() && signal.dataFormat() != E::UnsignedInt)
+		if (signal.isDiscrete() && signal.dataFormat() != E::DataFormat::UnsignedInt)
 		{
 			QMessageBox::critical(this, "Could not save signal", "Error: Discrete signal has not UnsignedInt DataFormat");
 			return;
 		}
-		if (signal.isAnalog() && signal.dataFormat() == E::UnsignedInt)
+		if (signal.isAnalog() && signal.dataFormat() == E::DataFormat::UnsignedInt)
 		{
 			QMessageBox::critical(this, "Could not save signal", "Error: Analog signal has UnsignedInt DataFormat");
 			return;
@@ -315,14 +315,14 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 		Signal& signal = signalProperites->signal();
 
-		if (signal.isDiscrete() && signal.dataFormat() != E::UnsignedInt)
+		if (signal.isDiscrete() && signal.dataFormat() != E::DataFormat::UnsignedInt)
 		{
-			signal.setDataFormat(E::UnsignedInt);
+			signal.setDataFormat(E::DataFormat::UnsignedInt);
 		}
 
-		if (signal.isAnalog() && signal.dataFormat() == E::UnsignedInt)
+		if (signal.isAnalog() && signal.dataFormat() == E::DataFormat::UnsignedInt)
 		{
-			signal.setDataFormat(E::SignedInt);
+			signal.setDataFormat(E::DataFormat::SignedInt);
 		}
 	}
 }

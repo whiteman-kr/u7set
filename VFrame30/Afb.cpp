@@ -132,8 +132,8 @@ namespace Afb
 	//							AfbSignal
 	//
 	AfbSignal::AfbSignal(void):
-		m_type(AfbSignalType::Analog),
-		m_dataFormat(AfbDataFormat::UnsignedInt),
+		m_type(E::SignalType::Analog),
+		m_dataFormat(E::DataFormat::UnsignedInt),
 		m_operandIndex(0),
 		m_size(0)
 	{
@@ -204,17 +204,17 @@ namespace Afb
 
 		switch (dataFormat())
 		{
-		case AfbDataFormat::UnsignedInt:
+		case E::DataFormat::UnsignedInt:
 			{
 				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
 				break;
 			}
-		case AfbDataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
 				xmlWriter->writeAttribute("DataFormat", "SignedInt");
 				break;
 			}
-		case AfbDataFormat::Float:
+		case E::DataFormat::Float:
 			{
 				xmlWriter->writeAttribute("DataFormat", "Float");
 				break;
@@ -261,12 +261,12 @@ namespace Afb
 		{
 			if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
 			{
-				setType(AfbSignalType::Analog);
+				setType(E::SignalType::Analog);
 			}
 			else
 				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
 				{
-					setType(AfbSignalType::Discrete);
+					setType(E::SignalType::Discrete);
 				}
 				else
 				{
@@ -279,17 +279,17 @@ namespace Afb
 		{
 			if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
 			{
-				setDataFormat(AfbDataFormat::UnsignedInt);
+				setDataFormat(E::DataFormat::UnsignedInt);
 			}
 			else
 				if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
 				{
-					setDataFormat(AfbDataFormat::SignedInt);
+					setDataFormat(E::DataFormat::SignedInt);
 				}
 				else
 					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
 					{
-						setDataFormat(AfbDataFormat::Float);
+						setDataFormat(E::DataFormat::Float);
 					}
 					else
 					{
@@ -343,7 +343,7 @@ namespace Afb
 
 	// Type
 	//
-	AfbSignalType AfbSignal::type() const
+	E::SignalType AfbSignal::type() const
 	{
 		return m_type;
 	}
@@ -351,17 +351,17 @@ namespace Afb
 	{
 		return static_cast<int>(m_type);
 	}
-	void AfbSignal::setType(AfbSignalType type)
+	void AfbSignal::setType(E::SignalType type)
 	{
 		m_type = type;
 	}
 
-	AfbDataFormat AfbSignal::dataFormat() const
+	E::DataFormat AfbSignal::dataFormat() const
 	{
 		return m_dataFormat;
 	}
 
-	void AfbSignal::setDataFormat(AfbDataFormat dataFormat)
+	void AfbSignal::setDataFormat(E::DataFormat dataFormat)
 	{
 		m_dataFormat = dataFormat;
 	}
@@ -388,12 +388,12 @@ namespace Afb
 
 	bool AfbSignal::isAnalog() const
 	{
-		return m_type == AfbSignalType::Analog;
+		return m_type == E::SignalType::Analog;
 	}
 
 	bool AfbSignal::isDiscrete() const
 	{
-		return m_type == AfbSignalType::Discrete;
+		return m_type == E::SignalType::Discrete;
 	}
 
 	//
@@ -404,8 +404,8 @@ namespace Afb
 
 	AfbParam::AfbParam(void):
 		m_visible(true),
-		m_type(AfbSignalType::Analog),
-		m_dataFormat(AfbDataFormat::UnsignedInt),
+		m_type(E::SignalType::Analog),
+		m_dataFormat(E::DataFormat::UnsignedInt),
 		m_instantiator(false),
 		m_user(false),
 		m_operandIndex(0),
@@ -422,7 +422,7 @@ namespace Afb
 	{
 	}
 
-	void AfbParam::update(const AfbSignalType& type, const AfbDataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
+	void AfbParam::update(const E::SignalType& type, const E::DataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
 	{
 
 		m_type = type;
@@ -516,12 +516,12 @@ namespace Afb
 		{
 			if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
 			{
-				setType(AfbSignalType::Analog);
+				setType(E::SignalType::Analog);
 			}
 			else
 				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
 				{
-					setType(AfbSignalType::Discrete);
+					setType(E::SignalType::Discrete);
 				}
 				else
 				{
@@ -534,17 +534,17 @@ namespace Afb
 		{
 			if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
 			{
-				setDataFormat(AfbDataFormat::UnsignedInt);
+				setDataFormat(E::DataFormat::UnsignedInt);
 			}
 			else
 				if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
 				{
-					setDataFormat(AfbDataFormat::SignedInt);
+					setDataFormat(E::DataFormat::SignedInt);
 				}
 				else
 					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
 					{
-						setDataFormat(AfbDataFormat::Float);
+						setDataFormat(E::DataFormat::Float);
 					}
 					else
 					{
@@ -607,13 +607,13 @@ namespace Afb
 				{
 					switch (dataFormat())
 					{
-						case AfbDataFormat::UnsignedInt:
-						case AfbDataFormat::SignedInt:
+						case E::DataFormat::UnsignedInt:
+						case E::DataFormat::SignedInt:
 						{
 							val = str.toInt();
 							break;
 						}
-						case AfbDataFormat::Float:
+						case E::DataFormat::Float:
 						{
 							val = str.toDouble();
 							break;
@@ -677,17 +677,17 @@ namespace Afb
 
 		switch (dataFormat())
 		{
-		case AfbDataFormat::UnsignedInt:
+		case E::DataFormat::UnsignedInt:
 			{
 				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
 				break;
 			}
-		case AfbDataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
 				xmlWriter->writeAttribute("DataFormat", "SignedInt");
 				break;
 			}
-		case AfbDataFormat::Float:
+		case E::DataFormat::Float:
 			{
 				xmlWriter->writeAttribute("DataFormat", "Float");
 				break;
@@ -757,33 +757,33 @@ namespace Afb
 
 	// Type
 	//
-	AfbSignalType AfbParam::type() const
+	E::SignalType AfbParam::type() const
 	{
 		return m_type;
 	}
-	void AfbParam::setType(AfbSignalType type)
+	void AfbParam::setType(E::SignalType type)
 	{
 		m_type = type;
 	}
 
-	AfbDataFormat AfbParam::dataFormat() const
+	E::DataFormat AfbParam::dataFormat() const
 	{
 		return m_dataFormat;
 	}
 
-	void AfbParam::setDataFormat(AfbDataFormat dataFormat)
+	void AfbParam::setDataFormat(E::DataFormat dataFormat)
 	{
 		m_dataFormat = dataFormat;
 	}
 
 	bool AfbParam::isAnalog() const
 	{
-		return m_type == AfbSignalType::Analog;
+		return m_type == E::SignalType::Analog;
 	}
 
 	bool AfbParam::isDiscrete() const
 	{
-		return m_type == AfbSignalType::Discrete;
+		return m_type == E::SignalType::Discrete;
 	}
 
 	// Value

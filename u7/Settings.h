@@ -60,6 +60,9 @@ public:
 	bool hideWarnings() const;
 	void setHideWarnings(bool value);
 
+	const QStringList& buildSearchCompleter() const;
+	QStringList& buildSearchCompleter();
+
 	// Data
 	//
 public:
@@ -156,6 +159,7 @@ private:
 	bool m_debugMode = false;
 	bool m_infoMode = false;
 	bool m_hideWarnings = false;
+	QStringList m_buildSerachCompleter;
 
 };
 

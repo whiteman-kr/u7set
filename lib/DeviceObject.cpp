@@ -86,59 +86,84 @@ namespace Hardware
 
 	//
 	//
+	// PropertyNames
+	//
+	//
+	const QString PropertyNames::fileId = "FileID";
+	const QString PropertyNames::uuid = "Uuid";
+	const QString PropertyNames::equipmentIdTemplate = "EquipmentIDTemplate";
+	const QString PropertyNames::equipmentId = "EquipmentID";
+	const QString PropertyNames::caption = "Caption";
+	const QString PropertyNames::childRestriction = "ChildRestriction";
+	const QString PropertyNames::place = "Place";
+	const QString PropertyNames::specificProperties = "SpecificProperties";
+	const QString PropertyNames::preset = "Preset";
+	const QString PropertyNames::presetRoot = "PresetRoot";
+	const QString PropertyNames::presetName = "PresetName";
+	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
+
+	const QString PropertyNames::type = "Type";
+	const QString PropertyNames::function = "Function";
+	const QString PropertyNames::byteOrder = "ByteOrder";
+	const QString PropertyNames::format = "Format";
+	const QString PropertyNames::memoryArea = "MemoryArea";
+	const QString PropertyNames::size = "Size";
+
+	const QString PropertyNames::validityOffset = "ValidityOffset";
+	const QString PropertyNames::validityBit = "ValidityBit";
+	const QString PropertyNames::valueOffset = "ValueOffset";
+	const QString PropertyNames::valueBit = "ValueBit";
+
+	const QString PropertyNames::appSignalLowAdc = "LowAdc";
+	const QString PropertyNames::appSignalHighAdc = "HighAdc";
+	const QString PropertyNames::appSignalLowEngUnits = "LowEngUnits";
+	const QString PropertyNames::appSignalHighEngUnits = "HighEngUnits";
+	const QString PropertyNames::appSignalDataFormat = "DataFormat";
+
+	const QString PropertyNames::categoryAppSignal = "AppSignal";
+
+	//
+	//
 	// DeviceObject
 	//
 	//
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
-static const QString fileIdCaption("FileID");								// Perfomance optimization
-static const QString uuidCaption("Uuid");
-static const QString equipmentIdTemplateCaption("EquipmentIDTemplate");
-static const QString equipmentIdCaption("EquipmentID");
-static const QString captionCaption("Caption");
-static const QString childRestrictionCaption("ChildRestriction");
-static const QString placeCaption("Place");
-static const QString specPropCaption("SpecificProperties");
-static const QString presetCaption("Preset");
-static const QString presetRootCaption("PresetRoot");
-static const QString presetNameCaption("PresetName");
-static const QString presetObjectUuidCaption("PresetObjectUuid");
-
-		auto fileIdProp = ADD_PROPERTY_GETTER(int, fileIdCaption, true, DeviceObject::fileId);
+		auto fileIdProp = ADD_PROPERTY_GETTER(int, PropertyNames::fileId, true, DeviceObject::fileId);
 		fileIdProp->setExpert(true);
 
-		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, uuidCaption, true, DeviceObject::uuid);
+		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::uuid, true, DeviceObject::uuid);
 		uuidProp->setExpert(true);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, equipmentIdTemplateCaption, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIdTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
 
-		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, equipmentIdCaption, true, DeviceObject::equipmentId);
+		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, PropertyNames::equipmentId, true, DeviceObject::equipmentId);
 		equipmentIdProp->setReadOnly(true);
 
-		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, captionCaption, true, DeviceObject::caption, DeviceObject::setCaption);
+		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::caption, true, DeviceObject::caption, DeviceObject::setCaption);
 
-		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, childRestrictionCaption, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::childRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		childRestrProp->setExpert(true);
 
-		ADD_PROPERTY_GETTER_SETTER(int, placeCaption, true, DeviceObject::place, DeviceObject::setPlace);
+		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
-		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, specPropCaption, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
+		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
 		specificProp->setExpert(true);
 
-		auto presetProp = ADD_PROPERTY_GETTER(bool, presetCaption, true, DeviceObject::preset);
+		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::preset);
 		presetProp->setExpert(true);
 
-		auto presetRootProp = ADD_PROPERTY_GETTER(bool, presetRootCaption, true, DeviceObject::presetRoot);
+		auto presetRootProp = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
 		presetRootProp->setExpert(true);
 
 		if (preset == true)
 		{
-			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, presetNameCaption, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 			presetNameProp->setExpert(true);
 		}
 
-		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, presetObjectUuidCaption, true, DeviceObject::presetObjectUuid);
+		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
 		presetObjectUuidProp->setExpert(true);
 
 		captionProp->setUpdateFromPreset(true);
@@ -330,8 +355,7 @@ static const QString presetObjectUuidCaption("PresetObjectUuid");
 
 			if (m_preset == true && propertyExists("PresetName") == false)
 			{
-static const QString presetNameCaption("PresetName");	// Optimization
-				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, presetNameCaption, true, DeviceObject::presetName, DeviceObject::setPresetName);
+				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 				presetNameProp->setExpert(true);
 			}
 
@@ -1444,6 +1468,22 @@ static const QString presetNameCaption("PresetName");	// Optimization
 	{
 		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[static_cast<int>(device)]);
 		return result;
+	}
+
+	void DeviceObject::setExpertToProperty(const QString& property, bool expert)
+	{
+		std::shared_ptr<Property> prop = propertyByCaption(property);
+
+		if (prop != nullptr)
+		{
+			prop->setExpert(expert);
+		}
+		else
+		{
+			assert(prop);
+		}
+
+		return;
 	}
 
 	int DeviceObject::childrenCount() const
@@ -2578,29 +2618,32 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-static const QString typeCaption("Type");				// Optimization
-static const QString functionCaption("Function");
-static const QString byteOrderCaption("ByteOrder");
-static const QString formatCaption("Format");
-static const QString memoryAreaCaption("MemoryArea");
-static const QString sizeCaption("Size");
-static const QString validityOffsetCaption("ValidityOffset");
-static const QString validityBitCaption("ValidityBit");
-static const QString valueOffsetCaption("ValueOffset");
-static const QString valueBitCaption("ValueBit");
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
+		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
+		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, PropertyNames::byteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, PropertyNames::format, true, DeviceSignal::format, DeviceSignal::setFormat)
+		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, PropertyNames::memoryArea, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
 
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, DeviceSignal::type, DeviceSignal::setType)
-		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, functionCaption, true, DeviceSignal::function, DeviceSignal::setFunction)
-		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, formatCaption, true, DeviceSignal::format, DeviceSignal::setFormat)
-		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, memoryAreaCaption, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
+		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::size, true, DeviceSignal::size, DeviceSignal::setSize)
+		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::validityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
+		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::validityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
 
-		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, sizeCaption, true, DeviceSignal::size, DeviceSignal::setSize)
-		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, validityOffsetCaption, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
-		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, validityBitCaption, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
 
-		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, valueOffsetCaption, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, valueBitCaption, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+		auto appSignalLowAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalLowAdc, true, DeviceSignal::appSignalLowAdc, DeviceSignal::setAppSignalLowAdc)
+		auto appSignalHighAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalHighAdc, true, DeviceSignal::appSignalHighAdc, DeviceSignal::setAppSignalHighAdc)
+
+		auto appSignalLowEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalLowEngUnits, true, DeviceSignal::appSignalLowEngUnits, DeviceSignal::setAppSignalLowEngUnits)
+		auto appSignalHighEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalHighEngUnits, true, DeviceSignal::appSignalHighEngUnits, DeviceSignal::setAppSignalHighEngUnits)
+
+		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AppSignalDataFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
+
+		appSignalLowAdcProp->setCategory(PropertyNames::categoryAppSignal);
+		appSignalHighAdcProp->setCategory(PropertyNames::categoryAppSignal);
+		appSignalLowEngUnitsProp->setCategory(PropertyNames::categoryAppSignal);
+		appSignalHighEngUnitsProp->setCategory(PropertyNames::categoryAppSignal);
+		appSignalDataFormatProp->setCategory(PropertyNames::categoryAppSignal);
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(preset);
@@ -2631,6 +2674,21 @@ static const QString valueBitCaption("ValueBit");
 
 		valueBitProp->setUpdateFromPreset(true);
 		valueBitProp->setExpert(preset);
+
+		appSignalLowAdcProp->setUpdateFromPreset(true);
+		appSignalLowAdcProp->setExpert(preset);
+
+		appSignalHighAdcProp->setUpdateFromPreset(true);
+		appSignalHighAdcProp->setExpert(preset);
+
+		appSignalLowEngUnitsProp->setUpdateFromPreset(true);
+		appSignalLowEngUnitsProp->setExpert(preset);
+
+		appSignalHighEngUnitsProp->setUpdateFromPreset(true);
+		appSignalHighEngUnitsProp->setExpert(preset);
+
+		appSignalDataFormatProp->setUpdateFromPreset(true);
+		appSignalDataFormatProp->setExpert(preset);
 	}
 
 	DeviceSignal::~DeviceSignal()
@@ -2665,6 +2723,14 @@ static const QString valueBitCaption("ValueBit");
 
 		signalMessage->set_valueoffset(static_cast<int>(m_valueOffset));
 		signalMessage->set_valuebit(static_cast<int>(m_valueBit));
+
+		signalMessage->set_appsignallowadc(m_appSignalLowAdc);
+		signalMessage->set_appsignalhighadc(m_appSignalHighAdc);
+
+		signalMessage->set_appsignallowengunits(m_appSignalLowEngUnits);
+		signalMessage->set_appsignalhighengunits(m_appSignalHighEngUnits);
+
+		signalMessage->set_appsignaldataformat(static_cast<int>(m_appSignalDataFormat));
 
 		return true;
 	}
@@ -2748,61 +2814,31 @@ static const QString valueBitCaption("ValueBit");
 		m_valueOffset = signalMessage.valueoffset();
 		m_valueBit = signalMessage.valuebit();
 
+		m_appSignalLowAdc = signalMessage.appsignallowadc();
+		m_appSignalHighAdc = signalMessage.appsignalhighadc();
+
+		m_appSignalLowEngUnits = signalMessage.appsignallowengunits();
+		m_appSignalHighEngUnits =  signalMessage.appsignalhighengunits();
+
+		m_appSignalDataFormat = static_cast<E::AppSignalDataFormat>(signalMessage.appsignaldataformat());
+
 		if (m_preset == true)
 		{
-			auto prop = propertyByCaption("Type");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("Function");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("ByteOrder");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("Format");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("Size");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("ValidityOffset");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("ValidityBit");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("ValueOffset");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
-
-			prop = propertyByCaption("ValueBit");
-			if (prop != nullptr)
-			{
-				prop->setExpert(true);
-			}
+			setExpertToProperty(PropertyNames::type, true);
+			setExpertToProperty(PropertyNames::function, true);
+			setExpertToProperty(PropertyNames::byteOrder, true);
+			setExpertToProperty(PropertyNames::format, true);
+			setExpertToProperty(PropertyNames::memoryArea, true);
+			setExpertToProperty(PropertyNames::size, true);
+			setExpertToProperty(PropertyNames::validityOffset, true);
+			setExpertToProperty(PropertyNames::validityBit, true);
+			setExpertToProperty(PropertyNames::valueOffset, true);
+			setExpertToProperty(PropertyNames::valueBit, true);
+			setExpertToProperty(PropertyNames::appSignalLowAdc, true);
+			setExpertToProperty(PropertyNames::appSignalHighAdc, true);
+			setExpertToProperty(PropertyNames::appSignalLowEngUnits, true);
+			setExpertToProperty(PropertyNames::appSignalHighEngUnits, true);
+			setExpertToProperty(PropertyNames::appSignalDataFormat, true);
 		}
 
 		return true;
@@ -3002,6 +3038,55 @@ static const QString valueBitCaption("ValueBit");
 		return	m_type == E::SignalType::Discrete;
 	}
 
+	int DeviceSignal::appSignalLowAdc() const
+	{
+		return m_appSignalLowAdc;
+	}
+
+	void DeviceSignal::setAppSignalLowAdc(int value)
+	{
+		m_appSignalLowAdc = value;
+	}
+
+	int DeviceSignal::appSignalHighAdc() const
+	{
+		return m_appSignalHighAdc;
+	}
+
+	void DeviceSignal::setAppSignalHighAdc(int value)
+	{
+		m_appSignalHighAdc = value;
+	}
+
+	double DeviceSignal::appSignalLowEngUnits() const
+	{
+		return m_appSignalLowEngUnits;
+	}
+
+	void DeviceSignal::setAppSignalLowEngUnits(double value)
+	{
+		m_appSignalLowEngUnits = value;
+	}
+
+	double DeviceSignal::appSignalHighEngUnits() const
+	{
+		return m_appSignalHighEngUnits;
+	}
+
+	void DeviceSignal::setAppSignalHighEngUnits(double value)
+	{
+		m_appSignalHighEngUnits = value;
+	}
+
+	E::AppSignalDataFormat DeviceSignal::appSignalDataFormat() const
+	{
+		return m_appSignalDataFormat;
+	}
+
+	void DeviceSignal::setAppSignalDataFormat(E::AppSignalDataFormat value)
+	{
+		m_appSignalDataFormat = value;
+	}
 
 	//
 	//

@@ -63,9 +63,6 @@ public:
 public:
 	VFrame30::Schema* createSchema() const;
 
-protected:
-	void CreateActions();
-
 signals:
 
 protected slots:
@@ -80,6 +77,10 @@ protected slots:
 
 	void refreshFiles();
 
+private slots:
+	void ctrlF();
+	void search();
+
 	// Properties
 	//
 public:
@@ -89,8 +90,13 @@ public:
 	//
 private:
 	std::function<VFrame30::Schema*()> m_createSchemaFunc;
-	SchemaFileView* m_filesView;
+	SchemaFileView* m_filesView = nullptr;
 	QString m_templateFileExtension;
+
+	QLineEdit* m_searchEdit = nullptr;
+	QPushButton* m_searchButton = nullptr;
+
+	QAction* m_searchAction = nullptr;
 };
 
 

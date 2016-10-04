@@ -207,19 +207,29 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 		m_templateFileExtension(templateFileExtension),
 		m_createSchemaFunc(createSchemaFunc)
 {
-	// Create actions
-	//
-	CreateActions();
-
 	// Create controls
 	//
 	m_filesView = new SchemaFileView(db, parentFileName);
 	m_filesView->filesModel().setFilter("." + fileExt);
 
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addWidget(m_filesView);
+	m_searchEdit = new QLineEdit(this);
+	m_searchEdit->setPlaceholderText(tr("Search Text"));
+	m_searchEdit->setMinimumWidth(400);
 
-	setLayout(pMainLayout);
+	m_searchButton = new QPushButton(tr("Search"));
+
+	QGridLayout* layout = new QGridLayout(this);
+	layout->addWidget(m_filesView, 0, 0, 1, 6);
+	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
+	layout->addWidget(m_searchButton, 1, 2, 1, 1);
+	layout->setColumnStretch(4, 100);
+
+	setLayout(layout);
+
+	m_searchAction = new QAction(tr("Edit search"), this);
+	m_searchAction->setShortcut(QKeySequence::Find);
+
+	this->addAction(m_searchAction);
 
 	// --
 	//
@@ -229,6 +239,10 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
 	connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
 	connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
+
+	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPage::ctrlF);
+	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
+	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
 
 	return;
 }
@@ -241,10 +255,6 @@ SchemaControlTabPage::~SchemaControlTabPage()
 VFrame30::Schema* SchemaControlTabPage::createSchema() const
 {
 	return m_createSchemaFunc();
-}
-
-void SchemaControlTabPage::CreateActions()
-{
 }
 
 void SchemaControlTabPage::addFile()
@@ -809,6 +819,121 @@ void SchemaControlTabPage::refreshFiles()
 {
 	assert(m_filesView);
 	m_filesView->refreshFiles();
+	return;
+}
+
+void SchemaControlTabPage::ctrlF()
+{
+	assert(m_searchEdit);
+	m_searchEdit->setFocus();
+	m_searchEdit->selectAll();
+
+	return;
+}
+
+void SchemaControlTabPage::search()
+{
+
+	// Search for text in schemas
+	//
+	assert(m_filesView);
+	assert(m_searchEdit);
+
+	QString searchText = m_searchEdit->text();
+
+	if (searchText.isEmpty() == true)
+	{
+		m_filesView->clearSelection();
+		return;
+	}
+
+	qDebug() << "Search for schema, text " << searchText;
+
+	// --
+	//
+	const std::vector<std::shared_ptr<DbFileInfo>>& files = m_filesView->files();
+
+	std::vector<std::shared_ptr<DbFileInfo>> foundFiles;
+	foundFiles.reserve(files.size());
+
+	for (std::shared_ptr<DbFileInfo> f : files)
+	{
+		if (f->fileName().contains(searchText, Qt::CaseInsensitive) == true)
+		{
+			foundFiles.push_back(f);
+			continue;
+		}
+
+		// Parse details
+		//
+		VFrame30::SchemaDetails details;
+		bool ok = details.parseDetails(f->details());
+
+		if (ok == true)
+		{
+			if (details.m_schemaId.contains(searchText, Qt::CaseInsensitive) == true)
+			{
+				foundFiles.push_back(f);
+				continue;
+			}
+
+			if (details.m_caption.contains(searchText, Qt::CaseInsensitive) == true)
+			{
+				foundFiles.push_back(f);
+				continue;
+			}
+
+			if (details.m_signals.find(searchText) != details.m_signals.end())
+			{
+				foundFiles.push_back(f);
+				continue;
+			}
+
+			if (details.m_labels.find(searchText) != details.m_labels.end())
+			{
+				foundFiles.push_back(f);
+				continue;
+			}
+
+			QUuid textAsUuid(searchText);
+
+			if (textAsUuid.isNull() == false &&
+				details.m_guids.find(textAsUuid) != details.m_guids.end())
+			{
+				foundFiles.push_back(f);
+				continue;
+			}
+		}
+	}
+
+	// Select found schemas
+	//
+	m_filesView->selectionModel()->clearSelection();
+
+	for (std::shared_ptr<DbFileInfo> f : foundFiles)
+	{
+		qDebug() << f->fileName();
+
+		int fileRow = m_filesView->filesModel().getFileRow(f->fileId());
+		assert(fileRow != -1);
+
+		if (fileRow == -1)
+		{
+			continue;
+		}
+
+		QModelIndex md = m_filesView->filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
+		assert(md.isValid() == true);
+
+		if (md.isValid() == true)
+		{
+			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		}
+	}
+
+	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
+	m_filesView->setFocus();
+
 	return;
 }
 

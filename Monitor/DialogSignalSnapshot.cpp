@@ -517,7 +517,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 				if (s.isAnalog() == true)
 				{
-					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(s.dataFormat()));
+					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(static_cast<int>(s.dataFormat())));
 				}
 
 				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));

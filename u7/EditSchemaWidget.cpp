@@ -8,6 +8,7 @@
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
 #include "ChooseAfbDialog.h"
+#include "ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "../VFrame30/UfbSchema.h"
@@ -20,7 +21,6 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "SignalsTabPage.h"
-
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -4323,24 +4323,70 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
 
-	// To do filter
+	int sameXPosCount = 0;			// Pairs of points amount by X coordinate
+	int sameYPosCount = 0;			// Pairs of points amount by Y coordinate
+
+	size_t currentPointIndex = 0;	// Index of current point to process
+
+	// In cycle we are processing current point with previous point
 	//
-//	void PosConnectionImpl::RemoveUnwantedPoints()
-//	{
-//		SchemaPoint firstPoint = points.front();
-//		SchemaPoint lastPoint = points.back();
+	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
+	{
+		VFrame30::SchemaPoint curPoint = result.at(currentPointIndex);
+		VFrame30::SchemaPoint prevPoint = result.at(currentPointIndex - 1);
 
-//		if (std::abs(firstPoint.X - lastPoint.X) < 0.000001 ||
-//			std::abs(firstPoint.Y - lastPoint.Y) < 0.000001)
-//		{
-//			while (points.size() != 1)
-//			{
-//				points.pop_back();
-//			}
+		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
+		{
+			sameXPosCount ++;
+		}
+		else
+		{
+			// Remove points only if we have more than one pair with same
+			// X coordinates
+			//
+			if (sameXPosCount > 1)
+			{
+				result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
+				currentPointIndex--;
+			}
 
-//			points.push_back(lastPoint);
-//		}
-//	}
+			sameXPosCount = 0;
+		}
+
+		if (std::abs(curPoint.Y - prevPoint.Y) < 0.0000001)
+		{
+			sameYPosCount++;
+		}
+		else
+		{
+			// Remove points only if we have more than one pair with same
+			// X coordinates
+			//
+			if (sameYPosCount > 1)
+			{
+				result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
+				currentPointIndex--;
+			}
+
+			sameYPosCount = 0;
+		}
+	}
+
+	// If some pairs with same coordinate values are placed at the end of
+	// the line, we must remove them!
+	//
+	if (sameXPosCount > 1 || sameYPosCount > 1)
+	{
+		if (sameYPosCount > 1)
+		{
+			result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
+		}
+
+		if (sameXPosCount > 1)
+		{
+			result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
+		}
+	}
 
 	return result;
 }
@@ -5506,6 +5552,7 @@ void EditSchemaWidget::addFblElement()
 
 void EditSchemaWidget::addUfbElement()
 {
+
 	// Get User Functional Block List
 	//
 	std::vector<DbFileInfo> fileList;
@@ -5562,14 +5609,34 @@ void EditSchemaWidget::addUfbElement()
 
 	// Choose User Functional Block
 	//
+	ChooseUfbDialog dialog(ufbs, this);
 
 	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
 
-	std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
+	/*std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
 	if (selectedUfb == nullptr)
 	{
 		return;
+	}*/
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		std::shared_ptr<VFrame30::UfbSchema> ufb = dialog.result();
+		assert(ufb);
+
+		qDebug() << "UserFunctionalBlock selected " << ufb->caption();
+
+		//QString errorMsg;
+
+		//addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(ufb.get()), &errorMsg));
+
+		//if (errorMsg.isEmpty() == false)
+		//{
+		//	QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		//}
 	}
+
+	return;
 
 	// Add Ufb
 	//

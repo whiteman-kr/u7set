@@ -401,6 +401,11 @@ void FileListModel::setFilter(const QString& value)
 	m_filter = value;
 }
 
+const std::vector<std::shared_ptr<DbFileInfo>>& FileListModel::files() const
+{
+	return m_files;
+}
+
 //
 //
 // FileView
@@ -1226,6 +1231,11 @@ void FileListView::filesViewSelectionChanged(const QItemSelection& /*selected*/,
 FileListModel& FileListView::filesModel()
 {
 	return m_filesModel;
+}
+
+const std::vector<std::shared_ptr<DbFileInfo>>& FileListView::files() const
+{
+	return m_filesModel.files();
 }
 
 const DbFileInfo& FileListView::parentFile() const

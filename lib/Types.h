@@ -81,14 +81,23 @@ public:
 	};
 	Q_ENUM(ByteOrder)
 
-
-	enum DataFormat
+	// DataFormat is used only for analog signals
+	// ATTENTION: Keep in sync with AppSignalDataFormat
+	//
+	enum class DataFormat
 	{
-		UnsignedInt,
-		SignedInt,
-		Float
+		UnsignedInt = 0,
+		SignedInt = 1,
+		Float = 2
 	};
 	Q_ENUM(DataFormat)
+
+	enum class AppSignalDataFormat
+	{
+		SignedInt32 = E::DataFormat::SignedInt,
+		Float32 = E::DataFormat::Float
+	};
+	Q_ENUM(AppSignalDataFormat)
 
 	enum class MemoryArea
 	{

@@ -138,11 +138,10 @@ void DialogAfblEditor::on_m_add_clicked()
 
 	// Add test signals
 	//
-
 	AfbSignal signal;
 	signal.setOpName("SignalName");
 	signal.setCaption("SignalCaption");
-	signal.setType(AfbSignalType::Analog);
+	signal.setType(E::SignalType::Analog);
 
 	std::vector<AfbSignal> afbSignals;
 	afbSignals.push_back(signal);
@@ -154,12 +153,11 @@ void DialogAfblEditor::on_m_add_clicked()
 
 	// Param 1
 	//
-
 	AfbParam param1;
 	param1.setOpName("ParamName");
 	param1.setCaption("Param1Caption");
-    param1.setType(AfbSignalType::Analog);
-    param1.setDataFormat(AfbDataFormat::UnsignedInt);
+	param1.setType(E::SignalType::Analog);
+	param1.setDataFormat(E::DataFormat::UnsignedInt);
 	param1.setValue(0);
 	param1.setDefaultValue(0);
 	param1.setLowLimit(0);
@@ -167,12 +165,11 @@ void DialogAfblEditor::on_m_add_clicked()
 
 	// Param 2
 	//
-
 	AfbParam param2;
 	param2.setOpName("ParamName");
 	param2.setCaption("Param2Caption");
-    param2.setType(AfbSignalType::Analog);
-    param2.setDataFormat(AfbDataFormat::Float);
+	param2.setType(E::SignalType::Analog);
+	param2.setDataFormat(E::DataFormat::Float);
     param2.setValue(1.5);
 	param2.setDefaultValue(1.5);
 	param2.setLowLimit(0.5);
@@ -180,11 +177,10 @@ void DialogAfblEditor::on_m_add_clicked()
 
 	// Param 3
 	//
-
 	AfbParam param3;
 	param3.setOpName("ParamName");
 	param3.setCaption("Param3Caption");
-    param3.setType(AfbSignalType::Discrete);
+	param3.setType(E::SignalType::Discrete);
     param3.setValue(false);
 	param3.setDefaultValue(true);
 	param3.setLowLimit(false);
@@ -196,7 +192,6 @@ void DialogAfblEditor::on_m_add_clicked()
 	afbParams.push_back(param3);
 
 	//
-
 	afb.setInputSignals(afbSignals);
 	afb.setOutputSignals(afbSignals);
 	afb.setParams(afbParams);
