@@ -321,7 +321,7 @@ namespace Builder
 
 	public:
 		AppSignal(Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
 
 		~AppSignal();
 
@@ -390,7 +390,7 @@ namespace Builder
 		~AppSignalMap();
 
 		bool insert(const AppItem* appItem);
-		bool insert(const AppFb* appFb, const LogicPin& outputPin);
+		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
 
 		AppSignal* getByStrID(const QString& strID);
 

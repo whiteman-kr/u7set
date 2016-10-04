@@ -2566,6 +2566,31 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5057
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Uncompatible data format of analog AFB Signal '%1.%2'.
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 AFB signal caption
+	///		%3 AFB Uuid
+	///
+	/// Description:
+	///		Data format of specified AFB Signal is not Float or Signed Int. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5057,
+				  QString(tr("Uncompatible data format of analog AFB signal '%1.%2'.")).
+				  arg(afbCaption).arg(afbSignal));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

@@ -3341,7 +3341,20 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setAppSignalID(q.value(12).toString());
 	s.setCustomAppSignalID(q.value(13).toString());
 	s.setCaption(q.value(14).toString());
-	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(q.value(15).toInt()));
+
+	int f = q.value(15).toInt();
+
+	if (f == TO_INT(E::DataFormat::UnsignedInt))
+	{
+		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
+		//
+		s.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+	}
+	else
+	{
+		s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
+	}
+
 	s.setDataSize(q.value(16).toInt());
 	s.setLowADC(q.value(17).toInt());
 	s.setHighADC(q.value(18).toInt());

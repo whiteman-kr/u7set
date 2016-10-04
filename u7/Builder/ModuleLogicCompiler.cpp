@@ -4942,7 +4942,7 @@ namespace Builder
 
 						if (appFb != nullptr)
 						{
-							result &= m_appSignals.insert(appFb, output);
+							result &= m_appSignals.insert(appFb, output, m_log);
 						}
 						else
 						{
@@ -6086,7 +6086,7 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat dataFormat, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -6221,51 +6221,45 @@ namespace Builder
 
 	// insert "shadow" signal bound to FB output pin
 	//
-	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin)
+	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log)
 	{
-		if (appFb == nullptr)
+		if (appFb == nullptr || log == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
-		E::SignalType signalType = E::SignalType::Discrete;
+		E::SignalType signalType = s.type();
 
-		switch(s.type())			// Afb::AfbSignalType
+		E::AnalogAppSignalFormat analogSignalFormat;
+		int dataSize = 1;
+
+		if (signalType == E::SignalType::Analog)
 		{
-		case E::SignalType::Analog:
-			signalType = E::SignalType::Analog;
-			break;
+			switch(s.dataFormat())		// Afb::AfbDataFormat
+			{
+			case E::DataFormat::Float:
+				analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+				dataSize = FLOAT32_SIZE;
+				break;
 
-		case E::SignalType::Discrete:
-			signalType = E::SignalType::Discrete;
-			break;
+			case E::DataFormat::SignedInt:
+				analogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
+				dataSize = SIGNED_INT32_SIZE;
+				break;
 
-		default:
-			assert(false);
-			return false;
-		}
+			case E::DataFormat::UnsignedInt:
+				// Uncompatible data format of analog AFB Signal '%1.%2'
+				//
+				log->errALC5057(appFb->afb().caption(), s.caption(), appFb->guid());
 
-		E::DataFormat dataFormat = E::DataFormat::SignedInt;
+				return false;
 
-		switch(s.dataFormat())		// Afb::AfbDataFormat
-		{
-		case E::DataFormat::Float:
-			dataFormat = E::DataFormat::Float;
-			break;
-
-		case E::DataFormat::UnsignedInt:
-			dataFormat = E::DataFormat::UnsignedInt;
-			break;
-
-		case E::DataFormat::SignedInt:
-			dataFormat = E::DataFormat::SignedInt;
-			break;
-
-		default:
-			assert(false);
-			return false;
+			default:
+				assert(false);
+				return false;
+			}
 		}
 
 		QUuid outPinGuid = outputPin.guid();
@@ -6284,7 +6278,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, signalType, dataFormat, s.size(), appFb, strID);
+			appSignal = new AppSignal(outPinGuid, signalType, analogSignalFormat, dataSize, appFb, strID);
 
 			// shadow signals always connected to output pin, therefore considered computed
 			//
