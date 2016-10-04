@@ -9,7 +9,8 @@ TuningObject::TuningObject()
 	  m_valid(false),
 	  m_underflow(false),
 	  m_overflow(false),
-	  m_analog(false)
+	  m_analog(false),
+	  m_appSignalHash(0)
 {
 
 
@@ -43,6 +44,7 @@ QString TuningObject::appSignalID() const
 void TuningObject::setAppSignalID(const QString& value)
 {
 	m_appSignalID = value;
+	m_appSignalHash = ::calcHash(value);
 }
 
 QString TuningObject::caption() const
@@ -145,3 +147,10 @@ void TuningObject::setOverflow(bool value)
 {
 	m_overflow = value;
 }
+
+Hash TuningObject::appSignalHash() const
+{
+	return m_appSignalHash;
+
+}
+

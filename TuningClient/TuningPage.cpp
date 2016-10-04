@@ -625,6 +625,15 @@ void TuningPage::fillObjectsList()
 	{
 		TuningObject o = theObjects.object(i);
 
+		// Root filter
+		//
+		if (theFilters.m_root->match(o) == false)
+		{
+			continue;
+		}
+
+		// Tree Filter
+		//
 		if (m_treeFilter != nullptr)
 		{
 			bool result = true;
@@ -646,6 +655,9 @@ void TuningPage::fillObjectsList()
 			}
 		}
 
+		// Tab Filter
+		//
+
 		if (m_tabFilter != nullptr)
 		{
 			if (m_tabFilter->match(o) == false)
@@ -653,6 +665,9 @@ void TuningPage::fillObjectsList()
 				continue;
 			}
 		}
+
+		// Button Filter
+		//
 
 		if (m_buttonFilter != nullptr)
 		{
@@ -688,14 +703,14 @@ void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{
-		assert(filter);
-		return;
+		qDebug()<<"Filter tree removed.";
+	}
+	else
+	{
+		qDebug()<<"Filter tree clicked: "<<filter->caption();
 	}
 
-	qDebug()<<"Filter tree clicked: "<<filter->caption();
-
 	m_treeFilter = filter;
-
 
 	fillObjectsList();
 }

@@ -3,6 +3,77 @@
 #include "ObjectManager.h"
 #include "Settings.h"
 
+TuningFilterValue::TuningFilterValue()
+{
+
+}
+
+QString TuningFilterValue::appSignalId() const
+{
+	return m_appSignalId;
+}
+
+void TuningFilterValue::setAppSignalId(const QString& value)
+{
+	m_appSignalId = value;
+	m_hash = ::calcHash(m_appSignalId);
+}
+
+QString TuningFilterValue::caption() const
+{
+	return m_caption;
+}
+
+void TuningFilterValue::setCaption(const QString& value)
+{
+	m_caption = value;
+}
+
+bool TuningFilterValue::useValue() const
+{
+	return m_useValue;
+}
+
+void TuningFilterValue::setUseValue(bool value)
+{
+	m_useValue = value;
+}
+
+bool TuningFilterValue::analog()  const
+{
+	return m_analog;
+}
+
+void TuningFilterValue::setAnalog(bool value)
+{
+	m_analog = value;
+}
+
+int TuningFilterValue::decimalPlaces() const
+{
+	return m_decimalPlaces;
+}
+
+void TuningFilterValue::setDecimalPlaces(int value)
+{
+	m_decimalPlaces = value;
+}
+
+double TuningFilterValue::value() const
+{
+	return m_value;
+}
+
+void TuningFilterValue::setValue(double value)
+{
+	m_value = value;
+}
+
+Hash TuningFilterValue::hash() const
+{
+	return m_hash;
+}
+
 //
 // ObjectFilter
 //
@@ -55,7 +126,8 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
 
-	m_signalValues = That.m_signalValues;
+	m_signalValuesMap = That.m_signalValuesMap;
+	m_signalValuesVec = That.m_signalValuesVec;
 
 	m_filterType = That.m_filterType;
 	m_signalType = That.m_signalType;
@@ -167,35 +239,35 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 
 				if (reader.attributes().hasAttribute("AppSignalId"))
 				{
-					ofv.appSignalId = reader.attributes().value("AppSignalId").toString();
+					ofv.setAppSignalId(reader.attributes().value("AppSignalId").toString());
 				}
 
 				if (reader.attributes().hasAttribute("Caption"))
 				{
-					ofv.caption = reader.attributes().value("Caption").toString();
+					ofv.setCaption(reader.attributes().value("Caption").toString());
 				}
 
 				if (reader.attributes().hasAttribute("UseValue"))
 				{
-					ofv.useValue = reader.attributes().value("UseValue").toString() == "true";
+					ofv.setUseValue(reader.attributes().value("UseValue").toString() == "true");
 				}
 
 				if (reader.attributes().hasAttribute("Analog"))
 				{
-					ofv.analog = reader.attributes().value("Analog").toString() == "true";
+					ofv.setAnalog(reader.attributes().value("Analog").toString() == "true");
 				}
 
 				if (reader.attributes().hasAttribute("Value"))
 				{
-					ofv.value = reader.attributes().value("Value").toDouble();
+					ofv.setValue(reader.attributes().value("Value").toDouble());
 				}
 
 				if (reader.attributes().hasAttribute("DecimalPlaces"))
 				{
-					ofv.decimalPlaces = reader.attributes().value("DecimalPlaces").toInt();
+					ofv.setDecimalPlaces(reader.attributes().value("DecimalPlaces").toInt());
 				}
 
-				m_signalValues.push_back(ofv);
+				addValue(ofv);
 
 				continue;
 			}
@@ -235,7 +307,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool TuningFilter::save(QXmlStreamWriter& writer)
+bool TuningFilter::save(QXmlStreamWriter& writer) const
 {
 	if (isRoot() == true)
 	{
@@ -278,17 +350,19 @@ bool TuningFilter::save(QXmlStreamWriter& writer)
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
 
 	writer.writeStartElement("Values");
-	for (const TuningFilterValue& v : m_signalValues)
+
+	std::vector <TuningFilterValue> values = signalValues();
+	for (const TuningFilterValue& v : values)
 	{
 		writer.writeStartElement("Value");
-		writer.writeAttribute("AppSignalId", v.appSignalId);
-		writer.writeAttribute("Caption", v.caption);
-		writer.writeAttribute("UseValue", v.useValue ? "true" : "false");
-		writer.writeAttribute("Analog", v.analog ? "true" : "false");
-		writer.writeAttribute("Value", QString::number(v.value, 'f', v.decimalPlaces));
-		if (v.analog == true)
+		writer.writeAttribute("AppSignalId", v.appSignalId());
+		writer.writeAttribute("Caption", v.caption());
+		writer.writeAttribute("UseValue", v.useValue() ? "true" : "false");
+		writer.writeAttribute("Analog", v.analog() ? "true" : "false");
+		writer.writeAttribute("Value", QString::number(v.value(), 'f', v.decimalPlaces()));
+		if (v.analog() == true)
 		{
-			writer.writeAttribute("DecimalPlaces", QString::number(v.decimalPlaces));
+			writer.writeAttribute("DecimalPlaces", QString::number(v.decimalPlaces()));
 		}
 		writer.writeEndElement();
 	}
@@ -402,72 +476,92 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 
 std::vector <TuningFilterValue> TuningFilter::signalValues() const
 {
-	return m_signalValues;
+	std::vector <TuningFilterValue> result;
+
+	for (Hash hash : m_signalValuesVec)
+	{
+		result.push_back(m_signalValuesMap.at(hash));
+	}
+
+	return result;
 }
 
 void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
 {
-	m_signalValues = values;
-}
+	m_signalValuesVec.clear();
+	m_signalValuesMap.clear();
 
-void TuningFilter::setValue(const QString& appSignalId, double value)
-{
-	for (TuningFilterValue& ofv : m_signalValues)
+	for (const TuningFilterValue&  v : values)
 	{
-		if (ofv.appSignalId == appSignalId)
-		{
-			ofv.useValue = true;
-			ofv.value = value;
-			return;
-		}
+		addValue(v);
 	}
 }
 
-bool TuningFilter::valueExists(const QString& appSignalId)
+void TuningFilter::setValue(Hash hash, double value)
 {
-	for (const TuningFilterValue& ofv : m_signalValues)
-	{
-		if (ofv.appSignalId == appSignalId)
-		{
-			return true;
-		}
-	}
-	return false;
-}
+	auto it = m_signalValuesMap.find(hash);
 
-
-void TuningFilter::addValue(const TuningFilterValue& value)
-{
-	if (valueExists(value.appSignalId) == true)
+	if (it == m_signalValuesMap.end())
 	{
 		assert(false);
 		return;
 	}
 
-	m_signalValues.push_back(value);
+	TuningFilterValue& ofv = it->second;
+	ofv.setUseValue(true);
+	ofv.setValue(value);
 }
 
-void TuningFilter::removeValue(const QString& appSignalId)
+bool TuningFilter::valueExists(Hash hash) const
 {
-	int index = -1;
+	return m_signalValuesMap.find(hash) != m_signalValuesMap.end();
+}
 
-	for (const TuningFilterValue& ofv : m_signalValues)
+void TuningFilter::addValue(const TuningFilterValue& value)
+{
+	Hash hash = value.hash();
+	if (valueExists(hash) == true)
 	{
-		index++;
+		assert(false);
+		return;
+	}
 
-		if (ofv.appSignalId == appSignalId)
+	m_signalValuesVec.push_back(hash);
+	m_signalValuesMap[hash] = value;
+}
+
+void TuningFilter::removeValue(Hash hash)
+{
+	// remove from map
+	//
+	auto it = m_signalValuesMap.find(hash);
+
+	if (it == m_signalValuesMap.end())
+	{
+		assert(false);
+		return;
+	}
+
+	m_signalValuesMap.erase(it);
+
+	// remove from vector
+	//
+	bool found = false;
+	for (auto itv = m_signalValuesVec.begin(); itv != m_signalValuesVec.end(); itv++)
+	{
+		if (*itv == hash)
 		{
+			m_signalValuesVec.erase(itv);
+			found = true;
 			break;
 		}
 	}
 
-	if (index == -1)
+	if (found == false)
 	{
 		assert(false);
 		return;
 	}
-
-	m_signalValues.erase(m_signalValues.begin() + index);
 }
 
 TuningFilter::FilterType TuningFilter::filterType() const
@@ -499,7 +593,7 @@ TuningFilter* TuningFilter::parentFilter() const
 bool TuningFilter::isEmpty() const
 {
 	if (m_signalType == SignalType::All &&
-			m_signalValues.empty() == true &&
+			m_signalValuesVec.empty() == true &&
 			m_appSignalIDMasks.empty() == true &&
 			m_customAppSignalIDMasks.empty() == true &&
 			m_equipmentIDMasks.empty() == true)
@@ -530,38 +624,36 @@ bool TuningFilter::isButton() const
 	return filterType() == FilterType::Button;
 }
 
-void TuningFilter::addTopChild(std::shared_ptr<TuningFilter> child)
+void TuningFilter::addTopChild(const std::shared_ptr<TuningFilter> &child)
 {
 	child->m_parentFilter = this;
 	m_childFilters.insert(m_childFilters.begin(), child);
 }
 
-void TuningFilter::addChild(std::shared_ptr<TuningFilter> child)
+void TuningFilter::addChild(const std::shared_ptr<TuningFilter> &child)
 {
 	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
 }
 
-void TuningFilter::removeChild(std::shared_ptr<TuningFilter> child)
+void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 {
-	int index = -1;
+	bool found = false;
 
-	for (auto it : m_childFilters)
+	for (auto it = m_childFilters.begin(); it != m_childFilters.end(); it++)
 	{
-		index++;
-		if (it.get() == child.get())
+		if (it->get() == child.get())
 		{
+			m_childFilters.erase(it);
+			found = true;
 			break;
 		}
 	}
 
-	if (index == -1)
+	if (found == false)
 	{
 		assert(false);
-	}
-	else
-	{
-		m_childFilters.erase(m_childFilters.begin() + index);
+		return;
 	}
 }
 
@@ -589,7 +681,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 }
 
 
-bool TuningFilter::match(const TuningObject& object)
+bool TuningFilter::match(const TuningObject& object) const
 {
 	if (isEmpty() == true)
 	{
@@ -605,6 +697,16 @@ bool TuningFilter::match(const TuningObject& object)
 		return false;
 	}
 
+	// List of appSignalId
+	//
+	if (m_signalValuesVec.empty() == false)
+	{
+		if (valueExists(object.appSignalHash()) == false)
+		{
+			return false;
+		}
+	}
+
 	// Mask for equipmentID
 	//
 
@@ -615,7 +717,7 @@ bool TuningFilter::match(const TuningObject& object)
 
 		bool result = false;
 
-		for (QString m : m_equipmentIDMasks)
+		for (const QString& m : m_equipmentIDMasks)
 		{
 			if (m.isEmpty() == true)
 			{
@@ -645,7 +747,7 @@ bool TuningFilter::match(const TuningObject& object)
 
 		bool result = false;
 
-		for (QString m : m_appSignalIDMasks)
+		for (const QString& m : m_appSignalIDMasks)
 		{
 			if (m.isEmpty() == true)
 			{
@@ -654,28 +756,6 @@ bool TuningFilter::match(const TuningObject& object)
 			QRegExp rx(m.trimmed());
 			rx.setPatternSyntax(QRegExp::Wildcard);
 			if (rx.exactMatch(s))
-			{
-				result = true;
-				break;
-			}
-		}
-		if (result == false)
-		{
-			return false;
-		}
-	}
-
-	// List of appSignalId
-	//
-	if (m_signalValues.empty() == false)
-	{
-		QString s = object.appSignalID();
-
-		bool result = false;
-
-		for (const TuningFilterValue& v : m_signalValues)
-		{
-			if (v.appSignalId == s)
 			{
 				result = true;
 				break;
@@ -696,7 +776,7 @@ bool TuningFilter::match(const TuningObject& object)
 
 		bool result = false;
 
-		for (QString m : m_customAppSignalIDMasks)
+		for (const QString& m : m_customAppSignalIDMasks)
 		{
 			if (m.isEmpty() == true)
 			{
@@ -718,7 +798,6 @@ bool TuningFilter::match(const TuningObject& object)
 
 	return true;
 }
-
 
 //
 // ObjectFilterStorage
@@ -999,7 +1078,7 @@ void TuningFilterStorage::createAutomaticFilters()
 			for (const QString& appSignalID : schemasDetails.m_appSignalIDs)
 			{
 				TuningFilterValue ofv;
-				ofv.appSignalId = appSignalID;
+				ofv.setAppSignalId(appSignalID);
 				ofTs->addValue(ofv);
 			}
 
