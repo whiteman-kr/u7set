@@ -38,7 +38,7 @@ private:
 
 signals:
 	void signalsUpdated();
-	void filtersUpdated();
+	void userFiltersUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
@@ -46,7 +46,6 @@ private slots:
 	void slot_tuningConnectionFailed();
 
 public slots:
-	void slot_filtersUpdated();
 
 	void exit();
 	void showSettings();

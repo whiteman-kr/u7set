@@ -79,6 +79,7 @@ protected slots:
 
 private slots:
 	void ctrlF();
+	void search();
 
 	// Properties
 	//

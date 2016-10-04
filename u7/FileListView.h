@@ -35,6 +35,8 @@ public:
 	QString filter() const;
 	void setFilter(const QString& value);		// "" -- no filter, "cdd" -- just cdd files
 
+	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
+
 	// Data
 	//
 private:
@@ -118,6 +120,8 @@ public slots:
 	//
 public:
 	FileListModel& filesModel();
+
+	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
 
 	const DbFileInfo& parentFile() const;
 	int parentFileId() const;

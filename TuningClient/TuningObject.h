@@ -2,6 +2,7 @@
 #define TUNINGOBJECT_H
 
 #include "Stable.h"
+#include "../lib/Hash.h"
 
 class TuningObject
 {
@@ -48,6 +49,7 @@ public:
 	bool overflow() const;
 	void setOverflow(bool value);
 
+	Hash appSignalHash() const;
 
 private:
 
@@ -69,6 +71,8 @@ private:
 	bool m_valid = 0;
 	bool m_underflow = 0;
 	bool m_overflow = 0;
+
+	Hash m_appSignalHash = 0;
 };
 
 

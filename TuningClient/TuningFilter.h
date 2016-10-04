@@ -14,14 +14,40 @@ struct SchemaDetails
 
 };
 
-struct TuningFilterValue
+class TuningFilterValue
 {
-	QString appSignalId;
-	QString caption;
-	bool useValue = false;
-	bool analog = false;
-	int decimalPlaces = 0;
-	double value = 0;
+public:
+	TuningFilterValue();
+
+	QString appSignalId() const;
+	void setAppSignalId(const QString& value);
+
+	QString caption() const;
+	void setCaption(const QString& value);
+
+	bool useValue() const;
+	void setUseValue(bool value);
+
+	bool analog()  const;
+	void setAnalog(bool value);
+
+	int decimalPlaces() const;
+	void setDecimalPlaces(int value);
+
+	double value() const;
+	void setValue(double value);
+
+	Hash hash() const;
+private:
+
+	QString m_appSignalId;
+	QString m_caption;
+	bool m_useValue = false;
+	bool m_analog = false;
+	int m_decimalPlaces = 0;
+	double m_value = 0;
+
+	Hash m_hash = 0;
 };
 
 class TuningFilter : public PropertyObject
@@ -57,11 +83,9 @@ public:
 	TuningFilter& operator= (const TuningFilter& That);
 
 	bool load(QXmlStreamReader& reader);
-	bool save(QXmlStreamWriter& writer);
+	bool save(QXmlStreamWriter& writer) const;
 
-	bool match(const TuningObject &object);
-
-
+	bool match(const TuningObject &object) const;
 
 public:
 	// Properties
@@ -86,12 +110,12 @@ public:
 	std::vector <TuningFilterValue> signalValues() const;
 	void setValues(const std::vector <TuningFilterValue>& values);
 
-	void setValue(const QString& appSignalId, double value);
+	void setValue(Hash hash, double value);
 
-	bool valueExists(const QString& appSignalId);
+	bool valueExists(Hash hash) const;
 	void addValue(const TuningFilterValue& value);
 
-	void removeValue(const QString& appSignalId);
+	void removeValue(Hash hash);
 
 	FilterType filterType() const;
 	void setFilterType(FilterType value);
@@ -109,10 +133,10 @@ public:
 	bool isTab() const;
 	bool isButton() const;
 
-	void addTopChild(std::shared_ptr<TuningFilter> child);
-	void addChild(std::shared_ptr<TuningFilter> child);
+	void addTopChild(const std::shared_ptr<TuningFilter>& child);
+	void addChild(const std::shared_ptr<TuningFilter>& child);
 
-	void removeChild(std::shared_ptr<TuningFilter> child);
+	void removeChild(const std::shared_ptr<TuningFilter>& child);
 
 	void removeAllChildren();
 
@@ -133,7 +157,8 @@ private:
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
-	std::vector <TuningFilterValue> m_signalValues;
+	std::vector<Hash> m_signalValuesVec;
+	std::map <Hash, TuningFilterValue> m_signalValuesMap;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
@@ -143,8 +168,6 @@ private:
 	TuningFilter* m_parentFilter = nullptr;
 
 };
-
-
 
 class TuningFilterStorage
 {

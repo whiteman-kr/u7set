@@ -23,6 +23,9 @@ private:
 
 	TuningPage* m_tuningPage = nullptr;
 
+public slots:
+	void slot_resetTreeFilter();
+
 private slots:
 	void slot_treeSelectionChanged();
 
