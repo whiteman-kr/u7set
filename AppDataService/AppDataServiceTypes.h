@@ -15,7 +15,7 @@ struct SignalParseInfo
 	Address16 validityAddr;
 
 	E::SignalType type = E::SignalType::Discrete;
-	E::DataFormat dataFormat = E::DataFormat::UnsignedInt;
+	E::AnalogAppSignalFormat analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder byteOrder = E::ByteOrder::BigEndian;
 
 

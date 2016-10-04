@@ -112,7 +112,7 @@ private:
 	bool m_checkedOut = false;
 	int m_userID = 0;
 	E::Channel m_channel = E::Channel::A;
-	E::SignalType m_type = E::SignalType::Analog;
+	E::SignalType m_signalType = E::SignalType::Analog;
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
@@ -121,7 +121,14 @@ private:
 	QString m_appSignalID;
 	QString m_customAppSignalID;
 	QString m_caption;
-	E::DataFormat m_dataFormat = E::DataFormat::Float;
+
+	// 04.10.2016
+	// Changed from E:DataFormat m_dataFormat => E::AppSignalDataFormat m_analogSignalFormat
+	// m_analogSignalFormat matters only for analog signals
+	// for all discretes assume data format UnsignedInt
+	//
+	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+
 	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
@@ -203,12 +210,12 @@ public:
 	E::Channel channel() const { return m_channel; }
 	int channelInt() const { return TO_INT(m_channel); }
 
-	int typeInt() const { return TO_INT(m_type); }
-	E::SignalType type() const { return m_type; }
-	void setType(E::SignalType type) { m_type = type; }
+	int signalTypeInt() const { return TO_INT(m_signalType); }
+	E::SignalType signalType() const { return m_signalType; }
+	void setSignalType(E::SignalType type) { m_signalType = type; }
 
-	bool isAnalog() const { return m_type == E::SignalType::Analog; }
-	bool isDiscrete() const { return m_type == E::SignalType::Discrete; }
+	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
+	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
 
 	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
 	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
@@ -269,12 +276,18 @@ public:
 	Q_INVOKABLE QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
 
-	Q_INVOKABLE E::DataFormat dataFormat() const { return m_dataFormat; }
-	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_dataFormat); }
-	void setDataFormat(E::DataFormat dataFormat) { m_dataFormat = dataFormat; }
+	/*Q_INVOKABLE E::DataFormat dataFormat() const { return m_appSignalDataFormat; }
+	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_appSignalDataFormat); }*/
+
+	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
+	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
+
+	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
+	void setAnalogSignalFormat(E::DataFormat dataFormat);		// for DeviceSignal.dataFormat conversion
 
 	Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
+	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
 
 	Q_INVOKABLE int lowADC() const { return m_lowADC; }
 	void setLowADC(int lowADC) { m_lowADC = lowADC; }
@@ -367,8 +380,6 @@ public:
 	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
 	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
 
-	bool isCompatibleDataFormat(E::DataFormat afbDataFormat) const;
-
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
@@ -377,6 +388,8 @@ public:
 
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
+
+	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size) const;
 
 	friend class DbWorker;
 };

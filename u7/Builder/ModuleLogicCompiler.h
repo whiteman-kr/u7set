@@ -321,7 +321,7 @@ namespace Builder
 
 	public:
 		AppSignal(Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
 
 		~AppSignal();
 
@@ -345,8 +345,8 @@ namespace Builder
 		Address16& ramAddr() { return m_signal->ramAddr(); }
 		Address16& regAddr() { return m_signal->regValueAddr(); }
 
-		E::SignalType type() const { return m_signal->type(); }
-		E::DataFormat dataFormat() const { return m_signal->dataFormat(); }
+		E::SignalType signalType() const { return m_signal->signalType(); }
+		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signal->analogSignalFormat(); }
 		int dataSize() const { return m_signal->dataSize(); }
 
 		bool isAnalog() const { return m_signal->isAnalog(); }
@@ -355,7 +355,8 @@ namespace Builder
 		bool isInternal() const { return m_signal->isInternal(); }
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
-		bool isCompatibleDataFormat(E::DataFormat afbDataFormat) const { return m_signal->isCompatibleDataFormat(afbDataFormat); }
+
+		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
 
 		const Signal& constSignal() { return *m_signal; }
 

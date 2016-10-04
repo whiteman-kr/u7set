@@ -102,11 +102,11 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-			if (!dataFormatInfo.contains(signal.dataFormatInt()))
+/*			if (!dataFormatInfo.contains(signal.dataFormatInt()))
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
 				hasWrongField = true;
-			}
+			}*/
 
 			if (!unitInfo.contains(signal.unitID()))
 			{
@@ -219,11 +219,11 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-			if (!dataFormatInfo.contains(signal.dataFormatInt()))
+			/*if (!dataFormatInfo.contains(signal.dataFormatInt()))
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
 				hasWrongField = true;
-			}
+			}*/
 
 			if (!unitInfo.contains(signal.unitID()))
 			{

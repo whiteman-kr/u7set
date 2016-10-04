@@ -1110,13 +1110,13 @@ namespace Builder
 
 				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
-				if (signal->dataFormat() == E::DataFormat::Float)
+				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == E::DataFormat::SignedInt)
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 					{
 						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 					}
@@ -1524,7 +1524,7 @@ namespace Builder
 
 		Command cmd;
 
-		switch(appSignal.type())
+		switch(appSignal.signalType())
 		{
 		case E::SignalType::Discrete:
 
@@ -1555,7 +1555,7 @@ namespace Builder
 				break;
 
 			case SIZE_32BIT:
-				switch(appSignal.dataFormat())
+				switch(appSignal.analogSignalFormat())
 				{
 				case E::DataFormat::SignedInt:
 					if (constItem.isIntegral())
@@ -1634,7 +1634,7 @@ namespace Builder
 				return false;
 			}
 
-			if (appSignal.dataFormat() != srcSignal.dataFormat())
+			if (appSignal.analogSignalFormat() != srcSignal.analogSignalFormat())
 			{
 				msg = QString(tr("Signals %1 and %2 data formats are not compatible")).
 						arg(appSignal.appSignalID()).arg(srcSignal.appSignalID());
@@ -1675,7 +1675,7 @@ namespace Builder
 			}
 		}
 
-		if (appSignal.dataFormat() != srcSignal.dataFormat())
+		if (appSignal.analogSignalFormat() != srcSignal.analogSignalFormat())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
@@ -2043,15 +2043,9 @@ namespace Builder
 				return false;
 			}
 
-			if (appSignal.isCompatibleDataFormat(afbSignal.dataFormat()) == false)
+			if (appSignal.isCompatibleDataFormat(afbSignal) == false)
 			{
 				m_log->errALC5008(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
-				return false;
-			}
-
-			if (appSignal.dataSize() != afbSignal.size())
-			{
-				m_log->errALC5009(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
 				return false;
 			}
 		}
@@ -2341,7 +2335,7 @@ namespace Builder
 				return false;
 			}
 
-			if (srcSignal.dataFormat() != destSignal.dataFormat())
+			if (srcSignal.analogSignalFormat() != destSignal.analogSignalFormat())
 			{
 				// Signals '%1' and '%2' have different data format.
 				//
@@ -2392,19 +2386,11 @@ namespace Builder
 				return false;
 			}
 
-			if (srcSignal.dataFormat() != afbSignal.dataFormat())
+			if (srcSignal.isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size()) == false)
 			{
 				// Signal '%1' is connected to input '%2.%3' with uncompatible data format.
 				//
 				m_log->errALC5008(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
-				return false;
-			}
-
-			if (srcSignal.dataSize() != afbSignal.size())
-			{
-				// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
-				//
-				m_log->errALC5009(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
 				return false;
 			}
 
@@ -2518,15 +2504,9 @@ namespace Builder
 				return false;
 			}
 
-			if (appSignal->isCompatibleDataFormat(afbSignal.dataFormat()) == false)
+			if (appSignal->isCompatibleDataFormat(afbSignal) == false)
 			{
 				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
-				return false;
-			}
-
-			if (appSignal->dataSize() != afbSignal.size())
-			{
-				m_log->errALC5005(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
 				return false;
 			}
 		}
@@ -3375,10 +3355,10 @@ namespace Builder
 			xmlWriter.writeAttribute("StrID", s->appSignalID());
 			xmlWriter.writeAttribute("ExtStrID", s->customAppSignalID());
 			xmlWriter.writeAttribute("Name", s->caption());
-			xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
+			xmlWriter.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->signalTypeInt()));
 			xmlWriter.writeAttribute("Unit", Signal::unitList->valueAt(s->unitID()));
 			xmlWriter.writeAttribute("DataSize", QString::number(s->dataSize()));
-			xmlWriter.writeAttribute("DataFormat", QMetaEnum::fromType<E::DataFormat>().valueToKey(s->dataFormatInt()));
+			xmlWriter.writeAttribute("DataFormat", QMetaEnum::fromType<E::DataFormat>().valueToKey(s->analogSignalFormatInt()));
 			xmlWriter.writeAttribute("ByteOrder", QMetaEnum::fromType<E::ByteOrder>().valueToKey(s->byteOrderInt()));
 			xmlWriter.writeAttribute("Offset", QString::number(txSignal.address.offset()));
 			xmlWriter.writeAttribute("BitNo", QString::number(txSignal.address.bit()));
@@ -3807,13 +3787,13 @@ namespace Builder
 				}
 				FbScal& fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
-				if (signal->dataFormat() == E::DataFormat::Float)
+				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == E::DataFormat::SignedInt)
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 					{
 						fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 					}
@@ -4529,9 +4509,9 @@ namespace Builder
 
 		QString errorMsg;
 
-		switch(signal.dataFormat())
+		switch(signal.analogSignalFormat())
 		{
-		case E::DataFormat::Float:
+		case E::AnalogAppSignalFormat::Float32:
 			{
 				FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
@@ -4551,7 +4531,7 @@ namespace Builder
 
 			break;
 
-		case E::DataFormat::SignedInt:
+		case E::AnalogAppSignalFormat::SignedInt32:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 
@@ -4573,8 +4553,8 @@ namespace Builder
 
 		default:
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.dataFormat())));
+					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 		}
 
 		return appItem;
@@ -4604,9 +4584,9 @@ namespace Builder
 
 		QString errorMsg;
 
-		switch(signal.dataFormat())
+		switch(signal.analogSignalFormat())
 		{
-		case E::DataFormat::Float:
+		case E::AnalogAppSignalFormat::Float32:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
@@ -4626,7 +4606,7 @@ namespace Builder
 
 			break;
 
-		case E::DataFormat::SignedInt:
+		case E::AnalogAppSignalFormat::SignedInt32:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 
@@ -4648,8 +4628,8 @@ namespace Builder
 
 		default:
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, dataFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.dataFormat())));
+					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 		}
 
 		return appItem;
@@ -6117,8 +6097,8 @@ namespace Builder
 		// construct shadow AppSignal based on OutputPin
 		//
 		m_signal->setAppSignalID(strID);
-		m_signal->setType(signalType);
-		m_signal->setDataFormat(dataFormat);
+		m_signal->setSignalType(signalType);
+		m_signal->setAnalogSignalFormat(dataFormat);
 		m_signal->setDataSize(dataSize);
 		m_signal->setInOutType(E::SignalInOutType::Internal);
 		m_signal->setAcquire(false);								// non-registered signal !
@@ -6158,6 +6138,12 @@ namespace Builder
 		}
 
 		return QUuid();
+	}
+
+
+	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
+	{
+		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size());
 	}
 
 

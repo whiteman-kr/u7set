@@ -10,12 +10,4 @@ const int	LM1_PLACE = 0,
 
             OPTO_INTERFACE_COUNT = 3;
 
-const int	WORD_SIZE = 16,
-            DWORD_SIZE = 32,
-            FLOAT_SIZE = 32;
-
-const int	ANALOG_SIZE_W = 2;
-
-const int	SIZE_16BIT = 16;
-const int	SIZE_32BIT = 32;
 

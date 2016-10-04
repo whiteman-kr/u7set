@@ -71,7 +71,7 @@ void SignalProperties::initProperties()
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction, m_signal);
 
-	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::type, Signal::setType, m_signal);
+	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(signalTypeCategory);
 
 	auto signalInOutTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType, m_signal);
@@ -98,10 +98,16 @@ void SignalProperties::initProperties()
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
 
-	auto dataFormatProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::DataFormat, dataFormatCaption, true, Signal::dataFormat, Signal::setDataFormat, m_signal);
+	auto dataFormatProperty = addProperty<E::AnalogAppSignalFormat>(dataFormatCaption, QString(), true,
+										(std::function<E::AnalogAppSignalFormat(void)>)std::bind(&Signal::analogSignalFormat, &m_signal),
+										std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
+
 	dataFormatProperty->setCategory(dataFormatCategory);
 
-	auto dataSizeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, dataSizeCaption, true, Signal::dataSize, Signal::setDataSize, m_signal);
+	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
+										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),
+										std::bind(static_cast<void (Signal::*)(int)>(&Signal::setDataSize), &m_signal, std::placeholders::_1));
+
 	dataSizeProperty->setCategory(dataFormatCategory);
 
 	if (m_signal.isAnalog() == true)
