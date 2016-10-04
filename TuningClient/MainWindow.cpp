@@ -36,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
 	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
 
-	connect(this, &MainWindow::filtersUpdated, this, &MainWindow::slot_filtersUpdated);
-
 	QString errorCode;
 	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
 	{
@@ -206,6 +204,8 @@ void MainWindow::createWorkspace()
 {
 	m_tuningWorkspace = new TuningWorkspace(this);
 	setCentralWidget(m_tuningWorkspace);
+
+	connect(this, &MainWindow::userFiltersUpdated, m_tuningWorkspace, &TuningWorkspace::slot_resetTreeFilter);
 }
 
 void MainWindow::slot_configurationArrived(ConfigSettings settings)
@@ -249,13 +249,6 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 	return;
 }
 
-void MainWindow::slot_filtersUpdated()
-{
-	removeWorkspace();
-	createWorkspace();
-	return;
-}
-
 void MainWindow::slot_tuningSourcesArrived()
 {
 
@@ -286,7 +279,7 @@ void MainWindow::runPresetEditor()
 	{
 		theUserFilters = editFilters;
 		theUserFilters.save("UserFilters.xml");
-		emit filtersUpdated();
+		emit userFiltersUpdated();
 	}
 }
 

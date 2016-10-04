@@ -114,6 +114,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 97", ":/DatabaseUpgrade/Upgrade0097.sql"},
 	{"Upgrade to version 98", ":/DatabaseUpgrade/Upgrade0098.sql"},
 	{"Upgrade to version 99", ":/DatabaseUpgrade/Upgrade0099.sql"},
+	{"Upgrade to version 100", ":/DatabaseUpgrade/Upgrade0100.sql"},
 };
 
 
@@ -3332,7 +3333,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCheckedOut(q.value(4).toBool());
 	s.setUserID(q.value(5).toInt());
 	s.setChannel(static_cast<E::Channel>(q.value(6).toInt()));
-	s.setType(static_cast<E::SignalType>(q.value(7).toInt()));
+	s.setSignalType(static_cast<E::SignalType>(q.value(7).toInt()));
 	s.setCreated(q.value(8).toDateTime());
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toDateTime());
@@ -3340,7 +3341,20 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setAppSignalID(q.value(12).toString());
 	s.setCustomAppSignalID(q.value(13).toString());
 	s.setCaption(q.value(14).toString());
-	s.setDataFormat(static_cast<E::DataFormat>(q.value(15).toInt()));
+
+	int f = q.value(15).toInt();
+
+	if (f == TO_INT(E::DataFormat::UnsignedInt))
+	{
+		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
+		//
+		s.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+	}
+	else
+	{
+		s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
+	}
+
 	s.setDataSize(q.value(16).toInt());
 	s.setLowADC(q.value(17).toInt());
 	s.setHighADC(q.value(18).toInt());
@@ -3390,7 +3404,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.checkedOut())
 	.arg(s.userID())
 	.arg(TO_INT(s.channel()))
-	.arg(TO_INT(s.type()))
+	.arg(TO_INT(s.signalType()))
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
 	.arg(s.deleted())
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
@@ -3398,7 +3412,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(toSqlStr(s.appSignalID()))
 	.arg(toSqlStr(s.customAppSignalID()))
 	.arg(toSqlStr(s.caption()))
-	.arg(TO_INT(s.dataFormat()))
+	.arg(s.analogSignalFormatInt())
 	.arg(s.dataSize())
 	.arg(s.lowADC())
 	.arg(s.highADC())
@@ -3933,7 +3947,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 
 			newSignals.append(signal);
 
-			addSignal(signal.type(), &newSignals);
+			addSignal(signal.signalType(), &newSignals);
 		}
 	}
 

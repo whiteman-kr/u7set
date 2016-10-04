@@ -129,7 +129,7 @@ namespace  Tuning
 
 			if (signal->isAnalog() == true)
 			{
-				if (signal->dataFormat() == E::DataFormat::Float)
+				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 				{
 					data.append(QVariant(QString("AnalogFloat")));
 
@@ -150,7 +150,7 @@ namespace  Tuning
 				}
 				else
 				{
-					if (signal->dataFormat() != E::DataFormat::SignedInt)
+					if (signal->analogSignalFormat() != E::AnalogAppSignalFormat::SignedInt32)
 					{
 						assert(false);
 						continue;
@@ -304,7 +304,7 @@ namespace  Tuning
 
 		// Data in m_framesData is in Big Endian format!
 		//
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::Float)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 		{
 			float value = *reinterpret_cast<float*>(valuePointer);
 			value = reverseBytes<float>(value);
@@ -323,7 +323,7 @@ namespace  Tuning
 			return true;
 		}
 
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::SignedInt)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 		{
 			qint32 value = reverseBytes<qint32>(*reinterpret_cast<qint32*>(valuePointer));
 			tss->currentValue = static_cast<double>(value);
@@ -389,7 +389,7 @@ namespace  Tuning
 
 		// Data in m_framesData is in Big Endian format!
 		//
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::Float)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 		{
 			float floatValue = reverseBytes<float>(static_cast<float>(value));	// to Big Endian
 
@@ -398,7 +398,7 @@ namespace  Tuning
 			return true;
 		}
 
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::SignedInt)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 		{
 			qint32 intValue = reverseBytes<qint32>(static_cast<qint32>(value));	// to Big Endian
 
@@ -506,7 +506,7 @@ namespace  Tuning
 
 			if (signal->isAnalog())
 			{
-				if (signal->dataSize() != 32)
+				if (signal->dataSize() != SIZE_32BIT)
 				{
 					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
 						  QString(tr("Signal '%1' for tuning must have 32-bit dataSize")).
@@ -515,13 +515,13 @@ namespace  Tuning
 				}
 				else
 				{
-					if (signal->dataFormat() == E::DataFormat::Float)
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 					{
 						m_tuningSignals[TYPE_ANALOG_FLOAT].append(signal);
 					}
 					else
 					{
-						if (signal->dataFormat() == E::DataFormat::SignedInt)
+						if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 						{
 							m_tuningSignals[TYPE_ANALOG_INT].append(signal);
 						}
@@ -898,12 +898,12 @@ namespace  Tuning
 
 	int TuningData::getSignalType(const Signal* signal)
 	{
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::Float)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 		{
 			return TYPE_ANALOG_FLOAT;
 		}
 
-		if (signal->isAnalog() && signal->dataFormat() == E::DataFormat::SignedInt)
+		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 		{
 			return TYPE_ANALOG_INT;
 		}

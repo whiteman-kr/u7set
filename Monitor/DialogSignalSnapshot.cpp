@@ -77,23 +77,30 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 		break;
 	case SnapshotItemModel::Columns::Type:
 		{
-			if (s1.type() == s2.type())
+			if (s1.isDiscrete() == true || s2.isDiscrete() == true)
 			{
-				if (s1.dataFormat() == s2.dataFormat())
+				v1 = s1.inOutTypeInt();
+				v2 = s2.inOutTypeInt();
+				break;
+			}
+
+			if (s1.signalType() == s2.signalType())
+			{
+				if (s1.analogSignalFormat() == s2.analogSignalFormat())
 				{
 					v1 = s1.inOutTypeInt();
 					v2 = s2.inOutTypeInt();
 				}
 				else
 				{
-					v1 = s1.dataFormatInt();
-					v2 = s2.dataFormatInt();
+					v1 = s1.analogSignalFormatInt();
+					v2 = s2.analogSignalFormatInt();
 				}
 			}
 			else
 			{
-				v1 = s1.typeInt();
-				v2 = s2.typeInt();
+				v1 = s1.signalTypeInt();
+				v2 = s2.signalTypeInt();
 			}
 		}
 		break;
@@ -513,11 +520,11 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 		case Columns::Type:
 			{
-				QString str = E::valueToString<E::SignalType>(s.type());
+				QString str = E::valueToString<E::SignalType>(s.signalType());
 
 				if (s.isAnalog() == true)
 				{
-					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(static_cast<int>(s.dataFormat())));
+					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
 				}
 
 				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));

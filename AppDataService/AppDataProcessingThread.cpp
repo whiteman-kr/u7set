@@ -148,7 +148,7 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 				rawValue = reverseUint32(rawValue);
 			}
 
-			switch (parseInfo.dataFormat)
+			switch (parseInfo.analogSignalFormat)
 			{
 			case E::DataFormat::Float:
 				value = static_cast<double>(*reinterpret_cast<float*>(&rawValue));

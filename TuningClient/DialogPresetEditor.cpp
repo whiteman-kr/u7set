@@ -345,17 +345,17 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 	QStringList l;
 	l.push_back("-");
 	l.push_back("Signal");
-	l.push_back(value.appSignalId);
-	l.push_back(value.caption);
-	if (value.useValue == true)
+	l.push_back(value.appSignalId());
+	l.push_back(value.caption());
+	if (value.useValue() == true)
 	{
-		if (value.analog == false)
+		if (value.analog() == false)
 		{
-			l.push_back(value.value == 0 ? tr("No") : tr("Yes"));
+			l.push_back(value.value() == 0 ? tr("No") : tr("Yes"));
 		}
 		else
 		{
-			l.push_back(QString::number(value.value, 'f', value.decimalPlaces));
+			l.push_back(QString::number(value.value(), 'f', value.decimalPlaces()));
 		}
 	}
 
@@ -535,28 +535,28 @@ void DialogPresetEditor::on_m_add_clicked()
 
 	QList<QTreeWidgetItem*> children;
 
-	for (QModelIndex& i : ui->m_signalsTable->selectionModel()->selectedRows())
+	for (const QModelIndex& i : ui->m_signalsTable->selectionModel()->selectedRows())
 	{
 		int objectIndex = m_model->objectIndex(i.row());
 
 		TuningObject o = theObjects.object(objectIndex);
 
-		if (filter->valueExists(o.appSignalID()) == true)
+		if (filter->valueExists(o.appSignalHash()) == true)
 		{
 			continue;
 		}
 
 		TuningFilterValue ofv;
-		ofv.appSignalId = o.appSignalID();
-		ofv.caption = o.caption();
-		ofv.analog = o.analog();
+		ofv.setAppSignalId(o.appSignalID());
+		ofv.setCaption(o.caption());
+		ofv.setAnalog(o.analog());
 		if (o.analog() == true)
 		{
-			ofv.decimalPlaces = o.decimalPlaces();
+			ofv.setDecimalPlaces(o.decimalPlaces());
 		}
 		if (o.valid() == true)
 		{
-			ofv.value = o.value().toDouble();
+			ofv.setValue(o.value().toDouble());
 		}
 
 		QTreeWidgetItem* childItem = new QTreeWidgetItem();
@@ -609,7 +609,7 @@ void DialogPresetEditor::on_m_remove_clicked()
 		}
 
 		TuningFilterValue ofv = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-		filter->removeValue(ofv.appSignalId);
+		filter->removeValue(ofv.hash());
 
 		QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
 		delete deleteItem;
@@ -681,20 +681,20 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		}
 		else
 		{
-			if (ov.analog != firstValue.analog)
+			if (ov.analog() != firstValue.analog())
 			{
 				QMessageBox::warning(this, "Preset Editor", "Please select signals of same type (analog or discrete).");
 				return;
 			}
 
-			if (ov.value != firstValue.value)
+			if (ov.value() != firstValue.value())
 			{
 				sameValue = false;
 			}
 		}
 	}
 
-	DialogInputValue d(firstValue.analog, firstValue.value, sameValue, firstValue.decimalPlaces);
+	DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, firstValue.decimalPlaces());
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -728,13 +728,13 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		}
 
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-		ov.useValue = true;
-		ov.value = d.value();
+		ov.setUseValue(true);
+		ov.setValue(d.value());
 
 		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
 		setSignalItemText(item, ov);
 
-		filter->setValue(ov.appSignalId, ov.value);
+		filter->setValue(ov.hash(), ov.value());
 	}
 
 	m_modified = true;

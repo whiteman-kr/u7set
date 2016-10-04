@@ -616,8 +616,8 @@ namespace Hardware
 		double appSignalHighEngUnits() const;
 		void setAppSignalHighEngUnits(double value);
 
-		E::AppSignalDataFormat appSignalDataFormat() const;
-		void setAppSignalDataFormat(E::AppSignalDataFormat value);
+		E::AnalogAppSignalFormat appSignalDataFormat() const;
+		void setAppSignalDataFormat(E::AnalogAppSignalFormat value);
 
 		// Data
 		//
@@ -644,7 +644,7 @@ namespace Hardware
 		int m_appSignalHighAdc = 65535;
 		double m_appSignalLowEngUnits = 0.0;
 		double m_appSignalHighEngUnits = 100.0;
-		E::AppSignalDataFormat m_appSignalDataFormat = E::AppSignalDataFormat::Float32;
+		E::AnalogAppSignalFormat m_appSignalDataFormat = E::AnalogAppSignalFormat::Float32;
 	};
 
 	//

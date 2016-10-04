@@ -20,17 +20,13 @@ public:
 
 	bool loadSignals(const QByteArray& data, QString *errorCode);
 
-
 private:
 
 	QMutex m_mutex;
 
 	QStringList m_tuningSourcesList;
 
-	//std::map<quint64, TuningSource> m_tuningSourcesMap;
-
 	std::vector<TuningObject> m_objects;
-
 };
 
 extern ObjectManager theObjects;

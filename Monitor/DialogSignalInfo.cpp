@@ -143,10 +143,10 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	ui->editCustomAppID->setText(m_signal.customAppSignalID());
 	ui->editCaption->setText(m_signal.caption());
 
-	str = E::valueToString<E::SignalType>(m_signal.type());
+	str = E::valueToString<E::SignalType>(m_signal.signalType());
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(static_cast<int>(m_signal.dataFormat())));
+		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
 
 	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutTypeInt()));

@@ -2637,7 +2637,7 @@ R"DELIM({
 		auto appSignalLowEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalLowEngUnits, true, DeviceSignal::appSignalLowEngUnits, DeviceSignal::setAppSignalLowEngUnits)
 		auto appSignalHighEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalHighEngUnits, true, DeviceSignal::appSignalHighEngUnits, DeviceSignal::setAppSignalHighEngUnits)
 
-		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AppSignalDataFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
+		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
 
 		appSignalLowAdcProp->setCategory(PropertyNames::categoryAppSignal);
 		appSignalHighAdcProp->setCategory(PropertyNames::categoryAppSignal);
@@ -2820,7 +2820,7 @@ R"DELIM({
 		m_appSignalLowEngUnits = signalMessage.appsignallowengunits();
 		m_appSignalHighEngUnits =  signalMessage.appsignalhighengunits();
 
-		m_appSignalDataFormat = static_cast<E::AppSignalDataFormat>(signalMessage.appsignaldataformat());
+		m_appSignalDataFormat = static_cast<E::AnalogAppSignalFormat>(signalMessage.appsignaldataformat());
 
 		if (m_preset == true)
 		{
@@ -3078,12 +3078,12 @@ R"DELIM({
 		m_appSignalHighEngUnits = value;
 	}
 
-	E::AppSignalDataFormat DeviceSignal::appSignalDataFormat() const
+	E::AnalogAppSignalFormat DeviceSignal::appSignalDataFormat() const
 	{
 		return m_appSignalDataFormat;
 	}
 
-	void DeviceSignal::setAppSignalDataFormat(E::AppSignalDataFormat value)
+	void DeviceSignal::setAppSignalDataFormat(E::AnalogAppSignalFormat value)
 	{
 		m_appSignalDataFormat = value;
 	}

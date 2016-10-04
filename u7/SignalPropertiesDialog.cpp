@@ -147,16 +147,17 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 		if (signalProperties->signal().isDiscrete())
 		{
-			if (signalProperties->signal().dataFormat() != E::DataFormat::UnsignedInt)
+			/* WhiteMan 04.10.2016
+			 * if (signalProperties->signal().dataFormat() != E::DataFormat::UnsignedInt)
 			{
 				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
-				signalProperties->signal().setDataFormat(E::DataFormat::UnsignedInt);
+				signalProperties->signal().setAnalogSignalFormat(E::DataFormat::UnsignedInt);
 			}
 			if (signalProperties->signal().dataSize() != 1)
 			{
 				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
 				signalProperties->signal().setDataSize(1);
-			}
+			}*/
 			signalProperties->propertyByCaption("DataFormat")->setReadOnly(true);
 			signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
 		}
@@ -254,6 +255,9 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
 			return;
 		}
+
+		/* WhiteMan 04.10.2016
+		 *
 		if (signal.isDiscrete() && signal.dataFormat() != E::DataFormat::UnsignedInt)
 		{
 			QMessageBox::critical(this, "Could not save signal", "Error: Discrete signal has not UnsignedInt DataFormat");
@@ -263,7 +267,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		{
 			QMessageBox::critical(this, "Could not save signal", "Error: Analog signal has UnsignedInt DataFormat");
 			return;
-		}
+		}*/
 	}
 
 	// Save
@@ -311,19 +315,21 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 	checkoutSignal(objects);
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
+		/* WhiteMan 04.10.2016
+		 *
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
 
 		Signal& signal = signalProperites->signal();
 
 		if (signal.isDiscrete() && signal.dataFormat() != E::DataFormat::UnsignedInt)
 		{
-			signal.setDataFormat(E::DataFormat::UnsignedInt);
+			signal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
 		}
 
 		if (signal.isAnalog() && signal.dataFormat() == E::DataFormat::UnsignedInt)
 		{
-			signal.setDataFormat(E::DataFormat::SignedInt);
-		}
+			signal.setAnalogSignalFormat(E::DataFormat::SignedInt);
+		}*/
 	}
 }
 

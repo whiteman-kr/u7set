@@ -154,9 +154,6 @@ void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, Tuni
 	addChildTreeObjects(f, item);
 
 	treeItems.push_back(item);
-
-
-
 }
 
 void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent)
@@ -195,15 +192,21 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 	}
 }
 
+void TuningWorkspace::slot_resetTreeFilter()
+{
+	m_filterTree->clearSelection();
+}
+
 void TuningWorkspace::slot_treeSelectionChanged()
 {
-	QTreeWidgetItem* item = m_filterTree->currentItem();
-	if (item == nullptr)
+	QList<QTreeWidgetItem*> selectedItems = m_filterTree->selectedItems();
+	if (selectedItems.isEmpty() == true)
 	{
-		return;
+		emit filterSelectionChanged(nullptr);
 	}
-
-	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-
-	emit filterSelectionChanged(filter);
+	else
+	{
+		std::shared_ptr<TuningFilter> filter = selectedItems[0]->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		emit filterSelectionChanged(filter);
+	}
 }

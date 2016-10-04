@@ -178,8 +178,9 @@ namespace Builder
 		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 		void wrnALC5053(QString fbCaption, QUuid itemUuid);									// Automatic sorting of XY points of FB '%1' has been performed
 		void errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Parameters '%1.%2' and '%1.%3' should not be equal.
-		void wrnALC5055(QString connectionID);														// Optical connection '%1' is configured manually.
-		void errALC5056(QString subsystemID, QString lmEquipmentID);							// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+		void wrnALC5055(QString connectionID);												// Optical connection '%1' is configured manually.
+		void errALC5056(QString subsystemID, QString lmEquipmentID);						// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+		void errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid);				// Uncompatible data format of analog AFB signal '%1.%2'
 
 		// EQP			Equipment issues						6000-6999
 		//

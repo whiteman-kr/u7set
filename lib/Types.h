@@ -92,12 +92,12 @@ public:
 	};
 	Q_ENUM(DataFormat)
 
-	enum class AppSignalDataFormat
+	enum class AnalogAppSignalFormat
 	{
 		SignedInt32 = E::DataFormat::SignedInt,
 		Float32 = E::DataFormat::Float
 	};
-	Q_ENUM(AppSignalDataFormat)
+	Q_ENUM(AnalogAppSignalFormat)
 
 	enum class MemoryArea
 	{
@@ -263,4 +263,20 @@ enum class OutputMessageLevel
 	Warning,
 	Error
 };
+
+
+const int	WORD_SIZE = 16,
+			DWORD_SIZE = 32,
+
+			FLOAT32_SIZE = 32,
+			SIGNED_INT32_SIZE = 32,
+
+			DISCRETE_SIZE = 1;
+
+const int	ANALOG_SIZE_W = 2;
+
+const int	SIZE_1BIT = 1;
+const int	SIZE_8BIT = 8;
+const int	SIZE_16BIT = 16;
+const int	SIZE_32BIT = 32;
 

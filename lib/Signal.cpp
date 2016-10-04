@@ -42,13 +42,13 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (deviceSignal.isAnalogSignal())
 	{
-		m_type = E::SignalType::Analog;
+		m_signalType = E::SignalType::Analog;
 	}
 	else
 	{
 		if (deviceSignal.isDiscreteSignal())
 		{
-			m_type = E::SignalType::Discrete;
+			m_signalType = E::SignalType::Discrete;
 		}
 		else
 		{
@@ -87,19 +87,12 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
 	m_equipmentID = deviceSignal.equipmentIdTemplate();
 
-	if (m_type == E::SignalType::Analog)
+	if (m_signalType == E::SignalType::Analog)
 	{
-		m_dataFormat = deviceSignal.format();
-
-		assert(m_dataFormat == E::DataFormat::Float || m_dataFormat == E::DataFormat::SignedInt);
-
-		m_dataSize = 32;
+		setAnalogSignalFormat(deviceSignal.format());
 	}
-	else
-	{
-		m_dataFormat = E::DataFormat::UnsignedInt;
-		m_dataSize = deviceSignal.size();
-	}
+
+	setDataSize(m_signalType, m_analogSignalFormat);
 }
 
 
@@ -112,7 +105,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_checkedOut = signal.m_checkedOut;
 	m_userID = signal.m_userID;
 	m_channel = signal.m_channel;
-	m_type = signal.m_type;
+	m_signalType = signal.m_signalType;
 	m_created = signal.m_created;
 	m_deleted = signal.m_deleted;
 	m_instanceCreated = signal.m_instanceCreated;
@@ -123,7 +116,7 @@ Signal& Signal::operator =(const Signal& signal)
 
 	m_customAppSignalID = signal.m_customAppSignalID;
 	m_caption = signal.m_caption;
-	m_dataFormat = signal.m_dataFormat;
+	m_analogSignalFormat = signal.m_analogSignalFormat;
 	m_dataSize = signal.m_dataSize;
 	m_lowADC = signal.m_lowADC;
 	m_highADC = signal.m_highADC;
@@ -377,11 +370,11 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "SignalGroupID", &Signal::setSignalGroupID);
 	serializeField(attr, "SignalInstanceID", &Signal::setSignalInstanceID);
 //	serializeField(attr, "Channel", &Signal::setChannel);
-	serializeField(attr, "Type", &Signal::setType);
+	serializeField(attr, "Type", &Signal::setSignalType);
 	serializeField(attr, "StrID", &Signal::setAppSignalID);
 	serializeField(attr, "ExtStrID", &Signal::setCustomAppSignalID);
 	serializeField(attr, "Name", &Signal::setCaption);
-	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setDataFormat);
+	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setAnalogSignalFormat);
 	serializeField(attr, "DataSize", &Signal::setDataSize);
 	serializeField(attr, "LowADC", &Signal::setLowADC);
 	serializeField(attr, "HighADC", &Signal::setHighADC);
@@ -416,17 +409,53 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 }
 
 
-
-bool Signal::isCompatibleDataFormat(E::DataFormat /*afbDataFormat*/) const
+// for DeviceSignal.dataFormat conversion
+//
+void Signal::setAnalogSignalFormat(E::DataFormat dataFormat)
 {
-	return true;
+	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
+
+	// values of corresponding members of enums E::AppSignalDataFormat and E::DataFormat are equal!
+	//
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(dataFormat);
+}
+
+
+void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
+{
+	if (signalType == E::SignalType::Discrete)
+	{
+		m_dataSize = DISCRETE_SIZE;
+	}
+	else
+	{
+		if (signalType == E::SignalType::Analog)
+		{
+			switch(dataFormat)
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				m_dataSize = FLOAT32_SIZE;
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				m_dataSize = SIGNED_INT32_SIZE;
+				break;
+
+			default:
+				assert(false);		// unknown data format
+			}
+		}
+		else
+		{
+			assert(false);			// unknown signal type
+		}
+	}
 }
 
 
 SignalSet::SignalSet()
 {
 }
-
 
 SignalSet::~SignalSet()
 {
@@ -565,12 +594,12 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("GroupID", signalGroupID());
 	xml.writeIntAttribute("InstanceID", signalInstanceID());
 	xml.writeIntAttribute("Channel", channelInt());
-	xml.writeIntAttribute("Type", typeInt());
+	xml.writeIntAttribute("Type", signalTypeInt());
 	xml.writeStringAttribute("AppSignalID", appSignalID());
 	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
 	xml.writeStringAttribute("Caption", caption());
 	xml.writeStringAttribute("EquipmentID", equipmentID());
-	xml.writeIntAttribute("DataFormat", dataFormatInt());
+	xml.writeIntAttribute("DataFormat", analogSignalFormatInt());
 	xml.writeIntAttribute("DataSize", dataSize());
 	xml.writeIntAttribute("LowADC", lowADC());
 	xml.writeIntAttribute("HighADC", highADC());
@@ -636,7 +665,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	int type = 0;
 
 	result &= xml.readIntAttribute("Type", &type);
-	m_type = static_cast<E::SignalType>(type);
+	m_signalType = static_cast<E::SignalType>(type);
 
 	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
 	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
@@ -644,7 +673,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
 
 	result &= xml.readIntAttribute("DataFormat", &intValue);
-	m_dataFormat = static_cast<E::DataFormat>(intValue);
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(intValue);
 
 	result &= xml.readIntAttribute("DataSize", &m_dataSize);
 	result &= xml.readIntAttribute("LowADC", &m_lowADC);
@@ -733,7 +762,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_checkedout(m_checkedOut);
 	s->set_userid(m_userID);
 	s->set_subsystemchannel(TO_INT(m_channel));
-	s->set_type(m_type);
+	s->set_type(m_signalType);
 	s->set_created(m_created.toMSecsSinceEpoch());
 	s->set_deleted(m_deleted);
 	s->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
@@ -741,7 +770,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_appsignalid(m_appSignalID.toStdString());
 	s->set_customappsignalid(m_customAppSignalID.toStdString());
 	s->set_caption(m_caption.toStdString());
-	s->set_dataformat(static_cast<::google::protobuf::int32>(m_dataFormat));
+	s->set_dataformat(static_cast<::google::protobuf::int32>(m_analogSignalFormat));
 	s->set_datasize(m_dataSize);
 	s->set_lowadc(m_lowADC);
 	s->set_highadc(m_highADC);
@@ -834,7 +863,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_type())
 	{
-		m_type = static_cast<E::SignalType>(s->type());
+		m_signalType = static_cast<E::SignalType>(s->type());
 	}
 
 	if (s->has_created())
@@ -874,7 +903,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if(s->has_dataformat())
 	{
-		m_dataFormat = static_cast<E::DataFormat>(s->dataformat());
+		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s->dataformat());
 	}
 
 	if (s->has_datasize())
@@ -1072,6 +1101,46 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 		m_ramAddr.setBit(s->ramaddrbit());
 	}
 }
+
+
+bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size) const
+{
+	if (m_signalType != signalType)
+	{
+		return false;
+	}
+
+	if (m_signalType == E::SignalType::Analog)
+	{
+		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 &&
+			(dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE))
+		{
+			return true;
+		}
+
+		if (m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32 &&
+			(dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	if (m_signalType == E::SignalType::Discrete)
+	{
+		if (size == DISCRETE_SIZE)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	assert(false);
+	return false;
+}
+
 
 // --------------------------------------------------------------------------------------------------------
 //
