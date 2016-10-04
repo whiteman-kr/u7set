@@ -21,6 +21,7 @@ public:
 private:
 	void fillTree();
 	void itemSelected(QTreeWidgetItem* item, int column);
+	void itemDoubleClicked(QModelIndex index);
 
 public:
 	std::shared_ptr<VFrame30::UfbSchema> result();

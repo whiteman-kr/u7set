@@ -4346,6 +4346,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 			//
 			if (sameXPosCount > 1)
 			{
+				assert(currentPointIndex > 0);
 				result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
 				currentPointIndex--;
 			}
@@ -4364,6 +4365,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 			//
 			if (sameYPosCount > 1)
 			{
+				assert(currentPointIndex > 0);
 				result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
 				currentPointIndex--;
 			}
@@ -4375,17 +4377,17 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 	// If some pairs with same coordinate values are placed at the end of
 	// the line, we must remove them!
 	//
-	if (sameXPosCount > 1 || sameYPosCount > 1)
-	{
-		if (sameYPosCount > 1)
-		{
-			result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
-		}
 
-		if (sameXPosCount > 1)
-		{
-			result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
-		}
+	if (sameYPosCount > 1)
+	{
+		assert(currentPointIndex == result.size());
+		result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
+	}
+
+	if (sameXPosCount > 1)
+	{
+		assert(currentPointIndex == result.size());
+		result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
 	}
 
 	return result;

@@ -11,6 +11,7 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 
 	ui->ufbElements->setHeaderLabel(tr("Caption"));
 	ui->ufbElements->setSortingEnabled(true);
+	ui->ufbElements->sortItems(0, Qt::AscendingOrder);
 
 	ui->caption->setReadOnly(true);
 	ui->description->setReadOnly(true);
@@ -22,7 +23,7 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 
 	connect (ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
 	connect (ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
-
+	connect (ui->ufbElements, &QTreeWidget::doubleClicked, this, &ChooseUfbDialog::itemDoubleClicked);
 	fillTree();
 }
 
@@ -64,9 +65,9 @@ void ChooseUfbDialog::fillTree()
 				items.append(new QTreeWidgetItem(allSection, QStringList(ufb->caption())));
 			}
 		}
-
-		ui->ufbElements->expandAll();
 	}
+
+	ui->ufbElements->expandAll();
 }
 
 void ChooseUfbDialog::itemSelected(QTreeWidgetItem* item, int column)
@@ -88,6 +89,27 @@ void ChooseUfbDialog::itemSelected(QTreeWidgetItem* item, int column)
 	}
 
 	return;
+}
+
+void ChooseUfbDialog::itemDoubleClicked(QModelIndex index)
+{
+	QString itemName = index.sibling(index.row(), 0).data(Qt::DisplayRole).toString();
+
+	qDebug() << itemName;
+
+	for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
+	{
+		if (ufb->caption() == itemName)
+		{
+			m_selectedUfb = ufb;
+
+			ui->caption->setText(ufb->caption());
+			ui->description->setPlainText(ufb->description());
+			ui->ok->setEnabled(true);
+
+			accept();
+		}
+	}
 }
 
 std::shared_ptr<VFrame30::UfbSchema> ChooseUfbDialog::result()
