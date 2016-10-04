@@ -122,21 +122,21 @@ namespace VFrame30
 			QString paramValue;
 			switch (param.type())
 			{
-				case Afb::AfbSignalType::Analog:
+				case E::SignalType::Analog:
 					{
 						QVariant a = propertyValue(param.caption());
 
 						switch (param.dataFormat())
 						{
-							case Afb::AfbDataFormat::UnsignedInt:
+							case E::DataFormat::UnsignedInt:
 								paramValue = a.toString();
 								break;
 
-							case Afb::AfbDataFormat::SignedInt:
+							case E::DataFormat::SignedInt:
 								paramValue = a.toString();
 								break;
 
-							case Afb::AfbDataFormat::Float:
+							case E::DataFormat::Float:
 
 								paramValue.setNum(a.toDouble(), 'f', precision());
 
@@ -157,7 +157,7 @@ namespace VFrame30
 					}
 					break;
 
-				case Afb::AfbSignalType::Discrete:
+				case E::SignalType::Discrete:
 					{
 						QVariant d = property(param.caption().toStdString().c_str());
 						paramValue = d.toString();

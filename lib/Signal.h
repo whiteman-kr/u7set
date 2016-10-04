@@ -367,7 +367,7 @@ public:
 	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
 	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
 
-	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
+	bool isCompatibleDataFormat(E::DataFormat afbDataFormat) const;
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);

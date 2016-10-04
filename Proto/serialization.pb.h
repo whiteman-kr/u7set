@@ -6038,6 +6038,41 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 memoryarea() const;
   inline void set_memoryarea(::google::protobuf::int32 value);
 
+  // optional int32 appSignalLowAdc = 12 [default = 0];
+  inline bool has_appsignallowadc() const;
+  inline void clear_appsignallowadc();
+  static const int kAppSignalLowAdcFieldNumber = 12;
+  inline ::google::protobuf::int32 appsignallowadc() const;
+  inline void set_appsignallowadc(::google::protobuf::int32 value);
+
+  // optional int32 appSignalHighAdc = 13 [default = 65535];
+  inline bool has_appsignalhighadc() const;
+  inline void clear_appsignalhighadc();
+  static const int kAppSignalHighAdcFieldNumber = 13;
+  inline ::google::protobuf::int32 appsignalhighadc() const;
+  inline void set_appsignalhighadc(::google::protobuf::int32 value);
+
+  // optional double appSignalLowEngUnits = 14 [default = 0];
+  inline bool has_appsignallowengunits() const;
+  inline void clear_appsignallowengunits();
+  static const int kAppSignalLowEngUnitsFieldNumber = 14;
+  inline double appsignallowengunits() const;
+  inline void set_appsignallowengunits(double value);
+
+  // optional double appSignalHighEngUnits = 15 [default = 100];
+  inline bool has_appsignalhighengunits() const;
+  inline void clear_appsignalhighengunits();
+  static const int kAppSignalHighEngUnitsFieldNumber = 15;
+  inline double appsignalhighengunits() const;
+  inline void set_appsignalhighengunits(double value);
+
+  // optional int32 appSignalDataFormat = 16 [default = 2];
+  inline bool has_appsignaldataformat() const;
+  inline void clear_appsignaldataformat();
+  static const int kAppSignalDataFormatFieldNumber = 16;
+  inline ::google::protobuf::int32 appsignaldataformat() const;
+  inline void set_appsignaldataformat(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
   inline void set_has_obsoletetype();
@@ -6062,6 +6097,16 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_function();
   inline void set_has_memoryarea();
   inline void clear_has_memoryarea();
+  inline void set_has_appsignallowadc();
+  inline void clear_has_appsignallowadc();
+  inline void set_has_appsignalhighadc();
+  inline void clear_has_appsignalhighadc();
+  inline void set_has_appsignallowengunits();
+  inline void clear_has_appsignallowengunits();
+  inline void set_has_appsignalhighengunits();
+  inline void clear_has_appsignalhighengunits();
+  inline void set_has_appsignaldataformat();
+  inline void clear_has_appsignaldataformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -6076,9 +6121,14 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 function_;
   ::google::protobuf::int32 memoryarea_;
+  ::google::protobuf::int32 appsignallowadc_;
+  double appsignallowengunits_;
+  ::google::protobuf::int32 appsignalhighadc_;
+  ::google::protobuf::int32 appsignaldataformat_;
+  double appsignalhighengunits_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -14237,6 +14287,116 @@ inline ::google::protobuf::int32 DeviceSignal::memoryarea() const {
 inline void DeviceSignal::set_memoryarea(::google::protobuf::int32 value) {
   set_has_memoryarea();
   memoryarea_ = value;
+}
+
+// optional int32 appSignalLowAdc = 12 [default = 0];
+inline bool DeviceSignal::has_appsignallowadc() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void DeviceSignal::set_has_appsignallowadc() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void DeviceSignal::clear_has_appsignallowadc() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void DeviceSignal::clear_appsignallowadc() {
+  appsignallowadc_ = 0;
+  clear_has_appsignallowadc();
+}
+inline ::google::protobuf::int32 DeviceSignal::appsignallowadc() const {
+  return appsignallowadc_;
+}
+inline void DeviceSignal::set_appsignallowadc(::google::protobuf::int32 value) {
+  set_has_appsignallowadc();
+  appsignallowadc_ = value;
+}
+
+// optional int32 appSignalHighAdc = 13 [default = 65535];
+inline bool DeviceSignal::has_appsignalhighadc() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void DeviceSignal::set_has_appsignalhighadc() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void DeviceSignal::clear_has_appsignalhighadc() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void DeviceSignal::clear_appsignalhighadc() {
+  appsignalhighadc_ = 65535;
+  clear_has_appsignalhighadc();
+}
+inline ::google::protobuf::int32 DeviceSignal::appsignalhighadc() const {
+  return appsignalhighadc_;
+}
+inline void DeviceSignal::set_appsignalhighadc(::google::protobuf::int32 value) {
+  set_has_appsignalhighadc();
+  appsignalhighadc_ = value;
+}
+
+// optional double appSignalLowEngUnits = 14 [default = 0];
+inline bool DeviceSignal::has_appsignallowengunits() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void DeviceSignal::set_has_appsignallowengunits() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void DeviceSignal::clear_has_appsignallowengunits() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void DeviceSignal::clear_appsignallowengunits() {
+  appsignallowengunits_ = 0;
+  clear_has_appsignallowengunits();
+}
+inline double DeviceSignal::appsignallowengunits() const {
+  return appsignallowengunits_;
+}
+inline void DeviceSignal::set_appsignallowengunits(double value) {
+  set_has_appsignallowengunits();
+  appsignallowengunits_ = value;
+}
+
+// optional double appSignalHighEngUnits = 15 [default = 100];
+inline bool DeviceSignal::has_appsignalhighengunits() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void DeviceSignal::set_has_appsignalhighengunits() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void DeviceSignal::clear_has_appsignalhighengunits() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void DeviceSignal::clear_appsignalhighengunits() {
+  appsignalhighengunits_ = 100;
+  clear_has_appsignalhighengunits();
+}
+inline double DeviceSignal::appsignalhighengunits() const {
+  return appsignalhighengunits_;
+}
+inline void DeviceSignal::set_appsignalhighengunits(double value) {
+  set_has_appsignalhighengunits();
+  appsignalhighengunits_ = value;
+}
+
+// optional int32 appSignalDataFormat = 16 [default = 2];
+inline bool DeviceSignal::has_appsignaldataformat() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void DeviceSignal::set_has_appsignaldataformat() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void DeviceSignal::clear_has_appsignaldataformat() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void DeviceSignal::clear_appsignaldataformat() {
+  appsignaldataformat_ = 2;
+  clear_has_appsignaldataformat();
+}
+inline ::google::protobuf::int32 DeviceSignal::appsignaldataformat() const {
+  return appsignaldataformat_;
+}
+inline void DeviceSignal::set_appsignaldataformat(::google::protobuf::int32 value) {
+  set_has_appsignaldataformat();
+  appsignaldataformat_ = value;
 }
 
 // -------------------------------------------------------------------

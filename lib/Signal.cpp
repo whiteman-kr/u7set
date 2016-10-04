@@ -417,24 +417,9 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 
 
 
-bool Signal::isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const
+bool Signal::isCompatibleDataFormat(E::DataFormat /*afbDataFormat*/) const
 {
-	if (m_dataFormat == E::DataFormat::Float && afbDataFormat == Afb::AfbDataFormat::Float)
-	{
-		return true;
-	}
-
-	if (m_dataFormat == E::DataFormat::SignedInt && afbDataFormat == Afb::AfbDataFormat::SignedInt)
-	{
-		return true;
-	}
-
-	if (m_dataFormat == E::DataFormat::UnsignedInt && afbDataFormat == Afb::AfbDataFormat::UnsignedInt)
-	{
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 
@@ -756,7 +741,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_appsignalid(m_appSignalID.toStdString());
 	s->set_customappsignalid(m_customAppSignalID.toStdString());
 	s->set_caption(m_caption.toStdString());
-	s->set_dataformat(m_dataFormat);
+	s->set_dataformat(static_cast<::google::protobuf::int32>(m_dataFormat));
 	s->set_datasize(m_dataSize);
 	s->set_lowadc(m_lowADC);
 	s->set_highadc(m_highADC);

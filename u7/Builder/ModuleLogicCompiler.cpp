@@ -1962,7 +1962,7 @@ namespace Builder
 
 		switch(fbInput.type())
 		{
-		case Afb::AfbSignalType::Discrete:
+		case E::SignalType::Discrete:
 			// input connected to discrete input
 			//
 			if (!constItem.isIntegral())
@@ -1978,7 +1978,7 @@ namespace Builder
 			}
 			break;
 
-		case Afb::AfbSignalType::Analog:
+		case E::SignalType::Analog:
 			// const connected to analog input
 			//
 
@@ -1992,12 +1992,12 @@ namespace Builder
 			case SIZE_32BIT:
 				switch(fbInput.dataFormat())
 				{
-				case Afb::AfbDataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.intValue()));
 					break;
 
-				case Afb::AfbDataFormat::Float:
+				case E::DataFormat::Float:
 					cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.floatValue()));
 					break;
@@ -6248,11 +6248,11 @@ namespace Builder
 
 		switch(s.type())			// Afb::AfbSignalType
 		{
-		case Afb::AfbSignalType::Analog:
+		case E::SignalType::Analog:
 			signalType = E::SignalType::Analog;
 			break;
 
-		case Afb::AfbSignalType::Discrete:
+		case E::SignalType::Discrete:
 			signalType = E::SignalType::Discrete;
 			break;
 
@@ -6265,15 +6265,15 @@ namespace Builder
 
 		switch(s.dataFormat())		// Afb::AfbDataFormat
 		{
-		case Afb::AfbDataFormat::Float:
+		case E::DataFormat::Float:
 			dataFormat = E::DataFormat::Float;
 			break;
 
-		case Afb::AfbDataFormat::UnsignedInt:
+		case E::DataFormat::UnsignedInt:
 			dataFormat = E::DataFormat::UnsignedInt;
 			break;
 
-		case Afb::AfbDataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			dataFormat = E::DataFormat::SignedInt;
 			break;
 
@@ -6475,17 +6475,17 @@ namespace Builder
 
 			switch(afbParam.dataFormat())
 			{
-			case Afb::SignedInt:
+			case E::DataFormat::SignedInt:
 				m_dataFormat = E::DataFormat::SignedInt;
 				m_signedIntValue = qv.toInt();
 				break;
 
-			case Afb::UnsignedInt:
+			case E::DataFormat::UnsignedInt:
 				m_dataFormat = E::DataFormat::UnsignedInt;
 				m_unsignedIntValue = qv.toUInt();
 				break;
 
-			case Afb::Float:
+			case E::DataFormat::Float:
 				assert(m_dataSize == SIZE_32BIT);
 				m_dataFormat = E::DataFormat::Float;
 				m_floatValue = qv.toFloat();

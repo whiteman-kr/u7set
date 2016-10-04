@@ -146,7 +146,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	str = E::valueToString<E::SignalType>(m_signal.type());
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(m_signal.dataFormat()));
+		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::DataFormat>(static_cast<int>(m_signal.dataFormat())));
 	}
 
 	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutTypeInt()));

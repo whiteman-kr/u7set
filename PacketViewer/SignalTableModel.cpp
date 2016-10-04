@@ -75,7 +75,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 				}
 				switch (signal.dataFormat())
 				{
-				case E::SignedInt:
+				case E::DataFormat::SignedInt:
 					switch (signal.dataSize() / 8)
 					{
 					case sizeof(qint8): return getAdc<qint8>(signal);
@@ -86,9 +86,9 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 					}
 
 					break;
-				case E::UnsignedInt:
+				case E::DataFormat::UnsignedInt:
 					return getAdc<quint64>(signal);
-				case E::Float:
+				case E::DataFormat::Float:
 					static_assert(sizeof(float) == sizeof(quint32) && sizeof(double) == sizeof(quint64), "Please check size of basic types");
 					switch (signal.dataSize() / 8)
 					{
