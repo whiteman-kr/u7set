@@ -1537,33 +1537,56 @@ SignalsTabPage::~SignalsTabPage()
 QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
 {
 	QVector<Signal> signalVector;
-	QStringList signalTypeList;
 
-	auto values = E::enumValues<E::SignalType>();
-	for (auto pair : values)
+	QDialog signalCreationSettingsDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	QFormLayout* fl = new QFormLayout(&signalCreationSettingsDialog);
+
+	QList<QCheckBox*> checkBoxList;
+	QStringList selectedLmIdList;
+
+	for (QString lmId : lmIdList)
 	{
-		signalTypeList << pair.second;
+		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
+		enableLmCheck->setChecked(true);
+
+		fl->addRow(enableLmCheck);
+		checkBoxList.append(enableLmCheck);
 	}
 
-	bool ok = true;
-	E::SignalType type = E::SignalType::Discrete;
-	QString typeString = QInputDialog::getItem(parent, "Select signal type", "Signal type:", signalTypeList, TO_INT(type), false, &ok);
-	if (!ok)
+	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
+	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
+	signalTypeCombo->setCurrentIndex(0);
+
+	fl->addRow(tr("Signal type"), signalTypeCombo);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &signalCreationSettingsDialog, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &signalCreationSettingsDialog, &QDialog::reject);
+
+	fl->addRow(buttonBox);
+
+	signalCreationSettingsDialog.setLayout(fl);
+
+	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
+
+	if (signalCreationSettingsDialog.exec() != QDialog::Accepted)
 	{
 		return QStringList();
 	}
 
-	for (auto pair : values)
+	E::SignalType type = static_cast<E::SignalType>(signalTypeCombo->currentIndex());
+
+	for (QCheckBox* check : checkBoxList)
 	{
-		if (typeString == pair.second)
+		if (check->isChecked())
 		{
-			type = static_cast<E::SignalType>(pair.first);
-			break;
+			selectedLmIdList << check->text();
 		}
 	}
 
 	int channelNo = 0;
-	for (QString lmId : lmIdList)
+	for (QString lmId : selectedLmIdList)
 	{
 		QString signalSuffix = QString("%1%2").arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
 		if (lmIdList.count() > 1)
