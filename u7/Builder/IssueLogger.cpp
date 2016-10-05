@@ -523,7 +523,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
+				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
