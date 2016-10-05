@@ -144,6 +144,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 		signalProperties->propertyByCaption("Type")->setReadOnly(true);
 		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
+		signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
 
 		if (signalProperties->signal().isDiscrete())
 		{
@@ -158,8 +159,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
 				signalProperties->signal().setDataSize(1);
 			}*/
-			signalProperties->propertyByCaption("DataFormat")->setReadOnly(true);
-			signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
+			signalProperties->propertyByCaption("DataFormat")->setVisible(false);
 		}
 
 		if (!signalProperties->signal().isInternal())

@@ -12,8 +12,9 @@ class ObjectManager
 public:
 	ObjectManager();
 
-	int objectsCount();
 	TuningObject object(int index);
+
+	std::vector<TuningObject> objects();
 
 	int tuningSourcesCount();
 	QString tuningSourceEquipmentId(int index);

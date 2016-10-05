@@ -59,7 +59,10 @@ void TcpAppDataClient::onConnection()
 
 void TcpAppDataClient::onDisconnection()
 {
-	m_updateStatesTimer->stop();
+	if (m_updateStatesTimer != nullptr)
+	{
+		m_updateStatesTimer->stop();
+	}
 
 	m_unitList.clear();
 	m_signalHahes.clear();
@@ -353,6 +356,11 @@ void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 r
 
 void TcpAppDataClient::getNextStatePart()
 {
+	if (isClearToSendRequest() == false)
+	{
+		return;
+	}
+
 	int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
 							((m_totalItemsCount % ADS_GET_APP_SIGNAL_STATE_MAX) == 0 ? 0 : 1);
 

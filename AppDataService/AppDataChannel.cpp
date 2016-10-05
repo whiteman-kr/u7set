@@ -151,7 +151,7 @@ void AppDataChannel::createAndBindSocket()
 		if (m_socketBound == true)
 		{
 			QString str = QString("DataChannel: socket bound on %1 - OK").arg(m_dataReceivingIP.addressPortStr());
-			qDebug() << str;
+			qDebug() << C_STR(str);
 		}
 	}
 }
@@ -236,13 +236,11 @@ void AppDataChannel::onTimer1s()
 	createAndBindSocket();
 	checkDataSourcesDataReceiving();
 
-	if (m_receivedCount != 0)
+	if (m_receivedFramesCount != 0)
 	{
-		qDebug() << "Receive per second " << m_receivedCount << "losted " << m_lostedFramesCount;
+		qDebug() << "Receive per second " << m_receivedFramesCount;
 
-		m_receivedCount = 0;
-
-		m_lostedFramesCount = 0;
+		m_receivedFramesCount = 0;
 	}
 }
 
@@ -257,7 +255,7 @@ void AppDataChannel::onSocketReadyRead()
 
 	QHostAddress from;
 
-	for(int i =0; i < 1000; i++)
+	for(int i = 0; i < 1000; i++)
 	{
 		qint64 size = m_socket->pendingDatagramSize();
 
@@ -266,76 +264,39 @@ void AppDataChannel::onSocketReadyRead()
 			break;
 		}
 
-		if (size > sizeof(m_rupFrame))
-		{
-			assert(false);
-			m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
-			qDebug() << "DataChannel: datagram too big";
-			return;
-		}
-
 		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&m_rupFrame), sizeof(m_rupFrame), &from);
-
-		m_receivedCount++;
 
 		if (result == -1)
 		{
 			closeSocket();
-			qDebug() << "DataChannel: read socket error";
+			qDebug() << "DataChannel" << C_STR(m_dataReceivingIP.addressPortStr()) << " read socket error";
+			return;
 		}
 
-		quint32 headerNumerator = (quint32)reverseUint16(m_rupFrame.header.numerator);
+		m_receivedFramesCount++;
 
-		if (m_firstRupFrame == true)
-		{
-			m_rupFrameNumerator = headerNumerator;
+		quint32 ip = from.toIPv4Address();
 
-			m_rupFrameNumerator++;
-
-			m_firstRupFrame = false;
-		}
-		else
-		{
-			if (m_rupFrameNumerator != headerNumerator)
-			{
-				if (m_rupFrameNumerator < headerNumerator)
-				{
-					m_lostedFramesCount += headerNumerator - m_rupFrameNumerator;
-				}
-				else
-				{
-					m_lostedFramesCount += 65535 - m_rupFrameNumerator + headerNumerator;
-				}
-
-				m_rupFrameNumerator = headerNumerator;
-			}
-
-			m_rupFrameNumerator++;
-		}
-	}
-
-//	assert(result == sizeof(m_rupFrame));
-
-	quint32 ip = from.toIPv4Address();
-
-	if (m_appDataSources.contains(ip))
-	{
-		DataSource* dataSource = m_appDataSources[ip];
+		AppDataSource* dataSource = m_appDataSources.value(ip, nullptr);
 
 		if (dataSource != nullptr)
 		{
-			dataSource->processPacket(ip, m_rupFrame, m_rupDataQueue);
+			if (size != sizeof(m_rupFrame))
+			{
+				dataSource->incBadFrameSizeError();
+			}
+			else
+			{
+				//dataSource->pushRupFrame(m_rupFrame);
+				dataSource->processPacket(ip, m_rupFrame, m_rupDataQueue);
+			}
 		}
 		else
 		{
-			assert(false);
-		}
-	}
-	else
-	{
-		if (m_unknownDataSources.contains(ip) == false)
-		{
-			m_unknownDataSources.insert(ip, ip);
+			if (m_unknownDataSources.contains(ip) == false && m_unknownDataSources.count() < 500)
+			{
+				m_unknownDataSources.insert(ip, ip);
+			}
 		}
 	}
 }

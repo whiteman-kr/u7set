@@ -107,8 +107,6 @@ private:
 
 	std::vector<std::pair<Hash, AppSignalState>> m_signalsTable;
 
-	std::map<Hash, Signal> m_signalsParamCache;
-
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 

@@ -386,7 +386,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
+		case SC_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		/*case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
@@ -844,7 +844,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::DataFormat>(value.toInt())); break;
+			case SC_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -1065,14 +1065,13 @@ void SignalsModel::addSignal()
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
-		signal.setAnalogSignalFormat(E::DataFormat::Float);
-		signal.setDataSize(32);
+		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+		signal.setDataSize(FLOAT32_SIZE);
 		signal.setSignalType(E::SignalType::Analog);
 	}
 	else
 	{
-		signal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
-		signal.setDataSize(1);
+		signal.setDataSize(DISCRETE_SIZE);
 		signal.setSignalType(E::SignalType::Discrete);
 	}
 	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
@@ -1538,33 +1537,56 @@ SignalsTabPage::~SignalsTabPage()
 QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
 {
 	QVector<Signal> signalVector;
-	QStringList signalTypeList;
 
-	auto values = E::enumValues<E::SignalType>();
-	for (auto pair : values)
+	QDialog signalCreationSettingsDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	QFormLayout* fl = new QFormLayout(&signalCreationSettingsDialog);
+
+	QList<QCheckBox*> checkBoxList;
+	QStringList selectedLmIdList;
+
+	for (QString lmId : lmIdList)
 	{
-		signalTypeList << pair.second;
+		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
+		enableLmCheck->setChecked(true);
+
+		fl->addRow(enableLmCheck);
+		checkBoxList.append(enableLmCheck);
 	}
 
-	bool ok = true;
-	E::SignalType type = E::SignalType::Discrete;
-	QString typeString = QInputDialog::getItem(parent, "Select signal type", "Signal type:", signalTypeList, TO_INT(type), false, &ok);
-	if (!ok)
+	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
+	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
+	signalTypeCombo->setCurrentIndex(0);
+
+	fl->addRow(tr("Signal type"), signalTypeCombo);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &signalCreationSettingsDialog, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &signalCreationSettingsDialog, &QDialog::reject);
+
+	fl->addRow(buttonBox);
+
+	signalCreationSettingsDialog.setLayout(fl);
+
+	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
+
+	if (signalCreationSettingsDialog.exec() != QDialog::Accepted)
 	{
 		return QStringList();
 	}
 
-	for (auto pair : values)
+	E::SignalType type = static_cast<E::SignalType>(signalTypeCombo->currentIndex());
+
+	for (QCheckBox* check : checkBoxList)
 	{
-		if (typeString == pair.second)
+		if (check->isChecked())
 		{
-			type = static_cast<E::SignalType>(pair.first);
-			break;
+			selectedLmIdList << check->text();
 		}
 	}
 
 	int channelNo = 0;
-	for (QString lmId : lmIdList)
+	for (QString lmId : selectedLmIdList)
 	{
 		QString signalSuffix = QString("%1%2").arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
 		if (lmIdList.count() > 1)
@@ -1590,14 +1612,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		Signal newSignal;
 
 		newSignal.setSignalType(type);
+
 		if (type == E::SignalType::Analog)
 		{
-			newSignal.setAnalogSignalFormat(E::DataFormat::Float);
+			newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+			newSignal.setDataSize(FLOAT32_SIZE);
 		}
 		else
 		{
-			newSignal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
+			newSignal.setDataSize(DISCRETE_SIZE);
 		}
+
 		newSignal.setAppSignalID(newSignalStrId);
 		newSignal.setCustomAppSignalID(newSignalExtStrId);
 		newSignal.setEquipmentID(lmId);

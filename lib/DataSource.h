@@ -10,6 +10,9 @@
 #include "../Proto/network.pb.h"
 
 
+typedef Queue<RupFrame> RupFramesQueue;
+
+
 struct RupData
 {
 	quint32 sourceIP;
@@ -135,8 +138,9 @@ protected:
 	qint64 m_errorProtocolVersion = 0;
 	qint64 m_errorFramesQuantity = 0;
 	qint64 m_errorFrameNo = 0;
-	qint64 m_lostedPackets = 0;
+	qint64 m_lostedFramesCount = 0;
 	qint64 m_errorDataID = 0;
+	qint64 m_errorBadFrameSize = 0;
 
 	bool m_dataProcessingEnabled = true;
 
@@ -144,15 +148,17 @@ protected:
 
 	//
 
-	bool m_firstPacket = true;
-	quint16 m_prevNumerator = 0;
+	bool m_firstRupFrame = true;
+	quint16 m_rupFrameNumerator = 0;
 
 	//
 
-	RupFrame* m_rupFrames = nullptr;
-	char* m_framesData = nullptr;
+	RupFrame m_rupFrames[RUP_MAX_FRAME_COUNT];
+	char m_framesData[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 
 	//
+
+	RupFramesQueue m_rupFramesQueue;
 
 public:
 	DataSource();
@@ -255,4 +261,8 @@ public:
 
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
+
+	void pushRupFrame(const RupFrame& rupFrame);
+
+	void incBadFrameSizeError() { m_errorBadFrameSize++; }
 };
