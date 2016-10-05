@@ -4,6 +4,7 @@
 #include "../../VFrame30/SchemaItem.h"
 #include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
+#include "../../VFrame30/UfbSchema.h"
 
 
 // Forware delcarations
@@ -227,8 +228,12 @@ namespace Builder
 	protected:
 		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out);
 
+		bool loadUfbSchemas();
+
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
+
 		bool checkAfbItemsVersion(VFrame30::LogicSchema* logicSchema);
+		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema);
 
 		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema);
 
@@ -274,6 +279,7 @@ namespace Builder
 
 		AppLogicData* m_applicationData = nullptr;
 		Afb::AfbElementCollection* m_afbCollection = nullptr;
+		std::map<QString, std::shared_ptr<VFrame30::UfbSchema>> m_ufbs;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;
 	};

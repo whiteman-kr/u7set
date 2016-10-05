@@ -47,7 +47,7 @@ namespace VFrame30
 
 		// Create input output signals in VFrame30::FblEtem
 		//
-		updateElement(ufbSchema, errorMsg);
+		updateUfbElement(ufbSchema, errorMsg);
 
 		return;
 	}
@@ -196,7 +196,7 @@ namespace VFrame30
 	}
 
 
-	bool SchemaItemUfb::updateElement(const UfbSchema* ufbSchema, QString* errorMessage)
+	bool SchemaItemUfb::updateUfbElement(const UfbSchema* ufbSchema, QString* errorMessage)
 	{
 		if (errorMessage == nullptr)
 		{
@@ -252,6 +252,20 @@ namespace VFrame30
 				break;
 			}
 		}
+
+		// Sort in/outs by vert pos
+		//
+		std::sort(ufbInputs.begin(), ufbInputs.end(),
+				[](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
+				{
+					return s1->topDocPt() < s2->topDocPt();
+				});
+
+		std::sort(ufbOutputs.begin(), ufbOutputs.end(),
+				[](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
+				{
+					return s1->topDocPt() < s2->topDocPt();
+				});
 
 		// Create in/outs in this item
 		//

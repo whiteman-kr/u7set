@@ -294,6 +294,24 @@ namespace Builder
 				  tr("Load units from the project database error."));
 	}
 
+	/// IssueCode: PDB2005
+	///
+	/// IssueType: Error
+	///
+	/// Title: Load UFB schemas from the project database error.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Load UFB schemas from the project database error. Can occur on database connection lost or schema has incompatible format.
+	///
+	void IssueLogger::errPDB2005()
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2005,
+				  tr("Load UFB schemas from the project database error."));
+	}
+
 
 	// CFG			FSC configuration						3000-3999
 	//
@@ -1022,7 +1040,7 @@ namespace Builder
 	///		%3 Logic schema StrID
 	///
 	/// Description:
-	///		To proccess logic block it is required AFB description which in not found.
+	///		To proccess logic block it is required AFB description which in not found. Open schema to upfate AFBs.
 	///
 	void IssueLogger::errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid)
 	{
@@ -1034,6 +1052,59 @@ namespace Builder
 				  .arg(schemaItem)
 				  .arg(schemaItemAfbVersion)
 				  .arg(latesAfbVersion)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4009
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
+	///
+	/// Parameters:
+	///		%1 UFB Schema ID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
+	///
+	/// Description:
+	///		To proccess logic block it is required UFB schema which in not found.
+	///
+	void IssueLogger::errALP4009(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4009,
+				  tr("UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  .arg(ufbElement)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4010
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4').
+	///
+	/// Parameters:
+	///		%1 UFB Schema ID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
+	///
+	/// Description:
+	///		SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4'). Open schema to upfate AFBs.
+	///
+	void IssueLogger::errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4010,
+				  tr("SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4').")
+				  .arg(schemaItem)
+				  .arg(schemaItemUfbVersion)
+				  .arg(latesUfbVersion)
 				  .arg(schema));
 	}
 

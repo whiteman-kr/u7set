@@ -232,7 +232,9 @@ public:
 	//
 public:
 	void setPageTitle();
+
 	void updateAfbSchemaItems();
+	void updateUfbSchemaItems();
 
 protected:
 	void CreateActions();

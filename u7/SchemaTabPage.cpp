@@ -723,10 +723,11 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
-	// Update AFBs after creating tab page, so it will be possible to set new (modified) caption
+	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
 	// to the tab page title
 	//
 	editTabPage->updateAfbSchemaItems();
+	editTabPage->updateUfbSchemaItems();
 
 	return;
 }
@@ -1106,6 +1107,19 @@ void EditSchemaTabPage::updateAfbSchemaItems()
 	}
 
 	m_schemaWidget->updateAfbsForSchema();
+
+	return;
+}
+
+void EditSchemaTabPage::updateUfbSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
+
+	m_schemaWidget->updateUfbsForSchema();
 
 	return;
 }

@@ -39,7 +39,7 @@ namespace VFrame30
 	public:
 		virtual QString buildName() const override;
 
-		bool updateElement(const UfbSchema* ufbSchema, QString* errorMsg);
+		bool updateUfbElement(const UfbSchema* ufbSchema, QString* errorMsg);
 
 		// Properties and Data
 		//
