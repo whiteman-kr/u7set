@@ -655,7 +655,6 @@ message SchemaItemUfb
     optional string ufbSchemaId = 1;
 	optional string ufbCaption = 2;
 	optional int32 ufbVersion = 3 [default = -1];
-	optional string label = 6;
 }
 
 

@@ -61,6 +61,7 @@ namespace Builder
 		void errPDB2002(int fileId, QString fileName, QString databaseMessage);
 		void errPDB2003();										// Load signals from the project database error
 		void errPDB2004();										// Load units from the project database error
+		void errPDB2005();										// Load UFB schemas from the project database error
 
 		// CFG			FSC configuration						3000-3999
 		//
@@ -110,6 +111,9 @@ namespace Builder
 		void errALP4006(QString schema, QString schemaItem, QString pin, const std::vector<QUuid>& itemsUuids);
 		void errALP4007(QString schema, QString schemaItem, QString afbElement, QUuid itemUuid);
 		void errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid);
+		void errALP4009(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid);
+		void errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid);
+
 		void errALP4020(QString logicModule);
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);

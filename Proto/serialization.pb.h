@@ -5055,18 +5055,6 @@ class SchemaItemUfb : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 ufbversion() const;
   inline void set_ufbversion(::google::protobuf::int32 value);
 
-  // optional string label = 6;
-  inline bool has_label() const;
-  inline void clear_label();
-  static const int kLabelFieldNumber = 6;
-  inline const ::std::string& label() const;
-  inline void set_label(const ::std::string& value);
-  inline void set_label(const char* value);
-  inline void set_label(const char* value, size_t size);
-  inline ::std::string* mutable_label();
-  inline ::std::string* release_label();
-  inline void set_allocated_label(::std::string* label);
-
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemUfb)
  private:
   inline void set_has_ufbschemaid();
@@ -5075,18 +5063,15 @@ class SchemaItemUfb : public ::google::protobuf::Message {
   inline void clear_has_ufbcaption();
   inline void set_has_ufbversion();
   inline void clear_has_ufbversion();
-  inline void set_has_label();
-  inline void clear_has_label();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* ufbschemaid_;
   ::std::string* ufbcaption_;
-  ::std::string* label_;
   ::google::protobuf::int32 ufbversion_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -13029,76 +13014,6 @@ inline ::google::protobuf::int32 SchemaItemUfb::ufbversion() const {
 inline void SchemaItemUfb::set_ufbversion(::google::protobuf::int32 value) {
   set_has_ufbversion();
   ufbversion_ = value;
-}
-
-// optional string label = 6;
-inline bool SchemaItemUfb::has_label() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void SchemaItemUfb::set_has_label() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void SchemaItemUfb::clear_has_label() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void SchemaItemUfb::clear_label() {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    label_->clear();
-  }
-  clear_has_label();
-}
-inline const ::std::string& SchemaItemUfb::label() const {
-  return *label_;
-}
-inline void SchemaItemUfb::set_label(const ::std::string& value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(value);
-}
-inline void SchemaItemUfb::set_label(const char* value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(value);
-}
-inline void SchemaItemUfb::set_label(const char* value, size_t size) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* SchemaItemUfb::mutable_label() {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  return label_;
-}
-inline ::std::string* SchemaItemUfb::release_label() {
-  clear_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = label_;
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void SchemaItemUfb::set_allocated_label(::std::string* label) {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    delete label_;
-  }
-  if (label) {
-    set_has_label();
-    label_ = label;
-  } else {
-    clear_has_label();
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
 }
 
 // -------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include "../../VFrame30/SchemaItemAfb.h"
 #include "../../VFrame30/SchemaItemSignal.h"
 #include "../../VFrame30/SchemaItemConst.h"
+#include "../../VFrame30/SchemaItemUfb.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
 
@@ -1150,6 +1151,23 @@ namespace Builder
 			checkAfbItemsVersion(schema.get());
 		}
 
+		// Load UfbSchemas
+		//
+		LOG_MESSAGE(m_log, tr("Loading UFB schemas..."));
+		ok = loadUfbSchemas();
+
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Check SchemaItemUfb versions
+		//
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
+		{
+			checkUfbItemsVersion(schema.get());
+		}
+
 		// Parse application logic
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
@@ -1301,6 +1319,70 @@ namespace Builder
 		return true;
 	}
 
+	bool Parser::loadUfbSchemas()
+	{
+		m_ufbs.clear();
+
+		// Get User Functional Block List
+		//
+		std::vector<DbFileInfo> fileList;
+
+		bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + ::UfbFileExtension, true, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Get UFBs latest version from the DB
+		//
+		std::vector<std::shared_ptr<DbFile>> files;
+
+		ok = db()->getLatestVersion(fileList, &files, nullptr);
+
+		if (ok == false)
+		{
+			m_log->errPDB2005();
+			return false;
+		}
+
+		// Parse files, create actual UFBs
+		//
+		for (const std::shared_ptr<DbFile>& f : files)
+		{
+			if (f->deleted() == true ||
+				f->action() == VcsItemAction::Deleted)
+			{
+				continue;
+			}
+
+			std::shared_ptr<VFrame30::Schema> s = VFrame30::Schema::Create(f->data());
+
+			if (s == nullptr)
+			{
+				assert(s);
+				continue;
+			}
+
+			if (s->isUfbSchema() == false)
+			{
+				m_log->errPDB2005();
+				continue;
+			}
+
+			std::shared_ptr<VFrame30::UfbSchema> u =  std::dynamic_pointer_cast<VFrame30::UfbSchema>(s);
+			if (u == nullptr)
+			{
+				assert(u);
+				m_log->errPDB2005();
+				continue;
+			}
+
+			m_ufbs[u->schemaID()] = u;
+		}
+
+		return true;
+	}
+
 	bool Parser::checkEquipmentIds(VFrame30::LogicSchema* logicSchema)
 	{
 		if (logicSchema == nullptr ||
@@ -1416,6 +1498,69 @@ namespace Builder
 											  afbItem->buildName(),
 											  afbItem->afbElement().version(),
 											  afbDescription->version(),
+											  si->guid());
+
+							ok = false;
+							continue;
+						}
+					}
+				}
+
+				// We can parse only one layer
+				//
+				break;
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema)
+	{
+		if (logicSchema == nullptr ||
+			m_afbCollection == nullptr)
+		{
+			assert(logicSchema);
+			assert(m_afbCollection);
+
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_afbCollection %2")
+							  .arg(reinterpret_cast<size_t>(logicSchema))
+							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
+			return false;
+		}
+
+		bool ok = true;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
+		{
+			if (l->compile() == true)
+			{
+				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				{
+					if (si->isType<VFrame30::SchemaItemUfb>() == true)
+					{
+						VFrame30::SchemaItemUfb* ufbItem = si->toType<VFrame30::SchemaItemUfb>();
+						assert(ufbItem);
+
+						auto ufbsIt = m_ufbs.find(ufbItem->ufbSchemaId());
+
+						if (ufbsIt == m_ufbs.end())
+						{
+							// UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
+							//
+							m_log->errALP4009(logicSchema->schemaID(), ufbItem->buildName(), ufbItem->ufbSchemaId(), si->guid());
+							ok = false;
+							continue;
+						}
+
+						std::shared_ptr<VFrame30::UfbSchema> ufbSchema = ufbsIt->second;
+
+						if (ufbSchema->version() != ufbItem->ufbSchemaVersion())
+						{
+							m_log->errALP4010(logicSchema->schemaID(),
+											  ufbItem->buildName(),
+											  ufbItem->ufbSchemaVersion(),
+											  ufbSchema->version(),
 											  si->guid());
 
 							ok = false;

@@ -20,6 +20,7 @@
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemUfb.h"
 #include "SignalsTabPage.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -2927,10 +2928,11 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 		//
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> newItems;
 
-		auto logicSchema = schema()->toLogicSchema();
+		DbController* dbc = db();
+		auto s = schema();
 
 		std::for_each(selectedItems().begin(), selectedItems().end(),
-			[xdif, ydif, &newItems, logicSchema](const std::shared_ptr<VFrame30::SchemaItem>& si)
+			[xdif, ydif, &newItems, dbc, s](const std::shared_ptr<VFrame30::SchemaItem>& si)
 			{
 				QByteArray data;
 
@@ -2958,8 +2960,14 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
 					assert(fblItemRect);
 
-					int counterValue = logicSchema->nextCounterValue();
-					fblItemRect->setLabel(logicSchema->schemaID() + "_" + QString::number(counterValue));
+					int counterValue = 0;
+					bool nextValRes = dbc->nextCounterValue(&counterValue);
+					if (nextValRes == false)
+					{
+						return;
+					}
+
+					fblItemRect->setLabel(s->schemaID() + "_" + QString::number(counterValue));
 				}
 
 				newItem->MoveItem(xdif, ydif);
@@ -4045,7 +4053,7 @@ bool EditSchemaWidget::updateAfbsForSchema()
 	//
 	std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
 
-	bool ok = getAfbsDescriptions(&afbs);
+	bool ok = loadAfbsDescriptions(&afbs);
 	if (ok == false)
 	{
 		return false;
@@ -4074,6 +4082,47 @@ bool EditSchemaWidget::updateAfbsForSchema()
 
 	return true;
 }
+
+bool EditSchemaWidget::updateUfbsForSchema()
+{
+	// Get Ufb list
+	//
+	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
+
+	bool ok = loadUfbSchemas(&ufbs);
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Update
+	//
+	QString errorMessage;
+	int updatedItemCount = 0;
+
+	ok = schema()->updateAllSchemaItemUfb(ufbs, &updatedItemCount, &errorMessage);
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("Update UFB schema items error: ") + errorMessage);
+		return false;
+	}
+
+	if (updatedItemCount != 0)
+	{
+		setModified();
+
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("%1 UFB(s) are updated according to the latest UFB schemas.").arg(updatedItemCount));
+		msgBox.setInformativeText("Please, check iput/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.exec();
+	}
+
+	return true;
+}
+
 
 void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 {
@@ -4405,7 +4454,7 @@ std::list<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const st
 	return result;
 }
 
-bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
+bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
 {
 	if (out == nullptr)
 	{
@@ -4440,6 +4489,12 @@ bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbE
 
 	for (std::shared_ptr<DbFile> f : files)
 	{
+		if (f->deleted() == true ||
+			f->action() == VcsItemAction::Deleted)
+		{
+			continue;
+		}
+
 		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
 
 		QString errorMsg;
@@ -4457,6 +4512,81 @@ bool EditSchemaWidget::getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbE
 	}
 
 	std::swap(*out, elements);
+
+	return true;
+}
+
+bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	out->clear();
+
+	// Get User Functional Block List
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Get UFBs latest version from the DB
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	ok = db()->getLatestVersion(fileList, &files, this);
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Parse files, create actual UFBs
+	//
+	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
+	ufbs.reserve(files.size());
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		if (f->deleted() == true ||
+			f->action() == VcsItemAction::Deleted)
+		{
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::Schema> s = VFrame30::Schema::Create(f->data());
+
+		if (s == nullptr)
+		{
+			assert(s);
+			continue;
+		}
+
+		if (s->isUfbSchema() == false)
+		{
+			assert(s->isUfbSchema() == true);
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::UfbSchema> u =  std::dynamic_pointer_cast<VFrame30::UfbSchema>(s);
+		if (u == nullptr)
+		{
+			assert(u);
+			continue;
+		}
+
+		ufbs.push_back(u);
+
+		qDebug() << u->schemaID() << " " << u->version();
+	}
+
+	std::swap(ufbs, *out);
 
 	return true;
 }
@@ -5092,7 +5222,9 @@ void EditSchemaWidget::editPaste()
 		}
 
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
+
 		bool schemaItemAfbIsPresent = false;
+		bool schemaItemUfbIsPresent = false;
 
 		for (int i = 0; i < message.items_size(); i++)
 		{
@@ -5109,6 +5241,11 @@ void EditSchemaWidget::editPaste()
 			if (schemaItem->isSchemaItemAfb() == true)
 			{
 				schemaItemAfbIsPresent = true;
+			}
+
+			if (schemaItem->isType<VFrame30::UfbSchema>() == true)
+			{
+				schemaItemUfbIsPresent = true;
 			}
 
 			if (schemaItem->isFblItemRect() == true)
@@ -5131,12 +5268,17 @@ void EditSchemaWidget::editPaste()
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
 		}
 
-		// If new itesm has differeten afb description version
+		// If new itesm has differeten afb/ufb description version
 		// then they will be updated to the current version
 		//
 		if (schemaItemAfbIsPresent == true)
 		{
 			updateAfbsForSchema();
+		}
+
+		if (schemaItemUfbIsPresent == true)
+		{
+			updateUfbsForSchema();
 		}
 
 		return;
@@ -5520,7 +5662,7 @@ void EditSchemaWidget::addFblElement()
 	// Get Afb descriptions
 	//
 	std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
-	bool ok = getAfbsDescriptions(&afbs);
+	bool ok = loadAfbsDescriptions(&afbs);
 
 	if (ok == false)
 	{
@@ -5557,72 +5699,20 @@ void EditSchemaWidget::addFblElement()
 
 void EditSchemaWidget::addUfbElement()
 {
-
-	// Get User Functional Block List
-	//
-	std::vector<DbFileInfo> fileList;
-
-	bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	// Get UFBs latest version from the DB
-	//
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	ok = db()->getLatestVersion(fileList, &files, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	// Parse files, create actual UFBs
+	// Get Schemas
 	//
 	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
-	ufbs.reserve(files.size());
 
-	for (const std::shared_ptr<DbFile>& f : files)
+	bool ok = loadUfbSchemas(&ufbs);
+
+	if (ok == false)
 	{
-		std::shared_ptr<VFrame30::Schema> s = VFrame30::Schema::Create(f->data());
-
-		if (s == nullptr)
-		{
-			assert(s);
-			continue;
-		}
-
-		if (s->isUfbSchema() == false)
-		{
-			assert(s->isUfbSchema() == true);
-			continue;
-		}
-
-		std::shared_ptr<VFrame30::UfbSchema> u =  std::dynamic_pointer_cast<VFrame30::UfbSchema>(s);
-		if (u == nullptr)
-		{
-			assert(u);
-			continue;
-		}
-
-		ufbs.push_back(u);
-
-		qDebug() << u->schemaID() << " " << u->version();
+		return;
 	}
-
 
 	// Choose User Functional Block
 	//
 	ChooseUfbDialog dialog(ufbs, this);
-
-	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
-
-	/*std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
-	if (selectedUfb == nullptr)
-	{
-		return;
-	}*/
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -5631,57 +5721,16 @@ void EditSchemaWidget::addUfbElement()
 
 		qDebug() << "UserFunctionalBlock selected " << ufb->caption();
 
-		//QString errorMsg;
+		QString errorMsg;
+		addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), ufb.get(), &errorMsg));
 
-		//addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(ufb.get()), &errorMsg));
-
-		//if (errorMsg.isEmpty() == false)
-		//{
-		//	QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-		//}
+		if (errorMsg.isEmpty() == false)
+		{
+			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		}
 	}
 
 	return;
-
-	// Add Ufb
-	//
-
-//	QString errorMsg;
-//	addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), *(afb.get()), &errorMsg));
-
-//	if (errorMsg.isEmpty() == false)
-//	{
-//		QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-//	}
-
-
-
-//	// --
-//	//
-//	ChooseAfbDialog* dialog = new ChooseAfbDialog(afbs, this);
-
-//	if (dialog->exec() == QDialog::Accepted)
-//	{
-//		int index = dialog->index();
-
-//		if (index < 0 || static_cast<size_t>(index) >= afbs.size())
-//		{
-//			assert(false);
-//			return;
-//		}
-
-//		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
-
-//		QString errorMsg;
-//		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
-
-//		if (errorMsg.isEmpty() == false)
-//		{
-//			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-//		}
-//	}
-
-//	return;
 }
 
 void EditSchemaWidget::onLeftKey()
