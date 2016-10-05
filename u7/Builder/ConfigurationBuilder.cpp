@@ -239,7 +239,6 @@ namespace Builder
 
 		if (jsResult.toBool() == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Module configuration generating failed!"));
 			return false;
 		}
 		qDebug() << jsResult.toInt();
