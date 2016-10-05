@@ -3080,15 +3080,21 @@ namespace Builder
 			return false;
 		}
 
+		Comment comment;
+
 		if (port->txDataSizeW() == 0)
 		{
+			comment.setComment(QString(tr("No txData of opto-port %1")).arg(port->equipmentID()));
+			m_code.append(comment);
+			m_code.newLine();
 			return true;
 		}
+
+		assert(port->txDataSizeW() > sizeof(quint32) / sizeof(quint16));	// txDataSizeW must be > then sizeofW(port DataID)
 
 		bool result = true;
 
 		Command cmd;
-		Comment comment;
 
 		comment.setComment(QString(tr("Copying txData of opto-port %1")).arg(port->equipmentID()));
 		m_code.append(comment);
