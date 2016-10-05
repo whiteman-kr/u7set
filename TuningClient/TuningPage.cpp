@@ -1,11 +1,128 @@
 #include "Settings.h"
 #include "TuningPage.h"
 
+using namespace std;
+
 //
-//SnapshotItemModel
+// TuningItemSorter
 //
 
-using namespace std;
+TuningItemSorter::TuningItemSorter(int column, Qt::SortOrder order):
+	m_column(column),
+	m_order(order)
+{
+}
+
+bool TuningItemSorter::sortFunction(const TuningObject& o1, const TuningObject& o2, int column, Qt::SortOrder order) const
+{
+
+	QVariant v1;
+	QVariant v2;
+
+	switch (static_cast<TuningItemModel::Columns>(column))
+	{
+	case TuningItemModel::Columns::CustomAppSignalID:
+		{
+			v1 = o1.customAppSignalID();
+			v2 = o2.customAppSignalID();
+		}
+		break;
+	case TuningItemModel::Columns::EquipmentID:
+		{
+			v1 = o1.equipmentID();
+			v2 = o2.equipmentID();
+		}
+		break;
+	case TuningItemModel::Columns::AppSignalID:
+		{
+			v1 = o1.appSignalID();
+			v2 = o2.appSignalID();
+		}
+		break;
+	case TuningItemModel::Columns::Caption:
+		{
+			v1 = o1.caption();
+			v2 = o2.caption();
+		}
+		break;
+	case TuningItemModel::Columns::Units:
+		{
+			v1 = o1.units();
+			v2 = o2.units();
+		}
+		break;
+	case TuningItemModel::Columns::Type:
+		{
+			v1 = o1.analog();
+			v2 = o2.analog();
+		}
+		break;
+
+	case TuningItemModel::Columns::Default:
+		{
+			if (o1.analog() == o2.analog())
+			{
+				v1 = o1.value();
+				v2 = o2.value();
+			}
+			else
+			{
+				v1 = o1.analog();
+				v2 = o2.analog();
+			}
+		}
+		break;
+	case TuningItemModel::Columns::Value:
+		{
+			if (o1.analog() == o2.analog())
+			{
+				v1 = o1.value();
+				v2 = o2.value();
+			}
+			else
+			{
+				v1 = o1.analog();
+				v2 = o2.analog();
+			}
+		}
+		break;
+	case TuningItemModel::Columns::Valid:
+		{
+			v1 = o1.valid();
+			v2 = o2.valid();
+		}
+		break;
+	case TuningItemModel::Columns::Underflow:
+		{
+			v1 = o1.underflow();
+			v2 = o2.underflow();
+		}
+		break;
+	case TuningItemModel::Columns::Overflow:
+		{
+			v1 = o1.overflow();
+			v2 = o2.overflow();
+		}
+		break;
+	default:
+		assert(false);
+		return false;
+	}
+
+	if (v1 == v2)
+	{
+		return o1.customAppSignalID() < o2.customAppSignalID();
+	}
+
+	if (order == Qt::AscendingOrder)
+		return v1 < v2;
+	else
+		return v1 > v2;
+}
+
+//
+// TuningItemModel
+//
 
 TuningItemModel::TuningItemModel(QObject* parent)
   :QAbstractItemModel(parent)
@@ -35,7 +152,7 @@ TuningItemModel::~TuningItemModel()
 	}
 }
 
-void TuningItemModel::setObjectsIndexes(const std::vector<int>& objectsIndexes)
+void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int>& objectsIndexes)
 {
 	if (rowCount() > 0)
 	{
@@ -43,7 +160,7 @@ void TuningItemModel::setObjectsIndexes(const std::vector<int>& objectsIndexes)
 
 		removeRows(0, rowCount());
 
-		m_objectsIndexes.clear();
+		m_objects.clear();
 
 		endRemoveRows();
 	}
@@ -54,7 +171,10 @@ void TuningItemModel::setObjectsIndexes(const std::vector<int>& objectsIndexes)
 
 		beginInsertRows(QModelIndex(), 0, (int)objectsIndexes.size() - 1);
 
-		m_objectsIndexes = objectsIndexes;
+		for (int index : objectsIndexes)
+		{
+			m_objects.push_back(allObjects[index]);
+		}
 
 		insertRows(0, (int)objectsIndexes.size());
 
@@ -92,25 +212,65 @@ void TuningItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 
 }
 
-/*QStringList TuningItemModel::columnsNames()
+int TuningItemModel::columnIndex(int index) const
 {
-	return m_columnsNames;
-}
-*/
-
-/*void TuningItemModel::update()
-{
-	emit QAbstractItemModel::dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-}*/
-
-int TuningItemModel::objectIndex(int index)
-{
-	if (index < 0 || index >= m_objectsIndexes.size())
+	if (index <0 || index >= m_columnsIndexes.size())
 	{
 		assert(false);
 		return -1;
 	}
-	return m_objectsIndexes[index];
+
+	return m_columnsIndexes[index];
+}
+
+void TuningItemModel::updateStates(int from, int to)
+{
+	/*if (m_signalsTable.size() == 0)
+	{
+		return;
+	}
+	if (from >= m_signalsTable.size() || to >= m_signalsTable.size())
+	{
+		assert(false);
+		return;
+	}
+
+	std::vector<Hash> requestHashes;
+	requestHashes.reserve(to - from);
+
+	std::vector<AppSignalState> requestStates;
+
+	for (int i = from; i <= to; i++)
+	{
+		requestHashes.push_back(m_signalsTable[i].first);
+	}
+
+	int count = theSignals.signalState(requestHashes, &requestStates);
+
+	if (count != requestHashes.size() || count != requestStates.size())
+	{
+		assert(false);
+		return;
+	}
+
+	int state = 0;
+	for (int i = from; i <= to; i++)
+	{
+		m_signalsTable[i].second = requestStates[state];
+		state++;
+	}*/
+
+	return;
+}
+
+TuningObject TuningItemModel::object(int index)
+{
+	if (index < 0 || index >= m_objects.size())
+	{
+		assert(false);
+		return TuningObject();
+	}
+	return m_objects[index];
 }
 
 void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBold)
@@ -122,7 +282,7 @@ void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBo
 	m_font = new QFont(fontName, fontSize, fontBold);
 }
 
-void TuningItemModel::addColumn(TuningPageColumns column)
+void TuningItemModel::addColumn(Columns column)
 {
 	m_columnsIndexes.push_back(column);
 }
@@ -131,6 +291,26 @@ QModelIndex TuningItemModel::index(int row, int column, const QModelIndex &paren
 {
 	Q_UNUSED(parent);
 	return createIndex(row, column);
+}
+
+void TuningItemModel::sort(int column, Qt::SortOrder order)
+{
+	if (column < 0 || column >= m_columnsIndexes.size())
+	{
+		assert(false);
+		return;
+	}
+
+	int sortColumnIndex = m_columnsIndexes[column];
+
+	std::sort(m_objects.begin(), m_objects.end(), TuningItemSorter(sortColumnIndex, order));
+
+	if (m_objects.empty() == false)
+	{
+		emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+	}
+
+	return;
 }
 
 QModelIndex TuningItemModel::parent(const QModelIndex &index) const
@@ -150,7 +330,7 @@ int TuningItemModel::columnCount(const QModelIndex &parent) const
 int TuningItemModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return (int)m_objectsIndexes.size();
+	return (int)m_objects.size();
 
 }
 
@@ -186,13 +366,8 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		int row = index.row();
-		if (row >= m_objectsIndexes.size())
-		{
-			assert(false);
-			return QVariant();
-		}
-
+		//QString str = QString("%1:%2").arg(row).arg(col);
+		//qDebug()<<str;
 		int col = index.column();
 
 		if (col < 0 || col >= m_columnsIndexes.size())
@@ -201,10 +376,14 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		//QString str = QString("%1:%2").arg(row).arg(col);
-		//qDebug()<<str;
+		int row = index.row();
+		if (row >= m_objects.size())
+		{
+			assert(false);
+			return QVariant();
+		}
 
-		TuningObject o = theObjects.object(m_objectsIndexes[row]);
+		const TuningObject& o = m_objects[row];
 
 		int displayIndex = m_columnsIndexes[col];
 
@@ -242,30 +421,32 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		// State
 		//
 
-
-
 		if (displayIndex == Value)
 		{
-			/*if (o->Valid == true)
-				{
-					if (s->isDiscrete())
-					{
-						return ((int)state.value == s->normalState()) ? tr("No") : tr("Yes");
-					}
-					if (s->isAnalog())
-					{
-						QString str = QString::number(state.value, 'f', s->decimalPlaces());
-						if (state.flags.underflow == true)
-						{
-							str += tr(" [Underflow");
-						}
-
-						return str;
-					}
-				}
-				else*/
+			if (o.valid() == true)
 			{
-				return tr("???");
+				if (o.analog() == false)
+				{
+					return ((int)o.value().toDouble() == 0 ? tr("No") : tr("Yes"));
+				}
+				else
+				{
+					QString str = QString::number(o.value().toDouble(), 'f', o.decimalPlaces());
+					if (o.underflow() == true)
+					{
+						str += tr(" [Underflow]");
+					}
+					if (o.overflow() == true)
+					{
+						str += tr(" [Overflow]");
+					}
+
+					return str;
+				}
+			}
+			else
+			{
+				return tr("?");
 			}
 		}
 
@@ -369,16 +550,26 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 	int col = index.column();
 	int displayIndex = m_columnsIndexes[col];
 
+	int row = index.row();
+	if (row >= m_objects.size())
+	{
+		assert(false);
+		return QBrush();
+	}
+
 	if (displayIndex == Value)
 	{
-		//int displayIndex = m_columnsIndexes[col];
-		QColor color = QColor(Qt::red);
-		return QBrush(color);
+		const TuningObject& o = m_objects[row];
+
+		if (o.valid() == false)
+		{
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
 	}
 
 	if (displayIndex == Default)
 	{
-		//int displayIndex = m_columnsIndexes[col];
 		QColor color = QColor(Qt::gray);
 		return QBrush(color);
 	}
@@ -391,11 +582,22 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 	int col = index.column();
 	int displayIndex = m_columnsIndexes[col];
 
+	int row = index.row();
+	if (row >= m_objects.size())
+	{
+		assert(false);
+		return QBrush();
+	}
+
 	if (displayIndex == Value)
 	{
-		//int displayIndex = m_columnsIndexes[col];
-		QColor color = QColor(Qt::white);
-		return QBrush(color);
+		const TuningObject& o = m_objects[row];
+
+		if (o.valid() == false)
+		{
+			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
 	}
 
 	if (displayIndex == Default)
@@ -579,8 +781,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_objectList->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
 	m_objectList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_objectList->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-	//m_objectList->setSortingEnabled(true);
-	//m_objectList->sortByColumn(0, Qt::AscendingOrder);
+	m_objectList->setSortingEnabled(true);
+
+	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
 
 	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
 	if (pageSettings == nullptr)
@@ -596,6 +799,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	fillObjectsList();
 	m_objectList->resizeColumnsToContents();
+
+	m_updateStateTimerId = startTimer(500);
+
 }
 
 TuningPage::~TuningPage()
@@ -619,11 +825,13 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
-	m_objectsIndexes.clear();
+	std::vector<int> objectsIndexes;
 
-	for (int i = 0; i < theObjects.objectsCount(); i++)
+	std::vector<TuningObject> objects = theObjects.objects();
+
+	for (int i = 0; i < objects.size(); i++)
 	{
-		TuningObject o = theObjects.object(i);
+		const TuningObject& o = objects[i];
 
 		// Root filter
 		//
@@ -677,10 +885,11 @@ void TuningPage::fillObjectsList()
 			}
 		}
 
-		m_objectsIndexes.push_back(i);
+		objectsIndexes.push_back(i);
 	}
 
-	m_model->setObjectsIndexes(m_objectsIndexes);
+	m_model->setObjectsIndexes(objects, objectsIndexes);
+	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
@@ -699,6 +908,15 @@ void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 
 }
 
+void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	m_sortColumn = column;
+	m_sortOrder = order;
+
+	m_model->sort(column, order);
+}
+
+
 void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
@@ -713,4 +931,46 @@ void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 	m_treeFilter = filter;
 
 	fillObjectsList();
+}
+
+void TuningPage::timerEvent(QTimerEvent* event)
+{
+	assert(event);
+
+	if  (event->timerId() == m_updateStateTimerId && m_model->rowCount() > 0 && isVisible() == true)
+	{
+		// Update only visible dynamic items
+		//
+		int from = m_objectList->rowAt(0);
+		int to = m_objectList->rowAt(m_objectList->height() - m_objectList->horizontalHeader()->height());
+
+		if (from == -1)
+		{
+			from = 0;
+		}
+
+		if (to == -1)
+		{
+			to = m_model->rowCount() - 1;
+		}
+
+		// Update signal states
+		//
+		m_model->updateStates(from, to);
+
+		// Redraw visible table items
+		//
+		for (int col = 0; col < m_model->columnCount(); col++)
+		{
+			int displayIndex = m_model->columnIndex(col);
+
+			if (displayIndex >= static_cast<int>(TuningItemModel::Columns::Value))
+			{
+				for (int row = from; row <= to; row++)
+				{
+					m_objectList->update(m_model->index(row, col));
+				}
+			}
+		}
+	}
 }

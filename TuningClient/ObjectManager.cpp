@@ -4,22 +4,24 @@ ObjectManager::ObjectManager()
 {
 }
 
-int ObjectManager::objectsCount()
-{
-	QMutexLocker l(&m_mutex);
-	return (int)m_objects.size();
-
-}
-
 TuningObject ObjectManager::object(int index)
 {
 	QMutexLocker l(&m_mutex);
+
 	if (index < 0 || index >= m_objects.size())
 	{
 		assert(false);
 		return TuningObject();
 	}
+
 	return m_objects[index];
+
+}
+
+std::vector<TuningObject> ObjectManager::objects()
+{
+	QMutexLocker l(&m_mutex);
+	return m_objects;
 }
 
 int ObjectManager::tuningSourcesCount()

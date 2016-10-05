@@ -79,10 +79,10 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 	// Objects and model
 	//
 	m_model = new TuningItemModel(this);
-	m_model->addColumn(TuningItemModel::TuningPageColumns::CustomAppSignalID);
-	m_model->addColumn(TuningItemModel::TuningPageColumns::AppSignalID);
-	m_model->addColumn(TuningItemModel::TuningPageColumns::EquipmentID);
-	m_model->addColumn(TuningItemModel::TuningPageColumns::Caption);
+	m_model->addColumn(TuningItemModel::Columns::CustomAppSignalID);
+	m_model->addColumn(TuningItemModel::Columns::AppSignalID);
+	m_model->addColumn(TuningItemModel::Columns::EquipmentID);
+	m_model->addColumn(TuningItemModel::Columns::Caption);
 
 	ui->m_signalsTable->setModel(m_model);
 
@@ -91,6 +91,10 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 	ui->m_signalsTable->verticalHeader()->setDefaultSectionSize(16);
 	ui->m_signalsTable->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	ui->m_signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	ui->m_signalsTable->setSortingEnabled(true);
+
+	connect(ui->m_signalsTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogPresetEditor::sortIndicatorChanged);
+
 
 	fillObjectsList();
 
@@ -107,7 +111,6 @@ DialogPresetEditor::~DialogPresetEditor()
 
 void DialogPresetEditor::fillObjectsList()
 {
-	m_objectsIndexes.clear();
 
 	SignalType signalType = SignalType::All;
 	QVariant data = ui->m_signalTypeCombo->currentData();
@@ -127,9 +130,13 @@ void DialogPresetEditor::fillObjectsList()
 	QRegExp rx(mask);
 	rx.setPatternSyntax(QRegExp::Wildcard);
 
-	for (int i = 0; i < theObjects.objectsCount(); i++)
+	std::vector<TuningObject> objects = theObjects.objects();
+
+	std::vector<int> objectsIndexes;
+
+	for (int i = 0; i < objects.size(); i++)
 	{
-		TuningObject o = theObjects.object(i);
+		const TuningObject& o = objects[i];
 
 		if (signalType == SignalType::Analog && o.analog() == false)
 		{
@@ -172,10 +179,11 @@ void DialogPresetEditor::fillObjectsList()
 			}
 		}
 
-		m_objectsIndexes.push_back(i);
+		objectsIndexes.push_back(i);
 	}
 
-	m_model->setObjectsIndexes(m_objectsIndexes);
+	m_model->setObjectsIndexes(objects, objectsIndexes);
+	ui->m_signalsTable->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
 std::shared_ptr<TuningFilter> DialogPresetEditor::selectedFilter(QTreeWidgetItem** item)
@@ -537,9 +545,7 @@ void DialogPresetEditor::on_m_add_clicked()
 
 	for (const QModelIndex& i : ui->m_signalsTable->selectionModel()->selectedRows())
 	{
-		int objectIndex = m_model->objectIndex(i.row());
-
-		TuningObject o = theObjects.object(objectIndex);
+		TuningObject o = m_model->object(i.row());
 
 		if (filter->valueExists(o.appSignalHash()) == true)
 		{
@@ -766,3 +772,10 @@ void DialogPresetEditor::slot_signalsUpdated()
 	fillObjectsList();
 }
 
+void DialogPresetEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	m_sortColumn = column;
+	m_sortOrder = order;
+
+	m_model->sort(column, order);
+}

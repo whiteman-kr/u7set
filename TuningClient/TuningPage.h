@@ -6,6 +6,26 @@
 #include "TuningFilter.h"
 
 
+class TuningItemModel;
+
+class TuningItemSorter
+{
+public:
+	  TuningItemSorter(int column, Qt::SortOrder order);
+
+	  bool operator()(const TuningObject& o1, const TuningObject& o2) const
+	  {
+		  return sortFunction(o1, o2, m_column, m_order);
+	  }
+
+	  bool sortFunction(const TuningObject& o1, const TuningObject& o2, int column, Qt::SortOrder order) const;
+
+private:
+	  int m_column = -1;
+
+	  Qt::SortOrder m_order = Qt::AscendingOrder;
+};
+
 class TuningItemModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -16,7 +36,7 @@ public:
 
 public:
 
-	enum TuningPageColumns
+	enum Columns
 	{
 		CustomAppSignalID = 0,
 		EquipmentID,
@@ -33,26 +53,27 @@ public:
 	};
 
 public:
-	void setObjectsIndexes(const std::vector<int> &objectsIndexes);
+	void setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int> &objectsIndexes);
 
+	TuningObject object(int index);
+
+	void addColumn(Columns column);
+	int columnIndex(int index) const;
 	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
-	//QStringList columnsNames();
-
-	//void update();
-
-	int objectIndex(int index);
+	void updateStates(int from, int to);
 
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
 
-	void addColumn(TuningPageColumns column);
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+
+	void sort(int column, Qt::SortOrder order) override;
 
 protected:
-	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
 	QModelIndex parent(const QModelIndex &index) const override;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -60,7 +81,7 @@ protected:
 	virtual QBrush foregroundColor(const QModelIndex& index) const;
 
 private:
-	std::vector<int> m_objectsIndexes;
+
 	QStringList m_columnsNames;
 
 	QFont* m_font = nullptr;
@@ -68,6 +89,7 @@ private:
 protected:
 	std::vector<int> m_columnsIndexes;
 
+	std::vector<TuningObject> m_objects;
 };
 
 class TuningItemModelMain : public TuningItemModel
@@ -115,10 +137,15 @@ signals:
 private slots:
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
+
 public slots:
 	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
 
+
 private:
+
+	virtual void timerEvent(QTimerEvent* event) override;
 
 	QTableView* m_objectList = nullptr;
 
@@ -146,8 +173,6 @@ private:
 
 	TuningItemModelMain *m_model = nullptr;
 
-	std::vector<int> m_objectsIndexes;
-
 	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
 
 	std::shared_ptr<TuningFilter> m_tabFilter = nullptr;
@@ -155,6 +180,12 @@ private:
 	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
 
 	int m_tuningPageIndex = 0;
+
+	int m_updateStateTimerId = -1;
+
+	int m_sortColumn = 0;
+
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
 };
 

@@ -50,6 +50,8 @@ private slots:
 	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
 
 	void slot_signalsUpdated();
+
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
 private:
 
 	enum class TreeItemType
@@ -96,7 +98,9 @@ private:
 
 	TuningFilterStorage* m_filterStorage;
 
-	std::vector<int> m_objectsIndexes;
+	int m_sortColumn = 0;
+
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 #endif // DIALOGPRESETEDITOR_H
