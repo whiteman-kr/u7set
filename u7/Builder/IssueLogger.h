@@ -72,7 +72,7 @@ namespace Builder
 		Q_INVOKABLE void wrnCFG3007(QString signalID);
 		Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
 
-		Q_INVOKABLE void errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module);
+		Q_INVOKABLE void errCFG3009(QString signalID1, QString signalID2, QString module);
 		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);
 
 		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);

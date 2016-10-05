@@ -509,27 +509,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.
+	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
-	///			%2 SpredTolerance 1
-	///         %3 Signal 2 StrID
-	///			%4 SpredTolerance 2
-	///         %5 Module StrID
+	///         %2 Signal 2 StrID
+	///         %3 Module StrID
 	///
 	/// Description:
-	///			SpredTolerance values should be equal in one channel in AIM module.
+	///			SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
 	///
-	void IssueLogger::errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module)
+	void IssueLogger::errCFG3009(QString signalID1, QString signalID2, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.")
+				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
 				  .arg(signalID1)
-				  .arg(spredTolerance1)
 				  .arg(signalID2)
-				  .arg(spredTolerance2)
 				  .arg(module));
 	}
 
