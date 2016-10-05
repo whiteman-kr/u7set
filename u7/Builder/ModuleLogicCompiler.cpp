@@ -1557,7 +1557,7 @@ namespace Builder
 			case SIZE_32BIT:
 				switch(appSignal.analogSignalFormat())
 				{
-				case E::DataFormat::SignedInt:
+				case E::AnalogAppSignalFormat::SignedInt32:
 					if (constItem.isIntegral())
 					{
 						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
@@ -1572,7 +1572,7 @@ namespace Builder
 					}
 					break;
 
-				case E::DataFormat::Float:
+				case E::AnalogAppSignalFormat::Float32:
 					if (constItem.isFloat())
 					{
 						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
