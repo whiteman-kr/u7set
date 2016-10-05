@@ -64,7 +64,9 @@ QString OutputLogItem::toHtml() const
 				 .arg(m_time.toString("hh:mm:ss:zzz   "))
 				 .arg(m_message);
 		break;
-	case OutputMessageLevel::Warning:
+	case OutputMessageLevel::Warning0:
+	case OutputMessageLevel::Warning1:
+	case OutputMessageLevel::Warning2:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
 						 "<font face=\"%1\" size=\"4\" color=#F87217>WRN %4</font>")
 				 .arg(m_htmlFont)
@@ -101,8 +103,14 @@ QString OutputLogItem::toCsv() const
 	case OutputMessageLevel::Success:
 		level = "SCS";
 		break;
-	case OutputMessageLevel::Warning:
-		level = "WRN";
+	case OutputMessageLevel::Warning2:
+		level = "WRN2";
+		break;
+	case OutputMessageLevel::Warning1:
+		level = "WRN1";
+		break;
+	case OutputMessageLevel::Warning0:
+		level = "WRN0";
 		break;
 	case OutputMessageLevel::Error:
 		level = "ERR";
@@ -125,6 +133,42 @@ QString OutputLogItem::toCsv() const
 	return result;
 }
 
+bool OutputLogItem::isError() const
+{
+	return m_level == OutputMessageLevel::Error;
+}
+
+bool OutputLogItem::isWarning() const
+{
+	return  m_level == OutputMessageLevel::Warning0 ||
+			m_level == OutputMessageLevel::Warning1 ||
+			m_level == OutputMessageLevel::Warning2;
+}
+
+bool OutputLogItem::isWarning0() const
+{
+	return m_level == OutputMessageLevel::Warning0;
+}
+
+bool OutputLogItem::isWarning1() const
+{
+	return m_level == OutputMessageLevel::Warning1;
+}
+
+bool OutputLogItem::isWarning2() const
+{
+	return m_level == OutputMessageLevel::Warning2;
+}
+
+bool OutputLogItem::isSuccess() const
+{
+	return m_level == OutputMessageLevel::Success;
+}
+
+bool OutputLogItem::isMessage() const
+{
+	return m_level == OutputMessageLevel::Message;
+}
 
 // OutputLog
 //
@@ -166,7 +210,9 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, QString file
 	//
 	switch (level)
 	{
-		case OutputMessageLevel::Warning:
+		case OutputMessageLevel::Warning2:
+		case OutputMessageLevel::Warning1:
+		case OutputMessageLevel::Warning0:
 			incWarningCount();
 			break;
 		case OutputMessageLevel::Error:
@@ -203,14 +249,34 @@ void OutputLog::writeSuccess(const QString& str)
 	return write(str, OutputMessageLevel::Success, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeWarning(const QString& str)
+void OutputLog::writeWarning0(const QString& str)
 {
-	return write(str, OutputMessageLevel::Warning, QString(""), 0, QString(""));
+	return write(str, OutputMessageLevel::Warning0, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeWarning(QString issue, const QString& str)
+void OutputLog::writeWarning1(const QString& str)
 {
-	return write(issue + ": " + str, OutputMessageLevel::Warning, QString(""), 0, QString(""));
+	return write(str, OutputMessageLevel::Warning1, QString(""), 0, QString(""));
+}
+
+void OutputLog::writeWarning2(const QString& str)
+{
+	return write(str, OutputMessageLevel::Warning2, QString(""), 0, QString(""));
+}
+
+void OutputLog::writeWarning0(QString issue, const QString& str)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning0, QString(""), 0, QString(""));
+}
+
+void OutputLog::writeWarning1(QString issue, const QString& str)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning1, QString(""), 0, QString(""));
+}
+
+void OutputLog::writeWarning2(QString issue, const QString& str)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning2, QString(""), 0, QString(""));
 }
 
 void OutputLog::writeError(const QString& str)
@@ -233,14 +299,34 @@ void OutputLog::writeSuccess(const QString& str, QString file, int fileLine, QSt
 	return write(str, OutputMessageLevel::Success, file, fileLine, func);
 }
 
-void OutputLog::writeWarning(const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeWarning0(const QString& str, QString file, int fileLine, QString func)
 {
-	return write(str, OutputMessageLevel::Warning, file, fileLine, func);
+	return write(str, OutputMessageLevel::Warning0, file, fileLine, func);
 }
 
-void OutputLog::writeWarning(QString issue, const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeWarning1(const QString& str, QString file, int fileLine, QString func)
 {
-	return write(issue + ": " + str, OutputMessageLevel::Warning, file, fileLine, func);
+	return write(str, OutputMessageLevel::Warning1, file, fileLine, func);
+}
+
+void OutputLog::writeWarning2(const QString& str, QString file, int fileLine, QString func)
+{
+	return write(str, OutputMessageLevel::Warning2, file, fileLine, func);
+}
+
+void OutputLog::writeWarning0(QString issue, const QString& str, QString file, int fileLine, QString func)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning0, file, fileLine, func);
+}
+
+void OutputLog::writeWarning1(QString issue, const QString& str, QString file, int fileLine, QString func)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning1, file, fileLine, func);
+}
+
+void OutputLog::writeWarning2(QString issue, const QString& str, QString file, int fileLine, QString func)
+{
+	return write(issue + ": " + str, OutputMessageLevel::Warning2, file, fileLine, func);
 }
 
 void OutputLog::writeError(const QString& str, QString file, int fileLine, QString func)

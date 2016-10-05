@@ -260,7 +260,9 @@ enum class OutputMessageLevel
 {
 	Message,
 	Success,
-	Warning,
+	Warning2,		// The least important warning
+	Warning1,		// Just warning
+	Warning0,		// The most important warning
 	Error
 };
 

@@ -57,8 +57,9 @@ public:
 	bool infoMode() const;
 	void setInfoMode(bool value);
 
-	bool hideWarnings() const;
-	void setHideWarnings(bool value);
+
+	int buildWarningLevel() const;
+	void setBuildWarningLevel(int value);
 
 	const QStringList& buildSearchCompleter() const;
 	QStringList& buildSearchCompleter();
@@ -158,7 +159,7 @@ private:
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;
-	bool m_hideWarnings = false;
+	int m_buildWarningLevel = 0;		// 0 is Show All Warnings
 	QStringList m_buildSerachCompleter;
 
 };

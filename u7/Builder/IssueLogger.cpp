@@ -135,7 +135,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCMN0015(QString fileName1, QString fileName2, QString id)
 	{
-		LOG_WARNING(IssueType::Common,
+		LOG_WARNING0(IssueType::Common,
 				  15,
 				  tr("'%1' and '%2' files have the same ID = '%3'.")
 				  .arg(fileName1).arg(fileName2).arg(id));
@@ -205,7 +205,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnPDB2000()
 	{
-		LOG_WARNING(IssueType::ProjectDatabase,
+		LOG_WARNING2(IssueType::ProjectDatabase,
 				  2000,
 				  tr("The workcopies of the checked out files will be compiled."));
 	}
@@ -432,7 +432,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3005(QString signalID, QString controllerID)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING0(IssueType::FscConfiguration,
 				  3005,
 				  tr("Signal '%1' is not found in controller '%2'.")
 				  .arg(signalID)
@@ -454,7 +454,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3006(int place, QString controllerID)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING0(IssueType::FscConfiguration,
 				  3006,
 				  tr("Signal with place %1 is not found in controller '%2'.")
 				  .arg(place)
@@ -476,7 +476,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3007(QString signalID)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING1(IssueType::FscConfiguration,
 				  3007,
 				  tr("Signal '%1' is not found in Application Signals.")
 				  .arg(signalID));
@@ -497,7 +497,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3008(QString softwareID, QString module)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING1(IssueType::FscConfiguration,
 				  3008,
 				  tr("Software '%1' is not found (Logic Module '%2').")
 				  .arg(softwareID)
@@ -509,27 +509,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.
+	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
-	///			%2 SpredTolerance 1
-	///         %3 Signal 2 StrID
-	///			%4 SpredTolerance 2
-	///         %5 Module StrID
+	///         %2 Signal 2 StrID
+	///         %3 Module StrID
 	///
 	/// Description:
-	///			SpredTolerance values should be equal in one channel in AIM module.
+	///			SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
 	///
-	void IssueLogger::errCFG3009(QString signalID1, double spredTolerance1, QString signalID2, double spredTolerance2, QString module)
+	void IssueLogger::errCFG3009(QString signalID1, QString signalID2, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Different SpredTolerance values (signal %1: %2; signal %3: %4) for module '%5'.")
+				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
 				  .arg(signalID1)
-				  .arg(spredTolerance1)
 				  .arg(signalID2)
-				  .arg(spredTolerance2)
 				  .arg(module));
 	}
 
@@ -703,7 +699,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3015(QString objectID, QString propertyName, QString softwareID)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING1(IssueType::FscConfiguration,
 				  3015,
 				  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
 				  .arg(objectID)
@@ -726,7 +722,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3016(QString objectID, QString propertyName)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING1(IssueType::FscConfiguration,
 				  3016,
 				  tr("Property '%1.%2' is empty.")
 				  .arg(objectID)
@@ -772,7 +768,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnCFG3018(QString propertyName, QString ip, int port, QString controller)
 	{
-		LOG_WARNING(IssueType::FscConfiguration,
+		LOG_WARNING2(IssueType::FscConfiguration,
 				  3018,
 				  tr("Default '%1' IP address %2:%3 is used in controller %4.")
 				  .arg(propertyName)
@@ -928,7 +924,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALP4004(QString schema)
 	{
-		LOG_WARNING(IssueType::AlParsing,
+		LOG_WARNING1(IssueType::AlParsing,
 					4004,
 					tr("Schema is excluded from build (Schem '%1').")
 					.arg(schema));
@@ -948,7 +944,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALP4005(QString schema)
 	{
-		LOG_WARNING(IssueType::AlParsing,
+		LOG_WARNING2(IssueType::AlParsing,
 					4005,
 					tr("Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').")
 					.arg(schema));
@@ -1302,7 +1298,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5001(QString logicModuleID)
 	{
-		LOG_WARNING(IssueType::AlCompiler,
+		LOG_WARNING2(IssueType::AlCompiler,
 				  5001,
 				  tr("Application logic for module '%1' is not found.").arg(logicModuleID));
 	}
@@ -1551,7 +1547,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5012(QString appSignalID)
 	{
-		LOG_WARNING(IssueType::AlCompiler,
+		LOG_WARNING1(IssueType::AlCompiler,
 				  5012,
 				  tr("Application signal '%1' is not bound to any device object.").arg(appSignalID));
 	}
@@ -2494,7 +2490,7 @@ namespace Builder
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
-		LOG_WARNING(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5053,
 				  QString(tr("Automatic sorting of XY points of FB '%1' has been performed.")).arg(fbCaption));
 	}
@@ -2538,7 +2534,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5055(QString connectionID)
 	{
-		LOG_WARNING(IssueType::AlCompiler,
+		LOG_WARNING2(IssueType::AlCompiler,
 				  5055,
 				  QString(tr("Optical connection '%1' is configured manually.")).arg(connectionID));
 	}

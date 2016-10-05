@@ -12,6 +12,7 @@ class QCheckBox;
 class QTextEdit;
 class QPushButton;
 class QSplitter;
+class QComboBox;
 
 //
 //
@@ -58,8 +59,6 @@ protected slots:
 	void buildWasStarted();
 	void buildWasFinished();
 
-	void hideWaringsStateChanged(int state);
-
 	void prevIssue();
 	void nextIssue();
 
@@ -68,6 +67,14 @@ protected slots:
 	// Data
 	//
 private:
+	enum class WarningShowLevel
+	{
+		ShowAll,
+		Middle,
+		Important,
+		HideAll
+	};
+
 	QWidget* m_rightSideWidget = nullptr;
 	QTextEdit* m_outputWidget = nullptr;
 
@@ -86,7 +93,7 @@ private:
 	QWidget* m_settingsWidget = nullptr;
 
 	QCheckBox* m_debugCheckBox = nullptr;
-	QCheckBox* m_hideWarningsCheckBox = nullptr;
+	QComboBox* m_warningsLevelComboBox = nullptr;
 
 	Builder::IssueLogger m_outputLog;
 	int m_logTimerId = -1;

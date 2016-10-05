@@ -121,11 +121,11 @@ public:
 			DbController* dbcontroller,	QWidget* parent,
 			QString fileExt, QString parentFileName, QString templFileExt, QString caption);
 
-	template<typename SchemaType1, typename SchemaType2>
-	static SchemasTabPage* create(
-			DbController* dbcontroller, QWidget* parent,
-			QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
-			QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2);
+//	template<typename SchemaType1, typename SchemaType2>
+//	static SchemasTabPage* create(
+//			DbController* dbcontroller, QWidget* parent,
+//			QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
+//			QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2);
 
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
@@ -171,47 +171,47 @@ SchemasTabPage* SchemasTabPage::create(
 	return p;
 }
 
-template<typename SchemaType1, typename SchemaType2>
-SchemasTabPage* SchemasTabPage::create(DbController* dbcontroller, QWidget* parent,
-		QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
-		QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2)
-{
-	static_assert(std::is_base_of<VFrame30::Schema, SchemaType1>::value, "Base class must be VFrame30::Schema");
-	static_assert(std::is_base_of<VFrame30::Schema, SchemaType2>::value, "Base class must be VFrame30::Schema");
+//template<typename SchemaType1, typename SchemaType2>
+//SchemasTabPage* SchemasTabPage::create(DbController* db, QWidget* parent,
+//		QString fileExt1, QString parentFileName1, QString templFileExt1, QString caption1,
+//		QString fileExt2, QString parentFileName2, QString templFileExt2, QString caption2)
+//{
+//	static_assert(std::is_base_of<VFrame30::Schema, SchemaType1>::value, "Base class must be VFrame30::Schema");
+//	static_assert(std::is_base_of<VFrame30::Schema, SchemaType2>::value, "Base class must be VFrame30::Schema");
 
-	assert(dbcontroller != nullptr);
+//	assert(db != nullptr);
 
-	SchemasTabPage* p = new SchemasTabPage(dbcontroller, parent);
+//	SchemasTabPage* p = new SchemasTabPage(db, parent);
 
-	// Create Schema function, will be stored in two places, SchemaTabPage and SchemaControlTabPage
-	//
-	std::function<VFrame30::Schema*()> createFunc1(
-		[]() -> VFrame30::Schema*
-		{
-			return new SchemaType1();
-		});
+//	// Create Schema function, will be stored in two places, SchemaTabPage and SchemaControlTabPage
+//	//
+//	std::function<VFrame30::Schema*()> createFunc1(
+//		[]() -> VFrame30::Schema*
+//		{
+//			return new SchemaType1();
+//		});
 
-	std::function<VFrame30::Schema*()> createFunc2(
-		[]() -> VFrame30::Schema*
-		{
-			return new SchemaType2();
-		});
+//	std::function<VFrame30::Schema*()> createFunc2(
+//		[]() -> VFrame30::Schema*
+//		{
+//			return new SchemaType2();
+//		});
 
-	// Add control page
-	//
+//	// Add control page
+//	//
 
-	SchemaControlTabPage* controlTabPage1 =
-			new SchemaControlTabPage(fileExt1, dbcontroller, parentFileName1, templFileExt1, createFunc1);
+//	SchemaControlTabPage* controlTabPage1 =
+//			new SchemaControlTabPage(fileExt1, db, parentFileName1, templFileExt1, createFunc1);
 
-	p->m_tabWidget->addTab(controlTabPage1, caption1);
+//	p->m_tabWidget->addTab(controlTabPage1, caption1);
 
-	SchemaControlTabPage* controlTabPage2 =
-			new SchemaControlTabPage(fileExt2, dbcontroller, parentFileName2, templFileExt2, createFunc2);
+//	SchemaControlTabPage* controlTabPage2 =
+//			new SchemaControlTabPage(fileExt2, db, parentFileName2, templFileExt2, createFunc2);
 
-	p->m_tabWidget->addTab(controlTabPage2, caption2);
+//	p->m_tabWidget->addTab(controlTabPage2, caption2);
 
-	return p;
-}
+//	return p;
+//}
 
 
 //
