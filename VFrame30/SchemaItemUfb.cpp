@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "SchemaItemUfb.h"
-#include "Schema.h"
+#include "UfbSchema.h"
+#include "SchemaItemSignal.h"
 
 namespace VFrame30
 {
@@ -128,17 +129,6 @@ namespace VFrame30
 			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
 		}
 
-		// Draw line under caption
-		//
-
-//		QPen captionLinePen(lineColor());
-//		captionLinePen.setWidthF(0.0);		// Don't use getter!
-
-//		p->setPen(captionLinePen);
-
-//		p->drawLine(QPointF(r.left(), topDocPt() + m_font.drawSize() * 1.5),
-//					QPointF(r.left() + r.width(), topDocPt() + m_font.drawSize() * 1.5));
-
 		return;
 	}
 
@@ -146,63 +136,56 @@ namespace VFrame30
 	//
 	bool SchemaItemUfb::SaveData(Proto::Envelope* message) const
 	{
-//		bool result = FblItemRect::SaveData(message);
-//		if (result == false || message->has_schemaitem() == false)
-//		{
-//			assert(result);
-//			assert(message->has_schemaitem());
-//			return false;
-//		}
+		bool result = FblItemRect::SaveData(message);
+		if (result == false || message->has_schemaitem() == false)
+		{
+			assert(result);
+			assert(message->has_schemaitem());
+			return false;
+		}
 	
-//		// --
-//		//
-//		Proto::SchemaItemUfb* ufbpb = message->mutable_schemaitem()->mutable_ufb();
+		// --
+		//
+		Proto::SchemaItemUfb* ufbpb = message->mutable_schemaitem()->mutable_ufb();
 
-//		ufbpb->set_precision(m_precision);
-//		ufbpb->set_label(m_label.toStdString());
+		ufbpb->set_ufbschemaid(m_ufbSchemaId.toStdString());
+		ufbpb->set_ufbcaption(m_ufbCaption.toStdString());
+		ufbpb->set_ufbversion(m_ufbVersion);
 
 		return true;
 	}
 
 	bool SchemaItemUfb::LoadData(const Proto::Envelope& message)
 	{
-		return false;
-//		if (message.has_schemaitem() == false)
-//		{
-//			assert(message.has_schemaitem());
-//			return false;
-//		}
+		if (message.has_schemaitem() == false)
+		{
+			assert(message.has_schemaitem());
+			return false;
+		}
 
-//		// --
-//		//
-//		bool result = FblItemRect::LoadData(message);
-//		if (result == false)
-//		{
-//			return false;
-//		}
+		// --
+		//
+		bool result = FblItemRect::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
 
-//		// --
-//		//
-//		if (message.schemaitem().has_ufb() == false)
-//		{
-//			assert(message.schemaitem().has_ufb());
-//			return false;
-//		}
+		// --
+		//
+		if (message.schemaitem().has_ufb() == false)
+		{
+			assert(message.schemaitem().has_ufb());
+			return false;
+		}
 		
-//		const Proto::SchemaItemUfb& ufbpb = message.schemaitem().ufb();
-		
-//		m_precision = ufbpb.precision();
+		const Proto::SchemaItemUfb& ufbpb = message.schemaitem().ufb();
 
-//		if (ufbpb.has_label() == true)
-//		{
-//			m_label = QString::fromStdString(ufbpb.label());
-//		}
+		m_ufbSchemaId = QString::fromStdString(ufbpb.ufbschemaid());
+		m_ufbCaption = QString::fromStdString(ufbpb.ufbcaption());
+		m_ufbVersion = ufbpb.ufbversion();
 
-//		// Add afb properties to class meta object
-//		//
-//		addSpecificParamProperties();
-
-//		return ok;
+		return true;
 	}
 
 	QString SchemaItemUfb::buildName() const
@@ -215,91 +198,80 @@ namespace VFrame30
 
 	bool SchemaItemUfb::updateElement(const UfbSchema* ufbSchema, QString* errorMessage)
 	{
-		return false;
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
 
-//		if (errorMessage == nullptr)
-//		{
-//			assert(errorMessage);
-//			return false;
-//		}
+		if (m_ufbSchemaId.isEmpty() == false &&
+			m_ufbSchemaId != ufbSchema->schemaID())
+		{
+			assert(false);
+			*errorMessage += tr("Update %1 from different UFB %2.").arg(m_ufbSchemaId).arg(ufbSchema->schemaID());
+			return false;
+		}
 
-//		if (m_afbElement.strID() != sourceAfb.strID())
-//		{
-//			assert(m_afbElement.strID() == sourceAfb.strID());
-//			return false;
-//		}
+		m_ufbSchemaId = ufbSchema->schemaID();
+		m_ufbCaption = ufbSchema->caption();
+		m_ufbVersion = ufbSchema->version();
 
-//		// Update params, m_afbElement contains old parameters
-//		//
-//		std::vector<Afb::AfbParam> newParams = sourceAfb.params();
-//		const std::vector<Afb::AfbParam>& currentParams = m_afbElement.params();
+		// Get in/outs from ufb schema
+		//
+		std::vector<const SchemaItemSignal*> ufbInputs;
+		std::vector<const SchemaItemSignal*> ufbOutputs;
 
-//		for (Afb::AfbParam& p : newParams)
-//		{
-//			if (p.user() == false)
-//			{
-//				continue;
-//			}
+		ufbInputs.reserve(16);
+		ufbOutputs.reserve(16);
 
-//			auto foundExistingParam = std::find_if(currentParams.begin(), currentParams.end(),
-//					[&p](const Afb::AfbParam& mp)
-//					{
-//						return p.caption() == mp.caption();		// Don't use opIndex, it can be same (-1)
-//					});
+		for (std::shared_ptr<SchemaLayer> layer : ufbSchema->Layers)
+		{
+			if (layer->compile() == true)
+			{
+				for (std::shared_ptr<SchemaItem> item : layer->Items)
+				{
+					const FblItemRect* fblItemRect = item->toFblItemRect();
+					if (fblItemRect == nullptr)
+					{
+						continue;
+					}
 
-//			if (foundExistingParam != currentParams.end())
-//			{
-//				// Try to set old value to the param
-//				//
-//				const Afb::AfbParam& currentParam = *foundExistingParam;
+					if (fblItemRect->isInputSignalElement() == true)
+					{
+						ufbInputs.push_back(fblItemRect->toInputSignalElement());
+						continue;
+					}
 
-//				if (p.value().type() == currentParam.value().type())
-//				{
-//					p.setValue(currentParam.value());
+					if (fblItemRect->isOutputSignalElement() == true)
+					{
+						ufbOutputs.push_back(fblItemRect->toOutputSignalElement());
+						continue;
+					}
+				}
 
-//					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.value();
-//				}
-//			}
-//		}
+				break;
+			}
+		}
 
-//		// Update description
-//		//
-//		m_afbElement = sourceAfb;
+		// Create in/outs in this item
+		//
+		removeAllInputs();
+		removeAllOutputs();
 
-//		std::swap(params(), newParams);		// The prev assignemnt (m_afbElement = sourceAfb) just reseted all paramas
-//											// Set them to the actual values
+		for (const SchemaItemSignal* in : ufbInputs)
+		{
+			this->addInput(-1, in->appSignalIds());
+		}
 
-//		// Update in/out pins
-//		//
-//		removeAllInputs();
-//		removeAllOutputs();
+		for (const SchemaItemSignal* out: ufbOutputs)
+		{
+			this->addOutput(-1, out->appSignalIds());
+		}
 
-//		const std::vector<Afb::AfbSignal>& inputSignals = m_afbElement.inputSignals();
-//		for (const Afb::AfbSignal& s : inputSignals)
-//		{
-//			addInput(s);
-//		}
+		// --
+		//
 
-//		const std::vector<Afb::AfbSignal>& outputSignals = m_afbElement.outputSignals();
-//		for (const Afb::AfbSignal& s : outputSignals)
-//		{
-//			addOutput(s);
-//		}
-
-//		// Run afterCreationScript, lets assume we create allmost new itesm, as we deleted all inputs/outs and updated params
-//		//
-//		QString afterCreationScript = m_afbElement.afterCreationScript();
-
-//		if (afterCreationScript.isEmpty() == false)
-//		{
-//			executeScript(afterCreationScript, m_afbElement, errorMessage);
-//		}
-
-//		// Here is remove all props and add new from m_params
-//		//
-//		addSpecificParamProperties();
-
-//		return true;
+		return true;
 	}
 
 	QString SchemaItemUfb::ufbSchemaId() const
@@ -314,17 +286,6 @@ namespace VFrame30
 
 	int SchemaItemUfb::ufbSchemaVersion() const
 	{
-		return m_version;
+		return m_ufbVersion;
 	}
-
-	QString SchemaItemUfb::label() const
-	{
-		return m_label;
-	}
-
-	void SchemaItemUfb::setLabel(QString value)
-	{
-		m_label = value;
-	}
-
 }

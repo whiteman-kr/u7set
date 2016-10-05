@@ -20,6 +20,7 @@
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemUfb.h"
 #include "SignalsTabPage.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -5616,14 +5617,6 @@ void EditSchemaWidget::addUfbElement()
 	//
 	ChooseUfbDialog dialog(ufbs, this);
 
-	// TO DO, TASK https://jira.radiy.com/browse/RPCT-1080
-
-	/*std::shared_ptr<VFrame30::UfbSchema> selectedUfb = ufbs.front();
-	if (selectedUfb == nullptr)
-	{
-		return;
-	}*/
-
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		std::shared_ptr<VFrame30::UfbSchema> ufb = dialog.result();
@@ -5631,57 +5624,16 @@ void EditSchemaWidget::addUfbElement()
 
 		qDebug() << "UserFunctionalBlock selected " << ufb->caption();
 
-		//QString errorMsg;
+		QString errorMsg;
+		addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), ufb.get(), &errorMsg));
 
-		//addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(ufb.get()), &errorMsg));
-
-		//if (errorMsg.isEmpty() == false)
-		//{
-		//	QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-		//}
+		if (errorMsg.isEmpty() == false)
+		{
+			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+		}
 	}
 
 	return;
-
-	// Add Ufb
-	//
-
-//	QString errorMsg;
-//	addItem(std::make_shared<VFrame30::SchemaItemUfb>(schema()->unit(), *(afb.get()), &errorMsg));
-
-//	if (errorMsg.isEmpty() == false)
-//	{
-//		QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-//	}
-
-
-
-//	// --
-//	//
-//	ChooseAfbDialog* dialog = new ChooseAfbDialog(afbs, this);
-
-//	if (dialog->exec() == QDialog::Accepted)
-//	{
-//		int index = dialog->index();
-
-//		if (index < 0 || static_cast<size_t>(index) >= afbs.size())
-//		{
-//			assert(false);
-//			return;
-//		}
-
-//		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
-
-//		QString errorMsg;
-//		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
-
-//		if (errorMsg.isEmpty() == false)
-//		{
-//			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
-//		}
-//	}
-
-//	return;
 }
 
 void EditSchemaWidget::onLeftKey()
