@@ -377,30 +377,34 @@ namespace Builder
 				{
 					// tuning adapter
 					//
-					if (adapterProperties.tuningServiceID.isEmpty() == true)
+					if (adapterProperties.tuningEnable == true)
 					{
-						log->wrnCFG3016(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID);
-						continue;
-					}
+						if (adapterProperties.tuningServiceID.isEmpty() == true)
+						{
+							log->wrnCFG3016(adapterProperties.adapterID,
+											LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID);
+						}
+						else
+						{
+							if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
+							{
+								log->wrnCFG3015(adapterProperties.adapterID,
+												LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
+												adapterProperties.tuningServiceID);
+							}
+							else
+							{
+								software = m_softwareList[adapterProperties.tuningServiceID];
 
-					if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
-					{
-						log->wrnCFG3015(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
-										adapterProperties.tuningServiceID);
-						continue;
-					}
-
-					software = m_softwareList[adapterProperties.tuningServiceID];
-
-					if (software->type() != E::SoftwareType::TuningService)
-					{
-						log->errCFG3017(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
-										adapterProperties.tuningServiceID);
-						result = false;
-						continue;
+								if (software->type() != E::SoftwareType::TuningService)
+								{
+									log->errCFG3017(adapterProperties.adapterID,
+													LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
+													adapterProperties.tuningServiceID);
+									result = false;
+								}
+							}
+						}
 					}
 				}
 				else
@@ -409,58 +413,66 @@ namespace Builder
 
 					// test appDataServiceID property
 					//
-					if (adapterProperties.appDataServiceID.isEmpty() == true)
+					if (adapterProperties.appDataEnable == true)
 					{
-						log->wrnCFG3016(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID);
-						continue;
-					}
+						if (adapterProperties.appDataServiceID.isEmpty() == true)
+						{
+							log->wrnCFG3016(adapterProperties.adapterID,
+											LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID);
+						}
+						else
+						{
+							if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
+							{
+								log->wrnCFG3015(adapterProperties.adapterID,
+												LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
+												adapterProperties.appDataServiceID);
+							}
+							else
+							{
+								software = m_softwareList[adapterProperties.appDataServiceID];
 
-					if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
-					{
-						log->wrnCFG3015(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
-										adapterProperties.appDataServiceID);
-						continue;
-					}
-
-					software = m_softwareList[adapterProperties.appDataServiceID];
-
-					if (software->type() != E::SoftwareType::AppDataService)
-					{
-						log->errCFG3017(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
-										adapterProperties.appDataServiceID);
-						result = false;
-						continue;
+								if (software->type() != E::SoftwareType::AppDataService)
+								{
+									log->errCFG3017(adapterProperties.adapterID,
+													LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
+													adapterProperties.appDataServiceID);
+									result = false;
+								}
+							}
+						}
 					}
 
 					// test diagDataServiceID property
 					//
-					if (adapterProperties.diagDataServiceID.isEmpty() == true)
+					if (adapterProperties.diagDataEnable == true)
 					{
-						log->wrnCFG3016(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID);
-						continue;
-					}
+						if (adapterProperties.diagDataServiceID.isEmpty() == true)
+						{
+							log->wrnCFG3016(adapterProperties.adapterID,
+											LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID);
+						}
+						else
+						{
+							if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
+							{
+								log->wrnCFG3015(adapterProperties.adapterID,
+												LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
+												adapterProperties.diagDataServiceID);
+							}
+							else
+							{
+								software = m_softwareList[adapterProperties.diagDataServiceID];
 
-					if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
-					{
-						log->wrnCFG3015(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
-										adapterProperties.diagDataServiceID);
-						continue;
-					}
-
-					software = m_softwareList[adapterProperties.diagDataServiceID];
-
-					if (software->type() != E::SoftwareType::DiagDataService)
-					{
-						log->errCFG3017(adapterProperties.adapterID,
-										LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
-										adapterProperties.diagDataServiceID);
-						result = false;
-						continue;
+								if (software->type() != E::SoftwareType::DiagDataService)
+								{
+									log->errCFG3017(adapterProperties.adapterID,
+													LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
+													adapterProperties.diagDataServiceID);
+									result = false;
+								}
+							}
+						}
 					}
 				}
 			}

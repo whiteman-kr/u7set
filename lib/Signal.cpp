@@ -48,13 +48,14 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	{
 		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
 
+		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
+
 		m_lowADC = deviceSignal.appSignalLowAdc();
 		m_highADC = deviceSignal.appSignalHighAdc();
 
 		m_lowEngeneeringUnits = deviceSignal.appSignalLowEngUnits();
 		m_highEngeneeringUnits = deviceSignal.appSignalHighEngUnits();;
 	}
-
 
 	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
 	{

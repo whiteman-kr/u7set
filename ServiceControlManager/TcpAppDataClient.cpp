@@ -353,6 +353,11 @@ void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 r
 
 void TcpAppDataClient::getNextStatePart()
 {
+	if (isClearToSendRequest() == false)
+	{
+		return;
+	}
+
 	int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
 							((m_totalItemsCount % ADS_GET_APP_SIGNAL_STATE_MAX) == 0 ? 0 : 1);
 
