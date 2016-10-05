@@ -2586,6 +2586,30 @@ namespace Builder
 				  arg(afbCaption).arg(afbSignal));
 	}
 
+	/// IssueCode: ALC5058
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Parameter '%1' of AFB '%2' can't be 0.
+	///
+	/// Parameters:
+	///		%1 AFB parameter caption
+	///		%2 AFB caption
+	///		%3 AFB Uuid
+	///
+	/// Description:
+	///		Specified parameter of AFB can't be 0. Check parameter value.
+	///
+	void IssueLogger::errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5058,
+				  QString(tr("Parameter '%1' of AFB '%2' can't be 0.")).
+				  arg(paramCaption).arg(afbCaption));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//
