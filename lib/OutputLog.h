@@ -9,7 +9,7 @@
 #define LOG_EMPTY_LINE(logObject)	logObject->writeEmptyLine();
 
 #define LOG_ERROR_OBSOLETE(logObject, prefix, message)		logObject->writeError(message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning(message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning0(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, Q_FUNC_INFO);
 
@@ -34,6 +34,14 @@ public:
 	QString toText() const;
 	QString toHtml() const;
 	QString toCsv() const;
+
+	bool isError() const;
+	bool isWarning() const;
+	bool isWarning0() const;
+	bool isWarning1() const;
+	bool isWarning2() const;
+	bool isSuccess() const;
+	bool isMessage() const;
 
 public:
 	int m_no = 0;
@@ -65,15 +73,29 @@ public:
 	Q_INVOKABLE void write(const QString& str, OutputMessageLevel level, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeMessage(const QString& str);
 	Q_INVOKABLE void writeSuccess(const QString& str);
-	Q_INVOKABLE void writeWarning(const QString& str);
-	Q_INVOKABLE void writeWarning(QString issue, const QString& str);
+
+	Q_INVOKABLE void writeWarning0(const QString& str);
+	Q_INVOKABLE void writeWarning1(const QString& str);
+	Q_INVOKABLE void writeWarning2(const QString& str);
+
+	Q_INVOKABLE void writeWarning0(QString issue, const QString& str);
+	Q_INVOKABLE void writeWarning1(QString issue, const QString& str);
+	Q_INVOKABLE void writeWarning2(QString issue, const QString& str);
+
 	Q_INVOKABLE void writeError(const QString& str);
 	Q_INVOKABLE void writeError(QString issue, const QString& str);
 
 	Q_INVOKABLE void writeMessage(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeSuccess(const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeWarning(const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeWarning(QString issue, const QString& str, QString file, int fileLine, QString func);
+
+	Q_INVOKABLE void writeWarning0(const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning1(const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning2(const QString& str, QString file, int fileLine, QString func);
+
+	Q_INVOKABLE void writeWarning0(QString issue, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning1(QString issue, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning2(QString issue, const QString& str, QString file, int fileLine, QString func);
+
 	Q_INVOKABLE void writeError(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeError(QString issue, const QString& str, QString file, int fileLine, QString func);
 

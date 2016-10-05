@@ -5,7 +5,7 @@
 
 DataFormatList::DataFormatList()
 {
-	auto enumValues = E::enumValues<E::DataFormat>();
+	auto enumValues = E::enumValues<E::AnalogAppSignalFormat>();
 
 	for (auto v : enumValues)
 	{
@@ -40,20 +40,21 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		return;
 	}
 
-	if (deviceSignal.isAnalogSignal())
+	m_signalType = deviceSignal.type();
+
+	assert(m_signalType == E::SignalType::Analog || m_signalType == E::SignalType::Discrete);
+
+	if (m_signalType == E::SignalType::Analog)
 	{
-		m_signalType = E::SignalType::Analog;
-	}
-	else
-	{
-		if (deviceSignal.isDiscreteSignal())
-		{
-			m_signalType = E::SignalType::Discrete;
-		}
-		else
-		{
-			assert(false);			// invalid deviceSignalType
-		}
+		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
+
+		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
+
+		m_lowADC = deviceSignal.appSignalLowAdc();
+		m_highADC = deviceSignal.appSignalHighAdc();
+
+		m_lowEngeneeringUnits = deviceSignal.appSignalLowEngUnits();
+		m_highEngeneeringUnits = deviceSignal.appSignalHighEngUnits();;
 	}
 
 	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
@@ -86,11 +87,6 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	m_caption = QString("Signal #%1").arg(deviceSignalStrID);
 	m_equipmentID = deviceSignal.equipmentIdTemplate();
-
-	if (m_signalType == E::SignalType::Analog)
-	{
-		setAnalogSignalFormat(deviceSignal.format());
-	}
 
 	setDataSize(m_signalType, m_analogSignalFormat);
 }
@@ -312,7 +308,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	(this->*setter)(address);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::DataFormat))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::AnalogAppSignalFormat))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -324,7 +320,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == dataFormatInfo[i])
 		{
-			(this->*setter)(static_cast<E::DataFormat>(dataFormatInfo.keyAt(i)));
+			(this->*setter)(static_cast<E::AnalogAppSignalFormat>(dataFormatInfo.keyAt(i)));
 			return;
 		}
 	}
@@ -411,14 +407,20 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 
 // for DeviceSignal.dataFormat conversion
 //
+/*
 void Signal::setAnalogSignalFormat(E::DataFormat dataFormat)
 {
-	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
+	//	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
+
+	if (dataFormat == E::DataFormat::UnsignedInt)
+	{
+		dataFormat = E::DataFormat::SignedInt;
+	}
 
 	// values of corresponding members of enums E::AppSignalDataFormat and E::DataFormat are equal!
 	//
 	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(dataFormat);
-}
+}*/
 
 
 void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)

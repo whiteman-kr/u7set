@@ -60,6 +60,7 @@ protected slots:
 
 	void runConfigurator();
     void runAfblEditor();
+	void showUfbLibraryTabPage(bool show);
 	void runSubsystemListEditor();
     void runConnectionsEditor();
 	void runRS232SignalListEditor();
@@ -87,6 +88,7 @@ private:
 	QAction* m_settingsAction = nullptr;
 
 	QAction* m_afblEditorAction = nullptr;
+	QAction* m_ufbLibraryAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_rs232SignalListEditorAction = nullptr;
@@ -103,6 +105,7 @@ private:
 	EquipmentTabPage* m_equipmentTab = nullptr;
 	SignalsTabPage* m_signalsTab = nullptr;
 	SchemasTabPage* m_logicSchema = nullptr;
+	SchemasTabPage* m_ufbLibrary = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;

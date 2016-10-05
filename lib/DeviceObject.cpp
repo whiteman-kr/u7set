@@ -120,7 +120,7 @@ namespace Hardware
 	const QString PropertyNames::appSignalHighEngUnits = "HighEngUnits";
 	const QString PropertyNames::appSignalDataFormat = "DataFormat";
 
-	const QString PropertyNames::categoryAppSignal = "AppSignal";
+	const QString PropertyNames::categoryAnalogAppSignal = "AnalogAppSignal";
 
 	//
 	//
@@ -2639,11 +2639,11 @@ R"DELIM({
 
 		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
 
-		appSignalLowAdcProp->setCategory(PropertyNames::categoryAppSignal);
-		appSignalHighAdcProp->setCategory(PropertyNames::categoryAppSignal);
-		appSignalLowEngUnitsProp->setCategory(PropertyNames::categoryAppSignal);
-		appSignalHighEngUnitsProp->setCategory(PropertyNames::categoryAppSignal);
-		appSignalDataFormatProp->setCategory(PropertyNames::categoryAppSignal);
+		appSignalLowAdcProp->setCategory(PropertyNames::categoryAnalogAppSignal);
+		appSignalHighAdcProp->setCategory(PropertyNames::categoryAnalogAppSignal);
+		appSignalLowEngUnitsProp->setCategory(PropertyNames::categoryAnalogAppSignal);
+		appSignalHighEngUnitsProp->setCategory(PropertyNames::categoryAnalogAppSignal);
+		appSignalDataFormatProp->setCategory(PropertyNames::categoryAnalogAppSignal);
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(preset);

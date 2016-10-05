@@ -226,7 +226,10 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 			OutputMessageLevel issue = GlobalMessanger::instance()->issueForSchemaItem(item->guid());
 
-			if ((issue == OutputMessageLevel::Warning || issue == OutputMessageLevel::Error) &&
+			if ((issue == OutputMessageLevel::Warning0 ||
+				 issue == OutputMessageLevel::Warning1 ||
+				 issue == OutputMessageLevel::Warning2 ||
+				 issue == OutputMessageLevel::Error) &&
 				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue

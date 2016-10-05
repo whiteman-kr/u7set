@@ -386,7 +386,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
+		case SC_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		/*case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
@@ -844,7 +844,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::DataFormat>(value.toInt())); break;
+			case SC_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -1065,14 +1065,13 @@ void SignalsModel::addSignal()
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
-		signal.setAnalogSignalFormat(E::DataFormat::Float);
-		signal.setDataSize(32);
+		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+		signal.setDataSize(FLOAT32_SIZE);
 		signal.setSignalType(E::SignalType::Analog);
 	}
 	else
 	{
-		signal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
-		signal.setDataSize(1);
+		signal.setDataSize(DISCRETE_SIZE);
 		signal.setSignalType(E::SignalType::Discrete);
 	}
 	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
@@ -1590,14 +1589,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		Signal newSignal;
 
 		newSignal.setSignalType(type);
+
 		if (type == E::SignalType::Analog)
 		{
-			newSignal.setAnalogSignalFormat(E::DataFormat::Float);
+			newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+			newSignal.setDataSize(FLOAT32_SIZE);
 		}
 		else
 		{
-			newSignal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
+			newSignal.setDataSize(DISCRETE_SIZE);
 		}
+
 		newSignal.setAppSignalID(newSignalStrId);
 		newSignal.setCustomAppSignalID(newSignalExtStrId);
 		newSignal.setEquipmentID(lmId);

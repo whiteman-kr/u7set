@@ -4,6 +4,7 @@
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
 #include <QTextBlock>
+#include <QComboBox>
 #include <QCompleter>
 
 //
@@ -95,9 +96,14 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_debugCheckBox->setChecked(true);
 	settingsWidgetLayout->addWidget(m_debugCheckBox);
 
-	m_hideWarningsCheckBox = new QCheckBox(tr("Hide warnings"), m_settingsWidget);
-	m_hideWarningsCheckBox->setChecked(theSettings.hideWarnings());
-	settingsWidgetLayout->addWidget(m_hideWarningsCheckBox);
+	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
+
+	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::ShowAll), tr("Show All Warnings"));
+	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::Middle), tr("Mid Warnings"));
+	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::Important), tr("Important Warnings"));
+	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::HideAll), tr("Hide All Warning"));
+	m_warningsLevelComboBox->setCurrentIndex(theSettings.buildWarningLevel());
+	settingsWidgetLayout->addWidget(m_warningsLevelComboBox);
 
 	settingsWidgetLayout->addStretch();
 
@@ -133,7 +139,12 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &BuildTabPage::buildWasStarted);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &BuildTabPage::buildWasFinished);
 
-	connect(m_hideWarningsCheckBox, &QCheckBox::stateChanged, this, &BuildTabPage::hideWaringsStateChanged);
+	connect(m_warningsLevelComboBox , static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			[](int index)
+			{
+				theSettings.setBuildWarningLevel(index);
+			}
+			);
 
 	connect(m_prevIssueButton, &QPushButton::clicked, this, &BuildTabPage::prevIssue);
 	connect(m_nextIssueButton, &QPushButton::clicked, this, &BuildTabPage::nextIssue);
@@ -191,12 +202,6 @@ void BuildTabPage::cancelBuild()
 	}
 }
 
-//BuildTabPage* BuildTabPage::instance()
-//{
-//	assert(m_this);
-//	return m_this;
-//}
-
 void BuildTabPage::CreateActions()
 {
 //	m_addSystemAction = new QAction(tr("System"), this);
@@ -218,7 +223,7 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 		m_outputLog.isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
-		bool hideWarnings = theSettings.hideWarnings();
+		WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
 
 		std::vector<OutputLogItem> messages;
 		messages.reserve(20);
@@ -235,7 +240,20 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 		{
 			const OutputLogItem& m = messages[i];
 
-			if (hideWarnings == true && m.m_level == OutputMessageLevel::Warning)
+			if (warningShowLevel == WarningShowLevel::HideAll &&
+				m.isWarning() == true)
+			{
+				continue;
+			}
+
+			if (warningShowLevel == WarningShowLevel::Important &&
+				(m.isWarning1() == true || m.isWarning2()))
+			{
+				continue;
+			}
+
+			if (warningShowLevel == WarningShowLevel::Middle &&
+				m.isWarning2())
 			{
 				continue;
 			}
@@ -248,7 +266,10 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 			}
 		}
 
-		m_outputWidget->append(outputMessagesBuffer);
+		if (outputMessagesBuffer.isEmpty() == false)
+		{
+			m_outputWidget->append(outputMessagesBuffer);
+		}
 
 		return;
 	}
@@ -349,25 +370,11 @@ void BuildTabPage::buildWasFinished()
 	return;
 }
 
-void BuildTabPage::hideWaringsStateChanged(int state)
-{
-	bool hideWarning = (static_cast<Qt::CheckState>(state) == Qt::CheckState::Checked);
-	theSettings.setHideWarnings(hideWarning);
-}
-
 void BuildTabPage::prevIssue()
 {
 	assert(m_outputWidget);
 
-	QString regExpVal;
-	if (theSettings.hideWarnings() == true)
-	{
-		regExpVal = "\\bERR\\b";
-	}
-	else
-	{
-		regExpVal = "\\b(ERR|WRN)\\b";
-	}
+	QString regExpVal("\\b(ERR|WRN)\\b");
 
 	//  --
 	//
@@ -428,15 +435,7 @@ void BuildTabPage::nextIssue()
 {
 	assert(m_outputWidget);
 
-	QString regExpVal;
-	if (theSettings.hideWarnings() == true)
-	{
-		regExpVal = "\\bERR\\b";
-	}
-	else
-	{
-		regExpVal = "\\b(ERR|WRN)\\b";
-	}
+	QString regExpVal("\\b(ERR|WRN)\\b");
 
 	//  --
 	//

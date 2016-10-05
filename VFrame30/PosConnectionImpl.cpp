@@ -236,7 +236,9 @@ namespace VFrame30
 		case OutputMessageLevel::Error:
 			color = SchemaItem::errorColor;
 			break;
-		case OutputMessageLevel::Warning:
+		case OutputMessageLevel::Warning0:
+		case OutputMessageLevel::Warning1:
+		case OutputMessageLevel::Warning2:
 			color = SchemaItem::warningColor;
 			break;
 		default:

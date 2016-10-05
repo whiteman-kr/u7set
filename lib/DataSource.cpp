@@ -87,17 +87,16 @@ const char* DataSource::PROP_COUNT = "Count";
 const char* DataSource::SIGNAL_ID_ELEMENT = "SignalID";
 
 
-DataSource::DataSource()
+DataSource::DataSource() :
+	m_rupFramesQueue(RUP_MAX_FRAME_COUNT * 150)
 {
-	m_rupFrames = new RupFrame[RUP_MAX_FRAME_COUNT];
-	m_framesData = new char[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
 }
+
 
 DataSource::~DataSource()
 {
-	delete [] m_rupFrames;
-	delete [] m_framesData;
 }
+
 
 quint64 DataSource::generateID() const
 {
@@ -506,6 +505,45 @@ bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
 	assert(m_id = generateID());
 
 	return true;
+}
+
+
+void DataSource::pushRupFrame(const RupFrame& rupFrame)
+{
+	m_receivedFramesCount++;
+
+	m_receivedDataSize += sizeof(RupFrame);
+
+	quint32 headerNumerator = (quint32)reverseUint16(rupFrame.header.numerator);
+
+	if (m_firstRupFrame == true)
+	{
+		m_rupFrameNumerator = headerNumerator;
+
+		m_rupFrameNumerator++;
+
+		m_firstRupFrame = false;
+	}
+	else
+	{
+		if (m_rupFrameNumerator != headerNumerator)
+		{
+			if (m_rupFrameNumerator < headerNumerator)
+			{
+				m_lostedFramesCount += headerNumerator - m_rupFrameNumerator;
+			}
+			else
+			{
+				m_lostedFramesCount += 65535 - m_rupFrameNumerator + headerNumerator;
+			}
+
+			m_rupFrameNumerator = headerNumerator;
+		}
+
+		m_rupFrameNumerator++;
+	}
+
+	m_rupFramesQueue.push(&rupFrame);
 }
 
 

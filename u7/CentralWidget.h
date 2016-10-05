@@ -17,7 +17,6 @@ signals:
 
 private slots:
 	void currentChanged(int index);
-
 	
 public slots:
 	void switchToTabPage(QWidget* w);

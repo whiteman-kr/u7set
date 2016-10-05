@@ -538,6 +538,9 @@ public:
 	VALUE& operator[](const KEY& key);
 	const VALUE& operator[](const KEY& key) const;
 
+	const VALUE value(const KEY& key);
+	const VALUE value(const KEY& key, const VALUE& defaultValue);
+
 	int indexOf(const KEY& key)
 	{
 		if (m_map.contains(key))
@@ -600,5 +603,29 @@ const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 {
 	assert(m_map.contains(key) == true);
 	return (*this)[m_map[key]];
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE HashedVector<KEY, VALUE>::value(const KEY& key)
+{
+	int index = m_map.value(key, -1);
+
+	assert(index != -1);
+	return (*this)[index];
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue)
+{
+	int index = m_map.value(key, -1);
+
+	if (index == -1)
+	{
+		return defaultValue;
+	}
+
+	return (*this)[index];
 }
 

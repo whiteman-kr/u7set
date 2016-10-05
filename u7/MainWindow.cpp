@@ -49,17 +49,27 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
 	m_signalsTab = new SignalsTabPage(dbController(), nullptr);
+
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
 
-	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema, VFrame30::UfbSchema>(
-				dbController(), nullptr,
-				::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("Control"),
-				::UfbFileExtension, ::UfblFileName, ::UfbTemplExtension, tr("UFB Library"));
+//	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema, VFrame30::UfbSchema>(
+//				dbController(), nullptr,
+//				::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("Control"),
+//				::UfbFileExtension, ::UfblFileName, ::UfbTemplExtension, tr("UFB Library"));
 
-	m_monitorSchema = SchemasTabPage::create<
-					  VFrame30::MonitorSchema>(dbController(), nullptr,
-					  ::MvsFileExtension, ::MvsFileName, ::MvsTemplExtension, tr("Control"));
+	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(
+						dbController(), nullptr,
+						::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("UserAppLogic"));
+
+	m_ufbLibrary = SchemasTabPage::create<VFrame30::UfbSchema>(
+					   dbController(), nullptr,
+					   ::UfbFileExtension, ::UfblFileName, ::UfbTemplExtension, tr("UFB Library"));
+	m_ufbLibrary->setWindowTitle(tr("UFB Library"));
+
+	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(
+						  dbController(), nullptr,
+						  ::MvsFileExtension, ::MvsFileName, ::MvsTemplExtension, tr("Control"));
 
 	getCentralWidget()->addTabPage(m_projectsTab, tr("&Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("&Equipment"));
@@ -93,6 +103,11 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 MainWindow::~MainWindow()
 {
 	qDebug() << Q_FUNC_INFO;
+
+	if (m_ufbLibrary->parent() == nullptr)
+	{
+		delete m_ufbLibrary;
+	}
 }
 
 void MainWindow::closeEvent(QCloseEvent* e)
@@ -126,9 +141,9 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		//m_diagSchema->hasUnsavedSchemas() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-			 tr("Some schemas have unsaved changes."),
-			QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
-			QMessageBox::SaveAll);
+																   tr("Some schemas have unsaved changes."),
+																   QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
+																   QMessageBox::SaveAll);
 
 		if (result == QMessageBox::Cancel)
 		{
@@ -195,10 +210,16 @@ void MainWindow::createActions()
 	m_settingsAction->setEnabled(true);
 	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_afblEditorAction = new QAction(tr("AFBL Editor..."), this);
-	m_afblEditorAction->setStatusTip(tr("Run AFBL Editor"));
+	m_afblEditorAction = new QAction(tr("AFB Library Editor..."), this);
+	m_afblEditorAction->setStatusTip(tr("Run AFB Editor"));
 	m_afblEditorAction->setEnabled(false);
 	connect(m_afblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
+
+	m_ufbLibraryAction = new QAction(tr("UFB Library Editor..."), this);
+	m_ufbLibraryAction->setStatusTip(tr("Run UFB Library Editor"));
+	m_ufbLibraryAction->setEnabled(false);
+	m_ufbLibraryAction->setCheckable(true);
+	connect(m_ufbLibraryAction, &QAction::toggled, this, &MainWindow::showUfbLibraryTabPage);
 
     m_subsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
 	m_subsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
@@ -269,6 +290,7 @@ void MainWindow::createMenus()
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	pToolsMenu->addAction(m_afblEditorAction);
+	pToolsMenu->addAction(m_ufbLibraryAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	if (theSettings.useConnections())
 	{
@@ -382,6 +404,49 @@ void MainWindow::runAfblEditor()
     d.exec();
 }
 
+void MainWindow::showUfbLibraryTabPage(bool show)
+{
+	qDebug() << "Show Ufb Library TabPage, show = " << show;
+
+	if (m_ufbLibrary == nullptr ||
+		m_logicSchema == nullptr)
+	{
+		assert(m_logicSchema);
+		assert(m_ufbLibrary);
+		return;
+	}
+
+	if (show == true)
+	{
+		// Add m_ufbLibrary to TabPage after AppSchema
+		//
+		int logicSchemaTabIndex = getCentralWidget()->indexOf(m_logicSchema);
+
+		if (logicSchemaTabIndex == -1)
+		{
+			assert(logicSchemaTabIndex != -1);
+			return;
+		}
+
+		getCentralWidget()->insertTab(logicSchemaTabIndex + 1, m_ufbLibrary, m_ufbLibrary->windowTitle());
+		getCentralWidget()->setCurrentWidget(m_ufbLibrary);
+	}
+	else
+	{
+		int tabIndex = getCentralWidget()->indexOf(m_ufbLibrary);
+
+		if (tabIndex == -1)
+		{
+			assert(tabIndex != -1);
+			return;
+		}
+
+		getCentralWidget()->removeTab(tabIndex);
+	}
+
+	return;
+}
+
 void MainWindow::runSubsystemListEditor()
 {
 	if (dbController()->isProjectOpened() == false)
@@ -473,6 +538,7 @@ void MainWindow::projectOpened(DbProject project)
 
 	m_usersAction->setEnabled(true);
     m_afblEditorAction->setEnabled(true);
+	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_rs232SignalListEditorAction->setEnabled(true);
@@ -503,6 +569,7 @@ void MainWindow::projectClosed()
 
 	m_usersAction->setEnabled(false);
 	m_afblEditorAction->setEnabled(false);
+	m_ufbLibraryAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
 	m_rs232SignalListEditorAction->setEnabled(false);

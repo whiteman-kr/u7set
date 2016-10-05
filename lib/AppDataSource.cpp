@@ -11,6 +11,7 @@ AppDataSource::AppDataSource()
 {
 }
 
+
 bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 {
 	if (protoState == nullptr)
@@ -29,7 +30,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 	protoState->set_errorprotocolversion(m_errorProtocolVersion);
 	protoState->set_errorframesquantity(m_errorFramesQuantity);
 	protoState->set_errorframeno(m_errorFrameNo);
-	protoState->set_lostedpackets(m_lostedPackets);
+	protoState->set_lostedpackets(m_lostedFramesCount);
 
 	return true;
 }
@@ -47,7 +48,7 @@ bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
 	m_errorProtocolVersion = protoState.errorprotocolversion();
 	m_errorFramesQuantity = protoState.errorframesquantity();
 	m_errorFrameNo = protoState.errorframeno();
-	m_lostedPackets = protoState.lostedpackets();
+	m_lostedFramesCount = protoState.lostedpackets();
 
 	return true;
 }
