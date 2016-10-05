@@ -90,7 +90,7 @@ void Settings::writeUserScope() const
 
 	s.setValue("UploadTabPage/Splitter/state", m_UploadTabPageSplitterState);
 
-	s.setValue("m_hideWarnings", m_hideWarnings);
+	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
 	return;
@@ -170,7 +170,7 @@ void Settings::loadUserScope()
 
 	m_UploadTabPageSplitterState = s.value("UploadTabPage/Splitter/state").toByteArray();
 
-	m_hideWarnings = s.value("m_hideWarnings").toBool();
+	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
 
     return;
@@ -309,14 +309,14 @@ void Settings::setInfoMode(bool value)
 	m_infoMode = value;
 }
 
-bool Settings::hideWarnings() const
+int Settings::buildWarningLevel() const
 {
-	return m_hideWarnings;
+	return m_buildWarningLevel;
 }
 
-void Settings::setHideWarnings(bool value)
+void Settings::setBuildWarningLevel(int value)
 {
-	m_hideWarnings = value;
+	m_buildWarningLevel = value;
 }
 
 

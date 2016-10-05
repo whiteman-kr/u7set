@@ -93,7 +93,7 @@ namespace Hardware
 		static const QString appSignalHighEngUnits;
 		static const QString appSignalDataFormat;
 
-		static const QString categoryAppSignal;
+		static const QString categoryAnalogAppSignal;
 	};
 
 	// Forward declarations
