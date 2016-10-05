@@ -94,8 +94,8 @@ public:
 
 	enum class AnalogAppSignalFormat
 	{
-		SignedInt32 = E::DataFormat::SignedInt,
-		Float32 = E::DataFormat::Float
+		SignedInt32 = static_cast<int>(E::DataFormat::SignedInt),
+		Float32 = static_cast<int>(E::DataFormat::Float)
 	};
 	Q_ENUM(AnalogAppSignalFormat)
 

@@ -59,7 +59,10 @@ void TcpAppDataClient::onConnection()
 
 void TcpAppDataClient::onDisconnection()
 {
-	m_updateStatesTimer->stop();
+	if (m_updateStatesTimer != nullptr)
+	{
+		m_updateStatesTimer->stop();
+	}
 
 	m_unitList.clear();
 	m_signalHahes.clear();
