@@ -255,7 +255,6 @@ HEADERS  += \
 	Builder/OptoModule.h \
 	GlobalMessanger.h \
     Builder/LmMemoryMap.h \
-    Builder/LmLimits.h \
     ../lib/Address16.h \
     Builder/ModuleLogicCompiler.h \
     ../lib/WUtils.h \
@@ -288,7 +287,8 @@ HEADERS  += \
     DialogSettingsConfigurator.h \
     Builder/ArchivingServiceCfgGenerator.h \
     Builder/TuningClientCfgGenerator.h \
-    ChooseUfbDialog.h
+    ChooseUfbDialog.h \
+    ../lib/LmLimits.h
 
 FORMS    += \
     ChangesetDialog.ui \

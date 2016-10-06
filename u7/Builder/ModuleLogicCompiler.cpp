@@ -2774,30 +2774,29 @@ namespace Builder
 
 				QString idStr;
 
-				if (port->manualSettings() == true)
-				{
-					result &= port->calculateTxSignalsAddresses(m_log);
+				bool res = true;
 
+				res &= port->parseRawDescriptionStr(m_log);
+
+				res &= port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log);
+
+				res &= port->calculateTxSignalsAddresses(m_log);
+
+				if (res == true)
+				{
 					idStr.sprintf("0x%X", port->txDataID());
 
-					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', manual settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', %2 settings: analog signals %3, discrete signals %4, data size %5 bytes, dataID %6")).
 							arg(port->connectionID()).
+							arg(port->manualSettings() == true ? "manual" : "automatic").
 							arg(port->txAnalogSignalsCount()).
 							arg(port->txDiscreteSignalsCount()).
 							arg(port->txDataSizeW() * 2).
 							arg(idStr)  );
-
 				}
 				else
 				{
-					result &= port->calculateTxSignalsAddresses(m_log);
-
-					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', automatic settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-							arg(port->connectionID()).
-							arg(port->txAnalogSignalsCount()).
-							arg(port->txDiscreteSignalsCount()).
-							arg(port->txDataSizeW() * 2).
-							arg(idStr)  );
+					result = false;
 				}
 			}
 		}
@@ -2809,6 +2808,8 @@ namespace Builder
 
 		return result;
 	}
+
+
 
 
 	bool ModuleLogicCompiler::buildRS232SignalLists()
@@ -3109,6 +3110,15 @@ namespace Builder
 
 		m_code.append(cmd);
 		m_code.newLine();
+
+		if (port->txRawDataSizeW() > 0)
+		{
+			// write raw data
+
+			comment.setComment(QString(tr("Copying raw data (%1 words) of opto-port %2")).arg(port->txRawDataSizeW()).arg(port->equipmentID()));
+			m_code.append(comment);
+			m_code.newLine();
+		}
 
 		// copy analog signals
 		//
@@ -3873,11 +3883,21 @@ namespace Builder
 
 		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentId(), m_lm->caption(),
 														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
+		if (result == false)
+		{
+			return false;
+		}
+
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
 
 		result &= setLmAppLANDataUID(binCode);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		QStringList mifCode;
 
