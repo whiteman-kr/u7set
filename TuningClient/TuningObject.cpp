@@ -177,3 +177,8 @@ Hash TuningObject::appSignalHash() const
 
 }
 
+bool TuningObject::modified() const
+{
+	return m_value != m_editValue;
+}
+
