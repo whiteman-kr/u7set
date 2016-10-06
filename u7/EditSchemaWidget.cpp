@@ -21,6 +21,7 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemTerminator.h"
 #include "SignalsTabPage.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -1824,6 +1825,15 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemConst>(schema()->unit()));
 			});
 
+	m_addTerminatorAction = new QAction(tr("Terminator"), this);
+	m_addTerminatorAction->setEnabled(true);
+	m_addTerminatorAction->setIcon(QIcon(":/Images/Images/SchemaTerminator.svg"));
+	connect(m_addTerminatorAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemTerminator>(schema()->unit()));
+			});
+
 	m_addFblElementAction = new QAction(tr("App Functional Block"), this);
 	m_addFblElementAction->setEnabled(true);
 	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
@@ -2148,6 +2158,7 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addInOutSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
+			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addFblElementAction);
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
@@ -2160,6 +2171,7 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addInputSignalAction);
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
+			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addFblElementAction);
 		}
 
