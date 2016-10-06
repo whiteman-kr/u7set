@@ -60,6 +60,9 @@ namespace Hardware
 		quint32 port1TxRsDataUID() const;
 		void setPort1TxRsDataUID(quint32 value);
 
+		QString port1RawDataDescription() const;
+		void setPort1RawDataDescription(const QString& value);
+
 		//
 		//
 		//
@@ -84,6 +87,9 @@ namespace Hardware
 
 		quint32 port2TxRsDataUID() const;
 		void setPort2TxRsDataUID(quint32 value);
+
+		QString port2RawDataDescription() const;
+		void setPort2RawDataDescription(const QString& value);
 
 		//
 		//
@@ -127,6 +133,8 @@ namespace Hardware
 			m_port1TxRsID = that.m_port1TxRsID;
 			m_port1TxRsDataUID = that.m_port1TxRsDataUID;
 			m_port1TxStartAddress = that.m_port1TxStartAddress;
+			m_port1RawDataDescription = that.m_port1RawDataDescription;
+
 
 			m_port2ManualTxWordsQuantity = that.m_port2ManualTxWordsQuantity;
 			m_port2ManualRxWordsQuantity = that.m_port2ManualRxWordsQuantity;
@@ -135,6 +143,7 @@ namespace Hardware
 			m_port2TxRsID = that.m_port2TxRsID;
 			m_port2TxRsDataUID = that.m_port2TxRsDataUID;
 			m_port2TxStartAddress = that.m_port2TxStartAddress;
+			m_port2RawDataDescription = that.m_port2RawDataDescription;
 
 			m_serialMode = that.m_serialMode;
 			m_enableSerial = that.m_enableSerial;
@@ -162,6 +171,7 @@ namespace Hardware
 		quint32 m_port1TxRxOptoDataUID = 0;
 		int m_port1TxRsID = 0;
 		quint32 m_port1TxRsDataUID = 0;
+		QString m_port1RawDataDescription;
 
 		int m_port2TxStartAddress = 0;
 		QString m_port2EquipmentID;
@@ -171,6 +181,7 @@ namespace Hardware
 		quint32 m_port2TxRxOptoDataUID = 0;
 		int m_port2TxRsID = 0;
 		quint32 m_port2TxRsDataUID = 0;
+		QString m_port2RawDataDescription;
 
 		OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
 		OptoPort::Mode m_mode = OptoPort::Mode::Optical;

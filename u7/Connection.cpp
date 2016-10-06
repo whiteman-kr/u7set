@@ -19,6 +19,12 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
+		auto propPort1RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, "Port1RawDataDescription", true, Connection::port1RawDataDescription, Connection::setPort1RawDataDescription);
+		propPort1RawDataDescription->setCategory(tr("Miscellaneous"));
+
+		auto propPort2RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, "Port2RawDataDescription", true, Connection::port2RawDataDescription, Connection::setPort2RawDataDescription);
+		propPort2RawDataDescription->setCategory(tr("Miscellaneous"));
+
 		auto proptx1sa = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxStartAddress", true, Connection::port1ManualTxStartAddress, Connection::setPort1ManualTxStartAddress);
 		proptx1sa->setCategory(tr("Manual Settings"));
 
@@ -90,7 +96,10 @@ namespace Hardware
 		writer.writeAttribute("DisableDataID", disableDataID() ? "true" : "false");
 		writer.writeAttribute("GenerateVHDFile", generateVHDFile() ? "true" : "false");
 
-        // Tx/Rx words quantity
+		writer.writeAttribute("Port1RawDataDescription", port1RawDataDescription());
+		writer.writeAttribute("Port2RawDataDescription", port2RawDataDescription());
+
+		// Tx/Rx words quantity
         //
 		writer.writeAttribute("Port1TxStartAddress", QString::number(port1ManualTxStartAddress()));
 		writer.writeAttribute("Port1TxWordsQuantity", QString::number(port1ManualTxWordsQuantity()));
@@ -166,7 +175,17 @@ namespace Hardware
 			setGenerateVHDFile(reader.attributes().value("GenerateVHDFile").toString() == "true" ? true : false);
 		}
 
-        // Tx/Rx words quantity, may be overloaded later
+		if (reader.attributes().hasAttribute("Port1RawDataDescription"))
+		{
+			setPort1RawDataDescription(reader.attributes().value("Port1RawDataDescription").toString());
+		}
+
+		if (reader.attributes().hasAttribute("Port2RawDataDescription"))
+		{
+			setPort2RawDataDescription(reader.attributes().value("Port2RawDataDescription").toString());
+		}
+
+		// Tx/Rx words quantity, may be overloaded later
         //
 
 		if (reader.attributes().hasAttribute("Port1TxStartAddress"))
@@ -343,6 +362,16 @@ namespace Hardware
         m_port1TxRsDataUID = value;
     }
 
+	QString Connection::port1RawDataDescription() const
+	{
+		return m_port1RawDataDescription;
+	}
+
+	void Connection::setPort1RawDataDescription(const QString& value)
+	{
+		m_port1RawDataDescription = value;
+	}
+
     //
     // port2
     //
@@ -377,7 +406,17 @@ namespace Hardware
         m_port2ManualRxWordsQuantity = value;
     }
 
-    //
+	QString Connection::port2RawDataDescription() const
+	{
+		return m_port2RawDataDescription;
+	}
+
+	void Connection::setPort2RawDataDescription(const QString& value)
+	{
+		m_port2RawDataDescription = value;
+	}
+
+	//
     //
 
     int Connection::port2TxRxOptoID() const
