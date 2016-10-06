@@ -12,6 +12,7 @@ namespace VFrame30
 	class SchemaLayer;
 	class SchemaItem;
 	class LogicSchema;
+	class UfbSchema;
 	class SchemaDetails;
 
 	
@@ -66,6 +67,7 @@ namespace VFrame30
 		void BuildFblConnectionMap() const;
 
 		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
+		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
 
 		virtual QStringList getSignalList() const;
 		virtual QStringList getLabels() const;

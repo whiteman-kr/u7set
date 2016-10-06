@@ -492,6 +492,9 @@ namespace Hardware
 		QString configurationScript() const;
 		void setConfigurationScript(const QString& value);
 
+		QString rawDataDescription() const;
+		void setRawDataDescription(const QString& value);
+
 		int moduleType() const;
 
 		bool isIOModule() const;
@@ -507,6 +510,7 @@ namespace Hardware
 		uint16_t m_type = 0;	// high byte is family type, low byte is module version
 
 		QString m_configurationScript;
+		QString m_rawDataDescription;
 	};
 
 

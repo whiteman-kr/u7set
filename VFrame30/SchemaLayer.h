@@ -34,7 +34,6 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
 		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1

@@ -39,8 +39,7 @@ namespace VFrame30
 	public:
 		virtual QString buildName() const override;
 
-	protected:
-		bool updateElement(const UfbSchema* ufbSchema, QString* errorMsg);
+		bool updateUfbElement(const UfbSchema* ufbSchema, QString* errorMsg);
 
 		// Properties and Data
 		//
@@ -49,14 +48,9 @@ namespace VFrame30
 		QString ufbCaption() const;
 		int ufbSchemaVersion() const;
 
-		QString label() const;
-		void setLabel(QString value);
-
 	private:
 		QString m_ufbSchemaId;
 		QString m_ufbCaption;
-		int m_version = -1;
-
-		QString m_label;
+		int m_ufbVersion = -1;
 	};
 }

@@ -384,6 +384,7 @@ message SchemaItem
 	optional SchemaItemReceiver ReceiverItem = 132;			// +ConnectionItem, FblItemRect
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
+	optional SchemaItemTerminator terminator = 135;				// +FblItemRect
 }
 
 //
@@ -655,7 +656,15 @@ message SchemaItemUfb
     optional string ufbSchemaId = 1;
 	optional string ufbCaption = 2;
 	optional int32 ufbVersion = 3 [default = -1];
-	optional string label = 6;
+}
+
+//
+//
+// SchemaItemTerminator
+//
+//
+message SchemaItemTerminator
+{
 }
 
 
@@ -723,6 +732,7 @@ message DeviceModule
 	optional int32 typeObsolete = 1 [default = 0];
 	optional string configurationScript = 2;
 	optional int32 moduleType = 3;
+	optional string rawDataDescription = 4;
 }
 
 message DeviceController

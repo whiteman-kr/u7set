@@ -1526,6 +1526,7 @@ namespace Builder
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 		AppFbParamValue& i_conf_n = m_paramValuesArray["i_conf_n"];
+		AppFbParamValue& i_ust = m_paramValuesArray["i_ust"];
 
 		CHECK_UNSIGNED_INT(i_conf);
 		CHECK_UNSIGNED_INT(i_conf_n);
@@ -1535,12 +1536,32 @@ namespace Builder
 		if (i_conf.unsignedIntValue() == 1)
 		{
 			m_runTime = 5;		// SI
+
+			CHECK_SIGNED_INT32(i_ust);
+
+			if (i_ust.signedIntValue() == 0)
+			{
+				// Parameter '%1' of AFB '%2' can't be 0.
+				//
+				m_log->errALC5058(i_ust.caption(), caption(), guid());
+				return false;
+			}
 		}
 		else
 		{
 			if (i_conf.unsignedIntValue() == 2)
 			{
 				m_runTime = 20;		// FP
+
+				CHECK_FLOAT32(i_ust);
+
+				if (i_ust.floatValue() == 0)
+				{
+					// Parameter '%1' of AFB '%2' can't be 0.
+					//
+					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					return false;
+				}
 			}
 			else
 			{

@@ -75,6 +75,7 @@ class SchemaItemConnection;
 class SchemaItemTransmitter;
 class SchemaItemReceiver;
 class SchemaItemUfb;
+class SchemaItemTerminator;
 class DeviceObject;
 class DeviceRoot;
 class DeviceSystem;
@@ -2705,6 +2706,15 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemUfb* release_ufb();
   inline void set_allocated_ufb(::Proto::SchemaItemUfb* ufb);
 
+  // optional .Proto.SchemaItemTerminator terminator = 135;
+  inline bool has_terminator() const;
+  inline void clear_terminator();
+  static const int kTerminatorFieldNumber = 135;
+  inline const ::Proto::SchemaItemTerminator& terminator() const;
+  inline ::Proto::SchemaItemTerminator* mutable_terminator();
+  inline ::Proto::SchemaItemTerminator* release_terminator();
+  inline void set_allocated_terminator(::Proto::SchemaItemTerminator* terminator);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItem)
  private:
   inline void set_has_uuid();
@@ -2759,6 +2769,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_inoutsignal();
   inline void set_has_ufb();
   inline void clear_has_ufb();
+  inline void set_has_terminator();
+  inline void clear_has_terminator();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2788,9 +2800,10 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemReceiver* receiveritem_;
   ::Proto::SchemaItemInOut* inoutsignal_;
   ::Proto::SchemaItemUfb* ufb_;
+  ::Proto::SchemaItemTerminator* terminator_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(27 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5055,18 +5068,6 @@ class SchemaItemUfb : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 ufbversion() const;
   inline void set_ufbversion(::google::protobuf::int32 value);
 
-  // optional string label = 6;
-  inline bool has_label() const;
-  inline void clear_label();
-  static const int kLabelFieldNumber = 6;
-  inline const ::std::string& label() const;
-  inline void set_label(const ::std::string& value);
-  inline void set_label(const char* value);
-  inline void set_label(const char* value, size_t size);
-  inline ::std::string* mutable_label();
-  inline ::std::string* release_label();
-  inline void set_allocated_label(::std::string* label);
-
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemUfb)
  private:
   inline void set_has_ufbschemaid();
@@ -5075,18 +5076,15 @@ class SchemaItemUfb : public ::google::protobuf::Message {
   inline void clear_has_ufbcaption();
   inline void set_has_ufbversion();
   inline void clear_has_ufbversion();
-  inline void set_has_label();
-  inline void clear_has_label();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* ufbschemaid_;
   ::std::string* ufbcaption_;
-  ::std::string* label_;
   ::google::protobuf::int32 ufbversion_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5094,6 +5092,78 @@ class SchemaItemUfb : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemUfb* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemTerminator : public ::google::protobuf::Message {
+ public:
+  SchemaItemTerminator();
+  virtual ~SchemaItemTerminator();
+
+  SchemaItemTerminator(const SchemaItemTerminator& from);
+
+  inline SchemaItemTerminator& operator=(const SchemaItemTerminator& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemTerminator& default_instance();
+
+  void Swap(SchemaItemTerminator* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemTerminator* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemTerminator& from);
+  void MergeFrom(const SchemaItemTerminator& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemTerminator)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemTerminator* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -5808,6 +5878,18 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 moduletype() const;
   inline void set_moduletype(::google::protobuf::int32 value);
 
+  // optional string rawDataDescription = 4;
+  inline bool has_rawdatadescription() const;
+  inline void clear_rawdatadescription();
+  static const int kRawDataDescriptionFieldNumber = 4;
+  inline const ::std::string& rawdatadescription() const;
+  inline void set_rawdatadescription(const ::std::string& value);
+  inline void set_rawdatadescription(const char* value);
+  inline void set_rawdatadescription(const char* value, size_t size);
+  inline ::std::string* mutable_rawdatadescription();
+  inline ::std::string* release_rawdatadescription();
+  inline void set_allocated_rawdatadescription(::std::string* rawdatadescription);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
   inline void set_has_typeobsolete();
@@ -5816,15 +5898,18 @@ class DeviceModule : public ::google::protobuf::Message {
   inline void clear_has_configurationscript();
   inline void set_has_moduletype();
   inline void clear_has_moduletype();
+  inline void set_has_rawdatadescription();
+  inline void clear_has_rawdatadescription();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* configurationscript_;
   ::google::protobuf::int32 typeobsolete_;
   ::google::protobuf::int32 moduletype_;
+  ::std::string* rawdatadescription_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11090,6 +11175,44 @@ inline void SchemaItem::set_allocated_ufb(::Proto::SchemaItemUfb* ufb) {
   }
 }
 
+// optional .Proto.SchemaItemTerminator terminator = 135;
+inline bool SchemaItem::has_terminator() const {
+  return (_has_bits_[0] & 0x04000000u) != 0;
+}
+inline void SchemaItem::set_has_terminator() {
+  _has_bits_[0] |= 0x04000000u;
+}
+inline void SchemaItem::clear_has_terminator() {
+  _has_bits_[0] &= ~0x04000000u;
+}
+inline void SchemaItem::clear_terminator() {
+  if (terminator_ != NULL) terminator_->::Proto::SchemaItemTerminator::Clear();
+  clear_has_terminator();
+}
+inline const ::Proto::SchemaItemTerminator& SchemaItem::terminator() const {
+  return terminator_ != NULL ? *terminator_ : *default_instance_->terminator_;
+}
+inline ::Proto::SchemaItemTerminator* SchemaItem::mutable_terminator() {
+  set_has_terminator();
+  if (terminator_ == NULL) terminator_ = new ::Proto::SchemaItemTerminator;
+  return terminator_;
+}
+inline ::Proto::SchemaItemTerminator* SchemaItem::release_terminator() {
+  clear_has_terminator();
+  ::Proto::SchemaItemTerminator* temp = terminator_;
+  terminator_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_terminator(::Proto::SchemaItemTerminator* terminator) {
+  delete terminator_;
+  terminator_ = terminator;
+  if (terminator) {
+    set_has_terminator();
+  } else {
+    clear_has_terminator();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -13031,75 +13154,9 @@ inline void SchemaItemUfb::set_ufbversion(::google::protobuf::int32 value) {
   ufbversion_ = value;
 }
 
-// optional string label = 6;
-inline bool SchemaItemUfb::has_label() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void SchemaItemUfb::set_has_label() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void SchemaItemUfb::clear_has_label() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void SchemaItemUfb::clear_label() {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    label_->clear();
-  }
-  clear_has_label();
-}
-inline const ::std::string& SchemaItemUfb::label() const {
-  return *label_;
-}
-inline void SchemaItemUfb::set_label(const ::std::string& value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(value);
-}
-inline void SchemaItemUfb::set_label(const char* value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(value);
-}
-inline void SchemaItemUfb::set_label(const char* value, size_t size) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  label_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* SchemaItemUfb::mutable_label() {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
-  }
-  return label_;
-}
-inline ::std::string* SchemaItemUfb::release_label() {
-  clear_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = label_;
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void SchemaItemUfb::set_allocated_label(::std::string* label) {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    delete label_;
-  }
-  if (label) {
-    set_has_label();
-    label_ = label;
-  } else {
-    clear_has_label();
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
+// -------------------------------------------------------------------
+
+// SchemaItemTerminator
 
 // -------------------------------------------------------------------
 
@@ -14037,6 +14094,76 @@ inline ::google::protobuf::int32 DeviceModule::moduletype() const {
 inline void DeviceModule::set_moduletype(::google::protobuf::int32 value) {
   set_has_moduletype();
   moduletype_ = value;
+}
+
+// optional string rawDataDescription = 4;
+inline bool DeviceModule::has_rawdatadescription() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceModule::set_has_rawdatadescription() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceModule::clear_has_rawdatadescription() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceModule::clear_rawdatadescription() {
+  if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_->clear();
+  }
+  clear_has_rawdatadescription();
+}
+inline const ::std::string& DeviceModule::rawdatadescription() const {
+  return *rawdatadescription_;
+}
+inline void DeviceModule::set_rawdatadescription(const ::std::string& value) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(value);
+}
+inline void DeviceModule::set_rawdatadescription(const char* value) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(value);
+}
+inline void DeviceModule::set_rawdatadescription(const char* value, size_t size) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DeviceModule::mutable_rawdatadescription() {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  return rawdatadescription_;
+}
+inline ::std::string* DeviceModule::release_rawdatadescription() {
+  clear_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = rawdatadescription_;
+    rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DeviceModule::set_allocated_rawdatadescription(::std::string* rawdatadescription) {
+  if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete rawdatadescription_;
+  }
+  if (rawdatadescription) {
+    set_has_rawdatadescription();
+    rawdatadescription_ = rawdatadescription;
+  } else {
+    clear_has_rawdatadescription();
+    rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

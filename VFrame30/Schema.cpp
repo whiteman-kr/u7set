@@ -6,6 +6,7 @@
 #include "DiagSchema.h"
 #include "FblItem.h"
 #include "SchemaItemAfb.h"
+#include "SchemaItemUfb.h"
 #include "SchemaItemLink.h"
 #include "HorzVertLinks.h"
 #include "../lib/ProtoSerialization.h"
@@ -501,6 +502,67 @@ namespace VFrame30
 			if (si->afbElement().version() != afb.version())
 			{
 				bool ok = si->updateAfbElement(afb, errorMessage);
+
+				if (ok == true)
+				{
+					(*updatedItemCount) ++;
+				}
+			}
+		}
+
+		return errorMessage->isEmpty();
+	}
+
+	bool Schema::updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage)
+	{
+		if (updatedItemCount == nullptr ||
+			errorMessage == nullptr)
+		{
+			assert(updatedItemCount);
+			assert(errorMessage);
+			return false;
+		}
+
+		*updatedItemCount = 0;
+
+		// Find all VFrame30::SchemaItemAfb items
+		//
+		std::list<std::shared_ptr<VFrame30::SchemaItemUfb>> schemaUfbItems;
+
+		for (std::shared_ptr<SchemaLayer> l : Layers)
+		{
+			for (std::shared_ptr<SchemaItem> si : l->Items)
+			{
+				std::shared_ptr<VFrame30::SchemaItemUfb> schemaUfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemUfb>(si);
+
+				if (schemaUfbItem != nullptr)
+				{
+					schemaUfbItems.push_back(schemaUfbItem);
+				}
+			}
+		}
+
+		// Update found items
+		//
+		for (std::shared_ptr<VFrame30::SchemaItemUfb> si : schemaUfbItems)
+		{
+			auto foundIt = std::find_if(ufbs.begin(), ufbs.end(),
+				[&si](std::shared_ptr<UfbSchema> ufb)
+				{
+					return si->ufbSchemaId() == ufb->schemaID();
+				});
+
+			if (foundIt == ufbs.end())
+			{
+				*errorMessage += tr("Cant find UFB schema for %1.\n").arg(si->ufbSchemaId());
+				continue;
+			}
+
+			const UfbSchema* ufb = foundIt->get();
+
+			if (si->ufbSchemaVersion() != ufb->version())
+			{
+				bool ok = si->updateUfbElement(ufb, errorMessage);
 
 				if (ok == true)
 				{

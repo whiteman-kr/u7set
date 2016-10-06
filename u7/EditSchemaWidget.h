@@ -5,6 +5,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/FblItem.h"
+#include "../VFrame30/UfbSchema.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 
@@ -362,6 +363,7 @@ public:
 	QPointF snapToGrid(QPointF pt) const;
 
 	bool updateAfbsForSchema();
+	bool updateUfbsForSchema();
 
 protected:
 	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
@@ -373,7 +375,8 @@ protected:
 	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
 	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
 
-	bool getAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
+	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
+	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 
 public:
 	void resetAction();
@@ -582,6 +585,7 @@ private:
 		QAction* m_addOutputSignalAction = nullptr;
 		QAction* m_addInOutSignalAction = nullptr;
 		QAction* m_addConstantAction = nullptr;
+		QAction* m_addTerminatorAction = nullptr;
 		QAction* m_addFblElementAction = nullptr;
 		QAction* m_addLinkAction = nullptr;
 		QAction* m_addTransmitter = nullptr;
