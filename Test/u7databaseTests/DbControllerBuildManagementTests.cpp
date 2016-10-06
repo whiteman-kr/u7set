@@ -82,7 +82,7 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID("buildTestCustomAppSignal");
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -108,7 +108,7 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setOutputUnitID(1);
 //	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 

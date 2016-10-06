@@ -75,7 +75,7 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID("testCustomAppSignal");
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -101,7 +101,7 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -128,7 +128,7 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("appSignalID").toString() == newSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == newSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == newSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	QVERIFY2(query.value("dataFormatId").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	//QVERIFY2(query.value("dataFormatId").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == newSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == newSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == newSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
@@ -276,7 +276,7 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID("firstSignalForGetSignalIdsTest");
-	newSignal.setDataFormat(E::DataFormat::Float);
+ newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -302,7 +302,7 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -365,7 +365,7 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -391,7 +391,7 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -521,7 +521,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -547,7 +547,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -594,7 +594,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 	QVERIFY2(query.value("appSignalID").toString() == resultSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == resultSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == resultSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	//QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
@@ -650,7 +650,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -676,7 +676,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -714,7 +714,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setAperture(0.4);
 	resultSignal.setByteOrder(E::ByteOrder::BigEndian);
 	resultSignal.setCalculated(false);
-	resultSignal.setDataFormat(E::DataFormat::UnsignedInt);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	resultSignal.setDataSize(40);
 	resultSignal.setDecimalPlaces(4);
 	resultSignal.setEnableTuning(false);
@@ -738,7 +738,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setOutputUnitID(1);
 	//	resultSignal.setReadOnly(true);
 	resultSignal.setSpreadTolerance(2346.8);
-	resultSignal.setType(E::SignalType::Discrete);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	resultSignal.setUnbalanceLimit(2345.3);
 	resultSignal.setUnitID(2);
 
@@ -755,7 +755,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	QVERIFY2(query.value("appSignalID").toString() == resultSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == resultSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == resultSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	//QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
@@ -811,7 +811,7 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -837,7 +837,7 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);// setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
@@ -906,7 +906,7 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
-	newSignal.setDataFormat(E::DataFormat::Float);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -932,7 +932,7 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
+	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
