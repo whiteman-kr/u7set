@@ -5968,15 +5968,25 @@ namespace Builder
 
 	bool AppFb::checkRequiredParameters(const QStringList& requiredParams)
 	{
+		return checkRequiredParameters(requiredParams, true);
+	}
+
+
+	bool AppFb::checkRequiredParameters(const QStringList& requiredParams, bool displayError)
+	{
 		bool result = true;
 
 		for(const QString& opName : requiredParams)
 		{
 			if (m_paramValuesArray.contains(opName) == false)
 			{
-				// Required parameter '%1' of AFB '%2' is missing.
-				//
-				m_log->errALC5045(opName, caption(), guid());
+				if (displayError == true)
+				{
+					// Required parameter '%1' of AFB '%2' is missing.
+					//
+					m_log->errALC5045(opName, caption(), guid());
+				}
+
 				result = false;
 			}
 		}

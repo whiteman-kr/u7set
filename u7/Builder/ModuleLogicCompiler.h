@@ -255,6 +255,8 @@ namespace Builder
 		//
 
 		bool checkRequiredParameters(const QStringList& requiredParams);
+		bool checkRequiredParameters(const QStringList& requiredParams, bool displayError);
+
 
 		bool checkUnsignedInt(const AppFbParamValue& paramValue);
 		bool checkUnsignedInt16(const AppFbParamValue& paramValue);
