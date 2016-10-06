@@ -1140,7 +1140,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result = multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
+			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
 		}
 		else
 		{

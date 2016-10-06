@@ -1,4 +1,5 @@
 #include "../lib/DeviceHelper.h"
+#include "../lib/LmLimits.h"
 
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
 {
@@ -178,4 +179,131 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 	}
 
 	return deviceObject->toController();
+}
+
+
+int DeviceHelper::getAllNativePrimaryDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
+{
+	if (lm == nullptr || log == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	int size = 0;
+
+	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i);
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceModule* module =  device->toModule();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		//  UNCOMMENT after primaryDataSize() implementation
+		//
+		// size += module->primaryDataSize();
+		//
+
+		size += 10;		//  DELETE after primaryDataSize() implementation
+	}
+
+	return size;
+}
+
+
+int DeviceHelper::getModulePrimaryDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
+{
+	if (lm == nullptr || log == nullptr || moduleIsFound == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	*moduleIsFound = false;
+
+	if (modulePlace < FIRST_MODULE_PLACE || modulePlace > LAST_MODULE_PLACE)
+	{
+		assert(false);
+		return 0;
+	}
+
+	int size = 0;
+
+	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return 0;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i);
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceModule* module =  device->toModule();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->place() != modulePlace)
+		{
+			continue;
+		}
+
+		//  UNCOMMENT after primaryDataSize() implementation
+		//
+		// size = module->primaryDataSize();
+		//
+
+		size = 10;				//  DELETE after primaryDataSize() implementation
+
+		*moduleIsFound = true;
+
+		break;
+	}
+
+	return size;
 }
