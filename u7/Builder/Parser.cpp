@@ -1333,6 +1333,11 @@ namespace Builder
 			return false;
 		}
 
+		if (fileList.empty() == true)
+		{
+			return true;
+		}
+
 		// Get UFBs latest version from the DB
 		//
 		std::vector<std::shared_ptr<DbFile>> files;
