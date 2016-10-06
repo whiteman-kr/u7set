@@ -3,6 +3,8 @@
 TuningObject::TuningObject()
 	:
 	  m_value(0.0),
+	  m_editValue(0.0),
+	  m_defaultValue(0.0),
 	  m_lowLimit(0.0),
 	  m_highLimit(0.0),
 	  m_decimalPlaces(0),
@@ -77,15 +79,35 @@ void TuningObject::setAnalog(bool value)
 	m_analog = value;
 }
 
-QVariant TuningObject::value() const
+double TuningObject::value() const
 {
 	return m_value;
 
 }
 
-void TuningObject::setValue(const QVariant& value)
+void TuningObject::setValue(double value)
 {
 	m_value = value;
+}
+
+double TuningObject::editValue() const
+{
+	return m_editValue;
+}
+
+void TuningObject::setEditValue(double value)
+{
+	m_editValue = value;
+}
+
+double TuningObject::defaultValue() const
+{
+	return m_defaultValue;
+}
+
+void TuningObject::setDefaultValue(double value)
+{
+	m_defaultValue = value;
 }
 
 double TuningObject::lowLimit() const
@@ -120,7 +142,8 @@ void TuningObject::setDecimalPlaces(int value)
 
 bool TuningObject::valid() const
 {
-	return m_valid;
+	return true;
+	//return m_valid;
 }
 
 void TuningObject::setValid(bool value)
@@ -152,5 +175,10 @@ Hash TuningObject::appSignalHash() const
 {
 	return m_appSignalHash;
 
+}
+
+bool TuningObject::modified() const
+{
+	return m_value != m_editValue;
 }
 

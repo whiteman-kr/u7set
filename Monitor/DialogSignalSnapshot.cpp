@@ -891,7 +891,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
-		if (ui->buttonFixate->isChecked() == false)
+		if (ui->buttonFixate->isChecked() == false && m_model->rowCount() > 0)
 		{
 			// Update only visible dynamic items
 			//

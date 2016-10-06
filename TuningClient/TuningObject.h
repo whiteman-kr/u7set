@@ -28,8 +28,14 @@ public:
 	bool analog() const;
 	void setAnalog(bool value);
 
-	QVariant value() const;
-	void setValue(const QVariant& value);
+	double value() const;
+	void setValue(double value);
+
+	double editValue() const;
+	void setEditValue(double value);
+
+	double defaultValue() const;
+	void setDefaultValue(double value);
 
 	double lowLimit() const;
 	void setLowLimit(double value);
@@ -51,6 +57,8 @@ public:
 
 	Hash appSignalHash() const;
 
+	bool modified() const;
+
 private:
 
 	QString m_customAppSignalID;
@@ -61,7 +69,9 @@ private:
 
 	bool m_analog = false;
 
-	QVariant m_value;
+	double m_defaultValue = 0;
+	double m_value = 0;
+	double m_editValue = 0;
 
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
