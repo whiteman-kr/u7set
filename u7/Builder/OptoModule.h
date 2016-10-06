@@ -56,7 +56,8 @@ namespace Hardware
 		QVector<TxSignal> m_txAnalogSignals;
 		QVector<TxSignal> m_txDiscreteSignals;
 
-		int m_txAnalogSignalsSizeW = 0;     // variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
+		int m_txRawDataSizeW = 0;			// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
+		int m_txAnalogSignalsSizeW = 0;		//
 		int m_txDiscreteSignalsSizeW = 0;   //
 		int m_txDataSizeW = 0;              //
 		quint32 m_txDataID = 0;             // range 0..0xFFFFFFFF

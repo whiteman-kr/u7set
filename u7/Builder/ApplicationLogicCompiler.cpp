@@ -1044,13 +1044,13 @@ namespace Builder
 			str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
 			list.append(str);
 
-			str = QString(tr("Port ID:\t\t-%1")).arg(port->portID());
+			str = QString(tr("Port ID:\t\t-"));
 			list.append(str);
 
-			str = QString(tr("Linked port ID:\t\t-%1")).arg(port->linkedPortID());
+			str = QString(tr("Linked port ID:\t\t%1")).arg(port->linkedPortID());
 			list.append(str);
 
-			str = QString(tr("Connection ID:\t\t-%1\n\n")).arg(port->connectionID());
+			str = QString(tr("Connection ID:\t\t%1\n\n")).arg(port->connectionID());
 			list.append(str);
 
 			return;

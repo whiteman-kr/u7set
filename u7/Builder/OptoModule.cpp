@@ -90,6 +90,16 @@ namespace Hardware
 			return false;
 		}
 
+		if (m_txRawDataSizeW == 0 &&
+			m_txAnalogSignals.count() == 0 &&
+			m_txDiscreteSignals.count() == 0)
+		{
+			m_txAnalogSignalsSizeW = 0;
+			m_txDiscreteSignalsSizeW = 0;
+			m_txDataSizeW = 0;
+			return true;
+		}
+
 		sortTxSignals();
 
 		bool result = true;
@@ -107,6 +117,14 @@ namespace Hardware
 		int txDataIDSizeW = sizeof(m_txDataID) / sizeof(quint16);
 
 		address.addWord(txDataIDSizeW);
+
+		// then place Raw Data
+
+		address.addWord(m_txRawDataSizeW);
+
+		// then place analog signals
+
+		int startAddr = address.offset();
 
 		for(TxSignal& txAnalogSignal : m_txAnalogSignals)
 		{
@@ -127,7 +145,11 @@ namespace Hardware
 			m_txDataID = CRC32(m_txDataID, C_STR(txAnalogSignal.appSignalID), txAnalogSignal.appSignalID.length(), false);
 		}
 
-		m_txAnalogSignalsSizeW = address.offset() - txDataIDSizeW ;
+		m_txAnalogSignalsSizeW = address.offset() - startAddr ;
+
+		// then place discrete signals
+
+		startAddr = address.offset();
 
 		for(TxSignal& txDiscreteSignal : m_txDiscreteSignals)
 		{
@@ -153,9 +175,9 @@ namespace Hardware
 
 		address.wordAlign();
 
-		m_txDiscreteSignalsSizeW = address.offset() - m_txAnalogSignalsSizeW - txDataIDSizeW;
+		m_txDiscreteSignalsSizeW = address.offset() - startAddr;
 
-		int fullTxDataSizeW = txDataIDSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+		int fullTxDataSizeW = txDataIDSizeW + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
 
 		if (manualSettings())
 		{
