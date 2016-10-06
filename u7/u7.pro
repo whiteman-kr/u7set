@@ -179,7 +179,8 @@ SOURCES +=\
     DialogSettingsConfigurator.cpp \
     Builder/ArchivingServiceCfgGenerator.cpp \
     Builder/TuningClientCfgGenerator.cpp \
-    ChooseUfbDialog.cpp
+    ChooseUfbDialog.cpp \
+    Builder/ModulesRawData.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -288,7 +289,8 @@ HEADERS  += \
     Builder/ArchivingServiceCfgGenerator.h \
     Builder/TuningClientCfgGenerator.h \
     ChooseUfbDialog.h \
-    ../lib/LmLimits.h
+    ../lib/LmLimits.h \
+    Builder/ModulesRawData.h
 
 FORMS    += \
     ChangesetDialog.ui \

@@ -45,8 +45,8 @@ namespace Hardware
 		enum class RawDataDescriptionItemType
 		{
 			RawDataSize,
-			AllNativePrimaryData,
-			ModulePrimaryData,
+			AllNativeRawData,
+			ModuleRawData,
 			PortRawData
 		};
 

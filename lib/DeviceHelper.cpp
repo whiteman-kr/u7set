@@ -182,7 +182,7 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 }
 
 
-int DeviceHelper::getAllNativePrimaryDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
+int DeviceHelper::getAllNativerawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
 {
 	if (lm == nullptr || log == nullptr)
 	{
@@ -237,7 +237,7 @@ int DeviceHelper::getAllNativePrimaryDataSize(const Hardware::DeviceModule* lm, 
 }
 
 
-int DeviceHelper::getModulePrimaryDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
+int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
 {
 	if (lm == nullptr || log == nullptr || moduleIsFound == nullptr)
 	{

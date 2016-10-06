@@ -284,14 +284,7 @@ namespace Hardware
 			return false;
 		}
 
-		// DEBUG
-
-		if (m_equipmentID == "SS_R_CH01_MD00_OPTOPORT01")
-		{
-			m_rawDataDescriptionStr = " RAW_DATA_SIZE=AUTO\nALL_NATIVE_PRIMARY_DATA\nMODULE_PRIMARY_DATA=2\nPORT_RAW_DATA=SS_R_CH01_MD00_OPTOPORT03\n ";
-		}
-
-		// DEBUG
+		m_rawDataDescription.clear();
 
 		m_rawDataDescriptionStr = m_rawDataDescriptionStr.trimmed().toUpper();
 
@@ -316,7 +309,7 @@ namespace Hardware
 
 			str = str.trimmed();
 
-			QString itemTypeStr = str.section("=", 0, 0);
+			QString itemTypeStr = str.section("=", 0, 0).trimmed();
 
 			if (itemTypeStr == RAW_DATA_SIZE)
 			{
@@ -359,7 +352,7 @@ namespace Hardware
 
 			if (itemTypeStr == ALL_NATIVE_PRIMARY_DATA)
 			{
-				item.type = RawDataDescriptionItemType::AllNativePrimaryData;
+				item.type = RawDataDescriptionItemType::AllNativeRawData;
 				m_rawDataDescription.append(item);
 				continue;
 			}
@@ -379,7 +372,7 @@ namespace Hardware
 				}
 				else
 				{
-					item.type = RawDataDescriptionItemType::ModulePrimaryData;
+					item.type = RawDataDescriptionItemType::ModuleRawData;
 					item.modulePlace = place;
 					m_rawDataDescription.append(item);
 				}
@@ -472,17 +465,17 @@ namespace Hardware
 			case RawDataDescriptionItemType::RawDataSize:
 				break;
 
-			case RawDataDescriptionItemType::AllNativePrimaryData:
+			case RawDataDescriptionItemType::AllNativeRawData:
 
-				size += DeviceHelper::getAllNativePrimaryDataSize(lm, log);
+				size += DeviceHelper::getAllNativerawDataSize(lm, log);
 
 				break;
 
-			case RawDataDescriptionItemType::ModulePrimaryData:
+			case RawDataDescriptionItemType::ModuleRawData:
 				{
 					bool moduleIsFound = false;
 
-					size += DeviceHelper::getModulePrimaryDataSize(lm, item.modulePlace, &moduleIsFound, log);
+					size += DeviceHelper::getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, log);
 
 					if (moduleIsFound == false)
 					{
