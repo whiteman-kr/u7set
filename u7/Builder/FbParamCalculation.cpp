@@ -1521,6 +1521,7 @@ namespace Builder
 
 		requiredParams.append("i_conf");
 		requiredParams.append("i_conf_n");
+		requiredParams.append("i_ust");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
@@ -1531,30 +1532,107 @@ namespace Builder
 		CHECK_UNSIGNED_INT(i_conf);
 		CHECK_UNSIGNED_INT(i_conf_n);
 
+		bool mismatchWithRange = false;
+
+		AppFbParamValue* i_lowlim = nullptr;
+		AppFbParamValue* i_highlim = nullptr;
+		AppFbParamValue* i_relvalue = nullptr;
+
+		QStringList optionalParams;
+
+		optionalParams.append("i_lowlim");
+		optionalParams.append("i_highlim");
+		optionalParams.append("i_relvalue");
+
+		if (checkRequiredParameters(optionalParams, false) == true)
+		{
+			i_lowlim = &m_paramValuesArray["i_lowlim"];
+			i_highlim = &m_paramValuesArray["i_highlim"];
+			i_relvalue = &m_paramValuesArray["i_relvalue"];
+
+			mismatchWithRange = true;
+		}
+
 		// i_conf must have value 1 (SI) or 2 (FP)
 		//
-		if (i_conf.unsignedIntValue() == 1)
+		switch(i_conf.unsignedIntValue())
 		{
-			m_runTime = 5;		// SI
+		case 1:				// SI
+			m_runTime = 5;
 
 			CHECK_SIGNED_INT32(i_ust);
 
-			if (i_ust.signedIntValue() == 0)
+			if (mismatchWithRange == true)
 			{
-				// Parameter '%1' of AFB '%2' can't be 0.
-				//
-				m_log->errALC5058(i_ust.caption(), caption(), guid());
-				return false;
+				CHECK_SIGNED_INT32(*i_lowlim);
+				CHECK_SIGNED_INT32(*i_highlim);
+				CHECK_FLOAT32(*i_relvalue);
+
+				if (i_lowlim->signedIntValue() == i_highlim->signedIntValue())
+				{
+					// Parameters '%1' and '%2' of AFB '%3' can't be equal.
+					//
+					m_log->errALC5054(caption(), i_lowlim->caption(), i_highlim->caption(), guid());
+					return false;
+				}
+
+				double value = (abs(i_highlim->signedIntValue() - i_lowlim->signedIntValue()) * i_relvalue->floatValue()) / 100.0;
+
+				if (value == 0)
+				{
+					// Parameter '%1' of AFB '%2' can't be 0.
+					//
+					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					return false;
+				}
+
+				i_ust.setSignedIntValue(static_cast<qint32>(value));
 			}
-		}
-		else
-		{
-			if (i_conf.unsignedIntValue() == 2)
+			else
 			{
-				m_runTime = 20;		// FP
+				if (i_ust.signedIntValue() == 0)
+				{
+					// Parameter '%1' of AFB '%2' can't be 0.
+					//
+					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					return false;
+				}
+			}
+			break;
 
-				CHECK_FLOAT32(i_ust);
+		case 2:				// FP
+			m_runTime = 20;
 
+			CHECK_FLOAT32(i_ust);
+
+			if (mismatchWithRange == true)
+			{
+				CHECK_FLOAT32(*i_lowlim);
+				CHECK_FLOAT32(*i_highlim);
+				CHECK_FLOAT32(*i_relvalue);
+
+				if (i_lowlim->floatValue() == i_highlim->floatValue())
+				{
+					// Parameters '%1' and '%2' of AFB '%3' can't be equal.
+					//
+					m_log->errALC5054(caption(), i_lowlim->caption(), i_highlim->caption(), guid());
+					return false;
+				}
+
+				double value = (abs(i_highlim->floatValue() - i_lowlim->floatValue()) * i_relvalue->floatValue()) / 100.0;
+
+				if (value == 0)
+				{
+					// Parameter '%1' of AFB '%2' can't be 0.
+					//
+					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					return false;
+				}
+
+				i_ust.setFloatValue(value);
+			}
+			else
+			{
 				if (i_ust.floatValue() == 0)
 				{
 					// Parameter '%1' of AFB '%2' can't be 0.
@@ -1563,13 +1641,14 @@ namespace Builder
 					return false;
 				}
 			}
-			else
-			{
-				// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-				//
-				m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
-				return false;
-			}
+
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
 		}
 
 		// i_conf_n must have value from 2 to 4

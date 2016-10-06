@@ -339,6 +339,7 @@ namespace Builder
 				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
 				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
+				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
 				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 				{
@@ -406,6 +407,7 @@ namespace Builder
 				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
 				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
+				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
 				optoPort2->setPortID(portID);
 				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
@@ -413,6 +415,7 @@ namespace Builder
 				optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
 				optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
+				optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
 
 				optoPort1->setLinkedPortID(optoPort2->equipmentID());
 				optoPort2->setLinkedPortID(optoPort1->equipmentID());
@@ -1140,7 +1143,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result = multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
+			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
 		}
 		else
 		{

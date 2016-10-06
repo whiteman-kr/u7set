@@ -14,6 +14,7 @@ namespace Hardware
 	class DeviceModule;
 	class Connection;
 	class ConnectionStorage;
+	class OptoModuleStorage;
 
 	class OptoPort : public QObject
 	{
@@ -41,7 +42,34 @@ namespace Hardware
 			int sizeBit = 0;
 		};
 
+		enum class RawDataDescriptionItemType
+		{
+			RawDataSize,
+			AllNativePrimaryData,
+			ModulePrimaryData,
+			PortRawData
+		};
+
+		struct RawDataDescriptionItem
+		{
+			RawDataDescriptionItemType type;
+
+			bool rawDataSizeIsAuto = false;			// for type - RawDataSize
+			int rawDataSize = 0;					//
+
+			int modulePlace = 0;					// for type - ModuleNativePrimaryData
+
+			QString portEquipmentID;				// for type - PortRawData
+		};
+
+		const int RAW_DATA_SIZE_INDEX = 0;
+
 	private:
+		static const char* RAW_DATA_SIZE;
+		static const char* ALL_NATIVE_PRIMARY_DATA;
+		static const char* MODULE_PRIMARY_DATA;
+		static const char* PORT_RAW_DATA;
+
 		QString m_equipmentID;
 		DeviceController* m_deviceController = nullptr;
 
@@ -50,6 +78,10 @@ namespace Hardware
 		QString m_linkedPortID;
 
 		QString m_connectionID;
+
+		QString m_rawDataDescriptionStr;
+
+		QVector<RawDataDescriptionItem> m_rawDataDescription;
 
 		QHash<QString, Address16> m_txSignalsIDs;		// appSignalID => txAddress
 
@@ -62,6 +94,8 @@ namespace Hardware
 		int m_txDataSizeW = 0;              //
 		quint32 m_txDataID = 0;             // range 0..0xFFFFFFFF
 
+		bool m_txRawDataSizeWIsCalculated = false;
+		bool m_txRawDataSizeWCalculationStarted = false;
 		int m_port = 0;
 
 		Mode m_mode = Mode::Optical;
@@ -87,6 +121,7 @@ namespace Hardware
 
 		void sortTxSignals();
 		void sortTxSignals(QVector<TxSignal> &array);
+
 
 	public:
 		OptoPort(const QString& optoModuleID, DeviceController* optoPortController, int port);
@@ -137,16 +172,27 @@ namespace Hardware
 		QVector<TxSignal> getTxSignals();
 
 		void addTxSignal(Signal* txSignal);
-		bool calculateTxSignalsAddresses(OutputLog* log);
+		bool calculateTxSignalsAddresses(Builder::IssueLogger* log);
 
 		QVector<TxSignal> txAnalogSignals() const { return m_txAnalogSignals; }
 		QVector<TxSignal> txDiscreteSignals() const { return m_txDiscreteSignals; }
+
+		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
+		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
+
+		const QVector<RawDataDescriptionItem>& rawDataDescription() const { m_rawDataDescription; }
+
+		int txRawDataSizeW() const { return m_txRawDataSizeW; }
+		void setTxRawDataSizeW(int rawDataSizeW);
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
 		int txAnalogSignalsCount() const { return m_txAnalogSignals.count(); }
 
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
 		int txDiscreteSignalsCount() const { return m_txDiscreteSignals.count(); }
+
+		bool txRawDataSizeWIsCalculated() const { return m_txRawDataSizeWIsCalculated; }
+		//void setRawDataSizeIsCalculated();
 
 		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
 
@@ -170,6 +216,9 @@ namespace Hardware
 		bool isConnected() const;
 
 		Address16 getTxSignalAddress(const QString& appSignalID) const;
+
+		bool parseRawDescriptionStr(Builder::IssueLogger* log);
+		bool calculatePortRawDataSize(const DeviceModule* lm, OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
 	};
 
 

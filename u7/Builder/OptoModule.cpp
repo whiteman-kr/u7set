@@ -13,6 +13,11 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
+	const char* OptoPort::RAW_DATA_SIZE = "RAW_DATA_SIZE";
+	const char* OptoPort::ALL_NATIVE_PRIMARY_DATA = "ALL_NATIVE_PRIMARY_DATA";
+	const char* OptoPort::MODULE_PRIMARY_DATA = "MODULE_PRIMARY_DATA";
+	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
+
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
 		m_deviceController(optoPortController),
 		m_optoModuleID(optoModuleStrID)
@@ -82,7 +87,7 @@ namespace Hardware
 	// initial txSignals addresses calculcation
 	// zero-offset from port txStartAddress
 	//
-	bool OptoPort::calculateTxSignalsAddresses(OutputLog* log)
+	bool OptoPort::calculateTxSignalsAddresses(Builder::IssueLogger *log)
 	{
 		if (log == nullptr)
 		{
@@ -201,6 +206,22 @@ namespace Hardware
 		return result;
 	}
 
+	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
+	{
+		assert(m_txRawDataSizeWIsCalculated == false);		// setTxRawDataSizeW() must be called once!
+
+		m_txRawDataSizeW = rawDataSizeW;
+
+		m_txRawDataSizeWIsCalculated = true;
+	}
+
+/*	void OptoPort::setRawDataSizeIsCalculated()
+	{
+		assert(m_rawDataSizeIsCalculated == false);		// setRawDataSizeIsCalculated() must be called once!
+
+		m_rawDataSizeIsCalculated = true;
+	}*/
+
 
 	bool OptoPort::isTxSignalIDExists(const QString& appSignalID)
 	{
@@ -253,6 +274,272 @@ namespace Hardware
 			}
 		}
 	}
+
+
+	bool OptoPort::parseRawDescriptionStr(Builder::IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// DEBUG
+
+		if (m_equipmentID == "SS_R_CH01_MD00_OPTOPORT01")
+		{
+			m_rawDataDescriptionStr = " RAW_DATA_SIZE=AUTO\nALL_NATIVE_PRIMARY_DATA\nMODULE_PRIMARY_DATA=2\nPORT_RAW_DATA=SS_R_CH01_MD00_OPTOPORT03\n ";
+		}
+
+		// DEBUG
+
+		m_rawDataDescriptionStr = m_rawDataDescriptionStr.trimmed().toUpper();
+
+		if (m_rawDataDescriptionStr.isEmpty() == true)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		// split string
+
+		QStringList list = m_rawDataDescriptionStr.split("\n", QString::SkipEmptyParts);
+
+		bool rawDataSizeFound = false;
+		QString msg;
+
+		for(QString str : list)
+		{
+			RawDataDescriptionItem item;
+			bool res = true;
+
+			str = str.trimmed();
+
+			QString itemTypeStr = str.section("=", 0, 0);
+
+			if (itemTypeStr == RAW_DATA_SIZE)
+			{
+				if (rawDataSizeFound == true)
+				{
+					msg = QString("Duplicate RAW_DATA_SIZE section in opto-port '%1' settings.").arg(equipmentID());
+					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+					result = false;
+					continue;
+				}
+
+				rawDataSizeFound = true;
+
+				QString sizeStr = str.section("=", 1, 1).trimmed();
+
+				if (sizeStr != "AUTO" )
+				{
+					int size = sizeStr.toInt(&res);
+
+					if (res == false)
+					{
+						msg = QString("Invalid RAW_DATA_SIZE value in opto-port '%1' settings.").arg(equipmentID());
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+						result = false;
+						continue;
+					}
+
+					item.rawDataSize = size;
+					item.rawDataSizeIsAuto = false;
+				}
+				else
+				{
+					item.rawDataSizeIsAuto = true;
+				}
+
+				item.type = RawDataDescriptionItemType::RawDataSize;
+				m_rawDataDescription.insert(RAW_DATA_SIZE_INDEX, item);		// RAW_DATA_SIZE always first item
+				continue;
+			}
+
+			if (itemTypeStr == ALL_NATIVE_PRIMARY_DATA)
+			{
+				item.type = RawDataDescriptionItemType::AllNativePrimaryData;
+				m_rawDataDescription.append(item);
+				continue;
+			}
+
+			if (itemTypeStr == MODULE_PRIMARY_DATA)
+			{
+				QString placeStr = str.section("=", 1, 1).trimmed();
+
+				int place = placeStr.toInt(&res);
+
+				if (res == false)
+				{
+					msg = QString("Invalid MODULE_NATIVE_PRIMARY_DATA value in opto-port '%1' settings.").arg(equipmentID());
+					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+					result = false;
+					continue;
+				}
+				else
+				{
+					item.type = RawDataDescriptionItemType::ModulePrimaryData;
+					item.modulePlace = place;
+					m_rawDataDescription.append(item);
+				}
+
+				continue;
+			}
+
+			if (itemTypeStr == PORT_RAW_DATA)
+			{
+				QString portEquipmentID = str.section("=", 1, 1).trimmed();
+
+				item.type = RawDataDescriptionItemType::PortRawData;
+				item.portEquipmentID = portEquipmentID;
+				m_rawDataDescription.append(item);
+				continue;
+			}
+
+			msg = QString("Unknown item %1 in opto-port '%2' settings.").arg(itemTypeStr).arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			result = false;
+
+			break;
+		}
+
+		if (rawDataSizeFound == false)
+		{
+			msg = QString("RAW_DATA_SIZE value is not found in opto-port '%1' settings.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			result = false;
+		}
+
+		return result;
+	}
+
+
+	bool OptoPort::calculatePortRawDataSize(const DeviceModule* lm, OptoModuleStorage* optoStorage, Builder::IssueLogger* log)
+	{
+		if (lm == nullptr || optoStorage == nullptr || log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QString msg;
+
+		if (m_txRawDataSizeWCalculationStarted == true)
+		{
+			// cyclic call of this->calculatePortRawDataSize()
+			//
+			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. Cyclic dependence.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (txRawDataSizeWIsCalculated() == true)
+		{
+			return true;
+		}
+
+		if (m_rawDataDescription.isEmpty() == true)
+		{
+			setTxRawDataSizeW(0);
+			return true;
+		}
+
+		const RawDataDescriptionItem& rawDataSizeItem = m_rawDataDescription[RAW_DATA_SIZE_INDEX];
+
+		assert(rawDataSizeItem.type == Hardware::OptoPort::RawDataDescriptionItemType::RawDataSize);
+
+		m_txRawDataSizeWCalculationStarted = true;		// to prevent cyclic calculatePortRawDataSize()
+
+		if (rawDataSizeItem.rawDataSizeIsAuto == false)
+		{
+			// txRawDataSizeW set manually
+			//
+			setTxRawDataSizeW(rawDataSizeItem.rawDataSize);
+			return true;
+		}
+
+		// automatic txRawDataSizeW calculation
+		//
+		bool result = true;
+
+		int size = 0;
+
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			switch(item.type)
+			{
+			case RawDataDescriptionItemType::RawDataSize:
+				break;
+
+			case RawDataDescriptionItemType::AllNativePrimaryData:
+
+				size += DeviceHelper::getAllNativePrimaryDataSize(lm, log);
+
+				break;
+
+			case RawDataDescriptionItemType::ModulePrimaryData:
+				{
+					bool moduleIsFound = false;
+
+					size += DeviceHelper::getModulePrimaryDataSize(lm, item.modulePlace, &moduleIsFound, log);
+
+					if (moduleIsFound == false)
+					{
+						msg = QString("Module on place %1 is not found (opto port '%2' settings).").arg(item.modulePlace).arg(equipmentID());
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+						result = false;
+					}
+				}
+
+				break;
+
+			case RawDataDescriptionItemType::PortRawData:
+				{
+					OptoPort* port = optoStorage->getOptoPort(item.portEquipmentID);
+
+					if (port == nullptr)
+					{
+						msg = QString("Port '%1' is not found (opto port '%2' settings).").arg(item.portEquipmentID).arg(equipmentID());
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+						result = false;
+						break;
+					}
+
+					bool res = port->calculatePortRawDataSize(lm, optoStorage, log);
+
+					if (res == true)
+					{
+						size += port->txRawDataSizeW();
+					}
+					else
+					{
+						result = false;
+					}
+				}
+				break;
+
+			default:
+				assert(false);
+				result = false;
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+		}
+
+		if (result == true)
+		{
+			setTxRawDataSizeW(size);
+		}
+
+		m_txRawDataSizeWCalculationStarted = false;
+
+		return result;
+	}
+
 
 
 	// ------------------------------------------------------------------

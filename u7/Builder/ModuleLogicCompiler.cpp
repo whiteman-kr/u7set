@@ -1372,6 +1372,12 @@ namespace Builder
 				continue;
 			}
 
+			if (appItem->isTerminator())
+			{
+				// no needed special code generation for terminator
+				continue;
+			}
+
 			m_log->errALC5011(appItem->guid());			// Application item '%1' has unknown type.
 			result = false;
 			break;
@@ -2418,6 +2424,8 @@ namespace Builder
 
 			int connectedSignals = 0;
 
+			bool connectedToTerminator = false;
+
 			for(QUuid connectedPinGuid : outPin.associatedIOs())
 			{
 				if (!m_pinParent.contains(connectedPinGuid))
@@ -2438,6 +2446,12 @@ namespace Builder
 					continue;
 				}
 
+				if (connectedPinParent->isTerminator())
+				{
+					connectedToTerminator = true;
+					continue;
+				}
+
 				assert(connectedPinParent->isSignal());
 
 				QUuid signalGuid;
@@ -2451,9 +2465,9 @@ namespace Builder
 				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
 			}
 
-			if (connectedSignals == 0)
+			if (connectedSignals == 0 && connectedToTerminator == false)
 			{
-				// output pin is not connected to signal
+				// output pin is not connected to signal or terminator
 				// save FB output value to shadow signal with GUID == outPin.guid()
 				//
 				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
@@ -2774,30 +2788,29 @@ namespace Builder
 
 				QString idStr;
 
-				if (port->manualSettings() == true)
-				{
-					result &= port->calculateTxSignalsAddresses(m_log);
+				bool res = true;
 
+				res &= port->parseRawDescriptionStr(m_log);
+
+				res &= port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log);
+
+				res &= port->calculateTxSignalsAddresses(m_log);
+
+				if (res == true)
+				{
 					idStr.sprintf("0x%X", port->txDataID());
 
-					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', manual settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', %2 settings: analog signals %3, discrete signals %4, data size %5 bytes, dataID %6")).
 							arg(port->connectionID()).
+							arg(port->manualSettings() == true ? "manual" : "automatic").
 							arg(port->txAnalogSignalsCount()).
 							arg(port->txDiscreteSignalsCount()).
 							arg(port->txDataSizeW() * 2).
 							arg(idStr)  );
-
 				}
 				else
 				{
-					result &= port->calculateTxSignalsAddresses(m_log);
-
-					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', automatic settings: analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-							arg(port->connectionID()).
-							arg(port->txAnalogSignalsCount()).
-							arg(port->txDiscreteSignalsCount()).
-							arg(port->txDataSizeW() * 2).
-							arg(idStr)  );
+					result = false;
 				}
 			}
 		}
@@ -2809,6 +2822,8 @@ namespace Builder
 
 		return result;
 	}
+
+
 
 
 	bool ModuleLogicCompiler::buildRS232SignalLists()
@@ -3109,6 +3124,15 @@ namespace Builder
 
 		m_code.append(cmd);
 		m_code.newLine();
+
+		if (port->txRawDataSizeW() > 0)
+		{
+			// write raw data
+
+			comment.setComment(QString(tr("Copying raw data (%1 words) of opto-port %2")).arg(port->txRawDataSizeW()).arg(port->equipmentID()));
+			m_code.append(comment);
+			m_code.newLine();
+		}
 
 		// copy analog signals
 		//
@@ -3873,11 +3897,21 @@ namespace Builder
 
 		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentId(), m_lm->caption(),
 														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
+		if (result == false)
+		{
+			return false;
+		}
+
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
 
 		result &= setLmAppLANDataUID(binCode);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		QStringList mifCode;
 
@@ -5934,15 +5968,25 @@ namespace Builder
 
 	bool AppFb::checkRequiredParameters(const QStringList& requiredParams)
 	{
+		return checkRequiredParameters(requiredParams, true);
+	}
+
+
+	bool AppFb::checkRequiredParameters(const QStringList& requiredParams, bool displayError)
+	{
 		bool result = true;
 
 		for(const QString& opName : requiredParams)
 		{
 			if (m_paramValuesArray.contains(opName) == false)
 			{
-				// Required parameter '%1' of AFB '%2' is missing.
-				//
-				m_log->errALC5045(opName, caption(), guid());
+				if (displayError == true)
+				{
+					// Required parameter '%1' of AFB '%2' is missing.
+					//
+					m_log->errALC5045(opName, caption(), guid());
+				}
+
 				result = false;
 			}
 		}

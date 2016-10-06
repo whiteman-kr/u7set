@@ -3,8 +3,7 @@
 #include "../lib/Address16.h"
 #include "../lib/Signal.h"
 #include "../lib/OutputLog.h"
-
-#include "../Builder/LmLimits.h"
+#include "../lib/LmLimits.h"
 
 
 namespace Builder

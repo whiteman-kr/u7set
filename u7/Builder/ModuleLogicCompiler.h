@@ -129,6 +129,7 @@ namespace Builder
 		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
 		bool isTransmitter() const { return m_appLogicItem.m_fblItem->isTransmitterElement(); }
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
+		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
 
 		bool hasRam() const { return afb().hasRam(); }
 
@@ -254,6 +255,8 @@ namespace Builder
 		//
 
 		bool checkRequiredParameters(const QStringList& requiredParams);
+		bool checkRequiredParameters(const QStringList& requiredParams, bool displayError);
+
 
 		bool checkUnsignedInt(const AppFbParamValue& paramValue);
 		bool checkUnsignedInt16(const AppFbParamValue& paramValue);

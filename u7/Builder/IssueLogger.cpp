@@ -2570,7 +2570,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Values of parameters '%1.%2' and '%1.%3' should not be equal.
+	/// Title:	   Parameters '%1' and '%2' of AFB '%3' can't be equal.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -2587,8 +2587,8 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5054,
-				  QString(tr("Values of parameters '%1.%2' and '%1.%3' should not be equal.")).
-				  arg(fbCaption).arg(param1).arg(param2));
+				  QString(tr("Parameters '%1' and '%2' of AFB '%3' can't be equal.")).
+				  arg(param1).arg(param2).arg(fbCaption));
 	}
 
 	/// IssueCode: ALC5055
