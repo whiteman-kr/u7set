@@ -3148,6 +3148,57 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	return true;
 }
 
+void EquipmentView::focusInEvent(QFocusEvent* /*event*/)
+{
+	QList<QAction*> acts = actions();
+
+	for (QAction* a : acts)
+	{
+		assert(a);
+
+		if (a->objectName() == QLatin1String("I_am_a_Copy_Action"))
+		{
+			a->setShortcut(QKeySequence::Copy);
+			continue;
+		}
+
+		if (a->objectName() == QLatin1String("I_am_a_Paste_Action"))
+		{
+			a->setShortcut(QKeySequence::Paste);
+			continue;
+		}
+	}
+
+	return;
+}
+
+void EquipmentView::focusOutEvent(QFocusEvent* event)
+{
+	if (event->reason() != Qt::PopupFocusReason)
+	{
+		QList<QAction*> acts = actions();
+
+		for (QAction* a : acts)
+		{
+			assert(a);
+
+			if (a->objectName() == QLatin1String("I_am_a_Copy_Action"))
+			{
+				a->setShortcut(QKeySequence());
+				continue;
+			}
+
+			if (a->objectName() == QLatin1String("I_am_a_Paste_Action"))
+			{
+				a->setShortcut(QKeySequence());
+				continue;
+			}
+		}
+	}
+
+	return;
+}
+
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
@@ -3453,12 +3504,14 @@ void EquipmentTabPage::CreateActions()
 	m_copyObjectAction->setStatusTip(tr("Copy equipment to the clipboard..."));
 	m_copyObjectAction->setEnabled(false);
 	m_copyObjectAction->setShortcut(QKeySequence::Copy);
+	m_copyObjectAction->setObjectName("I_am_a_Copy_Action");
 	connect(m_copyObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::copySelectedDevices);
 
 	m_pasteObjectAction = new QAction(tr("Paste"), this);
 	m_pasteObjectAction->setStatusTip(tr("Paste equipment from the clipboard..."));
 	m_pasteObjectAction->setEnabled(false);
 	m_pasteObjectAction->setShortcut(QKeySequence::Paste);
+	m_pasteObjectAction->setObjectName("I_am_a_Paste_Action");
 	connect(m_pasteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::pasteDevices);
 
 	//-----------------------------------

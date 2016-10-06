@@ -176,6 +176,12 @@ public slots:
 								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
 								std::vector<std::pair<int, int> >* addDeviceList);
 
+	// Events
+	//
+protected:
+	virtual void focusInEvent(QFocusEvent* event) override;
+	virtual void focusOutEvent(QFocusEvent* event) override;
+
 	// Properties
 	//
 protected:
