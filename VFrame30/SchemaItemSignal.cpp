@@ -556,7 +556,8 @@ namespace VFrame30
 			}
 			else
 			{
-				text = QLatin1String("Caption");
+				//text = QLatin1String("Caption");
+				text = signal.appSignalID();			// Good to see AppSignalID while editing
 			}
 			break;
 
