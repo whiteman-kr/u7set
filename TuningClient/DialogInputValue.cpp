@@ -3,7 +3,7 @@
 #include <QMessageBox>
 
 DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, int decimalPlaces, QWidget *parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_analog(analog),
 	ui(new Ui::DialogInputValue)
 {

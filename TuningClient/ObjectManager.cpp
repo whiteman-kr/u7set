@@ -125,7 +125,7 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 			if (reader.attributes().hasAttribute("DefaultValue"))
 			{
 				QString v = reader.attributes().value("DefaultValue").toString();
-				object.setValue(v.toDouble());
+				object.setDefaultValue(v.toDouble());
 			}
 
 			if (reader.attributes().hasAttribute("LowLimit"))
