@@ -1372,6 +1372,12 @@ namespace Builder
 				continue;
 			}
 
+			if (appItem->isTerminator())
+			{
+				// no needed special code generation for terminator
+				continue;
+			}
+
 			m_log->errALC5011(appItem->guid());			// Application item '%1' has unknown type.
 			result = false;
 			break;
@@ -2418,6 +2424,8 @@ namespace Builder
 
 			int connectedSignals = 0;
 
+			bool connectedToTerminator = false;
+
 			for(QUuid connectedPinGuid : outPin.associatedIOs())
 			{
 				if (!m_pinParent.contains(connectedPinGuid))
@@ -2438,6 +2446,12 @@ namespace Builder
 					continue;
 				}
 
+				if (connectedPinParent->isTerminator())
+				{
+					connectedToTerminator = true;
+					continue;
+				}
+
 				assert(connectedPinParent->isSignal());
 
 				QUuid signalGuid;
@@ -2451,9 +2465,9 @@ namespace Builder
 				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
 			}
 
-			if (connectedSignals == 0)
+			if (connectedSignals == 0 && connectedToTerminator == false)
 			{
-				// output pin is not connected to signal
+				// output pin is not connected to signal or terminator
 				// save FB output value to shadow signal with GUID == outPin.guid()
 				//
 				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
