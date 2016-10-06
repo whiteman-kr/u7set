@@ -6,6 +6,7 @@
 #include "SchemaItemConst.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemConnection.h"
+#include "SchemaItemTerminator.h"
 
 
 namespace VFrame30
@@ -701,6 +702,11 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemTransmitter*>(this) != nullptr;
 	}
 
+	bool FblItemRect::isTerminatorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this) != nullptr;
+	}
+
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
@@ -779,6 +785,16 @@ namespace VFrame30
 	const VFrame30::SchemaItemTransmitter* FblItemRect::toTransmitterElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemTransmitter*>(this);
+	}
+
+	VFrame30::SchemaItemTerminator* FblItemRect::toTerminatorElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemTerminator*>(this);
+	}
+
+	const VFrame30::SchemaItemTerminator* FblItemRect::toTerminatorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this);
 	}
 
 	// Weight propertie

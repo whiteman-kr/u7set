@@ -178,7 +178,7 @@ namespace Hardware
 		QVector<TxSignal> txDiscreteSignals() const { return m_txDiscreteSignals; }
 
 		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
-		void setDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
+		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
 
 		const QVector<RawDataDescriptionItem>& rawDataDescription() const { m_rawDataDescription; }
 

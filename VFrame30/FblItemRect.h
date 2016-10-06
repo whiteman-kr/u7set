@@ -14,6 +14,7 @@ namespace VFrame30
 	class SchemaItemConnection;
 	class SchemaItemReceiver;
 	class SchemaItemTransmitter;
+	class SchemaItemTerminator;
 }
 
 namespace VFrame30
@@ -88,6 +89,7 @@ namespace VFrame30
 		bool isConnectionElement() const;
 		bool isReceiverElement() const;
 		bool isTransmitterElement() const;
+		bool isTerminatorElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -112,6 +114,9 @@ namespace VFrame30
 
 		VFrame30::SchemaItemTransmitter* toTransmitterElement();
 		const VFrame30::SchemaItemTransmitter* toTransmitterElement() const;
+
+		VFrame30::SchemaItemTerminator* toTerminatorElement();
+		const VFrame30::SchemaItemTerminator* toTerminatorElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

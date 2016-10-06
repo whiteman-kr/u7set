@@ -562,7 +562,7 @@ void DialogPresetEditor::on_m_add_clicked()
 		}
 		if (o.valid() == true)
 		{
-			ofv.setValue(o.value().toDouble());
+			ofv.setValue(o.value());
 		}
 
 		QTreeWidgetItem* childItem = new QTreeWidgetItem();

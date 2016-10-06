@@ -1,5 +1,7 @@
 #include "Settings.h"
 #include "TuningPage.h"
+#include "DialogInputValue.h"
+#include <QKeyEvent>
 
 using namespace std;
 
@@ -62,8 +64,8 @@ bool TuningItemSorter::sortFunction(const TuningObject& o1, const TuningObject& 
 		{
 			if (o1.analog() == o2.analog())
 			{
-				v1 = o1.value();
-				v2 = o2.value();
+				v1 = o1.defaultValue();
+				v2 = o2.defaultValue();
 			}
 			else
 			{
@@ -124,8 +126,9 @@ bool TuningItemSorter::sortFunction(const TuningObject& o1, const TuningObject& 
 // TuningItemModel
 //
 
-TuningItemModel::TuningItemModel(QObject* parent)
-  :QAbstractItemModel(parent)
+TuningItemModel::TuningItemModel(QWidget *parent)
+	:QAbstractItemModel(parent),
+	m_parent(parent)
 {
 	// Fill column names
 
@@ -225,6 +228,14 @@ int TuningItemModel::columnIndex(int index) const
 
 void TuningItemModel::updateStates(int from, int to)
 {
+	static int counter = 0;
+
+	if (counter++ >= 2)
+	{
+		counter = 0;
+		m_blink = !m_blink;
+	}
+
 	/*if (m_signalsTable.size() == 0)
 	{
 		return;
@@ -427,21 +438,31 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			{
 				if (o.analog() == false)
 				{
-					return ((int)o.value().toDouble() == 0 ? tr("No") : tr("Yes"));
+					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
+
+					if (o.value() == o.editValue())
+					{
+						return valueString;
+					}
+					else
+					{
+						QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+						return tr("%1 => %2").arg(valueString).arg(editValueString);
+					}
 				}
 				else
 				{
-					QString str = QString::number(o.value().toDouble(), 'f', o.decimalPlaces());
-					if (o.underflow() == true)
-					{
-						str += tr(" [Underflow]");
-					}
-					if (o.overflow() == true)
-					{
-						str += tr(" [Overflow]");
-					}
+					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-					return str;
+					if (o.value() == o.editValue())
+					{
+						return valueString;
+					}
+					else
+					{
+						QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+						return tr("%1 => %2").arg(valueString).arg(editValueString);
+					}
 				}
 			}
 			else
@@ -454,11 +475,11 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		{
 			if (o.analog())
 			{
-				return tr("0.0");
+				return QString::number(o.defaultValue(), 'f', o.decimalPlaces());
 			}
 			else
 			{
-				return tr("No");
+				return ((int)o.defaultValue() == 0 ? tr("No") : tr("Yes"));
 			}
 		}
 
@@ -515,7 +536,7 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 //
 
 
-TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QObject* parent)
+TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
 	:TuningItemModel(parent)
 {
 	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
@@ -545,6 +566,76 @@ TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QObject* parent)
 	}
 }
 
+void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
+{
+	bool first = true;
+	bool analog = false;
+	double value = 0.0;
+	bool sameValue = true;
+	int decimalPlaces = 0;
+
+	for (int i : selectedRows)
+	{
+		const TuningObject& o = m_objects[i];
+
+		if (o.analog() == true)
+		{
+			if (o.decimalPlaces() > decimalPlaces)
+			{
+				decimalPlaces = o.decimalPlaces();
+			}
+		}
+
+		if (first == true)
+		{
+			analog = o.analog();
+			value = o.value();
+		}
+		else
+		{
+			if (analog != o.analog())
+			{
+				QMessageBox::warning(m_parent, tr("Set Value"), tr("Please select one type of objects: analog or discrete."));
+				return;
+			}
+
+			if (o.value() != value)
+			{
+				sameValue = false;
+			}
+		}
+	}
+
+	DialogInputValue d(analog, value, sameValue, decimalPlaces, m_parent);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	for (int i : selectedRows)
+	{
+		TuningObject& o = m_objects[i];
+		o.setEditValue(d.value());
+	}
+}
+
+void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
+{
+	for (int i : selectedRows)
+	{
+		TuningObject& o = m_objects[i];
+
+		if (o.analog() == false)
+		{
+			bool value = o.editValue() == 0 ? false : true;
+			value = !value;
+
+			o.setEditValue(value == true ? 1 : 0);
+		}
+	}
+}
+
+
 QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 {
 	int col = index.column();
@@ -560,6 +651,12 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 	if (displayIndex == Value)
 	{
 		const TuningObject& o = m_objects[row];
+
+		if (m_blink == true && o.editValue() != o.value())
+		{
+			QColor color = QColor(Qt::yellow);
+			return QBrush(color);
+		}
 
 		if (o.valid() == false)
 		{
@@ -593,6 +690,12 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 	{
 		const TuningObject& o = m_objects[row];
 
+		if (m_blink == true && o.editValue() != o.value())
+		{
+			QColor color = QColor(Qt::black);
+			return QBrush(color);
+		}
+
 		if (o.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
@@ -611,6 +714,157 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
 }
 
+Qt::ItemFlags TuningItemModelMain::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags f = TuningItemModel::flags(index);
+
+	int col = index.column();
+	int displayIndex = m_columnsIndexes[col];
+
+	int row = index.row();
+	if (row >= m_objects.size())
+	{
+		assert(false);
+		return f;
+	}
+
+
+	if (displayIndex == Value)
+	{
+		const TuningObject& o = m_objects[row];
+
+		if (o.analog() == false)
+		{
+			f |= Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
+		}
+		else
+		{
+			f |= Qt::ItemIsEnabled | Qt::ItemIsEditable;
+		}
+
+	}
+
+	return f;
+}
+
+QVariant TuningItemModelMain::data(const QModelIndex &index, int role) const
+{
+	int col = index.column();
+	int displayIndex = m_columnsIndexes[col];
+
+	int row = index.row();
+	if (row >= m_objects.size())
+	{
+		assert(false);
+		return QVariant();
+	}
+
+	const TuningObject& o = m_objects[row];
+
+	if (role == Qt::CheckStateRole && displayIndex == Value && o.analog() == false)
+	{
+		return (o.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
+	}
+
+	return TuningItemModel::data(index, role);
+}
+
+bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	if (!index.isValid())
+	{
+		return false;
+	}
+
+	int col = index.column();
+	int displayIndex = m_columnsIndexes[col];
+
+	int row = index.row();
+	if (row >= m_objects.size())
+	{
+		assert(false);
+		return false;
+	}
+
+	if (role == Qt::EditRole && displayIndex == TuningItemModel::Columns::Value)
+	{
+		TuningObject& o = m_objects[row];
+
+		bool ok = false;
+		double v = value.toDouble(&ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		o.setEditValue(v);
+		return true;
+	}
+
+
+	/*
+
+	// this is done by invertValue
+	//
+
+	if (role == Qt::CheckStateRole && displayIndex == TuningItemModel::Columns::Value)
+	{
+		TuningObject& o = m_objects[row];
+
+		if ((Qt::CheckState)value.toInt() == Qt::Checked)
+		{
+			o.setEditValue(1.0);
+			return true;
+		}
+		else
+		{
+			o.setEditValue(0.0);
+			return true;
+		}
+	}*/
+	return false;
+}
+
+void TuningItemModelMain::slot_setDefaults()
+{
+	for (TuningObject& o : m_objects)
+	{
+		if (o.analog() == true)
+		{
+			o.setEditValue(o.defaultValue());
+		}
+	}
+}
+
+void TuningItemModelMain::slot_setOn()
+{
+	for (TuningObject& o : m_objects)
+	{
+		if (o.analog() == false)
+		{
+			o.setEditValue(1.0);
+		}
+	}
+}
+
+void TuningItemModelMain::slot_setOff()
+{
+	for (TuningObject& o : m_objects)
+	{
+		if (o.analog() == false)
+		{
+			o.setEditValue(0.0);
+		}
+	}
+}
+
+void TuningItemModelMain::slot_undo()
+{
+	for (TuningObject& o : m_objects)
+	{
+		o.setEditValue(o.value());
+	}
+}
 
 //
 // TuningPage
@@ -734,6 +988,11 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	}
 
+	// Models and data
+	//
+	m_model = new TuningItemModelMain(m_tuningPageIndex, this);
+	//m_model->setFont("Ms Sans Serif", 10, true);
+
 	// Object List
 	//
 	m_objectList = new QTableView();
@@ -745,9 +1004,22 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_maskButton = new QPushButton("Apply Mask");
 
 	m_setValueButton = new QPushButton("Set Value");
+	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
+
 	m_setOnButton = new QPushButton("Set all to On");
+	connect(m_setOnButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOn);
+
 	m_setOffButton = new QPushButton("Set all to Off");
+	connect(m_setOffButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOff);
+
 	m_setToDefaultButton = new QPushButton("Set to Defaults");
+	connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
+
+	m_applyButton = new QPushButton("Apply");
+	//connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
+
+	m_undoButton = new QPushButton("Undo");
+	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
 	m_bottomLayout = new QHBoxLayout();
 
@@ -759,6 +1031,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_bottomLayout->addWidget(m_setOnButton);
 	m_bottomLayout->addWidget(m_setOffButton);
 	m_bottomLayout->addWidget(m_setToDefaultButton);
+	m_bottomLayout->addStretch();
+	m_bottomLayout->addWidget(m_applyButton);
+	m_bottomLayout->addWidget(m_undoButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -770,11 +1045,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_mainLayout->addWidget(m_objectList);
 	m_mainLayout->addLayout(m_bottomLayout);
 
-	// Models and data
-	//
-	m_model = new TuningItemModelMain(m_tuningPageIndex, this);
-	//m_model->setFont("Ms Sans Serif", 10, true);
-
 
 	m_objectList->setModel(m_model);
 	m_objectList->verticalHeader()->hide();
@@ -784,6 +1054,10 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_objectList->setSortingEnabled(true);
 
 	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
+
+	connect(m_objectList, &QTableView::doubleClicked, this, &TuningPage::slot_tableDoubleClicked);
+
+	m_objectList->installEventFilter(this);
 
 	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
 	if (pageSettings == nullptr)
@@ -800,7 +1074,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	fillObjectsList();
 	m_objectList->resizeColumnsToContents();
 
-	m_updateStateTimerId = startTimer(500);
+	m_updateStateTimerId = startTimer(250);
 
 }
 
@@ -916,6 +1190,46 @@ void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 	m_model->sort(column, order);
 }
 
+void TuningPage::slot_setValue()
+{
+	QModelIndexList selection = m_objectList->selectionModel()->selectedIndexes();
+
+	std::vector<int> selectedRows;
+
+	for (const QModelIndex i : selection)
+	{
+		selectedRows.push_back(i.row());
+	}
+
+	if (selectedRows.empty() == false)
+	{
+		m_model->setValue(selectedRows);
+	}
+}
+
+void TuningPage::invertValue()
+{
+	QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
+
+	std::vector<int> selectedRows;
+
+	for (const QModelIndex i : selection)
+	{
+		selectedRows.push_back(i.row());
+	}
+
+	if (selectedRows.empty() == false)
+	{
+		m_model->invertValue(selectedRows);
+	}
+}
+
+void TuningPage::slot_tableDoubleClicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+	slot_setValue();
+}
+
 
 void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
@@ -973,4 +1287,25 @@ void TuningPage::timerEvent(QTimerEvent* event)
 			}
 		}
 	}
+}
+
+bool TuningPage::eventFilter(QObject* object, QEvent* event)
+{
+	if (object == m_objectList && event->type()==QEvent::KeyPress)
+	{
+		QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
+		if(pKeyEvent->key() == Qt::Key_Return)
+		{
+			slot_setValue();
+			return true;
+		}
+
+		if(pKeyEvent->key() == Qt::Key_Space)
+		{
+			invertValue();
+			return true;
+		}
+	}
+
+	return QWidget::eventFilter(object, event);
 }
