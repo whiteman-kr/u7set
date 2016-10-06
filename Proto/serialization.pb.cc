@@ -1064,10 +1064,11 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
   DeviceModule_descriptor_ = file->message_type(47);
-  static const int DeviceModule_offsets_[3] = {
+  static const int DeviceModule_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, typeobsolete_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configurationscript_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, moduletype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, rawdatadescription_),
   };
   DeviceModule_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1735,68 +1736,68 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ftware\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Envelo"
     "pe\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevi"
     "ceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010"
-    "\"X\n\014DeviceModule\022\027\n\014typeObsolete\030\001 \001(\005:\001"
+    "\"t\n\014DeviceModule\022\027\n\014typeObsolete\030\001 \001(\005:\001"
     "0\022\033\n\023configurationScript\030\002 \001(\t\022\022\n\nmodule"
-    "Type\030\003 \001(\005\"\022\n\020DeviceController\"\240\003\n\014Devic"
-    "eSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyte"
-    "Order\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004siz"
-    "e\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n"
-    "\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001"
-    "(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005"
-    ":\0010\022\023\n\010function\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013"
-    " \001(\005:\0010\022\032\n\017appSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020a"
-    "ppSignalHighAdc\030\r \001(\005:\00565535\022\037\n\024appSigna"
-    "lLowEngUnits\030\016 \001(\001:\0010\022\"\n\025appSignalHighEn"
-    "gUnits\030\017 \001(\001:\003100\022\036\n\023appSignalDataFormat"
-    "\030\020 \001(\005:\0012\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\001"
-    "0\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023Module"
-    "Configuration\022\032\n\022struct_description\030\001 \001("
-    "\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigur"
-    "ationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConf"
-    "igurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 "
-    "\002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002"
-    " \002(\t\"0\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n"
-    "\003bit\030\002 \002(\005:\002-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005"
-    "\022\025\n\rsignalGroupID\030\002 \001(\005\022\030\n\020signalInstanc"
-    "eID\030\003 \001(\005\022\023\n\013changesetID\030\004 \001(\005\022\022\n\nchecke"
-    "dOut\030\005 \001(\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemC"
-    "hannel\030\007 \001(\005\022\014\n\004type\030\010 \001(\005\022\017\n\007created\030\t "
-    "\001(\003\022\017\n\007deleted\030\n \001(\010\022\027\n\017instanceCreated\030"
-    "\013 \001(\003\022\026\n\016instanceAction\030\014 \001(\005\022\023\n\013appSign"
-    "alID\030\r \001(\t\022\031\n\021customAppSignalID\030\016 \001(\t\022\017\n"
-    "\007caption\030\017 \001(\t\022\022\n\ndataFormat\030\020 \001(\005\022\020\n\010da"
-    "taSize\030\021 \001(\005\022\016\n\006lowADC\030\022 \001(\005\022\017\n\007highADC\030"
-    "\023 \001(\005\022\033\n\023lowEngeneeringUnits\030\024 \001(\001\022\034\n\024hi"
-    "ghEngeneeringUnits\030\025 \001(\001\022\016\n\006unitID\030\026 \001(\005"
-    "\022\022\n\nadjustment\030\027 \001(\001\022\025\n\rlowValidRange\030\030 "
-    "\001(\001\022\026\n\016highValidRange\030\031 \001(\001\022\026\n\016unbalance"
-    "Limit\030\032 \001(\001\022\025\n\rinputLowLimit\030\033 \001(\001\022\026\n\016in"
-    "putHighLimit\030\034 \001(\001\022\023\n\013inputUnitID\030\035 \001(\005\022"
-    "\025\n\rinputSensorID\030\036 \001(\005\022\026\n\016outputLowLimit"
-    "\030\037 \001(\001\022\027\n\017outputHighLimit\030  \001(\001\022\024\n\014outpu"
-    "tUnitID\030! \001(\005\022\022\n\noutputMode\030\" \001(\005\022\026\n\016out"
-    "putSensorID\030# \001(\005\022\017\n\007acquire\030$ \001(\010\022\022\n\nca"
-    "lculated\030% \001(\010\022\023\n\013normalState\030& \001(\005\022\025\n\rd"
-    "ecimalPlaces\030\' \001(\005\022\020\n\010aperture\030( \001(\001\022\021\n\t"
-    "inOutType\030) \001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\r"
-    "filteringTime\030+ \001(\001\022\027\n\017spreadTolerance\030,"
-    " \001(\001\022\021\n\tbyteOrder\030- \001(\005\022\024\n\014enableTuning\030"
-    ". \001(\010\022\032\n\022tuningDefaultValue\030/ \001(\001\022\014\n\004has"
-    "h\0300 \001(\004\022\033\n\022regValueAddrOffset\030\310\001 \001(\005\022\030\n\017"
-    "regValueAddrBit\030\311\001 \001(\005\022\036\n\025regValidityAdd"
-    "rOffset\030\312\001 \001(\005\022\033\n\022regValidityAddrBit\030\313\001 "
-    "\001(\005\022\033\n\022ioBufferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBu"
-    "fferAddrBit\030\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001"
-    "(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210\001\n\016AppSignalSta"
-    "te\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n"
-    "\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024"
-    "\n\tlocalTime\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:"
-    "\0010*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillime"
-    "ter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022"
-    "\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022"
-    "\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataForm"
-    "at\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Fl"
-    "oat\020\002", 9005);
+    "Type\030\003 \001(\005\022\032\n\022rawDataDescription\030\004 \001(\t\"\022"
+    "\n\020DeviceController\"\240\003\n\014DeviceSignal\022\027\n\014o"
+    "bsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:"
+    "\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031"
+    "\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013validityBit"
+    "\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010val"
+    "ueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010funct"
+    "ion\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017a"
+    "ppSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHigh"
+    "Adc\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnits"
+    "\030\016 \001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001(\001"
+    ":\003100\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\"\036\n"
+    "\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Softwar"
+    "e\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguratio"
+    "n\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030"
+    "\002 \003(\0132\037.Proto.ModuleConfigurationValue\022\016"
+    "\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationVal"
+    "ue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Prope"
+    "rty\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddr"
+    "ess16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002"
+    "-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsignalGr"
+    "oupID\030\002 \001(\005\022\030\n\020signalInstanceID\030\003 \001(\005\022\023\n"
+    "\013changesetID\030\004 \001(\005\022\022\n\ncheckedOut\030\005 \001(\010\022\016"
+    "\n\006userID\030\006 \001(\005\022\030\n\020subsystemChannel\030\007 \001(\005"
+    "\022\014\n\004type\030\010 \001(\005\022\017\n\007created\030\t \001(\003\022\017\n\007delet"
+    "ed\030\n \001(\010\022\027\n\017instanceCreated\030\013 \001(\003\022\026\n\016ins"
+    "tanceAction\030\014 \001(\005\022\023\n\013appSignalID\030\r \001(\t\022\031"
+    "\n\021customAppSignalID\030\016 \001(\t\022\017\n\007caption\030\017 \001"
+    "(\t\022\022\n\ndataFormat\030\020 \001(\005\022\020\n\010dataSize\030\021 \001(\005"
+    "\022\016\n\006lowADC\030\022 \001(\005\022\017\n\007highADC\030\023 \001(\005\022\033\n\023low"
+    "EngeneeringUnits\030\024 \001(\001\022\034\n\024highEngeneerin"
+    "gUnits\030\025 \001(\001\022\016\n\006unitID\030\026 \001(\005\022\022\n\nadjustme"
+    "nt\030\027 \001(\001\022\025\n\rlowValidRange\030\030 \001(\001\022\026\n\016highV"
+    "alidRange\030\031 \001(\001\022\026\n\016unbalanceLimit\030\032 \001(\001\022"
+    "\025\n\rinputLowLimit\030\033 \001(\001\022\026\n\016inputHighLimit"
+    "\030\034 \001(\001\022\023\n\013inputUnitID\030\035 \001(\005\022\025\n\rinputSens"
+    "orID\030\036 \001(\005\022\026\n\016outputLowLimit\030\037 \001(\001\022\027\n\017ou"
+    "tputHighLimit\030  \001(\001\022\024\n\014outputUnitID\030! \001("
+    "\005\022\022\n\noutputMode\030\" \001(\005\022\026\n\016outputSensorID\030"
+    "# \001(\005\022\017\n\007acquire\030$ \001(\010\022\022\n\ncalculated\030% \001"
+    "(\010\022\023\n\013normalState\030& \001(\005\022\025\n\rdecimalPlaces"
+    "\030\' \001(\005\022\020\n\010aperture\030( \001(\001\022\021\n\tinOutType\030) "
+    "\001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\rfilteringTim"
+    "e\030+ \001(\001\022\027\n\017spreadTolerance\030, \001(\001\022\021\n\tbyte"
+    "Order\030- \001(\005\022\024\n\014enableTuning\030. \001(\010\022\032\n\022tun"
+    "ingDefaultValue\030/ \001(\001\022\014\n\004hash\0300 \001(\004\022\033\n\022r"
+    "egValueAddrOffset\030\310\001 \001(\005\022\030\n\017regValueAddr"
+    "Bit\030\311\001 \001(\005\022\036\n\025regValidityAddrOffset\030\312\001 \001"
+    "(\005\022\033\n\022regValidityAddrBit\030\313\001 \001(\005\022\033\n\022ioBuf"
+    "ferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030"
+    "\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001(\005\022\023\n\nramAdd"
+    "rBit\030\317\001 \001(\005\"\210\001\n\016AppSignalState\022\017\n\004hash\030\001"
+    " \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r"
+    ":\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024\n\tlocalTime\030"
+    "\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010*3\n\nSchema"
+    "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
+    "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
+    "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
+    "\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsign"
+    "edInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 9033);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -18476,6 +18477,7 @@ void DeviceChassis::Swap(DeviceChassis* other) {
 const int DeviceModule::kTypeObsoleteFieldNumber;
 const int DeviceModule::kConfigurationScriptFieldNumber;
 const int DeviceModule::kModuleTypeFieldNumber;
+const int DeviceModule::kRawDataDescriptionFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceModule::DeviceModule()
@@ -18497,6 +18499,7 @@ void DeviceModule::SharedCtor() {
   typeobsolete_ = 0;
   configurationscript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   moduletype_ = 0;
+  rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -18507,6 +18510,9 @@ DeviceModule::~DeviceModule() {
 void DeviceModule::SharedDtor() {
   if (configurationscript_ != &::google::protobuf::internal::kEmptyString) {
     delete configurationscript_;
+  }
+  if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete rawdatadescription_;
   }
   if (this != default_instance_) {
   }
@@ -18542,6 +18548,11 @@ void DeviceModule::Clear() {
       }
     }
     moduletype_ = 0;
+    if (has_rawdatadescription()) {
+      if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+        rawdatadescription_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -18597,6 +18608,23 @@ bool DeviceModule::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(34)) goto parse_rawDataDescription;
+        break;
+      }
+
+      // optional string rawDataDescription = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_rawDataDescription:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_rawdatadescription()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->rawdatadescription().data(), this->rawdatadescription().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -18638,6 +18666,15 @@ void DeviceModule::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->moduletype(), output);
   }
 
+  // optional string rawDataDescription = 4;
+  if (has_rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->rawdatadescription().data(), this->rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->rawdatadescription(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -18664,6 +18701,16 @@ void DeviceModule::SerializeWithCachedSizes(
   // optional int32 moduleType = 3;
   if (has_moduletype()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->moduletype(), target);
+  }
+
+  // optional string rawDataDescription = 4;
+  if (has_rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->rawdatadescription().data(), this->rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->rawdatadescription(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -18696,6 +18743,13 @@ int DeviceModule::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->moduletype());
+    }
+
+    // optional string rawDataDescription = 4;
+    if (has_rawdatadescription()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->rawdatadescription());
     }
 
   }
@@ -18734,6 +18788,9 @@ void DeviceModule::MergeFrom(const DeviceModule& from) {
     if (from.has_moduletype()) {
       set_moduletype(from.moduletype());
     }
+    if (from.has_rawdatadescription()) {
+      set_rawdatadescription(from.rawdatadescription());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -18760,6 +18817,7 @@ void DeviceModule::Swap(DeviceModule* other) {
     std::swap(typeobsolete_, other->typeobsolete_);
     std::swap(configurationscript_, other->configurationscript_);
     std::swap(moduletype_, other->moduletype_);
+    std::swap(rawdatadescription_, other->rawdatadescription_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

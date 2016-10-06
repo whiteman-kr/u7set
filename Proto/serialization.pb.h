@@ -5878,6 +5878,18 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 moduletype() const;
   inline void set_moduletype(::google::protobuf::int32 value);
 
+  // optional string rawDataDescription = 4;
+  inline bool has_rawdatadescription() const;
+  inline void clear_rawdatadescription();
+  static const int kRawDataDescriptionFieldNumber = 4;
+  inline const ::std::string& rawdatadescription() const;
+  inline void set_rawdatadescription(const ::std::string& value);
+  inline void set_rawdatadescription(const char* value);
+  inline void set_rawdatadescription(const char* value, size_t size);
+  inline ::std::string* mutable_rawdatadescription();
+  inline ::std::string* release_rawdatadescription();
+  inline void set_allocated_rawdatadescription(::std::string* rawdatadescription);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
   inline void set_has_typeobsolete();
@@ -5886,15 +5898,18 @@ class DeviceModule : public ::google::protobuf::Message {
   inline void clear_has_configurationscript();
   inline void set_has_moduletype();
   inline void clear_has_moduletype();
+  inline void set_has_rawdatadescription();
+  inline void clear_has_rawdatadescription();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* configurationscript_;
   ::google::protobuf::int32 typeobsolete_;
   ::google::protobuf::int32 moduletype_;
+  ::std::string* rawdatadescription_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -14079,6 +14094,76 @@ inline ::google::protobuf::int32 DeviceModule::moduletype() const {
 inline void DeviceModule::set_moduletype(::google::protobuf::int32 value) {
   set_has_moduletype();
   moduletype_ = value;
+}
+
+// optional string rawDataDescription = 4;
+inline bool DeviceModule::has_rawdatadescription() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceModule::set_has_rawdatadescription() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceModule::clear_has_rawdatadescription() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceModule::clear_rawdatadescription() {
+  if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_->clear();
+  }
+  clear_has_rawdatadescription();
+}
+inline const ::std::string& DeviceModule::rawdatadescription() const {
+  return *rawdatadescription_;
+}
+inline void DeviceModule::set_rawdatadescription(const ::std::string& value) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(value);
+}
+inline void DeviceModule::set_rawdatadescription(const char* value) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(value);
+}
+inline void DeviceModule::set_rawdatadescription(const char* value, size_t size) {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  rawdatadescription_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DeviceModule::mutable_rawdatadescription() {
+  set_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    rawdatadescription_ = new ::std::string;
+  }
+  return rawdatadescription_;
+}
+inline ::std::string* DeviceModule::release_rawdatadescription() {
+  clear_has_rawdatadescription();
+  if (rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = rawdatadescription_;
+    rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DeviceModule::set_allocated_rawdatadescription(::std::string* rawdatadescription) {
+  if (rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete rawdatadescription_;
+  }
+  if (rawdatadescription) {
+    set_has_rawdatadescription();
+    rawdatadescription_ = rawdatadescription;
+  } else {
+    clear_has_rawdatadescription();
+    rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

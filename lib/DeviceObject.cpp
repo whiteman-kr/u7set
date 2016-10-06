@@ -2379,9 +2379,13 @@ R"DELIM({
 		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
 		configScriptProp->setExpert(true);
 
+		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
+		rawDataDescrProp->setExpert(true);
+
 		familyTypeProp->setUpdateFromPreset(true);
 		moduleVersionProp->setUpdateFromPreset(true);
 		configScriptProp->setUpdateFromPreset(true);
+		rawDataDescrProp->setUpdateFromPreset(true);
 	}
 
 	DeviceModule::~DeviceModule()
@@ -2404,6 +2408,7 @@ R"DELIM({
 
 		moduleMessage->set_moduletype(static_cast<int>(m_type));
 		moduleMessage->set_configurationscript(m_configurationScript.toStdString());
+		moduleMessage->set_rawdatadescription(m_rawDataDescription.toStdString());
 
 		return true;
 	}
@@ -2454,6 +2459,7 @@ R"DELIM({
 		}
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
+		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
 
 		return true;
 	}
@@ -2502,6 +2508,16 @@ R"DELIM({
 	void DeviceModule::setConfigurationScript(const QString& value)
 	{
 		m_configurationScript = value;
+	}
+
+	QString DeviceModule::rawDataDescription() const
+	{
+		return m_rawDataDescription;
+	}
+
+	void DeviceModule::setRawDataDescription(const QString& value)
+	{
+		m_rawDataDescription = value;
 	}
 
 	int DeviceModule::moduleType() const

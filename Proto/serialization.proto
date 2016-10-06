@@ -732,6 +732,7 @@ message DeviceModule
 	optional int32 typeObsolete = 1 [default = 0];
 	optional string configurationScript = 2;
 	optional int32 moduleType = 3;
+	optional string rawDataDescription = 4;
 }
 
 message DeviceController
