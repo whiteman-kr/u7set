@@ -2705,6 +2705,12 @@ R"DELIM({
 
 		appSignalDataFormatProp->setUpdateFromPreset(true);
 		appSignalDataFormatProp->setExpert(preset);
+
+		// Show/Hide analog signal properties
+		//
+		setType(type());
+
+		return;
 	}
 
 	DeviceSignal::~DeviceSignal()
@@ -2785,27 +2791,27 @@ R"DELIM({
 			switch (obsoleteType)
 			{
 				case Obsolete::SignalType::DiagDiscrete:
-					m_type = E::SignalType::Discrete;
+					setType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::DiagAnalog:
-					m_type = E::SignalType::Analog;
+					setType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::InputDiscrete:
-					m_type = E::SignalType::Discrete;
+					setType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::InputAnalog:
-					m_type = E::SignalType::Analog;
+					setType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::OutputDiscrete:
-					m_type = E::SignalType::Discrete;
+					setType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Output;
 					break;
 				case Obsolete::SignalType::OutputAnalog:
-					m_type = E::SignalType::Analog;
+					setType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Output;
 					break;
 				default:
@@ -2814,7 +2820,7 @@ R"DELIM({
 		}
 		else
 		{
-			m_type = static_cast<E::SignalType>(signalMessage.type());
+			setType(static_cast<E::SignalType>(signalMessage.type()));				// Show hide some props
 			m_function = static_cast<E::SignalFunction>(signalMessage.function());
 		}
 
@@ -2927,6 +2933,42 @@ R"DELIM({
 	void DeviceSignal::setType(E::SignalType value)
 	{
 		m_type = value;
+
+		if (function() == E::SignalFunction::Input ||
+			function() == E::SignalFunction::Output)
+		{
+			bool appSignalProps = false;
+
+			switch (m_type)
+			{
+			case E::SignalType::Analog:
+				appSignalProps = true;
+				break;
+			case E::SignalType::Discrete:
+				appSignalProps = false;
+				break;
+			default:
+				assert(false);
+			}
+
+			auto p1 = propertyByCaption(PropertyNames::appSignalLowAdc);
+			auto p2 = propertyByCaption(PropertyNames::appSignalHighAdc);
+			auto p3 = propertyByCaption(PropertyNames::appSignalLowEngUnits);
+			auto p4 = propertyByCaption(PropertyNames::appSignalHighEngUnits);
+			auto p5 = propertyByCaption(PropertyNames::appSignalDataFormat);
+
+			assert(p1);
+			assert(p2);
+			assert(p3);
+			assert(p4);
+			assert(p5);
+
+			p1->setVisible(appSignalProps);
+			p2->setVisible(appSignalProps);
+			p3->setVisible(appSignalProps);
+			p4->setVisible(appSignalProps);
+			p5->setVisible(appSignalProps);
+		}
 	}
 
 	E::SignalFunction DeviceSignal::function() const
@@ -3046,12 +3088,12 @@ R"DELIM({
 
 	bool DeviceSignal::isAnalogSignal() const
 	{
-		return	m_type == E::SignalType::Analog;
+		return m_type == E::SignalType::Analog;
 	}
 
 	bool DeviceSignal::isDiscreteSignal() const
 	{
-		return	m_type == E::SignalType::Discrete;
+		return m_type == E::SignalType::Discrete;
 	}
 
 	int DeviceSignal::appSignalLowAdc() const
