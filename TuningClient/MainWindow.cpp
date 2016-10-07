@@ -7,6 +7,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogPresetEditor.h"
+#include "DialogUsers.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -98,6 +99,12 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
+	m_pUsersAction = new QAction(tr("Users..."), this);
+	m_pUsersAction->setStatusTip(tr("Edit users"));
+	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
+	m_pUsersAction->setEnabled(true);
+	connect(m_pUsersAction, &QAction::triggered, this, &MainWindow::runUsersEditor);
+
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
@@ -136,6 +143,7 @@ void MainWindow::createMenu()
 
 	pToolsMenu->addAction(m_pPresetEditorAction);
 	pToolsMenu->addAction(m_pTuningSourcesAction);
+	pToolsMenu->addAction(m_pUsersAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -277,6 +285,16 @@ void MainWindow::slot_tuningConnectionFailed()
 void MainWindow::exit()
 {
 	close();
+}
+
+void MainWindow::runUsersEditor()
+{
+	DialogUsers d(theUserManager, this);
+	if (d.exec() == QDialog::Accepted && theSettings.admin() == true)
+	{
+		theUserManager = d.m_userManager;
+		theUserManager.Store();
+	}
 }
 
 void MainWindow::showSettings()

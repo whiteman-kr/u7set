@@ -1,5 +1,5 @@
 #include "DialogPresetEditor.h"
-#include "DialogPresetProperties.h"
+#include "DialogProperties.h"
 #include "ui_DialogPresetEditor.h"
 
 #include "MainWindow.h"
@@ -420,7 +420,7 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 		return;
 	}
 
-	DialogPresetProperties d(editFilter, this);
+	DialogProperties d(editFilter, this);
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());
