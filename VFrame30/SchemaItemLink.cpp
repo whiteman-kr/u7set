@@ -123,7 +123,7 @@ namespace VFrame30
 		}
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight);			// Don't use getter!
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(pen);
 
 		p->drawPolyline(polyline);
@@ -134,7 +134,7 @@ namespace VFrame30
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		QPen redPen(QColor(0xE0D00000));
-		redPen.setWidthF(m_weight);			// Don't use getter!
+		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);			// Don't use getter!
 
 		// вход/выход - рисование красного креста 
 		//

@@ -55,6 +55,8 @@ namespace VFrame30
 		int pinGridStep() const;
 		void setPinGridStep(int value);
 
+		double cosmeticPenWidth() const;
+
 		bool isEditMode() const;
 		void setEditMode(bool value);
 
@@ -77,6 +79,8 @@ namespace VFrame30
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
+
+		double m_cosmeticPenWidth = 0.0;
 	};
 
 	class VFRAME30LIBSHARED_EXPORT DrawHelper

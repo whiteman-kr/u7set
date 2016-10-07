@@ -328,7 +328,7 @@ namespace VFrame30
 
 		//
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight);		// Don't use getter!
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 		p->setPen(pen);
 
 		p->drawRect(r);
@@ -345,7 +345,7 @@ namespace VFrame30
 		const std::list<AfbPin>& inputPins = inputs();
 
 		QPen redPen(QColor(0xE0B00000));
-		redPen.setWidthF(m_weight);		// Don't use getter!
+		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
 		for (const AfbPin& input : inputPins)
 		{
