@@ -1247,8 +1247,6 @@ void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 		return;
 	}
 
-	qDebug()<<"Filter button clicked: "<<filter->caption();
-
 	m_buttonFilter = filter;
 
 	fillObjectsList();
@@ -1308,11 +1306,11 @@ void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{
-		qDebug()<<"Filter tree removed.";
+		//qDebug()<<"Filter tree removed.";
 	}
 	else
 	{
-		qDebug()<<"Filter tree clicked: "<<filter->caption();
+		//qDebug()<<"Filter tree clicked: "<<filter->caption();
 	}
 
 	m_treeFilter = filter;
