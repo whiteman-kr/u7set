@@ -85,7 +85,9 @@ SOURCES += main.cpp\
     ../lib/PropertyObject.cpp \
     DialogInputValue.cpp \
     TuningFilter.cpp \
-    LogFile.cpp
+    LogFile.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -116,7 +118,9 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyObject.h \
     DialogInputValue.h \
     TuningFilter.h \
-    LogFile.h
+    LogFile.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/OutputLog.h
 
 FORMS    += \
     DialogSettings.ui \

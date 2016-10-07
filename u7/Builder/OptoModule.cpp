@@ -14,8 +14,8 @@ namespace Hardware
 	// ------------------------------------------------------------------
 
 	const char* OptoPort::RAW_DATA_SIZE = "RAW_DATA_SIZE";
-	const char* OptoPort::ALL_NATIVE_PRIMARY_DATA = "ALL_NATIVE_PRIMARY_DATA";
-	const char* OptoPort::MODULE_PRIMARY_DATA = "MODULE_PRIMARY_DATA";
+	const char* OptoPort::ALL_NATIVE_PRIMARY_DATA = "ALL_NATIVE_RAW_DATA";
+	const char* OptoPort::MODULE_PRIMARY_DATA = "MODULE_RAW_DATA";
 	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :

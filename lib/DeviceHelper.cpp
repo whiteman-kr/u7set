@@ -185,6 +185,67 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 }
 
 
+const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
+{
+	if (lm == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	if (place < FIRST_MODULE_PLACE || place > LAST_MODULE_PLACE)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceModule* module = nullptr;
+
+	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i);
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		module =  device->toModule();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->place() != place)
+		{
+			continue;
+		}
+
+		return module;
+	}
+
+	return nullptr;
+}
+
+
 int DeviceHelper::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
 {
 	if (lm == nullptr || log == nullptr)
@@ -248,95 +309,23 @@ int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int mod
 
 	*moduleIsFound = false;
 
-	if (modulePlace < FIRST_MODULE_PLACE || modulePlace > LAST_MODULE_PLACE)
+	const Hardware::DeviceModule* module = getModuleOnPlace(lm, modulePlace);
+
+	if (module == nullptr)
 	{
-		assert(false);
 		return 0;
 	}
 
-	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
-
-	if (chassis == nullptr)
-	{
-		assert(false);
-		return 0;
-	}
-
-	int count = chassis->childrenCount();
+	*moduleIsFound = true;
 
 	int size = 0;
 
-	for(int i = 0; i < count; i++)
+	if (module->hasRawData() == true)
 	{
-		Hardware::DeviceObject* device = chassis->child(i);
-
-		if (device == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (device->isModule() == false)
-		{
-			continue;
-		}
-
-		Hardware::DeviceModule* module =  device->toModule();
-
-		if (module == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (module->place() != modulePlace)
-		{
-			continue;
-		}
-
-		*moduleIsFound = true;
-
-		if (module->hasRawData() == true)
-		{
-			size = getModuleRawDataSize(module, log);
-		}
-
-		break;
+		size = getModuleRawDataSize(module, log);
 	}
 
 	return size;
-}
-
-
-ModuleRawDataDescription* DeviceHelper::getModuleRawDataDescription(const Hardware::DeviceModule* module)
-{
-	if (module == nullptr)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
-}
-
-
-void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
-{
-	if (log != nullptr && device != nullptr)
-	{
-		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
-		return;
-	}
-}
-
-
-void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
-{
-	if (log != nullptr && device != nullptr)
-	{
-		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
-		return;
-	}
 }
 
 
@@ -387,3 +376,38 @@ int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* module, Bui
 
 	return 0;
 }
+
+
+
+ModuleRawDataDescription* DeviceHelper::getModuleRawDataDescription(const Hardware::DeviceModule* module)
+{
+	if (module == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
+}
+
+
+void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+
+void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+

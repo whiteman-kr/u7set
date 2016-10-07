@@ -180,7 +180,7 @@ namespace Hardware
 		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
 		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
 
-		const QVector<RawDataDescriptionItem>& rawDataDescription() const { m_rawDataDescription; }
+		const QVector<RawDataDescriptionItem>& rawDataDescription() const { return m_rawDataDescription; }
 
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
