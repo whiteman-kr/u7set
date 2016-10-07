@@ -8,6 +8,8 @@ DialogSettings::DialogSettings(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+
+
 	ui->m_instanceID->setText(theSettings.instanceStrId());
 
 	ui->m_IP1->setText(theSettings.configuratorAddress1().addressStr());
@@ -15,6 +17,16 @@ DialogSettings::DialogSettings(QWidget *parent) :
 
 	ui->m_IP2->setText(theSettings.configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(theSettings.configuratorAddress2().port()));
+
+	if (theSettings.admin() == false)
+	{
+		ui->m_instanceID->setEnabled(false);
+		ui->m_IP1->setEnabled(false);
+		ui->m_port1->setEnabled(false);
+		ui->m_IP2->setEnabled(false);
+		ui->m_port2->setEnabled(false);
+
+	}
 
 	ui->m_filterByEquipment->setChecked(theSettings.filterByEquipment());
 	ui->m_filterBySchema->setChecked(theSettings.filterBySchema());
@@ -35,5 +47,8 @@ void DialogSettings::on_DialogSettings_accepted()
 	theSettings.setFilterByEquipment(ui->m_filterByEquipment->checkState() == Qt::Checked);
 	theSettings.setFilterBySchema(ui->m_filterBySchema->checkState() == Qt::Checked);
 
-	theSettings.StoreSystem();
+	if (theSettings.admin() == true)
+	{
+		theSettings.StoreSystem();
+	}
 }

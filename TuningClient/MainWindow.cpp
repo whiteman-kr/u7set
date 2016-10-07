@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 		restoreGeometry(theSettings.m_mainWindowGeometry);
 		restoreState(theSettings.m_mainWindowState);
 	}
+	else
+	{
+		resize(1024, 768);
+	}
 
 	theLogFile.write("--");
 	theLogFile.write("-----------------------");
