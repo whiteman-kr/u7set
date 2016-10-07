@@ -154,7 +154,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 
 		QPen linePen(lineColor());
-		linePen.setWidthF(m_weight);		// Don't use getter!
+		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);		// Don't use getter!
 
 		// Draw slash lines
 		//

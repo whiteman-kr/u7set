@@ -97,6 +97,7 @@ namespace VFrame30
 		}
 
 		QPainter* p = drawParam->painter();
+		QPaintDevice* device = drawParam->device();
 
 		QPointF p1(startXDocPt(), startYDocPt());
 		QPointF p2(endXDocPt(), endYDocPt());
@@ -109,7 +110,7 @@ namespace VFrame30
 		}
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight);
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(pen);
 
 		p->drawLine(p1, p2);

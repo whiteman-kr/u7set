@@ -257,7 +257,7 @@ namespace VFrame30
 		// Draw line and symbol >>
 		//
 		QPen linePen(lineColor());
-		linePen.setWidthF(weight());
+		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(linePen);
 
 		p->drawLine(QPointF(r.right() - pinWidth, r.top()), QPointF(r.right() - pinWidth, r.bottom()));
@@ -441,7 +441,7 @@ namespace VFrame30
 		// Draw line and symbol >>
 		//
 		QPen linePen(lineColor());
-		linePen.setWidthF(weight());
+		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(linePen);
 
 		p->drawLine(QPointF(r.left() + pinWidth, r.top()), QPointF(r.left() + pinWidth, r.bottom()));

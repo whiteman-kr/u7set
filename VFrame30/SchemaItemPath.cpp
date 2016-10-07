@@ -112,7 +112,7 @@ namespace VFrame30
 		}
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight);
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(pen);
 
 		p->drawPolyline(polyline);
