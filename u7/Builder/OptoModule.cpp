@@ -315,7 +315,7 @@ namespace Hardware
 			{
 				if (rawDataSizeFound == true)
 				{
-					msg = QString("Duplicate RAW_DATA_SIZE section in opto-port '%1' settings.").arg(equipmentID());
+					msg = QString("Duplicate RAW_DATA_SIZE section in opto-port '%1' raw data description.").arg(equipmentID());
 					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 					result = false;
 					continue;
@@ -331,7 +331,7 @@ namespace Hardware
 
 					if (res == false)
 					{
-						msg = QString("Invalid RAW_DATA_SIZE value in opto-port '%1' settings.").arg(equipmentID());
+						msg = QString("Invalid RAW_DATA_SIZE value in opto-port '%1' raw data description.").arg(equipmentID());
 						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 						result = false;
 						continue;
@@ -365,7 +365,7 @@ namespace Hardware
 
 				if (res == false)
 				{
-					msg = QString("Invalid MODULE_NATIVE_PRIMARY_DATA value in opto-port '%1' settings.").arg(equipmentID());
+					msg = QString("Invalid MODULE_NATIVE_PRIMARY_DATA value in opto-port '%1' raw data description.").arg(equipmentID());
 					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 					result = false;
 					continue;
@@ -390,7 +390,7 @@ namespace Hardware
 				continue;
 			}
 
-			msg = QString("Unknown item %1 in opto-port '%2' settings.").arg(itemTypeStr).arg(equipmentID());
+			msg = QString("Unknown item %1 in opto-port '%2' raw data description.").arg(itemTypeStr).arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			result = false;
 
@@ -399,7 +399,7 @@ namespace Hardware
 
 		if (rawDataSizeFound == false)
 		{
-			msg = QString("RAW_DATA_SIZE value is not found in opto-port '%1' settings.").arg(equipmentID());
+			msg = QString("RAW_DATA_SIZE value is not found in opto-port '%1' raw data description.").arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			result = false;
 		}
@@ -467,7 +467,7 @@ namespace Hardware
 
 			case RawDataDescriptionItemType::AllNativeRawData:
 
-				size += DeviceHelper::getAllNativerawDataSize(lm, log);
+				size += DeviceHelper::getAllNativeRawDataSize(lm, log);
 
 				break;
 
@@ -479,7 +479,7 @@ namespace Hardware
 
 					if (moduleIsFound == false)
 					{
-						msg = QString("Module on place %1 is not found (opto port '%2' settings).").arg(item.modulePlace).arg(equipmentID());
+						msg = QString("Module on place %1 is not found (opto port '%2' raw data description).").arg(item.modulePlace).arg(equipmentID());
 						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 						result = false;
 					}
@@ -493,7 +493,7 @@ namespace Hardware
 
 					if (port == nullptr)
 					{
-						msg = QString("Port '%1' is not found (opto port '%2' settings).").arg(item.portEquipmentID).arg(equipmentID());
+						msg = QString("Port '%1' is not found (opto port '%2' raw data description).").arg(item.portEquipmentID).arg(equipmentID());
 						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 						result = false;
 						break;
@@ -532,7 +532,6 @@ namespace Hardware
 
 		return result;
 	}
-
 
 
 	// ------------------------------------------------------------------

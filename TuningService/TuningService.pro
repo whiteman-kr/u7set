@@ -58,7 +58,8 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     TcpTuningServer.cpp \
     TcpTuningClient.cpp \
-    TuningSource.cpp
+    TuningSource.cpp \
+    ../u7/Builder/ModulesRawData.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -96,7 +97,8 @@ HEADERS += \
     ../Proto/serialization.pb.h \
     TcpTuningServer.h \
     TcpTuningClient.h \
-    TuningSource.h
+    TuningSource.h \
+    ../u7/Builder/ModulesRawData.h
 
 include(../qtservice/src/qtservice.pri)
 

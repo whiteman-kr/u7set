@@ -1,6 +1,29 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/LmLimits.h"
 
+
+QHash<QString, ModuleRawDataDescription*> DeviceHelper::m_modulesRawDataDescription;
+
+void DeviceHelper::init()
+{
+	assert(m_modulesRawDataDescription.count() == 0);
+}
+
+
+void DeviceHelper::shutdown()
+{
+	for(ModuleRawDataDescription* desc : m_modulesRawDataDescription)
+	{
+		if (desc != nullptr)
+		{
+			delete desc;
+		}
+	}
+
+	m_modulesRawDataDescription.clear();
+}
+
+
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
@@ -102,26 +125,6 @@ bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString&
 }
 
 
-void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
-{
-	if (log != nullptr && device != nullptr)
-	{
-		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
-		return;
-	}
-}
-
-
-void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
-{
-	if (log != nullptr && device != nullptr)
-	{
-		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
-		return;
-	}
-}
-
-
 Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix)
 {
 	return getChildDeviceObjectBySuffix(device, suffix, nullptr);
@@ -182,7 +185,7 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 }
 
 
-int DeviceHelper::getAllNativerawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
+int DeviceHelper::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
 {
 	if (lm == nullptr || log == nullptr)
 	{
@@ -225,12 +228,10 @@ int DeviceHelper::getAllNativerawDataSize(const Hardware::DeviceModule* lm, Buil
 			continue;
 		}
 
-		//  UNCOMMENT after primaryDataSize() implementation
-		//
-		// size += module->primaryDataSize();
-		//
-
-		size += 10;		//  DELETE after primaryDataSize() implementation
+		if (module->hasRawData() == true)
+		{
+			size += getModuleRawDataSize(module, log);
+		}
 	}
 
 	return size;
@@ -253,8 +254,6 @@ int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int mod
 		return 0;
 	}
 
-	int size = 0;
-
 	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
 
 	if (chassis == nullptr)
@@ -264,6 +263,8 @@ int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int mod
 	}
 
 	int count = chassis->childrenCount();
+
+	int size = 0;
 
 	for(int i = 0; i < count; i++)
 	{
@@ -293,17 +294,96 @@ int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int mod
 			continue;
 		}
 
-		//  UNCOMMENT after primaryDataSize() implementation
-		//
-		// size = module->primaryDataSize();
-		//
-
-		size = 10;				//  DELETE after primaryDataSize() implementation
-
 		*moduleIsFound = true;
+
+		if (module->hasRawData() == true)
+		{
+			size = getModuleRawDataSize(module, log);
+		}
 
 		break;
 	}
 
 	return size;
+}
+
+
+ModuleRawDataDescription* DeviceHelper::getModuleRawDataDescription(const Hardware::DeviceModule* module)
+{
+	if (module == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
+}
+
+
+void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+
+void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+
+int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
+{
+	if (module == nullptr || log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (module->hasRawData() == false)
+	{
+		return 0;
+	}
+
+	ModuleRawDataDescription* desc = nullptr;
+
+	if (m_modulesRawDataDescription.contains(module->equipmentIdTemplate()))
+	{
+		desc = m_modulesRawDataDescription.value(module->equipmentIdTemplate());
+
+		if (desc == nullptr)
+		{
+			return 0;
+		}
+
+		return desc->rawDataSize();
+	}
+
+	//
+
+	desc = new ModuleRawDataDescription();
+
+	bool result = desc->init(module, log);
+
+	if (result == true)
+	{
+		m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), desc);
+
+		return desc->rawDataSize();
+	}
+
+	// parsing error occured
+	// add nullptr-description to prevent repeated parsing
+	//
+	m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), nullptr);
+
+	return 0;
 }

@@ -95,7 +95,8 @@ SOURCES += main.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp
+    ../lib/AppDataSource.cpp \
+    ../u7/Builder/ModulesRawData.cpp
 
 HEADERS += \
 	Stable.h \
@@ -140,7 +141,8 @@ HEADERS += \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h
+    ../lib/AppDataSource.h \
+    ../u7/Builder/ModulesRawData.h
 
 include(../qtservice/src/qtservice.pri)
 

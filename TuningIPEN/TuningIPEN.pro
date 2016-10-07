@@ -49,7 +49,8 @@ SOURCES +=\
     DiscreteSignalSetter.cpp \
     TripleChannelSignalsModel.cpp \
     TuningIPENSocket.cpp \
-    TuningIPENSource.cpp
+    TuningIPENSource.cpp \
+    ../u7/Builder/ModulesRawData.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -86,7 +87,8 @@ HEADERS  += TuningMainWindow.h \
     DiscreteSignalSetter.h \
     TripleChannelSignalsModel.h \
     TuningIPENSocket.h \
-    TuningIPENSource.h
+    TuningIPENSource.h \
+    ../u7/Builder/ModulesRawData.h
 
 include(../qtservice/src/qtservice.pri)
 

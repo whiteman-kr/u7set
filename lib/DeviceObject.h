@@ -494,6 +494,7 @@ namespace Hardware
 
 		QString rawDataDescription() const;
 		void setRawDataDescription(const QString& value);
+		bool hasRawData() const;
 
 		int moduleType() const;
 
