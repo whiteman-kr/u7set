@@ -127,6 +127,8 @@ void Settings::RestoreUser()
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
 	m_presetPropertiesSplitterState = s.value("PresetProperties/splitterState").toInt();
+	if (m_presetPropertiesSplitterState < 100)
+		m_presetPropertiesSplitterState = 100;
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 }
