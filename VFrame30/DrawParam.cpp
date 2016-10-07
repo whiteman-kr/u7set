@@ -12,6 +12,22 @@ namespace VFrame30
 	{
 		assert(m_painter != nullptr);
 		assert(m_schema != nullptr);
+
+		if (dynamic_cast<const QPdfWriter*>(painter->device()) != nullptr)
+		{
+			const QPdfWriter* pdfDevice = dynamic_cast<const QPdfWriter*>(painter->device());
+
+			if (pdfDevice->resolution() >= 600)
+			{
+				m_cosmeticPenWidth = 1.0 / 256.0;
+			}
+			else
+			{
+				m_cosmeticPenWidth = 0.0;
+			}
+		}
+
+		return;
 	}
 	
 	CDrawParam::~CDrawParam(void)
@@ -61,6 +77,11 @@ namespace VFrame30
 	void CDrawParam::setPinGridStep(int value)
 	{
 		m_pinGridStep = value;
+	}
+
+	double CDrawParam::cosmeticPenWidth() const
+	{
+		return m_cosmeticPenWidth;
 	}
 
 	bool CDrawParam::isEditMode() const

@@ -135,6 +135,8 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const;
 
+		static double penDeviceWidth(const QPaintDevice* device, double penWidth);
+
 		// ISchemaItemPropertiesPos interface implementation
 		//
 	public:

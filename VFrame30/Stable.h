@@ -47,6 +47,7 @@
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QMessageBox>
+#include <QtConcurrent/QtConcurrent>
 #include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
@@ -59,6 +60,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QAction>
+#include <QPdfWriter>
 
 #include <QJsonDocument>
 #include <QJsonObject>

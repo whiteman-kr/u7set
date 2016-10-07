@@ -7,6 +7,7 @@
 #include "TuningWorkspace.h"
 #include "TcpTuningClient.h"
 #include "ConfigController.h"
+#include "LogFile.h"
 
 
 namespace Ui {
@@ -72,5 +73,6 @@ private:
 };
 
 extern MainWindow* theMainWindow;
+extern LogFile theLogFile;
 
 #endif // MAINWINDOW_H

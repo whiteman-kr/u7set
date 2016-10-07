@@ -84,7 +84,8 @@ SOURCES += main.cpp\
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
     DialogInputValue.cpp \
-    TuningFilter.cpp
+    TuningFilter.cpp \
+    LogFile.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -114,7 +115,8 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
     DialogInputValue.h \
-    TuningFilter.h
+    TuningFilter.h \
+    LogFile.h
 
 FORMS    += \
     DialogSettings.ui \

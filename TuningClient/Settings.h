@@ -37,6 +37,8 @@ public:
 	bool filterBySchema() const;
 	void setFilterBySchema(bool value);
 
+	bool admin() const;
+
 public:
 
 	int m_requestInterval = 100;
@@ -63,7 +65,11 @@ public:
 	//
 	std::vector<TuningPageSettings> m_tuningPageSettings;
 
+
+
 private:
+
+	bool m_admin = false;
 
 	QString m_instanceStrId;
 

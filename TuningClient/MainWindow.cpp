@@ -18,6 +18,15 @@ MainWindow::MainWindow(QWidget *parent) :
 		restoreGeometry(theSettings.m_mainWindowGeometry);
 		restoreState(theSettings.m_mainWindowState);
 	}
+	else
+	{
+		resize(1024, 768);
+	}
+
+	theLogFile.write("--");
+	theLogFile.write("-----------------------");
+	theLogFile.write("--");
+	theLogFile.writeMessage(tr("Application started."));
 
 	createActions();
 	createMenu();
@@ -39,7 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	QString errorCode;
 	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
 	{
-		QMessageBox::critical(this, "Error", tr("Failed to load user filters: %1").arg(errorCode));
+		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
+
+		theLogFile.writeError(msg);
+		QMessageBox::critical(this, "Error", msg);
 	}
 
 	theUserFilters.m_root->setCaption(tr("User Presets"));
@@ -54,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
@@ -64,6 +77,8 @@ MainWindow::~MainWindow()
 
 	theFilters.save("ObjectFilters1.xml");
 	theUserFilters.save("ObjectFiltersUser1.xml");
+
+	theLogFile.writeMessage(tr("Application finished."));
 }
 
 void MainWindow::createActions()
@@ -297,3 +312,4 @@ void MainWindow::showTuningSources()
 }
 
 MainWindow* theMainWindow = nullptr;
+LogFile theLogFile("TuningClient", ".");
