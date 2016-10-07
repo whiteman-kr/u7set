@@ -1,7 +1,9 @@
+#include "Stable.h"
 #include "TuningFilter.h"
 #include "../lib/Types.h"
 #include "ObjectManager.h"
 #include "Settings.h"
+#include "MainWindow.h"
 
 TuningFilterValue::TuningFilterValue()
 {
@@ -934,6 +936,7 @@ bool TuningFilterStorage::save(const QString& fileName)
 
 	if (f.open(QFile::WriteOnly) == false)
 	{
+		theLogFile.writeError(QString("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName));
 		return false;
 	}
 
