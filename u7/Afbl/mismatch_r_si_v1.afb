@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#mismatch_fp_v1">
+    <AfbElement StrId="#mismatch_r_si_v1">
         <Properties>
-            <Caption>mismatch_fp</Caption>
-            <Version>1.0005</Version>
+            <Caption>mismatch_r_si</Caption>
+            <Version>1.0001</Version>
 	  <Implementation Version="1" OpIndex="22"/>
-            <Description>Analog mismatch block</Description>
+            <Description>Analog mismatch block with limits</Description>
             <Category>Other</Category>
             <OpCode>27</OpCode>
             <HasRam>false</HasRam>
@@ -13,10 +13,10 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_x1_data" Caption="in_1" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>
-            <AfbElementSignal OpName="i_x2_data" Caption="in_2" Type="Analog" DataFormat="Float" OpIndex="6" Size="32"/>
-            <AfbElementSignal OpName="i_x3_data" Caption="in_3" Type="Analog" DataFormat="Float" OpIndex="8" Size="32"/>
-            <AfbElementSignal OpName="i_x4_data" Caption="in_4" Type="Analog" DataFormat="Float" OpIndex="10" Size="32"/>                               
+            <AfbElementSignal OpName="i_x1_data" Caption="in_1" Type="Analog" DataFormat="SignedInt" OpIndex="4" Size="32"/>
+            <AfbElementSignal OpName="i_x2_data" Caption="in_2" Type="Analog" DataFormat="SignedInt" OpIndex="6" Size="32"/>
+            <AfbElementSignal OpName="i_x3_data" Caption="in_3" Type="Analog" DataFormat="SignedInt" OpIndex="8" Size="32"/>
+            <AfbElementSignal OpName="i_x4_data" Caption="in_4" Type="Analog" DataFormat="SignedInt" OpIndex="10" Size="32"/>                               
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_x1_mismatch" Caption="out_1" Type="Discrete" OpIndex="12" Size="1"/>
@@ -24,19 +24,15 @@
             <AfbElementSignal OpName="o_x3_mismatch" Caption="out_3" Type="Discrete" OpIndex="14" Size="1"/>
             <AfbElementSignal OpName="o_x4_mismatch" Caption="out_4" Type="Discrete" OpIndex="15" Size="1"/>
 
-            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="16" Size="1"/>
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="17" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="18" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="19" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="20" Size="1"/>     
+            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="16" Size="1"/>                
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>2</Value>
+                <Value>1</Value>
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
+            </AfbElementParam>            
             <AfbElementParam OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>3</Value>
                 <Default>2</Default>
@@ -53,11 +49,38 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_ust" Caption="Value" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="i_ust" Caption="Value" Visible="false" OpIndex="2" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>0</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="float">
+                <Value>5</Value>
+                <Default>0</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483647</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_highlim" Caption="HightLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>100</Value>
+                <Default>100</Default>
+                <LowLimit>-2147483647</LowLimit>
+                <HighLimit>2147483647</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
@@ -217,11 +240,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		opIndex++;
 	}
 	
-	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");	
 
 	videoItemFblElement.adjustHeight();
 

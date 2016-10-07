@@ -433,8 +433,8 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 {
 	if (QMessageBox::warning(this, tr("Remove Preset"),
 							 tr("Are you sure you want to remove selected presets?"),
-							 QMessageBox::StandardButton::Yes,
-							 QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
 	{
 		return;
 	}
