@@ -36,7 +36,7 @@ namespace Builder
 
     struct LmCommand
     {
-        LmCommandCode code;
+		LmCommandCode code;
         int sizeW;
         const char* str;
 
@@ -163,6 +163,8 @@ namespace Builder
         }
 
         void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
+
+		bool isNoCommand() const { return opCode.code == TO_INT(LmCommandCode::NoCommand); }
 
         void setOpCode(LmCommandCode code);
         int getOpCodeInt() const { return opCode.code; }
@@ -322,6 +324,8 @@ namespace Builder
 
         bool isCommand() override { return true; }
         bool isComment() override { return false; }
+
+		bool isNoCommand() const { return m_code.isNoCommand(); }
 
         bool isOpCode(LmCommandCode code) const { return m_code.getOpCode() == code; }
 

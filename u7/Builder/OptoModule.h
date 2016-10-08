@@ -16,6 +16,8 @@ namespace Hardware
 	class ConnectionStorage;
 	class OptoModuleStorage;
 
+	const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
+
 	class OptoPort : public QObject
 	{
 		Q_OBJECT

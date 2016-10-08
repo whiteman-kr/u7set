@@ -119,12 +119,10 @@ namespace Hardware
 
 		// m_txDataID first placed in buffer
 		//
-		int txDataIDSizeW = sizeof(m_txDataID) / sizeof(quint16);
-
-		address.addWord(txDataIDSizeW);
+		address.addWord(TX_DATA_ID_SIZE_W);
 
 		// then place Raw Data
-
+		//
 		address.addWord(m_txRawDataSizeW);
 
 		// then place analog signals
@@ -182,7 +180,7 @@ namespace Hardware
 
 		m_txDiscreteSignalsSizeW = address.offset() - startAddr;
 
-		int fullTxDataSizeW = txDataIDSizeW + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+		int fullTxDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
 
 		if (manualSettings())
 		{

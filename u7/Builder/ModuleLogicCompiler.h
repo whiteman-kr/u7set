@@ -631,10 +631,12 @@ namespace Builder
 
 		bool copyOptoConnectionsTxData();
 		bool copyOptoPortTxData(Hardware::OptoPort* port);
+
 		bool copyOptoPortTxRawDataData(Hardware::OptoPort* port);
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPort* port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port);
 
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPort* port, int& offset);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int modulePlace);
 
 		bool copyRS232Signals();

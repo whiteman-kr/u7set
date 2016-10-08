@@ -3154,7 +3154,7 @@ namespace Builder
 		m_code.append(comment);
 		m_code.newLine();
 
-		int offset = sizeof(quint32) / sizeof(quint16);		// txDataID
+		int offset = Hardware::TX_DATA_ID_SIZE_W;		// txDataID
 
 		const QVector<Hardware::OptoPort::RawDataDescriptionItem>& rawDataDescription = port->rawDataDescription();
 
@@ -3168,10 +3168,11 @@ namespace Builder
 				break;
 
 			case Hardware::OptoPort::RawDataDescriptionItemType::AllNativeRawData:
+				result &= copyOptoPortAllNativeRawData(port, offset);
 				break;
 
 			case Hardware::OptoPort::RawDataDescriptionItemType::ModuleRawData:
-				copyOptoPortTxModuleRawData(port, offset, item.modulePlace);
+				result &= copyOptoPortTxModuleRawData(port, offset, item.modulePlace);
 				break;
 
 			case Hardware::OptoPort::RawDataDescriptionItemType::PortRawData:
@@ -3322,6 +3323,25 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(Hardware::OptoPort* port, int& offset)
+	{
+		if (port == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool result = true;
+
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		{
+			result &= copyOptoPortTxModuleRawData(port, offset, place);
+		}
+
+		return result;
+	}
+
+
 	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int place)
 	{
 		if (port == nullptr)
@@ -3369,22 +3389,18 @@ namespace Builder
 			return false;
 		}
 
-		Comment comment;
-		Command cmd;
-
 		int localOffset = 0;
 		int toAddr = 0;
 		int fromAddr = 0;
 
-		comment.setComment(QString("Copy raw data of module %1 place %2").arg(module->equipmentIdTemplate()).arg(place));
-		m_code.append(comment);
-		m_code.newLine();
-
 		bool autoSize = false;
+		bool firstCommand = true;
 
 		for(const ModuleRawDataDescription::Item& item : items)
 		{
-			toAddr = port->txStartAddress() + offset + localOffset;
+			Command cmd;
+
+			toAddr = port->absTxStartAddress() + offset + localOffset;
 
 			fromAddr = m_memoryMap.getModuleDataOffset(place);
 
@@ -3399,7 +3415,6 @@ namespace Builder
 				fromAddr += moduleAppDataOffset + item.offset;
 
 				cmd.mov(toAddr, fromAddr);
-				m_code.append(cmd);
 
 				localOffset++;
 
@@ -3410,7 +3425,6 @@ namespace Builder
 				fromAddr += moduleDiagDataOffset + item.offset;
 
 				cmd.mov(toAddr, fromAddr);
-				m_code.append(cmd);
 
 				localOffset++;
 
@@ -3422,7 +3436,6 @@ namespace Builder
 				fromAddr += moduleAppDataOffset + item.offset;
 
 				cmd.mov32(toAddr, fromAddr);
-				m_code.append(cmd);
 
 				localOffset += 2;
 
@@ -3433,7 +3446,6 @@ namespace Builder
 				fromAddr += moduleDiagDataOffset + item.offset;
 
 				cmd.mov32(toAddr, fromAddr);
-				m_code.append(cmd);
 
 				localOffset += 2;
 
@@ -3441,6 +3453,17 @@ namespace Builder
 
 			default:
 				assert(false);
+			}
+
+			if (cmd.isNoCommand() == false)
+			{
+				if (firstCommand == true)
+				{
+					cmd.setComment(QString("module %1 raw data, place %2").arg(module->equipmentIdTemplate()).arg(place));
+					firstCommand = false;
+				}
+
+				m_code.append(cmd);
 			}
 		}
 
