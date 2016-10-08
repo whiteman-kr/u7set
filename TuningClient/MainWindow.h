@@ -8,6 +8,7 @@
 #include "TcpTuningClient.h"
 #include "ConfigController.h"
 #include "LogFile.h"
+#include "UserManager.h"
 
 
 namespace Ui {
@@ -49,6 +50,7 @@ private slots:
 public slots:
 
 	void exit();
+	void runUsersEditor();
 	void showSettings();
 	void runPresetEditor();
 	void showTuningSources();
@@ -62,6 +64,7 @@ private:
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
+	QAction* m_pUsersAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pLogAction = nullptr;
@@ -74,5 +77,12 @@ private:
 
 extern MainWindow* theMainWindow;
 extern LogFile theLogFile;
+
+extern ObjectManager theObjects;
+
+extern TuningFilterStorage theFilters;
+extern TuningFilterStorage theUserFilters;
+
+extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H

@@ -2,7 +2,7 @@
 #define TUNINGPAGE_H
 
 #include "Stable.h"
-#include "ObjectManager.h"
+#include "TuningObject.h"
 #include "TuningFilter.h"
 
 

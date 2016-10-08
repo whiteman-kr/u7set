@@ -39,6 +39,8 @@ public:
 
 	bool admin() const;
 
+	TuningPageSettings *tuningPageSettings(int index);
+
 public:
 
 	int m_requestInterval = 100;
@@ -61,13 +63,13 @@ public:
 	QPoint m_presetPropertiesWindowPos;
 	QByteArray m_presetPropertiesWindowGeometry;
 
-	// Tuning pages settings
-	//
-	std::vector<TuningPageSettings> m_tuningPageSettings;
-
 
 
 private:
+
+	// Tuning pages settings
+	//
+	std::vector<TuningPageSettings> m_tuningPageSettings;
 
 	bool m_admin = false;
 

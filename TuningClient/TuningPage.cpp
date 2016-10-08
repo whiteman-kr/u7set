@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "MainWindow.h"
 #include "TuningPage.h"
 #include "DialogInputValue.h"
 #include <QKeyEvent>
@@ -539,7 +540,7 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
 	:TuningItemModel(parent)
 {
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
@@ -872,6 +873,10 @@ void TuningItemModelMain::slot_undo()
 
 void TuningItemModelMain::slot_Apply()
 {
+	if (theUserManager.requestPassword() == false)
+	{
+		return;
+	}
 
 	QString str = tr("New values will be applied: \r\n\r\n");
 	QString strValue;
@@ -976,20 +981,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	QWidget(parent),
 	m_tabFilter(tabFilter)
 {
-	// Reserve place for tuning page settings and copy existing
-	//
-	if (theSettings.m_tuningPageSettings.size() <= m_tuningPageIndex)
-	{
-		std::vector<TuningPageSettings> m_tuningPageSettings2 = theSettings.m_tuningPageSettings;
-
-		theSettings.m_tuningPageSettings.resize(m_tuningPageIndex + 1);
-		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
-		{
-			theSettings.m_tuningPageSettings[i] = m_tuningPageSettings2[i];
-		}
-	}
-
-
 	std::vector<FilterButton*> buttons;
 
 	// Top buttons
@@ -1025,6 +1016,11 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 			if (f == nullptr)
 			{
 				assert(f);
+				continue;
+			}
+
+			if (f->isButton() == false)
+			{
 				continue;
 			}
 
@@ -1132,20 +1128,27 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	m_objectList->installEventFilter(this);
 
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+
+	fillObjectsList();
+
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
 		return;
 	}
 
-	for (int i = 0; i < pageSettings->m_columnCount; i++)
+	if (pageSettings->m_columnCount == 0)
 	{
-		m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
+		m_objectList->resizeColumnsToContents();
 	}
-
-	fillObjectsList();
-	m_objectList->resizeColumnsToContents();
+	else
+	{
+		for (int i = 0; i < pageSettings->m_columnCount; i++)
+		{
+			m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
+		}
+	}
 
 	m_updateStateTimerId = startTimer(250);
 
@@ -1153,7 +1156,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 TuningPage::~TuningPage()
 {
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[m_tuningPageIndex];
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);

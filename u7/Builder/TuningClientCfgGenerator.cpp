@@ -238,11 +238,30 @@ bool TuningClientCfgGenerator::writeSchemasDetails()
 
 bool TuningClientCfgGenerator::writeTuningSignals()
 {
+	// Parse tuningSourceEquipmentId
+	//
+	bool ok = false;
+	QString tuningSourceEquipmentId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	QStringList tuningSourceEquipmentIdMasks;
+	if (tuningSourceEquipmentId.isEmpty() == false)
+	{
+		tuningSourceEquipmentId.replace('\n', ';');
+		tuningSourceEquipmentIdMasks = tuningSourceEquipmentId.split(';');
+	}
+
+	// Write signals
+	//
 	QByteArray data;
 	XmlWriteHelper xmlWriter(&data);
 
 	xmlWriter.setAutoFormatting(true);
 	xmlWriter.writeStartDocument();
+
 	xmlWriter.writeStartElement("TuningSignals");
 
 	int count = m_signalSet->count();
@@ -253,6 +272,35 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 		if (s.enableTuning() == false)
 		{
 			continue;
+		}
+
+		// Check EquipmentIdMasks
+		//
+
+		if (tuningSourceEquipmentIdMasks.empty() == false)
+		{
+			bool result = false;
+			for (QString m : tuningSourceEquipmentIdMasks)
+			{
+				m = m.trimmed();
+
+				if (m.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QRegExp rx(m);
+				rx.setPatternSyntax(QRegExp::Wildcard);
+				if (rx.exactMatch(s.equipmentID()))
+				{
+					result = true;
+					break;
+				}
+			}
+			if (result == false)
+			{
+				continue;
+			}
 		}
 
 		xmlWriter.writeStartElement("TuningSignal");

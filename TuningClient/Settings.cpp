@@ -127,6 +127,8 @@ void Settings::RestoreUser()
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
 	m_presetPropertiesSplitterState = s.value("PresetProperties/splitterState").toInt();
+	if (m_presetPropertiesSplitterState < 100)
+		m_presetPropertiesSplitterState = 100;
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 }
@@ -190,6 +192,30 @@ void Settings::setFilterBySchema(bool value)
 bool Settings::admin() const
 {
 	return m_admin;
+}
+
+TuningPageSettings* Settings::tuningPageSettings(int index)
+{
+	// Reserve place for tuning page settings and copy existing
+	//
+	if (index >= m_tuningPageSettings.size())
+	{
+		std::vector<TuningPageSettings> m_tuningPageSettings2 = m_tuningPageSettings;
+
+		m_tuningPageSettings.resize(index + 1);
+		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
+		{
+			m_tuningPageSettings[i] = m_tuningPageSettings2[i];
+		}
+	}
+
+	if (index >= m_tuningPageSettings.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return &m_tuningPageSettings[index];
 }
 
 Settings theSettings;

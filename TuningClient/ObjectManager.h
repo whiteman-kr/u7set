@@ -16,8 +16,7 @@ public:
 
 	std::vector<TuningObject> objects();
 
-	int tuningSourcesCount();
-	QString tuningSourceEquipmentId(int index);
+	QStringList tuningSourcesEquipmentIds();
 
 	bool loadSignals(const QByteArray& data, QString *errorCode);
 
@@ -30,6 +29,5 @@ private:
 	std::vector<TuningObject> m_objects;
 };
 
-extern ObjectManager theObjects;
 
 #endif // OBJECTMANAGER_H
