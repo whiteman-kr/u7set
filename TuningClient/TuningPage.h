@@ -2,7 +2,7 @@
 #define TUNINGPAGE_H
 
 #include "Stable.h"
-#include "ObjectManager.h"
+#include "TuningObject.h"
 #include "TuningFilter.h"
 
 
@@ -119,6 +119,7 @@ public slots:
 	void slot_setOn();
 	void slot_setOff();
 	void slot_undo();
+	void slot_Apply();
 
 
 };

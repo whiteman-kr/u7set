@@ -1,16 +1,16 @@
-#include "DialogPresetProperties.h"
+#include "DialogProperties.h"
 #include "Settings.h"
 
 //
 //
-// DialogPresetProperties
+// DialogProperties
 //
 //
 
-DialogPresetProperties::DialogPresetProperties(std::shared_ptr<PropertyObject> object, QWidget *parent)
+DialogProperties::DialogProperties(std::shared_ptr<PropertyObject> object, QWidget *parent)
 	:PropertyEditorDialog(object, parent, false)
 {
-	setWindowTitle(tr("Preset Properties"));
+	setWindowTitle(tr("Properties"));
 
 	if (theSettings.m_presetPropertiesWindowPos.x() != -1 && theSettings.m_presetPropertiesWindowPos.y() != -1)
 	{
@@ -20,30 +20,24 @@ DialogPresetProperties::DialogPresetProperties(std::shared_ptr<PropertyObject> o
 	}
 }
 
-DialogPresetProperties::~DialogPresetProperties()
+DialogProperties::~DialogProperties()
 {
 }
 
-bool DialogPresetProperties::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
-{
-
-	return true;
-}
-
-void DialogPresetProperties::closeEvent(QCloseEvent * e)
+void DialogProperties::closeEvent(QCloseEvent * e)
 {
 	Q_UNUSED(e);
 	saveSettings();
 
 }
 
-void DialogPresetProperties::done(int r)
+void DialogProperties::done(int r)
 {
 	saveSettings();
 	PropertyEditorDialog::done(r);
 }
 
-void DialogPresetProperties::saveSettings()
+void DialogProperties::saveSettings()
 {
 	theSettings.m_presetPropertiesSplitterState = splitterPosition();
 	theSettings.m_presetPropertiesWindowPos = pos();

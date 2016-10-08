@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "TuningWorkspace.h"
 #include "Settings.h"
-#include "TuningFilter.h"
+#include "MainWindow.h"
 
 TuningWorkspace::TuningWorkspace(QWidget *parent)
 	:QWidget(parent)

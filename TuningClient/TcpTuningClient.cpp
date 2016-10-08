@@ -1,5 +1,6 @@
 #include "TcpTuningClient.h"
 #include "Settings.h"
+#include "MainWindow.h"
 
 TcpTuningClient::TcpTuningClient(ConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
 	:Tcp::Client(serverAddressPort1, serverAddressPort2),
@@ -37,25 +38,26 @@ void TcpTuningClient::onClientThreadFinished()
 
 void TcpTuningClient::onConnection()
 {
-	qDebug() << "TcpTuningClient::onConnection()";
+	theLogFile.writeMessage(tr("TcpTuningClient: connection established."));
 
 	assert(isClearToSendRequest() == true);
 
 	resetToGetTuningSources();
+
 
 	return;
 }
 
 void TcpTuningClient::onDisconnection()
 {
-	qDebug() << "TcpTuningClient::onDisconnection";
+	theLogFile.writeMessage(tr("TcpTuningClient: connection failed."));
 
 	emit connectionFailed();
 }
 
 void TcpTuningClient::onReplyTimeout()
 {
-	qDebug() << "TcpTuningClient::onReplyTimeout()";
+	theLogFile.writeMessage(tr("TcpTuningClient: reply timeout."));
 }
 
 void TcpTuningClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -79,7 +81,7 @@ void TcpTuningClient::processReply(quint32 requestID, const char* replyData, qui
 		break;
 	default:
 		assert(false);
-		qDebug() << "Wrong requestID in TcpTuningClient::processReply()";
+		theLogFile.writeError(tr("TcpTuningClient::processReply: Wrong requestID."));
 
 		resetToGetTuningSources();
 	}
@@ -105,14 +107,12 @@ void TcpTuningClient::resetToGetTuningState()
 
 void TcpTuningClient::requestTuningSourcesInfo()
 {
-	qDebug()<<"TcpTuningClient::requestTuningSourcesInfo";
 	assert(isClearToSendRequest());
 	sendRequest(TDS_GET_TUNING_SOURCES_INFO);
 }
 
 void TcpTuningClient::requestTuningSourcesState()
 {
-	qDebug()<<"TcpTuningClient::requestTuningSourcesState";
 	assert(isClearToSendRequest());
 	sendRequest(TDS_GET_TUNING_SOURCES_STATES);
 }
@@ -131,7 +131,7 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 
 	if (m_tuningDataSourcesInfoReply.error() != 0)
 	{
-		qDebug() << "TcpTuningClient::m_tuningDataSourcesInfoReply, error received: " << m_tuningDataSourcesInfoReply.error();
+		theLogFile.writeError(tr("TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1").arg(m_tuningDataSourcesInfoReply.error()));
 		assert(m_tuningDataSourcesStatesReply.error() != 0);
 
 		resetToGetTuningSources();
@@ -141,8 +141,6 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 	{
 		QMutexLocker l(&m_mutex);
 		m_tuningSources.clear();
-
-		qDebug()<<"TcpTuningClient::processTuningSourcesInfo: "<< m_tuningDataSourcesInfoReply.datasourceinfo_size();
 
 		for (int i = 0; i < m_tuningDataSourcesInfoReply.datasourceinfo_size(); i++)
 		{
@@ -205,7 +203,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 
 	if (m_tuningDataSourcesStatesReply.error() != 0)
 	{
-		qDebug() << "TcpTuningClient::processTuningSourcesState, error received: " << m_tuningDataSourcesStatesReply.error();
+		theLogFile.writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1").arg(m_tuningDataSourcesStatesReply.error()));
 		assert(m_tuningDataSourcesStatesReply.error() != 0);
 
 		resetToGetTuningSources();
@@ -214,8 +212,6 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 
 	{
 		QMutexLocker l(&m_mutex);
-
-		qDebug()<<"TcpTuningClient::processTuningSourcesState: "<< m_tuningDataSourcesStatesReply.tuningdatasourcesstates_size();
 
 		for (int i = 0; i < m_tuningDataSourcesStatesReply.tuningdatasourcesstates_size(); i++)
 		{
@@ -267,10 +263,8 @@ std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
 	}
 
 	return result;
-
 }
 
 TcpTuningClient* theTcpTuningClient = nullptr;
 
-ObjectManager theObjects;
 

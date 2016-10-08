@@ -3,8 +3,8 @@
     <AfbElement StrId="#mismatch_si_v1">
         <Properties>
             <Caption>mismatch_si</Caption>
-            <Version>1.0004</Version>
-	  <Implementation Version="0" OpIndex="22"/>
+            <Version>1.0005</Version>
+	  <Implementation Version="1" OpIndex="22"/>
             <Description>Analog mismatch block</Description>
             <Category>Other</Category>
             <OpCode>27</OpCode>
@@ -34,7 +34,7 @@
                 </Script>
             </AfbElementParam>            
             <AfbElementParam OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
-                <Value>2</Value>
+                <Value>3</Value>
                 <Default>2</Default>
                 <LowLimit>2</LowLimit>
                 <HighLimit>4</HighLimit>

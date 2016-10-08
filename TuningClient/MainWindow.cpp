@@ -7,6 +7,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogPresetEditor.h"
+#include "DialogUsers.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -18,6 +19,15 @@ MainWindow::MainWindow(QWidget *parent) :
 		restoreGeometry(theSettings.m_mainWindowGeometry);
 		restoreState(theSettings.m_mainWindowState);
 	}
+	else
+	{
+		resize(1024, 768);
+	}
+
+	theLogFile.write("--");
+	theLogFile.write("-----------------------");
+	theLogFile.write("--");
+	theLogFile.writeMessage(tr("Application started."));
 
 	createActions();
 	createMenu();
@@ -39,7 +49,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	QString errorCode;
 	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
 	{
-		QMessageBox::critical(this, "Error", tr("Failed to load user filters: %1").arg(errorCode));
+		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
+
+		theLogFile.writeError(msg);
+		QMessageBox::critical(this, "Error", msg);
 	}
 
 	theUserFilters.m_root->setCaption(tr("User Presets"));
@@ -54,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
@@ -61,9 +75,21 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
+	QString errorMsg;
 
-	theFilters.save("ObjectFilters1.xml");
-	theUserFilters.save("ObjectFiltersUser1.xml");
+	if (theFilters.save("ObjectFilters1.xml", &errorMsg) == false)
+	{
+		theLogFile.writeError(errorMsg);
+		QMessageBox::critical(this, tr("Error"), errorMsg);
+	}
+
+	if (theUserFilters.save("ObjectFiltersUser1.xml", &errorMsg) == false)
+	{
+		theLogFile.writeError(errorMsg);
+		QMessageBox::critical(this, tr("Error"), errorMsg);
+	}
+
+	theLogFile.writeMessage(tr("Application finished."));
 }
 
 void MainWindow::createActions()
@@ -82,6 +108,12 @@ void MainWindow::createActions()
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
+
+	m_pUsersAction = new QAction(tr("Users..."), this);
+	m_pUsersAction->setStatusTip(tr("Edit users"));
+	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
+	m_pUsersAction->setEnabled(true);
+	connect(m_pUsersAction, &QAction::triggered, this, &MainWindow::runUsersEditor);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -121,6 +153,7 @@ void MainWindow::createMenu()
 
 	pToolsMenu->addAction(m_pPresetEditorAction);
 	pToolsMenu->addAction(m_pTuningSourcesAction);
+	pToolsMenu->addAction(m_pUsersAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -242,7 +275,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		emit signalsUpdated();
 	}
 
-	theFilters.createAutomaticFilters();
+	theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjects.tuningSourcesEquipmentIds());
 
 	createWorkspace();
 
@@ -264,6 +297,16 @@ void MainWindow::exit()
 	close();
 }
 
+void MainWindow::runUsersEditor()
+{
+	DialogUsers d(theUserManager, this);
+	if (d.exec() == QDialog::Accepted && theSettings.admin() == true)
+	{
+		theUserManager = d.m_userManager;
+		theUserManager.Store();
+	}
+}
+
 void MainWindow::showSettings()
 {
 	DialogSettings d;
@@ -278,7 +321,14 @@ void MainWindow::runPresetEditor()
 	if (d.exec() == QDialog::Accepted)
 	{
 		theUserFilters = editFilters;
-		theUserFilters.save("UserFilters.xml");
+
+		QString errorMsg;
+
+		if (theUserFilters.save("UserFilters.xml", &errorMsg) == false)
+		{
+			theLogFile.writeError(errorMsg);
+			QMessageBox::critical(this, tr("Error"), errorMsg);
+		}
 		emit userFiltersUpdated();
 	}
 }
@@ -296,4 +346,13 @@ void MainWindow::showTuningSources()
 	}
 }
 
+
 MainWindow* theMainWindow = nullptr;
+LogFile theLogFile("TuningClient", ".");
+
+ObjectManager theObjects;
+
+TuningFilterStorage theFilters;
+TuningFilterStorage theUserFilters;
+
+UserManager theUserManager;

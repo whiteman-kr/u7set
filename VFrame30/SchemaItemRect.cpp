@@ -200,7 +200,7 @@ namespace VFrame30
 		//
 		if (drawRect() == true)
 		{
-			m_rectPen->setWidthF(static_cast<qreal>(m_weight));
+			m_rectPen->setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 
 			p->setPen(*m_rectPen);
 			p->drawRect(r);

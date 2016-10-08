@@ -57,6 +57,8 @@ public:
 
 	Hash appSignalHash() const;
 
+	bool modified() const;
+
 private:
 
 	QString m_customAppSignalID;

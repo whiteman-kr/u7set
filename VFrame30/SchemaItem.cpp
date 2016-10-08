@@ -250,6 +250,24 @@ namespace VFrame30
 		return false;
 	};
 
+	double SchemaItem::penDeviceWidth(const QPaintDevice* device, double penWidth)
+	{
+		if (dynamic_cast<const QPdfWriter*>(device) != nullptr)
+		{
+			const QPdfWriter* pdfDevice = dynamic_cast<const QPdfWriter*>(device);
+
+			if (pdfDevice->resolution() >= 600)
+			{
+				if (penWidth == 0.0)
+				{
+					return 1.0 / 256.0;
+				}
+			}
+		}
+
+		return penWidth;
+	}
+
 	// ISchemaItemPropertiesPos interface implementation
 	//
 	double SchemaItem::left() const

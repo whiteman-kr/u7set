@@ -1,5 +1,5 @@
 #include "DialogPresetEditor.h"
-#include "DialogPresetProperties.h"
+#include "DialogProperties.h"
 #include "ui_DialogPresetEditor.h"
 
 #include "MainWindow.h"
@@ -420,7 +420,7 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 		return;
 	}
 
-	DialogPresetProperties d(editFilter, this);
+	DialogProperties d(editFilter, this);
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());
@@ -433,8 +433,8 @@ void DialogPresetEditor::on_m_removePreset_clicked()
 {
 	if (QMessageBox::warning(this, tr("Remove Preset"),
 							 tr("Are you sure you want to remove selected presets?"),
-							 QMessageBox::StandardButton::Yes,
-							 QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
 	{
 		return;
 	}

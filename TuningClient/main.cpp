@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include "Settings.h"
+#include "UserManager.h"
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
@@ -88,15 +89,16 @@ int main(int argc, char *argv[])
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
+	theUserManager.Restore();
 
 	theMainWindow = new MainWindow();
 	theMainWindow->show();
 
 	int result = a.exec();
 
-	theSettings.StoreUser();
-
 	delete theMainWindow;
+
+	theSettings.StoreUser();
 
 	google::protobuf::ShutdownProtobufLibrary();
 

@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "MainWindow.h"
 #include "TuningPage.h"
 #include "DialogInputValue.h"
 #include <QKeyEvent>
@@ -440,7 +441,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
 
-					if (o.value() == o.editValue())
+					if (o.modified() == false)
 					{
 						return valueString;
 					}
@@ -454,7 +455,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-					if (o.value() == o.editValue())
+					if (o.modified() == false)
 					{
 						return valueString;
 					}
@@ -539,7 +540,7 @@ QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, i
 TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
 	:TuningItemModel(parent)
 {
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
@@ -589,7 +590,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		if (first == true)
 		{
 			analog = o.analog();
-			value = o.value();
+			value = o.editValue();
 		}
 		else
 		{
@@ -599,7 +600,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 				return;
 			}
 
-			if (o.value() != value)
+			if (o.modified() == true)
 			{
 				sameValue = false;
 			}
@@ -627,10 +628,14 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 
 		if (o.analog() == false)
 		{
-			bool value = o.editValue() == 0 ? false : true;
-			value = !value;
-
-			o.setEditValue(value == true ? 1 : 0);
+			if (o.editValue() == 0)
+			{
+				o.setEditValue(1);
+			}
+			else
+			{
+				o.setEditValue(0);
+			}
 		}
 	}
 }
@@ -652,7 +657,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 	{
 		const TuningObject& o = m_objects[row];
 
-		if (m_blink == true && o.editValue() != o.value())
+		if (m_blink == true && o.modified() == true)
 		{
 			QColor color = QColor(Qt::yellow);
 			return QBrush(color);
@@ -690,7 +695,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 	{
 		const TuningObject& o = m_objects[row];
 
-		if (m_blink == true && o.editValue() != o.value())
+		if (m_blink == true && o.modified() == true)
 		{
 			QColor color = QColor(Qt::black);
 			return QBrush(color);
@@ -842,7 +847,7 @@ void TuningItemModelMain::slot_setOn()
 	{
 		if (o.analog() == false)
 		{
-			o.setEditValue(1.0);
+			o.setEditValue(1);
 		}
 	}
 }
@@ -853,7 +858,7 @@ void TuningItemModelMain::slot_setOff()
 	{
 		if (o.analog() == false)
 		{
-			o.setEditValue(0.0);
+			o.setEditValue(0);
 		}
 	}
 }
@@ -865,6 +870,79 @@ void TuningItemModelMain::slot_undo()
 		o.setEditValue(o.value());
 	}
 }
+
+void TuningItemModelMain::slot_Apply()
+{
+	if (theUserManager.requestPassword() == false)
+	{
+		return;
+	}
+
+	QString str = tr("New values will be applied: \r\n\r\n");
+	QString strValue;
+
+	bool modifiedFound = false;
+	int modifiedCount = 0;
+
+	for (TuningObject& o : m_objects)
+	{
+		if (o.modified() == false)
+		{
+			continue;
+		}
+
+		modifiedFound = true;
+		modifiedCount++;
+	}
+
+	if (modifiedFound == false)
+	{
+		return;
+	}
+
+	int listCount = 0;
+
+	for (TuningObject& o : m_objects)
+	{
+		if (o.modified() == false)
+		{
+			continue;
+		}
+
+		if (listCount >= 10)
+		{
+			str += tr("and %1 more values.").arg(modifiedCount - listCount);
+			break;
+		}
+
+		if (o.analog() == true)
+		{
+			strValue = QString::number(o.editValue(), 'f', o.decimalPlaces());
+		}
+		else
+		{
+			strValue = o.editValue() == 0 ? tr("No") : tr("Yes");
+		}
+
+		str += tr("%1 (%2) = %3\r\n").arg(o.appSignalID()).arg(o.caption()).arg(strValue);
+
+		listCount++;
+	}
+
+
+
+	str += tr("\r\nAre you sure you want to continue?");
+
+	if (QMessageBox::warning(m_parent, tr("Apply Changes"),
+							 str,
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
+}
+
 
 //
 // TuningPage
@@ -903,20 +981,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	QWidget(parent),
 	m_tabFilter(tabFilter)
 {
-	// Reserve place for tuning page settings and copy existing
-	//
-	if (theSettings.m_tuningPageSettings.size() <= m_tuningPageIndex)
-	{
-		std::vector<TuningPageSettings> m_tuningPageSettings2 = theSettings.m_tuningPageSettings;
-
-		theSettings.m_tuningPageSettings.resize(m_tuningPageIndex + 1);
-		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
-		{
-			theSettings.m_tuningPageSettings[i] = m_tuningPageSettings2[i];
-		}
-	}
-
-
 	std::vector<FilterButton*> buttons;
 
 	// Top buttons
@@ -952,6 +1016,11 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 			if (f == nullptr)
 			{
 				assert(f);
+				continue;
+			}
+
+			if (f->isButton() == false)
+			{
 				continue;
 			}
 
@@ -1016,7 +1085,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
 
 	m_applyButton = new QPushButton("Apply");
-	//connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
+	connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
 	m_undoButton = new QPushButton("Undo");
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
@@ -1059,20 +1128,27 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	m_objectList->installEventFilter(this);
 
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[tuningPageIndex];
+
+	fillObjectsList();
+
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
 		return;
 	}
 
-	for (int i = 0; i < pageSettings->m_columnCount; i++)
+	if (pageSettings->m_columnCount == 0)
 	{
-		m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
+		m_objectList->resizeColumnsToContents();
 	}
-
-	fillObjectsList();
-	m_objectList->resizeColumnsToContents();
+	else
+	{
+		for (int i = 0; i < pageSettings->m_columnCount; i++)
+		{
+			m_objectList->setColumnWidth(i, pageSettings->m_columnsWidth[i]);
+		}
+	}
 
 	m_updateStateTimerId = startTimer(250);
 
@@ -1080,7 +1156,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 TuningPage::~TuningPage()
 {
-	TuningPageSettings* pageSettings = &theSettings.m_tuningPageSettings[m_tuningPageIndex];
+	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
@@ -1174,8 +1250,6 @@ void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 		return;
 	}
 
-	qDebug()<<"Filter button clicked: "<<filter->caption();
-
 	m_buttonFilter = filter;
 
 	fillObjectsList();
@@ -1235,11 +1309,11 @@ void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{
-		qDebug()<<"Filter tree removed.";
+		//qDebug()<<"Filter tree removed.";
 	}
 	else
 	{
-		qDebug()<<"Filter tree clicked: "<<filter->caption();
+		//qDebug()<<"Filter tree clicked: "<<filter->caption();
 	}
 
 	m_treeFilter = filter;

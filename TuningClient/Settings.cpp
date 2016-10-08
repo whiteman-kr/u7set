@@ -9,12 +9,16 @@ Settings::Settings():
 	m_configuratorIpAddress2("127.0.0.1"),
 	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST)
 {
-
 }
 
 void Settings::StoreSystem()
 {
-	QSettings s;
+	if (admin() == false)
+	{
+		return;
+	}
+
+	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 
 	s.setValue("m_instanceStrId", m_instanceStrId);
 
@@ -27,7 +31,23 @@ void Settings::StoreSystem()
 
 void Settings::RestoreSystem()
 {
-	QSettings s;
+	// determine if is running as administrator
+	//
+	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+	adminSettings.setValue("ApplicationName", qApp->applicationName());
+
+	if (adminSettings.status() == QSettings::AccessError)
+	{
+		m_admin = false;
+	}
+	else
+	{
+		m_admin = true;
+	}
+
+	// read system settings
+	//
+	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 
@@ -40,7 +60,7 @@ void Settings::RestoreSystem()
 
 void Settings::StoreUser()
 {
-	QSettings s;
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 	QMutexLocker l(&m);
 
@@ -50,14 +70,14 @@ void Settings::StoreUser()
 
 	s.setValue("MainWindow/Splitter/state", m_mainWindowSplitterState);
 
-	s.setValue("TuningPageSettingsCount", static_cast<uint>(m_tuningPageSettings.size()));
+	s.setValue("TuningPage/Count", static_cast<uint>(m_tuningPageSettings.size()));
 	for (int i = 0; i < m_tuningPageSettings.size(); i++)
 	{
-		s.setValue(QString("TuningPageSettings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);
+		s.setValue(QString("TuningPage/Settings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);
 		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
 		{
-			s.setValue(QString("TuningPageSettings%1/columnWidth/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsWidth[c]);
-			s.setValue(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
+			s.setValue(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsWidth[c]);
+			s.setValue(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
 		}
 	}
 
@@ -67,7 +87,7 @@ void Settings::StoreUser()
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 
-	s.setValue("PresetProperties/Splitter/state", m_presetPropertiesSplitterState);
+	s.setValue("PresetProperties/splitterState", m_presetPropertiesSplitterState);
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
 
@@ -75,7 +95,7 @@ void Settings::StoreUser()
 
 void Settings::RestoreUser()
 {
-	QSettings s;
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 	QMutexLocker l(&m);
 
@@ -85,18 +105,18 @@ void Settings::RestoreUser()
 
 	m_mainWindowSplitterState = s.value("MainWindow/Splitter/state").toByteArray();
 
-	int tuningPageSettingsCount = s.value("TuningPageSettingsCount", 0).toInt();
+	int tuningPageSettingsCount = s.value("TuningPage/Count", 0).toInt();
 	m_tuningPageSettings.resize(tuningPageSettingsCount);
 
 	for (int i = 0; i < tuningPageSettingsCount; i++)
 	{
-		m_tuningPageSettings[i].m_columnCount = s.value(QString("TuningPageSettings%1/columnCount").arg(i), 0).toInt();
+		m_tuningPageSettings[i].m_columnCount = s.value(QString("TuningPage/Settings%1/columnCount").arg(i), 0).toInt();
 		m_tuningPageSettings[i].m_columnsWidth.resize(m_tuningPageSettings[i].m_columnCount);
 		m_tuningPageSettings[i].m_columnsIndexes.resize(m_tuningPageSettings[i].m_columnCount);
 		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
 		{
-			m_tuningPageSettings[i].m_columnsWidth[c] = s.value(QString("TuningPageSettings%1/columnWidth/%2").arg(i).arg(c), 100).toInt();
-			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPageSettings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
+			m_tuningPageSettings[i].m_columnsWidth[c] = s.value(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), 100).toInt();
+			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
 		}
 	}
 
@@ -106,7 +126,9 @@ void Settings::RestoreUser()
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
-	m_presetPropertiesSplitterState = s.value("PresetProperties/Splitter/state").toInt();
+	m_presetPropertiesSplitterState = s.value("PresetProperties/splitterState").toInt();
+	if (m_presetPropertiesSplitterState < 100)
+		m_presetPropertiesSplitterState = 100;
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 }
@@ -165,6 +187,35 @@ bool Settings::filterBySchema() const
 void Settings::setFilterBySchema(bool value)
 {
 	m_filterBySchema = value;
+}
+
+bool Settings::admin() const
+{
+	return m_admin;
+}
+
+TuningPageSettings* Settings::tuningPageSettings(int index)
+{
+	// Reserve place for tuning page settings and copy existing
+	//
+	if (index >= m_tuningPageSettings.size())
+	{
+		std::vector<TuningPageSettings> m_tuningPageSettings2 = m_tuningPageSettings;
+
+		m_tuningPageSettings.resize(index + 1);
+		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
+		{
+			m_tuningPageSettings[i] = m_tuningPageSettings2[i];
+		}
+	}
+
+	if (index >= m_tuningPageSettings.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return &m_tuningPageSettings[index];
 }
 
 Settings theSettings;
