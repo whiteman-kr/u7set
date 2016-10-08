@@ -267,5 +267,4 @@ std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
 
 TcpTuningClient* theTcpTuningClient = nullptr;
 
-ObjectManager theObjects;
 

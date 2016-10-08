@@ -81,6 +81,11 @@ UserManager::UserManager()
 {
 }
 
+bool UserManager::requestPassword()
+{
+	return true;
+}
+
 
 void UserManager::Restore()
 {
@@ -122,4 +127,3 @@ void UserManager::Store()
 	}
 }
 
-UserManager theUserManager;

@@ -75,9 +75,19 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
+	QString errorMsg;
 
-	theFilters.save("ObjectFilters1.xml");
-	theUserFilters.save("ObjectFiltersUser1.xml");
+	if (theFilters.save("ObjectFilters1.xml", &errorMsg) == false)
+	{
+		theLogFile.writeError(errorMsg);
+		QMessageBox::critical(this, tr("Error"), errorMsg);
+	}
+
+	if (theUserFilters.save("ObjectFiltersUser1.xml", &errorMsg) == false)
+	{
+		theLogFile.writeError(errorMsg);
+		QMessageBox::critical(this, tr("Error"), errorMsg);
+	}
 
 	theLogFile.writeMessage(tr("Application finished."));
 }
@@ -265,7 +275,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		emit signalsUpdated();
 	}
 
-	theFilters.createAutomaticFilters();
+	theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjects.tuningSourcesEquipmentIds());
 
 	createWorkspace();
 
@@ -311,7 +321,14 @@ void MainWindow::runPresetEditor()
 	if (d.exec() == QDialog::Accepted)
 	{
 		theUserFilters = editFilters;
-		theUserFilters.save("UserFilters.xml");
+
+		QString errorMsg;
+
+		if (theUserFilters.save("UserFilters.xml", &errorMsg) == false)
+		{
+			theLogFile.writeError(errorMsg);
+			QMessageBox::critical(this, tr("Error"), errorMsg);
+		}
 		emit userFiltersUpdated();
 	}
 }
@@ -329,5 +346,13 @@ void MainWindow::showTuningSources()
 	}
 }
 
+
 MainWindow* theMainWindow = nullptr;
 LogFile theLogFile("TuningClient", ".");
+
+ObjectManager theObjects;
+
+TuningFilterStorage theFilters;
+TuningFilterStorage theUserFilters;
+
+UserManager theUserManager;

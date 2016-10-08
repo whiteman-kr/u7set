@@ -179,12 +179,12 @@ public:
 	bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
 
 	bool load(const QString& fileName, QString *errorCode);
-	bool save(const QString& fileName);
+	bool save(const QString& fileName, QString *errorMsg);
 
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
 
-	void createAutomaticFilters();
+	void createAutomaticFilters(bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;
 
@@ -197,7 +197,5 @@ Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
 Q_DECLARE_METATYPE(TuningFilterValue)
 
 
-extern TuningFilterStorage theFilters;
-extern TuningFilterStorage theUserFilters;
 
 #endif // OBJECTFILTER_H

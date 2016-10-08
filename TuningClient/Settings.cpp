@@ -194,4 +194,28 @@ bool Settings::admin() const
 	return m_admin;
 }
 
+TuningPageSettings* Settings::tuningPageSettings(int index)
+{
+	// Reserve place for tuning page settings and copy existing
+	//
+	if (index >= m_tuningPageSettings.size())
+	{
+		std::vector<TuningPageSettings> m_tuningPageSettings2 = m_tuningPageSettings;
+
+		m_tuningPageSettings.resize(index + 1);
+		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
+		{
+			m_tuningPageSettings[i] = m_tuningPageSettings2[i];
+		}
+	}
+
+	if (index >= m_tuningPageSettings.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return &m_tuningPageSettings[index];
+}
+
 Settings theSettings;

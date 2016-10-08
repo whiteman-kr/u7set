@@ -36,6 +36,8 @@ class UserManager
 public:
 	UserManager();
 
+	bool requestPassword();
+
 	void Restore();
 	void Store();
 
@@ -44,6 +46,5 @@ public:
 
 Q_DECLARE_METATYPE(User)
 
-extern UserManager theUserManager;
 
 #endif // USERMANAGER_H

@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "UserManager.h"
+#include "MainWindow.h"
 #include "DialogProperties.h"
 
 namespace Ui {

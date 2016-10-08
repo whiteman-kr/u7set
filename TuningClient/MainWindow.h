@@ -8,6 +8,7 @@
 #include "TcpTuningClient.h"
 #include "ConfigController.h"
 #include "LogFile.h"
+#include "UserManager.h"
 
 
 namespace Ui {
@@ -76,5 +77,12 @@ private:
 
 extern MainWindow* theMainWindow;
 extern LogFile theLogFile;
+
+extern ObjectManager theObjects;
+
+extern TuningFilterStorage theFilters;
+extern TuningFilterStorage theUserFilters;
+
+extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
