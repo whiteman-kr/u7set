@@ -68,8 +68,8 @@ namespace Hardware
 
 	private:
 		static const char* RAW_DATA_SIZE;
-		static const char* ALL_NATIVE_PRIMARY_DATA;
-		static const char* MODULE_PRIMARY_DATA;
+		static const char* ALL_NATIVE_RAW_DATA;
+		static const char* MODULE_RAW_DATA;
 		static const char* PORT_RAW_DATA;
 
 		QString m_equipmentID;
@@ -186,6 +186,8 @@ namespace Hardware
 
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
+
+		bool hasTxRawData() const { return m_rawDataDescriptionStr.isEmpty() == false; }
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
 		int txAnalogSignalsCount() const { return m_txAnalogSignals.count(); }

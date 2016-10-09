@@ -3110,7 +3110,8 @@ namespace Builder
 
 		Command cmd;
 
-		comment.setComment(QString(tr("Copying txData of opto-port %1")).arg(port->equipmentID()));
+		comment.setComment(QString(tr("Copying txData of opto-port %1 (%2 words)")).
+						   arg(port->equipmentID()).arg(port->txDataSizeW()));
 		m_code.append(comment);
 		m_code.newLine();
 
@@ -3176,6 +3177,7 @@ namespace Builder
 				break;
 
 			case Hardware::OptoPort::RawDataDescriptionItemType::PortRawData:
+				result &= copyOptoPortTxOptoPortRawData(port, offset, item.portEquipmentID);
 				break;
 
 			default:
@@ -3335,7 +3337,14 @@ namespace Builder
 
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
-			result &= copyOptoPortTxModuleRawData(port, offset, place);
+			const Hardware::DeviceModule* module = DeviceHelper::getModuleOnPlace(m_lm, place);
+
+			if (module == nullptr)
+			{
+				continue;
+			}
+
+			result &= copyOptoPortTxModuleRawData(port, offset, module);
 		}
 
 		return result;
@@ -3357,6 +3366,18 @@ namespace Builder
 			QString msg = QString("OptoPort %1 raw data copying, not found module on place %2.").
 					arg(port->equipmentID()).arg(place);
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return false;
+		}
+
+		return copyOptoPortTxModuleRawData(port, offset, module);
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module)
+	{
+		if (port == nullptr || module == nullptr)
+		{
+			assert(false);
 			return false;
 		}
 
@@ -3382,7 +3403,7 @@ namespace Builder
 		int moduleDiagDataOffset = 0;
 
 		result &= DeviceHelper::getIntProperty(module, "TxAppDataOffset", &moduleAppDataOffset, m_log);
-		result &= DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &moduleAppDataOffset, m_log);
+		result &= DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &moduleDiagDataOffset, m_log);
 
 		if (result == false)
 		{
@@ -3402,7 +3423,7 @@ namespace Builder
 
 			toAddr = port->absTxStartAddress() + offset + localOffset;
 
-			fromAddr = m_memoryMap.getModuleDataOffset(place);
+			fromAddr = m_memoryMap.getModuleDataOffset(module->place());
 
 			switch(item.type)
 			{
@@ -3459,7 +3480,7 @@ namespace Builder
 			{
 				if (firstCommand == true)
 				{
-					cmd.setComment(QString("module %1 raw data, place %2").arg(module->equipmentIdTemplate()).arg(place));
+					cmd.setComment(QString("copying module %1 raw data, place %2").arg(module->equipmentIdTemplate()).arg(module->place()));
 					firstCommand = false;
 				}
 
@@ -3478,6 +3499,70 @@ namespace Builder
 
 		return true;
 	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID)
+	{
+		if (port == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// get opto port received raw data
+		//
+		Hardware::OptoPort* portWithRxRawData = m_optoModuleStorage->getOptoPort(portEquipmentID);
+
+		if (portWithRxRawData == nullptr)
+		{
+			QString msg = QString("OptoPort %1 is not found (opto port %2 raw data settings).").
+					arg(portEquipmentID).arg(port->equipmentID());
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return false;
+		}
+
+		// get opto port linkerd to portWithRxRawData, that send raw data
+		//
+		Hardware::OptoPort* portWithTxRawData = m_optoModuleStorage->getOptoPort(portWithRxRawData->linkedPortID());
+
+		if (portWithTxRawData == nullptr)
+		{
+			QString msg = QString("OptoPort %1 linked to %2 is not found.").
+					arg(portWithRxRawData->linkedPortID()).arg(portWithRxRawData->equipmentID());
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return false;
+		}
+
+		if (portWithTxRawData->hasTxRawData() == false)
+		{
+			QString msg = QString("OptoPort %1 has't raw data description. Nothing to copy.").
+					arg(portWithTxRawData->equipmentID());
+			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return true;
+		}
+
+		if (portWithTxRawData->txRawDataSizeW() == false)
+		{
+			QString msg = QString("OptoPort %1 raw data size is 0. Nothing to copy.").
+					arg(portWithTxRawData->equipmentID());
+			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return true;
+		}
+
+		Command cmd;
+
+		cmd.movMem(port->absTxStartAddress() + offset,
+				   portWithRxRawData->rxStartAddress() + Hardware::TX_DATA_ID_SIZE_W,
+				   portWithTxRawData->txRawDataSizeW());
+
+		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+		return true;
+	}
+
 
 
 	bool ModuleLogicCompiler::copyRS232Signals()

@@ -14,8 +14,8 @@ namespace Hardware
 	// ------------------------------------------------------------------
 
 	const char* OptoPort::RAW_DATA_SIZE = "RAW_DATA_SIZE";
-	const char* OptoPort::ALL_NATIVE_PRIMARY_DATA = "ALL_NATIVE_RAW_DATA";
-	const char* OptoPort::MODULE_PRIMARY_DATA = "MODULE_RAW_DATA";
+	const char* OptoPort::ALL_NATIVE_RAW_DATA = "ALL_NATIVE_RAW_DATA";
+	const char* OptoPort::MODULE_RAW_DATA = "MODULE_RAW_DATA";
 	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
@@ -348,14 +348,14 @@ namespace Hardware
 				continue;
 			}
 
-			if (itemTypeStr == ALL_NATIVE_PRIMARY_DATA)
+			if (itemTypeStr == ALL_NATIVE_RAW_DATA)
 			{
 				item.type = RawDataDescriptionItemType::AllNativeRawData;
 				m_rawDataDescription.append(item);
 				continue;
 			}
 
-			if (itemTypeStr == MODULE_PRIMARY_DATA)
+			if (itemTypeStr == MODULE_RAW_DATA)
 			{
 				QString placeStr = str.section("=", 1, 1).trimmed();
 
@@ -363,7 +363,7 @@ namespace Hardware
 
 				if (res == false)
 				{
-					msg = QString("Invalid MODULE_NATIVE_PRIMARY_DATA value in opto-port '%1' raw data description.").arg(equipmentID());
+					msg = QString("Invalid MODULE_RAW_DATA value in opto-port '%1' raw data description.").arg(equipmentID());
 					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 					result = false;
 					continue;
@@ -487,9 +487,9 @@ namespace Hardware
 
 			case RawDataDescriptionItemType::PortRawData:
 				{
-					OptoPort* port = optoStorage->getOptoPort(item.portEquipmentID);
+					OptoPort* portRxRawData = optoStorage->getOptoPort(item.portEquipmentID);
 
-					if (port == nullptr)
+					if (portRxRawData == nullptr)
 					{
 						msg = QString("Port '%1' is not found (opto port '%2' raw data description).").arg(item.portEquipmentID).arg(equipmentID());
 						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
@@ -497,11 +497,24 @@ namespace Hardware
 						break;
 					}
 
-					bool res = port->calculatePortRawDataSize(lm, optoStorage, log);
+					OptoPort* portTxRawData = optoStorage->getOptoPort(portRxRawData->linkedPortID());
+
+					if (portTxRawData == nullptr)
+					{
+						msg = QString("Port '%1' linked to '%2' is not found (opto port '%3' raw data description).").
+								arg(portTxRawData->equipmentID()).
+								arg(portRxRawData->equipmentID()).
+								arg(equipmentID());
+						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+						result = false;
+						break;
+					}
+
+					bool res = portTxRawData->calculatePortRawDataSize(lm, optoStorage, log);
 
 					if (res == true)
 					{
-						size += port->txRawDataSizeW();
+						size += portTxRawData->txRawDataSizeW();
 					}
 					else
 					{
