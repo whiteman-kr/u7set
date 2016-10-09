@@ -196,7 +196,6 @@ namespace Hardware
 		int txDiscreteSignalsCount() const { return m_txDiscreteSignals.count(); }
 
 		bool txRawDataSizeWIsCalculated() const { return m_txRawDataSizeWIsCalculated; }
-		//void setRawDataSizeIsCalculated();
 
 		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
 

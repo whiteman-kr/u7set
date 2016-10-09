@@ -502,7 +502,7 @@ namespace Hardware
 					if (portTxRawData == nullptr)
 					{
 						msg = QString("Port '%1' linked to '%2' is not found (opto port '%3' raw data description).").
-								arg(portTxRawData->equipmentID()).
+								arg(portRxRawData->linkedPortID()).
 								arg(portRxRawData->equipmentID()).
 								arg(equipmentID());
 						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
