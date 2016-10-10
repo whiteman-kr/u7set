@@ -177,6 +177,7 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 	l << tr("ConnectionID");
 	l << tr("Port1 EquipmentID");
 	l << tr("Port2 EquipmentID");
+	l << tr("Type");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
@@ -184,6 +185,7 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     ui->m_list->setColumnWidth(il++, 100);
     ui->m_list->setColumnWidth(il++, 250);
     ui->m_list->setColumnWidth(il++, 250);
+	ui->m_list->setColumnWidth(il++, 100);
 	ui->m_list->setSortingEnabled(true);
 
 	ui->m_list->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -469,6 +471,7 @@ void DialogConnectionsEditor::setConnectionText(QTreeWidgetItem* item, Hardware:
 	item->setText(c++, connection->connectionID());
 	item->setText(c++, connection->port1EquipmentID());
 	item->setText(c++, connection->port2EquipmentID());
+	item->setText(c++, connection->manualSettings() ? tr("Manual") : tr("Auto"));
 
 }
 
