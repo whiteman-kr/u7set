@@ -95,7 +95,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (m_txRawDataSizeW == 0 &&
+		/*if (m_txRawDataSizeW == 0 &&
 			m_txAnalogSignals.count() == 0 &&
 			m_txDiscreteSignals.count() == 0)
 		{
@@ -103,7 +103,7 @@ namespace Hardware
 			m_txDiscreteSignalsSizeW = 0;
 			m_txDataSizeW = 0;
 			return true;
-		}
+		}*/
 
 		sortTxSignals();
 

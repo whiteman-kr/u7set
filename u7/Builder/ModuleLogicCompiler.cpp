@@ -120,13 +120,13 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-	//			if (!initAfbs()) break;
+			if (!initAfbs()) break;
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
 
-			if (!initAfbs()) break;
+			// if (!initAfbs()) break;
 
 			if (!copyLMDataToRegBuf()) break;
 
@@ -1166,14 +1166,148 @@ namespace Builder
 		m_code.comment(QString(tr("Copying MPS17 data place %2 to RegBuf")).arg(module.place));
 		m_code.newLine();
 
-		Command cmd;
+/*		Command cmd;
 
 		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
 		m_code.append(cmd);
 
+		m_code.newLine();*/
+
+		if (module.device == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
+
+		if (controller == nullptr)
+		{
+			return false;
+		}
+
+		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
+
+		Command cmd;
+
+		bool result = true;
+
+		// copy validity words
+		//
+		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+		{
+			if (deviceSignal->isAnalogSignal() == true)
+			{
+				continue;
+			}
+			cmd.mov()
+		}
+
+		TEST_R1_CH01_MD10_CTRLIN_TEMPVALID
+
 		m_code.newLine();
 
-		return true;
+		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+		{
+			if (deviceSignal->isAnalogSignal() == false)
+			{
+				continue;
+			}
+
+			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+			{
+				continue;
+			}
+
+			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+
+			if (boundSignals.count() > 1)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
+				result = false;
+				break;
+			}
+
+			bool commandWritten = false;
+
+			for(Signal* signal : boundSignals)
+			{
+				if (signal == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (signal->isDiscrete())
+				{
+					continue;
+				}
+
+				if (signal->dataSize() != SIZE_32BIT)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
+					RESULT_FALSE_BREAK
+				}
+
+				if (m_convertUsedInOutAnalogSignalsOnly == true &&
+					m_appSignals.getByStrID(signal->appSignalID()) == nullptr)
+				{
+					continue;
+				}
+
+				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
+
+				if (appFb == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
+
+				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					;	// already assigned
+				}
+				else
+				{
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+					{
+						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+
+				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
+				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
+				m_code.append(cmd);
+
+				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+				cmd.setComment("");
+				m_code.append(cmd);
+
+				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
+									fbScal.outputSignalIndex, appFb->caption());
+				m_code.append(cmd);
+
+				commandWritten = true;
+			}
+
+			if (commandWritten)
+			{
+				m_code.newLine();
+			}
+		}
+
+		return result;
 	}
 
 
@@ -3104,7 +3238,7 @@ namespace Builder
 			return true;
 		}
 
-		assert(port->txDataSizeW() > sizeof(quint32) / sizeof(quint16));	// txDataSizeW must be > then sizeofW(port DataID)
+		//assert(port->txDataSizeW() > Hardware::TX_DATA_ID_SIZE_W;	// txDataSizeW must be > then sizeofW(port DataID)
 
 		bool result = true;
 
