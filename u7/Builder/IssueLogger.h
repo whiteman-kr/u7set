@@ -29,6 +29,33 @@ namespace Builder
 		Equipment
 	};
 
+	struct BuildIssues
+	{
+		// Data
+		//
+		struct Counter
+		{
+			int errors = 0;
+			int warnings = 0;
+		};
+
+		std::map<QUuid, OutputMessageLevel> m_items;		// Item ussuses
+		std::map<QString, Counter> m_schemas;				// Item ussuses
+
+		// Methods
+		//
+		void clear();
+		void swap(BuildIssues* buildIssues);
+
+		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
+		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids, const QString& schemaID);
+
+		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
+		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid, const QString& schemaID);
+
+		void addSchemaIssue(OutputMessageLevel level, const QString& schemaID);
+	};
+
 
 	class IssueLogger : public OutputLog
 	{
@@ -207,9 +234,14 @@ namespace Builder
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
-		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
+		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids, const QString& schemaID);
 
-		void swapItemsIssues(std::map<QUuid, OutputMessageLevel>* itemsIssues);
+		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
+		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid, const QString& schemaID);
+
+		void addSchemaIssue(OutputMessageLevel level, const QString& schemaID);
+
+		void swapItemsIssues(BuildIssues* buildIssues);
 		void clearItemsIssues();
 
 	private:
@@ -217,7 +249,7 @@ namespace Builder
 
 	private:
 		QMutex m_mutex;
-		std::map<QUuid, OutputMessageLevel> m_itemsIssues;
+		BuildIssues m_buildIssues;
 	};
 
 }

@@ -5,6 +5,7 @@
 #include <QMutex>
 #include "../lib/OutputLog.h"
 #include "../lib/DbStruct.h"
+#include "Builder/IssueLogger.h"
 
 struct RunOrderDebugInfo
 {
@@ -38,8 +39,10 @@ public:
 	void fireBuildFinished();
 
 	void clearBuildSchemaIssues();
-	void swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data);
-	OutputMessageLevel issueForSchemaItem(QUuid itemId) const;
+	void swapSchemaIssues(Builder::BuildIssues* buildIssues);
+
+	OutputMessageLevel issueForSchemaItem(const QUuid& itemId) const;
+	Builder::BuildIssues::Counter issueForSchema(const QString& schemeId) const;
 
 	void clearSchemaItemRunOrder();
 	void setRunOrder(const QString& equipmentId, std::map<QUuid, int>& data);
@@ -72,10 +75,8 @@ private:
 	//
 	mutable QMutex m_buildResultMutex;
 
-	std::map<QUuid, OutputMessageLevel> m_buildSchemaIssues;
+	Builder::BuildIssues m_buildIssues;
 	std::list<RunOrderDebugInfo> m_runOrder;
-
-	//std::map<QUuid, int> m_schemaItemRunOrder;					// Debug information for dispalying on schema in debugMode
 
 	// -- end of data for m_buildResultMutex
 	//

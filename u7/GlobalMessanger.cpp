@@ -53,26 +53,49 @@ void GlobalMessanger::fireBuildFinished()
 void GlobalMessanger::clearBuildSchemaIssues()
 {
 	QMutexLocker ml(&m_buildResultMutex);
-	m_buildSchemaIssues.clear();
+	m_buildIssues.clear();
 }
 
-void GlobalMessanger::swapSchemaIssues(std::map<QUuid, OutputMessageLevel>& data)
+void GlobalMessanger::swapSchemaIssues(Builder::BuildIssues* buildIssues)
 {
+	if (buildIssues == nullptr)
+	{
+		assert(buildIssues);
+		return;
+	}
+
 	QMutexLocker ml(&m_buildResultMutex);
-	std::swap(m_buildSchemaIssues, data);
+	m_buildIssues.swap(buildIssues);
+	return;
 }
 
-OutputMessageLevel GlobalMessanger::issueForSchemaItem(QUuid itemId) const
+OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid& itemId) const
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
-	auto it = m_buildSchemaIssues.find(itemId);
+	auto it = m_buildIssues.m_items.find(itemId);
 
-	if (it == m_buildSchemaIssues.end())
+	if (it == m_buildIssues.m_items.end())
 	{
 		// Either Success or did not take part in build
 		//
 		return OutputMessageLevel::Success;
+	}
+
+	return it->second;
+}
+
+Builder::BuildIssues::Counter GlobalMessanger::issueForSchema(const QString& schemeId) const
+{
+	QMutexLocker ml(&m_buildResultMutex);
+
+	auto it = m_buildIssues.m_schemas.find(schemeId);
+
+	if (it == m_buildIssues.m_schemas.end())
+	{
+		// Either Success or did not take part in build
+		//
+		return Builder::BuildIssues::Counter();
 	}
 
 	return it->second;

@@ -20,6 +20,7 @@
 #include "TuningServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
+#include "IssueLogger.h"
 
 #include <QBuffer>
 #include <QtConcurrent/QtConcurrent>
@@ -315,10 +316,10 @@ namespace Builder
 
 		// Set Shceme Items Issues to GlobalMessanger
 		//
-		std::map<QUuid, OutputMessageLevel> schemaItemsIssues;
-		m_log->swapItemsIssues(&schemaItemsIssues);
+		BuildIssues m_buildIssues;
+		m_log->swapItemsIssues(&m_buildIssues);
 
-		GlobalMessanger::instance()->swapSchemaIssues(schemaItemsIssues);
+		GlobalMessanger::instance()->swapSchemaIssues(&m_buildIssues);
 
 		// We've done, exit
 		//

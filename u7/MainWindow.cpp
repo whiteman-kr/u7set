@@ -60,7 +60,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(
 						dbController(), nullptr,
-						::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("UserAppLogic"));
+						::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("AppLogic"));
 
 	m_ufbLibrary = SchemasTabPage::create<VFrame30::UfbSchema>(
 					   dbController(), nullptr,

@@ -50,7 +50,14 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 				return QVariant(fileInfo->size());
 
 			case FileStateColumn:
-				return QVariant(fileInfo->state().text());
+				if (fileInfo->state() == VcsState::CheckedIn)
+				{
+					return QVariant();
+				}
+				else
+				{
+					return QVariant(fileInfo->state().text());
+				}
 
 			case FileUserColumn:
 				return QVariant(fileInfo->userId());
@@ -64,10 +71,113 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 			case FileIdColumn:
 				return QVariant(fileInfo->fileId());
 
-			case FileDetailsColumn:
-				return QVariant(fileInfo->details());
+			case FileIssuesColumn:
+				{
+					QStringList fn = fileInfo->fileName().split('.');
+
+					if (fn.isEmpty() == false)
+					{
+						auto gm = GlobalMessanger::instance();
+						auto issueCount = gm->issueForSchema(fn.front());
+
+						if (issueCount.errors == 0 && issueCount.warnings == 0)
+						{
+							return QString();
+						}
+
+						QString result = QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+
+						return result;
+					}
+					else
+					{
+						assert(fn.isEmpty() == false);		// Empty file name?
+						return QVariant();
+					}
+
+					assert(false);
+				}
+
+//			case FileDetailsColumn:
+//				return QVariant(fileInfo->details());
 
 			default:
+				return QVariant();
+			}
+		}
+		break;
+
+	case Qt::BackgroundRole:
+		{
+			if (row >= m_files.size())
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			const std::shared_ptr<DbFileInfo>& fileInfo = m_files[row];
+
+			if (fileInfo->state() == VcsState::CheckedOut)
+			{
+				QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+				switch (static_cast<VcsItemAction::VcsItemActionType>(fileInfo->action().toInt()))
+				{
+				case VcsItemAction::Added:
+					b.setColor(QColor(0xE9, 0xFF, 0xE9));
+					break;
+				case VcsItemAction::Modified:
+					b.setColor(QColor(0xEA, 0xF0, 0xFF));
+					break;
+				case VcsItemAction::Deleted:
+					b.setColor(QColor(0xFF, 0xF0, 0xF0));
+					break;
+				}
+
+				return b;
+			}
+		}
+		break;
+
+	case Qt::TextColorRole:
+		{
+			if (row >= m_files.size())
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			const std::shared_ptr<DbFileInfo>& fileInfo = m_files[row];
+
+			if (col == FileIssuesColumn)
+			{
+				QStringList fn = fileInfo->fileName().split('.');
+
+				if (fn.isEmpty() == false)
+				{
+					auto gm = GlobalMessanger::instance();
+					auto issueCount = gm->issueForSchema(fn.front());
+
+					if (issueCount.errors > 0)
+					{
+						return QBrush(QColor(0xE0, 0x33, 0x33, 0xFF));
+					}
+
+					if (issueCount.warnings > 0)
+					{
+						return QBrush(QColor(0xE8, 0x72, 0x17, 0xFF));
+					}
+
+					return QVariant();
+				}
+				else
+				{
+					assert(fn.isEmpty() == false);		// Empty file name?
+					return QVariant();
+				}
+			}
+			else
+			{
 				return QVariant();
 			}
 		}
@@ -105,8 +215,11 @@ QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int
 			case FileIdColumn:
 				return QObject::tr("FileID");
 
-			case FileDetailsColumn:
-				return QObject::tr("Details");
+			case FileIssuesColumn:
+				return QObject::tr("Issues");
+
+//			case FileDetailsColumn:
+//				return QObject::tr("Details");
 
 			default:
 				assert(false);
@@ -235,20 +348,20 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 				});
 			break;
 
-		case FileDetailsColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->details() > f2->details();
-					}
-					else
-					{
-						return f1->details() <= f2->details();
-					}
-				});
-			break;
+//		case FileDetailsColumn:
+//			std::sort(m_files.begin(), m_files.end(),
+//				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+//				{
+//					if (order == Qt::AscendingOrder)
+//					{
+//						return f1->details() > f2->details();
+//					}
+//					else
+//					{
+//						return f1->details() <= f2->details();
+//					}
+//				});
+//			break;
 
 
 		default:
