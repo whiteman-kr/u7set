@@ -21,7 +21,7 @@ public:
 
 	void addFile(std::shared_ptr<DbFileInfo> file);
 
-	void setFiles(const std::vector<DbFileInfo>& files);
+	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
 	void clear();
 
 	std::shared_ptr<DbFileInfo> fileByRow(int row);
@@ -37,11 +37,15 @@ public:
 
 	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
 
+	QString usernameById(int userId) const;
+
 	// Data
 	//
 private:
 	std::vector<std::shared_ptr<DbFileInfo>> m_files;
 	QString m_filter;
+
+	std::map<int, QString> m_users;
 
 	enum Columns
 	{

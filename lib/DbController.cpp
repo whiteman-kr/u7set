@@ -174,6 +174,31 @@ bool DbController::openProject(const QString& projectName, const QString& userna
 
 	bool result = waitForComplete(parentWidget, tr("Openning project"));
 
+	if (result == false)
+	{
+		return result;
+	}
+
+	// Get user list
+	//
+	std::vector<DbUser> users;
+
+	result = getUserList(&users, parentWidget);
+	if (result == false)
+	{
+		return result;
+	}
+
+	{
+		QMutexLocker um(&m_userMutex);
+
+		m_users.clear();
+		for (const DbUser& u : users)
+		{
+			m_users[u.userId()] = u;
+		}
+	}
+
 	if (result == true)
 	{
 		emit projectOpened(m_worker->currentProject());
@@ -1901,6 +1926,22 @@ DbFileInfo DbController::systemFileInfo(int fileId) const
 QString DbController::lastError() const
 {
 	return m_lastError;
+}
+
+QString DbController::userName(int userId) const
+{
+	QMutexLocker ml(&m_userMutex);
+
+	auto it = m_users.find(userId);
+
+	if (it == m_users.end())
+	{
+		return QString("Undefined");
+	}
+	else
+	{
+		return it->second.username();
+	}
 }
 
 

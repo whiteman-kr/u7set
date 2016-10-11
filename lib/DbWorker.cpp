@@ -950,7 +950,6 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		return;
 	}
 
-
 	return;
 }
 
