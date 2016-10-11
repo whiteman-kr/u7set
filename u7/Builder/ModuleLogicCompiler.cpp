@@ -46,6 +46,12 @@ namespace Builder
 	}
 
 
+	ModuleLogicCompiler::~ModuleLogicCompiler()
+	{
+		cleanup();
+	}
+
+
 	Signal* ModuleLogicCompiler::getSignal(const QString& strID)
 	{
 		if (m_signalsStrID.contains(strID))
@@ -57,7 +63,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::firstPass()
+	bool ModuleLogicCompiler::pass1()
 	{
 
 		LOG_EMPTY_LINE(m_log)
@@ -89,6 +95,8 @@ namespace Builder
 
 		if (result == true)
 		{
+			m_pass1HasErrors = false;
+
 			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
 
@@ -96,6 +104,8 @@ namespace Builder
 		}
 		else
 		{
+			m_pass1HasErrors = true;
+
 			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
@@ -103,8 +113,20 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::secondPass()
+	bool ModuleLogicCompiler::pass2()
 	{
+		if (m_pass1HasErrors == true)
+		{
+			// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
+			//
+			LOG_EMPTY_LINE(m_log)
+			m_log->wrnALC5059(m_lm->equipmentIdTemplate());
+			LOG_EMPTY_LINE(m_log)
+
+			cleanup();
+
+			return true;
+		}
 
 		LOG_EMPTY_LINE(m_log)
 
@@ -374,7 +396,7 @@ namespace Builder
 		{
 			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 			//
-			m_log->errALC5056(m_lmSubsystemID, m_lm->equipmentId());
+			m_log->errALC5056(m_lmSubsystemID, m_lm->equipmentIdTemplate());
 			return false;
 		}
 
@@ -1132,7 +1154,7 @@ namespace Builder
 				m_code.append(cmd);
 
 				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-				cmd.setComment("");
+				cmd.clearComment();
 				m_code.append(cmd);
 
 				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
@@ -1166,16 +1188,10 @@ namespace Builder
 		m_code.comment(QString(tr("Copying MPS17 data place %2 to RegBuf")).arg(module.place));
 		m_code.newLine();
 
-/*		Command cmd;
-
-		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
-		m_code.append(cmd);
-
-		m_code.newLine();*/
-
 		if (module.device == nullptr)
 		{
-			ASSERT_RETURN_FALSE
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
 		}
 
 		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
@@ -1191,28 +1207,10 @@ namespace Builder
 
 		bool result = true;
 
-		// copy validity words
-		//
-		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
-		{
-			if (deviceSignal->isAnalogSignal() == true)
-			{
-				continue;
-			}
-			cmd.mov()
-		}
-
-		TEST_R1_CH01_MD10_CTRLIN_TEMPVALID
-
-		m_code.newLine();
+		bool commandWritten = false;
 
 		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 		{
-			if (deviceSignal->isAnalogSignal() == false)
-			{
-				continue;
-			}
-
 			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
@@ -1224,11 +1222,8 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
-				result = false;
-				break;
+				return false;
 			}
-
-			bool commandWritten = false;
 
 			for(Signal* signal : boundSignals)
 			{
@@ -1239,32 +1234,44 @@ namespace Builder
 
 				if (signal->isDiscrete())
 				{
+					if (deviceSignal->equipmentIdTemplate().endsWith("_TEMPVALID") == false)
+					{
+						continue;
+					}
+
+					// this is validity signal
+
+					cmd.mov(signal->ramAddr().offset(), module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset());
+					cmd.setComment("copy validity");
+					m_code.append(cmd);
+
+					commandWritten = true;
+
 					continue;
 				}
+
+				assert(signal->isAnalog());
 
 				if (signal->dataSize() != SIZE_32BIT)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
-					RESULT_FALSE_BREAK
-				}
-
-				if (m_convertUsedInOutAnalogSignalsOnly == true &&
-					m_appSignals.getByStrID(signal->appSignalID()) == nullptr)
-				{
-					continue;
+					return false;
 				}
 
 				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("SCALE element is not found for input analog signal %1")).arg(signal->appSignalID()));
+					return false;
 				}
 
 				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
 
 				if (appFb == nullptr)
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
 				}
 
 				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
@@ -1281,17 +1288,20 @@ namespace Builder
 					}
 					else
 					{
-						assert(false);
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
 					}
 				}
 
 				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
+								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(),
+								   appFb->caption());
+
 				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
 				m_code.append(cmd);
 
 				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-				cmd.setComment("");
+				cmd.clearComment();
 				m_code.append(cmd);
 
 				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
@@ -1300,11 +1310,11 @@ namespace Builder
 
 				commandWritten = true;
 			}
+		}
 
-			if (commandWritten)
-			{
-				m_code.newLine();
-			}
+		if (commandWritten)
+		{
+			m_code.newLine();
 		}
 
 		return result;
@@ -2287,7 +2297,7 @@ namespace Builder
 
 			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
 														receiver.appSignalId(),
-														m_lm->equipmentId(),
+														m_lm->equipmentIdTemplate(),
 														receiver.guid(),
 														rxAddress) == false)
 			{
@@ -2381,7 +2391,7 @@ namespace Builder
 
 			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
 																 receiver.appSignalId(),
-																 m_lm->equipmentId(),
+																 m_lm->equipmentIdTemplate(),
 																 receiver.guid(),
 																 rxAddress) == false)
 			{
@@ -3189,7 +3199,7 @@ namespace Builder
 				continue;
 			}
 
-			if (module->lmID() != m_lm->equipmentId() ||
+			if (module->lmID() != m_lm->equipmentIdTemplate() ||
 				module->allOptoPortsTxDataSizeW() == 0)
 			{
 				continue;
@@ -3447,7 +3457,7 @@ namespace Builder
 				// copy bit accumulator to opto interface buffer
 				//
 				cmd.mov(txSignalAddress, bitAccumulatorAddress);
-				cmd.setComment("");
+				cmd.clearComment();
 
 				m_code.append(cmd);
 			}
@@ -4017,7 +4027,7 @@ namespace Builder
 				//
 				m_code.newLine();
 				cmd.movConst(bitAccAddr, 0);
-				cmd.setComment("");
+				cmd.clearComment();
 				m_code.append(cmd);
 			}
 
@@ -4039,7 +4049,7 @@ namespace Builder
 			if (bitNo == WORD_SIZE)
 			{
 				cmd.mov(portDataAddress + wordCount, bitAccAddr);
-				cmd.setComment("");
+				cmd.clearComment();
 				m_code.append(cmd);
 
 				lastWordCopied = true;
@@ -4052,7 +4062,7 @@ namespace Builder
 		if (lastWordCopied == false)
 		{
 			cmd.mov(portDataAddress + wordCount, bitAccAddr);
-			cmd.setComment("");
+			cmd.clearComment();
 			m_code.append(cmd);
 		}
 
@@ -4080,7 +4090,7 @@ namespace Builder
 			return false;
 		}
 
-		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentId(),
+		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 
@@ -4088,7 +4098,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-							   arg(m_lm->equipmentId()).
+							   arg(m_lm->equipmentIdTemplate()).
 							   arg(tuningFrameCount));
 			result = false;
 			delete tuningData;
@@ -4104,10 +4114,10 @@ namespace Builder
 			}
 			else
 			{
-				tuningData->generateUniqueID(m_lm->equipmentId());
+				tuningData->generateUniqueID(m_lm->equipmentIdTemplate());
 
 				m_tuningData = tuningData;
-				m_tuningDataStorage->insert(m_lm->equipmentId(), tuningData);
+				m_tuningDataStorage->insert(m_lm->equipmentIdTemplate(), tuningData);
 			}
 		}
 
@@ -4298,7 +4308,7 @@ namespace Builder
 				m_code.append(cmd);
 
 				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-				cmd.setComment("");
+				cmd.clearComment();
 				m_code.append(cmd);
 
 				cmd.readFuncBlock(module.moduleDataOffset + module.rxAppDataOffset + deviceSignal->valueOffset(),
@@ -4354,7 +4364,7 @@ namespace Builder
 
 		m_code.generateBinCode();
 
-		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentId(), m_lm->caption(),
+		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
 														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
 		if (result == false)
 		{
@@ -4425,8 +4435,8 @@ namespace Builder
 		QStringList file;
 		QString line = QString("------------------------------------------------------------------------------------------");
 
-		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentId()));
-		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentId()));
+		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentIdTemplate()));
+		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentIdTemplate()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
 		file.append(QString("LM number: %1\n").arg(lmNumber));
 		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
@@ -5152,7 +5162,7 @@ namespace Builder
 				continue;
 			}
 
-			if (signal.equipmentID() == m_lm->equipmentId())
+			if (signal.equipmentID() == m_lm->equipmentIdTemplate())
 			{
 				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
 				continue;
@@ -5381,7 +5391,7 @@ namespace Builder
 			{
 				// The signal '%1' is not associated with LM '%2'.
 				//
-				m_log->errALC5030(item->strID(), m_lm->equipmentId(), item->guid());
+				m_log->errALC5030(item->strID(), m_lm->equipmentIdTemplate(), item->guid());
 				result = false;
 				continue;
 			}
@@ -5876,7 +5886,7 @@ namespace Builder
 					bool signalAllreadyInTxList = false;
 
 					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
-															   m_lm->equipmentId(),
+															   m_lm->equipmentIdTemplate(),
 															   appSignal->signal(),
 															   &signalAllreadyInTxList);
 					if (signalAllreadyInTxList == true)

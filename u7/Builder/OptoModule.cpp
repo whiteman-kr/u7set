@@ -1620,8 +1620,9 @@ namespace Hardware
 			return true;
 		}
 
-		assert(false);		// WTF?
-
+		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						   QString(tr("Ports of connection '%1' are not accessible in LM '%2'")).
+						   arg(connectionID).arg(lmID));
 		return false;
 	}
 

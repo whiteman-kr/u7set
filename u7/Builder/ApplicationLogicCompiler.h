@@ -11,6 +11,9 @@
 
 namespace Builder
 {
+	class ApplicationLogicCompiler;
+
+	typedef bool (ApplicationLogicCompiler::*ApplicationLogicCompilerProc)(void);
 
 	class ApplicationLogicCompiler : public QObject
 	{
@@ -33,7 +36,9 @@ namespace Builder
 		bool run();
 
 	private:
-		void findLMs();
+		bool isBuildCancelled();
+
+		bool findLMs();
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool checkAppSignals();

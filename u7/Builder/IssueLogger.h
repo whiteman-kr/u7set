@@ -189,6 +189,7 @@ namespace Builder
 		void errALC5056(QString subsystemID, QString lmEquipmentID);						// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 		void errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid);				// Uncompatible data format of analog AFB signal '%1.%2'.
 		void errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' can't be 0.
+		void wrnALC5059(QString lmID);														// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
 
 		// EQP			Equipment issues						6000-6999
 		//

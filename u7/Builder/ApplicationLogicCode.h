@@ -241,6 +241,7 @@ namespace Builder
 
         void setComment(const QString& comment) { m_comment = comment; }
         QString getComment() { return m_comment; }
+		void clearComment() { m_comment.clear(); }
 
         bool commentIsEmpty() { return m_comment.isEmpty(); }
     };

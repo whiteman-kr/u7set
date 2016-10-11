@@ -552,6 +552,8 @@ namespace Builder
 
 		Tuning::TuningData* m_tuningData = nullptr;
 
+		bool m_pass1HasErrors = false;
+
 	private:
 
 		bool getLMIntProperty(const QString& name, int* value);
@@ -699,6 +701,7 @@ namespace Builder
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		~ModuleLogicCompiler();
 
 		const SignalSet& signalSet() { return *m_signals; }
 		Signal* getSignal(const QString& strID);
@@ -707,8 +710,8 @@ namespace Builder
 
 		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
-		bool firstPass();
-		bool secondPass();
+		bool pass1();
+		bool pass2();
 
 		int lmCycleDuration() const { return m_lmCycleDuration; }
 	};

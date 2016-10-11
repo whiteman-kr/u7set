@@ -2610,7 +2610,6 @@ namespace Builder
 				  QString(tr("Optical connection '%1' is configured manually.")).arg(connectionID));
 	}
 
-
 	/// IssueCode: ALC5056
 	///
 	/// IssueType: Error
@@ -2679,6 +2678,26 @@ namespace Builder
 				  5058,
 				  QString(tr("Parameter '%1' of AFB '%2' can't be 0.")).
 				  arg(paramCaption).arg(afbCaption));
+	}
+
+
+	/// IssueCode: ALC5059
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
+	///
+	/// Parameters:
+	///		%1 Logic module ID
+	///
+	/// Description:
+	///		Compilation pass #2 for specified LM skiped because pass #1 finished with errors.
+	///
+	void IssueLogger::wrnALC5059(QString lmID)
+	{
+		LOG_WARNING2(IssueType::AlCompiler,
+				  5059,
+				  QString(tr("Compilation pass #2 for specified LM skiped because pass #1 finished with errors.")).arg(lmID));
 	}
 
 

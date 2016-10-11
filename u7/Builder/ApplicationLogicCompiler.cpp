@@ -104,41 +104,56 @@ namespace Builder
 
 		m_signals->resetAddresses();
 
-		findLMs();
-
-		bool result = false;
-
-		do
+		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
 		{
-			if (checkAppSignals() == false) break;
+			&ApplicationLogicCompiler::findLMs,
+			&ApplicationLogicCompiler::checkAppSignals,
+			&ApplicationLogicCompiler::checkOptoConnections,
+			&ApplicationLogicCompiler::checkLmIpAddresses,
+			&ApplicationLogicCompiler::compileModulesLogicsPass1,
+			&ApplicationLogicCompiler::disposeOptoModulesTxRxBuffers,
+			&ApplicationLogicCompiler::writeOptoConnectionsReport,
+			&ApplicationLogicCompiler::writeOptoModulesReport,
+			&ApplicationLogicCompiler::writeOptoVhdFiles,
+			&ApplicationLogicCompiler::compileModulesLogicsPass2,
+		};
 
-			if (checkOptoConnections() == false) break;
+		bool result = true;
 
-			if (checkLmIpAddresses() == false) break;
+		int procsCount = sizeof(appLogicCompilerProcs) / sizeof(ApplicationLogicCompilerProc);
 
-			if (compileModulesLogicsPass1() == false) break;
+		for(int i = 0; i < procsCount; i++)
+		{
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
 
-			if (disposeOptoModulesTxRxBuffers() == false) break;
+			result &= (this->*appLogicCompilerProcs[i])();		// call next ApplicationLogicCompiler procedure
 
-			if (writeOptoConnectionsReport() == false) break;
-
-			if (writeOptoModulesReport() == false) break;
-
-			if (writeOptoVhdFiles() == false) break;
-
-			if (compileModulesLogicsPass2() == false) break;
-
-			result = true;
-
-			break;
-
-		} while(true);
+			if (result == false)
+			{
+				break;
+			}
+		}
 
 		clear();
 
 		DeviceHelper::shutdown();
 
 		return result;
+	}
+
+
+	bool ApplicationLogicCompiler::isBuildCancelled()
+	{
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 
@@ -597,7 +612,7 @@ namespace Builder
 	// find all logic modules (LMs) in project
 	// fills m_lm vector
 	//
-	void ApplicationLogicCompiler::findLMs()
+	bool ApplicationLogicCompiler::findLMs()
 	{
 		m_lm.clear();
 
@@ -611,6 +626,8 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
 		}
+
+		return true;
 	}
 
 
@@ -677,10 +694,10 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass1()
 	{
-		bool result = true;
-
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Application logic compiler pass #1...")));
+
+		bool result = true;
 
 		// first compiler pass
 		//
@@ -690,7 +707,18 @@ namespace Builder
 
 			m_moduleCompilers.append(moduleLogicCompiler);
 
-			result &= moduleLogicCompiler->firstPass();
+			result &= moduleLogicCompiler->pass1();
+
+			/*if (result == false)
+			{
+				break;
+			}*/
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
 		}
 
 		return result;
@@ -1116,10 +1144,24 @@ namespace Builder
 		//
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
-			result &= m_moduleCompilers[i]->secondPass();
+			result &= m_moduleCompilers[i]->pass2();
+
+			/*if (result == false)
+			{
+				break;
+			}*/
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
 		}
 
-		result &= m_resultWriter->writeMultichannelFiles();
+		if (result == true)
+		{
+			result &= m_resultWriter->writeMultichannelFiles();
+		}
 
 		return result;
 	}
