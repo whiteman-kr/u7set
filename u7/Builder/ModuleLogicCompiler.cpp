@@ -95,8 +95,6 @@ namespace Builder
 
 		if (result == true)
 		{
-			m_pass1HasErrors = false;
-
 			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
 
@@ -104,8 +102,6 @@ namespace Builder
 		}
 		else
 		{
-			m_pass1HasErrors = true;
-
 			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
@@ -115,19 +111,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::pass2()
 	{
-		if (m_pass1HasErrors == true)
-		{
-			// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
-			//
-			LOG_EMPTY_LINE(m_log)
-			m_log->wrnALC5059(m_lm->equipmentIdTemplate());
-			LOG_EMPTY_LINE(m_log)
-
-			cleanup();
-
-			return true;
-		}
-
 		LOG_EMPTY_LINE(m_log)
 
 		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
@@ -5885,7 +5868,7 @@ namespace Builder
 
 					bool signalAllreadyInTxList = false;
 
-					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
+					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(), transmitter.guid(),
 															   m_lm->equipmentIdTemplate(),
 															   appSignal->signal(),
 															   &signalAllreadyInTxList);

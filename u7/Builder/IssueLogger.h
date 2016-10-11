@@ -48,6 +48,8 @@ namespace Builder
 		void errCMN0013(QString fileName);						// Write error of file '%1'.
 		void errCMN0014(QString fileName);						// File '%1' already exists.
 		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// '%1' and '%2' files have the same ID = '%3'.
+		void errCMN0016();										// The build was cancelled.
+
 
 		// INT			Internal issues							1000-1999
 		//
@@ -189,7 +191,7 @@ namespace Builder
 		void errALC5056(QString subsystemID, QString lmEquipmentID);						// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 		void errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid);				// Uncompatible data format of analog AFB signal '%1.%2'.
 		void errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' can't be 0.
-		void wrnALC5059(QString lmID);														// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
+		void errALC5059(QString connectionID, QString lmID, QUuid transmitterUuid);			// Ports of connection '%1' are not accessible in LM '%2'
 
 		// EQP			Equipment issues						6000-6999
 		//

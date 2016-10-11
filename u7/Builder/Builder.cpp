@@ -314,7 +314,10 @@ namespace Builder
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
 			m_log->clear();		// Log can contain thouthands of messages, if it some kind iof "same ids" error
-			LOG_ERROR_OBSOLETE(m_log, "", tr("The build was canceled."));
+
+			// The build was cancelled.
+			//
+			m_log->errCMN0016();
 		}
 
 		// We've done, exit

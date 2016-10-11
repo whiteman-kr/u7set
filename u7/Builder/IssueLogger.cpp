@@ -141,6 +141,24 @@ namespace Builder
 				  .arg(fileName1).arg(fileName2).arg(id));
 	}
 
+	/// IssueCode: CMN0016
+	///
+	/// IssueType: Error
+	///
+	/// Title: The build was cancelled.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		The build was cancelled by user.
+	///
+	void IssueLogger::errCMN0016()
+	{
+		LOG_ERROR(IssueType::Common,
+				  16,
+				  tr("The build was cancelled."));
+	}
+
 
 	// INT			Internal issues							1000-1999
 	//
@@ -2680,24 +2698,28 @@ namespace Builder
 				  arg(paramCaption).arg(afbCaption));
 	}
 
-
 	/// IssueCode: ALC5059
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title:	   Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
+	/// Title:	   Ports of connection '%1' are not accessible in LM '%2'.
 	///
 	/// Parameters:
-	///		%1 Logic module ID
+	///		%1 Opto connection ID
+	///		%2 Logic module equipmentID
+	///		%3 Transmitter Uuid
 	///
 	/// Description:
-	///		Compilation pass #2 for specified LM skiped because pass #1 finished with errors.
+	///		Ports of specified opto connection are not accessible in Logic Module.
 	///
-	void IssueLogger::wrnALC5059(QString lmID)
+	void IssueLogger::errALC5059(QString connectionID, QString lmID, QUuid transmitterUuid)
 	{
-		LOG_WARNING2(IssueType::AlCompiler,
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
 				  5059,
-				  QString(tr("Compilation pass #2 for specified LM skiped because pass #1 finished with errors.")).arg(lmID));
+				  QString(tr("Ports of connection '%1' are not accessible in LM '%2'.")).
+				  arg(connectionID).arg(lmID));
 	}
 
 

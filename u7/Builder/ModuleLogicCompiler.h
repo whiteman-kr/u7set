@@ -552,8 +552,6 @@ namespace Builder
 
 		Tuning::TuningData* m_tuningData = nullptr;
 
-		bool m_pass1HasErrors = false;
-
 	private:
 
 		bool getLMIntProperty(const QString& name, int* value);

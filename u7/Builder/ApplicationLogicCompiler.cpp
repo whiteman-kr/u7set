@@ -709,11 +709,6 @@ namespace Builder
 
 			result &= moduleLogicCompiler->pass1();
 
-			/*if (result == false)
-			{
-				break;
-			}*/
-
 			if (isBuildCancelled() == true)
 			{
 				result = false;
@@ -1145,11 +1140,6 @@ namespace Builder
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
 			result &= m_moduleCompilers[i]->pass2();
-
-			/*if (result == false)
-			{
-				break;
-			}*/
 
 			if (isBuildCancelled() == true)
 			{

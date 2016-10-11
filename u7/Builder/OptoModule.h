@@ -351,6 +351,7 @@ namespace Hardware
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
 		bool addTxSignal(const QString& connectionID,
+						 QUuid transmitterUuid,
 						 const QString& lmID,
 						 Signal* appSignal,
 						 bool* signalAllreadyInList);
