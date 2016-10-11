@@ -52,7 +52,8 @@ private:
 		FileActionColumn,
 		FileLastCheckInColumn,
 		FileIdColumn,
-		FileDetailsColumn,
+		FileIssuesColumn,
+		//FileDetailsColumn,
 
 		// Add other column befor this line
 		//

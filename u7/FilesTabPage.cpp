@@ -282,9 +282,9 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 				v.setValue(file->fileId());
 				break;
 
-			case FileDetailsColumn:
-				v.setValue<QString>(file->details());
-				break;
+//			case FileDetailsColumn:
+//				v.setValue<QString>(file->details());
+//				break;
 
 
 			default:
@@ -351,8 +351,8 @@ QVariant FileTreeModel::headerData(int section, Qt::Orientation orientation, int
 			case FileIdColumn:
 				return QObject::tr("FileID");
 
-			case FileDetailsColumn:
-				return QObject::tr("Details");
+//			case FileDetailsColumn:
+//				return QObject::tr("Details");
 
 			default:
 				assert(false);
