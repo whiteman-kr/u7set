@@ -37,6 +37,10 @@ public:
 	bool filterBySchema() const;
 	void setFilterBySchema(bool value);
 
+	bool admin() const;
+
+	TuningPageSettings *tuningPageSettings(int index);
+
 public:
 
 	int m_requestInterval = 100;
@@ -59,11 +63,15 @@ public:
 	QPoint m_presetPropertiesWindowPos;
 	QByteArray m_presetPropertiesWindowGeometry;
 
+
+
+private:
+
 	// Tuning pages settings
 	//
 	std::vector<TuningPageSettings> m_tuningPageSettings;
 
-private:
+	bool m_admin = false;
 
 	QString m_instanceStrId;
 

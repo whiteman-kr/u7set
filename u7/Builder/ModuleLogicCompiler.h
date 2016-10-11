@@ -630,7 +630,16 @@ namespace Builder
 		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);
 
 		bool copyOptoConnectionsTxData();
-		bool copyOptoPortTxData(Hardware::OptoModule *module, Hardware::OptoPort* port);
+		bool copyOptoPortTxData(Hardware::OptoPort* port);
+
+		bool copyOptoPortTxRawDataData(Hardware::OptoPort* port);
+		bool copyOptoPortTxAnalogSignals(Hardware::OptoPort* port);
+		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port);
+
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPort* port, int& offset);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int modulePlace);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
+		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
 
 		bool copyRS232Signals();
 		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);

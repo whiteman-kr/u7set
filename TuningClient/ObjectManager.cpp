@@ -24,24 +24,11 @@ std::vector<TuningObject> ObjectManager::objects()
 	return m_objects;
 }
 
-int ObjectManager::tuningSourcesCount()
+QStringList ObjectManager::tuningSourcesEquipmentIds()
 {
 	QMutexLocker l(&m_mutex);
-	return static_cast<int>(m_tuningSourcesList.size());
+	return m_tuningSourcesList;
 }
-
-QString ObjectManager::tuningSourceEquipmentId(int index)
-{
-	QMutexLocker l(&m_mutex);
-	if (index < 0 || index >= m_tuningSourcesList.size())
-	{
-		assert(false);
-		return QString();
-	}
-
-	return m_tuningSourcesList[index];
-}
-
 
 bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 {

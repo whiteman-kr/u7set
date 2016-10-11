@@ -1,5 +1,8 @@
+#include "../lib/DeviceHelper.h"
+
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
+
 
 namespace Builder
 {
@@ -97,6 +100,8 @@ namespace Builder
 			return false;
 		}
 
+		DeviceHelper::init();
+
 		m_signals->resetAddresses();
 
 		findLMs();
@@ -130,6 +135,8 @@ namespace Builder
 		} while(true);
 
 		clear();
+
+		DeviceHelper::shutdown();
 
 		return result;
 	}

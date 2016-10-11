@@ -2520,6 +2520,11 @@ R"DELIM({
 		m_rawDataDescription = value;
 	}
 
+	bool DeviceModule::hasRawData() const
+	{
+		return m_rawDataDescription.isEmpty() != true;
+	}
+
 	int DeviceModule::moduleType() const
 	{
 		return m_type;

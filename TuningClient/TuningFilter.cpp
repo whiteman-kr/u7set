@@ -1,9 +1,6 @@
 #include "Stable.h"
 #include "TuningFilter.h"
 #include "../lib/Types.h"
-#include "ObjectManager.h"
-#include "Settings.h"
-#include "MainWindow.h"
 
 TuningFilterValue::TuningFilterValue()
 {
@@ -912,7 +909,7 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode)
 	return !reader.hasError();
 }
 
-bool TuningFilterStorage::save(const QString& fileName)
+bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
 {
 	// save data to XML
 	//
@@ -936,7 +933,7 @@ bool TuningFilterStorage::save(const QString& fileName)
 
 	if (f.open(QFile::WriteOnly) == false)
 	{
-		theLogFile.writeError(QString("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName));
+		*errorMsg = QString("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName);
 		return false;
 	}
 
@@ -1064,9 +1061,9 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters()
+void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
-	if (theSettings.filterBySchema() == true)
+	if (bySchemas == true)
 	{
 
 		// Filter for Schema
@@ -1094,7 +1091,7 @@ void TuningFilterStorage::createAutomaticFilters()
 		m_root->addTopChild(ofSchema);
 	}
 
-	if (theSettings.filterByEquipment() == true)
+	if (byEquipment == true)
 	{
 		// Filter for EquipmentId
 		//
@@ -1102,10 +1099,8 @@ void TuningFilterStorage::createAutomaticFilters()
 		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption("Equipment");
 
-		for (int i = 0; i < theObjects.tuningSourcesCount(); i++)
+		for (const QString& ts : tuningSourcesEquipmentIds)
 		{
-			QString ts = theObjects.tuningSourceEquipmentId(i);
-
 			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
@@ -1119,5 +1114,3 @@ void TuningFilterStorage::createAutomaticFilters()
 
 }
 
-TuningFilterStorage theFilters;
-TuningFilterStorage theUserFilters;

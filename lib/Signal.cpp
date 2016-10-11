@@ -144,6 +144,11 @@ Signal& Signal::operator =(const Signal& signal)
 	m_enableTuning = signal.m_enableTuning;
 	m_tuningDefaultValue = signal.m_tuningDefaultValue;
 
+	m_ramAddr = signal.m_ramAddr;
+	m_regValueAddr = signal.m_regValueAddr;
+	m_regValidityAddr = signal.m_regValidityAddr;
+	m_tuningAddr = signal.m_tuningAddr;
+
 	m_lm = signal.m_lm;
 
 	return *this;

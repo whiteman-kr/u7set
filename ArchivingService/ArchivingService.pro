@@ -88,7 +88,8 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../u7/Builder/ModulesRawData.cpp
 
 HEADERS += \
     version.h \
@@ -119,7 +120,8 @@ HEADERS += \
     ../lib/ProtoSerialization.h \
     ../lib/OutputLog.h \
     ../lib/PropertyObject.h \
-    ../lib/Types.h
+    ../lib/Types.h \
+    ../u7/Builder/ModulesRawData.h
 
 include(../qtservice/src/qtservice.pri)
 

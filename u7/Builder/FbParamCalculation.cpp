@@ -1619,7 +1619,7 @@ namespace Builder
 					return false;
 				}
 
-				double value = (abs(i_highlim->floatValue() - i_lowlim->floatValue()) * i_relvalue->floatValue()) / 100.0;
+				double value = (std::abs(i_highlim->floatValue() - i_lowlim->floatValue()) * i_relvalue->floatValue()) / 100.0;
 
 				if (value == 0)
 				{

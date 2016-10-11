@@ -16,6 +16,8 @@ namespace Hardware
 	class ConnectionStorage;
 	class OptoModuleStorage;
 
+	const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
+
 	class OptoPort : public QObject
 	{
 		Q_OBJECT
@@ -45,8 +47,8 @@ namespace Hardware
 		enum class RawDataDescriptionItemType
 		{
 			RawDataSize,
-			AllNativePrimaryData,
-			ModulePrimaryData,
+			AllNativeRawData,
+			ModuleRawData,
 			PortRawData
 		};
 
@@ -66,8 +68,8 @@ namespace Hardware
 
 	private:
 		static const char* RAW_DATA_SIZE;
-		static const char* ALL_NATIVE_PRIMARY_DATA;
-		static const char* MODULE_PRIMARY_DATA;
+		static const char* ALL_NATIVE_RAW_DATA;
+		static const char* MODULE_RAW_DATA;
 		static const char* PORT_RAW_DATA;
 
 		QString m_equipmentID;
@@ -180,10 +182,12 @@ namespace Hardware
 		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
 		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
 
-		const QVector<RawDataDescriptionItem>& rawDataDescription() const { m_rawDataDescription; }
+		const QVector<RawDataDescriptionItem>& rawDataDescription() const { return m_rawDataDescription; }
 
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
+
+		bool hasTxRawData() const { return m_rawDataDescriptionStr.isEmpty() == false; }
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
 		int txAnalogSignalsCount() const { return m_txAnalogSignals.count(); }
@@ -192,7 +196,6 @@ namespace Hardware
 		int txDiscreteSignalsCount() const { return m_txDiscreteSignals.count(); }
 
 		bool txRawDataSizeWIsCalculated() const { return m_txRawDataSizeWIsCalculated; }
-		//void setRawDataSizeIsCalculated();
 
 		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
 

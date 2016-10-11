@@ -79,13 +79,17 @@ SOURCES += main.cpp\
     ../lib/AppSignalState.cpp \
     ../Proto/serialization.pb.cc \
     DialogPresetEditor.cpp \
-    DialogPresetProperties.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
     DialogInputValue.cpp \
     TuningFilter.cpp \
-    LogFile.cpp
+    LogFile.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp \
+    UserManager.cpp \
+    DialogUsers.cpp \
+    DialogProperties.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -110,19 +114,24 @@ HEADERS  += MainWindow.h \
     ../lib/AppSignalState.h \
     ../Proto/serialization.pb.h \
     DialogPresetEditor.h \
-    DialogPresetProperties.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
     DialogInputValue.h \
     TuningFilter.h \
-    LogFile.h
+    LogFile.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/OutputLog.h \
+    UserManager.h \
+    DialogUsers.h \
+    DialogProperties.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
     DialogPresetEditor.ui \
-    DialogInputValue.ui
+    DialogInputValue.ui \
+    DialogUsers.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
