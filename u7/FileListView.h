@@ -51,7 +51,7 @@ private:
 		FileUserColumn,
 		FileActionColumn,
 		FileLastCheckInColumn,
-		FileIdColumn,
+		//FileIdColumn,
 		FileIssuesColumn,
 		//FileDetailsColumn,
 

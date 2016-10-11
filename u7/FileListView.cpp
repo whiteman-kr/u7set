@@ -68,8 +68,8 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 			case FileLastCheckInColumn:
 				return QVariant(fileInfo->lastCheckIn().toString());
 
-			case FileIdColumn:
-				return QVariant(fileInfo->fileId());
+//			case FileIdColumn:
+//				return QVariant(fileInfo->fileId());
 
 			case FileIssuesColumn:
 				{
@@ -85,9 +85,23 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 							return QString();
 						}
 
-						QString result = QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+						if (issueCount.errors > 0 && issueCount.warnings == 0)
+						{
+							return QString("ERR: %1").arg(issueCount.errors);
+						}
 
-						return result;
+						if (issueCount.errors > 0 && issueCount.warnings > 0)
+						{
+							return QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+						}
+
+						if (issueCount.errors == 0 && issueCount.warnings > 0)
+						{
+							return QString("WRN: %2").arg(issueCount.warnings);
+						}
+
+						assert(false);
+						return QVariant();
 					}
 					else
 					{
@@ -212,8 +226,8 @@ QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int
 			case FileLastCheckInColumn:
 				return QObject::tr("Last Check In");
 
-			case FileIdColumn:
-				return QObject::tr("FileID");
+//			case FileIdColumn:
+//				return QObject::tr("FileID");
 
 			case FileIssuesColumn:
 				return QObject::tr("Issues");
@@ -333,20 +347,20 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 				});
 			break;
 
-		case FileIdColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->fileId() > f2->fileId();
-					}
-					else
-					{
-						return f1->fileId() <= f2->fileId();
-					}
-				});
-			break;
+//		case FileIdColumn:
+//			std::sort(m_files.begin(), m_files.end(),
+//				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+//				{
+//					if (order == Qt::AscendingOrder)
+//					{
+//						return f1->fileId() > f2->fileId();
+//					}
+//					else
+//					{
+//						return f1->fileId() <= f2->fileId();
+//					}
+//				});
+//			break;
 
 //		case FileDetailsColumn:
 //			std::sort(m_files.begin(), m_files.end(),
