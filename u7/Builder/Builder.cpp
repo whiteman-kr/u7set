@@ -300,6 +300,15 @@ namespace Builder
 		}
 		while (false);
 
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			m_log->clear();		// Log can contain thouthands of messages, if it some kind iof "same ids" error
+
+			// The build was cancelled.
+			//
+			m_log->errCMN0016();
+		}
+
 		buildWriter.finish();
 
 		db.closeProject(nullptr);
@@ -310,15 +319,6 @@ namespace Builder
 		m_log->swapItemsIssues(&schemaItemsIssues);
 
 		GlobalMessanger::instance()->swapSchemaIssues(schemaItemsIssues);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			m_log->clear();		// Log can contain thouthands of messages, if it some kind iof "same ids" error
-
-			// The build was cancelled.
-			//
-			m_log->errCMN0016();
-		}
 
 		// We've done, exit
 		//
