@@ -1552,7 +1552,8 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::addTxSignal(const QString& connectionID,
+	bool OptoModuleStorage::addTxSignal(const QString& schemaID,
+										const QString& connectionID,
 										QUuid transmitterUuid,
 										const QString& lmID,
 										Signal* appSignal,
@@ -1623,7 +1624,7 @@ namespace Hardware
 
 		// Ports of connection '%1' are not accessible in LM '%2.
 		//
-		m_log->errALC5059(connectionID, lmID, transmitterUuid);
+		m_log->errALC5059(schemaID, connectionID, lmID, transmitterUuid);
 
 		return false;
 	}

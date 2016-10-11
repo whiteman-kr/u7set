@@ -1642,7 +1642,7 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 			result = false;
 		}
 
@@ -2046,7 +2046,7 @@ namespace Builder
 
 				if (!appSignal->isComputed())
 				{
-					m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+					m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 					RESULT_FALSE_BREAK
 				}
 
@@ -5852,7 +5852,7 @@ namespace Builder
 
 					if (!appSignal->isComputed())
 					{
-						m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+						m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 						RESULT_FALSE_BREAK
 					}
 
@@ -5862,13 +5862,13 @@ namespace Builder
 					{
 						// Transmitter is linked to unknown opto connection '%1'.
 						//
-						m_log->errALC5024(transmitter.connectionId(), transmitter.guid());
+						m_log->errALC5024(item->schemaID(), transmitter.connectionId(), transmitter.guid());
 						RESULT_FALSE_BREAK
 					}
 
 					bool signalAllreadyInTxList = false;
 
-					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(), transmitter.guid(),
+					result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 															   m_lm->equipmentIdTemplate(),
 															   appSignal->signal(),
 															   &signalAllreadyInTxList);
@@ -6646,6 +6646,19 @@ namespace Builder
 	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
 	{
 		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size());
+	}
+
+
+	QString AppSignal::schemaID() const
+	{
+		if (m_appItem != nullptr)
+		{
+			return m_appItem->schemaID();
+		}
+
+		assert(false);
+
+		return "";
 	}
 
 

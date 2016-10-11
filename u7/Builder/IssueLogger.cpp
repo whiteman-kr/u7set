@@ -1397,21 +1397,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of signal '%1' is undefined.
+	/// Title: Value of signal '%1' is undefined (Logic schema '%2').
 	///
 	/// Parameters:
 	///		%1 Application signal ID
+	///		%2 Logic schema ID
 	///
 	/// Description:
 	///		Signal value can not be calculated
 	///
-	void IssueLogger::errALC5002(QString appSignalID, QUuid itemUuid)
+	void IssueLogger::errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5002,
-				  tr("Value of signal '%1' is undefined.").arg(appSignalID));
+				  tr("Value of signal '%1' is undefined (Logic schema '%2').").
+				  arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5003
@@ -1873,23 +1875,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Transmitter is linked to unknown opto connection '%1'.
+	/// Title: Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
 	///
 	/// Parameters:
 	///		%1 Connection ID
-	///		%2 Transmitter Uuid
+	///		%2 Logic schema ID
 	///
 	/// Description:
 	///		Transmitter is linked to unknown opto connection. Check transmitter's 'ConnectionID' property.
 	///
-	void IssueLogger::errALC5024(QString connection, QUuid transmitterUuid)
+	void IssueLogger::errALC5024(QString schemaID, QString connection, QUuid transmitterUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5024,
-				  QString(tr("Transmitter is linked to unknown opto connection '%1'.")).
-				  arg(connection));
+				  QString(tr("Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').")).
+				  arg(connection).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5025
@@ -2702,24 +2704,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Ports of connection '%1' are not accessible in LM '%2'.
+	/// Title:	   Ports of connection '%1' are not accessible in LM '%2' (Logic schema '%3').
 	///
 	/// Parameters:
 	///		%1 Opto connection ID
 	///		%2 Logic module equipmentID
-	///		%3 Transmitter Uuid
+	///		%3 Logic schema ID
 	///
 	/// Description:
 	///		Ports of specified opto connection are not accessible in Logic Module.
 	///
-	void IssueLogger::errALC5059(QString connectionID, QString lmID, QUuid transmitterUuid)
+	void IssueLogger::errALC5059(QString schemaID, QString connectionID, QString lmID, QUuid transmitterUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5059,
-				  QString(tr("Ports of connection '%1' are not accessible in LM '%2'.")).
-				  arg(connectionID).arg(lmID));
+				  QString(tr("Ports of connection '%1' are not accessible in LM '%2' (Logic schema '%3').")).
+				  arg(connectionID).arg(lmID).arg(schemaID));
 	}
 
 
