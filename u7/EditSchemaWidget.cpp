@@ -6610,6 +6610,11 @@ void EditSchemaWidget::findNext()
 
 	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(searchText));
 
+	m_findDialog->show();
+	m_findDialog->raise();
+	m_findDialog->activateWindow();
+	m_findDialog->setFocusToEditLine();
+
 	return;
 }
 
@@ -6710,6 +6715,11 @@ void EditSchemaWidget::findPrev()
 	clearSelection();
 
 	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(searchText));
+
+	m_findDialog->show();
+	m_findDialog->raise();
+	m_findDialog->activateWindow();
+	m_findDialog->setFocusToEditLine();
 
 	return;
 
