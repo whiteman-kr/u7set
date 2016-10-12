@@ -971,6 +971,55 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 lmdataid() const;
   inline void set_lmdataid(::google::protobuf::uint64 value);
 
+  // optional int64 errorProtocolVersion = 15;
+  inline bool has_errorprotocolversion() const;
+  inline void clear_errorprotocolversion();
+  static const int kErrorProtocolVersionFieldNumber = 15;
+  inline ::google::protobuf::int64 errorprotocolversion() const;
+  inline void set_errorprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errorFramesQuantity = 16;
+  inline bool has_errorframesquantity() const;
+  inline void clear_errorframesquantity();
+  static const int kErrorFramesQuantityFieldNumber = 16;
+  inline ::google::protobuf::int64 errorframesquantity() const;
+  inline void set_errorframesquantity(::google::protobuf::int64 value);
+
+  // optional int64 errorFrameNo = 17;
+  inline bool has_errorframeno() const;
+  inline void clear_errorframeno();
+  static const int kErrorFrameNoFieldNumber = 17;
+  inline ::google::protobuf::int64 errorframeno() const;
+  inline void set_errorframeno(::google::protobuf::int64 value);
+
+  // optional int64 lostedFramesCount = 18;
+  inline bool has_lostedframescount() const;
+  inline void clear_lostedframescount();
+  static const int kLostedFramesCountFieldNumber = 18;
+  inline ::google::protobuf::int64 lostedframescount() const;
+  inline void set_lostedframescount(::google::protobuf::int64 value);
+
+  // optional int64 errorDataID = 19;
+  inline bool has_errordataid() const;
+  inline void clear_errordataid();
+  static const int kErrorDataIDFieldNumber = 19;
+  inline ::google::protobuf::int64 errordataid() const;
+  inline void set_errordataid(::google::protobuf::int64 value);
+
+  // optional int64 errorBadFrameSize = 20;
+  inline bool has_errorbadframesize() const;
+  inline void clear_errorbadframesize();
+  static const int kErrorBadFrameSizeFieldNumber = 20;
+  inline ::google::protobuf::int64 errorbadframesize() const;
+  inline void set_errorbadframesize(::google::protobuf::int64 value);
+
+  // optional bool hasErrors = 21;
+  inline bool has_haserrors() const;
+  inline void clear_haserrors();
+  static const int kHasErrorsFieldNumber = 21;
+  inline bool haserrors() const;
+  inline void set_haserrors(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
  private:
   inline void set_has_id();
@@ -1001,6 +1050,20 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline void clear_has_lmdataenable();
   inline void set_has_lmdataid();
   inline void clear_has_lmdataid();
+  inline void set_has_errorprotocolversion();
+  inline void clear_has_errorprotocolversion();
+  inline void set_has_errorframesquantity();
+  inline void clear_has_errorframesquantity();
+  inline void set_has_errorframeno();
+  inline void clear_has_errorframeno();
+  inline void set_has_lostedframescount();
+  inline void clear_has_lostedframescount();
+  inline void set_has_errordataid();
+  inline void clear_has_errordataid();
+  inline void set_has_errorbadframesize();
+  inline void clear_has_errorbadframesize();
+  inline void set_has_haserrors();
+  inline void clear_has_haserrors();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1017,10 +1080,17 @@ class DataSourceInfo : public ::google::protobuf::Message {
   ::google::protobuf::int32 lmmoduletype_;
   ::std::string* lmadapterid_;
   ::google::protobuf::uint64 lmdataid_;
+  ::google::protobuf::int64 errorprotocolversion_;
+  ::google::protobuf::int64 errorframesquantity_;
+  ::google::protobuf::int64 errorframeno_;
+  ::google::protobuf::int64 lostedframescount_;
+  ::google::protobuf::int64 errordataid_;
+  ::google::protobuf::int64 errorbadframesize_;
   bool lmdataenable_;
+  bool haserrors_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3331,6 +3401,160 @@ inline ::google::protobuf::uint64 DataSourceInfo::lmdataid() const {
 inline void DataSourceInfo::set_lmdataid(::google::protobuf::uint64 value) {
   set_has_lmdataid();
   lmdataid_ = value;
+}
+
+// optional int64 errorProtocolVersion = 15;
+inline bool DataSourceInfo::has_errorprotocolversion() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void DataSourceInfo::set_has_errorprotocolversion() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void DataSourceInfo::clear_has_errorprotocolversion() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void DataSourceInfo::clear_errorprotocolversion() {
+  errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errorprotocolversion();
+}
+inline ::google::protobuf::int64 DataSourceInfo::errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline void DataSourceInfo::set_errorprotocolversion(::google::protobuf::int64 value) {
+  set_has_errorprotocolversion();
+  errorprotocolversion_ = value;
+}
+
+// optional int64 errorFramesQuantity = 16;
+inline bool DataSourceInfo::has_errorframesquantity() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void DataSourceInfo::set_has_errorframesquantity() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void DataSourceInfo::clear_has_errorframesquantity() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void DataSourceInfo::clear_errorframesquantity() {
+  errorframesquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesquantity();
+}
+inline ::google::protobuf::int64 DataSourceInfo::errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline void DataSourceInfo::set_errorframesquantity(::google::protobuf::int64 value) {
+  set_has_errorframesquantity();
+  errorframesquantity_ = value;
+}
+
+// optional int64 errorFrameNo = 17;
+inline bool DataSourceInfo::has_errorframeno() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void DataSourceInfo::set_has_errorframeno() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void DataSourceInfo::clear_has_errorframeno() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void DataSourceInfo::clear_errorframeno() {
+  errorframeno_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframeno();
+}
+inline ::google::protobuf::int64 DataSourceInfo::errorframeno() const {
+  return errorframeno_;
+}
+inline void DataSourceInfo::set_errorframeno(::google::protobuf::int64 value) {
+  set_has_errorframeno();
+  errorframeno_ = value;
+}
+
+// optional int64 lostedFramesCount = 18;
+inline bool DataSourceInfo::has_lostedframescount() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void DataSourceInfo::set_has_lostedframescount() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void DataSourceInfo::clear_has_lostedframescount() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void DataSourceInfo::clear_lostedframescount() {
+  lostedframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_lostedframescount();
+}
+inline ::google::protobuf::int64 DataSourceInfo::lostedframescount() const {
+  return lostedframescount_;
+}
+inline void DataSourceInfo::set_lostedframescount(::google::protobuf::int64 value) {
+  set_has_lostedframescount();
+  lostedframescount_ = value;
+}
+
+// optional int64 errorDataID = 19;
+inline bool DataSourceInfo::has_errordataid() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void DataSourceInfo::set_has_errordataid() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void DataSourceInfo::clear_has_errordataid() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void DataSourceInfo::clear_errordataid() {
+  errordataid_ = GOOGLE_LONGLONG(0);
+  clear_has_errordataid();
+}
+inline ::google::protobuf::int64 DataSourceInfo::errordataid() const {
+  return errordataid_;
+}
+inline void DataSourceInfo::set_errordataid(::google::protobuf::int64 value) {
+  set_has_errordataid();
+  errordataid_ = value;
+}
+
+// optional int64 errorBadFrameSize = 20;
+inline bool DataSourceInfo::has_errorbadframesize() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void DataSourceInfo::set_has_errorbadframesize() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void DataSourceInfo::clear_has_errorbadframesize() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void DataSourceInfo::clear_errorbadframesize() {
+  errorbadframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errorbadframesize();
+}
+inline ::google::protobuf::int64 DataSourceInfo::errorbadframesize() const {
+  return errorbadframesize_;
+}
+inline void DataSourceInfo::set_errorbadframesize(::google::protobuf::int64 value) {
+  set_has_errorbadframesize();
+  errorbadframesize_ = value;
+}
+
+// optional bool hasErrors = 21;
+inline bool DataSourceInfo::has_haserrors() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void DataSourceInfo::set_has_haserrors() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void DataSourceInfo::clear_has_haserrors() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void DataSourceInfo::clear_haserrors() {
+  haserrors_ = false;
+  clear_has_haserrors();
+}
+inline bool DataSourceInfo::haserrors() const {
+  return haserrors_;
+}
+inline void DataSourceInfo::set_haserrors(bool value) {
+  set_has_haserrors();
+  haserrors_ = value;
 }
 
 // -------------------------------------------------------------------

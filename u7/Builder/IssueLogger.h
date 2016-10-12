@@ -75,6 +75,8 @@ namespace Builder
 		void errCMN0013(QString fileName);						// Write error of file '%1'.
 		void errCMN0014(QString fileName);						// File '%1' already exists.
 		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// '%1' and '%2' files have the same ID = '%3'.
+		void errCMN0016();										// The build was cancelled.
+
 
 		// INT			Internal issues							1000-1999
 		//
@@ -159,7 +161,7 @@ namespace Builder
 
 		void errALC5000(QString appSignalID, QUuid itemUuid);					// Signal identifier '%1' is not found.
 		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
-		void errALC5002(QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined.
+		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined (Logic schema '%2').
 		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output '%1.%2' is connected to discrete signal '%3'.
 		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
 		void errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data size.
@@ -181,7 +183,7 @@ namespace Builder
 		void errALC5021(QString port, QString connection);							// Undefined opto port '%1' in the connection '%2'.
 		void errALC5022(QString connection);									// Opto ports of the same chassis is linked via connection '%1'.
 		void errALC5023(QString connection);									// Opto connection ID '%1' is not unique.
-		void errALC5024(QString connection, QUuid transmitterUuid);				// Transmitter is linked to unknown opto connection '%1'.
+		void errALC5024(QString schemaID, QString connection, QUuid transmitterUuid);			// Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
 		void errALC5025(QString connection, QUuid receiverUuid);				// Receiver is linked to unknown opto connection '%1'.
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
 		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
@@ -216,7 +218,7 @@ namespace Builder
 		void errALC5056(QString subsystemID, QString lmEquipmentID);						// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 		void errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid);				// Uncompatible data format of analog AFB signal '%1.%2'.
 		void errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' can't be 0.
-		void wrnALC5059(QString lmID);														// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
+		void errALC5059(QString schemaID, QString connectionID, QString lmID, QUuid transmitterUuid);			// Ports of connection '%1' are not accessible in LM '%2'
 
 		// EQP			Equipment issues						6000-6999
 		//

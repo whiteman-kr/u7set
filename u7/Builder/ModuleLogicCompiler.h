@@ -19,6 +19,7 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/FblItem.h"
+#include "../VFrame30/LogicSchema.h"
 
 #include "../u7/Connection.h"
 
@@ -142,6 +143,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+
+		QString schemaID() const { return m_appLogicItem.m_schema->schemaID(); }
 
 		QString label() const;
 
@@ -364,6 +367,8 @@ namespace Builder
 		const Signal& constSignal() { return *m_signal; }
 
 		Signal* signal() { return m_signal; }
+
+		QString schemaID() const;
 	};
 
 
@@ -551,8 +556,6 @@ namespace Builder
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
-
-		bool m_pass1HasErrors = false;
 
 	private:
 

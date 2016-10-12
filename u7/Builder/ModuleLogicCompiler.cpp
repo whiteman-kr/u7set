@@ -95,8 +95,6 @@ namespace Builder
 
 		if (result == true)
 		{
-			m_pass1HasErrors = false;
-
 			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
 
@@ -104,8 +102,6 @@ namespace Builder
 		}
 		else
 		{
-			m_pass1HasErrors = true;
-
 			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
@@ -115,19 +111,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::pass2()
 	{
-		if (m_pass1HasErrors == true)
-		{
-			// Compilation pass #2 for LM %1 skiped because pass #1 finished with errors.
-			//
-			LOG_EMPTY_LINE(m_log)
-			m_log->wrnALC5059(m_lm->equipmentIdTemplate());
-			LOG_EMPTY_LINE(m_log)
-
-			cleanup();
-
-			return true;
-		}
-
 		LOG_EMPTY_LINE(m_log)
 
 		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
@@ -1659,7 +1642,7 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 			result = false;
 		}
 
@@ -2063,7 +2046,7 @@ namespace Builder
 
 				if (!appSignal->isComputed())
 				{
-					m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+					m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 					RESULT_FALSE_BREAK
 				}
 
@@ -5869,7 +5852,7 @@ namespace Builder
 
 					if (!appSignal->isComputed())
 					{
-						m_log->errALC5002(appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+						m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
 						RESULT_FALSE_BREAK
 					}
 
@@ -5879,13 +5862,13 @@ namespace Builder
 					{
 						// Transmitter is linked to unknown opto connection '%1'.
 						//
-						m_log->errALC5024(transmitter.connectionId(), transmitter.guid());
+						m_log->errALC5024(item->schemaID(), transmitter.connectionId(), transmitter.guid());
 						RESULT_FALSE_BREAK
 					}
 
 					bool signalAllreadyInTxList = false;
 
-					result &= m_optoModuleStorage->addTxSignal(transmitter.connectionId(),
+					result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 															   m_lm->equipmentIdTemplate(),
 															   appSignal->signal(),
 															   &signalAllreadyInTxList);
@@ -6663,6 +6646,19 @@ namespace Builder
 	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
 	{
 		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size());
+	}
+
+
+	QString AppSignal::schemaID() const
+	{
+		if (m_appItem != nullptr)
+		{
+			return m_appItem->schemaID();
+		}
+
+		assert(false);
+
+		return "";
 	}
 
 

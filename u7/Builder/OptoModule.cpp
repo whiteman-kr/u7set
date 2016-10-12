@@ -1552,7 +1552,9 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::addTxSignal(const QString& connectionID,
+	bool OptoModuleStorage::addTxSignal(const QString& schemaID,
+										const QString& connectionID,
+										QUuid transmitterUuid,
 										const QString& lmID,
 										Signal* appSignal,
 										bool* signalAllreadyInList)
@@ -1620,9 +1622,10 @@ namespace Hardware
 			return true;
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						   QString(tr("Ports of connection '%1' are not accessible in LM '%2'")).
-						   arg(connectionID).arg(lmID));
+		// Ports of connection '%1' are not accessible in LM '%2.
+		//
+		m_log->errALC5059(schemaID, connectionID, lmID, transmitterUuid);
+
 		return false;
 	}
 

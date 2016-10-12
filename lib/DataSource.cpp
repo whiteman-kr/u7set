@@ -481,6 +481,14 @@ bool DataSource::getInfo(Network::DataSourceInfo* protoInfo) const
 	protoInfo->set_lmdataenable(m_lmDataEnable);
 	protoInfo->set_lmdataid(m_lmDataID);
 
+	protoInfo->set_errorprotocolversion(m_errorProtocolVersion);
+	protoInfo->set_errorframesquantity(m_errorFramesQuantity);
+	protoInfo->set_errorframeno(m_errorFrameNo);
+	protoInfo->set_lostedframescount(m_lostedFramesCount);
+	protoInfo->set_errordataid( m_errorDataID);
+	protoInfo->set_errorbadframesize(m_errorBadFrameSize);
+	protoInfo->set_haserrors(m_hasErrors);
+
 	return true;
 }
 
@@ -501,6 +509,15 @@ bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
 	m_lmAdapterID = QString::fromStdString(protoInfo.lmadapterid());
 	m_lmDataEnable = protoInfo.lmdataenable();
 	m_lmDataID = protoInfo.lmdataid();
+
+	m_errorProtocolVersion = protoInfo.errorprotocolversion();
+	m_errorFramesQuantity = protoInfo.errorframesquantity();
+	m_errorFrameNo = protoInfo.errorframeno();
+	m_lostedFramesCount = protoInfo.lostedframescount();
+	m_errorDataID = protoInfo.errordataid();
+	m_errorBadFrameSize = protoInfo.errorbadframesize();
+
+	m_hasErrors = protoInfo.haserrors();
 
 	assert(m_id = generateID());
 

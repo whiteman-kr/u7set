@@ -78,6 +78,14 @@ message DataSourceInfo
     optional string lmAdapterID = 12;
     optional bool lmDataEnable = 13;
     optional uint64 lmDataID = 14;
+
+    optional int64 errorProtocolVersion = 15;
+    optional int64 errorFramesQuantity = 16;
+    optional int64 errorFrameNo = 17;
+    optional int64 lostedFramesCount = 18;
+    optional int64 errorDataID = 19;
+    optional int64 errorBadFrameSize = 20;
+    optional bool hasErrors = 21;
 }
 
 

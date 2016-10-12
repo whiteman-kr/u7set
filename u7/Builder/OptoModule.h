@@ -350,7 +350,9 @@ namespace Hardware
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
-		bool addTxSignal(const QString& connectionID,
+		bool addTxSignal(const QString& schemaID,
+						 const QString& connectionID,
+						 QUuid transmitterUuid,
 						 const QString& lmID,
 						 Signal* appSignal,
 						 bool* signalAllreadyInList);

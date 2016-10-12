@@ -142,9 +142,13 @@ protected:
 	qint64 m_errorDataID = 0;
 	qint64 m_errorBadFrameSize = 0;
 
+	bool m_hasErrors = false;
+
 	bool m_dataProcessingEnabled = true;
 
 	qint64 m_lastPacketTime = 0;
+
+
 
 	//
 
