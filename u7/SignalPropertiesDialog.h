@@ -17,7 +17,7 @@ class QDialogButtonBox;
 enum class SignalType;
 
 
-void editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget *parent = 0);
+QStringList editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget *parent = 0);
 
 
 class SignalPropertiesDialog : public QDialog

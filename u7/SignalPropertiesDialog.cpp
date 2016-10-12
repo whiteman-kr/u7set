@@ -10,7 +10,7 @@
 #include "Stable.h"
 
 
-void editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
+QStringList editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
 	SignalSet signalSet;
 	dbController->getSignals(&signalSet, parent);
@@ -20,6 +20,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 	QMap<QString, int> signalIndexMap;
 	int lastIndexProcessed = -1;
 	QString wrongIds;
+	QStringList foundIds;
 	for (QString id : signalId)
 	{
 		id = id.trimmed();
@@ -27,6 +28,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 		{
 			int index = signalIndexMap[id];
 			signalVector.push_back(&signalSet[index]);
+			foundIds.push_back(id);
 			continue;
 		}
 		for (lastIndexProcessed++; lastIndexProcessed < signalSet.count(); lastIndexProcessed++)
@@ -36,6 +38,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			if (currentId == id)
 			{
 				signalVector.push_back(&signalSet[lastIndexProcessed]);
+				foundIds.push_back(id);
 				break;
 			}
 		}
@@ -58,7 +61,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 
 	if (signalVector.isEmpty())
 	{
-		return;
+		return signalId;
 	}
 
 	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, nullptr, parent);
@@ -107,6 +110,19 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			QMessageBox::critical(parent, "Error", message);
 		}
 	}
+
+	QStringList result = signalId;
+	for (int i = 0; i < foundIds.count(); i++)
+	{
+		QString id = foundIds[i];
+		int idPlace = signalId.indexOf(id);
+		if (idPlace == -1)
+		{
+			continue;
+		}
+		result[idPlace] = signalVector[i]->appSignalID();
+	}
+	return result;
 }
 
 
