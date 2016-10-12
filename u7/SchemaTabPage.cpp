@@ -1303,7 +1303,8 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		file.userId() != db()->currentUser().userId())
 	{
 		QMessageBox mb(this);
-		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.userId()));
+		QString username = db()->username(file.userId());
+		mb.setText(tr("File %1 is already checked out by user <b>%2</b>.").arg(file.fileName()).arg(username));
 		mb.exec();
 		return;
 	}

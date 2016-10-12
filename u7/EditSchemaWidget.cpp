@@ -4822,22 +4822,89 @@ void EditSchemaWidget::exportToPdf()
 	return;
 }
 
-QStringList EditSchemaWidget::signalsProperties(QStringList strIds)
+void EditSchemaWidget::signalsProperties(QStringList strIds)
 {
 	if (isLogicSchema() == false)
 	{
 		assert(isLogicSchema() == false);
-		return QStringList();
+		return;
 	}
 
 	if (strIds.isEmpty() == true)
 	{
-		return QStringList();
+		return;
 	}
 
-	QStringList result = ::editApplicationSignals(strIds, db(), this);
+	std::vector<std::pair<QString, QString>> result = ::editApplicationSignals(strIds, db(), this);
 
-	return result;
+	std::map<QString, QString> newIdsMap;
+	for (auto& p : result)
+	{
+		if (p.first != p.second)
+		{
+			newIdsMap[p.first] = p.second;
+		}
+	}
+
+	// in editApplicationSignals AppSignalIds could be changed,
+	// update them in selected items, apparently this function was called for selected items.
+	//
+	auto& selected = selectedItems();
+
+	for (auto item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
+		{
+			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+			assert(itemSignal);
+
+			QStringList signalStrIdList = itemSignal->appSignalIdList();
+			bool itemsSignalsWereChanged = false;
+
+			for (QString& appSignalId : signalStrIdList)
+			{
+				auto foundInChanged = newIdsMap.find(appSignalId);
+
+				if (foundInChanged != newIdsMap.end())
+				{
+					// AppSignalIdWasChanged
+					//
+					appSignalId = foundInChanged->second;		// appSignalId is a reference
+					itemsSignalsWereChanged = true;
+				}
+			}
+
+			if (itemsSignalsWereChanged == true)
+			{
+				QString oneStringIds;
+				for (const QString& s : signalStrIdList)
+				{
+					oneStringIds += s + QChar::LineFeed;
+				}
+
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), item);
+			}
+		}
+
+		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+		{
+			auto itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+			assert(itemReceiver);
+
+			QString appSignalId = itemReceiver->appSignalId();
+
+			auto foundInChanged = newIdsMap.find(appSignalId);
+
+			if (foundInChanged != newIdsMap.end())
+			{
+				// AppSignalIdWasChanged
+				//
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(foundInChanged->second), item);
+			}
+		}
+	}
+
+	return;
 }
 
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)

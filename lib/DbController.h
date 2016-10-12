@@ -253,7 +253,7 @@ public:
 
 	QString lastError() const;
 
-	QString userName(int userId) const;
+	QString username(int userId) const;
 
 	//
 	// Data

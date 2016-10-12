@@ -9,7 +9,10 @@
 #include "../lib/DbController.h"
 #include "Stable.h"
 
-
+// Returns vector of pairs,
+//	first: previous AppSignalID
+//  second: new AppSignalID
+//
 std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
 	SignalSet signalSet;
