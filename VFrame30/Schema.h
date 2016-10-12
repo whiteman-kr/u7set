@@ -170,6 +170,7 @@ namespace VFrame30
 		QString m_equipmentId;			// Valid for LogicSchemas
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
+		std::set<QString> m_connections;
 		std::set<QUuid> m_guids;
 		// WARNING !!!! If add any new members, add them to the move construnctor;
 		//

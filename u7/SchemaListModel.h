@@ -45,14 +45,7 @@ public:
 
 	// Data
 	//
-private:
-	std::vector<std::shared_ptr<DbFileInfo>> m_files;
-	QString m_filter;
-
-	std::map<int, QString> m_users;
-
-	std::map<int, VFrame30::SchemaDetails> m_details;		// Key is FileID
-
+public:
 	enum Columns
 	{
 		FileNameColumn,
@@ -69,4 +62,12 @@ private:
 		//
 		ColumnCount
 	};
+
+private:
+	std::vector<std::shared_ptr<DbFileInfo>> m_files;
+	QString m_filter;
+
+	std::map<int, QString> m_users;
+
+	std::map<int, VFrame30::SchemaDetails> m_details;		// Key is FileID
 };

@@ -4822,22 +4822,22 @@ void EditSchemaWidget::exportToPdf()
 	return;
 }
 
-void EditSchemaWidget::signalsProperties(QStringList strIds)
+QStringList EditSchemaWidget::signalsProperties(QStringList strIds)
 {
 	if (isLogicSchema() == false)
 	{
 		assert(isLogicSchema() == false);
-		return;
+		return QStringList();
 	}
 
 	if (strIds.isEmpty() == true)
 	{
-		return;
+		return QStringList();
 	}
 
-	::editApplicationSignals(strIds, db(), this);
+	QStringList result = ::editApplicationSignals(strIds, db(), this);
 
-	return;
+	return result;
 }
 
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)

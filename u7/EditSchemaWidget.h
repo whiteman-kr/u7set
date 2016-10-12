@@ -401,7 +401,7 @@ protected slots:
 
 	void exportToPdf();
 
-	void signalsProperties(QStringList strIds);
+	QStringList signalsProperties(QStringList strIds);
 	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
 
 	void escapeKey();

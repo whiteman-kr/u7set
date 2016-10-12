@@ -8,6 +8,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
 #include "SchemaItemLink.h"
+#include "SchemaItemConnection.h"
 #include "HorzVertLinks.h"
 #include "../lib/ProtoSerialization.h"
 
@@ -591,7 +592,7 @@ namespace VFrame30
 	std::vector<QUuid> Schema::getGuids() const
 	{
 		std::vector<QUuid> result;
-		result.reserve(1024);
+		result.reserve(2048);
 
 		for (std::shared_ptr<SchemaLayer> layer : Layers)
 		{
@@ -926,13 +927,45 @@ namespace VFrame30
 
 		// Get signalIds
 		//
-		QStringList signalIds = schema->getSignalList();
-		QVariant signaListVariant(signalIds);
+		QSet<QString> signalIds = schema->getSignalList().toSet();
 
 		// Get labels for AFBs
 		//
 		QStringList labels = schema->getLabels();
-		QVariant labelsVariant(labels);
+
+		// Get list of receivers/transmitters
+		//
+		QSet<QString> connections;
+
+		if (schema->isLogicSchema() == true)
+		{
+			for (std::shared_ptr<SchemaLayer> layer : schema->Layers)
+			{
+				if (layer->compile() == true)
+				{
+					for (std::shared_ptr<SchemaItem> item : layer->Items)
+					{
+						if (item->isType<SchemaItemConnection>() == true)
+						{
+							const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
+							assert(connItem);
+
+							connections.insert(connItem->connectionId());
+						}
+
+						if (item->isType<SchemaItemReceiver>() == true)
+						{
+							const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
+							assert(receiver);
+
+							signalIds << receiver->appSignalId();
+						}
+					}
+
+					break;
+				}
+			}
+		}
 
 		// Get a list of guids
 		//
@@ -946,10 +979,14 @@ namespace VFrame30
 			guidsStringList.push_back(uuid.toString());
 		}
 
-		QVariant guidsVariant(guidsStringList);
-
 		// Form JSon object
 		//
+		QVariant signaListVariant(signalIds.toList());
+		QVariant labelsVariant(labels);
+
+		QVariant connectionsVariant(connections.toList());
+		QVariant guidsVariant(guidsStringList);
+
 		jsonObject.insert("Version", QJsonValue(1));
 		jsonObject.insert("SchemaID", QJsonValue(schema->schemaID()));
 		jsonObject.insert("Caption", QJsonValue(schema->caption()));
@@ -962,6 +999,7 @@ namespace VFrame30
 
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
 		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
+		jsonObject.insert("Connections", QJsonValue::fromVariant(connectionsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
 
 		// Convert json to string and return it
@@ -1020,10 +1058,6 @@ namespace VFrame30
 				//
 				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
 
-				// Caption
-				//
-				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
-
 				// EquipmentID
 				//
 				QJsonValue eqidValue = jsonObject.value(QLatin1String("EquipmentID")).toString();
@@ -1055,6 +1089,16 @@ namespace VFrame30
 				for (const QString& str : labelList)
 				{
 					m_labels.insert(str);
+				}
+
+				// Connections
+				//
+				m_connections.clear();
+				QStringList connList = jsonObject.value(QLatin1String("Connections")).toVariant().toStringList();
+
+				for (const QString& str : connList)
+				{
+					m_connections.insert(str);
 				}
 
 				// ItemGuids
@@ -1096,6 +1140,11 @@ namespace VFrame30
 		}
 
 		if (m_labels.find(searchText) != m_labels.end())
+		{
+			return true;
+		}
+
+		if (m_connections.find(searchText) != m_connections.end())
 		{
 			return true;
 		}

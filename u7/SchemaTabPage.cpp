@@ -41,6 +41,10 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	verticalHeader()->setDefaultSectionSize(static_cast<int>(fontMetrics().height() * 1.4));
 	horizontalHeader()->setHighlightSections(false);
 
+	setColumnWidth(static_cast<int>(SchemaListModel::FileNameColumn), 180);
+	setColumnWidth(static_cast<int>(SchemaListModel::FileCaptionColumn), 400);
+	setColumnWidth(static_cast<int>(SchemaListModel::FileDetailsColumn), 250);
+
 	// Set context menu
 	//
 	setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -1502,7 +1506,7 @@ void SchemaControlTabPage::search()
 	assert(m_filesView);
 	assert(m_searchEdit);
 
-	QString searchText = m_searchEdit->text();
+	QString searchText = m_searchEdit->text().trimmed();
 
 	if (searchText.isEmpty() == true)
 	{
