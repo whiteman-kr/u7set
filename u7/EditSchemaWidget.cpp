@@ -4835,7 +4835,7 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 		return;
 	}
 
-	editApplicationSignals(strIds, db(), this);
+	::editApplicationSignals(strIds, db(), this);
 
 	return;
 }

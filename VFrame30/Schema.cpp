@@ -897,20 +897,20 @@ namespace VFrame30
 	//
 	//
 
-	SchemaDetails::SchemaDetails()
-	{
-	}
+//	SchemaDetails::SchemaDetails()
+//	{
+//	}
 
-	SchemaDetails::SchemaDetails(SchemaDetails&& src)
-	{
-		m_version = src.m_version;
-		m_schemaId = src.m_schemaId;
-		m_caption = src.m_caption;
-		m_equipmentId = src.m_equipmentId;
-		m_signals = std::move(src.m_signals);
-		m_labels = std::move(src.m_labels);
-		m_guids = std::move(src.m_guids);
-	}
+//	SchemaDetails::SchemaDetails(SchemaDetails&& src)
+//	{
+//		m_version = src.m_version;
+//		m_schemaId = src.m_schemaId;
+//		m_caption = src.m_caption;
+//		m_equipmentId = src.m_equipmentId;
+//		m_signals = std::move(src.m_signals);
+//		m_labels = std::move(src.m_labels);
+//		m_guids = std::move(src.m_guids);
+//	}
 
 	QString SchemaDetails::getDetailsString(const Schema* schema)
 	{
