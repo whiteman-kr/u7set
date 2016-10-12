@@ -138,13 +138,13 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 				switch (static_cast<VcsItemAction::VcsItemActionType>(fileInfo->action().toInt()))
 				{
 				case VcsItemAction::Added:
-					b.setColor(QColor(0xE9, 0xFF, 0xE9));
+					b.setColor(QColor(0xF9, 0xFF, 0xF9));
 					break;
 				case VcsItemAction::Modified:
-					b.setColor(QColor(0xEA, 0xF0, 0xFF));
+					b.setColor(QColor(0xF4, 0xFA, 0xFF));
 					break;
 				case VcsItemAction::Deleted:
-					b.setColor(QColor(0xFF, 0xF0, 0xF0));
+					b.setColor(QColor(0xFF, 0xF4, 0xF4));
 					break;
 				}
 

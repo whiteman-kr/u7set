@@ -868,42 +868,18 @@ void SchemaControlTabPage::search()
 		// Parse details
 		//
 		VFrame30::SchemaDetails details;
+
 		bool ok = details.parseDetails(f->details());
-
-		if (ok == true)
+		if (ok == false)
 		{
-			if (details.m_schemaId.contains(searchText, Qt::CaseInsensitive) == true)
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
+			continue;
+		}
 
-			if (details.m_caption.contains(searchText, Qt::CaseInsensitive) == true)
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			if (details.m_signals.find(searchText) != details.m_signals.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			if (details.m_labels.find(searchText) != details.m_labels.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			QUuid textAsUuid(searchText);
-
-			if (textAsUuid.isNull() == false &&
-				details.m_guids.find(textAsUuid) != details.m_guids.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
+		bool searchResult = details.searchForString(searchText);
+		if (searchResult == true)
+		{
+			foundFiles.push_back(f);
+			continue;
 		}
 	}
 
