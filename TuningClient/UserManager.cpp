@@ -114,7 +114,7 @@ void UserManager::Store()
 {
 	QSettings s(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName() + "Users");
 
-	s.setValue("Users/count", m_users.size());
+	s.setValue("Users/count", static_cast<quint64>(m_users.size()));
 
 	int index = 0;
 	for (const User& u : m_users)
