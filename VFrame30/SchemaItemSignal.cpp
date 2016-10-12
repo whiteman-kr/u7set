@@ -678,6 +678,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_cachedGridSize * 10;
 	}
 
+	// Text search
+	//
+	bool SchemaItemSignal::searchText(const QString& text) const
+	{
+		return appSignalIds().contains(text, Qt::CaseInsensitive);
+	}
+
 	QString SchemaItemSignal::appSignalIds() const
 	{
 		QString result;

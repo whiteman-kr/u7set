@@ -18,6 +18,7 @@
 #include <functional>
 #include <type_traits>
 #include <limits>
+#include <iterator>
 
 
 // Qt includes
@@ -78,6 +79,7 @@
 
 #include <QSplitter>
 #include <QTextEdit>
+#include <QLineEdit>
 #include <QComboBox>
 
 #include <QMessageBox>
