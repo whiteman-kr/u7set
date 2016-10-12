@@ -60,6 +60,8 @@ public:
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
 
+	QString usernameById(int userId) const;
+
 	void reset();
 
 public slots:
@@ -106,6 +108,8 @@ private:
 
 	int m_sortColumn = ObjectPlaceColumn ;
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+
+	std::map<int, QString> m_users;
 };
 
 

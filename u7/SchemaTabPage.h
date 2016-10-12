@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "FileListView.h"
+#include "SchemaListModel.h"
 #include "../lib/DbController.h"
 #include "EditSchemaWidget.h"
 #include "GlobalMessanger.h"
@@ -11,23 +11,27 @@
 // SchemaFileView
 //
 //
-class SchemaFileView : public FileListView
+class SchemaFileView : public QTableView, public HasDbController
 {
 	Q_OBJECT
+
 public:
 	SchemaFileView(DbController* dbcontroller, const QString& parentFileName);
-	virtual ~SchemaFileView();
+
+	// Methods
+	//
+protected:
+	void CreateActions();
 
 	// Methods
 	//
 public:
-	virtual void openFile(std::vector<DbFileInfo> files) override;
-	virtual void viewFile(std::vector<DbFileInfo> files) override;
-	virtual void addFile() override;
-	virtual void checkIn(std::vector<DbFileInfo> files) override;
-	virtual void undoChanges(std::vector<DbFileInfo> files) override;
-	virtual void deleteFile(std::vector<DbFileInfo> files) override;
-	virtual void fileDoubleClicked(DbFileInfo file) override;
+	void setFiles(const std::vector<DbFileInfo>& files);
+	void clear();
+
+	void getSelectedFiles(std::vector<DbFileInfo>* out);
+
+	void refreshFiles();
 
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
@@ -37,9 +41,71 @@ signals:
 	void checkInSignal(std::vector<DbFileInfo> files);
 	void undoChangesSignal(std::vector<DbFileInfo> files);
 
-	// Data
+	// Protected slots
+	//
+protected slots:
+	void projectOpened();
+	void projectClosed();
+
+	void slot_OpenFile();
+	void slot_ViewFile();
+	void slot_CheckOut();
+	void slot_CheckIn();
+	void slot_UndoChanges();
+	void slot_AddFile();
+	void slot_DeleteFile();
+	void slot_GetWorkcopy();
+	void slot_SetWorkcopy();
+	void slot_RefreshFiles();
+	void slot_doubleClicked(const QModelIndex& index);
+
+public slots:
+	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
+	// Public properties
+	//
+public:
+	SchemaListModel& filesModel();
+
+	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
+
+	const DbFileInfo& parentFile() const;
+	int parentFileId() const;
+
+	// Protected properties
 	//
 protected:
+
+	// Data
+	//
+private:
+	SchemaListModel m_filesModel;
+
+	QString m_parentFileName;
+	DbFileInfo m_parentFile;
+
+	//	Contexet Menu
+	//
+protected:
+	QAction* m_openFileAction = nullptr;
+	QAction* m_viewFileAction = nullptr;
+	// --
+	QAction* m_separatorAction0 = nullptr;
+	QAction* m_checkOutAction = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesAction = nullptr;
+	// --
+	QAction* m_separatorAction1 = nullptr;
+	QAction* m_addFileAction = nullptr;
+	QAction* m_deleteFileAction = nullptr;
+	// --
+	QAction* m_separatorAction2 = nullptr;
+	QAction* m_exportWorkingcopyAction = nullptr;
+	QAction* m_importWorkingcopyAction = nullptr;
+	// --
+	QAction* m_separatorAction3 = nullptr;
+	QAction* m_refreshFileAction = nullptr;
+	// End of ConextMenu
 };
 
 

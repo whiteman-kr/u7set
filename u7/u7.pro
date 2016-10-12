@@ -118,7 +118,6 @@ SOURCES +=\
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbProgress.cpp \
-    FileListView.cpp \
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
@@ -182,6 +181,8 @@ SOURCES +=\
     ChooseUfbDialog.cpp \
     Builder/ModulesRawData.cpp \
     Builder/BdfFile.cpp
+    SchemaListModel.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -225,7 +226,6 @@ HEADERS  += \
     BuildTabPage.h \
     ../lib/OutputLog.h \
     ../lib/DbProgress.h \
-    FileListView.h \
     version.h \
     ../lib/Crc.h \
     DialogFileEditor.h \
@@ -293,6 +293,7 @@ HEADERS  += \
     ../lib/LmLimits.h \
     Builder/ModulesRawData.h \
     Builder/BdfFile.h
+    SchemaListModel.h
 
 FORMS    += \
     ChangesetDialog.ui \

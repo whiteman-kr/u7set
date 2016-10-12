@@ -1053,6 +1053,11 @@ namespace Builder
 
 		for (std::shared_ptr<AppLogicModule> m : m_modules)
 		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
 			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleEquipmentId()));
 
 			ok = m->orderItems(log);
@@ -1176,6 +1181,11 @@ namespace Builder
 
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
 			LOG_MESSAGE(m_log, schema->caption());
 
 			ok = parseAppLogicSchema(schema);
@@ -1265,6 +1275,15 @@ namespace Builder
 		//
 		for (DbFileInfo& fi : applicationLogicFileList)
 		{
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			// --
+			//
 			LOG_MESSAGE(m_log, tr("Loading %1").arg(fi.fileName()));
 
 			std::shared_ptr<DbFile> file;

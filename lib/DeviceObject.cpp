@@ -1804,21 +1804,27 @@ namespace Hardware
 		return;
 	}
 
-	void DeviceObject::sortByUser(Qt::SortOrder order)
+	void DeviceObject::sortByUser(Qt::SortOrder order, const std::map<int, QString>& users)
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			[order, &users](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
 			{
 				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
 				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-				if (ref1->m_fileInfo.userId() < ref2->m_fileInfo.userId())
+				auto uit1 = users.find(ref1->m_fileInfo.userId());
+				QString u1 =  uit1 == users.end() ? "Unknows" : uit1->second;
+
+				auto uit2 = users.find(ref2->m_fileInfo.userId());
+				QString u2 =  uit2 == users.end() ? "Unknows" : uit2->second;
+
+				if (u1 < u2)
 				{
 					return true;
 				}
 				else
 				{
-					if (ref1->m_fileInfo.userId() == ref2->m_fileInfo.userId())
+					if (u1 == u2)
 					{
 						return ref1->m_equipmentId < ref2->m_equipmentId;
 					}

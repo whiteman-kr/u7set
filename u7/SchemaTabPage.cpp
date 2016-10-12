@@ -12,63 +12,725 @@
 //
 //
 SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parentFileName) :
-	FileListView(dbcontroller, parentFileName)
+	HasDbController(dbcontroller),
+	m_parentFileName(parentFileName)
 {
+	assert(dbcontroller != nullptr);
+	assert(m_parentFileName.isEmpty() == false);
+
+	// --
+	//
 	filesModel().setFilter("vfr");
+
+	// --
+	//
+	CreateActions();
+
+	// Adjust view
+	//
+	setModel(&m_filesModel);
+
+	setShowGrid(false);
+	setSortingEnabled(true);
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+	// Adjust headers
+	//
+	verticalHeader()->hide();
+	verticalHeader()->setDefaultSectionSize(static_cast<int>(fontMetrics().height() * 1.4));
+	horizontalHeader()->setHighlightSections(false);
+
+	// Set context menu
+	//
+	setContextMenuPolicy(Qt::ActionsContextMenu);
+
+	addAction(m_openFileAction);
+	addAction(m_viewFileAction);
+	addAction(m_separatorAction0);
+
+	addAction(m_checkOutAction);
+	addAction(m_checkInAction);
+	addAction(m_undoChangesAction);
+
+	addAction(m_separatorAction1);
+	addAction(m_addFileAction);
+	addAction(m_deleteFileAction);
+
+	addAction(m_separatorAction2);
+	addAction(m_exportWorkingcopyAction);
+	addAction(m_importWorkingcopyAction);
+
+	addAction(m_separatorAction3);
+	addAction(m_refreshFileAction);
+
+	// --
+	//
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaFileView::projectOpened);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaFileView::projectClosed);
+
+	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileView::filesViewSelectionChanged);
+
+	connect(this, &QTableView::doubleClicked, this, &SchemaFileView::slot_doubleClicked);
+
 	return;
 }
 
-SchemaFileView::~SchemaFileView()
+void SchemaFileView::CreateActions()
 {
+	m_openFileAction = new QAction(tr("Open..."), this);
+	m_openFileAction->setStatusTip(tr("Open file for edit..."));
+	m_openFileAction->setEnabled(false);
+	connect(m_openFileAction, &QAction::triggered, this, &SchemaFileView::slot_OpenFile);
+
+	m_viewFileAction = new QAction(tr("View..."), this);
+	m_viewFileAction->setStatusTip(tr("View file..."));
+	m_viewFileAction->setEnabled(false);
+	connect(m_viewFileAction, &QAction::triggered, this, &SchemaFileView::slot_ViewFile);
+
+	m_separatorAction0 = new QAction(this);
+	m_separatorAction0->setSeparator(true);
+
+	m_checkOutAction = new QAction(tr("Check Out"), this);
+	m_checkOutAction->setStatusTip(tr("Check Out for edit..."));
+	m_checkOutAction->setEnabled(false);
+	connect(m_checkOutAction, &QAction::triggered, this, &SchemaFileView::slot_CheckOut);
+
+	m_checkInAction = new QAction(tr("Check In"), this);
+	m_checkInAction->setStatusTip(tr("Check In changes..."));
+	m_checkInAction->setEnabled(false);
+	connect(m_checkInAction, &QAction::triggered, this, &SchemaFileView::slot_CheckIn);
+
+	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
+	m_undoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
+	m_undoChangesAction->setEnabled(false);
+	connect(m_undoChangesAction, &QAction::triggered, this, &SchemaFileView::slot_UndoChanges);
+
+	m_separatorAction1 = new QAction(this);
+	m_separatorAction1->setSeparator(true);
+
+	m_addFileAction = new QAction(tr("Add File..."), this);
+	m_addFileAction->setStatusTip(tr("Add file to version control..."));
+	m_addFileAction->setEnabled(false);
+	connect(m_addFileAction, &QAction::triggered, this, &SchemaFileView::slot_AddFile);
+
+	m_deleteFileAction = new QAction(tr("Delete File..."), this);
+	m_deleteFileAction ->setStatusTip(tr("Mark file as deleted..."));
+	m_deleteFileAction ->setEnabled(false);
+	connect(m_deleteFileAction , &QAction::triggered, this, &SchemaFileView::slot_DeleteFile);
+
+	m_separatorAction2 = new QAction(this);
+	m_separatorAction2->setSeparator(true);
+
+	m_exportWorkingcopyAction = new QAction(tr("Export Workingcopy..."), this);
+	m_exportWorkingcopyAction->setStatusTip(tr("Export workingcopy file to disk..."));
+	m_exportWorkingcopyAction->setEnabled(false);
+	connect(m_exportWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_GetWorkcopy);
+
+	m_importWorkingcopyAction = new QAction(tr("Import Workingcopy..."), this);
+	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy from disk file to project file..."));
+	m_importWorkingcopyAction->setEnabled(false);
+	connect(m_importWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_SetWorkcopy);
+
+	m_separatorAction3 = new QAction(this);
+	m_separatorAction3->setSeparator(true);
+
+	m_refreshFileAction = new QAction(tr("Refresh"), this);
+	m_refreshFileAction->setStatusTip(tr("Refresh file list..."));
+	m_refreshFileAction->setEnabled(false);
+	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileView::slot_RefreshFiles);
+
+	return;
 }
 
-void SchemaFileView::openFile(std::vector<DbFileInfo> files)
+void SchemaFileView::setFiles(const std::vector<DbFileInfo>& files)
 {
+	// Save old selection
+	//
+	QItemSelectionModel* selModel = this->selectionModel();
+	QModelIndexList	s = selModel->selectedRows();
+
+	std::vector<int> filesIds;
+	filesIds.reserve(s.size());
+
+	for (int i = 0; i < s.size(); i++)
+	{
+		std::shared_ptr<DbFileInfo> file = filesModel().fileByRow(s[i].row());
+		if (file.get() == nullptr)
+		{
+			continue;
+		}
+
+		int fileId = file->fileId();
+		if (fileId != -1)
+		{
+			filesIds.push_back(fileId);
+		}
+	}
+
+	selModel->clear();
+
+	// Get file list from the DB
+	//
+	std::vector<DbUser> users;
+	db()->getUserList(&users, this);
+
+	filesModel().setFiles(files, users);
+
+	// Restore selection
+	//
+	for (unsigned int i = 0; i < filesIds.size(); i++)
+	{
+		int selectRow = filesModel().getFileRow(filesIds[i]);
+
+		if (selectRow != -1)
+		{
+			QModelIndex md = filesModel().index(selectRow, 0);
+			selModel->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		}
+	}
+
+	return;
+}
+
+void SchemaFileView::clear()
+{
+	m_filesModel.clear();
+}
+
+void SchemaFileView::getSelectedFiles(std::vector<DbFileInfo>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return;
+	}
+
+	out->clear();
+
+	QItemSelectionModel* selModel = selectionModel();
+	if (selModel->hasSelection() == false)
+	{
+		return;
+	}
+
+	QModelIndexList	sel = selModel->selectedRows();
+
+	out->reserve(sel.size());
+
+	for (int i = 0; i < sel.size(); i++)
+	{
+		QModelIndex mi = sel[i];
+
+		auto file = m_filesModel.fileByRow(mi.row());
+
+		if (file.get() != nullptr)
+		{
+			out->push_back(*file.get());
+		}
+		else
+		{
+			assert(file.get() != nullptr);
+		}
+	}
+
+	return;
+}
+
+void SchemaFileView::refreshFiles()
+{
+	// Get file list from the DB
+	//
+	std::vector<DbFileInfo> files;
+
+	db()->getFileList(&files, parentFile().fileId(), filesModel().filter(), true, this);
+
+	// Set files to the view
+	//
+	setFiles(files);
+
+	setSortingEnabled(true);	// it triggers setSortingEnabled() with the current sort section and order.
+
+	return;
+}
+
+void SchemaFileView::projectOpened()
+{
+	this->setEnabled(true);
+
+	filesViewSelectionChanged(QItemSelection(), QItemSelection());
+
+	m_addFileAction->setEnabled(true);
+	m_refreshFileAction->setEnabled(true);
+
+	m_parentFile = db()->systemFileInfo(m_parentFileName);
+	assert(m_parentFile.fileId() != -1);
+
+	// Refresh file list in FileModel
+	//
+	refreshFiles();
+
+	return;
+}
+
+void SchemaFileView::projectClosed()
+{
+	this->setEnabled(false);
+
+	m_addFileAction->setEnabled(false);
+	m_refreshFileAction->setEnabled(false);
+
+	m_parentFile = DbFileInfo();
+
+	clear();
+}
+
+void SchemaFileView::slot_OpenFile()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedOut &&
+			(file.fileId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
 	emit openFileSignal(files);
+
 	return;
 }
 
-void SchemaFileView::viewFile(std::vector<DbFileInfo> files)
+void SchemaFileView::slot_ViewFile()
 {
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+		files.push_back(file);
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
 	emit viewFileSignal(files);
+
 	return;
 }
 
-void SchemaFileView::addFile()
+
+void SchemaFileView::slot_CheckOut()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedIn)
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	db()->checkOut(files, this);
+	refreshFiles();
+
+	return;
+}
+
+void SchemaFileView::slot_CheckIn()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	emit checkInSignal(files);
+
+	return;
+}
+
+void SchemaFileView::slot_UndoChanges()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	emit undoChangesSignal(files);
+
+	return;
+}
+
+void SchemaFileView::slot_AddFile()
 {
 	emit addFileSignal();
+
+	//  setSortingEnabled() triggers a call to sortByColumn() with the current sort section and order.
+	//
+	setSortingEnabled(true);
+
+	return;
 }
 
-void SchemaFileView::checkIn(std::vector<DbFileInfo> files)
+void SchemaFileView::slot_DeleteFile()
 {
-	emit checkInSignal(files);
-}
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
 
-void SchemaFileView::undoChanges(std::vector<DbFileInfo> files)
-{
-	emit undoChangesSignal(files);
-}
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
 
-void SchemaFileView::deleteFile(std::vector<DbFileInfo> files)
-{
-	emit deleteFileSignal(files);
-}
-
-void SchemaFileView::fileDoubleClicked(DbFileInfo file)
-{
-	std::vector<DbFileInfo> v;
-	v.push_back(file);
-
-	if (file.state() == VcsState::CheckedOut)
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
 	{
-		openFile(v);
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedIn ||
+			(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId()))
+		{
+			files.push_back(file);
+		}
 	}
-	else
+
+	if (files.empty() == true)
 	{
-		viewFile(v);
+		return;
+	}
+
+	emit deleteFileSignal(files);
+
+	return;
+}
+
+void SchemaFileView::slot_GetWorkcopy()
+{
+	// Get files workcopies form the database
+	//
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	// --
+	//
+	// Select destination folder
+	//
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (dir.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Get files from the database
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
+	db()->getWorkcopy(files, &out, this);
+
+	// Save files to disk
+	//
+	for (unsigned int i = 0; i < out.size(); i++)
+	{
+		bool writeResult = out[i]->writeToDisk(dir);
+
+		if (writeResult == false)
+		{
+			QMessageBox msgBox;
+			msgBox.setText(tr("Write file error."));
+			msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
+			msgBox.exec();
+		}
 	}
 
 	return;
+}
+
+void SchemaFileView::slot_SetWorkcopy()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	// --
+	//
+	if (files.size() != 1)
+	{
+		return;
+	}
+
+	auto fileInfo = files[0];
+
+	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.userId() != db()->currentUser().userId())
+	{
+		return;
+	}
+
+	// Select file
+	//
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);
+
+	bool readResult = file->readFromDisk(fileName);
+	if (readResult == false)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Can't read file %1.").arg(fileName));
+		mb.exec();
+		return;
+	}
+
+	// Set file id for DbStore setWorkcopy
+	//
+	file->setFileId(fileInfo.fileId());
+
+	std::vector<std::shared_ptr<DbFile>> workcopyFiles;
+	workcopyFiles.push_back(file);
+
+	db()->setWorkcopy(workcopyFiles, this);
+
+	refreshFiles();
+
+	return;
+}
+
+void SchemaFileView::slot_RefreshFiles()
+{
+	refreshFiles();
+
+	return;
+}
+
+void SchemaFileView::slot_doubleClicked(const QModelIndex& index)
+{
+	if (index.isValid() == true)
+	{
+		std::shared_ptr<DbFileInfo> file = m_filesModel.fileByRow(index.row());
+
+		if (file.get() != nullptr)
+		{
+			std::vector<DbFileInfo> v;
+			v.push_back(*file.get());
+
+			if (file->state() == VcsState::CheckedOut)
+			{
+				emit openFileSignal(v);
+			}
+			else
+			{
+				emit viewFileSignal(v);
+			}
+		}
+		else
+		{
+			assert(file.get() != nullptr);
+		}
+	}
+
+	return;
+}
+
+void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+{
+	QModelIndexList	s = selectionModel()->selectedRows();
+
+	bool hasOpenPossibility = false;
+	int hasViewPossibility = false;
+	bool hasCheckOutPossibility = false;
+	bool hasCheckInPossibility = false;
+	bool hasUndoPossibility = false;
+	bool canGetWorkcopy = false;
+	int canSetWorkcopy = 0;
+	bool hasDeletePossibility = false;
+
+	int currentUserId = db()->currentUser().userId();;
+
+	for (auto i = s.begin(); i != s.end(); ++i)
+	{
+		const std::shared_ptr<DbFileInfo> fileInfo = filesModel().fileByRow(i->row());
+
+		// hasViewPossibility -- almost any file SINGLE can be opened
+		//
+		hasViewPossibility ++;
+
+		// hasOpenPossibility -- almost any file can be opened
+		//
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		{
+			hasOpenPossibility = true;
+		}
+
+		// hasCheckInPossibility
+		//
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		{
+			hasCheckInPossibility = true;
+		}
+
+		// hasUndoPossibility
+		//
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		{
+			hasUndoPossibility = true;
+		}
+
+		// hasCheckOutPossibility
+		//
+		if (fileInfo->state() == VcsState::CheckedIn)
+		{
+			hasCheckOutPossibility = true;
+		}
+
+		// canGetWorkcopy, canSetWorkcopy
+		//
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		{
+			canGetWorkcopy = true;
+			canSetWorkcopy ++;
+		}
+
+		// hasDeletePossibility
+		if ((fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId) ||
+			fileInfo->state() == VcsState::CheckedIn)
+		{
+			hasDeletePossibility = true;
+		}
+	}
+
+	m_openFileAction->setEnabled(hasOpenPossibility);
+	m_viewFileAction->setEnabled(hasViewPossibility == 1);
+
+	m_checkOutAction->setEnabled(hasCheckOutPossibility);
+	m_checkInAction->setEnabled(hasCheckInPossibility);
+	m_undoChangesAction->setEnabled(hasUndoPossibility);
+
+	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
+	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
+
+	m_deleteFileAction->setEnabled(hasDeletePossibility);
+
+	return;
+
+}
+
+
+SchemaListModel& SchemaFileView::filesModel()
+{
+	return m_filesModel;
+}
+
+const std::vector<std::shared_ptr<DbFileInfo>>& SchemaFileView::files() const
+{
+	return m_filesModel.files();
+}
+
+const DbFileInfo& SchemaFileView::parentFile() const
+{
+	return m_parentFile;
+}
+
+int SchemaFileView::parentFileId() const
+{
+	return m_parentFile.fileId();
 }
 
 
@@ -868,42 +1530,18 @@ void SchemaControlTabPage::search()
 		// Parse details
 		//
 		VFrame30::SchemaDetails details;
+
 		bool ok = details.parseDetails(f->details());
-
-		if (ok == true)
+		if (ok == false)
 		{
-			if (details.m_schemaId.contains(searchText, Qt::CaseInsensitive) == true)
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
+			continue;
+		}
 
-			if (details.m_caption.contains(searchText, Qt::CaseInsensitive) == true)
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			if (details.m_signals.find(searchText) != details.m_signals.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			if (details.m_labels.find(searchText) != details.m_labels.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
-
-			QUuid textAsUuid(searchText);
-
-			if (textAsUuid.isNull() == false &&
-				details.m_guids.find(textAsUuid) != details.m_guids.end())
-			{
-				foundFiles.push_back(f);
-				continue;
-			}
+		bool searchResult = details.searchForString(searchText);
+		if (searchResult == true)
+		{
+			foundFiles.push_back(f);
+			continue;
 		}
 	}
 

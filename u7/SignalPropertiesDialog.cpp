@@ -10,23 +10,33 @@
 #include "Stable.h"
 
 
-void editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
+std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
 	SignalSet signalSet;
 	dbController->getSignals(&signalSet, parent);
 	dbController->getUnits(Signal::unitList.get(), parent);
+
 	int readOnly = false;
 	QVector<Signal*> signalVector;
 	QMap<QString, int> signalIndexMap;
 	int lastIndexProcessed = -1;
 	QString wrongIds;
-	for (QString id : signalId)
+	QStringList foundIds;
+	std::vector<std::pair<QString, QString>> result;
+
+	result.resize(signalId.count());
+
+	for (int i = 0; i < signalId.count(); i++)
 	{
+		QString id = signalId[i];
 		id = id.trimmed();
+		result[i].first = id;
+		result[i].second = id;
 		if (signalIndexMap.contains(id))
 		{
 			int index = signalIndexMap[id];
 			signalVector.push_back(&signalSet[index]);
+			foundIds.push_back(id);
 			continue;
 		}
 		for (lastIndexProcessed++; lastIndexProcessed < signalSet.count(); lastIndexProcessed++)
@@ -36,6 +46,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			if (currentId == id)
 			{
 				signalVector.push_back(&signalSet[lastIndexProcessed]);
+				foundIds.push_back(id);
 				break;
 			}
 		}
@@ -58,7 +69,7 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 
 	if (signalVector.isEmpty())
 	{
-		return;
+		return result;
 	}
 
 	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, nullptr, parent);
@@ -107,6 +118,18 @@ void editApplicationSignals(const QStringList& signalId, DbController* dbControl
 			QMessageBox::critical(parent, "Error", message);
 		}
 	}
+
+	for (int i = 0; i < foundIds.count(); i++)
+	{
+		for (size_t j = 0; j < result.size(); j++)
+		{
+			if (result[j].first == foundIds[i])
+			{
+				result[j].second = signalVector[i]->appSignalID();
+			}
+		}
+	}
+	return result;
 }
 
 

@@ -897,19 +897,20 @@ namespace VFrame30
 	//
 	//
 
-	SchemaDetails::SchemaDetails()
-	{
-	}
+//	SchemaDetails::SchemaDetails()
+//	{
+//	}
 
-	SchemaDetails::SchemaDetails(SchemaDetails&& src)
-	{
-		m_version = src.m_version;
-		m_schemaId = src.m_schemaId;
-		m_caption = src.m_caption;
-		m_signals = std::move(src.m_signals);
-		m_labels = std::move(src.m_labels);
-		m_guids = std::move(src.m_guids);
-	}
+//	SchemaDetails::SchemaDetails(SchemaDetails&& src)
+//	{
+//		m_version = src.m_version;
+//		m_schemaId = src.m_schemaId;
+//		m_caption = src.m_caption;
+//		m_equipmentId = src.m_equipmentId;
+//		m_signals = std::move(src.m_signals);
+//		m_labels = std::move(src.m_labels);
+//		m_guids = std::move(src.m_guids);
+//	}
 
 	QString SchemaDetails::getDetailsString(const Schema* schema)
 	{
@@ -952,6 +953,13 @@ namespace VFrame30
 		jsonObject.insert("Version", QJsonValue(1));
 		jsonObject.insert("SchemaID", QJsonValue(schema->schemaID()));
 		jsonObject.insert("Caption", QJsonValue(schema->caption()));
+
+		if (schema->isLogicSchema() == true)
+		{
+			assert(schema->toLogicSchema() != nullptr);
+			jsonObject.insert("EquipmentID", QJsonValue(schema->toLogicSchema()->equipmentIds()));
+		}
+
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
 		jsonObject.insert("Labels", QJsonValue::fromVariant(labelsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
@@ -1012,6 +1020,22 @@ namespace VFrame30
 				//
 				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
 
+				// Caption
+				//
+				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
+
+				// EquipmentID
+				//
+				QJsonValue eqidValue = jsonObject.value(QLatin1String("EquipmentID")).toString();
+				if (eqidValue.isUndefined() == false)
+				{
+					m_equipmentId = eqidValue.toString();
+				}
+				else
+				{
+					m_equipmentId.clear();
+				}
+
 				// Signals
 				//
 				m_signals.clear();
@@ -1046,8 +1070,44 @@ namespace VFrame30
 			assert(false);
 			return false;
 		}
-
-
 		return true;
+	}
+
+	bool SchemaDetails::searchForString(const QString& searchText) const
+	{
+		if (m_schemaId.contains(searchText, Qt::CaseInsensitive) == true)
+		{
+			return true;
+		}
+
+		if (m_caption.contains(searchText, Qt::CaseInsensitive) == true)
+		{
+			return true;
+		}
+
+		if (m_equipmentId.contains(searchText, Qt::CaseInsensitive) == true)
+		{
+			return true;
+		}
+
+		if (m_signals.find(searchText) != m_signals.end())
+		{
+			return true;
+		}
+
+		if (m_labels.find(searchText) != m_labels.end())
+		{
+			return true;
+		}
+
+		QUuid textAsUuid(searchText);
+
+		if (textAsUuid.isNull() == false &&
+			m_guids.find(textAsUuid) != m_guids.end())
+		{
+			return true;
+		}
+
+		return false;
 	}
 }
