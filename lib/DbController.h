@@ -253,6 +253,8 @@ public:
 
 	QString lastError() const;
 
+	QString userName(int userId) const;
+
 	//
 	// Data
 	//
@@ -266,6 +268,11 @@ private:
 	DbProgress m_progress;
 
 	QString m_lastError;
+
+	// Users
+	//
+	mutable QMutex m_userMutex;
+	std::map<int, DbUser> m_users;
 };
 
 

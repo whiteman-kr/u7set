@@ -156,12 +156,15 @@ namespace VFrame30
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
 
+		bool searchForString(const QString& searchText) const;
+
 	public:
 		// WARNING !!!! If add any new members, add them to the move construnctor;
 		//
 		int m_version = 0;
 		QString m_schemaId;
 		QString m_caption;
+		QString m_equipmentId;			// Valid for LogicSchemas
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QUuid> m_guids;

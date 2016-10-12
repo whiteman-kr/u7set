@@ -245,7 +245,7 @@ namespace Hardware
 		void sortByEquipmentId(Qt::SortOrder order);
 		void sortByCaption(Qt::SortOrder order);
 		void sortByState(Qt::SortOrder order);
-		void sortByUser(Qt::SortOrder order);
+		void sortByUser(Qt::SortOrder order, const std::map<int, QString>& users);
 
 		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
 		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);

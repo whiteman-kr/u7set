@@ -60,7 +60,7 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 				}
 
 			case FileUserColumn:
-				return QVariant(fileInfo->userId());
+				return QVariant(usernameById(fileInfo->userId()));
 
 			case FileActionColumn:
 				return QVariant(fileInfo->action().text());
@@ -68,8 +68,8 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 			case FileLastCheckInColumn:
 				return QVariant(fileInfo->lastCheckIn().toString());
 
-			case FileIdColumn:
-				return QVariant(fileInfo->fileId());
+//			case FileIdColumn:
+//				return QVariant(fileInfo->fileId());
 
 			case FileIssuesColumn:
 				{
@@ -85,9 +85,23 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 							return QString();
 						}
 
-						QString result = QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+						if (issueCount.errors > 0 && issueCount.warnings == 0)
+						{
+							return QString("ERR: %1").arg(issueCount.errors);
+						}
 
-						return result;
+						if (issueCount.errors > 0 && issueCount.warnings > 0)
+						{
+							return QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+						}
+
+						if (issueCount.errors == 0 && issueCount.warnings > 0)
+						{
+							return QString("WRN: %2").arg(issueCount.warnings);
+						}
+
+						assert(false);
+						return QVariant();
 					}
 					else
 					{
@@ -124,13 +138,13 @@ QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayR
 				switch (static_cast<VcsItemAction::VcsItemActionType>(fileInfo->action().toInt()))
 				{
 				case VcsItemAction::Added:
-					b.setColor(QColor(0xE9, 0xFF, 0xE9));
+					b.setColor(QColor(0xF9, 0xFF, 0xF9));
 					break;
 				case VcsItemAction::Modified:
-					b.setColor(QColor(0xEA, 0xF0, 0xFF));
+					b.setColor(QColor(0xF4, 0xFA, 0xFF));
 					break;
 				case VcsItemAction::Deleted:
-					b.setColor(QColor(0xFF, 0xF0, 0xF0));
+					b.setColor(QColor(0xFF, 0xF4, 0xF4));
 					break;
 				}
 
@@ -212,8 +226,8 @@ QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int
 			case FileLastCheckInColumn:
 				return QObject::tr("Last Check In");
 
-			case FileIdColumn:
-				return QObject::tr("FileID");
+//			case FileIdColumn:
+//				return QObject::tr("FileID");
 
 			case FileIssuesColumn:
 				return QObject::tr("Issues");
@@ -243,129 +257,119 @@ void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*
 
 	switch (column)
 	{
-		case FileNameColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->fileName() > f2->fileName();
-					}
-					else
-					{
-						return f1->fileName() <= f2->fileName();
-					}
-				});
-			break;
+	case FileNameColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			QString n1 = f1->fileName();
+			QString n2 = f2->fileName();
 
-		case FileSizeColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->size() > f2->size();
-					}
-					else
-					{
-						return f1->size() <= f2->size();
-					}
-				});
-			break;
+			if (order == Qt::AscendingOrder)
+			{
+				return n2 < n1;
+			}
+			else
+			{
+				return n1 < n2;
+			}
+		});
+		break;
 
-		case FileStateColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->state().text() > f2->state().text();
-					}
-					else
-					{
-						return f1->state().text() <= f2->state().text();
-					}
-				});
-			break;
+	case FileSizeColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			int s1 = f1->size();
+			int s2 = f2->size();
 
-		case FileUserColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->userId() > f2->userId();
-					}
-					else
-					{
-						return f1->userId() <= f2->userId();
-					}
-				});
-			break;
+			if (order == Qt::AscendingOrder)
+			{
+				return s2 < s1;
+			}
+			else
+			{
+				return s1 < s2;
+			}
+		});
+		break;
 
-		case FileActionColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->action().text() > f2->action().text();
-					}
-					else
-					{
-						return f1->action().text() <= f2->action().text();
-					}
-				});
-			break;
+	case FileStateColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			QString s1 = f1->state().text();
+			QString s2 = f2->state().text();
 
-		case FileLastCheckInColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->created() > f2->created();
-					}
-					else
-					{
-						return f1->created() <= f2->created();
-					}
-				});
-			break;
+			if (order == Qt::AscendingOrder)
+			{
+				return s2 < s1;
+			}
+			else
+			{
+				return s1 < s2;
+			}
+		});
+		break;
 
-		case FileIdColumn:
-			std::sort(m_files.begin(), m_files.end(),
-				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-				{
-					if (order == Qt::AscendingOrder)
-					{
-						return f1->fileId() > f2->fileId();
-					}
-					else
-					{
-						return f1->fileId() <= f2->fileId();
-					}
-				});
-			break;
+	case FileUserColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order, this](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			int uid1 = f1->userId();
+			int uid2 = f2->userId();
 
-//		case FileDetailsColumn:
-//			std::sort(m_files.begin(), m_files.end(),
-//				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-//				{
-//					if (order == Qt::AscendingOrder)
-//					{
-//						return f1->details() > f2->details();
-//					}
-//					else
-//					{
-//						return f1->details() <= f2->details();
-//					}
-//				});
-//			break;
+			QString u1 = this->usernameById(uid1);
+			QString u2 = this->usernameById(uid2);
 
+			if (order == Qt::AscendingOrder)
+			{
+				return u2 < u1;
+			}
+			else
+			{
+				return u1 < u2;
+			}
+		});
+		break;
 
-		default:
-			assert(false);
+	case FileActionColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			QString a1 = f1->action().text();
+			QString a2 = f2->action().text();
+
+			if (order == Qt::AscendingOrder)
+			{
+				return a2 < a1;
+			}
+			else
+			{
+				return a1 < a2;
+			}
+		});
+		break;
+
+	case FileLastCheckInColumn:
+		std::sort(m_files.begin(), m_files.end(),
+				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+		{
+			QDateTime c1 = f1->created();
+			QDateTime c2 = f2->created();
+
+			if (order == Qt::AscendingOrder)
+			{
+				return c2 < c1;
+			}
+			else
+			{
+				return c1 < c2;
+			}
+		});
+		break;
+
+	default:
+		assert(false);
 	}
 
 	// Move pers indexes
@@ -401,7 +405,7 @@ void FileListModel::addFile(std::shared_ptr<DbFileInfo> file)
 	}
 }
 
-void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
+void FileListModel::setFiles(const std::vector<DbFileInfo> &files, const std::vector<DbUser>& users)
 {
 	emit layoutAboutToBeChanged();
 
@@ -443,6 +447,15 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 	}
 
 	emit layoutChanged();
+
+	// Set users
+	//
+	m_users.clear();
+	for (const DbUser& u : users)
+	{
+		m_users[u.userId()] = u.username();
+	}
+
 	return;
 }
 
@@ -451,6 +464,8 @@ void FileListModel::clear()
 	beginResetModel();
 	m_files.clear();
 	endResetModel();
+
+	m_users.clear();
 	return;
 }
 
@@ -517,6 +532,20 @@ void FileListModel::setFilter(const QString& value)
 const std::vector<std::shared_ptr<DbFileInfo>>& FileListModel::files() const
 {
 	return m_files;
+}
+
+QString FileListModel::usernameById(int userId) const
+{
+	auto it = m_users.find(userId);
+
+	if (it == m_users.end())
+	{
+		return QString("Undefined");
+	}
+	else
+	{
+		return it->second;
+	}
 }
 
 //
@@ -697,7 +726,10 @@ void FileListView::setFiles(const std::vector<DbFileInfo>& files)
 
 	// Get file list from the DB
 	//
-	filesModel().setFiles(files);
+	std::vector<DbUser> users;
+	dbController()->getUserList(&users, this);
+
+	filesModel().setFiles(files, users);
 
 	// Restore selection
 	//

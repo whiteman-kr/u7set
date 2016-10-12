@@ -194,7 +194,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 			case ObjectUserColumn:
 				if (devieFileInfo.state() == VcsState::CheckedOut)
 				{
-					v.setValue<qint32>(devieFileInfo.userId());
+					v.setValue<QString>(usernameById(devieFileInfo.userId()));
 				}
 				break;
 
@@ -409,7 +409,7 @@ void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column
 		object->sortByState(order);
 		break;
 	case ObjectUserColumn:
-		object->sortByUser(order);
+		object->sortByUser(order, m_users);
 		break;
 	default:
 		assert(false);
@@ -998,12 +998,27 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QM
 	return object;
 }
 
+QString EquipmentModel::usernameById(int userId) const
+{
+	auto it = m_users.find(userId);
+
+	if (it == m_users.end())
+	{
+		return QString("Undefined");
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
 void EquipmentModel::reset()
 {
 	beginResetModel();
 
 	m_configuration->deleteAllChildren();
 	m_preset->deleteAllChildren();
+	m_users.clear();
 
 	endResetModel();
 }
@@ -1020,6 +1035,21 @@ void EquipmentModel::projectOpened()
 	else
 	{
 		assert(dbController()->isProjectOpened() == true);
+	}
+
+	// Fill user list
+	//
+	m_users.clear();
+
+	std::vector<DbUser> users;
+	bool ok = dbController()->getUserList(&users, nullptr);
+
+	if (ok == true)
+	{
+		for (const DbUser& u : users)
+		{
+			m_users[u.userId()] = u.username();
+		}
 	}
 
 	endResetModel();
