@@ -117,6 +117,8 @@ const QVector<int> defaultColumnVisibility =
 	SC_HIGH_LIMIT
 };
 
+SignalsModel* SignalsModel::m_instance = nullptr;
+
 
 
 SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
@@ -434,6 +436,7 @@ SignalsModel::SignalsModel(DbController* dbController, SignalsTabPage* parent) :
 	m_parentWindow(parent),
 	m_dbController(dbController)
 {
+	m_instance = this;
 }
 
 SignalsModel::~SignalsModel()
@@ -979,6 +982,15 @@ void SignalsModel::clearSignals()
 	m_unitInfo.clear();
 }
 
+Signal*SignalsModel::getSignalByStrID(const QString signalStrID)
+{
+	if (m_signalSet.ID2IndexMapIsEmpty())
+	{
+		m_signalSet.buildID2IndexMap();
+	}
+	return m_signalSet.getSignal(signalStrID);
+}
+
 QVector<int> SignalsModel::getSameChannelSignals(int row)
 {
 	QVector<int> sameChannelSignalRows;
@@ -1061,7 +1073,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
@@ -1410,7 +1422,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	filterToolBar->addWidget(new QLabel(" complies ", this));
 	filterToolBar->addWidget(m_filterEdit);
 
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	m_filterHistory = settings.value("SignalsTabPage/filterHistory").toStringList();
 
 	m_completer = new QCompleter(m_filterHistory, this);
@@ -1520,7 +1532,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
@@ -2005,7 +2017,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 			model->setStringList(m_filterHistory);
 		}
 
-		QSettings settings;
+		QSettings settings(QSettings::UserScope, qApp->organizationName());
 		settings.setValue("SignalsTabPage/filterHistory", m_filterHistory);
 	}
 
@@ -2055,7 +2067,7 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 		m_signalsView->setColumnHidden(columnIndex, !action->isChecked());
 		if (action->isChecked() && m_signalsView->columnWidth(columnIndex) == 0)
 		{
-			QSettings settings;
+			QSettings settings(QSettings::UserScope, qApp->organizationName());
 			int newValue = settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[columnIndex]).replace("/", "|")).replace("\n", " "), DEFAULT_COLUMN_WIDTH).toInt();
 			if (newValue == 0)
 			{
@@ -2084,13 +2096,13 @@ void SignalsTabPage::saveColumnWidth(int index)
 	{
 		return;
 	}
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), width);
 }
 
 void SignalsTabPage::saveColumnVisibility(int index, bool visible)
 {
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
 }
 
@@ -2218,7 +2230,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	m_signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
 													m_signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
 	for (int i = 1; i < COLUMNS_COUNT; i++)
@@ -2273,7 +2285,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	setLayout(vl1);
 
-	resize(settings.value("PendingChangesDialog/size", qApp->desktop()->size() * 3 / 4).toSize());
+	resize(settings.value("PendingChangesDialog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
 	m_splitter->setChildrenCollapsible(false);
 
 	QList<int> list = m_splitter->sizes();
@@ -2379,7 +2391,7 @@ void CheckinSignalsDialog::openUndoDialog()
 
 void CheckinSignalsDialog::saveGeometry()
 {
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	settings.setValue("PendingChangesDialog/size", size());
 	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
 }
@@ -2392,8 +2404,8 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 {
 	setWindowTitle(tr("Undo signal changes"));
 
-	QSettings settings;
-	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->size() * 3 / 4).toSize());
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
@@ -2480,7 +2492,7 @@ void UndoSignalsDialog::undoSelected()
 		m_sourceModel->showErrors(states);
 	}
 
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	settings.setValue("UndoSignalsDialog/size", size());
 
 	accept();
