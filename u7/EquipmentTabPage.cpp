@@ -750,7 +750,6 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		else
 		{
 			const std::shared_ptr<DbFile>& freshFile = *freshFileIt;
-
 			ok = d->Load(freshFile->data());	// Refresh data in the object
 		}
 
