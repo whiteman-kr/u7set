@@ -16,8 +16,22 @@
 std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
 	SignalSet signalSet;
-	dbController->getSignals(&signalSet, parent);
-	dbController->getUnits(Signal::unitList.get(), parent);
+
+	SignalsModel* model = SignalsModel::instance();
+	if (model == nullptr)
+	{
+		assert(false);
+		dbController->getSignals(&signalSet, parent);
+		dbController->getUnits(Signal::unitList.get(), parent);
+	}
+	else
+	{
+		for (const QString& id : signalId)
+		{
+			Signal* signal = new Signal(*model->getSignalByStrID(id));
+			signalSet.append(signal->ID(), signal);
+		}
+	}
 
 	int readOnly = false;
 	QVector<Signal*> signalVector;
@@ -75,7 +89,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 		return result;
 	}
 
-	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, nullptr, parent);
+	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, model, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -158,6 +172,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
+		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
 
 		if (readOnly)

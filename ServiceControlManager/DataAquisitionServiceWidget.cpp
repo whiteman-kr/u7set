@@ -23,7 +23,13 @@ DSC_STATE = 14,
 DSC_UPTIME = 15,
 DSC_RECEIVED = 16,
 DSC_SPEED = 17,
-DSC_COUNT = 18;
+DSC_ERROR_PROTOCOL_VERSION = 18,
+DSC_ERROR_FRAMES_QUANTITY = 19,
+DSC_ERROR_FRAME_NOMBER = 20,
+DSC_LOSTED_FRAMES_COUNT = 21,
+DSC_ERROR_DATA_ID = 22,
+DSC_ERROR_BAD_FRAME_SIZE = 23,
+DSC_COUNT = 24;
 
 const char* const dataSourceColumnStr[] =
 {
@@ -44,7 +50,13 @@ const char* const dataSourceColumnStr[] =
 	"State",
 	"Uptime",
 	"Received",
-	"Speed"
+	"Speed",
+	"Error Protocol version",
+	"Error Frames quantity",
+	"Error Frame nomber",
+	"Losted frames count",
+	"Error Data ID",
+	"Error Bad frame size",
 };
 
 const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSourceColumnStr[0]);
@@ -112,39 +124,58 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 	{
 		return QVariant();
 	}
-	if (role == Qt::DisplayRole)
+
+	const DataSource& d = *m_dataSource[row];
+
+	switch (role)
 	{
-		const DataSource& d = *m_dataSource[row];
-		switch (index.column())
-		{
-			case DSC_CAPTION: return d.lmCaption();
-			case DSC_IP: return d.lmAddressStr();
-			case DSC_PORT: return d.lmPort();
-			case DSC_PART_COUNT: return d.partCount();
-			case DSC_CHANNEL: return d.lmChannel();
-			case DSC_DATA_TYPE: return d.lmDataTypeStr();
-			case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
-			case DSC_MODULE_NUMBER: return d.lmNumber();
-			case DSC_MODULE_TYPE: return d.lmModuleType();
-			case DSC_SUBSYSTEM_ID: return d.lmSubsystemID();
-			case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
-			case DSC_ADAPTER_ID: return d.lmAdapterID();
-			case DSC_ENABLE_DATA: return d.lmDataEnable();
-			case DSC_DATA_ID: return d.lmDataID();
-			case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(d.state()));
-			case DSC_UPTIME:
+		case Qt::DisplayRole:
+			switch (index.column())
 			{
-				auto time = d.uptime();
-				int s = time % 60; time /= 60;
-				int m = time % 60; time /= 60;
-				int h = time % 24; time /= 24;
-				return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				case DSC_CAPTION: return d.lmCaption();
+				case DSC_IP: return d.lmAddressStr();
+				case DSC_PORT: return d.lmPort();
+				case DSC_PART_COUNT: return d.partCount();
+				case DSC_CHANNEL: return d.lmChannel();
+				case DSC_DATA_TYPE: return d.lmDataTypeStr();
+				case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
+				case DSC_MODULE_NUMBER: return d.lmNumber();
+				case DSC_MODULE_TYPE: return d.lmModuleType();
+				case DSC_SUBSYSTEM_ID: return d.lmSubsystemID();
+				case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
+				case DSC_ADAPTER_ID: return d.lmAdapterID();
+				case DSC_ENABLE_DATA: return d.lmDataEnable();
+				case DSC_DATA_ID: return d.lmDataID();
+				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(d.state()));
+				case DSC_UPTIME:
+				{
+					auto time = d.uptime();
+					int s = time % 60; time /= 60;
+					int m = time % 60; time /= 60;
+					int h = time % 24; time /= 24;
+					return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				}
+				case DSC_RECEIVED: return d.receivedDataSize();
+				case DSC_SPEED: return d.dataReceivingRate();
+				case DSC_ERROR_PROTOCOL_VERSION: return d.errorProtocolVersion();
+				case DSC_ERROR_FRAMES_QUANTITY: return d.errorFramesQuantity();
+				case DSC_ERROR_FRAME_NOMBER: return d.errorFrameNo();
+				case DSC_LOSTED_FRAMES_COUNT: return d.lostedFramesCount();
+				case DSC_ERROR_DATA_ID: return d.errorDataID();
+				case DSC_ERROR_BAD_FRAME_SIZE: return d.errorBadFrameSize();
+				default:
+					assert(false);
+				return QVariant();
 			}
-			case DSC_RECEIVED: return d.receivedDataSize();
-			case DSC_SPEED: return d.dataReceivingRate();
-			default:
-				assert(false);
-		}
+		break;
+		case Qt::BackgroundRole:
+			if (d.hasErrors())
+			{
+				return QBrush(QColor(0xff,0xee,0xee));
+			}
+		break;
+		default:
+			return QVariant();
 	}
 
 	return QVariant();

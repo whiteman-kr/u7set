@@ -84,6 +84,7 @@ public:
 	void clearSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+	Signal* getSignalByStrID(const QString signalStrID);
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int row) const { return m_signalSet.key(row); }
 	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
@@ -94,6 +95,7 @@ public:
 	DbController* dbController();
 	const DbController* dbController() const;
 	SignalsTabPage* parrentWindow() { return m_parentWindow; }
+	static SignalsModel* instance() { return m_instance; }
 	QString errorMessage(const ObjectState& state) const;
 	void showError(const ObjectState& state) const;
 	void showErrors(const QVector<ObjectState>& states) const;
@@ -130,6 +132,7 @@ private:
 
 	SignalsTabPage* m_parentWindow;
 	DbController* m_dbController;
+	static SignalsModel* m_instance;
 
 	QString getUnitStr(int unitID) const;
 	QString getSensorStr(int sensorID) const;
