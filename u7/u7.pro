@@ -180,7 +180,9 @@ SOURCES +=\
     Builder/TuningClientCfgGenerator.cpp \
     ChooseUfbDialog.cpp \
     Builder/ModulesRawData.cpp \
+    Builder/BdfFile.cpp \
     SchemaListModel.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -290,6 +292,7 @@ HEADERS  += \
     ChooseUfbDialog.h \
     ../lib/LmLimits.h \
     Builder/ModulesRawData.h \
+    Builder/BdfFile.h \
     SchemaListModel.h
 
 FORMS    += \

@@ -96,6 +96,11 @@ namespace VFrame30
 
 		static void debug(std::shared_ptr<SchemaItem> item);
 		virtual void debug() const;
+
+		// Text search
+		//
+	public:
+		virtual bool searchText(const QString& text) const;
 		
 		// Draw Functions
 		//

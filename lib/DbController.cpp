@@ -1928,7 +1928,7 @@ QString DbController::lastError() const
 	return m_lastError;
 }
 
-QString DbController::userName(int userId) const
+QString DbController::username(int userId) const
 {
 	QMutexLocker ml(&m_userMutex);
 

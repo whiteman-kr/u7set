@@ -165,6 +165,11 @@ namespace VFrame30
 		qDebug() << "\tguid:" << guid();
 	}
 
+	bool SchemaItem::searchText(const QString& /*text*/) const
+	{
+		return false;
+	}
+
 	// Drawing Functions
 	//
 

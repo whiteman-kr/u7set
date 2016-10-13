@@ -9,7 +9,6 @@
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 
-
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
@@ -74,6 +73,7 @@ class SchemaPropertiesDialog;
 class SchemaLayersDialog;
 class SchemaItemPropertiesDialog;
 class EditSchemaTabPage;
+class SchemaFindDialog;
 
 
 //
@@ -415,6 +415,8 @@ protected slots:
 	void modifiedChangedSlot(bool modified);
 
 	void selectAll();
+	void selectItem(std::shared_ptr<VFrame30::SchemaItem> item);
+
 	void editCut();
 	void editCopy();
 	void editPaste();
@@ -447,6 +449,10 @@ protected slots:
 	void bringForward();
 	void sendToBack();
 	void sendBackward();
+
+	void find();
+	void findNext();
+	void findPrev();
 
 	// Properties
 	//
@@ -535,6 +541,8 @@ private:
 	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initializend in constructor
 	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initializend in constructor
 	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
+
+	SchemaFindDialog* m_findDialog = nullptr;
 
 	// Actions
 	//
@@ -651,6 +659,10 @@ private:
 	//
 	QAction* m_separatorAction0 = nullptr;
 	QAction* m_layersAction = nullptr;
+	QAction* m_findAction = nullptr;
+	QAction* m_findNextAction = nullptr;
+	QAction* m_findPrevAction = nullptr;
+
 	//QMenu* m_propertiesMenu = nullptr;
 	//QAction* m_propertiesAction = nullptr;
 
@@ -659,4 +671,27 @@ private:
 private:
 };
 
+
+class SchemaFindDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	explicit SchemaFindDialog(QWidget* parent);
+
+	QString findText() const;
+	void setFocusToEditLine();
+
+signals:
+	void findPrev();
+	void findNext();
+
+public slots:
+	void updateCompleter();
+
+private:
+	QLineEdit* m_lineEdit = nullptr;
+	QPushButton* m_prevButton = nullptr;
+	QPushButton* m_nextButton = nullptr;
+};
 

@@ -41,6 +41,10 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	verticalHeader()->setDefaultSectionSize(static_cast<int>(fontMetrics().height() * 1.4));
 	horizontalHeader()->setHighlightSections(false);
 
+	setColumnWidth(static_cast<int>(SchemaListModel::FileNameColumn), 180);
+	setColumnWidth(static_cast<int>(SchemaListModel::FileCaptionColumn), 400);
+	setColumnWidth(static_cast<int>(SchemaListModel::FileDetailsColumn), 250);
+
 	// Set context menu
 	//
 	setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -1299,7 +1303,8 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		file.userId() != db()->currentUser().userId())
 	{
 		QMessageBox mb(this);
-		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.userId()));
+		QString username = db()->username(file.userId());
+		mb.setText(tr("File %1 is already checked out by user <b>%2</b>.").arg(file.fileName()).arg(username));
 		mb.exec();
 		return;
 	}
@@ -1502,7 +1507,7 @@ void SchemaControlTabPage::search()
 	assert(m_filesView);
 	assert(m_searchEdit);
 
-	QString searchText = m_searchEdit->text();
+	QString searchText = m_searchEdit->text().trimmed();
 
 	if (searchText.isEmpty() == true)
 	{

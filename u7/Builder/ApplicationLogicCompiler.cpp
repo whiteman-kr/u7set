@@ -2,6 +2,7 @@
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
+#include "BdfFile.h"
 
 
 namespace Builder
@@ -907,7 +908,11 @@ namespace Builder
 		QString outPortID = outPort->equipmentID().toLower();
 		QString inPortID = inPort->equipmentID().toLower();
 
-		QString fileName = QString("%1.vhd").arg(inPortID);
+		QString vhdFileName = QString("%1.vhd").arg(inPortID);
+		QString bdfFileName = QString("%1.bdf").arg(inPortID);
+
+		BdfFile bdfFile;
+
 		QStringList list;
 		QString str;
 
@@ -970,8 +975,12 @@ namespace Builder
 		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");
 		list.append(str);
 
+		bdfFile.addConnector32("const_rx_data_id");
+
 		str = QString("\t\trx_data_id : out std_logic_vector(32-1 downto 0);\n");
 		list.append(str);
+
+		bdfFile.addConnector32("rx_data_id");
 
 		if (txAnalogs.count() > 0)
 		{
@@ -982,6 +991,8 @@ namespace Builder
 						arg(txAnalog.sizeBit);
 
 				list.append(str);
+
+				bdfFile.addConnector(txAnalog.appSignalID, txAnalog.sizeBit);
 			}
 
 			list.append("");
@@ -993,6 +1004,8 @@ namespace Builder
 			{
 				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete.appSignalID.remove("#"));
 				list.append(str);
+
+				bdfFile.addConnector1(txDiscrete.appSignalID);
 			}
 
 			list.append("");
@@ -1053,7 +1066,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile("Opto-vhd", fileName, list);
+		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+
+		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
 
 		return true;
 	}

@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include <QRubberBand>
 #include <QClipboard>
+#include <QCompleter>
 #include <QMimeData>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
@@ -2122,6 +2123,26 @@ void EditSchemaWidget::createActions()
 	//m_layersAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Enter));
 	connect(m_layersAction, &QAction::triggered, this, &EditSchemaWidget::layers);
 	addAction(m_layersAction);
+
+	// Edit->Find
+	//
+	m_findAction = new QAction(tr("Find..."), this);
+	m_findAction->setEnabled(true);
+	m_findAction->setShortcut(QKeySequence::Find);
+	connect(m_findAction, &QAction::triggered, this, &EditSchemaWidget::find);
+	addAction(m_findAction);
+
+	m_findNextAction = new QAction(tr("Find Next"), this);
+	m_findNextAction->setEnabled(true);
+	m_findNextAction->setShortcut(QKeySequence::FindNext);
+	connect(m_findNextAction, &QAction::triggered, this, &EditSchemaWidget::findNext);
+	addAction(m_findNextAction);
+
+	m_findPrevAction = new QAction(tr("Find Previous"), this);
+	m_findPrevAction->setEnabled(true);
+	m_findPrevAction->setShortcut(QKeySequence::FindPrevious);
+	connect(m_findPrevAction, &QAction::triggered, this, &EditSchemaWidget::findPrev);
+	addAction(m_findPrevAction);
 
 	//
 	// Create Sub Menus
@@ -4796,6 +4817,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	// Layer, Item property etc
 	//
 	actions << m_separatorAction0;
+	actions << m_findAction;
 	actions << m_layersAction;
 	actions << m_propertiesAction;
 
@@ -4835,7 +4857,74 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 		return;
 	}
 
-	::editApplicationSignals(strIds, db(), this);
+	std::vector<std::pair<QString, QString>> result = ::editApplicationSignals(strIds, db(), this);
+
+	std::map<QString, QString> newIdsMap;
+	for (auto& p : result)
+	{
+		if (p.first != p.second)
+		{
+			newIdsMap[p.first] = p.second;
+		}
+	}
+
+	// in editApplicationSignals AppSignalIds could be changed,
+	// update them in selected items, apparently this function was called for selected items.
+	//
+	auto& selected = selectedItems();
+
+	for (auto item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
+		{
+			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+			assert(itemSignal);
+
+			QStringList signalStrIdList = itemSignal->appSignalIdList();
+			bool itemsSignalsWereChanged = false;
+
+			for (QString& appSignalId : signalStrIdList)
+			{
+				auto foundInChanged = newIdsMap.find(appSignalId);
+
+				if (foundInChanged != newIdsMap.end())
+				{
+					// AppSignalIdWasChanged
+					//
+					appSignalId = foundInChanged->second;		// appSignalId is a reference
+					itemsSignalsWereChanged = true;
+				}
+			}
+
+			if (itemsSignalsWereChanged == true)
+			{
+				QString oneStringIds;
+				for (const QString& s : signalStrIdList)
+				{
+					oneStringIds += s + QChar::LineFeed;
+				}
+
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), item);
+			}
+		}
+
+		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+		{
+			auto itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+			assert(itemReceiver);
+
+			QString appSignalId = itemReceiver->appSignalId();
+
+			auto foundInChanged = newIdsMap.find(appSignalId);
+
+			if (foundInChanged != newIdsMap.end())
+			{
+				// AppSignalIdWasChanged
+				//
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(foundInChanged->second), item);
+			}
+		}
+	}
 
 	return;
 }
@@ -5100,6 +5189,18 @@ void EditSchemaWidget::selectAll()
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 	items.assign(editSchemaView()->activeLayer()->Items.begin(), editSchemaView()->activeLayer()->Items.end());
 
+	editSchemaView()->setSelectedItems(items);
+
+	editSchemaView()->update();
+	return;
+}
+
+void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	editSchemaView()->clearSelection();
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+	items.push_back(item);
 	editSchemaView()->setSelectedItems(items);
 
 	editSchemaView()->update();
@@ -6394,6 +6495,236 @@ void EditSchemaWidget::sendBackward()
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
 }
 
+void EditSchemaWidget::find()
+{
+	if (m_findDialog == nullptr)
+	{
+		m_findDialog = new SchemaFindDialog(this);
+
+		connect(m_findDialog, &SchemaFindDialog::findPrev, this, &EditSchemaWidget::findPrev);
+		connect(m_findDialog, &SchemaFindDialog::findNext, this, &EditSchemaWidget::findNext);
+	}
+
+	m_findDialog->show();
+	m_findDialog->raise();
+	m_findDialog->activateWindow();
+
+	return;
+}
+
+void EditSchemaWidget::findNext()
+{
+	if (m_findDialog == nullptr)
+	{
+		find();
+		return;
+	}
+
+	QString searchText = m_findDialog->findText();
+
+	if (searchText.isEmpty() == true)
+	{
+		m_findDialog->show();
+		m_findDialog->raise();
+		m_findDialog->activateWindow();
+
+		m_findDialog->setFocusToEditLine();
+		return;
+	}
+
+	m_findDialog->updateCompleter();
+
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	auto& selected = selectedItems();		// Keep reference!!!!
+
+	// Get start iterator
+	//
+	auto searchStartIterator = layer->Items.begin();
+	if (selected.size() != 1)
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+	else
+	{
+		assert(selected.size() == 1);
+
+		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
+		if (searchStartIterator == layer->Items.end())
+		{
+			searchStartIterator = layer->Items.begin();
+		}
+		else
+		{
+			searchStartIterator++;
+		}
+	}
+
+	if (searchStartIterator == layer->Items.end())
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+
+	// Search the text from the selected
+	//
+	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		bool found = item->searchText(searchText);
+
+		if (found == true)
+		{
+			selectItem(item);
+			return;
+		}
+	}
+
+	// Serach text from the beginning to selected
+	//
+	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		bool found = item->searchText(searchText);
+
+		if (found == true)
+		{
+			selectItem(item);
+			return;
+		}
+	}
+
+	// Text not found
+	//
+	clearSelection();
+
+	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(searchText));
+
+	m_findDialog->show();
+	m_findDialog->raise();
+	m_findDialog->activateWindow();
+	m_findDialog->setFocusToEditLine();
+
+	return;
+}
+
+void EditSchemaWidget::findPrev()
+{
+	if (m_findDialog == nullptr)
+	{
+		find();
+		return;
+	}
+
+	QString searchText = m_findDialog->findText();
+
+	if (searchText.isEmpty() == true)
+	{
+		m_findDialog->show();
+		m_findDialog->raise();
+		m_findDialog->activateWindow();
+
+		m_findDialog->setFocusToEditLine();
+		return;
+	}
+
+	m_findDialog->updateCompleter();
+
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	auto& selected = selectedItems();		// Keep reference!!!!
+
+	// Get start iterator
+	//
+	auto searchStartIterator = layer->Items.rbegin();
+	if (selected.size() != 1)
+	{
+		searchStartIterator = layer->Items.rbegin();
+	}
+	else
+	{
+		assert(selected.size() == 1);
+
+		searchStartIterator = std::find(layer->Items.rbegin(), layer->Items.rend(), selected.front());
+		if (searchStartIterator == layer->Items.rend())
+		{
+			searchStartIterator = layer->Items.rbegin();
+		}
+		else
+		{
+			searchStartIterator++;
+		}
+	}
+
+	if (searchStartIterator == layer->Items.rend())
+	{
+		searchStartIterator = layer->Items.rbegin();
+	}
+
+	// Search the text from the selected
+	//
+	for (auto it = searchStartIterator; it != layer->Items.rend(); ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		bool found = item->searchText(searchText);
+
+		if (found == true)
+		{
+			selectItem(item);
+			return;
+		}
+	}
+
+	// Serach text from the beginning to selected
+	//
+	for (auto it = layer->Items.rbegin(); it != searchStartIterator; ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		bool found = item->searchText(searchText);
+
+		if (found == true)
+		{
+			selectItem(item);
+			return;
+		}
+	}
+
+	// Text not found
+	//
+	clearSelection();
+
+	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(searchText));
+
+	m_findDialog->show();
+	m_findDialog->raise();
+	m_findDialog->activateWindow();
+	m_findDialog->setFocusToEditLine();
+
+	return;
+
+}
+
 MouseState EditSchemaWidget::mouseState() const
 {
 	return editSchemaView()->mouseState();
@@ -6460,5 +6791,88 @@ void EditSchemaWidget::resetEditEngine()
 {
 	assert(m_editEngine);
 	m_editEngine->reset();
+}
+
+SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
+	QDialog(parent)
+{
+	m_lineEdit = new QLineEdit();
+
+	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
+	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_lineEdit->setCompleter(searchCompleter);
+
+	m_prevButton = new QPushButton(tr("Find Previous"));
+	//m_prevButton->setShortcut(QKeySequence::FindPrevious);	// Done via Actions, works much faster
+
+	m_nextButton = new QPushButton(tr("Find Next"));
+	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
+
+	QGridLayout* layout = new QGridLayout();
+
+	layout->addWidget(m_lineEdit, 0, 0, 1, 2);
+	layout->addWidget(m_prevButton, 1, 0);
+	layout->addWidget(m_nextButton, 1, 1);
+
+	setLayout(layout);
+
+	setMinimumWidth(300);
+
+	QAction* nextAction = new QAction(tr("Find Next"), this);
+	nextAction->setShortcut(QKeySequence::FindNext);
+	addAction(nextAction);
+
+	QAction* prevAction = new QAction(tr("Find Prev"), this);
+	prevAction->setShortcut(QKeySequence::FindPrevious);
+	addAction(prevAction);
+
+	connect(nextAction, &QAction::triggered, this, &SchemaFindDialog::findNext);
+	connect(prevAction, &QAction::triggered, this, &SchemaFindDialog::findPrev);
+
+	// --
+	//
+	connect(m_prevButton, &QPushButton::clicked, this, &SchemaFindDialog::findPrev);
+	connect(m_nextButton, &QPushButton::clicked, this, &SchemaFindDialog::findNext);
+
+	m_nextButton->setDefault(true);
+}
+
+QString SchemaFindDialog::findText() const
+{
+	assert(m_lineEdit);
+
+	QString text = m_lineEdit->text().trimmed();
+
+	return text;
+}
+
+void SchemaFindDialog::setFocusToEditLine()
+{
+	assert(m_lineEdit);
+
+	m_lineEdit->setFocus();
+	m_lineEdit->selectAll();
+
+	return;
+}
+
+void SchemaFindDialog::updateCompleter()
+{
+	// Update completer
+	//
+	QString searchText = findText();
+
+	if (theSettings.buildSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
+	{
+		theSettings.buildSearchCompleter() << searchText;
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_lineEdit->completer()->model());
+		assert(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.buildSearchCompleter());
+		}
+	}
 }
 

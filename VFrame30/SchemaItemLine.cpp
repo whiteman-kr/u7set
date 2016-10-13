@@ -97,7 +97,6 @@ namespace VFrame30
 		}
 
 		QPainter* p = drawParam->painter();
-		QPaintDevice* device = drawParam->device();
 
 		QPointF p1(startXDocPt(), startYDocPt());
 		QPointF p2(endXDocPt(), endYDocPt());
