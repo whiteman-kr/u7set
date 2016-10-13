@@ -223,7 +223,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStateReply));
   DataSourceInfo_descriptor_ = file->message_type(8);
-  static const int DataSourceInfo_offsets_[21] = {
+  static const int DataSourceInfo_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, caption_),
@@ -238,13 +238,6 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, lmadapterid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, lmdataenable_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, lmdataid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, errorprotocolversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, errorframesquantity_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, errorframeno_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, lostedframescount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, errordataid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, errorbadframesize_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceInfo, haserrors_),
   };
   DataSourceInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -288,7 +281,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetDataSourcesInfoReply));
   AppDataSourceState_descriptor_ = file->message_type(11);
-  static const int AppDataSourceState_offsets_[15] = {
+  static const int AppDataSourceState_offsets_[17] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, uptime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, receiveddatasize_),
@@ -304,6 +297,8 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, receiveddataid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, processingskiped_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, state_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, errorbadframesize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataSourceState, haserrors_),
   };
   AppDataSourceState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -610,52 +605,49 @@ void protobuf_AddDesc_network_2eproto() {
     "nal\"0\n\030GetAppSignalStateRequest\022\024\n\014signa"
     "lHashes\030\001 \003(\004\"Z\n\026GetAppSignalStateReply\022"
     "\020\n\005error\030\001 \001(\005:\0010\022.\n\017appSignalStates\030\002 \003"
-    "(\0132\025.Proto.AppSignalState\"\273\003\n\016DataSource"
+    "(\0132\025.Proto.AppSignalState\"\214\002\n\016DataSource"
     "Info\022\n\n\002id\030\001 \001(\004\022\023\n\013equipmentID\030\002 \001(\t\022\017\n"
     "\007caption\030\003 \001(\t\022\020\n\010dataType\030\004 \001(\005\022\n\n\002ip\030\005"
     " \001(\t\022\014\n\004port\030\006 \001(\005\022\017\n\007channel\030\007 \001(\005\022\023\n\013s"
     "ubsystemID\030\010 \001(\005\022\021\n\tsubsystem\030\t \001(\t\022\020\n\010l"
     "mNumber\030\n \001(\005\022\024\n\014lmModuleType\030\013 \001(\005\022\023\n\013l"
     "mAdapterID\030\014 \001(\t\022\024\n\014lmDataEnable\030\r \001(\010\022\020"
-    "\n\010lmDataID\030\016 \001(\004\022\034\n\024errorProtocolVersion"
-    "\030\017 \001(\003\022\033\n\023errorFramesQuantity\030\020 \001(\003\022\024\n\014e"
-    "rrorFrameNo\030\021 \001(\003\022\031\n\021lostedFramesCount\030\022"
-    " \001(\003\022\023\n\013errorDataID\030\023 \001(\003\022\031\n\021errorBadFra"
-    "meSize\030\024 \001(\003\022\021\n\thasErrors\030\025 \001(\010\"\033\n\031GetDa"
-    "taSourcesInfoRequest\"\\\n\027GetDataSourcesIn"
-    "foReply\022\020\n\005error\030\001 \001(\005:\0010\022/\n\016dataSourceI"
-    "nfo\030\002 \003(\0132\027.Network.DataSourceInfo\"\371\002\n\022A"
-    "ppDataSourceState\022\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030"
-    "\002 \001(\003\022\030\n\020receivedDataSize\030\003 \001(\003\022\031\n\021dataR"
-    "eceivingRate\030\004 \001(\001\022\033\n\023receivedFramesCoun"
-    "t\030\005 \001(\003\022\031\n\021processingEnabled\030\006 \001(\010\022\034\n\024pr"
-    "ocessedPacketCount\030\007 \001(\003\022\034\n\024errorProtoco"
-    "lVersion\030\010 \001(\003\022\033\n\023errorFramesQuantity\030\t "
-    "\001(\003\022\024\n\014errorFrameNo\030\n \001(\003\022\025\n\rlostedPacke"
-    "ts\030\013 \001(\003\022\023\n\013errorDataID\030\014 \001(\003\022\026\n\016receive"
-    "dDataID\030\r \001(\004\022\030\n\020processingSkiped\030\016 \001(\010\022"
-    "\r\n\005state\030\017 \001(\005\"k\n\034GetAppDataSourcesState"
-    "sReply\022\020\n\005error\030\001 \001(\005:\0010\0229\n\024appDataSourc"
-    "esStates\030\002 \003(\0132\033.Network.AppDataSourceSt"
-    "ate\"\021\n\017GetUnitsRequest\" \n\004Unit\022\n\n\002id\030\001 \001"
-    "(\005\022\014\n\004unit\030\002 \001(\t\"\?\n\rGetUnitsReply\022\020\n\005err"
-    "or\030\001 \001(\005:\0010\022\034\n\005units\030\002 \003(\0132\r.Network.Uni"
-    "t\"\027\n\025GetServiceInfoRequest\"\364\001\n\013ServiceIn"
-    "fo\022\017\n\004type\030\001 \001(\005:\0010\022\027\n\014majorVersion\030\002 \001("
-    "\005:\0010\022\027\n\014minorVersion\030\003 \001(\005:\0010\022\022\n\007buildNo"
-    "\030\004 \001(\005:\0010\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006uptime\030\006 \001("
-    "\003:\0010\022\027\n\014serviceState\030\007 \001(\005:\0010\022\030\n\rservice"
-    "Uptime\030\010 \001(\003:\0010\022\032\n\017clientRequestIP\030\t \001(\r"
-    ":\0010\022\034\n\021clientRequestPort\030\n \001(\005:\0010\"R\n\023Get"
-    "ServiceInfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013se"
-    "rviceInfo\030\002 \002(\0132\024.Network.ServiceInfo\"\030\n"
-    "\026GetTuningSourcesStates\"u\n\021TuningSourceS"
-    "tate\022\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020rece"
-    "ivedDataSize\030\003 \001(\003\022\031\n\021dataReceivingRate\030"
-    "\004 \001(\001\022\017\n\007respond\030\005 \001(\010\"l\n\033GetTuningSourc"
-    "esStatesReply\022\020\n\005error\030\001 \001(\005:\0010\022;\n\027tunin"
-    "gDataSourcesStates\030\002 \003(\0132\032.Network.Tunin"
-    "gSourceState", 2372);
+    "\n\010lmDataID\030\016 \001(\004\"\033\n\031GetDataSourcesInfoRe"
+    "quest\"\\\n\027GetDataSourcesInfoReply\022\020\n\005erro"
+    "r\030\001 \001(\005:\0010\022/\n\016dataSourceInfo\030\002 \003(\0132\027.Net"
+    "work.DataSourceInfo\"\247\003\n\022AppDataSourceSta"
+    "te\022\n\n\002id\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receiv"
+    "edDataSize\030\003 \001(\003\022\031\n\021dataReceivingRate\030\004 "
+    "\001(\001\022\033\n\023receivedFramesCount\030\005 \001(\003\022\031\n\021proc"
+    "essingEnabled\030\006 \001(\010\022\034\n\024processedPacketCo"
+    "unt\030\007 \001(\003\022\034\n\024errorProtocolVersion\030\010 \001(\003\022"
+    "\033\n\023errorFramesQuantity\030\t \001(\003\022\024\n\014errorFra"
+    "meNo\030\n \001(\003\022\025\n\rlostedPackets\030\013 \001(\003\022\023\n\013err"
+    "orDataID\030\014 \001(\003\022\026\n\016receivedDataID\030\r \001(\004\022\030"
+    "\n\020processingSkiped\030\016 \001(\010\022\r\n\005state\030\017 \001(\005\022"
+    "\031\n\021errorBadFrameSize\030\020 \001(\003\022\021\n\thasErrors\030"
+    "\021 \001(\010\"k\n\034GetAppDataSourcesStatesReply\022\020\n"
+    "\005error\030\001 \001(\005:\0010\0229\n\024appDataSourcesStates\030"
+    "\002 \003(\0132\033.Network.AppDataSourceState\"\021\n\017Ge"
+    "tUnitsRequest\" \n\004Unit\022\n\n\002id\030\001 \001(\005\022\014\n\004uni"
+    "t\030\002 \001(\t\"\?\n\rGetUnitsReply\022\020\n\005error\030\001 \001(\005:"
+    "\0010\022\034\n\005units\030\002 \003(\0132\r.Network.Unit\"\027\n\025GetS"
+    "erviceInfoRequest\"\364\001\n\013ServiceInfo\022\017\n\004typ"
+    "e\030\001 \001(\005:\0010\022\027\n\014majorVersion\030\002 \001(\005:\0010\022\027\n\014m"
+    "inorVersion\030\003 \001(\005:\0010\022\022\n\007buildNo\030\004 \001(\005:\0010"
+    "\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006uptime\030\006 \001(\003:\0010\022\027\n\014s"
+    "erviceState\030\007 \001(\005:\0010\022\030\n\rserviceUptime\030\010 "
+    "\001(\003:\0010\022\032\n\017clientRequestIP\030\t \001(\r:\0010\022\034\n\021cl"
+    "ientRequestPort\030\n \001(\005:\0010\"R\n\023GetServiceIn"
+    "foReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo"
+    "\030\002 \002(\0132\024.Network.ServiceInfo\"\030\n\026GetTunin"
+    "gSourcesStates\"u\n\021TuningSourceState\022\n\n\002i"
+    "d\030\001 \001(\004\022\016\n\006uptime\030\002 \001(\003\022\030\n\020receivedDataS"
+    "ize\030\003 \001(\003\022\031\n\021dataReceivingRate\030\004 \001(\001\022\017\n\007"
+    "respond\030\005 \001(\010\"l\n\033GetTuningSourcesStatesR"
+    "eply\022\020\n\005error\030\001 \001(\005:\0010\022;\n\027tuningDataSour"
+    "cesStates\030\002 \003(\0132\032.Network.TuningSourceSt"
+    "ate", 2243);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -2635,13 +2627,6 @@ const int DataSourceInfo::kLmModuleTypeFieldNumber;
 const int DataSourceInfo::kLmAdapterIDFieldNumber;
 const int DataSourceInfo::kLmDataEnableFieldNumber;
 const int DataSourceInfo::kLmDataIDFieldNumber;
-const int DataSourceInfo::kErrorProtocolVersionFieldNumber;
-const int DataSourceInfo::kErrorFramesQuantityFieldNumber;
-const int DataSourceInfo::kErrorFrameNoFieldNumber;
-const int DataSourceInfo::kLostedFramesCountFieldNumber;
-const int DataSourceInfo::kErrorDataIDFieldNumber;
-const int DataSourceInfo::kErrorBadFrameSizeFieldNumber;
-const int DataSourceInfo::kHasErrorsFieldNumber;
 #endif  // !_MSC_VER
 
 DataSourceInfo::DataSourceInfo()
@@ -2674,13 +2659,6 @@ void DataSourceInfo::SharedCtor() {
   lmadapterid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   lmdataenable_ = false;
   lmdataid_ = GOOGLE_ULONGLONG(0);
-  errorprotocolversion_ = GOOGLE_LONGLONG(0);
-  errorframesquantity_ = GOOGLE_LONGLONG(0);
-  errorframeno_ = GOOGLE_LONGLONG(0);
-  lostedframescount_ = GOOGLE_LONGLONG(0);
-  errordataid_ = GOOGLE_LONGLONG(0);
-  errorbadframesize_ = GOOGLE_LONGLONG(0);
-  haserrors_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2767,15 +2745,6 @@ void DataSourceInfo::Clear() {
     }
     lmdataenable_ = false;
     lmdataid_ = GOOGLE_ULONGLONG(0);
-    errorprotocolversion_ = GOOGLE_LONGLONG(0);
-    errorframesquantity_ = GOOGLE_LONGLONG(0);
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    errorframeno_ = GOOGLE_LONGLONG(0);
-    lostedframescount_ = GOOGLE_LONGLONG(0);
-    errordataid_ = GOOGLE_LONGLONG(0);
-    errorbadframesize_ = GOOGLE_LONGLONG(0);
-    haserrors_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -3011,118 +2980,6 @@ bool DataSourceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(120)) goto parse_errorProtocolVersion;
-        break;
-      }
-
-      // optional int64 errorProtocolVersion = 15;
-      case 15: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errorProtocolVersion:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errorprotocolversion_)));
-          set_has_errorprotocolversion();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(128)) goto parse_errorFramesQuantity;
-        break;
-      }
-
-      // optional int64 errorFramesQuantity = 16;
-      case 16: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errorFramesQuantity:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errorframesquantity_)));
-          set_has_errorframesquantity();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(136)) goto parse_errorFrameNo;
-        break;
-      }
-
-      // optional int64 errorFrameNo = 17;
-      case 17: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errorFrameNo:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errorframeno_)));
-          set_has_errorframeno();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(144)) goto parse_lostedFramesCount;
-        break;
-      }
-
-      // optional int64 lostedFramesCount = 18;
-      case 18: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_lostedFramesCount:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &lostedframescount_)));
-          set_has_lostedframescount();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(152)) goto parse_errorDataID;
-        break;
-      }
-
-      // optional int64 errorDataID = 19;
-      case 19: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errorDataID:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errordataid_)));
-          set_has_errordataid();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(160)) goto parse_errorBadFrameSize;
-        break;
-      }
-
-      // optional int64 errorBadFrameSize = 20;
-      case 20: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errorBadFrameSize:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errorbadframesize_)));
-          set_has_errorbadframesize();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(168)) goto parse_hasErrors;
-        break;
-      }
-
-      // optional bool hasErrors = 21;
-      case 21: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_hasErrors:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &haserrors_)));
-          set_has_haserrors();
-        } else {
-          goto handle_uninterpreted;
-        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3235,41 +3092,6 @@ void DataSourceInfo::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(14, this->lmdataid(), output);
   }
 
-  // optional int64 errorProtocolVersion = 15;
-  if (has_errorprotocolversion()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(15, this->errorprotocolversion(), output);
-  }
-
-  // optional int64 errorFramesQuantity = 16;
-  if (has_errorframesquantity()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(16, this->errorframesquantity(), output);
-  }
-
-  // optional int64 errorFrameNo = 17;
-  if (has_errorframeno()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(17, this->errorframeno(), output);
-  }
-
-  // optional int64 lostedFramesCount = 18;
-  if (has_lostedframescount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(18, this->lostedframescount(), output);
-  }
-
-  // optional int64 errorDataID = 19;
-  if (has_errordataid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(19, this->errordataid(), output);
-  }
-
-  // optional int64 errorBadFrameSize = 20;
-  if (has_errorbadframesize()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(20, this->errorbadframesize(), output);
-  }
-
-  // optional bool hasErrors = 21;
-  if (has_haserrors()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(21, this->haserrors(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3371,41 +3193,6 @@ void DataSourceInfo::SerializeWithCachedSizes(
   // optional uint64 lmDataID = 14;
   if (has_lmdataid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(14, this->lmdataid(), target);
-  }
-
-  // optional int64 errorProtocolVersion = 15;
-  if (has_errorprotocolversion()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(15, this->errorprotocolversion(), target);
-  }
-
-  // optional int64 errorFramesQuantity = 16;
-  if (has_errorframesquantity()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(16, this->errorframesquantity(), target);
-  }
-
-  // optional int64 errorFrameNo = 17;
-  if (has_errorframeno()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(17, this->errorframeno(), target);
-  }
-
-  // optional int64 lostedFramesCount = 18;
-  if (has_lostedframescount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(18, this->lostedframescount(), target);
-  }
-
-  // optional int64 errorDataID = 19;
-  if (has_errordataid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(19, this->errordataid(), target);
-  }
-
-  // optional int64 errorBadFrameSize = 20;
-  if (has_errorbadframesize()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(20, this->errorbadframesize(), target);
-  }
-
-  // optional bool hasErrors = 21;
-  if (has_haserrors()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(21, this->haserrors(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3517,55 +3304,6 @@ int DataSourceInfo::ByteSize() const {
           this->lmdataid());
     }
 
-    // optional int64 errorProtocolVersion = 15;
-    if (has_errorprotocolversion()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errorprotocolversion());
-    }
-
-    // optional int64 errorFramesQuantity = 16;
-    if (has_errorframesquantity()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errorframesquantity());
-    }
-
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    // optional int64 errorFrameNo = 17;
-    if (has_errorframeno()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errorframeno());
-    }
-
-    // optional int64 lostedFramesCount = 18;
-    if (has_lostedframescount()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->lostedframescount());
-    }
-
-    // optional int64 errorDataID = 19;
-    if (has_errordataid()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errordataid());
-    }
-
-    // optional int64 errorBadFrameSize = 20;
-    if (has_errorbadframesize()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errorbadframesize());
-    }
-
-    // optional bool hasErrors = 21;
-    if (has_haserrors()) {
-      total_size += 2 + 1;
-    }
-
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -3637,29 +3375,6 @@ void DataSourceInfo::MergeFrom(const DataSourceInfo& from) {
     if (from.has_lmdataid()) {
       set_lmdataid(from.lmdataid());
     }
-    if (from.has_errorprotocolversion()) {
-      set_errorprotocolversion(from.errorprotocolversion());
-    }
-    if (from.has_errorframesquantity()) {
-      set_errorframesquantity(from.errorframesquantity());
-    }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (from.has_errorframeno()) {
-      set_errorframeno(from.errorframeno());
-    }
-    if (from.has_lostedframescount()) {
-      set_lostedframescount(from.lostedframescount());
-    }
-    if (from.has_errordataid()) {
-      set_errordataid(from.errordataid());
-    }
-    if (from.has_errorbadframesize()) {
-      set_errorbadframesize(from.errorbadframesize());
-    }
-    if (from.has_haserrors()) {
-      set_haserrors(from.haserrors());
-    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3697,13 +3412,6 @@ void DataSourceInfo::Swap(DataSourceInfo* other) {
     std::swap(lmadapterid_, other->lmadapterid_);
     std::swap(lmdataenable_, other->lmdataenable_);
     std::swap(lmdataid_, other->lmdataid_);
-    std::swap(errorprotocolversion_, other->errorprotocolversion_);
-    std::swap(errorframesquantity_, other->errorframesquantity_);
-    std::swap(errorframeno_, other->errorframeno_);
-    std::swap(lostedframescount_, other->lostedframescount_);
-    std::swap(errordataid_, other->errordataid_);
-    std::swap(errorbadframesize_, other->errorbadframesize_);
-    std::swap(haserrors_, other->haserrors_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -4141,6 +3849,8 @@ const int AppDataSourceState::kErrorDataIDFieldNumber;
 const int AppDataSourceState::kReceivedDataIDFieldNumber;
 const int AppDataSourceState::kProcessingSkipedFieldNumber;
 const int AppDataSourceState::kStateFieldNumber;
+const int AppDataSourceState::kErrorBadFrameSizeFieldNumber;
+const int AppDataSourceState::kHasErrorsFieldNumber;
 #endif  // !_MSC_VER
 
 AppDataSourceState::AppDataSourceState()
@@ -4174,6 +3884,8 @@ void AppDataSourceState::SharedCtor() {
   receiveddataid_ = GOOGLE_ULONGLONG(0);
   processingskiped_ = false;
   state_ = 0;
+  errorbadframesize_ = GOOGLE_LONGLONG(0);
+  haserrors_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -4226,6 +3938,10 @@ void AppDataSourceState::Clear() {
     receiveddataid_ = GOOGLE_ULONGLONG(0);
     processingskiped_ = false;
     state_ = 0;
+    errorbadframesize_ = GOOGLE_LONGLONG(0);
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    haserrors_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -4472,6 +4188,38 @@ bool AppDataSourceState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(128)) goto parse_errorBadFrameSize;
+        break;
+      }
+
+      // optional int64 errorBadFrameSize = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errorBadFrameSize:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errorbadframesize_)));
+          set_has_errorbadframesize();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(136)) goto parse_hasErrors;
+        break;
+      }
+
+      // optional bool hasErrors = 17;
+      case 17: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_hasErrors:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &haserrors_)));
+          set_has_haserrors();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -4569,6 +4317,16 @@ void AppDataSourceState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(15, this->state(), output);
   }
 
+  // optional int64 errorBadFrameSize = 16;
+  if (has_errorbadframesize()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(16, this->errorbadframesize(), output);
+  }
+
+  // optional bool hasErrors = 17;
+  if (has_haserrors()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(17, this->haserrors(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -4650,6 +4408,16 @@ void AppDataSourceState::SerializeWithCachedSizes(
   // optional int32 state = 15;
   if (has_state()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(15, this->state(), target);
+  }
+
+  // optional int64 errorBadFrameSize = 16;
+  if (has_errorbadframesize()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(16, this->errorbadframesize(), target);
+  }
+
+  // optional bool hasErrors = 17;
+  if (has_haserrors()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(17, this->haserrors(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -4764,6 +4532,20 @@ int AppDataSourceState::ByteSize() const {
           this->state());
     }
 
+    // optional int64 errorBadFrameSize = 16;
+    if (has_errorbadframesize()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errorbadframesize());
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional bool hasErrors = 17;
+    if (has_haserrors()) {
+      total_size += 2 + 1;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -4838,6 +4620,14 @@ void AppDataSourceState::MergeFrom(const AppDataSourceState& from) {
     if (from.has_state()) {
       set_state(from.state());
     }
+    if (from.has_errorbadframesize()) {
+      set_errorbadframesize(from.errorbadframesize());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_haserrors()) {
+      set_haserrors(from.haserrors());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -4876,6 +4666,8 @@ void AppDataSourceState::Swap(AppDataSourceState* other) {
     std::swap(receiveddataid_, other->receiveddataid_);
     std::swap(processingskiped_, other->processingskiped_);
     std::swap(state_, other->state_);
+    std::swap(errorbadframesize_, other->errorbadframesize_);
+    std::swap(haserrors_, other->haserrors_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

@@ -31,6 +31,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 	protoState->set_errorframesquantity(m_errorFramesQuantity);
 	protoState->set_errorframeno(m_errorFrameNo);
 	protoState->set_lostedpackets(m_lostedFramesCount);
+	protoState->set_errorbadframesize(m_errorBadFrameSize);
+	protoState->set_haserrors(m_hasErrors);
 
 	return true;
 }
@@ -49,6 +51,8 @@ bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
 	m_errorFramesQuantity = protoState.errorframesquantity();
 	m_errorFrameNo = protoState.errorframeno();
 	m_lostedFramesCount = protoState.lostedpackets();
+	m_errorBadFrameSize = protoState.errorbadframesize();
+	m_hasErrors = protoState.haserrors();
 
 	return true;
 }
