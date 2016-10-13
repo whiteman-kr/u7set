@@ -648,11 +648,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::IsFblItem() const
-	{
-		return true;
-	}
-
 	bool FblItemRect::isInputSignalElement() const
 	{
 		const VFrame30::SchemaItemInput* ptr = dynamic_cast<const VFrame30::SchemaItemInput*>(this);

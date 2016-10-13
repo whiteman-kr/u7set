@@ -78,8 +78,6 @@ namespace VFrame30
 	public:
 		virtual void setNewGuid() override;		// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
-		virtual bool IsFblItem() const override;
-
 		bool isInputSignalElement() const;
 		bool isOutputSignalElement() const;
 		bool isInOutSignalElement() const;

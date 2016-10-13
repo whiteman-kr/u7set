@@ -309,6 +309,44 @@ namespace VFrame30
 		return;
 	}
 
+	void PosConnectionImpl::drawCommentDim(CDrawParam* drawParam) const
+	{
+		if (isCommented() == false)
+		{
+			return;
+		}
+
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		double cbs = drawParam->controlBarSize();
+		double lineWeight = cbs;
+
+		// Draw the main part
+		//
+		QPolygonF polyline(static_cast<int>(points.size()));
+		int index = 0;
+
+		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
+		{
+			polyline[index++] = QPointF(pt->X, pt->Y);
+		}
+
+		QPen pen(SchemaItem::commentedColor);
+
+		pen.setWidthF(lineWeight);
+		p->setPen(pen);
+
+		p->drawPolyline(polyline);
+
+		return;
+	}
+
 	// Determine and Calculation Functions
 	//
 

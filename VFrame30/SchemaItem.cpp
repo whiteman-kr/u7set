@@ -10,20 +10,20 @@ namespace VFrame30
 	const QColor SchemaItem::errorColor(0xE0, 0x33, 0x33, 0xFF);
 	const QColor SchemaItem::warningColor(0xF8, 0x72, 0x17, 0xFF);
 	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
-
+	const QColor SchemaItem::commentedColor(0xF0, 0xF0, 0xFF, 0xB0);
 
 	// SchemaItem
 	//
 	SchemaItem::SchemaItem() :
-		m_static(true),
-		m_locked(false),
-		m_itemUnit(SchemaUnit::Display),
-		m_acceptClick(false)
+		m_itemUnit(SchemaUnit::Display)
 	{	
 		m_guid = QUuid::createUuid();
 
 		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
 		acceptClickProp->setCategory(PropertyNames::behaviourCategory);
+
+		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
+		commentedProp->setCategory(PropertyNames::functionalCategory);
 
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
 		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
@@ -48,13 +48,14 @@ namespace VFrame30
 		Proto::Write(schemaItem->mutable_uuid(), m_guid);
 		schemaItem->set_isstatic(m_static);
 		schemaItem->set_islocked(m_locked);
+		schemaItem->set_iscommented(m_commented);
 		schemaItem->set_itemunit(static_cast<Proto::SchemaUnit>(m_itemUnit));
 
 		schemaItem->set_acceptclick(m_acceptClick);
 
 		if (m_clickScript.isEmpty() == false)
 		{
-			Proto::Write(schemaItem->mutable_clickscript(), m_clickScript);
+			schemaItem->set_clickscript(m_clickScript.toStdString());
 		}
 
 		return true;
@@ -73,13 +74,14 @@ namespace VFrame30
 		m_guid = Proto::Read(schemaitem.uuid());
 		m_static = schemaitem.isstatic();
 		m_locked = schemaitem.islocked();
+		m_commented = schemaitem.iscommented();
 		m_itemUnit = static_cast<SchemaUnit>(schemaitem.itemunit());
 
 		m_acceptClick = schemaitem.acceptclick();
 
 		if (schemaitem.has_clickscript() == true)
 		{
-			Proto::Read(schemaitem.clickscript(), &m_clickScript);
+			m_clickScript = QString::fromStdString(schemaitem.clickscript());
 		}
 		else
 		{
@@ -229,6 +231,11 @@ namespace VFrame30
 		}
 	}
 
+	void SchemaItem::drawCommentDim(CDrawParam* /*drawParam*/) const
+	{
+
+	}
+
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
 	// 
 	bool SchemaItem::IsIntersectPoint(double x, double y) const
@@ -354,9 +361,9 @@ namespace VFrame30
 		return dynamic_cast<const FblItemRect*>(this);
 	}
 
-	bool SchemaItem::IsFblItem() const
+	bool SchemaItem::isFblItem() const
 	{
-		return false;
+		return dynamic_cast<const FblItem*>(this) != nullptr;
 	}
 
 	bool SchemaItem::isSchemaItemAfb() const
@@ -374,7 +381,7 @@ namespace VFrame30
 		return dynamic_cast<const SchemaItemAfb*>(this);
 	}
 
-	bool SchemaItem::IsLocked() const
+	bool SchemaItem::isLocked() const
 	{
 		return m_locked;
 	}
@@ -383,6 +390,21 @@ namespace VFrame30
 	{
 		m_locked = lock;
 		return;
+	}
+
+	bool SchemaItem::isCommented() const
+	{
+		return m_commented;
+	}
+
+	bool SchemaItem::commented() const
+	{
+		return m_commented;
+	}
+
+	void SchemaItem::setCommented(bool value)
+	{
+		m_commented = value;
 	}
 
 	const QUuid& SchemaItem::guid() const

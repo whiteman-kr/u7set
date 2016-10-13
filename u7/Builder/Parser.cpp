@@ -1320,6 +1320,25 @@ namespace Builder
 				return false;
 			}
 
+			// Remove all commented items from the schema
+			//
+			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+			{
+				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
+
+				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+				{
+					if (item->isCommented() == false)
+					{
+						newItemList.push_back(item);
+					}
+				}
+
+				layer->Items.swap(newItemList);
+			}
+
+			// Add to schema list
+			//
 			if (ls->excludeFromBuild() == true)
 			{
 				// Schema is excluded from build (Schema '%1').

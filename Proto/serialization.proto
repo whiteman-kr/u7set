@@ -353,7 +353,9 @@ message SchemaItem
 	required bool isLocked = 3;
 	required SchemaUnit itemUnit = 4;
 	optional bool acceptClick = 5 [default = false];
-	optional wstring clickScript = 6;
+	//optional wstring clickScript = 6;
+	optional string clickScript = 7;
+	optional bool isCommented = 8 [default = false];
 
 	// Inherited from SchmeItem
 	//

@@ -306,6 +306,45 @@ namespace VFrame30
 		return;
 	}
 
+	void PosRectImpl::drawCommentDim(CDrawParam* drawParam) const
+	{
+		if (isCommented() == false)
+		{
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		// Drwing resources initialization
+		//
+
+		// --
+		//
+		QPainter::RenderHints oldrenderhints = p->renderHints();
+		p->setRenderHint(QPainter::Antialiasing, false);
+
+		// --
+		//
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001f);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001f);
+		}
+
+		p->fillRect(r, QBrush(SchemaItem::commentedColor));
+
+		// --
+		//
+		p->setRenderHints(oldrenderhints);
+		return;
+	}
+
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	//

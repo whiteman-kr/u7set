@@ -87,10 +87,6 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-	bool FblItemLine::IsFblItem() const
-	{
-		return true;
-	}
 
 	// Weight propertie
 	//

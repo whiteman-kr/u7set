@@ -118,6 +118,9 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 		QPainter p(this);
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+		drawParam.setControlBarSize(
+			schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+
 		drawParam.setInfoMode(theSettings.infoMode());
 
 		draw(drawParam);
@@ -2124,7 +2127,15 @@ void EditSchemaWidget::createActions()
 	connect(m_layersAction, &QAction::triggered, this, &EditSchemaWidget::layers);
 	addAction(m_layersAction);
 
-	// Edit->Find
+	//
+	//
+	m_toggleCommentAction = new QAction(tr("Toggle Comment"), this);
+	m_toggleCommentAction->setEnabled(false);
+	m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Slash);
+	connect(m_toggleCommentAction, &QAction::triggered, this, &EditSchemaWidget::toggleComment);
+	addAction(m_toggleCommentAction);
+
+	// Find
 	//
 	m_findAction = new QAction(tr("Find..."), this);
 	m_findAction->setEnabled(true);
@@ -4814,10 +4825,18 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		}
 	}
 
+	// --
+	//
+	QAction* separatorCommentFind = new QAction(&menu);
+	separatorCommentFind->setSeparator(true);
+
+	actions << separatorCommentFind;
+	actions << m_toggleCommentAction;
+	actions << m_findAction;
+
 	// Layer, Item property etc
 	//
 	actions << m_separatorAction0;
-	actions << m_findAction;
 	actions << m_layersAction;
 	actions << m_propertiesAction;
 
@@ -5606,6 +5625,20 @@ void EditSchemaWidget::selectionChanged()
 	m_bringForwardAction->setEnabled(allowSetOrder);
 	m_sendToBackAction->setEnabled(allowSetOrder);
 	m_sendBackwardAction->setEnabled(allowSetOrder);
+
+	// Comment Action
+	//
+	bool hasFblItems = false;
+	for (auto& selItem : selected)
+	{
+		if (selItem->isFblItem() == true)
+		{
+			hasFblItems = true;
+			break;
+		}
+	}
+
+	m_toggleCommentAction->setEnabled(hasFblItems);
 
 	// --
 	//
@@ -6493,6 +6526,78 @@ void EditSchemaWidget::sendBackward()
 {
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
+}
+
+void EditSchemaWidget::toggleComment()
+{
+	qDebug() << "EditSchemaWidget::toggleComment()";
+
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	// Only FblItems can be commented
+	//
+	bool hasCommented = false;
+	bool hasUncommented = false;
+
+	const auto& selected = selectedItems();
+
+	for (auto& selItem : selected)
+	{
+		if (selItem->isFblItem() == true)
+		{
+			if (selItem->isCommented() == true)
+			{
+				hasCommented = true;
+			}
+			else
+			{
+				hasUncommented = true;
+			}
+		}
+	}
+
+	if (hasUncommented == true)
+	{
+		// Comment all
+		//
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.reserve(selected.size());
+
+		for (auto& selItem : selected)
+		{
+			if (selItem->isFblItem() == true)
+			{
+				items.push_back(selItem);
+			}
+		}
+
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::commented, QVariant(true), items);
+		return;
+	}
+
+	if (hasCommented == true)
+	{
+		// Uncomment all
+		//
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.reserve(selected.size());
+
+		for (auto& selItem : selected)
+		{
+			if (selItem->isFblItem() == true)
+			{
+				items.push_back(selItem);
+			}
+		}
+
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::commented, QVariant(false), items);
+		return;
+	}
+
+	return;
 }
 
 void EditSchemaWidget::find()
