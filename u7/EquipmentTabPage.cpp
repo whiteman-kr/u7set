@@ -706,15 +706,56 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		}
 	}
 
-	dbController()->checkOut(files, m_parentWidget);
+	bool ok = dbController()->checkOut(files, m_parentWidget);
+	if (ok == false)
+	{
+		return;
+	}
 
+	// Get latest version of the objectcs
 	// Update FileInfo in devices and Update model
 	//
+	std::vector<std::shared_ptr<DbFile>> freshFiles;
+	freshFiles.reserve(files.size());
+
+	ok = dbController()->getLatestVersion(files, &freshFiles, m_parentWidget);
+	if (ok == false)
+	{
+		return;
+	}
+
 	for (QModelIndex& index : rowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
-		assert(d);
 
+		if (d == nullptr)
+		{
+			assert(d);
+			continue;
+		}
+
+		// Update object
+		//
+		auto& freshFileIt = std::find_if(freshFiles.begin(), freshFiles.end(),
+				[d](const std::shared_ptr<DbFile>& f)
+				{
+					return d->fileId() == f->fileId();
+				});
+
+		if (freshFileIt == freshFiles.end())
+		{
+			assert(false);
+			continue;
+		}
+		else
+		{
+			const std::shared_ptr<DbFile>& freshFile = *freshFileIt;
+
+			ok = d->Load(freshFile->data());	// Refresh data in the object
+		}
+
+		// Update fileInfo and model
+		//
 		for (const auto& fi : files)
 		{
 			if (fi.fileId() == d->fileInfo().fileId())
