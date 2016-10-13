@@ -417,6 +417,8 @@ public:
 	QVector<int> getChannelSignalsID(int signalGroupID);
 
 	void buildID2IndexMap();
+	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
+	bool ID2IndexMapIsEmpty();
 	bool contains(const QString& appSignalID);
 
 	Signal* getSignal(const QString& appSignalID);

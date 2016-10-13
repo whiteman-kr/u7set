@@ -475,6 +475,7 @@ void SignalSet::clear()
 	SignalPtrOrderedHash::clear();
 
 	m_groupSignals.clear();
+	m_strID2IndexMap.clear();
 }
 
 
@@ -1181,6 +1182,11 @@ void SignalSet::buildID2IndexMap()
 			m_strID2IndexMap.insert(s.appSignalID(), i);
 		}
 	}
+}
+
+bool SignalSet::ID2IndexMapIsEmpty()
+{
+	return m_strID2IndexMap.isEmpty();
 }
 
 

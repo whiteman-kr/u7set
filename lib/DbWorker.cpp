@@ -3270,6 +3270,8 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		//set.append(s->ID(), s);
 	}
 
+	signalSet->clearID2IndexMap();
+
 	quint64 finish = QDateTime::currentMSecsSinceEpoch();
 	Q_UNUSED(finish);
 

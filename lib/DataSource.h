@@ -226,6 +226,15 @@ public:
 	quint64 receivedDataSize() const { return m_receivedDataSize; }
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 
+	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
+	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
+	qint64 errorFrameNo() const { return m_errorFrameNo; }
+	qint64 lostedFramesCount() const { return m_lostedFramesCount; }
+	qint64 errorDataID() const { return m_errorDataID; }
+	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
+
+	bool hasErrors() const { return m_hasErrors; }
+
 	void setID(quint32 id) { m_id = id; }
 	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
 	void partCount(quint32 partCount) { m_partCount = partCount; }
