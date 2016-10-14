@@ -823,7 +823,23 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		return;
 	}
 
-	dbController()->undoChanges(files, m_parentWidget);
+	bool ok = dbController()->undoChanges(files, m_parentWidget);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Get latest version of the object
+	//
+	std::vector<std::shared_ptr<DbFile>> latestFilesVersion;
+	ok = dbController()->getLatestVersion(files, &latestFilesVersion, m_parentWidget);
+
+	if (ok == false)
+	{
+		// Can't update objects
+		//
+		return;
+	}
 
 	// Update FileInfo in devices and Update model
 	//
@@ -832,6 +848,29 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
+		// Set latest version to the object
+		//
+		auto foundFile = std::find_if(latestFilesVersion.begin(), latestFilesVersion.end(),
+					[d](const std::shared_ptr<DbFile>& f)
+					{
+						return f->fileId() == d->fileInfo().fileId();
+					});
+
+		if (foundFile != latestFilesVersion.end())
+		{
+			const std::shared_ptr<DbFile>& f = *foundFile;
+			d->Load(f->data());
+		}
+		else
+		{
+			// Where is a file?
+			//
+			assert(foundFile != latestFilesVersion.end());
+			continue;
+		}
+
+		// Update fileInfo
+		//
 		bool updated = false;
 		for (DbFileInfo& fi : files)
 		{
