@@ -4759,12 +4759,6 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	//
 	m_addAction->setDisabled(readOnly());
 
-	if (readOnly() == true)
-	{
-		m_editPasteAction->setDisabled(true);
-		m_deleteAction->setDisabled(true);
-	}
-
 	// Version Control enable/disable items
 	//
 	m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
