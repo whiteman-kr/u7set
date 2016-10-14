@@ -38,6 +38,8 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
+		static QString getCoulumnText(CDrawParam* drawParam, const E::ColumnData& data, const Signal& signal, const AppSignalState& signalState, E::AnalogFormat analogFormat, int precision);
+
 	protected:
 		void drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const;
 
@@ -45,8 +47,6 @@ namespace VFrame30
 
 		void drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const;
 		void drawSinglechannelValues(CDrawParam* drawParam, QPen& linePen) const;
-
-		QString getCoulumnText(CDrawParam* drawParam, const Column& column, const Signal& signal, const AppSignalState& signalState) const;
 
 		void createColumnProperties();
 

@@ -4972,20 +4972,50 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline ::std::string* release_appsignalid();
   inline void set_allocated_appsignalid(::std::string* appsignalid);
 
+  // optional int32 dataType = 3 [default = 0];
+  inline bool has_datatype() const;
+  inline void clear_datatype();
+  static const int kDataTypeFieldNumber = 3;
+  inline ::google::protobuf::int32 datatype() const;
+  inline void set_datatype(::google::protobuf::int32 value);
+
+  // optional int32 precision = 4 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 4;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional int32 analogFormat = 5 [default = 102];
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 5;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemReceiver)
  private:
   inline void set_has_showvalidity();
   inline void clear_has_showvalidity();
   inline void set_has_appsignalid();
   inline void clear_has_appsignalid();
+  inline void set_has_datatype();
+  inline void clear_has_datatype();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* appsignalid_;
   bool showvalidity_;
+  ::google::protobuf::int32 datatype_;
+  ::google::protobuf::int32 precision_;
+  ::google::protobuf::int32 analogformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -13053,6 +13083,72 @@ inline void SchemaItemReceiver::set_allocated_appsignalid(::std::string* appsign
     clear_has_appsignalid();
     appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional int32 dataType = 3 [default = 0];
+inline bool SchemaItemReceiver::has_datatype() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemReceiver::set_has_datatype() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemReceiver::clear_has_datatype() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemReceiver::clear_datatype() {
+  datatype_ = 0;
+  clear_has_datatype();
+}
+inline ::google::protobuf::int32 SchemaItemReceiver::datatype() const {
+  return datatype_;
+}
+inline void SchemaItemReceiver::set_datatype(::google::protobuf::int32 value) {
+  set_has_datatype();
+  datatype_ = value;
+}
+
+// optional int32 precision = 4 [default = 2];
+inline bool SchemaItemReceiver::has_precision() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemReceiver::set_has_precision() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemReceiver::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemReceiver::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemaItemReceiver::precision() const {
+  return precision_;
+}
+inline void SchemaItemReceiver::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional int32 analogFormat = 5 [default = 102];
+inline bool SchemaItemReceiver::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemReceiver::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemReceiver::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemReceiver::clear_analogformat() {
+  analogformat_ = 102;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 SchemaItemReceiver::analogformat() const {
+  return analogformat_;
+}
+inline void SchemaItemReceiver::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
 }
 
 // -------------------------------------------------------------------

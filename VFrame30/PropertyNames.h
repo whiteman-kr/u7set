@@ -49,6 +49,8 @@ namespace VFrame30
 		static const QString alignHorz;
 		static const QString alignVert;
 
+		static const QString dataType;
+
 		static const QString appSignalIDs;
 		static const QString appSignalId;
 		static const QString connectionId;

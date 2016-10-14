@@ -41,6 +41,8 @@ const QString PropertyNames::locked("Locked");
 const QString PropertyNames::alignHorz("AlignHorz");
 const QString PropertyNames::alignVert("AlignVert");
 
+const QString PropertyNames::dataType("DataType");
+
 const QString PropertyNames::appSignalIDs("AppSignalIDs");
 const QString PropertyNames::appSignalId("AppSignalID");
 const QString PropertyNames::connectionId("ConnectionID");
