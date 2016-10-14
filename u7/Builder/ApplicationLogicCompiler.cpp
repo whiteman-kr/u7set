@@ -969,7 +969,7 @@ namespace Builder
 		list.append("use ieee.std_logic_1164.all;");
 		list.append("use ieee.numeric_std.all;\n");
 
-		str = QString("entity %1 is port\n\t(\n").arg(inPortID);
+		str = QString("entity %1 is\n\tport (\n").arg(inPortID);
 		list.append(str);
 
 		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");

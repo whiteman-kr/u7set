@@ -2149,7 +2149,11 @@ void EquipmentView::addInOutsToSignals()
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
-	bool result = db()->autoAddSignals(&inOuts, this);
+	std::vector<Signal> addedSignals;
+
+	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+
+	qDebug() << "Signals added:" << addedSignals.size();
 
 	if (result == true)
 	{

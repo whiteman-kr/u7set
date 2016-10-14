@@ -1515,7 +1515,7 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 
 
-bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget)
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{
@@ -1532,7 +1532,7 @@ bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* de
 		return false;
 	}
 
-	emit signal_autoAddSignals(deviceSignals);
+	emit signal_autoAddSignals(deviceSignals, addedSignals);
 
 	ok = waitForComplete(parentWidget, tr("Auto add signals"));
 

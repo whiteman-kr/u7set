@@ -3478,12 +3478,12 @@ void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSign
 }
 
 
-void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
+bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	if (newSignal == nullptr)
 	{
 		assert(newSignal != nullptr);
-		return;
+		return false;
 	}
 
 	// Operation
@@ -3493,7 +3493,7 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	if (db.isOpen() == false)
 	{
 		emitError(tr("Cannot add signals. Database connection is not opened."));
-		return;
+		return false;
 	}
 
 	// request
@@ -3507,7 +3507,7 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	if (result == false)
 	{
 		emitError(tr("Can't add new signal(s)! Error: ") +  q.lastError().text());
-		return;
+		return false;
 	}
 
 	int i = 0;
@@ -3540,7 +3540,7 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		if (result == false)
 		{
 			emitError(tr("Can't set signal workcopy! Error: ") +  q2.lastError().text());
-			return;
+			return false;
 		}
 
 		assert(i<newSignal->count());
@@ -3555,7 +3555,7 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		if (result == false)
 		{
 			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
-			return;
+			return false;
 		}
 
 		while(q3.next() != false)
@@ -3568,6 +3568,8 @@ void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	}
 
 	assert(i == readed);
+
+	return true;
 }
 
 
@@ -3919,7 +3921,8 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals,
+								   std::vector<Signal>* addedSignals)
 {
 	AUTO_COMPLETE
 
@@ -3927,6 +3930,11 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 	{
 		assert(deviceSignals != nullptr);
 		return;
+	}
+
+	if (addedSignals != nullptr)
+	{
+		addedSignals->clear();
 	}
 
 	int signalCount = int(deviceSignals->size());
@@ -3948,13 +3956,21 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 
 		if (deviceSignal->isInputSignal() || deviceSignal->isOutputSignal() || deviceSignal->isValiditySignal())
 		{
-			Signal signal(*deviceSignal);
+			if (isSignalWithEquipmentIDExists(deviceSignal->equipmentIdTemplate()) == false)
+			{
+				Signal signal(*deviceSignal);
 
-			QVector<Signal> newSignals;
+				QVector<Signal> newSignals;
 
-			newSignals.append(signal);
+				newSignals.append(signal);
 
-			addSignal(signal.signalType(), &newSignals);
+				bool result = addSignal(signal.signalType(), &newSignals);
+
+				if (result == true && addedSignals != nullptr)
+				{
+					addedSignals->push_back(newSignals[0]);
+				}
+			}
 		}
 	}
 
@@ -4002,6 +4018,43 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 			emitError(tr("Can't delete signal! No data returned!"));
 		}
 	}
+}
+
+
+bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
+{
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return false;
+	}
+
+	QString request = QString("SELECT * FROM is_signal_with_equipmentid_exists(%1, '%2')")
+					  .arg(currentUser().userId())
+					  .arg(equipmentID);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return false;
+	}
+
+	result = q.next();
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result = q.value(0).toBool();
+
+	return result;
 }
 
 

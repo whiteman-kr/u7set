@@ -82,8 +82,6 @@ struct DataFormatPair
 };
 
 
-
-
 typedef OrderedHash<int, QString> UnitList;
 
 
