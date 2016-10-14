@@ -109,7 +109,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		assert(vi.get() != nullptr);
 
-		// Do not set property, if it has same value
+		// Do not set property, if it has the same value
 		//
 		if (vi->propertyValue(property->propertyName()) == value)
 		{
@@ -130,6 +130,18 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	if (items.empty() == true)
 	{
 		return;
+	}
+
+	//editEngine()->runSetProperty(property->propertyName(), value, items);	// Is two objects with the diff  BOOL values are selected,
+																			// and then values changed, editEngine()->runSetProperty
+																			// will select ONLY item with changed value, not good ((
+																			// items changed to m_objects
+
+	items.clear();
+	for (auto i : m_objects)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
+		items.push_back(vi);
 	}
 
 	editEngine()->runSetProperty(property->propertyName(), value, items);

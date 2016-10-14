@@ -128,6 +128,10 @@ namespace VFrame30
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
 		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar);
 
+		// Draw comment "dim"
+		//
+		virtual void drawCommentDim(CDrawParam* drawParam) const;
+
 		// Determine and Calculation Functions
 		//
 	public:	
@@ -173,7 +177,7 @@ namespace VFrame30
 		FblItemRect* toFblItemRect();
 		const FblItemRect* toFblItemRect() const;
 
-		virtual bool IsFblItem() const;
+		bool isFblItem() const;
 
 		bool isSchemaItemAfb() const;
 		SchemaItemAfb* toSchemaItemAfb();
@@ -197,9 +201,12 @@ namespace VFrame30
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
 
-
-		bool IsLocked() const;
+		bool isLocked() const;
 		void setLocked(bool locked);
+
+		bool isCommented() const;
+		bool commented() const;
+		void setCommented(bool value);
 
 		const QUuid& guid() const;
 		void setGuid(const QUuid& guid);
@@ -223,18 +230,21 @@ namespace VFrame30
 		// Data
 		//
 	protected:
-		bool m_static;
-		bool m_locked;
+		bool m_static = true;
+		bool m_locked = false;
+		bool m_commented = false;
 		QUuid m_guid;
 		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
-		bool m_acceptClick;			// The SchemaItem accept mouse Left button click and runs script
+		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
 
 	public:
 		static const QColor errorColor;
 		static const QColor warningColor;
 		static const QColor selectionColor;
+		static const QColor lockedSelectionColor;
+		static const QColor commentedColor;
 	};
 
 #ifdef VFRAME30LIB_LIBRARY

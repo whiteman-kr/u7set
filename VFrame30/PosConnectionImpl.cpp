@@ -281,7 +281,8 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(SchemaItem::selectionColor);
+		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
 
@@ -289,7 +290,7 @@ namespace VFrame30
 			
 		// Draw control bars
 		//
-		if (drawSizeBar == true)
+		if (drawSizeBar == true && isLocked() == false)
 		{
 			QBrush solidBrush(pen.color());
 
@@ -305,6 +306,44 @@ namespace VFrame30
 				p->fillRect(controlRectangles, solidBrush);
 			}
 		}
+
+		return;
+	}
+
+	void PosConnectionImpl::drawCommentDim(CDrawParam* drawParam) const
+	{
+		if (isCommented() == false)
+		{
+			return;
+		}
+
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		double cbs = drawParam->controlBarSize();
+		double lineWeight = cbs;
+
+		// Draw the main part
+		//
+		QPolygonF polyline(static_cast<int>(points.size()));
+		int index = 0;
+
+		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
+		{
+			polyline[index++] = QPointF(pt->X, pt->Y);
+		}
+
+		QPen pen(SchemaItem::commentedColor);
+
+		pen.setWidthF(lineWeight);
+		p->setPen(pen);
+
+		p->drawPolyline(polyline);
 
 		return;
 	}

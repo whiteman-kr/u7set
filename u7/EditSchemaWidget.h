@@ -450,9 +450,15 @@ protected slots:
 	void sendToBack();
 	void sendBackward();
 
+	void toggleComment();
+
+	void toggleLock();
+
 	void find();
 	void findNext();
 	void findPrev();
+
+	void hideWorkDialogs();
 
 	// Properties
 	//
@@ -658,10 +664,15 @@ private:
 	// Properties
 	//
 	QAction* m_separatorAction0 = nullptr;
-	QAction* m_layersAction = nullptr;
+
+	QAction* m_toggleCommentAction = nullptr;
+	QAction* m_lockAction = nullptr;
+
 	QAction* m_findAction = nullptr;
 	QAction* m_findNextAction = nullptr;
 	QAction* m_findPrevAction = nullptr;
+
+	QAction* m_layersAction = nullptr;
 
 	//QMenu* m_propertiesMenu = nullptr;
 	//QAction* m_propertiesAction = nullptr;

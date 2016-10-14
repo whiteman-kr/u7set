@@ -44,16 +44,29 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_outputWidget->setAutoFormatting(QTextEdit::AutoNone);
 	m_outputWidget->document()->setUndoRedoEnabled(false);
 
+	auto p = qApp->palette("QListView");
+
+	QColor highlight = p.highlight().color();
+	QColor highlightText = p.highlightedText().color();
+
+	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
+							 .arg(highlight.name())
+							 .arg(highlightText.name());
+
+	m_outputWidget->setStyleSheet(selectionColor);
+
+	//--
+	//
 	m_buildButton = new QPushButton(tr("Build... <F7>"));
 
 	m_cancelButton = new QPushButton(tr("Cancel"));
 	m_cancelButton->setEnabled(false);
 
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
-	m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);
+	//m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);	// Too slow, use usual QAction
 
 	m_nextIssueButton = new QPushButton(tr("Next Issue <F6>"));
-	m_nextIssueButton->setShortcut(Qt::Key_F6);
+	//m_nextIssueButton->setShortcut(Qt::Key_F6);				// Too slow, use usual QAction
 
 	m_findTextEdit = new QLineEdit();
 	m_findTextEdit->setPlaceholderText("Find Text");
@@ -64,7 +77,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_findTextEdit->setCompleter(searchCompleter);
 
 	m_findTextButton = new QPushButton(tr("Search <F3>"));
-	m_findTextButton->setShortcut(Qt::Key_F3);
+	//m_findTextButton->setShortcut(Qt::Key_F3);				// Too slow, use usual QAction
 
 	QGridLayout* rightWidgetLayout = new QGridLayout();
 
@@ -204,10 +217,20 @@ void BuildTabPage::cancelBuild()
 
 void BuildTabPage::CreateActions()
 {
-//	m_addSystemAction = new QAction(tr("System"), this);
-//	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-//	m_addSystemAction->setEnabled(false);
-//	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
+	m_findNextAction = new QAction(tr("Find Text"), this);
+	m_findNextAction->setShortcut(Qt::Key_F3);
+	connect(m_findNextAction, &QAction::triggered, this, &BuildTabPage::search);
+	addAction(m_findNextAction);
+
+	m_prevIssueAction = new QAction(tr("Prev Issue"), this);
+	m_prevIssueAction->setShortcut(Qt::SHIFT + Qt::Key_F6);
+	connect(m_prevIssueAction, &QAction::triggered, this, &BuildTabPage::prevIssue);
+	addAction(m_prevIssueAction);
+
+	m_nextIssueAction = new QAction(tr("Next Issue"), this);
+	m_nextIssueAction->setShortcut(Qt::Key_F6);
+	connect(m_nextIssueAction, &QAction::triggered, this, &BuildTabPage::nextIssue);
+	addAction(m_nextIssueAction);
 
 	return;
 }
@@ -537,10 +560,10 @@ void BuildTabPage::search()
 		found = m_outputWidget->find(searchText);
 	}
 
-	if (found == true)
-	{
-		m_outputWidget->setFocus();
-	}
+//	if (found == true)
+//	{
+//		m_outputWidget->setFocus();
+//	}
 
 	return;
 }

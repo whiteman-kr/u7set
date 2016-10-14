@@ -1368,7 +1368,7 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(vf, fi, db());
+	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(tabWidget, vf, fi, db());
 
 	connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, this, &SchemaControlTabPage::refreshFiles);
 
@@ -1474,7 +1474,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	// Create TabPage and add it to the TabControl
 	//
 
-	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(vf, fi, db());
+	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(tabWidget, vf, fi, db());
 	editTabPage->setReadOnly(true);
 
 	tabWidget->addTab(editTabPage, tabPageTitle);
@@ -1592,10 +1592,12 @@ const DbFileInfo& SchemaControlTabPage::parentFile() const
 // EditSchemaTabPage
 //
 //
-EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
-	m_schemaWidget(nullptr)
+	m_schemaWidget(nullptr),
+	m_tabWidget(tabWidget)
 {
+	assert(m_tabWidget);
 	assert(schema.get() != nullptr);
 
 	setWindowTitle(schema->schemaID());
@@ -1678,6 +1680,8 @@ EditSchemaTabPage::EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, c
 	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPage::fileMenuTriggered);
 	connect(m_schemaWidget->m_orderAction, &QAction::triggered, this, &EditSchemaTabPage::itemsOrderTriggered);
 	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPage::sizeAndPosMenuTriggered);
+
+	connect(m_tabWidget, &QTabWidget::currentChanged, m_schemaWidget, &EditSchemaWidget::hideWorkDialogs);
 
 	return;
 }

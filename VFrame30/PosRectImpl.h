@@ -87,6 +87,10 @@ namespace VFrame30
 		//
 		virtual void DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
 
+		// Draw comment "dim"
+		//
+		virtual void drawCommentDim(CDrawParam* drawParam) const override;
+
 		// Determine and Calculation Functions
 		//
 	public:

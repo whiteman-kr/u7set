@@ -192,9 +192,16 @@ namespace VFrame30
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
 					item->Draw(drawParam, this, pLayer);
+
+					if (item->isCommented() == true)
+					{
+						item->drawCommentDim(drawParam);
+					}
 				}
 			}
 		}
+
+		return;
 	}
 
 	void Schema::Print()
@@ -325,7 +332,7 @@ namespace VFrame30
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
-				if (item->get()->IsFblItem() == false)
+				if (item->get()->isFblItem() == false)
 				{
 					continue;
 				}
@@ -365,7 +372,7 @@ namespace VFrame30
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
-				if (item->get()->IsFblItem() == false)
+				if (item->get()->isFblItem() == false)
 				{
 					continue;
 				}

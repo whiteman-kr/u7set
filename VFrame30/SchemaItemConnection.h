@@ -156,11 +156,25 @@ namespace VFrame30
 		bool isValidityPin(const QUuid& pin) const;
 		bool isOutputPin(const QUuid& pinGuid) const;
 
+		E::ColumnData data() const;
+		void setData(E::ColumnData value);
+
+		int precision() const;
+		void setPrecision(int value);
+
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat value);
+
 		// Data
 		//
 	private:
 		QString m_appSignalId = "#APPSIGNALID";
 		bool m_showValidity = true;
+
+		E::ColumnData m_dataType = E::ColumnData::AppSignalID;	// Data for displaying
+
+		int m_precision = 2;
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 	};
 
 }
