@@ -251,7 +251,7 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 				return QObject::tr("Object");
 
 			case ObjectEquipmentIdColumn:
-				return QObject::tr("EquipmentID");
+				return QObject::tr("EquipmentIDTemplate");
 
 				case ObjectPlaceColumn:
 					return QObject::tr("Place");
