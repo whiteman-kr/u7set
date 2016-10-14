@@ -44,6 +44,7 @@ namespace VFrame30
 
 		static const QString width;
 		static const QString height;
+		static const QString locked;
 
 		static const QString alignHorz;
 		static const QString alignVert;

@@ -281,7 +281,8 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(SchemaItem::selectionColor);
+		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
 
@@ -289,7 +290,7 @@ namespace VFrame30
 			
 		// Draw control bars
 		//
-		if (drawSizeBar == true)
+		if (drawSizeBar == true && isLocked() == false)
 		{
 			QBrush solidBrush(pen.color());
 

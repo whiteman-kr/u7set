@@ -452,9 +452,13 @@ protected slots:
 
 	void toggleComment();
 
+	void toggleLock();
+
 	void find();
 	void findNext();
 	void findPrev();
+
+	void hideWorkDialogs();
 
 	// Properties
 	//
@@ -662,6 +666,7 @@ private:
 	QAction* m_separatorAction0 = nullptr;
 
 	QAction* m_toggleCommentAction = nullptr;
+	QAction* m_lockAction = nullptr;
 
 	QAction* m_findAction = nullptr;
 	QAction* m_findNextAction = nullptr;

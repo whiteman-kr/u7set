@@ -466,12 +466,17 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	// Shift position
 	//
+	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::SchemaItem> si)
+		[xdif, ydif, ctrlIsPressed](std::shared_ptr<VFrame30::SchemaItem> si)
 		{
-			si->MoveItem(xdif, ydif);
-		}
-		);
+			if (si->isLocked() == false ||
+				(si->isLocked() == true && ctrlIsPressed == true))
+			{
+				si->MoveItem(xdif, ydif);
+			}
+		});
 
 	// Draw outline
 	//
@@ -486,12 +491,18 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	for (auto it = std::begin(m_selectedItems); it != std::end(m_selectedItems); it++)
 	{
+		std::shared_ptr<VFrame30::SchemaItem> si = *it;
 
-		VFrame30::IPointList* ipoint = dynamic_cast<VFrame30::IPointList*>(it->get());
-		assert(ipoint != nullptr);
+		if ((si->isLocked() == true && ctrlIsPressed == false) ||
+			si->isLocked() == true)
+		{
+			continue;
+		}
 
+		VFrame30::IPointList* ipoint = dynamic_cast<VFrame30::IPointList*>(si.get());
 		if (ipoint == nullptr)
 		{
+			assert(ipoint);
 			continue;
 		}
 
@@ -520,11 +531,14 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// Shift position back
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::SchemaItem> si)
+		[xdif, ydif, ctrlIsPressed](std::shared_ptr<VFrame30::SchemaItem> si)
 		{
-			si->MoveItem(-xdif, -ydif);
-		}
-		);
+			if (si->isLocked() == false ||
+				(si->isLocked() == true && ctrlIsPressed == true))
+			{
+				si->MoveItem(-xdif, -ydif);
+			}
+		});
 
 	// Draw rullers by bounding rect
 	//
@@ -1231,6 +1245,8 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex)
 {
+	// Params checks
+	//
 	if (schemaItem == nullptr)
 	{
 		assert(schemaItem != nullptr);
@@ -1248,19 +1264,35 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		*outMovingEdgePointIndex = -1;
 	}
 
+	// --
+	//
 	float controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
+	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
-	// Координаты schemaItem и point одинакового типа
+	// SchemaItem position and point are the same units
 	//
 	if (dynamic_cast<VFrame30::IPosRect*>(schemaItem) != nullptr)
 	{
 		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemaItem) ;
 
-		// Если внутри прямоугольнка то SchemaItemAction.MoveItem
+		// If inside the rect then SchemaItemAction.MoveItem
 		//
 		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
-			return SchemaItemAction::MoveItem;
+			if (schemaItem->isLocked() == false ||
+				(schemaItem->isLocked() == true && ctrlIsPressed == true))
+			{
+				return SchemaItemAction::MoveItem;
+			}
+			else
+			{
+				return SchemaItemAction::NoAction;
+			}
+		}
+
+		if (schemaItem->isLocked() == true)
+		{
+			return SchemaItemAction::NoAction;
 		}
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
@@ -1319,13 +1351,32 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	{
 		VFrame30::IPosLine* itemPos = dynamic_cast<VFrame30::IPosLine*>(schemaItem) ;
 
-		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
-		//
 		double x1 = itemPos->startXDocPt();
 		double y1 = itemPos->startYDocPt();
 		double x2 = itemPos->endXDocPt();
 		double y2 = itemPos->endYDocPt();
 
+		// Если просто на линии, то SchemaItemAction.MoveItem
+		//
+		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
+		{
+			if (schemaItem->isLocked() == false ||
+				(schemaItem->isLocked() == true && ctrlIsPressed == true))
+			{
+				return SchemaItemAction::MoveItem;
+			}
+			else
+			{
+				return SchemaItemAction::NoAction;
+			}
+		}
+
+		if (schemaItem->isLocked() == true)
+		{
+			return SchemaItemAction::NoAction;
+		}
+
+		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		// Прямоугольники, за которые можно хвататься и изменять элемент
 		//
 		QRectF controlRectangles[2];
@@ -1343,13 +1394,6 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::MoveEndLinePoint;
 		}
 
-		// Если просто на линии, то SchemaItemAction.MoveItem
-		//
-		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
-		{
-			return SchemaItemAction::MoveItem;
-		}
-
 		return SchemaItemAction::NoAction;
 	}
 
@@ -1357,6 +1401,11 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	if (dynamic_cast<VFrame30::IPosConnection*>(schemaItem) != nullptr)
 	{
 		VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(schemaItem) ;
+
+		if (schemaItem->isLocked() == true)
+		{
+			return SchemaItemAction::NoAction;
+		}
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		//
@@ -2127,13 +2176,21 @@ void EditSchemaWidget::createActions()
 	connect(m_layersAction, &QAction::triggered, this, &EditSchemaWidget::layers);
 	addAction(m_layersAction);
 
+	// Comment
 	//
-	//
-	m_toggleCommentAction = new QAction(tr("Toggle Comment"), this);
+	m_toggleCommentAction = new QAction(tr("Comment/Uncomment"), this);
 	m_toggleCommentAction->setEnabled(false);
 	m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Slash);
 	connect(m_toggleCommentAction, &QAction::triggered, this, &EditSchemaWidget::toggleComment);
 	addAction(m_toggleCommentAction);
+
+	// Lock/Unlock
+	//
+	m_lockAction = new QAction(tr("Lock/Unlock"), this);
+	m_lockAction->setEnabled(false);
+	m_lockAction->setShortcut(Qt::CTRL + Qt::Key_L);
+	connect(m_lockAction, &QAction::triggered, this, &EditSchemaWidget::toggleLock);
+	addAction(m_lockAction);
 
 	// Find
 	//
@@ -2280,6 +2337,7 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 		properties();
 	}
 
+	return;
 }
 
 // Set corresponding to the current situation and user actions context menu
@@ -2448,11 +2506,14 @@ void EditSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 {
-	if (me->modifiers().testFlag(Qt::ShiftModifier) == false)
+	bool ctrlIsPressed = me->modifiers().testFlag(Qt::ControlModifier);
+	bool shiftIsPressed = me->modifiers().testFlag(Qt::ShiftModifier);
+
+	if (shiftIsPressed == false)
 	{
 		QPointF docPoint = widgetPointToDocument(me->pos(), false);
 
-		// Если выделен один объект, и клик на изменение рпазмеров этого объекта или изменение ребер, вершин и т.п.
+		// Если выделен один объект, и клик на изменение размеров этого объекта или изменение ребер, вершин и т.п.
 		//
 		if (selectedItems().size() == 1)
 		{
@@ -2602,7 +2663,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-
 		// Проверить выделенные элементы, на возможность выполнения команды их перемещения
 		//
 		for (auto si = selectedItems().begin(); si != selectedItems().end(); ++si)
@@ -2681,7 +2741,8 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		//
 		auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
-		if (itemUnderPoint != nullptr)
+		if (itemUnderPoint != nullptr &&
+			(itemUnderPoint->isLocked() == false || (itemUnderPoint->isLocked() == true && ctrlIsPressed == true)))
 		{
 			if (std::find(selectedItems().begin(), selectedItems().end(), itemUnderPoint) != selectedItems().end())
 			{
@@ -2942,6 +3003,8 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 		return;
 	}
 
+	const auto& selected = selectedItems();
+
 	QPointF mouseMovingStartPointIn = editSchemaView()->m_editStartDocPt;
 	QPointF mouseMovingEndPointIn = widgetPointToDocument(event->pos(), snapToGrid());
 
@@ -2964,7 +3027,21 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Move items
 		//
-		m_editEngine->runMoveItem(xdif, ydif, selectedItems(), snapToGrid());
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+		itemsForMove.reserve(selected.size());
+
+		for (auto& item : selected)
+		{
+			if (item->isLocked() == false)
+			{
+				itemsForMove.push_back(item);
+			}
+		}
+
+		if (itemsForMove.empty() == false)
+		{
+			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
+		}
 	}
 	else
 	{
@@ -2975,7 +3052,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 		DbController* dbc = db();
 		auto s = schema();
 
-		std::for_each(selectedItems().begin(), selectedItems().end(),
+		std::for_each(selected.begin(), selected.end(),
 			[xdif, ydif, &newItems, dbc, s](const std::shared_ptr<VFrame30::SchemaItem>& si)
 			{
 				QByteArray data;
@@ -4832,6 +4909,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	actions << separatorCommentFind;
 	actions << m_toggleCommentAction;
+	actions << m_lockAction;
 	actions << m_findAction;
 
 	// Layer, Item property etc
@@ -5640,6 +5718,10 @@ void EditSchemaWidget::selectionChanged()
 
 	m_toggleCommentAction->setEnabled(hasFblItems);
 
+	// Lock action
+	//
+	m_lockAction->setEnabled(selected.empty() == false);
+
 	// --
 	//
 	clipboardDataChanged();
@@ -5886,9 +5968,25 @@ void EditSchemaWidget::onLeftKey()
 		return;
 	}
 
-	double dif = -schemaView()->schema()->gridSize();
+	const auto& selected = selectedItems();
 
-	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	itemsForMove.reserve(selected.size());
+
+	for (auto& item : selected)
+	{
+		if (item->isLocked() == false)
+		{
+			itemsForMove.push_back(item);
+		}
+	}
+
+	if (itemsForMove.empty() == false)
+	{
+		double dif = -schemaView()->schema()->gridSize();
+
+		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+	}
 
 	return;
 }
@@ -5900,9 +5998,25 @@ void EditSchemaWidget::onRightKey()
 		return;
 	}
 
-	double dif = schemaView()->schema()->gridSize();
+	const auto& selected = selectedItems();
 
-	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	itemsForMove.reserve(selected.size());
+
+	for (auto& item : selected)
+	{
+		if (item->isLocked() == false)
+		{
+			itemsForMove.push_back(item);
+		}
+	}
+
+	if (itemsForMove.empty() == false)
+	{
+		double dif = schemaView()->schema()->gridSize();
+
+		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+	}
 
 	return;
 }
@@ -5914,9 +6028,25 @@ void EditSchemaWidget::onUpKey()
 		return;
 	}
 
-	double dif = -schemaView()->schema()->gridSize();
+	const auto& selected = selectedItems();
 
-	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	itemsForMove.reserve(selected.size());
+
+	for (auto& item : selected)
+	{
+		if (item->isLocked() == false)
+		{
+			itemsForMove.push_back(item);
+		}
+	}
+
+	if (itemsForMove.empty() == false)
+	{
+		double dif = -schemaView()->schema()->gridSize();
+
+		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+	}
 
 	return;
 }
@@ -5928,9 +6058,25 @@ void EditSchemaWidget::onDownKey()
 		return;
 	}
 
-	double dif = schemaView()->schema()->gridSize();
+	const auto& selected = selectedItems();
 
-	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	itemsForMove.reserve(selected.size());
+
+	for (auto& item : selected)
+	{
+		if (item->isLocked() == false)
+		{
+			itemsForMove.push_back(item);
+		}
+	}
+
+	if (itemsForMove.empty() == false)
+	{
+		double dif = schemaView()->schema()->gridSize();
+
+		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+	}
 
 	return;
 }
@@ -6600,6 +6746,53 @@ void EditSchemaWidget::toggleComment()
 	return;
 }
 
+void EditSchemaWidget::toggleLock()
+{
+	qDebug() << "EditSchemaWidget::toggleLock()";
+
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	// Only FblItems can be commented
+	//
+	bool hasLocked = false;
+	bool hasUnlocked = false;
+
+	const auto& selected = selectedItems();
+
+	for (auto& selItem : selected)
+	{
+		if (selItem->isLocked() == true)
+		{
+			hasLocked = true;
+		}
+		else
+		{
+			hasUnlocked = true;
+		}
+	}
+
+	if (hasUnlocked == true)
+	{
+		// Lock all
+		//
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::locked, QVariant(true), selected);
+		return;
+	}
+
+	if (hasLocked == true)
+	{
+		// Unlock all
+		//
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::locked, QVariant(false), selected);
+		return;
+	}
+
+	return;
+}
+
 void EditSchemaWidget::find()
 {
 	if (m_findDialog == nullptr)
@@ -6827,7 +7020,26 @@ void EditSchemaWidget::findPrev()
 	m_findDialog->setFocusToEditLine();
 
 	return;
+}
 
+void EditSchemaWidget::hideWorkDialogs()
+{
+	if (m_findDialog != nullptr)
+	{
+		m_findDialog->hide();
+	}
+
+	if (m_itemsPropertiesDialog != nullptr)
+	{
+		m_itemsPropertiesDialog->hide();
+	}
+
+	if (m_schemaPropertiesDialog != nullptr)
+	{
+		m_schemaPropertiesDialog = nullptr;
+	}
+
+	return;
 }
 
 MouseState EditSchemaWidget::mouseState() const

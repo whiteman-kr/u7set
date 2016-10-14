@@ -205,7 +205,7 @@ namespace VFrame30
 
 		double lineWeight = cbs / 2.0f;
 
-		QPen pen(QColor(0x33, 0x99, 0xFF, 0x80));
+		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
 
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
@@ -214,7 +214,7 @@ namespace VFrame30
 		
 		// Draw control bars
 		//
-		if (drawSizeBar == true)
+		if (drawSizeBar == true && isLocked() == false)
 		{
 			QRectF r1(p1.x() - cbs / 2.0f, p1.y() - cbs / 2.0f, cbs, cbs);
 			QRectF r2(p2.x() - cbs / 2.0f, p2.y() - cbs / 2.0f, cbs, cbs);

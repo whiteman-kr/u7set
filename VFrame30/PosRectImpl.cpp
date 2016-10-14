@@ -245,7 +245,9 @@ namespace VFrame30
 		{
 			selectionPen = std::make_shared<QPen>(QColor(0x33, 0x99, 0xFF, 0x80));
 		}
-		
+
+		selectionPen->setColor(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+
 		// --
 		//
 		QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -275,7 +277,7 @@ namespace VFrame30
 
 		// Прямоугольники, за которые можно хвататься и изменять элемент
 		//
-		if (drawSizeBar == true)
+		if (drawSizeBar == true && isLocked() == false)
 		{
 			double fx = r.left();
 			double fy = r.top();
@@ -325,7 +327,9 @@ namespace VFrame30
 
 		// --
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+		double margin = drawParam->controlBarSize() / 4.0;
+
+		QRectF r(leftDocPt() - margin, topDocPt() - margin, widthDocPt() + margin * 2.0, heightDocPt() + margin * 2.0);
 
 		if (std::abs(r.left() - r.right()) < 0.000001)
 		{

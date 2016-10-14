@@ -10,7 +10,8 @@ namespace VFrame30
 	const QColor SchemaItem::errorColor(0xE0, 0x33, 0x33, 0xFF);
 	const QColor SchemaItem::warningColor(0xF8, 0x72, 0x17, 0xFF);
 	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
-	const QColor SchemaItem::commentedColor(0xF0, 0xF0, 0xFF, 0xB0);
+	const QColor SchemaItem::lockedSelectionColor(0xF0, 0x80, 0x80, 0xB0);
+	const QColor SchemaItem::commentedColor(0xE0, 0xE0, 0xEF, 0xC0);
 
 	// SchemaItem
 	//
@@ -24,6 +25,9 @@ namespace VFrame30
 
 		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
 		commentedProp->setCategory(PropertyNames::functionalCategory);
+
+		auto lockedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::locked, true, SchemaItem::isLocked, SchemaItem::setLocked);
+		lockedProp->setCategory(PropertyNames::appearanceCategory);
 
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
 		clickScriptProp->setCategory(PropertyNames::behaviourCategory);

@@ -36,6 +36,7 @@ const QString PropertyNames::ufbSchemaVersion("UFBSchemaVersion");
 
 const QString PropertyNames::width("Width");
 const QString PropertyNames::height("Height");
+const QString PropertyNames::locked("Locked");
 
 const QString PropertyNames::alignHorz("AlignHorz");
 const QString PropertyNames::alignVert("AlignVert");

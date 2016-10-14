@@ -243,6 +243,7 @@ namespace VFrame30
 		static const QColor errorColor;
 		static const QColor warningColor;
 		static const QColor selectionColor;
+		static const QColor lockedSelectionColor;
 		static const QColor commentedColor;
 	};
 
