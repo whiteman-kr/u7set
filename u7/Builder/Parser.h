@@ -132,13 +132,14 @@ namespace Builder
 					   const BushContainer& bushes,
 					   IssueLogger* log);
 
-		bool orderItems(IssueLogger* log);
+		bool orderItems(IssueLogger* log, bool* interruptProcess);
 
 	private:
 		bool setItemsOrder(IssueLogger* log,
 						   std::map<QUuid, AppLogicItem>& remainItems,
 						   std::list<AppLogicItem>& orderedItems,
-						   const std::map<QUuid, AppLogicItem>& constItems);
+						   const std::map<QUuid, AppLogicItem>& constItems,
+						   bool* interruptProcess);
 
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//

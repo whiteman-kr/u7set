@@ -520,11 +520,13 @@ namespace Builder
 		return true;
 	}
 
-	bool AppLogicModule::orderItems(IssueLogger* log)
+	bool AppLogicModule::orderItems(IssueLogger* log, bool* interruptProcess)
 	{
-		if (log == nullptr)
+		if (log == nullptr ||
+			interruptProcess == nullptr)
 		{
 			assert(log);
+			assert(interruptProcess);
 			return false;
 		}
 
@@ -607,9 +609,20 @@ namespace Builder
 		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
 		while (fblItems.empty() == false)
 		{
+			if (*interruptProcess == true)
+			{
+				break;
+			}
+
 			qDebug() << "Pass " << pass++;
 
-			setItemsOrder(log, fblItems, orderedList, constFblItems);
+			setItemsOrder(log, fblItems, orderedList, constFblItems, interruptProcess);
+
+			if (*interruptProcess == true)
+			{
+				break;
+			}
+
 
 			if (checkRemainsCount == fblItems.size())
 			{
@@ -633,6 +646,11 @@ namespace Builder
 			}
 		}
 
+		if (*interruptProcess == true)
+		{
+			return false;
+		}
+
 		// --
 		//
 		if (fblItems.empty() == false)
@@ -654,7 +672,6 @@ namespace Builder
 		{
 			// Set complete data
 			//
-
 			std::swap(m_items, orderedList);
 		}
 
@@ -673,11 +690,14 @@ namespace Builder
 	bool AppLogicModule::setItemsOrder(IssueLogger* log,
 									   std::map<QUuid, AppLogicItem>& remainItems,
 									   std::list<AppLogicItem>& orderedItems,
-									   const std::map<QUuid, AppLogicItem>& constItems)
+									   const std::map<QUuid, AppLogicItem>& constItems,
+									   bool* interruptProcess)
 	{
-		if (log == nullptr)
+		if (log == nullptr ||
+			interruptProcess == nullptr)
 		{
 			assert(log);
+			assert(interruptProcess);
 			return false;
 		}
 
@@ -687,6 +707,11 @@ namespace Builder
 		//
 		for (auto currentIt = orderedItems.begin(); currentIt != orderedItems.end(); ++currentIt)
 		{
+			if (*interruptProcess == true)
+			{
+				return false;
+			}
+
 			AppLogicItem currentItem = *currentIt;		// NOT REFERENCE, ITEM CAN BE MOVED LATER
 
 			//qDebug() << "Parsing -- order item " << currentItem.m_fblItem->buildName();
@@ -1107,6 +1132,8 @@ namespace Builder
 		std::vector<QFuture<bool>> orderTasks;
 		orderTasks.reserve(m_modules.size());
 
+		bool iterruptRequest = false;
+
 		for (std::shared_ptr<AppLogicModule> m : m_modules)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -1114,9 +1141,38 @@ namespace Builder
 				return false;
 			}
 
-			QFuture<bool> task =  QtConcurrent::run(std::bind(&AppLogicModule::orderItems, m, log));
+			QFuture<bool> task =  QtConcurrent::run(std::bind(&AppLogicModule::orderItems, m, log, &iterruptRequest));
 			orderTasks.push_back(task);
 		}
+
+		// Wait for finish and process interrupt request
+		//
+		do
+		{
+			bool allFinished = true;
+			for (QFuture<bool>& task : orderTasks)
+			{
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		}
+		while (1);
 
 		for (QFuture<bool>& task : orderTasks)
 		{
