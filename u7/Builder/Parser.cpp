@@ -1,6 +1,8 @@
 #include "Parser.h"
 
 #include <typeindex>
+#include <functional>
+#include <QtConcurrent/QtConcurrent>
 
 #include "IssueLogger.h"
 #include "GlobalMessanger.h"
@@ -528,13 +530,14 @@ namespace Builder
 
 		qDebug() << "Order items for module " << m_moduleEquipmentId;
 
+		LOG_MESSAGE(log, QObject::tr("Started OrderItems for module: %1").arg(moduleEquipmentId()));
+
 		bool result = true;
 
 		// The last preparation - connect SchemaItemInput to SchemaItemOutput
 		// Get all signals and put it to hash tables.
 		//
 		result = setInputOutputsElementsConnection(log);
-
 		if (result == false)
 		{
 			return false;
@@ -653,6 +656,15 @@ namespace Builder
 			//
 
 			std::swap(m_items, orderedList);
+		}
+
+		if (result == true)
+		{
+			QString str = QString("Finished OrderItems for module %1, %2 functional item(s) were parsed")
+						  .arg(moduleEquipmentId())
+						  .arg(m_items.size());
+
+			LOG_MESSAGE(log, str);
 		}
 
 		return result;
@@ -1090,8 +1102,10 @@ namespace Builder
 			return false;
 		}
 
-		bool ok = true;
 		bool result = true;
+
+		std::vector<QFuture<bool>> orderTasks;
+		orderTasks.reserve(m_modules.size());
 
 		for (std::shared_ptr<AppLogicModule> m : m_modules)
 		{
@@ -1100,17 +1114,13 @@ namespace Builder
 				return false;
 			}
 
-			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleEquipmentId()));
+			QFuture<bool> task =  QtConcurrent::run(std::bind(&AppLogicModule::orderItems, m, log));
+			orderTasks.push_back(task);
+		}
 
-			ok = m->orderItems(log);
-
-			if (ok == false)
-			{
-				result = false;
-			}
-
-			QString str = QString("%1 functional item(s) parsed").arg(m->items().size());
-			LOG_MESSAGE(log, str);
+		for (QFuture<bool>& task : orderTasks)
+		{
+			result &= task.result();
 		}
 
 		return result;
