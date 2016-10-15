@@ -194,7 +194,7 @@ namespace VFrame30
 
 		// Look for point in inputs
 		//
-		const std::list<AfbPin>& inputPoints = inputs();
+		const std::vector<AfbPin>& inputPoints = inputs();
 		int inputCount = inputsCount();
 		int index = 0;
 
@@ -213,7 +213,7 @@ namespace VFrame30
 
 		// Look for point in outputs
 		//
-		const std::list<AfbPin>& outputPoints = outputs();
+		const std::vector<AfbPin>& outputPoints = outputs();
 		int outputCount = outputsCount();
 		index = 0;
 
@@ -342,7 +342,7 @@ namespace VFrame30
 
 		// Draw input pins
 		//
-		const std::list<AfbPin>& inputPins = inputs();
+		const std::vector<AfbPin>& inputPins = inputs();
 
 		QPen redPen(QColor(0xE0B00000));
 		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
@@ -400,7 +400,7 @@ namespace VFrame30
 
 		// Drawing output pins
 		//
-		const std::list<AfbPin>& outputPins = outputs();
+		const std::vector<AfbPin>& outputPins = outputs();
 
 		for (const AfbPin& output : outputPins)
 		{
@@ -581,12 +581,12 @@ namespace VFrame30
 		if (inputsCount() != 0)
 		{
 			qDebug() << "\tInputs: ";
-			const std::list<VFrame30::AfbPin>& ins = inputs();
+			const std::vector<VFrame30::AfbPin>& ins = inputs();
 			for (const VFrame30::AfbPin& pin : ins)
 			{
 				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
 
-				const std::list<QUuid>& asios = pin.associatedIOs();
+				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)
 				{
 					for (const QUuid& u : asios)
@@ -600,12 +600,12 @@ namespace VFrame30
 		if (outputsCount() != 0)
 		{
 			qDebug() << "\tOutputs: ";
-			const std::list<VFrame30::AfbPin>& outs = outputs();
+			const std::vector<VFrame30::AfbPin>& outs = outputs();
 			for (const VFrame30::AfbPin& pin : outs)
 			{
 				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
 
-				const std::list<QUuid>& asios = pin.associatedIOs();
+				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)
 				{
 					for (const QUuid& u : asios)
@@ -631,14 +631,14 @@ namespace VFrame30
 
 		// Set new guids for all inputs/outputs
 		//
-		std::list<AfbPin>* inputs = mutableInputs();
+		std::vector<AfbPin>* inputs = mutableInputs();
 
 		for (AfbPin& in : *inputs)
 		{
 			in.setGuid(QUuid::createUuid());
 		}
 
-		std::list<AfbPin>* outputs = mutableOutputs();
+		std::vector<AfbPin>* outputs = mutableOutputs();
 
 		for (AfbPin& out : *outputs)
 		{

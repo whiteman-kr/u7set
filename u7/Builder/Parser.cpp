@@ -77,7 +77,7 @@ namespace Builder
 
 	VFrame30::FblItemRect* Bush::itemByPinGuid(QUuid pinId) const
 	{
-		for (auto item : fblItems)
+		for (const auto& item : fblItems)
 		{
 			VFrame30::AfbPin pin;
 			bool found = item.second->GetConnectionPoint(pinId, &pin);
@@ -129,12 +129,12 @@ namespace Builder
 		std::vector<QUuid> v;
 		v.reserve(links.size() + fblItems.size());
 
-		for (auto it : links)
+		for (const auto& it : links)
 		{
 			v.push_back(it.first);
 		}
 
-		for (auto it : fblItems)
+		for (const auto& it : fblItems)
 		{
 			v.push_back(it.first);
 		}
@@ -147,7 +147,7 @@ namespace Builder
 		std::vector<QUuid> v;
 		v.reserve(links.size());
 
-		for (auto it : links)
+		for (const auto& it : links)
 		{
 			v.push_back(it.first);
 		}
@@ -168,15 +168,19 @@ namespace Builder
 			return result;
 		}
 
-		for (auto id : inputPins)
+		const std::vector<VFrame30::AfbPin>& itemInputs = item->inputs();
+
+		result.reserve(itemInputs.size());
+
+		for (const auto& id : inputPins)
 		{
-			auto foundPin = std::find_if(std::begin(item->inputs()), std::end(item->inputs()),
+			auto foundPin = std::find_if(itemInputs.begin(), itemInputs.end(),
 				[&id](const VFrame30::AfbPin& itemInput)
 				{
 					return itemInput.guid() == id;
 				});
 
-			if (foundPin != std::end(item->inputs()))
+			if (foundPin != itemInputs.end())
 			{
 				result.push_back(*foundPin);
 			}
@@ -277,7 +281,8 @@ namespace Builder
 	//
 	int BushContainer::getBranchByPinPos(VFrame30::SchemaPoint pt) const
 	{
-		for (size_t i = 0; i < bushes.size(); i++)
+		size_t bushesSize = bushes.size();
+		for (size_t i = 0; i < bushesSize; ++i)
 		{
 			const Bush& branch = bushes[i];
 
@@ -560,7 +565,7 @@ namespace Builder
 		//
 		bool hasItemsWithouInputs = false;
 
-		for (auto item : fblItems)
+		for (const auto& item : fblItems)
 		{
 			if (item.second.m_fblItem->inputsCount() == 0)
 			{
@@ -570,7 +575,7 @@ namespace Builder
 			}
 		}
 
-		for (auto item : fblItems)
+		for (const auto& item : fblItems)
 		{
 			if (item.second.m_fblItem->outputsCount() == 0)
 			{
@@ -678,11 +683,14 @@ namespace Builder
 			//
 			std::map<QUuid, AppLogicItem> dependantItems;
 
-			const std::list<VFrame30::AfbPin>& outputs = currentItem.m_fblItem->outputs();
+			const std::vector<VFrame30::AfbPin>& outputs = currentItem.m_fblItem->outputs();
 
 			for (const VFrame30::AfbPin& out : outputs)
 			{
-				auto deps = getItemsWithInput(constItems.begin(), constItems.end(), out.guid());
+				auto constItemsBegin = constItems.begin();
+				auto constItemsEnd = constItems.end();
+
+				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
 
 				//qDebug() << "Dependant Items:";
 				for (const AppLogicItem& di : deps)
@@ -800,7 +808,7 @@ namespace Builder
 		QHash<QString, AppLogicItem> signalInputItems;
 		QHash<QString, AppLogicItem> signalOutputItems;
 
-		for (auto lipair : m_fblItemsAcc)
+		for (const auto& lipair : m_fblItemsAcc)
 		{
 			const AppLogicItem& li = lipair.second;
 
@@ -894,40 +902,74 @@ namespace Builder
 	}
 
 	template<typename Iter>
-	std::list<AppLogicItem> AppLogicModule::getItemsWithInput(
-		Iter begin,
-		Iter end,
-		const QUuid& guid)
+	std::vector<AppLogicItem> AppLogicModule::getItemsWithInput(
+			const Iter& begin,
+			const Iter& end,
+			const QUuid& guid)
 	{
 		std::map<QUuid, AppLogicItem> result;	// set removes duplicats
 
 		for (auto it = begin; it != end; ++it)
 		{
 			const AppLogicItem& item = it->second;
-			const std::list<VFrame30::AfbPin>& inputs = item.m_fblItem->inputs();
+			const std::vector<VFrame30::AfbPin>& inputs = item.m_fblItem->inputs();
 
-			for (auto in : inputs)
+			//for (const VFrame30::AfbPin& in : inputs)
+			size_t inputCount = inputs.size();
+			for (size_t inputIndex = 0; inputIndex < inputCount; ++inputIndex)
 			{
-				const std::list<QUuid>& associatedOutputs = in.associatedIOs();
+				const VFrame30::AfbPin& in = inputs[inputIndex];
 
-				auto foundAssociated = std::find(associatedOutputs.begin(), associatedOutputs.end(), guid);
+				const std::vector<QUuid>& associatedOutputs = in.associatedIOs();
 
-				if (foundAssociated != associatedOutputs.end())
+				// !!!
+				// This find is very slow in debug mode, so it was changed to for with pointer
+				//
+//				auto associatedOutputsBegin = associatedOutputs.begin();
+//				auto associatedOutputsEnd = associatedOutputs.end();
+//
+//				auto foundAssociated = std::find(associatedOutputsBegin, associatedOutputsEnd, guid);
+//
+//				if (foundAssociated != associatedOutputsEnd)
+//				{
+//					result[item.m_fblItem->guid()] = item;
+//					break;
+//				}
+
+				// Low level optimization instead of std::find(associatedOutputsBegin, associatedOutputsEnd, guid);
+				//
+				bool found = false;
+
+				const QUuid* assocPtr = associatedOutputs.data();
+				size_t associatedOutputsSize = associatedOutputs.size();
+
+				for (size_t ait = 0; ait < associatedOutputsSize; ++ait, ++assocPtr)
+				//for (const QUuid& a : associatedOutputs)
 				{
-					result[item.m_fblItem->guid()] = item;
+					if (*assocPtr == guid)
+					{
+						result[item.m_fblItem->guid()] = item;
+						found = true;
+						break;
+					}
+				}
+
+				if (found == true)
+				{
 					break;
 				}
 			}
 		}
 
-		std::list<AppLogicItem> resultList;
+		std::vector<AppLogicItem> resultVector;
+		resultVector.reserve(8);
 
-		for (auto it = result.begin(); it != result.end(); ++it)
+		for (const auto& item : result)
 		{
-			resultList.push_back(it->second);
+			resultVector.push_back(item.second);
 		}
 
-		return resultList;
+		return resultVector;
 	}
 
 	QString AppLogicModule::moduleEquipmentId() const
@@ -1980,8 +2022,8 @@ namespace Builder
 			{
 				fblItem->SetConnectionsPos(logicSchema->gridSize(), logicSchema->pinGridStep());	// Calculate pins positions
 
-				const std::list<VFrame30::AfbPin>& inputs = fblItem->inputs();
-				const std::list<VFrame30::AfbPin>& outputs = fblItem->outputs();
+				const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
+				const std::vector<VFrame30::AfbPin>& outputs = fblItem->outputs();
 
 				for (const VFrame30::AfbPin& pt : inputs)
 				{
@@ -2258,8 +2300,8 @@ namespace Builder
 				fblItem->ClearAssociatedConnections();
 				fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
 
-				std::list<VFrame30::AfbPin>* inputs = fblItem->mutableInputs();
-				std::list<VFrame30::AfbPin>* outputs = fblItem->mutableOutputs();
+				std::vector<VFrame30::AfbPin>* inputs = fblItem->mutableInputs();
+				std::vector<VFrame30::AfbPin>* outputs = fblItem->mutableOutputs();
 
 				for (VFrame30::AfbPin& in : *inputs)
 				{
@@ -2361,8 +2403,8 @@ namespace Builder
 				fblElement->ClearAssociatedConnections();
 				fblElement->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
 
-				std::list<VFrame30::AfbPin>* inputs = fblElement->mutableInputs();
-				std::list<VFrame30::AfbPin>* outputs = fblElement->mutableOutputs();
+				std::vector<VFrame30::AfbPin>* inputs = fblElement->mutableInputs();
+				std::vector<VFrame30::AfbPin>* outputs = fblElement->mutableOutputs();
 
 				for (VFrame30::AfbPin& in : *inputs)
 				{
@@ -2461,10 +2503,11 @@ namespace Builder
 					const std::shared_ptr<VFrame30::FblItemRect>& item = it->second;
 					// Schema item %1 has not linked pin %2 (Logic Schema '%3').
 					//
-					std::vector<VFrame30::AfbPin> inputs = bush.getInputPinsForItem(item->guid());
+					const std::vector<VFrame30::AfbPin>& inputs = bush.getInputPinsForItem(item->guid());
 
 					QString inputsStr;
-					for (auto input : inputs)
+					inputsStr.reserve(1024);
+					for (const VFrame30::AfbPin& input : inputs)
 					{
 						inputsStr += (inputsStr.isEmpty() == true) ? input.caption() : QString(", %1").arg(input.caption());
 					}
@@ -2483,7 +2526,7 @@ namespace Builder
 				for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
 				{
 					const std::shared_ptr<VFrame30::FblItemRect>& item = it->second;
-					const std::list<VFrame30::AfbPin>& outputs = item->outputs();
+					const std::vector<VFrame30::AfbPin>& outputs = item->outputs();
 
 					for (const VFrame30::AfbPin& out : outputs)
 					{

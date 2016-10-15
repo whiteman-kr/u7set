@@ -543,7 +543,7 @@ namespace VFrame30
 		// pin 1 is always validity
 		// its defined in setShowValidity function
 		//
-		const std::list<VFrame30::AfbPin>& outs = outputs();
+		const std::vector<VFrame30::AfbPin>& outs = outputs();
 
 		if (outs.size() != 2)
 		{
@@ -573,7 +573,7 @@ namespace VFrame30
 		// its defined in setShowValidity function
 		//
 
-		const std::list<VFrame30::AfbPin>& outs = outputs();
+		const std::vector<VFrame30::AfbPin>& outs = outputs();
 
 		if (outs.size() < 1 || outs.size() > 2)
 		{
