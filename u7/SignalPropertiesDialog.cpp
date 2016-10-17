@@ -17,6 +17,8 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 {
 	SignalSet signalSet;
 
+	QString wrongIds;
+
 	SignalsModel* model = SignalsModel::instance();
 	if (model == nullptr)
 	{
@@ -28,7 +30,20 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 	{
 		for (const QString& id : signalId)
 		{
-			Signal* signal = new Signal(*model->getSignalByStrID(id));
+			Signal* modelSignal = model->getSignalByStrID(id);
+			if (modelSignal == nullptr)
+			{
+				continue;
+			}
+
+			int signalIndex = model->keyIndex(modelSignal->ID());
+			if (signalIndex == -1)
+			{
+				continue;
+			}
+
+			model->loadSignal(signalIndex);
+			Signal* signal = new Signal(model->signal(signalIndex));
 			signalSet.append(signal->ID(), signal);
 		}
 	}
@@ -37,7 +52,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 	QVector<Signal*> signalVector;
 	QMap<QString, int> signalIndexMap;
 	int lastIndexProcessed = -1;
-	QString wrongIds;
 	QStringList foundIds;
 	std::vector<std::pair<QString, QString>> result;
 
