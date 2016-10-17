@@ -303,9 +303,17 @@ std::vector<DbFileInfo> DbWorker::systemFiles() const
 QString DbWorker::toSqlStr(QString str)
 {
 	str = str.replace("'", "''");
-	//str = str.replace("\\", "\\\\");
-	//str = str.replace("\"", "\\\"");
 	return str;
+}
+
+QString DbWorker::toSqlBoolean(bool value)
+{
+	if (value == true)
+	{
+		return "TRUE";
+	}
+
+	return "FALSE";
 }
 
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
@@ -3200,8 +3208,6 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 	{
 		int signalID = q.value(0).toInt();
 
-		//qDebug() << signalID;
-
 		signalsIDs->append(signalID);
 	}
 
@@ -3256,10 +3262,6 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	request = QString("SELECT * FROM get_latest_signals_all(%1)")
 		.arg(currentUser().userId());
 
-
-	quint64 start = QDateTime::currentMSecsSinceEpoch();
-	Q_UNUSED(start);
-
 	result = q.exec(request);
 
 	if (result == false)
@@ -3269,8 +3271,6 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	}
 
 	int n = 0;
-
-//	OrderedHash<int, Signal*> set;
 
 	while(q.next() != false)
 	{
@@ -3286,16 +3286,9 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		getSignalData(q, *s);
 
 		signalSet->append(s->ID(), s);
-
-		//set.append(s->ID(), s);
 	}
 
 	signalSet->clearID2IndexMap();
-
-	quint64 finish = QDateTime::currentMSecsSinceEpoch();
-	Q_UNUSED(finish);
-
-	//qDebug() << (finish - start);
 
 	m_progress->setValue(100);
 
@@ -3388,7 +3381,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 			appSignalIdsStr.append(",");
 		}
 
-		appSignalIdsStr.append(QString("'%1'").arg(id));
+		appSignalIdsStr.append(QString("'%1'").arg(toSqlStr(id)));
 
 		first = false;
 	}
@@ -3489,21 +3482,21 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 QString DbWorker::getSignalDataStr(const Signal& s)
 {
 	QString str = QString(
-			"(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
-			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
+			"(%1,%2,%3,%4,%5,%6,%7,%8,'%9',%10,"
+			"'%11',%12,'%13','%14','%15',%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42,%43,%44,%45,%46,%47)")
+			"'%41',%42,%43,%44,%45,%46,%47)")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
 	.arg(s.changesetID())
-	.arg(s.checkedOut())
+	.arg(toSqlBoolean(s.checkedOut()))
 	.arg(s.userID())
 	.arg(TO_INT(s.channel()))
 	.arg(TO_INT(s.signalType()))
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
-	.arg(s.deleted())
+	.arg(toSqlBoolean(s.deleted()))
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
 	.arg(s.instanceAction())
 	.arg(toSqlStr(s.appSignalID()))
@@ -3516,7 +3509,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.lowEngeneeringUnits())
 	.arg(s.highEngeneeringUnits())
 	.arg(s.unitID())
-	.arg(0.0)	// was Adjustment
+	.arg(0.0)									// was Adjustment
 	.arg(s.lowValidRange())
 	.arg(s.highValidRange())
 	.arg(s.unbalanceLimit())
@@ -3528,18 +3521,18 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.outputHighLimit())
 	.arg(s.outputUnitID())
 	.arg(s.outputSensorID())
-	.arg(s.acquire() ? "TRUE" : "FALSE")
-	.arg(s.calculated() ? "TRUE" : "FALSE")
+	.arg(toSqlBoolean(s.acquire()))
+	.arg(toSqlBoolean(s.calculated()))
 	.arg(s.normalState())
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
 	.arg(TO_INT(s.inOutType()))
 	.arg(toSqlStr(s.equipmentID()))
-	.arg(s.outputMode())					// since version 35 of database
+	.arg(s.outputMode())						// since version 35 of database
 	.arg(s.filteringTime())						//
-	.arg(s.spreadTolerance())						//
+	.arg(s.spreadTolerance())					//
 	.arg(TO_INT(s.byteOrder()))					//
-	.arg(s.enableTuning() ? "TRUE" : "FALSE")	// since version 42 of database
+	.arg(toSqlBoolean(s.enableTuning()))			// since version 42 of database
 	.arg(s.tuningDefaultValue());				// since version 58 of database
 
 	//qDebug() << str;
@@ -3589,7 +3582,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	// request
 	//
 	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
-		.arg(currentUser().userId()).arg(static_cast<int>(signalType)).arg(newSignal->count());
+		.arg(currentUser().userId()).arg(TO_INT(signalType)).arg(newSignal->count());
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -3620,7 +3613,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		QString sds = getSignalDataStr(signal);
 
-		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, '%2')")
+		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
 			.arg(currentUser().userId()).arg(sds);
 
 		QSqlQuery q2(db);
@@ -3710,6 +3703,90 @@ void DbWorker::slot_getUnits(UnitList *units)
 }
 
 
+void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (newUnitID == nullptr)
+	{
+		assert(newUnitID != nullptr);
+		return;
+	}
+
+	*newUnitID = 0;
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot add unit. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM add_unit('%1','%2')").
+			arg(toSqlStr(unitEn)).arg(toSqlStr(unitRu));
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't add unit! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		*newUnitID = q.value(0).toInt();
+	}
+}
+
+
+void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
+{
+	AUTO_COMPLETE
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot update unit. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM update_unit(%1,'%2','%3')").
+			arg(unitID).arg(toSqlStr(unitEn)).arg(toSqlStr(unitRu));
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't update unit! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	int rawsAffected = 0;
+
+	while(q.next() != false)
+	{
+		rawsAffected = q.value(0).toInt();
+	}
+
+	assert(rawsAffected == 1);
+}
+
+
 void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates)
 {
 	AUTO_COMPLETE
@@ -3748,7 +3825,7 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 
 	for(int i = 0; i < count; i++)
 	{
-		if (i < count -1)
+		if (i < count - 1)
 		{
 			request += QString("%1,").arg((*signalIDs)[i]);
 		}
@@ -3812,7 +3889,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	QString sds = getSignalDataStr(*signal);
 
-	QString request = QString("SELECT * FROM set_signal_workcopy(%1, '%2')")
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
 		.arg(currentUser().userId()).arg(sds);
 
 	QSqlQuery q(db);
@@ -4086,8 +4163,8 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 
 	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
 	{
-		QString request = QString("SELECT * FROM delete_signal_by_device_str_id(%1, '%2')")
-			.arg(currentUser().userId()).arg(deviceSignal->equipmentIdTemplate());
+		QString request = QString("SELECT * FROM delete_signal_by_equipmentid(%1, '%2')")
+			.arg(currentUser().userId()).arg(toSqlStr(deviceSignal->equipmentIdTemplate()));
 
 		QSqlQuery q(db);
 

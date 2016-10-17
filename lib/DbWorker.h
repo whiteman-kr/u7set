@@ -65,6 +65,7 @@ public:
     std::vector<DbFileInfo> systemFiles() const;
 
 	static QString toSqlStr(QString str);
+	static QString toSqlBoolean(bool value);
 
     //
     // Operations
@@ -132,8 +133,6 @@ public slots:
 
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
-    void slot_getUnits(UnitList* units);
-
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
     void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);
 
@@ -146,6 +145,12 @@ public slots:
     void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
+
+	// Units management
+	//
+	void slot_getUnits(UnitList* units);
+	void slot_addUnit(QString unitEn, QString unitRu, int* newUnitID);
+	void slot_updateUnit(int unitID, QString unitEn, QString unitRu);
 
     // Build management
     //

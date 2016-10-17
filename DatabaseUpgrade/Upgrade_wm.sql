@@ -30,11 +30,13 @@ ALTER TABLE SignalInstance ALTER COLUMN aperture SET DEFAULT 1;
 
 -- Drop all stored procedures dependent from SignalData type
 
+DROP FUNCTION delete_signal_by_device_str_id(integer, text);
 DROP FUNCTION get_latest_signal(integer, integer);
 DROP FUNCTION set_signal_workcopy(integer, signaldata);
 DROP FUNCTION get_latest_signals(integer, integer[]);
 DROP FUNCTION get_latest_signals_all(integer);
 DROP FUNCTION checkout_signals(integer, integer[]);
+
 
 -- Drop SignalData type
 
@@ -93,6 +95,29 @@ CREATE TYPE signaldata AS
 
 
 -- Re-create dropped functions
+
+CREATE OR REPLACE FUNCTION delete_signal_by_equipmentid(
+    user_id integer,
+    signal_equipment_id text)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+	os objectstate;
+	result record;
+BEGIN
+	FOR result IN
+		SELECT S.SignalID FROM Signal AS S, SignalInstance AS SI
+		WHERE S.SignalID = SI.SignalID AND S.Deleted = FALSE AND SI.EquipmentID = signal_equipment_id
+	LOOP
+		os = delete_signal(user_id, result.SignalID);
+	END LOOP;
+
+	return os;
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+
 
 CREATE OR REPLACE FUNCTION public.get_latest_signal(
     user_id integer,

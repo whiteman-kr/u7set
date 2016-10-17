@@ -910,6 +910,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 void SignalsModel::loadSignals()
 {
 	bool signalsCleared = false;
+
 	if (m_signalSet.count() != 0)
 	{
 		signalsCleared = true;

@@ -138,7 +138,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 					}
 					default:
 					{
-						assert(false);
 						message += QString("Unknown error %1\n").arg(state.errCode);
 					}
 				}

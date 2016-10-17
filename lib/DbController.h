@@ -100,8 +100,6 @@ public:
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
-	bool getUnits(UnitList* units, QWidget* parentWidget);
-
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
 
@@ -112,6 +110,12 @@ public:
 
 	bool autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget);
 	bool autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget);
+
+	// Units management
+	//
+	bool getUnits(UnitList* units, QWidget* parentWidget);
+	bool addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget);
+	bool updateUnit(int unitID, QString unitEn, QString unitRu, QWidget* parentWidget);
 
 	// Build management
 	//
@@ -176,7 +180,6 @@ signals:
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
-	void signal_getUnits(UnitList* units);
 	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
@@ -187,6 +190,9 @@ signals:
 	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
 	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
 
+	void signal_getUnits(UnitList* units);
+	void signal_addUnit(QString unitEn, QString unitRu, int* newUnitID);
+	void signal_updateUnit(int unitID, QString unitEn, QString unitRu);
 
 	// Build management
 	//

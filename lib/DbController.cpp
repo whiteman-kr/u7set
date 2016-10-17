@@ -66,7 +66,6 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
-	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
@@ -74,6 +73,10 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 	connect(this, &DbController::signal_autoAddSignals, m_worker, &DbWorker::slot_autoAddSignals);
 	connect(this, &DbController::signal_autoDeleteSignals, m_worker, &DbWorker::slot_autoDeleteSignals);
+
+	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
+	connect(this, &DbController::signal_addUnit, m_worker, &DbWorker::slot_addUnit);
+	connect(this, &DbController::signal_updateUnit, m_worker, &DbWorker::slot_updateUnit);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
 	connect(this, &DbController::signal_buildFinish, m_worker, &DbWorker::slot_buildFinish);
@@ -1398,7 +1401,50 @@ bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
 	ok = waitForComplete(parentWidget, tr("Reading units"));
 
 	return ok;
+}
 
+
+bool DbController::addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget)
+{
+	if (newUnitID == nullptr)
+	{
+		assert(newUnitID != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_addUnit(unitEn, unitRu, newUnitID);
+
+	ok = waitForComplete(parentWidget, tr("Add unit"));
+
+	return ok;
+}
+
+
+bool DbController::updateUnit(int unitID, QString unitEn, QString unitRu, QWidget* parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_updateUnit(unitID, unitEn, unitRu);
+
+	ok = waitForComplete(parentWidget, tr("Update unit"));
+
+	return ok;
 }
 
 
