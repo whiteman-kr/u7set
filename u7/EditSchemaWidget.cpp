@@ -2704,8 +2704,8 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				if (fbRect != nullptr &&
 					std::find(selectedItems().begin(), selectedItems().end(), item) == selectedItems().end())	// Item is not selected, as in this case it can be resized or moved by control bars
 				{
-					const std::list<VFrame30::AfbPin>& inputs = fbRect->inputs();
-					const std::list<VFrame30::AfbPin>& outputs = fbRect->outputs();
+					const std::vector<VFrame30::AfbPin>& inputs = fbRect->inputs();
+					const std::vector<VFrame30::AfbPin>& outputs = fbRect->outputs();
 
 					itemPins.clear();
 					itemPins.insert(itemPins.end(), inputs.begin(), inputs.end());
@@ -4464,8 +4464,8 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 		{
 			fblItemRect->SetConnectionsPos(schema()->gridSize(), schema()->pinGridStep());
 
-			const std::list<VFrame30::AfbPin>& inputs = fblItemRect->inputs();
-			const std::list<VFrame30::AfbPin>& outputs = fblItemRect->outputs();
+			const std::vector<VFrame30::AfbPin>& inputs = fblItemRect->inputs();
+			const std::vector<VFrame30::AfbPin>& outputs = fblItemRect->outputs();
 
 			itemPins.clear();
 			itemPins.insert(itemPins.end(), inputs.begin(), inputs.end());

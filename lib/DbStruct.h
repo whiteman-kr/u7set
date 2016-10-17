@@ -360,6 +360,9 @@ public:
 	int userId() const;
 	void setUserId(int value);
 
+	const QString& username() const;
+	void setUsername(const QString& value);
+
 	const QString& comment() const;
 	void setComment(const QString& value);
 
@@ -372,6 +375,7 @@ private:
 	int m_changesetId = 0;
 	QDateTime m_date;
 	int m_userId = -1;
+	QString m_username;
 	QString m_comment;
 	VcsItemAction m_action;
 };

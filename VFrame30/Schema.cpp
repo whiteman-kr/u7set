@@ -425,7 +425,7 @@ namespace VFrame30
 				// Найти в connectionMap такую координату и если она есть до увеличить счетчик пинов,
 				// если нет, то создать запись в списке
 				//
-				const std::list<AfbPin>& inputs = pFblItem->inputs();
+				const std::vector<AfbPin>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();
@@ -440,7 +440,7 @@ namespace VFrame30
 					}
 				}
 
-				const std::list<AfbPin>& outputs = pFblItem->outputs();
+				const std::vector<AfbPin>& outputs = pFblItem->outputs();
 				for (auto pin = outputs.begin(); pin != outputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();

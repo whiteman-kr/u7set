@@ -56,7 +56,7 @@ namespace VFrame30
 		const QUuid& guid() const;
 		void setGuid(const QUuid& guid);
 
-		const std::list<QUuid>& associatedIOs() const;
+		const std::vector<QUuid>& associatedIOs() const;
 		void ClearAssociattdIOs();
 		void AddAssociattedIOs(const QUuid& guid);
 
@@ -76,7 +76,7 @@ namespace VFrame30
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
 
-		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
+		std::vector<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
 		QString m_caption;					// Pin caption
 	};
@@ -110,11 +110,11 @@ namespace VFrame30
 		// Connections
 		//
 	public:
-		const std::list<VFrame30::AfbPin>& inputs() const;
-		const std::list<VFrame30::AfbPin>& outputs() const;
+		const std::vector<VFrame30::AfbPin>& inputs() const;
+		const std::vector<VFrame30::AfbPin>& outputs() const;
 
-		std::list<VFrame30::AfbPin>* mutableInputs();
-		std::list<VFrame30::AfbPin>* mutableOutputs();
+		std::vector<AfbPin>* mutableInputs();
+		std::vector<AfbPin>* mutableOutputs();
 
 		bool GetConnectionPoint(const QUuid& guid, VFrame30::AfbPin* pResult) const;
 
@@ -144,8 +144,8 @@ namespace VFrame30
 		// Properties
 		//
 	private:
-		std::list<VFrame30::AfbPin> m_inputPoints;
-		std::list<VFrame30::AfbPin> m_outputPoints;
+		std::vector<VFrame30::AfbPin> m_inputPoints;
+		std::vector<VFrame30::AfbPin> m_outputPoints;
 	};
 }
 

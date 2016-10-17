@@ -231,8 +231,8 @@ namespace VFrame30
 
 				fbl->SetConnectionsPos(gridSize, pinGridStep);
 
-				const std::list<VFrame30::AfbPin>& inputs = fbl->inputs();
-				const std::list<VFrame30::AfbPin>& outputs = fbl->outputs();
+				const std::vector<VFrame30::AfbPin>& inputs = fbl->inputs();
+				const std::vector<VFrame30::AfbPin>& outputs = fbl->outputs();
 
 				for (const VFrame30::AfbPin& pin : inputs)
 				{
