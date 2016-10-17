@@ -13,6 +13,7 @@ namespace VFrame30
 	public:
 		static const QString acceptClick;
 		static const QString clickScript;
+		static const QString commented;
 
 		static const QString fontName;
 		static const QString fontSize;
@@ -43,9 +44,12 @@ namespace VFrame30
 
 		static const QString width;
 		static const QString height;
+		static const QString locked;
 
 		static const QString alignHorz;
 		static const QString alignVert;
+
+		static const QString dataType;
 
 		static const QString appSignalIDs;
 		static const QString appSignalId;

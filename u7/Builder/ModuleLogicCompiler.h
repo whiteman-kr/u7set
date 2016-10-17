@@ -134,8 +134,8 @@ namespace Builder
 
 		bool hasRam() const { return afb().hasRam(); }
 
-		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
-		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
+		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
+		const std::vector<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_afbElement.params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }

@@ -25,8 +25,6 @@ namespace VFrame30
 
 		// Properties and Data
 	public:
-		virtual bool IsFblItem() const override;
-
 		double weight() const;
 		void setWeight(double weight);
 
@@ -34,7 +32,7 @@ namespace VFrame30
 		void setLineColor(QRgb color);
 
 	protected:
-		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
+		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt
 		QRgb m_lineColor;
 	};
 }

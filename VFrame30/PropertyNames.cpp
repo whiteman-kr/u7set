@@ -5,6 +5,7 @@ namespace VFrame30
 
 const QString PropertyNames::acceptClick("AcceptClick");
 const QString PropertyNames::clickScript("ClickScript");
+const QString PropertyNames::commented("Commented");
 
 const QString PropertyNames::fontName("FontName");
 const QString PropertyNames::fontSize("FontSize");
@@ -35,9 +36,12 @@ const QString PropertyNames::ufbSchemaVersion("UFBSchemaVersion");
 
 const QString PropertyNames::width("Width");
 const QString PropertyNames::height("Height");
+const QString PropertyNames::locked("Locked");
 
 const QString PropertyNames::alignHorz("AlignHorz");
 const QString PropertyNames::alignVert("AlignVert");
+
+const QString PropertyNames::dataType("DataType");
 
 const QString PropertyNames::appSignalIDs("AppSignalIDs");
 const QString PropertyNames::appSignalId("AppSignalID");

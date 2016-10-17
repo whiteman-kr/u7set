@@ -8,6 +8,7 @@ namespace VFrame30
 	//
 	AfbPin::AfbPin()
 	{
+		m_associatedIOs.reserve(32);
 	}
 
 	AfbPin::AfbPin(
@@ -21,6 +22,7 @@ namespace VFrame30
 		m_afbOperandIndex(operandIndex),
 		m_caption(caption)
 	{
+		m_associatedIOs.reserve(32);
 	}
 
 	AfbPin::AfbPin(ConnectionDirrection dirrection,
@@ -32,10 +34,12 @@ namespace VFrame30
 		m_afbOperandIndex(afbSignal.operandIndex()),
 		m_caption(afbSignal.caption())
 	{
+		m_associatedIOs.reserve(32);
 	}
 
 	AfbPin::AfbPin(const Proto::FblConnectionPoint& cpm)
 	{
+		m_associatedIOs.reserve(32);
 		LoadData(cpm);
 	}
 
@@ -67,6 +71,7 @@ namespace VFrame30
 		m_caption = QString::fromStdString(cpm.caption());
 
 		m_associatedIOs.clear();
+		m_associatedIOs.reserve(cpm.associatedios_size());
 		for (int i = 0; i < cpm.associatedios_size(); i++)
 		{
 			QUuid au = Proto::Read(cpm.associatedios(i));
@@ -131,7 +136,7 @@ namespace VFrame30
 		m_guid = guid;
 	}
 
-	const std::list<QUuid>& AfbPin::associatedIOs() const
+	const std::vector<QUuid>& AfbPin::associatedIOs() const
 	{
 		return m_associatedIOs;
 	}
@@ -179,6 +184,8 @@ namespace VFrame30
 
 	FblItem::FblItem(void)
 	{
+		m_inputPoints.reserve(8);
+		m_outputPoints.reserve(8);
 	}
 
 	FblItem::~FblItem(void)
@@ -313,22 +320,22 @@ namespace VFrame30
 
 	// Connections
 	//
-	const std::list<VFrame30::AfbPin>& FblItem::inputs() const
+	const std::vector<AfbPin>& FblItem::inputs() const
 	{
 		return m_inputPoints;
 	}
 
-	const std::list<VFrame30::AfbPin>& FblItem::outputs() const
+	const std::vector<AfbPin>& FblItem::outputs() const
 	{
 		return m_outputPoints;
 	}
 
-	std::list<VFrame30::AfbPin>* FblItem::mutableInputs()
+	std::vector<VFrame30::AfbPin>* FblItem::mutableInputs()
 	{
 		return &m_inputPoints;
 	}
 
-	std::list<VFrame30::AfbPin>* FblItem::mutableOutputs()
+	std::vector<VFrame30::AfbPin>* FblItem::mutableOutputs()
 	{
 		return &m_outputPoints;
 	}

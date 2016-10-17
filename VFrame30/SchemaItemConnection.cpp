@@ -1,4 +1,5 @@
 #include "SchemaItemConnection.h"
+#include "SchemaItemSignal.h"
 #include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
 
@@ -73,58 +74,6 @@ namespace VFrame30
 	void SchemaItemConnection::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, schema, layer);
-
-//		//--
-//		//
-//		QPainter* p = drawParam->painter();
-
-//		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-//		if (std::abs(r.left() - r.right()) < 0.000001)
-//		{
-//			r.setRight(r.left() + 0.000001);
-//		}
-
-//		if (std::abs(r.bottom() - r.top()) < 0.000001)
-//		{
-//			r.setBottom(r.top() + 0.000001);
-//		}
-
-//		int dpiX = 96;
-//		QPaintDevice* pPaintDevice = p->device();
-//		if (pPaintDevice == nullptr)
-//		{
-//			assert(pPaintDevice);
-//			dpiX = 96;
-//		}
-//		else
-//		{
-//			dpiX = pPaintDevice->logicalDpiX();
-//		}
-
-//		double pinWidth = GetPinWidth(itemUnit(), dpiX);
-
-//		if (inputsCount() > 0)
-//		{
-//			r.setLeft(r.left() + pinWidth);
-//		}
-
-//		if (outputsCount() > 0)
-//		{
-//			r.setRight(r.right() - pinWidth);
-//		}
-
-//		r.setLeft(r.left() + m_font.drawSize() / 4.0);
-//		r.setRight(r.right() - m_font.drawSize() / 4.0);
-
-//		// Draw Signals StrIDs
-//		//
-//		QString text = valueToString();
-
-//		p->setPen(textColor());
-
-//		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
-
 		return;
 	}
 
@@ -145,13 +94,11 @@ namespace VFrame30
 		m_connectionId = m_connectionId.trimmed();
 	}
 
-
 	//
 	//
 	//			SchemaItemTransmitter
 	//
 	//
-
 	SchemaItemTransmitter::SchemaItemTransmitter() :
 		SchemaItemTransmitter(SchemaUnit::Inch)
 	{
@@ -357,6 +304,27 @@ namespace VFrame30
 								 SchemaItemReceiver::appSignalId,
 								 SchemaItemReceiver::setAppSignalId);
 
+		ADD_PROPERTY_GET_SET_CAT(E::ColumnData,
+								 PropertyNames::dataType,
+								 PropertyNames::monitorCategory,
+								 true,
+								 SchemaItemReceiver::data,
+								 SchemaItemReceiver::setData);
+
+		ADD_PROPERTY_GET_SET_CAT(int,
+								 PropertyNames::precision,
+								 PropertyNames::monitorCategory,
+								 true,
+								 SchemaItemReceiver::precision,
+								 SchemaItemReceiver::setPrecision);
+
+		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat,
+								 PropertyNames::analogFormat,
+								 PropertyNames::monitorCategory,
+								 true,
+								 SchemaItemReceiver::analogFormat,
+								 SchemaItemReceiver::setAnalogFormat);
+
 		setShowValidity(true);
 	}
 
@@ -382,6 +350,9 @@ namespace VFrame30
 
 		receiver->set_showvalidity(m_showValidity);
 		receiver->set_appsignalid(m_appSignalId.toStdString());
+		receiver->set_datatype(static_cast<int>(m_dataType));
+		receiver->set_precision(m_precision);
+		receiver->set_analogformat(static_cast<int>(m_analogFormat));
 
 		return true;
 	}
@@ -406,6 +377,9 @@ namespace VFrame30
 
 		m_showValidity = receiver.showvalidity();
 		m_appSignalId = QString::fromStdString(receiver.appsignalid());
+		m_dataType = static_cast<E::ColumnData>(receiver.datatype());
+		m_precision = receiver.precision();
+		m_analogFormat = static_cast<E::AnalogFormat>(receiver.analogformat());
 
 		return true;
 	}
@@ -469,25 +443,27 @@ namespace VFrame30
 
 		DrawHelper::DrawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
 
-		// Draw AppSignalID
+		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
 		//
-		QString signalText = appSignalId();
+		QString appSignalId = this->appSignalId();
+
+		Signal signal;
+		signal.setAppSignalID(appSignalId);
+
+		AppSignalState signalState;
+		signalState.flags.valid = false;
+
+		bool signalFound = false;
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			// Try to get CustomSignalID
-			//
-			Signal appSignal;
-
-			bool ok = drawParam->appSignalManager()->signal(appSignalId(), &appSignal);
-
-			if (ok == true)
-			{
-				signalText = appSignal.customAppSignalID();
-			}
+			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+			signalState = drawParam->appSignalManager()->signalState(appSignalId);
 		}
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), signalText, r, Qt::AlignHCenter | Qt::AlignBottom);
+		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);
+
+		DrawHelper::DrawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
 
 		return;
 	}
@@ -567,7 +543,7 @@ namespace VFrame30
 		// pin 1 is always validity
 		// its defined in setShowValidity function
 		//
-		const std::list<VFrame30::AfbPin>& outs = outputs();
+		const std::vector<VFrame30::AfbPin>& outs = outputs();
 
 		if (outs.size() != 2)
 		{
@@ -597,7 +573,7 @@ namespace VFrame30
 		// its defined in setShowValidity function
 		//
 
-		const std::list<VFrame30::AfbPin>& outs = outputs();
+		const std::vector<VFrame30::AfbPin>& outs = outputs();
 
 		if (outs.size() < 1 || outs.size() > 2)
 		{
@@ -608,4 +584,45 @@ namespace VFrame30
 		bool result = outs.front().guid() == pinGuid;
 		return result;
 	}
+
+	E::ColumnData SchemaItemReceiver::data() const
+	{
+		return m_dataType;
+	}
+
+	void SchemaItemReceiver::setData(E::ColumnData value)
+	{
+		m_dataType = value;
+	}
+
+	int SchemaItemReceiver::precision() const
+	{
+		return m_precision;
+	}
+
+	void SchemaItemReceiver::setPrecision(int value)
+	{
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (value > 12)
+		{
+			value = 12;
+		}
+
+		m_precision = value;
+	}
+
+	E::AnalogFormat SchemaItemReceiver::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void SchemaItemReceiver::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
+	}
+
 }

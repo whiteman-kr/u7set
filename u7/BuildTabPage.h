@@ -110,6 +110,12 @@ private:
 	QTextCursor m_lastNavCursor;
 	bool m_lastNavIsPrevIssue = false;
 	bool m_lastNavIsNextIssue = false;
+
+	// Actions
+	//
+	QAction* m_findNextAction = nullptr;
+	QAction* m_prevIssueAction = nullptr;
+	QAction* m_nextIssueAction = nullptr;
 };
 
 

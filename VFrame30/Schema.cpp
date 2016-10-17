@@ -192,9 +192,16 @@ namespace VFrame30
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
 					item->Draw(drawParam, this, pLayer);
+
+					if (item->isCommented() == true)
+					{
+						item->drawCommentDim(drawParam);
+					}
 				}
 			}
 		}
+
+		return;
 	}
 
 	void Schema::Print()
@@ -325,7 +332,7 @@ namespace VFrame30
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
-				if (item->get()->IsFblItem() == false)
+				if (item->get()->isFblItem() == false)
 				{
 					continue;
 				}
@@ -365,7 +372,7 @@ namespace VFrame30
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
-				if (item->get()->IsFblItem() == false)
+				if (item->get()->isFblItem() == false)
 				{
 					continue;
 				}
@@ -418,7 +425,7 @@ namespace VFrame30
 				// Найти в connectionMap такую координату и если она есть до увеличить счетчик пинов,
 				// если нет, то создать запись в списке
 				//
-				const std::list<AfbPin>& inputs = pFblItem->inputs();
+				const std::vector<AfbPin>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();
@@ -433,7 +440,7 @@ namespace VFrame30
 					}
 				}
 
-				const std::list<AfbPin>& outputs = pFblItem->outputs();
+				const std::vector<AfbPin>& outputs = pFblItem->outputs();
 				for (auto pin = outputs.begin(); pin != outputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();

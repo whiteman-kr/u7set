@@ -187,6 +187,91 @@ namespace VFrame30
 		return;
 	}
 
+	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam,
+											 const E::ColumnData& data,
+											 const Signal& signal,
+											 const AppSignalState& signalState,
+											 E::AnalogFormat analogFormat,
+											 int precision)
+	{
+		QString text;
+
+		switch (data)
+		{
+		case E::ColumnData::AppSignalID:
+			text = signal.appSignalID();
+			break;
+
+		case E::ColumnData::CustomerSignalID:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = signal.customAppSignalID();
+
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				text = signal.appSignalID();
+			}
+			break;
+
+		case E::ColumnData::Caption:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = signal.caption();
+
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				//text = QLatin1String("Caption");
+				text = signal.appSignalID();			// Good to see AppSignalID while editing
+			}
+			break;
+
+
+		case E::ColumnData::State:
+			{
+				if (drawParam->isMonitorMode() == true)
+				{
+					if (signalState.flags.valid == false)
+					{
+						const static QString nonValidStr = "?";
+						text = nonValidStr;
+					}
+					else
+					{
+						if (signal.isAnalog())
+						{
+							text = QString::number(signalState.value, static_cast<char>(analogFormat), precision);
+						}
+						else
+						{
+							text = QString::number(signalState.value);
+						}
+					}
+				}
+				else
+				{
+					text = QLatin1String("0");
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return text;
+	}
+
+
 	void SchemaItemSignal::drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const
 	{
 		if (painter == nullptr)
@@ -203,7 +288,7 @@ namespace VFrame30
 
 		if (inputsCount() > 0)
 		{
-			const std::list<AfbPin>& inputPins = inputs();
+			const std::vector<AfbPin>& inputPins = inputs();
 			assert(inputPins.empty() == false);
 
 			painter->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
@@ -212,7 +297,7 @@ namespace VFrame30
 
 		if (outputsCount() > 0)
 		{
-			const std::list<AfbPin>& pins = outputs();
+			const std::vector<AfbPin>& pins = outputs();
 			assert(pins.empty() == false);
 
 			painter->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
@@ -353,7 +438,7 @@ namespace VFrame30
 
 				// --
 				//
-				QString text = getCoulumnText(drawParam, column, appSignals[i], appSignalStates[i]);
+				QString text = getCoulumnText(drawParam, column.data, appSignals[i], appSignalStates[i], m_analogFormat, m_precision);
 
 				QRectF textRect(left, top, columnWidth, columntHeight);
 
@@ -484,7 +569,7 @@ namespace VFrame30
 
 			// Draw data
 			//
-			QString text = getCoulumnText(drawParam, c, signal, signalState);
+			QString text = getCoulumnText(drawParam, c.data, signal, signalState, m_analogFormat, m_precision);
 
 			QRectF textRect(rect.left() + startOffset, rect.top(), width, rect.height());
 			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
@@ -518,84 +603,6 @@ namespace VFrame30
 	}
 
 
-	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam, const Column& column, const Signal& signal, const AppSignalState& signalState) const
-	{
-		QString text;
-
-		switch (column.data)
-		{
-		case E::ColumnData::AppSignalID:
-			text = signal.appSignalID();
-			break;
-
-		case E::ColumnData::CustomerSignalID:
-			if (drawParam->isMonitorMode() == true)
-			{
-				text = signal.customAppSignalID();
-
-				if (text.isEmpty() == true)
-				{
-					text = QLatin1String("?");
-				}
-			}
-			else
-			{
-				text = signal.appSignalID();
-			}
-			break;
-
-		case E::ColumnData::Caption:
-			if (drawParam->isMonitorMode() == true)
-			{
-				text = signal.caption();
-
-				if (text.isEmpty() == true)
-				{
-					text = QLatin1String("?");
-				}
-			}
-			else
-			{
-				//text = QLatin1String("Caption");
-				text = signal.appSignalID();			// Good to see AppSignalID while editing
-			}
-			break;
-
-
-		case E::ColumnData::State:
-			{
-				if (drawParam->isMonitorMode() == true)
-				{
-					if (signalState.flags.valid == false)
-					{
-						const static QString nonValidStr = "?";
-						text = nonValidStr;
-					}
-					else
-					{
-						if (signal.isAnalog())
-						{
-							text = QString::number(signalState.value, static_cast<char>(m_analogFormat), m_precision);
-						}
-						else
-						{
-							text = QString::number(signalState.value);
-						}
-					}
-				}
-				else
-				{
-					text = QLatin1String("0");
-				}
-			}
-			break;
-
-		default:
-			assert(false);
-		}
-
-		return text;
-	}
 
 
 	void SchemaItemSignal::createColumnProperties()

@@ -291,7 +291,7 @@ class EditSchemaTabPage : public QWidget, public HasDbController
 
 public:
 	EditSchemaTabPage() = delete;
-	EditSchemaTabPage(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* db);
+	EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* db);
 	virtual ~EditSchemaTabPage();
 
 	// Public methods
@@ -323,7 +323,6 @@ protected slots:
 public:
 	bool saveWorkcopy();
 
-
 protected:
 	void getCurrentWorkcopy();				// Save current schema to a file
 	void setCurrentWorkcopy();				// Load a schema from a file
@@ -345,4 +344,5 @@ public:
 private:
 	EditSchemaWidget* m_schemaWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
 };

@@ -353,7 +353,9 @@ message SchemaItem
 	required bool isLocked = 3;
 	required SchemaUnit itemUnit = 4;
 	optional bool acceptClick = 5 [default = false];
-	optional wstring clickScript = 6;
+	//optional wstring clickScript = 6;
+	optional string clickScript = 7;
+	optional bool isCommented = 8 [default = false];
 
 	// Inherited from SchmeItem
 	//
@@ -644,6 +646,9 @@ message SchemaItemReceiver
 {
     optional bool showValidity = 1 [default = true];
 	optional string appSignalId = 2;
+	optional int32 dataType = 3 [default = 0];
+	optional int32 precision = 4 [default = 2];
+	optional int32 analogFormat = 5 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 }
 
 //

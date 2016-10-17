@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QDebug>
+#include <QHostInfo>
 
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
@@ -121,6 +122,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 104", ":/DatabaseUpgrade/Upgrade0104.sql"},
 	{"Upgrade to version 105", ":/DatabaseUpgrade/Upgrade0105.sql"},
 	{"Upgrade to version 106", ":/DatabaseUpgrade/Upgrade0106.sql"},
+	{"Upgrade to version 107", ":/DatabaseUpgrade/Upgrade0107.sql"},
+	{"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
 };
 
 
@@ -1369,9 +1372,22 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				// Add record to Version table
 				//
 				{
-					QString addVersionRecord = QString(
-						"INSERT INTO Version (VersionNo, Reasone)"
-						"VALUES (%1, '%2');").arg(i + 1).arg(ui.text);
+					QString addVersionRecord;
+
+					if (i < 107)	// i < {"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
+					{
+						addVersionRecord = QString("INSERT INTO Version (VersionNo, Reasone) VALUES (%1, '%2');").arg(i + 1).arg(ui.text);
+					}
+					else
+					{
+						// Column host is already added to table Version
+						//
+						addVersionRecord = QString("INSERT INTO Version (VersionNo, Reasone, Host) VALUES (%1, '%2', '%3');")
+										   .arg(i + 1)
+										   .arg(ui.text)
+										   .arg(QHostInfo::localHostName());
+					}
+
 
 					QSqlQuery versionQuery(db);
 
@@ -2989,7 +3005,10 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 		return;
 	}
 
-	// request
+	// Get user list at first
+	//
+
+	// Request for history
 	//
 	QString request = QString("SELECT * FROM get_file_history(%1)")
 			.arg(file->fileId());
@@ -3012,6 +3031,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 		ci.setDate(q.value("CheckInTime").toDateTime());
 		ci.setComment(q.value("Comment").toString());
 		ci.setUserId(q.value("UserID").toInt());
+		ci.setUsername(q.value("Username").toString());
 		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 
 		out->push_back(ci);
