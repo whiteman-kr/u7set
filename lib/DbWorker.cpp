@@ -3350,6 +3350,76 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 }
 
 
+void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray)
+{
+	AUTO_COMPLETE
+
+	if (signalArray == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalArray->clear();
+
+	if (appSignalIds.empty())
+	{
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get latest signals by AppSignalIDs. Database connection is not opened."));
+		return;
+	}
+
+	QString appSignalIdsStr;
+
+	bool first = true;
+
+	for(const QString& id : appSignalIds)
+	{
+		if (first == false)
+		{
+			appSignalIdsStr.append(",");
+		}
+
+		appSignalIdsStr.append(QString("'%1'").arg(id));
+
+		first = false;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_latest_signals_by_appsignalids(%1, ARRAY[%2])")
+		.arg(currentUser().userId()).arg(appSignalIdsStr);
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get_latest_signals_by_appsignalids! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		Signal signal;
+
+		getSignalData(q, signal);
+
+		signalArray->append(signal);
+	}
+
+	return;
+
+}
+
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {

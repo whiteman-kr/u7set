@@ -64,6 +64,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
+	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
@@ -1321,6 +1322,32 @@ bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parent
 	ok = waitForComplete(parentWidget, tr("Reading latest signal"));
 
 	return ok;
+}
+
+
+bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget)
+{
+	if (signalArray == nullptr)
+	{
+		assert(signalArray != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getLatestSignalsByAppSignalIDs(appSignalIDs, signalArray);
+
+	ok = waitForComplete(parentWidget, tr("Reading latest signals"));
+
+	return ok;
+
 }
 
 
