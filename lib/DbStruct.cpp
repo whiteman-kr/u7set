@@ -709,6 +709,16 @@ void DbChangesetInfo::setUserId(int value)
 	m_userId = value;
 }
 
+const QString& DbChangesetInfo::username() const
+{
+	return m_username;
+}
+
+void DbChangesetInfo::setUsername(const QString& value)
+{
+	m_username = value;
+}
+
 const QString& DbChangesetInfo::comment() const
 {
 	return m_comment;

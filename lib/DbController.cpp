@@ -874,7 +874,9 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 
 	// Emit signal end wait for complete
 	//
-	emit signal_checkIn(&files, comment);
+	QString trimmedCommnet = comment.trimmed();
+
+	emit signal_checkIn(&files, trimmedCommnet);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
 	return true;
@@ -902,7 +904,9 @@ bool DbController::checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector
 
 	// Emit signal end wait for complete
 	//
-	emit signal_checkInTree(&parentFiles, outCheckedIn, comment);
+	QString trimmedCommnet = comment.trimmed();
+
+	emit signal_checkInTree(&parentFiles, outCheckedIn, trimmedCommnet);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
 	return true;
@@ -1506,7 +1510,9 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 		return false;
 	}
 
-	emit signal_checkinSignals(signalIDs, comment, objectState);
+	QString trimmedCommnet = comment.trimmed();
+
+	emit signal_checkinSignals(signalIDs, trimmedCommnet, objectState);
 
 	ok = waitForComplete(parentWidget, tr("Checkin signals"));
 

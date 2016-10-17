@@ -16,6 +16,17 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 
 	// Set changesetList
 	//
+//	auto p = qApp->palette("QTreeView");
+
+//	QColor highlight = p.highlight().color();
+//	QColor highlightText = p.highlightedText().color();
+
+//	QString selectionColor = QString("QTreeWidget {selection-background-color: red; selection-color: %2; }")
+//							 .arg(highlight.name())
+//							 .arg(highlightText.name());
+
+//	ui->changesetList->setStyleSheet(selectionColor);
+
 	ui->changesetList->setColumnCount(4);
 
 	QStringList headerLabels;
@@ -34,7 +45,7 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
-		itemTextList << QString::number(ci.userId());
+		itemTextList << ci.username();
 		itemTextList << ci.action().text();
 		itemTextList << ci.date().toString(Qt::SystemLocaleShortDate);
 		itemTextList << ci.comment();

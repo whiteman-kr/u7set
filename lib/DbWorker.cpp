@@ -123,6 +123,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 105", ":/DatabaseUpgrade/Upgrade0105.sql"},
 	{"Upgrade to version 106", ":/DatabaseUpgrade/Upgrade0106.sql"},
 	{"Upgrade to version 107", ":/DatabaseUpgrade/Upgrade0107.sql"},
+	{"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
 };
 
 
@@ -3004,7 +3005,10 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 		return;
 	}
 
-	// request
+	// Get user list at first
+	//
+
+	// Request for history
 	//
 	QString request = QString("SELECT * FROM get_file_history(%1)")
 			.arg(file->fileId());
@@ -3027,6 +3031,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 		ci.setDate(q.value("CheckInTime").toDateTime());
 		ci.setComment(q.value("Comment").toString());
 		ci.setUserId(q.value("UserID").toInt());
+		ci.setUsername(q.value("Username").toString());
 		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 
 		out->push_back(ci);
