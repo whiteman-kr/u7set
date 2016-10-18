@@ -602,10 +602,13 @@ namespace Hardware
 			switch (version)
 			{
 			case 1:
-				parseSpecificPropertieyStructV1(columns);
+				parseSpecificPropertiesStructV1(columns);
 				break;
 			case 2:
-				parseSpecificPropertieyStructV2(columns);
+				parseSpecificPropertiesStructV2(columns);
+				break;
+			case 3:
+				parseSpecificPropertiesStructV3(columns);
 				break;
 			default:
 				assert(false);
@@ -643,7 +646,7 @@ namespace Hardware
 	}
 
 
-	void DeviceObject::parseSpecificPropertieyStructV1(const QStringList& columns)
+	void DeviceObject::parseSpecificPropertiesStructV1(const QStringList& columns)
 	{
 		if (columns.count() != 9)
 		{
@@ -853,7 +856,7 @@ namespace Hardware
 		}
 	}
 
-	void DeviceObject::parseSpecificPropertieyStructV2(const QStringList &columns)
+	void DeviceObject::parseSpecificPropertiesStructV2(const QStringList &columns)
 	{
 		if (columns.count() != 11)
 		{
@@ -1077,6 +1080,248 @@ namespace Hardware
 			newProperty->setUpdateFromPreset(updateFromPreset);
 			newProperty->setExpert(expert);
 			newProperty->setDescription(strDescription);
+
+			return;
+		}
+	}
+
+	void DeviceObject::parseSpecificPropertiesStructV3(const QStringList &columns)
+	{
+		if (columns.count() != 12)
+		{
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible";
+			return;
+		}
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QStringRef type(&columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString strDescription(columns[10]);
+		QString strVisible(columns[11]);
+
+		int precision = strPrecision.toInt();
+
+		bool updateFromPreset = false;
+		if (strUpdateFromPreset.toUpper() == "TRUE")
+		{
+			updateFromPreset = true;
+		}
+
+		bool expert = false;
+		if (strExpert.toUpper() == "TRUE")
+		{
+			expert = true;
+		}
+
+		bool visible = false;
+		if (strVisible.toUpper() == "TRUE")
+		{
+			visible = true;
+		}
+
+		if (name.isEmpty() || name.size() > 1024)
+		{
+			qDebug() << Q_FUNC_INFO << " SpecificProperties: filed name must have size  from 1 to 1024, name: " << name;
+			return;
+		}
+
+		if (type != "qint32" &&
+				type != "quint32" &&
+				type != "bool" &&
+				type != "double" &&
+				type != "E::Channel" &&
+				type != "string")
+		{
+			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
+			return;
+		}
+
+
+		if (type == "qint32")
+		{
+			// Min
+			//
+			bool ok = false;
+			qint32 minInt = min.toInt(&ok);
+			if (ok == false)
+			{
+				minInt = std::numeric_limits<qint32>::min();
+			}
+
+			// Max
+			//
+			qint32 maxInt = max.toInt(&ok);
+			if (ok == false)
+			{
+				maxInt = std::numeric_limits<qint32>::max();
+			}
+
+			// Default Value
+			//
+			qint32 defaultInt = defaultValue.toInt();
+
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+
+			newProperty->setSpecific(true);
+			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
+			newProperty->setValue(QVariant(defaultInt));
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
+
+			return;
+		}
+
+		if (type == "quint32")
+		{
+			// Min
+			//
+			bool ok = false;
+			quint32 minUInt = min.toUInt(&ok);
+			if (ok == false)
+			{
+				minUInt = std::numeric_limits<quint32>::min();
+			}
+
+			// Max
+			//
+			quint32 maxUInt = max.toUInt(&ok);
+			if (ok == false)
+			{
+				maxUInt = std::numeric_limits<quint32>::max();
+			}
+
+			// Default Value
+			//
+			quint32 defaultUInt = defaultValue.toUInt();
+
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+
+			newProperty->setSpecific(true);
+			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
+			newProperty->setValue(QVariant(defaultUInt));
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
+
+			return;
+		}
+
+		if (type == "double")
+		{
+			// Min
+			//
+			bool ok = false;
+			double minDouble = min.toDouble(&ok);
+			if (ok == false)
+			{
+				minDouble = std::numeric_limits<double>::min();
+			}
+
+			// Max
+			//
+			double maxDouble = max.toDouble(&ok);
+			if (ok == false)
+			{
+				maxDouble = std::numeric_limits<double>::max();
+			}
+
+			// Default Value
+			//
+			double defaultDouble = defaultValue.toDouble();
+
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+
+			newProperty->setSpecific(true);
+			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
+			newProperty->setValue(QVariant(defaultDouble));
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
+
+			return;
+		}
+
+		if (type == "bool")
+		{
+			// Default Value
+			//
+			bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+
+			newProperty->setSpecific(true);
+			newProperty->setValue(QVariant(defaultBool));
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
+
+			return;
+		}
+
+		if (type == "E::Channel")
+		{
+			// Default Value
+			//
+			QString defaultString = defaultValue.toString();
+
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+			newProperty->setValue(QVariant::fromValue(E::Channel::A));
+
+			newProperty->setSpecific(true);
+			newProperty->setValue(defaultString.toStdString().c_str());
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
+
+			return;
+		}
+
+		if (type == "string")
+		{
+			// Add property with default value, if present old value, it will be set later
+			//
+			auto newProperty = addProperty(name, category, true);
+
+			newProperty->setSpecific(true);
+			newProperty->setValue(QVariant(defaultValue.toString()));
+			newProperty->setReadOnly(false);
+			newProperty->setPrecision(precision);
+			newProperty->setUpdateFromPreset(updateFromPreset);
+			newProperty->setExpert(expert);
+			newProperty->setDescription(strDescription);
+			newProperty->setVisible(visible);
 
 			return;
 		}
