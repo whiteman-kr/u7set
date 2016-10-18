@@ -4266,7 +4266,12 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
 		assert(fblItemRect);
 
-		int counterValue = logicSchema->nextCounterValue();
+		int counterValue = 0;
+		bool nextValRes = db()->nextCounterValue(&counterValue);
+		if (nextValRes == false)
+		{
+			return;
+		}
 
 		fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
 	}
@@ -4962,7 +4967,12 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 	// in editApplicationSignals AppSignalIds could be changed,
 	// update them in selected items, apparently this function was called for selected items.
 	//
-	auto& selected = selectedItems();
+
+	// !!! Make a copy of selectted items!!!!!
+	// As in this loop runSetProperty is called and selection vector is changed,
+	// and this loop will crash if it is not a copy
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
 
 	for (auto item : selected)
 	{
@@ -4995,8 +5005,12 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 					oneStringIds += s + QChar::LineFeed;
 				}
 
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), item);
+				std::shared_ptr<VFrame30::SchemaItem> itemPtrCopy(item);
+
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), itemPtrCopy);
 			}
+
+			continue;
 		}
 
 		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
@@ -5014,6 +5028,7 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 				//
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(foundInChanged->second), item);
 			}
+			continue;
 		}
 	}
 
@@ -5041,9 +5056,16 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 
 	qDebug() << equipmentIdList;
 
+	int counterValue = 0;
+	bool nextValRes = db()->nextCounterValue(&counterValue);
+	if (nextValRes == false)
+	{
+		return;
+	}
+
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
 														  equipmentIdList,
-														  logicSchema()->nextCounterValue(),
+														  counterValue,
 														  schema()->schemaID(),
 														  schema()->caption(),
 														  this);
@@ -5461,7 +5483,13 @@ void EditSchemaWidget::editPaste()
 					VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
 					assert(fblItemRect);
 
-					int counterValue = logicSchema->nextCounterValue();
+					int counterValue = 0;
+					bool nextValRes = db()->nextCounterValue(&counterValue);
+					if (nextValRes == false)
+					{
+						return;
+					}
+
 					fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
 				}
 			}
