@@ -319,9 +319,6 @@ DECLARE
         findAppSignalID integer [] = ARRAY(SELECT * FROM get_signal_ids_with_appsignalid(user_id, sd.AppSignalID));
 
         findCustomAppSignalID integer [] = ARRAY(SELECT * FROM get_signal_ids_with_customappsignalid(user_id, sd.CustomAppSignalID));
-
-        findEquipmentID integer [] = ARRAY(SELECT * FROM get_signal_ids_with_equipmentid(user_id, sd.EquipmentID));
-
 BEGIN
         SELECT
 	        S.CheckedOutInstanceID, S.UserID, S.SignalID INTO chOutInstanceID, chOutUserID, signalID
@@ -340,10 +337,6 @@ BEGIN
 
                 IF (array_length(findCustomAppSignalID, 1) > 1) OR (array_length(findCustomAppSignalID, 1) = 1 AND findCustomAppSignalID[1] != signalID) THEN
 		        RAISE USING ERRCODE = '55022';
-		END IF;
-
-                IF (array_length(findEquipmentID, 1) > 1) OR (array_length(findEquipmentID, 1) = 1 AND findEquipmentID[1] != signalID) THEN
-		        RAISE USING ERRCODE = '55033';
 		END IF;
 
                 -- update checked out workcopy

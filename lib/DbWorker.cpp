@@ -3683,17 +3683,8 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState&
 			}
 			else
 			{
-				if (err.contains("55033"))
-				{
-					errMsg = QString(tr("Application signal with EquipmentID '%1' already exists!")).arg(s.equipmentID());
-					objectState.errCode = ERR_SIGNAL_EXISTS;
-				}
-				else
-				{
-					errMsg = err;
-				}
+				errMsg = err;
 			}
-
 		}
 		return false;
 	}
