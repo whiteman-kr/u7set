@@ -30,7 +30,8 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 18;		// i/o modules scripts moved to ConfiurationScript in presets
 //var configScriptVersion = 19;		// i/o modules family checking has been removed
 //var configScriptVersion = 21;		// DataUID for LM modules is taken from linked port
-var configScriptVersion = 22;		// added buildThread parameter to interrupt build
+//var configScriptVersion = 22;		// added buildThread parameter to interrupt build
+var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
 
 
 function(buildThread, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -544,7 +545,7 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 		log.errCFG3004(lmID + ethernetcontrollerID, lmID);
 		return false;
 	}
-	var checkTuningProperties = ["TuningServiceID", "TuningEnable", "TuningIP", "TuningPort"];
+	var checkTuningProperties = ["TuningServiceID", "TuningEnable", "TuningIP", "TuningPort", "OverrideTuningDataWordCount"];
 	for (var cp = 0; cp < checkTuningProperties.length; cp++)
 	{
 		if (ethernetController.propertyValue(checkTuningProperties[cp]) == undefined)
@@ -604,12 +605,23 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 		}
 	}
 	
+	var controllerTuningWordsCount = tuningWordsCount;
+	
+	var tuningDataID = module.propertyValue("TuningLANDataUID");
+	
+	var overrideTuningWordsCount =	ethernetController.propertyValue("OverrideTuningDataWordCount");
+	if (overrideTuningWordsCount != -1)
+	{
+		controllerTuningWordsCount = overrideTuningWordsCount;
+		tuningDataID = 0;
+	}
+
 	if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
-								tuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, module.propertyValue("TuningLANDataUID"),
-								0, 0, 0, 0, 0, 0) == false)	//Subnet2 is not used
-								{
-									return false;
-								}								
+							controllerTuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, tuningDataID,
+							0, 0, 0, 0, 0, 0) == false)	//Subnet2 is not used
+							{
+								return false;
+							}								
 	lanFrame++;
 								
 	// REG / DIAG
@@ -643,7 +655,8 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 			return false;
 		}
 		var checkProperties = ["AppDataServiceID", "AppDataEnable", "AppDataIP", "AppDataPort", 
-			"DiagDataServiceID", "DiagDataEnable", "DiagDataIP", "DiagDataPort"];
+			"DiagDataServiceID", "DiagDataEnable", "DiagDataIP", "DiagDataPort",
+			"OverrideAppDataWordCount", "OverrideDiagDataWordCount"];
 		for (var cp = 0; cp < checkProperties.length; cp++)
 		{
 			if (ethernetController.propertyValue(checkProperties[cp]) == undefined)
@@ -714,10 +727,30 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 			}
 		}
 			
+		var regDataID = module.propertyValue("AppLANDataUID");
+		var diagDataID = module.propertyValue("DiagLANDataUID");
 		
+		var controllerAppWordsCount = appWordsCount;
+		
+		var overrideRegWordsCount =	ethernetController.propertyValue("OverrideAppDataWordCount");
+		if (overrideRegWordsCount != -1)
+		{
+			controllerAppWordsCount = overrideRegWordsCount;
+			regDataID = 0;
+		}
+		
+		var controllerDiagWordsCount = diagWordsCount;
+		
+		var overrideDiagWordsCount = ethernetController.propertyValue("OverrideDiagDataWordCount");
+		if (overrideDiagWordsCount != -1)
+		{
+			controllerDiagWordsCount = overrideDiagWordsCount;
+			diagDataID = 0;
+		}
+
 		if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController,
-									appWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], module.propertyValue("AppLANDataUID"),
-									diagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], module.propertyValue("DiagLANDataUID")) == false)
+									controllerAppWordsCount, ip[0], port[0], serviceIP[0], servicePort[0], regDataID,
+									controllerDiagWordsCount, ip[1], port[1], serviceIP[1], servicePort[1], diagDataID) == false)
 									{
 										return false;
 									}								

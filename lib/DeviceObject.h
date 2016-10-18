@@ -161,8 +161,9 @@ namespace Hardware
 		// Parse m_specificProperties and create Qt meta system specific properies
 		void parseSpecificPropertiesStruct();
 
-		void parseSpecificPropertieyStructV1(const QStringList& columns);
-		void parseSpecificPropertieyStructV2(const QStringList& columns);
+		void parseSpecificPropertiesStructV1(const QStringList& columns);
+		void parseSpecificPropertiesStructV2(const QStringList& columns);
+		void parseSpecificPropertiesStructV3(const QStringList& columns);
 
 		// Get all signals, including signals from child items
 		void getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const;
