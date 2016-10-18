@@ -3167,10 +3167,9 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			{
 				// Preset property is not found in device, this is new property, add it
 				//
-				assert(dynamic_cast<PropertyValue<QVariant>*>(presetProperty.get()) != nullptr);
+				assert(dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty.get()) != nullptr);
 
-				std::shared_ptr<PropertyValue<QVariant>> newDeviceProperty = std::make_shared<PropertyValue<QVariant>>();
-
+				std::shared_ptr<PropertyValueNoGetterSetter> newDeviceProperty = std::make_shared<PropertyValueNoGetterSetter>();
 				newDeviceProperty->updateFromPreset(presetProperty.get(), true);
 
 				deviceProperties.push_back(newDeviceProperty);

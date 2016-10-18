@@ -773,7 +773,11 @@ public:
 		Property::copy(presetProperty);	// Copy data from the base class
 
 		PropertyValueNoGetterSetter* source = dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty);
-		assert(source);
+		if (source == nullptr)
+		{
+			assert(source);
+			return;
+		}
 
 		if (updateValue == true)
 		{
