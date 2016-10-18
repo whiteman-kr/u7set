@@ -3541,7 +3541,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 }
 
 
-void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
+void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
 {
 	os.id = q.value("id").toInt();
 	os.deleted = q.value("deleted").toBool();
@@ -3611,24 +3611,18 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		signal.setCreated(QDateTime::currentDateTime());
 		signal.setInstanceCreated(QDateTime::currentDateTime());
 
-		QString sds = getSignalDataStr(signal);
+		QString errMsg;
+		ObjectState objectState;
 
-		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
-			.arg(currentUser().userId()).arg(sds);
-
-		QSqlQuery q2(db);
-
-		result = q2.exec(request2);
+		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
 
 		if (result == false)
 		{
-			emitError(tr("Can't set signal workcopy! Error: ") +  q2.lastError().text());
+			emitError(errMsg);
 			return false;
 		}
 
-		assert(i<newSignal->count());
-
-		request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
 			.arg(currentUser().userId()).arg(signalID);
 
 		QSqlQuery q3(db);
@@ -3637,7 +3631,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		if (result == false)
 		{
-			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			emitError(tr("Can't get latest signal! Error: ") +  q3.lastError().text());
 			return false;
 		}
 
@@ -3651,6 +3645,63 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	}
 
 	assert(i == readed);
+
+	return true;
+}
+
+
+bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg)
+{
+	errMsg.clear();
+
+	QString sds = getSignalDataStr(s);
+
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+		.arg(currentUser().userId()).arg(sds);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		QString err = q.lastError().text();
+
+		if (err.contains("55011"))
+		{
+			errMsg = QString(tr("Application signal with AppSignalID '%1' already exists!")).arg(s.appSignalID());
+			objectState.errCode = ERR_SIGNAL_EXISTS;
+		}
+		else
+		{
+			if (err.contains("55022"))
+			{
+				errMsg = QString(tr("Application signal with CustomAppSignalID '%1' already exists!")).arg(s.customAppSignalID());
+				objectState.errCode = ERR_SIGNAL_EXISTS;
+			}
+			else
+			{
+				if (err.contains("55033"))
+				{
+					errMsg = QString(tr("Application signal with EquipmentID '%1' already exists!")).arg(s.equipmentID());
+					objectState.errCode = ERR_SIGNAL_EXISTS;
+				}
+				else
+				{
+					errMsg = err;
+				}
+			}
+
+		}
+		return false;
+	}
+
+	if (q.next() == false)
+	{
+		return false;
+	}
+
+	getObjectState(q, objectState);
 
 	return true;
 }
@@ -3887,24 +3938,14 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	signal->setCreated(QDateTime::currentDateTime());
 	signal->setInstanceCreated(QDateTime::currentDateTime());
 
-	QString sds = getSignalDataStr(*signal);
+	QString errMsg;
 
-	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
-		.arg(currentUser().userId()).arg(sds);
-
-	QSqlQuery q(db);
-
-	bool result = q.exec(request);
+	bool result = setSignalWorkcopy(db, *signal, *objectState, errMsg);
 
 	if (result == false)
 	{
-		emitError(tr("Can't set signal workcopy! Error: ") +  q.lastError().text());
+		emitError(errMsg);
 		return;
-	}
-
-	if (q.next() != false)
-	{
-		getObjectState(q, *objectState);
 	}
 
 	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")

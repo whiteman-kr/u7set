@@ -26,7 +26,7 @@ private:
     void getSignalData(QSqlQuery& q, Signal &s);
     QString getSignalDataStr(const Signal& s);
 
-    void getObjectState(QSqlQuery& q, ObjectState &os);
+	void getObjectState(QSqlQuery& q, ObjectState& os);
 
 public:
     DbWorker(DbProgress* progress);
@@ -132,6 +132,7 @@ public slots:
 	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
+	bool setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg);
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
     void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);

@@ -618,8 +618,8 @@ QString SignalsModel::errorMessage(const ObjectState& state) const
 		case ERR_SIGNAL_ALREADY_CHECKED_OUT: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
 		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
 		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);
+		case ERR_SIGNAL_EXISTS: return "";				// error message is displayed by PGSql driver
 		default:
-			assert(false);
 			return tr("Unknown error %1").arg(state.errCode);
 	}
 }
@@ -635,13 +635,20 @@ void SignalsModel::showError(const ObjectState& state) const
 void SignalsModel::showErrors(const QVector<ObjectState>& states) const
 {
 	QString message;
+
 	foreach (const ObjectState& state, states)
 	{
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
-			message += errorMessage(state) + "\n";
+			if (message.isEmpty() == false)
+			{
+				message += "\n";
+			}
+
+			message += errorMessage(state);
 		}
 	}
+
 	if (!message.isEmpty())
 	{
 		QMessageBox::critical(m_parentWindow, tr("Error"), message);

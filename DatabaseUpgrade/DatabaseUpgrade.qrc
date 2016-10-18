@@ -106,7 +106,6 @@
         <file>Upgrade0104.sql</file>
         <file>Upgrade0105.sql</file>
         <file>Upgrade0106.sql</file>
-        <file>Upgrade_wm.sql</file>
         <file>Upgrade0107.sql</file>
         <file>Upgrade0108.sql</file>
     </qresource>
