@@ -147,6 +147,10 @@ public slots:
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
 
+	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
+	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
+	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
+
 	// Units management
 	//
 	void slot_getUnits(UnitList* units);

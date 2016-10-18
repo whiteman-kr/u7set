@@ -125,6 +125,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 107", ":/DatabaseUpgrade/Upgrade0107.sql"},
 	{"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
 	{"Upgrade to version 109", ":/DatabaseUpgrade/Upgrade0109.sql"},
+	{"Upgrade to version 110", ":/DatabaseUpgrade/Upgrade0110.sql"},
 };
 
 
@@ -4242,7 +4243,7 @@ bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 
 	QString request = QString("SELECT * FROM is_signal_with_equipmentid_exists(%1, '%2')")
 					  .arg(currentUser().userId())
-					  .arg(equipmentID);
+					  .arg(toSqlStr(equipmentID));
 
 	QSqlQuery q(db);
 
@@ -4264,6 +4265,129 @@ bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 	result = q.value(0).toBool();
 
 	return result;
+}
+
+
+void DbWorker::slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get ignal IDs with AppSignalID. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signal_ids_with_appsignalid(%1, '%2')")
+					  .arg(currentUser().userId())
+					  .arg(toSqlStr(appSignalID));
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	while(q.next() == true)
+	{
+		signalIDs->append(q.value(0).toInt());
+	}
+}
+
+
+void DbWorker::slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get ignal IDs with CustomAppSignalID. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2')")
+					  .arg(currentUser().userId())
+					  .arg(toSqlStr(customAppSignalID));
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	while(q.next() == true)
+	{
+		signalIDs->append(q.value(0).toInt());
+	}
+}
+
+
+void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get ignal IDs with EquipmentID. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')")
+					  .arg(currentUser().userId())
+					  .arg(toSqlStr(equipmentID));
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	while(q.next() == true)
+	{
+		signalIDs->append(q.value(0).toInt());
+	}
 }
 
 

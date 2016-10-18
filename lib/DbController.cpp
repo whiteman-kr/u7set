@@ -73,6 +73,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 	connect(this, &DbController::signal_autoAddSignals, m_worker, &DbWorker::slot_autoAddSignals);
 	connect(this, &DbController::signal_autoDeleteSignals, m_worker, &DbWorker::slot_autoDeleteSignals);
+	connect(this, &DbController::signal_getSignalsIDsWithAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithAppSignalID);
+	connect(this, &DbController::signal_getSignalsIDsWithCustomAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithCustomAppSignalID);
+	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
 
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_addUnit, m_worker, &DbWorker::slot_addUnit);
@@ -1639,6 +1642,81 @@ bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>*
 	emit signal_autoDeleteSignals(deviceSignals);
 
 	ok = waitForComplete(parentWidget, tr("Auto delete signals"));
+
+	return ok;
+}
+
+
+bool DbController::getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignalsIDsWithAppSignalID(appSignalID, signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Gget signals IDs with AppSignalID"));
+
+	return ok;
+}
+
+
+bool DbController::getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignalsIDsWithCustomAppSignalID(customAppSignalID, signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Gget signals IDs with CustomAppSignalID"));
+
+	return ok;
+}
+
+
+bool DbController::getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignalsIDsWithEquipmentID(equipmentID, signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Gget signals IDs with EquipmentID"));
 
 	return ok;
 }
