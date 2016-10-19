@@ -1,4 +1,4 @@
---
+﻿--
 -- RPCT-1176
 --
 
@@ -116,7 +116,7 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedOutInstanceID IS NULL AND S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID));
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -145,7 +145,7 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedOutInstanceID IS NULL AND S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID));
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -174,7 +174,7 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedOutInstanceID IS NULL AND S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID));
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -813,7 +813,7 @@ BEGIN
 	        S.SignalID = SI.SignalID AND
 		SI.EquipmentID = equipment_id AND
 		S.Deleted != TRUE AND
-		(S.CheckedOutInstanceID IS NULL AND S.CheckedInInstanceID = SI.SignalInstanceID);
+		S.CheckedInInstanceID = SI.SignalInstanceID;
 
         RETURN signalCount > 0;
 END;
