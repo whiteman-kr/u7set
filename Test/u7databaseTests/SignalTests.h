@@ -48,12 +48,12 @@ public:
 		int dataSize = 0;
 		int lowAdc = 0;
 		int highAdc = 0;
-		double lowLimit = 0;
-		double highLimit = 0;
+		double lowengeneeringunits = 0;
+		double highengeneeringunits = 0;
 		int unitId = 0;
 		double adjustment = 0;
-		double dropLimit = 0;
-		double excessLimit = 0;
+		double lowvalidrange = 0;
+		double highvalidrange = 0;
 		double unbalanceLimit = 0;
 		double inputLowLimit = 0;
 		int inputHighLimit = 0;
@@ -72,7 +72,7 @@ public:
 		QString equipmentID;
 		int outputRangeMode = 0;
 		double filteringTime = 0;
-		double maxDifference = 0;
+		double spreadtolerance = 0;
 		int byteOrder = 0;
 		QString enableTuning;
 		double tuningDefaultValue = 0;

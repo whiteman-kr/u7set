@@ -987,27 +987,53 @@ void DbControllerSignalTests::autoAddSignalsTest()
 
 	QSqlQuery query;
 
-	Hardware::DeviceSignal newSignal;
+	QStringList signalCaptions;
 
-	QString firstCaption = "autoAddSignalTest";
+	Hardware::DeviceSignal firstSignalToAdd;
 
-	newSignal.setCaption(firstCaption);
-	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setType(E::SignalType::Discrete);
-	newSignal.setFunction(E::SignalFunction::Input);
-	newSignal.setEquipmentIdTemplate(firstCaption);
+	signalCaptions << "autoAddSignalTestFirst";
+
+	firstSignalToAdd.setCaption(signalCaptions.at(0));
+	firstSignalToAdd.setByteOrder(E::ByteOrder::LittleEndian);
+	firstSignalToAdd.setObjectName(signalCaptions.at(0));
+	firstSignalToAdd.setType(E::SignalType::Discrete);
+	firstSignalToAdd.setFunction(E::SignalFunction::Input);
+	firstSignalToAdd.setEquipmentIdTemplate(signalCaptions.at(0));
+
+	Hardware::DeviceSignal secondSignalToAdd;
+
+	signalCaptions << "autoAddSignalTestSecond";
+
+	secondSignalToAdd.setCaption(signalCaptions.at(1));
+	secondSignalToAdd.setByteOrder(E::ByteOrder::LittleEndian);
+	secondSignalToAdd.setObjectName(signalCaptions.at(1));
+	secondSignalToAdd.setType(E::SignalType::Discrete);
+	secondSignalToAdd.setFunction(E::SignalFunction::Input);
+	secondSignalToAdd.setEquipmentIdTemplate(signalCaptions.at(1));
 
 	std::vector <Hardware::DeviceSignal*> newSignals;
+	std::vector <Signal> addedSignals;
 
-	newSignals.push_back(&newSignal);
+	newSignals.push_back(&firstSignalToAdd);
+	newSignals.push_back(&secondSignalToAdd);
 
-	bool ok = m_dbController->autoAddSignals(&newSignals, 0);
+	bool ok = m_dbController->autoAddSignals(&newSignals, &addedSignals, 0);
 	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption='Signal #%1'").arg(firstCaption));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(addedSignals.size() == 2, qPrintable("Error: wrong amount of added signals"));
+
+	for (int currentSignal = 0; currentSignal < addedSignals.size(); currentSignal++)
+	{
+		QString addedSignalCaption = Signal(addedSignals.at(currentSignal)).caption();
+		QString newSignalCaption = "Signal #" + Hardware::DeviceSignal(*newSignals.at(currentSignal)).caption();
+
+		QVERIFY2 (addedSignalCaption == newSignalCaption, qPrintable("Error: signal mistmatch in result check"));
+		//qDebug() << addedSignalCaption << ":::" << newSignalCaption;
+
+		ok = query.exec(QString("SELECT * FROM signalInstance WHERE caption='Signal #%1'").arg(signalCaptions.at(currentSignal)));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	}
 
 	db.close();
 }

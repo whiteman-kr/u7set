@@ -539,12 +539,12 @@ void SignalTests::checkout_signalsTest()
 	sd.dataSize = query.value("dataSize").toInt();
 	sd.lowAdc = query.value("lowAdc").toInt();
 	sd.highAdc = query.value("highAdc").toInt();
-	sd.lowLimit = query.value("lowlimit").toDouble();
-	sd.highLimit = query.value("highLimit").toDouble();
+	sd.lowengeneeringunits = query.value("lowengeneeringunits").toDouble();
+	sd.highengeneeringunits = query.value("highengeneeringunits").toDouble();
 	sd.unitId = query.value("unitId").toInt();
 	sd.adjustment = query.value("adjustment").toDouble();
-	sd.dropLimit = query.value("dropLimit").toDouble();
-	sd.excessLimit = query.value("excessLimit").toDouble();
+	sd.lowvalidrange = query.value("lowvalidrange").toDouble();
+	sd.highvalidrange = query.value("highvalidrange").toDouble();
 	sd.unbalanceLimit = query.value("unbalanceLimit").toDouble();
 	sd.inputLowLimit = query.value("inputLowLimit").toDouble();
 	sd.inputHighLimit = query.value("inputHighLimit").toDouble();
@@ -563,7 +563,7 @@ void SignalTests::checkout_signalsTest()
 	sd.equipmentID = query.value("equipmentID").toString();
 	sd.outputRangeMode = query.value("outputRangeMode").toInt();
 	sd.filteringTime = query.value("filteringTime").toDouble();
-	sd.maxDifference = query.value("maxDifference").toDouble();
+	sd.spreadtolerance = query.value("spreadtolerance").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
 	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
@@ -638,12 +638,12 @@ void SignalTests::checkout_signalsTest()
 				QVERIFY2(tempQuery.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: dataSize is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: lowAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: highAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-				QVERIFY2(tempQuery.value("lowLimit").toDouble() == sd.lowLimit, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-				QVERIFY2(tempQuery.value("highLimit").toDouble() == sd.highLimit, qPrintable(QString("Error: highLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+				QVERIFY2(tempQuery.value("lowengeneeringunits").toDouble() == sd.lowengeneeringunits, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+				QVERIFY2(tempQuery.value("highengeneeringunits").toDouble() == sd.highengeneeringunits, qPrintable(QString("Error: highengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: unitId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("adjustment").toDouble() == sd.adjustment, qPrintable(QString("Error: adjustment is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-				QVERIFY2(tempQuery.value("dropLimit").toDouble() == sd.dropLimit, qPrintable(QString("Error: dropLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-				QVERIFY2(tempQuery.value("excessLimit").toDouble() == sd.excessLimit, qPrintable(QString("Error: excessLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+				QVERIFY2(tempQuery.value("lowvalidrange").toDouble() == sd.lowvalidrange, qPrintable(QString("Error: lowvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+				QVERIFY2(tempQuery.value("highvalidrange").toDouble() == sd.highvalidrange, qPrintable(QString("Error: highvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("unbalanceLimit").toDouble() == sd.unbalanceLimit, qPrintable(QString("Error: unbalanceLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("inputLowLimit").toDouble() == sd.inputLowLimit, qPrintable(QString("Error: inputLowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("inputHighLimit").toDouble() == sd.inputHighLimit, qPrintable(QString("Error: inputHighLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -662,7 +662,7 @@ void SignalTests::checkout_signalsTest()
 				QVERIFY2(tempQuery.value("equipmentID").toString() == sd.equipmentID, qPrintable(QString("Error: deviceStrId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: outputRangeMode is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("filteringTime").toDouble() == sd.filteringTime, qPrintable(QString("Error: filteringTime is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-				QVERIFY2(tempQuery.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+				QVERIFY2(tempQuery.value("spreadtolerance").toDouble() == sd.spreadtolerance, qPrintable(QString("Error: spreadtolerance is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 				QVERIFY2(tempQuery.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -869,12 +869,12 @@ void SignalTests::get_latest_signalTest()
 	sd.dataSize = query.value("dataSize").toInt();
 	sd.lowAdc = query.value("lowAdc").toInt();
 	sd.highAdc = query.value("highAdc").toInt();
-	sd.lowLimit = query.value("lowlimit").toDouble();
-	sd.highLimit = query.value("highLimit").toDouble();
+	sd.lowengeneeringunits = query.value("lowengeneeringunits").toDouble();
+	sd.highengeneeringunits = query.value("highengeneeringunits").toDouble();
 	sd.unitId = query.value("unitId").toInt();
 	sd.adjustment = query.value("adjustment").toDouble();
-	sd.dropLimit = query.value("dropLimit").toDouble();
-	sd.excessLimit = query.value("excessLimit").toDouble();
+	sd.lowvalidrange = query.value("lowvalidrange").toDouble();
+	sd.highvalidrange = query.value("highvalidrange").toDouble();
 	sd.unbalanceLimit = query.value("unbalanceLimit").toDouble();
 	sd.inputLowLimit = query.value("inputLowLimit").toDouble();
 	sd.inputHighLimit = query.value("inputHighLimit").toDouble();
@@ -893,7 +893,7 @@ void SignalTests::get_latest_signalTest()
 	sd.equipmentID = query.value("equipmentID").toString();
 	sd.outputRangeMode = query.value("outputRangeMode").toInt();
 	sd.filteringTime = query.value("filteringTime").toDouble();
-	sd.maxDifference = query.value("maxDifference").toDouble();
+	sd.spreadtolerance = query.value("spreadtolerance").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
 	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
@@ -912,12 +912,12 @@ void SignalTests::get_latest_signalTest()
 	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: dataSize is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: lowAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: highAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("lowLimit").toDouble() == sd.lowLimit, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("highLimit").toDouble() == sd.highLimit, qPrintable(QString("Error: highLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowengeneeringunits").toDouble() == sd.lowengeneeringunits, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highengeneeringunits").toDouble() == sd.highengeneeringunits, qPrintable(QString("Error: highengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: unitId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("adjustment").toDouble() == sd.adjustment, qPrintable(QString("Error: adjustment is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("dropLimit").toDouble() == sd.dropLimit, qPrintable(QString("Error: dropLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("excessLimit").toDouble() == sd.excessLimit, qPrintable(QString("Error: excessLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowvalidrange").toDouble() == sd.lowvalidrange, qPrintable(QString("Error: lowvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highvalidrange").toDouble() == sd.highvalidrange, qPrintable(QString("Error: highvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unbalanceLimit").toDouble() == sd.unbalanceLimit, qPrintable(QString("Error: unbalanceLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputLowLimit").toDouble() == sd.inputLowLimit, qPrintable(QString("Error: inputLowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == sd.inputHighLimit, qPrintable(QString("Error: inputHighLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -936,7 +936,7 @@ void SignalTests::get_latest_signalTest()
 	QVERIFY2(query.value("equipmentID").toString() == sd.equipmentID, qPrintable(QString("Error: deviceStrId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: outputRangeMode is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("filteringTime").toDouble() == sd.filteringTime, qPrintable(QString("Error: filteringTime is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("spreadtolerance").toDouble() == sd.spreadtolerance, qPrintable(QString("Error: spreadtolerance is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -1264,12 +1264,12 @@ void SignalTests::get_latest_signalsTest()
 	sd.dataSize = query.value("dataSize").toInt();
 	sd.lowAdc = query.value("lowAdc").toInt();
 	sd.highAdc = query.value("highAdc").toInt();
-	sd.lowLimit = query.value("lowlimit").toDouble();
-	sd.highLimit = query.value("highLimit").toDouble();
+	sd.lowengeneeringunits = query.value("lowengeneeringunits").toDouble();
+	sd.highengeneeringunits = query.value("highengeneeringunits").toDouble();
 	sd.unitId = query.value("unitId").toInt();
 	sd.adjustment = query.value("adjustment").toDouble();
-	sd.dropLimit = query.value("dropLimit").toDouble();
-	sd.excessLimit = query.value("excessLimit").toDouble();
+	sd.lowvalidrange = query.value("lowvalidrange").toDouble();
+	sd.highvalidrange = query.value("highvalidrange").toDouble();
 	sd.unbalanceLimit = query.value("unbalanceLimit").toDouble();
 	sd.inputLowLimit = query.value("inputLowLimit").toDouble();
 	sd.inputHighLimit = query.value("inputHighLimit").toDouble();
@@ -1288,7 +1288,7 @@ void SignalTests::get_latest_signalsTest()
 	sd.equipmentID = query.value("equipmentID").toString();
 	sd.outputRangeMode = query.value("outputRangeMode").toInt();
 	sd.filteringTime = query.value("filteringTime").toDouble();
-	sd.maxDifference = query.value("maxDifference").toDouble();
+	sd.spreadtolerance = query.value("spreadtolerance").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
 	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
@@ -1307,12 +1307,12 @@ void SignalTests::get_latest_signalsTest()
 	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: dataSize is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: lowAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: highAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("lowLimit").toDouble() == sd.lowLimit, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("highLimit").toDouble() == sd.highLimit, qPrintable(QString("Error: highLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowengeneeringunits").toDouble() == sd.lowengeneeringunits, qPrintable(QString("Error: lowengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highengeneeringunits").toDouble() == sd.highengeneeringunits, qPrintable(QString("Error: highengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: unitId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("adjustment").toDouble() == sd.adjustment, qPrintable(QString("Error: adjustment is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("dropLimit").toDouble() == sd.dropLimit, qPrintable(QString("Error: dropLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("excessLimit").toDouble() == sd.excessLimit, qPrintable(QString("Error: excessLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowvalidrange").toDouble() == sd.lowvalidrange, qPrintable(QString("Error: lowvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highvalidrange").toDouble() == sd.highvalidrange, qPrintable(QString("Error: highvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unbalanceLimit").toDouble() == sd.unbalanceLimit, qPrintable(QString("Error: unbalanceLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputLowLimit").toDouble() == sd.inputLowLimit, qPrintable(QString("Error: inputLowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == sd.inputHighLimit, qPrintable(QString("Error: inputHighLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -1331,7 +1331,7 @@ void SignalTests::get_latest_signalsTest()
 	QVERIFY2(query.value("equipmentID").toString() == sd.equipmentID, qPrintable(QString("Error: deviceStrId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: outputRangeMode is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("filteringTime").toDouble() == sd.filteringTime, qPrintable(QString("Error: filteringTime is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("spreadtolerance").toDouble() == sd.spreadtolerance, qPrintable(QString("Error: spreadtolerance is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -1440,12 +1440,12 @@ void SignalTests::get_latest_signals_allTest()
 	sd.dataSize = query.value("dataSize").toInt();
 	sd.lowAdc = query.value("lowAdc").toInt();
 	sd.highAdc = query.value("highAdc").toInt();
-	sd.lowLimit = query.value("lowlimit").toDouble();
-	sd.highLimit = query.value("highLimit").toDouble();
+	sd.lowengeneeringunits = query.value("lowengeneeringunits").toDouble();
+	sd.highengeneeringunits = query.value("highengeneeringunits").toDouble();
 	sd.unitId = query.value("unitId").toInt();
 	sd.adjustment = query.value("adjustment").toDouble();
-	sd.dropLimit = query.value("dropLimit").toDouble();
-	sd.excessLimit = query.value("excessLimit").toDouble();
+	sd.lowvalidrange = query.value("lowvalidrange").toDouble();
+	sd.highvalidrange = query.value("highvalidrange").toDouble();
 	sd.unbalanceLimit = query.value("unbalanceLimit").toDouble();
 	sd.inputLowLimit = query.value("inputLowLimit").toDouble();
 	sd.inputHighLimit = query.value("inputHighLimit").toDouble();
@@ -1464,7 +1464,7 @@ void SignalTests::get_latest_signals_allTest()
 	sd.equipmentID = query.value("equipmentID").toString();
 	sd.outputRangeMode = query.value("outputRangeMode").toInt();
 	sd.filteringTime = query.value("filteringTime").toDouble();
-	sd.maxDifference = query.value("maxDifference").toDouble();
+	sd.spreadtolerance = query.value("spreadtolerance").toDouble();
 	sd.byteOrder = query.value("byteOrder").toInt();
 	sd.enableTuning = query.value("enableTuning").toString();
 	sd.tuningDefaultValue = query.value("tuningDefaultValue").toDouble();
@@ -1484,12 +1484,12 @@ void SignalTests::get_latest_signals_allTest()
 	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: dataSize is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: lowAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: highAdc is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("lowLimit").toDouble() == sd.lowLimit, qPrintable(QString("Error: lowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("highLimit").toDouble() == sd.highLimit, qPrintable(QString("Error: highLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowengeneeringunits").toDouble() == sd.lowengeneeringunits, qPrintable(QString("Error: lowengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highengeneeringunits").toDouble() == sd.highengeneeringunits, qPrintable(QString("Error: highengeneeringunits is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: unitId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("adjustment").toDouble() == sd.adjustment, qPrintable(QString("Error: adjustment is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("dropLimit").toDouble() == sd.dropLimit, qPrintable(QString("Error: dropLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("excessLimit").toDouble() == sd.excessLimit, qPrintable(QString("Error: excessLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("lowvalidrange").toDouble() == sd.lowvalidrange, qPrintable(QString("Error: lowvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("highvalidrange").toDouble() == sd.highvalidrange, qPrintable(QString("Error: highvalidrange is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("unbalanceLimit").toDouble() == sd.unbalanceLimit, qPrintable(QString("Error: unbalanceLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputLowLimit").toDouble() == sd.inputLowLimit, qPrintable(QString("Error: inputLowLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == sd.inputHighLimit, qPrintable(QString("Error: inputHighLimit is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -1508,7 +1508,7 @@ void SignalTests::get_latest_signals_allTest()
 	QVERIFY2(query.value("equipmentID").toString() == sd.equipmentID, qPrintable(QString("Error: deviceStrId is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: outputRangeMode is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("filteringTime").toDouble() == sd.filteringTime, qPrintable(QString("Error: filteringTime is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
-	QVERIFY2(query.value("maxDifference").toDouble() == sd.maxDifference, qPrintable(QString("Error: maxDifference is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
+	QVERIFY2(query.value("spreadtolerance").toDouble() == sd.spreadtolerance, qPrintable(QString("Error: spreadtolerance is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: byteOrder is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: enableTuning is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: tuningDefaultValue is wrong in table signalInstance (signalId %1)").arg(sd.signalId)));
@@ -1704,12 +1704,12 @@ void SignalTests::set_signal_workcopyTest()
 	sd.dataSize = 2;
 	sd.lowAdc = 3;
 	sd.highAdc = 4;
-	sd.lowLimit = 5;
-	sd.highLimit = 6;
+	sd.lowengeneeringunits = 5;
+	sd.highengeneeringunits = 6;
 	sd.unitId = 7;
 	sd.adjustment = 8;
-	sd.dropLimit = 9;
-	sd.excessLimit = 10;
+	sd.lowvalidrange = 9;
+	sd.highvalidrange = 10;
 	sd.unbalanceLimit = 11;
 	sd.inputLowLimit = 12;
 	sd.inputHighLimit = 13;
@@ -1728,7 +1728,7 @@ void SignalTests::set_signal_workcopyTest()
 	sd.equipmentID = "equipmentID";
 	sd.outputRangeMode = 24;
 	sd.filteringTime = 25;
-	sd.maxDifference = 26;
+	sd.spreadtolerance = 26;
 	sd.byteOrder = 27;
 	sd.enableTuning = "true";
 	sd.tuningDefaultValue = 89.234;
@@ -1755,23 +1755,23 @@ void SignalTests::set_signal_workcopyTest()
 					 .arg(sd.dataSize)
 					 .arg(sd.lowAdc)
 					 .arg(sd.highAdc)
-					 .arg(sd.lowLimit));
+	                 .arg(sd.lowengeneeringunits));
 
 	arguments.append(QString("%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, ")
-					 .arg(sd.highLimit)
+	                 .arg(sd.highengeneeringunits)
 					 .arg(sd.unitId)
 					 .arg(sd.adjustment)
-					 .arg(sd.dropLimit)
-					 .arg(sd.excessLimit)
+	                 .arg(sd.lowvalidrange)
+	                 .arg(sd.highvalidrange)
 					 .arg(sd.unbalanceLimit)
-					 .arg(sd.inputLowLimit)
-					 .arg(sd.inputHighLimit)
+	                 .arg(sd.inputLowLimit)
+	                 .arg(sd.inputHighLimit)
 					 .arg(sd.inputUnitId)
 					 .arg(sd.inputSensorId));
 
 	arguments.append(QString("%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, ")
-					 .arg(sd.outputLowLimit)
-					 .arg(sd.outputHighLimit)
+	                 .arg(sd.outputLowLimit)
+	                 .arg(sd.outputHighLimit)
 					 .arg(sd.outputUnitId)
 					 .arg(sd.outputSensorId)
 					 .arg(sd.acquire)
@@ -1785,7 +1785,7 @@ void SignalTests::set_signal_workcopyTest()
 					 .arg(sd.equipmentID)
 					 .arg(sd.outputRangeMode)
 					 .arg(sd.filteringTime)
-					 .arg(sd.maxDifference)
+	                 .arg(sd.spreadtolerance)
 					 .arg(sd.byteOrder)
 					 .arg(sd.enableTuning)
 					 .arg(sd.tuningDefaultValue));
@@ -1817,12 +1817,12 @@ void SignalTests::set_signal_workcopyTest()
 	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: value dataSize is not match (Actual: %1, Expected: %2)").arg(query.value("dataSize").toInt()).arg(sd.dataSize)));
 	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: value lowAdc is not match (Actual: %1, Expected: %2)").arg(query.value("lowAdc").toInt()).arg(sd.lowAdc)));
 	QVERIFY2(query.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: value highAdc is not match (Actual: %1, Expected: %2)").arg(query.value("highAdc").toInt()).arg(sd.highAdc)));
-	QVERIFY2(query.value("lowLimit").toInt() == sd.lowLimit, qPrintable(QString("Error: value lowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("lowLimit").toInt()).arg(sd.lowLimit)));
-	QVERIFY2(query.value("highLimit").toInt() == sd.highLimit, qPrintable(QString("Error: value highLimit is not match (Actual: %1, Expected: %2)").arg(query.value("highLimit").toInt()).arg(sd.highLimit)));
+	QVERIFY2(query.value("lowengeneeringunits").toInt() == sd.lowengeneeringunits, qPrintable(QString("Error: value lowengeneeringunits is not match (Actual: %1, Expected: %2)").arg(query.value("lowengeneeringunits").toInt()).arg(sd.lowengeneeringunits)));
+	QVERIFY2(query.value("highengeneeringunits").toInt() == sd.highengeneeringunits, qPrintable(QString("Error: value highengeneeringunits is not match (Actual: %1, Expected: %2)").arg(query.value("highengeneeringunits").toInt()).arg(sd.highengeneeringunits)));
 	QVERIFY2(query.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: value unitId is not match (Actual: %1, Expected: %2)").arg(query.value("unitId").toInt()).arg(sd.unitId)));
 	QVERIFY2(query.value("adjustment").toInt() == sd.adjustment, qPrintable(QString("Error: value adjustment is not match (Actual: %1, Expected: %2)").arg(query.value("adjustment").toInt()).arg(sd.adjustment)));
-	QVERIFY2(query.value("dropLimit").toInt() == sd.dropLimit, qPrintable(QString("Error: value dropLimit is not match (Actual: %1, Expected: %2)").arg(query.value("dropLimit").toInt()).arg(sd.dropLimit)));
-	QVERIFY2(query.value("excessLimit").toInt() == sd.excessLimit, qPrintable(QString("Error: value excessLimit is not match (Actual: %1, Expected: %2)").arg(query.value("excessLimit").toInt()).arg(sd.excessLimit)));
+	QVERIFY2(query.value("lowvalidrange").toInt() == sd.lowvalidrange, qPrintable(QString("Error: value lowvalidrange is not match (Actual: %1, Expected: %2)").arg(query.value("lowvalidrange").toInt()).arg(sd.lowvalidrange)));
+	QVERIFY2(query.value("highvalidrange").toInt() == sd.highvalidrange, qPrintable(QString("Error: value highvalidrange is not match (Actual: %1, Expected: %2)").arg(query.value("highvalidrange").toInt()).arg(sd.highvalidrange)));
 	QVERIFY2(query.value("unbalanceLimit").toInt() == sd.unbalanceLimit, qPrintable(QString("Error: value unbalanceLimit is not match (Actual: %1, Expected: %2)").arg(query.value("unbalanceLimit").toInt()).arg(sd.unbalanceLimit)));
 	QVERIFY2(query.value("inputLowLimit").toInt() == sd.inputLowLimit, qPrintable(QString("Error: value inputLowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputLowLimit").toInt()).arg(sd.inputLowLimit)));
 	QVERIFY2(query.value("inputHighLimit").toInt() == sd.inputHighLimit, qPrintable(QString("Error: value inputHighLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputHighLimit").toInt()).arg(sd.inputHighLimit)));
@@ -1841,7 +1841,7 @@ void SignalTests::set_signal_workcopyTest()
 	QVERIFY2(query.value("equipmentID").toString() == sd.equipmentID, qPrintable(QString("Error: value equipmentID is not match (Actual: %1, Expected: %2)").arg(query.value("equipmentID").toString()).arg(sd.equipmentID)));
 	QVERIFY2(query.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: value outputRangeMode is not match (Actual: %1, Expected: %2)").arg(query.value("outputRangeMode").toInt()).arg(sd.outputRangeMode)));
 	QVERIFY2(query.value("filteringTime").toInt() == sd.filteringTime, qPrintable(QString("Error: value filteringTime is not match (Actual: %1, Expected: %2)").arg(query.value("filteringTime").toInt()).arg(sd.filteringTime)));
-	QVERIFY2(query.value("maxDifference").toInt() == sd.maxDifference, qPrintable(QString("Error: value maxDifference is not match (Actual: %1, Expected: %2)").arg(query.value("maxDifference").toInt()).arg(sd.maxDifference)));
+	QVERIFY2(query.value("spreadtolerance").toInt() == sd.spreadtolerance, qPrintable(QString("Error: value spreadtolerance is not match (Actual: %1, Expected: %2)").arg(query.value("spreadtolerance").toInt()).arg(sd.spreadtolerance)));
 	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: value byteOrder is not match (Actual: %1, Expected: %2)").arg(query.value("byteOrder").toInt()).arg(sd.byteOrder)));
 	QVERIFY2(query.value("enableTuning").toString() == sd.enableTuning, qPrintable(QString("Error: value enableTuning is not match (Actual: %1, Expected: %2)").arg(query.value("enableTuning").toString()).arg(sd.enableTuning)));
 	QVERIFY2(query.value("tuningDefaultValue").toDouble() == sd.tuningDefaultValue, qPrintable(QString("Error: value tuningDefaultValue is not match (Actual: %1, Expected: %2)").arg(query.value("tuningDefaultValue").toDouble()).arg(sd.tuningDefaultValue)));
