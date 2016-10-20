@@ -674,7 +674,6 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
@@ -714,7 +713,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setAperture(0.4);
 	resultSignal.setByteOrder(E::ByteOrder::BigEndian);
 	resultSignal.setCalculated(false);
-	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+	resultSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	resultSignal.setDataSize(40);
 	resultSignal.setDecimalPlaces(4);
 	resultSignal.setEnableTuning(false);
@@ -736,9 +735,8 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setOutputMode(E::OutputMode::Minus10_Plus10_V);
 	resultSignal.setOutputSensorID(34847);
 	resultSignal.setOutputUnitID(1);
-	//	resultSignal.setReadOnly(true);
 	resultSignal.setSpreadTolerance(2346.8);
-	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+	resultSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	resultSignal.setUnbalanceLimit(2345.3);
 	resultSignal.setUnitID(2);
 
@@ -755,7 +753,6 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	QVERIFY2(query.value("appSignalID").toString() == resultSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == resultSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == resultSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	//QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
@@ -835,7 +832,6 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);// setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);

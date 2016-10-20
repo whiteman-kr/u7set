@@ -21,7 +21,8 @@ private slots:
 	void get_latest_signals_allTest();
 	void undo_signal_changesTest();
 	void set_signal_workcopyTest();
-	void get_signal_Ids_with_appsignalIds();
+	void get_signal_Ids_with_appsignalId();
+	void get_signal_Ids_with_customAppSignalId();
 
 public:
 	int m_firstUserForTest = -1;

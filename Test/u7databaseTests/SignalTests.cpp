@@ -1879,7 +1879,7 @@ void SignalTests::set_signal_workcopyTest()
 
 }
 
-void SignalTests::get_signal_Ids_with_appsignalIds()
+void SignalTests::get_signal_Ids_with_appsignalId()
 {
 	QSqlQuery query;
 
@@ -2016,6 +2016,159 @@ void SignalTests::get_signal_Ids_with_appsignalIds()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_appsignalid(%1, '%2') ORDER BY get_signal_ids_with_appsignalid").arg(m_firstUserForTest).arg(appsignalId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	currentValue = 0;
+
+	while (query.next())
+	{
+		QVERIFY2 (currentValue < 2, qPrintable("Error: wrong amount of returned signals"));
+
+		QVERIFY2 (query.value(0).toInt() == signalIds[currentValue], qPrintable("Error: wrong signalId returned"));
+
+		currentValue++;
+	}
+
+	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
+}
+
+void SignalTests::get_signal_Ids_with_customAppSignalId()
+{
+	QSqlQuery query;
+
+	QVector<int> signalIds;
+
+	QString appsignalId = "CustomAppSignalIdForGetSignalIdsWithAppSignalIds";
+
+	// Create first signal (created by admin. Not checked In)
+	//
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Second signal (created by user, not checked In)
+	//
+
+	ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 0)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Third signal (created by admin. Checked In - Checked Out - Deleted - Checked In)
+	//
+
+	ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(1, %1)").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// First time fucntion check. Started by admin. Two records expected (First and Second)
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(1, '%1') ORDER BY get_signal_ids_with_customappsignalid").arg(appsignalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	int currentValue = 0;
+
+	while (query.next())
+	{
+		QVERIFY2 (currentValue < 2, qPrintable("Error: wrong amount of returned signals"));
+
+		QVERIFY2 (query.value(0).toInt() == signalIds[currentValue], qPrintable("Error: wrong signalId returned"));
+
+		currentValue++;
+	}
+
+	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
+
+	// Second Time function start. Started by user. One record expected (Second)
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
+
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.value(0).toInt() == signalIds[1], qPrintable("Error: wrong signalId returned"));
+	QVERIFY2 (query.next() == false, qPrintable("Error: one record expected"));
+
+	// Check in First Signal by admin
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalIds[0]));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Third time function start. Started by user. Two records expected (First, Second)
+
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	currentValue = 0;
+
+	while (query.next())
+	{
+		QVERIFY2 (currentValue < 2, qPrintable("Error: wrong amount of returned signals"));
+
+		QVERIFY2 (query.value(0).toInt() == signalIds[currentValue], qPrintable("Error: wrong signalId returned"));
+
+		currentValue++;
+	}
+
+	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	currentValue = 0;
