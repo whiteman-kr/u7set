@@ -3207,9 +3207,9 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	// Log action
 	//
 	QString logMessage = QString("slot_addDeviceObject: Device %1, FileID %2, ParentID %3")
-						 .arg(device->equipmentId()
+						 .arg(device->equipmentId())
 						 .arg(device->fileId())
-						 .arg(parentId));
+						 .arg(parentId);
 
 	addLogRecord(db, logMessage);
 
@@ -3720,7 +3720,9 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ").arg(newSignal->size());
+	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ")
+						 .arg(newSignal->size());
+
 	for (const Signal& s : *newSignal)
 	{
 		logMessage += s.appSignalID() + QLatin1String(" ");
@@ -3920,6 +3922,7 @@ void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
 	// Log action
 	//
 	QString logMessage = QString("slot_addUnit: Unit %1").arg(unitEn);
+
 	addLogRecord(db, logMessage);
 
 	// request
@@ -3960,6 +3963,7 @@ void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
 	// Log action
 	//
 	QString logMessage = QString("slot_updateUnit: UnitID %1, UnitEN %2").arg(unitID).arg(unitEn);
+
 	addLogRecord(db, logMessage);
 
 	// request
@@ -4019,7 +4023,9 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 
 	// Log action
 	//
-	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ").arg(signalIDs->size());
+	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ")
+						 .arg(signalIDs->size());
+
 	for (int id : *signalIDs)
 	{
 		logMessage += QString("%1 ").arg(id);
@@ -4153,6 +4159,7 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 	// Log action
 	//
 	QString logMessage = QString("slot_deleteSignal: SignalID %1").arg(signalID);
+
 	addLogRecord(db, logMessage);
 
 	// --
@@ -4204,6 +4211,7 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 	// Log action
 	//
 	QString logMessage = QString("slot_undoSignalChanges: SignalID %1").arg(signalID);
+
 	addLogRecord(db, logMessage);
 
 	// --
@@ -4262,7 +4270,10 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	// Log action
 	//
-	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ").arg(comment).arg(signalIDs->size());
+	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ")
+						 .arg(comment)
+						 .arg(signalIDs->size());
+
 	for (int id : *signalIDs)
 	{
 		logMessage += QString("%1 ").arg(id);
@@ -4599,7 +4610,10 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 
 	// Log action
 	//
-	QString logMessage = QString("slot_buildStart: Release %1, Changeset %2").arg(release).arg(changeset);
+	QString logMessage = QString("slot_buildStart: Release %1, Changeset %2")
+						 .arg(release)
+						 .arg(changeset);
+
 	addLogRecord(db, logMessage);
 
 	// --
