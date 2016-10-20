@@ -23,6 +23,7 @@ private slots:
 	void set_signal_workcopyTest();
 	void get_signal_Ids_with_appsignalId();
 	void get_signal_Ids_with_customAppSignalId();
+	void get_signal_Ids_with_equipmentId();
 
 public:
 	int m_firstUserForTest = -1;
