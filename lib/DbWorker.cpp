@@ -4804,7 +4804,6 @@ bool DbWorker::addLogRecord(QSqlDatabase db, QString text)
 {
 	if (db.isOpen() == false)
 	{
-		assert(db.isOpen() == true);
 		return false;
 	}
 
