@@ -938,7 +938,20 @@ CREATE OR REPLACE FUNCTION add_unit(
 $BODY$
 DECLARE
         new_unitID integer;
+	exists integer;
 BEGIN
+        SELECT COUNT(*) INTO exists FROM Unit WHERE unit_en = en_unit;
+
+        IF exists > 0 THEN
+	        RETURN -1;
+	END IF;
+
+        SELECT COUNT(*) INTO exists FROM Unit WHERE unit_ru = ru_unit;
+
+        IF exists > 0 THEN
+	        RETURN -2;
+	END IF;
+
         INSERT INTO public.unit(unitid, unit_en, unit_ru) VALUES (DEFAULT, en_unit, ru_unit) RETURNING unitID INTO new_unitID;
 
         RETURN new_unitID;
@@ -946,7 +959,6 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-
 
 --
 -- Add function update_unit(en_unit text, ru_unit text)
@@ -956,21 +968,33 @@ CREATE OR REPLACE FUNCTION update_unit(
         unit_id integer,
 	en_unit text,
 	ru_unit text)
-RETURNS boolean AS
+RETURNS integer AS
         $BODY$
 DECLARE
-        row_found boolean;
+        row_found integer;
+	exists integer;
 BEGIN
+        SELECT COUNT(*) INTO exists FROM Unit WHERE unit_en = en_unit;
+
+        IF exists > 0 THEN
+	        RETURN -1;
+	END IF;
+
+        SELECT COUNT(*) INTO exists FROM Unit WHERE unit_ru = ru_unit;
+
+        IF exists > 0 THEN
+	        RETURN -2;
+	END IF;
+
         WITH rows AS (
 	        UPDATE unit SET unit_en=en_unit, unit_ru=ru_unit
 		        WHERE unitid = unit_id RETURNING 1
 	)
 
-        SELECT count(*) > 0 INTO row_found FROM rows;
+        SELECT count(*) INTO row_found FROM rows;
 
         RETURN row_found;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-

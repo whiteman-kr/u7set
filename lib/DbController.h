@@ -119,7 +119,7 @@ public:
 	//
 	bool getUnits(UnitList* units, QWidget* parentWidget);
 	bool addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget);
-	bool updateUnit(int unitID, QString unitEn, QString unitRu, QWidget* parentWidget);
+	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);
 
 	// Build management
 	//
@@ -202,7 +202,7 @@ signals:
 	//
 	void signal_getUnits(UnitList* units);
 	void signal_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void signal_updateUnit(int unitID, QString unitEn, QString unitRu);
+	void signal_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
 
 	// Build management
 	//
