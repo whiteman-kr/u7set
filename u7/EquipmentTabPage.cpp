@@ -2236,9 +2236,31 @@ void EquipmentView::addInOutsToSignals()
 
 	if (result == true)
 	{
+		QString messageText;
+
+		if (addedSignals.empty() == true)
+		{
+			messageText = tr("Application Logic signlas for inputs/outputs were not added. Apparently they were added earlier.");
+		}
+
+		if (addedSignals.size() == 1)
+		{
+			messageText = tr("1 Appllication Logic signal for inputs/Ooutputs was added.");
+		}
+
+		if (addedSignals.size() > 1)
+		{
+			messageText = tr("%1 Appllication Logic signals for inputs/outputs were added.").arg(addedSignals.size());
+		}
+
+		QMessageBox::information(this, qAppName(), messageText);
+
 		// Show application signals for current module
 		//
-		showAppSignals(true);
+		if (addedSignals.empty() == false)
+		{
+			showAppSignals(true);
+		}
 	}
 
 	return;
