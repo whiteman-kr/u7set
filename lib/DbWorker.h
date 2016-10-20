@@ -37,8 +37,8 @@ protected:
 
     bool checkDatabaseFeatures(QSqlDatabase db);
 
-    void emitError(const QSqlError& err);
-    void emitError(const QString& err);
+	void emitError(QSqlDatabase db, const QSqlError& err);
+	void emitError(QSqlDatabase db, const QString& err);
 
     //
     // Public signals
@@ -173,6 +173,8 @@ public slots:
 
     // Service
     //
+	bool addLogRecord(QSqlDatabase db, QString text);
+
     bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
     bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
     int db_getProjectVersion(QSqlDatabase db);

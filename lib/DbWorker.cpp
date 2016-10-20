@@ -126,6 +126,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
 	{"Upgrade to version 109", ":/DatabaseUpgrade/Upgrade0109.sql"},
 	{"Upgrade to version 110", ":/DatabaseUpgrade/Upgrade0110.sql"},
+	{"Upgrade to version 111", ":/DatabaseUpgrade/Upgrade0111.sql"},
 };
 
 
@@ -221,13 +222,18 @@ bool DbWorker::checkDatabaseFeatures(QSqlDatabase db)
 		hasPreparedQueries == true;
 }
 
-void DbWorker::emitError(const QSqlError& err)
+void DbWorker::emitError(QSqlDatabase db, const QSqlError& err)
 {
-	emitError(err.text());
+	emitError(db, err.text());
 }
 
-void DbWorker::emitError(const QString& err)
+void DbWorker::emitError(QSqlDatabase db, const QString& err)
 {
+	if (db.isOpen() == true)
+	{
+		addLogRecord(db, err);
+	}
+
 	qDebug() << err;
 	m_progress->setErrorMessage(err);
 }
@@ -346,7 +352,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
@@ -359,14 +365,14 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		bool ok = db.open();
 		if (ok == false)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
 		ok = checkDatabaseFeatures(db);
 		if (ok == false)
 		{
-			emitError(tr("Database driver doesn't have required features."));
+			emitError(db, tr("Database driver doesn't have required features."));
 			db.close();
 			return;
 		}
@@ -381,7 +387,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 		if (result == false)
 		{
-			emitError(query.lastError());
+			emitError(db, query.lastError());
 			db.close();
 			return;
 		}
@@ -429,7 +435,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 			bool result = projectDb.open();
 			if (result == false)
 			{
-				emitError(projectDb.lastError());
+				emitError(projectDb, projectDb.lastError());
 				continue;
 			}
 
@@ -527,7 +533,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
@@ -540,14 +546,14 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		bool ok = db.open();
 		if (ok == false)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
 		ok = checkDatabaseFeatures(db);
 		if (ok == false)
 		{
-			emitError(tr("Database driver doesn't have required features."));
+			emitError(db, tr("Database driver doesn't have required features."));
 			db.close();
 			return;
 		}
@@ -565,7 +571,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 
 		if (result == false)
 		{
-			emitError(query.lastError());
+			emitError(db, query.lastError());
 			db.close();
 			return;
 		}
@@ -594,7 +600,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		bool result = newDatabase.open();
 		if (result == false)
 		{
-			emitError(newDatabase.lastError());
+			emitError(newDatabase, newDatabase.lastError());
 			return;
 		}
 
@@ -613,7 +619,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		result = newDbQuery.exec(createVersionTableSql);
 		if (result == false)
 		{
-			emitError(newDbQuery.lastError());
+			emitError(newDatabase, newDbQuery.lastError());
 			newDatabase.close();
 			return;
 		}
@@ -628,7 +634,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		result = newDbQuery.exec(request);
 		if (result == false)
 		{
-			emitError(newDbQuery.lastError());
+			emitError(newDatabase, newDbQuery.lastError());
 			newDatabase.close();
 			return;
 		}
@@ -642,7 +648,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		result = newDbQuery.exec(addFirstVersionRecord);
 		if (result == false)
 		{
-			emitError(newDbQuery.lastError());
+			emitError(newDatabase, newDbQuery.lastError());
 			newDbQuery.clear();
 			newDatabase.close();
 			return;
@@ -667,7 +673,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		result = newDbQuery.exec(createUserTableSql);
 		if (result == false)
 		{
-			emitError(newDbQuery.lastError());
+			emitError(newDatabase, newDbQuery.lastError());
 			newDbQuery.clear();
 			newDatabase.close();
 			return;
@@ -691,7 +697,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		result = newDbQuery.exec();
 		if (result == false)
 		{
-			emitError(newDbQuery.lastError());
+			emitError(newDatabase, newDbQuery.lastError());
 			newDatabase.close();
 			return;
 		}
@@ -735,7 +741,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (isProjectOpened() == true)
 	{
-		emitError(tr("OpenProject error, another project is opened. To open a new project, please close the current project."));
+		emitError(QSqlDatabase(), tr("OpenProject error, another project is opened. To open a new project, please close the current project."));
 		return;
 	}
 
@@ -753,7 +759,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	bool result = db.open();
 	if (result == false)
 	{
-		emitError(db.lastError());
+		emitError(db, db.lastError());
 		return;
 	}
 
@@ -769,7 +775,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (result == false)
 	{
-		emitError(query.lastError());
+		emitError(db, query.lastError());
 
 		query.clear();
 		db.close();
@@ -778,7 +784,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (query.next() == false)
 	{
-		emitError(tr("Internal error. Can't check username and password."));
+		emitError(db, tr("Internal error. Can't check username and password."));
 
 		query.clear();
 		db.close();
@@ -789,7 +795,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (userId <= 0)
 	{
-		emitError(tr("Can't open project. Wrong username or password."));
+		emitError(db, tr("Can't open project. Wrong username or password."));
 
 		query.clear();
 		db.close();
@@ -803,7 +809,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (result == false)
 	{
-		emitError(tr("Can't read user data ") + db.lastError().text());
+		emitError(db, tr("Can't read user data ") + db.lastError().text());
 
 		query.clear();
 		db.close();
@@ -812,7 +818,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (user.isDisabled() == true)
 	{
-		emitError(tr("User %1 is not allowed to open the project. User is disabled, contact project administartor.").arg(username));
+		emitError(db, tr("User %1 is not allowed to open the project. User is disabled, contact project administartor.").arg(username));
 
 		query.clear();
 		db.close();
@@ -945,7 +951,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (result == false)
 	{
-		emitError(tr("Can't get system folder.") + db.lastError().text());
+		emitError(db, tr("Can't get system folder.") + db.lastError().text());
 		query.clear();
 		db.close();
 
@@ -963,6 +969,12 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		return;
 	}
 
+	// Add log record
+	//
+	addLogRecord(db, QString("Project is opened. Software version %1, supported DB version %2")
+				 .arg(qApp->applicationName() + " " + qApp->applicationVersion())
+				 .arg(DbWorker::databaseVersion()));
+
 	return;
 }
 
@@ -975,6 +987,17 @@ void DbWorker::slot_closeProject()
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
+	// Log close
+	//
+	{
+		QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+		if (db.isOpen() == true)
+		{
+			addLogRecord(db, "Project is about to close.");
+		}
+	}
+
 	// Check
 	//
 	setCurrentUser(DbUser());
@@ -982,7 +1005,7 @@ void DbWorker::slot_closeProject()
 
 	if (QSqlDatabase::contains(projectConnectionName()) == false)
 	{
-		emitError(tr("Project is not opened."));
+		emitError(QSqlDatabase(), tr("Project is not opened."));
 		return;
 	}
 
@@ -993,7 +1016,7 @@ void DbWorker::slot_closeProject()
 
 		if (db.isOpen() == false)
 		{
-			emitError(tr("Project database connection is closed."));
+			emitError(QSqlDatabase(), tr("Project database connection is closed."));
 			return;
 		}
 
@@ -1051,15 +1074,17 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 		bool result = db.open();
 		if (result == false)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
+
+		addLogRecord(db, "About to delete project.");
 
 		result = db_checkUserPassword(db, username, password);
 
 		if (result == false)
 		{
-			emitError("Wrong password.");
+			emitError(db, "Wrong password.");
 			db.close();
 			return;
 		}
@@ -1076,7 +1101,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
@@ -1089,7 +1114,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 		bool ok = db.open();
 		if (ok == false)
 		{
-			emitError(db.lastError());
+			emitError(db, db.lastError());
 			return;
 		}
 
@@ -1115,7 +1140,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 
 		if (result == false)
 		{
-			emitError(query.lastError());
+			emitError(db, query.lastError());
 			db.close();
 			return;
 		}
@@ -1181,14 +1206,14 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		bool result = db.open();
 		if (result == false)
 		{
-			emitError(db.lastError());
+			emitError(QSqlDatabase(), db.lastError());
 			return;
 		}
 
 		projectVersion = db_getProjectVersion(db);
 		if (projectVersion == -1)
 		{
-			emitError("Cannot get project database version.");
+			emitError(QSqlDatabase(), "Cannot get project database version.");
 			db.close();
 			return;
 		}
@@ -1196,7 +1221,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		result = db_checkUserPassword(db, username, password);
 		if (result == false)
 		{
-			emitError("Wrong password.");
+			emitError(QSqlDatabase(), "Wrong password.");
 			db.close();
 			return;
 		}
@@ -1214,7 +1239,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
-			emitError(db.lastError());
+			emitError(QSqlDatabase(), db.lastError());
 			return;
 		}
 
@@ -1227,7 +1252,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		bool ok = db.open();
 		if (ok == false)
 		{
-			emitError(db.lastError());
+			emitError(QSqlDatabase(), db.lastError());
 			return;
 		}
 
@@ -1246,7 +1271,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 		if (result == false)
 		{
-			emitError(query.lastError());
+			emitError(QSqlDatabase(), query.lastError());
 			db.close();
 			return;
 		}
@@ -1273,7 +1298,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		bool result = db.open();
 		if (result == false)
 		{
-			emitError(db.lastError());
+			emitError(QSqlDatabase(), db.lastError());
 			return;
 		}
 
@@ -1282,7 +1307,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 		result = db.transaction();
 		if (result == false)
 		{
-			emitError(db.lastError());
+			emitError(QSqlDatabase(), db.lastError());
 			db.close();
 			return;
 		}
@@ -1315,7 +1340,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 			if (result == false)
 			{
-				emitError(versionQuery.lastError());
+				emitError(QSqlDatabase(), versionQuery.lastError());
 				return;
 			}
 			versionQuery.clear();
@@ -1323,7 +1348,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 			projectVersion = db_getProjectVersion(db);
 			if (projectVersion == -1)
 			{
-				emitError(versionQuery.lastError());
+				emitError(QSqlDatabase(), versionQuery.lastError());
 				return;
 			}
 
@@ -1331,14 +1356,25 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 			//
 			if (projectVersion == databaseVersion())
 			{
-				emitError(tr("Database %1 is up to date.").arg(databaseName));
+				emitError(QSqlDatabase(), tr("Database %1 is up to date.").arg(databaseName));
 				return;
 			}
 
 			if (projectVersion > databaseVersion())
 			{
-				emitError(tr("Database %1 is newer than the software version.").arg(databaseName));
+				emitError(QSqlDatabase(), tr("Database %1 is newer than the software version.").arg(databaseName));
 				return;
+			}
+
+			// Log action
+			//
+			if (projectVersion >= 110)
+			{
+				QString logMessage = QString("Upgrading project DB from version %1 to %2")
+									 .arg(projectVersion + 1)
+									 .arg(databaseVersion() + 1);
+
+				addLogRecord(db, logMessage);
 			}
 
 			// Upgrade database
@@ -1359,7 +1395,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 				if (result == false)
 				{
-					emitError(tr("Can't open file %1. \n%2").arg(ui.upgradeFileName).arg(upgradeFile.errorString()));
+					emitError(QSqlDatabase(), tr("Can't open file %1. \n%2").arg(ui.upgradeFileName).arg(upgradeFile.errorString()));
 					break;
 				}
 
@@ -1374,7 +1410,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 					if (result == false)
 					{
-						emitError(upgradeQuery.lastError());
+						emitError(QSqlDatabase(), upgradeQuery.lastError());
 						break;
 					}
 				}
@@ -1405,7 +1441,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 					if (result == false)
 					{
-						emitError(versionQuery.lastError());
+						emitError(QSqlDatabase(), versionQuery.lastError());
 						break;
 					}
 				}
@@ -1440,7 +1476,7 @@ WHERE
 
 				if (result == false)
 				{
-					emitError(euipmentListQuery.lastError());
+					emitError(QSqlDatabase(), euipmentListQuery.lastError());
 					return;
 				}
 
@@ -1461,7 +1497,7 @@ WHERE
 
 						if (result == false || getFileQuery.next() == false)
 						{
-							emitError(tr("Cannot get file data, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							emitError(QSqlDatabase(), tr("Cannot get file data, FileInstanceID: %1").arg(fileInstanceId.toString()));
 							return;
 						}
 
@@ -1471,7 +1507,7 @@ WHERE
 						if (device == nullptr)
 						{
 							result = false;
-							emitError(tr("Cannot read file data, FileName %1, FileInstanceID %2.").arg(fileName).arg(fileInstanceId.toString()));
+							emitError(QSqlDatabase(), tr("Cannot read file data, FileName %1, FileInstanceID %2.").arg(fileName).arg(fileInstanceId.toString()));
 							return;
 						}
 
@@ -1491,7 +1527,7 @@ WHERE
 
 						if (result == false)
 						{
-							emitError(tr("Cannot update file details, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							emitError(QSqlDatabase(), tr("Cannot update file details, FileInstanceID: %1").arg(fileInstanceId.toString()));
 							return;
 						}
 					}
@@ -1525,12 +1561,15 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not openned."));
 		return;
 	}
 
-	// Check if such user already exists
-	// SELECT * FROM creat_user();
+	// Log action
+	//
+	addLogRecord(db, tr("slot_setProjectProperty: propertyName '%1', propertyValue '%2'").arg(propertyName).arg(propertyValue));
+
+	// --
 	//
 	QSqlQuery query(db);
 
@@ -1542,7 +1581,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 
 	if (result == false)
 	{
-		emitError(tr("Cannot set property %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		emitError(db, tr("Cannot set property %1, error: %2").arg(propertyName).arg(db.lastError().text()));
 		return;
 	}
 
@@ -1583,7 +1622,7 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not openned."));
 		return;
 	}
 
@@ -1599,7 +1638,7 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 
 	if (result == false)
 	{
-		emitError(tr("Cannot get project property value %1, error: %2").arg(propertyName).arg(db.lastError().text()));
+		emitError(db, tr("Cannot get project property value %1, error: %2").arg(propertyName).arg(db.lastError().text()));
 		return;
 	}
 
@@ -1633,19 +1672,22 @@ void DbWorker::slot_createUser(DbUser user)
 
 	// Operation
 	//
-
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get user list. Database connection is not openned."));
+		emitError(db, tr("Cannot get user list. Database connection is not openned."));
 		return;
 	}
 
 	if (currentUser().isAdminstrator() == false)
 	{
-		emitError(tr("Current user does not have administrator privileges."));
+		emitError(db, tr("Current user does not have administrator privileges."));
 		return;
 	}
+
+	// Log action
+	//
+	addLogRecord(db, tr("slot_createUser: Username '%1'").arg(user.username()));
 
 	// Check if such user already exists
 	// SELECT * FROM creat_user();
@@ -1666,7 +1708,7 @@ void DbWorker::slot_createUser(DbUser user)
 
 	if (result == false)
 	{
-		emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
+		emitError(db, tr("Can't create user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
 		return;
 	}
 
@@ -1703,17 +1745,20 @@ void DbWorker::slot_updateUser(DbUser user)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not openned."));
 		return;
 	}
 
 	if (currentUser().username() != user.username() && currentUser().isAdminstrator() == false)
 	{
 		assert(false);
-		emitError(tr("Only administrators can change other users' details."));
+		emitError(db, tr("Only administrators can change other users' details."));
 		return;
 	}
 
+	// Log action
+	//
+	addLogRecord(db, tr("slot_updateUser: Username '%1'").arg(user.username()));
 
 	// update user
 	//
@@ -1734,7 +1779,7 @@ void DbWorker::slot_updateUser(DbUser user)
 
 	if (result == false)
 	{
-		emitError(tr("Can't update user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
+		emitError(db, tr("Can't update user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
 		return;
 	}
 
@@ -1772,7 +1817,7 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get user list. Database connection is not openned."));
+		emitError(db, tr("Cannot get user list. Database connection is not openned."));
 		return;
 	}
 
@@ -1836,7 +1881,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
 		return;
 	}
 
@@ -1852,7 +1897,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 
 	if (result == false)
 	{
-		emitError(tr("Can't get file list. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get file list. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -1901,7 +1946,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
 		return;
 	}
 
@@ -1929,7 +1974,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 
 	if (result == false)
 	{
-		emitError(tr("Can't get file info. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -1968,9 +2013,22 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_addFiles: FileCount %1, ParentID %2, FileNames: ")
+						 .arg(files->size())
+						 .arg(parentId);
+
+	for (auto& f : *files)
+	{
+		logMessage += f->fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
 
 	// Iterate through files
 	//
@@ -2004,13 +2062,13 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (result == false)
 		{
-			emitError(tr("Can't add file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't add file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get request result."));
+			emitError(db, tr("Can't get request result."));
 			return;
 		}
 
@@ -2046,9 +2104,19 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot delete files. Database connection is not openned."));
+		emitError(db, tr("Cannot delete files. Database connection is not openned."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_deleteFiles: FileCount %1, FileNames: ").arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += f.fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
 
 	// files for deletion shoud be sorted in DESCENDING FileID order, to delete dependant files first
 	//
@@ -2091,13 +2159,13 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 		if (result == false)
 		{
-			emitError(tr("Can't delete file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't delete file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get result"));
+			emitError(db, tr("Can't get result"));
 			return;
 		}
 
@@ -2137,7 +2205,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
@@ -2168,13 +2236,13 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 		bool result = q.exec(request);
 		if (result == false)
 		{
-			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't find file: %1").arg(fi.fileName()));
+			emitError(db, tr("Can't find file: %1").arg(fi.fileName()));
 			return;
 		}
 
@@ -2214,7 +2282,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
@@ -2233,7 +2301,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	bool result = q.exec(request);
 	if (result == false)
 	{
-		emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2293,7 +2361,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
@@ -2325,7 +2393,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 	bool result = q.exec(request);
 	if (result == false)
 	{
-		emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2370,7 +2438,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
@@ -2401,13 +2469,13 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		bool result = q.exec(request);
 		if (result == false)
 		{
-			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			emitError(db, tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
 			return;
 		}
 
@@ -2447,9 +2515,19 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_setWorkcopy: FileCount %1, FileNames: ").arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += QString("%1 %2, ").arg(f->fileName()).arg(f->fileId());
+	}
+
+	addLogRecord(db, logMessage);
 
 	// Iterate through files
 	//
@@ -2486,13 +2564,13 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 
 		if (result == false)
 		{
-			emitError(tr("Can't save file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't save file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get FileID"));
+			emitError(db, tr("Can't get FileID"));
 			return;
 		}
 
@@ -2501,7 +2579,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		if (fileId != file->fileId())
 		{
 			assert(fileId == file->fileId());
-			emitError(tr("Write file error. filename: %1").arg(file->fileName()));
+			emitError(db, tr("Write file error. filename: %1").arg(file->fileName()));
 			continue;
 		}
 	}
@@ -2535,7 +2613,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
@@ -2567,13 +2645,13 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 		bool result = q.exec(request);
 		if (result == false)
 		{
-			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
 			return;
 		}
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			emitError(db, tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
 			return;
 		}
 
@@ -2613,10 +2691,22 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_checkIn: Comment '%1', FileCount %2, FileNames: ").arg(comment).arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += QString("%1 %2, ").arg(f.fileName()).arg(f.fileId());
+	}
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM check_in(%1, ARRAY[")
 		.arg(currentUser().userId());
 
@@ -2648,7 +2738,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 
 	if (result == false)
 	{
-		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't check in. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2702,10 +2792,25 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_checkInTree: Comment '%1', FileCount %2, ParentFileNames: ")
+						 .arg(comment)
+						 .arg(parentFiles->size());
+
+	for (auto& f : *parentFiles)
+	{
+		logMessage += f.fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM check_in_tree(%1, ARRAY[")
 		.arg(currentUser().userId());
 
@@ -2737,7 +2842,7 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 
 	if (result == false)
 	{
-		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't check in. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2788,10 +2893,22 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not openned."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_checkOut: FileCount %1, FileNames: ").arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += QString("%1 %2, ").arg(f.fileName()).arg(f.fileId());
+	}
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM check_out(%1, ARRAY[")
 		.arg(currentUser().userId());
 
@@ -2813,7 +2930,6 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 
 	request += QString("]);");
 
-
 	// request
 	//
 	QSqlQuery q(db);
@@ -2823,7 +2939,7 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 
 	if (result == false)
 	{
-		emitError(tr("Can't undo changes. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't check out file. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2875,10 +2991,22 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_undoChanges: FileCount %1, FileNames: ").arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += QString("%1 %2, ").arg(f.fileName()).arg(f.fileId());
+	}
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[")
 			.arg(currentUser().userId());
 
@@ -2909,7 +3037,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 
 	if (result == false)
 	{
-		emitError(tr("Can't check out. Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't check out. Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -2956,7 +3084,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
 		return;
 	}
 
@@ -2972,13 +3100,13 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	bool result = q.exec(request);
 	if (result == false)
 	{
-		emitError(tr("Error: ") +  q.lastError().text());
+		emitError(db, tr("Error: ") +  q.lastError().text());
 		return;
 	}
 
 	if (q.next() == false)
 	{
-		emitError(tr("Can't get result."));
+		emitError(db, tr("Can't get result."));
 		return;
 	}
 
@@ -3011,7 +3139,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
 		return;
 	}
 
@@ -3029,7 +3157,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	bool result = q.exec(request);
 	if (result == false)
 	{
-		emitError(tr("Error: ") +  q.lastError().text());
+		emitError(db, tr("Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3072,9 +3200,18 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_addDeviceObject: Device %1, FileID %2, ParentID %3")
+						 .arg(device->equipmentId()
+						 .arg(device->fileId())
+						 .arg(parentId));
+
+	addLogRecord(db, logMessage);
 
 	// Recursive function
 	//
@@ -3105,7 +3242,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		{
 			assert(result);
 			nesting --;
-			emitError(tr("Argument errors."));
+			emitError(db, tr("Argument errors."));
 			return false;
 		}
 
@@ -3124,14 +3261,14 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		if (result == false)
 		{
 			nesting --;
-			emitError(tr("Can't add device. Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't add device. Error: ") +  q.lastError().text());
 			return false;
 		}
 
 		if (q.next() == false)
 		{
 			nesting --;
-			emitError(tr("Can't get result."));
+			emitError(db, tr("Can't get result."));
 			return false;
 		}
 
@@ -3188,7 +3325,7 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
+		emitError(db, tr("Cannot get signals' IDs. Database connection is not opened."));
 		return;
 	}
 
@@ -3202,7 +3339,7 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3236,7 +3373,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals. Database connection is not opened."));
+		emitError(db, tr("Cannot get signals. Database connection is not opened."));
 		return;
 	}
 
@@ -3268,7 +3405,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3318,7 +3455,7 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get latest signal. Database connection is not opened."));
+		emitError(db, tr("Cannot get latest signal. Database connection is not opened."));
 		return;
 	}
 
@@ -3332,7 +3469,7 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3368,7 +3505,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get latest signals by AppSignalIDs. Database connection is not opened."));
+		emitError(db, tr("Cannot get latest signals by AppSignalIDs. Database connection is not opened."));
 		return;
 	}
 
@@ -3398,7 +3535,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 	if (result == false)
 	{
-		emitError(tr("Can't get_latest_signals_by_appsignalids! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get_latest_signals_by_appsignalids! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3577,9 +3714,18 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot add signals. Database connection is not opened."));
+		emitError(db, tr("Cannot add signals. Database connection is not opened."));
 		return false;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ").arg(newSignal->size());
+	for (const Signal& s : *newSignal)
+	{
+		logMessage += s.appSignalID() + QLatin1String(" ");
+	}
+	addLogRecord(db, logMessage);
 
 	// request
 	//
@@ -3591,7 +3737,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	if (result == false)
 	{
-		emitError(tr("Can't add new signal(s)! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't add new signal(s)! Error: ") +  q.lastError().text());
 		return false;
 	}
 
@@ -3620,7 +3766,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		if (result == false)
 		{
-			emitError(errMsg);
+			emitError(db, errMsg);
 			return false;
 		}
 
@@ -3633,7 +3779,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		if (result == false)
 		{
-			emitError(tr("Can't get latest signal! Error: ") +  q3.lastError().text());
+			emitError(db, tr("Can't get latest signal! Error: ") +  q3.lastError().text());
 			return false;
 		}
 
@@ -3720,7 +3866,7 @@ void DbWorker::slot_getUnits(UnitList *units)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get units. Database connection is not opened."));
+		emitError(db, tr("Cannot get units. Database connection is not opened."));
 		return;
 	}
 
@@ -3733,7 +3879,7 @@ void DbWorker::slot_getUnits(UnitList *units)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get units! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get units! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3767,9 +3913,14 @@ void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot add unit. Database connection is not opened."));
+		emitError(db, tr("Cannot add unit. Database connection is not opened."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_addUnit: Unit %1").arg(unitEn);
+	addLogRecord(db, logMessage);
 
 	// request
 	//
@@ -3781,7 +3932,7 @@ void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
 
 	if (result == false)
 	{
-		emitError(tr("Can't add unit! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't add unit! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3802,9 +3953,14 @@ void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot update unit. Database connection is not opened."));
+		emitError(db, tr("Cannot update unit. Database connection is not opened."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_updateUnit: UnitID %1, UnitEN %2").arg(unitID).arg(unitEn);
+	addLogRecord(db, logMessage);
 
 	// request
 	//
@@ -3816,7 +3972,7 @@ void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
 
 	if (result == false)
 	{
-		emitError(tr("Can't update unit! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't update unit! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3857,9 +4013,18 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot checkout signals. Database connection is not opened."));
+		emitError(db, tr("Cannot checkout signals. Database connection is not opened."));
 		return;
 	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ").arg(signalIDs->size());
+	for (int id : *signalIDs)
+	{
+		logMessage += QString("%1 ").arg(id);
+	}
+	addLogRecord(db, logMessage);
 
 	// request
 	//
@@ -3885,7 +4050,7 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 
 	if (result == false)
 	{
-		emitError(tr("Can't checkout signals! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't checkout signals! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -3922,7 +4087,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot set signal workcopy. Database connection is not opened."));
+		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
 		return;
 	}
 
@@ -3937,7 +4102,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	if (result == false)
 	{
-		emitError(errMsg);
+		emitError(db, errMsg);
 		return;
 	}
 
@@ -3950,7 +4115,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+		emitError(db, tr("Can't get latest signal! Error: ") +  q2.lastError().text());
 		return;
 	}
 
@@ -3960,7 +4125,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 	else
 	{
-		emitError(tr("Can't get latest signal! No data returned!"));
+		emitError(db, tr("Can't get latest signal! No data returned!"));
 	}
 }
 
@@ -3981,10 +4146,17 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot delete signal. Database connection is not opened."));
+		emitError(db, tr("Cannot delete signal. Database connection is not opened."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_deleteSignal: SignalID %1").arg(signalID);
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM delete_signal(%1, %2)")
 		.arg(currentUser().userId()).arg(signalID);
 
@@ -3994,7 +4166,7 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 
 	if (result == false)
 	{
-		emitError(tr("Can't delete signal! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't delete signal! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -4004,7 +4176,7 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 	}
 	else
 	{
-		emitError(tr("Can't delete signal! No data returned!"));
+		emitError(db, tr("Can't delete signal! No data returned!"));
 	}
 }
 
@@ -4025,10 +4197,17 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot undo signal changes. Database connection is not opened."));
+		emitError(db, tr("Cannot undo signal changes. Database connection is not opened."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_undoSignalChanges: SignalID %1").arg(signalID);
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM undo_signal_changes(%1, %2)")
 		.arg(currentUser().userId()).arg(signalID);
 
@@ -4038,7 +4217,7 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 
 	if (result == false)
 	{
-		emitError(tr("Can't undo signal changes! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't undo signal changes! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -4048,7 +4227,7 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 	}
 	else
 	{
-		emitError(tr("Can't undo signal changes! No data returned!"));
+		emitError(db, tr("Can't undo signal changes! No data returned!"));
 	}
 }
 
@@ -4077,10 +4256,21 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot checkin signals. Database connection is not opened."));
+		emitError(db, tr("Cannot checkin signals. Database connection is not opened."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ").arg(comment).arg(signalIDs->size());
+	for (int id : *signalIDs)
+	{
+		logMessage += QString("%1 ").arg(id);
+	}
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	int count = signalIDs->count();
 
 	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
@@ -4107,7 +4297,7 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	if (result == false)
 	{
-		emitError(tr("Can't checkin signals! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't checkin signals! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -4189,10 +4379,12 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot delete signal. Database connection is not opened."));
+		emitError(db, tr("Cannot delete signal. Database connection is not opened."));
 		return;
 	}
 
+	//--
+	//
 	ObjectState os;
 
 	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
@@ -4206,7 +4398,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 
 		if (result == false)
 		{
-			emitError(tr("Can't delete signal! Error: ") +  q.lastError().text());
+			emitError(db, tr("Can't delete signal! Error: ") +  q.lastError().text());
 			return;
 		}
 
@@ -4216,7 +4408,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 		}
 		else
 		{
-			emitError(tr("Can't delete signal! No data returned!"));
+			emitError(db, tr("Can't delete signal! No data returned!"));
 		}
 	}
 }
@@ -4228,7 +4420,7 @@ bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return false;
 	}
 
@@ -4242,7 +4434,7 @@ bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return false;
 	}
 
@@ -4275,7 +4467,7 @@ void DbWorker::slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<in
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get ignal IDs with AppSignalID. Database connection is not opened."));
+		emitError(db, tr("Cannot get ignal IDs with AppSignalID. Database connection is not opened."));
 		return;
 	}
 
@@ -4289,7 +4481,7 @@ void DbWorker::slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<in
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4316,7 +4508,7 @@ void DbWorker::slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get ignal IDs with CustomAppSignalID. Database connection is not opened."));
+		emitError(db, tr("Cannot get ignal IDs with CustomAppSignalID. Database connection is not opened."));
 		return;
 	}
 
@@ -4330,7 +4522,7 @@ void DbWorker::slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4357,7 +4549,7 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get ignal IDs with EquipmentID. Database connection is not opened."));
+		emitError(db, tr("Cannot get ignal IDs with EquipmentID. Database connection is not opened."));
 		return;
 	}
 
@@ -4371,7 +4563,7 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4401,10 +4593,17 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_buildStart: Release %1, Changeset %2").arg(release).arg(changeset);
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM build_start(%1, '%2', cast(%3 as boolean), %4)")
 					  .arg(currentUser().userId())
 					  .arg(DbWorker::toSqlStr(workstation))
@@ -4417,7 +4616,7 @@ void DbWorker::slot_buildStart(QString workstation, bool release, int changeset,
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4438,10 +4637,21 @@ void DbWorker::slot_buildFinish(int buildID, int errors, int warnings, QString b
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
+	// Log action
+	//
+	QString logMessage = QString("slot_buildFinish: BuildID %1, Errors %2, Warnings %3")
+						 .arg(buildID)
+						 .arg(errors)
+						 .arg(warnings);
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
 	QString request = QString("SELECT * FROM build_finish(%1, %2, %3, '%4')")
 					  .arg(buildID)
 					  .arg(errors)
@@ -4454,7 +4664,7 @@ void DbWorker::slot_buildFinish(int buildID, int errors, int warnings, QString b
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4478,7 +4688,7 @@ void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -4490,7 +4700,7 @@ void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4516,7 +4726,7 @@ void DbWorker::slot_lastChangesetId(int* lastChangesetId)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -4528,7 +4738,7 @@ void DbWorker::slot_lastChangesetId(int* lastChangesetId)
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4554,7 +4764,7 @@ void DbWorker::slot_nextCounterValue(int* counter)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Database connection is not opened."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -4566,7 +4776,7 @@ void DbWorker::slot_nextCounterValue(int* counter)
 
 	if (result == false)
 	{
-		emitError(q.lastError().text());
+		emitError(db, q.lastError().text());
 		return;
 	}
 
@@ -4574,6 +4784,37 @@ void DbWorker::slot_nextCounterValue(int* counter)
 	*counter = q.value(0).toInt();
 
 	return;
+}
+
+bool DbWorker::addLogRecord(QSqlDatabase db, QString text)
+{
+	if (db.isOpen() == false)
+	{
+		assert(db.isOpen() == true);
+		return false;
+	}
+
+	int userId = currentUser().userId();
+	QString host = QHostInfo::localHostName();
+	quint64 processId = QCoreApplication::applicationPid();
+	QString sqlText = toSqlStr(text);
+
+	QString request = QString("SELECT * FROM add_log_record(%1, '%2', %3, '%4');")
+					  .arg(userId)
+					  .arg(host)
+					  .arg(processId)
+					  .arg(sqlText);
+
+	QSqlQuery query(db);
+	bool result = query.exec(request);
+
+	if (result == false)
+	{
+		qDebug() << Q_FUNC_INFO << query.lastError();
+		return false;
+	}
+
+	return true;
 }
 
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
@@ -4698,7 +4939,7 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 
 	if (result == false)
 	{
-		emitError(versionQuery.lastError());
+		emitError(QSqlDatabase(), versionQuery.lastError());
 		versionQuery.clear();
 		return -1;
 	}
