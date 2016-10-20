@@ -1407,6 +1407,11 @@ bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
 }
 
 
+// On success return ID of newly created unit (newUnitID >= 1)
+// On error:
+//		newUnitID == -1 - unit with 'unitEn' already exists
+//		newUnitID == -2 - unit with 'unitRu' already exists
+//
 bool DbController::addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget)
 {
 	if (newUnitID == nullptr)
@@ -1432,8 +1437,20 @@ bool DbController::addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidg
 }
 
 
-bool DbController::updateUnit(int unitID, QString unitEn, QString unitRu, QWidget* parentWidget)
+// On success return count of updated units, result == 1
+// On error:
+//		result == 0  - unit with 'unitID' is not found
+//		result == -1 - unit with 'unitEn' already exists
+//		result == -2 - unit with 'unitRu' already exists
+//
+bool DbController::updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget)
 {
+	if (result == nullptr)
+	{
+		assert(result != nullptr);
+		return false;
+	}
+
 	// Init progress and check availability
 	//
 	bool ok = initOperation();
@@ -1443,7 +1460,7 @@ bool DbController::updateUnit(int unitID, QString unitEn, QString unitRu, QWidge
 		return false;
 	}
 
-	emit signal_updateUnit(unitID, unitEn, unitRu);
+	emit signal_updateUnit(unitID, unitEn, unitRu, result);
 
 	ok = waitForComplete(parentWidget, tr("Update unit"));
 

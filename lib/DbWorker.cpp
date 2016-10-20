@@ -3792,9 +3792,16 @@ void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
 }
 
 
-void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
+void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result)
 {
 	AUTO_COMPLETE
+
+	if (result == nullptr)
+	{
+		return;
+	}
+
+	*result = 0;
 
 	// Operation
 	//
@@ -3812,22 +3819,18 @@ void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu)
 			arg(unitID).arg(toSqlStr(unitEn)).arg(toSqlStr(unitRu));
 	QSqlQuery q(db);
 
-	bool result = q.exec(request);
+	bool res = q.exec(request);
 
-	if (result == false)
+	if (res == false)
 	{
 		emitError(tr("Can't update unit! Error: ") +  q.lastError().text());
 		return;
 	}
 
-	int rawsAffected = 0;
-
 	while(q.next() != false)
 	{
-		rawsAffected = q.value(0).toInt();
+		*result = q.value(0).toInt();
 	}
-
-	assert(rawsAffected == 1);
 }
 
 
