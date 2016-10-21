@@ -21,10 +21,11 @@ private slots:
 	void get_latest_signals_allTest();
 	void undo_signal_changesTest();
 	void set_signal_workcopyTest();
-	void get_signal_Ids_with_appsignalId();
-	void get_signal_Ids_with_customAppSignalId();
-	void get_signal_Ids_with_equipmentId();
-	void delete_signal_by_equipmentid();
+	void get_signal_Ids_with_appsignalIdTest();
+	void get_signal_Ids_with_customAppSignalIdTest();
+	void get_signal_Ids_with_equipmentIdTest();
+	void delete_signal_by_equipmentidTest();
+	void is_signal_with_equipmentid_existsTest();
 
 public:
 	int m_firstUserForTest = -1;

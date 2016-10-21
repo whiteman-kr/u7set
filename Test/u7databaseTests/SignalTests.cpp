@@ -1879,7 +1879,7 @@ void SignalTests::set_signal_workcopyTest()
 
 }
 
-void SignalTests::get_signal_Ids_with_appsignalId()
+void SignalTests::get_signal_Ids_with_appsignalIdTest()
 {
 	QSqlQuery query;
 
@@ -2032,7 +2032,7 @@ void SignalTests::get_signal_Ids_with_appsignalId()
 	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
 }
 
-void SignalTests::get_signal_Ids_with_customAppSignalId()
+void SignalTests::get_signal_Ids_with_customAppSignalIdTest()
 {
 	QSqlQuery query;
 
@@ -2185,7 +2185,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
 }
 
-void SignalTests::get_signal_Ids_with_equipmentId()
+void SignalTests::get_signal_Ids_with_equipmentIdTest()
 {
 	QSqlQuery query;
 
@@ -2338,7 +2338,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
 }
 
-void SignalTests::delete_signal_by_equipmentid()
+void SignalTests::delete_signal_by_equipmentidTest()
 {
 	QSqlQuery query;
 	QSqlQuery tempQuery;
@@ -2402,4 +2402,120 @@ void SignalTests::delete_signal_by_equipmentid()
 
 		QVERIFY2(tempQuery.value("deleted").toBool() == true, qPrintable("Error: Signal was not deleted"));
 	}
+}
+
+void SignalTests::is_signal_with_equipmentid_existsTest()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	QVector<int> signalIds;
+
+	QString equipmentId = "is_signal_with_equipmentid_existsTest";
+
+	// TODO: ONLY ONE SIGNAL WILL BE DELETED!!!!
+	//
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Test before checkIn
+	//
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(1, '%1')").arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function return false (true expected)"));
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(%1, '%2')").arg(m_firstUserForTest).arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: function return true (false expected)"));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Test with one signal checkedIn
+	//
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(1, '%1')").arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function return false (true expected)"));
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(%1, '%2')").arg(m_firstUserForTest).arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function return false (true expected)"));
+
+	// Signal created by user, and was not checkedIn
+	//
+
+	signalIds.clear();
+
+	equipmentId = "second_is_signal_with_equipmentid_existsTest";
+
+	ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 0)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(1, '%1')").arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function return false (true expected)"));
+
+	ok = query.exec(QString("SELECT * FROM is_signal_with_equipmentid_exists(%1, '%2')").arg(m_firstUserForTest).arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function return false (true expected)"));
 }
