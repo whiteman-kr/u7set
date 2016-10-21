@@ -127,6 +127,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Upgrade to version 109", ":/DatabaseUpgrade/Upgrade0109.sql"},
 	{"Upgrade to version 110", ":/DatabaseUpgrade/Upgrade0110.sql"},
 	{"Upgrade to version 111", ":/DatabaseUpgrade/Upgrade0111.sql"},
+	{"Upgrade to version 112", ":/DatabaseUpgrade/Upgrade0112.sql"},
 };
 
 
@@ -3148,7 +3149,8 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 
 	// Request for history
 	//
-	QString request = QString("SELECT * FROM get_file_history(%1)")
+	QString request = QString("SELECT * FROM get_file_history(%1, %2)")
+			.arg(currentUser().userId())
 			.arg(file->fileId());
 
 	QSqlQuery q(db);

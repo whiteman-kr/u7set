@@ -9,6 +9,7 @@
 #include "DialogChoosePreset.h"
 #include "GlobalMessanger.h"
 #include "SignalsTabPage.h"
+#include "ChangesetDialog.h"
 
 #include <QPalette>
 #include <QtTreePropertyBrowser>
@@ -2773,6 +2774,56 @@ void EquipmentView::undoChangesSelectedDevices()
 	return;
 }
 
+void EquipmentView::showHistory()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selected.front());
+
+	if (device == nullptr)
+	{
+		assert(device);
+		return;
+	}
+
+	// Get file history
+	//
+	std::vector<DbChangesetInfo> fileHistory;
+
+	bool ok = db()->getFileHistory(device->fileInfo(), &fileHistory, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show chageset dialog
+	//
+	int changesetId = ChangesetDialog::getChangeset(fileHistory, this);
+
+	if (changesetId == -1)
+	{
+		return;
+	}
+
+//	// Get file with choosen changeset
+//	//
+//	std::vector<std::shared_ptr<DbFile>> out;
+
+//	bool result = db()->getSpecificCopy(files, changesetId, &out, this);
+//	if (result == false || out.size() != files.size())
+//	{
+//		return;
+//	}
+}
+
 void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3419,6 +3470,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_checkOutAction);
 	m_equipmentView->addAction(m_checkInAction);
 	m_equipmentView->addAction(m_undoChangesAction);
+	m_equipmentView->addAction(m_historyAction);
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
 	m_equipmentView->addAction(m_separatorAction3);
@@ -3677,6 +3729,11 @@ void EquipmentTabPage::CreateActions()
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, m_equipmentView, &EquipmentView::undoChangesSelectedDevices);
 
+	m_historyAction = new QAction(tr("History..."), this);
+	m_historyAction->setStatusTip(tr("Show check in history"));
+	m_historyAction->setEnabled(false);
+	connect(m_historyAction, &QAction::triggered, m_equipmentView, &EquipmentView::showHistory);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
@@ -3781,6 +3838,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_checkOutAction);
 	assert(m_checkInAction);
 	assert(m_undoChangesAction);
+	assert(m_historyAction);
 	assert(m_refreshAction);
 	assert(m_addPresetRackAction);
 	assert(m_addPresetChassisAction);
@@ -3826,6 +3884,7 @@ void EquipmentTabPage::setActionState()
 	m_checkOutAction->setEnabled(false);
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
+	m_historyAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
 	m_addPresetRackAction->setEnabled(false);
@@ -3948,6 +4007,7 @@ void EquipmentTabPage::setActionState()
 	//m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+	m_historyAction->setEnabled(selectedIndexList.size() == 1);
 
 	// Enbale possible creation items;
 	//

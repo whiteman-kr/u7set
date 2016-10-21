@@ -169,6 +169,7 @@ public slots:
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
+	void showHistory();
 	void refreshSelectedDevices();
 
 	void updateSelectedDevices();
@@ -299,6 +300,7 @@ private:
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
+	QAction* m_historyAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction3 = nullptr;
