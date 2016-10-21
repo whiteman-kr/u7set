@@ -2038,7 +2038,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 
 	QVector<int> signalIds;
 
-	QString appsignalId = "CustomAppSignalIdForGetSignalIdsWithAppSignalIds";
+	QString customAppsignalId = "CustomAppSignalIdForGetSignalIdsWithAppSignalIds";
 
 	// Create first signal (created by admin. Not checked In)
 	//
@@ -2056,7 +2056,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 
 	int signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(customAppsignalId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Second signal (created by user, not checked In)
@@ -2075,7 +2075,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 
 	signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(customAppsignalId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Third signal (created by admin. Checked In - Checked Out - Deleted - Checked In)
@@ -2094,7 +2094,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 
 	signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET customAppSIgnalId = '%1' WHERE signalInstanceId = %2").arg(customAppsignalId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalId));
@@ -2115,7 +2115,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 	// First time fucntion check. Started by admin. Two records expected (First and Second)
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(1, '%1') ORDER BY get_signal_ids_with_customappsignalid").arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(1, '%1') ORDER BY get_signal_ids_with_customappsignalid").arg(customAppsignalId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	int currentValue = 0;
@@ -2134,7 +2134,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 	// Second Time function start. Started by user. One record expected (Second)
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(customAppsignalId));
 
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
@@ -2149,7 +2149,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 
 	// Third time function start. Started by user. Two records expected (First, Second)
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(customAppsignalId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	currentValue = 0;
@@ -2168,7 +2168,7 @@ void SignalTests::get_signal_Ids_with_customAppSignalId()
 	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalIds[0]));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_customappsignalid(%1, '%2') ORDER BY get_signal_ids_with_customappsignalid").arg(m_firstUserForTest).arg(customAppsignalId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	currentValue = 0;
@@ -2191,7 +2191,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 
 	QVector<int> signalIds;
 
-	QString appsignalId = "EquipmentIdForGetSignalIdsWithAppSignalIds";
+	QString equipmentId = "EquipmentIdForGetSignalIdsWithAppSignalIds";
 
 	// Create first signal (created by admin. Not checked In)
 	//
@@ -2209,7 +2209,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 
 	int signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Second signal (created by user, not checked In)
@@ -2228,7 +2228,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 
 	signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Third signal (created by admin. Checked In - Checked Out - Deleted - Checked In)
@@ -2247,7 +2247,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 
 	signalInstanceId = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(appsignalId).arg(signalInstanceId));
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalId));
@@ -2268,7 +2268,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 	// First time fucntion check. Started by admin. Two records expected (First and Second)
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(1, '%1') ORDER BY get_signal_ids_with_equipmentid").arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(1, '%1') ORDER BY get_signal_ids_with_equipmentid").arg(equipmentId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	int currentValue = 0;
@@ -2287,7 +2287,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 	// Second Time function start. Started by user. One record expected (Second)
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(equipmentId));
 
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
@@ -2302,7 +2302,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 
 	// Third time function start. Started by user. Two records expected (First, Second)
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(equipmentId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	currentValue = 0;
@@ -2321,7 +2321,7 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalIds[0]));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(appsignalId));
+	ok = query.exec(QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2') ORDER BY get_signal_ids_with_equipmentid").arg(m_firstUserForTest).arg(equipmentId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
 	currentValue = 0;
@@ -2336,4 +2336,70 @@ void SignalTests::get_signal_Ids_with_equipmentId()
 	}
 
 	QVERIFY2 (currentValue == 2, qPrintable("Error: wrong amount of returned signals"));
+}
+
+void SignalTests::delete_signal_by_equipmentid()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	QVector<int> signalIds;
+
+	QString equipmentId = "delete_signal_by_equipmentid";
+
+	// TODO: ONLY ONE SIGNAL WILL BE DELETED!!!!
+	//
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+	signalIds.push_back(signalId);
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE SignalInstance SET equipmentID = '%1' WHERE signalInstanceId = %2").arg(equipmentId).arg(signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1, %2}', 'TEST')").arg(signalIds[0]).arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1, %2}')").arg(signalIds[0]).arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM delete_signal_by_equipmentid(1, '%1') ORDER BY id").arg(equipmentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	for (int currentSignalId : signalIds)
+	{
+		ok = tempQuery.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(currentSignalId));
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+
+		ok = tempQuery.exec(QString("SELECT * FROM Signal WHERE SignalId = %1").arg(currentSignalId));
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+		QVERIFY2(tempQuery.value("deleted").toBool() == true, qPrintable("Error: Signal was not deleted"));
+	}
 }

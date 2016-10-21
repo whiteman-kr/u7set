@@ -24,6 +24,7 @@ private slots:
 	void get_signal_Ids_with_appsignalId();
 	void get_signal_Ids_with_customAppSignalId();
 	void get_signal_Ids_with_equipmentId();
+	void delete_signal_by_equipmentid();
 
 public:
 	int m_firstUserForTest = -1;
