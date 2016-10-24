@@ -37,8 +37,8 @@ protected:
 
     bool checkDatabaseFeatures(QSqlDatabase db);
 
-	void emitError(QSqlDatabase db, const QSqlError& err);
-	void emitError(QSqlDatabase db, const QString& err);
+	void emitError(QSqlDatabase db, const QSqlError& err, bool addLogRecord = true);
+	void emitError(QSqlDatabase db, const QString& err, bool addLogRecord = true);
 
     //
     // Public signals

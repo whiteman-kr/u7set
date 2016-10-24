@@ -223,16 +223,17 @@ bool DbWorker::checkDatabaseFeatures(QSqlDatabase db)
 		hasPreparedQueries == true;
 }
 
-void DbWorker::emitError(QSqlDatabase db, const QSqlError& err)
+void DbWorker::emitError(QSqlDatabase db, const QSqlError& err, bool addLogRecord)
 {
-	emitError(db, err.text());
+	emitError(db, err.text(), addLogRecord);
 }
 
-void DbWorker::emitError(QSqlDatabase db, const QString& err)
+void DbWorker::emitError(QSqlDatabase db, const QString& err, bool addLogRecord)
 {
-	if (db.isOpen() == true)
+	if (db.isOpen() == true &&
+		addLogRecord == true)
 	{
-		addLogRecord(db, err);
+		this->addLogRecord(db, err);
 	}
 
 	qDebug() << err;
@@ -1369,7 +1370,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 			// Log action
 			//
-			if (projectVersion >= 110)
+			if (projectVersion >= 111)
 			{
 				QString logMessage = QString("Upgrading project DB from version %1 to %2")
 									 .arg(projectVersion + 1)
@@ -4818,7 +4819,7 @@ bool DbWorker::addLogRecord(QSqlDatabase db, QString text)
 	QString sqlText = toSqlStr(text);
 
 	QString request = QString("SELECT * FROM add_log_record(%1, '%2', %3, '%4');")
-					  .arg(userId)
+					  .arg(userId < 1 ? "NULL" : QString::number(userId))		// UserID starts from 1 (is Administartor)
 					  .arg(host)
 					  .arg(processId)
 					  .arg(sqlText);
@@ -4829,6 +4830,7 @@ bool DbWorker::addLogRecord(QSqlDatabase db, QString text)
 	if (result == false)
 	{
 		qDebug() << Q_FUNC_INFO << query.lastError();
+		emitError(db, query.lastError(), false);
 		return false;
 	}
 
