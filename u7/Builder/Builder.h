@@ -149,7 +149,7 @@ namespace Builder
 
 		bool release() const;
 
-		Q_INVOKABLE bool jsIsInterruptRequested();
+		bool isInterruptRequested();
 
 		// Data
 		//

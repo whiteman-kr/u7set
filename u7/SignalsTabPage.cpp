@@ -847,7 +847,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		assert(row < m_signalSet.count());
 
-		Signal& signal = m_signalSet[index.row()];
+		Signal& signal = m_signalSet[row];
 
 		switch (index.column())
 		{

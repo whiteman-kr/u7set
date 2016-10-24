@@ -328,7 +328,12 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 	*(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
 	ptr += sizeof(quint16);
 
-	ptr += sizeof(quint64);	//reserved
+	*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
+	ptr += sizeof(quint16);
+
+	ptr += sizeof(quint16);	//reserved
+
+	ptr += sizeof(quint32);	//reserved
 
 	*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
 	ptr += sizeof(quint16);
