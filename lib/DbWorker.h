@@ -116,8 +116,8 @@ public slots:
 
     void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
-	void slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out);
-	void slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangesetInfo>* out);
+	void slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out);
+	void slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out);
 
     // Hardware Configuration
     //

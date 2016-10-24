@@ -6,7 +6,7 @@ SelectChangesetDialog::SelectChangesetDialog()
 	assert(false);
 }
 
-SelectChangesetDialog::SelectChangesetDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, const std::vector<DbChangeset>& fileHistory, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SelectChangesetDialog),
 	m_fileHistory(fileHistory),
@@ -44,7 +44,7 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, const std::vector<Db
 
 	for (unsigned int i = 0; i < fileHistory.size(); i++)
 	{
-		const DbChangesetInfo& ci = fileHistory[i];
+		const DbChangeset& ci = fileHistory[i];
 
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
@@ -87,7 +87,7 @@ int SelectChangesetDialog::changeset() const
 
 // Modal dialogbox, gets selected changest on Ok
 //
-int SelectChangesetDialog::getChangeset(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent)
+int SelectChangesetDialog::getChangeset(QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
 {
 	SelectChangesetDialog cd("Select Changeset - " + fileName, fileHistory, parent);
 

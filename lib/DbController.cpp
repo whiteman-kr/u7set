@@ -1021,7 +1021,7 @@ bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget*
 	return true;
 }
 
-bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangeset>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -1048,7 +1048,7 @@ bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangese
 	return true;
 }
 
-bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangeset>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//

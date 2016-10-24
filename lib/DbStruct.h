@@ -6,6 +6,8 @@
 #include <memory>
 #include <assert.h>
 
+class Signal;
+
 // signal management error codes
 // returns in ObjectState.errCode field
 //
@@ -342,13 +344,14 @@ private:
 
 //
 //
-// DbChangesetInfo
+// DbChangeset
 //
 //
-class DbChangesetInfo
+class DbChangeset
 {
 public:
-	DbChangesetInfo();
+	DbChangeset();
+	virtual ~DbChangeset();
 
 	// Properties
 	//
@@ -383,6 +386,22 @@ private:
 	VcsItemAction m_action;
 };
 
+//
+//
+// DbChangesetDetails
+//
+//
+class DbChangesetDetails : public DbChangeset
+{
+public:
+	DbChangesetDetails();
+	virtual ~DbChangesetDetails();
+
+private:
+	std::vector<DbFileInfo> m_files;
+	std::vector<std::shared_ptr<Signal>> m_signals;
+};
+
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING
 // To remove annoing warning c4267 under windows x64, go to qmetatype.h, line 897 (Qt 5.3.1) and set static_cast to int for the
 // returning value.
@@ -395,11 +414,12 @@ private:
 Q_DECLARE_METATYPE(DbUser)
 Q_DECLARE_METATYPE(DbFileInfo)
 Q_DECLARE_METATYPE(DbFile)
-Q_DECLARE_METATYPE(DbChangesetInfo)
+Q_DECLARE_METATYPE(DbChangeset)
 Q_DECLARE_METATYPE(DbProject)
 Q_DECLARE_METATYPE(std::vector<DbProject>)
 Q_DECLARE_METATYPE(std::vector<DbFileInfo>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
 Q_DECLARE_METATYPE(std::vector<int>)
-Q_DECLARE_METATYPE(std::vector<DbChangesetInfo>)
+Q_DECLARE_METATYPE(std::vector<DbChangeset>)
+Q_DECLARE_METATYPE(std::vector<DbChangesetDetails>)
 

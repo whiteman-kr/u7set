@@ -14,16 +14,16 @@ class FileHistoryDialog : public QDialog
 private:
 	FileHistoryDialog();
 public:
-	FileHistoryDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	FileHistoryDialog(QString title, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	~FileHistoryDialog();
 
-	static void showHistory(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	static void showHistory(QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	
 private slots:
 	void on_changesetList_doubleClicked(const QModelIndex &index);
 
 private:
 	Ui::FileHistoryDialog *ui;
-	std::vector<DbChangesetInfo> m_fileHistory;
+	std::vector<DbChangeset> m_fileHistory;
 };
 

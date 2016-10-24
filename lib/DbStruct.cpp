@@ -659,74 +659,92 @@ int DbFile::size() const
 
 //
 //
-// DbChangesetInfo
+// DbChangeset
 //
 //
-DbChangesetInfo::DbChangesetInfo()
+DbChangeset::DbChangeset()
 {
 }
 
-int DbChangesetInfo::changeset() const
+DbChangeset::~DbChangeset()
+{
+}
+
+int DbChangeset::changeset() const
 {
 	return m_changesetId;
 }
 
-void DbChangesetInfo::setChangeset(int value)
+void DbChangeset::setChangeset(int value)
 {
 	m_changesetId = value;
 }
 
-QDateTime DbChangesetInfo::date() const
+QDateTime DbChangeset::date() const
 {
 	return m_date;
 }
 
-void DbChangesetInfo::setDate(const QDateTime& value)
+void DbChangeset::setDate(const QDateTime& value)
 {
 	m_date = value;
 }
 
-void DbChangesetInfo::setDate(const QString& value)
+void DbChangeset::setDate(const QString& value)
 {
 	m_date = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
 }
 
-const VcsItemAction& DbChangesetInfo::action() const
+const VcsItemAction& DbChangeset::action() const
 {
 	return m_action;
 }
 
-void DbChangesetInfo::setAction(const VcsItemAction& value)
+void DbChangeset::setAction(const VcsItemAction& value)
 {
 	m_action = value;
 }
 
-int DbChangesetInfo::userId() const
+int DbChangeset::userId() const
 {
 	return m_userId;
 }
 
-void DbChangesetInfo::setUserId(int value)
+void DbChangeset::setUserId(int value)
 {
 	m_userId = value;
 }
 
-const QString& DbChangesetInfo::username() const
+const QString& DbChangeset::username() const
 {
 	return m_username;
 }
 
-void DbChangesetInfo::setUsername(const QString& value)
+void DbChangeset::setUsername(const QString& value)
 {
 	m_username = value;
 }
 
-const QString& DbChangesetInfo::comment() const
+const QString& DbChangeset::comment() const
 {
 	return m_comment;
 }
 
-void DbChangesetInfo::setComment(const QString& value)
+void DbChangeset::setComment(const QString& value)
 {
 	m_comment = value;
+}
+
+//
+//
+// DbChangesetDetails
+//
+//
+DbChangesetDetails::DbChangesetDetails() :
+	DbChangeset()
+{
+}
+
+DbChangesetDetails::~DbChangesetDetails()
+{
 }

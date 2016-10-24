@@ -2795,7 +2795,7 @@ void EquipmentView::showHistory()
 
 	// Get file history
 	//
-	std::vector<DbChangesetInfo> fileHistory;
+	std::vector<DbChangeset> fileHistory;
 
 	bool ok = db()->getFileHistoryRecursive(device->fileInfo(), &fileHistory, this);
 	if (ok == false)

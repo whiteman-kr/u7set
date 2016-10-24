@@ -3122,7 +3122,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	return;
 }
 
-void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out)
+void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out)
 {
 	// Init automitic varaiables
 	//
@@ -3169,7 +3169,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>
 
 	while (q.next())
 	{
-		DbChangesetInfo ci;
+		DbChangeset ci;
 
 		ci.setChangeset(q.value(0).toInt());
 		ci.setUserId(q.value(1).toInt());
@@ -3184,7 +3184,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>
 	return;
 }
 
-void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangesetInfo>* out)
+void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out)
 {
 	// Init automitic varaiables
 	//
@@ -3231,7 +3231,7 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 
 	while (q.next())
 	{
-		DbChangesetInfo ci;
+		DbChangeset ci;
 
 		ci.setChangeset(q.value(0).toInt());
 		ci.setUserId(q.value(1).toInt());

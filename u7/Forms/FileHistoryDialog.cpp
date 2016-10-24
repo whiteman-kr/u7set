@@ -6,7 +6,7 @@ FileHistoryDialog::FileHistoryDialog()
 	assert(false);
 }
 
-FileHistoryDialog::FileHistoryDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent) :
+FileHistoryDialog::FileHistoryDialog(QString title, const std::vector<DbChangeset>& fileHistory, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::FileHistoryDialog),
 	m_fileHistory(fileHistory)
@@ -44,7 +44,7 @@ FileHistoryDialog::FileHistoryDialog(QString title, const std::vector<DbChangese
 
 	for (unsigned int i = 0; i < fileHistory.size(); i++)
 	{
-		const DbChangesetInfo& ci = fileHistory[i];
+		const DbChangeset& ci = fileHistory[i];
 
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
@@ -79,7 +79,7 @@ FileHistoryDialog::~FileHistoryDialog()
 
 // Modalless dfialogbox
 //
-void FileHistoryDialog::showHistory(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent)
+void FileHistoryDialog::showHistory(QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
 {
 	FileHistoryDialog* dialog = new FileHistoryDialog("History - " + fileName, fileHistory, parent);
 

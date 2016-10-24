@@ -14,12 +14,12 @@ class SelectChangesetDialog : public QDialog
 private:
 	SelectChangesetDialog();
 public:
-	SelectChangesetDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	SelectChangesetDialog(QString title, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	~SelectChangesetDialog();
 
 	int changeset() const;			// Result
 
-	static int getChangeset(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	static int getChangeset(QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	
 private slots:
 	void on_buttonBox_accepted();
@@ -27,7 +27,7 @@ private slots:
 
 private:
 	Ui::SelectChangesetDialog *ui;
-	std::vector<DbChangesetInfo> m_fileHistory;
+	std::vector<DbChangeset> m_fileHistory;
 	int m_changeset;
 };
 

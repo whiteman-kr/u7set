@@ -1418,7 +1418,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Get file history
 	//
-	std::vector<DbChangesetInfo> fileHistory;
+	std::vector<DbChangeset> fileHistory;
 
 	db()->getFileHistory(file, &fileHistory, this);
 
