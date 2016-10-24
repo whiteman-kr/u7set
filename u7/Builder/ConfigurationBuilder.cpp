@@ -189,8 +189,8 @@ namespace Builder
 
 		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
-		QJSValue jsThread = jsEngine.newQObject(m_buildWorkerThread);
-		QQmlEngine::setObjectOwnership(m_buildWorkerThread, QQmlEngine::CppOwnership);
+		QJSValue jsBuilder = jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
@@ -221,7 +221,7 @@ namespace Builder
 
 		QJSValueList args;
 
-		args << jsThread;
+		args << jsBuilder;
 		args << jsRoot;
 		args << jsConfCollection;
 		args << jsLog;
@@ -356,6 +356,22 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	int ConfigurationBuilder::jsBuildNo()
+	{
+		return buildNo();
+	}
+
+	bool ConfigurationBuilder::jsIsInterruptRequested()
+	{
+		if(m_buildWorkerThread == nullptr)
+		{
+			assert(m_buildWorkerThread);
+			return false;
+		}
+
+		return m_buildWorkerThread->isInterruptRequested();
 	}
 
 	void ConfigurationBuilder::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)

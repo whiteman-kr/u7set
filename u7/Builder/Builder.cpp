@@ -1113,7 +1113,7 @@ namespace Builder
 		return !m_debug;
 	}
 
-	bool BuildWorkerThread::jsIsInterruptRequested()
+	bool BuildWorkerThread::isInterruptRequested()
 	{
 		return QThread::currentThread()->isInterruptionRequested();
 	}

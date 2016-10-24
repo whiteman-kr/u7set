@@ -116,7 +116,8 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID))
+		GROUP BY S.SignalID;
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -145,7 +146,9 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID))
+		GROUP BY
+		        S.SignalID;
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -174,12 +177,15 @@ BEGIN
 			S.Deleted != TRUE AND
 			((S.CheckedOutInstanceID IS NOT NULL AND S.CheckedOutInstanceID = SI.SignalInstanceID AND (S.UserID = user_id OR userIsAdmin = TRUE))
 			        OR
-			(S.CheckedInInstanceID = SI.SignalInstanceID));
+			(S.CheckedInInstanceID = SI.SignalInstanceID))
+		GROUP BY
+		        S.SignalID;
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100
   ROWS 1000;
+
 
 -- Re-create dropped functions
 

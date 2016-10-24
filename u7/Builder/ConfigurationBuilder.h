@@ -51,6 +51,9 @@ namespace Builder
 
 		bool build();
 
+		Q_INVOKABLE int jsBuildNo();
+		Q_INVOKABLE bool jsIsInterruptRequested();
+
 	protected:
 
 
