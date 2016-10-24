@@ -16,119 +16,122 @@
 //
 const UpgradeItem DbWorker::upgradeItems[] =
 {
-	{"Create project", ":/DatabaseUpgrade/Upgrade0001.sql"},
-	{"Upgrade to version 2", ":/DatabaseUpgrade/Upgrade0002.sql"},
-	{"Upgrade to version 3", ":/DatabaseUpgrade/Upgrade0003.sql"},
-	{"Upgrade to version 4", ":/DatabaseUpgrade/Upgrade0004.sql"},
-	{"Upgrade to version 5", ":/DatabaseUpgrade/Upgrade0005.sql"},
-	{"Upgrade to version 6", ":/DatabaseUpgrade/Upgrade0006.sql"},
-	{"Upgrade to version 7", ":/DatabaseUpgrade/Upgrade0007.sql"},
-	{"Upgrade to version 8", ":/DatabaseUpgrade/Upgrade0008.sql"},
-	{"Upgrade to version 9", ":/DatabaseUpgrade/Upgrade0009.sql"},
-	{"Upgrade to version 10", ":/DatabaseUpgrade/Upgrade0010.sql"},
-	{"Upgrade to version 11", ":/DatabaseUpgrade/Upgrade0011.sql"},
-	{"Upgrade to version 12", ":/DatabaseUpgrade/Upgrade0012.sql"},
-	{"Upgrade to version 13", ":/DatabaseUpgrade/Upgrade0013.sql"},
-	{"Upgrade to version 14", ":/DatabaseUpgrade/Upgrade0014.sql"},
-	{"Upgrade to version 15", ":/DatabaseUpgrade/Upgrade0015.sql"},
-	{"Upgrade to version 16", ":/DatabaseUpgrade/Upgrade0016.sql"},
-	{"Upgrade to version 17", ":/DatabaseUpgrade/Upgrade0017.sql"},
-	{"Upgrade to version 18", ":/DatabaseUpgrade/Upgrade0018.sql"},
-	{"Upgrade to version 19", ":/DatabaseUpgrade/Upgrade0019.sql"},
-	{"Upgrade to version 20", ":/DatabaseUpgrade/Upgrade0020.sql"},
-	{"Upgrade to version 21", ":/DatabaseUpgrade/Upgrade0021.sql"},
-	{"Upgrade to version 22", ":/DatabaseUpgrade/Upgrade0022.sql"},
-	{"Upgrade to version 23", ":/DatabaseUpgrade/Upgrade0023.sql"},
-	{"Upgrade to version 24", ":/DatabaseUpgrade/Upgrade0024.sql"},
-	{"Upgrade to version 25", ":/DatabaseUpgrade/Upgrade0025.sql"},
-	{"Upgrade to version 26", ":/DatabaseUpgrade/Upgrade0026.sql"},
-	{"Upgrade to version 27", ":/DatabaseUpgrade/Upgrade0027.sql"},
-	{"Upgrade to version 28", ":/DatabaseUpgrade/Upgrade0028.sql"},
-	{"Upgrade to version 29", ":/DatabaseUpgrade/Upgrade0029.sql"},
-	{"Upgrade to version 30", ":/DatabaseUpgrade/Upgrade0030.sql"},
-	{"Upgrade to version 31", ":/DatabaseUpgrade/Upgrade0031.sql"},
-	{"Upgrade to version 32", ":/DatabaseUpgrade/Upgrade0032.sql"},
-	{"Upgrade to version 33", ":/DatabaseUpgrade/Upgrade0033.sql"},
-	{"Upgrade to version 34", ":/DatabaseUpgrade/Upgrade0034.sql"},
-	{"Upgrade to version 35", ":/DatabaseUpgrade/Upgrade0035.sql"},
-	{"Upgrade to version 36", ":/DatabaseUpgrade/Upgrade0036.sql"},
-	{"Upgrade to version 37", ":/DatabaseUpgrade/Upgrade0037.sql"},
-	{"Upgrade to version 38", ":/DatabaseUpgrade/Upgrade0038.sql"},
-	{"Upgrade to version 39", ":/DatabaseUpgrade/Upgrade0039.sql"},
-	{"Upgrade to version 40", ":/DatabaseUpgrade/Upgrade0040.sql"},
-	{"Upgrade to version 41", ":/DatabaseUpgrade/Upgrade0041.sql"},
-	{"Upgrade to version 42", ":/DatabaseUpgrade/Upgrade0042.sql"},
-	{"Upgrade to version 43", ":/DatabaseUpgrade/Upgrade0043.sql"},
-	{"Upgrade to version 44", ":/DatabaseUpgrade/Upgrade0044.sql"},
-	{"Upgrade to version 45", ":/DatabaseUpgrade/Upgrade0045.sql"},
-	{"Upgrade to version 46", ":/DatabaseUpgrade/Upgrade0046.sql"},
-	{"Upgrade to version 47", ":/DatabaseUpgrade/Upgrade0047.sql"},
-	{"Upgrade to version 48", ":/DatabaseUpgrade/Upgrade0048.sql"},
-	{"Upgrade to version 49", ":/DatabaseUpgrade/Upgrade0049.sql"},
-	{"Upgrade to version 50", ":/DatabaseUpgrade/Upgrade0050.sql"},
-	{"Upgrade to version 51", ":/DatabaseUpgrade/Upgrade0051.sql"},
-	{"Upgrade to version 52", ":/DatabaseUpgrade/Upgrade0052.sql"},
-	{"Upgrade to version 53", ":/DatabaseUpgrade/Upgrade0053.sql"},
-	{"Upgrade to version 54", ":/DatabaseUpgrade/Upgrade0054.sql"},
-	{"Upgrade to version 55", ":/DatabaseUpgrade/Upgrade0055.sql"},
-	{"Upgrade to version 56", ":/DatabaseUpgrade/Upgrade0056.sql"},
-	{"Upgrade to version 57", ":/DatabaseUpgrade/Upgrade0057.sql"},
-	{"Upgrade to version 58", ":/DatabaseUpgrade/Upgrade0058.sql"},
-	{"Upgrade to version 59", ":/DatabaseUpgrade/Upgrade0059.sql"},
-	{"Upgrade to version 60", ":/DatabaseUpgrade/Upgrade0060.sql"},
-	{"Upgrade to version 61", ":/DatabaseUpgrade/Upgrade0061.sql"},
-	{"Upgrade to version 62", ":/DatabaseUpgrade/Upgrade0062.sql"},
-	{"Upgrade to version 63", ":/DatabaseUpgrade/Upgrade0063.sql"},
-	{"Upgrade to version 64", ":/DatabaseUpgrade/Upgrade0064.sql"},
-	{"Upgrade to version 65", ":/DatabaseUpgrade/Upgrade0065.sql"},
-	{"Upgrade to version 66", ":/DatabaseUpgrade/Upgrade0066.sql"},
-	{"Upgrade to version 67", ":/DatabaseUpgrade/Upgrade0067.sql"},
-	{"Upgrade to version 68", ":/DatabaseUpgrade/Upgrade0068.sql"},
-	{"Upgrade to version 69", ":/DatabaseUpgrade/Upgrade0069.sql"},
-	{"Upgrade to version 70", ":/DatabaseUpgrade/Upgrade0070.sql"},
-	{"Upgrade to version 71", ":/DatabaseUpgrade/Upgrade0071.sql"},
-	{"Upgrade to version 72", ":/DatabaseUpgrade/Upgrade0072.sql"},
-	{"Upgrade to version 73", ":/DatabaseUpgrade/Upgrade0073.sql"},
-	{"Upgrade to version 74", ":/DatabaseUpgrade/Upgrade0074.sql"},
-	{"Upgrade to version 75", ":/DatabaseUpgrade/Upgrade0075.sql"},
-	{"Upgrade to version 76", ":/DatabaseUpgrade/Upgrade0076.sql"},
-	{"Upgrade to version 77", ":/DatabaseUpgrade/Upgrade0077.sql"},
-	{"Upgrade to version 78", ":/DatabaseUpgrade/Upgrade0078.sql"},
-	{"Upgrade to version 79", ":/DatabaseUpgrade/Upgrade0079.sql"},
-	{"Upgrade to version 80", ":/DatabaseUpgrade/Upgrade0080.sql"},
-	{"Upgrade to version 81", ":/DatabaseUpgrade/Upgrade0081.sql"},
-	{"Upgrade to version 82", ":/DatabaseUpgrade/Upgrade0082.sql"},
-	{"Upgrade to version 83", ":/DatabaseUpgrade/Upgrade0083.sql"},
-	{"Upgrade to version 84", ":/DatabaseUpgrade/Upgrade0084.sql"},
-	{"Upgrade to version 85", ":/DatabaseUpgrade/Upgrade0085.sql"},
-	{"Upgrade to version 86", ":/DatabaseUpgrade/Upgrade0086.sql"},
-	{"Upgrade to version 87", ":/DatabaseUpgrade/Upgrade0087.sql"},
-	{"Upgrade to version 88", ":/DatabaseUpgrade/Upgrade0088.sql"},
-	{"Upgrade to version 89", ":/DatabaseUpgrade/Upgrade0089.sql"},
-	{"Upgrade to version 90", ":/DatabaseUpgrade/Upgrade0090.sql"},
-	{"Upgrade to version 91", ":/DatabaseUpgrade/Upgrade0091.sql"},
-	{"Upgrade to version 92", ":/DatabaseUpgrade/Upgrade0092.sql"},
-	{"Upgrade to version 93", ":/DatabaseUpgrade/Upgrade0093.sql"},
-	{"Upgrade to version 94", ":/DatabaseUpgrade/Upgrade0094.sql"},
-	{"Upgrade to version 95", ":/DatabaseUpgrade/Upgrade0095.sql"},
-	{"Upgrade to version 96", ":/DatabaseUpgrade/Upgrade0096.sql"},
-	{"Upgrade to version 97", ":/DatabaseUpgrade/Upgrade0097.sql"},
-	{"Upgrade to version 98", ":/DatabaseUpgrade/Upgrade0098.sql"},
-	{"Upgrade to version 99", ":/DatabaseUpgrade/Upgrade0099.sql"},
-	{"Upgrade to version 100", ":/DatabaseUpgrade/Upgrade0100.sql"},
-	{"Upgrade to version 101", ":/DatabaseUpgrade/Upgrade0101.sql"},
-	{"Upgrade to version 102", ":/DatabaseUpgrade/Upgrade0102.sql"},
-	{"Upgrade to version 103", ":/DatabaseUpgrade/Upgrade0103.sql"},
-	{"Upgrade to version 104", ":/DatabaseUpgrade/Upgrade0104.sql"},
-	{"Upgrade to version 105", ":/DatabaseUpgrade/Upgrade0105.sql"},
-	{"Upgrade to version 106", ":/DatabaseUpgrade/Upgrade0106.sql"},
-	{"Upgrade to version 107", ":/DatabaseUpgrade/Upgrade0107.sql"},
-	{"Upgrade to version 108", ":/DatabaseUpgrade/Upgrade0108.sql"},
-	{"Upgrade to version 109", ":/DatabaseUpgrade/Upgrade0109.sql"},
-	{"Upgrade to version 110", ":/DatabaseUpgrade/Upgrade0110.sql"},
-	{"Upgrade to version 111", ":/DatabaseUpgrade/Upgrade0111.sql"},
-	{"Upgrade to version 112", ":/DatabaseUpgrade/Upgrade0112.sql"},
+	{":/DatabaseUpgrade/Upgrade0001.sql", "Create project"},
+	{":/DatabaseUpgrade/Upgrade0002.sql", "Upgrade to version 2"},
+	{":/DatabaseUpgrade/Upgrade0003.sql", "Upgrade to version 3"},
+	{":/DatabaseUpgrade/Upgrade0004.sql", "Upgrade to version 4"},
+	{":/DatabaseUpgrade/Upgrade0005.sql", "Upgrade to version 5"},
+	{":/DatabaseUpgrade/Upgrade0006.sql", "Upgrade to version 6"},
+	{":/DatabaseUpgrade/Upgrade0007.sql", "Upgrade to version 7"},
+	{":/DatabaseUpgrade/Upgrade0008.sql", "Upgrade to version 8"},
+	{":/DatabaseUpgrade/Upgrade0009.sql", "Upgrade to version 9"},
+	{":/DatabaseUpgrade/Upgrade0010.sql", "Upgrade to version 10"},
+	{":/DatabaseUpgrade/Upgrade0011.sql", "Upgrade to version 11"},
+	{":/DatabaseUpgrade/Upgrade0012.sql", "Upgrade to version 12"},
+	{":/DatabaseUpgrade/Upgrade0013.sql", "Upgrade to version 13"},
+	{":/DatabaseUpgrade/Upgrade0014.sql", "Upgrade to version 14"},
+	{":/DatabaseUpgrade/Upgrade0015.sql", "Upgrade to version 15"},
+	{":/DatabaseUpgrade/Upgrade0016.sql", "Upgrade to version 16"},
+	{":/DatabaseUpgrade/Upgrade0017.sql", "Upgrade to version 17"},
+	{":/DatabaseUpgrade/Upgrade0018.sql", "Upgrade to version 18"},
+	{":/DatabaseUpgrade/Upgrade0019.sql", "Upgrade to version 19"},
+	{":/DatabaseUpgrade/Upgrade0020.sql", "Upgrade to version 20"},
+	{":/DatabaseUpgrade/Upgrade0021.sql", "Upgrade to version 21"},
+	{":/DatabaseUpgrade/Upgrade0022.sql", "Upgrade to version 22"},
+	{":/DatabaseUpgrade/Upgrade0023.sql", "Upgrade to version 23"},
+	{":/DatabaseUpgrade/Upgrade0024.sql", "Upgrade to version 24"},
+	{":/DatabaseUpgrade/Upgrade0025.sql", "Upgrade to version 25"},
+	{":/DatabaseUpgrade/Upgrade0026.sql", "Upgrade to version 26"},
+	{":/DatabaseUpgrade/Upgrade0027.sql", "Upgrade to version 27"},
+	{":/DatabaseUpgrade/Upgrade0028.sql", "Upgrade to version 28"},
+	{":/DatabaseUpgrade/Upgrade0029.sql", "Upgrade to version 29"},
+	{":/DatabaseUpgrade/Upgrade0030.sql", "Upgrade to version 30"},
+	{":/DatabaseUpgrade/Upgrade0031.sql", "Upgrade to version 31"},
+	{":/DatabaseUpgrade/Upgrade0032.sql", "Upgrade to version 32"},
+	{":/DatabaseUpgrade/Upgrade0033.sql", "Upgrade to version 33"},
+	{":/DatabaseUpgrade/Upgrade0034.sql", "Upgrade to version 34"},
+	{":/DatabaseUpgrade/Upgrade0035.sql", "Upgrade to version 35"},
+	{":/DatabaseUpgrade/Upgrade0036.sql", "Upgrade to version 36"},
+	{":/DatabaseUpgrade/Upgrade0037.sql", "Upgrade to version 37"},
+	{":/DatabaseUpgrade/Upgrade0038.sql", "Upgrade to version 38"},
+	{":/DatabaseUpgrade/Upgrade0039.sql", "Upgrade to version 39"},
+	{":/DatabaseUpgrade/Upgrade0040.sql", "Upgrade to version 40"},
+	{":/DatabaseUpgrade/Upgrade0041.sql", "Upgrade to version 41"},
+	{":/DatabaseUpgrade/Upgrade0042.sql", "Upgrade to version 42"},
+	{":/DatabaseUpgrade/Upgrade0043.sql", "Upgrade to version 43"},
+	{":/DatabaseUpgrade/Upgrade0044.sql", "Upgrade to version 44"},
+	{":/DatabaseUpgrade/Upgrade0045.sql", "Upgrade to version 45"},
+	{":/DatabaseUpgrade/Upgrade0046.sql", "Upgrade to version 46"},
+	{":/DatabaseUpgrade/Upgrade0047.sql", "Upgrade to version 47"},
+	{":/DatabaseUpgrade/Upgrade0048.sql", "Upgrade to version 48"},
+	{":/DatabaseUpgrade/Upgrade0049.sql", "Upgrade to version 49"},
+	{":/DatabaseUpgrade/Upgrade0050.sql", "Upgrade to version 50"},
+	{":/DatabaseUpgrade/Upgrade0051.sql", "Upgrade to version 51"},
+	{":/DatabaseUpgrade/Upgrade0052.sql", "Upgrade to version 52"},
+	{":/DatabaseUpgrade/Upgrade0053.sql", "Upgrade to version 53"},
+	{":/DatabaseUpgrade/Upgrade0054.sql", "Upgrade to version 54"},
+	{":/DatabaseUpgrade/Upgrade0055.sql", "Upgrade to version 55"},
+	{":/DatabaseUpgrade/Upgrade0056.sql", "Upgrade to version 56"},
+	{":/DatabaseUpgrade/Upgrade0057.sql", "Upgrade to version 57"},
+	{":/DatabaseUpgrade/Upgrade0058.sql", "Upgrade to version 58"},
+	{":/DatabaseUpgrade/Upgrade0059.sql", "Upgrade to version 59"},
+	{":/DatabaseUpgrade/Upgrade0060.sql", "Upgrade to version 60"},
+	{":/DatabaseUpgrade/Upgrade0061.sql", "Upgrade to version 61"},
+	{":/DatabaseUpgrade/Upgrade0062.sql", "Upgrade to version 62"},
+	{":/DatabaseUpgrade/Upgrade0063.sql", "Upgrade to version 63"},
+	{":/DatabaseUpgrade/Upgrade0064.sql", "Upgrade to version 64"},
+	{":/DatabaseUpgrade/Upgrade0065.sql", "Upgrade to version 65"},
+	{":/DatabaseUpgrade/Upgrade0066.sql", "Upgrade to version 66"},
+	{":/DatabaseUpgrade/Upgrade0067.sql", "Upgrade to version 67"},
+	{":/DatabaseUpgrade/Upgrade0068.sql", "Upgrade to version 68"},
+	{":/DatabaseUpgrade/Upgrade0069.sql", "Upgrade to version 69"},
+	{":/DatabaseUpgrade/Upgrade0070.sql", "Upgrade to version 70"},
+	{":/DatabaseUpgrade/Upgrade0071.sql", "Upgrade to version 71"},
+	{":/DatabaseUpgrade/Upgrade0072.sql", "Upgrade to version 72"},
+	{":/DatabaseUpgrade/Upgrade0073.sql", "Upgrade to version 73"},
+	{":/DatabaseUpgrade/Upgrade0074.sql", "Upgrade to version 74"},
+	{":/DatabaseUpgrade/Upgrade0075.sql", "Upgrade to version 75"},
+	{":/DatabaseUpgrade/Upgrade0076.sql", "Upgrade to version 76"},
+	{":/DatabaseUpgrade/Upgrade0077.sql", "Upgrade to version 77"},
+	{":/DatabaseUpgrade/Upgrade0078.sql", "Upgrade to version 78"},
+	{":/DatabaseUpgrade/Upgrade0079.sql", "Upgrade to version 79"},
+	{":/DatabaseUpgrade/Upgrade0080.sql", "Upgrade to version 80"},
+	{":/DatabaseUpgrade/Upgrade0081.sql", "Upgrade to version 81"},
+	{":/DatabaseUpgrade/Upgrade0082.sql", "Upgrade to version 82"},
+	{":/DatabaseUpgrade/Upgrade0083.sql", "Upgrade to version 83"},
+	{":/DatabaseUpgrade/Upgrade0084.sql", "Upgrade to version 84"},
+	{":/DatabaseUpgrade/Upgrade0085.sql", "Upgrade to version 85"},
+	{":/DatabaseUpgrade/Upgrade0086.sql", "Upgrade to version 86"},
+	{":/DatabaseUpgrade/Upgrade0087.sql", "Upgrade to version 87"},
+	{":/DatabaseUpgrade/Upgrade0088.sql", "Upgrade to version 88"},
+	{":/DatabaseUpgrade/Upgrade0089.sql", "Upgrade to version 89"},
+	{":/DatabaseUpgrade/Upgrade0090.sql", "Upgrade to version 90"},
+	{":/DatabaseUpgrade/Upgrade0091.sql", "Upgrade to version 91"},
+	{":/DatabaseUpgrade/Upgrade0092.sql", "Upgrade to version 92"},
+	{":/DatabaseUpgrade/Upgrade0093.sql", "Upgrade to version 93"},
+	{":/DatabaseUpgrade/Upgrade0094.sql", "Upgrade to version 94"},
+	{":/DatabaseUpgrade/Upgrade0095.sql", "Upgrade to version 95"},
+	{":/DatabaseUpgrade/Upgrade0096.sql", "Upgrade to version 96"},
+	{":/DatabaseUpgrade/Upgrade0097.sql", "Upgrade to version 97"},
+	{":/DatabaseUpgrade/Upgrade0098.sql", "Upgrade to version 98"},
+	{":/DatabaseUpgrade/Upgrade0099.sql", "Upgrade to version 99"},
+	{":/DatabaseUpgrade/Upgrade0100.sql", "Upgrade to version 100"},
+	{":/DatabaseUpgrade/Upgrade0101.sql", "Upgrade to version 101"},
+	{":/DatabaseUpgrade/Upgrade0102.sql", "Upgrade to version 102"},
+	{":/DatabaseUpgrade/Upgrade0103.sql", "Upgrade to version 103"},
+	{":/DatabaseUpgrade/Upgrade0104.sql", "Upgrade to version 104"},
+	{":/DatabaseUpgrade/Upgrade0105.sql", "Upgrade to version 105"},
+	{":/DatabaseUpgrade/Upgrade0106.sql", "Upgrade to version 106"},
+	{":/DatabaseUpgrade/Upgrade0107.sql", "Upgrade to version 107"},
+	{":/DatabaseUpgrade/Upgrade0108.sql", "Upgrade to version 108"},
+	{":/DatabaseUpgrade/Upgrade0109.sql", "Upgrade to version 109"},
+	{":/DatabaseUpgrade/Upgrade0110.sql", "Upgrade to version 110"},
+	{":/DatabaseUpgrade/Upgrade0111.sql", "Upgrade to version 111"},
+	{":/DatabaseUpgrade/Upgrade0112.sql", "Upgrade to version 112"},
+	{":/DatabaseUpgrade/Upgrade0113.sql", "Upgrade to version 113, add fileinstance_index_fileid, get_file_history, get_file_history_recursive"},
 };
+
+
 
 
 int DbWorker::counter = 0;
@@ -1397,7 +1400,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 				if (result == false)
 				{
-					emitError(QSqlDatabase(), tr("Can't open file %1. \n%2").arg(ui.upgradeFileName).arg(upgradeFile.errorString()));
+					emitError(QSqlDatabase(), tr("Can't open file %1. \n%2").arg(ui.upgradeFileName).arg(upgradeFile.errorString()), false);
 					break;
 				}
 
@@ -1412,7 +1415,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 					if (result == false)
 					{
-						emitError(QSqlDatabase(), upgradeQuery.lastError());
+						emitError(QSqlDatabase(), upgradeQuery.lastError(), false);
 						break;
 					}
 				}
@@ -1443,7 +1446,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 					if (result == false)
 					{
-						emitError(QSqlDatabase(), versionQuery.lastError());
+						emitError(QSqlDatabase(), versionQuery.lastError(), false);
 						break;
 					}
 				}
@@ -3119,7 +3122,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	return;
 }
 
-void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out)
+void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out)
 {
 	// Init automitic varaiables
 	//
@@ -3130,7 +3133,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 
 	// Check parameters
 	//
-	if (file == nullptr || file->fileId() == -1 || out == nullptr)
+	if (file.fileId() == -1 || out == nullptr)
 	{
 		assert(false);
 		return;
@@ -3152,7 +3155,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	//
 	QString request = QString("SELECT * FROM get_file_history(%1, %2)")
 			.arg(currentUser().userId())
-			.arg(file->fileId());
+			.arg(file.fileId());
 
 	QSqlQuery q(db);
 	q.setForwardOnly(true);
@@ -3168,18 +3171,81 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	{
 		DbChangesetInfo ci;
 
-		ci.setChangeset(q.value("ChangesetID").toInt());
-		ci.setDate(q.value("CheckInTime").toDateTime());
-		ci.setComment(q.value("Comment").toString());
-		ci.setUserId(q.value("UserID").toInt());
-		ci.setUsername(q.value("Username").toString());
-		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+		ci.setChangeset(q.value(0).toInt());
+		ci.setUserId(q.value(1).toInt());
+		ci.setUsername(q.value(2).toString());
+		ci.setDate(q.value(3).toDateTime());
+		ci.setComment(q.value(4).toString());
+		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
 
 		out->push_back(ci);
 	}
 
 	return;
 }
+
+void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangesetInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
+
+	// Check parameters
+	//
+	if (parentFile.fileId() == -1 || out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// Get user list at first
+	//
+
+	// Request for history
+	//
+	QString request = QString("SELECT * FROM get_file_history_recursive(%1, %2)")
+			.arg(currentUser().userId())
+			.arg(parentFile.fileId());
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangesetInfo ci;
+
+		ci.setChangeset(q.value(0).toInt());
+		ci.setUserId(q.value(1).toInt());
+		ci.setUsername(q.value(2).toString());
+		ci.setDate(q.value(3).toDateTime());
+		ci.setComment(q.value(4).toString());
+		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+
+		out->push_back(ci);
+	}
+
+	return;
+}
+
 
 void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId)
 {

@@ -9,7 +9,7 @@
 #include "DialogChoosePreset.h"
 #include "GlobalMessanger.h"
 #include "SignalsTabPage.h"
-#include "ChangesetDialog.h"
+#include "./Forms/FileHistoryDialog.h"
 
 #include <QPalette>
 #include <QtTreePropertyBrowser>
@@ -2797,31 +2797,17 @@ void EquipmentView::showHistory()
 	//
 	std::vector<DbChangesetInfo> fileHistory;
 
-	bool ok = db()->getFileHistory(device->fileInfo(), &fileHistory, this);
-
+	bool ok = db()->getFileHistoryRecursive(device->fileInfo(), &fileHistory, this);
 	if (ok == false)
 	{
 		return;
 	}
 
-	// Show chageset dialog
+	// Show history dialog
 	//
-	int changesetId = ChangesetDialog::getChangeset(fileHistory, this);
+	FileHistoryDialog::showHistory(device->equipmentId(), fileHistory, this);
 
-	if (changesetId == -1)
-	{
-		return;
-	}
-
-//	// Get file with choosen changeset
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
-
-//	bool result = db()->getSpecificCopy(files, changesetId, &out, this);
-//	if (result == false || out.size() != files.size())
-//	{
-//		return;
-//	}
+	return;
 }
 
 void EquipmentView::refreshSelectedDevices()

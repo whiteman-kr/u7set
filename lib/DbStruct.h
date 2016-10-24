@@ -84,9 +84,10 @@ class VcsItemAction
 public:
 	enum VcsItemActionType
 	{
-		Added = 1,			// Don't change values, it is stored in DB
-		Modified = 2,
-		Deleted = 3
+		Unknown = 0,		// Don't change values, they are stored in DB
+		Added = 1,			// Don't change values, they are stored in DB
+		Modified = 2,		// Don't change values, they are stored in DB
+		Deleted = 3			// Don't change values, they are stored in DB
 	};
 
 	VcsItemAction();
@@ -147,8 +148,8 @@ protected:
 
 struct UpgradeItem
 {
-	QString text;
     QString upgradeFileName;
+	QString text;
 };
 
 //
