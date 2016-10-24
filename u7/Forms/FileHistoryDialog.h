@@ -21,9 +21,14 @@ public:
 	
 private slots:
 	void on_changesetList_doubleClicked(const QModelIndex &index);
+	void on_changesetList_customContextMenuRequested(const QPoint &pos);
+
+	static void changesetDetails(int changeset);
 
 private:
 	Ui::FileHistoryDialog *ui;
 	std::vector<DbChangeset> m_fileHistory;
+
+
 };
 

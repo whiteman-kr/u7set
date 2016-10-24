@@ -92,7 +92,65 @@ void FileHistoryDialog::showHistory(QString fileName, const std::vector<DbChange
 
 void FileHistoryDialog::on_changesetList_doubleClicked(const QModelIndex& /*index*/)
 {
-	// To Do: Show Changeset details dialog
-	//
+	QTreeWidgetItem* item = ui->changesetList->currentItem();
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	bool ok = false;
+	int changeset = item->text(0).toUInt(&ok);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	FileHistoryDialog::changesetDetails(changeset);
+
 	return;
+}
+
+void FileHistoryDialog::on_changesetList_customContextMenuRequested(const QPoint& /*pos*/)
+{
+	QMenu menu(ui->changesetList);
+
+	QTreeWidgetItem* item = ui->changesetList->currentItem();
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	bool ok = false;
+	int changeset = item->text(0).toUInt(&ok);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Changeset Details
+	//
+	QAction* changesetDetailsAction = new QAction(tr("Changeset Details..."), &menu);
+	connect(changesetDetailsAction, &QAction::triggered, this,
+			[changeset]()
+			{
+				FileHistoryDialog::changesetDetails(changeset);
+			});
+
+	menu.addAction(changesetDetailsAction);
+
+	// Show menu
+	//
+	menu.exec(cursor().pos());
+
+	return;
+}
+
+void FileHistoryDialog::changesetDetails(int changeset)
+{
+	// SET PARENT OF THE CREATED WINDOW  this->parent() !!!!!!!!!!!!!!!1
+	assert(false);
 }
