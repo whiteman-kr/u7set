@@ -1,18 +1,20 @@
-#include "ChangesetDialog.h"
-#include "ui_ChangesetDialog.h"
+#include "SelectChangesetDialog.h"
+#include "ui_SelectChangesetDialog.h"
 
-ChangesetDialog::ChangesetDialog()
+SelectChangesetDialog::SelectChangesetDialog()
 {
 	assert(false);
 }
 
-ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::ChangesetDialog),
+	ui(new Ui::SelectChangesetDialog),
 	m_fileHistory(fileHistory),
 	m_changeset(-1)
 {
 	ui->setupUi(this);
+
+	setWindowTitle(title);
 
 	// Set changesetList
 	//
@@ -29,9 +31,10 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 
 	ui->changesetList->setColumnCount(4);
 
-	QStringList headerLabels;
-	headerLabels << tr("Changeset") << tr("User") << tr("Action") << tr("Date") << tr("Comment");
 
+	QStringList headerLabels;
+
+	headerLabels << tr("Changeset") << tr("User") << tr("Action") << tr("Date") << tr("Comment");
 	ui->changesetList->setHeaderLabels(headerLabels);
 
 	// Fill changeset list
@@ -72,19 +75,22 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 	return;
 }
 
-ChangesetDialog::~ChangesetDialog()
+SelectChangesetDialog::~SelectChangesetDialog()
 {
 	delete ui;
 }
 
-int ChangesetDialog::changeset() const
+int SelectChangesetDialog::changeset() const
 {
 	return m_changeset;
 }
 
-int ChangesetDialog::getChangeset(const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent)
+// Modal dialogbox, gets selected changest on Ok
+//
+int SelectChangesetDialog::getChangeset(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent)
 {
-	ChangesetDialog cd(fileHistory, parent);
+	SelectChangesetDialog cd("Select Changeset - " + fileName, fileHistory, parent);
+
 	int result = cd.exec();
 
 	if (result == QDialog::Accepted)
@@ -97,7 +103,7 @@ int ChangesetDialog::getChangeset(const std::vector<DbChangesetInfo>& fileHistor
 	}
 }
 
-void ChangesetDialog::on_buttonBox_accepted()
+void SelectChangesetDialog::on_buttonBox_accepted()
 {
 	QTreeWidgetItem* curItem = ui->changesetList->currentItem();
 
@@ -112,7 +118,7 @@ void ChangesetDialog::on_buttonBox_accepted()
 	QDialog::accept();
 }
 
-void ChangesetDialog::on_changesetList_doubleClicked(const QModelIndex& /*index*/)
+void SelectChangesetDialog::on_changesetList_doubleClicked(const QModelIndex& /*index*/)
 {
 	QTreeWidgetItem* item = ui->changesetList->currentItem();
 

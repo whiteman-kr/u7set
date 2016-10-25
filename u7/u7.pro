@@ -81,7 +81,6 @@ QMAKE_EXTRA_TARGETS += versionTarget
 
 SOURCES +=\
     CentralWidget.cpp \
-    ChangesetDialog.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogSettings.cpp \
@@ -181,12 +180,13 @@ SOURCES +=\
     ChooseUfbDialog.cpp \
     Builder/ModulesRawData.cpp \
     Builder/BdfFile.cpp \
-    SchemaListModel.cpp
+    SchemaListModel.cpp \
+    Forms/SelectChangesetDialog.cpp \
+    Forms/FileHistoryDialog.cpp
 
 
 HEADERS  += \
     CentralWidget.h \
-    ChangesetDialog.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogSettings.h \
@@ -293,10 +293,11 @@ HEADERS  += \
     ../lib/LmLimits.h \
     Builder/ModulesRawData.h \
     Builder/BdfFile.h \
-    SchemaListModel.h
+    SchemaListModel.h \
+    Forms/SelectChangesetDialog.h \
+    Forms/FileHistoryDialog.h
 
 FORMS    += \
-    ChangesetDialog.ui \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
@@ -315,7 +316,9 @@ FORMS    += \
     SchemaItemPropertiesDialog.ui \
     DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
-    ChooseUfbDialog.ui
+    ChooseUfbDialog.ui \
+    Forms/SelectChangesetDialog.ui \
+    Forms/FileHistoryDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

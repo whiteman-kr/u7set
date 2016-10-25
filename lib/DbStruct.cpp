@@ -92,6 +92,8 @@ QString VcsItemAction::text() const
 {
 	switch (m_action)
 	{
+	case Unknown:
+		return QObject::tr("Unknown");
 	case Added:
 		return QObject::tr("Added");
 	case Modified:

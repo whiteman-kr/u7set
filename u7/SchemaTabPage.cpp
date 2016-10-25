@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "SchemaTabPage.h"
 #include "CreateSchemaDialog.h"
-#include "ChangesetDialog.h"
+#include "Forms/SelectChangesetDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include <QJsonArray>
@@ -1424,7 +1424,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Show chageset dialog
 	//
-	int changesetId = ChangesetDialog::getChangeset(fileHistory, this);
+	int changesetId = SelectChangesetDialog::getChangeset(file.fileName(), fileHistory, this);
 
 	if (changesetId == -1)
 	{

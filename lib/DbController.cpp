@@ -58,6 +58,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
 
 	connect(this, &DbController::signal_getFileHistory, m_worker, &DbWorker::slot_getFileHistory);
+	connect(this, &DbController::signal_getFileHistoryRecursive, m_worker, &DbWorker::slot_getFileHistoryRecursive);
 
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
@@ -1041,11 +1042,36 @@ bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangese
 
 	// Emit signal end wait for complete
 	//
-	DbFileInfo f(file);
+	emit signal_getFileHistory(file, out);
 
-	emit signal_getFileHistory(&f, out);
+	ok = waitForComplete(parentWidget, tr("Getting file history"));
+	return true;
+}
 
-	ok = waitForComplete(parentWidget, tr("Getting object history"));
+bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (parentFile.fileId() == -1 || out == nullptr)
+	{
+		assert(parentFile.fileId() != -1);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileHistoryRecursive(parentFile, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file history"));
 	return true;
 }
 
