@@ -28,7 +28,5 @@ private slots:
 private:
 	Ui::FileHistoryDialog *ui;
 	std::vector<DbChangeset> m_fileHistory;
-
-
 };
 
