@@ -84,6 +84,7 @@ public:
 
 	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
 
+	bool getProjectHistory(std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getFileHistory(const DbFileInfo& file, std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangeset>* out, QWidget* parentWidget);
 
@@ -175,6 +176,7 @@ signals:
 
 	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
+	void signal_getHistory(std::vector<DbChangeset>* out);
 	void signal_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out);
 	void signal_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out);
 

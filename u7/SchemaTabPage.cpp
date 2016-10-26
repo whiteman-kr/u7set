@@ -58,6 +58,7 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	addAction(m_checkInAction);
 	addAction(m_undoChangesAction);
 	addAction(m_historyAction);
+	addAction(m_allSchemasHistoryAction);
 
 	addAction(m_separatorAction1);
 	addAction(m_addFileAction);
@@ -116,6 +117,11 @@ void SchemaFileView::CreateActions()
 	m_historyAction->setStatusTip(tr("Show file history..."));
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, this, &SchemaFileView::slot_showHistory);
+
+	m_allSchemasHistoryAction = new QAction(tr("All Schemas History..."), this);
+	m_allSchemasHistoryAction->setStatusTip(tr("Show all schemas history..."));
+	m_allSchemasHistoryAction->setEnabled(true);
+	connect(m_allSchemasHistoryAction, &QAction::triggered, this, &SchemaFileView::slot_showHistoryForAllSchemas);
 
 	m_separatorAction1 = new QAction(this);
 	m_separatorAction1->setSeparator(true);
@@ -459,6 +465,25 @@ void SchemaFileView::slot_showHistory()
 	// Show history dialog
 	//
 	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
+
+	return;
+}
+
+void SchemaFileView::slot_showHistoryForAllSchemas()
+{
+	// Get file history
+	//
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistoryRecursive(m_parentFile, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), m_parentFile.fileName(), fileHistory, this);
 
 	return;
 }

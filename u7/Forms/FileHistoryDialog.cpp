@@ -57,7 +57,7 @@ FileHistoryDialog::FileHistoryDialog(QString title, DbController* db, const std:
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
 		itemTextList << ci.username();
-		itemTextList << ci.date().toString(Qt::SystemLocaleShortDate);
+		itemTextList << ci.date().toString("dd MMM yyyy HH:mm:ss");
 		itemTextList << ci.comment();
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);

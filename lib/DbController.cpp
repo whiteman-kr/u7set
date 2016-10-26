@@ -57,6 +57,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
 
+	connect(this, &DbController::signal_getHistory, m_worker, &DbWorker::slot_getHistory);
 	connect(this, &DbController::signal_getFileHistory, m_worker, &DbWorker::slot_getFileHistory);
 	connect(this, &DbController::signal_getFileHistoryRecursive, m_worker, &DbWorker::slot_getFileHistoryRecursive);
 
@@ -1020,6 +1021,32 @@ bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget*
 	emit signal_fileHasChildren(hasChildren, &file);
 
 	ok = waitForComplete(parentWidget, tr("Checking file children"));
+	return true;
+}
+
+bool DbController::getProjectHistory(std::vector<DbChangeset>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getHistory(out);
+
+	ok = waitForComplete(parentWidget, tr("Getting project history"));
 	return true;
 }
 

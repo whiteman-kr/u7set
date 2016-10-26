@@ -130,9 +130,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0112.sql", "Upgrade to version 112"},
 	{":/DatabaseUpgrade/Upgrade0113.sql", "Upgrade to version 113, add fileinstance_index_fileid, get_file_history, get_file_history_recursive"},
 	{":/DatabaseUpgrade/Upgrade0114.sql", "Upgrade to version 114, add get_changeset_details, change retval get_file_history, get_file_history_recursive"},
+	{":/DatabaseUpgrade/Upgrade0115.sql", "Upgrade to version 115, add get_history function"},
 };
-
-
 
 
 int DbWorker::counter = 0;
@@ -3119,6 +3118,61 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	int childCount = q.value(0).toInt();
 
 	*hasChildren = childCount > 0;
+
+	return;
+}
+
+void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// Get user list at first
+	//
+
+	// Request for history
+	//
+	QString request = QString("SELECT * FROM get_history(%1)")
+			.arg(currentUser().userId());
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangeset ci;
+		db_dbChangeset(q, &ci);
+
+		out->push_back(ci);
+	}
 
 	return;
 }
