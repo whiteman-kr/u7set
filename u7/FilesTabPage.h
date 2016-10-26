@@ -124,6 +124,7 @@ public slots:
 	void checkOutFile();
 	void checkInFile();
 	void undoChangesFile();
+	void showHistory();
 	void getLatestVersion();
 	void getLatestTreeVersion();
 	void setWorkcopy();
@@ -182,6 +183,7 @@ private:
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
+	QAction* m_historyAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_getLatestVersionAction = nullptr;

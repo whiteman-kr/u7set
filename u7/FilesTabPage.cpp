@@ -8,6 +8,7 @@
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
+#include "Forms/FileHistoryDialog.h"
 
 
 //
@@ -1149,6 +1150,42 @@ void FileTreeView::undoChangesFile()
 	return;
 }
 
+void FileTreeView::showHistory()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	FileTreeModelItem* file = fileTreeModel()->fileItem(selected.first());
+
+	if (file == nullptr)
+	{
+		assert(file);
+		return;
+	}
+
+	// Get file history
+	//
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistoryRecursive(*file, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), file->fileName(), fileHistory, this);
+
+	return;
+}
+
 void FileTreeView::getLatestVersion()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
@@ -1495,6 +1532,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_fileView->addAction(m_checkOutAction);
 	m_fileView->addAction(m_checkInAction);
 	m_fileView->addAction(m_undoChangesAction);
+	m_fileView->addAction(m_historyAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction2);
 	m_fileView->addAction(m_getLatestVersionAction);
@@ -1577,6 +1615,11 @@ void FilesTabPage::createActions()
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, m_fileView, &FileTreeView::undoChangesFile);
+
+	m_historyAction = new QAction(tr("History..."), this);
+	m_historyAction->setStatusTip(tr("Show check in history"));
+	m_historyAction->setEnabled(false);
+	connect(m_historyAction, &QAction::triggered, m_fileView, &FileTreeView::showHistory);
 
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
@@ -1699,6 +1742,7 @@ void FilesTabPage::setActionState()
 	m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+	m_historyAction->setEnabled(selectedIndexList.size() == 1);
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
