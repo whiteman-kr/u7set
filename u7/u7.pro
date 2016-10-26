@@ -182,7 +182,8 @@ SOURCES +=\
     Builder/BdfFile.cpp \
     SchemaListModel.cpp \
     Forms/SelectChangesetDialog.cpp \
-    Forms/FileHistoryDialog.cpp
+    Forms/FileHistoryDialog.cpp \
+    Forms/ChangesetDetailsDialog.cpp
 
 
 HEADERS  += \
@@ -295,7 +296,8 @@ HEADERS  += \
     Builder/BdfFile.h \
     SchemaListModel.h \
     Forms/SelectChangesetDialog.h \
-    Forms/FileHistoryDialog.h
+    Forms/FileHistoryDialog.h \
+    Forms/ChangesetDetailsDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -318,7 +320,8 @@ FORMS    += \
     DialogSettingsConfigurator.ui \
     ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
-    Forms/FileHistoryDialog.ui
+    Forms/FileHistoryDialog.ui \
+    Forms/ChangesetDetailsDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

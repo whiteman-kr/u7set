@@ -116,8 +116,10 @@ public slots:
 
     void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
-	void slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out);
-	void slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangesetInfo>* out);
+	void slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out);
+	void slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out);
+
+	void slot_getChangesetDetails(int changeset, DbChangesetDetails* out);
 
     // Hardware Configuration
     //
@@ -183,6 +185,9 @@ public slots:
     bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const;
     bool db_updateFile(const QSqlQuery& q, DbFile* file) const;
     bool db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo);
+
+	bool db_dbChangeset(const QSqlQuery& q, DbChangeset* out);
+	bool db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* destination);
 
     // Properties
     //

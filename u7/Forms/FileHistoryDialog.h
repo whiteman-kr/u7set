@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include "../lib/DbController.h"
 #include "../lib/DbStruct.h"
 
 namespace Ui {
@@ -14,16 +15,20 @@ class FileHistoryDialog : public QDialog
 private:
 	FileHistoryDialog();
 public:
-	FileHistoryDialog(QString title, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	FileHistoryDialog(QString title, DbController* db, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	~FileHistoryDialog();
 
-	static void showHistory(QString fileName, const std::vector<DbChangesetInfo>& fileHistory, QWidget* parent);
+	static void showHistory(DbController* db, QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
 	
 private slots:
 	void on_changesetList_doubleClicked(const QModelIndex &index);
+	void on_changesetList_customContextMenuRequested(const QPoint &pos);
+
+	void changesetDetails(int changeset);
 
 private:
 	Ui::FileHistoryDialog *ui;
-	std::vector<DbChangesetInfo> m_fileHistory;
+	std::vector<DbChangeset> m_fileHistory;
+	DbController* m_db = nullptr;
 };
 

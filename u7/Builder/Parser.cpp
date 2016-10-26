@@ -1802,16 +1802,25 @@ namespace Builder
 
 			// Find all branches - connected links
 			//
+			bool result = true;
+
 			BushContainer bushContainer;
 
 			if (logicSchema->isMultichannelSchema() == true)
 			{
 				// Multischema checks. All multichannel signals must be transformed to singlechannel here
 				//
-				multichannelProcessing(logicSchema, moduleLayer, equipmentId);
+				result = multichannelProcessing(logicSchema, moduleLayer, equipmentId);
 			}
 
-			bool result = findBushes(logicSchema, moduleLayer, &bushContainer);
+			if (result == false)
+			{
+				// Something wron in multichannelProcessing for this schema, stop parsing it
+				//
+				continue;
+			}
+
+			result = findBushes(logicSchema, moduleLayer, &bushContainer);
 
 			if (result == false)
 			{
@@ -1886,6 +1895,7 @@ namespace Builder
 			return false;
 		}
 
+		bool result = true;
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 		{
@@ -1919,14 +1929,16 @@ namespace Builder
 			{
 				// it's not singlechannel Signal and not enough or more then channel count
 				//
+				result = false;
 				m_log->errALP4031(schema->schemaID(), signalItem->buildName(), signalItem->guid());
 				continue;
 			}
 
 			assert(false);
+			result = false;
 		}
 
-		return true;
+		return result;
 	}
 
 	bool Parser::filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema,
