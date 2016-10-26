@@ -60,6 +60,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getFileHistory, m_worker, &DbWorker::slot_getFileHistory);
 	connect(this, &DbController::signal_getFileHistoryRecursive, m_worker, &DbWorker::slot_getFileHistoryRecursive);
 
+	connect(this, &DbController::signal_getChangesetDetails, m_worker, &DbWorker::slot_getChangesetDetails);
+
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
@@ -1072,6 +1074,32 @@ bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::ve
 	emit signal_getFileHistoryRecursive(parentFile, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file history"));
+	return true;
+}
+
+bool DbController::getChangesetDetails(int changeset, DbChangesetDetails* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getChangesetDetails(changeset, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting changeset %1 details").arg(changeset));
 	return true;
 }
 

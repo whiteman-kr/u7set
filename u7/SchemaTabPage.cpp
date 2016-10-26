@@ -458,7 +458,7 @@ void SchemaFileView::slot_showHistory()
 
 	// Show history dialog
 	//
-	FileHistoryDialog::showHistory(file.fileName(), fileHistory, this);
+	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
 
 	return;
 }
@@ -1459,7 +1459,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Show chageset dialog
 	//
-	int changesetId = SelectChangesetDialog::getChangeset(file, fileHistory, this);
+	int changesetId = SelectChangesetDialog::getChangeset(db(), file, fileHistory, this);
 
 	if (changesetId == -1)
 	{

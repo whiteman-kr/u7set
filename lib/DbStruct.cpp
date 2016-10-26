@@ -743,8 +743,89 @@ void DbChangeset::setComment(const QString& value)
 DbChangesetDetails::DbChangesetDetails() :
 	DbChangeset()
 {
+	m_objects.reserve(64);
 }
 
 DbChangesetDetails::~DbChangesetDetails()
 {
 }
+
+const std::vector<DbChangesetObject>& DbChangesetDetails::objects() const
+{
+	return m_objects;
+}
+
+void DbChangesetDetails::addObject(const DbChangesetObject& object)
+{
+	m_objects.push_back(object);
+}
+
+
+DbChangesetObject::DbChangesetObject()
+{
+}
+
+DbChangesetObject::~DbChangesetObject()
+{
+}
+
+DbChangesetObject::Type DbChangesetObject::type() const
+{
+	return m_type;
+}
+
+void DbChangesetObject::setType(DbChangesetObject::Type value)
+{
+	m_type = value;
+}
+
+int DbChangesetObject::id() const
+{
+	return m_id;
+}
+
+void DbChangesetObject::setId(int value)
+{
+	m_id = value;
+}
+
+QString DbChangesetObject::name() const
+{
+	return m_name;
+}
+
+void DbChangesetObject::setName(const QString& value)
+{
+	m_name = value;
+}
+
+QString DbChangesetObject::caption() const
+{
+	return m_caption;
+}
+
+void DbChangesetObject::setCaption(const QString& value)
+{
+	m_caption = value;
+}
+
+VcsItemAction DbChangesetObject::action() const
+{
+	return m_action;
+}
+
+void DbChangesetObject::setAction(VcsItemAction value)
+{
+	m_action = value;
+}
+
+QString DbChangesetObject::parent() const
+{
+	return m_parent;
+}
+
+void DbChangesetObject::setParent(const QString& value)
+{
+	m_parent = value;
+}
+

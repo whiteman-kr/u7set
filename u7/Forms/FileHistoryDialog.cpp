@@ -1,22 +1,30 @@
 #include "FileHistoryDialog.h"
 #include "ui_FileHistoryDialog.h"
+#include "ChangesetDetailsDialog.h"
 
 FileHistoryDialog::FileHistoryDialog()
 {
 	assert(false);
 }
 
-FileHistoryDialog::FileHistoryDialog(QString title, const std::vector<DbChangeset>& fileHistory, QWidget* parent) :
+FileHistoryDialog::FileHistoryDialog(QString title, DbController* db, const std::vector<DbChangeset>& fileHistory, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::FileHistoryDialog),
-	m_fileHistory(fileHistory)
+	m_fileHistory(fileHistory),
+	m_db(db)
 {
+	assert(m_db);
+
 	ui->setupUi(this);
 
 	setWindowTitle(title);
 
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
+
 	// Set changesetList
 	//
+
 //	auto p = qApp->palette("QTreeView");
 
 //	QColor highlight = p.highlight().color();
@@ -79,12 +87,17 @@ FileHistoryDialog::~FileHistoryDialog()
 
 // Modalless dfialogbox
 //
-void FileHistoryDialog::showHistory(QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
+void FileHistoryDialog::showHistory(DbController* db, QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
 {
-	FileHistoryDialog* dialog = new FileHistoryDialog("History - " + fileName, fileHistory, parent);
+	if (db == nullptr)
+	{
+		assert(db);
+		return;
+	}
+
+	FileHistoryDialog* dialog = new FileHistoryDialog("History - " + fileName, db, fileHistory, parent);
 
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
-
 	dialog->show();
 
 	return;
@@ -135,7 +148,7 @@ void FileHistoryDialog::on_changesetList_customContextMenuRequested(const QPoint
 	//
 	QAction* changesetDetailsAction = new QAction(tr("Changeset Details..."), &menu);
 	connect(changesetDetailsAction, &QAction::triggered, this,
-			[changeset]()
+			[this, changeset]()
 			{
 				FileHistoryDialog::changesetDetails(changeset);
 			});
@@ -151,6 +164,8 @@ void FileHistoryDialog::on_changesetList_customContextMenuRequested(const QPoint
 
 void FileHistoryDialog::changesetDetails(int changeset)
 {
-	// SET PARENT OF THE CREATED WINDOW  this->parent() !!!!!!!!!!!!!!!1
-	assert(false);
+	QWidget* parentWidget = dynamic_cast<QWidget*>(this->parent());
+	assert(parentWidget);
+
+	ChangesetDetailsDialog::showChangesetDetails(m_db, changeset, parentWidget);
 }

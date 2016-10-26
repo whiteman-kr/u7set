@@ -3,6 +3,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
+#include <QtSql/QSqlRecord>
 #include <memory>
 #include <assert.h>
 
@@ -391,15 +392,62 @@ private:
 // DbChangesetDetails
 //
 //
+class DbChangesetObject;
+
 class DbChangesetDetails : public DbChangeset
 {
 public:
 	DbChangesetDetails();
 	virtual ~DbChangesetDetails();
 
+public:
+	const std::vector<DbChangesetObject>& objects() const;
+	void addObject(const DbChangesetObject& object);
+
 private:
-	std::vector<DbFileInfo> m_files;
-	std::vector<std::shared_ptr<Signal>> m_signals;
+	std::vector<DbChangesetObject> m_objects;
+};
+
+
+class DbChangesetObject
+{
+public:
+	DbChangesetObject();
+	virtual ~DbChangesetObject();
+
+public:
+	enum class Type
+	{
+		File,					//	Values are hardcoded in DB
+		Signal
+	};
+
+public:
+	DbChangesetObject::Type type() const;
+	void setType(DbChangesetObject::Type value);
+
+	int id() const;
+	void setId(int value);
+
+	QString name() const;
+	void setName(const QString& value);
+
+	QString caption() const;
+	void setCaption(const QString& value);
+
+	VcsItemAction action() const;
+	void setAction(VcsItemAction value);
+
+	QString parent() const;
+	void setParent(const QString& value);
+
+private:
+	Type m_type = Type::File;
+	int m_id = -1;				// File.FileID or Signal.SignalsID
+	QString m_name;				// FileName or AppSignalID
+	QString m_caption;
+	VcsItemAction m_action = VcsItemAction::Added;
+	QString m_parent;
 };
 
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING

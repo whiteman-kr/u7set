@@ -2805,7 +2805,7 @@ void EquipmentView::showHistory()
 
 	// Show history dialog
 	//
-	FileHistoryDialog::showHistory(device->equipmentId(), fileHistory, this);
+	FileHistoryDialog::showHistory(db(), device->equipmentId(), fileHistory, this);
 
 	return;
 }

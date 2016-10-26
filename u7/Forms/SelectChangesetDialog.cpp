@@ -1,17 +1,21 @@
 #include "SelectChangesetDialog.h"
 #include "ui_SelectChangesetDialog.h"
+#include "ChangesetDetailsDialog.h"
 
 SelectChangesetDialog::SelectChangesetDialog()
 {
 	assert(false);
 }
 
-SelectChangesetDialog::SelectChangesetDialog(QString title, const std::vector<DbChangeset>& history, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SelectChangesetDialog),
+	m_db(db),
 	m_history(history),
 	m_changeset(-1)
 {
+	assert(m_db);
+
 	ui->setupUi(this);
 
 	setWindowTitle(title);
@@ -97,9 +101,15 @@ DbFileInfo SelectChangesetDialog::file() const
 
 // Modal dialogbox, gets selected changest on Ok
 //
-int SelectChangesetDialog::getChangeset(const DbFileInfo& file, const std::vector<DbChangeset>& history, QWidget* parent)
+int SelectChangesetDialog::getChangeset(DbController* db, const DbFileInfo& file, const std::vector<DbChangeset>& history, QWidget* parent)
 {
-	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), history, parent);
+	if (db == nullptr)
+	{
+		assert(db);
+		return -1;
+	}
+
+	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, history, parent);
 	cd.setFile(file);
 
 	int result = cd.exec();
@@ -170,9 +180,9 @@ void SelectChangesetDialog::on_changesetList_customContextMenuRequested(const QP
 
 	QAction* changesetDetailsAction = new QAction(tr("Changeset Details..."), &menu);
 	connect(changesetDetailsAction, &QAction::triggered, this,
-			[changeset]()
+			[this, changeset]()
 			{
-				SelectChangesetDialog::changesetDetails(changeset);
+				changesetDetails(changeset);
 			});
 
 	QAction* compareAction = new QAction(tr("Compare..."), &menu);
@@ -193,8 +203,10 @@ void SelectChangesetDialog::on_changesetList_customContextMenuRequested(const QP
 
 void SelectChangesetDialog::changesetDetails(int changeset)
 {
-	// SET PARENT OF THE CREATED WINDOW  this->parent() !!!!!!!!!!!!!!!1
-	assert(false);
+	QWidget* parentWidget = dynamic_cast<QWidget*>(this->parent());
+	assert(parentWidget);
+
+	ChangesetDetailsDialog::showChangesetDetails(m_db, changeset, parentWidget);
 }
 
 void SelectChangesetDialog::compareFile(DbFileInfo& file, int changeset)

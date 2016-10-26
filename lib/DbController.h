@@ -87,6 +87,8 @@ public:
 	bool getFileHistory(const DbFileInfo& file, std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangeset>* out, QWidget* parentWidget);
 
+	bool getChangesetDetails(int changeset, DbChangesetDetails* out, QWidget* parentWidget);
+
 	// Hardware Configuration
 	//
 	bool addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
@@ -175,6 +177,8 @@ signals:
 
 	void signal_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out);
 	void signal_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out);
+
+	void signal_getChangesetDetails(int changeset, DbChangesetDetails* out);
 
 	// --
 	//
