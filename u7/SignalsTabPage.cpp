@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QCompleter>
 #include <QStringListModel>
+#include <QGroupBox>
 
 #include "../lib/DbController.h"
 
@@ -1559,18 +1560,46 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	QVector<Signal> signalVector;
 
 	QDialog signalCreationSettingsDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-	QFormLayout* fl = new QFormLayout(&signalCreationSettingsDialog);
+	QFormLayout* fl = new QFormLayout;
 
 	QList<QCheckBox*> checkBoxList;
 	QStringList selectedLmIdList;
+
+	QVBoxLayout* vl = new QVBoxLayout;
+
+	QGroupBox *groupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
+	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* groupBoxLayout = new QVBoxLayout;
+	groupBox->setLayout(groupBoxLayout);
+	vl->addWidget(groupBox);
 
 	for (QString lmId : lmIdList)
 	{
 		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
 		enableLmCheck->setChecked(true);
 
-		fl->addRow(enableLmCheck);
+		groupBoxLayout->addWidget(enableLmCheck);
 		checkBoxList.append(enableLmCheck);
+
+		connect(enableLmCheck, &QCheckBox::toggled, [&checkBoxList, enableLmCheck](bool checked){
+			if (checked)
+			{
+				return;
+			}
+			bool hasCheckedLm = false;
+			for (QCheckBox* lmCheck : checkBoxList)
+			{
+				if (lmCheck->isChecked())
+				{
+					hasCheckedLm = true;
+					break;
+				}
+			}
+			if (!hasCheckedLm)
+			{
+				enableLmCheck->setChecked(true);
+			}
+		});
 	}
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
@@ -1584,9 +1613,11 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	connect(buttonBox, &QDialogButtonBox::accepted, &signalCreationSettingsDialog, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &signalCreationSettingsDialog, &QDialog::reject);
 
-	fl->addRow(buttonBox);
+	vl->addLayout(fl);
+	vl->addStretch();
+	vl->addWidget(buttonBox);
 
-	signalCreationSettingsDialog.setLayout(fl);
+	signalCreationSettingsDialog.setLayout(vl);
 
 	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
 
