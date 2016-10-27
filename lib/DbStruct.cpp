@@ -92,6 +92,8 @@ QString VcsItemAction::text() const
 {
 	switch (m_action)
 	{
+	case Unknown:
+		return QObject::tr("Unknown");
 	case Added:
 		return QObject::tr("Added");
 	case Modified:
@@ -657,74 +659,173 @@ int DbFile::size() const
 
 //
 //
-// DbChangesetInfo
+// DbChangeset
 //
 //
-DbChangesetInfo::DbChangesetInfo()
+DbChangeset::DbChangeset()
 {
 }
 
-int DbChangesetInfo::changeset() const
+DbChangeset::~DbChangeset()
+{
+}
+
+int DbChangeset::changeset() const
 {
 	return m_changesetId;
 }
 
-void DbChangesetInfo::setChangeset(int value)
+void DbChangeset::setChangeset(int value)
 {
 	m_changesetId = value;
 }
 
-QDateTime DbChangesetInfo::date() const
+QDateTime DbChangeset::date() const
 {
 	return m_date;
 }
 
-void DbChangesetInfo::setDate(const QDateTime& value)
+void DbChangeset::setDate(const QDateTime& value)
 {
 	m_date = value;
 }
 
-void DbChangesetInfo::setDate(const QString& value)
+void DbChangeset::setDate(const QString& value)
 {
 	m_date = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
 }
 
-const VcsItemAction& DbChangesetInfo::action() const
+const VcsItemAction& DbChangeset::action() const
 {
 	return m_action;
 }
 
-void DbChangesetInfo::setAction(const VcsItemAction& value)
+void DbChangeset::setAction(const VcsItemAction& value)
 {
 	m_action = value;
 }
 
-int DbChangesetInfo::userId() const
+int DbChangeset::userId() const
 {
 	return m_userId;
 }
 
-void DbChangesetInfo::setUserId(int value)
+void DbChangeset::setUserId(int value)
 {
 	m_userId = value;
 }
 
-const QString& DbChangesetInfo::username() const
+const QString& DbChangeset::username() const
 {
 	return m_username;
 }
 
-void DbChangesetInfo::setUsername(const QString& value)
+void DbChangeset::setUsername(const QString& value)
 {
 	m_username = value;
 }
 
-const QString& DbChangesetInfo::comment() const
+const QString& DbChangeset::comment() const
 {
 	return m_comment;
 }
 
-void DbChangesetInfo::setComment(const QString& value)
+void DbChangeset::setComment(const QString& value)
 {
 	m_comment = value;
 }
+
+//
+//
+// DbChangesetDetails
+//
+//
+DbChangesetDetails::DbChangesetDetails() :
+	DbChangeset()
+{
+	m_objects.reserve(64);
+}
+
+DbChangesetDetails::~DbChangesetDetails()
+{
+}
+
+const std::vector<DbChangesetObject>& DbChangesetDetails::objects() const
+{
+	return m_objects;
+}
+
+void DbChangesetDetails::addObject(const DbChangesetObject& object)
+{
+	m_objects.push_back(object);
+}
+
+
+DbChangesetObject::DbChangesetObject()
+{
+}
+
+DbChangesetObject::~DbChangesetObject()
+{
+}
+
+DbChangesetObject::Type DbChangesetObject::type() const
+{
+	return m_type;
+}
+
+void DbChangesetObject::setType(DbChangesetObject::Type value)
+{
+	m_type = value;
+}
+
+int DbChangesetObject::id() const
+{
+	return m_id;
+}
+
+void DbChangesetObject::setId(int value)
+{
+	m_id = value;
+}
+
+QString DbChangesetObject::name() const
+{
+	return m_name;
+}
+
+void DbChangesetObject::setName(const QString& value)
+{
+	m_name = value;
+}
+
+QString DbChangesetObject::caption() const
+{
+	return m_caption;
+}
+
+void DbChangesetObject::setCaption(const QString& value)
+{
+	m_caption = value;
+}
+
+VcsItemAction DbChangesetObject::action() const
+{
+	return m_action;
+}
+
+void DbChangesetObject::setAction(VcsItemAction value)
+{
+	m_action = value;
+}
+
+QString DbChangesetObject::parent() const
+{
+	return m_parent;
+}
+
+void DbChangesetObject::setParent(const QString& value)
+{
+	m_parent = value;
+}
+

@@ -4260,9 +4260,6 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 	if (schema()->isLogicSchema() == true &&
 		newItem->isFblItemRect() == true)
 	{
-		auto logicSchema = schema()->toLogicSchema();
-		assert(logicSchema);
-
 		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
 		assert(fblItemRect);
 

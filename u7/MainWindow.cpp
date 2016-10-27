@@ -18,6 +18,7 @@
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "GlobalMessanger.h"
+#include "Forms/FileHistoryDialog.h"
 
 #include "../VFrame30/VFrame30.h"
 
@@ -262,6 +263,15 @@ void MainWindow::createActions()
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
 	addAction(m_startBuildAction);
 
+
+	m_projectHistoryAction = new QAction(tr("Project History..."), this);
+	m_projectHistoryAction->setStatusTip(tr("Show project history"));
+	m_projectHistoryAction->setEnabled(false);
+	connect(m_projectHistoryAction, &QAction::triggered, this, &MainWindow::projectHistory);
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectHistoryAction->setEnabled(true);});
+	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
+	addAction(m_projectHistoryAction);
+
 	return;
 }
 
@@ -283,6 +293,7 @@ void MainWindow::createMenus()
 	// Project
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
+	pProjectMenu->addAction(m_projectHistoryAction);
 	pProjectMenu->addAction(m_startBuildAction);
 
 	// Tools
@@ -524,6 +535,32 @@ void MainWindow::startBuild()
 	{
 		m_buildTabPage->build();
 	}
+
+	return;
+}
+
+void MainWindow::projectHistory()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	std::vector<DbChangeset> history;
+
+	bool ok = m_dbController->getProjectHistory(&history, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	FileHistoryDialog::showHistory(m_dbController, db()->currentProject().projectName(), history, this);
 
 	return;
 }

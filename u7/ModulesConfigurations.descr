@@ -30,24 +30,25 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 18;		// i/o modules scripts moved to ConfiurationScript in presets
 //var configScriptVersion = 19;		// i/o modules family checking has been removed
 //var configScriptVersion = 21;		// DataUID for LM modules is taken from linked port
-//var configScriptVersion = 22;		// added buildThread parameter to interrupt build
-var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
+//var configScriptVersion = 22;		// added builder parameter to interrupt build
+//var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
+var configScriptVersion = 24;		// buildThread has been replaced by builder, added buildNo
 
 
-function(buildThread, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function(builder, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration");
     log.writeMessage("Configuration script version is " + configScriptVersion);
 
     var result = true;
 
-    result = module_lm_1(buildThread, root, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+    result = module_lm_1(builder, root, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
     }
 
-    result = module_lm_1_statistics(buildThread, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+    result = module_lm_1_statistics(builder, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
     if (result == false)
     {
         return false;
@@ -151,7 +152,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC)
     return Math.round(res);
 }
 
-function module_lm_1(buildThread, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function module_lm_1(builder, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -174,20 +175,20 @@ function module_lm_1(buildThread, device, root, confCollection, log, signalSet, 
         {
             // Generate Configuration
             //
-            return generate_lm_1_rev3(buildThread, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
+            return generate_lm_1_rev3(builder, device, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage);
         }
         return true;
     }
 
     for (var i = 0; i < device.childrenCount(); i++)
 	{
-		if (buildThread.jsIsInterruptRequested() == true)
+		if (builder.jsIsInterruptRequested() == true)
 		{
 			return true;
 		}
 	
         var child = device.jsChild(i);
-        if (module_lm_1(buildThread, child, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
+        if (module_lm_1(builder, child, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -196,7 +197,7 @@ function module_lm_1(buildThread, device, root, confCollection, log, signalSet, 
     return true;
 }
 
-function module_lm_1_statistics(buildThread, device, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function module_lm_1_statistics(builder, device, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -265,13 +266,13 @@ function module_lm_1_statistics(buildThread, device, confCollection, log, signal
 
     for (var i = 0; i < device.childrenCount(); i++)
     {
-		if (buildThread.jsIsInterruptRequested() == true)
+		if (builder.jsIsInterruptRequested() == true)
 		{
 			return true;
 		}
 
         var child = device.jsChild(i);
-        if (module_lm_1_statistics(buildThread, child, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
+        if (module_lm_1_statistics(builder, child, confCollection, log, signalSet, subsystemStorage, opticModuleStorage) == false)
         {
             return false;
         }
@@ -283,7 +284,7 @@ function module_lm_1_statistics(buildThread, device, confCollection, log, signal
 // Generate configuration for module LM-1
 //
 //
-function generate_lm_1_rev3(buildThread, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
 	if (module.propertyValue("EquipmentID") == undefined)
 	{
@@ -390,8 +391,16 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
     ptr += 2;
     
+	var buildNo = builder.jsBuildNo();
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "BuildNo", buildNo) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
+    ptr += 2;
+
     // reserved
-    ptr += 8;
+    ptr += 6;
     
     // write LMNumberCount, if old value is less than current. If it is the same, output an error.
     //
@@ -405,7 +414,7 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
     
     if (oldLMNumberCount < LMNumber)
     {
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumber", LMNumber) == false)
+        if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumberCount", LMNumber) == false)
 		{
 			return false;
 		}
@@ -458,7 +467,7 @@ function generate_lm_1_rev3(buildThread, module, root, confCollection, log, sign
 
     for (var i = 0; i < parent.childrenCount(); i++)
     {
-		if (buildThread.jsIsInterruptRequested() == true)
+		if (builder.jsIsInterruptRequested() == true)
 		{
 			return true;
 		}
