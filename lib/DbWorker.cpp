@@ -131,6 +131,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0113.sql", "Upgrade to version 113, add fileinstance_index_fileid, get_file_history, get_file_history_recursive"},
 	{":/DatabaseUpgrade/Upgrade0114.sql", "Upgrade to version 114, add get_changeset_details, change retval get_file_history, get_file_history_recursive"},
 	{":/DatabaseUpgrade/Upgrade0115.sql", "Upgrade to version 115, add get_history function"},
+	{":/DatabaseUpgrade/Upgrade0116.sql", "Upgrade to version 116, remove administrator rights to all except UserID=1"},
 };
 
 
@@ -1769,14 +1770,13 @@ void DbWorker::slot_updateUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8, %9);")
+	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %8, %9);")
 						 .arg(currentUser().userId())
 						 .arg(DbWorker::toSqlStr(user.username()))
 						 .arg(DbWorker::toSqlStr(user.firstName()))
 						 .arg(DbWorker::toSqlStr(user.lastName()))
 						 .arg(DbWorker::toSqlStr(user.password()))
 						 .arg(user.newPassword().isEmpty() ? QString::null : DbWorker::toSqlStr(user.newPassword()))
-						 .arg(user.isAdminstrator() ? "TRUE" : "FALSE")
 						 .arg(user.isReadonly() ? "TRUE" : "FALSE")
 						 .arg(user.isDisabled() ? "TRUE" : "FALSE");
 
