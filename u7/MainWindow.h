@@ -67,6 +67,7 @@ protected slots:
     void showAbout();
 	void debug();
 	void startBuild();
+	void projectHistory();
 
 private slots:
 	void projectOpened(DbProject project);
@@ -95,6 +96,7 @@ private:
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
+	QAction* m_projectHistoryAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;

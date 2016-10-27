@@ -57,8 +57,11 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
 
+	connect(this, &DbController::signal_getHistory, m_worker, &DbWorker::slot_getHistory);
 	connect(this, &DbController::signal_getFileHistory, m_worker, &DbWorker::slot_getFileHistory);
 	connect(this, &DbController::signal_getFileHistoryRecursive, m_worker, &DbWorker::slot_getFileHistoryRecursive);
+
+	connect(this, &DbController::signal_getChangesetDetails, m_worker, &DbWorker::slot_getChangesetDetails);
 
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
@@ -1021,7 +1024,33 @@ bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget*
 	return true;
 }
 
-bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+bool DbController::getProjectHistory(std::vector<DbChangeset>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getHistory(out);
+
+	ok = waitForComplete(parentWidget, tr("Getting project history"));
+	return true;
+}
+
+bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangeset>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -1048,7 +1077,7 @@ bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangese
 	return true;
 }
 
-bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangeset>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -1072,6 +1101,32 @@ bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::ve
 	emit signal_getFileHistoryRecursive(parentFile, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file history"));
+	return true;
+}
+
+bool DbController::getChangesetDetails(int changeset, DbChangesetDetails* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getChangesetDetails(changeset, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting changeset %1 details").arg(changeset));
 	return true;
 }
 

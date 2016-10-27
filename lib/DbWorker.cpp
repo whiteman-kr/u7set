@@ -129,9 +129,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0111.sql", "Upgrade to version 111"},
 	{":/DatabaseUpgrade/Upgrade0112.sql", "Upgrade to version 112"},
 	{":/DatabaseUpgrade/Upgrade0113.sql", "Upgrade to version 113, add fileinstance_index_fileid, get_file_history, get_file_history_recursive"},
+	{":/DatabaseUpgrade/Upgrade0114.sql", "Upgrade to version 114, add get_changeset_details, change retval get_file_history, get_file_history_recursive"},
+	{":/DatabaseUpgrade/Upgrade0115.sql", "Upgrade to version 115, add get_history function"},
 };
-
-
 
 
 int DbWorker::counter = 0;
@@ -3122,7 +3122,62 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	return;
 }
 
-void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out)
+void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// Get user list at first
+	//
+
+	// Request for history
+	//
+	QString request = QString("SELECT * FROM get_history(%1)")
+			.arg(currentUser().userId());
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangeset ci;
+		db_dbChangeset(q, &ci);
+
+		out->push_back(ci);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out)
 {
 	// Init automitic varaiables
 	//
@@ -3169,14 +3224,8 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>
 
 	while (q.next())
 	{
-		DbChangesetInfo ci;
-
-		ci.setChangeset(q.value(0).toInt());
-		ci.setUserId(q.value(1).toInt());
-		ci.setUsername(q.value(2).toString());
-		ci.setDate(q.value(3).toDateTime());
-		ci.setComment(q.value(4).toString());
-		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+		DbChangeset ci;
+		db_dbChangeset(q, &ci);
 
 		out->push_back(ci);
 	}
@@ -3184,7 +3233,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>
 	return;
 }
 
-void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangesetInfo>* out)
+void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out)
 {
 	// Init automitic varaiables
 	//
@@ -3231,16 +3280,70 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 
 	while (q.next())
 	{
-		DbChangesetInfo ci;
-
-		ci.setChangeset(q.value(0).toInt());
-		ci.setUserId(q.value(1).toInt());
-		ci.setUsername(q.value(2).toString());
-		ci.setDate(q.value(3).toDateTime());
-		ci.setComment(q.value(4).toString());
-		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+		DbChangeset ci;
+		db_dbChangeset(q, &ci);
 
 		out->push_back(ci);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// Request for data
+	//
+	QString request = QString("SELECT * FROM get_changeset_details(%1, %2)")
+			.arg(currentUser().userId())
+			.arg(changeset);
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// --
+	//
+
+//	QMapIterator<QString, QVariant> i(q.boundValues());
+//	while (i.hasNext())
+//	{
+//		i.next();
+//		qDebug() << i.key().toUtf8().data() << ": " << i.value().toString().toUtf8().data() << endl;
+//	}
+
+	while (q.next())
+	{
+		db_dbChangesetObject(q, out);
 	}
 
 	return;
@@ -5184,6 +5287,54 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 
 	return true;
 }
+
+bool DbWorker::db_dbChangeset(const QSqlQuery& q, DbChangeset* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	out->setChangeset(q.value(0).toInt());
+	out->setUserId(q.value(1).toInt());
+	out->setUsername(q.value(2).toString());
+	out->setDate(q.value(3).toDateTime());
+	out->setComment(q.value(4).toString());
+	out->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+
+	return true;
+}
+
+bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* destination)
+{
+	if (destination == nullptr)
+	{
+		assert(destination);
+		return false;
+	}
+
+	destination->setChangeset(q.value(0).toInt());
+	destination->setUserId(q.value(1).toInt());
+	destination->setUsername(q.value(2).toString());
+	destination->setDate(q.value(3).toDateTime());
+	destination->setComment(q.value(4).toString());
+	destination->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+
+	DbChangesetObject csObject;
+
+	csObject.setType(static_cast<DbChangesetObject::Type>(q.value(6 + 0).toInt()));
+	csObject.setId(q.value(6 + 1).toInt());
+	csObject.setName(q.value(6 + 2).toString());
+	csObject.setCaption(q.value(6 + 3).toString());
+	csObject.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(6 + 4).toInt()));
+	csObject.setParent(q.value(6 + 5).toString());
+
+	destination->addObject(csObject);
+
+	return true;
+}
+
 
 const QString& DbWorker::host() const
 {

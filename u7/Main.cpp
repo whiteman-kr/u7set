@@ -112,7 +112,8 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<DbUser>();
 	qRegisterMetaType<DbFileInfo>();
 	qRegisterMetaType<DbFile>();
-	qRegisterMetaType<DbChangesetInfo>();
+	qRegisterMetaType<DbChangeset>();
+	qRegisterMetaType<DbChangesetDetails>();
 	qRegisterMetaType<DbProject>();
 	qRegisterMetaType<std::vector<DbProject>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();

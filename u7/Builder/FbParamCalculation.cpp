@@ -1181,11 +1181,11 @@ namespace Builder
 		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
 		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
 
-		CHECK_FLOAT32(i_ti);
+		CHECK_SIGNED_INT32(i_ti);
 		CHECK_FLOAT32(i_max);
 		CHECK_FLOAT32(i_min);
 
-		float i_ti_value = i_ti.floatValue();
+		int i_ti_value = i_ti.signedIntValue();
 
 		if (i_ti_value < 0)
 		{

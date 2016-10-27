@@ -69,7 +69,7 @@ BEGIN
 			Users.Username AS Username,
 			Changeset.Time AS Time,
 			Changeset.Comment AS Comment,
-			FileInstance.Action AS Action
+			0 AS Action
 		FROM
 			FileInstance, Changeset, Users
 		WHERE

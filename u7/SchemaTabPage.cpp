@@ -2,6 +2,7 @@
 #include "SchemaTabPage.h"
 #include "CreateSchemaDialog.h"
 #include "Forms/SelectChangesetDialog.h"
+#include "Forms/FileHistoryDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include <QJsonArray>
@@ -56,6 +57,8 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	addAction(m_checkOutAction);
 	addAction(m_checkInAction);
 	addAction(m_undoChangesAction);
+	addAction(m_historyAction);
+	addAction(m_allSchemasHistoryAction);
 
 	addAction(m_separatorAction1);
 	addAction(m_addFileAction);
@@ -109,6 +112,16 @@ void SchemaFileView::CreateActions()
 	m_undoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
 	m_undoChangesAction->setEnabled(false);
 	connect(m_undoChangesAction, &QAction::triggered, this, &SchemaFileView::slot_UndoChanges);
+
+	m_historyAction = new QAction(tr("History..."), this);
+	m_historyAction->setStatusTip(tr("Show file history..."));
+	m_historyAction->setEnabled(false);
+	connect(m_historyAction, &QAction::triggered, this, &SchemaFileView::slot_showHistory);
+
+	m_allSchemasHistoryAction = new QAction(tr("All Schemas History..."), this);
+	m_allSchemasHistoryAction->setStatusTip(tr("Show all schemas history..."));
+	m_allSchemasHistoryAction->setEnabled(true);
+	connect(m_allSchemasHistoryAction, &QAction::triggered, this, &SchemaFileView::slot_showHistoryForAllSchemas);
 
 	m_separatorAction1 = new QAction(this);
 	m_separatorAction1->setSeparator(true);
@@ -428,6 +441,53 @@ void SchemaFileView::slot_UndoChanges()
 	return;
 }
 
+void SchemaFileView::slot_showHistory()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	// Get file history
+	//
+	DbFileInfo file = selectedFiles.front();
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistoryRecursive(file, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
+
+	return;
+}
+
+void SchemaFileView::slot_showHistoryForAllSchemas()
+{
+	// Get file history
+	//
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistoryRecursive(m_parentFile, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), m_parentFile.fileName(), fileHistory, this);
+
+	return;
+}
+
 void SchemaFileView::slot_AddFile()
 {
 	emit addFileSignal();
@@ -706,6 +766,7 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
 	m_checkInAction->setEnabled(hasCheckInPossibility);
 	m_undoChangesAction->setEnabled(hasUndoPossibility);
+	m_historyAction->setEnabled(s.size() == 1);
 
 	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
 	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
@@ -713,7 +774,6 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 	m_deleteFileAction->setEnabled(hasDeletePossibility);
 
 	return;
-
 }
 
 
@@ -1418,13 +1478,13 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Get file history
 	//
-	std::vector<DbChangesetInfo> fileHistory;
+	std::vector<DbChangeset> fileHistory;
 
 	db()->getFileHistory(file, &fileHistory, this);
 
 	// Show chageset dialog
 	//
-	int changesetId = SelectChangesetDialog::getChangeset(file.fileName(), fileHistory, this);
+	int changesetId = SelectChangesetDialog::getChangeset(db(), file, fileHistory, this);
 
 	if (changesetId == -1)
 	{

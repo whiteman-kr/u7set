@@ -13,11 +13,17 @@
   <property name="windowTitle">
    <string>History</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QTreeWidget" name="changesetList">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
