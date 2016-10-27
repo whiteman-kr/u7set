@@ -736,7 +736,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 
 		// Update object
 		//
-		auto& freshFileIt = std::find_if(freshFiles.begin(), freshFiles.end(),
+		auto freshFileIt = std::find_if(freshFiles.begin(), freshFiles.end(),
 				[d](const std::shared_ptr<DbFile>& f)
 				{
 					return d->fileId() == f->fileId();
