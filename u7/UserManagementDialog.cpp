@@ -28,7 +28,7 @@ UserManagementDialog::UserManagementDialog(QWidget* parent, DbController* dbCont
 
 	// Enable/disable Create new user button
 	//
-	ui->createUserButton->setEnabled(m_currentUser.isAdminstrator());
+	ui->isAdministrator->setEnabled(false);
 
 	return;
 }
@@ -63,7 +63,6 @@ void UserManagementDialog::enableUserControls(bool enable)
 	ui->oldPasswordEdit->setEnabled(enable);
 	ui->newPasswordEdit->setEnabled(enable);
 	ui->passwordConfirmationEdit->setEnabled(enable);
-	ui->isAdministrator->setEnabled(enable);
 	ui->isReadonly->setEnabled(enable);
 	ui->isDisabled->setEnabled(enable);
 
@@ -172,14 +171,12 @@ void UserManagementDialog::on_userChanged(const QString & username)
 	//
 	if (m_currentUser.isAdminstrator() && m_currentUser.userId() == 1 && username == m_currentUser.username())
 	{
-		ui->isAdministrator->setEnabled(false);
 		ui->isReadonly->setEnabled(false);
 		ui->isDisabled->setEnabled(false);
 	}
 
 	if (m_currentUser.isAdminstrator() == false)
 	{
-		ui->isAdministrator->setEnabled(false);		// Just Administrator has rights to change there fileds
 		ui->isDisabled->setEnabled(false);
 	}
 
@@ -194,14 +191,12 @@ void UserManagementDialog::on_userChanged(const QString & username)
 
 	if (username == m_currentUser.username() || username == "Administrator")
 	{
-		ui->isAdministrator->setEnabled(false);
 		ui->isReadonly->setEnabled(false);
 		ui->isDisabled->setEnabled(false);
 	}
 	else
 	{
 		ui->isReadonly->setEnabled(m_currentUser.isAdminstrator());
-		ui->isAdministrator->setEnabled(m_currentUser.isAdminstrator());
 		ui->isDisabled->setEnabled(m_currentUser.isAdminstrator());
 	}
 
