@@ -1770,7 +1770,7 @@ void DbWorker::slot_updateUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %8, %9);")
+	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8);")
 						 .arg(currentUser().userId())
 						 .arg(DbWorker::toSqlStr(user.username()))
 						 .arg(DbWorker::toSqlStr(user.firstName()))
