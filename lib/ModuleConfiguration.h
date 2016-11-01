@@ -70,6 +70,8 @@ namespace Hardware
         Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
         Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
 
+		Q_INVOKABLE quint32 calcCrc32(int frameIndex, int start, int count);
+
         Q_INVOKABLE void writeLog(QString logString);
 
 		Q_INVOKABLE void jsSetDescriptionFields(QString fields);
@@ -80,7 +82,10 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
+		quint64 uniqueID(int lmNumber);
+		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
 
+		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
 
 	private:
 
@@ -134,6 +139,10 @@ namespace Hardware
 		// channel data
 		//
 		std::map<int, ModuleFirmwareData> m_channelData;
+
+		// Unique ID
+		//
+		std::map<int, quint64> m_dataUniqueIDMap;
 
 		// binary data
 		//

@@ -58,6 +58,8 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
+		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules);
+
 		// Expand Devices StrId
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);
@@ -78,14 +80,6 @@ namespace Builder
 		// Load Application Functional Block Library
 		//
 		bool loadAfbl(DbController *db, Afb::AfbElementCollection* afbCollection);
-
-		// Generate Modules Configurations Firmwares
-		//
-		bool modulesConfiguration(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter);
-
-		// Generate Tuning configuration
-		//
-		bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Tuning::TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//

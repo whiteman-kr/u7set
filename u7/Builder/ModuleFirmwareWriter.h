@@ -13,8 +13,9 @@ namespace Hardware
 		bool save(QByteArray &dest, Builder::IssueLogger *log);
 		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger *log);
 
-    private:
+	private:
 		bool storeChannelData(Builder::IssueLogger *log);
+
 
     };
 
@@ -23,13 +24,19 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int buildNo, bool debug, int changesetId);
+		ModuleFirmwareCollection();
 		virtual ~ModuleFirmwareCollection();
+
+		void init(const QString& projectName, const QString& userName, int buildNo, bool debug, int changesetId);
 
 		// Methods
 		//
 	public:
 		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount);
+
+		quint64 getFirmwareUniqueId(const QString &subsystemID, int lmNumber);
+
+		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
 
 		// Properties
 		//

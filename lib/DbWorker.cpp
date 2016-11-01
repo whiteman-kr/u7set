@@ -133,6 +133,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0115.sql", "Upgrade to version 115, add get_history function"},
 	{":/DatabaseUpgrade/Upgrade0116.sql", "Upgrade to version 116, remove administrator rights to all except UserID=1"},
 	{":/DatabaseUpgrade/Upgrade0117.sql", "Upgrade to version 117, update LM-1 preset"},
+	{":/DatabaseUpgrade/Upgrade0118.sql", "Upgrade to version 118, update configuration script to count UniqueID"},
 };
 
 

@@ -386,6 +386,16 @@ namespace Builder
 		return true;
 	}
 
+	quint64 MultichannelFile::getFirmwareUniqueId(int lmNumber)
+	{
+		return m_moduleFirmware.uniqueID(lmNumber);
+	}
+
+	void MultichannelFile::setGenericUniqueId(int lmNumber, quint64 genericUniqueId)
+	{
+		m_moduleFirmware.setGenericUniqueId(lmNumber, genericUniqueId);
+	}
+
 
 	// --------------------------------------------------------------------------------------
 	//
@@ -992,6 +1002,42 @@ namespace Builder
 	bool BuildResultWriter::isRelease() const
 	{
 		return m_buildInfo.release;
+	}
+
+	quint64 BuildResultWriter::getAppUniqueId(const QString &subsystemID, int lmNumber)
+	{
+		if (m_multichannelFiles.contains(subsystemID) == false)
+		{
+			assert(false);
+			return 0;
+		}
+		MultichannelFile* multiChannelFile = m_multichannelFiles[subsystemID];
+		if (multiChannelFile == nullptr)
+		{
+			assert(multiChannelFile);
+			return 0;
+		}
+
+		quint64 result = multiChannelFile->getFirmwareUniqueId(lmNumber);
+		return result;
+
+	}
+
+	void BuildResultWriter::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
+	{
+		if (m_multichannelFiles.contains(subsystemID) == false)
+		{
+			assert(false);
+			return;
+		}
+		MultichannelFile* firmware = m_multichannelFiles[subsystemID];
+		if (firmware == nullptr)
+		{
+			assert(firmware);
+			return;
+		}
+
+		firmware->setGenericUniqueId(lmNumber, genericUniqueId);
 	}
 
 }
