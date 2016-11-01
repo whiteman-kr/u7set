@@ -132,6 +132,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0114.sql", "Upgrade to version 114, add get_changeset_details, change retval get_file_history, get_file_history_recursive"},
 	{":/DatabaseUpgrade/Upgrade0115.sql", "Upgrade to version 115, add get_history function"},
 	{":/DatabaseUpgrade/Upgrade0116.sql", "Upgrade to version 116, remove administrator rights to all except UserID=1"},
+	{":/DatabaseUpgrade/Upgrade0117.sql", "Upgrade to version 117, update LM-1 preset"},
 };
 
 
