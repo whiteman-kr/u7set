@@ -363,9 +363,9 @@ namespace Builder
 	}
 
 
-	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode, const std::vector<QVariantList>& descriptionData)
+	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList>& descriptionData)
 	{
-		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, 0/*uniqueID*/, appLogicBinCode, descriptionData, m_log) == false)
+		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, uniqueID, appLogicBinCode, descriptionData, m_log) == false)
 		{
 			return false;
 		}

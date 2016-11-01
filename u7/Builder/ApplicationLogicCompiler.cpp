@@ -1163,16 +1163,11 @@ namespace Builder
 			}
 		}
 
-		if (result == true)
-		{
-			result &= m_resultWriter->writeMultichannelFiles();
-		}
-
 		return result;
 	}
 
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, ApplicationLogicCode& appLogicCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -1197,7 +1192,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, binCode, metadata);
+			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, uniqueID, binCode, metadata);
 		}
 		else
 		{

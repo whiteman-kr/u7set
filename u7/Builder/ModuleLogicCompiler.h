@@ -629,7 +629,7 @@ namespace Builder
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
 		bool setLmAppLANDataSize();
-		bool setLmAppLANDataUID(const QByteArray& lmAppCode);
+		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
 
 		bool generateRS232ConectionCode();
 		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);

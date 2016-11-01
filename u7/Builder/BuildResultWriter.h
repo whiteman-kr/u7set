@@ -111,7 +111,7 @@ namespace Builder
 	public:
 		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, const QStringList &descriptionFields);
 
-		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
+		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
 
 		bool getFileData(QByteArray& fileData);
 

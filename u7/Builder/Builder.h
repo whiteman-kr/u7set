@@ -112,6 +112,8 @@ namespace Builder
 											Tuning::TuningDataStorage* tuningDataStorage,
 											BuildResultWriter* buildResultWriter);
 
+		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
+
 		// What's the next compilation task?
 		//
 

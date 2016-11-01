@@ -259,6 +259,20 @@ namespace Builder
 			}
 
 			//
+			// Tuning parameters
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
+
+			ok = tuningParameters(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Generate SCADA software configurations
 			//
 			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
@@ -283,13 +297,7 @@ namespace Builder
 				break;
 			}
 
-			//
-			// Tuning parameters
-			//
-			LOG_EMPTY_LINE(m_log);
-			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
-
-			ok = tuningParameters(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
+			ok = writeBinaryFiles(buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1003,6 +1011,16 @@ namespace Builder
 		{
 			LOG_SUCCESS(m_log, tr("Sofware configuration generation was succesfully finished"));
 		}
+
+		return result;
+	}
+
+
+	bool BuildWorkerThread::writeBinaryFiles(BuildResultWriter &buildResultWriter)
+	{
+		bool result = true;
+
+		result &= buildResultWriter.writeMultichannelFiles();
 
 		return result;
 	}
