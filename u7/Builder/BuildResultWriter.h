@@ -111,13 +111,17 @@ namespace Builder
 	public:
 		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, const QStringList &descriptionFields);
 
-		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
+		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
 
 		bool getFileData(QByteArray& fileData);
 
 		QString subsysStrID() const { return m_subsysStrID; }
 		QString lmCaption() const { return m_lmCaption; }
+		QString lmEquipmentID() const { return m_lmEquipmentID; }
 		int subsysID() const { return m_subsysID; }
+
+		quint64 getFirmwareUniqueId(int lmNumber);
+		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
 	};
 
 
@@ -216,6 +220,10 @@ namespace Builder
 
 		bool isDebug() const;
 		bool isRelease() const;
+
+		quint64 getAppUniqueId(const QString& subsystemID, int lmNumber);
+
+		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
 	};
 }
 

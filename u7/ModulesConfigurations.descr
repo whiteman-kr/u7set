@@ -32,7 +32,8 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 21;		// DataUID for LM modules is taken from linked port
 //var configScriptVersion = 22;		// added builder parameter to interrupt build
 //var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
-var configScriptVersion = 24;		// buildThread has been replaced by builder, added buildNo
+//var configScriptVersion = 25;		// buildThread has been replaced by builder, added buildNo
+var configScriptVersion = 25;		// added UniqueID computing
 
 
 function(builder, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
@@ -442,18 +443,21 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "UartID", uartId) == false)  //CFG_Ch_Dtype == UARTID?
+    
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "UartID", uartId) == false)  //CFG_Ch_Dtype == UARTID?
 	{
 		return false;
 	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = "+ uartId + "\r\n");
     ptr += 2;
-	var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
-	if (hashString == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
+	
+	//var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
+	//if (hashString == "")
+	//{
+	//		return false;
+	//}
+	//confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
+	//Hash (UniqueID) will be counted later
     ptr += 8;
     
     // I/O Modules configuration
@@ -777,6 +781,21 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 	{
 		return false;
 	}
+	
+	// create UniqueID
+	//
+	var startFrame = configStartFrames + configFrameCount * (LMNumber - 1);
+
+	var uniqueID = 0;
+	
+	for (var i = 0; i < configFrameCount; i++)
+	{
+		var crc = confFirmware.calcCrc32(startFrame + i, 0, frameSize);
+
+		uniqueID ^= crc;
+	}
+	
+	confFirmware.jsSetUniqueID(LMNumber, uniqueID);
   
 	return true;
 }

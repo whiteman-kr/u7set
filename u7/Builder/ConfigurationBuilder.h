@@ -46,19 +46,24 @@ namespace Builder
 		ConfigurationBuilder() = delete;
 		ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 							 Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
-							 QString projectName, QString userName, BuildResultWriter* buildWriter);
+							 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> &lmModules);
 		virtual ~ConfigurationBuilder();
 
-		bool build();
+		bool build(BuildResultWriter &buildResultWriter);
+
+		bool writeBinaryFiles(BuildResultWriter &buildResultWriter);
 
 		Q_INVOKABLE int jsBuildNo();
 		Q_INVOKABLE bool jsIsInterruptRequested();
+
+		quint64 getFirmwareUniqueId(const QString &subsystemID, int lmNumber);
+
+		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
 
 	protected:
 
 
 	private:
-		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>& modules);
 		DbController* db();
 		IssueLogger* log() const;
 		int buildNo() const;
@@ -67,6 +72,8 @@ namespace Builder
 		bool release() const;
 
 	private:
+		Hardware::ModuleFirmwareCollection m_confCollection;
+
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
@@ -74,7 +81,7 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
-		BuildResultWriter* m_buildWriter = nullptr;
+		std::vector<Hardware::DeviceModule*> m_lmModules;
 
 		int m_buildNo = 0;
 		int m_changesetId = 0;

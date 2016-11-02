@@ -10,19 +10,19 @@ namespace Builder
 
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 								 Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int buildNo, int changesetId, bool debug,
-								 QString projectName, QString userName, BuildResultWriter* buildWriter):
+								 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_tuningDataStorage(tuningDataStorage),
 		m_log(log),
-		m_buildWriter(buildWriter),
 		m_buildNo(buildNo),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName)
+		m_userName(userName),
+		m_lmModules(lmModules)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -30,7 +30,6 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_tuningDataStorage);
 		assert(m_log);
-		assert(m_buildWriter);
 
 		return;
 	}
@@ -49,14 +48,9 @@ namespace Builder
 			return false;
 		}
 
-		Hardware::ModuleFirmwareCollection firmwareCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
+		m_firmwareCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
-		std::vector<Hardware::DeviceModule*> lmModules;
-		findLmModules(m_deviceRoot, lmModules);
-
-		QString errorString;
-
-		for (Hardware::DeviceModule* m : lmModules)
+		for (Hardware::DeviceModule* m : m_lmModules)
 		{
 
 			if (m->propertyExists("SubsystemID") == false)
@@ -103,7 +97,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = (Hardware::ModuleFirmwareWriter*)firmwareCollection.jsGet(tr("LM-1"), subsysStrID, subsysID, 0x104, frameSize, frameCount);
+			Hardware::ModuleFirmwareWriter* firmware = (Hardware::ModuleFirmwareWriter*)m_firmwareCollection.jsGet(tr("LM-1"), subsysStrID, subsysID, 0x104, frameSize, frameCount);
 			if (firmware == nullptr)
 			{
 				assert(firmware);
@@ -143,7 +137,12 @@ namespace Builder
 			}
 		}
 
-		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = firmwareCollection.firmwares();
+		return true;
+	}
+
+	bool TuningBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
+	{
+		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = m_firmwareCollection.firmwares();
 		for (auto it = firmwares.begin(); it != firmwares.end(); it++)
 		{
 			Hardware::ModuleFirmwareWriter& f = it->second;
@@ -169,43 +168,25 @@ namespace Builder
 				return false;
 			}
 
-			if (m_buildWriter->addFile(path, fileName + ".tub", data) == false)
+			if (buildResultWriter.addFile(path, fileName + ".tub", data) == false)
 			{
 				return false;
 			}
 		}
 
-
 		return true;
 	}
 
-	void TuningBuilder::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)
+	quint64 TuningBuilder::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
 	{
-		if (object == nullptr)
-		{
-			assert(object);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i);
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->moduleFamily() == Hardware::DeviceModule::LM)
-				{
-					modules.push_back(module);
-				}
-			}
-
-			findLmModules(child, modules);
-		}
-
-		return;
+		return m_firmwareCollection.getFirmwareUniqueId(subsystemID, lmNumber);
 	}
+
+	void TuningBuilder::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
+	{
+		m_firmwareCollection.setGenericUniqueId(subsystemID, lmNumber, genericUniqueId);
+	}
+
 
 	DbController* TuningBuilder::db()
 	{

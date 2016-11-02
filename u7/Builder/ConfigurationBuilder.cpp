@@ -53,7 +53,7 @@ namespace Builder
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
 											   IssueLogger *log, int buildNo, int changesetId, bool debug, QString projectName, QString userName,
-											   BuildResultWriter* buildWriter):
+											   const std::vector<Hardware::DeviceModule*>& lmModules):
 		m_buildWorkerThread(buildWorkerThread),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
@@ -61,12 +61,12 @@ namespace Builder
 		m_subsystems(subsystems),
 		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
-		m_buildWriter(buildWriter),
 		m_buildNo(buildNo),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName)
+		m_userName(userName),
+		m_lmModules(lmModules)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -74,7 +74,6 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_opticModuleStorage);
 		assert(m_log);
-		assert(m_buildWriter);
 
 		return;
 	}
@@ -83,7 +82,7 @@ namespace Builder
 	{
 	}
 
-	bool ConfigurationBuilder::build()
+	bool ConfigurationBuilder::build(BuildResultWriter &buildResultWriter)
 	{
 		if (db() == nullptr || log() == nullptr)
 		{
@@ -100,43 +99,6 @@ namespace Builder
 		LOG_MESSAGE(m_log, tr("Generating modules configurations"));
 
 		bool ok = false;
-
-		// Check if connections' identifiers (non-empty) exist in the database
-		//
-		/*for (int i = 0; i < m_connections->count(); i++)
-		{
-			std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
-
-			std::vector<Hardware::DeviceObject*> list;
-
-			if (connection->port1StrID().length() > 0)
-			{
-				list.clear();
-				m_deviceRoot->findChildObjectsByMask(connection->port1StrID(), list);
-				if (list.empty() == true)
-				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-							  tr("No source port %1 was found for connection %2").arg(connection->port1StrID()).arg(connection->caption()));
-					return false;
-				}
-			}
-
-			if (connection->mode() == Hardware::OptoPort::Mode::Optical)
-			{
-				if (connection->port2StrID().length() > 0)
-				{
-					list.clear();
-					m_deviceRoot->findChildObjectsByMask(connection->port2StrID(), list);
-					if (list.empty() == true)
-					{
-						LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-								  tr("No target port %1 was found for connection %2").arg(connection->port2StrID()).arg(connection->caption()));
-						return false;
-					}
-				}
-			}
-		}*/
-
 
 		// Get script file from the project databse
 		//
@@ -187,7 +149,7 @@ namespace Builder
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, buildNo(), debug(), changesetId());
+		m_confCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
 		QJSValue jsBuilder = jsEngine.newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
@@ -195,8 +157,8 @@ namespace Builder
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
-		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
+		QJSValue jsConfCollection = jsEngine.newQObject(&m_confCollection);
+		QQmlEngine::setObjectOwnership(&m_confCollection, QQmlEngine::CppOwnership);
 
 		QJSValue jsLog = jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
@@ -241,13 +203,10 @@ namespace Builder
 		{
 			return false;
 		}
-		qDebug() << jsResult.toInt();
 
 		// Find all LM modules and save ssKey and channel information
 		//
-		std::vector<Hardware::DeviceModule*> lmModules;
-		findLmModules(m_deviceRoot, lmModules);
-		std::sort(lmModules.begin(), lmModules.end(),
+		std::sort(m_lmModules.begin(), m_lmModules.end(),
 				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
 				  {
 					  return a->equipmentIdTemplate() < b->equipmentIdTemplate();
@@ -256,7 +215,7 @@ namespace Builder
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
 
-		for (Hardware::DeviceModule* m : lmModules)
+		for (Hardware::DeviceModule* m : m_lmModules)
 		{
 			if (m->propertyExists("SubsystemID") == false)
 			{
@@ -304,11 +263,18 @@ namespace Builder
 			lmReportData.append(s + "\r\n");
 		}
 
-		if (m_buildWriter->addFile("Reports", "lmJumpers.txt", lmReportData) == false)
+		if (buildResultWriter.addFile("Reports", "lmJumpers.txt", lmReportData) == false)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save lmJumpers.txt file!"));
 			return false;
 		}
+
+		return true;
+	}
+
+	bool ConfigurationBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
+	{
+
 
 		// Save confCollection items to binary files
 		//
@@ -318,7 +284,7 @@ namespace Builder
 		}
 		else
 		{
-			for (auto i = confCollection.firmwares().begin(); i != confCollection.firmwares().end(); i++)
+			for (auto i = m_confCollection.firmwares().begin(); i != m_confCollection.firmwares().end(); i++)
 			{
 				Hardware::ModuleFirmwareWriter& f = i->second;
 
@@ -343,12 +309,12 @@ namespace Builder
 					return false;
 				}
 
-				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
+				if (buildResultWriter.addFile(path, fileName + ".mcb", data) == false)
 				{
 					return false;
 				}
 
-				if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
+				if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == false)
 				{
 					return false;
 				}
@@ -374,33 +340,16 @@ namespace Builder
 		return m_buildWorkerThread->isInterruptRequested();
 	}
 
-	void ConfigurationBuilder::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)
+	quint64 ConfigurationBuilder::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
 	{
-		if (object == nullptr)
-		{
-			assert(object);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i);
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->moduleFamily() == Hardware::DeviceModule::LM)
-				{
-					modules.push_back(module);
-				}
-			}
-
-			findLmModules(child, modules);
-		}
-
-		return;
+		return m_confCollection.getFirmwareUniqueId(subsystemID, lmNumber);
 	}
+
+	void ConfigurationBuilder::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
+	{
+		m_confCollection.setGenericUniqueId(subsystemID, lmNumber, genericUniqueId);
+	}
+
 
 	DbController* ConfigurationBuilder::db()
 	{

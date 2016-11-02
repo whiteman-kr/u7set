@@ -2807,7 +2807,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::setLmAppLANDataUID(const QByteArray& lmAppCode)
+	bool ModuleLogicCompiler::setLmAppLANDataUID(const QByteArray& lmAppCode, quint64& uniqueID)
 	{
 		Crc64 crc;
 
@@ -2864,6 +2864,8 @@ namespace Builder
 			crc.add(appRegSignals[k]->appSignalID());
 			crc.add(appRegSignals[k]->regAddr().bitAddress());
 		}
+
+		uniqueID = crc.result();
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											"AppLANDataUID",
@@ -4347,19 +4349,21 @@ namespace Builder
 
 		m_code.generateBinCode();
 
-		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_code);
+		QByteArray binCode;
+
+		m_code.getBinCode(binCode);
+
+		quint64 uniqueID = 0;
+
+		result &= setLmAppLANDataUID(binCode, uniqueID);
+
 		if (result == false)
 		{
 			return false;
 		}
 
-		QByteArray binCode;
-
-		m_code.getBinCode(binCode);
-
-		result &= setLmAppLANDataUID(binCode);
-
+		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
+														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, uniqueID, m_code);
 		if (result == false)
 		{
 			return false;

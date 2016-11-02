@@ -532,7 +532,7 @@ namespace Hardware
     QString ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
-			offset > (int)(frameSize() - sizeof(quint64)) || start + count >= frameSize())
+			offset > (int)(frameSize() - sizeof(quint64)) || start + count > frameSize())
         {
             qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
             return QString();
@@ -564,6 +564,20 @@ namespace Hardware
 
 		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
+	}
+
+	quint32 ModuleFirmware::calcCrc32(int frameIndex, int start, int count)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			start + count > frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
+
+		return result & 0xffffffff;
 	}
 
     void ModuleFirmware::writeLog(QString logString)
@@ -619,7 +633,63 @@ namespace Hardware
         return m_frames[frameIndex];
     }
 
+	quint64 ModuleFirmware::uniqueID(int lmNumber)
+	{
+		auto it = m_dataUniqueIDMap.find(lmNumber);
+		if (it == m_dataUniqueIDMap.end())
+		{
+			assert(false);
+			return 0;
+		}
 
+		return it->second;
+	}
+
+	void ModuleFirmware::jsSetUniqueID(int lmNumber, quint64 uniqueID)
+	{
+		m_dataUniqueIDMap[lmNumber] = uniqueID;
+	}
+
+
+	void ModuleFirmware::setGenericUniqueId(int lmNumber, quint64 genericUniqueId)
+	{
+		if (m_channelData.empty() == false)
+		{
+			if (m_channelData.find(lmNumber) == m_channelData.end())
+			{
+				assert(false);
+				return;
+			}
+
+			m_channelData[lmNumber].uniqueID = genericUniqueId;
+		}
+		else
+		{
+			const int ConfigDataStartFrame = 2;
+
+			const int LMNumberConfigFrameCount = 19;
+
+			int frameNumber = ConfigDataStartFrame + LMNumberConfigFrameCount * (lmNumber - 1);
+
+			const int UniqueIdOffset = 4;
+
+			quint64 uidBE = qToBigEndian(genericUniqueId);
+
+			if (frameNumber < 0 || frameNumber >= (int)m_frames.size())
+			{
+				assert(false);
+				return;
+			}
+
+			std::vector<quint8>& frame = m_frames[frameNumber];
+
+			quint8* pData = frame.data();
+
+			quint64* pUniqueIdPtr = (quint64*)(pData + UniqueIdOffset);
+
+			*pUniqueIdPtr = uidBE;
+		}
+	}
 
 
 	QString ModuleFirmware::caption() const

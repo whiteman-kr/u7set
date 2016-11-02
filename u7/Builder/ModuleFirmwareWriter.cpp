@@ -178,12 +178,15 @@ bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int 
 	channelData.data = data;
 	channelData.uniqueID = uniqueID;
 
+	m_dataUniqueIDMap[channel] = uniqueID;
+
 	m_descriptonData[channel] = descriptionData;
 
 	m_channelData[channel] = channelData;
 
 	return true;
 }
+
 
 bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 {
@@ -370,24 +373,32 @@ bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
 	return true;
 }
 
+
+
 //
 //
 // ModuleFirmwareCollection
 //
 //
 
-ModuleFirmwareCollection::ModuleFirmwareCollection(const QString &projectName, const QString &userName,
-												   int buildNo, bool debug, int changesetId):
-	m_projectName(projectName),
-	m_userName(userName),
-	m_buildNo(buildNo),
-	m_debug(debug),
-	m_changesetId(changesetId)
+ModuleFirmwareCollection::ModuleFirmwareCollection():
+	m_buildNo(0),
+	m_debug(false),
+	m_changesetId(0)
 {
 }
 
 ModuleFirmwareCollection::~ModuleFirmwareCollection()
 {
+}
+
+void ModuleFirmwareCollection::init(const QString& projectName, const QString& userName, int buildNo, bool debug, int changesetId)
+{
+	m_projectName = projectName;
+	m_userName = userName;
+	m_buildNo = buildNo;
+	m_debug = debug;
+	m_changesetId = changesetId;
 }
 
 QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount)
@@ -406,9 +417,36 @@ QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int 
 	return &fw;
 }
 
+quint64 ModuleFirmwareCollection::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
+{
+	if (m_firmwares.count(subsystemID) == 0)
+	{
+		assert(false);
+		return 0;
+	}
+
+	ModuleFirmware& fw = m_firmwares[subsystemID];
+
+	return fw.uniqueID(lmNumber);
+}
+
+void ModuleFirmwareCollection::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
+{
+	if (m_firmwares.count(subsystemID) == 0)
+	{
+		assert(false);
+		return;
+	}
+
+	ModuleFirmware& fw = m_firmwares[subsystemID];
+
+	fw.setGenericUniqueId(lmNumber, genericUniqueId);
+}
+
 std::map<QString, ModuleFirmwareWriter> &ModuleFirmwareCollection::firmwares()
 {
 	return m_firmwares;
 }
+
 
 }

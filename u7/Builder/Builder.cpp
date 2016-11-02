@@ -212,6 +212,14 @@ namespace Builder
 				}
 			}
 
+
+			//
+			// Find all LM Modules
+			//
+
+			std::vector<Hardware::DeviceModule *> lmModules;
+			findLmModules(equipmentSet.root(), lmModules);
+
 			//
 			// Loading connections
 			//
@@ -259,6 +267,23 @@ namespace Builder
 			}
 
 			//
+			// Tuning parameters
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
+
+			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, m_log,
+										buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules);
+
+			ok = tuningBuilder.build();
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Generate SCADA software configurations
 			//
 			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
@@ -275,7 +300,11 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ok = modulesConfiguration(this, &db, equipmentSet.root(), &signalSet, &subsystems, &opticModuleStorage, lastChangesetId, &buildWriter);
+			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), &signalSet, &subsystems, &opticModuleStorage, m_log,
+											   buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules);
+
+			ok = cfgBuilder.build(buildWriter);
+
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -284,12 +313,66 @@ namespace Builder
 			}
 
 			//
-			// Tuning parameters
+			// Count Unique ID for this compilation
 			//
-			LOG_EMPTY_LINE(m_log);
-			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-			ok = tuningParameters(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, lastChangesetId, &buildWriter);
+			for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+			{
+				Hardware::DeviceModule* lm = *it;
+				if (lm == nullptr)
+				{
+					assert(lm);
+					break;
+				}
+
+				QString subsysID = lm->propertyValue("SubsystemID").toString();
+				if (subsysID.isEmpty())
+				{
+					assert(false);
+					continue;
+				}
+
+				bool ok = false;
+				int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
+				if (ok == false)
+				{
+					assert(false);
+					continue;
+				}
+
+				quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
+				quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+				quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+
+				quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+
+				buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+				tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+				cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+
+			}
+
+			//
+			// Write logic, configuration and tuning binary files
+			//
+
+			ok = writeBinaryFiles(buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			ok = tuningBuilder.writeBinaryFiles(buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			ok = cfgBuilder.writeBinaryFiles(buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -404,6 +487,34 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)
+	{
+		if (object == nullptr)
+		{
+			assert(object);
+			return;
+		}
+
+		for (int i = 0; i < object->childrenCount(); i++)
+		{
+			Hardware::DeviceObject* child = object->child(i);
+
+			if (child->deviceType() == Hardware::DeviceType::Module)
+			{
+				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+
+				if (module->moduleFamily() == Hardware::DeviceModule::LM)
+				{
+					modules.push_back(module);
+				}
+			}
+
+			findLmModules(child, modules);
+		}
+
+		return;
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
@@ -798,50 +909,6 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::OptoModuleStorage *opticModuleStorage, int changesetId, BuildResultWriter* buildWriter)
-	{
-		if (buildWorkerThread == nullptr ||
-			db == nullptr ||
-			deviceRoot == nullptr ||
-			signalSet == nullptr ||
-			subsystems == nullptr ||
-			opticModuleStorage == nullptr ||
-			buildWriter == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		ConfigurationBuilder cfgBuilder = {buildWorkerThread, db, deviceRoot, signalSet, subsystems, opticModuleStorage, m_log,
-										   buildWriter->buildInfo().id, changesetId, debug(), projectName(), projectUserName(), buildWriter};
-
-		bool result = cfgBuilder.build();
-
-		return result;
-
-	}
-
-	bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Tuning::TuningDataStorage *tuningDataStorage, int changesetId, BuildResultWriter* buildWriter)
-	{
-		if (db == nullptr ||
-			deviceRoot == nullptr ||
-			signalSet == nullptr ||
-			subsystems == nullptr ||
-			tuningDataStorage == nullptr ||
-			buildWriter == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, tuningDataStorage, m_log,
-									buildWriter->buildInfo().id, changesetId, debug(), projectName(), projectUserName(), buildWriter};
-
-		bool result = tunBuilder.build();
-
-		return result;
-
-	}
 
 	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
@@ -1003,6 +1070,16 @@ namespace Builder
 		{
 			LOG_SUCCESS(m_log, tr("Sofware configuration generation was succesfully finished"));
 		}
+
+		return result;
+	}
+
+
+	bool BuildWorkerThread::writeBinaryFiles(BuildResultWriter &buildResultWriter)
+	{
+		bool result = true;
+
+		result &= buildResultWriter.writeMultichannelFiles();
 
 		return result;
 	}
@@ -1209,4 +1286,6 @@ namespace Builder
 	{
 	}
 
+
 }
+
