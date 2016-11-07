@@ -1024,15 +1024,12 @@ namespace Builder
 
 		Command cmd;
 
-		if (m_convertUsedInOutAnalogSignalsOnly == true)
-		{
-			// initialize module signals memory to 0
-			//
-			cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
-			cmd.setComment(tr("initialize module memory to 0"));
-			m_code.append(cmd);
-			m_code.newLine();
-		}
+		// initialize module signals memory to 0
+		//
+		cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
+		cmd.setComment(tr("initialize module memory to 0"));
+		m_code.append(cmd);
+		m_code.newLine();
 
 		bool result = true;
 
@@ -1177,6 +1174,15 @@ namespace Builder
 			return false;
 		}
 
+		Command cmd;
+
+		// initialize module signals memory to 0
+		//
+		//cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
+		//cmd.setComment(tr("initialize module memory to 0"));
+		//m_code.append(cmd);
+		//m_code.newLine();
+
 		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
 
 		if (controller == nullptr)
@@ -1185,8 +1191,6 @@ namespace Builder
 		}
 
 		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
-
-		Command cmd;
 
 		bool result = true;
 
