@@ -2646,7 +2646,7 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
 				  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%1.%3'.")).
-				  arg(fbCaption).arg(param1).arg(fbCaption).arg(param2));
+				  arg(fbCaption).arg(param1).arg(param2));
 	}
 
 	/// IssueCode: ALC5053

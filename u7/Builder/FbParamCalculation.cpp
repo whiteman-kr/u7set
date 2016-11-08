@@ -1472,21 +1472,24 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
+		requiredParams.append("i_kd");
 		requiredParams.append("i_td");
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
+		AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
 		AppFbParamValue& i_td = m_paramValuesArray["i_td"];
 		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
 		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
 
-		CHECK_FLOAT32(i_td);
+		CHECK_FLOAT32(i_kd);
+		CHECK_SIGNED_INT32(i_td);
 		CHECK_FLOAT32(i_max);
 		CHECK_FLOAT32(i_min);
 
-		float i_td_value = i_td.floatValue();
+		int i_td_value = i_td.signedIntValue();
 
 		if (i_td_value < 0)
 		{
