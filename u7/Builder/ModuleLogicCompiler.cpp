@@ -486,7 +486,9 @@ namespace Builder
 
 		if (m_moduleLogic == nullptr)
 		{
-			m_log->wrnALC5001(m_lm->equipmentIdTemplate());			//	Application logic for module '%1' is not found.
+			//	Application logic for module '%1' is not found.
+			//
+			m_log->wrnALC5001(m_lm->equipmentIdTemplate());
 		}
 
 		do
@@ -572,6 +574,20 @@ namespace Builder
 		}
 		qDebug() << "----------------------------- APPLICATION LOGIC END --------------------------";
 	}
+
+
+	QString ModuleLogicCompiler::getSchemaID(const LogicConst& constItem)
+	{
+		AppItem* appItem = m_appItems.value(constItem.guid(), nullptr);
+
+		if (appItem != nullptr)
+		{
+			return appItem->schemaID();
+		}
+
+		return QString();
+	}
+
 
 
 	bool ModuleLogicCompiler::buildOptoModulesStorage()
@@ -2102,9 +2118,12 @@ namespace Builder
 		case E::SignalType::Discrete:
 			// input connected to discrete input
 			//
-			if (!constItem.isIntegral())
+			if (constItem.isIntegral() == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Floating point constant connected to discrete input")));
+				// Float constant is connected to discrete input (Logic schema '%1').
+				//
+				m_log->errALC5060(getSchemaID(constItem), constItem.guid());
+				result = false;
 			}
 			else
 			{
@@ -2118,25 +2137,54 @@ namespace Builder
 		case E::SignalType::Analog:
 			// const connected to analog input
 			//
-
 			switch(fbInput.size())
 			{
 			case SIZE_16BIT:
-				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
-				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constItem.intValue()));
+				if (constItem.isIntegral() == false)
+				{
+					// Float constant is connected to 16-bit input (Logic schema '%1').
+					//
+					m_log->errALC5061(getSchemaID(constItem), constItem.guid());
+					result = false;
+				}
+				else
+				{
+					cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constItem.intValue()));
+				}
 				break;
 
 			case SIZE_32BIT:
 				switch(fbInput.dataFormat())
 				{
 				case E::DataFormat::SignedInt:
-					cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
-					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.intValue()));
+					if (constItem.isIntegral() == false)
+					{
+						// Float constant is connected to SignedInt input (Logic schema '%1').
+						//
+						m_log->errALC5062(getSchemaID(constItem), constItem.guid());
+						result = false;
+					}
+					else
+					{
+						cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.intValue()));
+					}
 					break;
 
 				case E::DataFormat::Float:
-					cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
-					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.floatValue()));
+					if (constItem.isFloat() == false)
+					{
+						// Integer constant is connected to Float input (Logic schema '%1').
+						//
+						m_log->errALC5063(getSchemaID(constItem), constItem.guid());
+						result = false;
+					}
+					else
+					{
+						cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.floatValue()));
+					}
 					break;
 
 				default:

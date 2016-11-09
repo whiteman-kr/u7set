@@ -702,6 +702,8 @@ namespace Builder
 
 		void dumApplicationLogicItems();
 
+		QString getSchemaID(const LogicConst& constItem);
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();

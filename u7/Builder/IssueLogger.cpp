@@ -2809,6 +2809,91 @@ namespace Builder
 				  arg(connectionID).arg(lmID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5060
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant is connected to discrete input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Float constant is connected to discrete input. Change contant type to IntegerType.
+	///
+	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5060,
+				  QString(tr("Float constant is connected to discrete input (Logic schema '%1').")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5061
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant is connected to 16-bit input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Float constant is connected to 16-bit input. Change contant type to IntegerType.
+	///
+	void IssueLogger::errALC5061(QString schemaID, QUuid constantUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5061,
+				  QString(tr("Float constant is connected to 16-bit input (Logic schema '%1').")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5062
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant is connected to SignedInt input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Float constant is connected to SignedInt input. Change contant type to IntegerType.
+	///
+	void IssueLogger::errALC5062(QString schemaID, QUuid constantUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5062,
+				  QString(tr("Float constant is connected to SignedInt input (Logic schema '%1').")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5063
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Integer constant is connected to Float input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Integer constant is connected to Float input. Change contant type to FloatType.
+	///
+	void IssueLogger::errALC5063(QString schemaID, QUuid constantUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5063,
+				  QString(tr("Integer constant is connected to Float input (Logic schema '%1').")).arg(schemaID));
+	}
+
+
 
 	// EQP			Equipment issues						6000-6999
 	//
