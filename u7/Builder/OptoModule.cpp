@@ -438,7 +438,12 @@ namespace Hardware
 
 		const RawDataDescriptionItem& rawDataSizeItem = m_rawDataDescription[RAW_DATA_SIZE_INDEX];
 
-		assert(rawDataSizeItem.type == Hardware::OptoPort::RawDataDescriptionItemType::RawDataSize);
+		if (rawDataSizeItem.type != Hardware::OptoPort::RawDataDescriptionItemType::RawDataSize)
+		{
+			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. RAW_DATA_SIZE item not found.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
 
 		m_txRawDataSizeWCalculationStarted = true;		// to prevent cyclic calculatePortRawDataSize()
 

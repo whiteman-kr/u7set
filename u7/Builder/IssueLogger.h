@@ -219,6 +219,10 @@ namespace Builder
 		void errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid);				// Uncompatible data format of analog AFB signal '%1.%2'.
 		void errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' can't be 0.
 		void errALC5059(QString schemaID, QString connectionID, QString lmID, QUuid transmitterUuid);			// Ports of connection '%1' are not accessible in LM '%2'
+		void errALC5060(QString schemaID, QUuid constantUuid);													// Float constant is connected to discrete input (Logic schema '%1').
+		void errALC5061(QString schemaID, QUuid constantUuid);													// Float constant is connected to 16-bit input (Logic schema '%1').
+		void errALC5062(QString schemaID, QUuid constantUuid);													// Float constant is connected to SignedInt input (Logic schema '%1').
+		void errALC5063(QString schemaID, QUuid constantUuid);													// Integer constant is connected to Float input (Logic schema '%1').
 
 		// EQP			Equipment issues						6000-6999
 		//

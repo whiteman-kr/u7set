@@ -2530,7 +2530,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						assert(false);
+                        //assert(false);
 
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
