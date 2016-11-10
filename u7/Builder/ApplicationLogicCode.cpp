@@ -274,20 +274,14 @@ namespace Builder
 
     QHash<int, const LmCommand*> Command::m_lmCommands;
 
-    int Command::m_bitMemoryStart = 0;
-    int Command::m_bitMemorySizeW = 0;
-    int Command::m_wordMemoryStart = 0;
-    int Command::m_wordMemorySizeW = 0;
-
+	LmMemoryMap* Command::m_memoryMap = nullptr;
+	IssueLogger* Command::m_log = nullptr;
 
     Command::Command()
     {
-        if (m_bitMemoryStart == 0 ||
-            m_bitMemorySizeW == 0 ||
-            m_wordMemoryStart == 0 ||
-            m_wordMemorySizeW == 0)
+		if (m_memoryMap == nullptr)
         {
-            assert(false);			// call ApplicationLogicCode::initCommandMemoryRanges() first
+			assert(false);			// call ApplicationLogicCode::initMemoryMap() first
             return;
         }
 
@@ -302,166 +296,240 @@ namespace Builder
     }
 
 
-    void Command::setMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW)
+	void Command::setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log)
     {
-        m_bitMemoryStart = bitMemoryStart;
-        m_bitMemorySizeW = bitMemorySizeW;
-        m_wordMemoryStart = wordMemoryStart;
-        m_wordMemorySizeW = wordMemorySizeW;
+		if (memoryMap == nullptr ||
+			log == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_memoryMap = memoryMap;
+		m_log = log;
     }
 
 
-    void Command::resetMemoryRanges()
+	void Command::resetMemoryMap()
     {
-        m_bitMemoryStart = 0;
-        m_bitMemorySizeW = 0;
-        m_wordMemoryStart = 0;
-        m_wordMemorySizeW = 0;
+		m_memoryMap = nullptr;
+		m_log = nullptr;
     }
 
 
     void Command::nop()
     {
-        m_code.setOpCode(LmCommandCode::NOP);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::NOP);
     }
 
 
     void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime)
     {
-        if (fbRunTime == 0)
-        {
-            assert(false);		// fbRunTime can't be 0
-        }
+		m_result = true;
 
-        m_fbRunTime = fbRunTime;
+		m_fbRunTime = fbRunTime;
 
         m_code.setOpCode(LmCommandCode::START);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		// check: fbType, fbInstance
+
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
     }
 
 
     void Command::stop()
     {
-        m_code.setOpCode(LmCommandCode::STOP);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::STOP);
     }
 
 
     void Command::mov(quint16 addrTo, quint16 addrFrom)
     {
-        m_code.setOpCode(LmCommandCode::MOV);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOV);
         m_code.setWord2(addrTo);
         m_code.setWord3(addrFrom);
+
+		//
+
+		read16(addrFrom);
+		write16(addrTo);
     }
 
 
     void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
     {
-        if (addressInBitMemory(addrTo) ||
-            addressInBitMemory(addrTo + sizeW - 1))
-        {
-            assert(false);			// MOVEMEM command can't write to bit-addressed memory
-            return;
-        }
+		m_result = true;
 
-        m_code.setOpCode(LmCommandCode::MOVMEM);
+		m_code.setOpCode(LmCommandCode::MOVMEM);
         m_code.setWord2(addrTo);
         m_code.setWord3(addrFrom);
         m_code.setWord4(sizeW);
+
+		//
+
+		if (addressInBitMemory(addrTo) ||
+			addressInBitMemory(addrTo + sizeW - 1))
+		{
+			// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
+			//
+			m_log->errALC5066(addrTo, addrFrom, sizeW);
+			m_result = false;
+		}
+
+		readArea(addrFrom, sizeW);
+		writeArea(addrTo, sizeW);
     }
 
 
     void Command::movConst(quint16 addrTo, quint16 constVal)
     {
-        m_code.setOpCode(LmCommandCode::MOVC);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOVC);
         m_code.setWord2(addrTo);
         m_code.setWord3(constVal);
+
+		//
+
+		write16(addrTo);
     }
 
 
     void Command::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
     {
-        if (addressInBitMemory(addrTo) == false &&
-            addressInWordMemory(addrTo) == false)
-        {
-            assert(false);			// MOVBC command can write only in bit- or word-addressed memory
-            return;
-        }
+		m_result = true;
 
-        m_code.setOpCode(LmCommandCode::MOVBC);
+		m_code.setOpCode(LmCommandCode::MOVBC);
         m_code.setWord2(addrTo);
         m_code.setWord3(constBit);
         m_code.setBitNo(bitNo);
+
+		//
+
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+
+			//	Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+			//
+			m_log->errALC5067(addrTo, bitNo, constBit);
+
+			m_result = false;
+		}
+
+		write16(addrTo);
     }
 
 
     void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::WRFB);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::WRFB);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrFrom);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		read16(addrFrom);
     }
 
 
     void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::RDFB);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::RDFB);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrTo);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		write16(addrTo);
     }
 
 
     void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::WRFBC);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::WRFBC);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(constVal);
         m_code.setFbCaption(fbCaption);
-    }
+	}
 
 
     void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::WRFBB);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::WRFBB);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrFrom);
         m_code.setBitNo(bitNo);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		read16(addrFrom);
     }
 
 
     void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
     {
-        if (addressInBitMemory(addrTo) == false &&
-            addressInWordMemory(addrTo) == false)
-        {
-            assert(false);			// RDFBB command can write only in bit- or word-addressed memory
-            return;
-        }
+		m_result = true;
 
-        m_code.setOpCode(LmCommandCode::RDFBB);
-        m_code.setFbType(fbType);
+		m_code.setOpCode(LmCommandCode::RDFBB);
+		m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrTo);
         m_code.setBitNo(bitNo);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+			assert(false);			// RDFBB command can write only in bit- or word-addressed memory
+			m_result = false;
+			return;
+		}
+
+		m_memoryMap->write16(addrTo);
     }
 
     void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::RDFBTS);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::RDFBTS);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
@@ -472,118 +540,175 @@ namespace Builder
 
 	void Command::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
     {
-        if (addressInBitMemory(addr) ||
-            addressInBitMemory(addr + sizeW - 1))
-        {
-            assert(false);			// SETMEM command can't write to bit-addressed memory
-            return;
-        }
+		m_result = true;
 
-        m_code.setOpCode(LmCommandCode::SETMEM);
+		m_code.setOpCode(LmCommandCode::SETMEM);
         m_code.setWord2(addr);
         m_code.setWord3(constValue);
         m_code.setWord4(sizeW);
+
+		//
+
+		if (addressInBitMemory(addr) ||
+			addressInBitMemory(addr + sizeW - 1))
+		{
+			assert(false);			// SETMEM command can't write to bit-addressed memory
+			m_result = false;
+		}
+
+		writeArea(addr, sizeW);
     }
 
 
     void Command::movBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask)
     {
-        m_code.setOpCode(LmCommandCode::MOVB);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOVB);
         m_code.setWord2(addrTo);
         m_code.setBitNo2(addrToMask);
         m_code.setWord3(addrFrom);
         m_code.setBitNo1(addrFromMask);
+
+		//
+
+		read16(addrFrom);
     }
 
 
     void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
     {
-        if (fbRunTime == 0)
-        {
-            assert(false);		// fbRunTime can't be 0
-        }
+		m_result = true;
 
-        m_fbRunTime = fbRunTime;
+		m_fbRunTime = fbRunTime;
 
         m_code.setOpCode(LmCommandCode::NSTART);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setWord3(startCount);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
     }
 
 
     void Command::appStart(quint16 appStartAddr)
     {
-        m_code.setOpCode(LmCommandCode::APPSTART);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::APPSTART);
         m_code.setWord2(appStartAddr);
     }
 
 
     void Command::mov32(quint16 addrTo, quint16 addrFrom)
     {
-        m_code.setOpCode(LmCommandCode::MOV32);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOV32);
         m_code.setWord2(addrTo);
         m_code.setWord3(addrFrom);
+
+		//
+
+		read32(addrFrom);
+		write32(addrTo);
     }
 
 
     void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
     {
-        m_code.setOpCode(LmCommandCode::MOVC32);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOVC32);
         m_code.setWord2(addrTo);
         m_code.setWord3((constInt32 >> 16) & 0xFFFF);
         m_code.setWord4(constInt32 & 0xFFFF);
         m_code.setConstInt32(constInt32);
+
+		//
+
+		write32(addrTo);
     }
 
 
 	void Command::movConstUInt32(quint16 addrTo, quint32 constUInt32)
 	{
+		m_result = true;
+
 		m_code.setOpCode(LmCommandCode::MOVC32);
 		m_code.setWord2(addrTo);
 		m_code.setWord3((constUInt32 >> 16) & 0xFFFF);
 		m_code.setWord4(constUInt32 & 0xFFFF);
 		m_code.setConstUInt32(constUInt32);
+
+		//
+
+		write32(addrTo);
 	}
 
 
     void Command::movConstFloat(quint16 addrTo, float constFloat)
     {
-        qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+		m_result = true;
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
 
         m_code.setOpCode(LmCommandCode::MOVC32);
         m_code.setWord2(addrTo);
         m_code.setWord3((constInt32 >> 16) & 0xFFFF);
         m_code.setWord4(constInt32 & 0xFFFF);
         m_code.setConstFloat(constFloat);
+
+		//
+
+		write32(addrTo);
     }
 
 
     void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::WRFB32);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::WRFB32);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrFrom);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		read32(addrFrom);
     }
 
 
     void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::RDFB32);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::RDFB32);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
         m_code.setWord3(addrTo);
         m_code.setFbCaption(fbCaption);
+
+		//
+
+		write32(addrTo);
     }
 
 
     void Command::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
     {
+		m_result = true;
+
         m_code.setOpCode(LmCommandCode::WRFBC32);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
@@ -597,7 +722,9 @@ namespace Builder
 
     void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption)
     {
-        qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+		m_result = true;
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
 
         m_code.setOpCode(LmCommandCode::WRFBC32);
         m_code.setFbType(fbType);
@@ -612,7 +739,9 @@ namespace Builder
 
     void Command::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
     {
-        m_code.setOpCode(LmCommandCode::RDFBTS32);
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::RDFBTS32);
         m_code.setFbType(fbType);
         m_code.setFbInstance(fbInstance);
         m_code.setFbParamNo(fbParamNo);
@@ -625,7 +754,9 @@ namespace Builder
 
     void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
     {
-        qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
+		m_result = true;
+
+		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
 
         m_code.setOpCode(LmCommandCode::RDFBTS32);
         m_code.setFbType(fbType);
@@ -1053,8 +1184,14 @@ namespace Builder
 
     bool Command::addressInBitMemory(int address)
     {
-        if (address >= m_bitMemoryStart &&
-            address < m_bitMemoryStart + m_bitMemorySizeW)
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);		// call setMemoryMap first
+			return false;
+		}
+
+		if (address >= m_memoryMap->appBitMemoryStart() &&
+			address < m_memoryMap->appBitMemoryStart() + m_memoryMap->appBitMemorySizeW())
         {
             return true;
         }
@@ -1065,8 +1202,14 @@ namespace Builder
 
     bool Command::addressInWordMemory(int address)
     {
-        if (address >= m_wordMemoryStart &&
-            address < m_wordMemoryStart + m_wordMemorySizeW)
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);		// call setMemoryMap first
+			return false;
+		}
+
+		if (address >= m_memoryMap->appWordMemoryStart() &&
+			address < m_memoryMap->appWordMemoryStart() + m_memoryMap->appWordMemorySizeW())
         {
             return true;
         }
@@ -1075,6 +1218,101 @@ namespace Builder
     }
 
 
+	bool Command::read16(int addrFrom)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->read16(addrFrom);
+		}
+
+		return m_result;
+	}
+
+
+	bool Command::read32(int addrFrom)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->read32(addrFrom);
+		}
+
+		return m_result;
+	}
+
+
+	bool Command::readArea(int addrFrom, int sizeW)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->readArea(addrFrom, sizeW);
+		}
+
+		return m_result;
+	}
+
+
+	bool Command::write16(int addrTo)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->write16(addrTo);
+		}
+
+		return m_result;
+	}
+
+
+	bool Command::write32(int addrTo)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->write32(addrTo);
+		}
+
+		return m_result;
+	}
+
+
+	bool Command::writeArea(int addrTo, int sizeW)
+	{
+		if (m_memoryMap == nullptr)
+		{
+			assert(false);
+			m_result = false;
+		}
+		else
+		{
+			m_result &= m_memoryMap->writeArea(addrTo, sizeW);
+		}
+
+		return m_result;
+	}
+
 
     // ---------------------------------------------------------------------------------------
     //
@@ -1082,14 +1320,14 @@ namespace Builder
     //
     // ---------------------------------------------------------------------------------------
 
-    ApplicationLogicCode::ApplicationLogicCode()
+	ApplicationLogicCode::ApplicationLogicCode()
     {
     }
 
 
     ApplicationLogicCode::~ApplicationLogicCode()
     {
-        Command::resetMemoryRanges();
+		Command::resetMemoryMap();
 
         for(auto codeItem : m_codeItems)
         {
@@ -1100,9 +1338,16 @@ namespace Builder
     }
 
 
-    void ApplicationLogicCode::initCommandMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW)
+	void ApplicationLogicCode::setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log)
     {
-        Command::setMemoryRanges(bitMemoryStart, bitMemorySizeW, wordMemoryStart, wordMemorySizeW);
+		if (lmMemory == nullptr ||
+			log == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		Command::setMemoryMap(lmMemory, log);
     }
 
 

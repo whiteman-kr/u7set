@@ -223,6 +223,10 @@ namespace Builder
 		void errALC5061(QString schemaID, QUuid constantUuid);													// Float constant is connected to 16-bit input (Logic schema '%1').
 		void errALC5062(QString schemaID, QUuid constantUuid);													// Float constant is connected to SignedInt input (Logic schema '%1').
 		void errALC5063(QString schemaID, QUuid constantUuid);													// Integer constant is connected to Float input (Logic schema '%1').
+		void errALC5064(int address);								// Read address %1 of application memory is out of range 0..65535.
+		void errALC5065(int address);								// Write address %1 of application memory is out of range 0..65535.
+		void errALC5066(int addrTo, int addrFrom, int sizeW);		// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
+		void errALC5067(int addrTo, int bit, int value);			// Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
 
 		// EQP			Equipment issues						6000-6999
 		//

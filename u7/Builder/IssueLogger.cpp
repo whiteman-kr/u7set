@@ -2893,6 +2893,87 @@ namespace Builder
 				  QString(tr("Integer constant is connected to Float input (Logic schema '%1').")).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5064
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Read address %1 of application memory is out of range 0..65535.
+	///
+	/// Parameters:
+	///		%1 Application memory read address
+	///
+	/// Description:
+	///		Specified read address of application memory is out of range 0..65535. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5064(int address)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5064,
+				  QString(tr("Read address %1 of application memory is out of range 0..65535.")).arg(address));
+	}
+
+	/// IssueCode: ALC5065
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Write address %1 of application memory is out of range 0..65535.
+	///
+	/// Parameters:
+	///		%1 Application memory write address
+	///
+	/// Description:
+	///		Specified write address of application memory is out of range 0..65535. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5065(int address)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5065,
+				  QString(tr("Write address %1 of application memory is out of range 0..65535.")).arg(address));
+	}
+
+	/// IssueCode: ALC5066
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
+	///
+	/// Parameters:
+	///		%1 Destination address
+	///		%2 Source address
+	///		%3 Memory size to move
+	///
+	/// Description:
+	///		Command 'MOVEMEM' can't write to bit-addressed memory. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5066(int addrTo, int addrFrom, int sizeW)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5066,
+				  QString(tr("Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.")).
+					arg(addrTo).arg(addrFrom).arg(sizeW));
+	}
+
+	/// IssueCode: ALC5067
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+	///
+	/// Parameters:
+	///		%1 Destination address
+	///		%2 Source address
+	///		%3 Memory size to move
+	///
+	/// Description:
+	///		Command 'MOVBC' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5067(int addrTo, int bit, int value)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5067,
+				  QString(tr("Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.")).
+					arg(addrTo).arg(bit).arg(value));
+	}
 
 
 	// EQP			Equipment issues						6000-6999

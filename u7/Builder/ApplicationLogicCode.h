@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include "../lib/Types.h"
+#include "LmMemoryMap.h"
 
 namespace Builder
 {
@@ -268,16 +269,16 @@ namespace Builder
     private:
         static QHash<int, const LmCommand*> m_lmCommands;
 
-        // initialized by ApplicationLogicCode::initCommandMemoryRanges()
+		// initialized by ApplicationLogicCode::setMemoryMap()
         //
-        static int m_bitMemoryStart;
-        static int m_bitMemorySizeW;
-        static int m_wordMemoryStart;
-        static int m_wordMemorySizeW;
+		static LmMemoryMap* m_memoryMap;
+		static IssueLogger* m_log;
 
         int m_address = -1;
 
         int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
+
+		bool m_result = true;
 
         CommandCode m_code;
 
@@ -285,6 +286,14 @@ namespace Builder
 
         bool addressInBitMemory(int address);
         bool addressInWordMemory(int address);
+
+		bool read16(int addrFrom);
+		bool read32(int addrFrom);
+		bool readArea(int addrFrom, int sizeW);
+
+		bool write16(int addrTo);
+		bool write32(int addrTo);
+		bool writeArea(int addrTo, int sizeW);
 
     public:
         Command();
@@ -326,6 +335,8 @@ namespace Builder
         bool isCommand() override { return true; }
         bool isComment() override { return false; }
 
+		bool hasError() const { return m_result == false; }
+
 		bool isNoCommand() const { return m_code.isNoCommand(); }
 
         bool isOpCode(LmCommandCode code) const { return m_code.getOpCode() == code; }
@@ -342,8 +353,8 @@ namespace Builder
 
         bool getReadAndRunTimes(int* readTime, int* runTime);
 
-        static void setMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW);
-        static void resetMemoryRanges();
+		static void setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log);
+		static void resetMemoryMap();
     };
 
 
@@ -357,14 +368,14 @@ namespace Builder
 
         E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-    public:
-        ApplicationLogicCode();
+	public:
+		ApplicationLogicCode();
         ~ApplicationLogicCode();
 
-        void initCommandMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW);
+		void setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log);
 
-        void append(const Command &cmd);
-        void append(const Comment &cmt);
+		void append(const Command& cmd);
+		void append(const Comment& cmt);
         void comment(QString commentStr);
         void newLine();
 

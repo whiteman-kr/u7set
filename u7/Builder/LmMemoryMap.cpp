@@ -69,10 +69,12 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	LmMemoryMap::LmMemoryMap(OutputLog *log) :
+	LmMemoryMap::LmMemoryMap(IssueLogger *log) :
 		m_log(log)
 	{
 		assert(m_log != nullptr);
+
+		m_memory.resize(APP_MEMORY_SIZE);
 	}
 
 
@@ -458,11 +460,13 @@ namespace Builder
 		return m_appWordAdressed.nonRegAnalogSignals.appendSignal(signal);
 	}
 
+
 	double LmMemoryMap::bitAddressedMemoryUsed()
 	{
 		return double((m_appBitAdressed.regDiscretSignals.sizeW() + m_appBitAdressed.nonRegDiscretSignals.sizeW()) * 100) /
 				double(m_appBitAdressed.memory.sizeW());
 	}
+
 
 	double LmMemoryMap::wordAddressedMemoryUsed()
 	{
@@ -471,5 +475,97 @@ namespace Builder
 	}
 
 
+	bool LmMemoryMap::read16(int address)
+	{
+		if (address < 0 || address >= APP_MEMORY_SIZE)
+		{
+			// Read address %1 of application memory is out of range 0..65535.
+			//
+			m_log->errALC5064(address);
+			return false;
+		}
+
+		m_memory[address].readCount++;
+
+		return true;
+	}
+
+
+	bool LmMemoryMap::read32(int address)
+	{
+		return readArea(address, 2);
+	}
+
+
+	bool LmMemoryMap::readArea(int startAddress, int size)
+	{
+		bool result = true;
+
+		for(int i = 0; i < size ; i++)
+		{
+			result &= read16(startAddress + i);
+		}
+
+		return result;
+	}
+
+
+	bool LmMemoryMap::write16(int address)
+	{
+		if (address < 0 || address >= APP_MEMORY_SIZE)
+		{
+			// Write address %1 of application memory is out of range 0..65535.
+			//
+			m_log->errALC5065(address);
+			return false;
+		}
+
+		m_memory[address].writeCount++;
+
+		return true;
+	}
+
+
+	bool LmMemoryMap::write32(int address)
+	{
+		return writeArea(address, 2);
+	}
+
+
+	bool LmMemoryMap::writeArea(int startAddress, int size)
+	{
+		bool result = true;
+
+		for(int i = 0; i < size ; i++)
+		{
+			result &= write16(startAddress + i);
+		}
+
+		return result;
+	}
+
+
+	int LmMemoryMap::getMemoryReadCount(int address) const
+	{
+		if (address < 0 || address >= APP_MEMORY_SIZE)
+		{
+			assert(false);
+			return 0;
+		}
+
+		return m_memory[address].readCount;
+	}
+
+
+	int LmMemoryMap::getMemoryWriteCount(int address) const
+	{
+		if (address < 0 || address >= APP_MEMORY_SIZE)
+		{
+			assert(false);
+			return 0;
+		}
+
+		return m_memory[address].writeCount;
+	}
 }
 

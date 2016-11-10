@@ -8,6 +8,9 @@ const int	LM1_PLACE = 0,
 
             MODULES_COUNT = 14,
 
-            OPTO_INTERFACE_COUNT = 3;
+			OPTO_INTERFACE_COUNT = 3,
+
+			APP_MEMORY_SIZE = 65536,
+			CODE_MEMORY_SIZE = 65536;
 
 

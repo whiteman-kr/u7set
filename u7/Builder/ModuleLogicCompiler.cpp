@@ -347,10 +347,7 @@ namespace Builder
 							 m_lmDiagData,
 							 m_lmAppData);
 
-			m_code.initCommandMemoryRanges(m_appLogicBitData.startAddress(),
-										   m_appLogicBitData.sizeW(),
-										   m_appLogicWordData.startAddress(),
-										   m_appLogicWordData.sizeW());
+			m_code.setMemoryMap(&m_memoryMap, m_log);
 		}
 
 		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
@@ -3013,8 +3010,6 @@ namespace Builder
 	}
 
 
-
-
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
 		if (m_optoModuleStorage == nullptr)
@@ -5628,7 +5623,7 @@ namespace Builder
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
 							Address16 ramAddr(module.appRegDataOffset + valueOffset, valueBit);
-							Address16 regAddr(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), valueBit);
+							Address16 regAddr(ramAddr.offset() - m_memoryMap.appWordMemoryStart(), valueBit);
 
 							signal->ramAddr() = ramAddr;
 							signal->regValueAddr() = regAddr;
@@ -5688,7 +5683,7 @@ namespace Builder
 				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
-				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
+				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
 
 				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}
@@ -5714,7 +5709,7 @@ namespace Builder
 
 				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(appSignal->constSignal());
 
-				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
+				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), ramAddr.bit());
 
 				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
 			}

@@ -4,6 +4,7 @@
 #include "../lib/Signal.h"
 #include "../lib/OutputLog.h"
 #include "../lib/LmLimits.h"
+#include "IssueLogger.h"
 
 
 namespace Builder
@@ -149,7 +150,15 @@ namespace Builder
 			MemoryArea memory;
 		} m_lmInOuts;
 
-		OutputLog* m_log = nullptr;
+		struct ReadWriteAccess
+		{
+			int readCount = 0;
+			int writeCount = 0;
+		};
+
+		QVector<ReadWriteAccess> m_memory;
+
+		IssueLogger* m_log = nullptr;
 
 		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title);
 		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
@@ -157,7 +166,7 @@ namespace Builder
 
 	public:
 
-		LmMemoryMap(OutputLog* log);
+		LmMemoryMap(IssueLogger* log);
 
 		bool init(	const MemoryArea& moduleData,
 					const MemoryArea& optoInterfaceData,
@@ -178,14 +187,16 @@ namespace Builder
 		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
 		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscretSignals.sizeW(); }
 
-		int bitAddressedMemoryAddress() const { return m_appBitAdressed.memory.startAddress(); }
-		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
-		int wordAddressedMemoryAddress() const { return m_appWordAdressed.memory.startAddress(); }
+		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
+		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
 
+		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
+
+		int appWordMemoryStart() const { return m_appWordAdressed.memory.startAddress(); }
+		int appWordMemorySizeW() const { return m_appWordAdressed.memory.sizeW(); }
 
 		// rb_* - adrresses and sizes in Registration Buffer
 		//
-		//int rb_lmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
 		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
 
 		int rb_lmInputsAddress() const { return m_appWordAdressed.lmInputs.startAddress(); }
@@ -211,6 +222,17 @@ namespace Builder
 		double wordAddressedMemoryUsed();
 
 		int getAppDataSize() { return m_appWordAdressed.nonRegAnalogSignals.startAddress() - m_appWordAdressed.memory.startAddress(); }
+
+		bool read16(int address);
+		bool read32(int address);
+		bool readArea(int startAddress, int size);
+
+		bool write16(int address);
+		bool write32(int address);
+		bool writeArea(int startAddress, int size);
+
+		int getMemoryReadCount(int address) const;
+		int getMemoryWriteCount(int address) const;
 	};
 
 }
