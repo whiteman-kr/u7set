@@ -13,4 +13,5 @@ private slots:
 	void get_unitsTest();
 	void build_startTest();
 	void build_finishTest();
+	void add_unitTest();
 };

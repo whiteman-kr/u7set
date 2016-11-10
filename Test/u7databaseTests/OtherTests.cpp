@@ -99,7 +99,6 @@ void OtherTests::build_startTest()
 void OtherTests::build_finishTest()
 {
 	QSqlQuery query;
-	QSqlQuery tempQuery;
 
 	const int errorsAmount = 1;
 	const int warningsAmount = 2;
@@ -136,4 +135,37 @@ void OtherTests::build_finishTest()
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
 	QVERIFY2(query.value(0).toInt() == 1, qPrintable("Error: table build not changed"));
+}
+
+void OtherTests::add_unitTest()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	QString unit_en = "test_unit_en";
+	QString unit_ru = "тест_юнит_ру";
+
+	int unit_id = -1;
+
+	bool ok = query.exec(QString("SELECT * FROM add_unit('%1','%2')").arg(unit_en).arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT * FROM unit WHERE unit_en = '%1' AND unit_ru = '%2'").arg(unit_en).arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	unit_id = tempQuery.value("unitid").toInt();
+
+	QVERIFY2(query.value("add_unit").toInt() == unit_id, qPrintable("Error: wrong unit_id returned!"));
+
+	ok = query.exec(QString("SELECT * FROM add_unit('%1','test')").arg(unit_en));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("add_unit").toInt() == -1, qPrintable("Error: expecting existing unit_en error!"));
+
+	ok = query.exec(QString("SELECT * FROM add_unit('test','%1')").arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("add_unit").toInt() == -2, qPrintable("Error: expecting existing unit_ru error!"));
 }
