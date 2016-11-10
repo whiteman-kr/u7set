@@ -920,6 +920,8 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 
 void DbControllerFileTests::getFileHistoryTest()
 {
+	qRegisterMetaType<DbFileInfo>("DbFileInfo");
+
 	QSqlDatabase db = QSqlDatabase::database();
 
 	db.setHostName(m_databaseHost);
@@ -977,10 +979,10 @@ void DbControllerFileTests::getFileHistoryTest()
 	ok = m_dbController->checkIn(file, comment, 0);
 	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1);").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2);").arg(m_dbController->currentUser().userId()).arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	std::vector<DbChangesetInfo> result;
+	std::vector<DbChangeset> result;
 
 	ok = m_dbController->getFileHistory(file, &result, 0);
 	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
@@ -991,7 +993,7 @@ void DbControllerFileTests::getFileHistoryTest()
 
 		for (uint currentElement = 0; currentElement < result.size(); currentElement++)
 		{
-			DbChangesetInfo buff = result.at(currentElement);
+			DbChangeset buff = result.at(currentElement);
 			if (buff.changeset() == query.value("changesetId").toInt())
 			{
 				exist = true;

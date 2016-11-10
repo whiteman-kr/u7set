@@ -541,4 +541,75 @@ void UserTests::update_userTest()
 
 	ok = query.exec(QString("SELECT * FROM update_user(1, 'errorNameForUpdateUserTest', '%1', '%1', '%2', '%1', false, false, false)").arg(oldDataForTest).arg(newDataForTest));
 	QVERIFY2(ok == false, qPrintable("Wrong userName error expected!"));
+
+	/////////////////////////////////////////////////////////////////////
+	// Another function without is_Admin testing
+	//
+	/////////////////////////////////////////////////////////////////////
+
+	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%2', '%2', '%1', '%2', true, true)").arg(oldDataForTest).arg(newDataForTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(query.value(0).toInt()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("firstName").toString() == newDataForTest, qPrintable("Error: firstName is not correct, or wrong userId has been returned!"));
+	QVERIFY2(query.value("lastName").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
+	QVERIFY2(query.value("password").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
+	QVERIFY2(query.value("readonly").toBool() == true, qPrintable("Error: lastName is not correct!"));
+	QVERIFY2(query.value("disabled").toBool() == true, qPrintable("Error: lastName is not correct!"));
+
+
+	// Call too simple password error
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%1', '%1', '%2', '%3', false, false)").arg(oldDataForTest).arg(newDataForTest).arg(simplePassword));
+	QVERIFY2(ok == false, qPrintable("Too small password error expected!"));
+
+	// Call wrong user error
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(%2, '%1', 'TEST', 'TEST', 'testPass', '%1', false, false)").arg(oldDataForTest).arg(userForErrorTest));
+	QVERIFY2(ok == false, qPrintable("Wrong user error expected!"));
+
+	// Try to change one user by another
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(%2, 'UpdateUserWrongUserChangePassErrorTest', 'firstName', 'lastName', 'testPassword', 'newPassword', false, false)").arg(userForErrorTest));
+	QVERIFY2(ok == false, qPrintable("Error: user must not be able to change another user's password"));
+
+	// Try to change user flags by user
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'newPassword', 'testPassword', true, true)").arg(setAdminUpdateUserTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == setAdminUpdateUserTest, qPrintable ("Error: function returned wrong id"));
+
+	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(setAdminUpdateUserTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("readOnly").toBool() == true, qPrintable ("Error: function do not changed value readOnly"));
+	QVERIFY2(query.value("disabled").toBool() == false, qPrintable ("Error: function changed value disabled y user"));
+
+	// Call wrong password error
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserWrongPasswordAdministrator', 'TEST', 'TEST', 'errorPassword', 'newPassword', false, false)").arg(AdministratorForErrorTest));
+	QVERIFY2(ok == false, qPrintable("Wrong password error expected!"));
+
+	// Call user is not exist error
+	//
+
+	ok = query.exec(QString("SELECT * FROM update_user(1, 'errorNameForUpdateUserTest', '%1', '%1', '%2', '%1', false, false)").arg(oldDataForTest).arg(newDataForTest));
+	QVERIFY2(ok == false, qPrintable("Wrong userName error expected!"));
+
 }
