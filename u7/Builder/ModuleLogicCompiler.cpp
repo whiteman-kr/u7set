@@ -2969,13 +2969,18 @@ namespace Builder
 
 				QString idStr;
 
-				bool res = true;
+				bool res = false;
 
-				res &= port->parseRawDescriptionStr(m_log);
+				do
+				{
+					if (port->parseRawDescriptionStr(m_log) == false) break;
+					if (port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log) == false) break;
+					if (port->calculateTxSignalsAddresses(m_log) == false) break;
 
-				res &= port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log);
-
-				res &= port->calculateTxSignalsAddresses(m_log);
+					res = true;
+					break;
+				}
+				while(1);
 
 				if (res == true)
 				{
@@ -2996,9 +3001,12 @@ namespace Builder
 			}
 		}
 
-		for(Hardware::OptoModule* optoModule : optoModules)
+		if (result == true)
 		{
-			optoModule->calculateTxStartAddresses();
+			for(Hardware::OptoModule* optoModule : optoModules)
+			{
+				optoModule->calculateTxStartAddresses();
+			}
 		}
 
 		return result;
