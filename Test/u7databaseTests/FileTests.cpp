@@ -590,7 +590,7 @@ void FileTests::get_file_historyTest()
 
 	// Check history of the file with fileId
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1)").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(fileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -616,7 +616,7 @@ void FileTests::get_file_historyTest()
 	// Check if function returns nothing
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1)").arg(FileTests::maxValueId));
+	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(FileTests::maxValueId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid fileId error expected"));
@@ -629,7 +629,7 @@ void FileTests::get_file_historyTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1)").arg(query.value("id").toInt()));
+	ok = query.exec(QString("SELECT * FROM get_file_history(1, %1)").arg(query.value("id").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Error: new file must not has history"));
