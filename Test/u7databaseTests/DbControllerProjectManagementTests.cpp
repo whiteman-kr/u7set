@@ -147,6 +147,12 @@ void DbControllerProjectTests::getProjectListTest()
 	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
+	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, false, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
 	QSqlDatabase db = QSqlDatabase::database();
 
 	db.setHostName(m_databaseHost);
@@ -176,6 +182,9 @@ void DbControllerProjectTests::getProjectListTest()
 	{
 		QVERIFY2(databasesFromServer.contains(projectFromDb.databaseName()), qPrintable("Error: function getProjectList() returned wrong database names!"));
 	}
+
+	ok = m_dbController->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
 	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
