@@ -169,3 +169,44 @@ void OtherTests::add_unitTest()
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value("add_unit").toInt() == -2, qPrintable("Error: expecting existing unit_ru error!"));
 }
+
+void OtherTests::update_unit()
+{
+	QSqlQuery query;
+
+	QString unit_en = "test_unit_en_1";
+	QString unit_ru = "тест_юнит_ру_1";
+
+	QString new_unit_en = "test1";
+	QString new_unit_ru = "test2";
+
+	int unit_id = -1;
+
+	bool ok = query.exec(QString("SELECT * FROM add_unit('%1','%2')").arg(unit_en).arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM unit WHERE unit_en = '%1' AND unit_ru = '%2'").arg(unit_en).arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	unit_id = query.value("unitid").toInt();
+
+	ok = query.exec(QString("SELECT * FROM update_unit(%1, '%2','test')").arg(unit_id).arg(unit_en));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("update_unit").toInt() == -1, qPrintable("Error: expecting existing unit_en error!"));
+
+	ok = query.exec(QString("SELECT * FROM update_unit(%1, 'test','%2')").arg(unit_id).arg(unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("update_unit").toInt() == -2, qPrintable("Error: expecting existing unit_ru error!"));
+
+	ok = query.exec(QString("SELECT * FROM update_unit(%1, '%2', '%3')").arg(unit_id).arg(new_unit_en).arg(new_unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM unit WHERE unit_en = '%1' AND unit_ru = '%2'").arg(new_unit_en).arg(new_unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+}
