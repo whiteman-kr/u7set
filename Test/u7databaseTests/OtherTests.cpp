@@ -170,7 +170,7 @@ void OtherTests::add_unitTest()
 	QVERIFY2(query.value("add_unit").toInt() == -2, qPrintable("Error: expecting existing unit_ru error!"));
 }
 
-void OtherTests::update_unit()
+void OtherTests::update_unitTest()
 {
 	QSqlQuery query;
 
@@ -207,6 +207,41 @@ void OtherTests::update_unit()
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM unit WHERE unit_en = '%1' AND unit_ru = '%2'").arg(new_unit_en).arg(new_unit_ru));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+}
+
+void OtherTests::add_log_recordTest()
+{
+	QSqlQuery query;
+
+	QString host = "localhost";
+	QString message = "Just simple log. Nothing interesting";
+
+	int processId = 667;
+	int userId = 1;
+
+	bool ok = query.exec(QString("SELECT * FROM add_log_record(%1, '%2', %3, '%4')").arg(userId).arg(host).arg(processId).arg(message));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM Log WHERE UserID=%1 AND Host='%2' AND ProcessID=%3 AND Text='%4'").arg(userId).arg(host).arg(processId).arg(message));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM add_log_record(%1, '%2')").arg(userId).arg(message));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM Log WHERE UserID=%1 AND Text='%2'").arg(userId).arg(message));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM add_log_record(%1, '%2', '%3')").arg(userId).arg(host).arg(message));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM Log WHERE UserID=%1 AND Host='%2' AND Text='%3'").arg(userId).arg(host).arg(message));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 }
