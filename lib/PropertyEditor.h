@@ -127,12 +127,12 @@ namespace ExtWidgets
 	};
 
 
-	class MultiLineEdit : public QDialog
+    class MultiLineEdit : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		MultiLineEdit(QWidget* parent, const QString& text, const QString& caption);
+        MultiLineEdit(QWidget* parent, const QString& text, const QString& caption);
 		QString text();
 
 	private slots:
@@ -143,7 +143,7 @@ namespace ExtWidgets
 		QTextEdit* m_textEdit = nullptr;
 
 		virtual void accept();
-	};
+    };
 
 
 	class QtMultiCheckBox : public QWidget
@@ -174,7 +174,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption);
+        explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption, const QString &validator);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
@@ -196,6 +196,7 @@ namespace ExtWidgets
 		QVariant m_oldValue;
 		int m_userType = 0;
 		QString m_caption;
+        QString m_validator;
 	};
 
 

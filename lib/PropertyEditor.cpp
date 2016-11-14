@@ -362,7 +362,7 @@ namespace ExtWidgets
 	//
 	// ---------MultiLineEdit----------
 	//
-	MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text, const QString &caption):
+    MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text, const QString &caption):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
 	{
 		setWindowTitle(caption);
@@ -381,7 +381,7 @@ namespace ExtWidgets
 		m_textEdit->setTabChangesFocus(false);
 		m_textEdit->setPlainText(value);
 
-		m_textEdit->blockSignals(true);
+        m_textEdit->blockSignals(true);
 		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
 		m_textEdit->blockSignals(false);
 
@@ -439,15 +439,17 @@ namespace ExtWidgets
 	// ---------QtMultiTextEdit----------
 	//
 
-	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption):
+    QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption, const QString& validator):
 		QWidget(parent),
 		m_userType(userType),
-		m_caption(caption)
+        m_caption(caption),
+        m_validator(validator)
+
 	{
 		m_lineEdit = new QLineEdit(parent);
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 
-		if (userType == QVariant::String)
+        if (userType == QVariant::String && m_validator.isEmpty() == true)
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -467,6 +469,15 @@ namespace ExtWidgets
 		setLayout(lt);
 
 		m_lineEdit->installEventFilter(this);
+
+        if (validator.isEmpty() == false)
+        {
+            QRegExp regexp(m_validator);
+            QRegExpValidator *v = new QRegExpValidator(regexp, this);
+            m_lineEdit->setValidator(v);
+        }
+
+
 		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
 	}
 
@@ -492,7 +503,7 @@ namespace ExtWidgets
 
 	void QtMultiTextEdit::onButtonPressed()
 	{
-		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text(), m_caption);
+        MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text(), m_caption);
 		if (multlLineEdit->exec() == QDialog::Accepted)
 		{
             m_lineEdit->blockSignals(true);
@@ -894,7 +905,7 @@ namespace ExtWidgets
 					case QVariant::UInt:
 					case QVariant::Double:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption());
+                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption(), p->validator());
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
@@ -916,7 +927,7 @@ namespace ExtWidgets
 
 					case QVariant::Uuid:
 						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption());
+                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption(), p->validator());
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
