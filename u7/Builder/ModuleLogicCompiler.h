@@ -165,6 +165,7 @@ namespace Builder
 		QString m_opName;
 		QString m_caption;
 		int m_operandIndex = NOT_FB_OPERAND_INDEX;
+		bool m_visible = false;
 
 		quint32 m_unsignedIntValue = 0;
 		qint32 m_signedIntValue = 0;
@@ -179,6 +180,8 @@ namespace Builder
 		bool isUnsignedInt32() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
 		bool isSignedInt32() const { return m_dataFormat == E::DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
 		bool isFloat32() const { return m_dataFormat == E::DataFormat::Float && m_dataSize == SIZE_32BIT; }
+		bool isVisible() const { return m_visible; }
+		bool isNoFbOperand() const { return m_operandIndex == NOT_FB_OPERAND_INDEX; }
 
 		bool instantiator() const { return m_instantiator; }
 
@@ -673,6 +676,7 @@ namespace Builder
 		AppFb* createAppFb(const AppItem& appItem);
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
+		bool displayAfbParams(const AppFb& appFb);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }

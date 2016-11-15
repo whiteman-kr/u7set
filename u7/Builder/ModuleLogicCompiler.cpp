@@ -728,7 +728,9 @@ namespace Builder
 				arg(fbOpcode).
 				arg(fbInstance).
 				arg(appFb->instantiatorID()).
-				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
+			   arg(appFb->hasRam() ? "has RAM" : "non RAM"));
+
+		displayAfbParams(*appFb);
 
 		m_code.newLine();
 
@@ -827,6 +829,37 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::displayAfbParams(const AppFb& appFb)
+	{
+		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+
+		Comment cmt;
+
+		for(const AppFbParamValue& paramValue : appFbParamValues)
+		{
+			if (paramValue.isVisible() == false && paramValue.isNoFbOperand() == true)
+			{
+				continue;
+			}
+
+			QString commentStr = paramValue.caption();
+
+			if (paramValue.isNoFbOperand() == false)
+			{
+				commentStr.append(QString(" (%1)").arg(paramValue.opName()));
+			}
+
+			commentStr.append(QString(" = %1").arg(paramValue.toString()));
+
+			cmt.setComment(commentStr);
+
+			m_code.append(cmt);
+		}
+
+		return true;
 	}
 
 
@@ -7013,6 +7046,7 @@ namespace Builder
 		m_caption = afbParam.caption();
 		m_operandIndex = afbParam.operandIndex();
 		m_instantiator = afbParam.instantiator();
+		m_visible = afbParam.visible();
 
 		if (afbParam.isDiscrete())
 		{
