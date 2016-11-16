@@ -364,6 +364,8 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
+				result &= optoPort1->parseRawDescriptionStr(m_log);
+
 				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 				{
 					// LM's port '%1' can't work in RS232/485 mode (connection '%2').
@@ -432,6 +434,8 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
+				result &= optoPort1->parseRawDescriptionStr(m_log);
+
 				optoPort2->setPortID(portID);
 				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
 				optoPort2->setManualSettings(connection->manualSettings());
@@ -439,6 +443,8 @@ namespace Builder
 				optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 				optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
+
+				result &= optoPort2->parseRawDescriptionStr(m_log);
 
 				optoPort1->setLinkedPortID(optoPort2->equipmentID());
 				optoPort2->setLinkedPortID(optoPort1->equipmentID());

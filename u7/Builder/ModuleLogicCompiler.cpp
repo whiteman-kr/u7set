@@ -3003,7 +3003,6 @@ namespace Builder
 
 				do
 				{
-					if (port->parseRawDescriptionStr(m_log) == false) break;
 					if (port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log) == false) break;
 					if (port->calculateTxSignalsAddresses(m_log) == false) break;
 
