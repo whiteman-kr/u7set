@@ -601,6 +601,33 @@ void FileTests::get_file_historyTest()
 	while (query.next())
 	{
 		QVERIFY2(fileInstanceQuery.next() == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
+
+		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
+		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
+		int changeSetId = query.value("changesetId").toInt();
+
+		ok = changeSetQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
+
+		QVERIFY2(ok == true, qPrintable(changeSetQuery.lastError().databaseText()));
+		QVERIFY2(changeSetQuery.first() == true, qPrintable(changeSetQuery.lastError().databaseText()));
+
+		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
+		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
+	}
+
+	// Check file history with another user
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2)").arg(m_firstUserForTest).arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = fileInstanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 ORDER BY changeSetId desc").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
+
+	while (query.next())
+	{
+		QVERIFY2(fileInstanceQuery.next() == true, qPrintable(fileInstanceQuery.lastError().databaseText()));
 		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
 		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
 		int changeSetId = query.value("changesetId").toInt();
