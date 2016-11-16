@@ -916,7 +916,7 @@ namespace Builder
 		QStringList list;
 		QString str;
 
-		int inBusWidth = outPort->txDataSizeW() * sizeof(quint16) * 16;
+		int inBusWidth = outPort->txDataSizeW() * SIZE_16BIT;
 
 		quint32 dataID = outPort->txDataID();
 
@@ -955,7 +955,7 @@ namespace Builder
 		str = QString("-- Opto port ID:\t%1").arg(inPort->equipmentID());
 		list.append(str);
 
-		str = QString("-- Rx data size:\t%1 bytes").arg(outPort->txDataSizeW() * sizeof(quint16));
+		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
 		list.append(str);
 
 		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
