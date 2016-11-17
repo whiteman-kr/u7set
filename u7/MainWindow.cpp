@@ -19,6 +19,7 @@
 #include "UploadTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
+#include "version.h"
 
 #include "../VFrame30/VFrame30.h"
 
@@ -502,9 +503,17 @@ void MainWindow::showAbout()
 {
 	QMessageBox aboutDialog(this);
 	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
-	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2>");
+	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2><br>SHA1 ID: " + QString(USED_SERVER_COMMIT_SHA).left(8));
 	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
 	aboutDialog.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+
+	auto button = aboutDialog.addButton("Copy SHA1 ID", QMessageBox::ActionRole);
+	connect(button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
+
+	aboutDialog.addButton(QMessageBox::Ok);
+
 	aboutDialog.exec();
 }
 
