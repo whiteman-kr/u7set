@@ -648,6 +648,7 @@ namespace Builder
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int modulePlace);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
 		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
+		bool copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset);
 
 		bool copyRS232Signals();
 		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);

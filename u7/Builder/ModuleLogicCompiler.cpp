@@ -3003,7 +3003,8 @@ namespace Builder
 
 				do
 				{
-					if (port->calculatePortRawDataSize(m_lm, m_optoModuleStorage, m_log) == false) break;
+					if (port->calculatePortRawDataSize(m_optoModuleStorage, m_log) == false) break;
+
 					if (port->calculateTxSignalsAddresses(m_log) == false) break;
 
 					res = true;
@@ -3396,6 +3397,10 @@ namespace Builder
 				result &= copyOptoPortTxOptoPortRawData(port, offset, item.portEquipmentID);
 				break;
 
+			case Hardware::OptoPort::RawDataDescriptionItemType::Const16:
+				result &= copyOptoPortTxConst16RawData(port, item.const16Value, offset);
+				break;
+
 			default:
 				assert(false);
 			}
@@ -3757,7 +3762,9 @@ namespace Builder
 			return true;
 		}
 
-		if (portWithTxRawData->txRawDataSizeW() == false)
+		int portTxRawDataSizeW = portWithTxRawData->txRawDataSizeW();
+
+		if (portTxRawDataSizeW == 0)
 		{
 			QString msg = QString("OptoPort %1 raw data size is 0. Nothing to copy.").
 					arg(portWithTxRawData->equipmentID());
@@ -3769,16 +3776,41 @@ namespace Builder
 
 		cmd.movMem(port->absTxStartAddress() + offset,
 				   portWithRxRawData->rxStartAddress() + Hardware::TX_DATA_ID_SIZE_W,
-				   portWithTxRawData->txRawDataSizeW());
+				   portTxRawDataSizeW);
 
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
 
 		m_code.append(cmd);
 		m_code.newLine();
 
+		offset += portTxRawDataSizeW;
+
 		return true;
 	}
 
+
+	bool ModuleLogicCompiler::copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset)
+	{
+		if (port == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		Command cmd;
+
+		cmd.movConst(port->absTxStartAddress() + offset, const16value);
+
+		cmd.setComment(QString("copying raw data const16 value = %1").arg(const16value));
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+		offset++;
+
+		return true;
+
+	}
 
 
 	bool ModuleLogicCompiler::copyRS232Signals()

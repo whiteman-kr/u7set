@@ -49,7 +49,8 @@ namespace Hardware
 			RawDataSize,
 			AllNativeRawData,
 			ModuleRawData,
-			PortRawData
+			PortRawData,
+			Const16
 		};
 
 		struct RawDataDescriptionItem
@@ -61,6 +62,8 @@ namespace Hardware
 
 			int modulePlace = 0;					// for type - ModuleNativePrimaryData
 
+			int const16Value = 0;					// for type - Const16
+
 			QString portEquipmentID;				// for type - PortRawData
 		};
 
@@ -71,6 +74,7 @@ namespace Hardware
 		static const char* ALL_NATIVE_RAW_DATA;
 		static const char* MODULE_RAW_DATA;
 		static const char* PORT_RAW_DATA;
+		static const char* CONST16;
 
 		QString m_equipmentID;
 		DeviceController* m_deviceController = nullptr;
@@ -123,6 +127,8 @@ namespace Hardware
 
 		void sortTxSignals();
 		void sortTxSignals(QVector<TxSignal> &array);
+
+		DeviceModule* getLM();
 
 
 	public:
@@ -221,7 +227,7 @@ namespace Hardware
 		Address16 getTxSignalAddress(const QString& appSignalID) const;
 
 		bool parseRawDescriptionStr(Builder::IssueLogger* log);
-		bool calculatePortRawDataSize(const DeviceModule* lm, OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
+		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
 	};
 
 
