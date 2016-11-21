@@ -1936,6 +1936,21 @@ bool DbController::nextCounterValue(int* counter)
 	return ok;
 }
 
+int DbController::nextCounterValue()
+{
+	int value = -1;
+	bool ok = nextCounterValue(&value);
+
+	if (ok == false)
+	{
+		return -1;
+	}
+	else
+	{
+		return value;
+	}
+}
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters
