@@ -993,35 +993,37 @@ void SchemaControlTabPage::addFile()
 	//
 	schema->setGuid(QUuid::createUuid());
 
+	int sequenceNo = db()->nextCounterValue();
+
 	// Set default ID
 	//
-	QString defaultId = "SCHEMAID";
+	QString defaultId = "SCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 
 	if (schema->isLogicSchema() == true)
 	{
-		defaultId = "APPSCHEMAID";
+		defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 	}
 
 	if (schema->isUfbSchema() == true)
 	{
-		defaultId = "USERFUNCTIONALBLOCKID";
+		defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
 	}
 
 	if (schema->isMonitorSchema() == true)
 	{
-		defaultId = "MONITORSCHEMAID";
+		defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 	}
 
 	if (schema->isDiagSchema() == true)
 	{
-		defaultId = "DIAGSCHEMAID";
+		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 	}
 
 	schema->setSchemaID(defaultId);
 
 	// Set Caption
 	//
-	schema->setCaption("Caption");
+	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
 
 	// Set default EqupmnetIDs for LogicSchema
 	//

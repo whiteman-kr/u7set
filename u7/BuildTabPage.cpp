@@ -203,7 +203,7 @@ void BuildTabPage::cancelBuild()
 
 		// wait for 20 seconds while bild stops
 		//
-		for (int i = 0; i < 2000 && m_builder.isRunning() == true; i++)
+		for (int i = 0; i < 20000 && m_builder.isRunning() == true; i++)
 		{
 			QThread::msleep(10);
 		}
@@ -308,6 +308,11 @@ void BuildTabPage::projectOpened()
 
 void BuildTabPage::projectClosed()
 {
+	cancelBuild();
+
+	m_findTextEdit->clear();
+	m_outputWidget->clear();
+
 	this->setEnabled(false);
 	return;
 }

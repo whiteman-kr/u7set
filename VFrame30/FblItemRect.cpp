@@ -465,12 +465,10 @@ namespace VFrame30
 		QRectF drawRect(r.right(), r.bottom(),
 						widthDocPt(), m_font.drawSize());
 
-		FontParam font = m_font;
-		font.setDrawSize(m_font.drawSize() * 0.75);
-
+		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
 		p->setPen(Qt::red);
 
-		QString str = QString("roi: %1").arg(runOrderIndex);
+		QString str = QString("roi %1").arg(runOrderIndex);
 
 		DrawHelper::DrawText(p,
 							 font,
