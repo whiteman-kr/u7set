@@ -33,7 +33,6 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Tcp.cpp \
     ../lib/JsonSerializable.cpp \
-    TuningSocket.cpp \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
@@ -59,7 +58,9 @@ SOURCES += \
     TcpTuningServer.cpp \
     TcpTuningClient.cpp \
     TuningSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    TuningSourceWorker.cpp \
+    TuningSocketListener.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -73,7 +74,6 @@ HEADERS += \
     ../lib/WUtils.h \
     ../lib/TcpFileTransfer.h \
     ../lib/Tcp.h \
-    TuningSocket.h \
     TuningService.h \
     ../lib/DataSource.h \
     ../lib/XmlHelper.h \
@@ -98,7 +98,9 @@ HEADERS += \
     TcpTuningServer.h \
     TcpTuningClient.h \
     TuningSource.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    TuningSourceWorker.h \
+    TuningSocketListener.h
 
 include(../qtservice/src/qtservice.pri)
 

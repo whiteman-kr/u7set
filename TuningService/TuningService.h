@@ -4,7 +4,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/CfgServerLoader.h"
 #include "../AppDataService/AppSignalStateEx.h"
-#include "../TuningService/TuningSocket.h"
+#include "../TuningService/TuningSocketListener.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 
@@ -65,7 +65,7 @@ namespace Tuning
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
-		TuningSocketWorker* m_tuningSocket = nullptr;
+		TuningSocketListener* m_tuningSocket = nullptr;
 		SimpleThread* m_tuningSocketThread = nullptr;
 
 		QTimer m_timer;
