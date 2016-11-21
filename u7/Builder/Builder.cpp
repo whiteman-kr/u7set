@@ -253,11 +253,11 @@ namespace Builder
 				break;
 			}
 
-			Tuning::TuningDataStorage tuningDataStorage;
-
 			//
 			// Compile application logic
 			//
+			Tuning::TuningDataStorage tuningDataStorage;
+
 			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &tuningDataStorage, &buildWriter);
 
 			if (ok == false ||

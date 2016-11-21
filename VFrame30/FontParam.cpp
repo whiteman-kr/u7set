@@ -8,6 +8,14 @@ namespace VFrame30
 	{
 	}
 
+	FontParam::FontParam(const QString& name, double drawSize, bool bold, bool italic) :
+		m_name(name),
+		m_size(drawSize),
+		m_bold(bold),
+		m_italic(italic)
+	{
+	}
+
 	bool FontParam::SaveData(Proto::FontParam* message) const
 	{
 		Proto::Write(message->mutable_name(), m_name);

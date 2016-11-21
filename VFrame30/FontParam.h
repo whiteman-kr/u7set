@@ -49,6 +49,7 @@ namespace VFrame30
 	{
 	public:
 		FontParam();
+		FontParam(const QString& name, double drawSize, bool bold, bool italic);
 
 		// Serialization
 		//
