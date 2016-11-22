@@ -309,7 +309,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runTuningSocket()
 	{
-		TuningSocketWorker* tuningSocket = new TuningSocketWorker(m_tuningSettings.tuningDataIP, m_tuningSources);
+		TuningSocketListener* tuningSocket = new TuningSocketListener(m_tuningSettings.tuningDataIP, m_tuningSources);
 
 		m_tuningSocketThread = new SimpleThread(tuningSocket);
 		m_tuningSocketThread->start();

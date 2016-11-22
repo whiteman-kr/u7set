@@ -155,6 +155,9 @@ public slots:
 	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
 
+	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
+	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+
 	// Units management
 	//
 	void slot_getUnits(UnitList* units);
