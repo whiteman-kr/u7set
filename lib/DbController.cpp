@@ -80,6 +80,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithAppSignalID);
 	connect(this, &DbController::signal_getSignalsIDsWithCustomAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithCustomAppSignalID);
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
+	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
+	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
 
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_addUnit, m_worker, &DbWorker::slot_addUnit);
@@ -1817,6 +1819,70 @@ bool DbController::getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int
 	ok = waitForComplete(parentWidget, tr("Gget signals IDs with EquipmentID"));
 
 	return ok;
+}
+
+
+bool DbController::getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSignalHistory(signalID, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting signal history"));
+
+	return true;
+}
+
+
+bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificSignals(signalIDs, changesetId, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
+
+	return true;
 }
 
 

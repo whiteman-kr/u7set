@@ -134,6 +134,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0116.sql", "Upgrade to version 116, remove administrator rights to all except UserID=1"},
 	{":/DatabaseUpgrade/Upgrade0117.sql", "Upgrade to version 117, update LM-1 preset"},
 	{":/DatabaseUpgrade/Upgrade0118.sql", "Upgrade to version 118, update configuration script to count UniqueID"},
+	{":/DatabaseUpgrade/Upgrade0119.sql", "Upgrade to version 119, added get_signal_history() and get_specific_signal() stored procedures"},
 };
 
 
@@ -4759,6 +4760,131 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	{
 		signalIDs->append(q.value(0).toInt());
 	}
+}
+
+
+void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// Request for history
+	//
+	QString request = QString("SELECT * FROM get_signal_history(%1, %2)")
+			.arg(currentUser().userId())
+			.arg(signalID);
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangeset ci;
+		db_dbChangeset(q, &ci);
+
+		out->push_back(ci);
+	}
+
+	return;
+}
+
+
+void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signalIDs == nullptr ||
+		signalIDs->empty() == true ||
+		out == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		assert(signalIDs->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through signalIDs
+	//
+	for (unsigned int i = 0; i < signalIDs->size(); i++)
+	{
+		int signalID = signalIDs->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_specific_signal(%1, %2, %3);")
+				.arg(currentUser().userId())
+				.arg(signalID)
+				.arg(changesetId);
+
+		QSqlQuery q(db);
+		q.setForwardOnly(true);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(db, tr("Can't get signal. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(db, tr("Can't find workcopy for signalID: %1. Is signal CheckedOut?").arg(signalID));
+			return;
+		}
+
+		Signal s;
+
+		getSignalData(q, s);
+
+		out->push_back(s);
+	}
+
+	return;
+
 }
 
 
