@@ -15,13 +15,60 @@ EditorDelegate::EditorDelegate(QObject *parent):QItemDelegate(parent)
 
 QWidget* EditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-	if(index.column() > 0)
+    if(index.column() == DialogSubsystemListEditor::Key)
+    {
+        QLineEdit* edit = new QLineEdit(parent);
+
+        QRegExp rx("[\\d]{1,2}");
+        edit->setValidator(new QRegExpValidator(rx, edit));
+
+        return edit;
+    }
+
+    if(index.column() == DialogSubsystemListEditor::SubsystemID)
+    {
+        QLineEdit* edit = new QLineEdit(parent);
+
+        QRegExp rx("^[A-Za-z][A-Za-z\\d]*$");
+        edit->setValidator(new QRegExpValidator(rx, edit));
+
+        return edit;
+    }
+
+    if(index.column() == DialogSubsystemListEditor::Caption)
 	{
 		return QItemDelegate::createEditor(parent, option, index);
 	}
-	return nullptr;
+
+    return nullptr;
 }
 
+void EditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+    if (index.column() == DialogSubsystemListEditor::Key || index.column() == DialogSubsystemListEditor::SubsystemID)
+    {
+        QString s = index.model()->data(index, Qt::EditRole).toString();
+        QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
+        edit->setText(s);
+    }
+    else
+    {
+        QItemDelegate::setEditorData(editor, index);
+    }
+}
+
+void EditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    if (index.column() == DialogSubsystemListEditor::Key || index.column() == DialogSubsystemListEditor::SubsystemID)
+    {
+        QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
+        model->setData(index, edit->text(), Qt::EditRole);
+    }
+    else
+    {
+        QItemDelegate::setModelData(editor, model, index);
+    }
+}
 
 //
 //
@@ -43,14 +90,14 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	ui->m_list->setColumnCount(3);
 	QStringList l;
 	l << tr("Index");
-	l << tr("Key");
+    l << tr("Key [0-63]");
 	l << tr("SubsystemID");
 	l << tr("Caption");
 	ui->m_list->setHeaderLabels(l);
 	ui->m_list->setColumnWidth(0, 50);
-	ui->m_list->setColumnWidth(1, 50);
+    ui->m_list->setColumnWidth(1, 70);
 	ui->m_list->setColumnWidth(2, 100);
-	ui->m_list->setColumnWidth(3, 150);
+    ui->m_list->setColumnWidth(3, 130);
 
 	m_editorDelegate = new EditorDelegate(this);
 	ui->m_list->setItemDelegate(m_editorDelegate);
@@ -117,21 +164,6 @@ bool DialogSubsystemListEditor::askForSaveChanged()
 
 bool DialogSubsystemListEditor::saveChanges()
 {
-	bool ok;
-	QString comment = QInputDialog::getText(this, tr("Subsystem List Editor"),
-											tr("Please enter comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
-
-	if (ok == false)
-	{
-		return false;
-	}
-	if (comment.isEmpty())
-	{
-		QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied!");
-		return false;
-	}
-
 	Hardware::SubsystemStorage subsystems;
 
 	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
@@ -144,16 +176,67 @@ bool DialogSubsystemListEditor::saveChanges()
 		}
 
 		int index = item->data(0, Qt::UserRole).toInt();
-		int key = item->text(1).toInt();
-		QString strId = item->text(2);
-		QString caption = item->text(3);
+        int key = item->text(Key).toInt();
+        QString strId = item->text(SubsystemID);
+        QString caption = item->text(Caption);
+
+        if (key < 0 || key > 63)
+        {
+            QMessageBox::warning(this, "Subsystem List Editor", tr("Wrong key value '%1' for SubsystemID '%2'!\n\nKey value must be in range 0-63.").arg(key).arg(strId));
+            return false;
+        }
+
+        // Add here other names in future
+        //
+        if (strId == "Reports" ||
+                strId == "LogicSchemas" ||
+                strId == "build.log" ||
+                strId == "build.xml"
+                )
+        {
+            QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%2' is a reserved word!").arg(strId));
+            return false;
+        }
+
+        int count = subsystems.count();
+        for (int s = 0; s < count; s++)
+        {
+            std::shared_ptr<Hardware::Subsystem> subsystemPtr = subsystems.get(s);
+
+            if (subsystemPtr->subsystemId() == strId)
+            {
+                QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%2' already exists!").arg(strId));
+                return false;
+            }
+
+            if (subsystemPtr->key() == key)
+            {
+                QMessageBox::warning(this, "Subsystem List Editor", tr("Key value '%1' already exists!").arg(key));
+                return false;
+            }
+        }
 
 		std::shared_ptr<Hardware::Subsystem> subsystem = std::make_shared<Hardware::Subsystem>(index, key, strId, caption);
 		subsystems.add(subsystem);
 	}
 
 
-	// save to db
+    bool ok;
+    QString comment = QInputDialog::getText(this, tr("Subsystem List Editor"),
+                                            tr("Please enter comment:"), QLineEdit::Normal,
+                                            tr("comment"), &ok);
+
+    if (ok == false)
+    {
+        return false;
+    }
+    if (comment.isEmpty())
+    {
+        QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied!");
+        return false;
+    }
+
+    // save to db
 	//
 	if (subsystems.save(db(), comment) == false)
 	{
