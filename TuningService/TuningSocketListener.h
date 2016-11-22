@@ -116,56 +116,47 @@ namespace Tuning
 
 
 	class TuningSources;
-
+	class TuningSourceWorker;
 
 	class TuningSocketListener : public SimpleThreadWorker
 	{
 		Q_OBJECT
 
 	public:
-		TuningSocketListener(const HostAddressPort& tuningIP, const TuningSources& tuningSources);
+		TuningSocketListener(const HostAddressPort& listenIP, const TuningSources& tuningSources);
 		~TuningSocketListener();
 
-		void sendRequest(const TuningSocketRequest& socketRequest);
-
-		bool getReply(SocketReply* reply);
-
 	signals:
-		/* void replyReady();
-
-		void userRequest(FotipFrame fotipFrame);
-		void replyWithNoZeroFlags(FotipFrame fotipFrame); */
 
 	private:
-		void clear();
-
 		virtual void onThreadStarted() override;
 		virtual void onThreadFinished() override;
-
-		void createRequestQueues();
-		void startTimer();
 
 		void createSocket();
 		void closeSocket();
 
-	private slots:
-		void onTimer20ms();
+		void startTimer();
 
-		void onRequest(quint32 tuningSourceIP);
+	private slots:
+		void onTimer();
+
 		void onSocketReadyRead();
 
-	private:
-		HostAddressPort m_tuningIP;
+		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const RupFotipFrame& reply);
 
-		QHash<quint32, TuningSocketRequestQueue*> m_requestQueues;
+	private:
+		HostAddressPort m_listenIP;
 
 		QTimer m_timer;
 
 		QUdpSocket* m_socket = nullptr;
 
+		QHash<quint32, TuningSourceWorker*> m_ipTuningSourceWorkerMap;
 
-		RupFotipFrame m_ackFrame;
-		RupFotipFrame m_reqFrame;
+		// statistics
+		//
+		qint64 m_errReplySize = 0;
+		qint64 m_errReadSocket = 0;
+		qint64 m_errUnknownTuningSource = 0;
 	};
-
 }

@@ -100,7 +100,8 @@ HEADERS += \
     TuningSource.h \
     ../u7/Builder/ModulesRawData.h \
     TuningSourceWorker.h \
-    TuningSocketListener.h
+    TuningSocketListener.h \
+    ../lib/DataProtocols.h
 
 include(../qtservice/src/qtservice.pri)
 
