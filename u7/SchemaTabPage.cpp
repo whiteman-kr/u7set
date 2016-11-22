@@ -1478,15 +1478,9 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	const DbFileInfo file = files[0];
 
-	// Get file history
-	//
-	std::vector<DbChangeset> fileHistory;
-
-	db()->getFileHistory(file, &fileHistory, this);
-
 	// Show chageset dialog
 	//
-	int changesetId = SelectChangesetDialog::getChangeset(db(), file, fileHistory, this);
+	int changesetId = SelectChangesetDialog::getChangeset(db(), file, false, this);
 
 	if (changesetId == -1)
 	{

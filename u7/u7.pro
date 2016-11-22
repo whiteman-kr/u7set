@@ -183,7 +183,8 @@ SOURCES +=\
     SchemaListModel.cpp \
     Forms/SelectChangesetDialog.cpp \
     Forms/FileHistoryDialog.cpp \
-    Forms/ChangesetDetailsDialog.cpp
+    Forms/ChangesetDetailsDialog.cpp \
+    Forms/CompareDialog.cpp
 
 
 HEADERS  += \
@@ -297,7 +298,8 @@ HEADERS  += \
     SchemaListModel.h \
     Forms/SelectChangesetDialog.h \
     Forms/FileHistoryDialog.h \
-    Forms/ChangesetDetailsDialog.h
+    Forms/ChangesetDetailsDialog.h \
+    Forms/CompareDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -321,7 +323,8 @@ FORMS    += \
     ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
     Forms/FileHistoryDialog.ui \
-    Forms/ChangesetDetailsDialog.ui
+    Forms/ChangesetDetailsDialog.ui \
+    Forms/CompareDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

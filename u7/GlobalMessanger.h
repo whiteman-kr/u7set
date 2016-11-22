@@ -7,11 +7,35 @@
 #include "../lib/DbStruct.h"
 #include "Builder/IssueLogger.h"
 
+
 struct RunOrderDebugInfo
 {
 	QString equipmentId;							// LM's ID
 	std::map<QUuid, int> schemaItemsRunOrder;		// Key is item's guid, value is run order index
 };
+
+
+enum class CompareVersionType
+{
+	Changeset,
+	Date,
+	LatestVersion
+};
+
+
+struct CompareData
+{
+	CompareVersionType sourceVersionType = CompareVersionType::Changeset;
+	int sourceChangeset = 0;
+	QDateTime sourceDate = QDateTime::currentDateTime();
+
+	CompareVersionType targetVersionType = CompareVersionType::LatestVersion;
+	int targetChangeset = 0;
+	QDateTime targetDate = QDateTime::currentDateTime();
+};
+
+Q_DECLARE_METATYPE(CompareData)
+
 
 class GlobalMessanger : public QObject
 {
@@ -52,6 +76,10 @@ public:
 	//
 	void fireChangeCurrentTab(QWidget* tab);
 
+	// CompareObject
+	//
+	void fireCompareObject(DbChangesetObject object, CompareData compareData);
+
 	// --
 	//
 
@@ -65,6 +93,8 @@ signals:
 	void showDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
 
 	void changeCurrentTab(QWidget* tab);
+
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 public slots:
 
