@@ -18,7 +18,13 @@ public:
 	EditorDelegate(QObject *parent);
 	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
+
+
 private:
+
+    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+    void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+
 };
 
 class DialogSubsystemListEditor : public QDialog
@@ -28,6 +34,15 @@ class DialogSubsystemListEditor : public QDialog
 public:
 	explicit DialogSubsystemListEditor(DbController* pDbController, QWidget *parent = 0);
 	~DialogSubsystemListEditor();
+
+    enum Columns
+    {
+        Index,
+        Key,
+        SubsystemID,
+        Caption
+
+    };
 
 private:
 	bool askForSaveChanged();

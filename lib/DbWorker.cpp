@@ -134,7 +134,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0116.sql", "Upgrade to version 116, remove administrator rights to all except UserID=1"},
 	{":/DatabaseUpgrade/Upgrade0117.sql", "Upgrade to version 117, update LM-1 preset"},
 	{":/DatabaseUpgrade/Upgrade0118.sql", "Upgrade to version 118, update configuration script to count UniqueID"},
-	{":/DatabaseUpgrade/Upgrade0119.sql", "Upgrade to version 119, added get_signal_history() and get_specific_signal() stored procedures"},
+    {":/DatabaseUpgrade/Upgrade0119.sql", "Upgrade to version 119, add RegRawDataDescription to LM-1"},
+	{":/DatabaseUpgrade/Upgrade0120.sql", "Upgrade to version 120, added get_signal_history() and get_specific_signal() stored procedures"},
 };
 
 
@@ -4884,7 +4885,6 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 	}
 
 	return;
-
 }
 
 

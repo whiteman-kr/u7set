@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include <QCloseEvent>
+#include <QDialogButtonBox>
 #include "MainWindow.h"
 #include "CentralWidget.h"
 #include "Settings.h"
@@ -501,18 +502,51 @@ void MainWindow::runRS232SignalListEditor()
 
 void MainWindow::showAbout()
 {
-	QMessageBox aboutDialog(this);
-	aboutDialog.setIconPixmap(QPixmap(":/Images/Images/logo.png"));
-	aboutDialog.setText("<h2>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h2><br>SHA1 ID: " + QString(USED_SERVER_COMMIT_SHA).left(8));
-	aboutDialog.setInformativeText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
-	aboutDialog.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	QDialog aboutDialog(this);
 
-	auto button = aboutDialog.addButton("Copy SHA1 ID", QMessageBox::ActionRole);
-	connect(button, &QPushButton::clicked, [](){
+	QHBoxLayout* hl = new QHBoxLayout;
+
+	QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+
+	hl->addWidget(logo);
+
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+
+	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+	text += "Build: Release";
+#else
+	text += "Build: Debug";
+#endif
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
+
+	label = new QLabel(&aboutDialog);
+	label->setText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	label->setWordWrap(true);
+	vl->addWidget(label);
+
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
 		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
 	});
 
-	aboutDialog.addButton(QMessageBox::Ok);
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
+	aboutDialog.setLayout(mainLayout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
 
 	aboutDialog.exec();
 }
