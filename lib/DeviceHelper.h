@@ -44,6 +44,9 @@ public:
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
 
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
+	static const Hardware::DeviceModule* getLM(const Hardware::DeviceChassis* chassis);
+
+	static const Hardware::DeviceModule* getAssociatedLM(const Hardware::DeviceObject* object);
 
 	static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
 	static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);

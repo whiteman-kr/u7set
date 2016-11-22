@@ -701,6 +701,25 @@ namespace Builder
 			return false;
 		}
 
+		// --
+		//
+		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
+		auto constItemsBegin = constItems.begin();
+		auto constItemsEnd = constItems.end();
+
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
+		{
+			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
+
+			for (const VFrame30::AfbPin& out : outputs)
+			{
+				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
+				itemsWithInputs[out.guid()] = deps;
+			}
+		}
+
+		// --
+		//
 		std::list<ChangeOrder> changeOrderHistory;
 
 		// Set other items
@@ -724,10 +743,15 @@ namespace Builder
 
 			for (const VFrame30::AfbPin& out : outputs)
 			{
-				auto constItemsBegin = constItems.begin();
-				auto constItemsEnd = constItems.end();
+				auto foundDepIterator = itemsWithInputs.find(out.guid());
+				if (foundDepIterator == itemsWithInputs.end())
+				{
+					assert(foundDepIterator != itemsWithInputs.end());
+					log->errINT1001("Output was not fount in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
+					continue;
+				}
 
-				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
+				const std::vector<AppLogicItem>& deps = foundDepIterator->second;
 
 				//qDebug() << "Dependant Items:";
 				for (const AppLogicItem& di : deps)
@@ -1294,7 +1318,7 @@ namespace Builder
 				return false;
 			}
 
-			LOG_MESSAGE(m_log, schema->caption());
+			LOG_MESSAGE(m_log, tr("Parsing ") + schema->schemaID());
 
 			ok = parseAppLogicSchema(schema);
 

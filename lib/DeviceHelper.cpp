@@ -199,8 +199,6 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 		return nullptr;
 	}
 
-	const Hardware::DeviceModule* module = nullptr;
-
 	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
 
 	if (chassis == nullptr)
@@ -226,7 +224,7 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 			continue;
 		}
 
-		module =  device->toModule();
+		const Hardware::DeviceModule* module = device->toModule();
 
 		if (module == nullptr)
 		{
@@ -243,6 +241,78 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 	}
 
 	return nullptr;
+}
+
+
+const Hardware::DeviceModule* DeviceHelper::getLM(const Hardware::DeviceChassis* chassis)
+{
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i);
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceModule* module =  device->toModule();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->isLM() == true)
+		{
+			if (module->place() == LM1_PLACE)
+			{
+				return 	module;
+			}
+
+			assert(false);
+			break;
+		}
+	}
+
+	return nullptr;
+}
+
+
+//
+// object is under chassis
+//
+const Hardware::DeviceModule* DeviceHelper::getAssociatedLM(const Hardware::DeviceObject* object)
+{
+	if (object == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceChassis* chassis = object->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return getLM(chassis);
 }
 
 

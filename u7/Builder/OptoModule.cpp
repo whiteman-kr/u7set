@@ -17,6 +17,7 @@ namespace Hardware
 	const char* OptoPort::ALL_NATIVE_RAW_DATA = "ALL_NATIVE_RAW_DATA";
 	const char* OptoPort::MODULE_RAW_DATA = "MODULE_RAW_DATA";
 	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
+	const char* OptoPort::CONST16 = "CONST16";
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
 		m_deviceController(optoPortController),
@@ -123,6 +124,7 @@ namespace Hardware
 
 		// then place Raw Data
 		//
+
 		address.addWord(m_txRawDataSizeW);
 
 		// then place analog signals
@@ -188,10 +190,12 @@ namespace Hardware
 
 			if (fullTxDataSizeW > m_txDataSizeW)
 			{
+				LOG_MESSAGE(log, QString(tr("Port %1: txIdSizeW = 2, txRawDataSizeW = %2, txAnalogSignalsSizeW = %3, txDiscreteSignalsSizeW = %4")).
+									arg(m_equipmentID).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (connection %3)")).
+								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
 								   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
-								   arg(m_connectionID));
+								   arg(m_equipmentID).arg(m_connectionID));
 
 				result = false;
 			}
@@ -388,6 +392,29 @@ namespace Hardware
 				continue;
 			}
 
+			if (itemTypeStr == CONST16)
+			{
+				QString constStr = str.section("=", 1, 1).trimmed();
+
+				int const16 = constStr.toInt(&res);
+
+				if (res == false)
+				{
+					msg = QString("Invalid CONST16 value in opto-port '%1' raw data description.").arg(equipmentID());
+					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+					result = false;
+					continue;
+				}
+				else
+				{
+					item.type = RawDataDescriptionItemType::Const16;
+					item.const16Value = const16;
+					m_rawDataDescription.append(item);
+				}
+
+				continue;
+			}
+
 			msg = QString("Unknown item %1 in opto-port '%2' raw data description.").arg(itemTypeStr).arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			result = false;
@@ -406,9 +433,11 @@ namespace Hardware
 	}
 
 
-	bool OptoPort::calculatePortRawDataSize(const DeviceModule* lm, OptoModuleStorage* optoStorage, Builder::IssueLogger* log)
+	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log)
 	{
-		if (lm == nullptr || optoStorage == nullptr || log == nullptr)
+		const DeviceModule* lm = DeviceHelper::getAssociatedLM(m_deviceController);
+
+		if (optoStorage == nullptr || log == nullptr || lm == nullptr)
 		{
 			assert(false);
 			return false;
@@ -452,14 +481,19 @@ namespace Hardware
 			// txRawDataSizeW set manually
 			//
 			setTxRawDataSizeW(rawDataSizeItem.rawDataSize);
+
+			LOG_MESSAGE(log, QString(tr("Port %1 manual rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 			return true;
 		}
+
+		LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 
 		// automatic txRawDataSizeW calculation
 		//
 		bool result = true;
 
 		int size = 0;
+		int partSizeW = 0;
 
 		for(const RawDataDescriptionItem& item : m_rawDataDescription)
 		{
@@ -470,7 +504,11 @@ namespace Hardware
 
 			case RawDataDescriptionItemType::AllNativeRawData:
 
-				size += DeviceHelper::getAllNativeRawDataSize(lm, log);
+				partSizeW = DeviceHelper::getAllNativeRawDataSize(lm, log);;
+
+				size += partSizeW;
+
+				LOG_MESSAGE(log, QString(tr("ALL_NETIVE_RAW_DATA sizeW = %1")).arg(partSizeW));
 
 				break;
 
@@ -478,7 +516,11 @@ namespace Hardware
 				{
 					bool moduleIsFound = false;
 
-					size += DeviceHelper::getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, log);
+					partSizeW = DeviceHelper::getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, log);
+
+					size += partSizeW;
+
+					LOG_MESSAGE(log, QString(tr("MODULE_RAW_DATA=%1 sizeW = %2")).arg(item.modulePlace).arg(partSizeW));
 
 					if (moduleIsFound == false)
 					{
@@ -515,17 +557,28 @@ namespace Hardware
 						break;
 					}
 
-					bool res = portTxRawData->calculatePortRawDataSize(lm, optoStorage, log);
+					bool res = portTxRawData->calculatePortRawDataSize(optoStorage, log);
 
 					if (res == true)
 					{
-						size += portTxRawData->txRawDataSizeW();
+						partSizeW = portTxRawData->txRawDataSizeW();
+
+						size += partSizeW;
+
+						LOG_MESSAGE(log, QString(tr("PORT_RAW_DATA=%1 sizeW = %2")).arg(item.portEquipmentID).arg(partSizeW));
 					}
 					else
 					{
 						result = false;
 					}
 				}
+				break;
+
+			case RawDataDescriptionItemType::Const16:
+
+				size++;
+				LOG_MESSAGE(log, QString(tr("CONST16=%1 sizeW = 1")).arg(item.const16Value));
+
 				break;
 
 			default:
@@ -542,6 +595,7 @@ namespace Hardware
 		if (result == true)
 		{
 			setTxRawDataSizeW(size);
+			LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 		}
 
 		m_txRawDataSizeWCalculationStarted = false;

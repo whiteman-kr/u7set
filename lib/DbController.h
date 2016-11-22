@@ -138,6 +138,7 @@ public:
 	// Next value in global counter, use for creating signals, etc with unique identifiers
 	//
 	bool nextCounterValue(int* counter);
+	int nextCounterValue();
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
