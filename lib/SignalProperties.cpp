@@ -24,7 +24,7 @@ void SignalProperties::initProperties()
 	static const QString typeCaption("Type");
 	static const QString inOutTypeCaption("InOutType");
 	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
-	static const QString cacheValidator2("^[A-Za-z][A-Za-z\\d_]*$");
+	static const QString cacheValidator2("^[#A-Za-z][A-Za-z\\d_]*$");
 	static const QString appSignalIDCaption("AppSignalID");
 	static const QString customSignalIDCaption("CustomAppSignalID");
 	static const QString captionCaption("Caption");

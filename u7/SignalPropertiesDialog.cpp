@@ -343,6 +343,10 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		{
 			signal.setCustomAppSignalID(signal.appSignalID().mid(1));
 		}
+		if (!signal.customAppSignalID().isEmpty() && signal.customAppSignalID()[0] == '#')
+		{
+			signal.setCustomAppSignalID(signal.customAppSignalID().mid(1));
+		}
 
 		signal.setEquipmentID(signal.equipmentID().trimmed());
 
