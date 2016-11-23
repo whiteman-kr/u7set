@@ -7,6 +7,7 @@
 #include "../TuningService/TuningSocketListener.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
+#include "TuningSourceWorker.h"
 
 namespace Tuning
 {
@@ -23,8 +24,6 @@ namespace Tuning
 
 		~TuningServiceWorker();
 
-		void clear();
-
 		virtual TuningServiceWorker* createInstance() override;
 
 	signals:
@@ -32,6 +31,8 @@ namespace Tuning
 	public slots:
 
 	private:
+		void clear();
+
 		virtual void initialize() override;
 		virtual void shutdown() override;
 
@@ -49,8 +50,8 @@ namespace Tuning
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();
 
-		void runTuningSocket();
-		void stopTuningSocket();
+		void runTuningSourceWorkers();
+		void stopTuningSourceWorkers();
 
 
 	private slots:
@@ -65,8 +66,9 @@ namespace Tuning
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
-		TuningSocketListener* m_tuningSocket = nullptr;
-		SimpleThread* m_tuningSocketThread = nullptr;
+		TuningSourceWorkerThreadMap m_sourceWorkerThreadMap;
+
+		TuningSocketListenerThread* m_socketListenerThread = nullptr;
 
 		QTimer m_timer;
 	};

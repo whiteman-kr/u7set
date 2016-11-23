@@ -7,7 +7,6 @@
 #include "../lib/DataProtocols.h"
 #include "../lib/Queue.h"
 
-
 namespace Tuning
 {
 	enum OperationCode
@@ -118,45 +117,4 @@ namespace Tuning
 	class TuningSources;
 	class TuningSourceWorker;
 
-	class TuningSocketListener : public SimpleThreadWorker
-	{
-		Q_OBJECT
-
-	public:
-		TuningSocketListener(const HostAddressPort& listenIP, const TuningSources& tuningSources);
-		~TuningSocketListener();
-
-	signals:
-
-	private:
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
-
-		void createSocket();
-		void closeSocket();
-
-		void startTimer();
-
-	private slots:
-		void onTimer();
-
-		void onSocketReadyRead();
-
-		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const RupFotipFrame& reply);
-
-	private:
-		HostAddressPort m_listenIP;
-
-		QTimer m_timer;
-
-		QUdpSocket* m_socket = nullptr;
-
-		QHash<quint32, TuningSourceWorker*> m_ipTuningSourceWorkerMap;
-
-		// statistics
-		//
-		qint64 m_errReplySize = 0;
-		qint64 m_errReadSocket = 0;
-		qint64 m_errUnknownTuningSource = 0;
-	};
 }

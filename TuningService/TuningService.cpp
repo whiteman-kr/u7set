@@ -110,15 +110,13 @@ namespace Tuning
 	void TuningServiceWorker::clearConfiguration()
 	{
 		stopTcpTuningServerThread();
-		stopTuningSocket();
+		stopTuningSourceWorkers();
 	}
 
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
-		//allocateSignalsAndStates();
-
-		runTuningSocket();
+		runTuningSourceWorkers();
 		runTcpTuningServerThread();
 	}
 
@@ -307,26 +305,72 @@ namespace Tuning
 	}
 
 
-	void TuningServiceWorker::runTuningSocket()
+	void TuningServiceWorker::runTuningSourceWorkers()
 	{
-		TuningSocketListener* tuningSocket = new TuningSocketListener(m_tuningSettings.tuningDataIP, m_tuningSources);
+		// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
+		//
+		assert(m_sourceWorkerThreadMap.size() == 0);
 
-		m_tuningSocketThread = new SimpleThread(tuningSocket);
-		m_tuningSocketThread->start();
+		for(TuningSource* tuningSource : m_tuningSources)
+		{
+			if (tuningSource == nullptr)
+			{
+				assert(false);
+				continue;
+			}
 
-//		connect(m_tuningSocket, &TuningSocketWorker::replyReady, this, &TuningServiceWorker::onReplyReady);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(*tuningSource);
+
+			if (sourceWorkerThread == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			m_sourceWorkerThreadMap.insert(sourceWorkerThread->sourceIP(), sourceWorkerThread);
+		}
+
+		// create and run TuningSocketListenerThread
+		//
+		assert(m_socketListenerThread == nullptr);
+
+		m_socketListenerThread = new TuningSocketListenerThread(m_tuningSettings.tuningDataIP, m_sourceWorkerThreadMap);
+		m_socketListenerThread->start();
+
+		// run TuningSourceWorkerThreads
+		//
+		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
+		{
+			sourceWorkerThread->start();
+		}
 	}
 
 
-	void TuningServiceWorker::stopTuningSocket()
+	void TuningServiceWorker::stopTuningSourceWorkers()
 	{
-		if (m_tuningSocketThread != nullptr)
+		// stop and delete TuningSourceWorkerThreads
+		//
+		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
 		{
-			m_tuningSocketThread->quitAndWait();		// m_tuningSocket delete inside
+			if (sourceWorkerThread == nullptr)
+			{
+				assert(false);
+				continue;
+			}
 
-			delete m_tuningSocketThread;
+			sourceWorkerThread->quitAndWait();
+			delete sourceWorkerThread;
+		}
 
-			m_tuningSocketThread = nullptr;
+		m_sourceWorkerThreadMap.clear();
+
+		// stop and delete TuningSocketListenerThread
+		//
+		if (m_socketListenerThread != nullptr)
+		{
+			m_socketListenerThread->quitAndWait();
+			delete m_socketListenerThread;
+			m_socketListenerThread = nullptr;
 		}
 	}
 

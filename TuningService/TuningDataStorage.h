@@ -146,7 +146,7 @@ namespace Tuning
 		void setFrameData(int frameNo, const char* fotipData);
 
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
-		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
+		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
 
 		const QStringList& metadataFields();
 		const std::vector<QVariantList>& metadata() const;

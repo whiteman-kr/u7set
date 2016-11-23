@@ -209,6 +209,7 @@ public:
 	void setLmAddressStr(const QString& addressStr) { m_lmAddressPort.setAddress(addressStr); }
 
 	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
+	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
