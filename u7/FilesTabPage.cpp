@@ -9,7 +9,7 @@
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
-
+#include "Forms/CompareDialog.h"
 
 //
 //
@@ -1186,6 +1186,30 @@ void FileTreeView::showHistory()
 	return;
 }
 
+void FileTreeView::showCompare()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	FileTreeModelItem* file = fileTreeModel()->fileItem(selected.first());
+
+	if (file == nullptr)
+	{
+		assert(file);
+		return;
+	}
+
+	CompareDialog::showCompare(db(), *file, -1, this);
+
+	return;
+}
+
 void FileTreeView::getLatestVersion()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
@@ -1533,6 +1557,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_fileView->addAction(m_checkInAction);
 	m_fileView->addAction(m_undoChangesAction);
 	m_fileView->addAction(m_historyAction);
+	m_fileView->addAction(m_compareAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction2);
 	m_fileView->addAction(m_getLatestVersionAction);
@@ -1620,6 +1645,11 @@ void FilesTabPage::createActions()
 	m_historyAction->setStatusTip(tr("Show check in history"));
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, m_fileView, &FileTreeView::showHistory);
+
+	m_compareAction = new QAction(tr("Compare..."), this);
+	m_compareAction->setStatusTip(tr("Compare file"));
+	m_compareAction->setEnabled(false);
+	connect(m_compareAction, &QAction::triggered, m_fileView, &FileTreeView::showCompare);
 
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
@@ -1743,6 +1773,7 @@ void FilesTabPage::setActionState()
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
+	m_compareAction->setEnabled(selectedIndexList.size() == 1);
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);

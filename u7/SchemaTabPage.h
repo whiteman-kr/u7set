@@ -53,6 +53,7 @@ protected slots:
 	void slot_CheckIn();
 	void slot_UndoChanges();
 	void slot_showHistory();
+	void slot_compare();
 	void slot_showHistoryForAllSchemas();
 	void slot_AddFile();
 	void slot_DeleteFile();
@@ -97,6 +98,7 @@ protected:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
+	QAction* m_compareAction = nullptr;
 	QAction* m_allSchemasHistoryAction = nullptr;
 	// --
 	QAction* m_separatorAction1 = nullptr;

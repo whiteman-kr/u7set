@@ -48,8 +48,12 @@ CompareDialog::CompareDialog(DbController* db, const DbChangesetObject& object, 
 	{
 		ui->sourceTypeComboBox->setCurrentIndex(static_cast<int>(CompareVersionType::Changeset));
 		ui->sourceChangesetLineEdit->setText(QString::number(changeset));
+	}
 
-		ui->targetTypeComboBox->setCurrentIndex(static_cast<int>(CompareVersionType::LatestVersion));
+	ui->targetTypeComboBox->setCurrentIndex(static_cast<int>(CompareVersionType::LatestVersion));
+
+	if (changeset != -1)
+	{
 		ui->targetChangesetLineEdit->setText(QString::number(changeset));
 	}
 
@@ -193,6 +197,12 @@ void CompareDialog::on_targetChangesetButton_clicked()
 
 void CompareDialog::done(int r)
 {
+	if (r == QDialog::Rejected)
+	{
+		QDialog::done(r);
+		return;
+	}
+
 	CompareData compareData;
 
 	// Source

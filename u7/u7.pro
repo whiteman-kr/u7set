@@ -184,7 +184,8 @@ SOURCES +=\
     Forms/SelectChangesetDialog.cpp \
     Forms/FileHistoryDialog.cpp \
     Forms/ChangesetDetailsDialog.cpp \
-    Forms/CompareDialog.cpp
+    Forms/CompareDialog.cpp \
+    Forms/ComparePropertyObjectDialog.cpp
 
 
 HEADERS  += \
@@ -299,7 +300,9 @@ HEADERS  += \
     Forms/SelectChangesetDialog.h \
     Forms/FileHistoryDialog.h \
     Forms/ChangesetDetailsDialog.h \
-    Forms/CompareDialog.h
+    Forms/CompareDialog.h \
+    Forms/ComparePropertyObjectDialog.h \
+    ../lib/diff_match_patch.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -324,7 +327,8 @@ FORMS    += \
     Forms/SelectChangesetDialog.ui \
     Forms/FileHistoryDialog.ui \
     Forms/ChangesetDetailsDialog.ui \
-    Forms/CompareDialog.ui
+    Forms/CompareDialog.ui \
+    Forms/ComparePropertyObjectDialog.ui
 
 RESOURCES += \
 	Resources.qrc \

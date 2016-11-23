@@ -3,6 +3,7 @@
 #include "CreateSchemaDialog.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
+#include "Forms/CompareDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include <QJsonArray>
@@ -58,6 +59,7 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	addAction(m_checkInAction);
 	addAction(m_undoChangesAction);
 	addAction(m_historyAction);
+	addAction(m_compareAction);
 	addAction(m_allSchemasHistoryAction);
 
 	addAction(m_separatorAction1);
@@ -117,6 +119,11 @@ void SchemaFileView::CreateActions()
 	m_historyAction->setStatusTip(tr("Show file history..."));
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, this, &SchemaFileView::slot_showHistory);
+
+	m_compareAction = new QAction(tr("Compare..."), this);
+	m_compareAction->setStatusTip(tr("Compare file..."));
+	m_compareAction->setEnabled(false);
+	connect(m_compareAction, &QAction::triggered, this, &SchemaFileView::slot_compare);
 
 	m_allSchemasHistoryAction = new QAction(tr("All Schemas History..."), this);
 	m_allSchemasHistoryAction->setStatusTip(tr("Show all schemas history..."));
@@ -469,6 +476,25 @@ void SchemaFileView::slot_showHistory()
 	return;
 }
 
+void SchemaFileView::slot_compare()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	DbFileInfo file = selectedFiles.front();
+
+	CompareDialog::showCompare(db(), file, -1, this);
+
+	return;
+}
+
 void SchemaFileView::slot_showHistoryForAllSchemas()
 {
 	// Get file history
@@ -767,6 +793,7 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 	m_checkInAction->setEnabled(hasCheckInPossibility);
 	m_undoChangesAction->setEnabled(hasUndoPossibility);
 	m_historyAction->setEnabled(s.size() == 1);
+	m_compareAction->setEnabled(s.size() == 1);
 
 	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
 	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file

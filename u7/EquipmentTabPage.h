@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
+#include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/PropertyEditor.h"
 
@@ -170,6 +171,7 @@ public slots:
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
 	void showHistory();
+	void compare();
 	void refreshSelectedDevices();
 
 	void updateSelectedDevices();
@@ -254,6 +256,8 @@ protected slots:
 
 	void objectVcsStateChanged();
 
+	void compareObject(DbChangesetObject object, CompareData compareData);
+
 	// Data
 	//
 private:
@@ -301,6 +305,7 @@ private:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
+	QAction* m_compareAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction3 = nullptr;
