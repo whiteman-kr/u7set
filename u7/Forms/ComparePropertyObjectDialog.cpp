@@ -22,14 +22,16 @@ ComparePropertyObjectDialog::ComparePropertyObjectDialog(QString source, QString
 
 	ui->source->setReadOnly(true);
 
+	std::wstring sourceStd = source.toStdWString();
+	std::wstring targetStd = target.toStdWString();
 
-	diff_match_patch<std::string> diff;
-	diff_match_patch<std::string>::Diffs diffs = diff.diff_main(source.toStdString(), target.toStdString(), true);
+	diff_match_patch<std::wstring> diff;
+	diff_match_patch<std::wstring>::Diffs diffs = diff.diff_main(sourceStd, targetStd, true);
 
 	bool equal = true;
 	for (auto d : diffs)
 	{
-		if (d.operation != diff_match_patch<std::string>::Operation::EQUAL)
+		if (d.operation != diff_match_patch<std::wstring>::Operation::EQUAL)
 		{
 			equal = false;
 			break;
@@ -42,8 +44,8 @@ ComparePropertyObjectDialog::ComparePropertyObjectDialog(QString source, QString
 	}
 	else
 	{
-		diff_match_patch<std::string>::diff_cleanupSemantic(diffs);
-		QString result = QString::fromStdString(diff_match_patch<std::string>::diff_prettyHtml(diffs));
+		diff_match_patch<std::wstring>::diff_cleanupSemantic(diffs);
+		QString result = QString::fromStdWString(diff_match_patch<std::wstring>::diff_prettyHtml(diffs));
 
 		ui->source->zoomIn();
 		ui->source->append(result.remove("&para;"));
@@ -78,15 +80,17 @@ void ComparePropertyObjectDialog::showDialog(
 	std::vector<std::shared_ptr<Property>> targetProps = target->properties();
 
 	std::sort(sourceProps.begin(), sourceProps.end(),
-			[](std::shared_ptr<Property> s1, std::shared_ptr<Property> s2)
+			[](std::shared_ptr<Property> p1, std::shared_ptr<Property> p2)
 			{
-				return s1->category() + s1->caption() < s2->category() + s2->caption();
+				return  QString("%1-%2").arg(p1->category()).arg(p1->caption()) <
+						QString("%1-%2").arg(p2->category()).arg(p2->caption());
 			});
 
 	std::sort(targetProps.begin(), targetProps.end(),
 			[](std::shared_ptr<Property> p1, std::shared_ptr<Property> p2)
 			{
-				return p1->category() + p1->caption() < p2->category() + p2->caption();
+				return  QString("%1-%2").arg(p1->category()).arg(p1->caption()) <
+						QString("%1-%2").arg(p2->category()).arg(p2->caption());
 			});
 
 	QString sourceStr;

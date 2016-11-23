@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "../lib/DbStruct.h"
+#include "GlobalMessanger.h"
 
 class DbController;
 
@@ -166,6 +167,7 @@ public slots:
 	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
 private slots:
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
 	//
