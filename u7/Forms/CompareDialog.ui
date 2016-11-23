@@ -97,7 +97,7 @@
       <item row="2" column="3" colspan="2">
        <widget class="QDateEdit" name="targetDateEdit">
         <property name="displayFormat">
-         <string>dd.MM.yyyy hh:mm:ss</string>
+         <string notr="true">dd.MM.yyyy hh:mm:ss</string>
         </property>
         <property name="calendarPopup">
          <bool>true</bool>
@@ -152,8 +152,21 @@
       </item>
       <item row="1" column="3" colspan="2">
        <widget class="QDateEdit" name="sourceDateEdit">
+        <property name="dateTime">
+         <datetime>
+          <hour>0</hour>
+          <minute>0</minute>
+          <second>0</second>
+          <year>2000</year>
+          <month>1</month>
+          <day>3</day>
+         </datetime>
+        </property>
+        <property name="currentSection">
+         <enum>QDateTimeEdit::DaySection</enum>
+        </property>
         <property name="displayFormat">
-         <string>dd.MM.yyyy hh:mm:ss</string>
+         <string notr="true">dd.MM.yyyy hh:mm:ss</string>
         </property>
         <property name="calendarPopup">
          <bool>true</bool>

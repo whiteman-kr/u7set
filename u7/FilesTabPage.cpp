@@ -1888,7 +1888,16 @@ void FilesTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 		break;
 	case CompareVersionType::Date:
 		{
-			assert(false);
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
 		}
 		break;
 	case CompareVersionType::LatestVersion:
@@ -1937,7 +1946,16 @@ void FilesTabPage::compareObject(DbChangesetObject object, CompareData compareDa
 		break;
 	case CompareVersionType::Date:
 		{
-			assert(false);
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
 		}
 		break;
 	case CompareVersionType::LatestVersion:

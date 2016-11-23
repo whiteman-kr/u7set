@@ -4525,7 +4525,16 @@ void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compa
 		break;
 	case CompareVersionType::Date:
 		{
-			assert(false);
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = Hardware::DeviceObject::Create(outFile->data());
+			}
 		}
 		break;
 	case CompareVersionType::LatestVersion:
@@ -4574,8 +4583,18 @@ void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compa
 		break;
 	case CompareVersionType::Date:
 		{
-			assert(false);
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = Hardware::DeviceObject::Create(outFile->data());
+			}
 		}
+		break;
 		break;
 	case CompareVersionType::LatestVersion:
 		{
