@@ -765,6 +765,16 @@ DbChangesetObject::DbChangesetObject()
 {
 }
 
+DbChangesetObject::DbChangesetObject(const DbFileInfo& file) :
+	m_type(Type::File),
+	m_id(file.fileId()),
+	m_name(file.fileName()),
+	m_caption(file.fileName()),
+	m_action(file.action()),
+	m_parent(QString::number(file.parentId()))
+{
+}
+
 DbChangesetObject::~DbChangesetObject()
 {
 }
@@ -777,6 +787,16 @@ DbChangesetObject::Type DbChangesetObject::type() const
 void DbChangesetObject::setType(DbChangesetObject::Type value)
 {
 	m_type = value;
+}
+
+bool DbChangesetObject::isFile() const
+{
+	return m_type == Type::File;
+}
+
+bool DbChangesetObject::isSignal() const
+{
+	return m_type == Type::Signal;
 }
 
 int DbChangesetObject::id() const

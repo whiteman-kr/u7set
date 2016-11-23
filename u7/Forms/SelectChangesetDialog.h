@@ -15,7 +15,7 @@ class SelectChangesetDialog : public QDialog
 private:
 	SelectChangesetDialog();
 public:
-	SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent);
+	SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, bool onlySelectChanget, QWidget* parent);
 	~SelectChangesetDialog();
 
 	int changeset() const;
@@ -23,7 +23,7 @@ public:
 	void setFile(const DbFileInfo& file);
 	DbFileInfo file() const;
 
-	static int getChangeset(DbController* db, const DbFileInfo& file, const std::vector<DbChangeset>& history, QWidget* parent);
+	static int getChangeset(DbController* db, const DbFileInfo& file, bool onlySelectChangeset, QWidget* parent);
 	
 private slots:
 	void on_buttonBox_accepted();
@@ -34,6 +34,8 @@ private slots:
 	void changesetDetails(int changeset);
 	void compareFile(DbFileInfo& file, int changeset);
 
+	void on_buttonBox_rejected();
+
 private:
 	Ui::SelectChangesetDialog* ui;
 	DbController* m_db = nullptr;
@@ -41,5 +43,7 @@ private:
 	int m_changeset = -1;
 
 	DbFileInfo m_file;
+
+	bool m_onlySelectChanget = false;
 };
 

@@ -7,7 +7,8 @@ int DialogChoosePreset::m_lastSortColumn = 0;
 QString DialogChoosePreset::m_lastSelectedPreset;
 Qt::SortOrder DialogChoosePreset::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
-DialogChoosePreset::DialogChoosePreset(QWidget *parent, DbController* db, Hardware::DeviceType selectedType) :
+
+DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardware::DeviceType selectedType) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogChoosePreset),
 	m_db(db)
@@ -86,30 +87,30 @@ DialogChoosePreset::DialogChoosePreset(QWidget *parent, DbController* db, Hardwa
 		switch (selectedType)
 		{
 		case Hardware::DeviceType::System:
-			if (presetType == Hardware::DeviceType::Rack
-					|| presetType == Hardware::DeviceType::Chassis
-					|| presetType == Hardware::DeviceType::Module
-					|| presetType == Hardware::DeviceType::Controller
-					|| presetType == Hardware::DeviceType::Workstation)
+			if (presetType == Hardware::DeviceType::Rack ||
+				presetType == Hardware::DeviceType::Chassis ||
+				presetType == Hardware::DeviceType::Module ||
+				presetType == Hardware::DeviceType::Controller ||
+				presetType == Hardware::DeviceType::Workstation)
 			{
 				showPreset = true;
 			}
 			break;
 
 		case Hardware::DeviceType::Rack:
-			if (presetType == Hardware::DeviceType::Chassis
-					|| presetType == Hardware::DeviceType::Module
-					|| presetType == Hardware::DeviceType::Controller
-					|| presetType == Hardware::DeviceType::Workstation)
+			if (presetType == Hardware::DeviceType::Chassis ||
+				presetType == Hardware::DeviceType::Module ||
+				presetType == Hardware::DeviceType::Controller ||
+				presetType == Hardware::DeviceType::Workstation)
 			{
 				showPreset = true;
 			}
 			break;
 
 		case Hardware::DeviceType::Chassis:
-			if (presetType == Hardware::DeviceType::Module
-					|| presetType == Hardware::DeviceType::Controller
-					|| presetType == Hardware::DeviceType::Workstation)
+			if (presetType == Hardware::DeviceType::Module ||
+				presetType == Hardware::DeviceType::Controller ||
+				presetType == Hardware::DeviceType::Workstation)
 			{
 				showPreset = true;
 			}
@@ -123,8 +124,8 @@ DialogChoosePreset::DialogChoosePreset(QWidget *parent, DbController* db, Hardwa
 			break;
 
 		case Hardware::DeviceType::Workstation:
-			if (presetType == Hardware::DeviceType::Controller
-					|| presetType == Hardware::DeviceType::Software)
+			if (presetType == Hardware::DeviceType::Controller ||
+				presetType == Hardware::DeviceType::Software)
 			{
 				showPreset = true;
 			}
@@ -136,11 +137,11 @@ DialogChoosePreset::DialogChoosePreset(QWidget *parent, DbController* db, Hardwa
 			continue;
 		}
 
-		l<<p->caption();
-		l<<p->presetName();
-		l<<QString::fromWCharArray(Hardware::DeviceTypeNames[static_cast<int>(presetType)]);
+		l << p->caption();
+		l << p->presetName();
+		l << Hardware::DeviceTypeNames[static_cast<int>(presetType)];
 
-		QTreeWidgetItem *item = new QTreeWidgetItem(l);
+		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, p->presetName());
 
 		ui->m_presetTree->addTopLevelItem(item);
@@ -154,6 +155,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget *parent, DbController* db, Hardwa
 	ui->m_presetTree->sortItems(m_lastSortColumn, m_lastSortOrder);
 	ui->m_presetTree->setSortingEnabled(true);
 
+	return;
 }
 
 DialogChoosePreset::~DialogChoosePreset()
@@ -196,7 +198,7 @@ void DialogChoosePreset::on_DialogChoosePreset_finished(int result)
 
 }
 
-void DialogChoosePreset::on_m_presetTree_doubleClicked(const QModelIndex &index)
+void DialogChoosePreset::on_m_presetTree_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 

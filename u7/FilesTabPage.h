@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "../lib/DbStruct.h"
+#include "GlobalMessanger.h"
 
 class DbController;
 
@@ -125,6 +126,7 @@ public slots:
 	void checkInFile();
 	void undoChangesFile();
 	void showHistory();
+	void showCompare();
 	void getLatestVersion();
 	void getLatestTreeVersion();
 	void setWorkcopy();
@@ -165,6 +167,7 @@ public slots:
 	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
 private slots:
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
 	//
@@ -184,6 +187,7 @@ private:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
+	QAction* m_compareAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_getLatestVersionAction = nullptr;

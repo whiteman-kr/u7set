@@ -413,6 +413,7 @@ class DbChangesetObject
 {
 public:
 	DbChangesetObject();
+	explicit DbChangesetObject(const DbFileInfo& file);
 	virtual ~DbChangesetObject();
 
 public:
@@ -425,6 +426,9 @@ public:
 public:
 	DbChangesetObject::Type type() const;
 	void setType(DbChangesetObject::Type value);
+
+	bool isFile() const;
+	bool isSignal() const;
 
 	int id() const;
 	void setId(int value);

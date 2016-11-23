@@ -108,6 +108,7 @@ public slots:
     void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
     void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out);
 
     void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
     void slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);

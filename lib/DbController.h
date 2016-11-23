@@ -74,6 +74,9 @@ public:
 	bool getSpecificCopy(const std::vector<DbFileInfo>& files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getSpecificCopy(const DbFileInfo& file, int changesetId, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
 
+	bool getSpecificCopy(const std::vector<DbFileInfo>& files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getSpecificCopy(const DbFileInfo& file, QDateTime date, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
+
 	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
 	bool checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget);
@@ -172,6 +175,7 @@ signals:
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
 	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);

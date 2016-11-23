@@ -48,7 +48,11 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
 
-	connect(this, &DbController::signal_getSpecificCopy, m_worker, &DbWorker::slot_getSpecificCopy);
+	connect(this, static_cast<void(DbController::*)(const std::vector<DbFileInfo>*, int, std::vector<std::shared_ptr<DbFile>>*)>(&DbController::signal_getSpecificCopy),
+			m_worker, static_cast<void(DbWorker::*)(const std::vector<DbFileInfo>*, int, std::vector<std::shared_ptr<DbFile>>*)>(&DbWorker::slot_getSpecificCopy));
+
+	connect(this, static_cast<void(DbController::*)(const std::vector<DbFileInfo>*, QDateTime, std::vector<std::shared_ptr<DbFile>>*)>(&DbController::signal_getSpecificCopy),
+			m_worker, static_cast<void(DbWorker::*)(const std::vector<DbFileInfo>*, QDateTime, std::vector<std::shared_ptr<DbFile>>*)>(&DbWorker::slot_getSpecificCopy));
 
 	connect(this, &DbController::signal_checkIn, m_worker, &DbWorker::slot_checkIn);
 	connect(this, &DbController::signal_checkInTree, m_worker, &DbWorker::slot_checkInTree);
@@ -846,6 +850,56 @@ bool DbController::getSpecificCopy(const DbFileInfo& file, int changesetId, std:
 
 	std::vector<std::shared_ptr<DbFile>> outvector;
 	bool result = getSpecificCopy(fiv, changesetId, &outvector, parentWidget);
+
+	if (result == false || outvector.size() != 1)
+	{
+		return false;
+	}
+
+	*out = outvector.front();
+	return true;
+}
+
+bool DbController::getSpecificCopy(const std::vector<DbFileInfo>& files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || files.empty() == true)
+	{
+		assert(out != nullptr);
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificCopy(&files, date, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file copy"));
+	return out;
+}
+
+bool DbController::getSpecificCopy(const DbFileInfo& file, QDateTime date, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fiv;
+	fiv.push_back(file);
+
+	std::vector<std::shared_ptr<DbFile>> outvector;
+	bool result = getSpecificCopy(fiv, date, &outvector, parentWidget);
 
 	if (result == false || outvector.size() != 1)
 	{

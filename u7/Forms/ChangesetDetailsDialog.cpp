@@ -1,11 +1,13 @@
 #include "ChangesetDetailsDialog.h"
 #include "ui_ChangesetDetailsDialog.h"
+#include "CompareDialog.h"
 
 QByteArray ChangesetDetailsDialog::m_splitterState = QByteArray();
 
-ChangesetDetailsDialog::ChangesetDetailsDialog(const DbChangesetDetails& changesetDetails, QWidget *parent) :
+ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChangesetDetails& changesetDetails, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::ChangesetDetailsDialog),
+	m_db(db),
 	m_changesetDetails(changesetDetails)
 {
 	ui->setupUi(this);
@@ -117,7 +119,7 @@ void ChangesetDetailsDialog::showChangesetDetails(DbController* db, int changese
 
 	// Show dialog
 	//
-	ChangesetDetailsDialog* dialog = new ChangesetDetailsDialog(changesetDetails, parent);
+	ChangesetDetailsDialog* dialog = new ChangesetDetailsDialog(db, changesetDetails, parent);
 
 	dialog->setWindowTitle(tr("Changeset #%1").arg(changeset));
 
@@ -174,5 +176,5 @@ void ChangesetDetailsDialog::on_objects_customContextMenuRequested(const QPoint&
 
 void ChangesetDetailsDialog::compare(DbChangesetObject object, int changeset)
 {
-	qDebug() << "ChangesetDetailsDialog::compareFile " << object.name() << "  changeset " << changeset;
+	CompareDialog::showCompare(m_db, object, changeset,dynamic_cast<QWidget*>(this->parent()));
 }
