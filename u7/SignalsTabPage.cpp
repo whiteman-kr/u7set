@@ -19,8 +19,9 @@
 
 #include "SignalsTabPage.h"
 #include "Settings.h"
+#include "../lib/SignalProperties.h"
 #include "SignalPropertiesDialog.h"
-#include "GlobalMessanger.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -733,11 +734,11 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		{
 			if (signal.userID() == dbController()->currentUser().userId())
 			{
-				switch (signal.instanceAction())
+				switch (signal.instanceAction().value())
 				{
-					case E::InstanceAction::Added: return plus;
-					case E::InstanceAction::Modified: return pencil;
-					case E::InstanceAction::Deleted: return cross;
+					case VcsItemAction::Added: return plus;
+					case VcsItemAction::Modified: return pencil;
+					case VcsItemAction::Deleted: return cross;
 					default:
 						assert(false);
 						return QVariant();
@@ -1450,6 +1451,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
 
+	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SignalsTabPage::compareObject);
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -2042,6 +2045,112 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 void SignalsTabPage::showError(QString message)
 {
 	QMessageBox::warning(this, "Error", message);
+}
+
+void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isSignal() == false)
+	{
+		return;
+	}
+
+	// Get versions from the project database
+	//
+	std::shared_ptr<SignalProperties> source = nullptr;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			std::vector<int> signalIds;
+			signalIds.push_back(object.id());
+
+			std::vector<Signal> outSignals;
+
+			bool ok = db()->getSpecificSignals(&signalIds, compareData.sourceChangeset, &outSignals, this);
+			if (ok == true && outSignals.size() == 1)
+			{
+				source = std::make_shared<SignalProperties>(outSignals.front());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			assert(false);
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			Signal outSignal;
+
+			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
+			if (ok == true)
+			{
+				source = std::make_shared<SignalProperties>(outSignal);
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	std::shared_ptr<SignalProperties> target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			std::vector<int> signalIds;
+			signalIds.push_back(object.id());
+
+			std::vector<Signal> outSignals;
+
+			bool ok = db()->getSpecificSignals(&signalIds, compareData.targetChangeset, &outSignals, this);
+			if (ok == true && outSignals.size() == 1)
+			{
+				target = std::make_shared<SignalProperties>(outSignals.front());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			assert(false);
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			Signal outSignal;
+
+			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
+			if (ok == true)
+			{
+				target = std::make_shared<SignalProperties>(outSignal);
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Compare
+	//
+	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
+
+	return;
 }
 
 void SignalsTabPage::saveColumnWidth(int index)

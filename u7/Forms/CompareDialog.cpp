@@ -75,11 +75,6 @@ CompareDialog::~CompareDialog()
 	delete ui;
 }
 
-void CompareDialog::showCompare(DbController* db, const DbFileInfo& file, int changeset, QWidget* parent)
-{
-	return CompareDialog::showCompare(db, DbChangesetObject(file), changeset, parent);
-}
-
 void CompareDialog::showCompare(DbController* db, const DbChangesetObject& object, int changeset, QWidget* parent)
 {
 	if (db == nullptr)
@@ -170,13 +165,32 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
 
 		if (changeset != -1)
 		{
 			ui->sourceChangesetLineEdit->setText(QString::number(changeset));
 		}
+
+		return;
 	}
+
+	if (m_object.isSignal() == true)
+	{
+		DbFileInfo file;
+		file.setFileId(m_object.id());
+
+		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, true, this);
+
+		if (changeset != -1)
+		{
+			ui->sourceChangesetLineEdit->setText(QString::number(changeset));
+		}
+
+		return;
+	}
+
+	assert(false);
 }
 
 void CompareDialog::on_targetChangesetButton_clicked()
@@ -186,7 +200,7 @@ void CompareDialog::on_targetChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
 
 		if (changeset != -1)
 		{

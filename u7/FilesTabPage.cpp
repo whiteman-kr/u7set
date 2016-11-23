@@ -1206,7 +1206,7 @@ void FileTreeView::showCompare()
 		return;
 	}
 
-	CompareDialog::showCompare(db(), *file, -1, this);
+	CompareDialog::showCompare(db(), DbChangesetObject(*file), -1, this);
 
 	return;
 }

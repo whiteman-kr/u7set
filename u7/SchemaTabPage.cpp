@@ -490,7 +490,7 @@ void SchemaFileView::slot_compare()
 	//
 	DbFileInfo file = selectedFiles.front();
 
-	CompareDialog::showCompare(db(), file, -1, this);
+	CompareDialog::showCompare(db(), DbChangesetObject(file), -1, this);
 
 	return;
 }
@@ -1507,7 +1507,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Show chageset dialog
 	//
-	int changesetId = SelectChangesetDialog::getChangeset(db(), file, false, this);
+	int changesetId = SelectChangesetDialog::getFileChangeset(db(), file, false, this);
 
 	if (changesetId == -1)
 	{

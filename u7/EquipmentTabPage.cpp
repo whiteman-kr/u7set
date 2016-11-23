@@ -2833,7 +2833,7 @@ void EquipmentView::compare()
 
 	// --
 	//
-	CompareDialog::showCompare(db(), device->fileInfo(), -1, this);
+	CompareDialog::showCompare(db(), DbChangesetObject(device->fileInfo()), -1, this);
 
 	return;
 }

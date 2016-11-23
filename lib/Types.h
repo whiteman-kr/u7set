@@ -120,15 +120,6 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
-
-	enum InstanceAction
-	{
-		Added = 1,
-		Modified = 2,
-		Deleted = 3
-	};
-	Q_ENUM(InstanceAction)
-
 	enum OutputMode
 	{
 		Plus0_Plus5_V = 0,

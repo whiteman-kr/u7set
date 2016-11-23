@@ -15,7 +15,7 @@ class ChangesetDetailsDialog : public QDialog
 	Q_OBJECT
 
 private:
-	explicit ChangesetDetailsDialog(DbController* db, const DbChangesetDetails& changesetDetails, QWidget* parent);
+	ChangesetDetailsDialog(DbController* db, const DbChangesetDetails& changesetDetails, QWidget* parent);
 public:
 	~ChangesetDetailsDialog();
 
