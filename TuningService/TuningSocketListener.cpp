@@ -1,4 +1,4 @@
-#include "TuningSocket.h"
+#include "TuningSocketListener.h"
 #include "../lib/Types.h"
 #include "TuningService.h"
 
@@ -74,10 +74,9 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketWorker::TuningSocketWorker(const HostAddressPort &tuningIP, const TuningSources& tuningSources) :
+	TuningSocketListener::TuningSocketListener(const HostAddressPort &tuningIP, const TuningSources& tuningSources) :
 		m_tuningIP(tuningIP),
-		m_timer100ms(this),
-		m_timer1s(this)
+		m_timer(this)
 	{
 		for(const TuningSource* tuningSource : tuningSources)
 		{
@@ -94,12 +93,12 @@ namespace Tuning
 	}
 
 
-	TuningSocketWorker::~TuningSocketWorker()
+	TuningSocketListener::~TuningSocketListener()
 	{
 	}
 
 
-	void TuningSocketWorker::sendRequest(const TuningSocketRequest &socketRequest)
+	void TuningSocketListener::sendRequest(const TuningSocketRequest &socketRequest)
 	{
 		TuningSocketRequestQueue* queue = m_requestQueues.value(socketRequest.lmIP, nullptr);
 
@@ -113,7 +112,7 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::clear()
+	void TuningSocketListener::clear()
 	{
 		for(TuningSocketRequestQueue* queue : m_requestQueues)
 		{
@@ -127,17 +126,17 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onThreadStarted()
+	void TuningSocketListener::onThreadStarted()
 	{
 		createRequestQueues();
+		createSocket();
 
-		startTimers();
+		startTimer();
 	}
 
-	void TuningSocketWorker::onThreadFinished()
+	void TuningSocketListener::onThreadFinished()
 	{
-		m_timer100ms.stop();
-		m_timer1s.stop();
+		m_timer.stop();
 
 		closeSocket();
 
@@ -145,7 +144,7 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::createRequestQueues()
+	void TuningSocketListener::createRequestQueues()
 	{
 		QList<quint32> tuningSourcesIPs = m_requestQueues.keys();
 
@@ -155,117 +154,57 @@ namespace Tuning
 
 			m_requestQueues.insert(tuningSourceIP, requestQueue);
 
-			connect(requestQueue, &TuningSocketRequestQueue::request, this, &TuningSocketWorker::onRequest);
+			connect(requestQueue, &TuningSocketRequestQueue::request, this, &TuningSocketListener::onRequest);
 		}
 	}
 
 
-	void TuningSocketWorker::startTimers()
+	void TuningSocketListener::startTimer()
 	{
-		connect(&m_timer1s, &QTimer::timeout, this, &TuningSocketWorker::onTimer1s);
-		m_timer1s.setInterval(1000);
-		m_timer1s.start();
-
-		connect(&m_timer100ms, &QTimer::timeout, this, &TuningSocketWorker::onTimer100ms);
-		m_timer100ms.setInterval(100);
-		m_timer100ms.start();
+		connect(&m_timer, &QTimer::timeout, this, &TuningSocketListener::onTimer20ms);
+		m_timer.setInterval(20);
+		m_timer.start();
 	}
 
 
-	void TuningSocketWorker::createAndBindSocket()
-	{
-		if (m_socket == nullptr)
-		{
-			m_socket = new QUdpSocket(this);
-
-			qDebug() << "DataChannel: listening socket created";
-
-			connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketWorker::onSocketReadyRead);
-		}
-
-		if (m_socketBound == false)
-		{
-			m_socketBound = m_socket->bind(m_tuningIP.address(), m_tuningIP.port());
-
-			if (m_socketBound == true)
-			{
-				QString str = QString("DataChannel: socket bound on %1 - OK").arg(m_tuningIP.addressPortStr());
-				qDebug() << C_STR(str);
-			}
-		}
-	}
-
-
-	void TuningSocketWorker::closeSocket()
+	void TuningSocketListener::createSocket()
 	{
 		if (m_socket != nullptr)
 		{
-			m_socket->close();
-			delete m_socket;
-			m_socket = nullptr;
+			assert(false);
+			return;
 		}
 
-		m_socketBound = false;
+		m_socket = new QUdpSocket(this);
+
+		qDebug() << "Tuning Source" << C_STR(m_tuningIP.addressPortStr()) << "socket created";
+
+		connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketListener::onSocketReadyRead);
 	}
 
 
-	void TuningSocketWorker::onTimer100ms()
+	void TuningSocketListener::closeSocket()
 	{
-		for(TuningSocketRequestQueue* queue : m_requestQueues)
+		if (m_socket == nullptr)
 		{
-			if (queue == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-
-			// TO DO !!!! MOVE THIS CONDITION DOWN !!!
-
-			if (queue->isEmpty())
-			{
-				continue;
-			}
-
-			// Queue is not empty
-			//
-
-			if (queue->isWaitingForAck())
-			{
-				queue->incWaitCount();
-
-				if (queue->waitCount() < MAX_WAIT_COUNT)
-				{
-					continue;			// continue wait
-				}
-
-				//
-				// TO DO: send NoRespond to TuningSources
-				//
-
-				queue->stopWaiting();
-			}
-
-			TuningSocketRequest request;
-
-			queue->pop(&request);
-
-			//
-			// TO DO: send request in socket
-			//
-
-			queue->requestIsSent();
+			assert(false);
+			return;
 		}
+
+		m_socket->close();
+		delete m_socket;
+		m_socket = nullptr;
 	}
 
 
-	void TuningSocketWorker::onTimer1s()
+	void TuningSocketListener::onTimer20ms()
 	{
-		createAndBindSocket();
 	}
 
 
-	void TuningSocketWorker::onRequest(quint32 tuningSourceIP)
+
+
+	void TuningSocketListener::onRequest(quint32 tuningSourceIP)
 	{
 		TuningSocketRequestQueue* queue = m_requestQueues.value(tuningSourceIP, nullptr);
 
@@ -396,7 +335,7 @@ namespace Tuning
 	}
 
 
-	void TuningSocketWorker::onSocketReadyRead()
+	void TuningSocketListener::onSocketReadyRead()
 	{
 		if (m_socket == nullptr)
 		{
@@ -444,7 +383,7 @@ namespace Tuning
 	}
 
 
-	bool TuningSocketWorker::getReply(SocketReply* reply)
+	bool TuningSocketListener::getReply(SocketReply* reply)
 	{
 		return true;
 		//return m_replies.pop(reply);

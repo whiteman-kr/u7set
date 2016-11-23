@@ -4,7 +4,7 @@
 #include <QList>
 #include "../lib/Signal.h"
 #include "../u7/Builder/IssueLogger.h"
-#include "../TuningService/TuningSocket.h"
+#include "../TuningService/TuningSocketListener.h"
 
 
 namespace Tuning

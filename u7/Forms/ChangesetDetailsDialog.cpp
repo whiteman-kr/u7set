@@ -81,7 +81,7 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 		itemTextList << co.parent();
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);
-		item->setData(0, Qt::UserRole, i);
+		item->setData(0, Qt::UserRole, static_cast<int>(i));
 
 		items.push_back(item);
 	}

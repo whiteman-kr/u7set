@@ -6,7 +6,7 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/DataProtocols.h"
 #include "../lib/Queue.h"
-#include "../TuningService/TuningSocket.h"
+#include "../TuningService/TuningSocketListener.h"
 
 namespace TuningIPEN
 {

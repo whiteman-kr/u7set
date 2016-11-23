@@ -118,23 +118,23 @@ namespace Tuning
 	class TuningSources;
 
 
-	class TuningSocketWorker : public SimpleThreadWorker
+	class TuningSocketListener : public SimpleThreadWorker
 	{
 		Q_OBJECT
 
 	public:
-		TuningSocketWorker(const HostAddressPort& tuningIP, const TuningSources& tuningSources);
-		~TuningSocketWorker();
+		TuningSocketListener(const HostAddressPort& tuningIP, const TuningSources& tuningSources);
+		~TuningSocketListener();
 
 		void sendRequest(const TuningSocketRequest& socketRequest);
 
 		bool getReply(SocketReply* reply);
 
 	signals:
-		/*void replyReady();
+		/* void replyReady();
 
 		void userRequest(FotipFrame fotipFrame);
-		void replyWithNoZeroFlags(FotipFrame fotipFrame);*/
+		void replyWithNoZeroFlags(FotipFrame fotipFrame); */
 
 	private:
 		void clear();
@@ -143,30 +143,26 @@ namespace Tuning
 		virtual void onThreadFinished() override;
 
 		void createRequestQueues();
-		void startTimers();
+		void startTimer();
 
-		void createAndBindSocket();
+		void createSocket();
 		void closeSocket();
 
 	private slots:
-		void onTimer100ms();
-		void onTimer1s();
+		void onTimer20ms();
 
 		void onRequest(quint32 tuningSourceIP);
 		void onSocketReadyRead();
 
 	private:
-		const int MAX_WAIT_COUNT = 10;
-
 		HostAddressPort m_tuningIP;
 
 		QHash<quint32, TuningSocketRequestQueue*> m_requestQueues;
 
-		QTimer m_timer100ms;
-		QTimer m_timer1s;
+		QTimer m_timer;
 
 		QUdpSocket* m_socket = nullptr;
-		bool m_socketBound = false;
+
 
 		RupFotipFrame m_ackFrame;
 		RupFotipFrame m_reqFrame;

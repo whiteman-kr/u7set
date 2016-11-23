@@ -119,6 +119,9 @@ public:
 	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs, QWidget* parentWidget);
 
+	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
+	bool getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
+
 	// Units management
 	//
 	bool getUnits(UnitList* units, QWidget* parentWidget);
@@ -206,6 +209,9 @@ signals:
 	void signal_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithEquipmentID(QString equipID, QVector<int>* signalIDs);
+
+	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
+	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
 
 	// Units management
 	//
