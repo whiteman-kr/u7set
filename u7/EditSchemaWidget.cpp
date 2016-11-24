@@ -187,6 +187,11 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	drawMovingLinePoint(&drawParam);
 	drawMovingEdgesOrVertexConnectionLine(&drawParam);
 
+	if (m_compareWidget == true)
+	{
+		drawCompareOutlines(&drawParam, clipRect);
+	}
+
 	p.restore();
 
 	// Draw grid performed in not ajusted painter
@@ -1174,6 +1179,77 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	si->setPointList(oldPos);
 
 	return;
+}
+
+void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect)
+{
+	if (drawParam == nullptr)
+	{
+		assert(drawParam != nullptr);
+		return;
+	}
+
+	// Draw items by layers which has Show flag
+	//
+	double clipX = clipRect.left();
+	double clipY = clipRect.top();
+	double clipWidth = clipRect.width();
+	double clipHeight = clipRect.height();
+
+	// Find compile layer
+	//
+	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	{
+		const VFrame30::SchemaLayer* pLayer = layer->get();
+
+		if (pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+
+			auto actionIt = m_itemsActions.find(item->guid());
+			if (actionIt == m_itemsActions.end())
+			{
+				assert(actionIt != m_itemsActions.end());
+				continue;
+			}
+
+			CompareAction compareAction = actionIt->second;
+
+			QColor color;
+
+			switch (compareAction)
+			{
+			case CompareAction::Unmodified:
+				color = QColor(0, 0, 0, 0);			// Full transparent, as is
+				break;
+			case CompareAction::Modified:
+				color = QColor(0, 0, 0xC0, 128);
+				break;
+			case CompareAction::Added:
+				color = QColor(0, 0xC0, 0, 128);
+				break;
+			case CompareAction::Deleted:
+				color = QColor(0xC0, 0, 0, 128);
+				break;
+			default:
+				assert(false);
+			}
+
+			if (compareAction != CompareAction::Unmodified &&
+				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			{
+				// Draw item issue
+				//
+				item->drawCompareAction(drawParam, color);
+			}
+		}
+	}
+
 }
 
 void EditSchemaView::drawGrid(QPainter* p)
@@ -7092,6 +7168,16 @@ void EditSchemaWidget::setSnapToGrid(bool value)
 	m_snapToGrid = value;
 }
 
+bool EditSchemaWidget::compareWidget() const
+{
+	return editSchemaView()->m_compareWidget;
+}
+
+void EditSchemaWidget::setCompareWidget(bool value)
+{
+	editSchemaView()->m_compareWidget = value;
+}
+
 bool EditSchemaWidget::readOnly() const
 {
 	assert(m_editEngine);
@@ -7127,6 +7213,11 @@ void EditSchemaWidget::resetEditEngine()
 {
 	assert(m_editEngine);
 	m_editEngine->reset();
+}
+
+void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
+{
+	editSchemaView()->m_itemsActions = itemsActions;
 }
 
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :

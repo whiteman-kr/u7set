@@ -1,9 +1,11 @@
 #include "Stable.h"
 #include "SchemaTabPage.h"
+#include "CompareSchema.h"
 #include "CreateSchemaDialog.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
+#include "Forms/ComparePropertyObjectDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include <QJsonArray>
@@ -849,6 +851,8 @@ SchemasTabPage::SchemasTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPage::projectClosed);
 
+	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemasTabPage::compareObject);
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -944,6 +948,244 @@ void SchemasTabPage::projectClosed()
 	this->setEnabled(false);
 	return;
 }
+
+void SchemasTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isFile() == false)
+	{
+		return;
+	}
+
+	// Check file extension,
+	// can compare	next files
+	//
+	if (object.name().endsWith("." + m_fileExtension) == false &&
+		object.name().endsWith("." + m_templFileExtension) == false)
+	{
+		return;
+	}
+
+	// Get versions from the project database
+	//
+	std::shared_ptr<VFrame30::Schema> source = nullptr;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	std::shared_ptr<VFrame30::Schema> target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Make single schema
+	//
+	std::map<QUuid, CompareAction> itemsActions;
+
+	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> targetItem : targetLayer->Items)
+		{
+			// Look for this item in source
+			//
+			std::shared_ptr<VFrame30::SchemaItem> sourceItem = source->getItemById(targetItem->guid());
+
+			if (sourceItem != nullptr)
+			{
+				// Item is found, so it was modified
+				//
+
+				// Check if properties where modified
+				//
+				QString sourceStr = ComparePropertyObjectDialog::objedctToCompareString(sourceItem.get());
+				QString targetStr = ComparePropertyObjectDialog::objedctToCompareString(targetItem.get());
+
+				if (sourceStr == targetStr)
+				{
+					// Check if position was changed
+					//
+					std::vector<VFrame30::SchemaPoint> sourcePoints = sourceItem->getPointList();
+					std::vector<VFrame30::SchemaPoint> targetPoints = targetItem->getPointList();
+
+					if (sourcePoints == targetPoints)
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Unmodified;
+					}
+					else
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Modified;
+					}
+				}
+				else
+				{
+					itemsActions[targetItem->guid()] = CompareAction::Modified;
+				}
+
+				continue;
+			}
+
+			if (sourceItem == nullptr)
+			{
+				// Item was added to targer
+				//
+				itemsActions[targetItem->guid()] = CompareAction::Added;
+				continue;
+			}
+		}
+	}
+
+	// Look for deteled items (in target)
+	//
+	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : sourceLayer->Items)
+		{
+			// Look for this item in source
+			//
+			std::shared_ptr<VFrame30::SchemaItem> targetItem = target->getItemById(sourceItem->guid());
+
+			if (targetItem == nullptr)
+			{
+				// Item is found, so it was deleted in target
+				//
+				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
+
+				// Add item to target
+				//
+				bool layerFound = false;
+				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+				{
+					if (targetLayer->guid() == sourceLayer->guid())
+					{
+						targetLayer->Items.push_back(sourceItem);
+						layerFound = true;
+						break;
+					}
+				}
+
+				assert(layerFound);
+			}
+		}
+	}
+
+	// Create tab page and add it to TabWidget
+	//
+	EditSchemaTabPage* compareTabPage = new EditSchemaTabPage(m_tabWidget, target, DbFileInfo(), db());
+
+	compareTabPage->setReadOnly(true);
+	compareTabPage->setCompareWidget(true);
+	compareTabPage->setCompareItemActions(itemsActions);
+
+	m_tabWidget->addTab(compareTabPage, "Compare " + target->schemaID());
+	m_tabWidget->setCurrentWidget(compareTabPage);
+
+	return;
+}
+
 
 
 //
@@ -1412,7 +1654,6 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Find the opened file, bu filId
 	//
-
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
 		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
@@ -2263,4 +2504,24 @@ void EditSchemaTabPage::resetModified()
 {
 	assert(m_schemaWidget);
 	return m_schemaWidget->resetModified();
+}
+
+bool EditSchemaTabPage::compareWidget() const
+{
+	return m_schemaWidget->compareWidget();
+}
+
+bool EditSchemaTabPage::isCompareWidget() const
+{
+	return m_schemaWidget->compareWidget();
+}
+
+void EditSchemaTabPage::setCompareWidget(bool value)
+{
+	return m_schemaWidget->setCompareWidget(value);
+}
+
+void EditSchemaTabPage::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
+{
+	m_schemaWidget->setCompareItemActions(itemsActions);
 }

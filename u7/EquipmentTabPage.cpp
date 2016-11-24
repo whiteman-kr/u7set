@@ -4595,7 +4595,6 @@ void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compa
 			}
 		}
 		break;
-		break;
 	case CompareVersionType::LatestVersion:
 		{
 			DbFileInfo file;

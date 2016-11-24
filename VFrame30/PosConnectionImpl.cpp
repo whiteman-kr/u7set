@@ -310,6 +310,39 @@ namespace VFrame30
 		return;
 	}
 
+	void PosConnectionImpl::drawCompareAction(CDrawParam* drawParam, QColor color) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		double cbs = drawParam->controlBarSize();
+		double lineWeight = cbs / 2.0f;
+
+		// Draw the main part
+		//
+		QPolygonF polyline(static_cast<int>(points.size()));
+		int index = 0;
+
+		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
+		{
+			polyline[index++] = QPointF(pt->X, pt->Y);
+		}
+
+		QPen pen(color);
+
+		pen.setWidthF(lineWeight);
+		p->setPen(pen);
+
+		p->drawPolyline(polyline);
+
+		return;
+	}
+
 	void PosConnectionImpl::drawCommentDim(CDrawParam* drawParam) const
 	{
 		if (isCommented() == false)

@@ -20,6 +20,8 @@ private:
 public:
 	~ComparePropertyObjectDialog();
 
+	static QString objedctToCompareString(PropertyObject* object);
+
 	static void showDialog(
 			DbChangesetObject object,
 			CompareData compareData,
