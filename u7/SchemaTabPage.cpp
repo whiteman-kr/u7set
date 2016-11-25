@@ -405,7 +405,8 @@ void SchemaFileView::slot_CheckIn()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.userId() == db()->currentUser().userId())
+		if (file.userId() == db()->currentUser().userId() ||
+			db()->currentUser().isAdminstrator() == true)
 		{
 			files.push_back(file);
 		}
@@ -433,7 +434,8 @@ void SchemaFileView::slot_UndoChanges()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.userId() == db()->currentUser().userId())
+		if (file.userId() == db()->currentUser().userId() ||
+			db()->currentUser().isAdminstrator() == true)
 		{
 			files.push_back(file);
 		}
@@ -733,7 +735,8 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 	int canSetWorkcopy = 0;
 	bool hasDeletePossibility = false;
 
-	int currentUserId = db()->currentUser().userId();;
+	int currentUserId = db()->currentUser().userId();
+	bool currentUserIsAdmin = db()->currentUser().isAdminstrator();
 
 	for (auto i = s.begin(); i != s.end(); ++i)
 	{
@@ -752,14 +755,16 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 
 		// hasCheckInPossibility
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut &&
+			(fileInfo->userId() == currentUserId  || currentUserIsAdmin == true))
 		{
 			hasCheckInPossibility = true;
 		}
 
 		// hasUndoPossibility
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut &&
+			(fileInfo->userId() == currentUserId || currentUserIsAdmin == true))
 		{
 			hasUndoPossibility = true;
 		}
@@ -1549,7 +1554,7 @@ void SchemaControlTabPage::undoChanges(std::vector<DbFileInfo> files)
 	for (const DbFileInfo& fi : files)
 	{
 		if (fi.state() == VcsState::CheckedOut &&
-			fi.userId() == db()->currentUser().userId())
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
 		{
 			undoFiles.push_back(fi);
 		}
