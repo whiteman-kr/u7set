@@ -24,6 +24,7 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "SignalsTabPage.h"
+#include "Forms/ComparePropertyObjectDialog.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -2251,6 +2252,11 @@ void EditSchemaWidget::createActions()
 	//m_layersAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Enter));
 	connect(m_layersAction, &QAction::triggered, this, &EditSchemaWidget::layers);
 	addAction(m_layersAction);
+
+	m_compareDiffAction = new QAction(tr("Item Diffs..."), this);
+	m_compareDiffAction->setEnabled(true);
+	connect(m_compareDiffAction, &QAction::triggered, this, &EditSchemaWidget::compareSchemaItem);
+	//addAction(m_compareDiffAction);
 
 	// Comment
 	//
@@ -4988,6 +4994,12 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	//
 	actions << m_separatorAction0;
 	actions << m_layersAction;
+
+	if (compareWidget() == true)
+	{
+		actions << m_compareDiffAction;
+	}
+
 	actions << m_propertiesAction;
 
 	menu.exec(actions, mapToGlobal(pos), 0, this);
@@ -5751,6 +5763,61 @@ void EditSchemaWidget::layers()
 	return;
 }
 
+void EditSchemaWidget::compareSchemaItem()
+{
+	if (editSchemaView()->m_compareWidget == false ||
+		editSchemaView()->m_compareSourceSchema == nullptr ||
+		editSchemaView()->m_compareTargetSchema == nullptr)
+	{
+		assert(editSchemaView()->m_compareWidget == true);
+		assert(editSchemaView()->m_compareSourceSchema);
+		assert(editSchemaView()->m_compareTargetSchema);
+		return;
+	}
+
+	if (selectedItems().size() != 1)
+	{
+		assert(selectedItems().size() == 1);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+	if (selectedItem == nullptr)
+	{
+		assert(selectedItem);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> sourceItem = editSchemaView()->m_compareSourceSchema->getItemById(selectedItem->guid());
+	std::shared_ptr<VFrame30::SchemaItem> targetItem = editSchemaView()->m_compareTargetSchema->getItemById(selectedItem->guid());
+
+	if (sourceItem == nullptr ||
+		targetItem == nullptr)
+	{
+		return;
+	}
+
+	DbChangesetObject dbObject;	// Fake object, need to fill only name
+
+	QString title;
+	if (selectedItem->isFblItem() == true)
+	{
+		title = selectedItem->metaObject()->className() + QString(" ") + selectedItem->toFblItemRect()->label();
+		title = title.remove("VFrame30::SchemaItem");
+	}
+	else
+	{
+		title = selectedItem->metaObject()->className();
+		title = title.remove("VFrame30::SchemaItem");
+	}
+	dbObject.setName(title);
+
+	CompareData cd = CompareData();
+	ComparePropertyObjectDialog::showDialog(dbObject, cd, sourceItem, targetItem, this);
+
+	return;
+}
+
 void EditSchemaWidget::selectionChanged()
 {
 	// Properties dialog
@@ -5816,6 +5883,10 @@ void EditSchemaWidget::selectionChanged()
 	// Lock action
 	//
 	m_lockAction->setEnabled(selected.empty() == false);
+
+	// Compare SchemaItem
+	//
+	m_compareDiffAction->setEnabled(selected.size() == 1 && isCompareWidget() == true);
 
 	// --
 	//
@@ -7173,9 +7244,25 @@ bool EditSchemaWidget::compareWidget() const
 	return editSchemaView()->m_compareWidget;
 }
 
-void EditSchemaWidget::setCompareWidget(bool value)
+bool EditSchemaWidget::isCompareWidget() const
+{
+	return editSchemaView()->m_compareWidget;
+}
+
+void EditSchemaWidget::setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target)
 {
 	editSchemaView()->m_compareWidget = value;
+
+	if (value == true)
+	{
+		assert(source);
+		assert(target);
+
+		editSchemaView()->m_compareSourceSchema = source;
+		editSchemaView()->m_compareTargetSchema = target;
+	}
+
+	return;
 }
 
 bool EditSchemaWidget::readOnly() const

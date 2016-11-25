@@ -307,7 +307,7 @@ public:
 
 	bool compareWidget() const;
 	bool isCompareWidget() const;
-	void setCompareWidget(bool value);
+	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
 
 	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
 

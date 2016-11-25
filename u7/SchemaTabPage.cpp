@@ -1,6 +1,5 @@
 #include "Stable.h"
 #include "SchemaTabPage.h"
-#include "CompareSchema.h"
 #include "CreateSchemaDialog.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
@@ -1177,7 +1176,7 @@ void SchemasTabPage::compareObject(DbChangesetObject object, CompareData compare
 	EditSchemaTabPage* compareTabPage = new EditSchemaTabPage(m_tabWidget, target, DbFileInfo(), db());
 
 	compareTabPage->setReadOnly(true);
-	compareTabPage->setCompareWidget(true);
+	compareTabPage->setCompareWidget(true, source, target);
 	compareTabPage->setCompareItemActions(itemsActions);
 
 	m_tabWidget->addTab(compareTabPage, "Compare " + target->schemaID());
@@ -2516,9 +2515,9 @@ bool EditSchemaTabPage::isCompareWidget() const
 	return m_schemaWidget->compareWidget();
 }
 
-void EditSchemaTabPage::setCompareWidget(bool value)
+void EditSchemaTabPage::setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target)
 {
-	return m_schemaWidget->setCompareWidget(value);
+	return m_schemaWidget->setCompareWidget(value, source, target);
 }
 
 void EditSchemaTabPage::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)

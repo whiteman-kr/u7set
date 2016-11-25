@@ -169,6 +169,8 @@ protected:
 
 	std::map<QUuid, CompareAction> m_itemsActions;
 	bool m_compareWidget = false;
+	std::shared_ptr<VFrame30::Schema> m_compareSourceSchema;
+	std::shared_ptr<VFrame30::Schema> m_compareTargetSchema;
 
 	// Selection area variables
 	//
@@ -434,6 +436,7 @@ protected slots:
 	void schemaProperties();
 	void properties();
 	void layers();
+	void compareSchemaItem();
 	void selectionChanged();
 
 	void clipboardDataChanged();
@@ -499,7 +502,8 @@ public:
 	void setSnapToGrid(bool value);
 
 	bool compareWidget() const;
-	void setCompareWidget(bool value);
+	bool isCompareWidget() const;
+	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
 
 	bool readOnly() const;
 	void setReadOnly(bool value);
@@ -691,6 +695,7 @@ private:
 
 	//QMenu* m_propertiesMenu = nullptr;
 	//QAction* m_propertiesAction = nullptr;
+	QAction* m_compareDiffAction = nullptr;
 
 	// --
 	// End of ConextMenu
