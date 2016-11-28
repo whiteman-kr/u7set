@@ -6,6 +6,13 @@ GlobalMessanger* GlobalMessanger::m_instance = nullptr;
 GlobalMessanger::GlobalMessanger() :
 	QObject()
 {
+
+static int CompareDataTypeId = -1;
+	if (CompareDataTypeId == -1)
+	{
+		CompareDataTypeId= qRegisterMetaType<CompareData>();
+	}
+
 }
 
 GlobalMessanger* GlobalMessanger::instance()
@@ -142,4 +149,9 @@ int GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid&
 void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
 {
 	emit changeCurrentTab(tab);
+}
+
+void GlobalMessanger::fireCompareObject(DbChangesetObject object, CompareData compareData)
+{
+	emit compareObject(object, compareData);
 }

@@ -51,6 +51,10 @@ namespace Builder
 		GlobalMessanger::instance()->clearBuildSchemaIssues();
 		GlobalMessanger::instance()->clearSchemaItemRunOrder();
 
+		// Log softaware version
+		//
+		LOG_MESSAGE(m_log, qApp->applicationName() + " v" + qApp->applicationVersion());
+
 		// Create database controller and open project
 		//
 		DbController db;

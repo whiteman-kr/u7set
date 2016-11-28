@@ -774,7 +774,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_created(m_created.toMSecsSinceEpoch());
 	s->set_deleted(m_deleted);
 	s->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
-	s->set_instanceaction(m_instanceAction);
+	s->set_instanceaction(m_instanceAction.toInt());
 	s->set_appsignalid(m_appSignalID.toStdString());
 	s->set_customappsignalid(m_customAppSignalID.toStdString());
 	s->set_caption(m_caption.toStdString());
@@ -891,7 +891,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_instanceaction())
 	{
-		m_instanceAction = static_cast<E::InstanceAction>(s->instanceaction());
+		m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s->instanceaction());
 	}
 
 	if (s->has_appsignalid())

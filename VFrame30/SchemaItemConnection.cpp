@@ -259,18 +259,21 @@ namespace VFrame30
 
 		m_pinCount = value;
 
-		removeAllInputs();
-
-		for (int i = 0; i < m_pinCount; i++)
+		if (m_pinCount != inputsCount())
 		{
-			addInput(i, QString("in_%1").arg(QString::number(i + 1)));
-		}
+			removeAllInputs();
 
-		double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+			for (int i = 0; i < m_pinCount; i++)
+			{
+				addInput(i, QString("in_%1").arg(QString::number(i + 1)));
+			}
 
-		if (heightDocPt() < minHeight)
-		{
-			SetHeightInDocPt(minHeight);
+			double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+
+			if (heightDocPt() < minHeight)
+			{
+				SetHeightInDocPt(minHeight);
+			}
 		}
 	}
 

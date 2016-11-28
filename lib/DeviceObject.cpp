@@ -15,30 +15,30 @@
 
 namespace Hardware
 {
-	const wchar_t* DeviceObjectExtensions[] =
+	const std::array<QString, 9> DeviceObjectExtensions =
 		{
-			L".hrt",		// Root
-			L".hsm",		// System
-			L".hrk",		// Rack
-			L".hcs",		// Chassis
-			L".hmd",		// Module
-			L".hws",		// Workstation
-			L".hsw",		// Software
-			L".hcr",		// Controller
-			L".hds",		// Signal
+			".hrt",			// Root
+			".hsm",			// System
+			".hrk",			// Rack
+			".hcs",			// Chassis
+			".hmd",			// Module
+			".hws",			// Workstation
+			".hsw",			// Software
+			".hcr",			// Controller
+			".hds",			// Signal
 		};
 
-	const wchar_t* DeviceTypeNames[] =
+	extern const std::array<QString, 9> DeviceTypeNames =
 		{
-			L"Root",		// Root
-			L"System",		// System
-			L"Rack",		// Rack
-			L"Chassis",		// Chassis
-			L"Module",		// Module
-			L"Workstation",	// Workstation
-			L"Software",	// Software
-			L"Controller",	// Controller
-			L"Signal",		// Signal
+			"Root",			// Root
+			"System",		// System
+			"Rack",			// Rack
+			"Chassis",		// Chassis
+			"Module",		// Module
+			"Workstation",	// Workstation
+			"Software",		// Software
+			"Controller",	// Controller
+			"Signal",		// Signal
 		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
@@ -1705,13 +1705,13 @@ namespace Hardware
 		size_t index = static_cast<size_t>(deviceType());
 		assert(index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
 
-		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[index]);
+		QString result = Hardware::DeviceObjectExtensions[index];
 		return result;
 	}
 
 	QString DeviceObject::fileExtension(DeviceType device)
 	{
-		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[static_cast<int>(device)]);
+		QString result = Hardware::DeviceObjectExtensions[static_cast<int>(device)];
 		return result;
 	}
 

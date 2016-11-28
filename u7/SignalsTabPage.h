@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
+#include "GlobalMessanger.h"
 #include "../lib/Signal.h"
 
 class DbController;
@@ -275,6 +276,8 @@ public slots:
 	void changeColumnVisibility(QAction* action);
 
 	void showError(QString message);
+
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
 	//

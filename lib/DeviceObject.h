@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <functional>
+#include <array>
 #include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
@@ -16,8 +17,8 @@ class DbController;
 
 namespace Hardware
 {
-	extern const wchar_t* DeviceObjectExtensions[];
-	extern const wchar_t* DeviceTypeNames[];
+	extern const std::array<QString, 9> DeviceObjectExtensions;
+	extern const std::array<QString, 9> DeviceTypeNames;
 
 	void Init();
 	void Shutdwon();

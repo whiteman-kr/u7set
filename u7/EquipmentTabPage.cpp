@@ -10,6 +10,8 @@
 #include "GlobalMessanger.h"
 #include "SignalsTabPage.h"
 #include "./Forms/FileHistoryDialog.h"
+#include "./Forms/CompareDialog.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
 
 #include <QPalette>
 #include <QtTreePropertyBrowser>
@@ -2810,6 +2812,33 @@ void EquipmentView::showHistory()
 	return;
 }
 
+void EquipmentView::compare()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selected.front());
+
+	if (device == nullptr)
+	{
+		assert(device);
+		return;
+	}
+
+	// --
+	//
+	CompareDialog::showCompare(db(), DbChangesetObject(device->fileInfo()), -1, this);
+
+	return;
+}
+
+
 void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3457,6 +3486,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_checkInAction);
 	m_equipmentView->addAction(m_undoChangesAction);
 	m_equipmentView->addAction(m_historyAction);
+	m_equipmentView->addAction(m_compareAction);
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
 	m_equipmentView->addAction(m_separatorAction3);
@@ -3539,6 +3569,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
     connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
+
+	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -3720,6 +3752,11 @@ void EquipmentTabPage::CreateActions()
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, m_equipmentView, &EquipmentView::showHistory);
 
+	m_compareAction = new QAction(tr("Compare..."), this);
+	m_compareAction->setStatusTip(tr("Compare file"));
+	m_compareAction->setEnabled(false);
+	connect(m_compareAction, &QAction::triggered, m_equipmentView, &EquipmentView::compare);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
@@ -3825,6 +3862,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_checkInAction);
 	assert(m_undoChangesAction);
 	assert(m_historyAction);
+	assert(m_compareAction);
 	assert(m_refreshAction);
 	assert(m_addPresetRackAction);
 	assert(m_addPresetChassisAction);
@@ -3871,6 +3909,7 @@ void EquipmentTabPage::setActionState()
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
 	m_historyAction->setEnabled(false);
+	m_compareAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
 	m_addPresetRackAction->setEnabled(false);
@@ -3994,6 +4033,7 @@ void EquipmentTabPage::setActionState()
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
+	m_compareAction->setEnabled(selectedIndexList.size() == 1);
 
 	// Enbale possible creation items;
 	//
@@ -4432,5 +4472,155 @@ void EquipmentTabPage::objectVcsStateChanged()
 {
 	setActionState();
 	setProperties();
+	return;
+}
+
+void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isFile() == false)
+	{
+		return;
+	}
+
+	// Check file extension
+	//
+	bool extFound = false;
+	QString fileName = object.name();
+
+	for (const QString& ext : Hardware::DeviceObjectExtensions)
+	{
+		if (fileName.endsWith(ext) == true)
+		{
+			extFound = true;
+			break;
+		}
+	}
+
+	if (extFound == false)
+	{
+		return;
+	}
+
+	// Get vesrions from the project database
+	//
+	std::shared_ptr<Hardware::DeviceObject> source = nullptr;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
+			if (ok == true)
+			{
+				source = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				source = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	std::shared_ptr<Hardware::DeviceObject> target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
+			if (ok == true)
+			{
+				target = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				target = Hardware::DeviceObject::Create(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Compare
+	//
+	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
+
 	return;
 }

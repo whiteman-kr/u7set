@@ -136,6 +136,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0118.sql", "Upgrade to version 118, update configuration script to count UniqueID"},
     {":/DatabaseUpgrade/Upgrade0119.sql", "Upgrade to version 119, add RegRawDataDescription to LM-1"},
 	{":/DatabaseUpgrade/Upgrade0120.sql", "Upgrade to version 120, added get_signal_history() and get_specific_signal() stored procedures"},
+	{":/DatabaseUpgrade/Upgrade0121.sql", "Upgrade to version 121, get_specific_copy() by time, changes in get_specific_copy by changeset"},
 };
 
 
@@ -2676,6 +2677,86 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 	return;
 }
 
+void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_specific_copy(%1, %2, '%3'::timestamp with time zone);")
+				.arg(currentUser().userId())
+				.arg(fi.fileId())
+				.arg(date.toString("yyyy-MM-dd HH:mm:ss"));
+
+		QSqlQuery q(db);
+		q.setForwardOnly(true);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(db, tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(db, tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		db_updateFile(q, file.get());
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
+	}
+
+	return;
+}
+
 void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 {
 	// Init automitic varaiables
@@ -3742,7 +3823,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCreated(q.value(8).toDateTime());
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toDateTime());
-	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
+	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(11).toInt()));
 	s.setAppSignalID(q.value(12).toString());
 	s.setCustomAppSignalID(q.value(13).toString());
 	s.setCaption(q.value(14).toString());
@@ -3813,7 +3894,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
 	.arg(toSqlBoolean(s.deleted()))
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
-	.arg(s.instanceAction())
+	.arg(s.instanceAction().toInt())
 	.arg(toSqlStr(s.appSignalID()))
 	.arg(toSqlStr(s.customAppSignalID()))
 	.arg(toSqlStr(s.caption()))

@@ -8,12 +8,14 @@ namespace Ui {
 	class ChangesetDetailsDialog;
 }
 
+class DbController;
+
 class ChangesetDetailsDialog : public QDialog
 {
 	Q_OBJECT
 
 private:
-	explicit ChangesetDetailsDialog(const DbChangesetDetails& changesetDetails, QWidget* parent);
+	ChangesetDetailsDialog(DbController* db, const DbChangesetDetails& changesetDetails, QWidget* parent);
 public:
 	~ChangesetDetailsDialog();
 
@@ -36,7 +38,9 @@ private:
 		ColumnCount
 	};
 
-	Ui::ChangesetDetailsDialog *ui;
+	Ui::ChangesetDetailsDialog* ui;
+
+	DbController* m_db = nullptr;
 	DbChangesetDetails m_changesetDetails;
 
 	static QByteArray m_splitterState;				// for local use, if want to store it in setting, use theSettings;

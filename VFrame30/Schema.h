@@ -76,6 +76,8 @@ namespace VFrame30
 		virtual QString details() const;				// form details JSON object (signal list)
 		static SchemaDetails parseDetails(const QString& details);	// parse details section (from DB), result is signal list
 
+		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
+
 		// Properties and Datas
 		//
 	public:

@@ -128,6 +128,8 @@ namespace VFrame30
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
 		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar);
 
+		virtual void drawCompareAction(CDrawParam* drawParam, QColor color) const;
+
 		// Draw comment "dim"
 		//
 		virtual void drawCommentDim(CDrawParam* drawParam) const;

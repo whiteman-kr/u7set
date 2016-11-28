@@ -87,7 +87,7 @@ FileHistoryDialog::~FileHistoryDialog()
 
 // Modalless dfialogbox
 //
-void FileHistoryDialog::showHistory(DbController* db, QString fileName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
+void FileHistoryDialog::showHistory(DbController* db, QString objectName, const std::vector<DbChangeset>& fileHistory, QWidget* parent)
 {
 	if (db == nullptr)
 	{
@@ -95,7 +95,7 @@ void FileHistoryDialog::showHistory(DbController* db, QString fileName, const st
 		return;
 	}
 
-	FileHistoryDialog* dialog = new FileHistoryDialog("History - " + fileName, db, fileHistory, parent);
+	FileHistoryDialog* dialog = new FileHistoryDialog("History - " + objectName, db, fileHistory, parent);
 
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->show();

@@ -1,18 +1,21 @@
 #include "SelectChangesetDialog.h"
 #include "ui_SelectChangesetDialog.h"
 #include "ChangesetDetailsDialog.h"
+#include "CompareDialog.h"
 
 SelectChangesetDialog::SelectChangesetDialog()
 {
 	assert(false);
 }
 
-SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, bool onlySelectChanget, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SelectChangesetDialog),
 	m_db(db),
 	m_history(history),
-	m_changeset(-1)
+	m_changeset(-1),
+	m_object(object),
+	m_onlySelectChanget(onlySelectChanget)
 {
 	assert(m_db);
 
@@ -89,19 +92,19 @@ int SelectChangesetDialog::changeset() const
 	return m_changeset;
 }
 
-void SelectChangesetDialog::setFile(const DbFileInfo& file)
-{
-	m_file = file;
-}
+//void SelectChangesetDialog::setFile(const DbFileInfo& file)
+//{
+//	m_file = file;
+//}
 
-DbFileInfo SelectChangesetDialog::file() const
-{
-	return m_file;
-}
+//DbFileInfo SelectChangesetDialog::file() const
+//{
+//	return m_file;
+//}
 
 // Modal dialogbox, gets selected changest on Ok
 //
-int SelectChangesetDialog::getChangeset(DbController* db, const DbFileInfo& file, const std::vector<DbChangeset>& history, QWidget* parent)
+int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& file, bool onlySelectChangeset, QWidget* parent)
 {
 	if (db == nullptr)
 	{
@@ -109,8 +112,42 @@ int SelectChangesetDialog::getChangeset(DbController* db, const DbFileInfo& file
 		return -1;
 	}
 
-	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, history, parent);
-	cd.setFile(file);
+	// Get file history
+	//
+	std::vector<DbChangeset> fileHistory;
+	db->getFileHistory(file, &fileHistory, parent);
+
+	DbChangesetObject object(file);
+
+	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, object, fileHistory, onlySelectChangeset, parent);
+
+	int result = cd.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		return cd.changeset();
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObject signal, bool onlySelectChangeset, QWidget* parent)
+{
+	if (db == nullptr)
+	{
+		assert(db);
+		return -1;
+	}
+
+	// Get signal history
+	//
+	std::vector<DbChangeset> signalHistory;
+	db->getSignalHistory(signal.id(), &signalHistory, parent);
+
+	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signal, signalHistory, onlySelectChangeset, parent);
+	//cd.setFile(file);
 
 	int result = cd.exec();
 
@@ -189,12 +226,17 @@ void SelectChangesetDialog::on_changesetList_customContextMenuRequested(const QP
 	connect(compareAction, &QAction::triggered, this,
 			[this, changeset]()
 			{
-				SelectChangesetDialog::compareFile(m_file, changeset);
+				CompareDialog::showCompare(m_db, m_object, changeset, dynamic_cast<QWidget*>(this->parent()));
+				reject();
 			});
 
 	menu.addAction(selectChangesetAction);
-	menu.addAction(changesetDetailsAction);
-	menu.addAction(compareAction);
+
+	if (m_onlySelectChanget == false)
+	{
+		menu.addAction(changesetDetailsAction);
+		menu.addAction(compareAction);
+	}
 
 	// Show menu
 	//
@@ -209,8 +251,10 @@ void SelectChangesetDialog::changesetDetails(int changeset)
 	ChangesetDetailsDialog::showChangesetDetails(m_db, changeset, parentWidget);
 }
 
-void SelectChangesetDialog::compareFile(DbFileInfo& file, int changeset)
+void SelectChangesetDialog::on_buttonBox_rejected()
 {
-	// SET PARENT OF THE CREATED WINDOW  this->parent() !!!!!!!!!!!!!!!1
-	assert(false);
+	// Close this dialog, its modal
+	//
+	m_changeset = -1;
+	QDialog::reject();
 }

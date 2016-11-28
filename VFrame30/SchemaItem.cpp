@@ -235,6 +235,10 @@ namespace VFrame30
 		}
 	}
 
+	void SchemaItem::drawCompareAction(CDrawParam* /*drawParam*/, QColor /*color*/) const
+	{
+	}
+
 	void SchemaItem::drawCommentDim(CDrawParam* /*drawParam*/) const
 	{
 

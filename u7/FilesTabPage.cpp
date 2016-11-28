@@ -9,7 +9,8 @@
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
-
+#include "Forms/CompareDialog.h"
+#include "Forms/ComparePropertyObjectDialog.h"
 
 //
 //
@@ -1186,6 +1187,30 @@ void FileTreeView::showHistory()
 	return;
 }
 
+void FileTreeView::showCompare()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	FileTreeModelItem* file = fileTreeModel()->fileItem(selected.first());
+
+	if (file == nullptr)
+	{
+		assert(file);
+		return;
+	}
+
+	CompareDialog::showCompare(db(), DbChangesetObject(*file), -1, this);
+
+	return;
+}
+
 void FileTreeView::getLatestVersion()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
@@ -1533,6 +1558,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_fileView->addAction(m_checkInAction);
 	m_fileView->addAction(m_undoChangesAction);
 	m_fileView->addAction(m_historyAction);
+	m_fileView->addAction(m_compareAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction2);
 	m_fileView->addAction(m_getLatestVersionAction);
@@ -1573,6 +1599,8 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FilesTabPage::selectionChanged);
 	connect(m_fileModel, &FileTreeModel::dataChanged, this, &FilesTabPage::modelDataChanged);
+
+	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &FilesTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -1620,6 +1648,11 @@ void FilesTabPage::createActions()
 	m_historyAction->setStatusTip(tr("Show check in history"));
 	m_historyAction->setEnabled(false);
 	connect(m_historyAction, &QAction::triggered, m_fileView, &FileTreeView::showHistory);
+
+	m_compareAction = new QAction(tr("Compare..."), this);
+	m_compareAction->setStatusTip(tr("Compare file"));
+	m_compareAction->setEnabled(false);
+	connect(m_compareAction, &QAction::triggered, m_fileView, &FileTreeView::showCompare);
 
 	//----------------------------------
 	m_SeparatorAction2 = new QAction(this);
@@ -1743,6 +1776,7 @@ void FilesTabPage::setActionState()
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
+	m_compareAction->setEnabled(selectedIndexList.size() == 1);
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
@@ -1798,6 +1832,158 @@ void FilesTabPage::modelDataChanged(const QModelIndex& topLeft,
 	Q_UNUSED(roles);
 
 	setActionState();
+
+	return;
+}
+
+void FilesTabPage::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isFile() == false)
+	{
+		return;
+	}
+
+	// Check file extension
+	//
+	std::array<QString, 5> extensions = {".xml", ".xsd", ".descr", ".txt", ".afb"};
+
+	bool extFound = false;
+	QString fileName = object.name();
+
+	for (const QString& ext : extensions)
+	{
+		if (fileName.endsWith(ext) == true)
+		{
+			extFound = true;
+			break;
+		}
+	}
+
+	if (extFound == false)
+	{
+		return;
+	}
+
+	// Get vesrions from the project database
+	//
+	QString source;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				source = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	QString target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				target = QString::fromUtf8(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Compare
+	//
+	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
 
 	return;
 }
