@@ -14,6 +14,7 @@
 #include <QCompleter>
 #include <QStringListModel>
 #include <QGroupBox>
+#include <QSet>
 
 #include "../lib/DbController.h"
 
@@ -488,7 +489,7 @@ bool SignalsModel::checkoutSignal(int index)
 		signalsIDs << m_signalSet.key(index);
 	}
 	QVector<ObjectState> objectStates;
-	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, parentWindow());
 	if (objectStates.count() == 0)
 	{
 		return false;
@@ -532,7 +533,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 		signalsIDs << m_signalSet.key(index);
 	}
 	QVector<ObjectState> objectStates;
-	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, parentWindow());
 	if (objectStates.count() == 0)
 	{
 		return false;
@@ -866,8 +867,6 @@ void SignalsModel::loadSignals()
 		{
 			emit signalsRestored();
 		}
-
-		emit cellsSizeChanged();
 	}
 
 	changeCheckedoutSignalActionsVisibility();
@@ -875,7 +874,7 @@ void SignalsModel::loadSignals()
 
 void SignalsModel::loadSignal(int row, bool updateView)
 {
-	dbController()->getLatestSignal(key(row), &m_signalSet[row], parrentWindow());
+	dbController()->getLatestSignal(key(row), &m_signalSet[row], parentWindow());
 	if (updateView)
 	{
 		emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
@@ -887,7 +886,7 @@ void SignalsModel::loadSignalSet(QVector<int> keys, bool updateView)
 	for (int i = 0; i < keys.count(); i++)
 	{
 		int row = keyIndex(keys[i]);
-		dbController()->getLatestSignal(keys[i], &m_signalSet[row], parrentWindow());
+		dbController()->getLatestSignal(keys[i], &m_signalSet[row], parentWindow());
 		if (updateView)
 		{
 			emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
@@ -1150,7 +1149,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 			if (dlg.isEditedSignal(ids[i]))
 			{
 				ObjectState state;
-				dbController()->setSignalWorkcopy(signalVector[i], &state, parrentWindow());
+				dbController()->setSignalWorkcopy(signalVector[i], &state, parentWindow());
 				states.append(state);
 			}
 		}
@@ -1167,7 +1166,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 void SignalsModel::saveSignal(Signal& signal)
 {
 	ObjectState state;
-	dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
+	dbController()->setSignalWorkcopy(&signal, &state, parentWindow());
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		showError(state);
@@ -1294,7 +1293,7 @@ void SignalsModel::deleteSignals(const QSet<int>& signalIDs)
 void SignalsModel::deleteSignal(int signalID)
 {
 	ObjectState state;
-	dbController()->deleteSignal(signalID, &state, parrentWindow());
+	dbController()->deleteSignal(signalID, &state, parentWindow());
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		showError(state);
@@ -1824,16 +1823,27 @@ void SignalsTabPage::checkIn()
 
 void SignalsTabPage::changeSignalActionsVisibility()
 {
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-	if (selection.count() == 0)
+	if (m_changingSelectionManualy)
+	{
+		return;
+	}
+	if (!m_signalsView->selectionModel()->hasSelection())
 	{
 		emit setSignalActionsVisibility(false);
 	}
 	else
 	{
+		QModelIndexList&& selection = m_signalsView->selectionModel()->selectedIndexes();
+		QSet<int> checkedRows;
 		for (int i = 0; i < selection.count(); i++)
 		{
-			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			int row = selection[i].row();
+			if (checkedRows.contains(row))
+			{
+				continue;
+			}
+			checkedRows.insert(row);
+			row = m_signalsProxyModel->mapToSource(selection[i]).row();
 			if (m_signalsModel->isEditableSignal(row))
 			{
 				emit setSignalActionsVisibility(true);
@@ -1868,32 +1878,45 @@ void SignalsTabPage::saveSelection()
 
 void SignalsTabPage::restoreSelection()
 {
-	auto basicSelectionMode = m_signalsView->selectionMode();
-	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
+	m_changingSelectionManualy = true;
 
 	QModelIndex currentSourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(m_focusedCellSignalID), m_focusedCellColumn);
 	QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
 
+	QItemSelection selection;
+
+	//int selectionRowCount = 0;
 	foreach (int id, m_selectedRowsSignalID)
 	{
-		QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(id), 0);
-		QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
-		if (proxyIndex.row() == currentProxyIndex.row())
+		int rowNo = m_signalsModel->keyIndex(id);
+
+		QModelIndex leftIndex  = m_signalsModel->index(rowNo, 0);
+		QModelIndex rightIndex = m_signalsModel->index(rowNo, m_signalsModel->columnCount() -1);
+
+		QItemSelection rowSelection(leftIndex, rightIndex);
+		selection.merge(rowSelection, QItemSelectionModel::Select);
+
+		/*selectionRowCount++;
+
+		if (selectionRowCount > 256)
 		{
-			//QTableView::setCurrentIndex will inverse selection on this row
-			continue;
-		}
-		m_signalsView->selectRow(proxyIndex.row());
+			// Selection limits has been added, because m_signalsView->selectionModel()->select(...) becomes extremely slow
+			break;
+		}*/
 	}
 
-	m_signalsView->setCurrentIndex(currentProxyIndex);
+	m_signalsView->selectionModel()->setCurrentIndex(currentProxyIndex, QItemSelectionModel::Select);
+	m_signalsView->selectionModel()->select(currentProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
-	m_signalsView->setSelectionMode(basicSelectionMode);
+	//m_signalsView->selectionModel()->select(m_signalsProxyModel->mapSelectionFromSource(selection), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 
 	m_signalsView->scrollTo(currentProxyIndex);
+
+	m_changingSelectionManualy = false;
+	changeSignalActionsVisibility();
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)
@@ -1921,7 +1944,6 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 		default:
 			assert(false);
 	}
-	m_signalsView->resizeColumnsToContents();
 }
 
 void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignalList)
@@ -2176,7 +2198,6 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_signalsView->setModel(m_proxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	m_signalsView->resizeColumnsToContents();
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -2256,7 +2277,7 @@ void CheckinSignalsDialog::checkinSelected()
 	QString commentText = m_commentEdit->toPlainText();
 	if (commentText.isEmpty())
 	{
-		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("Checkin comment is empty"));
+		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("Checkin comment is empty"));
 		return;
 	}
 	QVector<int> IDs;
@@ -2272,7 +2293,7 @@ void CheckinSignalsDialog::checkinSelected()
 	}
 	if (IDs.count() == 0)
 	{
-		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 	QVector<ObjectState> states;
@@ -2300,14 +2321,14 @@ void CheckinSignalsDialog::undoSelected()
 	}
 	if (IDs.count() == 0)
 	{
-		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 	QVector<ObjectState> states;
 	foreach (int ID, IDs)
 	{
 		ObjectState state;
-		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parrentWindow());
+		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;
@@ -2373,7 +2394,6 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 
 	signalsView->setModel(m_proxyModel);
 	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	signalsView->resizeColumnsToContents();
 	signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
 	signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(signalsView->fontMetrics().height() * 1.4));
@@ -2429,14 +2449,14 @@ void UndoSignalsDialog::undoSelected()
 	}
 	if (IDs.count() == 0)
 	{
-		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 	QVector<ObjectState> states;
 	foreach (int ID, IDs)
 	{
 		ObjectState state;
-		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parrentWindow());
+		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;

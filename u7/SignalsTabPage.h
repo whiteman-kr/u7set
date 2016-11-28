@@ -94,7 +94,7 @@ public:
 
 	DbController* dbController();
 	const DbController* dbController() const;
-	SignalsTabPage* parrentWindow() { return m_parentWindow; }
+	SignalsTabPage* parentWindow() { return m_parentWindow; }
 	static SignalsModel* instance() { return m_instance; }
 	QString errorMessage(const ObjectState& state) const;
 	void showError(const ObjectState& state) const;
@@ -112,7 +112,6 @@ signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
 	void signalsRestored();
-	void cellsSizeChanged();
 	void signalActivated(int row);
 
 public slots:
@@ -291,6 +290,7 @@ private:
 	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
+	bool m_changingSelectionManualy = false;
 
 	QList<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
