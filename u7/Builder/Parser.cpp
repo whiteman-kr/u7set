@@ -1315,8 +1315,6 @@ namespace Builder
 					continue;
 				}
 
-//				item.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
-
 				const VFrame30::SchemaItemUfb* ufbItem = item.m_fblItem->toType<VFrame30::SchemaItemUfb>();
 				assert(ufbItem);
 
@@ -1347,16 +1345,6 @@ namespace Builder
 
 						ufbItemsCopy.push_back(aliCopy);
 					}
-
-//					// !!!!!!!!!!!!!!!!!!! DEBUG
-//					qDebug() << "-----------------------------";
-//					qDebug() << "Bebore settinmg new guids to the copy";
-//					for (AppLogicItem& ali : ufbItemsCopy)			// set new pin guid to associatedIOs
-//					{
-//						ali.m_fblItem->debug();
-//					}
-//					qDebug() << "-----------------------------";
-//					// !!!!!!!!!!!!!!!!!!! DEBUG
 
 					// Set new inputs/ouputs guids to the copied items
 					// Keep connections to in<->out (Associated IOs)
@@ -1438,17 +1426,6 @@ namespace Builder
 						}
 					}
 
-//					// !!!!!!!!!!!!!!!!!!! DEBUG
-//					qDebug() << "-----------------------------";
-//					qDebug() << "After making full copy";
-//					for (AppLogicItem& ali : ufbItemsCopy)			// set new pin guid to associatedIOs
-//					{
-//						ali.m_fblItem->debug();
-//					}
-//					qDebug() << "-----------------------------";
-//					// !!!!!!!!!!!!!!!!!!! DEBUG
-
-
 					// Bind LogicSchema outputû to UFB items inputs
 					//
 					std::map<QUuid, QUuid> newAssocIoGuids;
@@ -1485,7 +1462,6 @@ namespace Builder
 						}
 
 						const AppLogicItem& foundInputSignalElement = *foundInputIt;
-//						foundInputSignalElement.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
 
 						if (foundInputSignalElement.m_fblItem->outputs().size() != 1)
 						{
@@ -1544,8 +1520,7 @@ namespace Builder
 							continue;
 						}
 
-						const AppLogicItem& foundOutputSignalElement = *foundOutputIt;
-//						foundOutputSignalElement.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
+						AppLogicItem& foundOutputSignalElement = *foundOutputIt;
 
 						if (foundOutputSignalElement.m_fblItem->inputs().size() != 1)
 						{
@@ -1554,7 +1529,7 @@ namespace Builder
 							continue;
 						}
 
-						const VFrame30::AfbPin& outputSignalElementPin = foundOutputSignalElement.m_fblItem->inputs().front();
+						VFrame30::AfbPin& outputSignalElementPin = foundOutputSignalElement.m_fblItem->inputs().front();
 						if (outputSignalElementPin.associatedIOs().size() != 1)
 						{
 							assert(outputSignalElementPin.associatedIOs().size() == 1);
@@ -1562,8 +1537,9 @@ namespace Builder
 							continue;
 						}
 
+						// newItemOutputGuid is out of item in UFB, so it is real elements out
+						//
 						QUuid newItemOutputGuid = outputSignalElementPin.associatedIOs().front();
-
 						newAssocIoGuids[outputGuid] = newItemOutputGuid;
 					}
 
