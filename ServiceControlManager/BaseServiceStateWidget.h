@@ -47,6 +47,7 @@ private:
 	QLabel* m_whoIsLabel = nullptr;
 	QLabel* m_uptimeLabel = nullptr;
 	QLabel* m_runningLabel = nullptr;
+	QLabel* m_clientRequestAddress = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
 
 	Network::ServiceInfo serviceState;
