@@ -4346,10 +4346,9 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	editSchemaView()->m_newItem = newItem;
 
-	// If items is SchemaItemAfb and this is LogicSchema, set label to it
+	// If items is FblItemRect, set label to it
 	//
-	if (schema()->isLogicSchema() == true &&
-		newItem->isFblItemRect() == true)
+	if (newItem->isFblItemRect() == true)
 	{
 		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
 		assert(fblItemRect);
@@ -5519,8 +5518,6 @@ void EditSchemaWidget::editPaste()
 	const QClipboard* clipboard = QApplication::clipboard();
 	const QMimeData* mimeData = clipboard->mimeData();
 
-	VFrame30::LogicSchema* logicSchema = schema()->toLogicSchema();
-
 	if (mimeData == nullptr)
 	{
 		return;
@@ -5570,22 +5567,19 @@ void EditSchemaWidget::editPaste()
 
 			if (schemaItem->isFblItemRect() == true)
 			{
-				// If items is FblItemRect and this is LogicSchema, set label to it
+				// If items is FblItemRect set label to it
 				//
-				if (logicSchema != nullptr)
+				VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
+				assert(fblItemRect);
+
+				int counterValue = 0;
+				bool nextValRes = db()->nextCounterValue(&counterValue);
+				if (nextValRes == false)
 				{
-					VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
-					assert(fblItemRect);
-
-					int counterValue = 0;
-					bool nextValRes = db()->nextCounterValue(&counterValue);
-					if (nextValRes == false)
-					{
-						return;
-					}
-
-					fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
+					return;
 				}
+
+				fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 			}
 		}
 
