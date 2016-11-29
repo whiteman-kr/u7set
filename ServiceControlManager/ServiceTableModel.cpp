@@ -199,6 +199,11 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 				case ServiceState::Stops: str += tr("Stops"); break;
 				default: str += tr("Unknown state"); break;
 			}
+			if (serviceState != ServiceState::Undefined &&
+				serviceState != ServiceState::Unavailable)
+			{
+				str += tr("\nListening clients on %1:%2").arg(QHostAddress(si.clientrequestip()).toString()).arg(si.clientrequestport());
+			}
 			return str;
 		}
 			break;

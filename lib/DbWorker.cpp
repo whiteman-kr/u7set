@@ -3823,7 +3823,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCreated(q.value(8).toDateTime());
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toDateTime());
-	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
+	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(11).toInt()));
 	s.setAppSignalID(q.value(12).toString());
 	s.setCustomAppSignalID(q.value(13).toString());
 	s.setCaption(q.value(14).toString());
@@ -3894,7 +3894,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
 	.arg(toSqlBoolean(s.deleted()))
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
-	.arg(s.instanceAction())
+	.arg(s.instanceAction().toInt())
 	.arg(toSqlStr(s.appSignalID()))
 	.arg(toSqlStr(s.customAppSignalID()))
 	.arg(toSqlStr(s.caption()))

@@ -1,12 +1,12 @@
 #include "../Builder/ModuleFirmwareWriter.h"
 #include <QtEndian>
+#include "version.h"
 
 namespace Hardware
 {
 
 ModuleFirmwareWriter::ModuleFirmwareWriter()
 {
-
 }
 
 
@@ -130,7 +130,17 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 	// properties
 	//
 
-	jObject.insert("userName", m_userName);
+    QString m_buildSoftware = qApp->applicationName() +" v" + qApp->applicationVersion();
+#ifndef Q_DEBUG
+    m_buildSoftware += ", release";
+#else
+    m_buildSoftware += ", debug";
+#endif
+    m_buildSoftware += ", commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+    QString m_buildTime = QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
+
+    jObject.insert("userName", m_userName);
 	jObject.insert("projectName", m_projectName);
 	jObject.insert("caption", caption());
 	jObject.insert("subsysId", subsysId());
@@ -141,6 +151,8 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 	jObject.insert("buildConfig", m_buildConfig);
 	jObject.insert("changesetId", m_changesetId);
 	jObject.insert("fileVersion", fileVersion());
+    jObject.insert("buildSoftware", m_buildSoftware);
+    jObject.insert("buildTime", m_buildTime);
 
 	dest = QJsonDocument(jObject).toJson();
 

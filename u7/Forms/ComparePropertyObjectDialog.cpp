@@ -59,6 +59,40 @@ ComparePropertyObjectDialog::~ComparePropertyObjectDialog()
 	delete ui;
 }
 
+QString ComparePropertyObjectDialog::objedctToCompareString(PropertyObject* object)
+{
+	if (object == nullptr)
+	{
+		assert(object);
+		return QString();
+	}
+
+	std::vector<std::shared_ptr<Property>> props = object->properties();
+
+	std::sort(props.begin(), props.end(),
+			[](std::shared_ptr<Property> p1, std::shared_ptr<Property> p2)
+			{
+				return  QString("%1-%2").arg(p1->category()).arg(p1->caption()) <
+						QString("%1-%2").arg(p2->category()).arg(p2->caption());
+			});
+
+	QString result;
+	for (std::shared_ptr<Property> p : props)
+	{
+		if (p->visible() == false)
+		{
+			continue;
+		}
+
+		result += QString("%1\\%2: %3\n")
+						.arg(p->category())
+						.arg(p->caption())
+						.arg(p->value().toString());
+	}
+
+	return result;
+}
+
 void ComparePropertyObjectDialog::showDialog(
 		DbChangesetObject object,
 		CompareData compareData,
@@ -74,52 +108,8 @@ void ComparePropertyObjectDialog::showDialog(
 		return;
 	}
 
-	//--
-	//
-	std::vector<std::shared_ptr<Property>> sourceProps = source->properties();
-	std::vector<std::shared_ptr<Property>> targetProps = target->properties();
-
-	std::sort(sourceProps.begin(), sourceProps.end(),
-			[](std::shared_ptr<Property> p1, std::shared_ptr<Property> p2)
-			{
-				return  QString("%1-%2").arg(p1->category()).arg(p1->caption()) <
-						QString("%1-%2").arg(p2->category()).arg(p2->caption());
-			});
-
-	std::sort(targetProps.begin(), targetProps.end(),
-			[](std::shared_ptr<Property> p1, std::shared_ptr<Property> p2)
-			{
-				return  QString("%1-%2").arg(p1->category()).arg(p1->caption()) <
-						QString("%1-%2").arg(p2->category()).arg(p2->caption());
-			});
-
-	QString sourceStr;
-	for (std::shared_ptr<Property> sp : sourceProps)
-	{
-		if (sp->visible() == false)
-		{
-			continue;
-		}
-
-		sourceStr += QString("%1\\%2: %3\n")
-						.arg(sp->category())
-						.arg(sp->caption())
-						.arg(sp->value().toString());
-	}
-
-	QString targetStr;
-	for (std::shared_ptr<Property> tp : targetProps)
-	{
-		if (tp->visible() == false)
-		{
-			continue;
-		}
-
-		targetStr += QString("%1\\%2: %3\n")
-						.arg(tp->category())
-						.arg(tp->caption())
-						.arg(tp->value().toString());
-	}
+	QString sourceStr = ComparePropertyObjectDialog::objedctToCompareString(source.get());
+	QString targetStr = ComparePropertyObjectDialog::objedctToCompareString(target.get());
 
 	showDialog(object, compareData, sourceStr, targetStr, parent);
 	return;

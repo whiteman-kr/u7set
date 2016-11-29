@@ -420,7 +420,7 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 
 void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
-	QSettings settings;
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	Signal& signal = *m_signalVector[0];
 	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
 	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());

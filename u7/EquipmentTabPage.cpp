@@ -2833,7 +2833,7 @@ void EquipmentView::compare()
 
 	// --
 	//
-	CompareDialog::showCompare(db(), device->fileInfo(), -1, this);
+	CompareDialog::showCompare(db(), DbChangesetObject(device->fileInfo()), -1, this);
 
 	return;
 }
@@ -4594,7 +4594,6 @@ void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compa
 				target = Hardware::DeviceObject::Create(outFile->data());
 			}
 		}
-		break;
 		break;
 	case CompareVersionType::LatestVersion:
 		{

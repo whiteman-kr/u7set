@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
+#include "Signal.h"
 
 const char* const rootFileName = "$root$";			// root file name
 const char* const AfblFileName = "AFBL";			// Application Functional Block Library
@@ -110,6 +111,11 @@ QString VcsItemAction::text() const
 int VcsItemAction::toInt() const
 {
 	return static_cast<int>(m_action);
+}
+
+VcsItemAction::VcsItemActionType VcsItemAction::value() const
+{
+	return m_action;
 }
 
 bool operator== (const VcsItemAction& s1, const VcsItemAction& s2)
@@ -774,6 +780,16 @@ DbChangesetObject::DbChangesetObject(const DbFileInfo& file) :
 	m_parent(QString::number(file.parentId()))
 {
 }
+
+DbChangesetObject::DbChangesetObject(const Signal& signal) :
+	m_type(Type::Signal),
+	m_id(signal.ID()),
+	m_name(signal.appSignalID()),
+	m_caption(signal.caption()),
+	m_action(VcsItemAction::Modified)
+{
+}
+
 
 DbChangesetObject::~DbChangesetObject()
 {

@@ -22,7 +22,6 @@ private:
 public:
 	~CompareDialog();
 
-	static void showCompare(DbController* db, const DbFileInfo& file, int changeset, QWidget* parent);
 	static void showCompare(DbController* db, const DbChangesetObject& object, int changeset, QWidget* parent);
 
 private slots:

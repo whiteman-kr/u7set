@@ -226,7 +226,40 @@ namespace VFrame30
 		}
 
 		return;
-	}	
+	}
+
+	void PosLineImpl::drawCompareAction(CDrawParam* drawParam, QColor color) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		QPointF p1(startXDocPt(), startYDocPt());
+		QPointF p2(endXDocPt(), endYDocPt());
+
+		if (std::abs(p1.x() - p2.x()) < 0.000001 && std::abs(p1.y() - p2.y()) < 0.000001)
+		{
+			// Пустая линия, рисуется очень большой
+			//
+			return;
+		}
+
+		double cbs = drawParam->controlBarSize();
+		double lineWeight = cbs / 2.0f;
+
+		QPen pen(color);
+
+		pen.setWidthF(lineWeight);
+		p->setPen(pen);
+
+		p->drawLine(p1, p2);
+
+		return;
+	}
 
 	bool PosLineImpl::IsIntersectRect(double x, double y, double width, double height) const
 	{

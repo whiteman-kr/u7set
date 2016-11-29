@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
+#include "GlobalMessanger.h"
 #include "../lib/Signal.h"
 
 class DbController;
@@ -94,7 +95,7 @@ public:
 
 	DbController* dbController();
 	const DbController* dbController() const;
-	SignalsTabPage* parrentWindow() { return m_parentWindow; }
+	SignalsTabPage* parentWindow() { return m_parentWindow; }
 	static SignalsModel* instance() { return m_instance; }
 	QString errorMessage(const ObjectState& state) const;
 	void showError(const ObjectState& state) const;
@@ -111,9 +112,7 @@ public:
 signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
-	void signalsRestored();
-	void cellsSizeChanged();
-	void signalActivated(int row);
+	void signalsRestored(int focusedSignalId = -1);
 
 public slots:
 	void loadSignals();
@@ -266,7 +265,7 @@ public slots:
 	void changeSignalActionsVisibility();
 
 	void saveSelection();
-	void restoreSelection();
+	void restoreSelection(int focusedSignalId = -1);
 
 	void changeSignalTypeFilter(int selectedType);
 	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);
@@ -276,6 +275,8 @@ public slots:
 	void changeColumnVisibility(QAction* action);
 
 	void showError(QString message);
+
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
 	//
@@ -291,6 +292,7 @@ private:
 	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
+	bool m_changingSelectionManualy = false;
 
 	QList<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;

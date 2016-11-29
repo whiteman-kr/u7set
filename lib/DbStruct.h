@@ -99,6 +99,8 @@ public:
 	QString text() const;
 	int toInt() const;
 
+	VcsItemActionType value() const;
+
 private:
 	VcsItemActionType m_action;
 
@@ -414,6 +416,7 @@ class DbChangesetObject
 public:
 	DbChangesetObject();
 	explicit DbChangesetObject(const DbFileInfo& file);
+	explicit DbChangesetObject(const Signal& signal);
 	virtual ~DbChangesetObject();
 
 public:

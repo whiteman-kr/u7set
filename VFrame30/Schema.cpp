@@ -625,6 +625,21 @@ namespace VFrame30
 		return d;
 	}
 
+	std::shared_ptr<SchemaItem> Schema::getItemById(const QUuid& id) const
+	{
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
+		{
+			std::shared_ptr<SchemaItem> result = layer->getItemById(id);
+
+			if (result != nullptr)
+			{
+				return result;
+			}
+		}
+
+		return std::shared_ptr<SchemaItem>();
+	}
+
 	// Properties and Data
 	//
 

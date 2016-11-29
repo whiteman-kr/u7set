@@ -20,7 +20,7 @@ void SignalProperties::initProperties()
 	static const QString createdCaption("Created");
 	static const QString deletedCaption("Deleted");
 	static const QString instanceCreatedCaption("InstanceCreated");
-	static const QString instanceActionCaption("InstanceAction");
+	//static const QString instanceActionCaption("InstanceAction");
 	static const QString typeCaption("Type");
 	static const QString inOutTypeCaption("InOutType");
 	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
@@ -69,7 +69,7 @@ void SignalProperties::initProperties()
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, createdCaption, false, Signal::created, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(bool, deletedCaption, false, Signal::deleted, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction, m_signal);
+	//ADD_PROPERTY_GETTER_INDIRECT(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction, m_signal);
 
 	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(signalTypeCategory);

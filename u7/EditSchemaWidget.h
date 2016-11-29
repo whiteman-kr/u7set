@@ -63,11 +63,17 @@ enum class SchemaItemAction
 	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemaPosConnectionLine)
 };
 
+enum class CompareAction
+{
+	Unmodified,
+	Modified,
+	Added,
+	Deleted
+};
+
 
 // Forward declarations
 //
-class QRubberBand;
-
 class EditSchemaWidget;
 class SchemaPropertiesDialog;
 class SchemaLayersDialog;
@@ -114,6 +120,7 @@ protected:
 	void drawRectSizing(VFrame30::CDrawParam* drawParam);
 	void drawMovingLinePoint(VFrame30::CDrawParam* drawParam);
 	void drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam);
+	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect);
 
 	void drawGrid(QPainter* p);
 
@@ -160,6 +167,11 @@ protected:
 	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
 
+	std::map<QUuid, CompareAction> m_itemsActions;
+	bool m_compareWidget = false;
+	std::shared_ptr<VFrame30::Schema> m_compareSourceSchema;
+	std::shared_ptr<VFrame30::Schema> m_compareTargetSchema;
+
 	// Selection area variables
 	//
 	QPointF m_mouseSelectionStartPoint;
@@ -187,7 +199,7 @@ protected:
 												// используются при завершении (MouseUp) редактирования.
 	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
 
-	//QRubberBand* m_rubberBand;					// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
+	//QRubberBand* m_rubberBand;				// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
 												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
 
 
@@ -424,6 +436,7 @@ protected slots:
 	void schemaProperties();
 	void properties();
 	void layers();
+	void compareSchemaItem();
 	void selectionChanged();
 
 	void clipboardDataChanged();
@@ -488,6 +501,10 @@ public:
 	bool snapToGrid() const;
 	void setSnapToGrid(bool value);
 
+	bool compareWidget() const;
+	bool isCompareWidget() const;
+	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
+
 	bool readOnly() const;
 	void setReadOnly(bool value);
 
@@ -496,6 +513,8 @@ public:
 	void resetModified();
 
 	void resetEditEngine();
+
+	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
 
 	// Data
 	//
@@ -676,6 +695,7 @@ private:
 
 	//QMenu* m_propertiesMenu = nullptr;
 	//QAction* m_propertiesAction = nullptr;
+	QAction* m_compareDiffAction = nullptr;
 
 	// --
 	// End of ConextMenu

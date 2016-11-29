@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(m_serviceTable, &QTableView::doubleClicked, m_serviceModel, &ServiceTableModel::openServiceStatusWidget);
 	setCentralWidget(m_serviceTable);
 
-	m_serviceTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_serviceTable->fontMetrics().height() * 1.4 * 3));
+	m_serviceTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_serviceTable->fontMetrics().height() * 1.4 * 4));
 	m_serviceTable->horizontalHeader()->setDefaultSectionSize(250);
 
 	m_serviceTable->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");

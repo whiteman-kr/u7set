@@ -114,7 +114,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	E::InstanceAction m_instanceAction = E::InstanceAction::Added;
+	VcsItemAction m_instanceAction = VcsItemAction::Added;
 
 	QString m_appSignalID;
 	QString m_customAppSignalID;
@@ -186,7 +186,7 @@ private:
 	void setDeleted(bool deleted) { m_deleted = deleted; }
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
-	void setInstanceAction(E::InstanceAction action) { m_instanceAction = action; }
+	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 
 public:
 	Signal();
@@ -226,7 +226,7 @@ public:
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
-	E::InstanceAction instanceAction() const { return m_instanceAction; }
+	VcsItemAction instanceAction() const { return m_instanceAction; }
 
 	Address16& iobufferAddr() { return m_ioBufferAddr; }
 	Address16& ramAddr() { return m_ramAddr; }

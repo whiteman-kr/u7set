@@ -44,15 +44,19 @@ CREATE OR REPLACE FUNCTION get_specific_signal(
   RETURNS SETOF signaldata AS
 $BODY$
 DECLARE
+    actual_changeset_id integer;
+    
 BEGIN
-        IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+    IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
 	THEN
 	        RETURN;
 	END IF;
 
+	actual_changeset_id := (SELECT max(ChangesetID) FROM SignalInstance WHERE SignalID = signal_id AND ChangesetID <= changeset_id);
+
     RETURN QUERY
-                SELECT
-		        S.SignalID,
+        SELECT
+		    S.SignalID,
 			S.SignalGroupID,
 			SI.SignalInstanceID,
 			SI.ChangesetID,
@@ -100,16 +104,14 @@ BEGIN
 			SI.EnableTuning,
 			SI.TuningDefaultValue
 		FROM
-		        Signal AS S,
+		    Signal AS S,
 			SignalInstance AS SI,
 			Changeset AS CHS
 		WHERE
-		        SI.SignalID = signal_id AND
+		    SI.SignalID = signal_id AND
 			SI.SignalID = S.SignalID AND
-			SI.ChangesetID = changeset_id AND
-		CHS.ChangesetID = changeset_id;
+            		SI.ChangesetID = actual_changeset_id AND
+            		CHS.ChangesetID = actual_changeset_id;
 END
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100
-  ROWS 1000;
+LANGUAGE plpgsql;

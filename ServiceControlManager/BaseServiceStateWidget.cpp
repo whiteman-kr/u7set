@@ -27,6 +27,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	statusBar()->addWidget(m_whoIsLabel = new QLabel(this));
 	statusBar()->addWidget(m_uptimeLabel = new QLabel(this));
 	statusBar()->addWidget(m_runningLabel = new QLabel(this));
+	statusBar()->addWidget(m_clientRequestAddressLabel = new QLabel(this));
 
 	m_socketThread = new UdpSocketThread();
 
@@ -98,11 +99,11 @@ void BaseServiceStateWidget::updateServiceState()
 		int s = time % 60; time /= 60;
 		int m = time % 60; time /= 60;
 		int h = time % 24; time /= 24;
-		m_uptimeLabel->setText(tr("Uptime") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+		m_uptimeLabel->setText(tr("Uptime ") + QString("(%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 	}
 	else
 	{
-		m_uptimeLabel->setText(tr("Uptime") + "???");
+		m_uptimeLabel->setText(tr("Uptime ") + "???");
 	}
 
 	QString str;
@@ -137,6 +138,18 @@ void BaseServiceStateWidget::updateServiceState()
 			break;
 	}
 	m_runningLabel->setText(str);
+
+	if (srvState != ServiceState::Undefined &&
+		srvState != ServiceState::Unavailable)
+	{
+		m_clientRequestAddressLabel->setText(tr("Listening clients on %1:%2")
+										.arg(QHostAddress(serviceState.clientrequestip()).toString())
+										.arg(serviceState.clientrequestport()));
+	}
+	else
+	{
+		m_clientRequestAddressLabel->setText(tr("Listening clients on ???:???"));
+	}
 
 	switch(srvState)
 	{
