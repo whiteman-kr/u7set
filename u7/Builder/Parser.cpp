@@ -1343,6 +1343,8 @@ namespace Builder
 						aliCopy.m_fblItem = std::dynamic_pointer_cast<VFrame30::FblItemRect>(VFrame30::SchemaItem::Create(buffer));
 						assert(aliCopy.m_fblItem);
 
+						aliCopy.m_groupId = ufbItem->guid();
+
 						ufbItemsCopy.push_back(aliCopy);
 					}
 
@@ -3220,14 +3222,14 @@ namespace Builder
 		{
 			const std::list<AppLogicItem>& items = ufb.second->items();
 
-			std::map<QUuid, int> schemaItemRunOrder;
+			std::map<QUuid, std::pair<int, int>> schemaItemRunOrder;
 
 			int index = 0;
 			for (const AppLogicItem& it : items)
 			{
 				assert(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
 
-				schemaItemRunOrder[it.m_fblItem->guid()] = index;
+				schemaItemRunOrder[it.m_fblItem->guid()] = std::make_pair(index, index);
 				index ++;
 			}
 
@@ -3242,14 +3244,33 @@ namespace Builder
 		{
 			const std::list<AppLogicItem>& items = lm->items();
 
-			std::map<QUuid, int> schemaItemRunOrder;
+			std::map<QUuid, std::pair<int, int>> schemaItemRunOrder;
 
 			int index = 0;
 			for (const AppLogicItem& it : items)
 			{
-				assert(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
+				if (it.m_groupId.isNull() == true)
+				{
+					assert(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
 
-				schemaItemRunOrder[it.m_fblItem->guid()] = index;
+					schemaItemRunOrder[it.m_fblItem->guid()] = std::make_pair(index, index);
+				}
+				else
+				{
+					// it.m_groupId is SchemaItemUfb.guid()
+					//
+					if (schemaItemRunOrder.count(it.m_groupId) == 0)
+					{
+						// This is the first group item
+						//
+						schemaItemRunOrder[it.m_groupId] = std::make_pair(index, index);
+					}
+					else
+					{
+						schemaItemRunOrder[it.m_groupId].second = index;
+					}
+				}
+
 				index ++;
 			}
 

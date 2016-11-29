@@ -587,9 +587,9 @@ namespace VFrame30
 		return m_cachedGridSize * 16;
 	}
 
-	void FblItemRect::debug() const
+	void FblItemRect::dump() const
 	{
-		PosRectImpl::debug();
+		PosRectImpl::dump();
 
 		qDebug() << "\tBuildName: " << buildName();
 

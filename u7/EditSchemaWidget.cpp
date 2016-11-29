@@ -312,29 +312,59 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 						for (int i = 0; i < eqIds.size(); i++)
 						{
-							int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
+							auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
 
 							if (i == 0)
 							{
-								orderIndexText = QString::number(runIndex);
+								if (runIndex.first == runIndex.second)
+								{
+									orderIndexText = QString::number(runIndex.first);
+								}
+								else
+								{
+									orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
+								}
 							}
 							else
 							{
-								orderIndexText.append(QLatin1String(", ") + QString::number(runIndex));
+								if (runIndex.first == runIndex.second)
+								{
+									orderIndexText.append(QLatin1String(", ") + QString::number(runIndex.first));
+								}
+								else
+								{
+									orderIndexText.append(QString(", %1-%2").arg(runIndex.first).arg(runIndex.second));
+								}
 							}
 						}
 					}
 					else
 					{
-						int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
-						orderIndexText = QString::number(runIndex);
+						auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
+
+						if (runIndex.first == runIndex.second)
+						{
+							orderIndexText = QString::number(runIndex.first);
+						}
+						else
+						{
+							orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
+						}
 					}
 				}
 
 				if (schema()->isUfbSchema() == true)
 				{
-					int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(schema()->schemaId(), item->guid());
-					orderIndexText = QString::number(runIndex);
+					auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(schema()->schemaId(), item->guid());
+
+					if (runIndex.first == runIndex.second)
+					{
+						orderIndexText = QString::number(runIndex.first);
+					}
+					else
+					{
+						orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
+					}
 				}
 
 				item->DrawDebugInfo(drawParam, orderIndexText);

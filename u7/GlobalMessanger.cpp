@@ -114,7 +114,7 @@ void GlobalMessanger::clearSchemaItemRunOrder()
 	m_runOrder.clear();
 }
 
-void GlobalMessanger::setRunOrder(const QString& equipmentId, std::map<QUuid, int>& data)
+void GlobalMessanger::setRunOrder(const QString& equipmentId, std::map<QUuid, std::pair<int, int>>& data)
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
@@ -124,7 +124,7 @@ void GlobalMessanger::setRunOrder(const QString& equipmentId, std::map<QUuid, in
 	return;
 }
 
-int GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const
+std::pair<int, int> GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const
 {
 	QMutexLocker ml(&m_buildResultMutex);
 
@@ -136,14 +136,14 @@ int GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid&
 
 			if (it == ro.schemaItemsRunOrder.end())
 			{
-				return -1;
+				return {-1, -1};
 			}
 
 			return it->second;
 		}
 	}
 
-	return -1;
+	return {-1, -1};
 }
 
 void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)

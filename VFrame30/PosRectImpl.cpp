@@ -21,9 +21,9 @@ namespace VFrame30
 		m_heightDocPt = 0;
 	}
 
-	void PosRectImpl::debug() const
+	void PosRectImpl::dump() const
 	{
-		SchemaItem::debug();
+		SchemaItem::dump();
 		qDebug() << "\t x, y, w, h: " << m_leftDocPt << ", " << m_topDocPt << ", " << m_widthDocPt << ", " << m_heightDocPt;
 	}
 

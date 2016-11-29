@@ -48,7 +48,7 @@ namespace VFrame30
 		// Public methods
 		//
 	public:
-		virtual void debug() const override;
+		virtual void dump() const override;
 
 		// Serialization
 		//

@@ -154,7 +154,7 @@ namespace VFrame30
 		assert(false);	// Implement in child classes
 	}
 
-	void SchemaItem::debug(std::shared_ptr<SchemaItem> item)
+	void SchemaItem::dump(std::shared_ptr<SchemaItem> item)
 	{
 		QString str = QString("SchemaItem %1, [ptr: %2, counter: %3], uuid: %4")
 					  .arg(item->metaObject()->className())
@@ -165,7 +165,7 @@ namespace VFrame30
 		qDebug() << str;
 	}
 
-	void SchemaItem::debug() const
+	void SchemaItem::dump() const
 	{
 		qDebug() << "Item: " << metaObject()->className();
 		qDebug() << "\tguid:" << guid();

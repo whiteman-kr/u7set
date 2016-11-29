@@ -97,7 +97,10 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
-		Afb::AfbElement m_afbElement;							// Specific instance with initialized Params
+		Afb::AfbElement m_afbElement;					// Specific instance with initialized Params
+
+		QUuid m_groupId;								// ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
+														// This id is empty if item is not in group
 
 		// Methods
 		//
