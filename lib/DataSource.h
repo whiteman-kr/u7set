@@ -148,8 +148,6 @@ protected:
 
 	qint64 m_lastPacketTime = 0;
 
-
-
 	//
 
 	bool m_firstRupFrame = true;

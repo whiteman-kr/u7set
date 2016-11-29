@@ -197,7 +197,7 @@ namespace Tuning
 	}
 
 
-	void TuningSource::processReply(const Tuning::SocketReply& reply)
+	/*void TuningSource::processReply(const Tuning::SocketReply& reply)
 	{
 		m_receivedRepyCount++;
 
@@ -221,7 +221,7 @@ namespace Tuning
 		}
 
 		m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
-	}
+	}*/
 
 
 	void TuningSource::testConnection(qint64 nowTime)
@@ -233,7 +233,7 @@ namespace Tuning
 	}
 
 
-	bool TuningSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
+/*	bool TuningSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
 	{
 		if (tss == nullptr)
 		{
@@ -265,10 +265,10 @@ namespace Tuning
 		}
 
 		return m_tuningData->setSignalState(appSignalID, value, sr);
-	}
+	}*/
 
 
-	quint64 TuningSource::uniqueID()
+	quint64 TuningSource::uniqueID() const
 	{
 		if (m_tuningData == nullptr)
 		{

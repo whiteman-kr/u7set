@@ -256,7 +256,7 @@ void SendTuningFrameWidget::sendPacket()
 		data <<= 6;
 		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
-		writeBigEndian(fotip.subsystemKeyWord, fotip.subsystemKeyWord);
+		writeBigEndian(fotip.subsystemKey.wordVaue, fotip.subsystemKey.wordVaue);
 
 		writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
 		writeBigEndian(fotip.flags.all, m_flags->text().toUInt());

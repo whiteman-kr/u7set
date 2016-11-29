@@ -1,4 +1,5 @@
 #include "../lib/WUtils.h"
+#include "../lib/Crc.h"
 #include "TuningSourceWorker.h"
 
 
@@ -11,10 +12,21 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	TuningSourceWorker::TuningSourceWorker(const TuningSource& source) :
-		m_source(source)
+	TuningSourceWorker::TuningSourceWorker(const TuningServiceSettings& settings, const TuningSource& source) :
+		m_timer(this),
+		m_socket(this),
+		m_tuningCommandQueue(this, 1000),
+		m_replyQueue(this, 10)
 	{
 		m_sourceIP = source.lmAddressPort();
+		m_sourceUniqueID = source.uniqueID();
+		m_lmNumber = static_cast<quint16>(source.lmNumber());
+		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());
+
+		m_tuningRomStartAddr = settings.tuningDataOffsetW;
+		m_tuningRomFrameCount = settings.tuningRomFrameCount;
+		m_tuningRomFrameSizeW = settings.tuningRomFrameSizeW;
+		m_tuningRomSizeW = settings.tuningRomSizeW;
 	}
 
 
@@ -26,23 +38,23 @@ namespace Tuning
 
 	void TuningSourceWorker::pushReply(const RupFotipFrame& reply)
 	{
-		AUTO_LOCK(m_waitReplyMutex)
+		m_replyQueue.push(&reply);
+	}
 
-		if (m_waitReply == false)
-		{
-			m_errUntimelyReplay++;
-			return;
-		}
 
-		memcpy(&m_reply, &reply, sizeof(RupFotipFrame));
-
-		emit replyReady();
+	void TuningSourceWorker::incErrReplySize()
+	{
+		m_errReplySize++;
 	}
 
 
 	void TuningSourceWorker::onThreadStarted()
 	{
-		connect(this, &TuningSourceWorker::replyReady, this, &TuningSourceWorker::onReplyReady);
+		connect(&m_replyQueue, &Queue<RupFotipFrame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
+		connect(&m_timer, &QTimer::timeout, this, &TuningSourceWorker::onTimer);
+
+		m_timer.setInterval(20);
+		m_timer.start();
 	}
 
 
@@ -53,7 +65,7 @@ namespace Tuning
 
 	bool TuningSourceWorker::processWaitReply()
 	{
-		AUTO_LOCK(m_waitReplyMutex)
+//		AUTO_LOCK(m_waitReplyMutex)
 
 		if (m_waitReply == true)
 		{
@@ -66,9 +78,11 @@ namespace Tuning
 
 			// fix replay timeout
 			//
-		}
 
-		m_waitReply = false;
+			m_errNoReply++;
+
+			m_waitReply = false;
+		}
 
 		return false;			// switch to next processing
 	}
@@ -76,37 +90,310 @@ namespace Tuning
 
 	bool TuningSourceWorker::processCommandQueue()
 	{
-		AUTO_LOCK(m_waitReplyMutex)
+//		AUTO_LOCK(m_waitReplyMutex)
 
 		if (m_waitReply == true)
 		{
 			return true;		// while wating reply has not another processing
 		}
 
-		// get commands from queue and send FOTIP request
+		if (m_tuningCommandQueue.isEmpty() == true)
+		{
+			return false;		// queue is empty, go to next processing
+		}
+
+		// get command from queue and send FOTIP request
 		//
 
+		TuningCommand tuningCmd;
 
-		return false;			// switch to next processing
+		m_tuningCommandQueue.pop(&tuningCmd);
+
+		sendFOTIPRequest(tuningCmd);
+
+		m_waitReply = true;
+
+		return true;
 	}
 
 
 	bool TuningSourceWorker::processIdle()
 	{
-		AUTO_LOCK(m_waitReplyMutex)
+//		AUTO_LOCK(m_waitReplyMutex)
 
 		if (m_waitReply == true)
 		{
 			return true;		// while wating reply has not another processing
+		}
+
+		TuningCommand tuningCmd;
+
+		tuningCmd.opCode = OperationCode::Read;
+		tuningCmd.read.frame = m_nextFrameToAutoRead;
+
+		m_tuningCommandQueue.push(&tuningCmd);
+
+		m_nextFrameToAutoRead++;
+
+		if (m_nextFrameToAutoRead >= m_tuningRomFrameCount)
+		{
+			m_nextFrameToAutoRead = 0;
 		}
 
 		return false;
 	}
 
 
-	void TuningSourceWorker::processReply()
+	void TuningSourceWorker::sendFOTIPRequest(const TuningCommand& tuningCmd)
 	{
+		initRupHeader(m_request);
 
+		initFotipHeader(m_request.fotip, tuningCmd);
+
+		initFotipData(m_request.fotip, tuningCmd);
+
+		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&m_request),
+											  sizeof(m_request),
+											  m_sourceIP.address(),
+											  m_sourceIP.port());
+		if (sent == -1)
+		{
+			m_errSent++;
+			return;
+		}
+
+		if (sent < sizeof(m_request))
+		{
+			m_errPartialSent++;
+		}
+	}
+
+
+	void TuningSourceWorker::initRupHeader(RupFotipFrame& rup)
+	{
+		rup.rupHeader.frameSize = ENTIRE_UDP_SIZE;
+		rup.rupHeader.protocolVersion = RUP_PROTOCOL_VERSION_5;
+
+		rup.rupHeader.flags.all = 0;
+		rup.rupHeader.flags.tuningData = 1;
+
+		rup.rupHeader.dataId = 0;
+		rup.rupHeader.moduleType = Hardware::DeviceModule::FamilyType::LM;	// 0x1100
+		rup.rupHeader.numerator = m_rupNumerator;
+		rup.rupHeader.framesQuantity = 1;
+		rup.rupHeader.frameNumber = 0;
+
+		QDateTime now = QDateTime::currentDateTime();
+
+		QDate date = now.date();
+		QTime time = now.time();
+
+		rup.rupHeader.timeStamp.year = date.year();
+		rup.rupHeader.timeStamp.month = date.month();
+		rup.rupHeader.timeStamp.day = date.day();
+
+		rup.rupHeader.timeStamp.hour = time.hour();
+		rup.rupHeader.timeStamp.minute = time.minute();
+		rup.rupHeader.timeStamp.second = time.second();
+		rup.rupHeader.timeStamp.millisecond = time.msec();
+
+		rup.rupHeader.reverseBytes();
+
+		m_rupNumerator++;
+	}
+
+
+	void TuningSourceWorker::initFotipHeader(FotipFrame& fotip, const TuningCommand& tuningCmd)
+	{
+		// common initialization
+		//
+		fotip.header.protocolVersion = FOTIP_PROTOCOL_VERSION_2;
+		fotip.header.uniqueId = m_sourceUniqueID;
+
+		fotip.header.subsystemKey.wordVaue = 0;
+		fotip.header.subsystemKey.lmNumber = m_lmNumber;
+		fotip.header.subsystemKey.subsystemCode = m_subsystemCode;
+		fotip.header.subsystemKey.crc = Crc::crc4(fotip.header.subsystemKey.wordVaue);
+
+		fotip.header.flags.all = 0;
+
+		fotip.header.fotipFrameSize = sizeof(FotipFrame);
+
+		fotip.header.romSize = m_tuningRomSizeW * 2;				// in bytes
+		fotip.header.romFrameSize = m_tuningRomFrameSizeW * 2;		// in bytes
+
+		memset(fotip.header.reserve, 0, sizeof(fotip.header.reserve));
+
+		fotip.header.operationCode = TO_INT(tuningCmd.opCode);
+
+		// operation-specific initialization
+		//
+
+		switch(tuningCmd.opCode)
+		{
+		case OperationCode::Read:
+			fotip.header.startAddress = m_tuningRomStartAddr + tuningCmd.read.frame * m_tuningRomFrameSizeW;
+			fotip.header.dataType = 0;
+			break;
+
+		default:
+			assert(false);
+		}
+
+		fotip.header.reverseBytes();
+	}
+
+
+	void TuningSourceWorker::initFotipData(FotipFrame& fotip, const TuningCommand& tuningCmd)
+	{
+		switch(tuningCmd.opCode)
+		{
+		case OperationCode::Read:
+			break;
+
+		default:
+			assert(false);
+		}
+	}
+
+
+	void TuningSourceWorker::processReply(RupFotipFrame& reply)
+	{
+		reply.rupHeader.reverseBytes();
+		reply.fotip.header.reverseBytes();
+
+		bool result = true;
+
+		result = checkRupHeader(reply.rupHeader);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		result = checkFotipHeader(reply.fotip.header);
+
+		if (result == false)
+		{
+			return;
+		}
+
+
+
+		int a = 0;
+		a++;
+	}
+
+
+	bool TuningSourceWorker::checkRupHeader(const RupFrameHeader& rupHeader)
+	{
+		if (rupHeader.protocolVersion != RUP_PROTOCOL_VERSION_5)
+		{
+			m_errRupProtocolVersion++;
+			return false;
+		}
+
+		if (rupHeader.frameSize != ENTIRE_UDP_SIZE)
+		{
+			m_errRupFrameSize++;
+			return false;
+		}
+
+		if (rupHeader.flags.tuningData != 1 ||
+			rupHeader.flags.appData != 0 ||
+			rupHeader.flags.diagData != 0 ||
+			rupHeader.flags.test != 0)
+		{
+			m_errRupNoTuningData++;
+			return false;
+		}
+
+		if (rupHeader.moduleType != Hardware::DeviceModule::FamilyType::LM)
+		{
+			m_errRupModuleType++;
+			return false;
+		}
+
+		if (rupHeader.framesQuantity != 1)
+		{
+			m_errRupFramesQuantity++;
+			return false;
+		}
+
+		if (rupHeader.frameNumber != 0)
+		{
+			m_errRupFrameNumber++;
+			return false;
+		}
+
+		//	quint32 dataId;	??
+
+		return true;
+	}
+
+
+	bool TuningSourceWorker::checkFotipHeader(const FotipHeader& fotipHeader)
+	{
+		if (fotipHeader.protocolVersion != FOTIP_PROTOCOL_VERSION_2)
+		{
+			m_errFotipProtocolVersion++;
+			return false;
+		}
+
+		if (fotipHeader.uniqueId != m_sourceUniqueID)
+		{
+			m_errFotipUniqueID++;
+			return false;
+		}
+
+		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
+		{
+			m_errFotipLmNumber++;
+			return false;
+		}
+
+		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
+		{
+			m_errFotipSubsystemCode++;
+			return false;
+		}
+
+		if (fotipHeader.operationCode != m_request.fotip.header.operationCode)
+		{
+			m_errFotipOperationCode++;
+			return false;
+		}
+
+		if (fotipHeader.fotipFrameSize != sizeof(FotipFrame))
+		{
+			m_errFotipFrameSize++;
+			return false;
+		}
+
+		if (fotipHeader.romSize !=  m_tuningRomSizeW * 2)
+		{
+			m_errFotipRomSize++;
+			return false;
+		}
+
+		if (fotipHeader.romFrameSize != m_tuningRomFrameSizeW * 2)
+		{
+			m_errFotipRomFrameSize++;
+			return false;
+		}
+
+		FotipHeaderFlags& flags = fotipHeader.flags;
+
+		if (flags.dataTypeError == 1)
+		{
+			m_errFotipFlagsDataType++;
+			return false;
+		}
+
+		//		quint32 startAddress;	??
+		//		quint16 dataType;		??
+
+		return true;
 	}
 
 
@@ -127,11 +414,22 @@ namespace Tuning
 
 	void TuningSourceWorker::onReplyReady()
 	{
+		bool res = m_replyQueue.pop(&m_reply);
+
+		if (res == false)
+		{
+			return;
+		}
+
+		if (m_waitReply == false)
+		{
+			m_errUntimelyReplay++;
+			return;
+		}
+
 		m_replyCount++;
 
-		processReply();
-
-		AUTO_LOCK(m_waitReplyMutex)
+		processReply(m_reply);
 
 		m_waitReply = false;
 	}
@@ -274,9 +572,9 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningSource& source)
+	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningServiceSettings& settings, const TuningSource& source)
 	{
-		m_sourceWorker = new TuningSourceWorker(source);
+		m_sourceWorker = new TuningSourceWorker(settings, source);
 
 		addWorker(m_sourceWorker);
 	}
@@ -299,13 +597,37 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorkerThread::pushReply(const RupFotipFrame &reply)
+	{
+		if (m_sourceWorker == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_sourceWorker->pushReply(reply);
+	}
+
+
+	void TuningSourceWorkerThread::incErrReplySize()
+	{
+		if (m_sourceWorker == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_sourceWorker->incErrReplySize();
+	}
+
+
 	// -------------------------------------------------------------------------
 	//
 	//	TuningSocketWorker class implementaton
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketListener::TuningSocketListener(const HostAddressPort &listenIP, const TuningSourceWorkerThreadMap &sourceWorkerMap) :
+	TuningSocketListener::TuningSocketListener(const HostAddressPort &listenIP, TuningSourceWorkerThreadMap& sourceWorkerMap) :
 		m_listenIP(listenIP),
 		m_sourceWorkerMap(sourceWorkerMap),
 		m_timer(this)
@@ -423,6 +745,8 @@ namespace Tuning
 				// anyway read datagram but isn't process it
 				//
 				m_socket->readDatagram(reinterpret_cast<char*>(&reply), sizeof(reply), &tuningSourceIP);
+
+				incSourceWorkerErrReplySize(tuningSourceIP);
 				continue;
 			}
 
@@ -445,16 +769,33 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		TuningSourceWorker* sourceWorker = m_ipTuningSourceWorkerMap.value(sourceIP, nullptr);
+		TuningSourceWorkerThread* sourceWorkerThread = m_sourceWorkerMap.value(sourceIP, nullptr);
 
-		if (sourceWorker == nullptr)
+		if (sourceWorkerThread == nullptr)
 		{
 			m_errUnknownTuningSource++;
 			return;
 		}
 
-		sourceWorker->pushReply(reply);
+		sourceWorkerThread->pushReply(reply);
 	}
+
+
+	void TuningSocketListener::incSourceWorkerErrReplySize(const QHostAddress& tuningSourceIP)
+	{
+		quint32 sourceIP = tuningSourceIP.toIPv4Address();
+
+		TuningSourceWorkerThread* sourceWorkerThread = m_sourceWorkerMap.value(sourceIP, nullptr);
+
+		if (sourceWorkerThread == nullptr)
+		{
+			m_errUnknownTuningSource++;
+			return;
+		}
+
+		sourceWorkerThread->incErrReplySize();
+	}
+
 
 
 	// ----------------------------------------------------------------------------------
@@ -464,7 +805,7 @@ namespace Tuning
 	// ----------------------------------------------------------------------------------
 
 	TuningSocketListenerThread::TuningSocketListenerThread(const HostAddressPort& listenIP,
-														   const TuningSourceWorkerThreadMap& sourceWorkerMap)
+														   TuningSourceWorkerThreadMap& sourceWorkerMap)
 	{
 		m_socketListener = new TuningSocketListener(listenIP, sourceWorkerMap);
 
@@ -476,6 +817,66 @@ namespace Tuning
 	}
 
 
+	// --------------------------------------------
 
+	// -------------------------------------------------------------------------
+	//
+	//	TuningSocketRequestQueue class implementaton
+	//
+	// -------------------------------------------------------------------------
+
+	TuningSocketRequestQueue::TuningSocketRequestQueue(quint32 tuningSourceIP) :
+		Queue<TuningSocketRequest>(1000),
+		m_tuningSourceIP(tuningSourceIP)
+	{
+	}
+
+
+	bool TuningSocketRequestQueue::push(const TuningSocketRequest* ptr)
+	{
+		bool result = Queue<TuningSocketRequest>::push(ptr);
+
+		if (result == true)
+		{
+			emit request(m_tuningSourceIP);
+			return true;
+		}
+
+		return false;
+	}
+
+
+	void TuningSocketRequestQueue::stopWaiting()
+	{
+		m_waitingForAk = false;
+		m_waitCount = 0;
+	}
+
+
+	void TuningSocketRequestQueue::requestIsSent()
+	{
+		assert(m_waitingForAk == false);
+
+		m_waitingForAk = true;
+		m_waitCount = 0;
+	}
+
+
+	void TuningSocketRequestQueue::incWaitCount()
+	{
+		assert(m_waitingForAk == true);
+
+		m_waitCount++;
+	}
+
+
+	int TuningSocketRequestQueue::waitCount() const
+	{
+		return m_waitCount;
+	}
+
+
+	// -----------------------------------------------------
 
 }
+

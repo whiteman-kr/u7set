@@ -53,7 +53,7 @@ protected:
 	int m_lostCount = 0;
 
 public:
-	QueueBase(int itemSize, int queueSize);
+	QueueBase(QObject* parent, int itemSize, int queueSize);
 	virtual ~QueueBase();
 
 	int getSize() { return m_size; }
@@ -79,8 +79,11 @@ template <typename TYPE>
 class Queue : public QueueBase
 {
 public:
+	Queue(QObject* parent, int queueSize) :
+		QueueBase(parent, sizeof(TYPE), queueSize) 	{}
+
 	Queue(int queueSize) :
-		QueueBase(sizeof(TYPE), queueSize) 	{}
+		QueueBase(nullptr, sizeof(TYPE), queueSize) 	{}
 
 	virtual bool push(const TYPE* ptr) { return QueueBase::push(reinterpret_cast<const char*>(ptr)); }
 	virtual bool pop(TYPE* ptr) { return QueueBase::pop(reinterpret_cast<char*>(ptr)); }

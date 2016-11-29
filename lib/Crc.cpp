@@ -70,6 +70,7 @@ quint16 Crc::crc4(quint16 value)
 
 	return crc;
 }
+
 quint64 Crc::crc64Normal(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);

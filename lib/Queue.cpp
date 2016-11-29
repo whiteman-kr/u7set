@@ -3,7 +3,8 @@
 #include "../lib/WUtils.h"
 
 
-QueueBase::QueueBase(int itemSize, int queueSize) :
+QueueBase::QueueBase(QObject* parent, int itemSize, int queueSize) :
+	QObject(parent),
 	m_itemSize(itemSize),
 	m_queueSize(queueSize),
 	m_writeIndex(queueSize),

@@ -181,7 +181,7 @@ namespace TuningIPEN
 		FotipHeader& fh = m_reqFrame.fotip.header;
 
 		fh.protocolVersion = 1;
-		fh.subsystemKeyWord = 0;
+		fh.subsystemKey.wordVaue = 0;
 
 		fh.subsystemKey.lmNumber = sr.lmNumber;
 		fh.subsystemKey.subsystemCode = sr.lmSubsystemID;
@@ -219,7 +219,7 @@ namespace TuningIPEN
 		fh.fotipFrameSize = 1432;
 		fh.romSize = sr.romSizeW * 2;					// words => bytes
 		fh.romFrameSize = sr.frameSizeW * 2;			// words => bytes
-		fh.dataType = sr.dataType;
+		fh.dataType = TO_INT(sr.dataType);
 		fh.uniqueId = sr.uniqueID;
 
 		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);

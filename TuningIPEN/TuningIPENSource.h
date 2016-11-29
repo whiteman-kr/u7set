@@ -3,7 +3,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/Signal.h"
 #include "../TuningService/TuningDataStorage.h"
-
+#include "TuningIPENSocket.h"
 
 namespace TuningIPEN
 {

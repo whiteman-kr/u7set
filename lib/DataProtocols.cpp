@@ -31,3 +31,22 @@ void RupFrameHeader::reverseBytes()
 
 	timeStamp.reverseBytes();
 }
+
+
+void FotipHeader::reverseBytes()
+{
+	protocolVersion = reverseUint16(protocolVersion);
+	uniqueId = reverseUint64(uniqueId);
+
+	subsystemKey.wordVaue = reverseUint16(subsystemKey.wordVaue);
+
+	operationCode = reverseUint16(operationCode);
+
+	flags.all = reverseUint16(flags.all);
+
+	startAddress = reverseUint32(startAddress);
+	fotipFrameSize = reverseUint16(fotipFrameSize);
+	romSize = reverseUint32(romSize);
+	romFrameSize = reverseUint16(romFrameSize);
+	dataType = reverseUint16(dataType);
+}

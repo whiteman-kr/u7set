@@ -494,7 +494,7 @@ void LogWriter::writeFrameToLog(QString caption, FotipFrame& fotipFrame)
 
 	writeField(out, "Protocol version", header.protocolVersion);
 	writeField(out, "Unique ID", header.uniqueId);
-	writeField(out, "Subsystem key", header.subsystemKeyWord);
+	writeField(out, "Subsystem key", header.subsystemKey.wordVaue);
 	writeField(out, "Operation code", header.operationCode);
 	writeField(out, "Flags", header.flags.all);
 	writeField(out, "Start address", header.startAddress);

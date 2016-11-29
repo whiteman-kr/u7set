@@ -18,10 +18,11 @@ struct SignalParseInfo
 	E::AnalogAppSignalFormat analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder byteOrder = E::ByteOrder::BigEndian;
 
-
 	int dataSize = 1;
 
 	int index = NO_INDEX;		// index of signal in AppSignals and AddSignalStates
+
+	QString appSignalID;
 
 	void setSignalParams(int i, const Signal& s);
 };

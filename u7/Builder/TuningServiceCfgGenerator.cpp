@@ -89,6 +89,11 @@ namespace Builder
 				break;
 			}
 
+			if (lmNetProperties.tuningEnable == false)
+			{
+				continue;
+			}
+
 			if (lmNetProperties.tuningServiceID == m_software->equipmentIdTemplate())
 			{
 				tuningLMs.append(lm);

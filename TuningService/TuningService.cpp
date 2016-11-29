@@ -319,7 +319,7 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(*tuningSource);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_tuningSettings, *tuningSource);
 
 			if (sourceWorkerThread == nullptr)
 			{
@@ -327,7 +327,9 @@ namespace Tuning
 				continue;
 			}
 
-			m_sourceWorkerThreadMap.insert(sourceWorkerThread->sourceIP(), sourceWorkerThread);
+			quint32 addr = sourceWorkerThread->sourceIP();
+
+			m_sourceWorkerThreadMap.insert(addr, sourceWorkerThread);
 		}
 
 		// create and run TuningSocketListenerThread

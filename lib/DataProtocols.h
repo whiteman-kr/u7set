@@ -119,11 +119,9 @@ struct FotipHeader
 {
 	quint16 protocolVersion;
 	quint64 uniqueId;
-	union
-	{
-		FotipSubsystemKey subsystemKey;
-		quint16 subsystemKeyWord;
-	};
+
+	FotipSubsystemKey subsystemKey;
+
 	quint16 operationCode;
 
 	FotipHeaderFlags flags;
@@ -134,6 +132,8 @@ struct FotipHeader
 	quint16 romFrameSize;
 	quint16 dataType;
 	quint8 reserve[FOTIP_HEADER_RESERVE_SIZE];
+
+	void reverseBytes();
 };
 
 
