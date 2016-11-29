@@ -28,7 +28,7 @@ namespace VFrame30
 
 	void Schema::Init(void)
 	{
-		ADD_PROPERTY_GETTER(QString, "SchemaID", true, Schema::schemaID);
+		ADD_PROPERTY_GETTER(QString, "SchemaID", true, Schema::schemaId);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
@@ -557,7 +557,7 @@ namespace VFrame30
 			auto foundIt = std::find_if(ufbs.begin(), ufbs.end(),
 				[&si](std::shared_ptr<UfbSchema> ufb)
 				{
-					return si->ufbSchemaId() == ufb->schemaID();
+					return si->ufbSchemaId() == ufb->schemaId();
 				});
 
 			if (foundIt == ufbs.end())
@@ -658,12 +658,12 @@ namespace VFrame30
 
 	// SchemaID
 	//
-	QString Schema::schemaID() const
+	QString Schema::schemaId() const
 	{
 		return m_schemaID;
 	}
 
-	void Schema::setSchemaID(const QString& id)
+	void Schema::setSchemaId(const QString& id)
 	{
 		m_schemaID = id;
 	}
@@ -1010,7 +1010,7 @@ namespace VFrame30
 		QVariant guidsVariant(guidsStringList);
 
 		jsonObject.insert("Version", QJsonValue(1));
-		jsonObject.insert("SchemaID", QJsonValue(schema->schemaID()));
+		jsonObject.insert("SchemaID", QJsonValue(schema->schemaId()));
 		jsonObject.insert("Caption", QJsonValue(schema->caption()));
 
 		if (schema->isLogicSchema() == true)

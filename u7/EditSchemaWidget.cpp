@@ -256,16 +256,9 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect)
 {
-	if (schema()->isLogicSchema() == false)
+	if (schema()->isLogicSchema() == false &&
+		schema()->isUfbSchema() == false)
 	{
-		return;
-	}
-
-	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>((schema().get()));
-
-	if (logicSchema == nullptr)
-	{
-		assert(logicSchema);
 		return;
 	}
 
@@ -284,7 +277,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 	// Find compile layer
 	//
-	for (auto layer = logicSchema->Layers.cbegin(); layer != logicSchema->Layers.cend(); ++layer)
+	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
 	{
 		const VFrame30::SchemaLayer* pLayer = layer->get();
 
@@ -304,27 +297,43 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 			{
 				orderIndexText = "?";
 
-				if (logicSchema->isMultichannelSchema() == true)
+				if (schema()->isLogicSchema() == true)
 				{
-					QStringList eqIds = logicSchema->equipmentIdList();
-
-					for (int i = 0; i < eqIds.size(); i++)
+					VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>((schema().get()));
+					if (logicSchema == nullptr)
 					{
-						int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
+						assert(logicSchema);
+						return;
+					}
 
-						if (i == 0)
+					if (logicSchema->isMultichannelSchema() == true)
+					{
+						QStringList eqIds = logicSchema->equipmentIdList();
+
+						for (int i = 0; i < eqIds.size(); i++)
 						{
-							orderIndexText = QString::number(runIndex);
-						}
-						else
-						{
-							orderIndexText.append(QLatin1String(", ") + QString::number(runIndex));
+							int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
+
+							if (i == 0)
+							{
+								orderIndexText = QString::number(runIndex);
+							}
+							else
+							{
+								orderIndexText.append(QLatin1String(", ") + QString::number(runIndex));
+							}
 						}
 					}
+					else
+					{
+						int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
+						orderIndexText = QString::number(runIndex);
+					}
 				}
-				else
+
+				if (schema()->isUfbSchema() == true)
 				{
-					int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
+					int runIndex = GlobalMessanger::instance()->schemaItemRunOrder(schema()->schemaId(), item->guid());
 					orderIndexText = QString::number(runIndex);
 				}
 
@@ -3170,7 +3179,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 						return;
 					}
 
-					fblItemRect->setLabel(s->schemaID() + "_" + QString::number(counterValue));
+					fblItemRect->setLabel(s->schemaId() + "_" + QString::number(counterValue));
 				}
 
 				newItem->MoveItem(xdif, ydif);
@@ -4352,7 +4361,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 			return;
 		}
 
-		fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+		fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 	}
 
 	// --
@@ -4788,7 +4797,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 		ufbs.push_back(u);
 
-		qDebug() << u->schemaID() << " " << u->version();
+		qDebug() << u->schemaId() << " " << u->version();
 	}
 
 	std::swap(ufbs, *out);
@@ -5011,14 +5020,14 @@ void EditSchemaWidget::exportToPdf()
 	assert(schema());
 
 	QString fileName = QFileDialog::getSaveFileName(
-		this, "Export schema to PDF", schema()->schemaID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+		this, "Export schema to PDF", schema()->schemaId() + ".pdf", "PDF (*.pdf);;All files (*.*)");
 
 	if (fileName.isEmpty())
 	{
 		return;
 	}
 
-	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaID() << " to PDF, " << fileName;
+	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaId() << " to PDF, " << fileName;
 
 	editSchemaView()->exportToPdf(fileName);
 
@@ -5151,7 +5160,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
 														  equipmentIdList,
 														  counterValue,
-														  schema()->schemaID(),
+														  schema()->schemaId(),
 														  schema()->caption(),
 														  this);
 
@@ -5575,7 +5584,7 @@ void EditSchemaWidget::editPaste()
 						return;
 					}
 
-					fblItemRect->setLabel(schema()->schemaID() + "_" + QString::number(counterValue));
+					fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 				}
 			}
 		}

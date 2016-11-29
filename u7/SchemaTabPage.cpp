@@ -1184,7 +1184,7 @@ void SchemasTabPage::compareObject(DbChangesetObject object, CompareData compare
 	compareTabPage->setCompareWidget(true, source, target);
 	compareTabPage->setCompareItemActions(itemsActions);
 
-	m_tabWidget->addTab(compareTabPage, "Compare " + target->schemaID());
+	m_tabWidget->addTab(compareTabPage, "Compare " + target->schemaId());
 	m_tabWidget->setCurrentWidget(compareTabPage);
 
 	return;
@@ -1292,7 +1292,7 @@ void SchemaControlTabPage::addFile()
 		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 	}
 
-	schema->setSchemaID(defaultId);
+	schema->setSchemaId(defaultId);
 
 	// Set Caption
 	//
@@ -1344,7 +1344,7 @@ void SchemaControlTabPage::addFile()
 	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
-	vfFile->setFileName(schema->schemaID() + m_filesView->filesModel().filter());
+	vfFile->setFileName(schema->schemaId() + m_filesView->filesModel().filter());
 	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
@@ -1776,7 +1776,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
 
 	QString tabPageTitle;
-	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->schemaID()).arg(changesetId);
+	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->schemaId()).arg(changesetId);
 
 	// Find the opened file,
 	//
@@ -1928,7 +1928,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 	assert(m_tabWidget);
 	assert(schema.get() != nullptr);
 
-	setWindowTitle(schema->schemaID());
+	setWindowTitle(schema->schemaId());
 
 	CreateActions();
 
@@ -2041,11 +2041,11 @@ void EditSchemaTabPage::setPageTitle()
 	{
 		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_schemaWidget->schema()->schemaID());
+			newTitle = QString("%1: ReadOnly").arg(m_schemaWidget->schema()->schemaId());
 		}
 		else
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_schemaWidget->schema()->schemaID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_schemaWidget->schema()->schemaId()).arg(fileInfo().changeset());
 		}
 
 		if (fileInfo().deleted() == true)
@@ -2057,11 +2057,11 @@ void EditSchemaTabPage::setPageTitle()
 	{
 		if (modified() == true)
 		{
-			newTitle = m_schemaWidget->schema()->schemaID() + "*";
+			newTitle = m_schemaWidget->schema()->schemaId() + "*";
 		}
 		else
 		{
-			newTitle = m_schemaWidget->schema()->schemaID();
+			newTitle = m_schemaWidget->schema()->schemaId();
 		}
 	}
 

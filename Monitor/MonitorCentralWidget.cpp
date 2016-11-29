@@ -44,7 +44,7 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 	if (tabSchema == nullptr)
 	{
 		tabSchema = std::make_shared<VFrame30::MonitorSchema>();
-		tabSchema->setSchemaID("EMPTYSCHEMA");
+		tabSchema->setSchemaId("EMPTYSCHEMA");
 		tabSchema->setCaption("Empty Schema");
 	}
 
@@ -242,7 +242,7 @@ void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
 		if (i == currentIndex())
 		{
 			//emit signal_schemaChanged(newSchema->schemaID());
-			emit signal_schemaChanged(tabPage->schema()->schemaID());
+			emit signal_schemaChanged(tabPage->schema()->schemaId());
 		}
 	}
 
@@ -257,7 +257,7 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 		return;
 	}
 
-	QString schemaId = tabWidget->schema()->schemaID();
+	QString schemaId = tabWidget->schema()->schemaId();
 	int tabIndex = addSchemaTabPage(schemaId);
 
 	// Switch to the new tab
@@ -314,7 +314,7 @@ void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VF
 		setTabText(tabIndex, schema->caption());
 	}
 
-	emit signal_schemaChanged(schema->schemaID());
+	emit signal_schemaChanged(schema->schemaId());
 	tabWidget->emitHistoryChanged();
 
 	return;

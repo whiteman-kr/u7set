@@ -90,8 +90,6 @@ namespace VFrame30
 			r.setRight(r.right() - pinWidth);
 		}
 
-		QRectF labelRect(r);	// save rect for future use
-
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
@@ -185,18 +183,6 @@ namespace VFrame30
 
 		p->setPen(textColor());
 		DrawHelper::DrawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
-
-		// Draw Label
-		//
-		if (drawParam->infoMode() == true)
-		{
-			QString labelText = label();
-
-			labelRect.moveBottomLeft(labelRect.topRight());
-
-			p->setPen(Qt::darkGray);
-			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
-		}
 
 		return;
 	}

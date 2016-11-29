@@ -205,14 +205,14 @@ namespace VFrame30
 		}
 
 		if (m_ufbSchemaId.isEmpty() == false &&
-			m_ufbSchemaId != ufbSchema->schemaID())
+			m_ufbSchemaId != ufbSchema->schemaId())
 		{
 			assert(false);
-			*errorMessage += tr("Update %1 from different UFB %2.").arg(m_ufbSchemaId).arg(ufbSchema->schemaID());
+			*errorMessage += tr("Update %1 from different UFB %2.").arg(m_ufbSchemaId).arg(ufbSchema->schemaId());
 			return false;
 		}
 
-		m_ufbSchemaId = ufbSchema->schemaID();
+		m_ufbSchemaId = ufbSchema->schemaId();
 		m_ufbCaption = ufbSchema->caption();
 		m_ufbVersion = ufbSchema->version();
 

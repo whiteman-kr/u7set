@@ -358,7 +358,7 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-							   std::shared_ptr<VFrame30::LogicSchema> schema) :
+							   std::shared_ptr<VFrame30::Schema> schema) :
 		m_fblItem(fblItem),
 		m_schema(schema)
 	{
@@ -455,25 +455,25 @@ namespace Builder
 	//		ApplicationLogicModule
 	//
 	// ------------------------------------------------------------------------
-	AppLogicModule::AppLogicModule(QString moduleStrId) :
-		m_moduleEquipmentId(moduleStrId)
+	AppLogicModule::AppLogicModule(QString moduleId) :
+		m_equipmentId(moduleId)
 	{
 	}
 
-	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
+	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::Schema> schema,
 			const BushContainer& bushes,
 			IssueLogger* log)
 	{
-		if (logicSchema == nullptr ||
+		if (schema == nullptr ||
 			log == nullptr)
 		{
-			assert(logicSchema);
+			assert(schema);
 			assert(log);
 
 			if (log != nullptr)
 			{
 				log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %2.")
-								.arg(reinterpret_cast<size_t>(logicSchema.get()))
+								.arg(reinterpret_cast<size_t>(schema.get()))
 								.arg(reinterpret_cast<size_t>(log)));
 			}
 
@@ -483,9 +483,9 @@ namespace Builder
 		// Create a copy of bushcontainer, as in case of processing multisignlas in multichannel schemas
 		// these multisignals will be created for all channels
 		//
-		BushContainer busheContainer = bushes;
+		BushContainer bushContainer = bushes;
 
-		if (busheContainer.bushes.empty() == true)
+		if (bushContainer.bushes.empty() == true)
 		{
 			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic schema does no contains any correct links."));
 			assert(false);	// if fires then add error to IussueLogger
@@ -494,7 +494,7 @@ namespace Builder
 
 		// Save all items to accumulator, they will be ordered in orderItems()
 		//
-		for (const Bush& bush : busheContainer.bushes)
+		for (const Bush& bush : bushContainer.bushes)
 		{
 			for (auto it = bush.fblItems.begin(); it != bush.fblItems.end(); ++it)
 			{
@@ -502,10 +502,10 @@ namespace Builder
 
 				if (f->isSignalElement() == true && f->toSignalElement()->multiChannel() == true)
 				{
-					log->errALP4030(logicSchema->schemaID(), f->buildName(), f->guid());
+					log->errALP4030(schema->schemaId(), f->buildName(), f->guid());
 				}
 
-				AppLogicItem li{f, logicSchema};
+				AppLogicItem li{f, schema};
 
 				m_fblItemsAcc[f->guid()] = li;
 			}
@@ -530,9 +530,9 @@ namespace Builder
 			return false;
 		}
 
-		qDebug() << "Order items for module " << m_moduleEquipmentId;
+		qDebug() << "Order items for module " << m_equipmentId;
 
-		LOG_MESSAGE(log, QObject::tr("Started OrderItems for module: %1").arg(moduleEquipmentId()));
+		LOG_MESSAGE(log, QObject::tr("Started OrderItems for module: %1").arg(equipmentId()));
 
 		bool result = true;
 
@@ -678,7 +678,7 @@ namespace Builder
 		if (result == true)
 		{
 			QString str = QString("Finished OrderItems for module %1, %2 functional item(s) were parsed")
-						  .arg(moduleEquipmentId())
+						  .arg(equipmentId())
 						  .arg(m_items.size());
 
 			LOG_MESSAGE(log, str);
@@ -901,9 +901,9 @@ namespace Builder
 					itemsUuids.push_back(li.m_fblItem->guid());
 					itemsUuids.push_back(duplicateItem->m_fblItem->guid());
 
-					log->errALP4021(moduleEquipmentId(),
-									li.m_schema->schemaID(),
-									duplicateItem->m_schema->schemaID(),
+					log->errALP4021(equipmentId(),
+									li.m_schema->schemaId(),
+									duplicateItem->m_schema->schemaId(),
 									li.m_fblItem->buildName(),
 									duplicateItem->m_fblItem->buildName(),
 									signalStrId,
@@ -1033,14 +1033,14 @@ namespace Builder
 		return resultVector;
 	}
 
-	QString AppLogicModule::moduleEquipmentId() const
+	QString AppLogicModule::equipmentId() const
 	{
-		return m_moduleEquipmentId;
+		return m_equipmentId;
 	}
 
-	void AppLogicModule::setModuleEquipmentId(QString value)
+	void AppLogicModule::setEquipmentId(QString value)
 	{
-		m_moduleEquipmentId = value;
+		m_equipmentId = value;
 	}
 
 	const std::list<AppLogicItem>& AppLogicModule::items() const
@@ -1068,7 +1068,7 @@ namespace Builder
 	{
 		for(std::shared_ptr<AppLogicModule> modulePtr : m_modules)
 		{
-			if (modulePtr->moduleEquipmentId() == moduleStrID)
+			if (modulePtr->equipmentId() == moduleStrID)
 			{
 				return modulePtr;
 			}
@@ -1079,14 +1079,14 @@ namespace Builder
 	}
 
 
-	bool AppLogicData::addData(QString equipmentId,
-							   const BushContainer& bushContainer,
-							   std::shared_ptr<VFrame30::LogicSchema> schema,
-							   IssueLogger* log)
+	bool AppLogicData::addLogicModuleData(QString equipmentId,
+										  const BushContainer& bushContainer,
+										  std::shared_ptr<VFrame30::LogicSchema> schema,
+										  IssueLogger* log)
 	{
 		if (equipmentId.isEmpty() == true)
 		{
-			log->errALP4001(schema->schemaID());
+			log->errALP4001(schema->schemaId());
 			return false;
 		}
 
@@ -1118,7 +1118,7 @@ namespace Builder
 		auto moduleIt = std::find_if(m_modules.begin(), m_modules.end(),
 									 [&equipmentId](const std::shared_ptr<AppLogicModule>& m)
 		{
-			return m->moduleEquipmentId() == equipmentId;
+			return m->equipmentId() == equipmentId;
 		});
 
 		if (moduleIt == m_modules.end())
@@ -1142,8 +1142,62 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicData::addUfbData(const BushContainer& bushContainer,
+								  std::shared_ptr<VFrame30::UfbSchema> schema,
+								  IssueLogger* log)
+	{
+		if (bushContainer.bushes.empty() == true)
+		{
+			// It is not error, just algorithm does not contain any fbl elements
+			//
+			return true;
+		}
 
-	bool AppLogicData::orderItems(IssueLogger* log)
+		if (schema == nullptr ||
+			log == nullptr)
+		{
+			assert(schema);
+			assert(log);
+
+			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %3")
+							.arg(reinterpret_cast<size_t>(schema.get()))
+							.arg(reinterpret_cast<size_t>(log)));
+			return false;
+		}
+
+		// Get module (m_ufb), if it is not in the list, add it
+		//
+		bool result = true;
+		auto moduleIt = std::find_if(m_ufbs.begin(), m_ufbs.end(),
+									[&schema](const std::pair<QString, std::shared_ptr<AppLogicModule>>& m)
+									{
+										return m.second->equipmentId() == schema->schemaId();
+									});
+
+		std::shared_ptr<AppLogicModule> module;
+
+		if (moduleIt == m_ufbs.end())
+		{
+			// Module was not found, addit
+			//
+			module = std::make_shared<AppLogicModule>(schema->schemaId());
+			m_ufbs[schema->schemaId()] = module;
+		}
+		else
+		{
+			module = moduleIt->second;
+		}
+
+		assert(module);
+
+		// add new branch to module
+		//
+		result &= module->addBranch(schema, bushContainer, log);
+
+		return result;
+	}
+
+	bool AppLogicData::orderLogicModuleItems(IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -1206,6 +1260,378 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicData::orderUfbItems(IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(nullptr);
+			return false;
+		}
+
+		bool result = true;
+		bool iterruptRequest = false;
+
+		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufbModule : m_ufbs)
+		{
+			iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+			if (iterruptRequest == true)
+			{
+				return false;
+			}
+
+			ufbModule.second->orderItems(log, &iterruptRequest);
+		}
+
+		return result;
+	}
+
+	bool AppLogicData::expandUfbs(IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(nullptr);
+			return false;
+		}
+
+		bool result = true;
+		bool iterruptRequest = false;
+
+		for (std::shared_ptr<AppLogicModule> module : m_modules)
+		{
+			iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+			if (iterruptRequest == true)
+			{
+				return false;
+			}
+
+			// Find VFrame30::SchemaItemUfb and insert AFTER them actual ufbs
+			//
+			for (auto itemIt = module->items().begin(); itemIt != module->items().end(); ++itemIt)
+			{
+				const AppLogicItem& item = *itemIt;
+
+				if (item.m_fblItem->isType<VFrame30::SchemaItemUfb>() == false)
+				{
+					continue;
+				}
+
+//				item.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
+
+				const VFrame30::SchemaItemUfb* ufbItem = item.m_fblItem->toType<VFrame30::SchemaItemUfb>();
+				assert(ufbItem);
+
+				std::shared_ptr<AppLogicModule> parsedUfb = ufb(ufbItem->ufbSchemaId());
+
+				if (parsedUfb == nullptr)
+				{
+					log->errALP4009(item.m_schema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid());
+					result = false;
+				}
+				else
+				{
+					// Make a copy of ordered items
+					// pin guids will be changed in this copy
+					//
+					std::list<AppLogicItem> ufbItemsCopy;
+
+					for (const AppLogicItem& ali : parsedUfb->items())
+					{
+						QByteArray buffer;
+						buffer.reserve(1024);
+
+						ali.m_fblItem->Save(buffer);
+
+						AppLogicItem aliCopy = ali;
+						aliCopy.m_fblItem = std::dynamic_pointer_cast<VFrame30::FblItemRect>(VFrame30::SchemaItem::Create(buffer));
+						assert(aliCopy.m_fblItem);
+
+						ufbItemsCopy.push_back(aliCopy);
+					}
+
+//					// !!!!!!!!!!!!!!!!!!! DEBUG
+//					qDebug() << "-----------------------------";
+//					qDebug() << "Bebore settinmg new guids to the copy";
+//					for (AppLogicItem& ali : ufbItemsCopy)			// set new pin guid to associatedIOs
+//					{
+//						ali.m_fblItem->debug();
+//					}
+//					qDebug() << "-----------------------------";
+//					// !!!!!!!!!!!!!!!!!!! DEBUG
+
+					// Set new inputs/ouputs guids to the copied items
+					// Keep connections to in<->out (Associated IOs)
+					//
+					std::map<QUuid, QUuid> oldToNewPins;			// key is old, value in new QUuid of the pin
+
+					// Set new values to all input and output pins, save changes in oldNewPinGuids
+					// from oldNewPinGuids assocIOs will be restored
+					//
+					for (AppLogicItem& ali : ufbItemsCopy)
+					{
+						assert(ali.m_fblItem);
+
+						// Set new item guid
+						//
+						ali.m_fblItem->setGuid(QUuid::createUuid());
+
+						// Set new label
+						//
+						ali.m_fblItem->setLabel(ufbItem->label() + "_" + ali.m_fblItem->label());
+
+						// Set new guids to in/outs
+						//
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+						{
+							QUuid newPinGuid = QUuid::createUuid();
+							oldToNewPins[pin.guid()] = newPinGuid;
+
+							pin.setGuid(newPinGuid);
+						}
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+						{
+							QUuid newPinGuid = QUuid::createUuid();
+							oldToNewPins[pin.guid()] = newPinGuid;
+
+							pin.setGuid(newPinGuid);
+						}
+					}
+
+					// Restore associatedIOs after assigning new pin guids
+					//
+					for (AppLogicItem& ali : ufbItemsCopy)			// set new pin guid to associatedIOs
+					{
+						assert(ali.m_fblItem);
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+						{
+							for (QUuid& assocIO : pin.associatedIOs())
+							{
+								auto newGuidIt = oldToNewPins.find(assocIO);
+
+								if (newGuidIt == oldToNewPins.end())
+								{
+									assert(newGuidIt != oldToNewPins.end());
+									result = false;
+									return false;
+								}
+
+								assocIO = newGuidIt->second;
+							}
+						}
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+						{
+							for (QUuid& assocIO : pin.associatedIOs())
+							{
+								auto newGuidIt = oldToNewPins.find(assocIO);
+
+								if (newGuidIt == oldToNewPins.end())
+								{
+									assert(newGuidIt != oldToNewPins.end());
+									result = false;
+									return false;
+								}
+
+								assocIO = newGuidIt->second;
+							}
+						}
+					}
+
+//					// !!!!!!!!!!!!!!!!!!! DEBUG
+//					qDebug() << "-----------------------------";
+//					qDebug() << "After making full copy";
+//					for (AppLogicItem& ali : ufbItemsCopy)			// set new pin guid to associatedIOs
+//					{
+//						ali.m_fblItem->debug();
+//					}
+//					qDebug() << "-----------------------------";
+//					// !!!!!!!!!!!!!!!!!!! DEBUG
+
+
+					// Bind LogicSchema outputû to UFB items inputs
+					//
+					std::map<QUuid, QUuid> newAssocIoGuids;
+
+					for (const VFrame30::AfbPin& in : ufbItem->inputs())
+					{
+						assert(in.IsInput() == true);
+
+						if (in.associatedIOs().size() != 1)
+						{
+							assert(in.associatedIOs().size() == 1);
+							result = false;
+							continue;
+						}
+
+						QUuid outputGuid = in.associatedIOs().front();	// This is the real output guid, set it to all
+																		// corrsponding inputs in ufb
+
+						auto foundInputIt = std::find_if(ufbItemsCopy.begin(), ufbItemsCopy.end(),
+								[&in](const AppLogicItem& ali)
+								{
+									return
+										ali.m_fblItem != nullptr &&
+										ali.m_fblItem->isInputSignalElement() == true &&
+										ali.m_fblItem->toInputSignalElement() != nullptr &&
+										ali.m_fblItem->toInputSignalElement()->appSignalIds().trimmed() == in.caption();
+								});
+
+						if (foundInputIt == ufbItemsCopy.end())
+						{
+							log->errALP4012(item.m_schema->schemaId(), ufbItem->label(), in.caption(), ufbItem->guid());
+							result = false;
+							continue;
+						}
+
+						const AppLogicItem& foundInputSignalElement = *foundInputIt;
+//						foundInputSignalElement.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
+
+						if (foundInputSignalElement.m_fblItem->outputs().size() != 1)
+						{
+							assert(foundInputSignalElement.m_fblItem->outputs().size() == 1);
+							result = false;
+							continue;
+						}
+
+						QUuid foundInputSignalElementOutputGuid = foundInputSignalElement.m_fblItem->outputs().front().guid();
+
+						newAssocIoGuids[foundInputSignalElementOutputGuid] = outputGuid;
+					}
+
+					for (AppLogicItem& ali : ufbItemsCopy)						// Set new pin guid to associatedIOs
+					{
+						assert(ali.m_fblItem);
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())	// Only for inputs
+						{
+							for (QUuid& assocIO : pin.associatedIOs())
+							{
+								auto newGuidIt = newAssocIoGuids.find(assocIO);
+
+								if (newGuidIt != newAssocIoGuids.end())
+								{
+									assocIO = newGuidIt->second;				// If it's found then change it
+								}
+							}
+						}
+					}
+
+					newAssocIoGuids.clear();
+					for (const VFrame30::AfbPin& out : ufbItem->outputs())
+					{
+						assert(out.IsOutput() == true);
+
+						QUuid outputGuid = out.guid();
+
+						// Find the real out
+						//
+
+						auto foundOutputIt = std::find_if(ufbItemsCopy.begin(), ufbItemsCopy.end(),
+								[&out](const AppLogicItem& ali)
+								{
+									return
+										ali.m_fblItem != nullptr &&
+										ali.m_fblItem->isOutputSignalElement() == true &&
+										ali.m_fblItem->toOutputSignalElement() != nullptr &&
+										ali.m_fblItem->toOutputSignalElement()->appSignalIds().trimmed() == out.caption();
+								});
+
+						if (foundOutputIt == ufbItemsCopy.end())
+						{
+							log->errALP4012(item.m_schema->schemaId(), ufbItem->label(), out.caption(), ufbItem->guid());
+							result = false;
+							continue;
+						}
+
+						const AppLogicItem& foundOutputSignalElement = *foundOutputIt;
+//						foundOutputSignalElement.m_fblItem->debug();		// !!!!!!!!!!!!!!!!!!!!!!!!
+
+						if (foundOutputSignalElement.m_fblItem->inputs().size() != 1)
+						{
+							assert(foundOutputSignalElement.m_fblItem->inputs().size() == 1);
+							result = false;
+							continue;
+						}
+
+						const VFrame30::AfbPin& outputSignalElementPin = foundOutputSignalElement.m_fblItem->inputs().front();
+						if (outputSignalElementPin.associatedIOs().size() != 1)
+						{
+							assert(outputSignalElementPin.associatedIOs().size() == 1);
+							result = false;
+							continue;
+						}
+
+						QUuid newItemOutputGuid = outputSignalElementPin.associatedIOs().front();
+
+						newAssocIoGuids[outputGuid] = newItemOutputGuid;
+					}
+
+					// Bind these Logic Schema item's inputs to real output
+					//
+					std::map<QUuid, std::vector<QUuid>> multiplesInputsForOutput;	// key is QUuid of real UFB output
+																					// value is a new assocIOs
+
+					for (AppLogicItem& ali : module->items())		// Set new pin guid to associatedIOs
+					{
+						assert(ali.m_fblItem);
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())	// Only for inputs
+						{
+							for (QUuid& assocIO : pin.associatedIOs())
+							{
+								auto newGuidIt = newAssocIoGuids.find(assocIO);
+
+								if (newGuidIt != newAssocIoGuids.end())
+								{
+									assocIO = newGuidIt->second;
+									multiplesInputsForOutput[newGuidIt->second].push_back(assocIO);
+								}
+							}
+						}
+					}
+
+					for (AppLogicItem& ali : ufbItemsCopy)						// Set new pin guid to associatedIOs
+					{
+						assert(ali.m_fblItem);
+
+						for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())	// Only for outputs
+						{
+							if (multiplesInputsForOutput.count(pin.guid()) == 0)
+							{
+								continue;
+							}
+
+							pin.associatedIOs() = multiplesInputsForOutput[pin.guid()];
+						}
+					}
+
+					// Remove all Signal Elements
+					//
+					ufbItemsCopy.remove_if(
+								[](const AppLogicItem& ali)
+								{
+									return ali.m_fblItem->isSignalElement();
+								});
+
+					// Inject ufb schema items
+					//
+					module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
+				}
+			}
+
+			// Remove all VFrame30::SchemaItemUfb, as they have already beeen expanded
+			//
+			module->items().remove_if(
+						[](const AppLogicItem& ali)
+						{
+							return ali.m_fblItem->isType<VFrame30::SchemaItemUfb>();
+						});
+		}
+
+		return result;
+	}
+
 	const std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules() const
 	{
 		return m_modules;
@@ -1214,6 +1640,25 @@ namespace Builder
 	std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules()
 	{
 		return m_modules;
+	}
+
+	const std::map<QString, std::shared_ptr<AppLogicModule>>& AppLogicData::ufbs() const
+	{
+		return m_ufbs;
+	}
+
+	std::shared_ptr<AppLogicModule> AppLogicData::ufb(QString ufbId) const
+	{
+		auto it = m_ufbs.find(ufbId);
+
+		if (it == m_ufbs.end())
+		{
+			return std::shared_ptr<AppLogicModule>();
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 
@@ -1255,13 +1700,69 @@ namespace Builder
 	{
 	}
 
-	bool Parser::build()
+	bool Parser::parse()
 	{
+		// Get User Functional Blocks
+		//
+		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
+
+		bool ok = loadUfbFiles(db(), &ufbs);
+		if (ok == false)
+		{
+			return ok;
+		}
+
+		// Check Ufbs SchemaItemAfb.afbElement versions
+		//
+		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
+		{
+			checkAfbItemsVersion(schema.get());
+		}
+
+		// Parse User Functional Blocks
+		//
+		if (ufbs.empty() == false)
+		{
+			LOG_MESSAGE(m_log, tr("Parsing User Functional Blocks..."));
+
+			bool result = true;
+			for (std::shared_ptr<VFrame30::UfbSchema> ufbSchema : ufbs)
+			{
+				if (QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					return false;
+				}
+
+				LOG_MESSAGE(m_log, tr("Parsing ") + ufbSchema->schemaId());
+
+				ok = parsUfbSchema(ufbSchema);
+
+				if (ok == false)
+				{
+					result = false;
+				}
+			}
+		}
+
+		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
+		// Order itmes in all modules
+		//
+		bool result = true;
+
+		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
+
+		ok = m_applicationData->orderUfbItems(m_log);
+
+		if (ok == false)
+		{
+			result = false;
+		}
+
 		// Get Application Logic
 		//
 		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemas;
 
-		bool ok = loadAppLogicFiles(db(), &schemas);
+		ok = loadAppLogicFiles(db(), &schemas);
 
 		if (ok == false)
 		{
@@ -1288,28 +1789,16 @@ namespace Builder
 			checkAfbItemsVersion(schema.get());
 		}
 
-		// Load UfbSchemas
-		//
-		LOG_MESSAGE(m_log, tr("Loading UFB schemas..."));
-		ok = loadUfbSchemas();
-
-		if (ok == false)
-		{
-			return false;
-		}
-
 		// Check SchemaItemUfb versions
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkUfbItemsVersion(schema.get());
+			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
 		// Parse application logic
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
-
-		bool result = true;
 
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
@@ -1318,7 +1807,7 @@ namespace Builder
 				return false;
 			}
 
-			LOG_MESSAGE(m_log, tr("Parsing ") + schema->schemaID());
+			LOG_MESSAGE(m_log, tr("Parsing ") + schema->schemaId());
 
 			ok = parseAppLogicSchema(schema);
 
@@ -1331,23 +1820,44 @@ namespace Builder
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
-		LOG_MESSAGE(m_log, tr("Ordering items..."));
+		LOG_MESSAGE(m_log, tr("Ordering AppLogic items..."));
 
-		ok = m_applicationData->orderItems(m_log);
+		ok = m_applicationData->orderLogicModuleItems(m_log);
 
 		if (ok == false)
 		{
 			result = false;
 		}
 
+		// Expand User Functioanl Block on places of SchemaIntemUfb
+		//
+		ok = m_applicationData->expandUfbs(m_log);
+
+		if (ok == false)
+		{
+			result = false;
+		}
+
+
 		//  In debug mode save/show item order for displaying on schemas
 		//
-		debugInfo();
+		setDebugInfo();
 
 		return result;
 	}
 
+	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
+	{
+		return loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+	}
+
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
+	{
+		return loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+	}
+
+	template<typename SchemaType>
+	bool Parser::loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString filter)
 	{
 		if (out == nullptr)
 		{
@@ -1361,20 +1871,16 @@ namespace Builder
 		// Get application logic file list from the DB
 		//
 		bool ok = false;
-		std::vector<DbFileInfo> applicationLogicFileList;
+		std::vector<DbFileInfo> fileList;
 
 		if (release() == true)
 		{
-			assert(false);
-		}
-		else
-		{
-			ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", true, nullptr);
+			ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
 
 			std::vector<DbFileInfo> markedAsDeletedRemoved;
-			markedAsDeletedRemoved.reserve(applicationLogicFileList.size());
+			markedAsDeletedRemoved.reserve(fileList.size());
 
-			for (DbFileInfo& fi : applicationLogicFileList)
+			for (DbFileInfo& fi : fileList)
 			{
 				if (fi.action() == VcsItemAction::Deleted)		// File is deleted
 				{
@@ -1385,27 +1891,47 @@ namespace Builder
 				markedAsDeletedRemoved.push_back(fi);
 			}
 
-			std::swap(markedAsDeletedRemoved, applicationLogicFileList);
+			std::swap(markedAsDeletedRemoved, fileList);
+		}
+		else
+		{
+			ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
+
+			std::vector<DbFileInfo> markedAsDeletedRemoved;
+			markedAsDeletedRemoved.reserve(fileList.size());
+
+			for (DbFileInfo& fi : fileList)
+			{
+				if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+				{
+					qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
+					continue;
+				}
+
+				markedAsDeletedRemoved.push_back(fi);
+			}
+
+			std::swap(markedAsDeletedRemoved, fileList);
 		}
 
 		if (ok == false)
 		{
 			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
 			//
-			m_log->errPDB2001(db->alFileId(), "%.als", db->lastError());
+			m_log->errPDB2001(db->alFileId(), filter, db->lastError());
 			return false;
 		}
 
-		if (applicationLogicFileList.empty() == true)
+		if (fileList.empty() == true)
 		{
 			return true;		// it is not a error
 		}
 
-		out->reserve(applicationLogicFileList.size());
+		out->reserve(fileList.size());
 
 		// Get file data and read it
 		//
-		for (DbFileInfo& fi : applicationLogicFileList)
+		for (DbFileInfo& fi : fileList)
 		{
 			// Check for cancel
 			//
@@ -1437,15 +1963,16 @@ namespace Builder
 				return false;
 			}
 
-			// Read Appliaction logic files
+			// Read schema files
 			//
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
 
-			std::shared_ptr<VFrame30::LogicSchema> ls = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema);
+			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
+
 				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
 				//
 				m_log->errCMN0010(file->fileName());
@@ -1475,84 +2002,15 @@ namespace Builder
 			{
 				// Schema is excluded from build (Schema '%1').
 				//
-				m_log->wrnALP4004(ls->schemaID());
+				m_log->wrnALP4004(ls->schemaId());
 				continue;
 			}
 			else
 			{
-				// Add LogicSchema to result
+				// Add schema to result
 				//
 				out->push_back(ls);
 			}
-		}
-
-		return true;
-	}
-
-	bool Parser::loadUfbSchemas()
-	{
-		m_ufbs.clear();
-
-		// Get User Functional Block List
-		//
-		std::vector<DbFileInfo> fileList;
-
-		bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + ::UfbFileExtension, true, nullptr);
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (fileList.empty() == true)
-		{
-			return true;
-		}
-
-		// Get UFBs latest version from the DB
-		//
-		std::vector<std::shared_ptr<DbFile>> files;
-
-		ok = db()->getLatestVersion(fileList, &files, nullptr);
-
-		if (ok == false)
-		{
-			m_log->errPDB2005();
-			return false;
-		}
-
-		// Parse files, create actual UFBs
-		//
-		for (const std::shared_ptr<DbFile>& f : files)
-		{
-			if (f->deleted() == true ||
-				f->action() == VcsItemAction::Deleted)
-			{
-				continue;
-			}
-
-			std::shared_ptr<VFrame30::Schema> s = VFrame30::Schema::Create(f->data());
-
-			if (s == nullptr)
-			{
-				assert(s);
-				continue;
-			}
-
-			if (s->isUfbSchema() == false)
-			{
-				m_log->errPDB2005();
-				continue;
-			}
-
-			std::shared_ptr<VFrame30::UfbSchema> u =  std::dynamic_pointer_cast<VFrame30::UfbSchema>(s);
-			if (u == nullptr)
-			{
-				assert(u);
-				m_log->errPDB2005();
-				continue;
-			}
-
-			m_ufbs[u->schemaID()] = u;
 		}
 
 		return true;
@@ -1578,7 +2036,7 @@ namespace Builder
 		{
 			// Property EquipmentIds is not set (LogicSchema '%1')
 			//
-			m_log->errALP4001(logicSchema->schemaID());
+			m_log->errALP4001(logicSchema->schemaId());
 			return false;
 		}
 
@@ -1592,7 +2050,7 @@ namespace Builder
 			{
 				// EquipmentID '%1' is not found in the project equipment (Logic Schema '%2')
 				//
-				m_log->errALP4002(logicSchema->schemaID(), eqid);
+				m_log->errALP4002(logicSchema->schemaId(), eqid);
 
 				ok = false;
 				continue;
@@ -1602,7 +2060,7 @@ namespace Builder
 			{
 				// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
 				//
-				m_log->errALP4003(logicSchema->schemaID(), eqid);
+				m_log->errALP4003(logicSchema->schemaId(), eqid);
 
 				ok = false;
 				continue;
@@ -1618,7 +2076,7 @@ namespace Builder
 				{
 					// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
 					//
-					m_log->errALP4003(logicSchema->schemaID(), eqid);
+					m_log->errALP4003(logicSchema->schemaId(), eqid);
 
 					ok = false;
 					continue;
@@ -1629,23 +2087,23 @@ namespace Builder
 		return ok;
 	}
 
-	bool Parser::checkAfbItemsVersion(VFrame30::LogicSchema* logicSchema)
+	bool Parser::checkAfbItemsVersion(VFrame30::Schema* schema)
 	{
-		if (logicSchema == nullptr ||
+		if (schema == nullptr ||
 			m_afbCollection == nullptr)
 		{
-			assert(logicSchema);
+			assert(schema);
 			assert(m_afbCollection);
 
 			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_afbCollection %2")
-							  .arg(reinterpret_cast<size_t>(logicSchema))
+							  .arg(reinterpret_cast<size_t>(schema))
 							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
 			return false;
 		}
 
 		bool ok = true;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
 		{
 			if (l->compile() == true)
 			{
@@ -1661,7 +2119,7 @@ namespace Builder
 						{
 							// AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
 							//
-							m_log->errALP4007(logicSchema->schemaID(), afbItem->buildName(), afbItem->afbStrID(), si->guid());
+							m_log->errALP4007(schema->schemaId(), afbItem->buildName(), afbItem->afbStrID(), si->guid());
 
 							ok = false;
 							continue;
@@ -1669,7 +2127,7 @@ namespace Builder
 
 						if (afbDescription->version() != afbItem->afbElement().version())
 						{
-							m_log->errALP4008(logicSchema->schemaID(),
+							m_log->errALP4008(schema->schemaId(),
 											  afbItem->buildName(),
 											  afbItem->afbElement().version(),
 											  afbDescription->version(),
@@ -1690,7 +2148,8 @@ namespace Builder
 		return ok;
 	}
 
-	bool Parser::checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema)
+	bool Parser::checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
+									  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs)
 	{
 		if (logicSchema == nullptr ||
 			m_afbCollection == nullptr)
@@ -1702,6 +2161,12 @@ namespace Builder
 							  .arg(reinterpret_cast<size_t>(logicSchema))
 							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
 			return false;
+		}
+
+		std::map<QString, std::shared_ptr<VFrame30::UfbSchema>> ufbsMap;
+		for (auto ufb : ufbs)
+		{
+			ufbsMap[ufb->schemaId()] = ufb;
 		}
 
 		bool ok = true;
@@ -1717,13 +2182,13 @@ namespace Builder
 						VFrame30::SchemaItemUfb* ufbItem = si->toType<VFrame30::SchemaItemUfb>();
 						assert(ufbItem);
 
-						auto ufbsIt = m_ufbs.find(ufbItem->ufbSchemaId());
+						auto ufbsIt = ufbsMap.find(ufbItem->ufbSchemaId());
 
-						if (ufbsIt == m_ufbs.end())
+						if (ufbsIt == ufbsMap.end())
 						{
 							// UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
 							//
-							m_log->errALP4009(logicSchema->schemaID(), ufbItem->buildName(), ufbItem->ufbSchemaId(), si->guid());
+							m_log->errALP4009(logicSchema->schemaId(), ufbItem->buildName(), ufbItem->ufbSchemaId(), si->guid());
 							ok = false;
 							continue;
 						}
@@ -1732,7 +2197,7 @@ namespace Builder
 
 						if (ufbSchema->version() != ufbItem->ufbSchemaVersion())
 						{
-							m_log->errALP4010(logicSchema->schemaID(),
+							m_log->errALP4010(logicSchema->schemaId(),
 											  ufbItem->buildName(),
 											  ufbItem->ufbSchemaVersion(),
 											  ufbSchema->version(),
@@ -1751,6 +2216,112 @@ namespace Builder
 		}
 
 		return ok;
+	}
+
+	bool Parser::parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema)
+	{
+		if (ufbSchema.get() == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// Find layer for compilation
+		//
+		bool layerFound = false;
+		bool ok = false;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : ufbSchema->Layers)
+		{
+			if (l->compile() == true)
+			{
+				layerFound = true;
+				ok = parseUfbLayer(ufbSchema, l);
+
+				if (ok == false)
+				{
+					return false;
+				}
+
+				// We can parse only one layer
+				//
+				break;
+			}
+		}
+
+		if (layerFound == false)
+		{
+			// Schema does not have logic layer (Schema '%1').
+			//
+			m_log->errALP4022(ufbSchema->schemaId());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Parser::parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,
+							   std::shared_ptr<VFrame30::SchemaLayer> layer)
+	{
+		if (ufbSchema == nullptr || layer == nullptr)
+		{
+			assert(ufbSchema);
+			assert(layer);
+			return false;
+		}
+
+		// Check for nested UFBs
+		//
+		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		{
+			if (item->isType<VFrame30::SchemaItemUfb>() == true)
+			{
+				assert(item->isFblItemRect() == true);
+
+				// User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').
+				//
+				m_log->errALP4011(ufbSchema->schemaId(), item->toFblItemRect()->label(), item->guid());
+				return false;
+			}
+		}
+
+		// Find all branches - connected links
+		//
+		BushContainer bushContainer;
+
+		bool result = true;
+		result = findBushes(ufbSchema, layer, &bushContainer);
+
+		if (result == false)
+		{
+			LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined, tr("Finding bushes error."));
+			return false;
+		}
+
+		//bushContainer.debugInfo();
+
+		// Set pins' guids to bushes
+		// All log errors should be reported in setBranchConnectionToPin
+		//
+		result = setBranchConnectionToPin(ufbSchema, layer, &bushContainer);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Associates input/outputs
+		//
+		result = setPinConnections(ufbSchema, layer, &bushContainer);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Generate afb list, and set it to some container
+		//
+		applicationData()->addUfbData(bushContainer, ufbSchema, m_log);
+
+		return true;
 	}
 
 	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema)
@@ -1788,7 +2359,7 @@ namespace Builder
 		{
 			// Schema does not have Logic layer (Logic Schema '%1').
 			//
-			m_log->errALP4022(logicSchema->schemaID());
+			m_log->errALP4022(logicSchema->schemaId());
 			return false;
 		}
 
@@ -1857,11 +2428,19 @@ namespace Builder
 			// Set pins' guids to bushes
 			// All log errors should be reported in setBranchConnectionToPin
 			//
-			setBranchConnectionToPin(logicSchema, moduleLayer, &bushContainer);
+			result = setBranchConnectionToPin(logicSchema, moduleLayer, &bushContainer);
+			if (result == false)
+			{
+				return false;
+			}
 
 			// Associates input/outputs
 			//
-			setPinConnections(logicSchema, moduleLayer, &bushContainer);
+			result = setPinConnections(logicSchema, moduleLayer, &bushContainer);
+			if (result == false)
+			{
+				return false;
+			}
 
 			// Filter singlechannel logic branches in multischema drawing
 			//
@@ -1872,7 +2451,7 @@ namespace Builder
 
 			// Generate afb list, and set it to some container
 			//
-			applicationData()->addData(equipmentId, bushContainer, logicSchema, m_log);
+			applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
 		}
 
 		return true;
@@ -1897,7 +2476,7 @@ namespace Builder
 
 		if (equipmentId.isEmpty() == true)
 		{
-			m_log->errALP4001(schema->schemaID());
+			m_log->errALP4001(schema->schemaId());
 			return false;
 		}
 
@@ -1915,7 +2494,7 @@ namespace Builder
 			// How did we end up here?
 			//
 			assert(signalIndexInBlocks != -1);
-			m_log->errINT1001(QString("AppLogicModule::AppLogicModule(%1) signalIndexInBlocks == -1").arg(schema->schemaID()));
+			m_log->errINT1001(QString("AppLogicModule::AppLogicModule(%1) signalIndexInBlocks == -1").arg(schema->schemaId()));
 			return false;
 		}
 
@@ -1954,7 +2533,7 @@ namespace Builder
 				// it's not singlechannel Signal and not enough or more then channel count
 				//
 				result = false;
-				m_log->errALP4031(schema->schemaID(), signalItem->buildName(), signalItem->guid());
+				m_log->errALP4031(schema->schemaId(), signalItem->buildName(), signalItem->guid());
 				continue;
 			}
 
@@ -2044,14 +2623,14 @@ namespace Builder
 						if (signal == nullptr)
 						{
 							allSignalsFromThisChannel = false;
-							m_log->errALP4034(schema->schemaID(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							m_log->errALP4034(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
 							continue;
 						}
 
 						if (signal->lm() == nullptr)
 						{
 							allSignalsFromThisChannel = false;
-							m_log->errALP4035(schema->schemaID(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							m_log->errALP4035(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
 							continue;
 						}
 
@@ -2071,7 +2650,7 @@ namespace Builder
 								{
 									// Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
 									//
-									m_log->errALP4033(schema->schemaID(), appSignalId, signalElement->guid());
+									m_log->errALP4033(schema->schemaId(), appSignalId, signalElement->guid());
 								}
 							}
 						}
@@ -2096,16 +2675,15 @@ namespace Builder
 
 	// Function connects all links, and compose them into bushes
 	//
-	bool Parser::findBushes(
-		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-		std::shared_ptr<VFrame30::SchemaLayer> layer,
-		BushContainer* bushContainer) const
+	bool Parser::findBushes(std::shared_ptr<VFrame30::Schema> schema,
+							std::shared_ptr<VFrame30::SchemaLayer> layer,
+							BushContainer* bushContainer) const
 	{
-		if (logicSchema.get() == nullptr ||
+		if (schema.get() == nullptr ||
 			layer.get() == nullptr ||
 			bushContainer == nullptr)
 		{
-			assert(logicSchema);
+			assert(schema);
 			assert(layer);
 			assert(bushContainer);
 			return false;
@@ -2122,7 +2700,7 @@ namespace Builder
 
 			if (fblItem != nullptr)
 			{
-				fblItem->SetConnectionsPos(logicSchema->gridSize(), logicSchema->pinGridStep());	// Calculate pins positions
+				fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());	// Calculate pins positions
 
 				const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
 				const std::vector<VFrame30::AfbPin>& outputs = fblItem->outputs();
@@ -2360,8 +2938,10 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicSchema> schema, std::shared_ptr<VFrame30::SchemaLayer> layer,
-						BushContainer* bushContainer) const
+	bool Parser::setBranchConnectionToPin(
+			std::shared_ptr<VFrame30::Schema> schema,
+			std::shared_ptr<VFrame30::SchemaLayer> layer,
+			BushContainer* bushContainer) const
 	{
 		if (schema.get() == nullptr ||
 			layer.get() == nullptr ||
@@ -2417,7 +2997,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						log()->errALP4006(schema->schemaID(), fblItem->buildName(), in.caption(), item->guid());
+						log()->errALP4006(schema->schemaId(), fblItem->buildName(), in.caption(), item->guid());
 						result = false;
 						continue;
 					}
@@ -2439,7 +3019,7 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						log()->errALP4006(schema->schemaID(), fblItem->buildName(), out.caption(), item->guid());
+						log()->errALP4006(schema->schemaId(), fblItem->buildName(), out.caption(), item->guid());
 
 						result = false;
 						continue;
@@ -2452,7 +3032,7 @@ namespace Builder
 					{
 						// Branch has multiple outputs.
 						//
-						log()->errALP4000(schema->schemaID(), bushContainer->bushes[branchIndex].getAllUuid());
+						log()->errALP4000(schema->schemaId(), bushContainer->bushes[branchIndex].getAllUuid());
 
 						result = false;
 						continue;
@@ -2470,9 +3050,9 @@ namespace Builder
 
 
 	bool Parser::setPinConnections(
-		std::shared_ptr<VFrame30::LogicSchema> schema,
-		std::shared_ptr<VFrame30::SchemaLayer> layer,
-		BushContainer* bushContainer)
+			std::shared_ptr<VFrame30::Schema> schema,
+			std::shared_ptr<VFrame30::SchemaLayer> layer,
+			BushContainer* bushContainer)
 	{
 		if (schema.get() == nullptr ||
 			layer.get() == nullptr ||
@@ -2585,7 +3165,7 @@ namespace Builder
 		{
 			// Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1')
 			//
-			m_log->wrnALP4005(schema->schemaID());
+			m_log->wrnALP4005(schema->schemaId());
 			return true;
 		}
 
@@ -2617,7 +3197,8 @@ namespace Builder
 					std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 					issuedItemsUuid.push_back(item->guid());
 
-					m_log->errALP4006(schema->schemaID(), item->buildName(), inputsStr, issuedItemsUuid);
+					m_log->errALP4006(schema->schemaId(), item->buildName(), inputsStr, issuedItemsUuid);
+					result = false;
 				}
 			}
 
@@ -2639,7 +3220,8 @@ namespace Builder
 							std::vector<QUuid> issuedItemsUuid = bush.getLinksUuids();
 							issuedItemsUuid.push_back(item->guid());
 
-							m_log->errALP4006(schema->schemaID(), item->buildName(), out.caption(), issuedItemsUuid);
+							m_log->errALP4006(schema->schemaId(), item->buildName(), out.caption(), issuedItemsUuid);
+							result = false;
 						}
 					}
 				}
@@ -2649,13 +3231,35 @@ namespace Builder
 		return result;
 	}
 
-	void Parser::debugInfo()
+	void Parser::setDebugInfo()
 	{
 		//LOG_MESSAGE(m_log, "Debug Info:");
 
-		// Set Schema Ityem Run Order for drawing on schemas
+		// Set UFBs run order for drawing on schemas
 		//
 		const AppLogicData* appLogicData = applicationData();
+		const auto& ufbs = appLogicData->ufbs();
+
+		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : ufbs)
+		{
+			const std::list<AppLogicItem>& items = ufb.second->items();
+
+			std::map<QUuid, int> schemaItemRunOrder;
+
+			int index = 0;
+			for (const AppLogicItem& it : items)
+			{
+				assert(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
+
+				schemaItemRunOrder[it.m_fblItem->guid()] = index;
+				index ++;
+			}
+
+			GlobalMessanger::instance()->setRunOrder(ufb.second->equipmentId(), schemaItemRunOrder);
+		}
+
+		// Set Schema Ityem Run Order for drawing on schemas
+		//
 		const auto& logicModules = appLogicData->modules();
 
 		for (std::shared_ptr<AppLogicModule> lm : logicModules)
@@ -2673,7 +3277,7 @@ namespace Builder
 				index ++;
 			}
 
-			GlobalMessanger::instance()->setRunOrder(lm->moduleEquipmentId(), schemaItemRunOrder);
+			GlobalMessanger::instance()->setRunOrder(lm->equipmentId(), schemaItemRunOrder);
 		}
 
 		return;

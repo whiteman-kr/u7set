@@ -1208,6 +1208,55 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4011
+	///
+	/// IssueType: Error
+	///
+	/// Title: User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB Schema ID
+	///
+	/// Description:
+	///		User Functional Block cannot have nested another User Functional Block.
+	///
+	void IssueLogger::errALP4011(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4011,
+				  tr("User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  '%3').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB Schema ID
+	///
+	/// Description:
+	///		User Functional Block cannot have nested another User Functional Block.
+	///
+	void IssueLogger::errALP4012(QString schema, QString schemaItem, QString pinCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4012,
+				  tr("Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema '%3').")
+				  .arg(pinCaption)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error
@@ -1264,20 +1313,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema does not have Logic layer (Logic Schema '%1').
+	/// Title: Schema does not have logic layer (Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic schema StrID
+	///		%1 SchemaID
 	///
 	/// Description:
-	///		Each logic schema has several layers (Logic, Frame and Notes), but the Logic layer is not found.
+	///		Each logic schema or user functional block schema has several layers (Logic, Frame and Notes), but the logic layer is not found.
 	///
 	void IssueLogger::errALP4022(QString schema)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
-				  tr("Schema does not have Logic layer (Logic Schema '%1').").arg(schema));
+				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
 	}
 
 

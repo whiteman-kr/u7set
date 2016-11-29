@@ -141,6 +141,11 @@ namespace VFrame30
 		return m_associatedIOs;
 	}
 
+	std::vector<QUuid>& AfbPin::associatedIOs()
+	{
+		return m_associatedIOs;
+	}
+
 	void AfbPin::ClearAssociattdIOs()
 	{
 		m_associatedIOs.clear();
@@ -325,7 +330,17 @@ namespace VFrame30
 		return m_inputPoints;
 	}
 
+	std::vector<AfbPin>& FblItem::inputs()
+	{
+		return m_inputPoints;
+	}
+
 	const std::vector<AfbPin>& FblItem::outputs() const
+	{
+		return m_outputPoints;
+	}
+
+	std::vector<AfbPin>& FblItem::outputs()
 	{
 		return m_outputPoints;
 	}

@@ -57,6 +57,7 @@ namespace VFrame30
 		void setGuid(const QUuid& guid);
 
 		const std::vector<QUuid>& associatedIOs() const;
+		std::vector<QUuid>& associatedIOs();
 		void ClearAssociattdIOs();
 		void AddAssociattedIOs(const QUuid& guid);
 
@@ -111,7 +112,10 @@ namespace VFrame30
 		//
 	public:
 		const std::vector<VFrame30::AfbPin>& inputs() const;
+		std::vector<VFrame30::AfbPin>& inputs();
+
 		const std::vector<VFrame30::AfbPin>& outputs() const;
+		std::vector<VFrame30::AfbPin>& outputs();
 
 		std::vector<AfbPin>* mutableInputs();
 		std::vector<AfbPin>* mutableOutputs();
