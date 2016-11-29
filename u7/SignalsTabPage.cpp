@@ -1100,6 +1100,7 @@ void SignalsModel::addSignal()
 		}
 		if (!resultSignalVector.isEmpty())
 		{
+			int firstInsertedSignalId = resultSignalVector[0]->ID();
 			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + resultSignalVector.count() - 1);
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
@@ -1108,7 +1109,7 @@ void SignalsModel::addSignal()
 			}
 			endInsertRows();
 			emit dataChanged(createIndex(m_signalSet.count() - resultSignalVector.count(), 0), createIndex(m_signalSet.count() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
-			emit signalActivated(m_signalSet.count() - resultSignalVector.count());
+			emit signalsRestored(firstInsertedSignalId);
 		}
 	}
 
@@ -1420,7 +1421,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
-	connect(m_signalsModel, &SignalsModel::signalActivated, m_signalsView, &QTableView::selectRow);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
@@ -1879,16 +1879,22 @@ void SignalsTabPage::saveSelection()
 	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
 }
 
-void SignalsTabPage::restoreSelection()
+void SignalsTabPage::restoreSelection(int focusedSignalId)
 {
 	m_changingSelectionManualy = true;
+
+	if (focusedSignalId != -1)
+	{
+		m_focusedCellSignalID = focusedSignalId;
+		m_focusedCellColumn = 0;
+	}
 
 	QModelIndex currentSourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(m_focusedCellSignalID), m_focusedCellColumn);
 	QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
 
-	QItemSelection selection;
+	/*QItemSelection selection;
 
-	//int selectionRowCount = 0;
+	int selectionRowCount = 0;
 	foreach (int id, m_selectedRowsSignalID)
 	{
 		int rowNo = m_signalsModel->keyIndex(id);
@@ -1899,19 +1905,19 @@ void SignalsTabPage::restoreSelection()
 		QItemSelection rowSelection(leftIndex, rightIndex);
 		selection.merge(rowSelection, QItemSelectionModel::Select);
 
-		/*selectionRowCount++;
+		selectionRowCount++;
 
 		if (selectionRowCount > 256)
 		{
 			// Selection limits has been added, because m_signalsView->selectionModel()->select(...) becomes extremely slow
 			break;
-		}*/
+		}
 	}
+
+	m_signalsView->selectionModel()->select(m_signalsProxyModel->mapSelectionFromSource(selection), QItemSelectionModel::Select | QItemSelectionModel::Rows);*/
 
 	m_signalsView->selectionModel()->setCurrentIndex(currentProxyIndex, QItemSelectionModel::Select);
 	m_signalsView->selectionModel()->select(currentProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-
-	//m_signalsView->selectionModel()->select(m_signalsProxyModel->mapSelectionFromSource(selection), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
