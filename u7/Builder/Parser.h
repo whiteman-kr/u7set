@@ -137,6 +137,8 @@ namespace Builder
 
 		bool orderItems(IssueLogger* log, bool* interruptProcess);
 
+		bool debugCheckItemsRelationsConsistency(IssueLogger* log) const;
+
 	private:
 		bool setItemsOrder(IssueLogger* log,
 						   std::map<QUuid, AppLogicItem>& remainItems,

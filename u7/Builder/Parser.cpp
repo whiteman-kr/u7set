@@ -687,6 +687,212 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicModule::debugCheckItemsRelationsConsistency(IssueLogger* log) const
+	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+		try
+		{
+			std::map<QUuid, AppLogicItem> itemMap;
+			std::map<QUuid, std::pair<AppLogicItem, VFrame30::AfbPin>> pins;
+
+			for (const AppLogicItem& ali : m_items)
+			{
+				assert(ali.m_fblItem);
+
+				if (itemMap.count(ali.m_fblItem->guid()) != 0)
+				{
+					throw QString("Two or more items have duplicate guids. item %1, item.guid %2")
+							.arg(ali.m_fblItem->label())
+							.arg(ali.m_fblItem->guid().toString());
+				}
+
+				for (const VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+				{
+					if (pin.IsInput() == false)
+					{
+						throw QString("Pin is in iutput list but has an output type. item %1, pin.caption %2")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption());
+					}
+
+					if (pins.count(pin.guid()) != 0)
+					{
+						throw QString("Duplicate pin guids. item %1, pin.caption %2, pin.guid %3")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption())
+								.arg(pin.guid().toString());
+					}
+
+					pins[pin.guid()] = std::make_pair(ali, pin);
+				}
+
+				for (const VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+				{
+					if (pin.IsOutput() == false)
+					{
+						throw QString("Pin is in output list but has an input type. item %1, pin.caption %2")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption());
+					}
+
+					if (pins.count(pin.guid()) != 0)
+					{
+						throw QString("Duplicate pin guids. item %1, pin.caption %2, pin.guid %3")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption())
+								.arg(pin.guid().toString());
+					}
+
+					pins[pin.guid()] = std::make_pair(ali, pin);
+				}
+			}
+
+			// Check associated IOs
+			//
+			for (const std::pair<QUuid, std::pair<AppLogicItem, VFrame30::AfbPin>>& pinPair : pins)
+			{
+				const AppLogicItem& ali = pinPair.second.first;
+				const VFrame30::AfbPin& pin = pinPair.second.second;
+
+				if (pin.IsInput() == true)
+				{
+					if (pin.associatedIOs().size() != 1)
+					{
+						throw QString("Input pin does not have associated output. item %1, pin.caption %2")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption());
+					}
+
+					QUuid associatedOutput = pin.associatedIOs().front();
+
+					auto associatedPinIt = pins.find(associatedOutput);
+					if (associatedPinIt == pins.end())
+					{
+						throw QString("Input pin has an associated output which cannot be found. item %1, pin.caption %2, not found assocIO %3")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption())
+								.arg(associatedOutput.toString());
+					}
+
+					// Reverse check, found ouput pin must have associated current input pin
+					//
+					const VFrame30::AfbPin& associatedOutputPin = associatedPinIt->second.second;
+
+					if (associatedOutputPin.IsOutput() == false)
+					{
+						throw QString("Input pin has an associated pin which is expected to be an output but it is an input. item %1, pin.caption %2, assocPin.caption %3, assocPin.guid %4")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption())
+								.arg(associatedOutputPin.caption())
+								.arg(associatedOutputPin.guid().toString());
+					}
+
+					auto foundInputAssocIt = std::find(associatedOutputPin.associatedIOs().begin(),
+													   associatedOutputPin.associatedIOs().end(),
+													   pin.guid());
+
+					if (foundInputAssocIt == associatedOutputPin.associatedIOs().end())
+					{
+						throw QString("There is no back association for input. Input has valid output which also must have initial input but it does not."
+									  "item %1, pin.caption %2, assocPin.caption %3, assocPin.guid %4")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption())
+								.arg(associatedOutputPin.caption())
+								.arg(associatedOutputPin.guid().toString());
+					}
+
+					continue;
+				}
+
+				if (pin.IsOutput() == true)
+				{
+					if (pin.associatedIOs().empty() == true)
+					{
+						throw QString("Ouput pin does not have associated inputs. item %1, pin.caption %2")
+								.arg(ali.m_fblItem->label())
+								.arg(pin.caption());
+					}
+
+					const std::vector<QUuid>& assocInputs = pin.associatedIOs();
+					for (const QUuid& assocInput : assocInputs)
+					{
+						auto associatedPinIt = pins.find(assocInput);
+						if (associatedPinIt == pins.end())
+						{
+							throw QString("Output pin has an associated input which cannot be found. item %1, pin.caption %2, not found assocIO %3")
+									.arg(ali.m_fblItem->label())
+									.arg(pin.caption())
+									.arg(assocInput.toString());
+						}
+
+						const VFrame30::AfbPin& assocInputPin = associatedPinIt->second.second;
+						assert(assocInputPin.guid() == assocInput);
+
+						if (assocInputPin.IsInput() == false)
+						{
+							throw QString("Output pin has an associated pin which is expected to be an intput but it is an output. item %1, pin.caption %2, assocPin.caption %3, assocPin.guid %4")
+									.arg(ali.m_fblItem->label())
+									.arg(pin.caption())
+									.arg(assocInputPin.caption())
+									.arg(assocInputPin.guid().toString());
+						}
+
+						// Check for the back association
+						//
+						if (assocInputPin.associatedIOs().size() != 1)
+						{
+							throw QString("Output pin has an associated input pin which is expected to have one assoc IO (back to output)."
+										  "item %1, pin.caption %2, assocPin.caption %3, assocPin.guid %4")
+									.arg(ali.m_fblItem->label())
+									.arg(pin.caption())
+									.arg(assocInputPin.caption())
+									.arg(assocInputPin.guid().toString());
+						}
+
+						if (assocInputPin.associatedIOs().front() != pin.guid())
+						{
+							throw QString("There is no back association for output. Output has valid assoc input which also must have initial output but it does not."
+										  "item %1, pin.caption %2, assocPin.caption %3, assocPin.guid %4")
+									.arg(ali.m_fblItem->label())
+									.arg(pin.caption())
+									.arg(assocInputPin.caption())
+									.arg(assocInputPin.guid().toString());
+						}
+					}
+
+					continue;
+				}
+
+				throw QString("pin is neither inpur nor output. item %1, pin.caption %2")
+						.arg(ali.m_fblItem->label())
+						.arg(pin.caption());
+			}
+		}
+		catch (QString message)
+		{
+			log->errINT1001(
+				QString("Please, report to developers: Checking items relations consistency error: module %1, error message %2")
+						.arg(m_equipmentId)
+						.arg(message));
+
+			qDebug() << "-------------------------- Checking items relations consistency error dump----------------------------------";
+			for (const AppLogicItem& ali : m_items)
+			{
+				ali.m_fblItem->dump();
+			}
+			qDebug() << "------------------- END OF Checking items relations consistency error dump ---------------------------------";
+
+			return false;
+		}
+
+		return true;
+	}
+
 	bool AppLogicModule::setItemsOrder(IssueLogger* log,
 									   std::map<QUuid, AppLogicItem>& remainItems,
 									   std::list<AppLogicItem>& orderedItems,
@@ -1304,6 +1510,8 @@ namespace Builder
 				return false;
 			}
 
+			module->debugCheckItemsRelationsConsistency(log);
+
 			// Find VFrame30::SchemaItemUfb and insert AFTER them actual ufbs
 			//
 			for (auto itemIt = module->items().begin(); itemIt != module->items().end(); ++itemIt)
@@ -1463,7 +1671,7 @@ namespace Builder
 							continue;
 						}
 
-						const AppLogicItem& foundInputSignalElement = *foundInputIt;
+						AppLogicItem& foundInputSignalElement = *foundInputIt;
 
 						if (foundInputSignalElement.m_fblItem->outputs().size() != 1)
 						{
@@ -1475,6 +1683,10 @@ namespace Builder
 						QUuid foundInputSignalElementOutputGuid = foundInputSignalElement.m_fblItem->outputs().front().guid();
 
 						newAssocIoGuids[foundInputSignalElementOutputGuid] = outputGuid;
+
+						// Set to this out guid of thre real item output
+						//
+						foundInputSignalElement.m_fblItem->outputs().front().setGuid(outputGuid);
 					}
 
 					for (AppLogicItem& ali : ufbItemsCopy)						// Set new pin guid to associatedIOs
@@ -1500,7 +1712,7 @@ namespace Builder
 					{
 						assert(out.IsOutput() == true);
 
-						QUuid outputGuid = out.guid();
+						QUuid ufbItemOutputPinGuid = out.guid();
 
 						// Find the real out
 						//
@@ -1542,7 +1754,7 @@ namespace Builder
 						// newItemOutputGuid is out of item in UFB, so it is real elements out
 						//
 						QUuid newItemOutputGuid = outputSignalElementPin.associatedIOs().front();
-						newAssocIoGuids[outputGuid] = newItemOutputGuid;
+						newAssocIoGuids[ufbItemOutputPinGuid] = newItemOutputGuid;
 					}
 
 					// Bind these Logic Schema item's inputs to real output
@@ -1605,6 +1817,14 @@ namespace Builder
 						{
 							return ali.m_fblItem->isType<VFrame30::SchemaItemUfb>();
 						});
+
+//			qDebug() << "-------------------------- AFTER UFB EXPANDING ----------------------------------";
+//			for (AppLogicItem& iii : module->items())
+//			{
+//				iii.m_fblItem->dump();
+//			}
+
+			module->debugCheckItemsRelationsConsistency(log);
 		}
 
 		return result;
@@ -1805,6 +2025,20 @@ namespace Builder
 		if (ok == false)
 		{
 			result = false;
+		}
+
+		// Check for relations conistency
+		//
+		LOG_MESSAGE(m_log, tr("Checking relations consistency..."));
+
+		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
+		{
+			module->debugCheckItemsRelationsConsistency(m_log);
+		}
+
+		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : m_applicationData->ufbs())
+		{
+			ufb.second->debugCheckItemsRelationsConsistency(m_log);
 		}
 
 		// Expand User Functioanl Block on places of SchemaIntemUfb
