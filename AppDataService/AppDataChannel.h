@@ -49,7 +49,7 @@ private:
 	const int PACKET_TIMEOUT = 1000;							// 1000 ms == 1 second
 	QUdpSocket* m_socket = nullptr;
 	bool m_socketBound = false;
-	RupFrame m_rupFrame;
+	Rup::Frame m_rupFrame;
 	RupDataQueue m_rupDataQueue;
 	QTimer m_timer1s;
 

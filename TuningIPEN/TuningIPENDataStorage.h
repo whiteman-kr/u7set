@@ -5,9 +5,9 @@
 #include "../lib/Signal.h"
 #include "../lib/DataProtocols.h"
 #include "../u7/Builder/IssueLogger.h"
+#include "TuningIPENSocket.h"
 
-
-namespace Tuning
+namespace TuningIPEN
 {
 
 	struct TuningSignalState
@@ -64,8 +64,8 @@ namespace Tuning
 
 		void setFrameData(int frameNo, const char* fotipData);
 
-//		bool getSignalState(const Signal* signal, TuningSignalState* tss);
-//		bool setSignalState(const Signal* signal, double value, SocketRequest* sr);
+		bool getSignalState(const Signal* signal, TuningSignalState* tss);
+		bool setSignalState(const Signal* signal, double value, SocketRequest* sr);
 	};
 
 
@@ -145,8 +145,8 @@ namespace Tuning
 
 		void setFrameData(int frameNo, const char* fotipData);
 
-//		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
-//		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
+		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
+		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
 
 		const QStringList& metadataFields();
 		const std::vector<QVariantList>& metadata() const;

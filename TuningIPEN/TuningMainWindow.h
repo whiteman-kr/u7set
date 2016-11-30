@@ -4,8 +4,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/DataSource.h"
 #include "../lib/Service.h"
-#include "../TuningService/TuningSource.h"
-#include "../TuningService/TuningService.h"
+#include "TuningIPENSource.h"
 #include "TuningIPENService.h"
 
 class QTabWidget;
@@ -14,62 +13,68 @@ class QFormLayout;
 class QPushButton;
 class QScrollBar;
 class QLabel;
-class AnalogSignalSetter;
-class DiscreteSignalSetter;
 
-class LogWriter : public QObject
+namespace TuningIPEN
 {
-	Q_OBJECT
 
-private:
-	void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
+	class AnalogSignalSetter;
+	class DiscreteSignalSetter;
 
-public slots:
-	void onUserRequest(FotipFrame fotipFrame);
-	void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
-};
 
-class TuningMainWindow : public QMainWindow
-{
-	Q_OBJECT
-private:
-	QString m_cfgPath;
-	QTabWidget* m_setOfSignalsScram;
-	QTableView* m_beamDoorsWidget;
-	QWidget* m_reactivityWidget;
-	QWidget* m_automaticPowerRegulatorWidget;
+	class LogWriter : public QObject
+	{
+		Q_OBJECT
 
-	TuningIPEN::TuningIPENService* m_service = nullptr;
-	QVector<TuningIPEN::TuningSourceInfo> m_info;
-	QMap<QString, QLabel*> m_statusLabelMap;
+	private:
+		void writeFrameToLog(QString caption, FotipFrame& fotipFrame);
 
-	QScrollBar* m_scrollBar;
-	QTimer* m_updateTimer;
-	QThread* m_logThread;
-	LogWriter* m_logWriter;
+	public slots:
+		void onUserRequest(FotipFrame fotipFrame);
+		void onReplyWithNoZeroFlags(FotipFrame fotipFrame);
+	};
 
-	AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
-	DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id);
+	class TuningMainWindow : public QMainWindow
+	{
+		Q_OBJECT
+	private:
+		QString m_cfgPath;
+		QTabWidget* m_setOfSignalsScram;
+		QTableView* m_beamDoorsWidget;
+		QWidget* m_reactivityWidget;
+		QWidget* m_automaticPowerRegulatorWidget;
 
-	bool loadConfigurationFromFile(const QString& fileName);
-	bool readTuningDataSources(XmlReadHelper& xml);
+		TuningIPEN::TuningIPENService* m_service = nullptr;
+		QVector<TuningIPEN::TuningSourceInfo> m_info;
+		QMap<QString, QLabel*> m_statusLabelMap;
 
-public slots:
-	void updateSignalStates();
+		QScrollBar* m_scrollBar;
+		QTimer* m_updateTimer;
+		QThread* m_logThread;
+		LogWriter* m_logWriter;
 
-	void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
-	void updateDataSourceStatus(TuningIPEN::TuningSourceState state);
+		AnalogSignalSetter* addAnalogSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id, double highLimit);
+		DiscreteSignalSetter* addDiscreteSetter(QFormLayout* fl, QVector<TuningIPEN::TuningSourceInfo>& sourceInfoVector, QString label, QString id);
 
-	void applyNewScrollBarValue();
+		bool loadConfigurationFromFile(const QString& fileName);
+		bool readTuningDataSources(XmlReadHelper& xml);
 
-signals:
-	void scrollBarMoved(double newValue);
-	void automaticModeChanged(bool newValue);
+	public slots:
+		void updateSignalStates();
 
-public:
-	explicit TuningMainWindow(QString buildPath, QWidget *parent = 0);
-	~TuningMainWindow();
+		void updateSignalState(QString appSignalID, double currentValue, double lowLimit, double highLimit, bool valid);
+		void updateDataSourceStatus(TuningIPEN::TuningSourceState state);
 
-	void onTuningServiceReady();
-};
+		void applyNewScrollBarValue();
 
+	signals:
+		void scrollBarMoved(double newValue);
+		void automaticModeChanged(bool newValue);
+
+	public:
+		explicit TuningMainWindow(QString buildPath, QWidget *parent = 0);
+		~TuningMainWindow();
+
+		void onTuningServiceReady();
+	};
+
+}

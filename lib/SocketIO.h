@@ -307,8 +307,6 @@ const int RP_PACKET_DATA_SIZE = 1428;
 const int RP_MAX_FRAME_COUNT = 10;
 const int RP_BUFFER_SIZE = RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE;
 
-const int RUP_PROTOCOL_VERSION_5 = 5;
-const int FOTIP_PROTOCOL_VERSION_2 = 2;
 
 typedef quint8 RpPacketData[RP_PACKET_DATA_SIZE];
 

@@ -508,7 +508,7 @@ Source::Source(QString address, int port, const SignalSet& signalSet, const QHas
 	m_dataSources(&dataSources)
 {
 	m_lastHeader.packetNo = -1;
-	memset(m_buffer, 0, RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE);
+	memset(m_buffer, 0, Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE);
 	memset(&m_lastHeader, 0, sizeof(m_lastHeader));
 }
 
@@ -520,7 +520,7 @@ Source::~Source()
 	}
 }
 
-void V4toV3Header(RpPacketHeader& v3header, const RupFrameHeader& v4header) // copy assignment
+void V4toV3Header(RpPacketHeader& v3header, const Rup::Header& v4header) // copy assignment
 {
 	v3header.packetSize = v4header.frameSize;
 	v3header.protocolVersion = v4header.protocolVersion;
@@ -562,7 +562,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 		case 4:
 		case 5:
 		{
-			RupFrameHeader& v4Header = *reinterpret_cast<RupFrameHeader*>(buffer);
+			Rup::Header& v4Header = *reinterpret_cast<Rup::Header*>(buffer);
 			if (needSwap)
 			{
 				swapHeader(v4Header);
@@ -581,7 +581,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 		incrementPartialFrameCount();
 	}
 
-	if (header.partCount > RUP_MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
+	if (header.partCount > Rup::MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
 	{
 		incrementFormatErrorCount();
 		delete [] buffer;
@@ -620,8 +620,8 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 				incrementPartialPacketCount();
 			}
 
-			currentDataSize = header.packetSize - sizeof(RupFrameHeader) - sizeof(packet.CRC64);
-			memcpy(m_buffer + header.partNo * currentDataSize, buffer + sizeof(RupFrameHeader), currentDataSize);
+			currentDataSize = header.packetSize - sizeof(Rup::Header) - sizeof(packet.CRC64);
+			memcpy(m_buffer + header.partNo * currentDataSize, buffer + sizeof(Rup::Header), currentDataSize);
 			break;
 		default:
 			assert(false);
@@ -696,7 +696,7 @@ void swapHeader(RpPacketHeader &header)
 	swapBytes(header.TimeStamp.year);
 }
 
-void swapHeader(RupFrameHeader& header)
+void swapHeader(Rup::Header& header)
 {
 	swapBytes(header.frameSize);
 	swapBytes(header.protocolVersion);

@@ -19,7 +19,7 @@ const char* const Columns[] =
 PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& lastHeader, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_buffer(reinterpret_cast<quint16*>(buffer)),
-	m_frameDataSize(RUP_FRAME_DATA_SIZE),
+	m_frameDataSize(Rup::FRAME_DATA_SIZE),
 	m_lastHeader(lastHeader),
 	needToSwapBytes(true)
 {
@@ -90,7 +90,7 @@ void PacketBufferTableModel::updateFrame(int frameNo, int version)
 			break;
 		case 4:
 		case 5:
-			newFrameDataSize = RUP_FRAME_DATA_SIZE;
+			newFrameDataSize = Rup::FRAME_DATA_SIZE;
 			break;
 		default:
 			assert(false);

@@ -10,7 +10,7 @@
 #include "../Proto/network.pb.h"
 
 
-typedef Queue<RupFrame> RupFramesQueue;
+typedef Queue<Rup::Frame> RupFramesQueue;
 
 
 struct RupData
@@ -20,7 +20,7 @@ struct RupData
 	Times time;
 
 	int dataSize;
-	char data[RUP_FRAME_DATA_SIZE * RUP_MAX_FRAME_COUNT];
+	char data[Rup::FRAME_DATA_SIZE * Rup::MAX_FRAME_COUNT];
 
 	void dump();
 };
@@ -155,8 +155,8 @@ protected:
 
 	//
 
-	RupFrame m_rupFrames[RUP_MAX_FRAME_COUNT];
-	char m_framesData[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
+	Rup::Frame m_rupFrames[Rup::MAX_FRAME_COUNT];
+	char m_framesData[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
 
 	//
 
@@ -261,7 +261,7 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	void processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
+	void processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>& rupDataQueue);
 
 	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
 	void clearAssociatedSignals() { m_associatedSignals.clear(); }
@@ -274,7 +274,7 @@ public:
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 
-	void pushRupFrame(const RupFrame& rupFrame);
+	void pushRupFrame(const Rup::Frame& rupFrame);
 
 	void incBadFrameSizeError() { m_errorBadFrameSize++; }
 };

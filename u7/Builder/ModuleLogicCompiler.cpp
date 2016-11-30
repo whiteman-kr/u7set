@@ -4651,9 +4651,9 @@ namespace Builder
 
 		int size = data.count();
 
-		int frameCount = size / FOTIP_TX_RX_DATA_SIZE;
+		int frameCount = size / FotipV2::TX_RX_DATA_SIZE;
 
-		assert((size % FOTIP_TX_RX_DATA_SIZE) == 0);
+		assert((size % FotipV2::TX_RX_DATA_SIZE) == 0);
 
 		file.append(QString("\n"));
 
@@ -4663,9 +4663,9 @@ namespace Builder
 
 			file.append(QString("\nFrame: %1\n").arg(f));
 
-			for(int i = 0; i < FOTIP_TX_RX_DATA_SIZE; i++)
+			for(int i = 0; i < FotipV2::TX_RX_DATA_SIZE; i++)
 			{
-				quint8 byte = data[f * FOTIP_TX_RX_DATA_SIZE + i];
+				quint8 byte = data[f * FotipV2::TX_RX_DATA_SIZE + i];
 
 				QString sv;
 

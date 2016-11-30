@@ -2,7 +2,7 @@
 
 #include "../lib/DataSource.h"
 #include "../lib/Signal.h"
-#include "../TuningService/TuningDataStorage.h"
+#include "TuningIPENDataStorage.h"
 #include "TuningIPENSocket.h"
 
 namespace TuningIPEN
@@ -41,7 +41,7 @@ namespace TuningIPEN
 	class TuningSource : public DataSource
 	{
 	private:
-		Tuning::TuningData* m_tuningData = nullptr;
+		TuningData* m_tuningData = nullptr;
 
 		bool m_deleteTuningData = false;
 
@@ -63,7 +63,7 @@ namespace TuningIPEN
 		TuningSource();
 		~TuningSource();
 
-		void setTuningData(Tuning::TuningData* tuningData);
+		void setTuningData(TuningData* tuningData);
 
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
@@ -79,10 +79,10 @@ namespace TuningIPEN
 		void setWaitReply() { m_waiReply = true; }
 		void resetWaitReply() { m_waiReply = false; }
 
-		void processReply(const Tuning::SocketReply& reply);
+		void processReply(const SocketReply& reply);
 
-		bool getSignalState(const QString& appSignalID, Tuning::TuningSignalState* tss);
-		bool setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr);
+		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
+		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
 
 		quint64 uniqueID();
 

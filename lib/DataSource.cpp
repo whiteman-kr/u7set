@@ -88,7 +88,7 @@ const char* DataSource::SIGNAL_ID_ELEMENT = "SignalID";
 
 
 DataSource::DataSource() :
-	m_rupFramesQueue(RUP_MAX_FRAME_COUNT * 150)
+	m_rupFramesQueue(Rup::MAX_FRAME_COUNT * 150)
 {
 }
 
@@ -341,7 +341,7 @@ bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
 }
 
 
-void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue)
+void DataSource::processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>& rupDataQueue)
 {
 	m_dataReceived = true;
 	m_receivedFramesCount++;
@@ -381,7 +381,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 
 	int framesQuantity = rupFrame.header.framesQuantity;
 
-	if (framesQuantity > RUP_MAX_FRAME_COUNT)
+	if (framesQuantity > Rup::MAX_FRAME_COUNT)
 	{
 		assert(false);
 		m_errorFramesQuantity++;
@@ -397,7 +397,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 		return ;
 	}
 
-	memcpy(m_rupFrames + frameNo, &rupFrame, sizeof(RupFrame));
+	memcpy(m_rupFrames + frameNo, &rupFrame, sizeof(Rup::Frame));
 
 	// check packet
 	//
@@ -423,7 +423,7 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
 		QDateTime plantTime;
-		RupTimeStamp timeStamp = m_rupFrames[0].header.timeStamp;
+		Rup::TimeStamp timeStamp = m_rupFrames[0].header.timeStamp;
 
 		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
@@ -442,13 +442,13 @@ void DataSource::processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& r
 		rupData->time.system = currentTime.toMSecsSinceEpoch();
 		rupData->time.local = currentTime.toLocalTime().toMSecsSinceEpoch();
 
-		rupData->dataSize = framesQuantity * RUP_FRAME_DATA_SIZE;
+		rupData->dataSize = framesQuantity * Rup::FRAME_DATA_SIZE;
 
 		// merge frames data into rupDataQueue's buffer
 		//
 		for(int i = 0; i < framesQuantity; i++)
 		{
-			memcpy(rupData->data + i * RUP_FRAME_DATA_SIZE, m_rupFrames[i].data, RUP_FRAME_DATA_SIZE);
+			memcpy(rupData->data + i * Rup::FRAME_DATA_SIZE, m_rupFrames[i].data, Rup::FRAME_DATA_SIZE);
 		}
 
 		// push rupData and unlock rupDataQueue
@@ -508,11 +508,11 @@ bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
 }
 
 
-void DataSource::pushRupFrame(const RupFrame& rupFrame)
+void DataSource::pushRupFrame(const Rup::Frame& rupFrame)
 {
 	m_receivedFramesCount++;
 
-	m_receivedDataSize += sizeof(RupFrame);
+	m_receivedDataSize += sizeof(Rup::Frame);
 
 	quint32 headerNumerator = (quint32)reverseUint16(rupFrame.header.numerator);
 

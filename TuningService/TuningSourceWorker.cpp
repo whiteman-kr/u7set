@@ -36,7 +36,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::pushReply(const RupFotipFrame& reply)
+	void TuningSourceWorker::pushReply(const Rup::Frame& reply)
 	{
 		m_replyQueue.push(&reply);
 	}
@@ -50,7 +50,7 @@ namespace Tuning
 
 	void TuningSourceWorker::onThreadStarted()
 	{
-		connect(&m_replyQueue, &Queue<RupFotipFrame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
+		connect(&m_replyQueue, &Queue<Rup::Frame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
 		connect(&m_timer, &QTimer::timeout, this, &TuningSourceWorker::onTimer);
 
 		m_timer.setInterval(20);
@@ -65,8 +65,6 @@ namespace Tuning
 
 	bool TuningSourceWorker::processWaitReply()
 	{
-//		AUTO_LOCK(m_waitReplyMutex)
-
 		if (m_waitReply == true)
 		{
 			m_waitReplyCounter++;
@@ -90,8 +88,6 @@ namespace Tuning
 
 	bool TuningSourceWorker::processCommandQueue()
 	{
-//		AUTO_LOCK(m_waitReplyMutex)
-
 		if (m_waitReply == true)
 		{
 			return true;		// while wating reply has not another processing
@@ -119,8 +115,6 @@ namespace Tuning
 
 	bool TuningSourceWorker::processIdle()
 	{
-//		AUTO_LOCK(m_waitReplyMutex)
-
 		if (m_waitReply == true)
 		{
 			return true;		// while wating reply has not another processing
@@ -128,7 +122,7 @@ namespace Tuning
 
 		TuningCommand tuningCmd;
 
-		tuningCmd.opCode = OperationCode::Read;
+		tuningCmd.opCode = FotipV2::OpCode::Read;
 		tuningCmd.read.frame = m_nextFrameToAutoRead;
 
 		m_tuningCommandQueue.push(&tuningCmd);
@@ -146,16 +140,31 @@ namespace Tuning
 
 	void TuningSourceWorker::sendFOTIPRequest(const TuningCommand& tuningCmd)
 	{
-		initRupHeader(m_request);
+		assert(sizeof(Rup::Frame) == ENTIRE_UDP_SIZE);
+		assert(sizeof(RupFotipV2) == ENTIRE_UDP_SIZE);
+		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
+		assert(sizeof(FotipV2::Header) == 128);
 
-		initFotipHeader(m_request.fotip, tuningCmd);
+		initRupHeader(m_request.rupHeader);
 
-		initFotipData(m_request.fotip, tuningCmd);
+		initFotipHeader(m_request.fotipFrame.header, tuningCmd);
+
+		initFotipData(m_request.fotipFrame, tuningCmd);
+
+		// convert headers to BigEndian
+		//
+		m_request.rupHeader.reverseBytes();
+		m_request.fotipFrame.header.reverseBytes();
 
 		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&m_request),
 											  sizeof(m_request),
 											  m_sourceIP.address(),
 											  m_sourceIP.port());
+		// revert headers to LittleEndian
+		//
+		m_request.rupHeader.reverseBytes();
+		m_request.fotipFrame.header.reverseBytes();
+
 		if (sent == -1)
 		{
 			m_errSent++;
@@ -169,86 +178,84 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::initRupHeader(RupFotipFrame& rup)
+	void TuningSourceWorker::initRupHeader(Rup::Header& rupHeader)
 	{
-		rup.rupHeader.frameSize = ENTIRE_UDP_SIZE;
-		rup.rupHeader.protocolVersion = RUP_PROTOCOL_VERSION_5;
+		rupHeader.frameSize = ENTIRE_UDP_SIZE;
+		rupHeader.protocolVersion = Rup::VERSION;
 
-		rup.rupHeader.flags.all = 0;
-		rup.rupHeader.flags.tuningData = 1;
+		rupHeader.flags.all = 0;
+		rupHeader.flags.tuningData = 1;
 
-		rup.rupHeader.dataId = 0;
-		rup.rupHeader.moduleType = Hardware::DeviceModule::FamilyType::LM;	// 0x1100
-		rup.rupHeader.numerator = m_rupNumerator;
-		rup.rupHeader.framesQuantity = 1;
-		rup.rupHeader.frameNumber = 0;
+		rupHeader.dataId = 0;
+		rupHeader.moduleType = Hardware::DeviceModule::FamilyType::LM;	// 0x1100
+		rupHeader.numerator = m_rupNumerator;
+		rupHeader.framesQuantity = 1;
+		rupHeader.frameNumber = 0;
 
 		QDateTime now = QDateTime::currentDateTime();
 
 		QDate date = now.date();
 		QTime time = now.time();
 
-		rup.rupHeader.timeStamp.year = date.year();
-		rup.rupHeader.timeStamp.month = date.month();
-		rup.rupHeader.timeStamp.day = date.day();
+		rupHeader.timeStamp.year = date.year();
+		rupHeader.timeStamp.month = date.month();
+		rupHeader.timeStamp.day = date.day();
 
-		rup.rupHeader.timeStamp.hour = time.hour();
-		rup.rupHeader.timeStamp.minute = time.minute();
-		rup.rupHeader.timeStamp.second = time.second();
-		rup.rupHeader.timeStamp.millisecond = time.msec();
-
-		rup.rupHeader.reverseBytes();
+		rupHeader.timeStamp.hour = time.hour();
+		rupHeader.timeStamp.minute = time.minute();
+		rupHeader.timeStamp.second = time.second();
+		rupHeader.timeStamp.millisecond = time.msec();
 
 		m_rupNumerator++;
 	}
 
 
-	void TuningSourceWorker::initFotipHeader(FotipFrame& fotip, const TuningCommand& tuningCmd)
+	void TuningSourceWorker::initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd)
 	{
 		// common initialization
 		//
-		fotip.header.protocolVersion = FOTIP_PROTOCOL_VERSION_2;
-		fotip.header.uniqueId = m_sourceUniqueID;
+		fotipHeader.protocolVersion = FotipV2::VERSION;
+		fotipHeader.uniqueId = m_sourceUniqueID;
 
-		fotip.header.subsystemKey.wordVaue = 0;
-		fotip.header.subsystemKey.lmNumber = m_lmNumber;
-		fotip.header.subsystemKey.subsystemCode = m_subsystemCode;
-		fotip.header.subsystemKey.crc = Crc::crc4(fotip.header.subsystemKey.wordVaue);
+		fotipHeader.subsystemKey.wordVaue = 0;
+		fotipHeader.subsystemKey.lmNumber = m_lmNumber;
+		fotipHeader.subsystemKey.subsystemCode = m_subsystemCode;
+		fotipHeader.subsystemKey.crc = Crc::crc4(fotipHeader.subsystemKey.wordVaue);
 
-		fotip.header.flags.all = 0;
+		fotipHeader.flags.all = 0;
 
-		fotip.header.fotipFrameSize = sizeof(FotipFrame);
+		fotipHeader.fotipFrameSize = sizeof(FotipV2::Frame);
 
-		fotip.header.romSize = m_tuningRomSizeW * 2;				// in bytes
-		fotip.header.romFrameSize = m_tuningRomFrameSizeW * 2;		// in bytes
+		fotipHeader.romSize = m_tuningRomSizeW * 2;					// in bytes
+		fotipHeader.romFrameSize = m_tuningRomFrameSizeW * 2;		// in bytes
 
-		memset(fotip.header.reserve, 0, sizeof(fotip.header.reserve));
+		fotipHeader.offsetInFrame = 0;
 
-		fotip.header.operationCode = TO_INT(tuningCmd.opCode);
+		memset(fotipHeader.reserve, 0, sizeof(fotipHeader.reserve));
+
+		fotipHeader.operationCode = TO_INT(tuningCmd.opCode);
 
 		// operation-specific initialization
 		//
 
 		switch(tuningCmd.opCode)
 		{
-		case OperationCode::Read:
-			fotip.header.startAddress = m_tuningRomStartAddr + tuningCmd.read.frame * m_tuningRomFrameSizeW;
-			fotip.header.dataType = 0;
+		case FotipV2::OpCode::Read:
+			fotipHeader.startAddress = m_tuningRomStartAddr + tuningCmd.read.frame * m_tuningRomFrameSizeW;
+			fotipHeader.dataType = TO_INT(FotipV2::DataType::Discrete);		// any data type is allowed
 			break;
 
 		default:
 			assert(false);
 		}
-
-		fotip.header.reverseBytes();
 	}
 
 
-	void TuningSourceWorker::initFotipData(FotipFrame& fotip, const TuningCommand& tuningCmd)
+	void TuningSourceWorker::initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd)
 	{
 		switch(tuningCmd.opCode)
 		{
-		case OperationCode::Read:
+		case FotipV2::OpCode::Read:
 			break;
 
 		default:
@@ -257,10 +264,10 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::processReply(RupFotipFrame& reply)
+	void TuningSourceWorker::processReply(RupFotipV2& reply)
 	{
 		reply.rupHeader.reverseBytes();
-		reply.fotip.header.reverseBytes();
+		reply.fotipFrame.header.reverseBytes();
 
 		bool result = true;
 
@@ -271,32 +278,32 @@ namespace Tuning
 			return;
 		}
 
-		result = checkFotipHeader(reply.fotip.header);
+		result = checkFotipHeader(reply.fotipFrame.header);
 
 		if (result == false)
 		{
 			return;
 		}
 
-
-
 		int a = 0;
 		a++;
 	}
 
 
-	bool TuningSourceWorker::checkRupHeader(const RupFrameHeader& rupHeader)
+	bool TuningSourceWorker::checkRupHeader(const Rup::Header& rupHeader)
 	{
-		if (rupHeader.protocolVersion != RUP_PROTOCOL_VERSION_5)
+		bool result = true;
+
+		if (rupHeader.protocolVersion != Rup::VERSION)
 		{
 			m_errRupProtocolVersion++;
-			return false;
+			result &= false;
 		}
 
 		if (rupHeader.frameSize != ENTIRE_UDP_SIZE)
 		{
 			m_errRupFrameSize++;
-			return false;
+			result &= false;
 		}
 
 		if (rupHeader.flags.tuningData != 1 ||
@@ -305,116 +312,198 @@ namespace Tuning
 			rupHeader.flags.test != 0)
 		{
 			m_errRupNoTuningData++;
-			return false;
+			result &= false;
 		}
 
 		if (rupHeader.moduleType != Hardware::DeviceModule::FamilyType::LM)
 		{
 			m_errRupModuleType++;
-			return false;
+			result &= false;
 		}
 
 		if (rupHeader.framesQuantity != 1)
 		{
 			m_errRupFramesQuantity++;
-			return false;
+			result &= false;
 		}
 
 		if (rupHeader.frameNumber != 0)
 		{
 			m_errRupFrameNumber++;
-			return false;
+			result &= false;
 		}
 
 		//	quint32 dataId;	??
 
-		return true;
+		return result;
 	}
 
 
-	bool TuningSourceWorker::checkFotipHeader(const FotipHeader& fotipHeader)
+	bool TuningSourceWorker::checkFotipHeader(const FotipV2::Header& fotipHeader)
 	{
-		if (fotipHeader.protocolVersion != FOTIP_PROTOCOL_VERSION_2)
+		bool result = true;
+
+		if (fotipHeader.protocolVersion != FotipV2::VERSION)
 		{
 			m_errFotipProtocolVersion++;
-			return false;
+			result &= false;
 		}
 
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
 			m_errFotipUniqueID++;
-			return false;
+			result &= false;
 		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
 			m_errFotipLmNumber++;
-			return false;
+			result &= false;
 		}
 
 		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
 		{
 			m_errFotipSubsystemCode++;
-			return false;
+			result &= false;
 		}
 
-		if (fotipHeader.operationCode != m_request.fotip.header.operationCode)
+		if (fotipHeader.operationCode != m_request.fotipFrame.header.operationCode)
 		{
 			m_errFotipOperationCode++;
-			return false;
+			result &= false;
 		}
 
-		if (fotipHeader.fotipFrameSize != sizeof(FotipFrame))
+		if (fotipHeader.fotipFrameSize != sizeof(FotipV2::Frame))
 		{
 			m_errFotipFrameSize++;
-			return false;
+			result &= false;
 		}
 
 		if (fotipHeader.romSize !=  m_tuningRomSizeW * 2)
 		{
 			m_errFotipRomSize++;
-			return false;
+			result &= false;
 		}
 
 		if (fotipHeader.romFrameSize != m_tuningRomFrameSizeW * 2)
 		{
 			m_errFotipRomFrameSize++;
-			return false;
+			result &= false;
 		}
 
-		FotipHeaderFlags& flags = fotipHeader.flags;
+		const FotipV2::HeaderFlags& flags = fotipHeader.flags;
 
+		// check FOTIP error flags
+		//
 		if (flags.dataTypeError == 1)
 		{
-			m_errFotipFlagsDataType++;
-			return false;
+			m_fotipFlagDataTypeErr++;
+			result &= false;
 		}
 
-		//		quint32 startAddress;	??
-		//		quint16 dataType;		??
+		if (flags.operationCodeError == 1)
+		{
+			m_fotipFlagOpCodeErr++;
+			result &= false;
+		}
 
-		return true;
+		if (flags.startAddressError == 1)
+		{
+			m_fotipFlagStartAddrErr++;
+			result &= false;
+		}
+
+		if (flags.romSizeError == 1)
+		{
+			m_fotipFlagRomSizeErr++;
+			result &= false;
+		}
+
+		if (flags.romFrameSizeError == 1)
+		{
+			m_fotipFlagRomFrameSizeErr++;
+			result &= false;
+		}
+
+		if (flags.frameSizeError == 1)
+		{
+			m_fotipFlagFrameSizeErr++;
+			result &= false;
+		}
+
+		if (flags.versionError == 1)
+		{
+			m_fotipFlagProtocolVersionErr++;
+			result &= false;
+		}
+
+		if (flags.subsystemKeyError == 1)
+		{
+			m_fotipFlagSubsystemKeyErr++;
+			result &= false;
+		}
+
+		if (flags.idError == 1)
+		{
+			m_fotipFlagUniueIDErr++;
+			result &= false;
+		}
+
+		if (flags.offsetError == 1)
+		{
+			m_fotipFlagOffsetErr++;
+			result &= false;
+		}
+
+		// check FOTIP success flags
+		//
+		if (flags.successfulCheck == 1)
+		{
+			m_fotipFlagBoundsCheckSuccess++;
+		}
+
+		if (flags.successfulWrite == 1)
+		{
+			m_fotipFlagWriteSuccess++;
+		}
+
+		if (flags.succesfulApply == 1)
+		{
+			m_fotipFlagApplySuccess++;
+		}
+
+		if (flags.setSOR == 1)
+		{
+			m_fotipFlagSetSOR++;
+		}
+
+		return result;
 	}
 
 
 	void TuningSourceWorker::onTimer()
 	{
-		do
+		if (processWaitReply() == true)
 		{
-			if (processWaitReply() == true) break;
-			if (processCommandQueue() == true) break;
-
-			processIdle();
-
-			break;
+			return;
 		}
-		while(1);
+
+		if (processCommandQueue() == true)
+		{
+			return;
+		}
+
+		processIdle();
 	}
 
 
 	void TuningSourceWorker::onReplyReady()
 	{
-		bool res = m_replyQueue.pop(&m_reply);
+		assert(sizeof(Rup::Frame) == sizeof(RupFotipV2));
+
+		// convert reply from Rup::Frame to RupFotipV2
+		//
+		bool res = m_replyQueue.pop(reinterpret_cast<Rup::Frame*>(&m_reply));
 
 		if (res == false)
 		{
@@ -434,137 +523,6 @@ namespace Tuning
 		m_waitReply = false;
 	}
 
-
-
-	/*void TuningSocketListener::onRequest(quint32 tuningSourceIP)
-	{
-		TuningSocketRequestQueue* queue = m_requestQueues.value(tuningSourceIP, nullptr);
-
-		if (queue == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		if (queue->isWaitingForAck() || queue->isEmpty())
-		{
-			return;
-		}
-
-		TuningSocketRequest request;
-
-		bool result = queue->pop(&request);
-
-		if (result == false)
-		{
-			assert(false);
-			return;
-		}
-
-		SocketRequest sr;
-
-		m_requests.pop(&sr);
-
-		if (m_socketBound == false)
-		{
-			return;
-		}
-
-		RupFrameHeader& rh = m_reqFrame.rupHeader;
-
-		rh.frameSize = ENTIRE_UDP_SIZE;
-		rh.protocolVersion = 4;
-		rh.flags.all = 0;
-		rh.flags.tuningData = 1;
-		rh.dataId = 0;
-		rh.moduleType = 4352;			// !!!!???
-		rh.numerator = sr.numerator;
-
-		rh.framesQuantity = 1;
-		rh.frameNumber = 0;
-
-		QDateTime t = QDateTime::currentDateTime();
-
-		rh.timeStamp.year = t.date().year();
-		rh.timeStamp.month = t.date().month();
-		rh.timeStamp.day = t.date().day();
-
-		rh.timeStamp.hour = t.time().hour();
-		rh.timeStamp.minute = t.time().minute();
-		rh.timeStamp.second = t.time().second();
-		rh.timeStamp.millisecond = t.time().msec();
-
-		FotipHeader& fh = m_reqFrame.fotip.header;
-
-		fh.protocolVersion = 1;
-		fh.subsystemKeyWord = 0;
-
-		fh.subsystemKey.lmNumber = sr.lmNumber;
-		fh.subsystemKey.subsystemCode = sr.lmSubsystemID;
-
-		quint16 data = fh.subsystemKey.subsystemCode;	// second
-		data <<= 6;
-		data += fh.subsystemKey.lmNumber;			// first
-
-		fh.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
-
-		// For IPEN only !!!! begin
-
-		if (sr.lmNumber >= 1 && sr.lmNumber <= 4)
-		{
-			const quint16 subsystemKeyIPEN[4] =
-			{
-				0x6141,
-				0x3142,
-				0x0143,
-				0x9144
-			};
-
-			fh.subsystemKey.wordVaue = subsystemKeyIPEN[sr.lmNumber - 1];
-		}
-		else
-		{
-			assert(false);
-		}
-
-		// For IPEN only !!!! end
-
-		fh.operationCode = TO_INT(sr.operation);
-		fh.flags.all = 0;
-		fh.startAddress = sr.startAddressW;
-		fh.fotipFrameSize = 1432;
-		fh.romSize = sr.romSizeW * 2;					// words => bytes
-		fh.romFrameSize = sr.frameSizeW * 2;			// words => bytes
-		fh.dataType = sr.dataType;
-		fh.uniqueId = sr.uniqueID;
-
-		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);
-		memset(m_reqFrame.fotip.reserv, 0, FOTIP_DATA_RESERV_SIZE);
-		memset(m_reqFrame.fotip.comparisonResult, 0, FOTIP_COMPARISON_RESULT_SIZE);
-
-		if (sr.operation == Tuning::OperationCode::Write)
-		{
-			memcpy(m_reqFrame.fotip.data, sr.fotipData, FOTIP_TX_RX_DATA_SIZE);
-		}
-		else
-		{
-			memset(m_reqFrame.fotip.data, 0, FOTIP_TX_RX_DATA_SIZE);
-		}
-
-		if (sr.userRequest == true)
-		{
-			emit userRequest(m_reqFrame.fotip);
-		}
-
-		int size = sizeof(m_reqFrame);
-
-		qint64 result = m_socket->writeDatagram(reinterpret_cast<char*>(&m_reqFrame), size, QHostAddress(sr.lmIP), sr.lmPort);
-
-		if (result == -1)
-		{
-			qDebug() << "Socket write error";
-		}
-	}*/
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -597,7 +555,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorkerThread::pushReply(const RupFotipFrame &reply)
+	void TuningSourceWorkerThread::pushReply(const Rup::Frame& reply)
 	{
 		if (m_sourceWorker == nullptr)
 		{
@@ -728,7 +686,7 @@ namespace Tuning
 		}
 
 		QHostAddress tuningSourceIP;
-		RupFotipFrame reply;
+		Rup::Frame reply;
 
 		int count = 0;
 
@@ -765,7 +723,7 @@ namespace Tuning
 	}
 
 
-	void TuningSocketListener::pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const RupFotipFrame& reply)
+	void TuningSocketListener::pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const Rup::Frame& reply)
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
@@ -797,7 +755,6 @@ namespace Tuning
 	}
 
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningSocketListenerThread class implementation
@@ -815,68 +772,6 @@ namespace Tuning
 	TuningSocketListenerThread::~TuningSocketListenerThread()
 	{
 	}
-
-
-	// --------------------------------------------
-
-	// -------------------------------------------------------------------------
-	//
-	//	TuningSocketRequestQueue class implementaton
-	//
-	// -------------------------------------------------------------------------
-
-	TuningSocketRequestQueue::TuningSocketRequestQueue(quint32 tuningSourceIP) :
-		Queue<TuningSocketRequest>(1000),
-		m_tuningSourceIP(tuningSourceIP)
-	{
-	}
-
-
-	bool TuningSocketRequestQueue::push(const TuningSocketRequest* ptr)
-	{
-		bool result = Queue<TuningSocketRequest>::push(ptr);
-
-		if (result == true)
-		{
-			emit request(m_tuningSourceIP);
-			return true;
-		}
-
-		return false;
-	}
-
-
-	void TuningSocketRequestQueue::stopWaiting()
-	{
-		m_waitingForAk = false;
-		m_waitCount = 0;
-	}
-
-
-	void TuningSocketRequestQueue::requestIsSent()
-	{
-		assert(m_waitingForAk == false);
-
-		m_waitingForAk = true;
-		m_waitCount = 0;
-	}
-
-
-	void TuningSocketRequestQueue::incWaitCount()
-	{
-		assert(m_waitingForAk == true);
-
-		m_waitCount++;
-	}
-
-
-	int TuningSocketRequestQueue::waitCount() const
-	{
-		return m_waitCount;
-	}
-
-
-	// -----------------------------------------------------
 
 }
 

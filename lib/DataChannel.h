@@ -30,7 +30,7 @@ protected:
 	QUdpSocket* m_socket = nullptr;
 	bool m_socketBound = false;
 
-	RupFrame m_rupFrame;
+	Rup::Frame m_rupFrame;
 
 	RupDataQueue m_rupDataQueue;
 

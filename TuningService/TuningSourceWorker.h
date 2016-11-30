@@ -87,7 +87,7 @@ namespace Tuning
 	};
 */
 
-	class TuningSocketRequestQueue : public Queue<TuningSocketRequest>
+	/*class TuningSocketRequestQueue : public Queue<TuningSocketRequest>
 	{
 		Q_OBJECT
 
@@ -111,7 +111,7 @@ namespace Tuning
 		quint32 m_tuningSourceIP;
 		bool m_waitingForAk = false;
 		int m_waitCount = 0;
-	};
+	}*/
 
 
 	class TuningSources;
@@ -145,7 +145,7 @@ namespace Tuning
 
 		struct TuningCommand
 		{
-			OperationCode opCode = OperationCode::Read;
+			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
 
 			Read read;
 			Write write;
@@ -158,7 +158,7 @@ namespace Tuning
 
 		quint32 sourceIP() const;
 
-		void pushReply(const RupFotipFrame& reply);
+		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
 
 	signals:
@@ -174,23 +174,24 @@ namespace Tuning
 
 		void sendFOTIPRequest(const TuningCommand& tuningCmd);
 
-		void initRupHeader(RupFotipFrame& rup);
-		void initFotipHeader(FotipFrame& fotip, const TuningCommand& tuningCmd);
-		void initFotipData(FotipFrame& fotip, const TuningCommand& tuningCmd);
+		void initRupHeader(Rup::Header& rupHeader);
+		void initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd);
+		void initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd);
 
-		void processReply(RupFotipFrame& reply);
+		void processReply(RupFotipV2 &reply);
 
-		bool checkRupHeader(const RupFrameHeader& rupHeader);
-		bool checkFotipHeader(const FotipHeader& fotipHeader);
-
+		bool checkRupHeader(const Rup::Header& rupHeader);
+		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
 
 	private slots:
 		void onTimer();
 		void onReplyReady();
 
 	private:
+
 		// data from tuning source
 		//
+		HostAddressPort m_sourceIP;
 
 		quint64 m_sourceUniqueID = 0;
 		quint16 m_lmNumber = 0;
@@ -203,26 +204,22 @@ namespace Tuning
 
 		//
 
-		HostAddressPort m_sourceIP;
-
 		bool m_waitReply = false;
+
+		const int MAX_WAIT_REPLY_COUNTER = 3;
 
 		int m_waitReplyCounter = 0;
 
 		int m_nextFrameToAutoRead = 0;
 
-		const int MAX_WAIT_REPLY_COUNTER = 3;
-
-		//QMutex m_waitReplyMutex;
-
 		QTimer m_timer;
 
 		QUdpSocket m_socket;
 
-		RupFotipFrame m_request;
-		RupFotipFrame m_reply;
+		RupFotipV2 m_request;
+		RupFotipV2 m_reply;
 
-		Queue<RupFotipFrame> m_replyQueue;
+		Queue<Rup::Frame> m_replyQueue;
 
 		Queue<TuningCommand> m_tuningCommandQueue;
 
@@ -278,13 +275,11 @@ namespace Tuning
 	};
 
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningSourceWorkerThread class declaration
 	//
 	// ----------------------------------------------------------------------------------
-
 
 	class TuningSourceWorkerThread : public SimpleThread
 	{
@@ -294,7 +289,7 @@ namespace Tuning
 
 		quint32 sourceIP();
 
-		void pushReply(const RupFotipFrame& reply);
+		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
 
 	private:
@@ -335,7 +330,7 @@ namespace Tuning
 
 		void onSocketReadyRead();
 
-		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const RupFotipFrame& reply);
+		void pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const Rup::Frame& reply);
 		void incSourceWorkerErrReplySize(const QHostAddress& tuningSourceIP);
 
 	private:
@@ -345,6 +340,7 @@ namespace Tuning
 		QTimer m_timer;
 
 		QUdpSocket* m_socket = nullptr;
+
 		// statistics
 		//
 		qint64 m_errReplySize = 0;

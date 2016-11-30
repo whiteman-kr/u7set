@@ -1,11 +1,11 @@
 #include <QtEndian>
 #include "../lib/Crc.h"
 #include "../lib/WUtils.h"
-#include "TuningDataStorage.h"
-#include "../TuningService/TuningSource.h"
+#include "TuningIPENDataStorage.h"
+#include "TuningIPENSource.h"
 
 
-namespace  Tuning
+namespace  TuningIPEN
 {
 
 	// -------------------------------------------------------------------------------------
@@ -292,11 +292,11 @@ namespace  Tuning
 			return;
 		}
 
-		memcpy(m_framesData + frameNo * FotipV2::TX_RX_DATA_SIZE, fotipData, FotipV2::TX_RX_DATA_SIZE);
+		memcpy(m_framesData + frameNo * FOTIP_TX_RX_DATA_SIZE, fotipData, FOTIP_TX_RX_DATA_SIZE);
 	}
 
 
-/*	bool TuningFramesData::getSignalState(const Signal* signal, TuningSignalState* tss)
+	bool TuningFramesData::getSignalState(const Signal* signal, TuningSignalState* tss)
 	{
 		int offset = signal->tuningAddr().offset() * sizeof(quint16) - m_firstFrameNo * m_tuningFrameSizeBytes;
 
@@ -365,7 +365,7 @@ namespace  Tuning
 	}
 
 
-	bool TuningFramesData::setSignalState(const Signal* signal, double value, Tuning::SocketRequest* sr)
+	bool TuningFramesData::setSignalState(const Signal* signal, double value, SocketRequest* sr)
 	{
 		if (sr == nullptr)
 		{
@@ -431,7 +431,7 @@ namespace  Tuning
 
 		assert(false);
 		return false;
-	}*/
+	}
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -826,7 +826,7 @@ namespace  Tuning
 	}
 
 
-/*	bool TuningData::getSignalState(const QString& appSignalID, TuningSignalState* tss)
+	bool TuningData::getSignalState(const QString& appSignalID, TuningSignalState* tss)
 	{
 		if (m_id2SignalMap.contains(appSignalID) == false)
 		{
@@ -852,7 +852,7 @@ namespace  Tuning
 	}
 
 
-	bool TuningData::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
+	bool TuningData::setSignalState(const QString& appSignalID, double value, SocketRequest* sr)
 	{
 		if (m_id2SignalMap.contains(appSignalID) == false)
 		{
@@ -893,7 +893,7 @@ namespace  Tuning
 		}
 
 		return m_tuningFramesData[type].setSignalState(signal, value, sr);
-	}*/
+	}
 
 
 	int TuningData::getSignalType(const Signal* signal)

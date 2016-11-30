@@ -24,7 +24,6 @@ SOURCES +=\
 	../Proto/serialization.pb.cc \
 	../lib/Types.cpp \
 	../lib/ProtoSerialization.cpp \
-        ../TuningService/TuningSource.cpp \
 	../lib/Service.cpp \
 	../lib/DataProtocols.cpp \
 	../lib/DataSource.cpp \
@@ -42,7 +41,6 @@ SOURCES +=\
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
     TuningIPENService.cpp \
-    ../TuningService/TuningDataStorage.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
@@ -50,7 +48,8 @@ SOURCES +=\
     TripleChannelSignalsModel.cpp \
     TuningIPENSocket.cpp \
     TuningIPENSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    TuningIPENDataStorage.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -63,7 +62,6 @@ HEADERS  += TuningMainWindow.h \
 	../Proto/serialization.pb.h \
 	../lib/Types.h \
 	../lib/ProtoSerialization.h \
-        ../TuningService/TuningSource.h \
 	../lib/Service.h \
 	../lib/DataProtocols.h \
 	../lib/DataSource.h \
@@ -80,7 +78,6 @@ HEADERS  += TuningMainWindow.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
     TuningIPENService.h \
-    ../TuningService/TuningDataStorage.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
@@ -88,7 +85,8 @@ HEADERS  += TuningMainWindow.h \
     TripleChannelSignalsModel.h \
     TuningIPENSocket.h \
     TuningIPENSource.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    TuningIPENDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 
