@@ -284,9 +284,6 @@ namespace Tuning
 		{
 			return;
 		}
-
-		int a = 0;
-		a++;
 	}
 
 
