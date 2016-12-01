@@ -213,7 +213,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 				checkoutSignal(QList<std::shared_ptr<PropertyObject>>() << signalProperties);
 				signalProperties->signal().setDataSize(1);
 			}*/
-			signalProperties->propertyByCaption("DataFormat")->setVisible(false);
 		}
 
 		if (!signalProperties->signal().isInternal())

@@ -26,15 +26,15 @@
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
-SC_NAME = 2,
-SC_CHANNEL = 3,
-SC_TYPE = 4,
-SC_DATA_FORMAT = 5,
-SC_DATA_SIZE = 6,
-SC_NORMAL_STATE = 7,
-SC_ACQUIRE = 8,
-SC_IN_OUT_TYPE = 9,
-SC_DEVICE_STR_ID = 10,
+SC_DEVICE_STR_ID = 2,
+SC_NAME = 3,
+SC_CHANNEL = 4,
+SC_TYPE = 5,
+SC_NORMAL_STATE = 6,
+SC_ACQUIRE = 7,
+SC_IN_OUT_TYPE = 8,
+SC_DATA_SIZE = 9,
+SC_ANALOG_DATA_FORMAT = 10,
 SC_LOW_ADC = 11,
 SC_HIGH_ADC = 12,
 SC_LOW_LIMIT = 13,
@@ -58,15 +58,15 @@ const char* Columns[] =
 {
 	"AppSignalID",
 	"CustomAppSignalID",
+	"EquipmentID",
 	"Caption",
 	"Channel",
 	"A/D",
-	"Data format",
-	"Data\nsize",
 	"Normal\nstate",
 	"Acquire",
 	"Input-output\ntype",
-	"EquipmentID",
+	"Data\nsize",
+	"Analog\nData format",
 	"Low ADC",
 	"High ADC",
 	"Low\nEngeneering Units",
@@ -194,7 +194,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		// ComboBox
 		//
-		case SC_DATA_FORMAT:
+		case SC_ANALOG_DATA_FORMAT:
 		{
 			QComboBox* cb = new QComboBox(parent);
 			cb->addItems(m_dataFormatInfo.getValuesList());
@@ -290,7 +290,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt())); break;
+		case SC_ANALOG_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt())); break;
 		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.unitID())); break;
 		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
@@ -342,7 +342,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
+		case SC_ANALOG_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_OUTPUT_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
@@ -628,7 +628,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('A');
-				case SC_DATA_FORMAT:
+				case SC_ANALOG_DATA_FORMAT:
 					if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
 					{
 						return m_dataFormatInfo.value(signal.analogSignalFormatInt());
@@ -680,7 +680,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('D');
-				case SC_DATA_FORMAT:
+				case SC_ANALOG_DATA_FORMAT:
 					if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
 					{
 						return m_dataFormatInfo.value(signal.analogSignalFormatInt());
@@ -783,7 +783,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
+			case SC_ANALOG_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -1938,14 +1938,14 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	switch(singalType)
 	{
 		case ST_DISCRETE:
-			for (int i = SC_LOW_ADC; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, true);
 			}
 			break;
 		case ST_ANALOG:
 		case ST_ANY:
-			for (int i = SC_LOW_ADC; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, false);
 			}
