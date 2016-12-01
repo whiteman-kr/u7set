@@ -29,7 +29,7 @@ void SignalProperties::initProperties()
 	static const QString customSignalIDCaption("CustomAppSignalID");
 	static const QString captionCaption("Caption");
 	static const QString captionValidator("^.+$");
-	static const QString dataFormatCaption("DataFormat");
+	static const QString analogDataFormatCaption("AnalogDataFormat");
 	static const QString dataSizeCaption("DataSize");
 	static const QString lowADCCaption("LowADC");
 	static const QString highADCCaption("HighADC");
@@ -98,12 +98,6 @@ void SignalProperties::initProperties()
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
 
-	auto dataFormatProperty = addProperty<E::AnalogAppSignalFormat>(dataFormatCaption, QString(), true,
-										(std::function<E::AnalogAppSignalFormat(void)>)std::bind(&Signal::analogSignalFormat, &m_signal),
-										std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
-
-	dataFormatProperty->setCategory(dataFormatCategory);
-
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
 										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),
 										std::bind(static_cast<void (Signal::*)(int)>(&Signal::setDataSize), &m_signal, std::placeholders::_1));
@@ -121,6 +115,12 @@ void SignalProperties::initProperties()
 				sensorList->append(i, SensorTypeStr[i]);
 			}
 		}
+
+		auto analogDataFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogDataFormatCaption, QString(), true,
+																			  (std::function<E::AnalogAppSignalFormat(void)>)std::bind(&Signal::analogSignalFormat, &m_signal),
+																			  std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
+
+		analogDataFormatProperty->setCategory(dataFormatCategory);
 
 		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC, m_signal);
 		lowADCProperty->setCategory(signalProcessingCategory);
