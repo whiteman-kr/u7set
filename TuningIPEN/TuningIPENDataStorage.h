@@ -6,6 +6,7 @@
 #include "../lib/DataProtocols.h"
 #include "../u7/Builder/IssueLogger.h"
 #include "TuningIPENSocket.h"
+#include "../TuningService/TuningDataStorage.h"
 
 namespace TuningIPEN
 {
@@ -69,7 +70,7 @@ namespace TuningIPEN
 	};
 
 
-	class TuningData : public QObject
+	class TuningData : public Tuning::TuningData
 	{
 		Q_OBJECT
 
