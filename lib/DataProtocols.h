@@ -68,7 +68,6 @@ namespace Rup
 
 	typedef quint8 Data[FRAME_DATA_SIZE];
 
-
 	struct Frame
 	{
 		Rup::Header header;
@@ -163,12 +162,12 @@ namespace FotipV2
 
 		FotipV2::HeaderFlags flags;
 
-		quint32 startAddress;
-		quint16 fotipFrameSize;
-		quint32 romSize;
-		quint16 romFrameSize;
+		quint32 startAddressW;
+		quint16 fotipFrameSizeB;
+		quint32 romSizeB;
+		quint16 romFrameSizeB;
 		quint16 dataType;							// enum FotipDataType values
-		quint32 offsetInFrame;
+		quint32 offsetInFrameW;
 
 		quint8 reserve[HEADER_RESERVE_SIZE];
 
@@ -182,11 +181,11 @@ namespace FotipV2
 	{
 		FotipV2::Header header;
 
-		char data[TX_RX_DATA_SIZE];
+		quint8 data[TX_RX_DATA_SIZE];
 
 		ComparisonResult cmpResult;
 
-		char reserv[DATA_RESERV_SIZE];
+		quint8 reserv[DATA_RESERV_SIZE];
 	};
 }
 

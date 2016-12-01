@@ -260,10 +260,10 @@ void SendTuningFrameWidget::sendPacket()
 
 		writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
 		writeBigEndian(fotip.flags.all, m_flags->text().toUInt());
-		writeBigEndian(fotip.startAddress, m_startAddress->text().toUInt());
-		writeBigEndian(fotip.fotipFrameSize, m_fotipFrameSize->text().toUInt());
-		writeBigEndian(fotip.romSize, m_romSize->text().toUInt());
-		writeBigEndian(fotip.romFrameSize, m_romFrameSize->text().toUInt());
+		writeBigEndian(fotip.startAddressW, m_startAddress->text().toUInt());
+		writeBigEndian(fotip.fotipFrameSizeB, m_fotipFrameSize->text().toUInt());
+		writeBigEndian(fotip.romSizeB, m_romSize->text().toUInt());
+		writeBigEndian(fotip.romFrameSizeB, m_romFrameSize->text().toUInt());
 		writeBigEndian(fotip.dataType, dataTypes[m_dataType->currentIndex()]);
 
 		switch (m_fillFotipDataMethod->currentIndex())
@@ -336,10 +336,10 @@ void SendTuningFrameWidget::sendPacket()
 
 		fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;
 		fotip.flags.all =  m_flags->text().toUInt();
-		fotip.startAddress = m_startAddress->text().toUInt();
-		fotip.fotipFrameSize = m_fotipFrameSize->text().toUInt();
-		fotip.romSize = m_romSize->text().toUInt();
-		fotip.romFrameSize = m_romFrameSize->text().toUInt();
+		fotip.startAddressW = m_startAddress->text().toUInt();
+		fotip.fotipFrameSizeB = m_fotipFrameSize->text().toUInt();
+		fotip.romSizeB = m_romSize->text().toUInt();
+		fotip.romFrameSizeB = m_romFrameSize->text().toUInt();
 		fotip.dataType = dataTypes[m_dataType->currentIndex()];
 
 		switch (m_fillFotipDataMethod->currentIndex())

@@ -6,6 +6,7 @@
 #include "../lib/ServiceSettings.h"
 
 #include "TuningSource.h"
+#include "TuningMemory.h"
 
 namespace Tuning
 {
@@ -117,7 +118,6 @@ namespace Tuning
 	class TuningSources;
 	class TuningSourceWorker;
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningSourceWorker class declaration
@@ -178,10 +178,15 @@ namespace Tuning
 		void initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd);
 		void initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd);
 
-		void processReply(RupFotipV2 &reply);
+		void processReply(RupFotipV2& reply);
+		void processReadReply(RupFotipV2& reply);
+		void processWriteReply(RupFotipV2& reply);
+		void processApplyReply(RupFotipV2& reply);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
+
+		void restartTimer();
 
 	private slots:
 		void onTimer();
@@ -191,13 +196,14 @@ namespace Tuning
 
 		// data from tuning source
 		//
+		QString m_sourceEquipmentID;
 		HostAddressPort m_sourceIP;
 
 		quint64 m_sourceUniqueID = 0;
 		quint16 m_lmNumber = 0;
 		quint16 m_subsystemCode = 0;
 
-		int m_tuningRomStartAddr = 0;
+		int m_tuningRomStartAddrW = 0;
 		int m_tuningRomFrameCount = 0;
 		int m_tuningRomFrameSizeW = 0;
 		int m_tuningRomSizeW = 0;
@@ -212,6 +218,7 @@ namespace Tuning
 
 		int m_nextFrameToAutoRead = 0;
 
+		int m_timerInterval = 10;
 		QTimer m_timer;
 
 		QUdpSocket m_socket;
@@ -224,6 +231,8 @@ namespace Tuning
 		Queue<TuningCommand> m_tuningCommandQueue;
 
 		quint16 m_rupNumerator = 0;
+
+		TuningMemory m_tuningMem;
 
 		// statisticts
 		//

@@ -19,6 +19,8 @@ namespace Builder
 {
 	class SignalSetObject;
 	class AppLogicData;
+	class TuningBuilder;
+	class ConfigurationBuilder;
 }
 
 namespace Hardware
@@ -41,6 +43,9 @@ namespace Afb
 
 namespace Builder
 {
+
+	typedef QHash<QString, quint64> LmsUniqueIdMap;		// LM's equipmentID => LM's uniqueID map
+
 	// ------------------------------------------------------------------------
 	//
 	//		BuildWorkerThread
@@ -99,14 +104,21 @@ namespace Builder
 
 		// Generate SCADA software configurations
 		//
-		bool generateSoftwareConfiguration(	DbController* db,
+		bool generateSoftwareConfiguration(DbController* db,
 											Hardware::SubsystemStorage* subsystems,
 											Hardware::EquipmentSet* equipment,
 											SignalSet* signalSet,
 											Tuning::TuningDataStorage* tuningDataStorage,
+											const LmsUniqueIdMap& lmsUniqueIdMap,
 											BuildResultWriter* buildResultWriter);
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
+
+		void generateLmsUniqueID(BuildResultWriter& buildWriter,
+								 TuningBuilder& tuningBuilder,
+								 ConfigurationBuilder& cfgBuilder,
+								 const std::vector<Hardware::DeviceModule *>& lmModules,
+								 LmsUniqueIdMap& lmsUniqueIdMap);
 
 		// What's the next compilation task?
 		//

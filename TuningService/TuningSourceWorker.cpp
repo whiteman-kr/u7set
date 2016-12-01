@@ -5,7 +5,6 @@
 
 namespace Tuning
 {
-
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningSourceWorker class implementation
@@ -18,15 +17,18 @@ namespace Tuning
 		m_tuningCommandQueue(this, 1000),
 		m_replyQueue(this, 10)
 	{
+		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
 		m_sourceUniqueID = source.uniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());
 
-		m_tuningRomStartAddr = settings.tuningDataOffsetW;
+		m_tuningRomStartAddrW = settings.tuningDataOffsetW;
 		m_tuningRomFrameCount = settings.tuningRomFrameCount;
 		m_tuningRomFrameSizeW = settings.tuningRomFrameSizeW;
 		m_tuningRomSizeW = settings.tuningRomSizeW;
+
+		m_tuningMem.init(m_tuningRomStartAddrW, m_tuningRomFrameSizeW, m_tuningRomFrameCount);
 	}
 
 
@@ -53,8 +55,9 @@ namespace Tuning
 		connect(&m_replyQueue, &Queue<Rup::Frame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
 		connect(&m_timer, &QTimer::timeout, this, &TuningSourceWorker::onTimer);
 
-		m_timer.setInterval(20);
-		m_timer.start();
+		m_timerInterval = 15;
+
+		restartTimer();
 	}
 
 
@@ -74,12 +77,19 @@ namespace Tuning
 				return true;
 			}
 
+			m_waitReplyCounter = 0;
+
 			// fix replay timeout
 			//
 
 			m_errNoReply++;
 
 			m_waitReply = false;
+
+			if ((m_errNoReply % 100) == 0)
+			{
+				qDebug() << C_STR(QString(tr("From '%1' NoReplies = %2")).arg(m_sourceEquipmentID).arg(m_errNoReply));
+			}
 		}
 
 		return false;			// switch to next processing
@@ -165,6 +175,8 @@ namespace Tuning
 		m_request.rupHeader.reverseBytes();
 		m_request.fotipFrame.header.reverseBytes();
 
+		m_waitReplyCounter = 0;
+
 		if (sent == -1)
 		{
 			m_errSent++;
@@ -224,12 +236,12 @@ namespace Tuning
 
 		fotipHeader.flags.all = 0;
 
-		fotipHeader.fotipFrameSize = sizeof(FotipV2::Frame);
+		fotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 
-		fotipHeader.romSize = m_tuningRomSizeW * 2;					// in bytes
-		fotipHeader.romFrameSize = m_tuningRomFrameSizeW * 2;		// in bytes
+		fotipHeader.romSizeB = m_tuningRomSizeW * sizeof(quint16);				// in bytes
+		fotipHeader.romFrameSizeB = m_tuningRomFrameSizeW * sizeof(quint16);		// in bytes
 
-		fotipHeader.offsetInFrame = 0;
+		fotipHeader.offsetInFrameW = 0;
 
 		memset(fotipHeader.reserve, 0, sizeof(fotipHeader.reserve));
 
@@ -241,7 +253,7 @@ namespace Tuning
 		switch(tuningCmd.opCode)
 		{
 		case FotipV2::OpCode::Read:
-			fotipHeader.startAddress = m_tuningRomStartAddr + tuningCmd.read.frame * m_tuningRomFrameSizeW;
+			fotipHeader.startAddressW = m_tuningRomStartAddrW + tuningCmd.read.frame * m_tuningRomFrameSizeW;
 			fotipHeader.dataType = TO_INT(FotipV2::DataType::Discrete);		// any data type is allowed
 			break;
 
@@ -278,12 +290,52 @@ namespace Tuning
 			return;
 		}
 
-		result = checkFotipHeader(reply.fotipFrame.header);
+		FotipV2::Header& fotipHeader = reply.fotipFrame.header;
+
+		result = checkFotipHeader(fotipHeader);
 
 		if (result == false)
 		{
 			return;
 		}
+
+		switch(fotipHeader.operationCode)
+		{
+		case FotipV2::OpCode::Read:
+			processReadReply(reply);
+			break;
+
+		case FotipV2::OpCode::Write:
+			processWriteReply(reply);
+			break;
+
+		case FotipV2::OpCode::Apply:
+			processApplyReply(reply);
+			break;
+
+		default:
+			assert(false);
+		}
+	}
+
+
+	void TuningSourceWorker::processReadReply(RupFotipV2& reply)
+	{
+		m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
+								reply.fotipFrame.header.romFrameSizeB,
+								reply.fotipFrame.data);
+	}
+
+
+	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
+	{
+
+	}
+
+
+	void TuningSourceWorker::processApplyReply(RupFotipV2& reply)
+	{
+
 	}
 
 
@@ -370,19 +422,19 @@ namespace Tuning
 			result &= false;
 		}
 
-		if (fotipHeader.fotipFrameSize != sizeof(FotipV2::Frame))
+		if (fotipHeader.fotipFrameSizeB != sizeof(FotipV2::Frame))
 		{
 			m_errFotipFrameSize++;
 			result &= false;
 		}
 
-		if (fotipHeader.romSize !=  m_tuningRomSizeW * 2)
+		if (fotipHeader.romSizeB !=  m_tuningRomSizeW * 2)
 		{
 			m_errFotipRomSize++;
 			result &= false;
 		}
 
-		if (fotipHeader.romFrameSize != m_tuningRomFrameSizeW * 2)
+		if (fotipHeader.romFrameSizeB != m_tuningRomFrameSizeW * 2)
 		{
 			m_errFotipRomFrameSize++;
 			result &= false;
@@ -478,6 +530,13 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::restartTimer()
+	{
+		//m_timer.setInterval(15);
+		m_timer.start(m_timerInterval);
+	}
+
+
 	void TuningSourceWorker::onTimer()
 	{
 		if (processWaitReply() == true)
@@ -513,7 +572,16 @@ namespace Tuning
 			return;
 		}
 
+		m_waitReplyCounter = 0;
+
 		m_replyCount++;
+
+		if ((m_replyCount % 100) == 0)
+		{
+			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").arg(m_replyCount).arg(m_sourceEquipmentID).arg(m_errNoReply));
+		}
+
+		restartTimer();
 
 		processReply(m_reply);
 

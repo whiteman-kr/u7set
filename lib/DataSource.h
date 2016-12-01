@@ -95,6 +95,7 @@ protected:
 	static const char* PROP_LM_DATA_IP;
 	static const char* PROP_LM_DATA_PORT;
 	static const char* PROP_LM_DATA_ID;
+	static const char* PROP_LM_UNIQUE_ID;
 	static const char* PROP_COUNT;
 	static const char* SIGNAL_ID_ELEMENT;
 
@@ -112,6 +113,7 @@ protected:
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	quint32 m_lmDataID = 0;
+	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
 
 	QStringList m_associatedSignals;
 
@@ -211,6 +213,9 @@ public:
 
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
+
+	quint64 uniqueID() const { return m_uniqueID; }
+	void setUniqueID(quint64 uniqueID) { m_uniqueID = uniqueID; }
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }

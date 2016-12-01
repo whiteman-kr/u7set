@@ -54,10 +54,10 @@ namespace FotipV2
 
 		flags.all = reverseUint16(flags.all);
 
-		startAddress = reverseUint32(startAddress);
-		fotipFrameSize = reverseUint16(fotipFrameSize);
-		romSize = reverseUint32(romSize);
-		romFrameSize = reverseUint16(romFrameSize);
+		startAddressW = reverseUint32(startAddressW);
+		fotipFrameSizeB = reverseUint16(fotipFrameSizeB);
+		romSizeB = reverseUint32(romSizeB);
+		romFrameSizeB = reverseUint16(romFrameSizeB);
 		dataType = reverseUint16(dataType);
 	}
 

@@ -21,8 +21,6 @@ namespace Tuning
 
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
-
-		quint64 uniqueID() const;
 	};
 
 

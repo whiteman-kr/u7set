@@ -83,6 +83,7 @@ const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
 const char* DataSource::PROP_LM_DATA_IP = "LmDataIP";
 const char* DataSource::PROP_LM_DATA_PORT = "LmDataPort";
 const char* DataSource::PROP_LM_DATA_ID = "LmDataID";
+const char* DataSource::PROP_LM_UNIQUE_ID = "LmUniqueID";
 const char* DataSource::PROP_COUNT = "Count";
 const char* DataSource::SIGNAL_ID_ELEMENT = "SignalID";
 
@@ -233,6 +234,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
 	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, false);
+	xml.writeUInt64Attribute(PROP_LM_UNIQUE_ID, m_uniqueID, true);
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
@@ -289,6 +291,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmAddressPort.setPort(port);
 
 	result &= xml.readUInt32Attribute(PROP_LM_DATA_ID, &m_lmDataID);
+	result &= xml.readUInt64Attribute(PROP_LM_UNIQUE_ID, &m_uniqueID);
 
 	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{

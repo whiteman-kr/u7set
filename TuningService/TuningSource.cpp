@@ -164,17 +164,4 @@ namespace Tuning
 		m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
 	}*/
 
-
-
-	quint64 TuningSource::uniqueID() const
-	{
-		if (m_tuningData == nullptr)
-		{
-			assert(false);
-			return 0;
-		}
-
-		return m_tuningData->uniqueID();
-	}
-
 }
