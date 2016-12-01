@@ -152,11 +152,4 @@ namespace TuningIPEN
 		const std::vector<QVariantList>& metadata() const;
 	};
 
-
-	class TuningDataStorage : public QHash<QString, TuningData*>
-	{
-	public:
-		~TuningDataStorage();
-	};
-
 }

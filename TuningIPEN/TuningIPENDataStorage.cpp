@@ -916,21 +916,4 @@ namespace  TuningIPEN
 		assert(false);
 		return -1;
 	}
-
-	// -------------------------------------------------------------------------------------
-	//
-	// TuningDataStorage class implementation
-	//
-	// -------------------------------------------------------------------------------------
-
-	TuningDataStorage::~TuningDataStorage()
-	{
-		for(TuningData* tuningData : *this)
-		{
-			delete tuningData;
-		}
-
-		QHash<QString, TuningData*>::clear();
-	}
-
 }
