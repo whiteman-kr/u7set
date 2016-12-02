@@ -2,78 +2,58 @@
 
 #include <QtCore>
 #include <QList>
+
+#include "../lib/Types.h"
 #include "../lib/Signal.h"
 #include "../lib/DataProtocols.h"
-#include "../u7/Builder/IssueLogger.h"
 
+#include "../u7/Builder/IssueLogger.h"
 
 namespace Tuning
 {
 
-	struct TuningSignalState
-	{
-		double currentValue = 0;
-		double lowLimit = 0;
-		double highLimit = 0;
-
-		bool valid = false;
-	};
-
-
-	class TuningFramesData
-	{
-	public:
-		static const int BITS_8 = 8;
-		static const int FRAMES_3 = 3;
-
-	private:
-		int m_firstFrameNo = 0;
-		int m_tuningFrameSizeBytes = 0;
-		int m_tuningFrameSizeBits = 0;
-
-		int m_signalSizeBits = 0;
-		int m_signalCount = 0;
-
-		//
-
-		int m_tripleFramesCount = 0;
-		int m_usedFramesCount = 0;
-
-		char* m_framesData = nullptr;
-
-		void setFramesDataBit(int offset, int bit, int value);
-
-	public:
-		TuningFramesData();
-		virtual ~TuningFramesData();
-
-		void init(int firstFrameNo, int tuningFrameSizeBytes, int signalSizeBits, int signalCount);
-
-		int firstFrameNo() const { return m_firstFrameNo; }
-
-		void copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata);
-
-		int usedFramesCount() const { return m_usedFramesCount; }
-		int framesDataSize() const { return m_usedFramesCount * m_tuningFrameSizeBytes; }
-
-		quint64 generateUniqueID(const QString& lmEquipmentID);
-
-		const char* framesData() const { return m_framesData; }
-
-		void converToBigEndian();
-
-		void setFrameData(int frameNo, const char* fotipData);
-
-//		bool getSignalState(const Signal* signal, TuningSignalState* tss);
-//		bool setSignalState(const Signal* signal, double value, SocketRequest* sr);
-	};
-
+	// -------------------------------------------------------------------------------------
+	//
+	// TuningData class declaration
+	//
+	// -------------------------------------------------------------------------------------
 
 	class TuningData : public QObject
 	{
 		Q_OBJECT
 
-	private:
+	public:
+		TuningData();
+		TuningData(	QString lmID,
+					int tuningFrameSizeBytes,
+					int tuningFramesCount);
+
+		virtual ~TuningData();
+
+		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
+
+		virtual bool buildTuningData();
+		virtual bool initTuningData();
+		virtual void getTuningData(QByteArray* tuningData) const;
+
+		quint64 generateUniqueID(const QString& lmEquipmentID);
+		quint64 uniqueID() const { return m_uniqueID; }
+
+		int usedFramesCount() const { return m_usedFramesCount; }
+
+		void getSignals(QList<Signal *>& signalList);
+
+		QList<Signal*> getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
+		QList<Signal*> getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
+		QList<Signal*> getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
+
+		const QStringList& metadataFields();
+		const std::vector<QVariantList>& metadata() const;
+
+		void writeToXml(XmlWriteHelper& xml);
+		bool readFromXml(XmlReadHelper& xml);
+
+	protected:
 		QString m_lmEquipmentID;
 
 		int m_tuningFrameSizeBytes = 0;
@@ -87,9 +67,14 @@ namespace Tuning
 
 		static const int TYPES_COUNT = 3;
 
-		TuningFramesData m_tuningFramesData[TYPES_COUNT];
+		static const int TRIPLE_FRAMES = 3;
 
 		QList<Signal*> m_tuningSignals[TYPES_COUNT];
+
+		int m_tuningSignalSizes[TYPES_COUNT];
+
+		quint8* m_tuningData = nullptr;
+		int m_tuningDataSize = 0;
 
 		QHash<QString, Signal*> m_id2SignalMap;
 
@@ -114,44 +99,14 @@ namespace Tuning
 
 		int signalValueSizeBits(int type);
 		int getSignalType(const Signal* signal);
-
-	public:
-		TuningData();
-		TuningData(	QString lmID,
-					int tuningFrameSizeBytes,
-					int tuningFramesCount);
-
-		~TuningData();
-
-		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
-		bool buildTuningData();
-		quint64 generateUniqueID(const QString& lmEquipmentID);
-
-		bool initTuningData();
-
-		quint64 uniqueID() const { return m_uniqueID; }
-		void getTuningData(QByteArray* tuningData) const;
-
-		int usedFramesCount() const { return m_usedFramesCount; }
-
-		void writeToXml(XmlWriteHelper& xml);
-		bool readFromXml(XmlReadHelper& xml);
-
-		void getSignals(QList<Signal *>& signalList);
-
-		QList<Signal*> getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
-		QList<Signal*> getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
-		QList<Signal*> getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
-
-		void setFrameData(int frameNo, const char* fotipData);
-
-//		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
-//		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
-
-		const QStringList& metadataFields();
-		const std::vector<QVariantList>& metadata() const;
 	};
 
+
+	// -------------------------------------------------------------------------------------
+	//
+	// TuningDataStorage class declaration
+	//
+	// -------------------------------------------------------------------------------------
 
 	class TuningDataStorage : public QHash<QString, TuningData*>
 	{

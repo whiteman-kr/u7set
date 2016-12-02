@@ -3,6 +3,7 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/Crc.h"
 #include "Connection.h"
+#include "../TuningIPEN/TuningIPENDataStorage.h"
 
 namespace Builder
 {
@@ -4181,6 +4182,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::buildTuningData()
 	{
+		assert(m_tuningData == nullptr);
+
 		bool result = true;
 
 		int tuningFrameSizeBytes = 0;
@@ -4194,27 +4197,33 @@ namespace Builder
 			return false;
 		}
 
+		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
+		// uncomment next 3 lines:
+		//
+		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(m_lm->equipmentIdTemplate(),
+		//													tuningFrameSizeBytes,
+		//													tuningFrameCount);
+		//
+		// and comment 3 lines below:
+		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 
-		if (tuningData->usedFramesCount() > tuningFrameCount)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-							   arg(m_lm->equipmentIdTemplate()).
-							   arg(tuningFrameCount));
-			result = false;
-			delete tuningData;
-		}
-		else
-		{
-			result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
-			result &= tuningData->buildTuningData();
+		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
+		//
+		result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
+		result &= tuningData->buildTuningData();
 
-			if (result == false)
+		if (result == true)
+		{
+			if (tuningData->usedFramesCount() > tuningFrameCount)
 			{
-				delete tuningData;
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+								   arg(m_lm->equipmentIdTemplate()).
+								   arg(tuningFrameCount));
+				result = false;
 			}
 			else
 			{
@@ -4223,6 +4232,11 @@ namespace Builder
 				m_tuningData = tuningData;
 				m_tuningDataStorage->insert(m_lm->equipmentIdTemplate(), tuningData);
 			}
+		}
+
+		if (result == false)
+		{
+			delete tuningData;
 		}
 
 		return result;
