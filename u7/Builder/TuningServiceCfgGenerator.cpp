@@ -5,16 +5,18 @@
 
 namespace Builder
 {
-	TuningServiceCfgGenerator::TuningServiceCfgGenerator(	DbController* db,
+	TuningServiceCfgGenerator::TuningServiceCfgGenerator(DbController* db,
 															Hardware::SubsystemStorage *subsystems,
 															Hardware::Software* software,
 															SignalSet* signalSet,
 															Hardware::EquipmentSet* equipment,
 															Tuning::TuningDataStorage *tuningDataStorage,
+															const LmsUniqueIdMap& lmsUniqueIdMap,
 															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
 		m_tuningDataStorage(tuningDataStorage),
-		m_subsystems(subsystems)
+		m_subsystems(subsystems),
+		m_lmsUniqueIdMap(lmsUniqueIdMap)
 	{
 	}
 
@@ -89,6 +91,11 @@ namespace Builder
 				break;
 			}
 
+			if (lmNetProperties.tuningEnable == false)
+			{
+				continue;
+			}
+
 			if (lmNetProperties.tuningServiceID == m_software->equipmentIdTemplate())
 			{
 				tuningLMs.append(lm);
@@ -131,6 +138,15 @@ namespace Builder
 				}
 			}
 
+			quint64 uniqueID = m_lmsUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
+
+			if (uniqueID == 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("UniqueID of LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
+				result = false;
+			}
+
 			Tuning::TuningSource ds;
 
 			ds.setLmChannel(lmChannel);
@@ -148,6 +164,8 @@ namespace Builder
 			ds.setLmPort(lmNetProperties.tuningPort);
 
 			ds.setLmDataID(0);			// !!! ???
+
+			ds.setUniqueID(uniqueID);
 
 			if (m_tuningDataStorage->contains(lm->equipmentId()) == true)
 			{

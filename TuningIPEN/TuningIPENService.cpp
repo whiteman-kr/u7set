@@ -42,14 +42,14 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENServiceWorker::requestPreprocessing(Tuning::SocketRequest& sr)
+	void TuningIPENServiceWorker::requestPreprocessing(SocketRequest& sr)
 	{
-		if (sr.operation != Tuning::OperationCode::Write)
+		if (sr.operation != FotipOpCode::Write)
 		{
 			return;
 		}
 
-		sr.dataType = Tuning::DataType::Discrete;			// turn off limits control!
+		sr.dataType = FotipDataType::Discrete;			// turn off limits control!
 
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
@@ -62,7 +62,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENServiceWorker::replyPreprocessing(Tuning::SocketReply& sr)
+	void TuningIPENServiceWorker::replyPreprocessing(SocketReply& sr)
 	{
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
@@ -248,7 +248,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::SocketRequest sr;
+		SocketRequest sr;
 
 		bool result = source->setSignalState(appSignalID, value, &sr);
 
@@ -272,7 +272,7 @@ namespace TuningIPEN
 		sr.lmSubsystemID = source->lmSubsystemID();
 		sr.uniqueID = source->uniqueID();
 		sr.numerator = source->numerator();
-		sr.operation = Tuning::OperationCode::Write;
+		sr.operation = FotipOpCode::Write;
 		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
 		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
 
@@ -384,7 +384,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::SocketRequest sr;
+		SocketRequest sr;
 
 		sr.lmIP = source->lmAddress32();
 		sr.lmPort = source->lmPort();
@@ -392,10 +392,10 @@ namespace TuningIPEN
 		sr.lmSubsystemID = source->lmSubsystemID();
 		sr.uniqueID = source->uniqueID();
 		sr.numerator = source->numerator();
-		sr.operation = Tuning::OperationCode::Read;
+		sr.operation = FotipOpCode::Read;
 		sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
 		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
-		sr.dataType = Tuning::DataType::Discrete;						//
+		sr.dataType = FotipDataType::Discrete;						//
 		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
 		sr.userRequest = false;
 
@@ -418,7 +418,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::SocketReply sr;
+		SocketReply sr;
 
 		int count = 0;
 
@@ -481,7 +481,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::TuningSignalState tss;
+		TuningSignalState tss;
 
 		bool result = source->getSignalState(appSignalID, &tss);
 

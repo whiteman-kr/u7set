@@ -31,8 +31,8 @@ namespace TuningIPEN
 	{
 		connect(&m_timer, &QTimer::timeout, this, &TuningIPENSocketWorker::onTimer);
 
-		connect(&m_requests, &Queue<Tuning::SocketRequest>::queueNotEmpty, this, &TuningIPENSocketWorker::onSocketRequest);
-		connect(&m_replies, &Queue<Tuning::SocketReply>::queueNotEmpty, this, &TuningIPENSocketWorker::replyReady);
+		connect(&m_requests, &Queue<SocketRequest>::queueNotEmpty, this, &TuningIPENSocketWorker::onSocketRequest);
+		connect(&m_replies, &Queue<SocketReply>::queueNotEmpty, this, &TuningIPENSocketWorker::replyReady);
 
 		if (m_tuningService != nullptr)
 		{
@@ -124,7 +124,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		Tuning::SocketReply* sr = m_replies.beginPush();
+		SocketReply* sr = m_replies.beginPush();
 
 		sr->lmIP = from.toIPv4Address();
 
@@ -145,7 +145,7 @@ namespace TuningIPEN
 
 	void TuningIPENSocketWorker::onSocketRequest()
 	{
-		Tuning::SocketRequest sr;
+		SocketRequest sr;
 
 		m_requests.pop(&sr);
 
@@ -154,7 +154,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		RupFrameHeader& rh = m_reqFrame.rupHeader;
+		Rup::Header& rh = m_reqFrame.rupHeader;
 
 		rh.frameSize = ENTIRE_UDP_SIZE;
 		rh.protocolVersion = 4;
@@ -181,7 +181,7 @@ namespace TuningIPEN
 		FotipHeader& fh = m_reqFrame.fotip.header;
 
 		fh.protocolVersion = 1;
-		fh.subsystemKeyWord = 0;
+		fh.subsystemKey.wordVaue = 0;
 
 		fh.subsystemKey.lmNumber = sr.lmNumber;
 		fh.subsystemKey.subsystemCode = sr.lmSubsystemID;
@@ -219,14 +219,14 @@ namespace TuningIPEN
 		fh.fotipFrameSize = 1432;
 		fh.romSize = sr.romSizeW * 2;					// words => bytes
 		fh.romFrameSize = sr.frameSizeW * 2;			// words => bytes
-		fh.dataType = sr.dataType;
+		fh.dataType = TO_INT(sr.dataType);
 		fh.uniqueId = sr.uniqueID;
 
 		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);
 		memset(m_reqFrame.fotip.reserv, 0, FOTIP_DATA_RESERV_SIZE);
 		memset(m_reqFrame.fotip.comparisonResult, 0, FOTIP_COMPARISON_RESULT_SIZE);
 
-		if (sr.operation == Tuning::OperationCode::Write)
+		if (sr.operation == FotipOpCode::Write)
 		{
 			memcpy(m_reqFrame.fotip.data, sr.fotipData, FOTIP_TX_RX_DATA_SIZE);
 		}
@@ -251,13 +251,13 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENSocketWorker::sendRequest(const Tuning::SocketRequest& socketRequest)
+	void TuningIPENSocketWorker::sendRequest(const SocketRequest& socketRequest)
 	{
 		m_requests.push(&socketRequest);
 	}
 
 
-	bool TuningIPENSocketWorker::getReply(Tuning::SocketReply* reply)
+	bool TuningIPENSocketWorker::getReply(SocketReply* reply)
 	{
 		return m_replies.pop(reply);
 	}

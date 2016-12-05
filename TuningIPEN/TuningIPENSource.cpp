@@ -27,7 +27,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningSource::setTuningData(Tuning::TuningData* tuningData)
+	void TuningSource::setTuningData(TuningData* tuningData)
 	{
 		if (tuningData == nullptr)
 		{
@@ -43,7 +43,7 @@ namespace TuningIPEN
 	{
 		if (m_tuningData == nullptr)
 		{
-			Tuning::TuningData td(lmEquipmentID(), 0, 0);
+			TuningData td(lmEquipmentID(), 0, 0);
 			td.writeToXml(xml);
 			return;
 		}
@@ -56,7 +56,7 @@ namespace TuningIPEN
 	{
 		assert(m_tuningData == nullptr);
 
-		m_tuningData = new Tuning::TuningData();
+		m_tuningData = new TuningData();
 
 		m_deleteTuningData = true;
 
@@ -197,7 +197,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningSource::processReply(const Tuning::SocketReply& reply)
+	void TuningSource::processReply(const SocketReply& reply)
 	{
 		m_receivedRepyCount++;
 
@@ -233,7 +233,7 @@ namespace TuningIPEN
 	}
 
 
-	bool TuningSource::getSignalState(const QString& appSignalID, Tuning::TuningSignalState* tss)
+	bool TuningSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
 	{
 		if (tss == nullptr)
 		{
@@ -257,7 +257,7 @@ namespace TuningIPEN
 	}
 
 
-	bool TuningSource::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
+	bool TuningSource::setSignalState(const QString& appSignalID, double value, SocketRequest* sr)
 	{
 		if (m_tuningData == nullptr)
 		{

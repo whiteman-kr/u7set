@@ -215,7 +215,6 @@ namespace Builder
 				}
 			}
 
-
 			//
 			// Find all LM Modules
 			//
@@ -285,17 +284,6 @@ namespace Builder
 			}
 
 			//
-			// Generate SCADA software configurations
-			//
-			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, &buildWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
 			// Compile Module configuration
 			//
 			LOG_EMPTY_LINE(m_log);
@@ -313,44 +301,19 @@ namespace Builder
 				break;
 			}
 
-			//
-			// Count Unique ID for this compilation
-			//
+			LmsUniqueIdMap lmsUniqueIdMap;
 
-			for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+			generateLmsUniqueID(buildWriter, tuningBuilder, cfgBuilder, lmModules, lmsUniqueIdMap);
+
+			//
+			// Generate SCADA software configurations
+			//
+			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, lmsUniqueIdMap, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
 			{
-				Hardware::DeviceModule* lm = *it;
-				if (lm == nullptr)
-				{
-					assert(lm);
-					break;
-				}
-
-				QString subsysID = lm->propertyValue("SubsystemID").toString();
-				if (subsysID.isEmpty())
-				{
-					assert(false);
-					continue;
-				}
-
-				bool ok = false;
-				int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
-				if (ok == false)
-				{
-					assert(false);
-					continue;
-				}
-
-				quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
-				quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
-				quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
-
-				quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
-
-				buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-				tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-				cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-
+				break;
 			}
 
 			//
@@ -988,6 +951,7 @@ namespace Builder
 															Hardware::EquipmentSet* equipment,
 															SignalSet* signalSet,
 															Tuning::TuningDataStorage* tuningDataStorage,
+															const LmsUniqueIdMap& lmsUniqueIdMap,
 															BuildResultWriter* buildResultWriter)
 	{
 		bool result = true;
@@ -999,7 +963,7 @@ namespace Builder
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
 
 		equipmentWalker(equipment->root(),
-			[this, &db, &subsystems, &signalSet, &buildResultWriter, &equipment, &tuningDataStorage, &result](Hardware::DeviceObject* currentDevice)
+			[this, &db, &subsystems, &signalSet, &buildResultWriter, &equipment, &tuningDataStorage, lmsUniqueIdMap, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -1031,7 +995,7 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(db, subsystems, software, signalSet, equipment, tuningDataStorage, buildResultWriter);
+					softwareCfgGenerator = new TuningServiceCfgGenerator(db, subsystems, software, signalSet, equipment, tuningDataStorage, lmsUniqueIdMap, buildResultWriter);
 					break;
 
 				case E::SoftwareType::TuningClient:
@@ -1084,6 +1048,59 @@ namespace Builder
 
 		return result;
 	}
+
+
+	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
+												TuningBuilder& tuningBuilder,
+												ConfigurationBuilder& cfgBuilder,
+												const std::vector<Hardware::DeviceModule *>& lmModules,
+												LmsUniqueIdMap &lmsUniqueIdMap)
+	{
+		lmsUniqueIdMap.clear();
+
+		//
+		// Count Unique ID for this compilation
+		//
+
+		for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+		{
+			Hardware::DeviceModule* lm = *it;
+
+			if (lm == nullptr)
+			{
+				assert(lm);
+				continue;
+			}
+
+			QString subsysID = lm->propertyValue("SubsystemID").toString();
+			if (subsysID.isEmpty())
+			{
+				assert(false);
+				continue;
+			}
+
+			bool ok = false;
+			int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
+			if (ok == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
+			quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+			quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+
+			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+
+			buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+
+			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
+		}
+	}
+
 
 
 	QString BuildWorkerThread::projectName() const

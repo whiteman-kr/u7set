@@ -10,7 +10,7 @@
 #include "../Proto/network.pb.h"
 
 
-typedef Queue<RupFrame> RupFramesQueue;
+typedef Queue<Rup::Frame> RupFramesQueue;
 
 
 struct RupData
@@ -20,7 +20,7 @@ struct RupData
 	Times time;
 
 	int dataSize;
-	char data[RUP_FRAME_DATA_SIZE * RUP_MAX_FRAME_COUNT];
+	char data[Rup::FRAME_DATA_SIZE * Rup::MAX_FRAME_COUNT];
 
 	void dump();
 };
@@ -95,6 +95,7 @@ protected:
 	static const char* PROP_LM_DATA_IP;
 	static const char* PROP_LM_DATA_PORT;
 	static const char* PROP_LM_DATA_ID;
+	static const char* PROP_LM_UNIQUE_ID;
 	static const char* PROP_COUNT;
 	static const char* SIGNAL_ID_ELEMENT;
 
@@ -112,6 +113,7 @@ protected:
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	quint32 m_lmDataID = 0;
+	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
 
 	QStringList m_associatedSignals;
 
@@ -148,8 +150,6 @@ protected:
 
 	qint64 m_lastPacketTime = 0;
 
-
-
 	//
 
 	bool m_firstRupFrame = true;
@@ -157,8 +157,8 @@ protected:
 
 	//
 
-	RupFrame m_rupFrames[RUP_MAX_FRAME_COUNT];
-	char m_framesData[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
+	Rup::Frame m_rupFrames[Rup::MAX_FRAME_COUNT];
+	char m_framesData[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
 
 	//
 
@@ -209,9 +209,13 @@ public:
 	void setLmAddressStr(const QString& addressStr) { m_lmAddressPort.setAddress(addressStr); }
 
 	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
+	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
+
+	quint64 uniqueID() const { return m_uniqueID; }
+	void setUniqueID(quint64 uniqueID) { m_uniqueID = uniqueID; }
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
@@ -262,7 +266,7 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	void processPacket(quint32 ip, RupFrame& rupFrame, Queue<RupData>& rupDataQueue);
+	void processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>& rupDataQueue);
 
 	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
 	void clearAssociatedSignals() { m_associatedSignals.clear(); }
@@ -275,7 +279,7 @@ public:
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 
-	void pushRupFrame(const RupFrame& rupFrame);
+	void pushRupFrame(const Rup::Frame& rupFrame);
 
 	void incBadFrameSizeError() { m_errorBadFrameSize++; }
 };

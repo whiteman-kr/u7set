@@ -5,68 +5,73 @@
 #include <QHash>
 #include "TuningIPENService.h"
 
-class TripleChannelSignalsModel;
-
-struct SignalState
+namespace TuningIPEN
 {
-	double currentValue;
-	double newValue;
-	double lowLimit;
-	double highLimit;
-	bool validity;
-};
 
-class SafetyChannelSignalsDelegate : public QStyledItemDelegate
-{
-	Q_OBJECT
+	class TripleChannelSignalsModel;
 
-public:
-	explicit SafetyChannelSignalsDelegate(QObject *parent = Q_NULLPTR);
+	struct SignalState
+	{
+		double currentValue;
+		double newValue;
+		double lowLimit;
+		double highLimit;
+		bool validity;
+	};
 
-signals:
-	void aboutToChangeDiscreteSignal(const QModelIndex& index);
+	class SafetyChannelSignalsDelegate : public QStyledItemDelegate
+	{
+		Q_OBJECT
 
-protected:
-	bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
-};
+	public:
+		explicit SafetyChannelSignalsDelegate(QObject *parent = Q_NULLPTR);
 
-class SafetyChannelSignalsModel : public QAbstractTableModel
-{
-	Q_OBJECT
-public:
-	explicit SafetyChannelSignalsModel(TuningIPEN::TuningSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
+	signals:
+		void aboutToChangeDiscreteSignal(const QModelIndex& index);
 
-	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &currentIndex, int role = Qt::DisplayRole) const;
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+	protected:
+		bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
+	};
 
-	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
-	Qt::ItemFlags flags(const QModelIndex & index) const override;
+	class SafetyChannelSignalsModel : public QAbstractTableModel
+	{
+		Q_OBJECT
+	public:
+		explicit SafetyChannelSignalsModel(TuningIPEN::TuningSourceInfo& sourceInfo, TuningIPEN::TuningIPENService* service, QObject *parent = 0);
 
-	Signal& signal(const QModelIndex &index);
+		int rowCount(const QModelIndex &parent = QModelIndex()) const ;
+		int columnCount(const QModelIndex &parent = QModelIndex()) const;
+		QVariant data(const QModelIndex &currentIndex, int role = Qt::DisplayRole) const;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-public slots:
-	void updateSignalStates();
-	void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
-	void changeDiscreteSignal(const QModelIndex& index);
+		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
 
-private:
-	TuningIPEN::TuningSourceInfo& m_sourceInfo;
-	QVector<SignalState> m_states;
-	TuningIPEN::TuningIPENService* m_service;
-	QHash<QString, int> signalIdMap;
-};
+		Signal& signal(const QModelIndex &index);
 
-class SafetyChannelSignalsProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	SafetyChannelSignalsProxyModel(TripleChannelSignalsModel* tripleSignalModel, SafetyChannelSignalsModel* sourceModel, QObject* parent = 0);
+	public slots:
+		void updateSignalStates();
+		void updateSignalState(QString appSignalID, double value, double lowLimit, double highLimit, bool validity);
+		void changeDiscreteSignal(const QModelIndex& index);
 
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	private:
+		TuningIPEN::TuningSourceInfo& m_sourceInfo;
+		QVector<SignalState> m_states;
+		TuningIPEN::TuningIPENService* m_service;
+		QHash<QString, int> signalIdMap;
+	};
 
-private:
-	TripleChannelSignalsModel* m_tripleSignalModel;
-	SafetyChannelSignalsModel* m_sourceModel;
-};
+	class SafetyChannelSignalsProxyModel : public QSortFilterProxyModel
+	{
+		Q_OBJECT
+	public:
+		SafetyChannelSignalsProxyModel(TripleChannelSignalsModel* tripleSignalModel, SafetyChannelSignalsModel* sourceModel, QObject* parent = 0);
+
+		bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+
+	private:
+		TripleChannelSignalsModel* m_tripleSignalModel;
+		SafetyChannelSignalsModel* m_sourceModel;
+	};
+
+}

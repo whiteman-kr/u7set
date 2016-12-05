@@ -10,6 +10,8 @@
 
 void SignalParseInfo::setSignalParams(int i, const Signal& s)
 {
+	appSignalID = s.appSignalID();
+
 	index = i;
 
 	valueAddr = s.regValueAddr();

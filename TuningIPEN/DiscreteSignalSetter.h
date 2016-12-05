@@ -4,26 +4,30 @@
 
 #include "TuningIPENService.h"
 
-
 class QPushButton;
 
-class DiscreteSignalSetter : public QWidget
+namespace TuningIPEN
 {
-	Q_OBJECT
-public:
-	explicit DiscreteSignalSetter(QString signalId, QString label, TuningIPEN::TuningIPENService* service, QWidget *parent = 0);
 
-public slots:
-	void updateValue();
-	void setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool valid);
-	void applyNewValue(bool enabled);
+	class DiscreteSignalSetter : public QWidget
+	{
+		Q_OBJECT
+	public:
+		explicit DiscreteSignalSetter(QString signalId, QString label, TuningIPEN::TuningIPENService* service, QWidget *parent = 0);
 
-signals:
-	void valueChanged(bool newValue);
+	public slots:
+		void updateValue();
+		void setCurrentValue(QString appSignalID, double value, double lowLimit, double highLimit, bool valid);
+		void applyNewValue(bool enabled);
 
-private:
-	QString m_signalId;
-	TuningIPEN::TuningIPENService* m_service = nullptr;
-	QPushButton* m_button = nullptr;
-};
+	signals:
+		void valueChanged(bool newValue);
+
+	private:
+		QString m_signalId;
+		TuningIPEN::TuningIPENService* m_service = nullptr;
+		QPushButton* m_button = nullptr;
+	};
+
+}
 

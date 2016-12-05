@@ -3,9 +3,8 @@
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
 #include "../AppDataService/AppSignalStateEx.h"
-#include "../TuningService/TuningSource.h"
-#include "TuningIPENSocket.h"
 #include "TuningIPENSource.h"
+#include "TuningIPENSocket.h"
 
 
 namespace TuningIPEN
@@ -50,8 +49,8 @@ namespace TuningIPEN
 		virtual void initialize() override;
 		virtual void shutdown() override;
 
-		virtual void requestPreprocessing(Tuning::SocketRequest& sr);
-		virtual void replyPreprocessing(Tuning::SocketReply& sr);
+		virtual void requestPreprocessing(SocketRequest& sr);
+		virtual void replyPreprocessing(SocketReply& sr);
 
 	private slots:
 		void onTimer();

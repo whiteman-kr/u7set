@@ -79,7 +79,7 @@ private:
 
 
 void swapHeader(RpPacketHeader& header);
-void swapHeader(RupFrameHeader& header);
+void swapHeader(Rup::Header& header);
 
 
 class Source : public Statistic
@@ -102,7 +102,7 @@ signals:
 	void fieldsChanged();
 
 private:
-	quint8 m_buffer[RUP_MAX_FRAME_COUNT * RUP_FRAME_DATA_SIZE];
+	quint8 m_buffer[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
 	RpPacketHeader m_lastHeader;
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;

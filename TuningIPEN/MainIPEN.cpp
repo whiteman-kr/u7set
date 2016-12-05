@@ -1,7 +1,7 @@
 #include "TuningMainWindow.h"
 #include <QApplication>
-#include "../TuningService/TuningSource.h"
-
+#include "TuningIPENSource.h"
+#include "TuningIPENSocket.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
 	}
 
 	qRegisterMetaType<TuningIPEN::TuningSourceState>("TuningDataSourceState");
-	qRegisterMetaType<FotipFrame>("FotipFrame");
+	qRegisterMetaType<TuningIPEN::FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
-	TuningMainWindow w(buildPath);
+	TuningIPEN::TuningMainWindow w(buildPath);
 	w.show();
 
 	int result =  a.exec();

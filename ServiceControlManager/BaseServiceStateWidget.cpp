@@ -27,7 +27,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	statusBar()->addWidget(m_whoIsLabel = new QLabel(this));
 	statusBar()->addWidget(m_uptimeLabel = new QLabel(this));
 	statusBar()->addWidget(m_runningLabel = new QLabel(this));
-	statusBar()->addWidget(m_clientRequestAddress = new QLabel(this));
+	statusBar()->addWidget(m_clientRequestAddressLabel = new QLabel(this));
 
 	m_socketThread = new UdpSocketThread();
 
@@ -142,13 +142,13 @@ void BaseServiceStateWidget::updateServiceState()
 	if (srvState != ServiceState::Undefined &&
 		srvState != ServiceState::Unavailable)
 	{
-		m_clientRequestAddress->setText(tr("Listening clients on %1:%2")
+		m_clientRequestAddressLabel->setText(tr("Listening clients on %1:%2")
 										.arg(QHostAddress(serviceState.clientrequestip()).toString())
 										.arg(serviceState.clientrequestport()));
 	}
 	else
 	{
-		m_clientRequestAddress->setText(tr("Listening clients on ???:???"));
+		m_clientRequestAddressLabel->setText(tr("Listening clients on ???:???"));
 	}
 
 	switch(srvState)

@@ -112,8 +112,7 @@ public:
 signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
-	void signalsRestored();
-	void signalActivated(int row);
+	void signalsRestored(int focusedSignalId = -1);
 
 public slots:
 	void loadSignals();
@@ -266,7 +265,7 @@ public slots:
 	void changeSignalActionsVisibility();
 
 	void saveSelection();
-	void restoreSelection();
+	void restoreSelection(int focusedSignalId = -1);
 
 	void changeSignalTypeFilter(int selectedType);
 	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);

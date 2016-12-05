@@ -6,15 +6,13 @@ namespace Tuning
 
 	// -------------------------------------------------------------------------------
 	//
-	// TuningDataSource class implementation
+	// TuningSource class implementation
 	//
 	// -------------------------------------------------------------------------------
 
 	TuningSource::TuningSource()
 	{
 		m_lmDataType = DataSource::DataType::Tuning;
-
-		m_fotipFlags.all = 0;
 	}
 
 
@@ -67,66 +65,9 @@ namespace Tuning
 	}
 
 
-	/*void TuningSource::getTuningDataSourceInfo(TuningSourceInfo& info)
-	{
-		info.channel = m_lmChannel;
-		info.dataType = m_lmDataType;
-		info.lmEquipmentID = m_lmEquipmentID;
-		info.lmCaption = m_lmCaption;
-		info.lmAdapterID = m_lmAdapterID;
-		info.lmDataEnable = m_lmDataEnable;
-		info.lmAddressPort = m_lmAddressPort;
-		info.lmDataID = m_lmDataID;
-
-		info.tuningSignals.clear();
-
-		if (m_tuningData == nullptr)
-		{
-			return;
-		}
-
-		QList<Signal*> signalList;
-
-		m_tuningData->getSignals(signalList);
-
-		info.tuningSignals.resize(signalList.count());
-
-		int index = 0;
-
-		for(Signal* signal : signalList)
-		{
-			if (index >= info.tuningSignals.count())
-			{
-				assert(false);
-				break;
-			}
-
-			info.tuningSignals[index] = *signal;
-
-			index++;
-		}
-	}*/
-
-
-	int TuningSource::nextFrameToRequest()
-	{
-		if (m_tuningData != nullptr)
-		{
-			m_frameToRequest++;
-
-			if (m_frameToRequest >= m_tuningData->usedFramesCount())
-			{
-				m_frameToRequest = 0;
-			}
-		}
-
-		return m_frameToRequest;
-	}
-
-
 	// -------------------------------------------------------------------------------
 	//
-	// TuningDataSources class implementation
+	// TuningSources class implementation
 	//
 	// -------------------------------------------------------------------------------
 
@@ -197,7 +138,7 @@ namespace Tuning
 	}
 
 
-	void TuningSource::processReply(const Tuning::SocketReply& reply)
+	/*void TuningSource::processReply(const Tuning::SocketReply& reply)
 	{
 		m_receivedRepyCount++;
 
@@ -221,76 +162,6 @@ namespace Tuning
 		}
 
 		m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
-	}
-
-
-	void TuningSource::testConnection(qint64 nowTime)
-	{
-		if (nowTime - m_lastReplyTime > 2000)		// connection timeout == 2 seconds
-		{
-			m_hasConnection = false;
-		}
-	}
-
-
-	bool TuningSource::getSignalState(const QString& appSignalID, TuningSignalState* tss)
-	{
-		if (tss == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (m_hasConnection == false)
-		{
-			tss->valid = false;
-			return true;
-		}
-
-
-		if (m_tuningData == nullptr)
-		{
-			return false;
-		}
-
-		return m_tuningData->getSignalState(appSignalID, tss);
-	}
-
-
-	bool TuningSource::setSignalState(const QString& appSignalID, double value, Tuning::SocketRequest* sr)
-	{
-		if (m_tuningData == nullptr)
-		{
-			return false;
-		}
-
-		return m_tuningData->setSignalState(appSignalID, value, sr);
-	}
-
-
-	quint64 TuningSource::uniqueID()
-	{
-		if (m_tuningData == nullptr)
-		{
-			assert(false);
-			return 0;
-		}
-
-		return m_tuningData->uniqueID();
-	}
-
-/*
-	TuningSourceState TuningSource::getState()
-	{
-		TuningSourceState state;
-
-		state.lmEquipmentID = m_lmEquipmentID;
-		state.hasConnection = m_hasConnection;
-		state.receivedReplyCount = m_receivedRepyCount;
-		state.sentRequestCount = m_sentRequestCount;
-		state.flags = m_fotipFlags;
-
-		return state;
 	}*/
 
 }
