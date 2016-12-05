@@ -689,6 +689,13 @@ namespace Builder
 
 	bool AppLogicModule::debugCheckItemsRelationsConsistency(IssueLogger* log) const
 	{
+		return AppLogicModule::debugCheckItemsRelationsConsistency(m_equipmentId, m_items, log);
+	}
+
+	bool AppLogicModule::debugCheckItemsRelationsConsistency(QString equipmentId,
+															 const std::list<AppLogicItem>& items,
+															 IssueLogger* log)
+	{
 		if (log == nullptr)
 		{
 			assert(log);
@@ -700,7 +707,7 @@ namespace Builder
 			std::map<QUuid, AppLogicItem> itemMap;
 			std::map<QUuid, std::pair<AppLogicItem, VFrame30::AfbPin>> pins;
 
-			for (const AppLogicItem& ali : m_items)
+			for (const AppLogicItem& ali : items)
 			{
 				assert(ali.m_fblItem);
 
@@ -875,22 +882,37 @@ namespace Builder
 		}
 		catch (QString message)
 		{
-			log->errINT1001(
-				QString("Please, report to developers: Checking items relations consistency error: module %1, error message %2")
-						.arg(m_equipmentId)
-						.arg(message));
+			QString errorMessage = QString("Please, report to developers: Checking items relations consistency error: module %1, error message %2")
+								   .arg(equipmentId)
+								   .arg(message);
 
 			qDebug() << "-------------------------- Checking items relations consistency error dump----------------------------------";
-			for (const AppLogicItem& ali : m_items)
+			qDebug() << errorMessage;
+
+			for (const AppLogicItem& ali : items)
 			{
 				ali.m_fblItem->dump();
 			}
 			qDebug() << "------------------- END OF Checking items relations consistency error dump ---------------------------------";
 
+			log->errINT1001(errorMessage);
 			return false;
 		}
 
 		return true;
+	}
+
+	void AppLogicModule::dump() const
+	{
+		qDebug() << "-------------------------- AppLogicModule::dump----------------------------------";
+		qDebug() << "equipmentId()" << equipmentId();
+
+		for (const AppLogicItem& ali : m_items)
+		{
+			ali.m_fblItem->dump();
+		}
+
+		qDebug() << "------------------------ END OF AppLogicModule::dump -----------------------------";
 	}
 
 	bool AppLogicModule::setItemsOrder(IssueLogger* log,
@@ -1510,7 +1532,11 @@ namespace Builder
 				return false;
 			}
 
-			module->debugCheckItemsRelationsConsistency(log);
+			bool checkResult = module->debugCheckItemsRelationsConsistency(log);
+			if (checkResult == false)
+			{
+				return false;
+			}
 
 			// Find VFrame30::SchemaItemUfb and insert AFTER them actual ufbs
 			//
@@ -1636,12 +1662,32 @@ namespace Builder
 						}
 					}
 
+					// Intermidiate check, to make sure all the new guids were set right and relations were kept in consistency
+					//
+					checkResult = AppLogicModule::debugCheckItemsRelationsConsistency(parsedUfb->equipmentId(), ufbItemsCopy, log);
+					if (checkResult == false)
+					{
+						return false;
+					}
+
+					qDebug() << "================= UFB Copy itmes dump ====================";
+					for (const AppLogicItem& ali : ufbItemsCopy)
+					{
+						ali.m_fblItem->dump();
+					}
+					qDebug() << "============- END OF UFB Copy itmes dump =================";
+
 					// Bind LogicSchema outputû to UFB items inputs
 					//
 					std::map<QUuid, QUuid> newAssocIoGuids;
 
+					// !!!!!!!!!!!!!!!!!!!!!!!!!
+					module->dump();	// !!!!!!!!!!!!!!!!!!!!!!!!!
+
 					for (const VFrame30::AfbPin& in : ufbItem->inputs())
 					{
+						qDebug() << in.caption() << " " << in.guid();		// !!!!!!!!!!!!!!!!!!!!!!!!!
+
 						assert(in.IsInput() == true);
 
 						if (in.associatedIOs().size() != 1)
@@ -1653,6 +1699,8 @@ namespace Builder
 
 						QUuid outputGuid = in.associatedIOs().front();	// This is the real output guid, set it to all
 																		// corrsponding inputs in ufb
+
+						qDebug() << "outputGuid" << " " << outputGuid;
 
 						auto foundInputIt = std::find_if(ufbItemsCopy.begin(), ufbItemsCopy.end(),
 								[&in](const AppLogicItem& ali)
@@ -1680,6 +1728,9 @@ namespace Builder
 							continue;
 						}
 
+						qDebug() << "foundInputSignalElement";			// !!!!!!!!!!!!!!!!!!!!!!!!
+						foundInputSignalElement.m_fblItem->dump();		// !!!!!!!!!!!!!!!!!!!!!!!!!!
+
 						QUuid foundInputSignalElementOutputGuid = foundInputSignalElement.m_fblItem->outputs().front().guid();
 
 						newAssocIoGuids[foundInputSignalElementOutputGuid] = outputGuid;
@@ -1689,6 +1740,7 @@ namespace Builder
 						foundInputSignalElement.m_fblItem->outputs().front().setGuid(outputGuid);
 					}
 
+					qDebug() << "Set new pin guid to associatedIOs";
 					for (AppLogicItem& ali : ufbItemsCopy)						// Set new pin guid to associatedIOs
 					{
 						assert(ali.m_fblItem);
@@ -1702,17 +1754,21 @@ namespace Builder
 								if (newGuidIt != newAssocIoGuids.end())
 								{
 									assocIO = newGuidIt->second;				// If it's found then change it
+
+									qDebug() << pin.caption() << " " << pin.guid() << "  assoc was set to " << newGuidIt->second;
 								}
 							}
 						}
 					}
+
+					qDebug() << "----";
 
 					newAssocIoGuids.clear();
 					for (const VFrame30::AfbPin& out : ufbItem->outputs())
 					{
 						assert(out.IsOutput() == true);
 
-						QUuid ufbItemOutputPinGuid = out.guid();
+						qDebug() << "ufbItemOutputPinGuid" << " " << out.guid();
 
 						// Find the real out
 						//
@@ -1743,6 +1799,9 @@ namespace Builder
 							continue;
 						}
 
+						qDebug() << "foundOutputSignalElement";			// !!!!!!!!!!!!!!!!!!!!!!!!
+						foundOutputSignalElement.m_fblItem->dump();		// !!!!!!!!!!!!!!!!!!!!!!!!
+
 						VFrame30::AfbPin& outputSignalElementPin = foundOutputSignalElement.m_fblItem->inputs().front();
 						if (outputSignalElementPin.associatedIOs().size() != 1)
 						{
@@ -1754,7 +1813,11 @@ namespace Builder
 						// newItemOutputGuid is out of item in UFB, so it is real elements out
 						//
 						QUuid newItemOutputGuid = outputSignalElementPin.associatedIOs().front();
-						newAssocIoGuids[ufbItemOutputPinGuid] = newItemOutputGuid;
+
+						qDebug() << "out.guid() " << out.guid();
+						qDebug() << "newItemOutputGuid " << newItemOutputGuid;
+
+						newAssocIoGuids[out.guid()] = newItemOutputGuid;
 					}
 
 					// Bind these Logic Schema item's inputs to real output
@@ -1774,8 +1837,13 @@ namespace Builder
 
 								if (newGuidIt != newAssocIoGuids.end())
 								{
+									qDebug() << "------- found AssocIO " << assocIO;
+									qDebug() << "------- changed to  AssocIO " << newGuidIt->second;
+
+									qDebug() << ali.m_fblItem->buildName();
+
+									multiplesInputsForOutput[assocIO].push_back(newGuidIt->second);
 									assocIO = newGuidIt->second;
-									multiplesInputsForOutput[newGuidIt->second].push_back(assocIO);
 								}
 							}
 						}
@@ -1784,6 +1852,8 @@ namespace Builder
 					for (AppLogicItem& ali : ufbItemsCopy)						// Set new pin guid to associatedIOs
 					{
 						assert(ali.m_fblItem);
+
+						qDebug() << ali.m_fblItem->buildName();
 
 						for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())	// Only for outputs
 						{
@@ -1807,6 +1877,8 @@ namespace Builder
 					// Inject ufb schema items
 					//
 					module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
+
+					module->dump();
 				}
 			}
 
@@ -1824,7 +1896,11 @@ namespace Builder
 //				iii.m_fblItem->dump();
 //			}
 
-			module->debugCheckItemsRelationsConsistency(log);
+			checkResult = module->debugCheckItemsRelationsConsistency(log);
+			if (checkResult == false)
+			{
+				return false;
+			}
 		}
 
 		return result;
@@ -2031,14 +2107,21 @@ namespace Builder
 		//
 		LOG_MESSAGE(m_log, tr("Checking relations consistency..."));
 
+		bool checkResult = true;
 		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
 		{
-			module->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= module->debugCheckItemsRelationsConsistency(m_log);
 		}
 
 		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : m_applicationData->ufbs())
 		{
-			ufb.second->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= ufb.second->debugCheckItemsRelationsConsistency(m_log);
+		}
+
+		if (checkResult == false)
+		{
+			result = false;
+			return result;
 		}
 
 		// Expand User Functioanl Block on places of SchemaIntemUfb
@@ -2049,7 +2132,6 @@ namespace Builder
 		{
 			result = false;
 		}
-
 
 		//  In debug mode save/show item order for displaying on schemas
 		//

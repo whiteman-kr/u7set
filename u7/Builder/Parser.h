@@ -139,6 +139,12 @@ namespace Builder
 
 		bool debugCheckItemsRelationsConsistency(IssueLogger* log) const;
 
+		static bool debugCheckItemsRelationsConsistency(QString equipmentId,
+														const std::list<AppLogicItem>& items,
+														IssueLogger* log);
+
+		void dump() const;
+
 	private:
 		bool setItemsOrder(IssueLogger* log,
 						   std::map<QUuid, AppLogicItem>& remainItems,
