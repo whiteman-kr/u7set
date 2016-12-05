@@ -4567,7 +4567,7 @@ namespace Builder
 
 		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
 
-		QList<Signal*> analogFloatSignals = m_tuningData->getAnalogFloatSignals();
+		const QVector<Signal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
 		if (analogFloatSignals.count() > 0)
 		{
@@ -4597,7 +4597,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> analogIntSignals = m_tuningData->getAnalogIntSignals();
+		const QVector<Signal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
 
 		if (analogIntSignals.count() > 0)
 		{
@@ -4627,7 +4627,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> discreteSignals = m_tuningData->getDiscreteSignals();
+		const QVector<Signal*>& discreteSignals = m_tuningData->getDiscreteSignals();
 
 		if (discreteSignals.count() > 0)
 		{

@@ -350,6 +350,15 @@ namespace Tuning
 
 	void TuningServiceWorker::stopTuningSourceWorkers()
 	{
+		// stop and delete TuningSocketListenerThread
+		//
+		if (m_socketListenerThread != nullptr)
+		{
+			m_socketListenerThread->quitAndWait();
+			delete m_socketListenerThread;
+			m_socketListenerThread = nullptr;
+		}
+
 		// stop and delete TuningSourceWorkerThreads
 		//
 		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
@@ -365,15 +374,6 @@ namespace Tuning
 		}
 
 		m_sourceWorkerThreadMap.clear();
-
-		// stop and delete TuningSocketListenerThread
-		//
-		if (m_socketListenerThread != nullptr)
-		{
-			m_socketListenerThread->quitAndWait();
-			delete m_socketListenerThread;
-			m_socketListenerThread = nullptr;
-		}
 	}
 
 

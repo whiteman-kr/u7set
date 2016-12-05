@@ -167,14 +167,17 @@ namespace Builder
 
 			ds.setUniqueID(uniqueID);
 
-			if (m_tuningDataStorage->contains(lm->equipmentId()) == true)
-			{
-				Tuning::TuningData* tuningData = (*m_tuningDataStorage)[lm->equipmentId()];
+			Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
 
-				if(tuningData != nullptr)
-				{
-					ds.setTuningData(tuningData);
-				}
+			if(tuningData != nullptr)
+			{
+				ds.setTuningData(tuningData);
+			}
+			else
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
+				result = false;
 			}
 
 			ds.writeToXml(xml);

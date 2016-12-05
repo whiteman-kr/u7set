@@ -52,7 +52,7 @@ namespace TuningIPEN
 
 		int firstFrameNo() const { return m_firstFrameNo; }
 
-		void copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata);
+		void copySignalsData(const QVector<Signal *> &signalsList, std::vector<QVariantList>& metadata);
 
 		int usedFramesCount() const { return m_usedFramesCount; }
 		int framesDataSize() const { return m_usedFramesCount * m_tuningFrameSizeBytes; }

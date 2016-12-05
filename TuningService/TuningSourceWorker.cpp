@@ -29,6 +29,13 @@ namespace Tuning
 		m_tuningRomSizeW = settings.tuningRomSizeW;
 
 		m_tuningMem.init(m_tuningRomStartAddrW, m_tuningRomFrameSizeW, m_tuningRomFrameCount);
+
+		initTuningSignals(source.tuningData());
+	}
+
+
+	TuningSourceWorker::~TuningSourceWorker()
+	{
 	}
 
 
@@ -46,7 +53,7 @@ namespace Tuning
 
 	void TuningSourceWorker::incErrReplySize()
 	{
-		m_errReplySize++;
+		m_stat.errReplySize++;
 	}
 
 
@@ -66,6 +73,85 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::initTuningSignals(const TuningData* td)
+	{
+		m_tuningSignals.clear();
+		m_hash2SignalIndexMap.clear();
+
+		if (td == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		QVector<Signal*> tuningSignals;
+
+		td->getSignals(tuningSignals);
+
+		int signalCount = tuningSignals.count();
+
+		m_tuningSignals.resize(signalCount);
+		m_hash2SignalIndexMap.reserve(static_cast<int>(signalCount * 1.2));
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal* signal = tuningSignals[i];
+
+			if (signal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Hash hash = calcHash(signal->appSignalID());
+
+			if (m_hash2SignalIndexMap.contains(hash))
+			{
+				assert(false);
+				continue;
+			}
+
+			m_hash2SignalIndexMap.insert(hash, i);
+
+			TuningSignal& ts = m_tuningSignals[i];
+
+			ts.signal = signal;
+			ts.offset = signal->tuningAddr().offset();
+			ts.bit = signal->tuningAddr().bit();
+
+			if (signal->isAnalog())
+			{
+				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					ts.type = SignalType::AnalogFloat;
+				}
+				else
+				{
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+					{
+						ts.type = SignalType::AnalogInt;
+					}
+					else
+					{
+						assert(false);		// unknown type of signal
+					}
+				}
+			}
+			else
+			{
+				if (signal->isDiscrete())
+				{
+					ts.type = SignalType::Discrete;
+				}
+				else
+				{
+					assert(false);		// unknown type of signal
+				}
+			}
+		}
+	}
+
+
 	bool TuningSourceWorker::processWaitReply()
 	{
 		if (m_waitReply == true)
@@ -81,14 +167,30 @@ namespace Tuning
 
 			// fix replay timeout
 			//
-
-			m_errNoReply++;
+			m_stat.errNoReply++;
 
 			m_waitReply = false;
 
-			if ((m_errNoReply % 100) == 0)
+			if ((m_stat.errNoReply % 100) == 0)
 			{
-				qDebug() << C_STR(QString(tr("From '%1' NoReplies = %2")).arg(m_sourceEquipmentID).arg(m_errNoReply));
+				qDebug() << C_STR(QString(tr("From '%1' NoReplies = %2")).arg(m_sourceEquipmentID).arg(m_stat.errNoReply));
+			}
+
+			m_retryCount++;
+
+			if (m_retryCount >= MAX_RETRY_COUNT)
+			{
+				// fix - source is not reply
+				//
+				m_stat.isReply = false;
+			}
+			else
+			{
+				// retry last request
+				//
+				sendFOTIPRequest(m_request);
+
+				qDebug() << "Retry last REQUEST";
 			}
 		}
 
@@ -115,9 +217,11 @@ namespace Tuning
 
 		m_tuningCommandQueue.pop(&tuningCmd);
 
-		sendFOTIPRequest(tuningCmd);
+		prepareFOTIPRequest(tuningCmd, m_request);
 
-		m_waitReply = true;
+		m_retryCount = 0;
+
+		sendFOTIPRequest(m_request);
 
 		return true;
 	}
@@ -148,44 +252,50 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::sendFOTIPRequest(const TuningCommand& tuningCmd)
+	void TuningSourceWorker::prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
+	{
+		initRupHeader(m_request.rupHeader);
+
+		initFotipHeader(m_request.fotipFrame.header, tuningCmd);
+
+		initFotipData(m_request.fotipFrame, tuningCmd);
+	}
+
+
+	void TuningSourceWorker::sendFOTIPRequest(RupFotipV2& request)
 	{
 		assert(sizeof(Rup::Frame) == ENTIRE_UDP_SIZE);
 		assert(sizeof(RupFotipV2) == ENTIRE_UDP_SIZE);
 		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
 		assert(sizeof(FotipV2::Header) == 128);
 
-		initRupHeader(m_request.rupHeader);
-
-		initFotipHeader(m_request.fotipFrame.header, tuningCmd);
-
-		initFotipData(m_request.fotipFrame, tuningCmd);
-
 		// convert headers to BigEndian
 		//
-		m_request.rupHeader.reverseBytes();
-		m_request.fotipFrame.header.reverseBytes();
+		request.rupHeader.reverseBytes();
+		request.fotipFrame.header.reverseBytes();
 
-		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&m_request),
-											  sizeof(m_request),
+		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
+											  sizeof(request),
 											  m_sourceIP.address(),
 											  m_sourceIP.port());
 		// revert headers to LittleEndian
 		//
-		m_request.rupHeader.reverseBytes();
-		m_request.fotipFrame.header.reverseBytes();
+		request.rupHeader.reverseBytes();
+		request.fotipFrame.header.reverseBytes();
 
 		m_waitReplyCounter = 0;
 
+		m_waitReply = true;
+
 		if (sent == -1)
 		{
-			m_errSent++;
+			m_stat.errSent++;
 			return;
 		}
 
 		if (sent < sizeof(m_request))
 		{
-			m_errPartialSent++;
+			m_stat.errPartialSent++;
 		}
 	}
 
@@ -239,7 +349,7 @@ namespace Tuning
 		fotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 
 		fotipHeader.romSizeB = m_tuningRomSizeW * sizeof(quint16);				// in bytes
-		fotipHeader.romFrameSizeB = m_tuningRomFrameSizeW * sizeof(quint16);		// in bytes
+		fotipHeader.romFrameSizeB = static_cast<quint16>(m_tuningRomFrameSizeW * sizeof(quint16));		// in bytes
 
 		fotipHeader.offsetInFrameW = 0;
 
@@ -345,13 +455,13 @@ namespace Tuning
 
 		if (rupHeader.protocolVersion != Rup::VERSION)
 		{
-			m_errRupProtocolVersion++;
+			m_stat.errRupProtocolVersion++;
 			result &= false;
 		}
 
 		if (rupHeader.frameSize != ENTIRE_UDP_SIZE)
 		{
-			m_errRupFrameSize++;
+			m_stat.errRupFrameSize++;
 			result &= false;
 		}
 
@@ -360,25 +470,25 @@ namespace Tuning
 			rupHeader.flags.diagData != 0 ||
 			rupHeader.flags.test != 0)
 		{
-			m_errRupNoTuningData++;
+			m_stat.errRupNoTuningData++;
 			result &= false;
 		}
 
 		if (rupHeader.moduleType != Hardware::DeviceModule::FamilyType::LM)
 		{
-			m_errRupModuleType++;
+			m_stat.errRupModuleType++;
 			result &= false;
 		}
 
 		if (rupHeader.framesQuantity != 1)
 		{
-			m_errRupFramesQuantity++;
+			m_stat.errRupFramesQuantity++;
 			result &= false;
 		}
 
 		if (rupHeader.frameNumber != 0)
 		{
-			m_errRupFrameNumber++;
+			m_stat.errRupFrameNumber++;
 			result &= false;
 		}
 
@@ -394,49 +504,49 @@ namespace Tuning
 
 		if (fotipHeader.protocolVersion != FotipV2::VERSION)
 		{
-			m_errFotipProtocolVersion++;
+			m_stat.errFotipProtocolVersion++;
 			result &= false;
 		}
 
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
-			m_errFotipUniqueID++;
+			m_stat.errFotipUniqueID++;
 			result &= false;
 		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
-			m_errFotipLmNumber++;
+			m_stat.errFotipLmNumber++;
 			result &= false;
 		}
 
 		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
 		{
-			m_errFotipSubsystemCode++;
+			m_stat.errFotipSubsystemCode++;
 			result &= false;
 		}
 
 		if (fotipHeader.operationCode != m_request.fotipFrame.header.operationCode)
 		{
-			m_errFotipOperationCode++;
+			m_stat.errFotipOperationCode++;
 			result &= false;
 		}
 
 		if (fotipHeader.fotipFrameSizeB != sizeof(FotipV2::Frame))
 		{
-			m_errFotipFrameSize++;
+			m_stat.errFotipFrameSize++;
 			result &= false;
 		}
 
 		if (fotipHeader.romSizeB !=  m_tuningRomSizeW * 2)
 		{
-			m_errFotipRomSize++;
+			m_stat.errFotipRomSize++;
 			result &= false;
 		}
 
 		if (fotipHeader.romFrameSizeB != m_tuningRomFrameSizeW * 2)
 		{
-			m_errFotipRomFrameSize++;
+			m_stat.errFotipRomFrameSize++;
 			result &= false;
 		}
 
@@ -446,61 +556,61 @@ namespace Tuning
 		//
 		if (flags.dataTypeError == 1)
 		{
-			m_fotipFlagDataTypeErr++;
+			m_stat.fotipFlagDataTypeErr++;
 			result &= false;
 		}
 
 		if (flags.operationCodeError == 1)
 		{
-			m_fotipFlagOpCodeErr++;
+			m_stat.fotipFlagOpCodeErr++;
 			result &= false;
 		}
 
 		if (flags.startAddressError == 1)
 		{
-			m_fotipFlagStartAddrErr++;
+			m_stat.fotipFlagStartAddrErr++;
 			result &= false;
 		}
 
 		if (flags.romSizeError == 1)
 		{
-			m_fotipFlagRomSizeErr++;
+			m_stat.fotipFlagRomSizeErr++;
 			result &= false;
 		}
 
 		if (flags.romFrameSizeError == 1)
 		{
-			m_fotipFlagRomFrameSizeErr++;
+			m_stat.fotipFlagRomFrameSizeErr++;
 			result &= false;
 		}
 
 		if (flags.frameSizeError == 1)
 		{
-			m_fotipFlagFrameSizeErr++;
+			m_stat.fotipFlagFrameSizeErr++;
 			result &= false;
 		}
 
 		if (flags.versionError == 1)
 		{
-			m_fotipFlagProtocolVersionErr++;
+			m_stat.fotipFlagProtocolVersionErr++;
 			result &= false;
 		}
 
 		if (flags.subsystemKeyError == 1)
 		{
-			m_fotipFlagSubsystemKeyErr++;
+			m_stat.fotipFlagSubsystemKeyErr++;
 			result &= false;
 		}
 
 		if (flags.idError == 1)
 		{
-			m_fotipFlagUniueIDErr++;
+			m_stat.fotipFlagUniueIDErr++;
 			result &= false;
 		}
 
 		if (flags.offsetError == 1)
 		{
-			m_fotipFlagOffsetErr++;
+			m_stat.fotipFlagOffsetErr++;
 			result &= false;
 		}
 
@@ -508,22 +618,22 @@ namespace Tuning
 		//
 		if (flags.successfulCheck == 1)
 		{
-			m_fotipFlagBoundsCheckSuccess++;
+			m_stat.fotipFlagBoundsCheckSuccess++;
 		}
 
 		if (flags.successfulWrite == 1)
 		{
-			m_fotipFlagWriteSuccess++;
+			m_stat.fotipFlagWriteSuccess++;
 		}
 
 		if (flags.succesfulApply == 1)
 		{
-			m_fotipFlagApplySuccess++;
+			m_stat.fotipFlagApplySuccess++;
 		}
 
 		if (flags.setSOR == 1)
 		{
-			m_fotipFlagSetSOR++;
+			m_stat.fotipFlagSetSOR++;
 		}
 
 		return result;
@@ -568,17 +678,21 @@ namespace Tuning
 
 		if (m_waitReply == false)
 		{
-			m_errUntimelyReplay++;
+			m_stat.errUntimelyReplay++;
 			return;
 		}
 
 		m_waitReplyCounter = 0;
+		m_retryCount = 0;
 
-		m_replyCount++;
+		m_stat.isReply = true;
 
-		if ((m_replyCount % 100) == 0)
+		m_stat.replyCount++;
+
+		if ((m_stat.replyCount % 100) == 0)
 		{
-			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").arg(m_replyCount).arg(m_sourceEquipmentID).arg(m_errNoReply));
+			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
+							  arg(m_stat.replyCount).arg(m_sourceEquipmentID).arg(m_stat.errNoReply));
 		}
 
 		restartTimer();

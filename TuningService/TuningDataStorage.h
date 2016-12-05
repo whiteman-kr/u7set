@@ -40,17 +40,27 @@ namespace Tuning
 
 		int usedFramesCount() const { return m_usedFramesCount; }
 
-		void getSignals(QList<Signal *>& signalList);
+		void getSignals(QVector<Signal *> &signalList) const;
 
-		QList<Signal*> getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
-		QList<Signal*> getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
-		QList<Signal*> getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
+		const QVector<Signal*>& getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
+		const QVector<Signal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
+		const QVector<Signal*>& getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
+
+		const QVector<Signal*>& getSignals(int type) const;
+
+		int getSignalsCount() const;
 
 		const QStringList& metadataFields();
 		const std::vector<QVariantList>& metadata() const;
 
 		void writeToXml(XmlWriteHelper& xml);
 		bool readFromXml(XmlReadHelper& xml);
+
+		static const int TYPE_ANALOG_FLOAT = 0;
+		static const int TYPE_ANALOG_INT = 1;
+		static const int TYPE_DISCRETE = 2;
+
+		static const int TYPES_COUNT = 3;
 
 	private:
 		void writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue);
@@ -63,15 +73,9 @@ namespace Tuning
 		quint64 m_uniqueID = 0;
 		int m_usedFramesCount = 0;
 
-		static const int TYPE_ANALOG_FLOAT = 0;
-		static const int TYPE_ANALOG_INT = 1;
-		static const int TYPE_DISCRETE = 2;
-
-		static const int TYPES_COUNT = 3;
-
 		static const int TRIPLE_FRAMES = 3;
 
-		QList<Signal*> m_tuningSignals[TYPES_COUNT];
+		QVector<Signal*> m_tuningSignals[TYPES_COUNT];
 
 		int m_tuningSignalSizes[TYPES_COUNT];
 

@@ -177,7 +177,9 @@ message GetServiceInfoReply
 
 message GetTuningSourcesStates
 {
+    repeated uint64 sourcesIds = 1;			    // unique id
 }
+
 
 message TuningSourceState
 {

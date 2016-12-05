@@ -90,7 +90,7 @@ namespace  TuningIPEN
 	}
 
 
-	void TuningFramesData::copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata)
+	void TuningFramesData::copySignalsData(const QVector<Signal*>& signalsList, std::vector<QVariantList>& metadata)
 	{
 		if (signalsList.count() != m_signalCount )
 		{
@@ -466,7 +466,7 @@ namespace  TuningIPEN
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
 			TuningFramesData& framesData = m_tuningFramesData[type];
-			QList<Signal*>& tuningSignals = m_tuningSignals[type];
+			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
 			framesData.init(m_usedFramesCount, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
 			framesData.copySignalsData(tuningSignals, m_metadata);
@@ -485,7 +485,7 @@ namespace  TuningIPEN
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
 			TuningFramesData& framesData = m_tuningFramesData[type];
-			QList<Signal*>& tuningSignals = m_tuningSignals[type];
+			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
 			framesData.init(firstFrame, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
 

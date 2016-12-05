@@ -37,6 +37,12 @@ namespace Tuning
 	}
 
 
+	const TuningData* TuningSource::tuningData() const
+	{
+		return m_tuningData;
+	}
+
+
 	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
 	{
 		if (m_tuningData == nullptr)
