@@ -59,7 +59,6 @@ namespace Tuning
 		m_deleteTuningData = true;
 
 		m_tuningData->readFromXml(xml);
-		m_tuningData->initTuningData();
 
 		return true;
 	}

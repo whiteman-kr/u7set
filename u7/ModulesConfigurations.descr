@@ -650,15 +650,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 		
 		var serviceIP = [0, 0];		
 		var servicePort = [0, 0];
-		
-		if (i == 0)
-		{
-			serviceIP[0] = 0xc0a80bfe;	//	192.168.11.254
-			serviceIP[1] = 0xc0a815fe;	//	192.168.21.254
-			
-			servicePort[0] = 13322;
-			servicePort[1] = 13352;
-		}
+
 
 		ethernetcontrollerID = "_ETHERNET0" + (i + 2);
 		ethernetController = module.jsFindChildObjectByMask(lmID + ethernetcontrollerID);
@@ -709,11 +701,29 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 				var service = root.jsFindChildObjectByMask(serviceID);
 				if (service == null)
 				{
+		
 					log.wrnCFG3008(serviceID, module.propertyValue("EquipmentID"));
-					if (serviceIP[s] != 0 && servicePort[s] != 0)
+
+					if (i == 0)	// in Ethernet port 1, if service was not found, use default IP addresses
 					{
-						log.wrnCFG3018(servicesName[s] + "DataService", ipToString(serviceIP[s]), servicePort[s], ethernetController.propertyValue("EquipmentID"));
+						if (s == 0)	// this is App
+						{
+							serviceIP[s] = 0xc0a80bfe;	//	192.168.11.254
+							servicePort[s] = 13322;
+						}
+
+						if (s == 1)	// this is Diag
+						{
+							serviceIP[s] = 0xc0a815fe;	//	192.168.21.254
+							servicePort[s] = 13352;
+						}
+
+						if (serviceIP[s] != 0 && servicePort[s] != 0)
+						{
+							log.wrnCFG3018(servicesName[s] + "DataService", ipToString(serviceIP[s]), servicePort[s], ethernetController.propertyValue("EquipmentID"));
+						}
 					}
+					
 				}
 				else
 				{

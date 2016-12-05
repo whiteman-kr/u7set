@@ -38,3 +38,7 @@ TYPE reverseBytes(TYPE value)
 inline quint16 reverseUint16(quint16 val) { return reverseBytes<quint16>(val); }
 inline quint32 reverseUint32(quint32 val) { return reverseBytes<quint32>(val); }
 inline quint64 reverseUint64(quint64 val) { return reverseBytes<quint64>(val); }
+
+inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
+
+inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }

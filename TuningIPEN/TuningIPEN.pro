@@ -49,7 +49,8 @@ SOURCES +=\
     TuningIPENSocket.cpp \
     TuningIPENSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    TuningIPENDataStorage.cpp
+    TuningIPENDataStorage.cpp \
+    ../TuningService/TuningDataStorage.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -86,7 +87,8 @@ HEADERS  += TuningMainWindow.h \
     TuningIPENSocket.h \
     TuningIPENSource.h \
     ../u7/Builder/ModulesRawData.h \
-    TuningIPENDataStorage.h
+    TuningIPENDataStorage.h \
+    ../TuningService/TuningDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 
