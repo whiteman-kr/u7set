@@ -1071,19 +1071,20 @@ void SignalsModel::addSignal()
 			for (int i = 0; i < channelCount; i++)
 			{
 				signalVector << signal;
-				QString strID = signal.appSignalID();
+				QString suffix;
 
 				if (signalCount > 1)
 				{
-					strID = (strID + "_sig%1").arg(s);
+					suffix = "_SIG" + QString::number(s);
 				}
 
 				if (channelCount > 1)
 				{
-					strID = (strID + "_%1").arg(QChar('A' + i));
+					suffix += "_" + QString('A' + i);
 				}
 
-				signalVector[i].setAppSignalID(strID.toUpper());
+				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
+				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix).toUpper());
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
