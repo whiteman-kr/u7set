@@ -4606,7 +4606,7 @@ namespace Builder
 			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
-			for(Signal* signal : analogFloatSignals)
+			for(Signal* signal : analogIntSignals)
 			{
 				if (signal == nullptr)
 				{
@@ -4616,7 +4616,7 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%d\t%d\t%d",
+				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
@@ -4671,6 +4671,8 @@ namespace Builder
 
 		file.append(QString("\n"));
 
+		int addr = 0;
+
 		for(int f = 0; f < frameCount; f++)
 		{
 			QString s;
@@ -4682,6 +4684,11 @@ namespace Builder
 				quint8 byte = data[f * FotipV2::TX_RX_DATA_SIZE + i];
 
 				QString sv;
+
+				if ((i % 16) == 0)
+				{
+					s.sprintf("%04X:  ", addr);
+				}
 
 				sv.sprintf("%02X ", static_cast<unsigned int>(byte));
 
@@ -4697,6 +4704,8 @@ namespace Builder
 					file.append(s);
 					s.clear();
 				}
+
+				addr++;
 			}
 
 			if (s.isEmpty() == false)

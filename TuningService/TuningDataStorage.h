@@ -33,7 +33,6 @@ namespace Tuning
 		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
 
 		virtual bool buildTuningData();
-		virtual bool initTuningData();
 		virtual void getTuningData(QByteArray* tuningData) const;
 
 		quint64 generateUniqueID(const QString& lmEquipmentID);
@@ -52,6 +51,9 @@ namespace Tuning
 
 		void writeToXml(XmlWriteHelper& xml);
 		bool readFromXml(XmlReadHelper& xml);
+
+	private:
+		void writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue);
 
 	protected:
 		QString m_lmEquipmentID;

@@ -181,6 +181,7 @@ namespace  Tuning
 	{
 		// allocate m_tuningData
 		//
+		m_metadata.clear();
 
 		m_tuningDataSize = m_usedFramesCount * m_tuningFrameSizeBytes;
 
@@ -195,6 +196,8 @@ namespace  Tuning
 
 		for(int t = TYPE_ANALOG_FLOAT; t < TYPES_COUNT; t++)
 		{
+			int discreteCount = 0;
+
 			for(Signal* signal : m_tuningSignals[t])
 			{
 				if (signal == nullptr)
@@ -203,53 +206,115 @@ namespace  Tuning
 					continue;
 				}
 
+				QVariantList metaData;
+
+				metaData.append(QVariant(signal->appSignalID()));
+				metaData.append(QVariant(signal->customAppSignalID()));
+				metaData.append(QVariant(signal->caption()));
+
+				// generate metadata
+				//
+
+				/*
+
+						m_metadataFields.append("Offset");
+						m_metadataFields.append("BitNo");
+						*/
+
+
+
+
+
 				quint8* dataPtr = m_tuningData + sizeB;
 
 				switch(t)
 				{
 				case TYPE_ANALOG_FLOAT:
 					{
+						float defaultValue = static_cast<float>(signal->tuningDefaultValue());
+						float lowBound = static_cast<float>(signal->lowEngeneeringUnits());
+						float highBound = static_cast<float>(signal->highEngeneeringUnits());
+
 						// in first frame - default value
 						//
 						*reinterpret_cast<float*>(dataPtr) =
-							reverseFloat(static_cast<float>(signal->tuningDefaultValue()));
+								reverseFloat(defaultValue);
 
 						// in second frame - low bound
 						//
 						*reinterpret_cast<float*>(dataPtr + m_tuningFrameSizeBytes) =
-							reverseFloat(static_cast<float>(signal->lowEngeneeringUnits()));
+								reverseFloat(lowBound);
 
 						// in third frame - high bound
 						//
 						*reinterpret_cast<float*>(dataPtr + m_tuningFrameSizeBytes * 2) =
-							reverseFloat(static_cast<float>(signal->highEngeneeringUnits()));
+								reverseFloat(highBound);
+
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(float);
+
+						metaData.append(QVariant(QString("AnalogFloat")));
+						metaData.append(QVariant(defaultValue));
+						metaData.append(QVariant(lowBound));
+						metaData.append(QVariant(highBound));
 					}
 					break;
 
 				case TYPE_ANALOG_INT:
 					{
+						qint32 defaultValue = static_cast<qint32>(signal->tuningDefaultValue());
+						qint32 lowBound = static_cast<qint32>(signal->lowEngeneeringUnits());
+						qint32 highBound = static_cast<qint32>(signal->highEngeneeringUnits());
+
 						// in first frame - default value
 						//
 						*reinterpret_cast<qint32*>(dataPtr) =
-							reverseFloat(static_cast<qint32>(signal->tuningDefaultValue()));
+								reverseInt32(defaultValue);
 
 						// in second frame - low bound
 						//
 						*reinterpret_cast<qint32*>(dataPtr + m_tuningFrameSizeBytes) =
-							reverseFloat(static_cast<qint32>(signal->lowEngeneeringUnits()));
+								reverseInt32(lowBound);
 
 						// in third frame - high bound
 						//
 						*reinterpret_cast<qint32*>(dataPtr + m_tuningFrameSizeBytes * 2) =
-							reverseFloat(static_cast<qint32>(signal->highEngeneeringUnits()));
+								reverseInt32(highBound);
+
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(qint32);
+
+						metaData.append(QVariant(QString("AnalogInt")));
+						metaData.append(QVariant(defaultValue));
+						metaData.append(QVariant(lowBound));
+						metaData.append(QVariant(highBound));
 					}
 					break;
 
 				case TYPE_DISCRETE:
+					{
+						quint16 defaultValue = signal->tuningDefaultValue() == 0.0 ? 0 : 1;
+
+						writeBigEndianUint16Bit(dataPtr, discreteCount % SIZE_16BIT, defaultValue);
+						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes, discreteCount % SIZE_16BIT, 0);
+						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes * 2, discreteCount % SIZE_16BIT, 1);
+
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), discreteCount % SIZE_16BIT));
+
+						discreteCount++;
+
+						if ((discreteCount % SIZE_16BIT) == 0)
+						{
+							sizeB += sizeof(quint16);
+						}
+
+						metaData.append(QVariant(QString("Discrete")));
+						metaData.append(QVariant(defaultValue));
+						metaData.append(QVariant(0));
+						metaData.append(QVariant(1));
+					}
 					break;
 
 				default:
@@ -263,57 +328,16 @@ namespace  Tuning
 					//
 					sizeB += m_tuningFrameSizeBytes * 2;
 				}
+
+				metaData.append(QVariant(signal->tuningAddr().offset()));
+				metaData.append(QVariant(signal->tuningAddr().bit()));
+
+				m_metadata.push_back(metaData);
 			}
 		}
 
-
-/*		m_usedFramesCount = 0;
-
-		m_metadata.clear();
-
-		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
-		{
-			TuningFramesData& framesData = m_tuningFramesData[type];
-			QList<Signal*>& tuningSignals = m_tuningSignals[type];
-
-			framesData.init(m_usedFramesCount, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
-			framesData.copySignalsData(tuningSignals, m_metadata);
-
-
-			m_usedFramesCount += framesData.usedFramesCount();
-		}*/
-
 		return true;
 	}
-
-
-	bool TuningData::initTuningData()
-	{
-/*		int firstFrame = 0;
-
-		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
-		{
-			TuningFramesData& framesData = m_tuningFramesData[type];
-			QList<Signal*>& tuningSignals = m_tuningSignals[type];
-
-			framesData.init(firstFrame, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
-
-			firstFrame += framesData.usedFramesCount();
-
-			for(Signal* signal : tuningSignals)
-			{
-				m_id2SignalMap.insert(signal->appSignalID(), signal);
-			}
-		}
-
-		if (firstFrame != m_usedFramesCount)
-		{
-			assert(false);
-		}*/
-
-		return true;
-	}
-
 
 	void TuningData::getTuningData(QByteArray* tuningData) const
 	{
@@ -496,6 +520,39 @@ namespace  Tuning
 		}
 
 		return result;
+	}
+
+
+	void TuningData::writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue)
+	{
+		if (dataPtr == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		assert(bitNo >= 0 && bitNo <= 15);
+
+		quint16* data16Ptr = reinterpret_cast<quint16*>(dataPtr);
+
+		// read word and convert from BigEndian to LittleEndian
+		//
+		quint16 value = reverseUint16(*data16Ptr);
+
+		quint16 bitMask = 1 << bitNo;
+
+		if (bitValue == 0)
+		{
+			value &= ~bitMask;
+		}
+		else
+		{
+			value |= bitMask;
+		}
+
+		// convert value from LittleEndian to BigEndian and write word
+		//
+		*data16Ptr = reverseUint16(value);
 	}
 
 

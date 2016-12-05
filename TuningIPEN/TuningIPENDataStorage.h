@@ -86,7 +86,8 @@ namespace TuningIPEN
 		virtual ~TuningData();
 
 		virtual bool buildTuningData() override;
-		virtual bool initTuningData() override;
+		bool initTuningData();
+
 		virtual void getTuningData(QByteArray* tuningData) const override;
 
 		void setFrameData(int frameNo, const char* fotipData);
