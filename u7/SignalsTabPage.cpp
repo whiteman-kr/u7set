@@ -1059,7 +1059,7 @@ void SignalsModel::addSignal()
 		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
-	SignalPropertiesDialog dlg(signal, m_unitInfo, false, nullptr, m_parentWindow);
+	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1140,9 +1140,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		signalVector.append(&signal);
 	}
 
-	SignalPropertiesDialog dlg(signalVector, m_unitInfo, readOnly, this, m_parentWindow);
-
-	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
+	SignalPropertiesDialog dlg(dbController(), signalVector, readOnly, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1612,7 +1610,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalPtrVector.push_back(&signal);
 	}
-	SignalPropertiesDialog dlg(signalPtrVector, *Signal::unitList.get(), false, nullptr, parent);
+	SignalPropertiesDialog dlg(dbController, signalPtrVector, false, parent);
 
 	if (dlg.exec() != QDialog::Accepted )
 	{

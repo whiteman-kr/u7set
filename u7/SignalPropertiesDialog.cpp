@@ -4,7 +4,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include "../lib/SignalProperties.h"
-#include "SignalsTabPage.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
 #include "Stable.h"
@@ -15,82 +14,36 @@
 //
 std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
-	SignalSet signalSet;
+	QVector<Signal> signalVector;
 
-	QString wrongIds;
-
-	SignalsModel* model = SignalsModel::instance();
-	if (model == nullptr)
+	if (!dbController->getLatestSignalsByAppSignalIDs(signalId, &signalVector, parent))
 	{
-		assert(false);
-		dbController->getSignals(&signalSet, parent);
-		dbController->getUnits(Signal::unitList.get(), parent);
-	}
-	else
-	{
-		for (const QString& id : signalId)
+		if (signalId.count() > 1)
 		{
-			Signal* modelSignal = model->getSignalByStrID(id);
-			if (modelSignal == nullptr)
-			{
-				continue;
-			}
-
-			int signalIndex = model->keyIndex(modelSignal->ID());
-			if (signalIndex == -1)
-			{
-				continue;
-			}
-
-			model->loadSignal(signalIndex);
-			Signal* signal = new Signal(model->signal(signalIndex));
-			signalSet.append(signal->ID(), signal);
+			QMessageBox::critical(parent, "Error", "Could not load signals from database");
 		}
+		else
+		{
+			QMessageBox::critical(parent, "Error", "Could not load signal from database");
+		}
+	}
+
+	if (!dbController->getUnits(Signal::unitList.get(), parent))
+	{
+		QMessageBox::critical(parent, "Error", "Could not get unit list from database");
+	}
+
+	QVector<Signal*> signalPtrVector;
+
+	for (Signal& signal : signalVector)
+	{
+		signalPtrVector.push_back(&signal);
 	}
 
 	int readOnly = false;
-	QVector<Signal*> signalVector;
-	QMap<QString, int> signalIndexMap;
-	int lastIndexProcessed = -1;
-	QStringList foundIds;
 	std::vector<std::pair<QString, QString>> result;
 
-	result.resize(signalId.count());
-
-	for (int i = 0; i < signalId.count(); i++)
-	{
-		QString id = signalId[i];
-		id = id.trimmed();
-		result[i].first = id;
-		result[i].second = id;
-		if (signalIndexMap.contains(id))
-		{
-			int index = signalIndexMap[id];
-			signalVector.push_back(&signalSet[index]);
-			foundIds.push_back(id);
-			continue;
-		}
-		for (lastIndexProcessed++; lastIndexProcessed < signalSet.count(); lastIndexProcessed++)
-		{
-			QString currentId = signalSet[lastIndexProcessed].appSignalID();
-			signalIndexMap.insert(currentId, lastIndexProcessed);
-			if (currentId == id)
-			{
-				signalVector.push_back(&signalSet[lastIndexProcessed]);
-				foundIds.push_back(id);
-				break;
-			}
-		}
-		if (lastIndexProcessed == signalSet.count())
-		{
-			wrongIds += id + "\n";
-		}
-	}
-	if (!wrongIds.isEmpty())
-	{
-		QMessageBox::critical(parent, "Error", "Signal ID not found:\n\n" + wrongIds);
-	}
-	for (Signal* signal : signalVector)
+	for (Signal* signal : signalPtrVector)
 	{
 		if (signal->checkedOut() && signal->userID() != dbController->currentUser().userId())
 		{
@@ -98,20 +51,22 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 		}
 	}
 
-	if (signalVector.isEmpty())
+	if (signalPtrVector.isEmpty())
 	{
 		return result;
 	}
 
-	SignalPropertiesDialog dlg(signalVector, *Signal::unitList.get(), readOnly, model, parent);
+	result.resize(signalPtrVector.count());
+
+	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QString message;
-		for (int i = 0; i < signalVector.count(); i++)
+		for (int i = 0; i < signalPtrVector.count(); i++)
 		{
 			ObjectState state;
-			dbController->setSignalWorkcopy(signalVector[i], &state, parent);
+			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
 				switch(state.errCode)
@@ -149,13 +104,13 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 		}
 	}
 
-	for (int i = 0; i < foundIds.count(); i++)
+	for (int i = 0; i < signalId.count(); i++)
 	{
 		for (size_t j = 0; j < result.size(); j++)
 		{
-			if (result[j].first == foundIds[i])
+			if (result[j].first == signalId[i])
 			{
-				result[j].second = signalVector[i]->appSignalID();
+				result[j].second = signalPtrVector[i]->appSignalID();
 			}
 		}
 	}
@@ -163,19 +118,12 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 }
 
 
-SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
-	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal, unitInfo, readOnly, signalsModel, parent)
-{
-
-}
-
-SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, QWidget *parent) :
 	QDialog(parent),
+	m_dbController(dbController),
 	m_signalVector(signalVector),
-	m_unitInfo(unitInfo),
-	m_signalsModel(signalsModel)
+	m_parent(parent)
 {
-	*Signal::unitList.get() = unitInfo;
 	QSettings settings;
 
 	QVBoxLayout* vl = new QVBoxLayout;
@@ -270,10 +218,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Un
 	}
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
 	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
-	if (m_signalsModel != nullptr)
-	{
-		connect(this, &SignalPropertiesDialog::onError, m_signalsModel, static_cast<void (SignalsModel::*)(QString)>(&SignalsModel::showError));
-	}
 
 	vl->addWidget(m_buttonBox);
 	setLayout(vl);
@@ -369,7 +313,7 @@ void SignalPropertiesDialog::saveDialogSettings()
 
 void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
 {
-	checkoutSignal(objects);
+	checkoutSignals(objects);
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		/* WhiteMan 04.10.2016
@@ -390,22 +334,16 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 	}
 }
 
-void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject> > objects)
+void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObject> > objects)
 {
-	if (m_signalsModel == nullptr)
-	{
-		return;
-	}
-
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
 		int id = signalProperites->signal().ID();
-		int row = m_signalsModel->keyIndex(id);
 		QString message;
-		if (!m_signalsModel->checkoutSignal(row, message) && !message.isEmpty())
+		if (checkoutSignal(signalProperites->signal(), message) && !message.isEmpty())
 		{
-			emit onError(message);
+			showError(message);
 			setWindowTitle("Signal properties (read only)");
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
@@ -414,6 +352,90 @@ void SignalPropertiesDialog::checkoutSignal(QList<std::shared_ptr<PropertyObject
 		{
 			m_editedSignalsId.append(id);
 		}
+	}
+}
+
+void SignalPropertiesDialog::showError(QString errorString)
+{
+	QMessageBox::warning(this, "Error", errorString);
+}
+
+bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
+{
+	if (s.checkedOut())
+	{
+		if (s.userID() == m_dbController->currentUser().userId())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	QVector<int> signalsIDs;
+	signalsIDs << s.ID();
+
+	QVector<ObjectState> objectStates;
+	m_dbController->checkoutSignals(&signalsIDs, &objectStates, m_parent);
+	if (objectStates.count() == 0)
+	{
+		return false;
+	}
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode != ERR_SIGNAL_OK)
+		{
+			message += errorMessage(objectState) + "\n";
+		}
+	}
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+				&& objectState.userId != m_dbController->currentUser().userId())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+QString SignalPropertiesDialog::errorMessage(const ObjectState& state) const
+{
+	switch(state.errCode)
+	{
+		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
+			return tr("Signal %1 is not checked out").arg(state.id);
+		case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+		{
+			std::vector<DbUser> users;
+			m_dbController->getUserList(&users, m_parent);
+			QString userName;
+			for (DbUser& user : users)
+			{
+				if (user.userId() == state.userId)
+				{
+					userName = user.username();
+				}
+			}
+			if (userName.isEmpty())
+			{
+				return tr("Signal %1 is checked out by other user").arg(state.id).arg(userName);
+			}
+			else
+			{
+				return tr("Signal %1 is checked out by other user\"%2\"").arg(state.id).arg(userName);
+			}
+		}
+		case ERR_SIGNAL_DELETED:
+			return tr("Signal %1 was deleted already").arg(state.id);
+		case ERR_SIGNAL_NOT_FOUND:
+			return tr("Signal %1 not found").arg(state.id);
+		case ERR_SIGNAL_EXISTS:
+			return "";				// error message is displayed by PGSql driver
+		default:
+			return tr("Unknown error %1").arg(state.errCode);
 	}
 }
 
