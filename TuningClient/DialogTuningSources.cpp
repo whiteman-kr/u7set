@@ -1,6 +1,7 @@
 #include "DialogTuningSources.h"
 #include "ui_DialogTuningSources.h"
 #include "TcpTuningClient.h"
+#include "DialogTuningSourceInfo.h"
 
 DialogTuningSources::DialogTuningSources(QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -9,33 +10,28 @@ DialogTuningSources::DialogTuningSources(QWidget *parent) :
 	setAttribute(Qt::WA_DeleteOnClose);
 	ui->setupUi(this);
 
-	ui->tableWidget->setColumnCount(static_cast<int>(Columns::ColumnCount));
-
 	QStringList headerLabels;
 	headerLabels<<"Id";
 	headerLabels<<"EquipmentId";
 	headerLabels<<"Caption";
-	headerLabels<<"DataType";
 	headerLabels<<"Ip";
 	headerLabels<<"Port";
 	headerLabels<<"Channel";
 	headerLabels<<"SubsystemID";
 	headerLabels<<"Subsystem";
 	headerLabels<<"LmNumber";
-	headerLabels<<"LmModuleType";
-	headerLabels<<"LmAdapterID";
-	headerLabels<<"LmDataEnable";
-	headerLabels<<"LmDataID";
 
-	headerLabels<<"Uptime";
-	headerLabels<<"ReceivedDataSize";
-	headerLabels<<"DataReceivingRate";
-	headerLabels<<"Respond";
+    headerLabels<<"IsReply";
+    headerLabels<<"RequestCount";
+    headerLabels<<"ReplyCount";
+    headerLabels<<"CommandQueueSize";
 
-	ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
-	ui->tableWidget->resizeColumnsToContents();
+    ui->treeWidget->setColumnCount(headerLabels.size());
+    ui->treeWidget->setHeaderLabels(headerLabels);
 
-	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+    update(false);
+
+    connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -63,53 +59,85 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-
 	std::vector<TuningSource> tsi = theTcpTuningClient->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
-	if (refreshOnly == false)
-	{
-		ui->tableWidget->setRowCount(count);
-	}
-	else
-	{
-		if (ui->tableWidget->rowCount() != count)
-		{
-			assert(false);
-			ui->tableWidget->setRowCount(count);
-		}
-	}
+    if (ui->treeWidget->topLevelItemCount() != count)
+    {
+        refreshOnly = false;
+    }
 
-	for (int i = 0; i < count; i++)
+    if (refreshOnly == false)
+    {
+        ui->treeWidget->clear();
+
+        for (int i = 0; i < count; i++)
+        {
+            QStringList connectionStrings;
+
+            TuningSource& ts = tsi[i];
+
+            connectionStrings << QString::number(ts.m_info.id());
+            connectionStrings << ts.m_info.equipmentid().c_str();
+            connectionStrings << ts.m_info.caption().c_str();
+            connectionStrings << ts.m_info.ip().c_str();
+            connectionStrings << QString::number(ts.m_info.port());
+            connectionStrings << QString::number(ts.m_info.channel());
+            connectionStrings << QString::number(ts.m_info.subsystemid());
+            connectionStrings << ts.m_info.subsystem().c_str();
+            connectionStrings << QString::number(ts.m_info.lmnumber());
+
+            QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
+
+            item->setData(0, Qt::UserRole, ts.m_info.id());
+
+            ui->treeWidget->addTopLevelItem(item);
+        }
+
+        for (int i = 0; i < ui->treeWidget->columnCount(); i++)
+        {
+            ui->treeWidget->resizeColumnToContents(i);
+        }
+    }
+
+    const int dynamicColumn = 9;
+
+    for (int i = 0; i < count; i++)
 	{
 		TuningSource& ts = tsi[i];
 
-		ui->tableWidget->item(i, static_cast<int>(Columns::Uptime))->setText(QString::number(ts.m_uptime));
-		ui->tableWidget->item(i, static_cast<int>(Columns::ReceivedDataSize))->setText(QString::number(ts.m_receivedDataSize));
-		ui->tableWidget->item(i, static_cast<int>(Columns::DataReceivingRate))->setText(QString::number(ts.m_dataReceivingRate));
-		ui->tableWidget->item(i, static_cast<int>(Columns::Respond))->setText(QString::number(ts.m_respond));
+        QTreeWidgetItem* item = ui->treeWidget->topLevelItem(i);
 
-		if (refreshOnly == false)
-		{
-			ui->tableWidget->item(i, static_cast<int>(Columns::Id))->setText(QString::number(ts.m_id));
-			ui->tableWidget->item(i, static_cast<int>(Columns::EquipmentId))->setText(ts.m_equipmentId);
-			ui->tableWidget->item(i, static_cast<int>(Columns::Caption))->setText(ts.m_caption);
-			ui->tableWidget->item(i, static_cast<int>(Columns::DataType))->setText(QString::number(ts.m_dataType));
-			ui->tableWidget->item(i, static_cast<int>(Columns::Ip))->setText(ts.m_ip);
-			ui->tableWidget->item(i, static_cast<int>(Columns::Port))->setText(QString::number(ts.m_port));
-			ui->tableWidget->item(i, static_cast<int>(Columns::Channel))->setText(QString::number(ts.m_channel));
-			ui->tableWidget->item(i, static_cast<int>(Columns::SubsystemID))->setText(QString::number(ts.m_subsystemID));
-			ui->tableWidget->item(i, static_cast<int>(Columns::Subsystem))->setText(ts.m_subsystem);
+        if (item == nullptr)
+        {
+            assert(false);
+            continue;
+        }
 
-			ui->tableWidget->item(i, static_cast<int>(Columns::LmNumber))->setText(QString::number(ts.m_lmNumber));
-			ui->tableWidget->item(i, static_cast<int>(Columns::LmModuleType))->setText(QString::number(ts.m_lmModuleType));
-			ui->tableWidget->item(i, static_cast<int>(Columns::LmAdapterID))->setText(ts.m_lmAdapterID);
-			ui->tableWidget->item(i, static_cast<int>(Columns::LmDataEnable))->setText(QString::number(ts.m_lmDataEnable));
-			ui->tableWidget->item(i, static_cast<int>(Columns::LmDataID))->setText(QString::number(ts.m_lmDataID));
+        int col = dynamicColumn;
 
-			ui->tableWidget->resizeColumnsToContents();
-		}
-	}
+        item->setText(col++, ts.m_state.isreply() ? "Yes" : "No");
+        item->setText(col++, QString::number(ts.m_state.requestcount()));
+        item->setText(col++, QString::number(ts.m_state.replycount()));
+        item->setText(col++, QString::number(ts.m_state.commandqueuesize()));
+    }
+
 }
 
 DialogTuningSources* theDialogTuningSources = nullptr;
+
+void DialogTuningSources::on_treeWidget_doubleClicked(const QModelIndex &index)
+{
+    QTreeWidgetItem* item = ui->treeWidget->topLevelItem(index.row());
+
+    if (item == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    quint64 id = item->data(0, Qt::UserRole).value<quint64>();
+
+    DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(this, id);
+    dlg->exec();
+}
