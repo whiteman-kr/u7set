@@ -2117,9 +2117,42 @@ void FileTests::get_specific_copyTest()
 	// Call function with wrong changeSetId
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, 1, %1);").arg(maxValueId));
+	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, %1, %2);").arg(fileId).arg(maxValueId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(ok == false, qPrintable("Wrong changeset error expected"));
+	ok = tempQuery.exec(QString("SELECT MAX(changesetId) FROM fileinstance WHERE fileId = %1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	int maxChangesetId = tempQuery.value(0).toInt();
+
+	QVERIFY2(query.value("changeSetId").toInt() == maxChangesetId, qPrintable(QString("Error: wrong changesetId returned while entered %1 changesetId").arg(maxValueId)));
+
+	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, %1, -1);").arg(fileId));
+	QVERIFY2(ok == false, qPrintable(query.lastError().databaseText()));
+
+	// Call second function, which works with timestamps
+	//
+
+	QString dateTimeToCheck = "2016-12-05 15:59:21.530509+02";
+
+	ok = query.exec(QString("UPDATE Fileinstance SET created = '%1' WHERE changesetId = %2 AND FileId = %3")
+	                .arg(dateTimeToCheck)
+	                .arg(maxChangesetId)
+	                .arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, %1, TIMESTAMP WITH TIME ZONE '%2')")
+	                .arg(fileId)
+	                .arg(dateTimeToCheck));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("changesetId").toInt() == maxChangesetId, qPrintable("Wrong changeset returned (timestamp)"));
+	QVERIFY2(query.value("fileId").toInt() == fileId, qPrintable("Wrong fileId returned (timestamp)"));
 }
 
 void FileTests::add_deviceTest()
