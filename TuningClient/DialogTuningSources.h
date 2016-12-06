@@ -30,22 +30,17 @@ private:
 		Id,
 		EquipmentId,
 		Caption,
-		DataType,
 		Ip,
 		Port,
 		Channel,
 		SubsystemID,
 		Subsystem,
 		LmNumber,
-		LmModuleType,
-		LmAdapterID,
-		LmDataEnable,
-		LmDataID,
 
-		Uptime,
-		ReceivedDataSize,
-		DataReceivingRate,
-		Respond,
+        IsReply,
+        RequestCount,
+        ReplyCount,
+        CommandQueueSize,
 
 		ColumnCount
 	};

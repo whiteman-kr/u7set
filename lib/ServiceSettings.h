@@ -84,11 +84,28 @@ private:
 	static const char* PROP_TUNING_ROM_FRAME_SIZE;
 	static const char* PROP_TUNING_ROM_SIZE;
 
+	static const char* TUNING_CLIENTS;
+	static const char* TUNING_CLIENT;
+	static const char* TUNING_SOURCES;
+	static const char* TUNING_SOURCE;
+	static const char* ATTR_EQUIIPMENT_ID;
+	static const char* ATTR_COUNT;
+
+	struct TuningClient
+	{
+		QString equipmentID;
+		QStringList sourcesIDs;
+	};
+
+	bool fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log);
+
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
 	HostAddressPort tuningDataIP;
+
+	QVector<TuningClient> clients;
 
 	int tuningDataOffsetW = 0;
 	int tuningDataSizeW = 0;
