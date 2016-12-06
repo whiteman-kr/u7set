@@ -1489,6 +1489,22 @@ namespace Hardware
 		return deviceType() == DeviceType::Signal;
 	}
 
+	const Hardware::DeviceRoot* DeviceObject::toRoot() const
+	{
+		const Hardware::DeviceRoot* r = dynamic_cast<const Hardware::DeviceRoot*>(this);
+		assert(r != nullptr);
+
+		return r;
+	}
+
+	Hardware::DeviceRoot* DeviceObject::toRoot()
+	{
+		Hardware::DeviceRoot* r = dynamic_cast<Hardware::DeviceRoot*>(this);
+		assert(r != nullptr);
+
+		return r;
+	}
+
 	const Hardware::DeviceSystem* DeviceObject::toSystem() const
 	{
 		const Hardware::DeviceSystem* d = dynamic_cast<const Hardware::DeviceSystem*>(this);
@@ -1693,6 +1709,29 @@ namespace Hardware
 			if (deviceObject->isSystem())
 			{
 				return deviceObject->toSystem();
+			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
+	const Hardware::DeviceRoot* DeviceObject::getParentRoot() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
+
+		do
+		{
+			deviceObject = deviceObject->parent();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isRoot())
+			{
+				return deviceObject->toRoot();
 			}
 		}
 		while(deviceObject != nullptr);

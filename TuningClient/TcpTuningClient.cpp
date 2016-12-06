@@ -213,7 +213,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 	{
 		QMutexLocker l(&m_mutex);
 
-		for (int i = 0; i < m_tuningDataSourcesStatesReply.tuningdatasourcesstates_size(); i++)
+	/*	for (int i = 0; i < m_tuningDataSourcesStatesReply.tuningdatasourcesstates_size(); i++)
 		{
 			const ::Network::TuningSourceState& tss = m_tuningDataSourcesStatesReply.tuningdatasourcesstates(i);
 
@@ -233,7 +233,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 			ts.m_receivedDataSize = tss.receiveddatasize();
 			ts.m_dataReceivingRate = tss.datareceivingrate();
 			ts.m_respond = tss.respond();
-		}
+		}*/
 	}
 
 	resetToGetTuningState();
