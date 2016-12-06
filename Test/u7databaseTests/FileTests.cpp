@@ -564,6 +564,8 @@ void FileTests::get_file_historyTest()
 	QSqlQuery query;
 	QSqlQuery fileInstanceQuery;
 	QSqlQuery changeSetQuery;
+	QSqlQuery usersQuery;
+
 	// Create new file, and create history for it
 	//
 
@@ -578,12 +580,23 @@ void FileTests::get_file_historyTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_out (1, '{%1}');").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM check_out (%1, '{%2}');").arg(m_firstUserForTest).arg(fileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(1, '{%1}', 'blah-blah');").arg(fileId));
+	ok = query.exec(QString("SELECT MAX(changesetId) FROM FileInstance WHERE fileID = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int changesetIdForDataUpdate = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE FileInstance SET Data = 'testtesttest' WHERE changesetId = %1").arg(changesetIdForDataUpdate));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'blah-blah');").arg(m_firstUserForTest).arg(fileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -604,6 +617,7 @@ void FileTests::get_file_historyTest()
 
 		QVERIFY2(fileInstanceQuery.value("changeSetId").toInt() == query.value("changesetId").toInt(), qPrintable("Error: changesetId is not match!"));
 		QVERIFY2(fileInstanceQuery.value("action").toInt() == query.value("action").toInt(), qPrintable("Error: action is not match"));
+
 		int changeSetId = query.value("changesetId").toInt();
 
 		ok = changeSetQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
@@ -613,6 +627,13 @@ void FileTests::get_file_historyTest()
 
 		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
 		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
+
+		ok = usersQuery.exec(QString("SELECT userName FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
+
+		QVERIFY2(ok == true, qPrintable(usersQuery.lastError().databaseText()));
+		QVERIFY2(usersQuery.first() == true, qPrintable(usersQuery.lastError().databaseText()));
+
+		QVERIFY2(usersQuery.value(0).toString() == query.value("userName").toString(), qPrintable("Error: wrong username returned"));
 	}
 
 	// Check file history with another user
@@ -638,6 +659,13 @@ void FileTests::get_file_historyTest()
 		QVERIFY2(changeSetQuery.first() == true, qPrintable(changeSetQuery.lastError().databaseText()));
 		QVERIFY2(changeSetQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable("Error: userId not match!"));
 		QVERIFY2(changeSetQuery.value("comment").toString() == query.value("comment").toString(), qPrintable("Error: comment is not match!"));
+
+		ok = usersQuery.exec(QString("SELECT userName FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
+
+		QVERIFY2(ok == true, qPrintable(usersQuery.lastError().databaseText()));
+		QVERIFY2(usersQuery.first() == true, qPrintable(usersQuery.lastError().databaseText()));
+
+		QVERIFY2(usersQuery.value(0).toString() == query.value("userName").toString(), qPrintable("Error: wrong username returned"));
 	}
 
 	// Check if function returns nothing
