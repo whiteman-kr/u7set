@@ -62,7 +62,7 @@ namespace Tuning
 		connect(&m_replyQueue, &Queue<Rup::Frame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
 		connect(&m_timer, &QTimer::timeout, this, &TuningSourceWorker::onTimer);
 
-		m_timerInterval = 15;
+		m_timerInterval = 5;
 
 		restartTimer();
 	}
@@ -642,7 +642,6 @@ namespace Tuning
 
 	void TuningSourceWorker::restartTimer()
 	{
-		//m_timer.setInterval(15);
 		m_timer.start(m_timerInterval);
 	}
 
@@ -695,7 +694,7 @@ namespace Tuning
 							  arg(m_stat.replyCount).arg(m_sourceEquipmentID).arg(m_stat.errNoReply));
 		}
 
-		restartTimer();
+		//restartTimer();
 
 		processReply(m_reply);
 

@@ -53,9 +53,17 @@ class GetUnitsReply;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
+class GetTuningSourcesInfo;
+class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
 class TuningSourceState;
 class GetTuningSourcesStatesReply;
+class ReadTuningSignals;
+class TuningSignalState;
+class ReadTuningSignalsReply;
+class TuningSignalWrite;
+class WriteTuningSignals;
+class WriteTuningSignalsReply;
 
 // ===================================================================
 
@@ -2137,6 +2145,188 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class GetTuningSourcesInfo : public ::google::protobuf::Message {
+ public:
+  GetTuningSourcesInfo();
+  virtual ~GetTuningSourcesInfo();
+
+  GetTuningSourcesInfo(const GetTuningSourcesInfo& from);
+
+  inline GetTuningSourcesInfo& operator=(const GetTuningSourcesInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetTuningSourcesInfo& default_instance();
+
+  void Swap(GetTuningSourcesInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  GetTuningSourcesInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetTuningSourcesInfo& from);
+  void MergeFrom(const GetTuningSourcesInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
+  // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfo)
+ private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* clientequipmentid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetTuningSourcesInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
+ public:
+  GetTuningSourcesInfoReply();
+  virtual ~GetTuningSourcesInfoReply();
+
+  GetTuningSourcesInfoReply(const GetTuningSourcesInfoReply& from);
+
+  inline GetTuningSourcesInfoReply& operator=(const GetTuningSourcesInfoReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetTuningSourcesInfoReply& default_instance();
+
+  void Swap(GetTuningSourcesInfoReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetTuningSourcesInfoReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetTuningSourcesInfoReply& from);
+  void MergeFrom(const GetTuningSourcesInfoReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 errorCode = 1 [default = 0];
+  inline bool has_errorcode() const;
+  inline void clear_errorcode();
+  static const int kErrorCodeFieldNumber = 1;
+  inline ::google::protobuf::int32 errorcode() const;
+  inline void set_errorcode(::google::protobuf::int32 value);
+
+  // repeated .Network.DataSourceInfo tuningSourceInfo = 2;
+  inline int tuningsourceinfo_size() const;
+  inline void clear_tuningsourceinfo();
+  static const int kTuningSourceInfoFieldNumber = 2;
+  inline const ::Network::DataSourceInfo& tuningsourceinfo(int index) const;
+  inline ::Network::DataSourceInfo* mutable_tuningsourceinfo(int index);
+  inline ::Network::DataSourceInfo* add_tuningsourceinfo();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >&
+      tuningsourceinfo() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >*
+      mutable_tuningsourceinfo();
+
+  // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfoReply)
+ private:
+  inline void set_has_errorcode();
+  inline void clear_has_errorcode();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo > tuningsourceinfo_;
+  ::google::protobuf::int32 errorcode_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetTuningSourcesInfoReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GetTuningSourcesStates : public ::google::protobuf::Message {
  public:
   GetTuningSourcesStates();
@@ -2191,14 +2381,29 @@ class GetTuningSourcesStates : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStates)
  private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2263,64 +2468,394 @@ class TuningSourceState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 id = 1;
-  inline bool has_id() const;
-  inline void clear_id();
-  static const int kIdFieldNumber = 1;
-  inline ::google::protobuf::uint64 id() const;
-  inline void set_id(::google::protobuf::uint64 value);
+  // optional uint64 sourceID = 1 [default = 0];
+  inline bool has_sourceid() const;
+  inline void clear_sourceid();
+  static const int kSourceIDFieldNumber = 1;
+  inline ::google::protobuf::uint64 sourceid() const;
+  inline void set_sourceid(::google::protobuf::uint64 value);
 
-  // optional int64 uptime = 2;
-  inline bool has_uptime() const;
-  inline void clear_uptime();
-  static const int kUptimeFieldNumber = 2;
-  inline ::google::protobuf::int64 uptime() const;
-  inline void set_uptime(::google::protobuf::int64 value);
+  // optional bool isReply = 2 [default = false];
+  inline bool has_isreply() const;
+  inline void clear_isreply();
+  static const int kIsReplyFieldNumber = 2;
+  inline bool isreply() const;
+  inline void set_isreply(bool value);
 
-  // optional int64 receivedDataSize = 3;
-  inline bool has_receiveddatasize() const;
-  inline void clear_receiveddatasize();
-  static const int kReceivedDataSizeFieldNumber = 3;
-  inline ::google::protobuf::int64 receiveddatasize() const;
-  inline void set_receiveddatasize(::google::protobuf::int64 value);
+  // optional int64 requestCount = 3 [default = 0];
+  inline bool has_requestcount() const;
+  inline void clear_requestcount();
+  static const int kRequestCountFieldNumber = 3;
+  inline ::google::protobuf::int64 requestcount() const;
+  inline void set_requestcount(::google::protobuf::int64 value);
 
-  // optional double dataReceivingRate = 4;
-  inline bool has_datareceivingrate() const;
-  inline void clear_datareceivingrate();
-  static const int kDataReceivingRateFieldNumber = 4;
-  inline double datareceivingrate() const;
-  inline void set_datareceivingrate(double value);
+  // optional int64 replyCount = 4 [default = 0];
+  inline bool has_replycount() const;
+  inline void clear_replycount();
+  static const int kReplyCountFieldNumber = 4;
+  inline ::google::protobuf::int64 replycount() const;
+  inline void set_replycount(::google::protobuf::int64 value);
 
-  // optional bool respond = 5;
-  inline bool has_respond() const;
-  inline void clear_respond();
-  static const int kRespondFieldNumber = 5;
-  inline bool respond() const;
-  inline void set_respond(bool value);
+  // optional int32 commandQueueSize = 5 [default = 0];
+  inline bool has_commandqueuesize() const;
+  inline void clear_commandqueuesize();
+  static const int kCommandQueueSizeFieldNumber = 5;
+  inline ::google::protobuf::int32 commandqueuesize() const;
+  inline void set_commandqueuesize(::google::protobuf::int32 value);
+
+  // optional int64 errUntimelyReplay = 6 [default = 0];
+  inline bool has_erruntimelyreplay() const;
+  inline void clear_erruntimelyreplay();
+  static const int kErrUntimelyReplayFieldNumber = 6;
+  inline ::google::protobuf::int64 erruntimelyreplay() const;
+  inline void set_erruntimelyreplay(::google::protobuf::int64 value);
+
+  // optional int64 errSent = 7 [default = 0];
+  inline bool has_errsent() const;
+  inline void clear_errsent();
+  static const int kErrSentFieldNumber = 7;
+  inline ::google::protobuf::int64 errsent() const;
+  inline void set_errsent(::google::protobuf::int64 value);
+
+  // optional int64 errPartialSent = 8 [default = 0];
+  inline bool has_errpartialsent() const;
+  inline void clear_errpartialsent();
+  static const int kErrPartialSentFieldNumber = 8;
+  inline ::google::protobuf::int64 errpartialsent() const;
+  inline void set_errpartialsent(::google::protobuf::int64 value);
+
+  // optional int64 errReplySize = 9 [default = 0];
+  inline bool has_errreplysize() const;
+  inline void clear_errreplysize();
+  static const int kErrReplySizeFieldNumber = 9;
+  inline ::google::protobuf::int64 errreplysize() const;
+  inline void set_errreplysize(::google::protobuf::int64 value);
+
+  // optional int64 errNoReply = 10 [default = 0];
+  inline bool has_errnoreply() const;
+  inline void clear_errnoreply();
+  static const int kErrNoReplyFieldNumber = 10;
+  inline ::google::protobuf::int64 errnoreply() const;
+  inline void set_errnoreply(::google::protobuf::int64 value);
+
+  // optional int64 errRupProtocolVersion = 11 [default = 0];
+  inline bool has_errrupprotocolversion() const;
+  inline void clear_errrupprotocolversion();
+  static const int kErrRupProtocolVersionFieldNumber = 11;
+  inline ::google::protobuf::int64 errrupprotocolversion() const;
+  inline void set_errrupprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errRupFrameSize = 12 [default = 0];
+  inline bool has_errrupframesize() const;
+  inline void clear_errrupframesize();
+  static const int kErrRupFrameSizeFieldNumber = 12;
+  inline ::google::protobuf::int64 errrupframesize() const;
+  inline void set_errrupframesize(::google::protobuf::int64 value);
+
+  // optional int64 errRupNoTuningData = 13 [default = 0];
+  inline bool has_errrupnotuningdata() const;
+  inline void clear_errrupnotuningdata();
+  static const int kErrRupNoTuningDataFieldNumber = 13;
+  inline ::google::protobuf::int64 errrupnotuningdata() const;
+  inline void set_errrupnotuningdata(::google::protobuf::int64 value);
+
+  // optional int64 errRupModuleType = 14 [default = 0];
+  inline bool has_errrupmoduletype() const;
+  inline void clear_errrupmoduletype();
+  static const int kErrRupModuleTypeFieldNumber = 14;
+  inline ::google::protobuf::int64 errrupmoduletype() const;
+  inline void set_errrupmoduletype(::google::protobuf::int64 value);
+
+  // optional int64 errRupFramesQuantity = 15 [default = 0];
+  inline bool has_errrupframesquantity() const;
+  inline void clear_errrupframesquantity();
+  static const int kErrRupFramesQuantityFieldNumber = 15;
+  inline ::google::protobuf::int64 errrupframesquantity() const;
+  inline void set_errrupframesquantity(::google::protobuf::int64 value);
+
+  // optional int64 errRupFrameNumber = 16 [default = 0];
+  inline bool has_errrupframenumber() const;
+  inline void clear_errrupframenumber();
+  static const int kErrRupFrameNumberFieldNumber = 16;
+  inline ::google::protobuf::int64 errrupframenumber() const;
+  inline void set_errrupframenumber(::google::protobuf::int64 value);
+
+  // optional int64 errFotipProtocolVersion = 17 [default = 0];
+  inline bool has_errfotipprotocolversion() const;
+  inline void clear_errfotipprotocolversion();
+  static const int kErrFotipProtocolVersionFieldNumber = 17;
+  inline ::google::protobuf::int64 errfotipprotocolversion() const;
+  inline void set_errfotipprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errFotipUniqueID = 18 [default = 0];
+  inline bool has_errfotipuniqueid() const;
+  inline void clear_errfotipuniqueid();
+  static const int kErrFotipUniqueIDFieldNumber = 18;
+  inline ::google::protobuf::int64 errfotipuniqueid() const;
+  inline void set_errfotipuniqueid(::google::protobuf::int64 value);
+
+  // optional int64 errFotipLmNumber = 19 [default = 0];
+  inline bool has_errfotiplmnumber() const;
+  inline void clear_errfotiplmnumber();
+  static const int kErrFotipLmNumberFieldNumber = 19;
+  inline ::google::protobuf::int64 errfotiplmnumber() const;
+  inline void set_errfotiplmnumber(::google::protobuf::int64 value);
+
+  // optional int64 errFotipSubsystemCode = 20 [default = 0];
+  inline bool has_errfotipsubsystemcode() const;
+  inline void clear_errfotipsubsystemcode();
+  static const int kErrFotipSubsystemCodeFieldNumber = 20;
+  inline ::google::protobuf::int64 errfotipsubsystemcode() const;
+  inline void set_errfotipsubsystemcode(::google::protobuf::int64 value);
+
+  // optional int64 errFotipOperationCode = 21 [default = 0];
+  inline bool has_errfotipoperationcode() const;
+  inline void clear_errfotipoperationcode();
+  static const int kErrFotipOperationCodeFieldNumber = 21;
+  inline ::google::protobuf::int64 errfotipoperationcode() const;
+  inline void set_errfotipoperationcode(::google::protobuf::int64 value);
+
+  // optional int64 errFotipFrameSize = 22 [default = 0];
+  inline bool has_errfotipframesize() const;
+  inline void clear_errfotipframesize();
+  static const int kErrFotipFrameSizeFieldNumber = 22;
+  inline ::google::protobuf::int64 errfotipframesize() const;
+  inline void set_errfotipframesize(::google::protobuf::int64 value);
+
+  // optional int64 errFotipRomSize = 23 [default = 0];
+  inline bool has_errfotipromsize() const;
+  inline void clear_errfotipromsize();
+  static const int kErrFotipRomSizeFieldNumber = 23;
+  inline ::google::protobuf::int64 errfotipromsize() const;
+  inline void set_errfotipromsize(::google::protobuf::int64 value);
+
+  // optional int64 errFotipRomFrameSize = 24 [default = 0];
+  inline bool has_errfotipromframesize() const;
+  inline void clear_errfotipromframesize();
+  static const int kErrFotipRomFrameSizeFieldNumber = 24;
+  inline ::google::protobuf::int64 errfotipromframesize() const;
+  inline void set_errfotipromframesize(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
+  inline bool has_fotipflagboundschecksuccess() const;
+  inline void clear_fotipflagboundschecksuccess();
+  static const int kFotipFlagBoundsCheckSuccessFieldNumber = 25;
+  inline ::google::protobuf::int64 fotipflagboundschecksuccess() const;
+  inline void set_fotipflagboundschecksuccess(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagWriteSuccess = 26 [default = 0];
+  inline bool has_fotipflagwritesuccess() const;
+  inline void clear_fotipflagwritesuccess();
+  static const int kFotipFlagWriteSuccessFieldNumber = 26;
+  inline ::google::protobuf::int64 fotipflagwritesuccess() const;
+  inline void set_fotipflagwritesuccess(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagDataTypeErr = 27 [default = 0];
+  inline bool has_fotipflagdatatypeerr() const;
+  inline void clear_fotipflagdatatypeerr();
+  static const int kFotipFlagDataTypeErrFieldNumber = 27;
+  inline ::google::protobuf::int64 fotipflagdatatypeerr() const;
+  inline void set_fotipflagdatatypeerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagOpCodeErr = 28 [default = 0];
+  inline bool has_fotipflagopcodeerr() const;
+  inline void clear_fotipflagopcodeerr();
+  static const int kFotipFlagOpCodeErrFieldNumber = 28;
+  inline ::google::protobuf::int64 fotipflagopcodeerr() const;
+  inline void set_fotipflagopcodeerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagStartAddrErr = 29 [default = 0];
+  inline bool has_fotipflagstartaddrerr() const;
+  inline void clear_fotipflagstartaddrerr();
+  static const int kFotipFlagStartAddrErrFieldNumber = 29;
+  inline ::google::protobuf::int64 fotipflagstartaddrerr() const;
+  inline void set_fotipflagstartaddrerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagRomSizeErr = 30 [default = 0];
+  inline bool has_fotipflagromsizeerr() const;
+  inline void clear_fotipflagromsizeerr();
+  static const int kFotipFlagRomSizeErrFieldNumber = 30;
+  inline ::google::protobuf::int64 fotipflagromsizeerr() const;
+  inline void set_fotipflagromsizeerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
+  inline bool has_fotipflagromframesizeerr() const;
+  inline void clear_fotipflagromframesizeerr();
+  static const int kFotipFlagRomFrameSizeErrFieldNumber = 31;
+  inline ::google::protobuf::int64 fotipflagromframesizeerr() const;
+  inline void set_fotipflagromframesizeerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
+  inline bool has_fotipflagframesizeerr() const;
+  inline void clear_fotipflagframesizeerr();
+  static const int kFotipFlagFrameSizeErrFieldNumber = 32;
+  inline ::google::protobuf::int64 fotipflagframesizeerr() const;
+  inline void set_fotipflagframesizeerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
+  inline bool has_fotipflagprotocolversionerr() const;
+  inline void clear_fotipflagprotocolversionerr();
+  static const int kFotipFlagProtocolVersionErrFieldNumber = 33;
+  inline ::google::protobuf::int64 fotipflagprotocolversionerr() const;
+  inline void set_fotipflagprotocolversionerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
+  inline bool has_fotipflagsubsystemkeyerr() const;
+  inline void clear_fotipflagsubsystemkeyerr();
+  static const int kFotipFlagSubsystemKeyErrFieldNumber = 34;
+  inline ::google::protobuf::int64 fotipflagsubsystemkeyerr() const;
+  inline void set_fotipflagsubsystemkeyerr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagUniueIDErr = 35 [default = 0];
+  inline bool has_fotipflaguniueiderr() const;
+  inline void clear_fotipflaguniueiderr();
+  static const int kFotipFlagUniueIDErrFieldNumber = 35;
+  inline ::google::protobuf::int64 fotipflaguniueiderr() const;
+  inline void set_fotipflaguniueiderr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagOffsetErr = 36 [default = 0];
+  inline bool has_fotipflagoffseterr() const;
+  inline void clear_fotipflagoffseterr();
+  static const int kFotipFlagOffsetErrFieldNumber = 36;
+  inline ::google::protobuf::int64 fotipflagoffseterr() const;
+  inline void set_fotipflagoffseterr(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagApplySuccess = 37 [default = 0];
+  inline bool has_fotipflagapplysuccess() const;
+  inline void clear_fotipflagapplysuccess();
+  static const int kFotipFlagApplySuccessFieldNumber = 37;
+  inline ::google::protobuf::int64 fotipflagapplysuccess() const;
+  inline void set_fotipflagapplysuccess(::google::protobuf::int64 value);
+
+  // optional int64 fotipFlagSetSOR = 38 [default = 0];
+  inline bool has_fotipflagsetsor() const;
+  inline void clear_fotipflagsetsor();
+  static const int kFotipFlagSetSORFieldNumber = 38;
+  inline ::google::protobuf::int64 fotipflagsetsor() const;
+  inline void set_fotipflagsetsor(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
-  inline void set_has_id();
-  inline void clear_has_id();
-  inline void set_has_uptime();
-  inline void clear_has_uptime();
-  inline void set_has_receiveddatasize();
-  inline void clear_has_receiveddatasize();
-  inline void set_has_datareceivingrate();
-  inline void clear_has_datareceivingrate();
-  inline void set_has_respond();
-  inline void clear_has_respond();
+  inline void set_has_sourceid();
+  inline void clear_has_sourceid();
+  inline void set_has_isreply();
+  inline void clear_has_isreply();
+  inline void set_has_requestcount();
+  inline void clear_has_requestcount();
+  inline void set_has_replycount();
+  inline void clear_has_replycount();
+  inline void set_has_commandqueuesize();
+  inline void clear_has_commandqueuesize();
+  inline void set_has_erruntimelyreplay();
+  inline void clear_has_erruntimelyreplay();
+  inline void set_has_errsent();
+  inline void clear_has_errsent();
+  inline void set_has_errpartialsent();
+  inline void clear_has_errpartialsent();
+  inline void set_has_errreplysize();
+  inline void clear_has_errreplysize();
+  inline void set_has_errnoreply();
+  inline void clear_has_errnoreply();
+  inline void set_has_errrupprotocolversion();
+  inline void clear_has_errrupprotocolversion();
+  inline void set_has_errrupframesize();
+  inline void clear_has_errrupframesize();
+  inline void set_has_errrupnotuningdata();
+  inline void clear_has_errrupnotuningdata();
+  inline void set_has_errrupmoduletype();
+  inline void clear_has_errrupmoduletype();
+  inline void set_has_errrupframesquantity();
+  inline void clear_has_errrupframesquantity();
+  inline void set_has_errrupframenumber();
+  inline void clear_has_errrupframenumber();
+  inline void set_has_errfotipprotocolversion();
+  inline void clear_has_errfotipprotocolversion();
+  inline void set_has_errfotipuniqueid();
+  inline void clear_has_errfotipuniqueid();
+  inline void set_has_errfotiplmnumber();
+  inline void clear_has_errfotiplmnumber();
+  inline void set_has_errfotipsubsystemcode();
+  inline void clear_has_errfotipsubsystemcode();
+  inline void set_has_errfotipoperationcode();
+  inline void clear_has_errfotipoperationcode();
+  inline void set_has_errfotipframesize();
+  inline void clear_has_errfotipframesize();
+  inline void set_has_errfotipromsize();
+  inline void clear_has_errfotipromsize();
+  inline void set_has_errfotipromframesize();
+  inline void clear_has_errfotipromframesize();
+  inline void set_has_fotipflagboundschecksuccess();
+  inline void clear_has_fotipflagboundschecksuccess();
+  inline void set_has_fotipflagwritesuccess();
+  inline void clear_has_fotipflagwritesuccess();
+  inline void set_has_fotipflagdatatypeerr();
+  inline void clear_has_fotipflagdatatypeerr();
+  inline void set_has_fotipflagopcodeerr();
+  inline void clear_has_fotipflagopcodeerr();
+  inline void set_has_fotipflagstartaddrerr();
+  inline void clear_has_fotipflagstartaddrerr();
+  inline void set_has_fotipflagromsizeerr();
+  inline void clear_has_fotipflagromsizeerr();
+  inline void set_has_fotipflagromframesizeerr();
+  inline void clear_has_fotipflagromframesizeerr();
+  inline void set_has_fotipflagframesizeerr();
+  inline void clear_has_fotipflagframesizeerr();
+  inline void set_has_fotipflagprotocolversionerr();
+  inline void clear_has_fotipflagprotocolversionerr();
+  inline void set_has_fotipflagsubsystemkeyerr();
+  inline void clear_has_fotipflagsubsystemkeyerr();
+  inline void set_has_fotipflaguniueiderr();
+  inline void clear_has_fotipflaguniueiderr();
+  inline void set_has_fotipflagoffseterr();
+  inline void clear_has_fotipflagoffseterr();
+  inline void set_has_fotipflagapplysuccess();
+  inline void clear_has_fotipflagapplysuccess();
+  inline void set_has_fotipflagsetsor();
+  inline void clear_has_fotipflagsetsor();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::uint64 id_;
-  ::google::protobuf::int64 uptime_;
-  ::google::protobuf::int64 receiveddatasize_;
-  double datareceivingrate_;
-  bool respond_;
+  ::google::protobuf::uint64 sourceid_;
+  ::google::protobuf::int64 requestcount_;
+  bool isreply_;
+  ::google::protobuf::int32 commandqueuesize_;
+  ::google::protobuf::int64 replycount_;
+  ::google::protobuf::int64 erruntimelyreplay_;
+  ::google::protobuf::int64 errsent_;
+  ::google::protobuf::int64 errpartialsent_;
+  ::google::protobuf::int64 errreplysize_;
+  ::google::protobuf::int64 errnoreply_;
+  ::google::protobuf::int64 errrupprotocolversion_;
+  ::google::protobuf::int64 errrupframesize_;
+  ::google::protobuf::int64 errrupnotuningdata_;
+  ::google::protobuf::int64 errrupmoduletype_;
+  ::google::protobuf::int64 errrupframesquantity_;
+  ::google::protobuf::int64 errrupframenumber_;
+  ::google::protobuf::int64 errfotipprotocolversion_;
+  ::google::protobuf::int64 errfotipuniqueid_;
+  ::google::protobuf::int64 errfotiplmnumber_;
+  ::google::protobuf::int64 errfotipsubsystemcode_;
+  ::google::protobuf::int64 errfotipoperationcode_;
+  ::google::protobuf::int64 errfotipframesize_;
+  ::google::protobuf::int64 errfotipromsize_;
+  ::google::protobuf::int64 errfotipromframesize_;
+  ::google::protobuf::int64 fotipflagboundschecksuccess_;
+  ::google::protobuf::int64 fotipflagwritesuccess_;
+  ::google::protobuf::int64 fotipflagdatatypeerr_;
+  ::google::protobuf::int64 fotipflagopcodeerr_;
+  ::google::protobuf::int64 fotipflagstartaddrerr_;
+  ::google::protobuf::int64 fotipflagromsizeerr_;
+  ::google::protobuf::int64 fotipflagromframesizeerr_;
+  ::google::protobuf::int64 fotipflagframesizeerr_;
+  ::google::protobuf::int64 fotipflagprotocolversionerr_;
+  ::google::protobuf::int64 fotipflagsubsystemkeyerr_;
+  ::google::protobuf::int64 fotipflaguniueiderr_;
+  ::google::protobuf::int64 fotipflagoffseterr_;
+  ::google::protobuf::int64 fotipflagapplysuccess_;
+  ::google::protobuf::int64 fotipflagsetsor_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(38 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2392,17 +2927,17 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
-  inline int tuningdatasourcesstates_size() const;
-  inline void clear_tuningdatasourcesstates();
-  static const int kTuningDataSourcesStatesFieldNumber = 2;
-  inline const ::Network::TuningSourceState& tuningdatasourcesstates(int index) const;
-  inline ::Network::TuningSourceState* mutable_tuningdatasourcesstates(int index);
-  inline ::Network::TuningSourceState* add_tuningdatasourcesstates();
+  // repeated .Network.TuningSourceState tuningSourcesState = 2;
+  inline int tuningsourcesstate_size() const;
+  inline void clear_tuningsourcesstate();
+  static const int kTuningSourcesStateFieldNumber = 2;
+  inline const ::Network::TuningSourceState& tuningsourcesstate(int index) const;
+  inline ::Network::TuningSourceState* mutable_tuningsourcesstate(int index);
+  inline ::Network::TuningSourceState* add_tuningsourcesstate();
   inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >&
-      tuningdatasourcesstates() const;
+      tuningsourcesstate() const;
   inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >*
-      mutable_tuningdatasourcesstates();
+      mutable_tuningsourcesstate();
 
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStatesReply)
  private:
@@ -2411,7 +2946,7 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState > tuningdatasourcesstates_;
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState > tuningsourcesstate_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
@@ -2423,6 +2958,597 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetTuningSourcesStatesReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ReadTuningSignals : public ::google::protobuf::Message {
+ public:
+  ReadTuningSignals();
+  virtual ~ReadTuningSignals();
+
+  ReadTuningSignals(const ReadTuningSignals& from);
+
+  inline ReadTuningSignals& operator=(const ReadTuningSignals& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ReadTuningSignals& default_instance();
+
+  void Swap(ReadTuningSignals* other);
+
+  // implements Message ----------------------------------------------
+
+  ReadTuningSignals* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ReadTuningSignals& from);
+  void MergeFrom(const ReadTuningSignals& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
+  // repeated uint64 signalHash = 2;
+  inline int signalhash_size() const;
+  inline void clear_signalhash();
+  static const int kSignalHashFieldNumber = 2;
+  inline ::google::protobuf::uint64 signalhash(int index) const;
+  inline void set_signalhash(int index, ::google::protobuf::uint64 value);
+  inline void add_signalhash(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      signalhash() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_signalhash();
+
+  // @@protoc_insertion_point(class_scope:Network.ReadTuningSignals)
+ private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* clientequipmentid_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhash_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ReadTuningSignals* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TuningSignalState : public ::google::protobuf::Message {
+ public:
+  TuningSignalState();
+  virtual ~TuningSignalState();
+
+  TuningSignalState(const TuningSignalState& from);
+
+  inline TuningSignalState& operator=(const TuningSignalState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSignalState& default_instance();
+
+  void Swap(TuningSignalState* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSignalState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSignalState& from);
+  void MergeFrom(const TuningSignalState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint64 signalHash = 1 [default = 0];
+  inline bool has_signalhash() const;
+  inline void clear_signalhash();
+  static const int kSignalHashFieldNumber = 1;
+  inline ::google::protobuf::uint64 signalhash() const;
+  inline void set_signalhash(::google::protobuf::uint64 value);
+
+  // optional int32 error = 2 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 2;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional bool valid = 3 [default = false];
+  inline bool has_valid() const;
+  inline void clear_valid();
+  static const int kValidFieldNumber = 3;
+  inline bool valid() const;
+  inline void set_valid(bool value);
+
+  // optional double value = 4 [default = 0];
+  inline bool has_value() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 4;
+  inline double value() const;
+  inline void set_value(double value);
+
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
+ private:
+  inline void set_has_signalhash();
+  inline void clear_has_signalhash();
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_valid();
+  inline void clear_has_valid();
+  inline void set_has_value();
+  inline void clear_has_value();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 signalhash_;
+  ::google::protobuf::int32 error_;
+  bool valid_;
+  double value_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningSignalState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ReadTuningSignalsReply : public ::google::protobuf::Message {
+ public:
+  ReadTuningSignalsReply();
+  virtual ~ReadTuningSignalsReply();
+
+  ReadTuningSignalsReply(const ReadTuningSignalsReply& from);
+
+  inline ReadTuningSignalsReply& operator=(const ReadTuningSignalsReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ReadTuningSignalsReply& default_instance();
+
+  void Swap(ReadTuningSignalsReply* other);
+
+  // implements Message ----------------------------------------------
+
+  ReadTuningSignalsReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ReadTuningSignalsReply& from);
+  void MergeFrom(const ReadTuningSignalsReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // repeated .Network.TuningSignalState tuningSignalState = 2;
+  inline int tuningsignalstate_size() const;
+  inline void clear_tuningsignalstate();
+  static const int kTuningSignalStateFieldNumber = 2;
+  inline const ::Network::TuningSignalState& tuningsignalstate(int index) const;
+  inline ::Network::TuningSignalState* mutable_tuningsignalstate(int index);
+  inline ::Network::TuningSignalState* add_tuningsignalstate();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalState >&
+      tuningsignalstate() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalState >*
+      mutable_tuningsignalstate();
+
+  // @@protoc_insertion_point(class_scope:Network.ReadTuningSignalsReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalState > tuningsignalstate_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ReadTuningSignalsReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TuningSignalWrite : public ::google::protobuf::Message {
+ public:
+  TuningSignalWrite();
+  virtual ~TuningSignalWrite();
+
+  TuningSignalWrite(const TuningSignalWrite& from);
+
+  inline TuningSignalWrite& operator=(const TuningSignalWrite& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSignalWrite& default_instance();
+
+  void Swap(TuningSignalWrite* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSignalWrite* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSignalWrite& from);
+  void MergeFrom(const TuningSignalWrite& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint64 signalHash = 1 [default = 0];
+  inline bool has_signalhash() const;
+  inline void clear_signalhash();
+  static const int kSignalHashFieldNumber = 1;
+  inline ::google::protobuf::uint64 signalhash() const;
+  inline void set_signalhash(::google::protobuf::uint64 value);
+
+  // optional double value = 2 [default = 0];
+  inline bool has_value() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 2;
+  inline double value() const;
+  inline void set_value(double value);
+
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalWrite)
+ private:
+  inline void set_has_signalhash();
+  inline void clear_has_signalhash();
+  inline void set_has_value();
+  inline void clear_has_value();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 signalhash_;
+  double value_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningSignalWrite* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class WriteTuningSignals : public ::google::protobuf::Message {
+ public:
+  WriteTuningSignals();
+  virtual ~WriteTuningSignals();
+
+  WriteTuningSignals(const WriteTuningSignals& from);
+
+  inline WriteTuningSignals& operator=(const WriteTuningSignals& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const WriteTuningSignals& default_instance();
+
+  void Swap(WriteTuningSignals* other);
+
+  // implements Message ----------------------------------------------
+
+  WriteTuningSignals* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const WriteTuningSignals& from);
+  void MergeFrom(const WriteTuningSignals& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
+  // optional bool autoAppay = 2 [default = false];
+  inline bool has_autoappay() const;
+  inline void clear_autoappay();
+  static const int kAutoAppayFieldNumber = 2;
+  inline bool autoappay() const;
+  inline void set_autoappay(bool value);
+
+  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
+  inline int tuningsignalwrite_size() const;
+  inline void clear_tuningsignalwrite();
+  static const int kTuningSignalWriteFieldNumber = 3;
+  inline const ::Network::TuningSignalWrite& tuningsignalwrite(int index) const;
+  inline ::Network::TuningSignalWrite* mutable_tuningsignalwrite(int index);
+  inline ::Network::TuningSignalWrite* add_tuningsignalwrite();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
+      tuningsignalwrite() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
+      mutable_tuningsignalwrite();
+
+  // @@protoc_insertion_point(class_scope:Network.WriteTuningSignals)
+ private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
+  inline void set_has_autoappay();
+  inline void clear_has_autoappay();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* clientequipmentid_;
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite > tuningsignalwrite_;
+  bool autoappay_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static WriteTuningSignals* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class WriteTuningSignalsReply : public ::google::protobuf::Message {
+ public:
+  WriteTuningSignalsReply();
+  virtual ~WriteTuningSignalsReply();
+
+  WriteTuningSignalsReply(const WriteTuningSignalsReply& from);
+
+  inline WriteTuningSignalsReply& operator=(const WriteTuningSignalsReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const WriteTuningSignalsReply& default_instance();
+
+  void Swap(WriteTuningSignalsReply* other);
+
+  // implements Message ----------------------------------------------
+
+  WriteTuningSignalsReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const WriteTuningSignalsReply& from);
+  void MergeFrom(const WriteTuningSignalsReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.WriteTuningSignalsReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static WriteTuningSignalsReply* default_instance_;
 };
 // ===================================================================
 
@@ -4282,120 +5408,1041 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
 
 // -------------------------------------------------------------------
 
+// GetTuningSourcesInfo
+
+// optional string clientEquipmentID = 1;
+inline bool GetTuningSourcesInfo::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetTuningSourcesInfo::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetTuningSourcesInfo::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetTuningSourcesInfo::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& GetTuningSourcesInfo::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void GetTuningSourcesInfo::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesInfo::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* GetTuningSourcesInfo::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesInfo::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GetTuningSourcesInfoReply
+
+// optional int32 errorCode = 1 [default = 0];
+inline bool GetTuningSourcesInfoReply::has_errorcode() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetTuningSourcesInfoReply::set_has_errorcode() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetTuningSourcesInfoReply::clear_has_errorcode() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetTuningSourcesInfoReply::clear_errorcode() {
+  errorcode_ = 0;
+  clear_has_errorcode();
+}
+inline ::google::protobuf::int32 GetTuningSourcesInfoReply::errorcode() const {
+  return errorcode_;
+}
+inline void GetTuningSourcesInfoReply::set_errorcode(::google::protobuf::int32 value) {
+  set_has_errorcode();
+  errorcode_ = value;
+}
+
+// repeated .Network.DataSourceInfo tuningSourceInfo = 2;
+inline int GetTuningSourcesInfoReply::tuningsourceinfo_size() const {
+  return tuningsourceinfo_.size();
+}
+inline void GetTuningSourcesInfoReply::clear_tuningsourceinfo() {
+  tuningsourceinfo_.Clear();
+}
+inline const ::Network::DataSourceInfo& GetTuningSourcesInfoReply::tuningsourceinfo(int index) const {
+  return tuningsourceinfo_.Get(index);
+}
+inline ::Network::DataSourceInfo* GetTuningSourcesInfoReply::mutable_tuningsourceinfo(int index) {
+  return tuningsourceinfo_.Mutable(index);
+}
+inline ::Network::DataSourceInfo* GetTuningSourcesInfoReply::add_tuningsourceinfo() {
+  return tuningsourceinfo_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >&
+GetTuningSourcesInfoReply::tuningsourceinfo() const {
+  return tuningsourceinfo_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >*
+GetTuningSourcesInfoReply::mutable_tuningsourceinfo() {
+  return &tuningsourceinfo_;
+}
+
+// -------------------------------------------------------------------
+
 // GetTuningSourcesStates
+
+// optional string clientEquipmentID = 1;
+inline bool GetTuningSourcesStates::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetTuningSourcesStates::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetTuningSourcesStates::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetTuningSourcesStates::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& GetTuningSourcesStates::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void GetTuningSourcesStates::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void GetTuningSourcesStates::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void GetTuningSourcesStates::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesStates::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* GetTuningSourcesStates::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesStates::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
 
 // -------------------------------------------------------------------
 
 // TuningSourceState
 
-// optional uint64 id = 1;
-inline bool TuningSourceState::has_id() const {
+// optional uint64 sourceID = 1 [default = 0];
+inline bool TuningSourceState::has_sourceid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TuningSourceState::set_has_id() {
+inline void TuningSourceState::set_has_sourceid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TuningSourceState::clear_has_id() {
+inline void TuningSourceState::clear_has_sourceid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TuningSourceState::clear_id() {
-  id_ = GOOGLE_ULONGLONG(0);
-  clear_has_id();
+inline void TuningSourceState::clear_sourceid() {
+  sourceid_ = GOOGLE_ULONGLONG(0);
+  clear_has_sourceid();
 }
-inline ::google::protobuf::uint64 TuningSourceState::id() const {
-  return id_;
+inline ::google::protobuf::uint64 TuningSourceState::sourceid() const {
+  return sourceid_;
 }
-inline void TuningSourceState::set_id(::google::protobuf::uint64 value) {
-  set_has_id();
-  id_ = value;
+inline void TuningSourceState::set_sourceid(::google::protobuf::uint64 value) {
+  set_has_sourceid();
+  sourceid_ = value;
 }
 
-// optional int64 uptime = 2;
-inline bool TuningSourceState::has_uptime() const {
+// optional bool isReply = 2 [default = false];
+inline bool TuningSourceState::has_isreply() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TuningSourceState::set_has_uptime() {
+inline void TuningSourceState::set_has_isreply() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TuningSourceState::clear_has_uptime() {
+inline void TuningSourceState::clear_has_isreply() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TuningSourceState::clear_uptime() {
-  uptime_ = GOOGLE_LONGLONG(0);
-  clear_has_uptime();
+inline void TuningSourceState::clear_isreply() {
+  isreply_ = false;
+  clear_has_isreply();
 }
-inline ::google::protobuf::int64 TuningSourceState::uptime() const {
-  return uptime_;
+inline bool TuningSourceState::isreply() const {
+  return isreply_;
 }
-inline void TuningSourceState::set_uptime(::google::protobuf::int64 value) {
-  set_has_uptime();
-  uptime_ = value;
+inline void TuningSourceState::set_isreply(bool value) {
+  set_has_isreply();
+  isreply_ = value;
 }
 
-// optional int64 receivedDataSize = 3;
-inline bool TuningSourceState::has_receiveddatasize() const {
+// optional int64 requestCount = 3 [default = 0];
+inline bool TuningSourceState::has_requestcount() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TuningSourceState::set_has_receiveddatasize() {
+inline void TuningSourceState::set_has_requestcount() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TuningSourceState::clear_has_receiveddatasize() {
+inline void TuningSourceState::clear_has_requestcount() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TuningSourceState::clear_receiveddatasize() {
-  receiveddatasize_ = GOOGLE_LONGLONG(0);
-  clear_has_receiveddatasize();
+inline void TuningSourceState::clear_requestcount() {
+  requestcount_ = GOOGLE_LONGLONG(0);
+  clear_has_requestcount();
 }
-inline ::google::protobuf::int64 TuningSourceState::receiveddatasize() const {
-  return receiveddatasize_;
+inline ::google::protobuf::int64 TuningSourceState::requestcount() const {
+  return requestcount_;
 }
-inline void TuningSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
-  set_has_receiveddatasize();
-  receiveddatasize_ = value;
+inline void TuningSourceState::set_requestcount(::google::protobuf::int64 value) {
+  set_has_requestcount();
+  requestcount_ = value;
 }
 
-// optional double dataReceivingRate = 4;
-inline bool TuningSourceState::has_datareceivingrate() const {
+// optional int64 replyCount = 4 [default = 0];
+inline bool TuningSourceState::has_replycount() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void TuningSourceState::set_has_datareceivingrate() {
+inline void TuningSourceState::set_has_replycount() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void TuningSourceState::clear_has_datareceivingrate() {
+inline void TuningSourceState::clear_has_replycount() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void TuningSourceState::clear_datareceivingrate() {
-  datareceivingrate_ = 0;
-  clear_has_datareceivingrate();
+inline void TuningSourceState::clear_replycount() {
+  replycount_ = GOOGLE_LONGLONG(0);
+  clear_has_replycount();
 }
-inline double TuningSourceState::datareceivingrate() const {
-  return datareceivingrate_;
+inline ::google::protobuf::int64 TuningSourceState::replycount() const {
+  return replycount_;
 }
-inline void TuningSourceState::set_datareceivingrate(double value) {
-  set_has_datareceivingrate();
-  datareceivingrate_ = value;
+inline void TuningSourceState::set_replycount(::google::protobuf::int64 value) {
+  set_has_replycount();
+  replycount_ = value;
 }
 
-// optional bool respond = 5;
-inline bool TuningSourceState::has_respond() const {
+// optional int32 commandQueueSize = 5 [default = 0];
+inline bool TuningSourceState::has_commandqueuesize() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void TuningSourceState::set_has_respond() {
+inline void TuningSourceState::set_has_commandqueuesize() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void TuningSourceState::clear_has_respond() {
+inline void TuningSourceState::clear_has_commandqueuesize() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void TuningSourceState::clear_respond() {
-  respond_ = false;
-  clear_has_respond();
+inline void TuningSourceState::clear_commandqueuesize() {
+  commandqueuesize_ = 0;
+  clear_has_commandqueuesize();
 }
-inline bool TuningSourceState::respond() const {
-  return respond_;
+inline ::google::protobuf::int32 TuningSourceState::commandqueuesize() const {
+  return commandqueuesize_;
 }
-inline void TuningSourceState::set_respond(bool value) {
-  set_has_respond();
-  respond_ = value;
+inline void TuningSourceState::set_commandqueuesize(::google::protobuf::int32 value) {
+  set_has_commandqueuesize();
+  commandqueuesize_ = value;
+}
+
+// optional int64 errUntimelyReplay = 6 [default = 0];
+inline bool TuningSourceState::has_erruntimelyreplay() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void TuningSourceState::set_has_erruntimelyreplay() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void TuningSourceState::clear_has_erruntimelyreplay() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void TuningSourceState::clear_erruntimelyreplay() {
+  erruntimelyreplay_ = GOOGLE_LONGLONG(0);
+  clear_has_erruntimelyreplay();
+}
+inline ::google::protobuf::int64 TuningSourceState::erruntimelyreplay() const {
+  return erruntimelyreplay_;
+}
+inline void TuningSourceState::set_erruntimelyreplay(::google::protobuf::int64 value) {
+  set_has_erruntimelyreplay();
+  erruntimelyreplay_ = value;
+}
+
+// optional int64 errSent = 7 [default = 0];
+inline bool TuningSourceState::has_errsent() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void TuningSourceState::set_has_errsent() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void TuningSourceState::clear_has_errsent() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void TuningSourceState::clear_errsent() {
+  errsent_ = GOOGLE_LONGLONG(0);
+  clear_has_errsent();
+}
+inline ::google::protobuf::int64 TuningSourceState::errsent() const {
+  return errsent_;
+}
+inline void TuningSourceState::set_errsent(::google::protobuf::int64 value) {
+  set_has_errsent();
+  errsent_ = value;
+}
+
+// optional int64 errPartialSent = 8 [default = 0];
+inline bool TuningSourceState::has_errpartialsent() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TuningSourceState::set_has_errpartialsent() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TuningSourceState::clear_has_errpartialsent() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void TuningSourceState::clear_errpartialsent() {
+  errpartialsent_ = GOOGLE_LONGLONG(0);
+  clear_has_errpartialsent();
+}
+inline ::google::protobuf::int64 TuningSourceState::errpartialsent() const {
+  return errpartialsent_;
+}
+inline void TuningSourceState::set_errpartialsent(::google::protobuf::int64 value) {
+  set_has_errpartialsent();
+  errpartialsent_ = value;
+}
+
+// optional int64 errReplySize = 9 [default = 0];
+inline bool TuningSourceState::has_errreplysize() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void TuningSourceState::set_has_errreplysize() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void TuningSourceState::clear_has_errreplysize() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void TuningSourceState::clear_errreplysize() {
+  errreplysize_ = GOOGLE_LONGLONG(0);
+  clear_has_errreplysize();
+}
+inline ::google::protobuf::int64 TuningSourceState::errreplysize() const {
+  return errreplysize_;
+}
+inline void TuningSourceState::set_errreplysize(::google::protobuf::int64 value) {
+  set_has_errreplysize();
+  errreplysize_ = value;
+}
+
+// optional int64 errNoReply = 10 [default = 0];
+inline bool TuningSourceState::has_errnoreply() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void TuningSourceState::set_has_errnoreply() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void TuningSourceState::clear_has_errnoreply() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void TuningSourceState::clear_errnoreply() {
+  errnoreply_ = GOOGLE_LONGLONG(0);
+  clear_has_errnoreply();
+}
+inline ::google::protobuf::int64 TuningSourceState::errnoreply() const {
+  return errnoreply_;
+}
+inline void TuningSourceState::set_errnoreply(::google::protobuf::int64 value) {
+  set_has_errnoreply();
+  errnoreply_ = value;
+}
+
+// optional int64 errRupProtocolVersion = 11 [default = 0];
+inline bool TuningSourceState::has_errrupprotocolversion() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void TuningSourceState::set_has_errrupprotocolversion() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void TuningSourceState::clear_has_errrupprotocolversion() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void TuningSourceState::clear_errrupprotocolversion() {
+  errrupprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupprotocolversion();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupprotocolversion() const {
+  return errrupprotocolversion_;
+}
+inline void TuningSourceState::set_errrupprotocolversion(::google::protobuf::int64 value) {
+  set_has_errrupprotocolversion();
+  errrupprotocolversion_ = value;
+}
+
+// optional int64 errRupFrameSize = 12 [default = 0];
+inline bool TuningSourceState::has_errrupframesize() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void TuningSourceState::set_has_errrupframesize() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void TuningSourceState::clear_has_errrupframesize() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void TuningSourceState::clear_errrupframesize() {
+  errrupframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupframesize();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupframesize() const {
+  return errrupframesize_;
+}
+inline void TuningSourceState::set_errrupframesize(::google::protobuf::int64 value) {
+  set_has_errrupframesize();
+  errrupframesize_ = value;
+}
+
+// optional int64 errRupNoTuningData = 13 [default = 0];
+inline bool TuningSourceState::has_errrupnotuningdata() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void TuningSourceState::set_has_errrupnotuningdata() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void TuningSourceState::clear_has_errrupnotuningdata() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void TuningSourceState::clear_errrupnotuningdata() {
+  errrupnotuningdata_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupnotuningdata();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupnotuningdata() const {
+  return errrupnotuningdata_;
+}
+inline void TuningSourceState::set_errrupnotuningdata(::google::protobuf::int64 value) {
+  set_has_errrupnotuningdata();
+  errrupnotuningdata_ = value;
+}
+
+// optional int64 errRupModuleType = 14 [default = 0];
+inline bool TuningSourceState::has_errrupmoduletype() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void TuningSourceState::set_has_errrupmoduletype() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void TuningSourceState::clear_has_errrupmoduletype() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void TuningSourceState::clear_errrupmoduletype() {
+  errrupmoduletype_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupmoduletype();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupmoduletype() const {
+  return errrupmoduletype_;
+}
+inline void TuningSourceState::set_errrupmoduletype(::google::protobuf::int64 value) {
+  set_has_errrupmoduletype();
+  errrupmoduletype_ = value;
+}
+
+// optional int64 errRupFramesQuantity = 15 [default = 0];
+inline bool TuningSourceState::has_errrupframesquantity() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void TuningSourceState::set_has_errrupframesquantity() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void TuningSourceState::clear_has_errrupframesquantity() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void TuningSourceState::clear_errrupframesquantity() {
+  errrupframesquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupframesquantity();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupframesquantity() const {
+  return errrupframesquantity_;
+}
+inline void TuningSourceState::set_errrupframesquantity(::google::protobuf::int64 value) {
+  set_has_errrupframesquantity();
+  errrupframesquantity_ = value;
+}
+
+// optional int64 errRupFrameNumber = 16 [default = 0];
+inline bool TuningSourceState::has_errrupframenumber() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void TuningSourceState::set_has_errrupframenumber() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void TuningSourceState::clear_has_errrupframenumber() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void TuningSourceState::clear_errrupframenumber() {
+  errrupframenumber_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupframenumber();
+}
+inline ::google::protobuf::int64 TuningSourceState::errrupframenumber() const {
+  return errrupframenumber_;
+}
+inline void TuningSourceState::set_errrupframenumber(::google::protobuf::int64 value) {
+  set_has_errrupframenumber();
+  errrupframenumber_ = value;
+}
+
+// optional int64 errFotipProtocolVersion = 17 [default = 0];
+inline bool TuningSourceState::has_errfotipprotocolversion() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipprotocolversion() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void TuningSourceState::clear_has_errfotipprotocolversion() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void TuningSourceState::clear_errfotipprotocolversion() {
+  errfotipprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipprotocolversion();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipprotocolversion() const {
+  return errfotipprotocolversion_;
+}
+inline void TuningSourceState::set_errfotipprotocolversion(::google::protobuf::int64 value) {
+  set_has_errfotipprotocolversion();
+  errfotipprotocolversion_ = value;
+}
+
+// optional int64 errFotipUniqueID = 18 [default = 0];
+inline bool TuningSourceState::has_errfotipuniqueid() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipuniqueid() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void TuningSourceState::clear_has_errfotipuniqueid() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void TuningSourceState::clear_errfotipuniqueid() {
+  errfotipuniqueid_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipuniqueid();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipuniqueid() const {
+  return errfotipuniqueid_;
+}
+inline void TuningSourceState::set_errfotipuniqueid(::google::protobuf::int64 value) {
+  set_has_errfotipuniqueid();
+  errfotipuniqueid_ = value;
+}
+
+// optional int64 errFotipLmNumber = 19 [default = 0];
+inline bool TuningSourceState::has_errfotiplmnumber() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotiplmnumber() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void TuningSourceState::clear_has_errfotiplmnumber() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void TuningSourceState::clear_errfotiplmnumber() {
+  errfotiplmnumber_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotiplmnumber();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotiplmnumber() const {
+  return errfotiplmnumber_;
+}
+inline void TuningSourceState::set_errfotiplmnumber(::google::protobuf::int64 value) {
+  set_has_errfotiplmnumber();
+  errfotiplmnumber_ = value;
+}
+
+// optional int64 errFotipSubsystemCode = 20 [default = 0];
+inline bool TuningSourceState::has_errfotipsubsystemcode() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipsubsystemcode() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void TuningSourceState::clear_has_errfotipsubsystemcode() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void TuningSourceState::clear_errfotipsubsystemcode() {
+  errfotipsubsystemcode_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipsubsystemcode();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipsubsystemcode() const {
+  return errfotipsubsystemcode_;
+}
+inline void TuningSourceState::set_errfotipsubsystemcode(::google::protobuf::int64 value) {
+  set_has_errfotipsubsystemcode();
+  errfotipsubsystemcode_ = value;
+}
+
+// optional int64 errFotipOperationCode = 21 [default = 0];
+inline bool TuningSourceState::has_errfotipoperationcode() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipoperationcode() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void TuningSourceState::clear_has_errfotipoperationcode() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void TuningSourceState::clear_errfotipoperationcode() {
+  errfotipoperationcode_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipoperationcode();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipoperationcode() const {
+  return errfotipoperationcode_;
+}
+inline void TuningSourceState::set_errfotipoperationcode(::google::protobuf::int64 value) {
+  set_has_errfotipoperationcode();
+  errfotipoperationcode_ = value;
+}
+
+// optional int64 errFotipFrameSize = 22 [default = 0];
+inline bool TuningSourceState::has_errfotipframesize() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipframesize() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void TuningSourceState::clear_has_errfotipframesize() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void TuningSourceState::clear_errfotipframesize() {
+  errfotipframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipframesize();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipframesize() const {
+  return errfotipframesize_;
+}
+inline void TuningSourceState::set_errfotipframesize(::google::protobuf::int64 value) {
+  set_has_errfotipframesize();
+  errfotipframesize_ = value;
+}
+
+// optional int64 errFotipRomSize = 23 [default = 0];
+inline bool TuningSourceState::has_errfotipromsize() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipromsize() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void TuningSourceState::clear_has_errfotipromsize() {
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline void TuningSourceState::clear_errfotipromsize() {
+  errfotipromsize_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipromsize();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipromsize() const {
+  return errfotipromsize_;
+}
+inline void TuningSourceState::set_errfotipromsize(::google::protobuf::int64 value) {
+  set_has_errfotipromsize();
+  errfotipromsize_ = value;
+}
+
+// optional int64 errFotipRomFrameSize = 24 [default = 0];
+inline bool TuningSourceState::has_errfotipromframesize() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void TuningSourceState::set_has_errfotipromframesize() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void TuningSourceState::clear_has_errfotipromframesize() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void TuningSourceState::clear_errfotipromframesize() {
+  errfotipromframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errfotipromframesize();
+}
+inline ::google::protobuf::int64 TuningSourceState::errfotipromframesize() const {
+  return errfotipromframesize_;
+}
+inline void TuningSourceState::set_errfotipromframesize(::google::protobuf::int64 value) {
+  set_has_errfotipromframesize();
+  errfotipromframesize_ = value;
+}
+
+// optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
+inline bool TuningSourceState::has_fotipflagboundschecksuccess() const {
+  return (_has_bits_[0] & 0x01000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagboundschecksuccess() {
+  _has_bits_[0] |= 0x01000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagboundschecksuccess() {
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline void TuningSourceState::clear_fotipflagboundschecksuccess() {
+  fotipflagboundschecksuccess_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagboundschecksuccess();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagboundschecksuccess() const {
+  return fotipflagboundschecksuccess_;
+}
+inline void TuningSourceState::set_fotipflagboundschecksuccess(::google::protobuf::int64 value) {
+  set_has_fotipflagboundschecksuccess();
+  fotipflagboundschecksuccess_ = value;
+}
+
+// optional int64 fotipFlagWriteSuccess = 26 [default = 0];
+inline bool TuningSourceState::has_fotipflagwritesuccess() const {
+  return (_has_bits_[0] & 0x02000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagwritesuccess() {
+  _has_bits_[0] |= 0x02000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagwritesuccess() {
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline void TuningSourceState::clear_fotipflagwritesuccess() {
+  fotipflagwritesuccess_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagwritesuccess();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagwritesuccess() const {
+  return fotipflagwritesuccess_;
+}
+inline void TuningSourceState::set_fotipflagwritesuccess(::google::protobuf::int64 value) {
+  set_has_fotipflagwritesuccess();
+  fotipflagwritesuccess_ = value;
+}
+
+// optional int64 fotipFlagDataTypeErr = 27 [default = 0];
+inline bool TuningSourceState::has_fotipflagdatatypeerr() const {
+  return (_has_bits_[0] & 0x04000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagdatatypeerr() {
+  _has_bits_[0] |= 0x04000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagdatatypeerr() {
+  _has_bits_[0] &= ~0x04000000u;
+}
+inline void TuningSourceState::clear_fotipflagdatatypeerr() {
+  fotipflagdatatypeerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagdatatypeerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagdatatypeerr() const {
+  return fotipflagdatatypeerr_;
+}
+inline void TuningSourceState::set_fotipflagdatatypeerr(::google::protobuf::int64 value) {
+  set_has_fotipflagdatatypeerr();
+  fotipflagdatatypeerr_ = value;
+}
+
+// optional int64 fotipFlagOpCodeErr = 28 [default = 0];
+inline bool TuningSourceState::has_fotipflagopcodeerr() const {
+  return (_has_bits_[0] & 0x08000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagopcodeerr() {
+  _has_bits_[0] |= 0x08000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagopcodeerr() {
+  _has_bits_[0] &= ~0x08000000u;
+}
+inline void TuningSourceState::clear_fotipflagopcodeerr() {
+  fotipflagopcodeerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagopcodeerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagopcodeerr() const {
+  return fotipflagopcodeerr_;
+}
+inline void TuningSourceState::set_fotipflagopcodeerr(::google::protobuf::int64 value) {
+  set_has_fotipflagopcodeerr();
+  fotipflagopcodeerr_ = value;
+}
+
+// optional int64 fotipFlagStartAddrErr = 29 [default = 0];
+inline bool TuningSourceState::has_fotipflagstartaddrerr() const {
+  return (_has_bits_[0] & 0x10000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagstartaddrerr() {
+  _has_bits_[0] |= 0x10000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagstartaddrerr() {
+  _has_bits_[0] &= ~0x10000000u;
+}
+inline void TuningSourceState::clear_fotipflagstartaddrerr() {
+  fotipflagstartaddrerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagstartaddrerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagstartaddrerr() const {
+  return fotipflagstartaddrerr_;
+}
+inline void TuningSourceState::set_fotipflagstartaddrerr(::google::protobuf::int64 value) {
+  set_has_fotipflagstartaddrerr();
+  fotipflagstartaddrerr_ = value;
+}
+
+// optional int64 fotipFlagRomSizeErr = 30 [default = 0];
+inline bool TuningSourceState::has_fotipflagromsizeerr() const {
+  return (_has_bits_[0] & 0x20000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagromsizeerr() {
+  _has_bits_[0] |= 0x20000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagromsizeerr() {
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline void TuningSourceState::clear_fotipflagromsizeerr() {
+  fotipflagromsizeerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagromsizeerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagromsizeerr() const {
+  return fotipflagromsizeerr_;
+}
+inline void TuningSourceState::set_fotipflagromsizeerr(::google::protobuf::int64 value) {
+  set_has_fotipflagromsizeerr();
+  fotipflagromsizeerr_ = value;
+}
+
+// optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
+inline bool TuningSourceState::has_fotipflagromframesizeerr() const {
+  return (_has_bits_[0] & 0x40000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagromframesizeerr() {
+  _has_bits_[0] |= 0x40000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagromframesizeerr() {
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline void TuningSourceState::clear_fotipflagromframesizeerr() {
+  fotipflagromframesizeerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagromframesizeerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagromframesizeerr() const {
+  return fotipflagromframesizeerr_;
+}
+inline void TuningSourceState::set_fotipflagromframesizeerr(::google::protobuf::int64 value) {
+  set_has_fotipflagromframesizeerr();
+  fotipflagromframesizeerr_ = value;
+}
+
+// optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
+inline bool TuningSourceState::has_fotipflagframesizeerr() const {
+  return (_has_bits_[0] & 0x80000000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagframesizeerr() {
+  _has_bits_[0] |= 0x80000000u;
+}
+inline void TuningSourceState::clear_has_fotipflagframesizeerr() {
+  _has_bits_[0] &= ~0x80000000u;
+}
+inline void TuningSourceState::clear_fotipflagframesizeerr() {
+  fotipflagframesizeerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagframesizeerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagframesizeerr() const {
+  return fotipflagframesizeerr_;
+}
+inline void TuningSourceState::set_fotipflagframesizeerr(::google::protobuf::int64 value) {
+  set_has_fotipflagframesizeerr();
+  fotipflagframesizeerr_ = value;
+}
+
+// optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
+inline bool TuningSourceState::has_fotipflagprotocolversionerr() const {
+  return (_has_bits_[1] & 0x00000001u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagprotocolversionerr() {
+  _has_bits_[1] |= 0x00000001u;
+}
+inline void TuningSourceState::clear_has_fotipflagprotocolversionerr() {
+  _has_bits_[1] &= ~0x00000001u;
+}
+inline void TuningSourceState::clear_fotipflagprotocolversionerr() {
+  fotipflagprotocolversionerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagprotocolversionerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagprotocolversionerr() const {
+  return fotipflagprotocolversionerr_;
+}
+inline void TuningSourceState::set_fotipflagprotocolversionerr(::google::protobuf::int64 value) {
+  set_has_fotipflagprotocolversionerr();
+  fotipflagprotocolversionerr_ = value;
+}
+
+// optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
+inline bool TuningSourceState::has_fotipflagsubsystemkeyerr() const {
+  return (_has_bits_[1] & 0x00000002u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagsubsystemkeyerr() {
+  _has_bits_[1] |= 0x00000002u;
+}
+inline void TuningSourceState::clear_has_fotipflagsubsystemkeyerr() {
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline void TuningSourceState::clear_fotipflagsubsystemkeyerr() {
+  fotipflagsubsystemkeyerr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagsubsystemkeyerr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagsubsystemkeyerr() const {
+  return fotipflagsubsystemkeyerr_;
+}
+inline void TuningSourceState::set_fotipflagsubsystemkeyerr(::google::protobuf::int64 value) {
+  set_has_fotipflagsubsystemkeyerr();
+  fotipflagsubsystemkeyerr_ = value;
+}
+
+// optional int64 fotipFlagUniueIDErr = 35 [default = 0];
+inline bool TuningSourceState::has_fotipflaguniueiderr() const {
+  return (_has_bits_[1] & 0x00000004u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflaguniueiderr() {
+  _has_bits_[1] |= 0x00000004u;
+}
+inline void TuningSourceState::clear_has_fotipflaguniueiderr() {
+  _has_bits_[1] &= ~0x00000004u;
+}
+inline void TuningSourceState::clear_fotipflaguniueiderr() {
+  fotipflaguniueiderr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflaguniueiderr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflaguniueiderr() const {
+  return fotipflaguniueiderr_;
+}
+inline void TuningSourceState::set_fotipflaguniueiderr(::google::protobuf::int64 value) {
+  set_has_fotipflaguniueiderr();
+  fotipflaguniueiderr_ = value;
+}
+
+// optional int64 fotipFlagOffsetErr = 36 [default = 0];
+inline bool TuningSourceState::has_fotipflagoffseterr() const {
+  return (_has_bits_[1] & 0x00000008u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagoffseterr() {
+  _has_bits_[1] |= 0x00000008u;
+}
+inline void TuningSourceState::clear_has_fotipflagoffseterr() {
+  _has_bits_[1] &= ~0x00000008u;
+}
+inline void TuningSourceState::clear_fotipflagoffseterr() {
+  fotipflagoffseterr_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagoffseterr();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagoffseterr() const {
+  return fotipflagoffseterr_;
+}
+inline void TuningSourceState::set_fotipflagoffseterr(::google::protobuf::int64 value) {
+  set_has_fotipflagoffseterr();
+  fotipflagoffseterr_ = value;
+}
+
+// optional int64 fotipFlagApplySuccess = 37 [default = 0];
+inline bool TuningSourceState::has_fotipflagapplysuccess() const {
+  return (_has_bits_[1] & 0x00000010u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagapplysuccess() {
+  _has_bits_[1] |= 0x00000010u;
+}
+inline void TuningSourceState::clear_has_fotipflagapplysuccess() {
+  _has_bits_[1] &= ~0x00000010u;
+}
+inline void TuningSourceState::clear_fotipflagapplysuccess() {
+  fotipflagapplysuccess_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagapplysuccess();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagapplysuccess() const {
+  return fotipflagapplysuccess_;
+}
+inline void TuningSourceState::set_fotipflagapplysuccess(::google::protobuf::int64 value) {
+  set_has_fotipflagapplysuccess();
+  fotipflagapplysuccess_ = value;
+}
+
+// optional int64 fotipFlagSetSOR = 38 [default = 0];
+inline bool TuningSourceState::has_fotipflagsetsor() const {
+  return (_has_bits_[1] & 0x00000020u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagsetsor() {
+  _has_bits_[1] |= 0x00000020u;
+}
+inline void TuningSourceState::clear_has_fotipflagsetsor() {
+  _has_bits_[1] &= ~0x00000020u;
+}
+inline void TuningSourceState::clear_fotipflagsetsor() {
+  fotipflagsetsor_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagsetsor();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagsetsor() const {
+  return fotipflagsetsor_;
+}
+inline void TuningSourceState::set_fotipflagsetsor(::google::protobuf::int64 value) {
+  set_has_fotipflagsetsor();
+  fotipflagsetsor_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -4424,29 +6471,466 @@ inline void GetTuningSourcesStatesReply::set_error(::google::protobuf::int32 val
   error_ = value;
 }
 
-// repeated .Network.TuningSourceState tuningDataSourcesStates = 2;
-inline int GetTuningSourcesStatesReply::tuningdatasourcesstates_size() const {
-  return tuningdatasourcesstates_.size();
+// repeated .Network.TuningSourceState tuningSourcesState = 2;
+inline int GetTuningSourcesStatesReply::tuningsourcesstate_size() const {
+  return tuningsourcesstate_.size();
 }
-inline void GetTuningSourcesStatesReply::clear_tuningdatasourcesstates() {
-  tuningdatasourcesstates_.Clear();
+inline void GetTuningSourcesStatesReply::clear_tuningsourcesstate() {
+  tuningsourcesstate_.Clear();
 }
-inline const ::Network::TuningSourceState& GetTuningSourcesStatesReply::tuningdatasourcesstates(int index) const {
-  return tuningdatasourcesstates_.Get(index);
+inline const ::Network::TuningSourceState& GetTuningSourcesStatesReply::tuningsourcesstate(int index) const {
+  return tuningsourcesstate_.Get(index);
 }
-inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::mutable_tuningdatasourcesstates(int index) {
-  return tuningdatasourcesstates_.Mutable(index);
+inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::mutable_tuningsourcesstate(int index) {
+  return tuningsourcesstate_.Mutable(index);
 }
-inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::add_tuningdatasourcesstates() {
-  return tuningdatasourcesstates_.Add();
+inline ::Network::TuningSourceState* GetTuningSourcesStatesReply::add_tuningsourcesstate() {
+  return tuningsourcesstate_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >&
-GetTuningSourcesStatesReply::tuningdatasourcesstates() const {
-  return tuningdatasourcesstates_;
+GetTuningSourcesStatesReply::tuningsourcesstate() const {
+  return tuningsourcesstate_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >*
-GetTuningSourcesStatesReply::mutable_tuningdatasourcesstates() {
-  return &tuningdatasourcesstates_;
+GetTuningSourcesStatesReply::mutable_tuningsourcesstate() {
+  return &tuningsourcesstate_;
+}
+
+// -------------------------------------------------------------------
+
+// ReadTuningSignals
+
+// optional string clientEquipmentID = 1;
+inline bool ReadTuningSignals::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ReadTuningSignals::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ReadTuningSignals::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ReadTuningSignals::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& ReadTuningSignals::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void ReadTuningSignals::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void ReadTuningSignals::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void ReadTuningSignals::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ReadTuningSignals::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* ReadTuningSignals::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ReadTuningSignals::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated uint64 signalHash = 2;
+inline int ReadTuningSignals::signalhash_size() const {
+  return signalhash_.size();
+}
+inline void ReadTuningSignals::clear_signalhash() {
+  signalhash_.Clear();
+}
+inline ::google::protobuf::uint64 ReadTuningSignals::signalhash(int index) const {
+  return signalhash_.Get(index);
+}
+inline void ReadTuningSignals::set_signalhash(int index, ::google::protobuf::uint64 value) {
+  signalhash_.Set(index, value);
+}
+inline void ReadTuningSignals::add_signalhash(::google::protobuf::uint64 value) {
+  signalhash_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+ReadTuningSignals::signalhash() const {
+  return signalhash_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+ReadTuningSignals::mutable_signalhash() {
+  return &signalhash_;
+}
+
+// -------------------------------------------------------------------
+
+// TuningSignalState
+
+// optional uint64 signalHash = 1 [default = 0];
+inline bool TuningSignalState::has_signalhash() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningSignalState::set_has_signalhash() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningSignalState::clear_has_signalhash() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningSignalState::clear_signalhash() {
+  signalhash_ = GOOGLE_ULONGLONG(0);
+  clear_has_signalhash();
+}
+inline ::google::protobuf::uint64 TuningSignalState::signalhash() const {
+  return signalhash_;
+}
+inline void TuningSignalState::set_signalhash(::google::protobuf::uint64 value) {
+  set_has_signalhash();
+  signalhash_ = value;
+}
+
+// optional int32 error = 2 [default = 0];
+inline bool TuningSignalState::has_error() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TuningSignalState::set_has_error() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TuningSignalState::clear_has_error() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TuningSignalState::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 TuningSignalState::error() const {
+  return error_;
+}
+inline void TuningSignalState::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional bool valid = 3 [default = false];
+inline bool TuningSignalState::has_valid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TuningSignalState::set_has_valid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TuningSignalState::clear_has_valid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TuningSignalState::clear_valid() {
+  valid_ = false;
+  clear_has_valid();
+}
+inline bool TuningSignalState::valid() const {
+  return valid_;
+}
+inline void TuningSignalState::set_valid(bool value) {
+  set_has_valid();
+  valid_ = value;
+}
+
+// optional double value = 4 [default = 0];
+inline bool TuningSignalState::has_value() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TuningSignalState::set_has_value() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TuningSignalState::clear_has_value() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TuningSignalState::clear_value() {
+  value_ = 0;
+  clear_has_value();
+}
+inline double TuningSignalState::value() const {
+  return value_;
+}
+inline void TuningSignalState::set_value(double value) {
+  set_has_value();
+  value_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ReadTuningSignalsReply
+
+// optional int32 error = 1 [default = 0];
+inline bool ReadTuningSignalsReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ReadTuningSignalsReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ReadTuningSignalsReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ReadTuningSignalsReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 ReadTuningSignalsReply::error() const {
+  return error_;
+}
+inline void ReadTuningSignalsReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// repeated .Network.TuningSignalState tuningSignalState = 2;
+inline int ReadTuningSignalsReply::tuningsignalstate_size() const {
+  return tuningsignalstate_.size();
+}
+inline void ReadTuningSignalsReply::clear_tuningsignalstate() {
+  tuningsignalstate_.Clear();
+}
+inline const ::Network::TuningSignalState& ReadTuningSignalsReply::tuningsignalstate(int index) const {
+  return tuningsignalstate_.Get(index);
+}
+inline ::Network::TuningSignalState* ReadTuningSignalsReply::mutable_tuningsignalstate(int index) {
+  return tuningsignalstate_.Mutable(index);
+}
+inline ::Network::TuningSignalState* ReadTuningSignalsReply::add_tuningsignalstate() {
+  return tuningsignalstate_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalState >&
+ReadTuningSignalsReply::tuningsignalstate() const {
+  return tuningsignalstate_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalState >*
+ReadTuningSignalsReply::mutable_tuningsignalstate() {
+  return &tuningsignalstate_;
+}
+
+// -------------------------------------------------------------------
+
+// TuningSignalWrite
+
+// optional uint64 signalHash = 1 [default = 0];
+inline bool TuningSignalWrite::has_signalhash() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningSignalWrite::set_has_signalhash() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningSignalWrite::clear_has_signalhash() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningSignalWrite::clear_signalhash() {
+  signalhash_ = GOOGLE_ULONGLONG(0);
+  clear_has_signalhash();
+}
+inline ::google::protobuf::uint64 TuningSignalWrite::signalhash() const {
+  return signalhash_;
+}
+inline void TuningSignalWrite::set_signalhash(::google::protobuf::uint64 value) {
+  set_has_signalhash();
+  signalhash_ = value;
+}
+
+// optional double value = 2 [default = 0];
+inline bool TuningSignalWrite::has_value() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TuningSignalWrite::set_has_value() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TuningSignalWrite::clear_has_value() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TuningSignalWrite::clear_value() {
+  value_ = 0;
+  clear_has_value();
+}
+inline double TuningSignalWrite::value() const {
+  return value_;
+}
+inline void TuningSignalWrite::set_value(double value) {
+  set_has_value();
+  value_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// WriteTuningSignals
+
+// optional string clientEquipmentID = 1;
+inline bool WriteTuningSignals::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void WriteTuningSignals::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void WriteTuningSignals::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void WriteTuningSignals::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& WriteTuningSignals::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void WriteTuningSignals::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void WriteTuningSignals::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void WriteTuningSignals::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* WriteTuningSignals::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* WriteTuningSignals::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void WriteTuningSignals::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool autoAppay = 2 [default = false];
+inline bool WriteTuningSignals::has_autoappay() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void WriteTuningSignals::set_has_autoappay() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void WriteTuningSignals::clear_has_autoappay() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void WriteTuningSignals::clear_autoappay() {
+  autoappay_ = false;
+  clear_has_autoappay();
+}
+inline bool WriteTuningSignals::autoappay() const {
+  return autoappay_;
+}
+inline void WriteTuningSignals::set_autoappay(bool value) {
+  set_has_autoappay();
+  autoappay_ = value;
+}
+
+// repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
+inline int WriteTuningSignals::tuningsignalwrite_size() const {
+  return tuningsignalwrite_.size();
+}
+inline void WriteTuningSignals::clear_tuningsignalwrite() {
+  tuningsignalwrite_.Clear();
+}
+inline const ::Network::TuningSignalWrite& WriteTuningSignals::tuningsignalwrite(int index) const {
+  return tuningsignalwrite_.Get(index);
+}
+inline ::Network::TuningSignalWrite* WriteTuningSignals::mutable_tuningsignalwrite(int index) {
+  return tuningsignalwrite_.Mutable(index);
+}
+inline ::Network::TuningSignalWrite* WriteTuningSignals::add_tuningsignalwrite() {
+  return tuningsignalwrite_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
+WriteTuningSignals::tuningsignalwrite() const {
+  return tuningsignalwrite_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
+WriteTuningSignals::mutable_tuningsignalwrite() {
+  return &tuningsignalwrite_;
+}
+
+// -------------------------------------------------------------------
+
+// WriteTuningSignalsReply
+
+// optional int32 error = 1 [default = 0];
+inline bool WriteTuningSignalsReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void WriteTuningSignalsReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void WriteTuningSignalsReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void WriteTuningSignalsReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 WriteTuningSignalsReply::error() const {
+  return error_;
+}
+inline void WriteTuningSignalsReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
 }
 
 

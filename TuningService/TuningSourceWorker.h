@@ -19,6 +19,8 @@ namespace Tuning
 		qint64 requestCount = 0;
 		qint64 replyCount = 0;
 
+		qint32 commandQueueSize = 0;
+
 		qint64 errUntimelyReplay = 0;
 		qint64 errSent = 0;
 		qint64 errPartialSent = 0;
