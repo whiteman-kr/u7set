@@ -107,14 +107,20 @@ void TcpTuningClient::resetToGetTuningState()
 
 void TcpTuningClient::requestTuningSourcesInfo()
 {
-	assert(isClearToSendRequest());
-	sendRequest(TDS_GET_TUNING_SOURCES_INFO);
+    assert(isClearToSendRequest());
+
+    m_getTuningSourcesInfo.set_clientequipmentid(theSettings.instanceStrId().toUtf8());
+
+    sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_getTuningSourcesInfo);
 }
 
 void TcpTuningClient::requestTuningSourcesState()
 {
 	assert(isClearToSendRequest());
-	sendRequest(TDS_GET_TUNING_SOURCES_STATES);
+
+    m_getTuningSourcesStates.set_clientequipmentid(theSettings.instanceStrId().toUtf8());
+
+    sendRequest(TDS_GET_TUNING_SOURCES_STATES, m_getTuningSourcesStates);
 }
 
 void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
@@ -148,23 +154,9 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 
 			const ::Network::DataSourceInfo& dsi = m_tuningDataSourcesInfoReply.datasourceinfo(i);
 
-			ts.m_id = dsi.id();
-			ts.m_equipmentId = dsi.equipmentid().c_str();
-			ts.m_caption = dsi.caption().c_str();
-			ts.m_dataType = dsi.datatype();
-			ts.m_ip = dsi.ip().c_str();
-			ts.m_port = dsi.port();
-			ts.m_channel = dsi.channel();
-			ts.m_subsystemID = dsi.subsystemid();
-			ts.m_subsystem = dsi.subsystem().c_str();
+            ts.m_info = dsi;
 
-			ts.m_lmNumber = dsi.lmnumber();
-			ts.m_lmModuleType = dsi.lmmoduletype();
-			ts.m_lmAdapterID = dsi.lmadapterid().c_str();
-			ts.m_lmDataEnable = dsi.lmdataenable();
-			ts.m_lmDataID = dsi.lmdataid();
-
-			quint64 id = dsi.id();
+            quint64 id = dsi.id();
 
 			if (m_tuningSources.find(id) != m_tuningSources.end())
 			{
@@ -174,9 +166,8 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 			}
 
 			qDebug()<<"Id = "<<id;
-			qDebug()<<"m_equipmentId = "<<ts.m_equipmentId;
-			qDebug()<<"m_ip = "<<ts.m_ip;
-
+            qDebug()<<"m_equipmentId = "<<dsi.equipmentid().c_str();
+            qDebug()<<"m_ip = "<<dsi.ip().c_str();
 
 			m_tuningSources[id] = ts;
 		}
@@ -213,11 +204,11 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 	{
 		QMutexLocker l(&m_mutex);
 
-		for (int i = 0; i < m_tuningDataSourcesStatesReply.tuningdatasourcesstates_size(); i++)
+        for (int i = 0; i < m_tuningDataSourcesStatesReply.tuningsourcesstate_size(); i++)
 		{
-			const ::Network::TuningSourceState& tss = m_tuningDataSourcesStatesReply.tuningdatasourcesstates(i);
+            const ::Network::TuningSourceState& tss = m_tuningDataSourcesStatesReply.tuningsourcesstate(i);
 
-			quint64 id = tss.id();
+            quint64 id = tss.sourceid();
 
 			auto it = m_tuningSources.find(id);
 			if (it == m_tuningSources.end())
@@ -229,10 +220,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 
 			TuningSource& ts = it->second;
 
-			ts.m_uptime = tss.uptime();
-			ts.m_receivedDataSize = tss.receiveddatasize();
-			ts.m_dataReceivingRate = tss.datareceivingrate();
-			ts.m_respond = tss.respond();
+            ts.m_state = tss;
 		}
 	}
 
@@ -263,6 +251,22 @@ std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
 	}
 
 	return result;
+}
+
+bool TcpTuningClient::tuningSourceInfo(quint64 id, TuningSource& result)
+{
+    QMutexLocker l(&m_mutex);
+
+    auto it = m_tuningSources.find(id);
+
+    if (it == m_tuningSources.end())
+    {
+        return false;
+    }
+
+    result = it->second;
+
+    return true;
 }
 
 TcpTuningClient* theTcpTuningClient = nullptr;

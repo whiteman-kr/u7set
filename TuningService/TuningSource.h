@@ -18,6 +18,7 @@ namespace Tuning
 		~TuningSource();
 
 		void setTuningData(TuningData* tuningData);
+		const TuningData* tuningData() const;
 
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
@@ -37,7 +38,8 @@ namespace Tuning
 
 		void buildIP2DataSourceMap();
 
-		TuningSource* getDataSourceByIP(quint32 ip);
+		const TuningSource* getSourceByIP(quint32 ip) const;
+		const TuningSource *getSourceByID(const QString& sourceID) const;
 	};
 
 }

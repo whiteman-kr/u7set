@@ -7,9 +7,12 @@
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceWorker.h"
+#include "TuningClientContext.h"
 
 namespace Tuning
 {
+	class TcpTuningServerThread;
+
 
 	class TuningServiceWorker : public ServiceWorker
 	{
@@ -25,6 +28,9 @@ namespace Tuning
 
 		virtual TuningServiceWorker* createInstance() override;
 
+		const TuningClientContext* getClientContext(QString clientID) const;
+		const TuningClientContext* getClientContext(const std::string& clientID) const;
+
 	signals:
 
 	public slots:
@@ -39,6 +45,9 @@ namespace Tuning
 		void stopCfgLoaderThread();
 		void clearConfiguration();
 		void applyNewConfiguration();
+
+		void buildServiceMaps();
+		void clearServiceMaps();
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
@@ -70,5 +79,7 @@ namespace Tuning
 		TuningSocketListenerThread* m_socketListenerThread = nullptr;
 
 		QTimer m_timer;
+
+		TuningClientContextMap m_clientContextMap;
 	};
 }

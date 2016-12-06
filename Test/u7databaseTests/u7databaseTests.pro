@@ -16,16 +16,19 @@ TEMPLATE = app
 DEFINES += Q_CONSOLE_APP
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-# Use this flags for code coverage info
+# Use this flags for code coverage info. Must be generated only for unix system (need libgcov)
 
-QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
-QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage
+unix {
+        QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+        QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage
 
-LIBS += \
--lgcov
+        LIBS += \
+        -lgcov
+}
 
 # DESTDIR
 #
+
 win32 {
         CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
         CONFIG(release, debug|release): DESTDIR = ../../bin/release

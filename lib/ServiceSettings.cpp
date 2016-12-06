@@ -207,6 +207,94 @@ const char* TuningServiceSettings::PROP_TUNING_ROM_FRAME_COUNT = "TuningROMFrame
 const char* TuningServiceSettings::PROP_TUNING_ROM_FRAME_SIZE = "TuningROMFrameSize";
 const char* TuningServiceSettings::PROP_TUNING_ROM_SIZE = "TuningROMSize";
 
+const char* TuningServiceSettings::TUNING_CLIENTS = "TuningClients";
+const char* TuningServiceSettings::TUNING_CLIENT = "TuningClient";
+const char* TuningServiceSettings::TUNING_SOURCES = "TuningSources";
+const char* TuningServiceSettings::TUNING_SOURCE = "TuningSource";
+const char* TuningServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
+const char* TuningServiceSettings::ATTR_COUNT = "Count";
+
+
+bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log)
+{
+	clients.clear();
+
+	if (software == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	Hardware::DeviceRoot* root = const_cast<Hardware::DeviceRoot*>(software->getParentRoot());
+
+	if (root == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	Hardware::equipmentWalker(root,
+		[this, &software, &result, &log](Hardware::DeviceObject* currentDevice)
+		{
+			if (currentDevice->isSoftware() == false)
+			{
+				return;
+			}
+
+			Hardware::Software* tuningClient = dynamic_cast<Hardware::Software*>(currentDevice);
+
+			if (tuningClient == nullptr)
+			{
+				assert(false);
+				result = false;
+				return;
+			}
+
+			if (tuningClient->type() != E::SoftwareType::TuningClient)
+			{
+				return;
+			}
+
+			// sw is TuningClient
+			//
+			QString tuningServiceID1;
+			QString tuningServiceID2;
+
+			result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID1", &tuningServiceID1, log);
+			result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID2", &tuningServiceID2, log);
+
+			if (result == false)
+			{
+				return;
+			}
+
+			if (tuningServiceID1 != software->equipmentIdTemplate() &&
+				tuningServiceID1 != software->equipmentIdTemplate())
+			{
+				return;
+			}
+
+			// TuningClient is linked to this TuningService
+
+			TuningClient tc;
+
+			tc.equipmentID = tuningClient->equipmentIdTemplate();
+
+			QString sourcesIDs;
+
+			result &= DeviceHelper::getStrProperty(tuningClient, "TuningSourceEquipmentID", &sourcesIDs, log);
+
+			tc.sourcesIDs = sourcesIDs.split("\n", QString::SkipEmptyParts);
+
+			this->clients.append(tc);
+		}
+	);
+
+
+	return result;
+}
 
 bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder::IssueLogger* log)
 {
@@ -235,6 +323,8 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 
 	tuningDataIP = HostAddressPort(tuningDataIPStr, tuningDataPort);
 
+	result &= fillTuningClientsInfo(software, log);
+
 	return result;
 }
 
@@ -258,6 +348,36 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeEndElement();	// </TuningMemorySettings>
 
 	xml.writeEndElement();	// </Settings>
+
+	// write tuning clients info
+	//
+	xml.writeStartElement(TUNING_CLIENTS);
+	xml.writeIntAttribute(ATTR_COUNT, clients.count());
+
+	for(int i = 0; i < clients.count(); i++)
+	{
+		TuningClient& tc = clients[i];
+
+		xml.writeStartElement(TUNING_CLIENT);
+		xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, tc.equipmentID);
+
+		xml.writeStartElement(TUNING_SOURCES);
+		xml.writeIntAttribute(ATTR_COUNT, tc.sourcesIDs.count());
+
+		for(QString& sourceID : tc.sourcesIDs)
+		{
+			xml.writeStartElement(TUNING_SOURCE);
+			xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, sourceID);
+
+			xml.writeEndElement();	// TUNING_SOURCE
+		}
+
+		xml.writeEndElement();		// TUNING_SOURCES
+
+		xml.writeEndElement();		// TUNING_CLIENT
+	}
+
+	xml.writeEndElement();			// TUNING_CLIENTS
 
 	return true;
 }
@@ -290,6 +410,69 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_COUNT, &tuningRomFrameCount);
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_SIZE, &tuningRomFrameSizeW);
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_SIZE, &tuningRomSizeW);
+
+	// read tuning clients info
+	//
+	clients.clear();
+
+	result = xml.findElement(TUNING_CLIENTS);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int clientsCount = 0;
+
+	result &= xml.readIntAttribute(ATTR_COUNT, &clientsCount);
+
+	for(int i = 0; i < clientsCount; i++)
+	{
+		TuningClient tc;
+
+		result = xml.findElement(TUNING_CLIENT);
+
+		if (result == false)
+		{
+			break;
+		}
+
+		result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &tc.equipmentID);
+
+		result = xml.findElement(TUNING_SOURCES);
+
+		if (result == false)
+		{
+			break;
+		}
+
+		int sourcesCount = 0;
+
+		result &= xml.readIntAttribute(ATTR_COUNT, &sourcesCount);
+
+		for(int s = 0; s < sourcesCount; s++)
+		{
+			result = xml.findElement(TUNING_SOURCE);
+
+			if (result == false)
+			{
+				break;
+			}
+
+			QString sourceID;
+
+			result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &sourceID);
+
+			tc.sourcesIDs.append(sourceID);
+		}
+
+		if (result == false)
+		{
+			break;
+		}
+
+		clients.append(tc);
+	}
 
 	return result;
 }

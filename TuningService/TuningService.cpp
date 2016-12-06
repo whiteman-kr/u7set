@@ -42,6 +42,18 @@ namespace Tuning
 	}
 
 
+	const TuningClientContext* TuningServiceWorker::getClientContext(QString clientID) const
+	{
+		return m_clientContextMap.getClientContext(clientID);
+	}
+
+
+	const TuningClientContext* TuningServiceWorker::getClientContext(const std::string& clientID) const
+	{
+		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
+	}
+
+
 	void TuningServiceWorker::initialize()
 	{
 		if (buildPath().isEmpty() == true)
@@ -111,23 +123,36 @@ namespace Tuning
 	{
 		stopTcpTuningServerThread();
 		stopTuningSourceWorkers();
+		clearServiceMaps();
 	}
 
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
+		buildServiceMaps();
 		runTuningSourceWorkers();
 		runTcpTuningServerThread();
 	}
 
 
+	void TuningServiceWorker::buildServiceMaps()
+	{
+		m_clientContextMap.init(m_tuningSettings, m_tuningSources);
+	}
+
+
+	void TuningServiceWorker::clearServiceMaps()
+	{
+		m_clientContextMap.clear();
+	}
+
+
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer();
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this);
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_tuningSettings.clientRequestIP,
-															tcpTuningSever,
-															m_tuningSources);
+															tcpTuningSever);
 		m_tcpTuningServerThread->start();
 	}
 
@@ -350,6 +375,15 @@ namespace Tuning
 
 	void TuningServiceWorker::stopTuningSourceWorkers()
 	{
+		// stop and delete TuningSocketListenerThread
+		//
+		if (m_socketListenerThread != nullptr)
+		{
+			m_socketListenerThread->quitAndWait();
+			delete m_socketListenerThread;
+			m_socketListenerThread = nullptr;
+		}
+
 		// stop and delete TuningSourceWorkerThreads
 		//
 		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
@@ -365,15 +399,6 @@ namespace Tuning
 		}
 
 		m_sourceWorkerThreadMap.clear();
-
-		// stop and delete TuningSocketListenerThread
-		//
-		if (m_socketListenerThread != nullptr)
-		{
-			m_socketListenerThread->quitAndWait();
-			delete m_socketListenerThread;
-			m_socketListenerThread = nullptr;
-		}
 	}
 
 

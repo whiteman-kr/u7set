@@ -21,6 +21,8 @@ protected:
 private slots:
 	void slot_tuningSourcesArrived();
 
+    void on_treeWidget_doubleClicked(const QModelIndex &index);
+
 private:
 	void update(bool refreshOnly);
 
@@ -30,22 +32,17 @@ private:
 		Id,
 		EquipmentId,
 		Caption,
-		DataType,
 		Ip,
 		Port,
 		Channel,
 		SubsystemID,
 		Subsystem,
 		LmNumber,
-		LmModuleType,
-		LmAdapterID,
-		LmDataEnable,
-		LmDataID,
 
-		Uptime,
-		ReceivedDataSize,
-		DataReceivingRate,
-		Respond,
+        IsReply,
+        RequestCount,
+        ReplyCount,
+        CommandQueueSize,
 
 		ColumnCount
 	};

@@ -76,7 +76,7 @@ namespace  Tuning
 	{
 		bool result = true;
 
-		for(QList<Signal*>& signalList : m_tuningSignals)
+		for(QVector<Signal*>& signalList : m_tuningSignals)
 		{
 			signalList.clear();
 		}
@@ -142,7 +142,7 @@ namespace  Tuning
 
 		int totalSize = 0;
 
-		for(QList<Signal*>& signalList : m_tuningSignals)
+		for(QVector<Signal*>& signalList : m_tuningSignals)
 		{
 			int signalCount = signalList.size();
 
@@ -365,7 +365,7 @@ namespace  Tuning
 
 		crc.add(lmEquipmentID);
 
-		for(QList<Signal*>& signalList : m_tuningSignals)
+		for(QVector<Signal*>& signalList : m_tuningSignals)
 		{
 			for(Signal* signal : signalList)
 			{
@@ -383,14 +383,39 @@ namespace  Tuning
 	}
 
 
-	void TuningData::getSignals(QList<Signal*>& signalList)
+	void TuningData::getSignals(QVector<Signal*>& signalList) const
 	{
 		signalList.clear();
 
-		for(QList<Signal*>& list : m_tuningSignals)
+		for(const QVector<Signal*>& list : m_tuningSignals)
 		{
 			signalList.append(list);
 		}
+	}
+
+
+	const QVector<Signal *>& TuningData::getSignals(int type) const
+	{
+		if (type < TYPE_ANALOG_FLOAT || type > TYPE_DISCRETE)
+		{
+			assert(false);
+			type = TYPE_ANALOG_FLOAT;
+		}
+
+		return m_tuningSignals[type];
+	}
+
+
+	int TuningData::getSignalsCount() const
+	{
+		int count = 0;
+
+		for(int i = TYPE_ANALOG_FLOAT; i < TYPES_COUNT; i++)
+		{
+			count += m_tuningSignals[i].count();
+		}
+
+		return count;
 	}
 
 
@@ -431,7 +456,7 @@ namespace  Tuning
 
 		int signalCount = 0;
 
-		for(QList<Signal*>& signalList : m_tuningSignals)
+		for(QVector<Signal*>& signalList : m_tuningSignals)
 		{
 			signalCount += signalList.count();
 		}
@@ -447,7 +472,7 @@ namespace  Tuning
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
-			QList<Signal*>& tuningSignals = m_tuningSignals[type];
+			QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
 			xml.writeStartElement(typeSection[type]);
 			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, tuningSignals.count());
