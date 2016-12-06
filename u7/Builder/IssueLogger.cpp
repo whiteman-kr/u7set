@@ -925,6 +925,51 @@ namespace Builder
 				  tr("Property '%1.%2'is not found.").arg(objectID).arg(propertyName));
 	}
 
+    /// IssueCode: CFG3021
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Property '%1.%2' is linked to undefined software ID '%3'.
+    ///
+    /// Parameters:
+    ///         %1 Object ID
+    ///         %2 Property name
+    ///			%3 Software ID
+    ///
+    /// Description:
+    ///			Occurs if adapter property is linked to undefined software ID.
+    ///
+    void IssueLogger::errCFG3021(QString objectID, QString propertyName, QString softwareID)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3021,
+                  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
+                  .arg(objectID)
+                  .arg(propertyName)
+                  .arg(softwareID));
+    }
+
+    /// IssueCode: CFG3022
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Property '%1.%2' is empty.
+    ///
+    /// Parameters:
+    ///         %1 Object ID
+    ///         %2 Property name
+    ///
+    /// Description:
+    ///			Occurs if adapter property is empty.
+    ///
+    void IssueLogger::errCFG3022(QString objectID, QString propertyName)
+    {
+        LOG_ERROR(IssueType::FscConfiguration,
+                  3022,
+                  tr("Property '%1.%2' is empty.")
+                  .arg(objectID)
+                  .arg(propertyName));
+    }
 
 
 	// ALP			Application Logic Parsing				4000-4999
