@@ -60,7 +60,8 @@ SOURCES += \
     TuningSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     TuningSourceWorker.cpp \
-    TuningMemory.cpp
+    TuningMemory.cpp \
+    TuningClientContext.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -101,7 +102,8 @@ HEADERS += \
     ../u7/Builder/ModulesRawData.h \
     TuningSourceWorker.h \
     ../lib/DataProtocols.h \
-    TuningMemory.h
+    TuningMemory.h \
+    TuningClientContext.h
 
 include(../qtservice/src/qtservice.pri)
 

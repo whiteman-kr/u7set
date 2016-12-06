@@ -63,6 +63,8 @@ namespace Tuning
 		qint64 fotipFlagOffsetErr = 0;
 		qint64 fotipFlagApplySuccess = 0;
 		qint64 fotipFlagSetSOR = 0;
+
+		void get(Network::TuningSourceState& tuningSourceState);
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -108,6 +110,8 @@ namespace Tuning
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
+
+		void getState(Network::TuningSourceState& tuningSourceState);
 
 	signals:
 		void replyReady();

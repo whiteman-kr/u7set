@@ -42,6 +42,18 @@ namespace Tuning
 	}
 
 
+	const TuningClientContext* TuningServiceWorker::getClientContext(QString clientID) const
+	{
+		return m_clientContextMap.getClientContext(clientID);
+	}
+
+
+	const TuningClientContext* TuningServiceWorker::getClientContext(const std::string& clientID) const
+	{
+		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
+	}
+
+
 	void TuningServiceWorker::initialize()
 	{
 		if (buildPath().isEmpty() == true)
@@ -111,23 +123,36 @@ namespace Tuning
 	{
 		stopTcpTuningServerThread();
 		stopTuningSourceWorkers();
+		clearServiceMaps();
 	}
 
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
+		buildServiceMaps();
 		runTuningSourceWorkers();
 		runTcpTuningServerThread();
 	}
 
 
+	void TuningServiceWorker::buildServiceMaps()
+	{
+		m_clientContextMap.init(m_tuningSettings, m_tuningSources);
+	}
+
+
+	void TuningServiceWorker::clearServiceMaps()
+	{
+		m_clientContextMap.clear();
+	}
+
+
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer();
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this);
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_tuningSettings.clientRequestIP,
-															tcpTuningSever,
-															m_tuningSources);
+															tcpTuningSever);
 		m_tcpTuningServerThread->start();
 	}
 

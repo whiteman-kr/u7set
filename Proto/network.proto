@@ -184,7 +184,7 @@ message GetTuningSourcesInfo
 
 message GetTuningSourcesInfoReply
 {
-    optional int32 errorCode = 1 [default = 0];
+    optional int32 error = 1 [default = 0];
     repeated DataSourceInfo tuningSourceInfo= 2;
 }
 

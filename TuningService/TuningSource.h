@@ -38,7 +38,8 @@ namespace Tuning
 
 		void buildIP2DataSourceMap();
 
-		TuningSource* getDataSourceByIP(quint32 ip);
+		const TuningSource* getSourceByIP(quint32 ip) const;
+		const TuningSource *getSourceByID(const QString& sourceID) const;
 	};
 
 }

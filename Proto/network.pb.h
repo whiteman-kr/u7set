@@ -2286,12 +2286,12 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 errorCode = 1 [default = 0];
-  inline bool has_errorcode() const;
-  inline void clear_errorcode();
-  static const int kErrorCodeFieldNumber = 1;
-  inline ::google::protobuf::int32 errorcode() const;
-  inline void set_errorcode(::google::protobuf::int32 value);
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
 
   // repeated .Network.DataSourceInfo tuningSourceInfo = 2;
   inline int tuningsourceinfo_size() const;
@@ -2307,13 +2307,13 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfoReply)
  private:
-  inline void set_has_errorcode();
-  inline void clear_has_errorcode();
+  inline void set_has_error();
+  inline void clear_has_error();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo > tuningsourceinfo_;
-  ::google::protobuf::int32 errorcode_;
+  ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -5484,26 +5484,26 @@ inline void GetTuningSourcesInfo::set_allocated_clientequipmentid(::std::string*
 
 // GetTuningSourcesInfoReply
 
-// optional int32 errorCode = 1 [default = 0];
-inline bool GetTuningSourcesInfoReply::has_errorcode() const {
+// optional int32 error = 1 [default = 0];
+inline bool GetTuningSourcesInfoReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetTuningSourcesInfoReply::set_has_errorcode() {
+inline void GetTuningSourcesInfoReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetTuningSourcesInfoReply::clear_has_errorcode() {
+inline void GetTuningSourcesInfoReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetTuningSourcesInfoReply::clear_errorcode() {
-  errorcode_ = 0;
-  clear_has_errorcode();
+inline void GetTuningSourcesInfoReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
 }
-inline ::google::protobuf::int32 GetTuningSourcesInfoReply::errorcode() const {
-  return errorcode_;
+inline ::google::protobuf::int32 GetTuningSourcesInfoReply::error() const {
+  return error_;
 }
-inline void GetTuningSourcesInfoReply::set_errorcode(::google::protobuf::int32 value) {
-  set_has_errorcode();
-  errorcode_ = value;
+inline void GetTuningSourcesInfoReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
 }
 
 // repeated .Network.DataSourceInfo tuningSourceInfo = 2;

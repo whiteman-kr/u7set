@@ -91,15 +91,15 @@ private:
 	static const char* ATTR_EQUIIPMENT_ID;
 	static const char* ATTR_COUNT;
 
+	bool fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log);
+
+public:
 	struct TuningClient
 	{
 		QString equipmentID;
 		QStringList sourcesIDs;
 	};
 
-	bool fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log);
-
-public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 

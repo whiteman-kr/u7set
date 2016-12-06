@@ -9,16 +9,9 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	TcpTuningServer::TcpTuningServer()
+	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service) :
+		m_service(service)
 	{
-
-	}
-
-
-	void TcpTuningServer::setThread(TcpTuningServerThread* thread)
-	{
-		assert(thread != nullptr);
-		m_thread = thread;
 	}
 
 
@@ -44,9 +37,7 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer();
-
-		newServer->setThread(m_thread);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service);
 
 		return newServer;
 	}
@@ -57,11 +48,11 @@ namespace Tuning
 		switch(requestID)
 		{
 		case TDS_GET_TUNING_SOURCES_INFO:
-			onGetTuningSourcesInfoRequest();
+			onGetTuningSourcesInfoRequest(requestData, requestDataSize);
 			break;
 
 		case TDS_GET_TUNING_SOURCES_STATES:
-			onGetTuningSourcesStateRequest();
+			onGetTuningSourcesStateRequest(requestData, requestDataSize);
 			break;
 
 		default:
@@ -71,16 +62,32 @@ namespace Tuning
 	}
 
 
-	void TcpTuningServer::onGetTuningSourcesInfoRequest()
+	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize)
 	{
 		m_getTuningSourcesInfoReply.Clear();
 
-		const TuningSources& tuningSrcs = tuningSources();
+		m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
 
-		for(const TuningSource* source : tuningSrcs)
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(m_getTuningSourcesInfo.clientequipmentid());
+
+		if (clientContext == nullptr)
 		{
-			Network::DataSourceInfo* protoInfo = m_getTuningSourcesInfoReply.add_datasourceinfo();
-			source->getInfo(protoInfo);
+			// unknown clientID
+			//
+			m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+			sendReply(m_getTuningSourcesInfoReply);
+			return;
+		}
+
+		QVector<Network::DataSourceInfo> dsiArray;
+
+		clientContext->getSourcesInfo(dsiArray);
+
+		for(const Network::DataSourceInfo& dsi : dsiArray)
+		{
+			Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+			*newDsi = dsi;
 		}
 
 		m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
@@ -89,14 +96,24 @@ namespace Tuning
 	}
 
 
-	void TcpTuningServer::onGetTuningSourcesStateRequest()
+	void TcpTuningServer::onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize)
 	{
-	}
+		m_getTuningSourcesStatesReply.Clear();
 
+		m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
 
-	TuningSources& TcpTuningServer::tuningSources()
-	{
-		return m_thread->tuningSources();
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(m_getTuningSourcesStates.clientequipmentid());
+
+		if (clientContext == nullptr)
+		{
+			// unknown clientID
+			//
+			m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+			sendReply(m_getTuningSourcesStatesReply);
+			return;
+		}
+
 	}
 
 
@@ -106,19 +123,12 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
+	class TuningServiceWorker;
+
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-							TcpTuningServer* server,
-							TuningSources& tuningSources) :
-		Tcp::ServerThread(listenAddressPort, server),
-		m_tuningSources(tuningSources)
+							TcpTuningServer* server) :
+		Tcp::ServerThread(listenAddressPort, server)
 	{
-		server->setThread(this);
-	}
-
-
-	TuningSources& TcpTuningServerThread::tuningSources()
-	{
-		return 	m_tuningSources;
 	}
 
 }

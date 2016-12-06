@@ -132,14 +132,15 @@ namespace Tuning
 	}
 
 
-	TuningSource* TuningSources::getDataSourceByIP(quint32 ip)
+	const TuningSource* TuningSources::getSourceByIP(quint32 ip) const
 	{
-		if (m_ip2Source.contains(ip))
-		{
-			return m_ip2Source[ip];
-		}
+		return m_ip2Source.value(ip, nullptr);
+	}
 
-		return nullptr;
+
+	const TuningSource* TuningSources::getSourceByID(const QString& sourceID) const
+	{
+		return value(sourceID, nullptr);
 	}
 
 

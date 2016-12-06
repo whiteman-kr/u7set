@@ -7,6 +7,16 @@ namespace Tuning
 {
 	// ----------------------------------------------------------------------------------
 	//
+	// SourceStatistics struct implementation
+	//
+	// ----------------------------------------------------------------------------------
+
+	void SourceStatistics::get(Network::TuningSourceState& tuningSourceState)
+	{
+	}
+
+	// ----------------------------------------------------------------------------------
+	//
 	// TuningSourceWorker class implementation
 	//
 	// ----------------------------------------------------------------------------------
@@ -54,6 +64,12 @@ namespace Tuning
 	void TuningSourceWorker::incErrReplySize()
 	{
 		m_stat.errReplySize++;
+	}
+
+
+	void TuningSourceWorker::getState(Network::TuningSourceState& tuningSourceState)
+	{
+		m_stat.get(tuningSourceState);
 	}
 
 

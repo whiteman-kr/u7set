@@ -3,11 +3,12 @@
 #include "../lib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "TuningSource.h"
+#include "TuningService.h"
 
 namespace Tuning
 {
 
-	class TcpTuningServerThread;
+	class TuningServiceWorker;
 
 	// -------------------------------------------------------------------------------
 	//
@@ -18,9 +19,9 @@ namespace Tuning
 	class TcpTuningServer  : public Tcp::Server
 	{
 	public:
-		TcpTuningServer();
+		TcpTuningServer(TuningServiceWorker& service);
 
-		void setThread(TcpTuningServerThread* thread);
+//		void setThread(TcpTuningServerThread* thread);
 
 	private:
 		virtual void onServerThreadStarted() override;
@@ -33,22 +34,23 @@ namespace Tuning
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
-		void onGetTuningSourcesInfoRequest();
-		void onGetTuningSourcesStateRequest();
-
-		TuningSources& tuningSources();
+		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
+		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
 
 	private:
-		TcpTuningServerThread* m_thread = nullptr;
+		TuningServiceWorker& m_service;
 
-		Network::GetDataSourcesInfoReply m_getTuningSourcesInfoReply;
+		Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
+		Network::GetTuningSourcesInfoReply m_getTuningSourcesInfoReply;
+
+		Network::GetTuningSourcesStates m_getTuningSourcesStates;
+		Network::GetTuningSourcesStatesReply m_getTuningSourcesStatesReply;
 	};
-
 
 
 	// -------------------------------------------------------------------------------
 	//
-	// TcpAppDataServerThread class declaration
+	// TcpTuningServerThread class declaration
 	//
 	// -------------------------------------------------------------------------------
 
@@ -56,13 +58,7 @@ namespace Tuning
 	{
 	public:
 		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server,
-								TuningSources& tuningSources);
-
-		TuningSources& tuningSources();
-
-	private:
-		TuningSources& m_tuningSources;
+								TcpTuningServer* server);
 	};
 
 }

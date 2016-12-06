@@ -393,5 +393,6 @@ enum class NetworkError
 	RequestStateExceed,
 	ParseRequestError,
 	RequestDataSourcesStatesExceed,
-	UnitsExceed
+	UnitsExceed,
+	UnknownTuningClientID,
 };
