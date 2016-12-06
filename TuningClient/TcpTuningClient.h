@@ -23,6 +23,8 @@ public:
 
 	std::vector<TuningSource> tuningSourcesInfo();
 
+    bool tuningSourceInfo(quint64 id, TuningSource& result);
+
 public:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;

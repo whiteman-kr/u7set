@@ -253,6 +253,22 @@ std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
 	return result;
 }
 
+bool TcpTuningClient::tuningSourceInfo(quint64 id, TuningSource& result)
+{
+    QMutexLocker l(&m_mutex);
+
+    auto it = m_tuningSources.find(id);
+
+    if (it == m_tuningSources.end())
+    {
+        return false;
+    }
+
+    result = it->second;
+
+    return true;
+}
+
 TcpTuningClient* theTcpTuningClient = nullptr;
 
 

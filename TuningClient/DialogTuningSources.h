@@ -21,6 +21,8 @@ protected:
 private slots:
 	void slot_tuningSourcesArrived();
 
+    void on_treeWidget_doubleClicked(const QModelIndex &index);
+
 private:
 	void update(bool refreshOnly);
 
