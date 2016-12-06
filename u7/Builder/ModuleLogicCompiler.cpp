@@ -477,7 +477,7 @@ namespace Builder
 	{
 		bool result = false;
 
-		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->equipmentIdTemplate());
+		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(m_lm->equipmentIdTemplate());
 
 		m_moduleLogic = appLogicModule.get();
 

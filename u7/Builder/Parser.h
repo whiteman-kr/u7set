@@ -137,6 +137,10 @@ namespace Builder
 
 		bool orderItems(IssueLogger* log, bool* interruptProcess);
 
+		//	Make deep copy with new guid for everything, items, pins, assocs, etc...
+		//
+		std::shared_ptr<AppLogicModule> deepCopy(QUuid groupId, const QString& label) const;
+
 		bool debugCheckItemsRelationsConsistency(IssueLogger* log) const;
 
 		static bool debugCheckItemsRelationsConsistency(QString equipmentId,
@@ -190,8 +194,6 @@ namespace Builder
 	public:
 		AppLogicData();
 
-		std::shared_ptr<AppLogicModule> getModuleLogicData(QString moduleStrID);
-
 		// Public methods
 		//
 	public:
@@ -209,11 +211,15 @@ namespace Builder
 
 		bool expandUfbs(IssueLogger* log);
 
+	private:
+		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
+
 		// Properties
 		//
 	public:
 		const std::list<std::shared_ptr<AppLogicModule>>& modules() const;
 		std::list<std::shared_ptr<AppLogicModule>>& modules();
+		std::shared_ptr<AppLogicModule> module(QString moduleStrID);
 
 		const std::map<QString, std::shared_ptr<AppLogicModule>>& ufbs() const;
 		std::shared_ptr<AppLogicModule> ufb(QString ufbId) const;

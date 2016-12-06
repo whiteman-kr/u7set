@@ -156,6 +156,24 @@ namespace VFrame30
 		m_associatedIOs.push_back(guid);
 	}
 
+	bool AfbPin::removeFromAssociatedIo(const QUuid& uuid)
+	{
+		auto oldSize = m_associatedIOs.size();
+
+		m_associatedIOs.erase(std::remove(m_associatedIOs.begin(),
+										  m_associatedIOs.end(),
+										  uuid),
+							  m_associatedIOs.end());
+
+		return m_associatedIOs.size() < oldSize;
+	}
+
+	bool AfbPin::hasAssociatedIo(const QUuid& guid) const
+	{
+		auto it = std::find(m_associatedIOs.begin(), m_associatedIOs.end(), guid);
+		return it != m_associatedIOs.end();
+	}
+
 	bool AfbPin::HasConnection() const
 	{
 		assert(!(IsInput() && m_associatedIOs.size() > 1));
@@ -469,6 +487,92 @@ namespace VFrame30
 	{
 		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
+	}
+
+	bool FblItem::hasInput(const QUuid& guid) const
+	{
+		auto foundIt = std::find_if(m_inputPoints.begin(), m_inputPoints.end(),
+									[&guid](const VFrame30::AfbPin& pin)
+									{
+										return pin.guid() == guid;
+									});
+
+		return foundIt != m_inputPoints.end();
+	}
+
+	bool FblItem::hasOutput(const QUuid& guid) const
+	{
+		auto foundIt = std::find_if(m_outputPoints.begin(), m_outputPoints.end(),
+									[&guid](const VFrame30::AfbPin& pin)
+									{
+										return pin.guid() == guid;
+									});
+
+		return foundIt != m_outputPoints.end();
+	}
+
+	const VFrame30::AfbPin& FblItem::input(const QUuid& guid) const
+	{
+		for (const VFrame30::AfbPin& pin : m_inputPoints)
+		{
+			if (pin.guid() == guid)
+			{
+				return pin;
+			}
+		}
+
+		assert(false);
+
+		static const VFrame30::AfbPin dummy;
+		return dummy;
+	}
+
+	VFrame30::AfbPin& FblItem::input(const QUuid& guid)
+	{
+		for (VFrame30::AfbPin& pin : m_inputPoints)
+		{
+			if (pin.guid() == guid)
+			{
+				return pin;
+			}
+		}
+
+		assert(false);
+
+		static VFrame30::AfbPin dummy;
+		return dummy;
+	}
+
+	const VFrame30::AfbPin& FblItem::output(const QUuid& guid) const
+	{
+		for (const VFrame30::AfbPin& pin : m_outputPoints)
+		{
+			if (pin.guid() == guid)
+			{
+				return pin;
+			}
+		}
+
+		assert(false);
+
+		static const VFrame30::AfbPin dummy;
+		return dummy;
+	}
+
+	VFrame30::AfbPin& FblItem::output(const QUuid& guid)
+	{
+		for (VFrame30::AfbPin& pin : m_outputPoints)
+		{
+			if (pin.guid() == guid)
+			{
+				return pin;
+			}
+		}
+
+		assert(false);
+
+		static VFrame30::AfbPin dummy;
+		return dummy;
 	}
 
 	QString FblItem::buildName() const

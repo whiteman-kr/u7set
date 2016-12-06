@@ -61,6 +61,10 @@ namespace VFrame30
 		void ClearAssociattdIOs();
 		void AddAssociattedIOs(const QUuid& guid);
 
+		bool removeFromAssociatedIo(const QUuid& uuid);
+
+		bool hasAssociatedIo(const QUuid& guid) const;
+
 		bool HasConnection() const;
 
 		int afbOperandIndex() const;
@@ -139,6 +143,16 @@ namespace VFrame30
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
 		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemaPoint* pResult, double gridSize, int pinGridStep) const;
+
+		bool hasInput(const QUuid& guid) const;
+		bool hasOutput(const QUuid& guid) const;
+
+		const VFrame30::AfbPin& input(const QUuid& guid) const;
+		VFrame30::AfbPin& input(const QUuid& guid);
+
+		const VFrame30::AfbPin& output(const QUuid& guid) const;
+		VFrame30::AfbPin& output(const QUuid& guid);
+
 
 		// Public methods
 		//
