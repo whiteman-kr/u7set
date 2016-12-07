@@ -87,6 +87,13 @@ namespace Tuning
 		for(const Network::DataSourceInfo& dsi : dsiArray)
 		{
 			Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+
+			if (newDsi == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
 			*newDsi = dsi;
 		}
 
@@ -114,6 +121,26 @@ namespace Tuning
 			return;
 		}
 
+		QVector<Network::TuningSourceState> tssArray;
+
+		clientContext->getSourcesStates(tssArray);
+
+		for(const Network::TuningSourceState& tss : tssArray)
+		{
+			Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
+
+			if (newTss == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			*newTss = tss;
+		}
+
+		m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+
+		sendReply(m_getTuningSourcesStatesReply);
 	}
 
 

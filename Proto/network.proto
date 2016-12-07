@@ -216,7 +216,7 @@ message TuningSourceState
     //
     optional int64 errRupProtocolVersion = 11 [default = 0];
     optional int64 errRupFrameSize = 12 [default = 0];
-    optional int64 errRupNoTuningData = 13 [default = 0];
+    optional int64 errRupNonTuningData = 13 [default = 0];
     optional int64 errRupModuleType = 14 [default = 0];
     optional int64 errRupFramesQuantity = 15 [default = 0];
     optional int64 errRupFrameNumber = 16 [default = 0];

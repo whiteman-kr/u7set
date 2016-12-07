@@ -2552,12 +2552,12 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errrupframesize() const;
   inline void set_errrupframesize(::google::protobuf::int64 value);
 
-  // optional int64 errRupNoTuningData = 13 [default = 0];
-  inline bool has_errrupnotuningdata() const;
-  inline void clear_errrupnotuningdata();
-  static const int kErrRupNoTuningDataFieldNumber = 13;
-  inline ::google::protobuf::int64 errrupnotuningdata() const;
-  inline void set_errrupnotuningdata(::google::protobuf::int64 value);
+  // optional int64 errRupNonTuningData = 13 [default = 0];
+  inline bool has_errrupnontuningdata() const;
+  inline void clear_errrupnontuningdata();
+  static const int kErrRupNonTuningDataFieldNumber = 13;
+  inline ::google::protobuf::int64 errrupnontuningdata() const;
+  inline void set_errrupnontuningdata(::google::protobuf::int64 value);
 
   // optional int64 errRupModuleType = 14 [default = 0];
   inline bool has_errrupmoduletype() const;
@@ -2760,8 +2760,8 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_errrupprotocolversion();
   inline void set_has_errrupframesize();
   inline void clear_has_errrupframesize();
-  inline void set_has_errrupnotuningdata();
-  inline void clear_has_errrupnotuningdata();
+  inline void set_has_errrupnontuningdata();
+  inline void clear_has_errrupnontuningdata();
   inline void set_has_errrupmoduletype();
   inline void clear_has_errrupmoduletype();
   inline void set_has_errrupframesquantity();
@@ -2827,7 +2827,7 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errnoreply_;
   ::google::protobuf::int64 errrupprotocolversion_;
   ::google::protobuf::int64 errrupframesize_;
-  ::google::protobuf::int64 errrupnotuningdata_;
+  ::google::protobuf::int64 errrupnontuningdata_;
   ::google::protobuf::int64 errrupmoduletype_;
   ::google::protobuf::int64 errrupframesquantity_;
   ::google::protobuf::int64 errrupframenumber_;
@@ -5873,26 +5873,26 @@ inline void TuningSourceState::set_errrupframesize(::google::protobuf::int64 val
   errrupframesize_ = value;
 }
 
-// optional int64 errRupNoTuningData = 13 [default = 0];
-inline bool TuningSourceState::has_errrupnotuningdata() const {
+// optional int64 errRupNonTuningData = 13 [default = 0];
+inline bool TuningSourceState::has_errrupnontuningdata() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void TuningSourceState::set_has_errrupnotuningdata() {
+inline void TuningSourceState::set_has_errrupnontuningdata() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void TuningSourceState::clear_has_errrupnotuningdata() {
+inline void TuningSourceState::clear_has_errrupnontuningdata() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void TuningSourceState::clear_errrupnotuningdata() {
-  errrupnotuningdata_ = GOOGLE_LONGLONG(0);
-  clear_has_errrupnotuningdata();
+inline void TuningSourceState::clear_errrupnontuningdata() {
+  errrupnontuningdata_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupnontuningdata();
 }
-inline ::google::protobuf::int64 TuningSourceState::errrupnotuningdata() const {
-  return errrupnotuningdata_;
+inline ::google::protobuf::int64 TuningSourceState::errrupnontuningdata() const {
+  return errrupnontuningdata_;
 }
-inline void TuningSourceState::set_errrupnotuningdata(::google::protobuf::int64 value) {
-  set_has_errrupnotuningdata();
-  errrupnotuningdata_ = value;
+inline void TuningSourceState::set_errrupnontuningdata(::google::protobuf::int64 value) {
+  set_has_errrupnontuningdata();
+  errrupnontuningdata_ = value;
 }
 
 // optional int64 errRupModuleType = 14 [default = 0];

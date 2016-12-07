@@ -61,6 +61,7 @@ namespace Tuning
 		void runTuningSourceWorkers();
 		void stopTuningSourceWorkers();
 
+		void setWorkerInTuningClientContext(const QString& sourceID, TuningSourceWorker* worker);
 
 	private slots:
 		void onTimer();

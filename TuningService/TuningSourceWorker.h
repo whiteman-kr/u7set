@@ -14,6 +14,8 @@ namespace Tuning
 
 	struct SourceStatistics
 	{
+		quint64 dataSourceID;		// generate by DataSource::generateID()
+
 		bool isReply = false;
 
 		qint64 requestCount = 0;
@@ -31,7 +33,7 @@ namespace Tuning
 		//
 		qint64 errRupProtocolVersion = 0;
 		qint64 errRupFrameSize = 0;
-		qint64 errRupNoTuningData = 0;
+		qint64 errRupNonTuningData = 0;
 		qint64 errRupModuleType = 0;
 		qint64 errRupFramesQuantity = 0;
 		qint64 errRupFrameNumber = 0;
@@ -64,7 +66,7 @@ namespace Tuning
 		qint64 fotipFlagApplySuccess = 0;
 		qint64 fotipFlagSetSOR = 0;
 
-		void get(Network::TuningSourceState& tuningSourceState);
+		void get(Network::TuningSourceState& tss);
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -107,6 +109,7 @@ namespace Tuning
 		~TuningSourceWorker();
 
 		quint32 sourceIP() const;
+		QString sourceEquipmentID() const;
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
@@ -234,6 +237,8 @@ namespace Tuning
 		~TuningSourceWorkerThread();
 
 		quint32 sourceIP();
+
+		TuningSourceWorker* worker();
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();

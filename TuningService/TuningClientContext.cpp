@@ -22,13 +22,13 @@ namespace Tuning
 	}
 
 
-	const Network::DataSourceInfo& TuningSourceContext::sourceInfo() const
+	void TuningSourceContext::getSourceInfo(Network::DataSourceInfo& si) const
 	{
-		return m_sourceInfo;
+		si = m_sourceInfo;
 	}
 
 
-	Network::TuningSourceState &TuningSourceContext::sourceState()
+	void TuningSourceContext::getSourceState(Network::TuningSourceState& tss) const
 	{
 		if (m_sourceWorker == nullptr)
 		{
@@ -36,10 +36,26 @@ namespace Tuning
 		}
 		else
 		{
-			m_sourceWorker->getState(m_sourceState);
+			m_sourceWorker->getState(tss);
+		}
+	}
+
+
+	void TuningSourceContext::setSourceWorker(TuningSourceWorker* worker)
+	{
+		if (worker == nullptr)
+		{
+			assert(false);
+			return;
 		}
 
-		return m_sourceState;
+		if (worker->sourceEquipmentID() != m_sourceID)
+		{
+			assert(false);
+			return;
+		}
+
+		m_sourceWorker = worker;
 	}
 
 
@@ -97,7 +113,7 @@ namespace Tuning
 				continue;
 			}
 
-			dataSourcesInfo[count] = sourceContext->sourceInfo();
+			sourceContext->getSourceInfo(dataSourcesInfo[count]);
 
 			count++;
 		}
@@ -112,6 +128,47 @@ namespace Tuning
 	void TuningClientContext::getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const
 	{
 		tuningSourcesStates.clear();
+
+		tuningSourcesStates.resize(m_sourceContextMap.count());
+
+		int count = 0;
+
+		for(const TuningSourceContext* sourceContext : m_sourceContextMap)
+		{
+			if (sourceContext == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			sourceContext->getSourceState(tuningSourcesStates[count]);
+
+			count++;
+		}
+
+		if (count < tuningSourcesStates.size())
+		{
+			tuningSourcesStates.resize(count);
+		}
+	}
+
+
+	void TuningClientContext::setSourceWorker(const QString& sourceID, TuningSourceWorker *worker)
+	{
+		TuningSourceContext* sourceContext = getSourceContext(sourceID);
+
+		if (sourceContext == nullptr)
+		{
+			return;			// its OK
+		}
+
+		sourceContext->setSourceWorker(worker);
+	}
+
+
+	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID)
+	{
+		return m_sourceContextMap.value(sourceID, nullptr);
 	}
 
 
@@ -153,7 +210,7 @@ namespace Tuning
 	{
 		for(const TuningServiceSettings::TuningClient& client : tss.clients)
 		{
-			if (m_clientContextMap.contains(client.equipmentID))
+			if (contains(client.equipmentID))
 			{
 				assert(false);
 				continue;
@@ -161,14 +218,14 @@ namespace Tuning
 
 			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID, client.sourcesIDs, sources);
 
-			m_clientContextMap.insert(client.equipmentID, clientContext);
+			insert(client.equipmentID, clientContext);
 		}
 	}
 
 
-	const TuningClientContext* TuningClientContextMap::getClientContext(QString clientID) const
+	TuningClientContext* TuningClientContextMap::getClientContext(QString clientID) const
 	{
-		TuningClientContext* clientContext = m_clientContextMap.value(clientID, nullptr);
+		TuningClientContext* clientContext = value(clientID, nullptr);
 
 		return clientContext;
 	}
@@ -176,7 +233,7 @@ namespace Tuning
 
 	void TuningClientContextMap::clear()
 	{
-		for(TuningClientContext* clientContext : m_clientContextMap)
+		for(TuningClientContext* clientContext : *this)
 		{
 			if (clientContext == nullptr)
 			{
@@ -187,6 +244,6 @@ namespace Tuning
 			delete clientContext;
 		}
 
-		m_clientContextMap.clear();
+		QHash<QString, TuningClientContext*>::clear();
 	}
 }
