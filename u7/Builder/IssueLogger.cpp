@@ -1267,7 +1267,7 @@ namespace Builder
 	///		%1 UFB SchemaItem
 	///		%2 UFB SchemaItem input pin caption
 	///		%3 UFB SchemaItem output pin caption
-	///		%4 UFB Schema ID
+	///		%4 UFB SchemaID
 	///
 	/// Description:
 	///		Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection.
@@ -1282,6 +1282,32 @@ namespace Builder
 				  .arg(schemaItem)
 				  .arg(inPin)
 				  .arg(outPin)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4014
+	///
+	/// IssueType: Error
+	///
+	/// Title: User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').
+	///
+	/// Parameters:
+	///		%1 SchemaItem type
+	///		%2 UFB SchemaItem
+	///		%3 UFB SchemaID
+	///
+	/// Description:
+	///		User Functional Block can contain only allowed types of items.
+	///
+	void IssueLogger::errALP4014(QString schema, QString schemaItem, QString itemType, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4014,
+				  tr("User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').")
+				  .arg(itemType)
+				  .arg(schemaItem)
 				  .arg(schema));
 	}
 

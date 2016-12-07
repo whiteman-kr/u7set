@@ -16,6 +16,7 @@
 #include "../../VFrame30/SchemaItemSignal.h"
 #include "../../VFrame30/SchemaItemConst.h"
 #include "../../VFrame30/SchemaItemUfb.h"
+#include "../../VFrame30/SchemaItemTerminator.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
 
@@ -1791,14 +1792,6 @@ namespace Builder
 					return false;
 				}
 
-				qDebug() << "================= UFB Copy itmes dump ====================";
-				for (const AppLogicItem& ali : ufbItemsCopy)
-				{
-					ali.m_fblItem->dump();
-				}
-				qDebug() << "============- END OF UFB Copy itmes dump =================";
-
-
 				// Check for the special case, input is connected to output of the same item
 				// SchemaItemUfb has loop withot any items
 				//        +-[UFB]-+
@@ -1838,9 +1831,6 @@ namespace Builder
 						}
 					}
 				}
-
-				// !!!!!!!!!!!!!!!!!!!!!!!!!
-				module->dump();
 
 				// Bind LogicSchema outputû to UFB items inputs
 				//
@@ -1948,8 +1938,6 @@ namespace Builder
 								//
 								if (targetItem.m_fblItem->isOutputSignalElement() == true)
 								{
-									qDebug() << "UFB DIRECT LINK " << ufbInputBlock.m_fblItem->toSignalElement()->appSignalIds() << " <-> " << targetItem.m_fblItem->toSignalElement()->appSignalIds();
-
 									assert(targetItemPin.hasAssociatedIo(ufbInputBlockPin.guid()));	// Check for back association
 
 									std::shared_ptr<VFrame30::SchemaItemInOut> inOutItem = std::make_shared<VFrame30::SchemaItemInOut>(targetItem.m_fblItem->itemUnit());
@@ -2115,8 +2103,6 @@ namespace Builder
 				// Inject ufb schema items
 				//
 				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
-
-				//module->dump();
 			}
 
 			// Remove all VFrame30::SchemaItemUfb, as they have already beeen expanded
@@ -2131,16 +2117,11 @@ namespace Builder
 			//
 			for (std::shared_ptr<VFrame30::SchemaItem> fakeItem : fakeItems)
 			{
-				qDebug() << "Delete fake item " << fakeItem->toType<VFrame30::SchemaItemSignal>()->appSignalIds();
 				module->removeInOutItemKeepAssoc(fakeItem->guid());
 			}
 
 			// --
 			//
-
-			qDebug() << "-------------------------- AFTER UFB EXPANDING ----------------------------------";
-			module->dump();		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 			checkResult = module->debugCheckItemsRelationsConsistency(log);
 			if (checkResult == false)
 			{
@@ -2842,10 +2823,14 @@ namespace Builder
 			return false;
 		}
 
-		// Check for nested UFBs
+		// Check that used only allowed items
 		//
+		bool result = true;
+
 		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 		{
+			// Check for nested UFBs
+			//
 			if (item->isType<VFrame30::SchemaItemUfb>() == true)
 			{
 				assert(item->isFblItemRect() == true);
@@ -2853,15 +2838,41 @@ namespace Builder
 				// User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').
 				//
 				m_log->errALP4011(ufbSchema->schemaId(), item->toFblItemRect()->label(), item->guid());
-				return false;
+				result = false;
+				continue;
 			}
+
+			// Check for allowed items
+			//
+			if (item->IsStatic() == true ||
+				item->isType<VFrame30::SchemaItemLink>() == true ||
+				item->isType<VFrame30::SchemaItemInput>() == true ||
+				item->isType<VFrame30::SchemaItemOutput>() == true ||
+				item->isType<VFrame30::SchemaItemConst>() == true ||
+				item->isType<VFrame30::SchemaItemTerminator>() == true ||
+				item->isType<VFrame30::SchemaItemAfb>() == true)
+			{
+				// All theses items are allowed to be used on UFB schema
+				//
+				continue;
+			}
+
+			QString itemType = QString::fromLatin1(item->metaObject()->className());
+			itemType.remove("VFrame30::SchemaItem");
+
+			m_log->errALP4014(ufbSchema->schemaId(), item->toFblItemRect()->label(), itemType, item->guid());
+			result = false;
+		}
+
+		if (result == false)
+		{
+			return result;
 		}
 
 		// Find all branches - connected links
 		//
 		BushContainer bushContainer;
 
-		bool result = true;
 		result = findBushes(ufbSchema, layer, &bushContainer);
 
 		if (result == false)
