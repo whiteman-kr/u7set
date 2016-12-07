@@ -309,8 +309,11 @@ void MainWindow::runUsersEditor()
 
 void MainWindow::showSettings()
 {
-	DialogSettings d;
-	d.exec();
+    DialogSettings* d = new DialogSettings(this);
+
+    d->exec();
+
+    delete d;
 }
 
 void MainWindow::runPresetEditor()

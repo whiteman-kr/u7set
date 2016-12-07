@@ -591,6 +591,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		{
 			analog = o.analog();
 			value = o.editValue();
+            first = false;
 		}
 		else
 		{
@@ -806,12 +807,6 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 		return true;
 	}
 
-
-	/*
-
-	// this is done by invertValue
-	//
-
 	if (role == Qt::CheckStateRole && displayIndex == TuningItemModel::Columns::Value)
 	{
 		TuningObject& o = m_objects[row];
@@ -826,7 +821,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 			o.setEditValue(0.0);
 			return true;
 		}
-	}*/
+    }
 	return false;
 }
 
@@ -976,6 +971,36 @@ void FilterButton::slot_toggled(bool checked)
 // TuningPage
 //
 
+bool TuningTableView::editorActive()
+{
+    return m_editorActive;
+}
+
+bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEvent * event)
+{
+    if (trigger == QAbstractItemView::EditKeyPressed)
+    {
+        qDebug()<<"edit "<<(int)trigger;
+        m_editorActive = true;
+    }
+
+    return QTableView::edit(index, trigger, event);
+}
+
+void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
+{
+
+    m_editorActive = false;
+
+    qDebug()<<"closeEditor";
+
+    QTableView::closeEditor(editor, hint);
+}
+
+//
+// TuningPage
+//
+
 TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
@@ -1064,7 +1089,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	// Object List
 	//
-	m_objectList = new QTableView();
+    m_objectList = new TuningTableView();
 
 	// Button controls
 	//
@@ -1121,6 +1146,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_objectList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_objectList->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_objectList->setSortingEnabled(true);
+    m_objectList->setEditTriggers(QAbstractItemView::EditKeyPressed);
 
 	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
 
@@ -1370,8 +1396,11 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 		QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
 		if(pKeyEvent->key() == Qt::Key_Return)
 		{
-			slot_setValue();
-			return true;
+            if (m_objectList->editorActive() == false)
+            {
+                slot_setValue();
+                return true;
+            }
 		}
 
 		if(pKeyEvent->key() == Qt::Key_Space)

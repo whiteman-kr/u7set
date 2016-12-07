@@ -97,7 +97,7 @@ void TcpTuningClient::resetToGetTuningSources()
 	return;
 }
 
-void TcpTuningClient::resetToGetTuningState()
+void TcpTuningClient::resetToGetTuningSourcesState()
 {
 	QThread::msleep(theSettings.m_requestInterval);
 
@@ -173,7 +173,7 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 		}
 	}
 
-	resetToGetTuningState();
+    requestTuningSourcesState();
 
 	emit tuningSourcesArrived();
 
@@ -188,7 +188,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 	if (ok == false)
 	{
 		assert(ok);
-		resetToGetTuningSources();
+        resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -197,7 +197,7 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 		theLogFile.writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1").arg(m_tuningDataSourcesStatesReply.error()));
 		assert(m_tuningDataSourcesStatesReply.error() != 0);
 
-		resetToGetTuningSources();
+        resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -224,10 +224,156 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 		}
 	}
 
-	resetToGetTuningState();
+    //if (false)
+    //{
+        // if there is a queued data to write something, write it.
+        //
+    //}
+    //else
+    {
+        // read tuning signals state
+        //
+        //requestReadTuningSignals();
+        resetToGetTuningSourcesState();
+    }
 
 	return;
 }
+
+void TcpTuningClient::requestReadTuningSignals()
+{
+    const int READ_TUNING_SIGNALS_MAX = 100;
+
+    // if no signals in the database, start the new request loop
+    //
+    QMutexLocker l(&theObjects.m_mutex);
+
+    int objectCount = theObjects.objectCount();
+
+    if (objectCount == 0)
+    {
+        resetToGetTuningSourcesState();
+        return;
+    }
+
+    // wrap the request index if needed
+    //
+
+    if (m_readTuningSignalIndex >= objectCount)
+    {
+        m_readTuningSignalIndex  = 0;
+    }
+
+    // determine the amount of signals needed to be requested
+    //
+
+    int readTuningSignalCount = READ_TUNING_SIGNALS_MAX;
+
+    if (m_readTuningSignalIndex + readTuningSignalCount >= objectCount)
+    {
+        readTuningSignalCount = objectCount - m_readTuningSignalIndex;
+    }
+
+    // create the request
+    //
+
+    assert(isClearToSendRequest());
+
+    m_readTuningSignals.set_clientequipmentid(theSettings.instanceStrId().toUtf8());
+
+    m_readTuningSignals.mutable_signalhash()->Reserve(READ_TUNING_SIGNALS_MAX);
+
+    m_readTuningSignals.mutable_signalhash()->Clear();
+
+    for (int i = 0; i < readTuningSignalCount; i++)
+    {
+        TuningObject* object = theObjects.objectPtr(m_readTuningSignalIndex + i);
+        if (object == nullptr)
+        {
+            assert(object);
+            continue;
+        }
+
+        m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(object->appSignalHash());
+    }
+
+    int s = m_readTuningSignals.mutable_signalhash()->size();
+    int c = m_readTuningSignals.mutable_signalhash()->Capacity();
+
+    qDebug()<<s;
+    qDebug()<<c;
+
+    //sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_readTuningSignals);
+
+    // increase the requested signal index
+    //
+
+    m_readTuningSignalIndex += readTuningSignalCount;
+
+}
+
+void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
+{
+    bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), data.size());
+
+    if (ok == false)
+    {
+        assert(ok);
+        resetToGetTuningSourcesState();
+        return;
+    }
+
+    if (m_readTuningSignalsReply.error() != 0)
+    {
+        theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, error received: %1").arg(m_readTuningSignalsReply.error()));
+        assert(m_tuningDataSourcesStatesReply.error() != 0);
+
+        resetToGetTuningSourcesState();
+        return;
+    }
+
+    {
+        QMutexLocker l(&theObjects.m_mutex);
+
+        for (int i = 0; i < m_readTuningSignalsReply.tuningsignalstate_size(); i++)
+        {
+            const ::Network::TuningSignalState& tss = m_readTuningSignalsReply.tuningsignalstate(i);
+
+            if (tss.error() != 0)
+            {
+                theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1").arg(tss.error()));
+                assert(tss.error() != 0);
+
+                continue;
+            }
+
+            TuningObject* object = theObjects.objectPtrByHash(tss.signalhash());
+
+            if (object == nullptr)
+            {
+                assert(object);
+                continue;
+            }
+
+            object->setValid(tss.valid());
+            object->setValue(tss.value());
+        }
+
+    }
+
+    //if (false)
+    //{
+        // if there is a queued data to write something, write it.
+        //
+    //}
+    //else
+    {
+        // read tuning signals state
+        //
+        requestReadTuningSignals();
+    }
+}
+
 
 void TcpTuningClient::slot_configurationArrived(ConfigSettings configuration)
 {

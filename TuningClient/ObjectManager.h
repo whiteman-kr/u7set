@@ -14,17 +14,29 @@ public:
 
 	TuningObject object(int index);
 
-	std::vector<TuningObject> objects();
+    int objectCount(); // this function must be used with mutex !!!
+
+    TuningObject* objectPtr(int index); // this function must be used with mutex !!!
+
+    TuningObject* objectPtrByHash(quint64 hash); // this function must be used with mutex !!!
+
+    std::vector<TuningObject> objects();
 
 	QStringList tuningSourcesEquipmentIds();
 
 	bool loadSignals(const QByteArray& data, QString *errorCode);
 
+
+public:
+
+    QMutex m_mutex;
+
 private:
 
-	QMutex m_mutex;
 
 	QStringList m_tuningSourcesList;
+
+    std::map<quint64, int> m_objectsHashMap;
 
 	std::vector<TuningObject> m_objects;
 };
