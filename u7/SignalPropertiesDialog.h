@@ -12,7 +12,6 @@ class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtBoolPropertyManager;
 class QtTreePropertyBrowser;
-class SignalsModel;
 class QDialogButtonBox;
 enum class SignalType;
 
@@ -24,28 +23,31 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
-	explicit SignalPropertiesDialog(QVector<Signal*> signalVector, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
 	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
 
 signals:
-	void onError(QString message);
 
 public slots:
 	void checkAndSaveSignal();
 	void saveDialogSettings();
 	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
-	void checkoutSignal(QList<std::shared_ptr<PropertyObject>> objects);
+	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
 	void saveLastEditedSignalProperties();
+	void showError(QString errorString);
 
 private:
+	DbController* m_dbController;
 	QVector<Signal*> m_signalVector;
 	QVector<int> m_editedSignalsId;
 	QDialogButtonBox* m_buttonBox;
-	UnitList& m_unitInfo;
-	SignalsModel* m_signalsModel;
 	QList<std::shared_ptr<PropertyObject>> m_objList;
+	bool m_tryCheckout;
+	QWidget* m_parent;
+
+	bool checkoutSignal(Signal& s, QString& message);
+	QString errorMessage(const ObjectState& state) const;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H

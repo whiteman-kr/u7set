@@ -3,6 +3,7 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/Crc.h"
 #include "Connection.h"
+#include "../TuningIPEN/TuningIPENDataStorage.h"
 
 namespace Builder
 {
@@ -4181,6 +4182,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::buildTuningData()
 	{
+		assert(m_tuningData == nullptr);
+
 		bool result = true;
 
 		int tuningFrameSizeBytes = 0;
@@ -4194,27 +4197,33 @@ namespace Builder
 			return false;
 		}
 
+		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
+		// uncomment next 3 lines:
+		//
+		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(m_lm->equipmentIdTemplate(),
+		//													tuningFrameSizeBytes,
+		//													tuningFrameCount);
+		//
+		// and comment 3 lines below:
+		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 
-		if (tuningData->usedFramesCount() > tuningFrameCount)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-							   arg(m_lm->equipmentIdTemplate()).
-							   arg(tuningFrameCount));
-			result = false;
-			delete tuningData;
-		}
-		else
-		{
-			result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
-			result &= tuningData->buildTuningData();
+		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
+		//
+		result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
+		result &= tuningData->buildTuningData();
 
-			if (result == false)
+		if (result == true)
+		{
+			if (tuningData->usedFramesCount() > tuningFrameCount)
 			{
-				delete tuningData;
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+								   arg(m_lm->equipmentIdTemplate()).
+								   arg(tuningFrameCount));
+				result = false;
 			}
 			else
 			{
@@ -4223,6 +4232,11 @@ namespace Builder
 				m_tuningData = tuningData;
 				m_tuningDataStorage->insert(m_lm->equipmentIdTemplate(), tuningData);
 			}
+		}
+
+		if (result == false)
+		{
+			delete tuningData;
 		}
 
 		return result;
@@ -4553,7 +4567,7 @@ namespace Builder
 
 		file.append(s.sprintf("Unique data ID: %llu (0x%016llX)", uniqueID, uniqueID));
 
-		QList<Signal*> analogFloatSignals = m_tuningData->getAnalogFloatSignals();
+		const QVector<Signal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
 		if (analogFloatSignals.count() > 0)
 		{
@@ -4583,7 +4597,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> analogIntSignals = m_tuningData->getAnalogIntSignals();
+		const QVector<Signal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
 
 		if (analogIntSignals.count() > 0)
 		{
@@ -4592,7 +4606,7 @@ namespace Builder
 			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
-			for(Signal* signal : analogFloatSignals)
+			for(Signal* signal : analogIntSignals)
 			{
 				if (signal == nullptr)
 				{
@@ -4602,7 +4616,7 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%d\t%d\t%d",
+				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
@@ -4613,7 +4627,7 @@ namespace Builder
 			}
 		}
 
-		QList<Signal*> discreteSignals = m_tuningData->getDiscreteSignals();
+		const QVector<Signal*>& discreteSignals = m_tuningData->getDiscreteSignals();
 
 		if (discreteSignals.count() > 0)
 		{
@@ -4657,6 +4671,8 @@ namespace Builder
 
 		file.append(QString("\n"));
 
+		int addr = 0;
+
 		for(int f = 0; f < frameCount; f++)
 		{
 			QString s;
@@ -4668,6 +4684,11 @@ namespace Builder
 				quint8 byte = data[f * FotipV2::TX_RX_DATA_SIZE + i];
 
 				QString sv;
+
+				if ((i % 16) == 0)
+				{
+					s.sprintf("%04X:  ", addr);
+				}
 
 				sv.sprintf("%02X ", static_cast<unsigned int>(byte));
 
@@ -4683,6 +4704,8 @@ namespace Builder
 					file.append(s);
 					s.clear();
 				}
+
+				addr++;
 			}
 
 			if (s.isEmpty() == false)

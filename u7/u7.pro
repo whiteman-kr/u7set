@@ -185,7 +185,8 @@ SOURCES +=\
     Forms/FileHistoryDialog.cpp \
     Forms/ChangesetDetailsDialog.cpp \
     Forms/CompareDialog.cpp \
-    Forms/ComparePropertyObjectDialog.cpp
+    Forms/ComparePropertyObjectDialog.cpp \
+    ../TuningIPEN/TuningIPENDataStorage.cpp
 
 
 HEADERS  += \
@@ -302,7 +303,8 @@ HEADERS  += \
     Forms/ChangesetDetailsDialog.h \
     Forms/CompareDialog.h \
     Forms/ComparePropertyObjectDialog.h \
-    ../lib/diff_match_patch.h
+    ../lib/diff_match_patch.h \
+    ../TuningIPEN/TuningIPENDataStorage.h
 
 FORMS    += \
     CreateProjectDialog.ui \

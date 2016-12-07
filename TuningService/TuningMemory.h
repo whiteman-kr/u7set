@@ -26,7 +26,10 @@ namespace Tuning
 		int m_frameSizeW = 0;
 		int m_framesCount = 0;
 
-		quint16* m_memory = nullptr;
+		int m_startAddrB = 0;
+		int m_frameSizeB = 0;
+
+		quint8* m_memory = nullptr;
 	};
 
 }

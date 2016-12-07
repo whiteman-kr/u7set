@@ -5,6 +5,7 @@
 #include "../lib/Signal.h"
 #include "../lib/DataProtocols.h"
 #include "../u7/Builder/IssueLogger.h"
+#include "../TuningService/TuningDataStorage.h"
 #include "TuningIPENSocket.h"
 
 namespace TuningIPEN
@@ -51,7 +52,7 @@ namespace TuningIPEN
 
 		int firstFrameNo() const { return m_firstFrameNo; }
 
-		void copySignalsData(QList<Signal*> signalsList, std::vector<QVariantList>& metadata);
+		void copySignalsData(const QVector<Signal *> &signalsList, std::vector<QVariantList>& metadata);
 
 		int usedFramesCount() const { return m_usedFramesCount; }
 		int framesDataSize() const { return m_usedFramesCount * m_tuningFrameSizeBytes; }
@@ -69,51 +70,12 @@ namespace TuningIPEN
 	};
 
 
-	class TuningData : public QObject
+	class TuningData : public Tuning::TuningData
 	{
 		Q_OBJECT
 
 	private:
-		QString m_lmEquipmentID;
-
-		int m_tuningFrameSizeBytes = 0;
-		int m_tuningFramesCount = 0;
-		quint64 m_uniqueID = 0;
-		int m_usedFramesCount = 0;
-
-		static const int TYPE_ANALOG_FLOAT = 0;
-		static const int TYPE_ANALOG_INT = 1;
-		static const int TYPE_DISCRETE = 2;
-
-		static const int TYPES_COUNT = 3;
-
 		TuningFramesData m_tuningFramesData[TYPES_COUNT];
-
-		QList<Signal*> m_tuningSignals[TYPES_COUNT];
-
-		QHash<QString, Signal*> m_id2SignalMap;
-
-		static QStringList m_metadataFields;
-		std::vector<QVariantList> m_metadata;
-
-		bool m_deleteSignals = false;
-
-		// XML serialization constants
-		//
-		static const char* TUNING_DATA_ELEMENT;
-		static const char* LM_ID;
-		static const char* UNIQUE_ID;
-		static const char* TUNING_FRAME_SIZE_BYTES;
-		static const char* TUNING_FRAMES_COUNT;
-		static const char* TUNING_USED_FRAMES_COUNT;
-		static const char* TUNING_ALL_SIGNALS_COUNT;
-		static const char* TUNING_ANALOG_FLOAT_SIGNALS;
-		static const char* TUNING_ANALOG_INT_SIGNALS;
-		static const char* TUNING_DISCRETE_SIGNALS;
-		static const char* TUNING_SIGNALS_COUNT;
-
-		int signalValueSizeBits(int type);
-		int getSignalType(const Signal* signal);
 
 	public:
 		TuningData();
@@ -121,42 +83,17 @@ namespace TuningIPEN
 					int tuningFrameSizeBytes,
 					int tuningFramesCount);
 
-		~TuningData();
+		virtual ~TuningData();
 
-		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
-		bool buildTuningData();
-		quint64 generateUniqueID(const QString& lmEquipmentID);
-
+		virtual bool buildTuningData() override;
 		bool initTuningData();
 
-		quint64 uniqueID() const { return m_uniqueID; }
-		void getTuningData(QByteArray* tuningData) const;
-
-		int usedFramesCount() const { return m_usedFramesCount; }
-
-		void writeToXml(XmlWriteHelper& xml);
-		bool readFromXml(XmlReadHelper& xml);
-
-		void getSignals(QList<Signal *>& signalList);
-
-		QList<Signal*> getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
-		QList<Signal*> getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
-		QList<Signal*> getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
+		virtual void getTuningData(QByteArray* tuningData) const override;
 
 		void setFrameData(int frameNo, const char* fotipData);
 
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
-
-		const QStringList& metadataFields();
-		const std::vector<QVariantList>& metadata() const;
-	};
-
-
-	class TuningDataStorage : public QHash<QString, TuningData*>
-	{
-	public:
-		~TuningDataStorage();
 	};
 
 }

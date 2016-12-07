@@ -85,7 +85,7 @@ namespace TuningIPEN
 			return;
 		}
 
-		QList<Signal*> signalList;
+		QVector<Signal*> signalList;
 
 		m_tuningData->getSignals(signalList);
 

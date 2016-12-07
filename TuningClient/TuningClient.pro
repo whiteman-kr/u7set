@@ -89,7 +89,8 @@ SOURCES += main.cpp\
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogUsers.cpp \
-    DialogProperties.cpp
+    DialogProperties.cpp \
+    DialogTuningSourceInfo.cpp
 
 HEADERS  += MainWindow.h \
     ObjectManager.h \
@@ -124,14 +125,16 @@ HEADERS  += MainWindow.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogUsers.h \
-    DialogProperties.h
+    DialogProperties.h \
+    DialogTuningSourceInfo.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
     DialogPresetEditor.ui \
     DialogInputValue.ui \
-    DialogUsers.ui
+    DialogUsers.ui \
+    DialogTuningSourceInfo.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

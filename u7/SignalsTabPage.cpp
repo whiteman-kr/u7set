@@ -1059,7 +1059,7 @@ void SignalsModel::addSignal()
 		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
-	SignalPropertiesDialog dlg(signal, m_unitInfo, false, nullptr, m_parentWindow);
+	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, false, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1071,19 +1071,20 @@ void SignalsModel::addSignal()
 			for (int i = 0; i < channelCount; i++)
 			{
 				signalVector << signal;
-				QString strID = signal.appSignalID();
+				QString suffix;
 
 				if (signalCount > 1)
 				{
-					strID = (strID + "_sig%1").arg(s);
+					suffix = "_SIG" + QString::number(s);
 				}
 
 				if (channelCount > 1)
 				{
-					strID = (strID + "_%1").arg(QChar('A' + i));
+					suffix += "_" + QString('A' + i);
 				}
 
-				signalVector[i].setAppSignalID(strID.toUpper());
+				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
+				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix).toUpper());
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
@@ -1139,9 +1140,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		signalVector.append(&signal);
 	}
 
-	SignalPropertiesDialog dlg(signalVector, m_unitInfo, readOnly, this, m_parentWindow);
-
-	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
+	SignalPropertiesDialog dlg(dbController(), signalVector, readOnly, true, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1611,7 +1610,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalPtrVector.push_back(&signal);
 	}
-	SignalPropertiesDialog dlg(signalPtrVector, *Signal::unitList.get(), false, nullptr, parent);
+	SignalPropertiesDialog dlg(dbController, signalPtrVector, false, false, parent);
 
 	if (dlg.exec() != QDialog::Accepted )
 	{

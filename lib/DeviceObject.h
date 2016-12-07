@@ -192,6 +192,9 @@ namespace Hardware
 		Q_INVOKABLE bool isSoftware() const;
 		Q_INVOKABLE bool isSignal() const;
 
+		const Hardware::DeviceRoot* toRoot() const;
+		Hardware::DeviceRoot* toRoot();
+
 		const Hardware::DeviceSystem* toSystem() const;
 		Hardware::DeviceSystem* toSystem();
 
@@ -215,6 +218,7 @@ namespace Hardware
 		const Hardware::DeviceChassis* getParentChassis() const;
 		const Hardware::DeviceRack* getParentRack() const;
 		const Hardware::DeviceSystem* getParentSystem() const;
+		const Hardware::DeviceRoot* getParentRoot() const;
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);

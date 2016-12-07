@@ -79,11 +79,12 @@ bool TuningClientCfgGenerator::writeSettings()
 
 		if (tuningServiceId1.isEmpty() == true)
 		{
-			QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID1 is invalid")
+            m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID1");
+
+            QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID1 is invalid")
 					.arg(m_software->equipmentIdTemplate());
 
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
+            writeErrorSection(xmlWriter, errorStr);
 			return false;
 		}
 
@@ -93,45 +94,47 @@ bool TuningClientCfgGenerator::writeSettings()
 			return false;
 		}
 
-		if (tuningServiceId2.isEmpty() == true)
-		{
-			QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID2 is invalid")
-					.arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
-			return false;
-		}
-
 		//
 		// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
 		//
+
 		Hardware::Software* tunsObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
-		Hardware::Software* tunsObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
 
-		if (tunsObject1 == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+        if (tunsObject1 == nullptr)
+        {
+            m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID1", tuningServiceId1);
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-			return false;
-		}
+            QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
 
-		if (tunsObject2 == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
+            writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+            return false;
+        }
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-			return false;
-		}
+        Hardware::Software* tunsObject2 = nullptr;
+
+        if (tuningServiceId2.isEmpty() == false)    // tuningServiceId2 is optional
+        {
+            tunsObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
+
+            if (tunsObject2 == nullptr)
+            {
+                m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID2", tuningServiceId2);
+
+                QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
+
+                writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+                return false;
+            }
+        }
 
 		TuningServiceSettings tunsSettings1;
 		tunsSettings1.readFromDevice(tunsObject1, m_log);
 
 		TuningServiceSettings tunsSettings2;
-		tunsSettings2.readFromDevice(tunsObject2, m_log);
+        if (tunsObject2 != nullptr)
+        {
+            tunsSettings2.readFromDevice(tunsObject2, m_log);
+        }
 
 		// Get ip addresses and ports, write them to configurations
 		//
@@ -172,10 +175,7 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 
 	if (objectFilters.isEmpty() == true)
 	{
-		QString errorStr = tr("TuningClient configuration error %1, property ObjectFilters is invalid")
-				.arg(m_software->equipmentIdTemplate());
-
-		m_log->writeError(errorStr);
+        m_log->errCFG3022(m_software->equipmentId(), "ObjectFilters");
 		return false;
 	}
 
@@ -183,10 +183,7 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 
 	if (buildFile == nullptr)
 	{
-		QString errorStr = tr("TuningClient configuration error %1, can't add file ObjectFilters.xml")
-				.arg(m_software->equipmentIdTemplate());
-
-		m_log->writeError(errorStr);
+        m_log->errCMN0012("ObjectFilters.xml");
 		return false;
 	}
 
@@ -224,10 +221,7 @@ bool TuningClientCfgGenerator::writeSchemasDetails()
 
 	if (buildFile == nullptr)
 	{
-		QString errorStr = tr("TuningClient configuration error %1, can't add file SchemasDetails.xml")
-				.arg(m_software->equipmentIdTemplate());
-
-		m_log->writeError(errorStr);
+        m_log->errCMN0012("SchemasDetails.xml");
 		return false;
 	}
 
@@ -328,10 +322,7 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 
 	if (buildFile == nullptr)
 	{
-		QString errorStr = tr("TuningClient configuration error %1, can't add file TuningSignals.xml")
-				.arg(m_software->equipmentIdTemplate());
-
-		m_log->writeError(errorStr);
+        m_log->errCMN0012("TuningSignals.xml");
 		return false;
 	}
 

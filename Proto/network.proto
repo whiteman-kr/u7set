@@ -172,28 +172,132 @@ message GetServiceInfoReply
 }
 
 
-// Getting Tuning Sources States
+// TuningService requests and replies
 //
+
+// Tuning sources info request
+
+message GetTuningSourcesInfo
+{
+    optional string clientEquipmentID = 1;
+}
+
+message GetTuningSourcesInfoReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated DataSourceInfo tuningSourceInfo= 2;
+}
+
+// Tuning sources states request
 
 message GetTuningSourcesStates
 {
+    optional string clientEquipmentID = 1;
 }
 
 message TuningSourceState
 {
-    optional uint64 id = 1;			    // unique id
-    optional int64 uptime = 2;			    // time from start of data receiving
-    optional int64 receivedDataSize = 3;	    //
-    optional double dataReceivingRate = 4;	    // bytes/sec
-    optional bool respond = 5;
-}
+    optional uint64 sourceID = 1 [default = 0];
 
+    optional bool isReply = 2 [default = false];
+
+    optional int64 requestCount = 3 [default = 0];
+    optional int64 replyCount = 4 [default = 0];
+
+    optional int32 commandQueueSize = 5 [default = 0];
+
+    optional int64 errUntimelyReplay = 6 [default = 0];
+    optional int64 errSent = 7 [default = 0];
+    optional int64 errPartialSent = 8 [default = 0];
+    optional int64 errReplySize = 9 [default = 0];
+    optional int64 errNoReply = 10 [default = 0];
+
+    // errors in reply RupFrameHeader
+    //
+    optional int64 errRupProtocolVersion = 11 [default = 0];
+    optional int64 errRupFrameSize = 12 [default = 0];
+    optional int64 errRupNonTuningData = 13 [default = 0];
+    optional int64 errRupModuleType = 14 [default = 0];
+    optional int64 errRupFramesQuantity = 15 [default = 0];
+    optional int64 errRupFrameNumber = 16 [default = 0];
+
+    // errors in reply FotipHeader
+    //
+    optional int64 errFotipProtocolVersion = 17 [default = 0];
+    optional int64 errFotipUniqueID = 18 [default = 0];
+    optional int64 errFotipLmNumber = 19 [default = 0];
+    optional int64 errFotipSubsystemCode = 20 [default = 0];
+    optional int64 errFotipOperationCode = 21 [default = 0];
+    optional int64 errFotipFrameSize = 22 [default = 0];
+    optional int64 errFotipRomSize = 23 [default = 0];
+    optional int64 errFotipRomFrameSize = 24 [default = 0];
+
+    // errors reported by LM in reply FotipHeader.flags
+    //
+    optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
+    optional int64 fotipFlagWriteSuccess = 26 [default = 0];
+    optional int64 fotipFlagDataTypeErr = 27 [default = 0];
+    optional int64 fotipFlagOpCodeErr = 28 [default = 0];
+    optional int64 fotipFlagStartAddrErr = 29 [default = 0];
+    optional int64 fotipFlagRomSizeErr = 30 [default = 0];
+    optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
+    optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
+    optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
+    optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
+    optional int64 fotipFlagUniueIDErr = 35 [default = 0];
+    optional int64 fotipFlagOffsetErr = 36 [default = 0];
+    optional int64 fotipFlagApplySuccess = 37 [default = 0];
+    optional int64 fotipFlagSetSOR = 38 [default = 0];
+}
 
 message GetTuningSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
-    repeated TuningSourceState tuningDataSourcesStates = 2;
+    repeated TuningSourceState tuningSourcesState = 2;
 }
+
+// Tuning signals read request
+
+message TuningSignalsRead
+{
+    optional string clientEquipmentID = 1;
+    repeated uint64 signalHash = 2;
+}
+
+message TuningSignalState
+{
+    optional uint64 signalHash = 1 [default = 0];
+    optional int32 error = 2 [default = 0];
+    optional bool valid = 3 [default = false];
+    optional double value = 4 [default = 0.0];
+}
+
+message TuningSignalsReadReply
+{
+    optional int32 error = 1 [default = 0];
+    repeated TuningSignalState tuningSignalState = 2;
+}
+
+// Write tuning signals request
+
+message TuningSignalWrite
+{
+    optional uint64 signalHash = 1 [default = 0];
+    optional double value = 2 [default = 0.0];
+}
+
+message TuningSignalsWrite
+{
+    optional string clientEquipmentID = 1;
+    optional bool autoAppay = 2 [default = false];
+    repeated TuningSignalWrite tuningSignalWrite = 3;
+}
+
+message TuningSignalsWriteReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
 
 
 

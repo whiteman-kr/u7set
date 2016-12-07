@@ -137,6 +137,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0119.sql", "Upgrade to version 119, add RegRawDataDescription to LM-1"},
 	{":/DatabaseUpgrade/Upgrade0120.sql", "Upgrade to version 120, added get_signal_history() and get_specific_signal() stored procedures"},
 	{":/DatabaseUpgrade/Upgrade0121.sql", "Upgrade to version 121, get_specific_copy() by time, changes in get_specific_copy by changeset"},
+    {":/DatabaseUpgrade/Upgrade0122.sql", "Upgrade to version 122, default IP address computing algoruthm has been fixed in configuration"},
+	{":/DatabaseUpgrade/Upgrade0123.sql", "Upgrade to version 123, changes in function get_latest_signals_by_appsignalids()"},
 };
 
 
