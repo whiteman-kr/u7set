@@ -1791,12 +1791,12 @@ namespace Builder
 					return false;
 				}
 
-//				qDebug() << "================= UFB Copy itmes dump ====================";
-//				for (const AppLogicItem& ali : ufbItemsCopy)
-//				{
-//					ali.m_fblItem->dump();
-//				}
-//				qDebug() << "============- END OF UFB Copy itmes dump =================";
+				qDebug() << "================= UFB Copy itmes dump ====================";
+				for (const AppLogicItem& ali : ufbItemsCopy)
+				{
+					ali.m_fblItem->dump();
+				}
+				qDebug() << "============- END OF UFB Copy itmes dump =================";
 
 
 				// Check for the special case, input is connected to output of the same item
@@ -1804,6 +1804,9 @@ namespace Builder
 				//        +-[UFB]-+
 				//        |       |
 				//        +-------+
+				// To solve this problem, a fake SchemaItemInOutSignal is added,
+				// all binding will be make to it.
+				// Fake item will be deleted later with rebinding associations
 				//
 				for (VFrame30::AfbPin& ufbInputPin : ufbItem->inputs())
 				{
@@ -1843,14 +1846,11 @@ namespace Builder
 				//
 				for (const VFrame30::AfbPin& ufbItemPin : ufbItem->inputs())
 				{
-					// [schemaOutputItem]-+------+-[UFB:ufbItem] .... [ufbInputBlock]-+---+---+-[ufbIntItem0]
-					//                                                                    |         ...
-					//                                                                    +---+-[ufbIntItemN]
-					// Bind schemaOutputItem <--> ufbIntItem0...ufbIntItemN
+					// [sourceItem]-+------+-[UFB:ufbItem] .... [ufbInputBlock]-+---+---+-[ufbTargetItem0]
+					//                                                              |         ...
+					//                                                              +---+-[ufbTargetItemN]
+					// Bind schemaOutputItem <--> ufbTargetItem0...ufbTargetItemN
 					//
-
-					//qDebug() << ufbItemPin.caption() << " " << ufbItemPin.guid();		// !!!!!!!!!!!!!!!!!!!!!!!!!
-
 					if (ufbItemPin.IsInput() == false ||
 						ufbItemPin.associatedIOs().size() != 1)
 					{
@@ -1862,31 +1862,28 @@ namespace Builder
 
 					QUuid outputGuid = ufbItemPin.associatedIOs().front();	// This is the real output guid, set it to all
 																			// corrsponding inputs in ufb
-
-					//qDebug() << "outputGuid" << " " << outputGuid;	// !!!!!!!!!!!!!!!!!!
-
-					// Find schemaOutputItem
+					// Find sourceItem
 					//
-					AppLogicItem schemaOutputItem;
+					AppLogicItem sourceItem;
 
 					for (AppLogicItem& ali : module->items())
 					{
 						bool found = ali.m_fblItem->hasOutput(outputGuid);
 						if (found == true)
 						{
-							schemaOutputItem = ali;
+							sourceItem = ali;
 							break;
 						}
 					}
 
-					if (schemaOutputItem.m_fblItem == nullptr)
+					if (sourceItem.m_fblItem == nullptr)
 					{
-						assert(schemaOutputItem.m_fblItem);
+						assert(sourceItem.m_fblItem);
 						log->errINT1001("Cant find item on schema, which has output.guid == outputGuid");
 						continue;
 					}
 
-					VFrame30::AfbPin& schemaOutputItemPin = schemaOutputItem.m_fblItem->output(outputGuid);
+					VFrame30::AfbPin& sourceItemPin = sourceItem.m_fblItem->output(outputGuid);
 
 					// Find ufbInputBlock
 					//
@@ -1916,33 +1913,63 @@ namespace Builder
 						continue;
 					}
 
-					//qDebug() << "inputBlock";				// !!!!!!!!!!!!!!!!!!!!!!!!
-					//ufbInputBlock.m_fblItem->dump();		// !!!!!!!!!!!!!!!!!!!!!!!!!!
-
 					VFrame30::AfbPin& ufbInputBlockPin = ufbInputBlock.m_fblItem->outputs().front();
 
-					// Bind schemaOutputItem to [ufbIntItem0...ufbIntItemN]
+					// Bind sourceItem to [targetItem0...targetItemN]
 					//
-
-					// Get ufbIntItem0... ufbIntItemN
-					// Set pins association
-					//
-					for (AppLogicItem& ufbItem : ufbItemsCopy)
+					for (AppLogicItem& targetItem : ufbItemsCopy)
 					{
-						std::vector<VFrame30::AfbPin>& ufbItemInputs = ufbItem.m_fblItem->inputs();
+						std::vector<VFrame30::AfbPin>& targetItemInputs = targetItem.m_fblItem->inputs();
 
-						for (VFrame30::AfbPin& ufbItemPin : ufbItemInputs)
+						for (VFrame30::AfbPin& targetItemPin : targetItemInputs)
 						{
-							if (ufbItemPin.hasAssociatedIo(ufbInputBlockPin.guid()) == true)
+							if (targetItemPin.hasAssociatedIo(ufbInputBlockPin.guid()) == true)
 							{
-								AppLogicData::bindTwoPins(schemaOutputItemPin, ufbItemPin);
+								// if target item is SchemaItemOutput then it is special case and fake item is required
+								//
+								if (targetItem.m_fblItem->isOutputSignalElement() == true)
+								{
+									qDebug() << "UFB DIRECT LINK " << ufbInputBlock.m_fblItem->toSignalElement()->appSignalIds() << " <-> " << targetItem.m_fblItem->toSignalElement()->appSignalIds();
+
+									assert(targetItemPin.hasAssociatedIo(ufbInputBlockPin.guid()));	// Check for back association
+
+									std::shared_ptr<VFrame30::SchemaItemInOut> inOutItem = std::make_shared<VFrame30::SchemaItemInOut>(targetItem.m_fblItem->itemUnit());
+									inOutItem->setAppSignalIds(QString("#FAKEITEM_%1INT_%2_%3")
+															   .arg(ufbItem->label())
+															   .arg(ufbInputBlock.m_fblItem->toSignalElement()->appSignalIds())
+															   .arg(targetItem.m_fblItem->toSignalElement()->appSignalIds()));
+
+									assert(inOutItem->inputsCount() == 1);
+									assert(inOutItem->outputsCount() == 1);
+
+									ufbInputBlockPin.removeFromAssociatedIo(targetItemPin.guid());
+									targetItemPin.ClearAssociattdIOs();
+
+									AppLogicData::bindTwoPins(ufbInputBlockPin, inOutItem->inputs().front());
+									AppLogicData::bindTwoPins(inOutItem->outputs().front(), targetItemPin);
+
+									fakeItems.push_back(inOutItem);
+
+									AppLogicItem fakeAli(inOutItem, item.m_schema);
+									ufbItemsCopy.push_back(fakeAli);	// Order is not important here, this item will be removed later
+
+									// Bind source to fake item input
+									//
+									AppLogicData::bindTwoPins(sourceItemPin, inOutItem->inputs().front());
+								}
+								else
+								{
+									// Bind pins
+									//
+									AppLogicData::bindTwoPins(sourceItemPin, targetItemPin);
+								}
 							}
 						}
 					}
 
 					// Remove from associated ufbItemPin
 					//
-					schemaOutputItemPin.removeFromAssociatedIo(ufbItemPin.guid());
+					sourceItemPin.removeFromAssociatedIo(ufbItemPin.guid());
 				}
 
 				// Binding outputs
@@ -1955,9 +1982,9 @@ namespace Builder
 						continue;
 					}
 
-					// [ufbIntItem]-+------+-[ufbOutputBlock] .... [UFB:ufbItem]-+---+---+-[schemaInputItem1]
+					// [ufbIntItem]-+------+-[ufbOutputBlock] .... [UFB:ufbItem]-+---+---+-[targetItem1]
 					//                                                               |         ...
-					//                                                               +---+-[schemaInputItemN]
+					//                                                               +---+-[targetItemN]
 
 					//qDebug() << "ufbItemPin" << " " << ufbItemPin.guid() << " " << ufbItemPin.caption();		// !!!!!!!!!!!
 
@@ -2000,10 +2027,10 @@ namespace Builder
 						continue;
 					}
 
-					// schemaInputItem1....schemaInputItemN
+					// targetItem1....targetItemN
 					//
-					std::vector<VFrame30::AfbPin*> schemaInputItems;
-					schemaInputItems.reserve(16);
+					std::vector<VFrame30::AfbPin*> targetItems;
+					targetItems.reserve(16);
 
 					for (AppLogicItem& ali : module->items())
 					{
@@ -2015,7 +2042,7 @@ namespace Builder
 								pin.associatedIOs().size() == 1 &&
 								pin.associatedIOs().front() == ufbItemPin.guid())
 							{
-								schemaInputItems.push_back(&pin);
+								targetItems.push_back(&pin);
 							}
 						}
 					}
@@ -2032,7 +2059,7 @@ namespace Builder
 
 							VFrame30::AfbPin& ufbIntItemPin = ufbItem.m_fblItem->output(ufbOutputBlockPinAssoc);
 
-							for (VFrame30::AfbPin* schemaInputItemPin : schemaInputItems)
+							for (VFrame30::AfbPin* schemaInputItemPin : targetItems)
 							{
 								AppLogicData::bindTwoPins(ufbIntItemPin, *schemaInputItemPin);
 							}
@@ -2054,7 +2081,7 @@ namespace Builder
 
 					// Remove unwanted association from UFB:ufbItem
 					//
-					for (VFrame30::AfbPin* schemaInputItemPin : schemaInputItems)
+					for (VFrame30::AfbPin* schemaInputItemPin : targetItems)
 					{
 						schemaInputItemPin->removeFromAssociatedIo(ufbItemPin.guid());
 					}
@@ -2065,7 +2092,11 @@ namespace Builder
 				ufbItemsCopy.remove_if(
 							[](const AppLogicItem& ali)
 							{
-								return ali.m_fblItem->isSignalElement();
+								// Remove onlu Inputs and Outputs block,
+								// Keep InOut blocks, it can be FakeItems to solve direct connections
+								//
+								return	ali.m_fblItem->isInputSignalElement() ||
+										ali.m_fblItem->isOutputSignalElement();
 							});
 
 				// Inject ufb schema items
@@ -2087,6 +2118,7 @@ namespace Builder
 			//
 			for (std::shared_ptr<VFrame30::SchemaItem> fakeItem : fakeItems)
 			{
+				qDebug() << "Delete fake item " << fakeItem->toType<VFrame30::SchemaItemSignal>()->appSignalIds();
 				module->removeInOutItemKeepAssoc(fakeItem->guid());
 			}
 
