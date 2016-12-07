@@ -17,8 +17,10 @@ namespace Tuning
 	public:
 		TuningSourceContext(const QString& sourceID, const TuningSource* source);
 
-		const Network::DataSourceInfo& sourceInfo() const;
-		Network::TuningSourceState& sourceState();
+		void getSourceInfo(Network::DataSourceInfo& si) const;
+		void getSourceState(Network::TuningSourceState& tss) const;
+
+		void setSourceWorker(TuningSourceWorker* worker);
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
@@ -44,7 +46,11 @@ namespace Tuning
 		void getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const;
 		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
 
+		void setSourceWorker(const QString& sourceID, TuningSourceWorker* worker);
+
 	private:
+		TuningSourceContext* getSourceContext(const QString& sourceID);
+
 		void clear();
 
 	private:
@@ -62,7 +68,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------------------
 
-	class TuningClientContextMap
+	class TuningClientContextMap : public QHash<QString, TuningClientContext*>
 	{
 	public:
 		TuningClientContextMap();
@@ -70,11 +76,8 @@ namespace Tuning
 
 		void init(const TuningServiceSettings& tss, const TuningSources& sources);
 
-		const TuningClientContext* getClientContext(QString clientID) const;
+		TuningClientContext *getClientContext(QString clientID) const;
 
 		void clear();
-
-	private:
-		QHash<QString, TuningClientContext*> m_clientContextMap;
 	};
 }

@@ -511,7 +511,7 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errnoreply_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupprotocolversion_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupframesize_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupnotuningdata_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupnontuningdata_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupmoduletype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupframesquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupframenumber_),
@@ -864,7 +864,7 @@ void protobuf_AddDesc_network_2eproto() {
     "`\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001 "
     "\001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netwo"
     "rk.DataSourceInfo\"3\n\026GetTuningSourcesSta"
-    "tes\022\031\n\021clientEquipmentID\030\001 \001(\t\"\235\t\n\021Tunin"
+    "tes\022\031\n\021clientEquipmentID\030\001 \001(\t\"\236\t\n\021Tunin"
     "gSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isR"
     "eply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:"
     "\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueu"
@@ -873,43 +873,43 @@ void protobuf_AddDesc_network_2eproto() {
     "nt\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n\n"
     "errNoReply\030\n \001(\003:\0010\022 \n\025errRupProtocolVer"
     "sion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:\001"
-    "0\022\035\n\022errRupNoTuningData\030\r \001(\003:\0010\022\033\n\020errR"
-    "upModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQua"
-    "ntity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001("
-    "\003:\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:\0010"
-    "\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFoti"
-    "pLmNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystemC"
-    "ode\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030\025 "
-    "\001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n\017"
-    "errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRomF"
-    "rameSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsChec"
-    "kSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSucce"
-    "ss\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001("
-    "\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025f"
-    "otipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipFl"
-    "agRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFra"
-    "meSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSize"
-    "Err\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersion"
-    "Err\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyErr"
-    "\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:\001"
-    "0\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025foti"
-    "pFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlagS"
-    "etSOR\030& \001(\003:\0010\"g\n\033GetTuningSourcesStates"
-    "Reply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSources"
-    "State\030\002 \003(\0132\032.Network.TuningSourceState\""
-    "B\n\021ReadTuningSignals\022\031\n\021clientEquipmentI"
-    "D\030\001 \001(\t\022\022\n\nsignalHash\030\002 \003(\004\"d\n\021TuningSig"
-    "nalState\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error"
-    "\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005value"
-    "\030\004 \001(\001:\0010\"a\n\026ReadTuningSignalsReply\022\020\n\005e"
-    "rror\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\013"
-    "2\032.Network.TuningSignalState\"<\n\021TuningSi"
-    "gnalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005valu"
-    "e\030\002 \001(\001:\0010\"\200\001\n\022WriteTuningSignals\022\031\n\021cli"
-    "entEquipmentID\030\001 \001(\t\022\030\n\tautoAppay\030\002 \001(\010:"
-    "\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Netw"
-    "ork.TuningSignalWrite\"+\n\027WriteTuningSign"
-    "alsReply\022\020\n\005error\030\001 \001(\005:\0010", 3986);
+    "0\022\036\n\023errRupNonTuningData\030\r \001(\003:\0010\022\033\n\020err"
+    "RupModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQu"
+    "antity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001"
+    "(\003:\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:\001"
+    "0\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFot"
+    "ipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystem"
+    "Code\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030\025"
+    " \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n"
+    "\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRom"
+    "FrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsChe"
+    "ckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSucc"
+    "ess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001"
+    "(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025"
+    "fotipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipF"
+    "lagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFr"
+    "ameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSiz"
+    "eErr\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersio"
+    "nErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyEr"
+    "r\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:"
+    "\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fot"
+    "ipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlag"
+    "SetSOR\030& \001(\003:\0010\"g\n\033GetTuningSourcesState"
+    "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
+    "sState\030\002 \003(\0132\032.Network.TuningSourceState"
+    "\"B\n\021ReadTuningSignals\022\031\n\021clientEquipment"
+    "ID\030\001 \001(\t\022\022\n\nsignalHash\030\002 \003(\004\"d\n\021TuningSi"
+    "gnalState\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005erro"
+    "r\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005valu"
+    "e\030\004 \001(\001:\0010\"a\n\026ReadTuningSignalsReply\022\020\n\005"
+    "error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003("
+    "\0132\032.Network.TuningSignalState\"<\n\021TuningS"
+    "ignalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005val"
+    "ue\030\002 \001(\001:\0010\"\200\001\n\022WriteTuningSignals\022\031\n\021cl"
+    "ientEquipmentID\030\001 \001(\t\022\030\n\tautoAppay\030\002 \001(\010"
+    ":\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Net"
+    "work.TuningSignalWrite\"+\n\027WriteTuningSig"
+    "nalsReply\022\020\n\005error\030\001 \001(\005:\0010", 3987);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -7575,7 +7575,7 @@ const int TuningSourceState::kErrReplySizeFieldNumber;
 const int TuningSourceState::kErrNoReplyFieldNumber;
 const int TuningSourceState::kErrRupProtocolVersionFieldNumber;
 const int TuningSourceState::kErrRupFrameSizeFieldNumber;
-const int TuningSourceState::kErrRupNoTuningDataFieldNumber;
+const int TuningSourceState::kErrRupNonTuningDataFieldNumber;
 const int TuningSourceState::kErrRupModuleTypeFieldNumber;
 const int TuningSourceState::kErrRupFramesQuantityFieldNumber;
 const int TuningSourceState::kErrRupFrameNumberFieldNumber;
@@ -7631,7 +7631,7 @@ void TuningSourceState::SharedCtor() {
   errnoreply_ = GOOGLE_LONGLONG(0);
   errrupprotocolversion_ = GOOGLE_LONGLONG(0);
   errrupframesize_ = GOOGLE_LONGLONG(0);
-  errrupnotuningdata_ = GOOGLE_LONGLONG(0);
+  errrupnontuningdata_ = GOOGLE_LONGLONG(0);
   errrupmoduletype_ = GOOGLE_LONGLONG(0);
   errrupframesquantity_ = GOOGLE_LONGLONG(0);
   errrupframenumber_ = GOOGLE_LONGLONG(0);
@@ -7706,7 +7706,7 @@ void TuningSourceState::Clear() {
     errnoreply_ = GOOGLE_LONGLONG(0);
     errrupprotocolversion_ = GOOGLE_LONGLONG(0);
     errrupframesize_ = GOOGLE_LONGLONG(0);
-    errrupnotuningdata_ = GOOGLE_LONGLONG(0);
+    errrupnontuningdata_ = GOOGLE_LONGLONG(0);
     errrupmoduletype_ = GOOGLE_LONGLONG(0);
     errrupframesquantity_ = GOOGLE_LONGLONG(0);
     errrupframenumber_ = GOOGLE_LONGLONG(0);
@@ -7936,19 +7936,19 @@ bool TuningSourceState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(104)) goto parse_errRupNoTuningData;
+        if (input->ExpectTag(104)) goto parse_errRupNonTuningData;
         break;
       }
 
-      // optional int64 errRupNoTuningData = 13 [default = 0];
+      // optional int64 errRupNonTuningData = 13 [default = 0];
       case 13: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_errRupNoTuningData:
+         parse_errRupNonTuningData:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &errrupnotuningdata_)));
-          set_has_errrupnotuningdata();
+                 input, &errrupnontuningdata_)));
+          set_has_errrupnontuningdata();
         } else {
           goto handle_uninterpreted;
         }
@@ -8434,9 +8434,9 @@ void TuningSourceState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(12, this->errrupframesize(), output);
   }
 
-  // optional int64 errRupNoTuningData = 13 [default = 0];
-  if (has_errrupnotuningdata()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(13, this->errrupnotuningdata(), output);
+  // optional int64 errRupNonTuningData = 13 [default = 0];
+  if (has_errrupnontuningdata()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(13, this->errrupnontuningdata(), output);
   }
 
   // optional int64 errRupModuleType = 14 [default = 0];
@@ -8632,9 +8632,9 @@ void TuningSourceState::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(12, this->errrupframesize(), target);
   }
 
-  // optional int64 errRupNoTuningData = 13 [default = 0];
-  if (has_errrupnotuningdata()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(13, this->errrupnotuningdata(), target);
+  // optional int64 errRupNonTuningData = 13 [default = 0];
+  if (has_errrupnontuningdata()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(13, this->errrupnontuningdata(), target);
   }
 
   // optional int64 errRupModuleType = 14 [default = 0];
@@ -8857,11 +8857,11 @@ int TuningSourceState::ByteSize() const {
           this->errrupframesize());
     }
 
-    // optional int64 errRupNoTuningData = 13 [default = 0];
-    if (has_errrupnotuningdata()) {
+    // optional int64 errRupNonTuningData = 13 [default = 0];
+    if (has_errrupnontuningdata()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->errrupnotuningdata());
+          this->errrupnontuningdata());
     }
 
     // optional int64 errRupModuleType = 14 [default = 0];
@@ -9110,8 +9110,8 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
     if (from.has_errrupframesize()) {
       set_errrupframesize(from.errrupframesize());
     }
-    if (from.has_errrupnotuningdata()) {
-      set_errrupnotuningdata(from.errrupnotuningdata());
+    if (from.has_errrupnontuningdata()) {
+      set_errrupnontuningdata(from.errrupnontuningdata());
     }
     if (from.has_errrupmoduletype()) {
       set_errrupmoduletype(from.errrupmoduletype());
@@ -9229,7 +9229,7 @@ void TuningSourceState::Swap(TuningSourceState* other) {
     std::swap(errnoreply_, other->errnoreply_);
     std::swap(errrupprotocolversion_, other->errrupprotocolversion_);
     std::swap(errrupframesize_, other->errrupframesize_);
-    std::swap(errrupnotuningdata_, other->errrupnotuningdata_);
+    std::swap(errrupnontuningdata_, other->errrupnontuningdata_);
     std::swap(errrupmoduletype_, other->errrupmoduletype_);
     std::swap(errrupframesquantity_, other->errrupframesquantity_);
     std::swap(errrupframenumber_, other->errrupframenumber_);

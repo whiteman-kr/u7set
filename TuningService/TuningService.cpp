@@ -355,6 +355,8 @@ namespace Tuning
 			quint32 addr = sourceWorkerThread->sourceIP();
 
 			m_sourceWorkerThreadMap.insert(addr, sourceWorkerThread);
+
+			setWorkerInTuningClientContext(tuningSource->lmEquipmentID(), sourceWorkerThread->worker());
 		}
 
 		// create and run TuningSocketListenerThread
@@ -399,6 +401,21 @@ namespace Tuning
 		}
 
 		m_sourceWorkerThreadMap.clear();
+	}
+
+
+	void TuningServiceWorker::setWorkerInTuningClientContext(const QString& sourceID, TuningSourceWorker* worker)
+	{
+		for(TuningClientContext* clientContext : m_clientContextMap)
+		{
+			if (clientContext == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			clientContext->setSourceWorker(sourceID, worker);
+		}
 	}
 
 

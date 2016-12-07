@@ -211,7 +211,7 @@ void DialogTuningSourceInfo::updateData()
 
     item->child(c++)->setText(1, QString::number(ts.m_state.errrupprotocolversion()));
     item->child(c++)->setText(1, QString::number(ts.m_state.errrupframesize()));
-    item->child(c++)->setText(1, QString::number(ts.m_state.errrupnotuningdata()));
+	item->child(c++)->setText(1, QString::number(ts.m_state.errrupnontuningdata()));
     item->child(c++)->setText(1, QString::number(ts.m_state.errrupmoduletype()));
 
     item->child(c++)->setText(1, QString::number(ts.m_state.errrupframesquantity()));

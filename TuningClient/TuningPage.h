@@ -143,6 +143,28 @@ signals:
 	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 };
 
+class TuningTableView : public QTableView
+{
+
+    Q_OBJECT
+
+public:
+    bool editorActive();
+
+protected:
+
+    virtual bool edit(const QModelIndex & index, EditTrigger trigger, QEvent * event);
+
+protected slots:
+
+    virtual void closeEditor(QWidget * editor, QAbstractItemDelegate::EndEditHint hint);
+
+private:
+
+    bool m_editorActive = false;
+
+};
+
 
 class TuningPage : public QWidget
 {
@@ -175,7 +197,7 @@ private:
 
 	bool eventFilter(QObject* object, QEvent* event);
 
-	QTableView* m_objectList = nullptr;
+    TuningTableView* m_objectList = nullptr;
 
 	QButtonGroup *m_filterButtonGroup = nullptr;
 

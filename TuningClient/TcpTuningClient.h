@@ -38,13 +38,16 @@ public:
 
 protected:
 	void resetToGetTuningSources();
-	void resetToGetTuningState();
+    void resetToGetTuningSourcesState();
 
 	void requestTuningSourcesInfo();
 	void processTuningSourcesInfo(const QByteArray& data);
 
 	void requestTuningSourcesState();
 	void processTuningSourcesState(const QByteArray& data);
+
+    void requestReadTuningSignals();
+    void processReadTuningSignals(const QByteArray& data);
 
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
@@ -62,7 +65,8 @@ private:
 private:
 
 	QMutex m_mutex;
-	// Cache protobug messages
+
+    // Cache protobug messages
 	//
     ::Network::GetTuningSourcesStates m_getTuningSourcesStates;
     ::Network::GetDataSourcesInfoReply m_tuningDataSourcesInfoReply;
@@ -70,10 +74,14 @@ private:
     ::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
     ::Network::GetTuningSourcesStatesReply m_tuningDataSourcesStatesReply;
 
+    ::Network::ReadTuningSignals m_readTuningSignals;
+    ::Network::ReadTuningSignalsReply m_readTuningSignalsReply;
+
 	std::map<quint64, TuningSource> m_tuningSources;
 
 	std::vector<QString> m_signalList;
 
+    int m_readTuningSignalIndex = 0;
 
 };
 
