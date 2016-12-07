@@ -82,7 +82,10 @@ void DialogTuningSources::update(bool refreshOnly)
             connectionStrings << ts.m_info.caption().c_str();
             connectionStrings << ts.m_info.ip().c_str();
             connectionStrings << QString::number(ts.m_info.port());
-            connectionStrings << QString::number(ts.m_info.channel());
+
+            QChar chChannel = 'A' + ts.m_info.channel();
+            connectionStrings << chChannel;
+
             connectionStrings << QString::number(ts.m_info.subsystemid());
             connectionStrings << ts.m_info.subsystem().c_str();
             connectionStrings << QString::number(ts.m_info.lmnumber());

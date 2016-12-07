@@ -7,10 +7,24 @@
 #include "ObjectManager.h"
 #include "ConfigController.h"
 
+#include <queue>
+
 struct TuningSource
 {
     ::Network::DataSourceInfo m_info;
     ::Network::TuningSourceState m_state;
+};
+
+struct WriteCommand
+{
+    Hash m_hash = 0;
+    double m_value = 0;
+
+    WriteCommand(Hash hash, double value)
+    {
+        m_hash = hash;
+        m_value = value;
+    }
 };
 
 
@@ -25,7 +39,9 @@ public:
 
     bool tuningSourceInfo(quint64 id, TuningSource& result);
 
-public:
+    void writeTuningSignal(Hash hash, double value);
+
+private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
@@ -46,11 +62,17 @@ protected:
 	void requestTuningSourcesState();
 	void processTuningSourcesState(const QByteArray& data);
 
+    void processTuningSignals();
+
     void requestReadTuningSignals();
     void processReadTuningSignals(const QByteArray& data);
 
+    void requestWriteTuningSignals();
+    void processWriteTuningSignals(const QByteArray& data);
+
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
+    void slot_signalsUpdated();
 
 signals:
 	void tuningSourcesArrived();
@@ -77,11 +99,17 @@ private:
 	::Network::TuningSignalsRead m_readTuningSignals;
 	::Network::TuningSignalsReadReply m_readTuningSignalsReply;
 
-	std::map<quint64, TuningSource> m_tuningSources;
+    ::Network::WriteTuningSignals m_writeTuningSignals;
+    ::Network::WriteTuningSignalsReply m_writeTuningSignalsReply;
+
+    std::map<quint64, TuningSource> m_tuningSources;
 
 	std::vector<QString> m_signalList;
 
+    std::queue<WriteCommand> m_writeQueue;
+
     int m_readTuningSignalIndex = 0;
+    int m_readTuningSignalCount = 0;
 
 };
 
