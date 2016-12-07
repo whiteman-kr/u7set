@@ -99,8 +99,8 @@ private:
 	::Network::TuningSignalsRead m_readTuningSignals;
 	::Network::TuningSignalsReadReply m_readTuningSignalsReply;
 
-    ::Network::WriteTuningSignals m_writeTuningSignals;
-    ::Network::WriteTuningSignalsReply m_writeTuningSignalsReply;
+	::Network::TuningSignalsWrite m_writeTuningSignals;
+	::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
 
     std::map<quint64, TuningSource> m_tuningSources;
 

@@ -293,7 +293,7 @@ message TuningSignalsWrite
     repeated TuningSignalWrite tuningSignalWrite = 3;
 }
 
-message WriteTuningSignalsReply
+message TuningSignalsWriteReply
 {
     optional int32 error = 1 [default = 0];
 }

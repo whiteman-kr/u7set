@@ -63,7 +63,7 @@ class TuningSignalState;
 class TuningSignalsReadReply;
 class TuningSignalWrite;
 class TuningSignalsWrite;
-class WriteTuningSignalsReply;
+class TuningSignalsWriteReply;
 
 // ===================================================================
 
@@ -3470,14 +3470,14 @@ class TuningSignalsWrite : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class WriteTuningSignalsReply : public ::google::protobuf::Message {
+class TuningSignalsWriteReply : public ::google::protobuf::Message {
  public:
-  WriteTuningSignalsReply();
-  virtual ~WriteTuningSignalsReply();
+  TuningSignalsWriteReply();
+  virtual ~TuningSignalsWriteReply();
 
-  WriteTuningSignalsReply(const WriteTuningSignalsReply& from);
+  TuningSignalsWriteReply(const TuningSignalsWriteReply& from);
 
-  inline WriteTuningSignalsReply& operator=(const WriteTuningSignalsReply& from) {
+  inline TuningSignalsWriteReply& operator=(const TuningSignalsWriteReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3491,17 +3491,17 @@ class WriteTuningSignalsReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const WriteTuningSignalsReply& default_instance();
+  static const TuningSignalsWriteReply& default_instance();
 
-  void Swap(WriteTuningSignalsReply* other);
+  void Swap(TuningSignalsWriteReply* other);
 
   // implements Message ----------------------------------------------
 
-  WriteTuningSignalsReply* New() const;
+  TuningSignalsWriteReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const WriteTuningSignalsReply& from);
-  void MergeFrom(const WriteTuningSignalsReply& from);
+  void CopyFrom(const TuningSignalsWriteReply& from);
+  void MergeFrom(const TuningSignalsWriteReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3531,7 +3531,7 @@ class WriteTuningSignalsReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:Network.WriteTuningSignalsReply)
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalsWriteReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
@@ -3548,7 +3548,7 @@ class WriteTuningSignalsReply : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static WriteTuningSignalsReply* default_instance_;
+  static TuningSignalsWriteReply* default_instance_;
 };
 // ===================================================================
 
@@ -6909,26 +6909,26 @@ TuningSignalsWrite::mutable_tuningsignalwrite() {
 
 // -------------------------------------------------------------------
 
-// WriteTuningSignalsReply
+// TuningSignalsWriteReply
 
 // optional int32 error = 1 [default = 0];
-inline bool WriteTuningSignalsReply::has_error() const {
+inline bool TuningSignalsWriteReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void WriteTuningSignalsReply::set_has_error() {
+inline void TuningSignalsWriteReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void WriteTuningSignalsReply::clear_has_error() {
+inline void TuningSignalsWriteReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void WriteTuningSignalsReply::clear_error() {
+inline void TuningSignalsWriteReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 WriteTuningSignalsReply::error() const {
+inline ::google::protobuf::int32 TuningSignalsWriteReply::error() const {
   return error_;
 }
-inline void WriteTuningSignalsReply::set_error(::google::protobuf::int32 value) {
+inline void TuningSignalsWriteReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
