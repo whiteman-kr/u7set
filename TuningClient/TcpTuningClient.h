@@ -74,8 +74,8 @@ private:
     ::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
     ::Network::GetTuningSourcesStatesReply m_tuningDataSourcesStatesReply;
 
-    ::Network::ReadTuningSignals m_readTuningSignals;
-    ::Network::ReadTuningSignalsReply m_readTuningSignalsReply;
+	::Network::TuningSignalsRead m_readTuningSignals;
+	::Network::TuningSignalsReadReply m_readTuningSignalsReply;
 
 	std::map<quint64, TuningSource> m_tuningSources;
 

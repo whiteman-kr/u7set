@@ -258,7 +258,7 @@ message GetTuningSourcesStatesReply
 
 // Tuning signals read request
 
-message ReadTuningSignals
+message TuningSignalsRead
 {
     optional string clientEquipmentID = 1;
     repeated uint64 signalHash = 2;
@@ -272,7 +272,7 @@ message TuningSignalState
     optional double value = 4 [default = 0.0];
 }
 
-message ReadTuningSignalsReply
+message TuningSignalsReadReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSignalState tuningSignalState = 2;
@@ -286,7 +286,7 @@ message TuningSignalWrite
     optional double value = 2 [default = 0.0];
 }
 
-message WriteTuningSignals
+message TuningSignalsWrite
 {
     optional string clientEquipmentID = 1;
     optional bool autoAppay = 2 [default = false];

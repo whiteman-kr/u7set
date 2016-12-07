@@ -59,6 +59,20 @@ namespace Tuning
 	}
 
 
+	void TuningSourceContext::getSignalState(Network::TuningSignalState& tss)
+	{
+		if (m_sourceWorker == nullptr)
+		{
+			tss.set_valid(false);
+			tss.set_error(TO_INT(NetworkError::InternalError));
+			return;
+		}
+
+		m_sourceWorker->getSignalState(tss);
+	}
+
+
+
 	// ----------------------------------------------------------------------------------------------
 	//
 	// TuningClientContext class implementation
@@ -153,6 +167,32 @@ namespace Tuning
 	}
 
 
+	void TuningClientContext::getSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const
+	{
+		int signalCount = request.signalhash_size();
+
+		reply.mutable_tuningsignalstate()->Reserve(signalCount);
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			Network::TuningSignalState* tss = reply.mutable_tuningsignalstate(i);
+
+			if (tss == nullptr)
+			{
+				continue;
+			}
+
+			Hash signalHash = request.signalhash(i);
+
+			tss->set_signalhash(signalHash);
+
+			getSignalState(*tss);
+		}
+
+		reply.set_error(TO_INT(NetworkError::Success));
+	}
+
+
 	void TuningClientContext::setSourceWorker(const QString& sourceID, TuningSourceWorker *worker)
 	{
 		TuningSourceContext* sourceContext = getSourceContext(sourceID);
@@ -166,9 +206,38 @@ namespace Tuning
 	}
 
 
-	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID)
+	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID) const
 	{
-		return m_sourceContextMap.value(sourceID, nullptr);
+		TuningSourceContext* srcContext = m_sourceContextMap.value(sourceID, nullptr);
+
+		return srcContext;
+	}
+
+
+	TuningSourceContext* TuningClientContext::getSourceContextBySignalHash(Hash signalHash) const
+	{
+		TuningSourceContext* srcContext = m_signalToSourceMap.value(signalHash, nullptr);
+
+		return srcContext;
+	}
+
+
+	void TuningClientContext::getSignalState(Network::TuningSignalState& tss) const
+	{
+		// tss->signalHash is allready filled!
+		//
+		Hash signalHash = tss.signalhash();
+
+		TuningSourceContext* sourceContext = getSourceContextBySignalHash(signalHash);
+
+		if (sourceContext == nullptr)
+		{
+			tss.set_valid(false);
+			tss.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			return;
+		}
+
+		sourceContext->getSignalState(tss);
 	}
 
 

@@ -376,6 +376,8 @@ const int ADS_GET_DATA_SOURCES_STATES_MAX = 1000;
 //
 const quint32 TDS_GET_TUNING_SOURCES_INFO = 0x1501;
 const quint32 TDS_GET_TUNING_SOURCES_STATES = 0x1502;
+const quint32 TDS_TUNING_SIGNALS_READ = 0x1503;
+const quint32 TDS_TUNING_SIGNALS_WRITE = 0x1504;
 
 
 // Getting application signals Units
@@ -395,4 +397,6 @@ enum class NetworkError
 	RequestDataSourcesStatesExceed,
 	UnitsExceed,
 	UnknownTuningClientID,
+	UnknownSignalHash,
+	InternalError,
 };

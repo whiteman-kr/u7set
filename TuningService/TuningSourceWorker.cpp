@@ -132,6 +132,31 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::getSignalState(Network::TuningSignalState& tss)
+	{
+		// tss.signalhash() is already filled
+		//
+		Hash signalHash = tss.signalhash();
+
+		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
+
+		if (signalIndex == -1)
+		{
+			assert(false);			// how all previous checks we pass ???
+
+			tss.set_valid(false);
+			tss.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			return;
+		}
+
+		TuningSignal& signal = m_tuningSignals[signalIndex];
+
+		tss.set_valid(signal.valid);
+		tss.set_value(signal.value);
+		tss.set_error(TO_INT(NetworkError::Success));
+	}
+
+
 	void TuningSourceWorker::onThreadStarted()
 	{
 		connect(&m_replyQueue, &Queue<Rup::Frame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);
@@ -190,40 +215,56 @@ namespace Tuning
 
 			TuningSignal& ts = m_tuningSignals[i];
 
+			ts.valid = false;
+			ts.value = 0;
+
 			ts.signal = signal;
+			ts.signalHash = hash;
+			ts.type = getTuningSignalType(signal);
 			ts.offset = signal->tuningAddr().offset();
 			ts.bit = signal->tuningAddr().bit();
+			ts.index = i;
+			ts.lowBound = signal->lowEngeneeringUnits();
+			ts.highBoud = signal->highEngeneeringUnits();
+			ts.defaultValue = signal->tuningDefaultValue();
+		}
+	}
 
-			if (signal->isAnalog())
+
+	TuningSourceWorker::TuningSignalType TuningSourceWorker::getTuningSignalType(Signal* s) const
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return TuningSignalType::Discrete;
+		}
+
+		if (s->isAnalog())
+		{
+			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 			{
-				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-				{
-					ts.type = SignalType::AnalogFloat;
-				}
-				else
-				{
-					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-					{
-						ts.type = SignalType::AnalogInt;
-					}
-					else
-					{
-						assert(false);		// unknown type of signal
-					}
-				}
+				return TuningSignalType::AnalogFloat;
 			}
 			else
 			{
-				if (signal->isDiscrete())
+				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 				{
-					ts.type = SignalType::Discrete;
-				}
-				else
-				{
-					assert(false);		// unknown type of signal
+					return TuningSignalType::AnalogInt;
 				}
 			}
 		}
+		else
+		{
+			if (s->isDiscrete())
+			{
+				return TuningSignalType::Discrete;
+			}
+		}
+
+		// unknown type of signal
+		//
+		assert(false);
+		return TuningSignalType::Discrete;
 	}
 
 
@@ -509,6 +550,26 @@ namespace Tuning
 		m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
 								reply.fotipFrame.header.romFrameSizeB,
 								reply.fotipFrame.data);
+
+		int signalCount = m_tuningSignals.count();
+
+		int frameStartAddrW = reply.fotipFrame.header.startAddressW;
+		int nextFrameStartAddrW = frameStartAddrW + reply.fotipFrame.header.romFrameSizeB / sizeof(quint16);
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			TuningSignal& ts = m_tuningSignals[i];
+
+			if (ts.offset < frameStartAddrW ||
+				ts.offset >= nextFrameStartAddrW)
+			{
+				continue;
+			}
+
+			// parse signal!!!
+			//
+
+		}
 	}
 
 
@@ -719,6 +780,8 @@ namespace Tuning
 	{
 		m_timer.start(m_timerInterval);
 	}
+
+
 
 
 	void TuningSourceWorker::onTimer()

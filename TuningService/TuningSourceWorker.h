@@ -79,6 +79,8 @@ namespace Tuning
 	{
 		Q_OBJECT
 
+	private:
+
 		struct Read
 		{
 			quint32 frame;
@@ -103,6 +105,35 @@ namespace Tuning
 			Apply apply;
 		};
 
+		enum class TuningSignalType
+		{
+			AnalogFloat = 0,
+			AnalogInt = 1,
+			Discrete = 2,
+		};
+
+		struct TuningSignal
+		{
+			// static fields
+			//
+			bool valid = false;
+			double value = 0;
+
+			// static fields
+			//
+			Signal* signal = nullptr;
+			Hash signalHash = 0;
+			TuningSignalType type = TuningSignalType::Discrete;
+			int index = -1;
+
+			int offset = -1;
+			int bit = -1;
+
+			double lowBound = 0;
+			double highBoud = 0;
+			double defaultValue = 0;
+		};
+
 	public:
 		TuningSourceWorker(const TuningServiceSettings& settings,
 						   const TuningSource& source);
@@ -115,6 +146,7 @@ namespace Tuning
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState& tuningSourceState);
+		void getSignalState(Network::TuningSignalState& tss);
 
 	signals:
 		void replyReady();
@@ -124,6 +156,7 @@ namespace Tuning
 		virtual void onThreadFinished() override;
 
 		void initTuningSignals(const TuningData* td);
+		TuningSignalType getTuningSignalType(Signal* s) const;
 
 		bool processWaitReply();
 		bool processCommandQueue();
@@ -167,23 +200,6 @@ namespace Tuning
 		int m_tuningRomSizeW = 0;
 
 		//
-
-		enum class SignalType
-		{
-			AnalogFloat = 0,
-			AnalogInt = 1,
-			Discrete = 2,
-		};
-
-		struct TuningSignal
-		{
-			Signal* signal = nullptr;
-
-			SignalType type = SignalType::Discrete;
-
-			int offset = 0;
-			int bit = 0;
-		};
 
 		QVector<TuningSignal> m_tuningSignals;
 		QHash<Hash, int> m_hash2SignalIndexMap;

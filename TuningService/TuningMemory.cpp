@@ -31,6 +31,9 @@ namespace Tuning
 		m_frameSizeW = frameSizeW;
 		m_framesCount = framesCount;
 
+		m_startAddrB = startAddr * sizeof(quint16);
+		m_frameSizeB = frameSizeW * sizeof(quint16);
+
 		if (frameSizeW * framesCount > 1024 * 1024)
 		{
 			assert(false);
@@ -49,21 +52,19 @@ namespace Tuning
 			return;
 		}
 
-		int frameSizeW = frameSizeB / sizeof(quint16);
-
-		if (frameSizeW != m_frameSizeW)
+		if (frameSizeB != m_frameSizeB)
 		{
 			assert(false);
 			return;
 		}
 
-		if ( (startAddrW + frameSizeW) > (m_startAddrW + m_frameSizeW * m_framesCount) )
+		if ( (startAddrW + m_frameSizeW) > (m_startAddrW + m_frameSizeW * m_framesCount) )
 		{
 			assert(false);
 			return;
 		}
 
-		int offset = startAddrW - m_startAddrW;
+		int offsetB = (startAddrW - m_startAddrW) * sizeof(quint16);
 
 		AUTO_LOCK(m_memLock);
 
@@ -73,7 +74,7 @@ namespace Tuning
 			return;
 		}
 
-		memcpy(m_memory + offset, buffer, m_frameSizeW * sizeof(quint16));
+		memcpy(m_memory + offsetB, buffer, m_frameSizeB);
 	}
 
 
@@ -87,7 +88,7 @@ namespace Tuning
 			return;
 		}
 
-		m_memory = new quint16 [m_frameSizeW * m_framesCount];
+		m_memory = new quint8 [m_frameSizeB * m_framesCount];
 	}
 
 

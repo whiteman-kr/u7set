@@ -55,6 +55,10 @@ namespace Tuning
 			onGetTuningSourcesStateRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_TUNING_SIGNALS_READ:
+			onTuningSignalsReadRequest(requestData, requestDataSize);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -142,6 +146,34 @@ namespace Tuning
 
 		sendReply(m_getTuningSourcesStatesReply);
 	}
+
+
+	void TcpTuningServer::onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize)
+	{
+		m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
+
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(m_tuningSignalsReadRequest.clientequipmentid());
+
+		if (clientContext == nullptr)
+		{
+			// unknown clientID
+			//
+			m_tuningSignalsReadReply.Clear();
+
+			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+
+			sendReply(m_tuningSignalsReadReply);
+			return;
+		}
+
+		clientContext->getSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
+
+		// m_tuningSignalsReadReply.set_error(???) must be set inside clientContext->getSignalStates()
+
+		sendReply(m_tuningSignalsReadReply);
+	}
+
 
 
 	// -------------------------------------------------------------------------------
