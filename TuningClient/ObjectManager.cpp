@@ -4,6 +4,12 @@ ObjectManager::ObjectManager()
 {
 }
 
+int ObjectManager::objectCount()
+{
+    return m_objects.size();
+
+}
+
 TuningObject ObjectManager::object(int index)
 {
 	QMutexLocker l(&m_mutex);
@@ -15,6 +21,31 @@ TuningObject ObjectManager::object(int index)
 	}
 
 	return m_objects[index];
+
+}
+
+TuningObject* ObjectManager::objectPtr(int index)
+{
+    if (index < 0 || index >= m_objects.size())
+    {
+        assert(false);
+        return nullptr;
+    }
+
+    return &m_objects[index];
+}
+
+TuningObject* ObjectManager::objectPtrByHash(quint64 hash)
+{
+    auto it = m_objectsHashMap.find(hash);
+
+    if (it == m_objectsHashMap.end())
+    {
+        assert(false);
+        return nullptr;
+    }
+
+    return objectPtr(it->second);
 
 }
 
@@ -41,6 +72,8 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 	QMutexLocker l(&m_mutex);
 
 	m_objects.clear();
+
+    m_objectsHashMap.clear();
 
 	QXmlStreamReader reader(data);
 
@@ -128,7 +161,9 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 			}
 
 
-			m_objects.push_back(object);
+            m_objects.push_back(object);
+
+            m_objectsHashMap[object.appSignalHash()] = m_objects.size() - 1;
 
 			continue;
 		}
