@@ -144,6 +144,7 @@ namespace Builder
 		void errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid);
 		void errALP4011(QString schema, QString schemaItem, QUuid itemUuid);
 		void errALP4012(QString schema, QString schemaItem, QString pinCaption, QUuid itemUuid);
+		void errALP4013(QString schema, QString schemaItem, QString inPin, QString outPin, QUuid itemUuid);
 
 		void errALP4020(QString logicModule);
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);

@@ -1925,6 +1925,25 @@ namespace Builder
 						{
 							if (targetItemPin.hasAssociatedIo(ufbInputBlockPin.guid()) == true)
 							{
+								// if target item is SchemaItemOutput then it is special case and fake item is required AND
+								// if sourceItem is also FakeItem , the it is empty loop
+								//
+								if (targetItem.m_fblItem->isOutputSignalElement() == true &&
+									std::find(fakeItems.begin(), fakeItems.end(), sourceItem.m_fblItem) != fakeItems.end())
+								{
+									log->errALP4013(item.m_schema->schemaId(),
+													ufbItem->buildName(),
+													ufbItemPin.caption(),
+													targetItem.m_fblItem->toOutputSignalElement()->appSignalIds(),
+													ufbItem->guid());
+
+									// It's very hard to recover from this, just exit and make a user correct schema
+									// The association tree will be inconsistent in case of removing some ins or outs....
+									// Don't start doing it ;)
+									//
+									return false;
+								}
+
 								// if target item is SchemaItemOutput then it is special case and fake item is required
 								//
 								if (targetItem.m_fblItem->isOutputSignalElement() == true)
@@ -1986,8 +2005,6 @@ namespace Builder
 					//                                                               |         ...
 					//                                                               +---+-[targetItemN]
 
-					//qDebug() << "ufbItemPin" << " " << ufbItemPin.guid() << " " << ufbItemPin.caption();		// !!!!!!!!!!!
-
 					// ufbOutputBlock
 					//
 					auto foundUfbOutputIt = std::find_if(ufbItemsCopy.begin(), ufbItemsCopy.end(),
@@ -2015,9 +2032,6 @@ namespace Builder
 						result = false;
 						continue;
 					}
-
-					//qDebug() << "ufbOutputBlock";			// !!!!!!!!!!!!!!!!!!!!!!!!
-					//ufbOutputBlock.m_fblItem->dump();		// !!!!!!!!!!!!!!!!!!!!!!!!
 
 					VFrame30::AfbPin& ufbOutputBlockPin = ufbOutputBlock.m_fblItem->inputs().front();
 					if (ufbOutputBlockPin.associatedIOs().size() != 1)
@@ -2065,7 +2079,6 @@ namespace Builder
 							}
 
 							ufbIntItemPin.removeFromAssociatedIo(ufbOutputBlockPin.guid());
-
 							break;
 						}
 					}

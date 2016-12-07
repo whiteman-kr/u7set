@@ -1257,6 +1257,34 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection, SchemaItem %1, in %2, out %3 (LogicSchema %4).
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB SchemaItem input pin caption
+	///		%3 UFB SchemaItem output pin caption
+	///		%4 UFB Schema ID
+	///
+	/// Description:
+	///		Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection.
+	///
+	void IssueLogger::errALP4013(QString schema, QString schemaItem, QString inPin, QString outPin, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4013,
+				  tr("Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection, SchemaItem %1, in %2, out %3 (LogicSchema %4).")
+				  .arg(schemaItem)
+				  .arg(inPin)
+				  .arg(outPin)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error
