@@ -166,7 +166,10 @@ void DialogTuningSourceInfo::updateData()
     item->child(c++)->setText(1, QString::number(ts.m_info.datatype()));
     item->child(c++)->setText(1, ts.m_info.ip().c_str());
     item->child(c++)->setText(1, QString::number(ts.m_info.port()));
-    item->child(c++)->setText(1, QString::number(ts.m_info.channel()));
+
+    QChar chChannel = 'A' + ts.m_info.channel();
+
+    item->child(c++)->setText(1, chChannel);
     item->child(c++)->setText(1, QString::number(ts.m_info.subsystemid()));
     item->child(c++)->setText(1, ts.m_info.subsystem().c_str());
 
