@@ -206,7 +206,7 @@ namespace Tuning
 				//
 				sendFOTIPRequest(m_request);
 
-				qDebug() << "Retry last REQUEST";
+//				qDebug() << "Retry last REQUEST";
 			}
 		}
 
