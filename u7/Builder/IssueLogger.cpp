@@ -1311,6 +1311,30 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4015
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB SchemaID
+	///
+	/// Description:
+	///		UFB Input or Output item must have ONE assigned AppSignalIDs which are used as pins on SchemaItem UFB
+	///
+	void IssueLogger::errALP4015(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4015,
+				  tr("UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error

@@ -2854,9 +2854,28 @@ namespace Builder
 			{
 				// All theses items are allowed to be used on UFB schema
 				//
+
+				// Check if Input/Output has particulary ONE assigned AppSignalID
+				//
+				if (item->isType<VFrame30::SchemaItemSignal>() == true)
+				{
+					const VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
+
+					if (signalItem->appSignalIdList().size() != 1)
+					{
+						// UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').
+						//
+						m_log->errALP4015(ufbSchema->schemaId(), item->toFblItemRect()->label(), item->guid());
+						result = false;
+						continue;
+					}
+				}
+
 				continue;
 			}
 
+			// User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').
+			//
 			QString itemType = QString::fromLatin1(item->metaObject()->className());
 			itemType.remove("VFrame30::SchemaItem");
 
