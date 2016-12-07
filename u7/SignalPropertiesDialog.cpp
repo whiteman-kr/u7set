@@ -35,8 +35,11 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 
 	QVector<Signal*> signalPtrVector;
 
+	QStringList foundSignalID;
+
 	for (Signal& signal : signalVector)
 	{
+		foundSignalID.push_back(signal.appSignalID());
 		signalPtrVector.push_back(&signal);
 	}
 
@@ -53,12 +56,20 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 
 	if (signalPtrVector.isEmpty())
 	{
+		if (signalId.count() > 1)
+		{
+			QMessageBox::critical(parent, "Error", "Could not find signals in database");
+		}
+		else
+		{
+			QMessageBox::critical(parent, "Error", "Could not find signal in database");
+		}
 		return result;
 	}
 
 	result.resize(signalPtrVector.count());
 
-	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, parent);
+	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, true, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -104,24 +115,20 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 		}
 	}
 
-	for (int i = 0; i < signalId.count(); i++)
+	for (int i = 0; i < signalPtrVector.count(); i++)
 	{
-		for (size_t j = 0; j < result.size(); j++)
-		{
-			if (result[j].first == signalId[i])
-			{
-				result[j].second = signalPtrVector[i]->appSignalID();
-			}
-		}
+		result[i].first = foundSignalID[i];
+		result[i].second = signalPtrVector[i]->appSignalID();
 	}
 	return result;
 }
 
 
-SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent) :
 	QDialog(parent),
 	m_dbController(dbController),
 	m_signalVector(signalVector),
+	m_tryCheckout(tryCheckout),
 	m_parent(parent)
 {
 	QSettings settings;
@@ -313,7 +320,10 @@ void SignalPropertiesDialog::saveDialogSettings()
 
 void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
 {
-	checkoutSignals(objects);
+	if (m_tryCheckout)
+	{
+		checkoutSignals(objects);
+	}
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		/* WhiteMan 04.10.2016
