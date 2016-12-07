@@ -170,7 +170,7 @@ void FileHistoryDialog::changesetDetails(int changeset)
 	ChangesetDetailsDialog::showChangesetDetails(m_db, changeset, parentWidget);
 }
 
-void FileHistoryDialog::on_buttonBox_clicked(QAbstractButton *button)
+void FileHistoryDialog::on_buttonBox_clicked(QAbstractButton* /*button*/)
 {
 	accept();
 }

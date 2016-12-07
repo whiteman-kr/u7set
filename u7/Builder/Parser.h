@@ -147,6 +147,8 @@ namespace Builder
 														const std::list<AppLogicItem>& items,
 														IssueLogger* log);
 
+		bool removeInOutItemKeepAssoc(const QUuid& itemGuid);
+
 		void dump() const;
 
 	private:
@@ -211,7 +213,6 @@ namespace Builder
 
 		bool expandUfbs(IssueLogger* log);
 
-	private:
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
 		// Properties

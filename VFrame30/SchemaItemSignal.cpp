@@ -202,7 +202,7 @@ namespace VFrame30
 			text = signal.appSignalID();
 			break;
 
-		case E::ColumnData::CustomerSignalID:
+		case E::ColumnData::CustomSignalID:
 			if (drawParam->isMonitorMode() == true)
 			{
 				text = signal.customAppSignalID();
