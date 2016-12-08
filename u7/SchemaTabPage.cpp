@@ -1845,8 +1845,6 @@ void SchemaControlTabPage::search()
 		return;
 	}
 
-	qDebug() << "Search for schema, text " << searchText;
-
 	// --
 	//
 	const std::vector<std::shared_ptr<DbFileInfo>>& files = m_filesView->files();

@@ -634,6 +634,11 @@ namespace VFrame30
 		return;
 	}
 
+	bool FblItemRect::searchText(const QString& text) const
+	{
+		return m_label.contains(text, Qt::CaseInsensitive);
+	}
+
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(FblItemRect, Font, m_font);

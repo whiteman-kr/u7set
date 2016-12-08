@@ -73,6 +73,11 @@ namespace VFrame30
 
 		virtual void dump() const override;
 
+		// Text search
+		//
+	public:
+		virtual bool searchText(const QString& text) const override;
+
 		// Properties and Data
 		//
 	public:
