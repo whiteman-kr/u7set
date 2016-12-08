@@ -1160,7 +1160,16 @@ namespace Builder
 		//
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
-			result &= m_moduleCompilers[i]->pass2();
+			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
+
+			if (moduleCompiler == nullptr)
+			{
+				assert(false);
+				result = false;
+				break;
+			}
+
+			result &= moduleCompiler->pass2();
 
 			if (isBuildCancelled() == true)
 			{

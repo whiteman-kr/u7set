@@ -1454,6 +1454,7 @@ namespace Builder
         m_codeItems.append(newComment);
     }
 
+
     void ApplicationLogicCode::generateBinCode()
     {
         for(CodeItem* codeItem : m_codeItems)
@@ -1793,20 +1794,24 @@ namespace Builder
 
         int prevRunTime = 0;
 
+		int count = 0;
+
         for(CodeItem* codeItem : m_codeItems)
         {
+			count++;
+
             if (codeItem == nullptr)
             {
                 assert(false);
                 return false;
             }
 
-            if (codeItem->isCommand() == false)
+			if (codeItem->isCommand() == false)
             {
                 continue;
             }
 
-            Command* command = dynamic_cast<Command*>(codeItem);
+			Command* command = dynamic_cast<Command*>(codeItem);
 
             if (command == nullptr)
             {
