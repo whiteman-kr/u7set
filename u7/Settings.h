@@ -44,7 +44,6 @@ public:
 	QStringList& loginCompleter();
 
 	bool freezeBuildPath() const;
-	bool useConnections() const;
 
 	void setDebugMode(bool value);
 	bool debugMode() const;
@@ -154,8 +153,6 @@ private:
 	bool m_expertMode = false;
 
 	QStringList m_loginCompleter;
-
-	bool m_useConnections = true;
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;

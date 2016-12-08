@@ -83,7 +83,6 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
 	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
 
-	s.setValue("m_useConnections", m_useConnections);
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
@@ -163,7 +162,6 @@ void Settings::loadUserScope()
         m_schemaItemSplitterState = 150;
 	}
 
-	m_useConnections = s.value("m_useConnections", true).toBool();
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
 	m_infoMode = s.value("m_infoMode").toBool();
@@ -262,11 +260,6 @@ const QStringList& Settings::loginCompleter() const
 QStringList& Settings::loginCompleter()
 {
 	return m_loginCompleter;
-}
-
-bool Settings::useConnections() const
-{
-	return m_useConnections;
 }
 
 void Settings::setDebugMode(bool value)

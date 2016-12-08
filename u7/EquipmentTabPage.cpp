@@ -3505,10 +3505,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_separatorAction3);
 	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
-	if (theSettings.useConnections())
-	{
-		m_equipmentView->addAction(m_connectionsAction);
-	}
+	m_equipmentView->addAction(m_connectionsAction);
+
 	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
 
 	// -----------------
@@ -3551,10 +3549,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_switchModeAction);
-	if (theSettings.useConnections())
-	{
-		m_toolBar->addAction(m_connectionsAction);
-	}
+	m_toolBar->addAction(m_connectionsAction);
+
 	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
 	//
