@@ -1344,7 +1344,9 @@ void SchemaControlTabPage::addFile()
 	schema->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
+
 	vfFile->setFileName(schema->schemaId() + m_filesView->filesModel().filter());
+	vfFile->setDetails(schema->details());
 	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
