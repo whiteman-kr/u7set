@@ -421,6 +421,15 @@ void SchemaListModel::addFile(std::shared_ptr<DbFileInfo> file)
 	{
 		emit layoutAboutToBeChanged();
 		m_files.push_back(file);
+
+		VFrame30::SchemaDetails details;
+
+		bool ok = details.parseDetails(file->details());
+		if (ok == true)
+		{
+			m_details[file->fileId()] = details;
+		}
+
 		emit layoutChanged();
 	}
 }

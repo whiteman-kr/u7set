@@ -454,8 +454,8 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
-		{					// (high byte is module family, low byte is module version)
+		enum FamilyType		// WARNING!!! Only high byte can be used as a part of the type
+		{					// (high byte is a module family, low byte is a module version)
 			OTHER = 0x0000,
 			LM = 0x1100,
 			AIM = 0x1200,

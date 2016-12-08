@@ -57,8 +57,13 @@ namespace VFrame30
 		void setGuid(const QUuid& guid);
 
 		const std::vector<QUuid>& associatedIOs() const;
+		std::vector<QUuid>& associatedIOs();
 		void ClearAssociattdIOs();
 		void AddAssociattedIOs(const QUuid& guid);
+
+		bool removeFromAssociatedIo(const QUuid& uuid);
+
+		bool hasAssociatedIo(const QUuid& guid) const;
 
 		bool HasConnection() const;
 
@@ -111,7 +116,10 @@ namespace VFrame30
 		//
 	public:
 		const std::vector<VFrame30::AfbPin>& inputs() const;
+		std::vector<VFrame30::AfbPin>& inputs();
+
 		const std::vector<VFrame30::AfbPin>& outputs() const;
+		std::vector<VFrame30::AfbPin>& outputs();
 
 		std::vector<AfbPin>* mutableInputs();
 		std::vector<AfbPin>* mutableOutputs();
@@ -135,6 +143,16 @@ namespace VFrame30
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
 		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemaPoint* pResult, double gridSize, int pinGridStep) const;
+
+		bool hasInput(const QUuid& guid) const;
+		bool hasOutput(const QUuid& guid) const;
+
+		const VFrame30::AfbPin& input(const QUuid& guid) const;
+		VFrame30::AfbPin& input(const QUuid& guid);
+
+		const VFrame30::AfbPin& output(const QUuid& guid) const;
+		VFrame30::AfbPin& output(const QUuid& guid);
+
 
 		// Public methods
 		//

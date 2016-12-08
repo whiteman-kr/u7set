@@ -26,6 +26,8 @@ private slots:
 
 	void changesetDetails(int changeset);
 
+	void on_buttonBox_clicked(QAbstractButton *button);
+
 private:
 	Ui::FileHistoryDialog *ui;
 	std::vector<DbChangeset> m_fileHistory;

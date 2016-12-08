@@ -45,7 +45,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Set height and width
 	//
-	ui->strdIdEdit->setText(schema->schemaID());
+	ui->strdIdEdit->setText(schema->schemaId());
 	ui->captionEdit->setText(schema->caption());
 
 	// Set width/height
@@ -249,7 +249,7 @@ void CreateSchemaDialog::accept()
 		m_schema->Load(data);
 	}
 
-	m_schema->setSchemaID(strID);
+	m_schema->setSchemaId(strID);
 	m_schema->setCaption(caption);
 
 	if (isLogicSchema() == true)

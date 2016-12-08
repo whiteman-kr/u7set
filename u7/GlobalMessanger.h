@@ -10,8 +10,8 @@
 
 struct RunOrderDebugInfo
 {
-	QString equipmentId;							// LM's ID
-	std::map<QUuid, int> schemaItemsRunOrder;		// Key is item's guid, value is run order index
+	QString equipmentId;										// LM's ID
+	std::map<QUuid, std::pair<int, int>> schemaItemsRunOrder;	// Key is item's guid, value is run order index
 };
 
 
@@ -69,8 +69,8 @@ public:
 	Builder::BuildIssues::Counter issueForSchema(const QString& schemeId) const;
 
 	void clearSchemaItemRunOrder();
-	void setRunOrder(const QString& equipmentId, std::map<QUuid, int>& data);
-	int schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const;
+	void setRunOrder(const QString& equipmentId, std::map<QUuid, std::pair<int, int> >& data);
+	std::pair<int, int> schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const;
 
 	// Select tab
 	//

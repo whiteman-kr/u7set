@@ -50,7 +50,7 @@ public:
 	enum class ColumnData
 	{
 		AppSignalID,
-		CustomerSignalID,
+		CustomSignalID,
 		Caption,
 		State
 	};

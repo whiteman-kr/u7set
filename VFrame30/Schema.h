@@ -84,8 +84,8 @@ namespace VFrame30
 		QUuid guid() const;
 		void setGuid(const QUuid& guid);
 
-		QString schemaID() const;
-		void setSchemaID(const QString& id);
+		QString schemaId() const;
+		void setSchemaId(const QString& id);
 
 		QString caption() const;
 		void setCaption(const QString& caption);

@@ -216,7 +216,7 @@ void MonitorSchemaWidget::restoreState(const SchemaHistoryItem& historyState)
 		// Just create an empty schema
 		//
 		schema = std::make_shared<VFrame30::MonitorSchema>();
-		schema->setSchemaID(historyState.m_schemaId);
+		schema->setSchemaId(historyState.m_schemaId);
 		schema->setCaption(historyState.m_schemaId + " not found");
 	}
 
@@ -386,7 +386,7 @@ void MonitorSchemaWidget::slot_setSchema(QString schemaId)
 		// Just create an empty schema
 		//
 		schema = std::make_shared<VFrame30::MonitorSchema>();
-		schema->setSchemaID("EMPTYSCHEMA");
+		schema->setSchemaId("EMPTYSCHEMA");
 		schema->setCaption("Empty Schema");
 	}
 
@@ -414,7 +414,7 @@ QString MonitorSchemaWidget::schemaId() const
 		return QString();
 	}
 
-	return schema()->schemaID();
+	return schema()->schemaId();
 }
 
 QString MonitorSchemaWidget::caption() const

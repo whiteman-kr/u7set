@@ -144,7 +144,7 @@ namespace Builder
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
-		QString schemaID() const { return m_appLogicItem.m_schema->schemaID(); }
+		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
 
 		QString label() const;
 

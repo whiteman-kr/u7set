@@ -832,16 +832,31 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		return;
 	}
 
+	// If file was just added it will be removed completely from the DB
+	//
+	std::vector<DbFileInfo> latestFiles = files;
+
+	latestFiles.erase(std::remove_if(latestFiles.begin(), latestFiles.end(),
+					[](const DbFileInfo& fi)
+					{
+						return fi.deleted();
+					}),
+				latestFiles.end());
+
 	// Get latest version of the object
 	//
 	std::vector<std::shared_ptr<DbFile>> latestFilesVersion;
-	ok = dbController()->getLatestVersion(files, &latestFilesVersion, m_parentWidget);
 
-	if (ok == false)
+	if (latestFiles.empty() == false)
 	{
-		// Can't update objects
-		//
-		return;
+		ok = dbController()->getLatestVersion(latestFiles, &latestFilesVersion, m_parentWidget);
+
+		if (ok == false)
+		{
+			// Can't update objects
+			//
+			return;
+		}
 	}
 
 	// Update FileInfo in devices and Update model
@@ -866,10 +881,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 		else
 		{
-			// Where is a file?
+			// Apparently file was completely deleted from the DB
 			//
-			assert(foundFile != latestFilesVersion.end());
-			continue;
 		}
 
 		// Update fileInfo
@@ -3492,10 +3505,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_separatorAction3);
 	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
-	if (theSettings.useConnections())
-	{
-		m_equipmentView->addAction(m_connectionsAction);
-	}
+	m_equipmentView->addAction(m_connectionsAction);
+
 	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
 
 	// -----------------
@@ -3538,10 +3549,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_switchModeAction);
-	if (theSettings.useConnections())
-	{
-		m_toolBar->addAction(m_connectionsAction);
-	}
+	m_toolBar->addAction(m_connectionsAction);
+
 	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
 	//

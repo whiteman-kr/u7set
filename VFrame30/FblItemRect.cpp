@@ -312,6 +312,9 @@ namespace VFrame30
 		//
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
+		FontParam smallFont = m_font;
+		smallFont.setDrawSize(m_font.drawSize() * 0.75);
+
 		if (inputsCount() > 0)
 		{
 			r.setLeft(r.left() + pinWidth);
@@ -321,6 +324,8 @@ namespace VFrame30
 		{
 			r.setRight(r.right() - pinWidth);
 		}
+
+		QRectF labelRect(r);	// save rect for future use
 
 		// Draw main rect
 		//
@@ -453,6 +458,18 @@ namespace VFrame30
 								 Qt::TextDontClip | Qt::AlignVCenter | Qt::AlignLeft);
 		}
 
+		// Draw Label
+		//
+		if (drawParam->infoMode() == true)
+		{
+			QString labelText = label();
+
+			labelRect.moveBottomLeft(labelRect.topRight());
+
+			p->setPen(Qt::darkGray);
+			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
+		}
+
 		return;
 	}
 
@@ -570,9 +587,9 @@ namespace VFrame30
 		return m_cachedGridSize * 16;
 	}
 
-	void FblItemRect::debug() const
+	void FblItemRect::dump() const
 	{
-		PosRectImpl::debug();
+		PosRectImpl::dump();
 
 		qDebug() << "\tBuildName: " << buildName();
 
@@ -615,6 +632,11 @@ namespace VFrame30
 		}
 
 		return;
+	}
+
+	bool FblItemRect::searchText(const QString& text) const
+	{
+		return m_label.contains(text, Qt::CaseInsensitive);
 	}
 
 	// Properties and Data

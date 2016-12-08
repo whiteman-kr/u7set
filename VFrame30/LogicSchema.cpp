@@ -111,7 +111,7 @@ namespace VFrame30
 					if (fblItemRect->label().isEmpty() == true)
 					{
 						int labelCounter = this->nextCounterValue();
-						fblItemRect->setLabel(schemaID() + "_" + QString::number(labelCounter));
+						fblItemRect->setLabel(schemaId() + "_" + QString::number(labelCounter));
 					}
 				}
 			}

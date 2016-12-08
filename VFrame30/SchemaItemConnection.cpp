@@ -231,8 +231,8 @@ namespace VFrame30
 
 	bool SchemaItemTransmitter::searchText(const QString& text) const
 	{
-		bool f = connectionId().contains(text, Qt::CaseInsensitive);
-		return f;
+		return	FblItemRect::searchText(text) ||
+				connectionId().contains(text, Qt::CaseInsensitive);
 	}
 
 	QString SchemaItemTransmitter::buildName() const
@@ -473,10 +473,11 @@ namespace VFrame30
 
 	bool SchemaItemReceiver::searchText(const QString& text) const
 	{
+		bool f0 = FblItemRect::searchText(text);
 		bool f1 = m_appSignalId.contains(text, Qt::CaseInsensitive);
 		bool f2 = connectionId().contains(text, Qt::CaseInsensitive);
 
-		return f1 | f2;
+		return f0 || f1 || f2;
 	}
 
 	double SchemaItemReceiver::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const

@@ -1253,6 +1253,133 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4011
+	///
+	/// IssueType: Error
+	///
+	/// Title: User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB Schema ID
+	///
+	/// Description:
+	///		User Functional Block cannot have nested another User Functional Block.
+	///
+	void IssueLogger::errALP4011(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4011,
+				  tr("User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  '%3').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB Schema ID
+	///
+	/// Description:
+	///		User Functional Block cannot have nested another User Functional Block.
+	///
+	void IssueLogger::errALP4012(QString schema, QString schemaItem, QString pinCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4012,
+				  tr("Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema '%3').")
+				  .arg(pinCaption)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection, SchemaItem %1, in %2, out %3 (LogicSchema %4).
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB SchemaItem input pin caption
+	///		%3 UFB SchemaItem output pin caption
+	///		%4 UFB SchemaID
+	///
+	/// Description:
+	///		Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection.
+	///
+	void IssueLogger::errALP4013(QString schema, QString schemaItem, QString inPin, QString outPin, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4013,
+				  tr("Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection, SchemaItem %1, in %2, out %3 (LogicSchema %4).")
+				  .arg(schemaItem)
+				  .arg(inPin)
+				  .arg(outPin)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4014
+	///
+	/// IssueType: Error
+	///
+	/// Title: User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').
+	///
+	/// Parameters:
+	///		%1 SchemaItem type
+	///		%2 UFB SchemaItem
+	///		%3 UFB SchemaID
+	///
+	/// Description:
+	///		User Functional Block can contain only allowed types of items.
+	///
+	void IssueLogger::errALP4014(QString schema, QString schemaItem, QString itemType, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4014,
+				  tr("User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').")
+				  .arg(itemType)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+	/// IssueCode: ALP4015
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').
+	///
+	/// Parameters:
+	///		%1 UFB SchemaItem
+	///		%2 UFB SchemaID
+	///
+	/// Description:
+	///		UFB Input or Output item must have ONE assigned AppSignalIDs which are used as pins on SchemaItem UFB
+	///
+	void IssueLogger::errALP4015(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4015,
+				  tr("UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error
@@ -1309,20 +1436,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema does not have Logic layer (Logic Schema '%1').
+	/// Title: Schema does not have logic layer (Schema '%1').
 	///
 	/// Parameters:
-	///		%1 Logic schema StrID
+	///		%1 SchemaID
 	///
 	/// Description:
-	///		Each logic schema has several layers (Logic, Frame and Notes), but the Logic layer is not found.
+	///		Each logic schema or user functional block schema has several layers (Logic, Frame and Notes), but the logic layer is not found.
 	///
 	void IssueLogger::errALP4022(QString schema)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
-				  tr("Schema does not have Logic layer (Logic Schema '%1').").arg(schema));
+				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
 	}
 
 

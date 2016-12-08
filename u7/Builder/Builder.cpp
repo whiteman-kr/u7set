@@ -200,7 +200,6 @@ namespace Builder
 			//
 			// Loading subsystems
 			//
-
 			Hardware::SubsystemStorage subsystems;
 
 			QString errorCode;
@@ -219,14 +218,12 @@ namespace Builder
 			//
 			// Find all LM Modules
 			//
-
 			std::vector<Hardware::DeviceModule *> lmModules;
 			findLmModules(equipmentSet.root(), lmModules);
 
 			//
 			// Loading connections
 			//
-
 			Hardware::ConnectionStorage connections;
 
 			ok = connections.load(&db, errorCode);
@@ -903,7 +900,7 @@ namespace Builder
 
 		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, signalSet, changesetId, debug()};
 
-		bool result = alPareser.build();
+		bool result = alPareser.parse();
 
 		if (result == false)
 		{

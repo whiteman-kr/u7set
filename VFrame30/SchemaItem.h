@@ -94,8 +94,8 @@ namespace VFrame30
 		virtual void SetWidthInDocPt(double widthInDocPt);
 		virtual void SetHeightInDocPt(double heightInDocPt);
 
-		static void debug(std::shared_ptr<SchemaItem> item);
-		virtual void debug() const;
+		static void dump(std::shared_ptr<SchemaItem> item);
+		virtual void dump() const;
 
 		// Text search
 		//

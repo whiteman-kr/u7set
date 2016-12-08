@@ -202,7 +202,7 @@ namespace VFrame30
 			text = signal.appSignalID();
 			break;
 
-		case E::ColumnData::CustomerSignalID:
+		case E::ColumnData::CustomSignalID:
 			if (drawParam->isMonitorMode() == true)
 			{
 				text = signal.customAppSignalID();
@@ -689,7 +689,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	//
 	bool SchemaItemSignal::searchText(const QString& text) const
 	{
-		return appSignalIds().contains(text, Qt::CaseInsensitive);
+		return	FblItemRect::searchText(text) ||
+				appSignalIds().contains(text, Qt::CaseInsensitive);
 	}
 
 	QString SchemaItemSignal::appSignalIds() const
