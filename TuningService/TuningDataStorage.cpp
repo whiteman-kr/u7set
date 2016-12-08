@@ -215,17 +215,9 @@ namespace  Tuning
 				// generate metadata
 				//
 
-				/*
-
-						m_metadataFields.append("Offset");
-						m_metadataFields.append("BitNo");
-						*/
-
-
-
-
-
 				quint8* dataPtr = m_tuningData + sizeB;
+
+				bool testSizeB = false;
 
 				switch(t)
 				{
@@ -253,6 +245,8 @@ namespace  Tuning
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(float);
+
+						testSizeB = true;
 
 						metaData.append(QVariant(QString("AnalogFloat")));
 						metaData.append(QVariant(defaultValue));
@@ -286,6 +280,8 @@ namespace  Tuning
 
 						sizeB += sizeof(qint32);
 
+						testSizeB = true;
+
 						metaData.append(QVariant(QString("AnalogInt")));
 						metaData.append(QVariant(defaultValue));
 						metaData.append(QVariant(lowBound));
@@ -308,6 +304,7 @@ namespace  Tuning
 						if ((discreteCount % SIZE_16BIT) == 0)
 						{
 							sizeB += sizeof(quint16);
+							testSizeB = true;
 						}
 
 						metaData.append(QVariant(QString("Discrete")));
@@ -321,7 +318,7 @@ namespace  Tuning
 					assert(false);
 				}
 
-				if ((sizeB % m_tuningFrameSizeBytes) == 0)
+				if (testSizeB == true && (sizeB % m_tuningFrameSizeBytes) == 0)
 				{
 					// frame full
 					// skip lowBound and highBound frames
@@ -335,6 +332,8 @@ namespace  Tuning
 				m_metadata.push_back(metaData);
 			}
 		}
+
+		assert(sizeB <= m_tuningDataSize);
 
 		return true;
 	}

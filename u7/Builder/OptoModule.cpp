@@ -486,7 +486,7 @@ namespace Hardware
 			return true;
 		}
 
-		LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID).arg(m_txRawDataSizeW));
+		LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID));
 
 		// automatic txRawDataSizeW calculation
 		//

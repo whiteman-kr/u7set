@@ -1039,7 +1039,7 @@ namespace Builder
 
 		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
 		list.append(str);
-		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n").arg(dataID);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n");
 		list.append(str);
 
 		if (txAnalogs.count() > 0)
