@@ -171,11 +171,13 @@ namespace Tuning
 	{
 		int signalCount = request.signalhash_size();
 
-		reply.mutable_tuningsignalstate()->Reserve(signalCount);
+		//reply.mutable_tuningsignalstate()->Reserve(signalCount);
+
+		reply.clear_tuningsignalstate();
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Network::TuningSignalState* tss = reply.mutable_tuningsignalstate(i);
+			Network::TuningSignalState* tss = reply.add_tuningsignalstate();
 
 			if (tss == nullptr)
 			{
