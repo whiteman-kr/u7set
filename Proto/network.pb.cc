@@ -582,11 +582,13 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsRead));
   TuningSignalState_descriptor_ = file->message_type(25);
-  static const int TuningSignalState_offsets_[4] = {
+  static const int TuningSignalState_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, signalhash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, valid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, readlowbound_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, readhighbound_),
   };
   TuningSignalState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -898,18 +900,19 @@ void protobuf_AddDesc_network_2eproto() {
     "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
     "sState\030\002 \003(\0132\032.Network.TuningSourceState"
     "\"B\n\021TuningSignalsRead\022\031\n\021clientEquipment"
-    "ID\030\001 \001(\t\022\022\n\nsignalHash\030\002 \003(\004\"d\n\021TuningSi"
-    "gnalState\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005erro"
-    "r\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005valu"
-    "e\030\004 \001(\001:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005"
-    "error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003("
-    "\0132\032.Network.TuningSignalState\"<\n\021TuningS"
-    "ignalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005val"
-    "ue\030\002 \001(\001:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n\021cl"
-    "ientEquipmentID\030\001 \001(\t\022\030\n\tautoAppay\030\002 \001(\010"
-    ":\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Net"
-    "work.TuningSignalWrite\"+\n\027TuningSignalsW"
-    "riteReply\022\020\n\005error\030\001 \001(\005:\0010", 3987);
+    "ID\030\001 \001(\t\022\022\n\nsignalHash\030\002 \003(\004\"\227\001\n\021TuningS"
+    "ignalState\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005err"
+    "or\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005val"
+    "ue\030\004 \001(\001:\0010\022\027\n\014readLowBound\030\005 \001(\001:\0010\022\030\n\r"
+    "readHighBound\030\006 \001(\001:\0010\"a\n\026TuningSignalsR"
+    "eadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSign"
+    "alState\030\002 \003(\0132\032.Network.TuningSignalStat"
+    "e\"<\n\021TuningSignalWrite\022\025\n\nsignalHash\030\001 \001"
+    "(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\"\200\001\n\022TuningSignal"
+    "sWrite\022\031\n\021clientEquipmentID\030\001 \001(\t\022\030\n\taut"
+    "oAppay\030\002 \001(\010:\005false\0225\n\021tuningSignalWrite"
+    "\030\003 \003(\0132\032.Network.TuningSignalWrite\"+\n\027Tu"
+    "ningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010", 4039);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -9799,6 +9802,8 @@ const int TuningSignalState::kSignalHashFieldNumber;
 const int TuningSignalState::kErrorFieldNumber;
 const int TuningSignalState::kValidFieldNumber;
 const int TuningSignalState::kValueFieldNumber;
+const int TuningSignalState::kReadLowBoundFieldNumber;
+const int TuningSignalState::kReadHighBoundFieldNumber;
 #endif  // !_MSC_VER
 
 TuningSignalState::TuningSignalState()
@@ -9821,6 +9826,8 @@ void TuningSignalState::SharedCtor() {
   error_ = 0;
   valid_ = false;
   value_ = 0;
+  readlowbound_ = 0;
+  readhighbound_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -9860,6 +9867,8 @@ void TuningSignalState::Clear() {
     error_ = 0;
     valid_ = false;
     value_ = 0;
+    readlowbound_ = 0;
+    readhighbound_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -9930,6 +9939,38 @@ bool TuningSignalState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(41)) goto parse_readLowBound;
+        break;
+      }
+
+      // optional double readLowBound = 5 [default = 0];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_readLowBound:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &readlowbound_)));
+          set_has_readlowbound();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(49)) goto parse_readHighBound;
+        break;
+      }
+
+      // optional double readHighBound = 6 [default = 0];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_readHighBound:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &readhighbound_)));
+          set_has_readhighbound();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -9972,6 +10013,16 @@ void TuningSignalState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->value(), output);
   }
 
+  // optional double readLowBound = 5 [default = 0];
+  if (has_readlowbound()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(5, this->readlowbound(), output);
+  }
+
+  // optional double readHighBound = 6 [default = 0];
+  if (has_readhighbound()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(6, this->readhighbound(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -9998,6 +10049,16 @@ void TuningSignalState::SerializeWithCachedSizes(
   // optional double value = 4 [default = 0];
   if (has_value()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->value(), target);
+  }
+
+  // optional double readLowBound = 5 [default = 0];
+  if (has_readlowbound()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(5, this->readlowbound(), target);
+  }
+
+  // optional double readHighBound = 6 [default = 0];
+  if (has_readhighbound()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(6, this->readhighbound(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -10032,6 +10093,16 @@ int TuningSignalState::ByteSize() const {
 
     // optional double value = 4 [default = 0];
     if (has_value()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double readLowBound = 5 [default = 0];
+    if (has_readlowbound()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double readHighBound = 6 [default = 0];
+    if (has_readhighbound()) {
       total_size += 1 + 8;
     }
 
@@ -10074,6 +10145,12 @@ void TuningSignalState::MergeFrom(const TuningSignalState& from) {
     if (from.has_value()) {
       set_value(from.value());
     }
+    if (from.has_readlowbound()) {
+      set_readlowbound(from.readlowbound());
+    }
+    if (from.has_readhighbound()) {
+      set_readhighbound(from.readhighbound());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -10101,6 +10178,8 @@ void TuningSignalState::Swap(TuningSignalState* other) {
     std::swap(error_, other->error_);
     std::swap(valid_, other->valid_);
     std::swap(value_, other->value_);
+    std::swap(readlowbound_, other->readlowbound_);
+    std::swap(readhighbound_, other->readhighbound_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

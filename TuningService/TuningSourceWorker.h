@@ -128,10 +128,18 @@ namespace Tuning
 
 			int offset = -1;
 			int bit = -1;
+			int frameNo = -1;
 
+			// signal properties from RPCT Databse
+			//
 			double lowBound = 0;
 			double highBoud = 0;
 			double defaultValue = 0;
+
+			// signal properties read from LM
+			//
+			double readLowBound = 0;
+			double readHighBound = 0;
 		};
 
 	public:

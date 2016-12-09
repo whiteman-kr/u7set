@@ -221,12 +221,14 @@ namespace Tuning
 			ts.signal = signal;
 			ts.signalHash = hash;
 			ts.type = getTuningSignalType(signal);
-			ts.offset = signal->tuningAddr().offset();
-			ts.bit = signal->tuningAddr().bit();
 			ts.index = i;
 			ts.lowBound = signal->lowEngeneeringUnits();
 			ts.highBoud = signal->highEngeneeringUnits();
 			ts.defaultValue = signal->tuningDefaultValue();
+
+			ts.offset = signal->tuningAddr().offset();
+			ts.bit = signal->tuningAddr().bit();
+			ts.frameNo = signal->tuningAddr().offset() / m_tuningRomFrameSizeW;
 		}
 	}
 
@@ -551,24 +553,86 @@ namespace Tuning
 								reply.fotipFrame.header.romFrameSizeB,
 								reply.fotipFrame.data);
 
+		// parse signals values and bounds
+		//
+		int frameNo = (reply.fotipFrame.header.startAddressW - m_tuningRomStartAddrW) / m_tuningRomFrameSizeW;
+
+		quint8* dataPtr = reply.fotipFrame.data;
+
 		int signalCount = m_tuningSignals.count();
 
-		int frameStartAddrW = reply.fotipFrame.header.startAddressW;
-		int nextFrameStartAddrW = frameStartAddrW + reply.fotipFrame.header.romFrameSizeB / sizeof(quint16);
+		float df = m_tuningSignals[0].defaultValue;
+		quint32 iv = *reinterpret_cast<quint32*>(&df);
+
+		quint8 b1 = reply.fotipFrame.data[0];
+		quint8 b2 = reply.fotipFrame.data[1];
+		quint8 b3 = reply.fotipFrame.data[2];
+		quint8 b4 = reply.fotipFrame.data[3];
 
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];
 
-			if (ts.offset < frameStartAddrW ||
-				ts.offset >= nextFrameStartAddrW)
+			if (ts.frameNo > frameNo ||
+				ts.frameNo + 2 < frameNo)
 			{
-				continue;
+				continue;		// signal is not in this frame
 			}
 
-			// parse signal!!!
-			//
+			double value = 0;
 
+			int offsetInFrameB = (ts.offset - ts.frameNo * m_tuningRomFrameSizeW) * sizeof(quint16);
+
+			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
+
+			switch(ts.type)
+			{
+			case TuningSignalType::AnalogFloat:
+				{
+					value = *reinterpret_cast<float*>(dataPtr + offsetInFrameB); //reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB));
+				}
+				break;
+
+			case TuningSignalType::AnalogInt:
+				{
+					value = reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB));
+				}
+				break;
+
+			case TuningSignalType::Discrete:
+				{
+					quint16 word =	reverseUint16(*reinterpret_cast<quint16*>(dataPtr + offsetInFrameB));
+					value = ((word & (0x0001 << ts.bit)) == 0 ? 0 : 1);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+
+			ts.valid = true;
+
+			// (frameNo % 3) == 0 - tuning signal value
+			// (frameNo % 3) == 1 - tuning signal read low bound
+			// (frameNo % 3) == 2 - tuning signal read high bound
+
+			switch(frameNo % 3)
+			{
+			case 0:
+				ts.value = value;
+				break;
+
+			case 1:
+				ts.readLowBound = value;
+				break;
+
+			case 2:
+				ts.readHighBound = value;
+				break;
+
+			default:
+				assert(false);
+			}
 		}
 	}
 

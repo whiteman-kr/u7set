@@ -3143,6 +3143,20 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline double value() const;
   inline void set_value(double value);
 
+  // optional double readLowBound = 5 [default = 0];
+  inline bool has_readlowbound() const;
+  inline void clear_readlowbound();
+  static const int kReadLowBoundFieldNumber = 5;
+  inline double readlowbound() const;
+  inline void set_readlowbound(double value);
+
+  // optional double readHighBound = 6 [default = 0];
+  inline bool has_readhighbound() const;
+  inline void clear_readhighbound();
+  static const int kReadHighBoundFieldNumber = 6;
+  inline double readhighbound() const;
+  inline void set_readhighbound(double value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   inline void set_has_signalhash();
@@ -3153,6 +3167,10 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline void clear_has_valid();
   inline void set_has_value();
   inline void clear_has_value();
+  inline void set_has_readlowbound();
+  inline void clear_has_readlowbound();
+  inline void set_has_readhighbound();
+  inline void clear_has_readhighbound();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3160,9 +3178,11 @@ class TuningSignalState : public ::google::protobuf::Message {
   ::google::protobuf::int32 error_;
   bool valid_;
   double value_;
+  double readlowbound_;
+  double readhighbound_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -6685,6 +6705,50 @@ inline double TuningSignalState::value() const {
 inline void TuningSignalState::set_value(double value) {
   set_has_value();
   value_ = value;
+}
+
+// optional double readLowBound = 5 [default = 0];
+inline bool TuningSignalState::has_readlowbound() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void TuningSignalState::set_has_readlowbound() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void TuningSignalState::clear_has_readlowbound() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void TuningSignalState::clear_readlowbound() {
+  readlowbound_ = 0;
+  clear_has_readlowbound();
+}
+inline double TuningSignalState::readlowbound() const {
+  return readlowbound_;
+}
+inline void TuningSignalState::set_readlowbound(double value) {
+  set_has_readlowbound();
+  readlowbound_ = value;
+}
+
+// optional double readHighBound = 6 [default = 0];
+inline bool TuningSignalState::has_readhighbound() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void TuningSignalState::set_has_readhighbound() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void TuningSignalState::clear_has_readhighbound() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void TuningSignalState::clear_readhighbound() {
+  readhighbound_ = 0;
+  clear_has_readhighbound();
+}
+inline double TuningSignalState::readhighbound() const {
+  return readhighbound_;
+}
+inline void TuningSignalState::set_readhighbound(double value) {
+  set_has_readhighbound();
+  readhighbound_ = value;
 }
 
 // -------------------------------------------------------------------
