@@ -88,7 +88,12 @@ void TcpTuningClient::processReply(quint32 requestID, const char* replyData, qui
 	case TDS_GET_TUNING_SOURCES_STATES:
 		processTuningSourcesState(data);
 		break;
-	default:
+
+    case TDS_TUNING_SIGNALS_READ:
+        processReadTuningSignals(data);
+        break;
+
+    default:
 		assert(false);
 		theLogFile.writeError(tr("TcpTuningClient::processReply: Wrong requestID."));
 
@@ -220,7 +225,7 @@ void TcpTuningClient::requestReadTuningSignals()
     qDebug()<<s;
     qDebug()<<c;
 
-    //sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_readTuningSignals);
+    sendRequest(TDS_TUNING_SIGNALS_READ, m_readTuningSignals);
 
 }
 
@@ -379,9 +384,9 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
         ts.m_state = tss;
     }
 
-    //requestReadTuningSignals();
+    requestReadTuningSignals();
 
-    resetToGetTuningSourcesState();
+    //resetToGetTuningSourcesState();
 
 	return;
 }
