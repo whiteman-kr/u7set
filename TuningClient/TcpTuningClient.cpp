@@ -255,7 +255,7 @@ void TcpTuningClient::requestWriteTuningSignals()
     assert(isClearToSendRequest());
 
     m_writeTuningSignals.set_clientequipmentid(theSettings.instanceStrId().toUtf8());
-    m_writeTuningSignals.set_autoappay(true);
+	m_writeTuningSignals.set_autoapply(true);
 
     m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(writeTuningSignalCount);
 
