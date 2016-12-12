@@ -441,6 +441,10 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
             continue;
         }
 
+        //double readLowBound = tss.readlowbound();
+
+        //double readHighBound = tss.readhighbound();
+
         TuningObject* object = theObjects.objectPtrByHash(tss.signalhash());
 
         if (object == nullptr)
@@ -500,6 +504,22 @@ void TcpTuningClient::processWriteTuningSignals(const QByteArray& data)
 
         resetToGetTuningSourcesState();
         return;
+    }
+
+    int writeResultCount = m_writeTuningSignalsReply.writeresult_size();
+
+    for (int i = 0; i < writeResultCount; i++)
+    {
+        const ::Network::TuningSignalWriteResult& twr = m_writeTuningSignalsReply.writeresult(i);
+
+        if (twr.error() != 0)
+        {
+            theLogFile.writeError(tr("TcpTuningClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2")
+                                  .arg(networkErrorStr(static_cast<NetworkError>(twr.error())))
+                                  .arg(twr.signalhash()));
+
+            continue;
+        }
     }
 
     processTuningSignals();
