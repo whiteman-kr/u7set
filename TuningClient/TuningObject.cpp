@@ -107,7 +107,21 @@ double TuningObject::editValue() const
 
 void TuningObject::setEditValue(double value)
 {
-	m_editValue = value;
+    if (m_editValue != value)
+    {
+        m_editValue = value;
+
+        if (m_value == m_editValue)
+        {
+            m_userModified = false;
+        }
+        else
+        {
+            m_userModified = true;
+        }
+
+        m_redraw = true;
+    }
 }
 
 double TuningObject::defaultValue() const
@@ -152,6 +166,7 @@ void TuningObject::setDecimalPlaces(int value)
 
 bool TuningObject::valid() const
 {
+    //return true;
     return m_valid;
 }
 
@@ -194,4 +209,9 @@ bool TuningObject::redraw()
 bool TuningObject::userModified() const
 {
     return m_userModified;
+}
+
+void TuningObject::clearUserModified()
+{
+    m_userModified = false;
 }

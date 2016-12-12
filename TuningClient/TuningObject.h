@@ -58,6 +58,7 @@ public:
     bool redraw();
 
     bool userModified() const;
+    void clearUserModified();
 
 private:
 

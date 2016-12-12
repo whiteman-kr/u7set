@@ -221,8 +221,10 @@ void TcpTuningClient::requestReadTuningSignals()
         m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(hash);
     }
 
-    int s = m_readTuningSignals.mutable_signalhash()->size();
-    int c = m_readTuningSignals.mutable_signalhash()->Capacity();
+    lObjects.unlock();
+
+    //int s = m_readTuningSignals.mutable_signalhash()->size();
+    //int c = m_readTuningSignals.mutable_signalhash()->Capacity();
 
     //qDebug()<<s;
     //qDebug()<<c;
@@ -278,13 +280,15 @@ void TcpTuningClient::requestWriteTuningSignals()
         m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(&wrCmd);
     }
 
-    int s = m_writeTuningSignals.mutable_tuningsignalwrite()->size();
-    int c = m_writeTuningSignals.mutable_tuningsignalwrite()->Capacity();
+    lQueue.unlock();
+
+    //int s = m_writeTuningSignals.mutable_tuningsignalwrite()->size();
+    //int c = m_writeTuningSignals.mutable_tuningsignalwrite()->Capacity();
 
     //qDebug()<<s;
     //qDebug()<<c;
 
-    //sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_writeTuningSignals);
+    sendRequest(TDS_TUNING_SIGNALS_WRITE, m_writeTuningSignals);
 }
 
 void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
@@ -335,6 +339,8 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 
 			m_tuningSources[id] = ts;
 		}
+
+        l.unlock();
 	}
 
     requestTuningSourcesState();
@@ -386,9 +392,9 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
         ts.m_state = tss;
     }
 
-    requestReadTuningSignals();
+    l.unlock();
 
-    //resetToGetTuningSourcesState();
+    processTuningSignals();
 
 	return;
 }
@@ -446,10 +452,12 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
         object->setValue(tss.value());
     }
 
+    int objectCount = theObjects.objectCount();
+
+    l.unlock();
+
     // increase the requested signal index, wrap the request index if needed
     //
-
-    int objectCount = theObjects.objectCount();
 
     m_readTuningSignalIndex += m_readTuningSignalCount;
 
@@ -519,6 +527,8 @@ void TcpTuningClient::slot_signalsUpdated()
         m_writeQueue.pop();
     }
 
+    l.unlock();
+
 }
 
 std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
@@ -531,6 +541,8 @@ std::vector<TuningSource> TcpTuningClient::tuningSourcesInfo()
 	{
 		result.push_back(ds.second);
 	}
+
+    l.unlock();
 
 	return result;
 }
@@ -548,6 +560,8 @@ bool TcpTuningClient::tuningSourceInfo(quint64 id, TuningSource& result)
 
     result = it->second;
 
+    l.unlock();
+
     return true;
 }
 
@@ -558,6 +572,20 @@ void TcpTuningClient::writeTuningSignal(Hash hash, double value)
     WriteCommand cmd(hash, value);
 
     m_writeQueue.push(cmd);
+
+    l.unlock();
+}
+
+void TcpTuningClient::writeTuningSignals(std::vector<WriteCommand> signalsArray)
+{
+    QMutexLocker l(&m_mutex);
+
+    for (auto c : signalsArray)
+    {
+        m_writeQueue.push(c);
+    }
+
+    l.unlock();
 }
 
 QString TcpTuningClient::networkErrorStr(NetworkError error)

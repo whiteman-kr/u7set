@@ -267,6 +267,8 @@ void TuningItemModel::updateStates(int from, int to)
 
 	}
 
+    l.unlock();
+
 	return;
 }
 
@@ -894,6 +896,8 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
+    std::vector<WriteCommand> signalsArray;
+
 	int listCount = 0;
 
 	for (TuningObject& o : m_objects)
@@ -923,8 +927,6 @@ void TuningItemModelMain::slot_Apply()
 		listCount++;
 	}
 
-
-
 	str += tr("\r\nAre you sure you want to continue?");
 
 	if (QMessageBox::warning(m_parent, tr("Apply Changes"),
@@ -935,6 +937,19 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
+    for (TuningObject& o : m_objects)
+    {
+        if (o.userModified() == false)
+        {
+            continue;
+        }
+
+        signalsArray.push_back(WriteCommand(o.appSignalHash(), o.editValue()));
+
+        o.clearUserModified(); // temporary solution!!!!!
+    }
+
+    theTcpTuningClient->writeTuningSignals(signalsArray);
 }
 
 
@@ -979,7 +994,7 @@ bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEven
 {
     if (trigger == QAbstractItemView::EditKeyPressed)
     {
-        qDebug()<<"edit "<<(int)trigger;
+        //qDebug()<<"edit "<<(int)trigger;
         m_editorActive = true;
     }
 
@@ -991,7 +1006,7 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 
     m_editorActive = false;
 
-    qDebug()<<"closeEditor";
+    //qDebug()<<"closeEditor";
 
     QTableView::closeEditor(editor, hint);
 }
@@ -1389,7 +1404,7 @@ void TuningPage::timerEvent(QTimerEvent* event)
                         continue;
                     }
 
-                    if (o->redraw() == true)
+                    if (o->redraw() == true || o->userModified() == true)
                     {
                         m_objectList->update(m_model->index(row, col));
                     }
