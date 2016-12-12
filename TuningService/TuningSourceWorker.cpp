@@ -68,6 +68,93 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
+	// TuningSourceWorker::TuningSignal class implementation
+	//
+	// ----------------------------------------------------------------------------------
+
+	void TuningSourceWorker::TuningSignal::init(const Signal* s, int index, int tuningRomFraeSizeW)
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_valid = false;
+		m_value = 0;
+
+		m_signal = s;
+		m_signalHash = ::calcHash(s->appSignalID());
+
+		m_type = getTuningSignalType(s);
+		m_index = index;
+		m_lowBound = s->lowEngeneeringUnits();
+		m_highBoud = s->highEngeneeringUnits();
+		m_defaultValue = s->tuningDefaultValue();
+
+		m_offset = s->tuningAddr().offset();
+		m_bit = s->tuningAddr().bit();
+		m_frameNo = s->tuningAddr().offset() / tuningRomFraeSizeW;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setState(bool valid, double value)
+	{
+		m_valid = valid;
+		m_value = value;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setReadLowBound(double readLowBound)
+	{
+		m_readLowBound = readLowBound;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setReadHighBound(double readHighBound)
+	{
+		m_readHighBound = readHighBound;
+	}
+
+	TuningSourceWorker::TuningSignalType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return TuningSignalType::Discrete;
+		}
+
+		if (s->isAnalog() == true)
+		{
+			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			{
+				return TuningSignalType::AnalogFloat;
+			}
+			else
+			{
+				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+				{
+					return TuningSignalType::AnalogInt;
+				}
+			}
+		}
+		else
+		{
+			if (s->isDiscrete() == true)
+			{
+				return TuningSignalType::Discrete;
+			}
+		}
+
+		// unknown type of signal
+		//
+		assert(false);
+		return TuningSignalType::Discrete;
+	}
+
+
+	// ----------------------------------------------------------------------------------
+	//
 	// TuningSourceWorker class implementation
 	//
 	// ----------------------------------------------------------------------------------
@@ -151,8 +238,10 @@ namespace Tuning
 
 		TuningSignal& signal = m_tuningSignals[signalIndex];
 
-		tss.set_valid(signal.valid);
-		tss.set_value(signal.value);
+		tss.set_valid(signal.valid());
+		tss.set_value(signal.value());
+		tss.set_readlowbound(signal.readLowBound());
+		tss.set_readhighbound(signal.readHighBound());
 		tss.set_error(TO_INT(NetworkError::Success));
 	}
 
@@ -215,58 +304,8 @@ namespace Tuning
 
 			TuningSignal& ts = m_tuningSignals[i];
 
-			ts.valid = false;
-			ts.value = 0;
-
-			ts.signal = signal;
-			ts.signalHash = hash;
-			ts.type = getTuningSignalType(signal);
-			ts.index = i;
-			ts.lowBound = signal->lowEngeneeringUnits();
-			ts.highBoud = signal->highEngeneeringUnits();
-			ts.defaultValue = signal->tuningDefaultValue();
-
-			ts.offset = signal->tuningAddr().offset();
-			ts.bit = signal->tuningAddr().bit();
-			ts.frameNo = signal->tuningAddr().offset() / m_tuningRomFrameSizeW;
+			ts.init(signal, i, m_tuningRomFrameSizeW);
 		}
-	}
-
-
-	TuningSourceWorker::TuningSignalType TuningSourceWorker::getTuningSignalType(Signal* s) const
-	{
-		if (s == nullptr)
-		{
-			assert(false);
-			return TuningSignalType::Discrete;
-		}
-
-		if (s->isAnalog())
-		{
-			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-			{
-				return TuningSignalType::AnalogFloat;
-			}
-			else
-			{
-				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-				{
-					return TuningSignalType::AnalogInt;
-				}
-			}
-		}
-		else
-		{
-			if (s->isDiscrete())
-			{
-				return TuningSignalType::Discrete;
-			}
-		}
-
-		// unknown type of signal
-		//
-		assert(false);
-		return TuningSignalType::Discrete;
 	}
 
 
@@ -301,6 +340,8 @@ namespace Tuning
 				// fix - source is not reply
 				//
 				m_stat.isReply = false;
+
+				invalidateAllSignals();
 			}
 			else
 			{
@@ -561,7 +602,7 @@ namespace Tuning
 
 		int signalCount = m_tuningSignals.count();
 
-		float df = m_tuningSignals[0].defaultValue;
+		float df = m_tuningSignals[0].defaultValue();
 		quint32 iv = *reinterpret_cast<quint32*>(&df);
 
 		quint8 b1 = reply.fotipFrame.data[0];
@@ -573,19 +614,19 @@ namespace Tuning
 		{
 			TuningSignal& ts = m_tuningSignals[i];
 
-			if (ts.frameNo > frameNo ||
-				ts.frameNo + 2 < frameNo)
+			if (ts.frameNo() < frameNo ||
+				ts.frameNo() + 2 >= frameNo)
 			{
 				continue;		// signal is not in this frame
 			}
 
 			double value = 0;
 
-			int offsetInFrameB = (ts.offset - ts.frameNo * m_tuningRomFrameSizeW) * sizeof(quint16);
+			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningRomFrameSizeW) * sizeof(quint16);
 
 			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
 
-			switch(ts.type)
+			switch(ts.type())
 			{
 			case TuningSignalType::AnalogFloat:
 				{
@@ -602,15 +643,13 @@ namespace Tuning
 			case TuningSignalType::Discrete:
 				{
 					quint16 word =	reverseUint16(*reinterpret_cast<quint16*>(dataPtr + offsetInFrameB));
-					value = ((word & (0x0001 << ts.bit)) == 0 ? 0 : 1);
+					value = ((word & (0x0001 << ts.bit())) == 0 ? 0 : 1);
 				}
 				break;
 
 			default:
 				assert(false);
 			}
-
-			ts.valid = true;
 
 			// (frameNo % 3) == 0 - tuning signal value
 			// (frameNo % 3) == 1 - tuning signal read low bound
@@ -619,15 +658,15 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.value = value;
+				ts.setState(true, value);
 				break;
 
 			case 1:
-				ts.readLowBound = value;
+				ts.setReadLowBound(value);
 				break;
 
 			case 2:
-				ts.readHighBound = value;
+				ts.setReadHighBound(value);
 				break;
 
 			default:
@@ -846,6 +885,13 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::invalidateAllSignals()
+	{
+		for(TuningSignal& s : m_tuningSignals)
+		{
+			s.setState(false, 0);
+		}
+	}
 
 
 	void TuningSourceWorker::onTimer()

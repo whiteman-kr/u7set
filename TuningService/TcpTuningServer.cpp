@@ -72,8 +72,10 @@ namespace Tuning
 
 		m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
 
+		QString clientRequestID = QString::fromStdString(m_getTuningSourcesInfo.clientequipmentid());
+
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_getTuningSourcesInfo.clientequipmentid());
+				m_service.getClientContext(clientRequestID);
 
 		if (clientContext == nullptr)
 		{
@@ -113,8 +115,10 @@ namespace Tuning
 
 		m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
 
+		QString clientRequestID = QString::fromStdString(m_getTuningSourcesStates.clientequipmentid());
+
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_getTuningSourcesStates.clientequipmentid());
+				m_service.getClientContext(clientRequestID);
 
 		if (clientContext == nullptr)
 		{
@@ -152,8 +156,10 @@ namespace Tuning
 	{
 		m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
 
+		QString clientRequestID = QString::fromStdString(m_tuningSignalsReadRequest.clientequipmentid());
+
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_tuningSignalsReadRequest.clientequipmentid());
+				m_service.getClientContext(clientRequestID);
 
 		if (clientContext == nullptr)
 		{
@@ -173,7 +179,6 @@ namespace Tuning
 
 		sendReply(m_tuningSignalsReadReply);
 	}
-
 
 
 	// -------------------------------------------------------------------------------

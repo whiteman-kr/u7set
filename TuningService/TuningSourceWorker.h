@@ -112,34 +112,57 @@ namespace Tuning
 			Discrete = 2,
 		};
 
-		struct TuningSignal
+		class TuningSignal
 		{
-			// static fields
+		public:
+			void init(const Signal* s, int index, int tuningRomFraeSizeW);
+
+			bool valid() const { return m_valid; }
+			double value() const { return m_value; }
+			double defaultValue() const { return m_defaultValue; }
+			double readLowBound() const { return m_readLowBound; }
+			double readHighBound() const { return m_readHighBound; }
+
+			int offset() const { return m_offset; }
+			int bit() const { return m_bit; }
+			int frameNo() const { return m_frameNo; }
+
+			TuningSignalType type() const { return m_type; }
+
+			void setState(bool valid, double value);
+			void setReadLowBound(double readLowBound);
+			void setReadHighBound(double readHighBound);
+
+		private:
+			TuningSignalType getTuningSignalType(const Signal* s);
+
+		private:
+			// state fields
 			//
-			bool valid = false;
-			double value = 0;
+			bool m_valid = false;
+			double m_value = 0;
 
 			// static fields
 			//
-			Signal* signal = nullptr;
-			Hash signalHash = 0;
-			TuningSignalType type = TuningSignalType::Discrete;
-			int index = -1;
+			const Signal* m_signal = nullptr;
+			Hash m_signalHash = 0;
+			TuningSignalType m_type = TuningSignalType::Discrete;
+			int m_index = -1;
 
-			int offset = -1;
-			int bit = -1;
-			int frameNo = -1;
+			int m_offset = -1;
+			int m_bit = -1;
+			int m_frameNo = -1;
 
 			// signal properties from RPCT Databse
 			//
-			double lowBound = 0;
-			double highBoud = 0;
-			double defaultValue = 0;
+			double m_lowBound = 0;
+			double m_highBoud = 0;
+			double m_defaultValue = 0;
 
 			// signal properties read from LM
 			//
-			double readLowBound = 0;
-			double readHighBound = 0;
+			double m_readLowBound = 0;
+			double m_readHighBound = 0;
 		};
 
 	public:
@@ -164,7 +187,6 @@ namespace Tuning
 		virtual void onThreadFinished() override;
 
 		void initTuningSignals(const TuningData* td);
-		TuningSignalType getTuningSignalType(Signal* s) const;
 
 		bool processWaitReply();
 		bool processCommandQueue();
@@ -186,6 +208,8 @@ namespace Tuning
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
 
 		void restartTimer();
+
+		void invalidateAllSignals();
 
 	private slots:
 		void onTimer();

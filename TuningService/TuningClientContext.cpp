@@ -101,6 +101,32 @@ namespace Tuning
 			TuningSourceContext* sourceContext = new TuningSourceContext(sourceID, source);
 
 			m_sourceContextMap.insert(sourceID, sourceContext);
+
+			// fill m_signalToSourceMap
+			//
+			const TuningData* tuningData = source->tuningData();
+
+			if (tuningData == nullptr)
+			{
+				continue;
+			}
+
+			QVector<Signal*> sourceSignals;
+
+			tuningData->getSignals(sourceSignals);
+
+			for(const Signal* signal : sourceSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				Hash signalHash = ::calcHash(signal->appSignalID());
+
+				m_signalToSourceMap.insert(signalHash, sourceContext);
+			}
 		}
 	}
 
@@ -281,7 +307,7 @@ namespace Tuning
 	{
 		for(const TuningServiceSettings::TuningClient& client : tss.clients)
 		{
-			if (contains(client.equipmentID))
+			if (contains(client.equipmentID) == true)
 			{
 				assert(false);
 				continue;
