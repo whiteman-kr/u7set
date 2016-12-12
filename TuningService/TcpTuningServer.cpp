@@ -59,6 +59,10 @@ namespace Tuning
 			onTuningSignalsReadRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_TUNING_SIGNALS_WRITE:
+			onTuningSignalsWriteRequest(requestData, requestDataSize);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -179,6 +183,34 @@ namespace Tuning
 
 		sendReply(m_tuningSignalsReadReply);
 	}
+
+
+	void TcpTuningServer::onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize)
+	{
+		/*m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
+
+		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
+
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(clientRequestID);
+
+		if (clientContext == nullptr)
+		{
+			// unknown clientID
+			//
+			m_tuningSignalsWriteReply.Clear();
+
+			m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+
+			sendReply(m_tuningSignalsWriteReply);
+			return;
+		}
+
+		clientContext->writeSignalStates(m_tuningSignalsWriteRequest);
+
+		sendReply(m_tuningSignalsWriteReply);*/
+	}
+
 
 
 	// -------------------------------------------------------------------------------

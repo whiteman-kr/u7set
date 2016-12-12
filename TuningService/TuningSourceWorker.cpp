@@ -605,10 +605,23 @@ namespace Tuning
 		float df = m_tuningSignals[0].defaultValue();
 		quint32 iv = *reinterpret_cast<quint32*>(&df);
 
-		quint8 b1 = reply.fotipFrame.data[0];
-		quint8 b2 = reply.fotipFrame.data[1];
-		quint8 b3 = reply.fotipFrame.data[2];
-		quint8 b4 = reply.fotipFrame.data[3];
+		if (frameNo == 0)
+		{
+			int a = 0;
+			a++;
+		}
+
+		if (frameNo == 1)
+		{
+			int a = 0;
+			a++;
+		}
+
+		if (frameNo == 2)
+		{
+			int a = 0;
+			a++;
+		}
 
 		for(int i = 0; i < signalCount; i++)
 		{

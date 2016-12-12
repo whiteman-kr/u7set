@@ -49,6 +49,7 @@ namespace Tuning
 		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
 
 		void getSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const;
+		void writeSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply);
 
 		void setSourceWorker(const QString& sourceID, TuningSourceWorker* worker);
 
