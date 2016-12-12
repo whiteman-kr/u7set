@@ -55,7 +55,7 @@ public:
 public:
 	void setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int> &objectsIndexes);
 
-	TuningObject object(int index);
+    TuningObject* object(int index);
 
 	void addColumn(Columns column);
 	int columnIndex(int index) const;

@@ -87,7 +87,17 @@ double TuningObject::value() const
 
 void TuningObject::setValue(double value)
 {
-	m_value = value;
+    if (m_value != value)
+    {
+        m_redraw = true;
+
+        m_value = value;
+
+        m_underflow = m_value < m_lowLimit;
+
+        m_overflow = m_value > m_highLimit;
+    }
+
 }
 
 double TuningObject::editValue() const
@@ -142,13 +152,18 @@ void TuningObject::setDecimalPlaces(int value)
 
 bool TuningObject::valid() const
 {
-	return true;
-	//return m_valid;
+    return m_valid;
 }
 
 void TuningObject::setValid(bool value)
 {
-	m_valid = value;
+    if (m_valid != value)
+    {
+        m_redraw = true;
+
+        m_valid = value;
+    }
+
 }
 
 bool TuningObject::underflow() const
@@ -156,29 +171,27 @@ bool TuningObject::underflow() const
 	return m_underflow;
 }
 
-void TuningObject::setUnderflow(bool value)
-{
-	m_underflow = value;
-}
-
 bool TuningObject::overflow() const
 {
 	return m_overflow;
 }
 
-void TuningObject::setOverflow(bool value)
-{
-	m_overflow = value;
-}
-
 Hash TuningObject::appSignalHash() const
 {
 	return m_appSignalHash;
-
 }
 
-bool TuningObject::modified() const
+bool TuningObject::redraw()
 {
-	return m_value != m_editValue;
+    bool result = m_redraw;
+
+    m_redraw = false;
+
+    return result;
 }
 
+
+bool TuningObject::userModified() const
+{
+    return m_userModified;
+}

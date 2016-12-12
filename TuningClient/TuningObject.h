@@ -50,14 +50,14 @@ public:
 	void setValid(bool value);
 
 	bool underflow() const;
-	void setUnderflow(bool value);
 
 	bool overflow() const;
-	void setOverflow(bool value);
 
-	Hash appSignalHash() const;
+    Hash appSignalHash() const;
 
-	bool modified() const;
+    bool redraw();
+
+    bool userModified() const;
 
 private:
 
@@ -78,11 +78,14 @@ private:
 
 	int m_decimalPlaces = 0;
 
-	bool m_valid = 0;
-	bool m_underflow = 0;
-	bool m_overflow = 0;
+    bool m_valid = false;
+    bool m_underflow = false;
+    bool m_overflow = false;
 
 	Hash m_appSignalHash = 0;
+
+    bool m_redraw = false;
+    bool m_userModified = false;
 };
 
 

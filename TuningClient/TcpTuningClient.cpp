@@ -216,14 +216,16 @@ void TcpTuningClient::requestReadTuningSignals()
             continue;
         }
 
-        m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(object->appSignalHash());
+        Hash hash = object->appSignalHash();
+
+        m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(hash);
     }
 
     int s = m_readTuningSignals.mutable_signalhash()->size();
     int c = m_readTuningSignals.mutable_signalhash()->Capacity();
 
-    qDebug()<<s;
-    qDebug()<<c;
+    //qDebug()<<s;
+    //qDebug()<<c;
 
     sendRequest(TDS_TUNING_SIGNALS_READ, m_readTuningSignals);
 
@@ -279,8 +281,8 @@ void TcpTuningClient::requestWriteTuningSignals()
     int s = m_writeTuningSignals.mutable_tuningsignalwrite()->size();
     int c = m_writeTuningSignals.mutable_tuningsignalwrite()->Capacity();
 
-    qDebug()<<s;
-    qDebug()<<c;
+    //qDebug()<<s;
+    //qDebug()<<c;
 
     //sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_writeTuningSignals);
 }
@@ -299,8 +301,8 @@ void TcpTuningClient::processTuningSourcesInfo(const QByteArray& data)
 
 	if (m_tuningDataSourcesInfoReply.error() != 0)
 	{
-		theLogFile.writeError(tr("TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1").arg(m_tuningDataSourcesInfoReply.error()));
-		assert(m_tuningDataSourcesStatesReply.error() != 0);
+        theLogFile.writeError(tr("TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1")
+                              .arg(networkErrorStr(static_cast<NetworkError>(m_tuningDataSourcesInfoReply.error()))));
 
 		resetToGetTuningSources();
 		return;
@@ -356,8 +358,8 @@ void TcpTuningClient::processTuningSourcesState(const QByteArray& data)
 
 	if (m_tuningDataSourcesStatesReply.error() != 0)
 	{
-		theLogFile.writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1").arg(m_tuningDataSourcesStatesReply.error()));
-		assert(m_tuningDataSourcesStatesReply.error() != 0);
+        theLogFile.writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1")
+                              .arg(networkErrorStr(static_cast<NetworkError>(m_tuningDataSourcesStatesReply.error()))));
 
         resetToGetTuningSourcesState();
 		return;
@@ -406,8 +408,8 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
 
     if (m_readTuningSignalsReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, error received: %1").arg(m_readTuningSignalsReply.error()));
-        assert(m_tuningDataSourcesStatesReply.error() != 0);
+        theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, error received: %1")
+                              .arg(networkErrorStr(static_cast<NetworkError>(m_readTuningSignalsReply.error()))));
 
         resetToGetTuningSourcesState();
         return;
@@ -415,14 +417,16 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
 
     QMutexLocker l(&theObjects.m_mutex);
 
-    for (int i = 0; i < m_readTuningSignalsReply.tuningsignalstate_size(); i++)
+    int readReplyCount = m_readTuningSignalsReply.tuningsignalstate_size();
+
+    for (int i = 0; i < readReplyCount; i++)
     {
         const ::Network::TuningSignalState& tss = m_readTuningSignalsReply.tuningsignalstate(i);
 
         if (tss.error() != 0)
         {
-            theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1").arg(tss.error()));
-            assert(tss.error() != 0);
+            theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1")
+                                  .arg(networkErrorStr(static_cast<NetworkError>(tss.error()))));
 
             continue;
         }
@@ -431,6 +435,9 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
 
         if (object == nullptr)
         {
+            theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, object not found by hash: %1")
+                                  .arg(tss.signalhash()));
+
             // no such signal found
             continue;
         }
@@ -476,8 +483,8 @@ void TcpTuningClient::processWriteTuningSignals(const QByteArray& data)
 
     if (m_writeTuningSignalsReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::processWriteTuningSignals, error received: %1").arg(m_writeTuningSignalsReply.error()));
-        assert(m_writeTuningSignalsReply.error() != 0);
+        theLogFile.writeError(tr("TcpTuningClient::processWriteTuningSignals, error received: %1")
+                              .arg(networkErrorStr(static_cast<NetworkError>(m_writeTuningSignalsReply.error()))));
 
         resetToGetTuningSourcesState();
         return;
@@ -553,6 +560,29 @@ void TcpTuningClient::writeTuningSignal(Hash hash, double value)
     m_writeQueue.push(cmd);
 }
 
+QString TcpTuningClient::networkErrorStr(NetworkError error)
+{
+    switch (error)
+    {
+    case NetworkError::Success:                         return "NetworkError::Success"; break;
+    case NetworkError::WrongPartNo:                     return "NetworkError::WrongPartNo"; break;
+    case NetworkError::RequestParamExceed:              return "NetworkError::RequestParamExceed"; break;
+    case NetworkError::RequestStateExceed:              return "NetworkError::RequestStateExceed"; break;
+    case NetworkError::ParseRequestError:               return "NetworkError::ParseRequestError"; break;
+    case NetworkError::RequestDataSourcesStatesExceed:  return "NetworkError::RequestDataSourcesStatesExceed"; break;
+    case NetworkError::UnitsExceed:                     return "NetworkError::UnitsExceed"; break;
+    case NetworkError::UnknownTuningClientID:           return "NetworkError::UnknownTuningClientID"; break;
+    case NetworkError::UnknownSignalHash:               return "NetworkError::UnknownSignalHash"; break;
+    case NetworkError::InternalError:                   return "NetworkError::InternalError"; break;
+    default:
+        assert(false);
+    }
+
+    return "?";
+}
+
 TcpTuningClient* theTcpTuningClient = nullptr;
+
+
 
 
