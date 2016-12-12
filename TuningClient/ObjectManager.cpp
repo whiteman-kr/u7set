@@ -6,7 +6,7 @@ ObjectManager::ObjectManager()
 
 int ObjectManager::objectCount()
 {
-    return m_objects.size();
+    return (int)m_objects.size();
 
 }
 
@@ -163,7 +163,7 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 
             m_objects.push_back(object);
 
-            m_objectsHashMap[object.appSignalHash()] = m_objects.size() - 1;
+            m_objectsHashMap[object.appSignalHash()] = (int)m_objects.size() - 1;
 
 			continue;
 		}

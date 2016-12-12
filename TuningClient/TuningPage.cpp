@@ -237,52 +237,47 @@ void TuningItemModel::updateStates(int from, int to)
 		m_blink = !m_blink;
 	}
 
-	/*if (m_signalsTable.size() == 0)
+    if (m_objects.size() == 0)
 	{
 		return;
 	}
-	if (from >= m_signalsTable.size() || to >= m_signalsTable.size())
+
+    if (from >= m_objects.size() || to >= m_objects.size())
 	{
 		assert(false);
 		return;
 	}
 
-	std::vector<Hash> requestHashes;
-	requestHashes.reserve(to - from);
-
-	std::vector<AppSignalState> requestStates;
+    QMutexLocker l(&theObjects.m_mutex);
 
 	for (int i = from; i <= to; i++)
 	{
-		requestHashes.push_back(m_signalsTable[i].first);
+        TuningObject& pageObject = m_objects[i];
+
+        TuningObject* baseObject = theObjects.objectPtrByHash(pageObject.appSignalHash());
+
+        if (baseObject == nullptr)
+        {
+            assert(false);
+            continue;
+        }
+
+        pageObject.setValid(baseObject->valid());
+        pageObject.setValue(baseObject->value());
+
 	}
-
-	int count = theSignals.signalState(requestHashes, &requestStates);
-
-	if (count != requestHashes.size() || count != requestStates.size())
-	{
-		assert(false);
-		return;
-	}
-
-	int state = 0;
-	for (int i = from; i <= to; i++)
-	{
-		m_signalsTable[i].second = requestStates[state];
-		state++;
-	}*/
 
 	return;
 }
 
-TuningObject TuningItemModel::object(int index)
+TuningObject* TuningItemModel::object(int index)
 {
 	if (index < 0 || index >= m_objects.size())
 	{
 		assert(false);
-		return TuningObject();
+        return nullptr;
 	}
-	return m_objects[index];
+    return &m_objects[index];
 }
 
 void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBold)
@@ -441,7 +436,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
 
-					if (o.modified() == false)
+                    if (o.userModified() == false)
 					{
 						return valueString;
 					}
@@ -455,7 +450,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-					if (o.modified() == false)
+                    if (o.userModified() == false)
 					{
 						return valueString;
 					}
@@ -601,7 +596,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 				return;
 			}
 
-			if (o.modified() == true)
+            if (value != o.editValue())
 			{
 				sameValue = false;
 			}
@@ -658,7 +653,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 	{
 		const TuningObject& o = m_objects[row];
 
-		if (m_blink == true && o.modified() == true)
+        if (m_blink == true && o.userModified() == true)
 		{
 			QColor color = QColor(Qt::yellow);
 			return QBrush(color);
@@ -696,7 +691,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 	{
 		const TuningObject& o = m_objects[row];
 
-		if (m_blink == true && o.modified() == true)
+        if (m_blink == true && o.userModified() == true)
 		{
 			QColor color = QColor(Qt::black);
 			return QBrush(color);
@@ -739,14 +734,18 @@ Qt::ItemFlags TuningItemModelMain::flags(const QModelIndex &index) const
 	{
 		const TuningObject& o = m_objects[row];
 
-		if (o.analog() == false)
-		{
-			f |= Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
-		}
-		else
-		{
-			f |= Qt::ItemIsEnabled | Qt::ItemIsEditable;
-		}
+
+        if (o.valid() == true)
+        {
+            if (o.analog() == false)
+            {
+                f |= Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
+            }
+            else
+            {
+                f |= Qt::ItemIsEnabled | Qt::ItemIsEditable;
+            }
+        }
 
 	}
 
@@ -767,7 +766,7 @@ QVariant TuningItemModelMain::data(const QModelIndex &index, int role) const
 
 	const TuningObject& o = m_objects[row];
 
-	if (role == Qt::CheckStateRole && displayIndex == Value && o.analog() == false)
+    if (role == Qt::CheckStateRole && displayIndex == Value && o.analog() == false && o.valid() == true)
 	{
 		return (o.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
@@ -881,7 +880,7 @@ void TuningItemModelMain::slot_Apply()
 
 	for (TuningObject& o : m_objects)
 	{
-		if (o.modified() == false)
+        if (o.userModified() == false)
 		{
 			continue;
 		}
@@ -899,7 +898,7 @@ void TuningItemModelMain::slot_Apply()
 
 	for (TuningObject& o : m_objects)
 	{
-		if (o.modified() == false)
+        if (o.userModified() == false)
 		{
 			continue;
 		}
@@ -1382,7 +1381,18 @@ void TuningPage::timerEvent(QTimerEvent* event)
 			{
 				for (int row = from; row <= to; row++)
 				{
-					m_objectList->update(m_model->index(row, col));
+                    TuningObject* o = m_model->object(row);
+
+                    if (o == nullptr)
+                    {
+                        assert(o);
+                        continue;
+                    }
+
+                    if (o->redraw() == true)
+                    {
+                        m_objectList->update(m_model->index(row, col));
+                    }
 				}
 			}
 		}
