@@ -177,7 +177,7 @@ namespace Tuning
 			return;
 		}
 
-		clientContext->getSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
+		clientContext->readSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
 
 		// m_tuningSignalsReadReply.set_error(???) must be set inside clientContext->getSignalStates()
 
@@ -187,7 +187,7 @@ namespace Tuning
 
 	void TcpTuningServer::onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize)
 	{
-		/*m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
+		m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
 
 		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
 
@@ -206,9 +206,9 @@ namespace Tuning
 			return;
 		}
 
-		clientContext->writeSignalStates(m_tuningSignalsWriteRequest);
+		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, m_tuningSignalsWriteReply);
 
-		sendReply(m_tuningSignalsWriteReply);*/
+		sendReply(m_tuningSignalsWriteReply);
 	}
 
 

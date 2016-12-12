@@ -93,6 +93,10 @@ void TcpTuningClient::processReply(quint32 requestID, const char* replyData, qui
         processReadTuningSignals(data);
         break;
 
+	case TDS_TUNING_SIGNALS_WRITE:
+		; //processWriteTuningSignals(data);
+		break;
+
     default:
 		assert(false);
 		theLogFile.writeError(tr("TcpTuningClient::processReply: Wrong requestID."));

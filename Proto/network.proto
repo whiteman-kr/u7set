@@ -307,7 +307,3 @@ message TuningSignalsWriteReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
 }
-
-
-
-

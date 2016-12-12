@@ -88,7 +88,8 @@ namespace Tuning
 
 		struct Write
 		{
-			quint32 frame;
+			qint64 signalIndex;
+			double value;
 		};
 
 		struct Apply
@@ -103,13 +104,6 @@ namespace Tuning
 			Read read;
 			Write write;
 			Apply apply;
-		};
-
-		enum class TuningSignalType
-		{
-			AnalogFloat = 0,
-			AnalogInt = 1,
-			Discrete = 2,
 		};
 
 		class TuningSignal
@@ -127,14 +121,14 @@ namespace Tuning
 			int bit() const { return m_bit; }
 			int frameNo() const { return m_frameNo; }
 
-			TuningSignalType type() const { return m_type; }
+			FotipV2::DataType type() const { return m_type; }
 
 			void setState(bool valid, double value);
 			void setReadLowBound(double readLowBound);
 			void setReadHighBound(double readHighBound);
 
 		private:
-			TuningSignalType getTuningSignalType(const Signal* s);
+			FotipV2::DataType getTuningSignalType(const Signal* s);
 
 		private:
 			// state fields
@@ -146,7 +140,7 @@ namespace Tuning
 			//
 			const Signal* m_signal = nullptr;
 			Hash m_signalHash = 0;
-			TuningSignalType m_type = TuningSignalType::Discrete;
+			FotipV2::DataType m_type = FotipV2::DataType::Discrete;
 			int m_index = -1;
 
 			int m_offset = -1;
@@ -177,7 +171,9 @@ namespace Tuning
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState& tuningSourceState);
-		void getSignalState(Network::TuningSignalState& tss);
+
+		void readSignalState(Network::TuningSignalState& tss);
+		void writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult);
 
 	signals:
 		void replyReady();
@@ -192,12 +188,11 @@ namespace Tuning
 		bool processCommandQueue();
 		bool processIdle();
 
-		void prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
+		bool prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
 		void sendFOTIPRequest(RupFotipV2& request);
 
-		void initRupHeader(Rup::Header& rupHeader);
-		void initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd);
-		void initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd);
+		bool initRupHeader(Rup::Header& rupHeader);
+		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
 
 		void processReply(RupFotipV2& reply);
 		void processReadReply(RupFotipV2& reply);
