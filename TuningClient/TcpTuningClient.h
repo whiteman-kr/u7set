@@ -43,6 +43,8 @@ public:
 
     void writeTuningSignal(Hash hash, double value);
 
+    void writeTuningSignals(std::vector<WriteCommand> signalsArray);
+
 private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
