@@ -113,6 +113,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* TuningSignalsWriteReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TuningSignalsWriteReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TuningSignalsApply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  TuningSignalsApply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TuningSignalsApplyReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  TuningSignalsApplyReply_reflection_ = NULL;
 
 }  // namespace
 
@@ -685,6 +691,36 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsWriteReply));
+  TuningSignalsApply_descriptor_ = file->message_type(31);
+  static const int TuningSignalsApply_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApply, clientequipmentid_),
+  };
+  TuningSignalsApply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      TuningSignalsApply_descriptor_,
+      TuningSignalsApply::default_instance_,
+      TuningSignalsApply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(TuningSignalsApply));
+  TuningSignalsApplyReply_descriptor_ = file->message_type(32);
+  static const int TuningSignalsApplyReply_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApplyReply, error_),
+  };
+  TuningSignalsApplyReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      TuningSignalsApplyReply_descriptor_,
+      TuningSignalsApplyReply::default_instance_,
+      TuningSignalsApplyReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApplyReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApplyReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(TuningSignalsApplyReply));
 }
 
 namespace {
@@ -759,6 +795,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
     TuningSignalWriteResult_descriptor_, &TuningSignalWriteResult::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TuningSignalsWriteReply_descriptor_, &TuningSignalsWriteReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    TuningSignalsApply_descriptor_, &TuningSignalsApply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    TuningSignalsApplyReply_descriptor_, &TuningSignalsApplyReply::default_instance());
 }
 
 }  // namespace
@@ -826,6 +866,10 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete TuningSignalWriteResult_reflection_;
   delete TuningSignalsWriteReply::default_instance_;
   delete TuningSignalsWriteReply_reflection_;
+  delete TuningSignalsApply::default_instance_;
+  delete TuningSignalsApply_reflection_;
+  delete TuningSignalsApplyReply::default_instance_;
+  delete TuningSignalsApplyReply_reflection_;
 }
 
 void protobuf_AddDesc_network_2eproto() {
@@ -940,7 +984,9 @@ void protobuf_AddDesc_network_2eproto() {
     "\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsW"
     "riteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResu"
     "lt\030\002 \003(\0132 .Network.TuningSignalWriteResu"
-    "lt", 4162);
+    "lt\"/\n\022TuningSignalsApply\022\031\n\021clientEquipm"
+    "entID\030\001 \001(\t\"+\n\027TuningSignalsApplyReply\022\020"
+    "\n\005error\030\001 \001(\005:\0010", 4256);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -974,6 +1020,8 @@ void protobuf_AddDesc_network_2eproto() {
   TuningSignalsWrite::default_instance_ = new TuningSignalsWrite();
   TuningSignalWriteResult::default_instance_ = new TuningSignalWriteResult();
   TuningSignalsWriteReply::default_instance_ = new TuningSignalsWriteReply();
+  TuningSignalsApply::default_instance_ = new TuningSignalsApply();
+  TuningSignalsApplyReply::default_instance_ = new TuningSignalsApplyReply();
   GetSignalListStartRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListStartReply::default_instance_->InitAsDefaultInstance();
   GetSignalListNextRequest::default_instance_->InitAsDefaultInstance();
@@ -1005,6 +1053,8 @@ void protobuf_AddDesc_network_2eproto() {
   TuningSignalsWrite::default_instance_->InitAsDefaultInstance();
   TuningSignalWriteResult::default_instance_->InitAsDefaultInstance();
   TuningSignalsWriteReply::default_instance_->InitAsDefaultInstance();
+  TuningSignalsApply::default_instance_->InitAsDefaultInstance();
+  TuningSignalsApplyReply::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_network_2eproto);
 }
 
@@ -11514,6 +11564,439 @@ void TuningSignalsWriteReply::Swap(TuningSignalsWriteReply* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = TuningSignalsWriteReply_descriptor_;
   metadata.reflection = TuningSignalsWriteReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int TuningSignalsApply::kClientEquipmentIDFieldNumber;
+#endif  // !_MSC_VER
+
+TuningSignalsApply::TuningSignalsApply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void TuningSignalsApply::InitAsDefaultInstance() {
+}
+
+TuningSignalsApply::TuningSignalsApply(const TuningSignalsApply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void TuningSignalsApply::SharedCtor() {
+  _cached_size_ = 0;
+  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+TuningSignalsApply::~TuningSignalsApply() {
+  SharedDtor();
+}
+
+void TuningSignalsApply::SharedDtor() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void TuningSignalsApply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* TuningSignalsApply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return TuningSignalsApply_descriptor_;
+}
+
+const TuningSignalsApply& TuningSignalsApply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+TuningSignalsApply* TuningSignalsApply::default_instance_ = NULL;
+
+TuningSignalsApply* TuningSignalsApply::New() const {
+  return new TuningSignalsApply;
+}
+
+void TuningSignalsApply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_clientequipmentid()) {
+      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        clientequipmentid_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool TuningSignalsApply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string clientEquipmentID = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_clientequipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->clientequipmentid().data(), this->clientequipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void TuningSignalsApply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string clientEquipmentID = 1;
+  if (has_clientequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->clientequipmentid().data(), this->clientequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->clientequipmentid(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* TuningSignalsApply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string clientEquipmentID = 1;
+  if (has_clientequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->clientequipmentid().data(), this->clientequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->clientequipmentid(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int TuningSignalsApply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string clientEquipmentID = 1;
+    if (has_clientequipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->clientequipmentid());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void TuningSignalsApply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const TuningSignalsApply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TuningSignalsApply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void TuningSignalsApply::MergeFrom(const TuningSignalsApply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_clientequipmentid()) {
+      set_clientequipmentid(from.clientequipmentid());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void TuningSignalsApply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void TuningSignalsApply::CopyFrom(const TuningSignalsApply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool TuningSignalsApply::IsInitialized() const {
+
+  return true;
+}
+
+void TuningSignalsApply::Swap(TuningSignalsApply* other) {
+  if (other != this) {
+    std::swap(clientequipmentid_, other->clientequipmentid_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata TuningSignalsApply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = TuningSignalsApply_descriptor_;
+  metadata.reflection = TuningSignalsApply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int TuningSignalsApplyReply::kErrorFieldNumber;
+#endif  // !_MSC_VER
+
+TuningSignalsApplyReply::TuningSignalsApplyReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void TuningSignalsApplyReply::InitAsDefaultInstance() {
+}
+
+TuningSignalsApplyReply::TuningSignalsApplyReply(const TuningSignalsApplyReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void TuningSignalsApplyReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+TuningSignalsApplyReply::~TuningSignalsApplyReply() {
+  SharedDtor();
+}
+
+void TuningSignalsApplyReply::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void TuningSignalsApplyReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* TuningSignalsApplyReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return TuningSignalsApplyReply_descriptor_;
+}
+
+const TuningSignalsApplyReply& TuningSignalsApplyReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+TuningSignalsApplyReply* TuningSignalsApplyReply::default_instance_ = NULL;
+
+TuningSignalsApplyReply* TuningSignalsApplyReply::New() const {
+  return new TuningSignalsApplyReply;
+}
+
+void TuningSignalsApplyReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool TuningSignalsApplyReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void TuningSignalsApplyReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* TuningSignalsApplyReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int TuningSignalsApplyReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void TuningSignalsApplyReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const TuningSignalsApplyReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TuningSignalsApplyReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void TuningSignalsApplyReply::MergeFrom(const TuningSignalsApplyReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void TuningSignalsApplyReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void TuningSignalsApplyReply::CopyFrom(const TuningSignalsApplyReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool TuningSignalsApplyReply::IsInitialized() const {
+
+  return true;
+}
+
+void TuningSignalsApplyReply::Swap(TuningSignalsApplyReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata TuningSignalsApplyReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = TuningSignalsApplyReply_descriptor_;
+  metadata.reflection = TuningSignalsApplyReply_reflection_;
   return metadata;
 }
 

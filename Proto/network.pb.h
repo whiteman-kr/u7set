@@ -65,6 +65,8 @@ class TuningSignalWrite;
 class TuningSignalsWrite;
 class TuningSignalWriteResult;
 class TuningSignalsWriteReply;
+class TuningSignalsApply;
+class TuningSignalsApplyReply;
 
 // ===================================================================
 
@@ -3676,6 +3678,175 @@ class TuningSignalsWriteReply : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static TuningSignalsWriteReply* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class TuningSignalsApply : public ::google::protobuf::Message {
+ public:
+  TuningSignalsApply();
+  virtual ~TuningSignalsApply();
+
+  TuningSignalsApply(const TuningSignalsApply& from);
+
+  inline TuningSignalsApply& operator=(const TuningSignalsApply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSignalsApply& default_instance();
+
+  void Swap(TuningSignalsApply* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSignalsApply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSignalsApply& from);
+  void MergeFrom(const TuningSignalsApply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalsApply)
+ private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* clientequipmentid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningSignalsApply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TuningSignalsApplyReply : public ::google::protobuf::Message {
+ public:
+  TuningSignalsApplyReply();
+  virtual ~TuningSignalsApplyReply();
+
+  TuningSignalsApplyReply(const TuningSignalsApplyReply& from);
+
+  inline TuningSignalsApplyReply& operator=(const TuningSignalsApplyReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSignalsApplyReply& default_instance();
+
+  void Swap(TuningSignalsApplyReply* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSignalsApplyReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSignalsApplyReply& from);
+  void MergeFrom(const TuningSignalsApplyReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalsApplyReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningSignalsApplyReply* default_instance_;
+};
 // ===================================================================
 
 
@@ -7174,6 +7345,106 @@ TuningSignalsWriteReply::writeresult() const {
 inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWriteResult >*
 TuningSignalsWriteReply::mutable_writeresult() {
   return &writeresult_;
+}
+
+// -------------------------------------------------------------------
+
+// TuningSignalsApply
+
+// optional string clientEquipmentID = 1;
+inline bool TuningSignalsApply::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningSignalsApply::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningSignalsApply::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningSignalsApply::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& TuningSignalsApply::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void TuningSignalsApply::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void TuningSignalsApply::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void TuningSignalsApply::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TuningSignalsApply::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* TuningSignalsApply::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TuningSignalsApply::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// TuningSignalsApplyReply
+
+// optional int32 error = 1 [default = 0];
+inline bool TuningSignalsApplyReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningSignalsApplyReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningSignalsApplyReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningSignalsApplyReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 TuningSignalsApplyReply::error() const {
+  return error_;
+}
+inline void TuningSignalsApplyReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
 }
 
 

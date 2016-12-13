@@ -81,29 +81,20 @@ namespace Tuning
 
 	private:
 
-		struct Read
-		{
-			quint32 frame;
-		};
-
-		struct Write
-		{
-			qint64 signalIndex;
-			double value;
-		};
-
-		struct Apply
-		{
-			quint32 frame;
-		};
-
 		struct TuningCommand
 		{
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
 
-			Read read;
-			Write write;
-			Apply apply;
+			struct
+			{
+				quint32 frame = 0;
+			} read;
+
+			struct
+			{
+				qint32 signalIndex = 0;
+				double value = 0;
+			} write;
 		};
 
 		class TuningSignal
@@ -174,6 +165,7 @@ namespace Tuning
 
 		void readSignalState(Network::TuningSignalState& tss);
 		void writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult);
+		void applySignalStates();
 
 	signals:
 		void replyReady();
