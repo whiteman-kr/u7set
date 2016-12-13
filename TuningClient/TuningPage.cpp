@@ -227,7 +227,7 @@ int TuningItemModel::columnIndex(int index) const
 	return m_columnsIndexes[index];
 }
 
-void TuningItemModel::updateStates(int from, int to)
+void TuningItemModel::updateStates()
 {
 	static int counter = 0;
 
@@ -242,15 +242,11 @@ void TuningItemModel::updateStates(int from, int to)
 		return;
 	}
 
-    if (from >= m_objects.size() || to >= m_objects.size())
-	{
-		assert(false);
-		return;
-	}
-
     QMutexLocker l(&theObjects.m_mutex);
 
-	for (int i = from; i <= to; i++)
+    int count = (int)m_objects.size();
+
+    for (int i = 0; i < count; i++)
 	{
         TuningObject& pageObject = m_objects[i];
 
@@ -576,6 +572,11 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 	{
 		const TuningObject& o = m_objects[i];
 
+        if (o.valid() == false)
+        {
+            return;
+        }
+
 		if (o.analog() == true)
 		{
 			if (o.decimalPlaces() > decimalPlaces)
@@ -624,7 +625,12 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 	{
 		TuningObject& o = m_objects[i];
 
-		if (o.analog() == false)
+        if (o.valid() == false)
+        {
+            return;
+        }
+
+        if (o.analog() == false)
 		{
 			if (o.editValue() == 0)
 			{
@@ -1384,7 +1390,7 @@ void TuningPage::timerEvent(QTimerEvent* event)
 
 		// Update signal states
 		//
-		m_model->updateStates(from, to);
+        m_model->updateStates();
 
 		// Redraw visible table items
 		//

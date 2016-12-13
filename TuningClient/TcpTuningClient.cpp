@@ -94,7 +94,7 @@ void TcpTuningClient::processReply(quint32 requestID, const char* replyData, qui
         break;
 
 	case TDS_TUNING_SIGNALS_WRITE:
-		; //processWriteTuningSignals(data);
+        processWriteTuningSignals(data);
 		break;
 
     default:
@@ -261,7 +261,7 @@ void TcpTuningClient::requestWriteTuningSignals()
     m_writeTuningSignals.set_clientequipmentid(theSettings.instanceStrId().toUtf8());
 	m_writeTuningSignals.set_autoapply(true);
 
-    m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(writeTuningSignalCount);
+    m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(WRITE_TUNING_SIGNALS_MAX);
 
     m_writeTuningSignals.mutable_tuningsignalwrite()->Clear();
 
@@ -275,13 +275,14 @@ void TcpTuningClient::requestWriteTuningSignals()
 
         const WriteCommand& cmd = m_writeQueue.front();
 
-        ::Network::TuningSignalWrite wrCmd;
-        wrCmd.set_value(cmd.m_value);
-        wrCmd.set_signalhash(cmd.m_hash);
+        ::Network::TuningSignalWrite* wrCmd = new ::Network::TuningSignalWrite();
+
+        wrCmd->set_value(cmd.m_value);
+        wrCmd->set_signalhash(cmd.m_hash);
+
+        m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(wrCmd);
 
         m_writeQueue.pop();
-
-        m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(&wrCmd);
     }
 
     lQueue.unlock();

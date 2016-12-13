@@ -62,7 +62,7 @@ public:
 	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
-	void updateStates(int from, int to);
+    void updateStates();
 
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
 
