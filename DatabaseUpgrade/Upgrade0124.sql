@@ -36,6 +36,122 @@ ALTER TABLE public.users
 ALTER TABLE public.users 
     DROP COLUMN password;
 
+
+-------------------------------------------------------------------------------
+--
+--		RPCT-1320, Add column md5 to FileInstance table
+--
+-------------------------------------------------------------------------------
+ALTER TABLE public.fileinstance
+    ADD COLUMN md5 text;
+
+UPDATE public.fileinstance SET md5 = md5(data);
+
+ALTER TABLE public.fileinstance
+   ALTER COLUMN md5 SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION set_workcopy(
+    user_id integer,
+	file_id integer,
+	file_data bytea,
+	in_details text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+    user_allowed int;
+	inst_file_id int;
+	fileinstance_uuid uuid;
+BEGIN
+    SELECT count(*) INTO user_allowed
+	    FROM CheckOut WHERE FileID = file_id AND UserID = user_id;
+
+    IF (user_allowed = 0 AND is_admin(user_id) = FALSE) THEN
+	    RAISE 'User is not allowed to set workcopy for file_id %', file_id;
+	END IF;
+
+    fileinstance_uuid := (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id);
+
+    IF (fileinstance_uuid IS NULL) THEN
+	    RAISE 'File % is not checked out', file_id;
+	END IF;
+
+    UPDATE FileInstance SET Size = length(file_data), Data = file_data, Details = in_details::JSONB, md5 = md5(file_data)
+	    WHERE FileInstanceID = fileinstance_uuid
+		RETURNING FileID INTO inst_file_id;
+
+    IF (inst_file_id <> file_id) THEN
+	    RAISE 'DATABASE CRITICAL ERROR, FileID in File and FileInstance tables is different! %', file_id;
+	END IF;
+
+    RETURN file_id;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION check_out(
+    user_id integer,
+	file_ids integer[])
+  RETURNS SETOF objectstate AS
+$BODY$
+DECLARE
+    AlreadyCheckedOut integer;
+	file_id integer;
+	checkout_instance_id uuid;
+	file_result ObjectState;
+BEGIN
+    -- Check if file is not checked out by other user,
+	-- if it's already checked out by user_id then it is ok
+	--
+	SELECT count(CheckOutID) INTO AlreadyCheckedOut
+	    FROM CheckOut
+		WHERE FileID = ANY(file_ids) AND UserID <> user_id;
+
+    IF (AlreadyCheckedOut > 0) THEN
+	    RAISE 'Files already checked out';
+	END IF;
+
+    FOREACH file_id IN ARRAY file_ids
+	LOOP
+	    -- Check out only if file_id has not been already checked out
+		--
+		IF (SELECT count(CheckOutID) FROM CheckOut WHERE FileID = file_id) = 0
+		THEN
+		    -- Add record to the CheckOutTable
+			INSERT INTO CheckOut (UserID, FileID) VALUES (user_id, file_id);
+
+            -- Make new work copy in FileInstance
+			INSERT INTO
+			    FileInstance (Data, Size, FileID, ChangesetID, Action, Details, md5)
+				SELECT
+				    Data, length(Data) AS Size, FileId, NULL, 2, Details, md5(Data)
+				FROM
+				    FileInstance
+				WHERE
+				    FileID = file_id AND
+					FileInstanceID = (SELECT CheckedInInstanceID FROM File WHERE FileID = file_id)
+				RETURNING FileInstanceID INTO checkout_instance_id;
+
+            -- Set CheckedOutInstanceID for File table
+			UPDATE File SET CheckedOutInstanceID = checkout_instance_id WHERE FileID = file_id;
+		END IF;
+
+    END LOOP;
+
+    -- Return checked out files
+	--
+	FOREACH file_id IN ARRAY file_ids
+	LOOP
+	    file_result := get_file_state(file_id);
+		RETURN NEXT file_result;
+	END LOOP;
+
+    RETURN;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
 -------------------------------------------------------------------------------
 --
 --		user_api.log_in -- RPCT-1321
