@@ -127,7 +127,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	m_model->loadSignal(row, false);
+	m_model->loadSignal(m_model->key(row), false);
 
 	switch (col)
 	{
@@ -504,7 +504,10 @@ bool SignalsModel::checkoutSignal(int index)
 			return false;
 		}
 	}
-	loadSignal(index, true);
+	for (int id : signalsIDs)
+	{
+		loadSignal(id, true);
+	}
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
@@ -554,7 +557,10 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 			return false;
 		}
 	}
-	loadSignal(index, true);
+	for (int id : signalsIDs)
+	{
+		loadSignal(id, true);
+	}
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
@@ -873,9 +879,14 @@ void SignalsModel::loadSignals()
 	changeCheckedoutSignalActionsVisibility();
 }
 
-void SignalsModel::loadSignal(int row, bool updateView)
+void SignalsModel::loadSignal(int signalId, bool updateView)
 {
-	dbController()->getLatestSignal(key(row), &m_signalSet[row], parentWindow());
+	int row = keyIndex(signalId);
+	if (row == -1)
+	{
+		return;
+	}
+	dbController()->getLatestSignal(signalId, &m_signalSet[row], parentWindow());
 	if (updateView)
 	{
 		emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
