@@ -37,6 +37,8 @@ namespace Tuning
 		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
 		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
 		void onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize);
+		void onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize);
+		void onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize);
 
 	private:
 		TuningServiceWorker& m_service;
@@ -49,6 +51,9 @@ namespace Tuning
 
 		Network::TuningSignalsRead m_tuningSignalsReadRequest;
 		Network::TuningSignalsReadReply m_tuningSignalsReadReply;
+
+		Network::TuningSignalsWrite m_tuningSignalsWriteRequest;
+		Network::TuningSignalsWriteReply m_tuningSignalsWriteReply;
 	};
 
 

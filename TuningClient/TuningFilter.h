@@ -37,7 +37,13 @@ public:
 	double value() const;
 	void setValue(double value);
 
-	Hash hash() const;
+    double lowLimit() const;
+    void setLowLimit(double value);
+
+    double highLimit() const;
+    void setHighLimit(double value);
+
+    Hash hash() const;
 private:
 
 	QString m_appSignalId;
@@ -46,6 +52,8 @@ private:
 	bool m_analog = false;
 	int m_decimalPlaces = 0;
 	double m_value = 0;
+    double m_lowLimit = 0;
+    double m_highLimit = 0;
 
 	Hash m_hash = 0;
 };

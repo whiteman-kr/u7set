@@ -25,6 +25,7 @@ namespace Tuning
 	public:
 		TuningData();
 		TuningData(	QString lmID,
+					int tuningMemoryStartAddrW,
 					int tuningFrameSizeBytes,
 					int tuningFramesCount);
 
@@ -63,11 +64,12 @@ namespace Tuning
 		static const int TYPES_COUNT = 3;
 
 	private:
-		void writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue);
+		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
 
 	protected:
 		QString m_lmEquipmentID;
 
+		int m_tuningMemoryStartAddrW = 0;
 		int m_tuningFrameSizeBytes = 0;
 		int m_tuningFramesCount = 0;
 		quint64 m_uniqueID = 0;

@@ -107,7 +107,21 @@ double TuningObject::editValue() const
 
 void TuningObject::setEditValue(double value)
 {
-	m_editValue = value;
+    if (m_editValue != value)
+    {
+        m_editValue = value;
+
+        if (m_value == m_editValue)
+        {
+            m_userModified = false;
+        }
+        else
+        {
+            m_userModified = true;
+        }
+
+        m_redraw = true;
+    }
 }
 
 double TuningObject::defaultValue() const
@@ -138,6 +152,36 @@ double TuningObject::highLimit() const
 void TuningObject::setHighLimit(double value)
 {
 	m_highLimit = value;
+}
+
+double TuningObject::readLowLimit() const
+{
+    return m_readLowLimit;
+}
+
+void TuningObject::setReadLowLimit(double value)
+{
+    if (m_readLowLimit != value)
+    {
+        m_redraw = true;
+
+        m_readLowLimit = value;
+    }
+}
+
+double TuningObject::readHighLimit() const
+{
+    return m_readHighLimit;
+}
+
+void TuningObject::setReadHighLimit(double value)
+{
+    if (m_readHighLimit != value)
+    {
+        m_redraw = true;
+
+        m_readHighLimit = value;
+    }
 }
 
 int TuningObject::decimalPlaces() const
@@ -194,4 +238,20 @@ bool TuningObject::redraw()
 bool TuningObject::userModified() const
 {
     return m_userModified;
+}
+
+void TuningObject::clearUserModified()
+{
+    m_userModified = false;
+}
+
+bool TuningObject::limitsUnbalance() const
+{
+    if (m_analog == true && m_valid == true)
+    {
+        return m_lowLimit != m_readLowLimit || m_highLimit != m_readHighLimit;
+    }
+
+    return false;
+
 }

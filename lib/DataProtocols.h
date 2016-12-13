@@ -181,7 +181,22 @@ namespace FotipV2
 	{
 		FotipV2::Header header;
 
-		quint8 data[TX_RX_DATA_SIZE];
+		union
+		{
+			struct
+			{
+				union
+				{
+					float analogFloatValue;
+					qint32 analogSignedIntValue;
+					quint32 discreteValue;
+				};
+
+				quint32 bitMask;
+			} write;
+
+			quint8 data[TX_RX_DATA_SIZE];
+		};
 
 		ComparisonResult cmpResult;
 

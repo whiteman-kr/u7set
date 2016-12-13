@@ -4186,9 +4186,11 @@ namespace Builder
 
 		bool result = true;
 
+		int tuningMemoryStartAddrW = 0;
 		int tuningFrameSizeBytes = 0;
 		int tuningFrameCount = 0;
 
+		result &= getLMIntProperty("TuningDataOffset", &tuningMemoryStartAddrW);
 		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeBytes);
 		result &= getLMIntProperty("TuningFrameCount", &tuningFrameCount);
 
@@ -4207,6 +4209,7 @@ namespace Builder
 		// and comment 3 lines below:
 		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
+												tuningMemoryStartAddrW,
 												tuningFrameSizeBytes,
 												tuningFrameCount);
 

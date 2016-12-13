@@ -39,13 +39,6 @@ namespace FotipV2
 	void Header::reverseBytes()
 	{
 		protocolVersion = reverseUint16(protocolVersion);
-
-//		quint32 h = uniqueId >> 32;
-//		quint32 l = uniqueId & 0xFFFFFFFF;
-//		uniqueId = reverseUint32(h);
-//		uniqueId <<= 32;
-//		uniqueId &= reverseUint32(l);
-
 		uniqueId = reverseUint64(uniqueId);
 
 		subsystemKey.wordVaue = reverseUint16(subsystemKey.wordVaue);
@@ -59,6 +52,6 @@ namespace FotipV2
 		romSizeB = reverseUint32(romSizeB);
 		romFrameSizeB = reverseUint16(romFrameSizeB);
 		dataType = reverseUint16(dataType);
+		offsetInFrameW = reverseUint32(offsetInFrameW);
 	}
-
 }
