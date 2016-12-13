@@ -545,24 +545,32 @@ void DialogPresetEditor::on_m_add_clicked()
 
 	for (const QModelIndex& i : ui->m_signalsTable->selectionModel()->selectedRows())
 	{
-		TuningObject o = m_model->object(i.row());
+        TuningObject* o = m_model->object(i.row());
 
-		if (filter->valueExists(o.appSignalHash()) == true)
+        if (o == nullptr)
+        {
+            assert(o);
+            continue;
+        }
+
+        if (filter->valueExists(o->appSignalHash()) == true)
 		{
 			continue;
 		}
 
 		TuningFilterValue ofv;
-		ofv.setAppSignalId(o.appSignalID());
-		ofv.setCaption(o.caption());
-		ofv.setAnalog(o.analog());
-		if (o.analog() == true)
+        ofv.setAppSignalId(o->appSignalID());
+        ofv.setCaption(o->caption());
+        ofv.setAnalog(o->analog());
+        if (o->analog() == true)
 		{
-			ofv.setDecimalPlaces(o.decimalPlaces());
+            ofv.setLowLimit(o->lowLimit());
+            ofv.setHighLimit(o->highLimit());
+            ofv.setDecimalPlaces(o->decimalPlaces());
 		}
-		if (o.valid() == true)
+        if (o->valid() == true)
 		{
-			ofv.setValue(o.value());
+            ofv.setValue(o->value());
 		}
 
 		QTreeWidgetItem* childItem = new QTreeWidgetItem();
@@ -668,6 +676,10 @@ void DialogPresetEditor::on_m_setValue_clicked()
 	bool first = true;
 	TuningFilterValue firstValue;
 
+    double lowLimit = 0;
+    double highLimit = 0;
+
+
 	bool sameValue = true;
 
 	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
@@ -683,7 +695,7 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		if (first == true)
 		{
 			firstValue = ov;
-			first = false;
+            first = false;
 		}
 		else
 		{
@@ -693,14 +705,23 @@ void DialogPresetEditor::on_m_setValue_clicked()
 				return;
 			}
 
-			if (ov.value() != firstValue.value())
+            if (ov.analog() == true)
+            {
+                if (ov.lowLimit() != firstValue.lowLimit() || ov.highLimit() != firstValue.highLimit())
+                {
+                    QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
+                    return;
+                }
+            }
+
+            if (ov.value() != firstValue.value())
 			{
 				sameValue = false;
 			}
 		}
 	}
 
-	DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, firstValue.decimalPlaces());
+    DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, lowLimit, highLimit, firstValue.decimalPlaces());
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

@@ -81,57 +81,73 @@ namespace Tuning
 
 	private:
 
-		struct Read
-		{
-			quint32 frame;
-		};
-
-		struct Write
-		{
-			quint32 frame;
-		};
-
-		struct Apply
-		{
-			quint32 frame;
-		};
-
 		struct TuningCommand
 		{
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
 
-			Read read;
-			Write write;
-			Apply apply;
+			struct
+			{
+				quint32 frame = 0;
+			} read;
+
+			struct
+			{
+				qint32 signalIndex = 0;
+				double value = 0;
+			} write;
 		};
 
-		enum class TuningSignalType
+		class TuningSignal
 		{
-			AnalogFloat = 0,
-			AnalogInt = 1,
-			Discrete = 2,
-		};
+		public:
+			void init(const Signal* s, int index, int tuningRomFraeSizeW);
 
-		struct TuningSignal
-		{
+			bool valid() const { return m_valid; }
+			double value() const { return m_value; }
+			double defaultValue() const { return m_defaultValue; }
+			double readLowBound() const { return m_readLowBound; }
+			double readHighBound() const { return m_readHighBound; }
+
+			int offset() const { return m_offset; }
+			int bit() const { return m_bit; }
+			int frameNo() const { return m_frameNo; }
+
+			FotipV2::DataType type() const { return m_type; }
+
+			void setState(bool valid, double value);
+			void setReadLowBound(double readLowBound);
+			void setReadHighBound(double readHighBound);
+
+		private:
+			FotipV2::DataType getTuningSignalType(const Signal* s);
+
+		private:
+			// state fields
+			//
+			bool m_valid = false;
+			double m_value = 0;
+
 			// static fields
 			//
-			bool valid = false;
-			double value = 0;
+			const Signal* m_signal = nullptr;
+			Hash m_signalHash = 0;
+			FotipV2::DataType m_type = FotipV2::DataType::Discrete;
+			int m_index = -1;
 
-			// static fields
+			int m_offset = -1;
+			int m_bit = -1;
+			int m_frameNo = -1;
+
+			// signal properties from RPCT Databse
 			//
-			Signal* signal = nullptr;
-			Hash signalHash = 0;
-			TuningSignalType type = TuningSignalType::Discrete;
-			int index = -1;
+			double m_lowBound = 0;
+			double m_highBoud = 0;
+			double m_defaultValue = 0;
 
-			int offset = -1;
-			int bit = -1;
-
-			double lowBound = 0;
-			double highBoud = 0;
-			double defaultValue = 0;
+			// signal properties read from LM
+			//
+			double m_readLowBound = 0;
+			double m_readHighBound = 0;
 		};
 
 	public:
@@ -146,7 +162,10 @@ namespace Tuning
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState& tuningSourceState);
-		void getSignalState(Network::TuningSignalState& tss);
+
+		void readSignalState(Network::TuningSignalState& tss);
+		void writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult);
+		void applySignalStates();
 
 	signals:
 		void replyReady();
@@ -156,18 +175,16 @@ namespace Tuning
 		virtual void onThreadFinished() override;
 
 		void initTuningSignals(const TuningData* td);
-		TuningSignalType getTuningSignalType(Signal* s) const;
 
 		bool processWaitReply();
 		bool processCommandQueue();
 		bool processIdle();
 
-		void prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
+		bool prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
 		void sendFOTIPRequest(RupFotipV2& request);
 
-		void initRupHeader(Rup::Header& rupHeader);
-		void initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd);
-		void initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd);
+		bool initRupHeader(Rup::Header& rupHeader);
+		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
 
 		void processReply(RupFotipV2& reply);
 		void processReadReply(RupFotipV2& reply);
@@ -178,6 +195,8 @@ namespace Tuning
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
 
 		void restartTimer();
+
+		void invalidateAllSignals();
 
 	private slots:
 		void onTimer();

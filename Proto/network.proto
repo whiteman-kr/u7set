@@ -270,6 +270,8 @@ message TuningSignalState
     optional int32 error = 2 [default = 0];
     optional bool valid = 3 [default = false];
     optional double value = 4 [default = 0.0];
+    optional double readLowBound = 5 [default = 0.0];
+    optional double readHighBound = 6 [default = 0.0];
 }
 
 message TuningSignalsReadReply
@@ -289,15 +291,34 @@ message TuningSignalWrite
 message TuningSignalsWrite
 {
     optional string clientEquipmentID = 1;
-    optional bool autoAppay = 2 [default = false];
+    optional bool autoApply = 2 [default = false];
     repeated TuningSignalWrite tuningSignalWrite = 3;
+}
+
+message TuningSignalWriteResult
+{
+    optional uint64 signalHash = 1 [default = 0];
+    optional int32 error = 2 [default = 0];
 }
 
 message TuningSignalsWriteReply
 {
     optional int32 error = 1 [default = 0];
+    repeated TuningSignalWriteResult writeResult = 2;
 }
 
 
+// Apply tuning signals request
+
+message TuningSignalsApply
+{
+    optional string clientEquipmentID = 1;
+}
+
+
+message TuningSignalsApplyReply
+{
+    optional int32 error = 1 [default = 0];
+}
 
 

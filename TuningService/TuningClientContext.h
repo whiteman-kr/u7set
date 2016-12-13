@@ -22,7 +22,9 @@ namespace Tuning
 
 		void setSourceWorker(TuningSourceWorker* worker);
 
-		void getSignalState(Network::TuningSignalState& tss);
+		void readSignalState(Network::TuningSignalState& tss);
+		void writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult);
+		void applySignalStates();
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
@@ -48,7 +50,9 @@ namespace Tuning
 		void getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const;
 		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
 
-		void getSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const;
+		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const;
+		void writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply& reply) const;
+		void applySignalStates() const;
 
 		void setSourceWorker(const QString& sourceID, TuningSourceWorker* worker);
 
@@ -56,7 +60,7 @@ namespace Tuning
 		TuningSourceContext* getSourceContext(const QString& sourceID) const;
 		TuningSourceContext* getSourceContextBySignalHash(Hash signalHash) const;
 
-		void getSignalState(Network::TuningSignalState& tss) const;
+		void readSignalState(Network::TuningSignalState& tss) const;
 
 		void clear();
 

@@ -68,6 +68,93 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
+	// TuningSourceWorker::TuningSignal class implementation
+	//
+	// ----------------------------------------------------------------------------------
+
+	void TuningSourceWorker::TuningSignal::init(const Signal* s, int index, int tuningRomFraeSizeW)
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_valid = false;
+		m_value = 0;
+
+		m_signal = s;
+		m_signalHash = ::calcHash(s->appSignalID());
+
+		m_type = getTuningSignalType(s);
+		m_index = index;
+		m_lowBound = s->lowEngeneeringUnits();
+		m_highBoud = s->highEngeneeringUnits();
+		m_defaultValue = s->tuningDefaultValue();
+
+		m_offset = s->tuningAddr().offset();
+		m_bit = s->tuningAddr().bit();
+		m_frameNo = s->tuningAddr().offset() / tuningRomFraeSizeW;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setState(bool valid, double value)
+	{
+		m_valid = valid;
+		m_value = value;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setReadLowBound(double readLowBound)
+	{
+		m_readLowBound = readLowBound;
+	}
+
+
+	void TuningSourceWorker::TuningSignal::setReadHighBound(double readHighBound)
+	{
+		m_readHighBound = readHighBound;
+	}
+
+	FotipV2::DataType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return FotipV2::DataType::Discrete;
+		}
+
+		if (s->isAnalog() == true)
+		{
+			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			{
+				return FotipV2::DataType::AnalogFloat;
+			}
+			else
+			{
+				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+				{
+					return FotipV2::DataType::AnalogSignedInt;
+				}
+			}
+		}
+		else
+		{
+			if (s->isDiscrete() == true)
+			{
+				return FotipV2::DataType::Discrete;
+			}
+		}
+
+		// unknown type of signal
+		//
+		assert(false);
+		return FotipV2::DataType::Discrete;
+	}
+
+
+	// ----------------------------------------------------------------------------------
+	//
 	// TuningSourceWorker class implementation
 	//
 	// ----------------------------------------------------------------------------------
@@ -132,7 +219,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::getSignalState(Network::TuningSignalState& tss)
+	void TuningSourceWorker::readSignalState(Network::TuningSignalState& tss)
 	{
 		// tss.signalhash() is already filled
 		//
@@ -151,9 +238,44 @@ namespace Tuning
 
 		TuningSignal& signal = m_tuningSignals[signalIndex];
 
-		tss.set_valid(signal.valid);
-		tss.set_value(signal.value);
+		tss.set_valid(signal.valid());
+		tss.set_value(signal.value());
+		tss.set_readlowbound(signal.readLowBound());
+		tss.set_readhighbound(signal.readHighBound());
 		tss.set_error(TO_INT(NetworkError::Success));
+	}
+
+
+	void TuningSourceWorker::writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult)
+	{
+		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
+
+		if (signalIndex == -1)
+		{
+			writeResult.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			return;
+		}
+
+		TuningCommand cmd;
+
+		cmd.opCode = FotipV2::OpCode::Write;
+
+		cmd.write.signalIndex = signalIndex;
+		cmd.write.value = value;
+
+		m_tuningCommandQueue.push(&cmd);
+
+		writeResult.set_error(TO_INT(NetworkError::Success));
+	}
+
+
+	void TuningSourceWorker::applySignalStates()
+	{
+		TuningCommand cmd;
+
+		cmd.opCode = FotipV2::OpCode::Apply;
+
+		m_tuningCommandQueue.push(&cmd);
 	}
 
 
@@ -215,56 +337,8 @@ namespace Tuning
 
 			TuningSignal& ts = m_tuningSignals[i];
 
-			ts.valid = false;
-			ts.value = 0;
-
-			ts.signal = signal;
-			ts.signalHash = hash;
-			ts.type = getTuningSignalType(signal);
-			ts.offset = signal->tuningAddr().offset();
-			ts.bit = signal->tuningAddr().bit();
-			ts.index = i;
-			ts.lowBound = signal->lowEngeneeringUnits();
-			ts.highBoud = signal->highEngeneeringUnits();
-			ts.defaultValue = signal->tuningDefaultValue();
+			ts.init(signal, i, m_tuningRomFrameSizeW);
 		}
-	}
-
-
-	TuningSourceWorker::TuningSignalType TuningSourceWorker::getTuningSignalType(Signal* s) const
-	{
-		if (s == nullptr)
-		{
-			assert(false);
-			return TuningSignalType::Discrete;
-		}
-
-		if (s->isAnalog())
-		{
-			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-			{
-				return TuningSignalType::AnalogFloat;
-			}
-			else
-			{
-				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-				{
-					return TuningSignalType::AnalogInt;
-				}
-			}
-		}
-		else
-		{
-			if (s->isDiscrete())
-			{
-				return TuningSignalType::Discrete;
-			}
-		}
-
-		// unknown type of signal
-		//
-		assert(false);
-		return TuningSignalType::Discrete;
 	}
 
 
@@ -280,6 +354,11 @@ namespace Tuning
 			}
 
 			m_waitReplyCounter = 0;
+
+			if (m_request.fotipFrame.header.operationCode == TO_INT(FotipV2::OpCode::Write))
+			{
+				qDebug() << "Write request timeout!";
+			}
 
 			// fix replay timeout
 			//
@@ -299,6 +378,8 @@ namespace Tuning
 				// fix - source is not reply
 				//
 				m_stat.isReply = false;
+
+				invalidateAllSignals();
 			}
 			else
 			{
@@ -333,7 +414,12 @@ namespace Tuning
 
 		m_tuningCommandQueue.pop(&tuningCmd);
 
-		prepareFOTIPRequest(tuningCmd, m_request);
+		bool result = prepareFOTIPRequest(tuningCmd, m_request);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		m_retryCount = 0;
 
@@ -368,13 +454,15 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
+	bool TuningSourceWorker::prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
 	{
-		initRupHeader(request.rupHeader);
+		bool result = true;
 
-		initFotipHeader(request.fotipFrame.header, tuningCmd);
+		result &= initRupHeader(request.rupHeader);
 
-		initFotipData(request.fotipFrame, tuningCmd);
+		result &= initFotipFrame(request.fotipFrame, tuningCmd);
+
+		return result;
 	}
 
 
@@ -403,6 +491,8 @@ namespace Tuning
 
 		m_waitReply = true;
 
+		restartTimer();
+
 		if (sent == -1)
 		{
 			m_stat.errSent++;
@@ -416,7 +506,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::initRupHeader(Rup::Header& rupHeader)
+	bool TuningSourceWorker::initRupHeader(Rup::Header& rupHeader)
 	{
 		rupHeader.frameSize = ENTIRE_UDP_SIZE;
 		rupHeader.protocolVersion = Rup::VERSION;
@@ -445,11 +535,15 @@ namespace Tuning
 		rupHeader.timeStamp.millisecond = time.msec();
 
 		m_rupNumerator++;
+
+		return true;
 	}
 
 
-	void TuningSourceWorker::initFotipHeader(FotipV2::Header& fotipHeader, const TuningCommand& tuningCmd)
+	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame &fotipFrame, const TuningCommand& tuningCmd)
 	{
+		FotipV2::Header& fotipHeader = fotipFrame.header;
+
 		// common initialization
 		//
 		fotipHeader.protocolVersion = FotipV2::VERSION;
@@ -464,7 +558,7 @@ namespace Tuning
 
 		fotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 
-		fotipHeader.romSizeB = m_tuningRomSizeW * sizeof(quint16);				// in bytes
+		fotipHeader.romSizeB = m_tuningRomSizeW * sizeof(quint16);										// in bytes
 		fotipHeader.romFrameSizeB = static_cast<quint16>(m_tuningRomFrameSizeW * sizeof(quint16));		// in bytes
 
 		fotipHeader.offsetInFrameW = 0;
@@ -483,22 +577,77 @@ namespace Tuning
 			fotipHeader.dataType = TO_INT(FotipV2::DataType::Discrete);		// any data type is allowed
 			break;
 
-		default:
-			assert(false);
-		}
-	}
+		case FotipV2::OpCode::Write:
+			{
+				int signalIndex = tuningCmd.write.signalIndex;
+				int signalCount = m_tuningSignals.count();
 
+				if (signalIndex < 0 || signalIndex >= signalCount)
+				{
+					assert(false);
+					return false;
+				}
 
-	void TuningSourceWorker::initFotipData(FotipV2::Frame& fotip, const TuningCommand& tuningCmd)
-	{
-		switch(tuningCmd.opCode)
-		{
-		case FotipV2::OpCode::Read:
+				TuningSignal& ts = m_tuningSignals[signalIndex];
+
+				int offsetW = ts.offset();
+
+				int frameNo =  offsetW / m_tuningRomFrameSizeW;
+
+				if ((frameNo % 3) != 0)
+				{
+					assert(false);
+					return false;
+				}
+
+				fotipHeader.dataType = TO_INT(ts.type());
+				fotipHeader.startAddressW = m_tuningRomStartAddrW + frameNo * m_tuningRomFrameSizeW;
+				fotipHeader.offsetInFrameW = offsetW - frameNo * m_tuningRomFrameSizeW;
+
+				fotipFrame.write.bitMask = 0;
+				fotipFrame.write.discreteValue = 0;		// zero fotipFrame.write.floatValue also
+
+				switch(ts.type())
+				{
+				case FotipV2::DataType::AnalogFloat:
+					fotipFrame.write.analogFloatValue = reverseFloat(static_cast<float>(tuningCmd.write.value));
+					break;
+
+				case FotipV2::DataType::AnalogSignedInt:
+					fotipFrame.write.analogSignedIntValue = reverseInt32(static_cast<qint32>(tuningCmd.write.value));
+					break;
+
+				case FotipV2::DataType::Discrete:
+					{
+						int bit = ts.bit();
+
+						assert(bit >= 0 && bit < 32 );
+
+						quint32 bitmask = 1 << bit;
+
+						fotipFrame.write.bitMask = reverseUint32(bitmask);
+
+						quint32 discreteValue = (tuningCmd.write.value == 0.0 ? 0 : 1) << bit;
+
+						fotipFrame.write.discreteValue = reverseUint32(discreteValue);
+					}
+					break;
+
+				default:
+					assert(false);
+				}
+			}
+			break;
+
+		case FotipV2::OpCode::Apply:
 			break;
 
 		default:
 			assert(false);
+			return false;
 		}
+
+		return true;
 	}
 
 
@@ -551,37 +700,89 @@ namespace Tuning
 								reply.fotipFrame.header.romFrameSizeB,
 								reply.fotipFrame.data);
 
-		int signalCount = m_tuningSignals.count();
+		// parse signals values and bounds
+		//
+		int frameNo = (reply.fotipFrame.header.startAddressW - m_tuningRomStartAddrW) / m_tuningRomFrameSizeW;
 
-		int frameStartAddrW = reply.fotipFrame.header.startAddressW;
-		int nextFrameStartAddrW = frameStartAddrW + reply.fotipFrame.header.romFrameSizeB / sizeof(quint16);
+		quint8* dataPtr = reply.fotipFrame.data;
+
+		int signalCount = m_tuningSignals.count();
 
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];
 
-			if (ts.offset < frameStartAddrW ||
-				ts.offset >= nextFrameStartAddrW)
+			if (frameNo < ts.frameNo() ||
+				frameNo > ts.frameNo() + 2)
 			{
-				continue;
+				continue;		// signal is not in this frame
 			}
 
-			// parse signal!!!
-			//
+			double value = 0;
 
+			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningRomFrameSizeW) * sizeof(quint16);
+
+			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
+
+			switch(ts.type())
+			{
+			case FotipV2::DataType::AnalogFloat:
+				{
+					value = reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB));
+				}
+				break;
+
+			case FotipV2::DataType::AnalogSignedInt:
+				{
+					value = reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB));
+				}
+				break;
+
+			case FotipV2::DataType::Discrete:
+				{
+					quint32 word =	reverseUint32(*reinterpret_cast<quint32*>(dataPtr + offsetInFrameB));
+					value = ((word & (1 << ts.bit())) == 0 ? 0 : 1);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+
+			// (frameNo % 3) == 0 - tuning signal value
+			// (frameNo % 3) == 1 - tuning signal read low bound
+			// (frameNo % 3) == 2 - tuning signal read high bound
+
+			switch(frameNo % 3)
+			{
+			case 0:
+				ts.setState(true, value);
+				break;
+
+			case 1:
+				ts.setReadLowBound(value);
+				break;
+
+			case 2:
+				ts.setReadHighBound(value);
+				break;
+
+			default:
+				assert(false);
+			}
 		}
 	}
 
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
-
+		int a = 0;
+		a++;
 	}
 
 
 	void TuningSourceWorker::processApplyReply(RupFotipV2& reply)
 	{
-
 	}
 
 
@@ -641,49 +842,49 @@ namespace Tuning
 		if (fotipHeader.protocolVersion != FotipV2::VERSION)
 		{
 			m_stat.errFotipProtocolVersion++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
 			m_stat.errFotipUniqueID++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
 			m_stat.errFotipLmNumber++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
 		{
 			m_stat.errFotipSubsystemCode++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.operationCode != m_request.fotipFrame.header.operationCode)
 		{
 			m_stat.errFotipOperationCode++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.fotipFrameSizeB != sizeof(FotipV2::Frame))
 		{
 			m_stat.errFotipFrameSize++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.romSizeB !=  m_tuningRomSizeW * 2)
 		{
 			m_stat.errFotipRomSize++;
-			result &= false;
+			result = false;
 		}
 
 		if (fotipHeader.romFrameSizeB != m_tuningRomFrameSizeW * 2)
 		{
 			m_stat.errFotipRomFrameSize++;
-			result &= false;
+			result = false;
 		}
 
 		const FotipV2::HeaderFlags& flags = fotipHeader.flags;
@@ -693,61 +894,61 @@ namespace Tuning
 		if (flags.dataTypeError == 1)
 		{
 			m_stat.fotipFlagDataTypeErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.operationCodeError == 1)
 		{
 			m_stat.fotipFlagOpCodeErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.startAddressError == 1)
 		{
 			m_stat.fotipFlagStartAddrErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.romSizeError == 1)
 		{
 			m_stat.fotipFlagRomSizeErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.romFrameSizeError == 1)
 		{
 			m_stat.fotipFlagRomFrameSizeErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.frameSizeError == 1)
 		{
 			m_stat.fotipFlagFrameSizeErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.versionError == 1)
 		{
 			m_stat.fotipFlagProtocolVersionErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.subsystemKeyError == 1)
 		{
 			m_stat.fotipFlagSubsystemKeyErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.idError == 1)
 		{
 			m_stat.fotipFlagUniueIDErr++;
-			result &= false;
+			result = false;
 		}
 
 		if (flags.offsetError == 1)
 		{
 			m_stat.fotipFlagOffsetErr++;
-			result &= false;
+			result = false;
 		}
 
 		// check FOTIP success flags
@@ -782,6 +983,13 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::invalidateAllSignals()
+	{
+		for(TuningSignal& s : m_tuningSignals)
+		{
+			s.setState(false, 0);
+		}
+	}
 
 
 	void TuningSourceWorker::onTimer()

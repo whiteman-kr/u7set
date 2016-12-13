@@ -47,7 +47,7 @@ namespace Tuning
 	{
 		if (m_tuningData == nullptr)
 		{
-			TuningData td(lmEquipmentID(), 0, 0);
+			TuningData td(lmEquipmentID(), 0, 0, 0);
 			td.writeToXml(xml);
 			return;
 		}

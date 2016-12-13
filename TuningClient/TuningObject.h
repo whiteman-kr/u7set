@@ -43,21 +43,30 @@ public:
 	double highLimit() const;
 	void setHighLimit(double value);
 
-	int decimalPlaces() const;
+    double readLowLimit() const;
+    void setReadLowLimit(double value);
+
+    double readHighLimit() const;
+    void setReadHighLimit(double value);
+
+    int decimalPlaces() const;
 	void setDecimalPlaces(int value);
 
 	bool valid() const;
 	void setValid(bool value);
 
 	bool underflow() const;
-	void setUnderflow(bool value);
 
 	bool overflow() const;
-	void setOverflow(bool value);
 
-	Hash appSignalHash() const;
+    Hash appSignalHash() const;
 
-	bool modified() const;
+    bool redraw();
+
+    bool userModified() const;
+    void clearUserModified();
+
+    bool limitsUnbalance() const;
 
 private:
 
@@ -76,13 +85,19 @@ private:
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
 
-	int m_decimalPlaces = 0;
+    double m_readLowLimit = 0;
+    double m_readHighLimit = 0;
 
-	bool m_valid = 0;
-	bool m_underflow = 0;
-	bool m_overflow = 0;
+    int m_decimalPlaces = 0;
+
+    bool m_valid = false;
+    bool m_underflow = false;
+    bool m_overflow = false;
 
 	Hash m_appSignalHash = 0;
+
+    bool m_redraw = false;
+    bool m_userModified = false;
 };
 
 

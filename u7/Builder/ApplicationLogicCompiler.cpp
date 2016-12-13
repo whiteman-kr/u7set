@@ -1039,7 +1039,7 @@ namespace Builder
 
 		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
 		list.append(str);
-		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n").arg(dataID);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n");
 		list.append(str);
 
 		if (txAnalogs.count() > 0)
@@ -1160,7 +1160,16 @@ namespace Builder
 		//
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
-			result &= m_moduleCompilers[i]->pass2();
+			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
+
+			if (moduleCompiler == nullptr)
+			{
+				assert(false);
+				result = false;
+				break;
+			}
+
+			result &= moduleCompiler->pass2();
 
 			if (isBuildCancelled() == true)
 			{

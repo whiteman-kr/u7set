@@ -117,7 +117,7 @@ signals:
 public slots:
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys, bool updateView = true);
-	void loadSignal(int row, bool updateView = true);
+	void loadSignal(int signalId, bool updateView = true);
 	void addSignal();
 	void showError(QString message);
 

@@ -30,7 +30,9 @@ struct WriteCommand
 
 class TcpTuningClient : public Tcp::Client
 {
-	Q_OBJECT
+    Q_ENUM(NetworkError)
+
+    Q_OBJECT
 public:
 	TcpTuningClient(ConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 	~TcpTuningClient();
@@ -40,6 +42,8 @@ public:
     bool tuningSourceInfo(quint64 id, TuningSource& result);
 
     void writeTuningSignal(Hash hash, double value);
+
+    void writeTuningSignals(std::vector<WriteCommand> signalsArray);
 
 private:
 	virtual void onClientThreadStarted() override;
@@ -78,7 +82,9 @@ signals:
 	void tuningSourcesArrived();
 	void connectionFailed();
 
+private:
 
+    QString networkErrorStr(NetworkError error);
 
 private:
 	ConfigController* m_cfgController = nullptr;
@@ -110,6 +116,8 @@ private:
 
     int m_readTuningSignalIndex = 0;
     int m_readTuningSignalCount = 0;
+
+
 
 };
 

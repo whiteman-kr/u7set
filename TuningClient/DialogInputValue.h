@@ -12,13 +12,15 @@ class DialogInputValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputValue(bool analog, double value, bool sameValue, int decimalPlaces, QWidget *parent = 0);
+    explicit DialogInputValue(bool analog, double value, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget *parent = 0);
 	~DialogInputValue();
 
 private:
 	Ui::DialogInputValue *ui;
 
 	double m_value = 0;
+    double m_lowLimit = 0;
+    double m_highLimit = 0;
 	bool m_analog = true;
 
 	virtual void accept();

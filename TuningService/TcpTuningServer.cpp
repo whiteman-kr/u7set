@@ -9,6 +9,8 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
+	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
+
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service) :
 		m_service(service)
 	{
@@ -59,6 +61,14 @@ namespace Tuning
 			onTuningSignalsReadRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_TUNING_SIGNALS_WRITE:
+			onTuningSignalsWriteRequest(requestData, requestDataSize);
+			break;
+
+		case TDS_TUNING_SIGNALS_APPLY:
+			onTuningSignalsApplyRequest(requestData, requestDataSize);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -72,33 +82,49 @@ namespace Tuning
 
 		m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
 
-		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_getTuningSourcesInfo.clientequipmentid());
+		QString clientRequestID = QString::fromStdString(m_getTuningSourcesInfo.clientequipmentid());
 
-		if (clientContext == nullptr)
+		QVector<const TuningClientContext*> clientContexts;
+
+		if (clientRequestID == SCM_CLIENT_ID)
 		{
-			// unknown clientID
-			//
-			m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
-			sendReply(m_getTuningSourcesInfoReply);
-			return;
+			m_service.getAllClientContexts(clientContexts);
 		}
-
-		QVector<Network::DataSourceInfo> dsiArray;
-
-		clientContext->getSourcesInfo(dsiArray);
-
-		for(const Network::DataSourceInfo& dsi : dsiArray)
+		else
 		{
-			Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+			const TuningClientContext* clntContext =
+					m_service.getClientContext(clientRequestID);
 
-			if (newDsi == nullptr)
+			if (clntContext == nullptr)
 			{
-				assert(false);
-				continue;
+				// unknown clientID
+				//
+				m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+				sendReply(m_getTuningSourcesInfoReply);
+				return;
 			}
 
-			*newDsi = dsi;
+			clientContexts.append(clntContext);
+		}
+
+		for(const TuningClientContext* clientContext : clientContexts)
+		{
+			QVector<Network::DataSourceInfo> dsiArray;
+
+			clientContext->getSourcesInfo(dsiArray);
+
+			for(const Network::DataSourceInfo& dsi : dsiArray)
+			{
+				Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+
+				if (newDsi == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				*newDsi = dsi;
+			}
 		}
 
 		m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
@@ -113,33 +139,49 @@ namespace Tuning
 
 		m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
 
-		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_getTuningSourcesStates.clientequipmentid());
+		QString clientRequestID = QString::fromStdString(m_getTuningSourcesStates.clientequipmentid());
 
-		if (clientContext == nullptr)
+		QVector<const TuningClientContext*> clientContexts;
+
+		if (clientRequestID == SCM_CLIENT_ID)
 		{
-			// unknown clientID
-			//
-			m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
-			sendReply(m_getTuningSourcesStatesReply);
-			return;
+			m_service.getAllClientContexts(clientContexts);
 		}
-
-		QVector<Network::TuningSourceState> tssArray;
-
-		clientContext->getSourcesStates(tssArray);
-
-		for(const Network::TuningSourceState& tss : tssArray)
+		else
 		{
-			Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
+			const TuningClientContext* clntContext =
+					m_service.getClientContext(clientRequestID);
 
-			if (newTss == nullptr)
+			if (clntContext == nullptr)
 			{
-				assert(false);
-				continue;
+				// unknown clientID
+				//
+				m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+				sendReply(m_getTuningSourcesStatesReply);
+				return;
 			}
 
-			*newTss = tss;
+			clientContexts.append(clntContext);
+		}
+
+		for(const TuningClientContext* clientContext : clientContexts)
+		{
+			QVector<Network::TuningSourceState> tssArray;
+
+			clientContext->getSourcesStates(tssArray);
+
+			for(const Network::TuningSourceState& tss : tssArray)
+			{
+				Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
+
+				if (newTss == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				*newTss = tss;
+			}
 		}
 
 		m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
@@ -152,8 +194,10 @@ namespace Tuning
 	{
 		m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
 
+		QString clientRequestID = QString::fromStdString(m_tuningSignalsReadRequest.clientequipmentid());
+
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(m_tuningSignalsReadRequest.clientequipmentid());
+				m_service.getClientContext(clientRequestID);
 
 		if (clientContext == nullptr)
 		{
@@ -167,13 +211,68 @@ namespace Tuning
 			return;
 		}
 
-		clientContext->getSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
+		clientContext->readSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
 
 		// m_tuningSignalsReadReply.set_error(???) must be set inside clientContext->getSignalStates()
 
 		sendReply(m_tuningSignalsReadReply);
 	}
 
+
+	void TcpTuningServer::onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize)
+	{
+		m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
+
+		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
+
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(clientRequestID);
+
+		if (clientContext == nullptr)
+		{
+			// unknown clientID
+			//
+			m_tuningSignalsWriteReply.Clear();
+
+			m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+
+			sendReply(m_tuningSignalsWriteReply);
+			return;
+		}
+
+		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, m_tuningSignalsWriteReply);
+
+		sendReply(m_tuningSignalsWriteReply);
+	}
+
+
+	void TcpTuningServer::onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize)
+	{
+		m_tuningSignalsApplyRequest.ParseFromArray(requestData, requestDataSize);
+
+		QString clientRequestID = QString::fromStdString(m_tuningSignalsApplyRequest.clientequipmentid());
+
+		const TuningClientContext* clientContext =
+				m_service.getClientContext(clientRequestID);
+
+		if (clientContext == nullptr)
+		{
+			// unknown clientID
+			//
+			m_tuningSignalsApplyReply.Clear();
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+
+			sendReply(m_tuningSignalsApplyReply);
+			return;
+		}
+
+		clientContext->applySignalStates();
+
+		m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::Success));
+
+		sendReply(m_tuningSignalsWriteReply);
+	}
 
 
 	// -------------------------------------------------------------------------------

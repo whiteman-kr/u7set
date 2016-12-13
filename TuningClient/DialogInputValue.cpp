@@ -2,9 +2,11 @@
 #include "ui_DialogInputValue.h"
 #include <QMessageBox>
 
-DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, int decimalPlaces, QWidget *parent) :
+DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_analog(analog),
+    m_lowLimit(lowLimit),
+    m_highLimit(highLimit),
 	ui(new Ui::DialogInputValue)
 {
 	ui->setupUi(this);
@@ -14,7 +16,14 @@ DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, in
 
 	if (analog == true)
 	{
-		if (sameValue == true)
+
+        QString str = tr("Enter the value (%1 - %2):")
+                .arg(QString::number(m_lowLimit, 'f', decimalPlaces))
+                .arg(QString::number(m_highLimit, 'f', decimalPlaces));
+
+        setWindowTitle(str);
+
+        if (sameValue == true)
 		{
 			ui->m_lineEdit->setText(QString::number(value, 'f', decimalPlaces));
 		}
@@ -54,12 +63,18 @@ void DialogInputValue::accept()
 		bool ok = false;
 		m_value = text.toDouble(&ok);
 
-		if (ok == false)
+        if (ok == false)
 		{
 			QMessageBox::critical(this, tr("Error"), tr("The value is incorrect."));
 			return;
 		}
-	}
+
+        if (m_value < m_lowLimit || m_value > m_highLimit)
+        {
+            QMessageBox::critical(this, tr("Error"), tr("The value is out of range."));
+            return;
+        }
+    }
 	else
 	{
 		if (ui->m_checkBox->checkState() == Qt::PartiallyChecked)

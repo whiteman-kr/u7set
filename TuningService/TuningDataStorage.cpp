@@ -33,9 +33,10 @@ namespace  Tuning
 	}
 
 
-	TuningData::TuningData(QString lmID,
+	TuningData::TuningData(QString lmID, int tuningMemoryStartAddrW,
 							int tuningFrameSizeBytes,
 							int tuningFramesCount) :
+		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
 		m_lmEquipmentID(lmID),
 		m_tuningFrameSizeBytes(tuningFrameSizeBytes),
 		m_tuningFramesCount(tuningFramesCount)
@@ -215,17 +216,9 @@ namespace  Tuning
 				// generate metadata
 				//
 
-				/*
-
-						m_metadataFields.append("Offset");
-						m_metadataFields.append("BitNo");
-						*/
-
-
-
-
-
 				quint8* dataPtr = m_tuningData + sizeB;
+
+				bool testSizeB = false;
 
 				switch(t)
 				{
@@ -252,7 +245,12 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
+
+						signal->setRamAddr(ramAddr);
+
 						sizeB += sizeof(float);
+						testSizeB = true;
 
 						metaData.append(QVariant(QString("AnalogFloat")));
 						metaData.append(QVariant(defaultValue));
@@ -284,7 +282,12 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
+
+						signal->setRamAddr(ramAddr);
+
 						sizeB += sizeof(qint32);
+						testSizeB = true;
 
 						metaData.append(QVariant(QString("AnalogInt")));
 						metaData.append(QVariant(defaultValue));
@@ -297,17 +300,45 @@ namespace  Tuning
 					{
 						quint16 defaultValue = signal->tuningDefaultValue() == 0.0 ? 0 : 1;
 
-						writeBigEndianUint16Bit(dataPtr, discreteCount % SIZE_16BIT, defaultValue);
-						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes, discreteCount % SIZE_16BIT, 0);
-						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes * 2, discreteCount % SIZE_16BIT, 1);
+						int bitNo = discreteCount % SIZE_32BIT;
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), discreteCount % SIZE_16BIT));
+						writeBigEndianUint32Bit(dataPtr, bitNo, defaultValue);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes, bitNo, 0);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes * 2, bitNo, 1);
+
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), bitNo));
+
+						// tuningable discrete signals pack in 32-bit container that place in LM memory in BigEndian format
+						// but access to this discretes is performeds as word-addressed
+						// so,
+						//   if discrete bitNo < 16 we add 1 to signal offset (in words)
+						//   if discrete bitNo >= 16 we set bit no for discrete is bitNo % 16
+						//
+						int additionalOffsetToDiscreteW = 0;
+
+						if (bitNo < 16)
+						{
+							additionalOffsetToDiscreteW = 1;
+						}
+						else
+						{
+							additionalOffsetToDiscreteW = 0;
+
+							bitNo = bitNo % SIZE_16BIT;
+						}
+
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
+
+						signal->setRamAddr(ramAddr);
+
+						//
 
 						discreteCount++;
 
-						if ((discreteCount % SIZE_16BIT) == 0)
+						if ((discreteCount % SIZE_32BIT) == 0)
 						{
-							sizeB += sizeof(quint16);
+							sizeB += sizeof(quint32);
+							testSizeB = true;
 						}
 
 						metaData.append(QVariant(QString("Discrete")));
@@ -321,7 +352,7 @@ namespace  Tuning
 					assert(false);
 				}
 
-				if ((sizeB % m_tuningFrameSizeBytes) == 0)
+				if (testSizeB == true && (sizeB % m_tuningFrameSizeBytes) == 0)
 				{
 					// frame full
 					// skip lowBound and highBound frames
@@ -335,6 +366,8 @@ namespace  Tuning
 				m_metadata.push_back(metaData);
 			}
 		}
+
+		assert(sizeB <= m_tuningDataSize);
 
 		return true;
 	}
@@ -548,7 +581,7 @@ namespace  Tuning
 	}
 
 
-	void TuningData::writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue)
+	void TuningData::writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue)
 	{
 		if (dataPtr == nullptr)
 		{
@@ -556,15 +589,15 @@ namespace  Tuning
 			return;
 		}
 
-		assert(bitNo >= 0 && bitNo <= 15);
+		assert(bitNo >= 0 && bitNo < 32);
 
-		quint16* data16Ptr = reinterpret_cast<quint16*>(dataPtr);
+		quint32* data32Ptr = reinterpret_cast<quint32*>(dataPtr);
 
-		// read word and convert from BigEndian to LittleEndian
+		// read dword and convert from BigEndian to LittleEndian
 		//
-		quint16 value = reverseUint16(*data16Ptr);
+		quint32 value = reverseUint32(*data32Ptr);
 
-		quint16 bitMask = 1 << bitNo;
+		quint32 bitMask = 1 << bitNo;
 
 		if (bitValue == 0)
 		{
@@ -575,9 +608,9 @@ namespace  Tuning
 			value |= bitMask;
 		}
 
-		// convert value from LittleEndian to BigEndian and write word
+		// convert value from LittleEndian to BigEndian and write dword
 		//
-		*data16Ptr = reverseUint16(value);
+		*data32Ptr = reverseUint32(value);
 	}
 
 

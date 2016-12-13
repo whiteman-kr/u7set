@@ -4642,8 +4642,15 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 			if (sameXPosCount > 1)
 			{
 				assert(currentPointIndex > 0);
-				result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
-				currentPointIndex--;
+				assert(currentPointIndex <= result.size());
+
+				size_t startIndex = currentPointIndex - sameXPosCount;
+				size_t lastIndex = currentPointIndex - 1;
+
+				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
+
+				currentPointIndex = currentPointIndex - sameXPosCount-1;
+				sameYPosCount = 0;
 			}
 
 			sameXPosCount = 0;
@@ -4661,8 +4668,15 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 			if (sameYPosCount > 1)
 			{
 				assert(currentPointIndex > 0);
-				result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
-				currentPointIndex--;
+				assert(currentPointIndex <= result.size());
+
+				size_t startIndex = currentPointIndex - sameYPosCount;
+				size_t lastIndex = currentPointIndex - 1;
+
+				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
+
+				currentPointIndex = currentPointIndex - sameYPosCount-1;
+				sameXPosCount = 0;
 			}
 
 			sameYPosCount = 0;
@@ -4676,13 +4690,36 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 	if (sameYPosCount > 1)
 	{
 		assert(currentPointIndex == result.size());
-		result.erase(result.begin() + (currentPointIndex - sameYPosCount), result.begin() + currentPointIndex - 1);
+
+		size_t beginIndex = currentPointIndex - sameYPosCount;
+		size_t lastIndex = currentPointIndex - 1;
+
+		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
 	}
 
 	if (sameXPosCount > 1)
 	{
 		assert(currentPointIndex == result.size());
-		result.erase(result.begin() + (currentPointIndex - sameXPosCount), result.begin() + currentPointIndex - 1);
+
+		size_t beginIndex = currentPointIndex - sameXPosCount;
+		size_t lastIndex = currentPointIndex - 1;
+
+		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
+	}
+
+	// Check points before return
+	//
+
+	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
+	{
+		VFrame30::SchemaPoint curPoint = result.at(currentPointIndex);
+		VFrame30::SchemaPoint prevPoint = result.at(currentPointIndex - 1);
+
+		// Points must be connected by X or Y axis. In other way - exception must be rised
+		//
+
+		assert((curPoint.X == prevPoint.X) ||
+			   (curPoint.Y == prevPoint.Y));
 	}
 
 	return result;
