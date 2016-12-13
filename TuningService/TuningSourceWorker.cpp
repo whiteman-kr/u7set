@@ -695,33 +695,12 @@ namespace Tuning
 
 		int signalCount = m_tuningSignals.count();
 
-		float df = m_tuningSignals[0].defaultValue();
-		quint32 iv = *reinterpret_cast<quint32*>(&df);
-
-		if (frameNo == 0)
-		{
-			int a = 0;
-			a++;
-		}
-
-		if (frameNo == 1)
-		{
-			int a = 0;
-			a++;
-		}
-
-		if (frameNo == 2)
-		{
-			int a = 0;
-			a++;
-		}
-
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];
 
-			if (ts.frameNo() < frameNo ||
-				ts.frameNo() + 2 >= frameNo)
+			if (frameNo < ts.frameNo() ||
+				frameNo > ts.frameNo() + 2)
 			{
 				continue;		// signal is not in this frame
 			}
@@ -736,7 +715,7 @@ namespace Tuning
 			{
 			case FotipV2::DataType::AnalogFloat:
 				{
-					value = *reinterpret_cast<float*>(dataPtr + offsetInFrameB); //reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB));
+					value = reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB));
 				}
 				break;
 
@@ -784,14 +763,11 @@ namespace Tuning
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
-		int a = 0;
-		a++;
 	}
 
 
 	void TuningSourceWorker::processApplyReply(RupFotipV2& reply)
 	{
-
 	}
 
 

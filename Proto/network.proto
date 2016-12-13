@@ -295,7 +295,6 @@ message TuningSignalsWrite
     repeated TuningSignalWrite tuningSignalWrite = 3;
 }
 
-
 message TuningSignalWriteResult
 {
     optional uint64 signalHash = 1 [default = 0];
@@ -307,3 +306,19 @@ message TuningSignalsWriteReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
 }
+
+
+// Apply tuning signals request
+
+message ApplyTuningSignals
+{
+    optional string clientEquipmentID = 1;
+}
+
+
+message ApplyTuningSignalsReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
+
