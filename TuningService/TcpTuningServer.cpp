@@ -63,6 +63,10 @@ namespace Tuning
 			onTuningSignalsWriteRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_TUNING_SIGNALS_APPLY:
+			onTuningSignalsApplyRequest(requestData, requestDataSize);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -211,6 +215,11 @@ namespace Tuning
 		sendReply(m_tuningSignalsWriteReply);
 	}
 
+
+	void TcpTuningServer::onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize)
+	{
+
+	}
 
 
 	// -------------------------------------------------------------------------------

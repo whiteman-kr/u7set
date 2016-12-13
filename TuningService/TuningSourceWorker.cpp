@@ -269,6 +269,16 @@ namespace Tuning
 	}
 
 
+	void TuningSourceWorker::applySignalStates()
+	{
+		TuningCommand cmd;
+
+		cmd.opCode = FotipV2::OpCode::Apply;
+
+		m_tuningCommandQueue.push(&cmd);
+	}
+
+
 	void TuningSourceWorker::onThreadStarted()
 	{
 		connect(&m_replyQueue, &Queue<Rup::Frame>::queueNotEmpty, this, &TuningSourceWorker::onReplyReady);

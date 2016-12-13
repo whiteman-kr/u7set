@@ -310,13 +310,13 @@ message TuningSignalsWriteReply
 
 // Apply tuning signals request
 
-message ApplyTuningSignals
+message TuningSignalsApply
 {
     optional string clientEquipmentID = 1;
 }
 
 
-message ApplyTuningSignalsReply
+message TuningSignalsApplyReply
 {
     optional int32 error = 1 [default = 0];
 }

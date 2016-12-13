@@ -65,8 +65,8 @@ class TuningSignalWrite;
 class TuningSignalsWrite;
 class TuningSignalWriteResult;
 class TuningSignalsWriteReply;
-class ApplyTuningSignals;
-class ApplyTuningSignalsReply;
+class TuningSignalsApply;
+class TuningSignalsApplyReply;
 
 // ===================================================================
 
@@ -3680,14 +3680,14 @@ class TuningSignalsWriteReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class ApplyTuningSignals : public ::google::protobuf::Message {
+class TuningSignalsApply : public ::google::protobuf::Message {
  public:
-  ApplyTuningSignals();
-  virtual ~ApplyTuningSignals();
+  TuningSignalsApply();
+  virtual ~TuningSignalsApply();
 
-  ApplyTuningSignals(const ApplyTuningSignals& from);
+  TuningSignalsApply(const TuningSignalsApply& from);
 
-  inline ApplyTuningSignals& operator=(const ApplyTuningSignals& from) {
+  inline TuningSignalsApply& operator=(const TuningSignalsApply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3701,17 +3701,17 @@ class ApplyTuningSignals : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ApplyTuningSignals& default_instance();
+  static const TuningSignalsApply& default_instance();
 
-  void Swap(ApplyTuningSignals* other);
+  void Swap(TuningSignalsApply* other);
 
   // implements Message ----------------------------------------------
 
-  ApplyTuningSignals* New() const;
+  TuningSignalsApply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ApplyTuningSignals& from);
-  void MergeFrom(const ApplyTuningSignals& from);
+  void CopyFrom(const TuningSignalsApply& from);
+  void MergeFrom(const TuningSignalsApply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3746,7 +3746,7 @@ class ApplyTuningSignals : public ::google::protobuf::Message {
   inline ::std::string* release_clientequipmentid();
   inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
 
-  // @@protoc_insertion_point(class_scope:Network.ApplyTuningSignals)
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalsApply)
  private:
   inline void set_has_clientequipmentid();
   inline void clear_has_clientequipmentid();
@@ -3763,18 +3763,18 @@ class ApplyTuningSignals : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static ApplyTuningSignals* default_instance_;
+  static TuningSignalsApply* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class ApplyTuningSignalsReply : public ::google::protobuf::Message {
+class TuningSignalsApplyReply : public ::google::protobuf::Message {
  public:
-  ApplyTuningSignalsReply();
-  virtual ~ApplyTuningSignalsReply();
+  TuningSignalsApplyReply();
+  virtual ~TuningSignalsApplyReply();
 
-  ApplyTuningSignalsReply(const ApplyTuningSignalsReply& from);
+  TuningSignalsApplyReply(const TuningSignalsApplyReply& from);
 
-  inline ApplyTuningSignalsReply& operator=(const ApplyTuningSignalsReply& from) {
+  inline TuningSignalsApplyReply& operator=(const TuningSignalsApplyReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3788,17 +3788,17 @@ class ApplyTuningSignalsReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ApplyTuningSignalsReply& default_instance();
+  static const TuningSignalsApplyReply& default_instance();
 
-  void Swap(ApplyTuningSignalsReply* other);
+  void Swap(TuningSignalsApplyReply* other);
 
   // implements Message ----------------------------------------------
 
-  ApplyTuningSignalsReply* New() const;
+  TuningSignalsApplyReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ApplyTuningSignalsReply& from);
-  void MergeFrom(const ApplyTuningSignalsReply& from);
+  void CopyFrom(const TuningSignalsApplyReply& from);
+  void MergeFrom(const TuningSignalsApplyReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3828,7 +3828,7 @@ class ApplyTuningSignalsReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:Network.ApplyTuningSignalsReply)
+  // @@protoc_insertion_point(class_scope:Network.TuningSignalsApplyReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
@@ -3845,7 +3845,7 @@ class ApplyTuningSignalsReply : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static ApplyTuningSignalsReply* default_instance_;
+  static TuningSignalsApplyReply* default_instance_;
 };
 // ===================================================================
 
@@ -7349,56 +7349,56 @@ TuningSignalsWriteReply::mutable_writeresult() {
 
 // -------------------------------------------------------------------
 
-// ApplyTuningSignals
+// TuningSignalsApply
 
 // optional string clientEquipmentID = 1;
-inline bool ApplyTuningSignals::has_clientequipmentid() const {
+inline bool TuningSignalsApply::has_clientequipmentid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ApplyTuningSignals::set_has_clientequipmentid() {
+inline void TuningSignalsApply::set_has_clientequipmentid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ApplyTuningSignals::clear_has_clientequipmentid() {
+inline void TuningSignalsApply::clear_has_clientequipmentid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ApplyTuningSignals::clear_clientequipmentid() {
+inline void TuningSignalsApply::clear_clientequipmentid() {
   if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_->clear();
   }
   clear_has_clientequipmentid();
 }
-inline const ::std::string& ApplyTuningSignals::clientequipmentid() const {
+inline const ::std::string& TuningSignalsApply::clientequipmentid() const {
   return *clientequipmentid_;
 }
-inline void ApplyTuningSignals::set_clientequipmentid(const ::std::string& value) {
+inline void TuningSignalsApply::set_clientequipmentid(const ::std::string& value) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(value);
 }
-inline void ApplyTuningSignals::set_clientequipmentid(const char* value) {
+inline void TuningSignalsApply::set_clientequipmentid(const char* value) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(value);
 }
-inline void ApplyTuningSignals::set_clientequipmentid(const char* value, size_t size) {
+inline void TuningSignalsApply::set_clientequipmentid(const char* value, size_t size) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* ApplyTuningSignals::mutable_clientequipmentid() {
+inline ::std::string* TuningSignalsApply::mutable_clientequipmentid() {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   return clientequipmentid_;
 }
-inline ::std::string* ApplyTuningSignals::release_clientequipmentid() {
+inline ::std::string* TuningSignalsApply::release_clientequipmentid() {
   clear_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -7408,7 +7408,7 @@ inline ::std::string* ApplyTuningSignals::release_clientequipmentid() {
     return temp;
   }
 }
-inline void ApplyTuningSignals::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+inline void TuningSignalsApply::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
   if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
     delete clientequipmentid_;
   }
@@ -7423,26 +7423,26 @@ inline void ApplyTuningSignals::set_allocated_clientequipmentid(::std::string* c
 
 // -------------------------------------------------------------------
 
-// ApplyTuningSignalsReply
+// TuningSignalsApplyReply
 
 // optional int32 error = 1 [default = 0];
-inline bool ApplyTuningSignalsReply::has_error() const {
+inline bool TuningSignalsApplyReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ApplyTuningSignalsReply::set_has_error() {
+inline void TuningSignalsApplyReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ApplyTuningSignalsReply::clear_has_error() {
+inline void TuningSignalsApplyReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ApplyTuningSignalsReply::clear_error() {
+inline void TuningSignalsApplyReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 ApplyTuningSignalsReply::error() const {
+inline ::google::protobuf::int32 TuningSignalsApplyReply::error() const {
   return error_;
 }
-inline void ApplyTuningSignalsReply::set_error(::google::protobuf::int32 value) {
+inline void TuningSignalsApplyReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
