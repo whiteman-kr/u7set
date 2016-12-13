@@ -248,69 +248,73 @@ CREATE OR REPLACE FUNCTION user_api.update_user(
 	RETURNS integer AS
 $BODY$
 DECLARE
-	user_id integer;
+    user_id integer;
 	user_salt text;
+	user_password_hash text;
 BEGIN
     -- Check session_key and raise error if it is wrong
-    --
-    PERFORM user_api.check_session_key(session_key, TRUE);
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
 
-	user_id := (SELECT userid FROM users WHERE username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~');
+    user_id := (SELECT userid FROM users WHERE username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~');
 
-	IF (user_id IS NULL) THEN
-		RAISE 'User % does not exists.', user_name;
+    IF (user_id IS NULL) THEN
+	    RAISE 'User % does not exists.', user_name;
 	END IF;
 
-	IF (user_id <> user_api.current_user_id(session_key) AND
-	   user_api.is_current_user_admin(session_key) = FALSE) 
+    IF (user_id <> user_api.current_user_id(session_key) AND
+	   user_api.is_current_user_admin(session_key) = FALSE)
 	THEN
-		RAISE 'User % has no right to update another user.', (SELECT username FROM users WHERE userid = user_api.current_user_id(session_key));
+	    RAISE 'User % has no right to update another user.', (SELECT username FROM users WHERE userid = user_api.current_user_id(session_key));
 	END IF;
 
-	-- update password if required (new_password is present)
+    -- update password if required (new_password is present)
 	IF (new_password IS NOT NULL AND char_length(new_password) <> 0)
 	THEN
-	
-		IF (user_api.current_user_id(session_key) = user_id) AND
+	    user_salt := (SELECT salt FROM users WHERE userid = user_id);
+
+        IF (user_api.current_user_id(session_key) = user_id) AND
 		   (SELECT passwordhash FROM users WHERE userid = user_id) <> user_api.password_hash(user_salt, user_password)
 		THEN
-			RAISE 'Old password is incorrect';
+		    RAISE 'Old password is incorrect';
 		END IF;
 
-		IF (char_length(new_password) < 6)
+        IF (char_length(new_password) < 6)
 		THEN
-			RAISE 'New password is too simple, it must contain at least 6 symbols.';
+		    RAISE 'New password is too simple, it must contain at least 6 symbols.';
 		END IF;
 
-		UPDATE users SET password = new_password WHERE userid = user_id;
+        user_password_hash := user_api.password_hash(user_salt, new_password);
+
+        UPDATE users SET passwordhash = user_password_hash WHERE userid = user_id;
 	END IF;
 
-	-- upadte all other fields
+    -- upadte all other fields
 	--
 	IF (user_api.is_current_user_admin(session_key) = TRUE)
 	THEN
-		UPDATE Users
-			SET
-				FirstName = first_name,
+	    UPDATE Users
+		    SET
+			    FirstName = first_name,
 				LastName = last_name,
 				-- Administrator = is_admin,  -- This column can't be changed anymore
 				ReadOnly = is_read_only,
 				Disabled = is_disabled
 			WHERE
-				userid = user_id;
+			    userid = user_id;
 	ELSE
-		UPDATE Users
-			SET
-				FirstName = first_name,
+	    UPDATE Users
+		    SET
+			    FirstName = first_name,
 				LastName = last_name,
 				--Administrator = is_admin,	-- If user is not administrator it has no right to change this columns
 				ReadOnly = is_read_only
 				--Disabled = is_disabled	-- If user is not administrator it has no right to change this columns
 			WHERE
-				userid = user_id;
+			    userid = user_id;
 	END IF;
 
-	-- return
+    -- return
 	RETURN user_id;
 END
 $BODY$
@@ -410,3 +414,65 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+-------------------------------------------------------------------------------
+--
+--          create_user
+--
+-------------------------------------------------------------------------------
+DROP FUNCTION public.create_user(integer, text, text, text, text, boolean, boolean, boolean);
+
+CREATE OR REPLACE FUNCTION user_api.create_user(
+    session_key text,
+	user_name text,
+	first_name text,
+	last_name text,
+	user_password text,
+	is_read_only boolean,
+	is_disabled boolean)
+  RETURNS integer AS
+$BODY$
+DECLARE
+    user_salt text;
+	user_password_hash text;
+	new_user_id integer;
+BEGIN
+
+    -- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+    -- Check access rights
+	--
+	IF (user_api.is_current_user_admin(session_key) = FALSE)
+	THEN
+	    RAISE 'User % has no right to add another user.', (SELECT username FROM users WHERE userid = user_api.current_user_id(session_key));
+	END IF;
+
+    IF (SELECT count(*) FROM Users WHERE Username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~') > 0
+	THEN
+	    RAISE 'User % already exists.', user_name;
+	END IF;
+
+    IF (char_length(user_password) < 6) THEN
+	    RAISE 'Password is too simple, it must contain at least 6 symbols.';
+	END IF;
+
+    user_salt := user_api.sha512(gen_salt('bf'));
+	user_password_hash := user_api.sha512(user_salt || user_password);
+
+    INSERT INTO Users (Username, FirstName, LastName, Salt, PasswordHash, Administrator, ReadOnly, Disabled)
+	    VALUES (user_name, first_name, last_name, user_salt, user_password_hash, false, is_read_only, is_disabled)
+		RETURNING UserID INTO new_user_id;
+
+    RETURN new_user_id;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+-------------------------------------------------------------------------------
+--
+--          get_user_id -- deprecated
+--
+-------------------------------------------------------------------------------
+DROP FUNCTION public.get_user_id(text, text);

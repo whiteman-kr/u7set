@@ -242,14 +242,22 @@ void DbWorker::emitError(QSqlDatabase db, const QSqlError& err, bool addLogRecor
 
 void DbWorker::emitError(QSqlDatabase db, const QString& err, bool addLogRecord)
 {
+	QString errorMessage = err;
+
+	if (sessionKey().isEmpty() == false &&
+		isProjectOpened() == true)
+	{
+		errorMessage.replace(sessionKey(), QLatin1String("xxx"));
+	}
+
 	if (db.isOpen() == true &&
 		addLogRecord == true)
 	{
-		this->addLogRecord(db, err);
+		this->addLogRecord(db, errorMessage);
 	}
 
-	qDebug() << err;
-	m_progress->setErrorMessage(err);
+	qDebug() << errorMessage;
+	m_progress->setErrorMessage(errorMessage);
 }
 
 int DbWorker::databaseVersion()
@@ -785,7 +793,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	QString errorMessage;
 
-	result = db_logIn(db, password, password, &errorMessage);
+	result = db_logIn(db, username, password, &errorMessage);
 	if (result == false)
 	{
 		emitError(db, errorMessage);
@@ -822,6 +830,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		db.close();
 		return;
 	}
+
+	user.setPassword(password);		// This password will be used to open project for build
 
 	setCurrentUser(user);
 
@@ -1137,7 +1147,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 
 		if (result == false)
 		{
-			emitError(db, query.lastError());
+			emitError(db, query.lastError(), false);
 			db.close();
 			return;
 		}
@@ -1736,13 +1746,12 @@ void DbWorker::slot_createUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	query.prepare("SELECT * FROM create_user(:userid, :username, :firstname, :lastname, :newpassword, :isadminstrator, :isreadonly, :isdisabled);");
-	query.bindValue(":userid", currentUser().userId());
+	query.prepare("SELECT * FROM user_api.create_user(:sessionkey, :username, :firstname, :lastname, :newpassword, :isreadonly, :isdisabled);");
+	query.bindValue(":sessionkey", sessionKey());
 	query.bindValue(":username", user.username());
 	query.bindValue(":firstname", user.firstName());
 	query.bindValue(":lastname", user.lastName());
 	query.bindValue(":newpassword", user.newPassword());
-	query.bindValue(":isadminstrator", user.isAdminstrator());
 	query.bindValue(":isreadonly", user.isReadonly());
 	query.bindValue(":isdisabled", user.isDisabled());
 
@@ -1758,7 +1767,6 @@ void DbWorker::slot_createUser(DbUser user)
 	{
 		result = query.next();
 		assert(result);
-
 		//int userID = query.value("UserID").toInt();
 	}
 
@@ -1806,8 +1814,8 @@ void DbWorker::slot_updateUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8);")
-						 .arg(currentUser().userId())
+	QString requestStr = QString("SELECT * FROM user_api.update_user('%1', '%2', '%3', '%4', '%5', '%6', %7, %8);")
+						 .arg(sessionKey())
 						 .arg(DbWorker::toSqlStr(user.username()))
 						 .arg(DbWorker::toSqlStr(user.firstName()))
 						 .arg(DbWorker::toSqlStr(user.lastName()))
@@ -1830,6 +1838,18 @@ void DbWorker::slot_updateUser(DbUser user)
 		assert(result);
 
 		//int userID = query.value("UserID").toInt();
+	}
+
+	// If update is ok AND user updates iself AND new password was set
+	// update password in m_currentUser, it will be used for opening project on build
+	//
+
+	if (user.newPassword().isEmpty() == false &&
+		currentUser().username() == user.username())
+	{
+		DbUser cu = currentUser();
+		cu.setPassword(user.newPassword());
+		setCurrentUser(cu);
 	}
 
 	return;
@@ -5437,7 +5457,7 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		return false;
 	}
 
-	if (projectVersion < 4)		// Since version 4 database has stored procedure get_user_id
+	if (projectVersion < 4)
 	{
 		// Check by query
 		//
