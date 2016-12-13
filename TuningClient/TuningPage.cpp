@@ -1033,7 +1033,12 @@ void TuningItemModelMain::slot_setOn()
 {
 	for (TuningObject& o : m_objects)
 	{
-		if (o.analog() == false)
+        if (o.valid() == false)
+        {
+            continue;
+        }
+
+        if (o.analog() == false)
 		{
 			o.setEditValue(1);
 		}
@@ -1044,7 +1049,12 @@ void TuningItemModelMain::slot_setOff()
 {
 	for (TuningObject& o : m_objects)
 	{
-		if (o.analog() == false)
+        if (o.valid() == false)
+        {
+            continue;
+        }
+
+        if (o.analog() == false)
 		{
 			o.setEditValue(0);
 		}
