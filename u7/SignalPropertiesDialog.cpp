@@ -1,4 +1,5 @@
 #include "SignalPropertiesDialog.h"
+#include "SignalsTabPage.h"
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QMessageBox>
@@ -274,6 +275,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}*/
 	}
 
+	connect(this, &SignalPropertiesDialog::signalChanged, SignalsModel::instance(), &SignalsModel::loadSignal, Qt::QueuedConnection);
+
 	// Save
 	//
 	for (int i = m_signalVector.count() - 1; i >= 0; i--)
@@ -303,6 +306,11 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		if (signal.caption().isEmpty())
 		{
 			signal.setCaption("Signal " + signal.customAppSignalID());
+		}
+
+		if (isEditedSignal(signal.ID()) && m_tryCheckout)
+		{
+			emit signalChanged(signal.ID(), true);
 		}
 	}
 

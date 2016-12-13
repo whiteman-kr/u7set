@@ -28,6 +28,7 @@ public:
 	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
 
 signals:
+	void signalChanged(int id, bool updateView);
 
 public slots:
 	void checkAndSaveSignal();
