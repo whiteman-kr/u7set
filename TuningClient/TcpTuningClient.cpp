@@ -442,10 +442,6 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
             continue;
         }
 
-        //double readLowBound = tss.readlowbound();
-
-        //double readHighBound = tss.readhighbound();
-
         TuningObject* object = theObjects.objectPtrByHash(tss.signalhash());
 
         if (object == nullptr)
@@ -457,6 +453,8 @@ void TcpTuningClient::processReadTuningSignals(const QByteArray& data)
             continue;
         }
 
+        object->setReadLowLimit(tss.readlowbound());
+        object->setReadHighLimit(tss.readhighbound());
         object->setValid(tss.valid());
         object->setValue(tss.value());
     }

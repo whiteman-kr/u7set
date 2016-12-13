@@ -68,6 +68,27 @@ void TuningFilterValue::setValue(double value)
 	m_value = value;
 }
 
+double TuningFilterValue::lowLimit() const
+{
+    return m_lowLimit;
+}
+
+void TuningFilterValue::setLowLimit(double value)
+{
+    m_lowLimit = value;
+}
+
+double TuningFilterValue::highLimit() const
+{
+    return m_highLimit;
+}
+
+void TuningFilterValue::setHighLimit(double value)
+{
+    m_highLimit = value;
+}
+
+
 Hash TuningFilterValue::hash() const
 {
 	return m_hash;
@@ -261,7 +282,17 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 					ofv.setValue(reader.attributes().value("Value").toDouble());
 				}
 
-				if (reader.attributes().hasAttribute("DecimalPlaces"))
+                if (reader.attributes().hasAttribute("LowLimit"))
+                {
+                    ofv.setLowLimit(reader.attributes().value("LowLimit").toDouble());
+                }
+
+                if (reader.attributes().hasAttribute("HighLimit"))
+                {
+                    ofv.setHighLimit(reader.attributes().value("HighLimit").toDouble());
+                }
+
+                if (reader.attributes().hasAttribute("DecimalPlaces"))
 				{
 					ofv.setDecimalPlaces(reader.attributes().value("DecimalPlaces").toInt());
 				}
@@ -361,7 +392,9 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 		writer.writeAttribute("Value", QString::number(v.value(), 'f', v.decimalPlaces()));
 		if (v.analog() == true)
 		{
-			writer.writeAttribute("DecimalPlaces", QString::number(v.decimalPlaces()));
+            writer.writeAttribute("LowLimit", QString::number(v.lowLimit(), 'f', v.decimalPlaces()));
+            writer.writeAttribute("HighLimit", QString::number(v.highLimit(), 'f', v.decimalPlaces()));
+            writer.writeAttribute("DecimalPlaces", QString::number(v.decimalPlaces()));
 		}
 		writer.writeEndElement();
 	}

@@ -564,6 +564,8 @@ void DialogPresetEditor::on_m_add_clicked()
         ofv.setAnalog(o->analog());
         if (o->analog() == true)
 		{
+            ofv.setLowLimit(o->lowLimit());
+            ofv.setHighLimit(o->highLimit());
             ofv.setDecimalPlaces(o->decimalPlaces());
 		}
         if (o->valid() == true)
@@ -674,6 +676,10 @@ void DialogPresetEditor::on_m_setValue_clicked()
 	bool first = true;
 	TuningFilterValue firstValue;
 
+    double lowLimit = 0;
+    double highLimit = 0;
+
+
 	bool sameValue = true;
 
 	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
@@ -689,7 +695,7 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		if (first == true)
 		{
 			firstValue = ov;
-			first = false;
+            first = false;
 		}
 		else
 		{
@@ -699,14 +705,23 @@ void DialogPresetEditor::on_m_setValue_clicked()
 				return;
 			}
 
-			if (ov.value() != firstValue.value())
+            if (ov.analog() == true)
+            {
+                if (ov.lowLimit() != firstValue.lowLimit() || ov.highLimit() != firstValue.highLimit())
+                {
+                    QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
+                    return;
+                }
+            }
+
+            if (ov.value() != firstValue.value())
 			{
 				sameValue = false;
 			}
 		}
 	}
 
-	DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, firstValue.decimalPlaces());
+    DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, lowLimit, highLimit, firstValue.decimalPlaces());
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

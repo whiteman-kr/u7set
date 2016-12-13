@@ -46,7 +46,9 @@ public:
 		Type,
 
 		Value,
-		Default,
+        LowLimit,
+        HighLimit,
+        Default,
 		Valid,
 		Underflow,
 		Overflow,
