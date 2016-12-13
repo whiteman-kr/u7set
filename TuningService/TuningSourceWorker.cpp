@@ -626,7 +626,6 @@ namespace Tuning
 				default:
 					assert(false);
 				}
-
 			}
 			break;
 

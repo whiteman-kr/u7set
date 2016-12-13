@@ -25,6 +25,7 @@ namespace Tuning
 	public:
 		TuningData();
 		TuningData(	QString lmID,
+					int tuningMemoryStartAddrW,
 					int tuningFrameSizeBytes,
 					int tuningFramesCount);
 
@@ -68,6 +69,7 @@ namespace Tuning
 	protected:
 		QString m_lmEquipmentID;
 
+		int m_tuningMemoryStartAddrW = 0;
 		int m_tuningFrameSizeBytes = 0;
 		int m_tuningFramesCount = 0;
 		quint64 m_uniqueID = 0;

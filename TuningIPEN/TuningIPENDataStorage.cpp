@@ -447,7 +447,7 @@ namespace  TuningIPEN
 	TuningData::TuningData(QString lmID,
 							int tuningFrameSizeBytes,
 							int tuningFramesCount) :
-		Tuning::TuningData(lmID, tuningFrameSizeBytes, tuningFramesCount)
+		Tuning::TuningData(lmID, 0, tuningFrameSizeBytes, tuningFramesCount)
 	{
 	}
 

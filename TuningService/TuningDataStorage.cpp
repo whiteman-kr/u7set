@@ -33,9 +33,10 @@ namespace  Tuning
 	}
 
 
-	TuningData::TuningData(QString lmID,
+	TuningData::TuningData(QString lmID, int tuningMemoryStartAddrW,
 							int tuningFrameSizeBytes,
 							int tuningFramesCount) :
+		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
 		m_lmEquipmentID(lmID),
 		m_tuningFrameSizeBytes(tuningFrameSizeBytes),
 		m_tuningFramesCount(tuningFramesCount)
@@ -244,8 +245,11 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						sizeB += sizeof(float);
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
 
+						signal->setRamAddr(ramAddr);
+
+						sizeB += sizeof(float);
 						testSizeB = true;
 
 						metaData.append(QVariant(QString("AnalogFloat")));
@@ -278,8 +282,11 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						sizeB += sizeof(qint32);
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
 
+						signal->setRamAddr(ramAddr);
+
+						sizeB += sizeof(qint32);
 						testSizeB = true;
 
 						metaData.append(QVariant(QString("AnalogInt")));
@@ -293,11 +300,38 @@ namespace  Tuning
 					{
 						quint16 defaultValue = signal->tuningDefaultValue() == 0.0 ? 0 : 1;
 
-						writeBigEndianUint32Bit(dataPtr, discreteCount % SIZE_16BIT, defaultValue);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes, discreteCount % SIZE_32BIT, 0);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes * 2, discreteCount % SIZE_32BIT, 1);
+						int bitNo = discreteCount % SIZE_32BIT;
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), discreteCount % SIZE_32BIT));
+						writeBigEndianUint32Bit(dataPtr, bitNo, defaultValue);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes, bitNo, 0);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes * 2, bitNo, 1);
+
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), bitNo));
+
+						// tuningable discrete signals pack in 32-bit container that place in LM memory in BigEndian format
+						// but access to this discretes is performeds as word-addressed
+						// so,
+						//   if discrete bitNo < 16 we add 1 to signal offset (in words)
+						//   if discrete bitNo >= 16 we set bit no for discrete is bitNo % 16
+						//
+						int additionalOffsetToDiscreteW = 0;
+
+						if (bitNo < 16)
+						{
+							additionalOffsetToDiscreteW = 1;
+						}
+						else
+						{
+							additionalOffsetToDiscreteW = 0;
+
+							bitNo = bitNo % SIZE_16BIT;
+						}
+
+						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
+
+						signal->setRamAddr(ramAddr);
+
+						//
 
 						discreteCount++;
 
