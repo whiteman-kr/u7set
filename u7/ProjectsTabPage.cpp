@@ -233,7 +233,7 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is higher than the programm version. Please update software."));
+		mb.setInformativeText(tr("The project database version is higher than the program version. Please update software."));
 		mb.exec();
 		return;
 	}
@@ -243,7 +243,7 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is lower than the programm version. Do you want to upgrade the project to the appropriate version?"));
+		mb.setInformativeText(tr("The project database version is lower than the program version. Do you want to upgrade the project to the appropriate version?"));
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		mb.setDefaultButton(QMessageBox::Ok);
 
@@ -338,7 +338,7 @@ void ProjectsTabPage::deleteProject()
 
 	QMessageBox msgBox(this);
 	msgBox.setText(tr("Deleting project %1.").arg(projectName));
-	msgBox.setInformativeText(tr("Do you want to delete project %1 and lost all data?").arg(projectName));
+	msgBox.setInformativeText(tr("Do you want to delete project %1 and discard all data?").arg(projectName));
 	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 	msgBox.setDefaultButton(QMessageBox::Cancel);
 	msgBox.setIcon(QMessageBox::Critical);
