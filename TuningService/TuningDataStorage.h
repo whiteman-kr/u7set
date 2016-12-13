@@ -63,7 +63,7 @@ namespace Tuning
 		static const int TYPES_COUNT = 3;
 
 	private:
-		void writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue);
+		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
 
 	protected:
 		QString m_lmEquipmentID;

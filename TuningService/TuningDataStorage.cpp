@@ -293,17 +293,17 @@ namespace  Tuning
 					{
 						quint16 defaultValue = signal->tuningDefaultValue() == 0.0 ? 0 : 1;
 
-						writeBigEndianUint16Bit(dataPtr, discreteCount % SIZE_16BIT, defaultValue);
-						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes, discreteCount % SIZE_16BIT, 0);
-						writeBigEndianUint16Bit(dataPtr + m_tuningFrameSizeBytes * 2, discreteCount % SIZE_16BIT, 1);
+						writeBigEndianUint32Bit(dataPtr, discreteCount % SIZE_16BIT, defaultValue);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes, discreteCount % SIZE_32BIT, 0);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes * 2, discreteCount % SIZE_32BIT, 1);
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), discreteCount % SIZE_16BIT));
+						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), discreteCount % SIZE_32BIT));
 
 						discreteCount++;
 
-						if ((discreteCount % SIZE_16BIT) == 0)
+						if ((discreteCount % SIZE_32BIT) == 0)
 						{
-							sizeB += sizeof(quint16);
+							sizeB += sizeof(quint32);
 							testSizeB = true;
 						}
 
@@ -547,7 +547,7 @@ namespace  Tuning
 	}
 
 
-	void TuningData::writeBigEndianUint16Bit(quint8* dataPtr, int bitNo, quint16 bitValue)
+	void TuningData::writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue)
 	{
 		if (dataPtr == nullptr)
 		{
@@ -555,15 +555,15 @@ namespace  Tuning
 			return;
 		}
 
-		assert(bitNo >= 0 && bitNo <= 15);
+		assert(bitNo >= 0 && bitNo < 32);
 
-		quint16* data16Ptr = reinterpret_cast<quint16*>(dataPtr);
+		quint32* data32Ptr = reinterpret_cast<quint32*>(dataPtr);
 
-		// read word and convert from BigEndian to LittleEndian
+		// read dword and convert from BigEndian to LittleEndian
 		//
-		quint16 value = reverseUint16(*data16Ptr);
+		quint32 value = reverseUint32(*data32Ptr);
 
-		quint16 bitMask = 1 << bitNo;
+		quint32 bitMask = 1 << bitNo;
 
 		if (bitValue == 0)
 		{
@@ -574,9 +574,9 @@ namespace  Tuning
 			value |= bitMask;
 		}
 
-		// convert value from LittleEndian to BigEndian and write word
+		// convert value from LittleEndian to BigEndian and write dword
 		//
-		*data16Ptr = reverseUint16(value);
+		*data32Ptr = reverseUint32(value);
 	}
 
 
