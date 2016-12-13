@@ -257,6 +257,35 @@ namespace Builder
 					result = false;
 				}
 			}
+
+			// check tuningable signals properties
+			//
+			if (s.enableTuning() == true)
+			{
+				if (s.isAnalog() == true)
+				{
+					if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())
+					{
+						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+						//
+						m_log->errALC5068(s.appSignalID());
+						result = false;
+					}
+					else
+					{
+						// limits OK
+						//
+						if (s.tuningDefaultValue() < s.lowEngeneeringUnits() ||
+							s.tuningDefaultValue() > s.highEngeneeringUnits())
+						{
+							// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
+							//
+							m_log->errALC5069(s.appSignalID());
+							result = false;
+						}
+					}
+				}
+			}
 		}
 
 		if (result == true)
