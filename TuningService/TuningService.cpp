@@ -54,6 +54,17 @@ namespace Tuning
 	}
 
 
+	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
+	{
+		clientContexts.clear();
+
+		for(const TuningClientContext* clntContext : m_clientContextMap)
+		{
+			clientContexts.append(clntContext);
+		}
+	}
+
+
 	void TuningServiceWorker::initialize()
 	{
 		if (buildPath().isEmpty() == true)

@@ -639,6 +639,9 @@ namespace Tuning
 			}
 			break;
 
+		case FotipV2::OpCode::Apply:
+			break;
+
 		default:
 			assert(false);
 			return false;
@@ -773,6 +776,8 @@ namespace Tuning
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
+		int a = 0;
+		a++;
 	}
 
 
