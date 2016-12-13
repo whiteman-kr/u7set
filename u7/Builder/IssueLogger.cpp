@@ -3148,6 +3148,50 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5068
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		LowEngeneeringUnits property of tuningable signal must be greate than HighEngeneeringUnits.
+	///		Correct signal properties.
+	///
+	void IssueLogger::errALC5068(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5068,
+				  QString(tr("LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.")).
+					arg(appSignalID));
+	}
+
+
+	/// IssueCode: ALC5069
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		TuningDefaultValue property of tuningable signal must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+	///		Correct signal TuningDefaultValue property.
+	///
+	void IssueLogger::errALC5069(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5069,
+				  QString(tr("TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.")).
+					arg(appSignalID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

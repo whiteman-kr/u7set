@@ -234,6 +234,8 @@ namespace Builder
 		void errALC5065(int address);								// Write address %1 of application memory is out of range 0..65535.
 		void errALC5066(int addrTo, int addrFrom, int sizeW);		// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
 		void errALC5067(int addrTo, int bit, int value);			// Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+		void errALC5068(QString appSignalID);						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
 
 		// EQP			Equipment issues						6000-6999
 		//
