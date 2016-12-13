@@ -315,3 +315,98 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------------
+--
+--          DbUser -- RPCT-1332
+--
+-------------------------------------------------------------------------------
+CREATE TYPE user_api.dbuser AS
+(
+    userid integer,
+	username text,
+	firstname text,
+	lastname text,
+	admininstrator boolean,
+	readonly boolean,
+	disabled boolean
+);
+
+
+-------------------------------------------------------------------------------
+--
+--          get_user_data -- RPCT-1132
+--
+-------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION user_api.get_user_data(
+    session_key text,
+	user_id int)
+	RETURNS user_api.dbuser AS
+$BODY$
+DECLARE
+    result user_api.dbuser;
+BEGIN
+    -- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+    SELECT u.userid, u.username, u.firstname, u.lastname, u.administrator, u.readonly, u.disabled
+	    INTO result
+		FROM users u
+		WHERE u.userid = user_id;
+
+    IF (result IS NULL)
+	THEN
+	    RAISE 'User with id % does not exists.', user_id;
+		END IF;
+
+    RETURN result;
+END
+$BODY$
+LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------------
+--
+--          check_user_password
+--
+-- This function does not need session key, as it's used to delete project
+-------------------------------------------------------------------------------
+DROP FUNCTION public.check_user_password(text, text);
+DROP FUNCTION public.check_user_password(integer, text);
+
+CREATE OR REPLACE FUNCTION user_api.check_user_password(user_name text, user_password text)
+RETURNS text AS
+$BODY$
+DECLARE
+    user_id integer;
+	user_salt text;
+	password_is_correct boolean;
+BEGIN
+    user_id :=  (SELECT userid
+	             FROM users
+				 WHERE username ILIKE replace(replace(replace(user_name, '~', '~~'), '%', '~%'), '_', '~_') escape '~');
+
+
+    password_is_correct := (SELECT EXISTS(
+	                            SELECT 1 FROM Users
+								WHERE
+								    users.userid = user_id AND
+									users.passwordhash = user_api.password_hash(users.salt, user_password)));
+
+    user_salt := (SELECT users.salt FROM users WHERE users.userid = user_id);
+
+    IF (user_id IS NULL OR
+	    password_is_correct = FALSE OR
+		password_is_correct IS NULL OR
+		user_salt IS NULL)
+		THEN
+		RETURN FALSE;
+		END IF;
+
+    RETURN TRUE;
+END
+$BODY$
+LANGUAGE plpgsql;

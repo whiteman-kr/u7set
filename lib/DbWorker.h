@@ -183,6 +183,10 @@ public slots:
     //
 	bool addLogRecord(QSqlDatabase db, QString text);
 
+	bool db_logIn(QSqlDatabase db, QString username, QString password, QString* errorMessage);
+	bool db_logOut(QSqlDatabase db);
+
+	bool db_getCurrentUserId(QSqlDatabase db, int* userId);
     bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
     bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
     int db_getProjectVersion(QSqlDatabase db);
@@ -216,12 +220,17 @@ public:
     void setCurrentProject(const DbProject& project);
 
 private:
+	const QString& sessionKey() const;
+	void setSessionKey(QString value);
+
+private:
     mutable QMutex m_mutex;
 
     QString m_host;
     int m_port;
     QString m_serverUsername;
     QString m_serverPassword;
+	QString m_sessionKey;
     DbProgress* m_progress;
 
     DbUser m_currentUser;
