@@ -29,6 +29,8 @@ const char* const MvsTemplExtension = "templ_mvs";		// Monitor schema template f
 const char* const DvsFileExtension = "dvs";				// Diagnostics schema file extnesion
 const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema template file extnesion
 
+const char* const OclFileExtension = "ocl";				// (Optical) Connection Link
+
 //
 //
 //	VcsState
