@@ -341,7 +341,6 @@ OTHER_FILES += \
 	../Proto/serialization.proto \
 	Tools/afbschema.xsd \
 	../Proto/proto_compile.sh \
-	month-report.txt \
     DatabaseUpgrade/Upgrade0039.txt
 
 DISTFILES += \
