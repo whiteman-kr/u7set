@@ -130,12 +130,14 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			//MemoryArea lmDiagnostics;					// copying from this->lmDiagnostics
+			MemoryArea regRawData;						// rawData
 			MemoryArea lmInputs;						// reads from this->m_lmInOuts area
 			MemoryArea lmOutputs;						// writes to this->m_lmInOuts ares
 			MemoryArea module[MODULES_COUNT];			// depends from chassis	configuration
 			MemoryArea regAnalogSignals;
+			MemoryArea regTuningAnalogSignals;
 			MemoryArea regDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
+			MemoryArea regTuningDiscreteSignals;
 			MemoryArea nonRegAnalogSignals;
 
 		} m_appWordAdressed;
@@ -160,7 +162,11 @@ namespace Builder
 
 		IssueLogger* m_log = nullptr;
 
-		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title);
+		// meory reporting functions nad variables
+
+		int m_sectionStartAddrW = -1;
+
+		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW = -1);
 		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
 		void addSignals(QStringList& memFile, MemoryArea& memArea);
 
@@ -214,8 +220,10 @@ namespace Builder
 
 		Address16 addRegDiscreteSignal(const Signal& signal);
 		Address16 addRegDiscreteSignalToRegBuffer(const Signal& signal);
+		Address16 addRegTuningDiscreteSignal(const Signal& signal);
 		Address16 addNonRegDiscreteSignal(const Signal& signal);
 		Address16 addRegAnalogSignal(const Signal& signal);
+		Address16 addRegTuningAnalogSignal(const Signal& signal);
 		Address16 addNonRegAnalogSignal(const Signal& signal);
 
 		double bitAddressedMemoryUsed();

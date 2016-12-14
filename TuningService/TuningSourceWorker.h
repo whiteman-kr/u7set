@@ -180,8 +180,8 @@ namespace Tuning
 		bool processCommandQueue();
 		bool processIdle();
 
-		bool prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
-		void sendFOTIPRequest(RupFotipV2& request);
+		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
+		void sendFotipRequest(RupFotipV2& request);
 
 		bool initRupHeader(Rup::Header& rupHeader);
 		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
