@@ -152,6 +152,44 @@ $BODY$
   LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION add_file(
+    user_id integer,
+	file_name text,
+	parent_id integer,
+	file_data bytea,
+	details text)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+    exists int;
+	newfileid int;
+	newfileinstanceid uuid;
+	return_value ObjectState;
+BEGIN
+    SELECT count(*) INTO exists FROM File WHERE Name = file_name AND ParentID = parent_id AND Deleted = false;
+	IF (exists > 0) THEN
+	    RAISE 'File % already exists', file_name;
+	END IF;
+
+    INSERT INTO File (Name, ParentID, Deleted)
+	    VALUES (file_name, parent_id, false) RETURNING FileID INTO newfileid;
+
+    INSERT INTO CheckOut (UserID, FileID)
+	    VALUES (user_id, newfileid);
+
+    INSERT INTO FileInstance (FileID, Size, Data, Action, Details, md5)
+	    VALUES (newfileid, length(file_data), file_data, 1, details::jsonb, md5(file_data)) RETURNING FileInstanceID INTO newfileinstanceid;
+
+    UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
+
+    return_value := ROW(newfileid, FALSE, TRUE, 1, user_id, 0);
+	RETURN return_value;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
+
 -------------------------------------------------------------------------------
 --
 --		user_api.log_in -- RPCT-1321
