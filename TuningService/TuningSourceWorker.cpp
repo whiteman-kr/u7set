@@ -625,9 +625,13 @@ namespace Tuning
 
 						quint32 bitmask = 1 << bit;
 
+						//quint32 bitmask = ~0;
+
 						fotipFrame.write.bitMask = reverseUint32(bitmask);
 
 						quint32 discreteValue = (tuningCmd.write.value == 0.0 ? 0 : 1) << bit;
+
+						//quint32 discreteValue = 0;
 
 						fotipFrame.write.discreteValue = reverseUint32(discreteValue);
 					}
