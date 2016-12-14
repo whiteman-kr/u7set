@@ -16,7 +16,14 @@ namespace Hardware
     Connection::Connection()
     {
 		ADD_PROPERTY_GETTER_SETTER(QString, "ConnectionID", true, Connection::connectionID, Connection::setConnectionID);
-		ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
+
+        auto propFileName = ADD_PROPERTY_GETTER(QString, "FileName", true, Connection::fileName);
+        propFileName->setExpert(true);
+
+        auto propFileID = ADD_PROPERTY_GETTER(QString, "FileID", true, Connection::fileID);
+        propFileID->setExpert(true);
+
+        ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
 		auto propPort1RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, "Port1RawDataDescription", true, Connection::port1RawDataDescription, Connection::setPort1RawDataDescription);
@@ -249,6 +256,27 @@ namespace Hardware
     {
 		m_connectionID = value;
     }
+
+    QString Connection::fileID() const
+    {
+        return m_fileID;
+    }
+
+    void Connection::setFileID(const QString& value)
+    {
+        m_fileID = value;
+    }
+
+    QString Connection::fileName() const
+    {
+        return m_fileName;
+    }
+
+    void Connection::setFileName(const QString& value)
+    {
+        m_fileName = value;
+    }
+
 
 	QString Connection::port1EquipmentID() const
     {

@@ -74,6 +74,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("ConnectionEditor/pos", m_connectionEditorWindowPos);
 	s.setValue("ConnectionEditor/geometry", m_connectionEditorWindowGeometry);
+    s.setValue("ConnectionEditor/splitter", m_connectionEditorSplitterState);
+    s.setValue("ConnectionEditor/peSplitterPos", m_connectionEditorPeSplitterPosition);
+
 	s.setValue("ConnectionEditor/sortColumn", m_connectionEditorSortColumn);
 	s.setValue("ConnectionEditor/sortOrder", static_cast<int>(m_connectionEditorSortOrder));
 
@@ -138,6 +141,13 @@ void Settings::loadUserScope()
 
 	m_connectionEditorWindowPos = s.value("ConnectionEditor/pos", QPoint(-1, -1)).toPoint();
 	m_connectionEditorWindowGeometry = s.value("ConnectionEditor/geometry").toByteArray();
+    m_connectionEditorSplitterState = s.value("ConnectionEditor/splitter").toByteArray();
+    m_connectionEditorPeSplitterPosition = s.value("ConnectionEditor/peSplitterPos").toInt();
+    if (m_connectionEditorPeSplitterPosition < 150)
+    {
+        m_connectionEditorPeSplitterPosition = 150;
+    }
+
 	m_connectionEditorSortColumn = s.value("ConnectionEditor/sortColumn").toInt();
 	m_connectionEditorSortOrder = static_cast<Qt::SortOrder>(s.value("ConnectionEditor/sortOrder").toInt());
 	m_connectionEditorMasks = s.value("ConnectionEditor/masks").toStringList();
@@ -146,9 +156,9 @@ void Settings::loadUserScope()
     m_connectionPropertiesWindowGeometry = s.value("Connection/geometry").toByteArray();
 
     m_connectionSplitterState = s.value("Connection/Splitter/state").toInt();
-    if (m_connectionSplitterState < 175)
+    if (m_connectionSplitterState < 150)
 	{
-        m_connectionSplitterState = 175;
+        m_connectionSplitterState = 150;
 	}
 
     //
