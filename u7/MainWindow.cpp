@@ -14,7 +14,7 @@
 #include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"
 #include "DialogSubsystemListEditor.h"
-#include "DialogConnectionsEditor.h"
+#include "DialogConnections.h"
 #include "Rs232SignalListEditor.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
@@ -229,8 +229,8 @@ void MainWindow::createActions()
 	m_subsystemListEditorAction->setEnabled(false);
 	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
-    m_connectionsEditorAction = new QAction(tr("Optical Connections Editor..."), this);
-    m_connectionsEditorAction->setStatusTip(tr("Run Optical Connections Editor"));
+    m_connectionsEditorAction = new QAction(tr("Connections Editor..."), this);
+    m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
@@ -476,14 +476,14 @@ void MainWindow::runConnectionsEditor()
         return;
     }
 
-	if (theDialogConnectionsEditor == nullptr)
+    if (theDialogConnections == nullptr)
 	{
-		theDialogConnectionsEditor = new DialogConnectionsEditor(dbController(), this);
-		theDialogConnectionsEditor->show();
+        theDialogConnections = new DialogConnections(dbController(), this);
+        theDialogConnections->show();
 	}
 	else
 	{
-		theDialogConnectionsEditor->activateWindow();
+        theDialogConnections->activateWindow();
 	}
 }
 
