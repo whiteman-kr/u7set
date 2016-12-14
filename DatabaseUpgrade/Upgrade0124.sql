@@ -1,4 +1,4 @@
-﻿-- RPCT-RPCT-1132 
+-- RPCT-RPCT-1132 
 
 CREATE EXTENSION pgcrypto;
 
@@ -178,7 +178,8 @@ BEGIN
 	    VALUES (user_id, newfileid);
 
     INSERT INTO FileInstance (FileID, Size, Data, Action, Details, md5)
-	    VALUES (newfileid, length(file_data), file_data, 1, details::jsonb, md5(file_data)) RETURNING FileInstanceID INTO newfileinstanceid;
+	    VALUES (newfileid, length(file_data), file_data, 1, details::jsonb, md5(file_data))
+		RETURNING FileInstanceID INTO newfileinstanceid;
 
     UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
 

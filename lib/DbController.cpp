@@ -2266,6 +2266,11 @@ int DbController::dvsFileId() const
 	return m_worker->dvsFileId();
 }
 
+int DbController::connectionsFileId() const
+{
+	return m_worker->connectionsFileId();
+}
+
 std::vector<DbFileInfo> DbController::systemFiles() const
 {
 	return m_worker->systemFiles();

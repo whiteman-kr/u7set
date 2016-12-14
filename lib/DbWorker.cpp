@@ -140,6 +140,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0122.sql", "Upgrade to version 122, default IP address computing algoruthm has been fixed in configuration"},
 	{":/DatabaseUpgrade/Upgrade0123.sql", "Upgrade to version 123, changes in function get_latest_signals_by_appsignalids()"},
 	{":/DatabaseUpgrade/Upgrade0124.sql", "Upgrade to version 124, Changing auths functions"},
+	{":/DatabaseUpgrade/Upgrade0125.sql", "Upgrade to version 125, CONNECTIONS system folder was added"},
 };
 
 
@@ -321,6 +322,12 @@ int DbWorker::mcFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_mcFileId;
+}
+
+int DbWorker::connectionsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_connectionsFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -864,6 +871,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_mvsFileId = -1;
 	m_dvsFileId = -1;
 	m_mcFileId = -1;
+	m_connectionsFileId = -1;
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -943,6 +951,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == ::ConnectionsFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_connectionsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -955,6 +971,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_mvsFileId != -1;
 	result &= m_dvsFileId != -1;
 	result &= m_mcFileId != -1;
+	result &= m_connectionsFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)
@@ -1384,7 +1401,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				addLogRecord(db, logMessage);
 			}
 
-			if (projectVersion > 124)
+			if (projectVersion >= 124)
 			{
 				// Log in to obtaine session key
 				//
