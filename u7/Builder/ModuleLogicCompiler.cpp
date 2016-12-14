@@ -144,7 +144,11 @@ namespace Builder
 
 			if (!generateAppLogicCode()) break;
 
+			if (!copyTuningAnalogSignalsToRegBuf()) break;
+
 			if (!copyDiscreteSignalsToRegBuf()) break;
+
+			if (!copyTuningDiscreteSignalsToRegBuf()) break;
 
 			if (!copyLmOutSignalsToModuleMemory()) break;
 
@@ -2804,6 +2808,76 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::copyTuningAnalogSignalsToRegBuf()
+	{
+		bool first = true;
+
+		QHash<int, int> processedSignalsMap;
+
+		int regBufStartAddr = m_memoryMap.getRegBufStartAddr();
+
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
+
+			if (processedSignalsMap.contains(appSignal->ID()) == true)
+			{
+				continue;
+			}
+
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isAnalog() == true &&
+				appSignal->enableTuning() == true)
+			{
+				if (first == true)
+				{
+					Comment cmnt;
+
+					cmnt.setComment(QString(tr("Copy registered tuningable analog signals to regBuf")));
+
+					m_code.append(cmnt);
+					m_code.newLine();
+
+					first = false;
+				}
+
+				Command cmd;
+				const Signal& s = appSignal->constSignal();
+
+				switch(appSignal->dataSize())
+				{
+				case SIZE_32BIT:
+					cmd.mov32(regBufStartAddr + s.regValueAddr().offset(), s.ramAddr().offset());
+					cmd.setComment(QString(tr("regBuf <= %1 %2").
+							arg(s.appSignalID()).arg(s.regValueAddrStr())));
+					m_code.append(cmd);
+					break;
+
+				case SIZE_16BIT:
+					cmd.mov(regBufStartAddr + s.regValueAddr().offset(), s.ramAddr().offset());
+					cmd.setComment(QString(tr("regBuf <= %1 %2").
+							arg(s.appSignalID()).arg(s.regValueAddrStr())));
+					m_code.append(cmd);
+					break;
+
+				default:
+					assert(false);
+				}
+
+				processedSignalsMap.insert(appSignal->ID(), appSignal->ID());
+			}
+		}
+
+		if (first == false)
+		{
+			m_code.newLine();
+		}
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
 	{
 		if (m_memoryMap.regDiscreteSignalsSizeW() == 0)
@@ -2823,6 +2897,105 @@ namespace Builder
 		m_code.append(cmd);
 
 		m_code.newLine();
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::copyTuningDiscreteSignalsToRegBuf()
+	{
+		bool first = true;
+
+		QHash<int, int> processedSignalsMap;
+
+		int regBufStartAddr = m_memoryMap.getRegBufStartAddr();
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		int bitNoInBitAcc = 0;
+
+		int signalsRegOffset = 0;
+
+		Command cmd;
+
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
+
+			if (processedSignalsMap.contains(appSignal->ID()) == true)
+			{
+				continue;
+			}
+
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isDiscrete() == true &&
+				appSignal->enableTuning() == true)
+			{
+				cmd.clearComment();
+
+				if (first == true)
+				{
+					Comment cmnt;
+
+					cmnt.setComment(QString(tr("Copy registered tuningable discrete signals to regBuf")));
+
+					m_code.append(cmnt);
+					m_code.newLine();
+
+					first = false;
+				}
+
+				const Signal& s = appSignal->constSignal();
+
+				if (bitNoInBitAcc == 0)
+				{
+					signalsRegOffset = s.regValueAddr().offset();
+
+					cmd.movConst(bitAccAddr, 0);
+					m_code.append(cmd);
+				}
+				else
+				{
+					// check that all signals is disposed in same word in regBuf
+					//
+					assert(s.regValueAddr().offset() == signalsRegOffset);
+				}
+
+				assert(s.regValueAddr().bit() == bitNoInBitAcc);
+
+				cmd.movBit(bitAccAddr, bitNoInBitAcc, s.ramAddr().offset(), s.ramAddr().bit());
+				cmd.setComment(QString(tr("bitAcc <= %1 %2").
+							arg(s.appSignalID()).arg(s.regValueAddrStr())));
+				m_code.append(cmd);
+
+				bitNoInBitAcc++;
+
+				if (bitNoInBitAcc == SIZE_16BIT)
+				{
+					cmd.mov(regBufStartAddr + signalsRegOffset, bitAccAddr);
+					m_code.append(cmd);
+					m_code.newLine();
+
+					bitNoInBitAcc = 0;
+				}
+
+				processedSignalsMap.insert(appSignal->ID(), appSignal->ID());
+			}
+		}
+
+		if (bitNoInBitAcc > 0)
+		{
+			cmd.clearComment();
+			cmd.mov(regBufStartAddr + signalsRegOffset, bitAccAddr);
+			m_code.append(cmd);
+			m_code.newLine();
+		}
+
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return true;
 	}
@@ -5784,37 +5957,6 @@ namespace Builder
 
 		m_memoryMap.recalculateAddresses();
 
-		// internal tuning analog registered
-		//
-		for(AppSignal* appSignal : m_appSignals)
-		{
-			if (appSignal == nullptr)
-			{
-				ASSERT_RESULT_FALSE_BREAK
-			}
-
-			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
-			{
-				continue;
-			}
-
-			if (appSignal->isInternal() == true &&
-				appSignal->isRegistered() == true &&
-				appSignal->isAnalog() == true &&
-				appSignal->enableTuning() == true)
-			{
-				Address16 regAddr = m_memoryMap.addRegTuningAnalogSignal(appSignal->constSignal());
-
-				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
-
-				// ramAddr of tuningable signals is calculated in buildTuningData!
-
-				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
-			}
-		}
-
-		m_memoryMap.recalculateAddresses();
-
 		// internal discrete registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
@@ -5843,6 +5985,35 @@ namespace Builder
 
 		m_memoryMap.recalculateAddresses();
 
+		// internal tuning analog registered
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (appSignal == nullptr)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
+			{
+				continue;
+			}
+
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isAnalog() == true &&
+				appSignal->enableTuning() == true)
+			{
+				Address16 regAddr = m_memoryMap.addRegTuningSignal(appSignal->constSignal());
+
+				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
+
+				// ramAddr of tuningable signals is calculated in buildTuningData!
+
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
+			}
+		}
+
 		// internal tuning discrete registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
@@ -5857,7 +6028,7 @@ namespace Builder
 				appSignal->isDiscrete() == true &&
 				appSignal->enableTuning() == true)
 			{
-				Address16 regAddr = m_memoryMap.addRegTuningDiscreteSignal(appSignal->constSignal());
+				Address16 regAddr = m_memoryMap.addRegTuningSignal(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), regAddr.bit());
 

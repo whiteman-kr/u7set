@@ -1150,6 +1150,12 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataForm
 }
 
 
+QString Signal::regValueAddrStr() const
+{
+	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
+}
+
+
 // --------------------------------------------------------------------------------------------------------
 //
 // SignalSet class implementation
