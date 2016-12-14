@@ -385,7 +385,7 @@ namespace Tuning
 			{
 				// retry last request
 				//
-				sendFOTIPRequest(m_request);
+				sendFotipRequest(m_request);
 
 //				qDebug() << "Retry last REQUEST";
 			}
@@ -414,7 +414,7 @@ namespace Tuning
 
 		m_tuningCommandQueue.pop(&tuningCmd);
 
-		bool result = prepareFOTIPRequest(tuningCmd, m_request);
+		bool result = prepareFotipRequest(tuningCmd, m_request);
 
 		if (result == false)
 		{
@@ -423,7 +423,7 @@ namespace Tuning
 
 		m_retryCount = 0;
 
-		sendFOTIPRequest(m_request);
+		sendFotipRequest(m_request);
 
 		return true;
 	}
@@ -454,7 +454,7 @@ namespace Tuning
 	}
 
 
-	bool TuningSourceWorker::prepareFOTIPRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
+	bool TuningSourceWorker::prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
 	{
 		bool result = true;
 
@@ -466,7 +466,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::sendFOTIPRequest(RupFotipV2& request)
+	void TuningSourceWorker::sendFotipRequest(RupFotipV2& request)
 	{
 		assert(sizeof(Rup::Frame) == ENTIRE_UDP_SIZE);
 		assert(sizeof(RupFotipV2) == ENTIRE_UDP_SIZE);
@@ -776,6 +776,8 @@ namespace Tuning
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
+		reply.fotipFrame.cmpResult.all = reverseUint16(reply.fotipFrame.cmpResult.all);
+
 		int a = 0;
 		a++;
 	}

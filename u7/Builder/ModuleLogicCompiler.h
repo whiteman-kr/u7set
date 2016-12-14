@@ -364,6 +364,7 @@ namespace Builder
 		bool isInternal() const { return m_signal->isInternal(); }
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
+		bool enableTuning() const { return m_signal->enableTuning(); }
 
 		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
 

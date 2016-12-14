@@ -143,11 +143,13 @@ namespace Builder
 		m_appWordAdressed.memory = appLogicWordData;
 		m_appWordAdressed.memory.lock();
 
-//		m_appWordAdressed.lmDiagnostics.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.regRawData.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmInputs.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmOutputs.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.regAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.regTuningAnalogSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.regDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.regTuningDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(appLogicWordData.startAddress());
 
 		// init LM diagnostics memory mapping
@@ -190,7 +192,9 @@ namespace Builder
 
 		// LM input discrete signals
 
-		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.memory.startAddress());
+		m_appWordAdressed.regRawData.setStartAddress(m_appWordAdressed.memory.startAddress());
+
+		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.regRawData.nextAddress());
 		m_appWordAdressed.lmInputs.setSizeW(m_lmInOuts.memory.sizeW());
 
 		// LM output discrete signals
@@ -216,10 +220,18 @@ namespace Builder
 
 		m_appWordAdressed.regAnalogSignals.setStartAddress(m_appWordAdressed.module[MODULES_COUNT - 1].nextAddress());
 
+		// registered tuningable analog signals
+
+		m_appWordAdressed.regTuningAnalogSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
+
 		// registered discrete signals
 
 		m_appWordAdressed.regDiscreteSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
 		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.regDiscretSignals.sizeW());
+
+		// registered tuningable discrete signals
+
+		m_appWordAdressed.regTuningDiscreteSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
 
 		// non registered analog signals
 
@@ -315,6 +327,8 @@ namespace Builder
 
 		addSignals(memFile, m_appBitAdressed.nonRegDiscretSignals);
 
+		memFile.append("");
+
 		//
 
 		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
@@ -323,7 +337,7 @@ namespace Builder
 
 		//
 
-		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory");
+		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory", m_appWordAdressed.memory.startAddress());
 
 		//		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
 		addRecord(memFile, m_appWordAdressed.lmInputs, "LM's inputs state");
@@ -344,11 +358,31 @@ namespace Builder
 
 		addSignals(memFile, m_appWordAdressed.regAnalogSignals);
 
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regTuningAnalogSignals, "registrated tuning analogs signals");
+
+		memFile.append("");
+
+		addSignals(memFile, m_appWordAdressed.regTuningAnalogSignals);
+
+		memFile.append("");
+
 		addRecord(memFile, m_appWordAdressed.regDiscreteSignals, "registrated discrete signals (from bit-addressed memory)");
 
 		memFile.append("");
 
 		addSignals(memFile, m_appWordAdressed.regDiscreteSignals);
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regTuningDiscreteSignals, "registrated tuning discrete signals");
+
+		memFile.append("");
+
+		addSignals(memFile, m_appWordAdressed.regTuningDiscreteSignals);
+
+		memFile.append("");
 
 		addRecord(memFile, m_appWordAdressed.nonRegAnalogSignals, "non-registrated analogs signals");
 
@@ -363,14 +397,16 @@ namespace Builder
 	}
 
 
-	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW)
 	{
+		m_sectionStartAddrW = sectionStartAddrW;
+
 		memFile.append(QString().rightJustified(80, '-'));
-		memFile.append(QString(" Address    Size      Description"));
+		memFile.append(QString(" Address   Offset    Size      Description"));
 		memFile.append(QString().rightJustified(80, '-'));
 
 		QString str;
-		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+		str.sprintf(" %05d               %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
 
 		memFile.append(str);
 		memFile.append(QString().rightJustified(80, '-'));
@@ -382,7 +418,18 @@ namespace Builder
 	{
 		QString str;
 
-		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+		if (m_sectionStartAddrW == -1)
+		{
+			str.sprintf(" %05d               %05d     %s",
+						memArea.startAddress(), memArea.sizeW(), C_STR(title));
+		}
+		else
+		{
+			str.sprintf(" %05d     %05d     %05d     %s",
+						memArea.startAddress(),
+						memArea.startAddress() - m_sectionStartAddrW,
+						memArea.sizeW(), C_STR(title));
+		}
 
 		memFile.append(str);
 	}
@@ -403,23 +450,43 @@ namespace Builder
 
 			if (signal.isDiscrete())
 			{
-				str.sprintf(" %05d.%02d   00000.01  %s",
-							signal.address().offset(), signal.address().bit(),
-							C_STR(signal.signalStrID()));
-
+				if (m_sectionStartAddrW == -1)
+				{
+					str.sprintf(" %05d.%02d            00000.01  %s",
+								signal.address().offset(), signal.address().bit(),
+								C_STR(signal.signalStrID()));
+				}
+				else
+				{
+					str.sprintf(" %05d.%02d  %05d.%02d  00000.01  %s",
+								signal.address().offset(),
+								signal.address().bit(),
+								signal.address().offset() - m_sectionStartAddrW,
+								signal.address().bit(),
+								C_STR(signal.signalStrID()));
+				}
 			}
 			else
 			{
-				str.sprintf(" %05d      %05d     %s",
-							signal.address().offset(),
-							signal.sizeW(),
-							C_STR(signal.signalStrID()));
+				if (m_sectionStartAddrW == -1)
+				{
+					str.sprintf(" %05d               %05d     %s",
+								signal.address().offset(),
+								signal.sizeW(),
+								C_STR(signal.signalStrID()));
+				}
+				else
+				{
+					str.sprintf(" %05d     %05d     %05d     %s",
+								signal.address().offset(),
+								signal.address().offset() - m_sectionStartAddrW,
+								signal.sizeW(),
+								C_STR(signal.signalStrID()));
+				}
 			}
 
 			memFile.append(str);
 		}
-
-		memFile.append("");
 	}
 
 
@@ -437,6 +504,15 @@ namespace Builder
 		return m_appWordAdressed.regDiscreteSignals.appendSignal(signal);
 	}
 
+
+	Address16 LmMemoryMap::addRegTuningDiscreteSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && signal.isRegistered() && signal.isDiscrete() && signal.enableTuning());
+
+		return m_appWordAdressed.regTuningDiscreteSignals.appendSignal(signal);
+	}
+
+
 	Address16 LmMemoryMap::addNonRegDiscreteSignal(const Signal& signal)
 	{
 		assert(signal.isInternal() && !signal.isRegistered() && signal.isDiscrete());
@@ -450,6 +526,14 @@ namespace Builder
 		assert(signal.isInternal() && signal.isRegistered() && signal.isAnalog());
 
 		return m_appWordAdressed.regAnalogSignals.appendSignal(signal);
+	}
+
+
+	Address16 LmMemoryMap::addRegTuningAnalogSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && signal.isRegistered() && signal.isAnalog() && signal.enableTuning());
+
+		return m_appWordAdressed.regTuningAnalogSignals.appendSignal(signal);
 	}
 
 
