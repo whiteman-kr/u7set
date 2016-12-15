@@ -23,8 +23,7 @@ void SignalProperties::initProperties()
 	//static const QString instanceActionCaption("InstanceAction");
 	static const QString typeCaption("Type");
 	static const QString inOutTypeCaption("InOutType");
-	static const QString cacheValidator1("^#[A-Za-z][A-Za-z\\d_]*$");
-	static const QString cacheValidator2("^[#A-Za-z][A-Za-z\\d_]*$");
+	static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
 	static const QString appSignalIDCaption("AppSignalID");
 	static const QString customSignalIDCaption("CustomAppSignalID");
 	static const QString captionCaption("Caption");
@@ -78,11 +77,11 @@ void SignalProperties::initProperties()
 	signalInOutTypeProperty->setCategory(signalTypeCategory);
 
 	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID, m_signal);
-	strIdProperty->setValidator(cacheValidator1);
+	strIdProperty->setValidator(cacheValidator);
 	strIdProperty->setCategory(identificationCategory);
 
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID, m_signal);
-	extStrIdProperty->setValidator(cacheValidator2);
+	extStrIdProperty->setValidator(cacheValidator);
 	extStrIdProperty->setCategory(identificationCategory);
 
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, captionCaption, true, Signal::caption, Signal::setCaption, m_signal);
