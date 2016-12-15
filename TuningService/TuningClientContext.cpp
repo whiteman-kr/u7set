@@ -74,7 +74,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceContext::writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult)
+	void TuningSourceContext::writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult)
 	{
 		if (m_sourceWorker == nullptr)
 		{

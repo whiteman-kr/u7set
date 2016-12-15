@@ -14,10 +14,17 @@ namespace Hardware
 		Connection();
 		Connection(const Connection& that);
 
-		bool save(QXmlStreamWriter& writer);
-		bool load(QXmlStreamReader& reader);
+        bool save(DbController *db);
+        bool load(const QByteArray& data);
+        bool loadFromXml(QXmlStreamReader& reader);
+        bool remove(DbController *db, bool &fileRemoved);
 
-		// Properties
+        bool checkOut(DbController* db);
+        bool checkIn(DbController* db, const QString &comment);
+        bool undo(DbController* db, bool &fileRemoved);
+        bool vcsStateAndAction(DbController* db, VcsState &state, VcsItemAction &action);
+
+        // Properties
 		//
 	public:
 
@@ -27,8 +34,8 @@ namespace Hardware
         QString connectionID() const;
         void setConnectionID(const QString& value);
 
-        QString fileID() const;
-        void setFileID(const QString& value);
+        int fileID() const;
+        void setFileID(const int value);
 
         QString fileName() const;
         void setFileName(const QString& value);
@@ -116,8 +123,8 @@ namespace Hardware
 		bool manualSettings() const;
 		void setManualSettings(bool value);
 
-		QStringList signalList() const;
-		void setSignalList(const QStringList& value);
+        QStringList signalList() const;
+        void setSignalList(const QStringList& value);
 
 		bool disableDataID() const;
 		void setDisableDataID(bool value);
@@ -162,7 +169,7 @@ namespace Hardware
 			m_generateVHDFile = that.m_generateVHDFile;
 
 			setMode(that.mode());
-			setSignalList(that.signalList());
+            setSignalList(that.signalList());
 
 			return *this;
 		}
@@ -172,7 +179,7 @@ namespace Hardware
 		QString m_connectionID;
 
         QString m_fileName;
-        QString m_fileID;
+        int m_fileID = -1;
 
 		int m_port1TxStartAddress = 0;
 		QString m_port1EquipmentID;
@@ -204,8 +211,8 @@ namespace Hardware
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
 
-		QStringList m_signalList;
-	};
+        QStringList m_signalList;
+    };
 
 
 	class ConnectionStorage : public QObject
@@ -225,23 +232,13 @@ namespace Hardware
 
 		void clear();
 
-		/*bool setLMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
-								 int m_txRxOptoID, quint32 m_txRxOptoDataUID);
+        bool load(DbController* db, QString &errorCode);
 
-		bool setOCMConnectionParams(const QString& portEquipmentID, int m_txWordsQuantity, int m_rxWordsQuantity,
-								 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);*/
-
-		bool load(DbController* db, QString &errorCode);
-		bool save(DbController* db);
-
-		bool checkOut(DbController* db);
-		bool checkIn(DbController* db, const QString &comment);
-		bool undo(DbController* db);
-		bool isCheckedOut(DbController* db);
+        bool loadFromXmlDeprecated(DbController* db, QString &errorCode);
+        bool deleteXmlDeprecated(DbController* db);
 
 	private:
 		std::vector<std::shared_ptr<Connection>> m_connections;
-		const QString fileName = "Connections.xml";
 	};
 }
 Q_DECLARE_METATYPE (std::shared_ptr<Hardware::Connection>)

@@ -194,6 +194,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* AppSignalState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AppSignalState_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Connection_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Connection_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
@@ -1314,6 +1317,39 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalState));
+  Connection_descriptor_ = file->message_type(58);
+  static const int Connection_offsets_[19] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, index_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2equipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1rawdatadescription_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2rawdatadescription_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, serialmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, mode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, enableserial_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, enableduplex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, manualsettings_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, disabledataid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, generatevhdfile_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1txstartaddress_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1txwordsquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1rxwordsquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2txstartaddress_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2txwordsquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2rxwordsquantity_),
+  };
+  Connection_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Connection_descriptor_,
+      Connection::default_instance_,
+      Connection_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Connection));
   SchemaUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
@@ -1446,6 +1482,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     AppSignal_descriptor_, &AppSignal::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignalState_descriptor_, &AppSignalState::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Connection_descriptor_, &Connection::default_instance());
 }
 
 }  // namespace
@@ -1567,6 +1605,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete AppSignal_reflection_;
   delete AppSignalState::default_instance_;
   delete AppSignalState_reflection_;
+  delete Connection::default_instance_;
+  delete Connection_reflection_;
 }
 
 void protobuf_AddDesc_serialization_2eproto() {
@@ -1798,12 +1838,27 @@ void protobuf_AddDesc_serialization_2eproto() {
     "AddrBit\030\317\001 \001(\005\"\210\001\n\016AppSignalState\022\017\n\004has"
     "h\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 "
     "\001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024\n\tlocalTi"
-    "me\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010*3\n\nSch"
-    "emaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004"
-    "Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020"
-    "\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog"
-    "\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Uns"
-    "ignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 9116);
+    "me\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010\"\277\004\n\nCo"
+    "nnection\022\020\n\005Index\030\001 \001(\005:\0010\022\026\n\014Connection"
+    "ID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022\032"
+    "\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1RawDa"
+    "taDescription\030\005 \001(\t:\000\022!\n\027Port2RawDataDes"
+    "cription\030\006 \001(\t:\000\022\025\n\nSerialMode\030\007 \001(\005:\0010\022"
+    "\017\n\004Mode\030\010 \001(\005:\0010\022\033\n\014EnableSerial\030\t \001(\010:\005"
+    "false\022\033\n\014EnableDuplex\030\n \001(\010:\005false\022\035\n\016Ma"
+    "nualSettings\030\013 \001(\010:\005false\022\034\n\rDisableData"
+    "ID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001(\010"
+    ":\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022"
+    "!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024Po"
+    "rt1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2Tx"
+    "StartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQua"
+    "ntity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuantity"
+    "\030\023 \001(\005:\003479*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016"
+    "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
+    "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
+    "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFb"
+    "lDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedIn"
+    "t\020\001\022\t\n\005Float\020\002", 9694);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1864,6 +1919,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Address16::default_instance_ = new Address16();
   AppSignal::default_instance_ = new AppSignal();
   AppSignalState::default_instance_ = new AppSignalState();
+  Connection::default_instance_ = new Connection();
   Uuid::default_instance_->InitAsDefaultInstance();
   qvariant::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
@@ -1922,6 +1978,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Address16::default_instance_->InitAsDefaultInstance();
   AppSignal::default_instance_->InitAsDefaultInstance();
   AppSignalState::default_instance_->InitAsDefaultInstance();
+  Connection::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
 
@@ -24405,6 +24462,1021 @@ void AppSignalState::Swap(AppSignalState* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = AppSignalState_descriptor_;
   metadata.reflection = AppSignalState_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int Connection::kIndexFieldNumber;
+const int Connection::kConnectionIDFieldNumber;
+const int Connection::kPort1EquipmentIDFieldNumber;
+const int Connection::kPort2EquipmentIDFieldNumber;
+const int Connection::kPort1RawDataDescriptionFieldNumber;
+const int Connection::kPort2RawDataDescriptionFieldNumber;
+const int Connection::kSerialModeFieldNumber;
+const int Connection::kModeFieldNumber;
+const int Connection::kEnableSerialFieldNumber;
+const int Connection::kEnableDuplexFieldNumber;
+const int Connection::kManualSettingsFieldNumber;
+const int Connection::kDisableDataIDFieldNumber;
+const int Connection::kGenerateVHDFileFieldNumber;
+const int Connection::kPort1TxStartAddressFieldNumber;
+const int Connection::kPort1TxWordsQuantityFieldNumber;
+const int Connection::kPort1RxWordsQuantityFieldNumber;
+const int Connection::kPort2TxStartAddressFieldNumber;
+const int Connection::kPort2TxWordsQuantityFieldNumber;
+const int Connection::kPort2RxWordsQuantityFieldNumber;
+#endif  // !_MSC_VER
+
+Connection::Connection()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Connection::InitAsDefaultInstance() {
+}
+
+Connection::Connection(const Connection& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Connection::SharedCtor() {
+  _cached_size_ = 0;
+  index_ = 0;
+  connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  port1equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  port2equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  port1rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  port2rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  serialmode_ = 0;
+  mode_ = 0;
+  enableserial_ = false;
+  enableduplex_ = false;
+  manualsettings_ = false;
+  disabledataid_ = false;
+  generatevhdfile_ = false;
+  port1txstartaddress_ = 0;
+  port1txwordsquantity_ = 479;
+  port1rxwordsquantity_ = 479;
+  port2txstartaddress_ = 0;
+  port2txwordsquantity_ = 479;
+  port2rxwordsquantity_ = 479;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Connection::~Connection() {
+  SharedDtor();
+}
+
+void Connection::SharedDtor() {
+  if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+    delete connectionid_;
+  }
+  if (port1equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete port1equipmentid_;
+  }
+  if (port2equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete port2equipmentid_;
+  }
+  if (port1rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete port1rawdatadescription_;
+  }
+  if (port2rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete port2rawdatadescription_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void Connection::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Connection::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Connection_descriptor_;
+}
+
+const Connection& Connection::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+Connection* Connection::default_instance_ = NULL;
+
+Connection* Connection::New() const {
+  return new Connection;
+}
+
+void Connection::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    index_ = 0;
+    if (has_connectionid()) {
+      if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+        connectionid_->clear();
+      }
+    }
+    if (has_port1equipmentid()) {
+      if (port1equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        port1equipmentid_->clear();
+      }
+    }
+    if (has_port2equipmentid()) {
+      if (port2equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        port2equipmentid_->clear();
+      }
+    }
+    if (has_port1rawdatadescription()) {
+      if (port1rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+        port1rawdatadescription_->clear();
+      }
+    }
+    if (has_port2rawdatadescription()) {
+      if (port2rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+        port2rawdatadescription_->clear();
+      }
+    }
+    serialmode_ = 0;
+    mode_ = 0;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    enableserial_ = false;
+    enableduplex_ = false;
+    manualsettings_ = false;
+    disabledataid_ = false;
+    generatevhdfile_ = false;
+    port1txstartaddress_ = 0;
+    port1txwordsquantity_ = 479;
+    port1rxwordsquantity_ = 479;
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    port2txstartaddress_ = 0;
+    port2txwordsquantity_ = 479;
+    port2rxwordsquantity_ = 479;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Connection::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 Index = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &index_)));
+          set_has_index();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_ConnectionID;
+        break;
+      }
+
+      // optional string ConnectionID = 2 [default = ""];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_ConnectionID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_connectionid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->connectionid().data(), this->connectionid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_Port1EquipmentID;
+        break;
+      }
+
+      // optional string Port1EquipmentID = 3 [default = ""];
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Port1EquipmentID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_port1equipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->port1equipmentid().data(), this->port1equipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(34)) goto parse_Port2EquipmentID;
+        break;
+      }
+
+      // optional string Port2EquipmentID = 4 [default = ""];
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Port2EquipmentID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_port2equipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->port2equipmentid().data(), this->port2equipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(42)) goto parse_Port1RawDataDescription;
+        break;
+      }
+
+      // optional string Port1RawDataDescription = 5 [default = ""];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Port1RawDataDescription:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_port1rawdatadescription()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->port1rawdatadescription().data(), this->port1rawdatadescription().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(50)) goto parse_Port2RawDataDescription;
+        break;
+      }
+
+      // optional string Port2RawDataDescription = 6 [default = ""];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Port2RawDataDescription:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_port2rawdatadescription()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->port2rawdatadescription().data(), this->port2rawdatadescription().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(56)) goto parse_SerialMode;
+        break;
+      }
+
+      // optional int32 SerialMode = 7 [default = 0];
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_SerialMode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &serialmode_)));
+          set_has_serialmode();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(64)) goto parse_Mode;
+        break;
+      }
+
+      // optional int32 Mode = 8 [default = 0];
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Mode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &mode_)));
+          set_has_mode();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(72)) goto parse_EnableSerial;
+        break;
+      }
+
+      // optional bool EnableSerial = 9 [default = false];
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_EnableSerial:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &enableserial_)));
+          set_has_enableserial();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(80)) goto parse_EnableDuplex;
+        break;
+      }
+
+      // optional bool EnableDuplex = 10 [default = false];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_EnableDuplex:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &enableduplex_)));
+          set_has_enableduplex();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_ManualSettings;
+        break;
+      }
+
+      // optional bool ManualSettings = 11 [default = false];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_ManualSettings:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &manualsettings_)));
+          set_has_manualsettings();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(96)) goto parse_DisableDataID;
+        break;
+      }
+
+      // optional bool DisableDataID = 12 [default = false];
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_DisableDataID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &disabledataid_)));
+          set_has_disabledataid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(104)) goto parse_GenerateVHDFile;
+        break;
+      }
+
+      // optional bool GenerateVHDFile = 13 [default = false];
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_GenerateVHDFile:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &generatevhdfile_)));
+          set_has_generatevhdfile();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(112)) goto parse_Port1TxStartAddress;
+        break;
+      }
+
+      // optional int32 Port1TxStartAddress = 14 [default = 0];
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1TxStartAddress:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port1txstartaddress_)));
+          set_has_port1txstartaddress();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(120)) goto parse_Port1TxWordsQuantity;
+        break;
+      }
+
+      // optional int32 Port1TxWordsQuantity = 15 [default = 479];
+      case 15: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1TxWordsQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port1txwordsquantity_)));
+          set_has_port1txwordsquantity();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(128)) goto parse_Port1RxWordsQuantity;
+        break;
+      }
+
+      // optional int32 Port1RxWordsQuantity = 16 [default = 479];
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1RxWordsQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port1rxwordsquantity_)));
+          set_has_port1rxwordsquantity();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(136)) goto parse_Port2TxStartAddress;
+        break;
+      }
+
+      // optional int32 Port2TxStartAddress = 17 [default = 0];
+      case 17: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2TxStartAddress:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port2txstartaddress_)));
+          set_has_port2txstartaddress();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(144)) goto parse_Port2TxWordsQuantity;
+        break;
+      }
+
+      // optional int32 Port2TxWordsQuantity = 18 [default = 479];
+      case 18: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2TxWordsQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port2txwordsquantity_)));
+          set_has_port2txwordsquantity();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(152)) goto parse_Port2RxWordsQuantity;
+        break;
+      }
+
+      // optional int32 Port2RxWordsQuantity = 19 [default = 479];
+      case 19: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2RxWordsQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port2rxwordsquantity_)));
+          set_has_port2rxwordsquantity();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Connection::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 Index = 1 [default = 0];
+  if (has_index()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->index(), output);
+  }
+
+  // optional string ConnectionID = 2 [default = ""];
+  if (has_connectionid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->connectionid().data(), this->connectionid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->connectionid(), output);
+  }
+
+  // optional string Port1EquipmentID = 3 [default = ""];
+  if (has_port1equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port1equipmentid().data(), this->port1equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      3, this->port1equipmentid(), output);
+  }
+
+  // optional string Port2EquipmentID = 4 [default = ""];
+  if (has_port2equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port2equipmentid().data(), this->port2equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->port2equipmentid(), output);
+  }
+
+  // optional string Port1RawDataDescription = 5 [default = ""];
+  if (has_port1rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port1rawdatadescription().data(), this->port1rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      5, this->port1rawdatadescription(), output);
+  }
+
+  // optional string Port2RawDataDescription = 6 [default = ""];
+  if (has_port2rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port2rawdatadescription().data(), this->port2rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->port2rawdatadescription(), output);
+  }
+
+  // optional int32 SerialMode = 7 [default = 0];
+  if (has_serialmode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->serialmode(), output);
+  }
+
+  // optional int32 Mode = 8 [default = 0];
+  if (has_mode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->mode(), output);
+  }
+
+  // optional bool EnableSerial = 9 [default = false];
+  if (has_enableserial()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(9, this->enableserial(), output);
+  }
+
+  // optional bool EnableDuplex = 10 [default = false];
+  if (has_enableduplex()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->enableduplex(), output);
+  }
+
+  // optional bool ManualSettings = 11 [default = false];
+  if (has_manualsettings()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->manualsettings(), output);
+  }
+
+  // optional bool DisableDataID = 12 [default = false];
+  if (has_disabledataid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(12, this->disabledataid(), output);
+  }
+
+  // optional bool GenerateVHDFile = 13 [default = false];
+  if (has_generatevhdfile()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(13, this->generatevhdfile(), output);
+  }
+
+  // optional int32 Port1TxStartAddress = 14 [default = 0];
+  if (has_port1txstartaddress()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->port1txstartaddress(), output);
+  }
+
+  // optional int32 Port1TxWordsQuantity = 15 [default = 479];
+  if (has_port1txwordsquantity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(15, this->port1txwordsquantity(), output);
+  }
+
+  // optional int32 Port1RxWordsQuantity = 16 [default = 479];
+  if (has_port1rxwordsquantity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(16, this->port1rxwordsquantity(), output);
+  }
+
+  // optional int32 Port2TxStartAddress = 17 [default = 0];
+  if (has_port2txstartaddress()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(17, this->port2txstartaddress(), output);
+  }
+
+  // optional int32 Port2TxWordsQuantity = 18 [default = 479];
+  if (has_port2txwordsquantity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(18, this->port2txwordsquantity(), output);
+  }
+
+  // optional int32 Port2RxWordsQuantity = 19 [default = 479];
+  if (has_port2rxwordsquantity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(19, this->port2rxwordsquantity(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Connection::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 Index = 1 [default = 0];
+  if (has_index()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->index(), target);
+  }
+
+  // optional string ConnectionID = 2 [default = ""];
+  if (has_connectionid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->connectionid().data(), this->connectionid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->connectionid(), target);
+  }
+
+  // optional string Port1EquipmentID = 3 [default = ""];
+  if (has_port1equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port1equipmentid().data(), this->port1equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->port1equipmentid(), target);
+  }
+
+  // optional string Port2EquipmentID = 4 [default = ""];
+  if (has_port2equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port2equipmentid().data(), this->port2equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->port2equipmentid(), target);
+  }
+
+  // optional string Port1RawDataDescription = 5 [default = ""];
+  if (has_port1rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port1rawdatadescription().data(), this->port1rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->port1rawdatadescription(), target);
+  }
+
+  // optional string Port2RawDataDescription = 6 [default = ""];
+  if (has_port2rawdatadescription()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->port2rawdatadescription().data(), this->port2rawdatadescription().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->port2rawdatadescription(), target);
+  }
+
+  // optional int32 SerialMode = 7 [default = 0];
+  if (has_serialmode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->serialmode(), target);
+  }
+
+  // optional int32 Mode = 8 [default = 0];
+  if (has_mode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->mode(), target);
+  }
+
+  // optional bool EnableSerial = 9 [default = false];
+  if (has_enableserial()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(9, this->enableserial(), target);
+  }
+
+  // optional bool EnableDuplex = 10 [default = false];
+  if (has_enableduplex()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->enableduplex(), target);
+  }
+
+  // optional bool ManualSettings = 11 [default = false];
+  if (has_manualsettings()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->manualsettings(), target);
+  }
+
+  // optional bool DisableDataID = 12 [default = false];
+  if (has_disabledataid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(12, this->disabledataid(), target);
+  }
+
+  // optional bool GenerateVHDFile = 13 [default = false];
+  if (has_generatevhdfile()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(13, this->generatevhdfile(), target);
+  }
+
+  // optional int32 Port1TxStartAddress = 14 [default = 0];
+  if (has_port1txstartaddress()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->port1txstartaddress(), target);
+  }
+
+  // optional int32 Port1TxWordsQuantity = 15 [default = 479];
+  if (has_port1txwordsquantity()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(15, this->port1txwordsquantity(), target);
+  }
+
+  // optional int32 Port1RxWordsQuantity = 16 [default = 479];
+  if (has_port1rxwordsquantity()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(16, this->port1rxwordsquantity(), target);
+  }
+
+  // optional int32 Port2TxStartAddress = 17 [default = 0];
+  if (has_port2txstartaddress()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(17, this->port2txstartaddress(), target);
+  }
+
+  // optional int32 Port2TxWordsQuantity = 18 [default = 479];
+  if (has_port2txwordsquantity()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(18, this->port2txwordsquantity(), target);
+  }
+
+  // optional int32 Port2RxWordsQuantity = 19 [default = 479];
+  if (has_port2rxwordsquantity()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(19, this->port2rxwordsquantity(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Connection::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 Index = 1 [default = 0];
+    if (has_index()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->index());
+    }
+
+    // optional string ConnectionID = 2 [default = ""];
+    if (has_connectionid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->connectionid());
+    }
+
+    // optional string Port1EquipmentID = 3 [default = ""];
+    if (has_port1equipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->port1equipmentid());
+    }
+
+    // optional string Port2EquipmentID = 4 [default = ""];
+    if (has_port2equipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->port2equipmentid());
+    }
+
+    // optional string Port1RawDataDescription = 5 [default = ""];
+    if (has_port1rawdatadescription()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->port1rawdatadescription());
+    }
+
+    // optional string Port2RawDataDescription = 6 [default = ""];
+    if (has_port2rawdatadescription()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->port2rawdatadescription());
+    }
+
+    // optional int32 SerialMode = 7 [default = 0];
+    if (has_serialmode()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->serialmode());
+    }
+
+    // optional int32 Mode = 8 [default = 0];
+    if (has_mode()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->mode());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bool EnableSerial = 9 [default = false];
+    if (has_enableserial()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool EnableDuplex = 10 [default = false];
+    if (has_enableduplex()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool ManualSettings = 11 [default = false];
+    if (has_manualsettings()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool DisableDataID = 12 [default = false];
+    if (has_disabledataid()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool GenerateVHDFile = 13 [default = false];
+    if (has_generatevhdfile()) {
+      total_size += 1 + 1;
+    }
+
+    // optional int32 Port1TxStartAddress = 14 [default = 0];
+    if (has_port1txstartaddress()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port1txstartaddress());
+    }
+
+    // optional int32 Port1TxWordsQuantity = 15 [default = 479];
+    if (has_port1txwordsquantity()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port1txwordsquantity());
+    }
+
+    // optional int32 Port1RxWordsQuantity = 16 [default = 479];
+    if (has_port1rxwordsquantity()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port1rxwordsquantity());
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional int32 Port2TxStartAddress = 17 [default = 0];
+    if (has_port2txstartaddress()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port2txstartaddress());
+    }
+
+    // optional int32 Port2TxWordsQuantity = 18 [default = 479];
+    if (has_port2txwordsquantity()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port2txwordsquantity());
+    }
+
+    // optional int32 Port2RxWordsQuantity = 19 [default = 479];
+    if (has_port2rxwordsquantity()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port2rxwordsquantity());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Connection::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Connection* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Connection*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Connection::MergeFrom(const Connection& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_index()) {
+      set_index(from.index());
+    }
+    if (from.has_connectionid()) {
+      set_connectionid(from.connectionid());
+    }
+    if (from.has_port1equipmentid()) {
+      set_port1equipmentid(from.port1equipmentid());
+    }
+    if (from.has_port2equipmentid()) {
+      set_port2equipmentid(from.port2equipmentid());
+    }
+    if (from.has_port1rawdatadescription()) {
+      set_port1rawdatadescription(from.port1rawdatadescription());
+    }
+    if (from.has_port2rawdatadescription()) {
+      set_port2rawdatadescription(from.port2rawdatadescription());
+    }
+    if (from.has_serialmode()) {
+      set_serialmode(from.serialmode());
+    }
+    if (from.has_mode()) {
+      set_mode(from.mode());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_enableserial()) {
+      set_enableserial(from.enableserial());
+    }
+    if (from.has_enableduplex()) {
+      set_enableduplex(from.enableduplex());
+    }
+    if (from.has_manualsettings()) {
+      set_manualsettings(from.manualsettings());
+    }
+    if (from.has_disabledataid()) {
+      set_disabledataid(from.disabledataid());
+    }
+    if (from.has_generatevhdfile()) {
+      set_generatevhdfile(from.generatevhdfile());
+    }
+    if (from.has_port1txstartaddress()) {
+      set_port1txstartaddress(from.port1txstartaddress());
+    }
+    if (from.has_port1txwordsquantity()) {
+      set_port1txwordsquantity(from.port1txwordsquantity());
+    }
+    if (from.has_port1rxwordsquantity()) {
+      set_port1rxwordsquantity(from.port1rxwordsquantity());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_port2txstartaddress()) {
+      set_port2txstartaddress(from.port2txstartaddress());
+    }
+    if (from.has_port2txwordsquantity()) {
+      set_port2txwordsquantity(from.port2txwordsquantity());
+    }
+    if (from.has_port2rxwordsquantity()) {
+      set_port2rxwordsquantity(from.port2rxwordsquantity());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Connection::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Connection::CopyFrom(const Connection& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Connection::IsInitialized() const {
+
+  return true;
+}
+
+void Connection::Swap(Connection* other) {
+  if (other != this) {
+    std::swap(index_, other->index_);
+    std::swap(connectionid_, other->connectionid_);
+    std::swap(port1equipmentid_, other->port1equipmentid_);
+    std::swap(port2equipmentid_, other->port2equipmentid_);
+    std::swap(port1rawdatadescription_, other->port1rawdatadescription_);
+    std::swap(port2rawdatadescription_, other->port2rawdatadescription_);
+    std::swap(serialmode_, other->serialmode_);
+    std::swap(mode_, other->mode_);
+    std::swap(enableserial_, other->enableserial_);
+    std::swap(enableduplex_, other->enableduplex_);
+    std::swap(manualsettings_, other->manualsettings_);
+    std::swap(disabledataid_, other->disabledataid_);
+    std::swap(generatevhdfile_, other->generatevhdfile_);
+    std::swap(port1txstartaddress_, other->port1txstartaddress_);
+    std::swap(port1txwordsquantity_, other->port1txwordsquantity_);
+    std::swap(port1rxwordsquantity_, other->port1rxwordsquantity_);
+    std::swap(port2txstartaddress_, other->port2txstartaddress_);
+    std::swap(port2txwordsquantity_, other->port2txwordsquantity_);
+    std::swap(port2rxwordsquantity_, other->port2rxwordsquantity_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Connection::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Connection_descriptor_;
+  metadata.reflection = Connection_reflection_;
   return metadata;
 }
 

@@ -145,19 +145,19 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 			if (reader.attributes().hasAttribute("DefaultValue"))
 			{
 				QString v = reader.attributes().value("DefaultValue").toString();
-				object.setDefaultValue(v.toDouble());
+                object.setDefaultValue(v.toFloat());
 			}
 
 			if (reader.attributes().hasAttribute("LowLimit"))
 			{
 				QString v = reader.attributes().value("LowLimit").toString();
-				object.setLowLimit(v.toDouble());
+                object.setLowLimit(v.toFloat());
 			}
 
 			if (reader.attributes().hasAttribute("HighLimit"))
 			{
 				QString v = reader.attributes().value("HighLimit").toString();
-				object.setHighLimit(v.toDouble());
+                object.setHighLimit(v.toFloat());
 			}
 
 
@@ -187,5 +187,18 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 	}
 
 	return !reader.hasError();
+}
+
+void ObjectManager::invalidateSignals()
+{
+    QMutexLocker l(&m_mutex);
+
+    int count = (int)m_objects.size();
+    for (int i = 0; i < count; i++)
+    {
+        TuningObject& object = m_objects[i];
+        object.setValid(false);
+    }
+
 }
 

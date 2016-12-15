@@ -135,9 +135,8 @@ namespace Builder
 			MemoryArea lmOutputs;						// writes to this->m_lmInOuts ares
 			MemoryArea module[MODULES_COUNT];			// depends from chassis	configuration
 			MemoryArea regAnalogSignals;
-			MemoryArea regTuningAnalogSignals;
 			MemoryArea regDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
-			MemoryArea regTuningDiscreteSignals;
+			MemoryArea regTuningSignals;
 			MemoryArea nonRegAnalogSignals;
 
 		} m_appWordAdressed;
@@ -210,9 +209,10 @@ namespace Builder
 
 		//
 
-		int getModuleDataOffset(int place);
+		int getModuleDataOffset(int place) const;
+		int getModuleRegDataOffset(int place) const;
 
-		int getModuleRegDataOffset(int place);
+		int getRegBufStartAddr() const;
 
 		int addModule(int place, int moduleAppRegDataSize);
 
@@ -220,16 +220,15 @@ namespace Builder
 
 		Address16 addRegDiscreteSignal(const Signal& signal);
 		Address16 addRegDiscreteSignalToRegBuffer(const Signal& signal);
-		Address16 addRegTuningDiscreteSignal(const Signal& signal);
 		Address16 addNonRegDiscreteSignal(const Signal& signal);
 		Address16 addRegAnalogSignal(const Signal& signal);
-		Address16 addRegTuningAnalogSignal(const Signal& signal);
+		Address16 addRegTuningSignal(const Signal& signal);
 		Address16 addNonRegAnalogSignal(const Signal& signal);
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();
 
-		int getAppDataSize() { return m_appWordAdressed.nonRegAnalogSignals.startAddress() - m_appWordAdressed.memory.startAddress(); }
+		int getAppDataSize() const { return m_appWordAdressed.nonRegAnalogSignals.startAddress() - m_appWordAdressed.memory.startAddress(); }
 
 		bool read16(int address);
 		bool read32(int address);

@@ -2,7 +2,7 @@
 #include "ui_DialogInputValue.h"
 #include <QMessageBox>
 
-DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget *parent) :
+DialogInputValue::DialogInputValue(bool analog, float value, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_analog(analog),
     m_lowLimit(lowLimit),
@@ -26,6 +26,7 @@ DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, do
         if (sameValue == true)
 		{
 			ui->m_lineEdit->setText(QString::number(value, 'f', decimalPlaces));
+            ui->m_lineEdit->selectAll();
 		}
 	}
 	else
@@ -61,7 +62,7 @@ void DialogInputValue::accept()
 		}
 
 		bool ok = false;
-		m_value = text.toDouble(&ok);
+        m_value = text.toFloat(&ok);
 
         if (ok == false)
 		{

@@ -92,6 +92,7 @@ class Property;
 class Address16;
 class AppSignal;
 class AppSignalState;
+class Connection;
 
 enum SchemaUnit {
   Display = 0,
@@ -7623,6 +7624,293 @@ class AppSignalState : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static AppSignalState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Connection : public ::google::protobuf::Message {
+ public:
+  Connection();
+  virtual ~Connection();
+
+  Connection(const Connection& from);
+
+  inline Connection& operator=(const Connection& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Connection& default_instance();
+
+  void Swap(Connection* other);
+
+  // implements Message ----------------------------------------------
+
+  Connection* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Connection& from);
+  void MergeFrom(const Connection& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 Index = 1 [default = 0];
+  inline bool has_index() const;
+  inline void clear_index();
+  static const int kIndexFieldNumber = 1;
+  inline ::google::protobuf::int32 index() const;
+  inline void set_index(::google::protobuf::int32 value);
+
+  // optional string ConnectionID = 2 [default = ""];
+  inline bool has_connectionid() const;
+  inline void clear_connectionid();
+  static const int kConnectionIDFieldNumber = 2;
+  inline const ::std::string& connectionid() const;
+  inline void set_connectionid(const ::std::string& value);
+  inline void set_connectionid(const char* value);
+  inline void set_connectionid(const char* value, size_t size);
+  inline ::std::string* mutable_connectionid();
+  inline ::std::string* release_connectionid();
+  inline void set_allocated_connectionid(::std::string* connectionid);
+
+  // optional string Port1EquipmentID = 3 [default = ""];
+  inline bool has_port1equipmentid() const;
+  inline void clear_port1equipmentid();
+  static const int kPort1EquipmentIDFieldNumber = 3;
+  inline const ::std::string& port1equipmentid() const;
+  inline void set_port1equipmentid(const ::std::string& value);
+  inline void set_port1equipmentid(const char* value);
+  inline void set_port1equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_port1equipmentid();
+  inline ::std::string* release_port1equipmentid();
+  inline void set_allocated_port1equipmentid(::std::string* port1equipmentid);
+
+  // optional string Port2EquipmentID = 4 [default = ""];
+  inline bool has_port2equipmentid() const;
+  inline void clear_port2equipmentid();
+  static const int kPort2EquipmentIDFieldNumber = 4;
+  inline const ::std::string& port2equipmentid() const;
+  inline void set_port2equipmentid(const ::std::string& value);
+  inline void set_port2equipmentid(const char* value);
+  inline void set_port2equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_port2equipmentid();
+  inline ::std::string* release_port2equipmentid();
+  inline void set_allocated_port2equipmentid(::std::string* port2equipmentid);
+
+  // optional string Port1RawDataDescription = 5 [default = ""];
+  inline bool has_port1rawdatadescription() const;
+  inline void clear_port1rawdatadescription();
+  static const int kPort1RawDataDescriptionFieldNumber = 5;
+  inline const ::std::string& port1rawdatadescription() const;
+  inline void set_port1rawdatadescription(const ::std::string& value);
+  inline void set_port1rawdatadescription(const char* value);
+  inline void set_port1rawdatadescription(const char* value, size_t size);
+  inline ::std::string* mutable_port1rawdatadescription();
+  inline ::std::string* release_port1rawdatadescription();
+  inline void set_allocated_port1rawdatadescription(::std::string* port1rawdatadescription);
+
+  // optional string Port2RawDataDescription = 6 [default = ""];
+  inline bool has_port2rawdatadescription() const;
+  inline void clear_port2rawdatadescription();
+  static const int kPort2RawDataDescriptionFieldNumber = 6;
+  inline const ::std::string& port2rawdatadescription() const;
+  inline void set_port2rawdatadescription(const ::std::string& value);
+  inline void set_port2rawdatadescription(const char* value);
+  inline void set_port2rawdatadescription(const char* value, size_t size);
+  inline ::std::string* mutable_port2rawdatadescription();
+  inline ::std::string* release_port2rawdatadescription();
+  inline void set_allocated_port2rawdatadescription(::std::string* port2rawdatadescription);
+
+  // optional int32 SerialMode = 7 [default = 0];
+  inline bool has_serialmode() const;
+  inline void clear_serialmode();
+  static const int kSerialModeFieldNumber = 7;
+  inline ::google::protobuf::int32 serialmode() const;
+  inline void set_serialmode(::google::protobuf::int32 value);
+
+  // optional int32 Mode = 8 [default = 0];
+  inline bool has_mode() const;
+  inline void clear_mode();
+  static const int kModeFieldNumber = 8;
+  inline ::google::protobuf::int32 mode() const;
+  inline void set_mode(::google::protobuf::int32 value);
+
+  // optional bool EnableSerial = 9 [default = false];
+  inline bool has_enableserial() const;
+  inline void clear_enableserial();
+  static const int kEnableSerialFieldNumber = 9;
+  inline bool enableserial() const;
+  inline void set_enableserial(bool value);
+
+  // optional bool EnableDuplex = 10 [default = false];
+  inline bool has_enableduplex() const;
+  inline void clear_enableduplex();
+  static const int kEnableDuplexFieldNumber = 10;
+  inline bool enableduplex() const;
+  inline void set_enableduplex(bool value);
+
+  // optional bool ManualSettings = 11 [default = false];
+  inline bool has_manualsettings() const;
+  inline void clear_manualsettings();
+  static const int kManualSettingsFieldNumber = 11;
+  inline bool manualsettings() const;
+  inline void set_manualsettings(bool value);
+
+  // optional bool DisableDataID = 12 [default = false];
+  inline bool has_disabledataid() const;
+  inline void clear_disabledataid();
+  static const int kDisableDataIDFieldNumber = 12;
+  inline bool disabledataid() const;
+  inline void set_disabledataid(bool value);
+
+  // optional bool GenerateVHDFile = 13 [default = false];
+  inline bool has_generatevhdfile() const;
+  inline void clear_generatevhdfile();
+  static const int kGenerateVHDFileFieldNumber = 13;
+  inline bool generatevhdfile() const;
+  inline void set_generatevhdfile(bool value);
+
+  // optional int32 Port1TxStartAddress = 14 [default = 0];
+  inline bool has_port1txstartaddress() const;
+  inline void clear_port1txstartaddress();
+  static const int kPort1TxStartAddressFieldNumber = 14;
+  inline ::google::protobuf::int32 port1txstartaddress() const;
+  inline void set_port1txstartaddress(::google::protobuf::int32 value);
+
+  // optional int32 Port1TxWordsQuantity = 15 [default = 479];
+  inline bool has_port1txwordsquantity() const;
+  inline void clear_port1txwordsquantity();
+  static const int kPort1TxWordsQuantityFieldNumber = 15;
+  inline ::google::protobuf::int32 port1txwordsquantity() const;
+  inline void set_port1txwordsquantity(::google::protobuf::int32 value);
+
+  // optional int32 Port1RxWordsQuantity = 16 [default = 479];
+  inline bool has_port1rxwordsquantity() const;
+  inline void clear_port1rxwordsquantity();
+  static const int kPort1RxWordsQuantityFieldNumber = 16;
+  inline ::google::protobuf::int32 port1rxwordsquantity() const;
+  inline void set_port1rxwordsquantity(::google::protobuf::int32 value);
+
+  // optional int32 Port2TxStartAddress = 17 [default = 0];
+  inline bool has_port2txstartaddress() const;
+  inline void clear_port2txstartaddress();
+  static const int kPort2TxStartAddressFieldNumber = 17;
+  inline ::google::protobuf::int32 port2txstartaddress() const;
+  inline void set_port2txstartaddress(::google::protobuf::int32 value);
+
+  // optional int32 Port2TxWordsQuantity = 18 [default = 479];
+  inline bool has_port2txwordsquantity() const;
+  inline void clear_port2txwordsquantity();
+  static const int kPort2TxWordsQuantityFieldNumber = 18;
+  inline ::google::protobuf::int32 port2txwordsquantity() const;
+  inline void set_port2txwordsquantity(::google::protobuf::int32 value);
+
+  // optional int32 Port2RxWordsQuantity = 19 [default = 479];
+  inline bool has_port2rxwordsquantity() const;
+  inline void clear_port2rxwordsquantity();
+  static const int kPort2RxWordsQuantityFieldNumber = 19;
+  inline ::google::protobuf::int32 port2rxwordsquantity() const;
+  inline void set_port2rxwordsquantity(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.Connection)
+ private:
+  inline void set_has_index();
+  inline void clear_has_index();
+  inline void set_has_connectionid();
+  inline void clear_has_connectionid();
+  inline void set_has_port1equipmentid();
+  inline void clear_has_port1equipmentid();
+  inline void set_has_port2equipmentid();
+  inline void clear_has_port2equipmentid();
+  inline void set_has_port1rawdatadescription();
+  inline void clear_has_port1rawdatadescription();
+  inline void set_has_port2rawdatadescription();
+  inline void clear_has_port2rawdatadescription();
+  inline void set_has_serialmode();
+  inline void clear_has_serialmode();
+  inline void set_has_mode();
+  inline void clear_has_mode();
+  inline void set_has_enableserial();
+  inline void clear_has_enableserial();
+  inline void set_has_enableduplex();
+  inline void clear_has_enableduplex();
+  inline void set_has_manualsettings();
+  inline void clear_has_manualsettings();
+  inline void set_has_disabledataid();
+  inline void clear_has_disabledataid();
+  inline void set_has_generatevhdfile();
+  inline void clear_has_generatevhdfile();
+  inline void set_has_port1txstartaddress();
+  inline void clear_has_port1txstartaddress();
+  inline void set_has_port1txwordsquantity();
+  inline void clear_has_port1txwordsquantity();
+  inline void set_has_port1rxwordsquantity();
+  inline void clear_has_port1rxwordsquantity();
+  inline void set_has_port2txstartaddress();
+  inline void clear_has_port2txstartaddress();
+  inline void set_has_port2txwordsquantity();
+  inline void clear_has_port2txwordsquantity();
+  inline void set_has_port2rxwordsquantity();
+  inline void clear_has_port2rxwordsquantity();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* connectionid_;
+  ::std::string* port1equipmentid_;
+  ::std::string* port2equipmentid_;
+  ::google::protobuf::int32 index_;
+  ::google::protobuf::int32 serialmode_;
+  ::std::string* port1rawdatadescription_;
+  ::std::string* port2rawdatadescription_;
+  ::google::protobuf::int32 mode_;
+  bool enableserial_;
+  bool enableduplex_;
+  bool manualsettings_;
+  bool disabledataid_;
+  bool generatevhdfile_;
+  ::google::protobuf::int32 port1txstartaddress_;
+  ::google::protobuf::int32 port1txwordsquantity_;
+  ::google::protobuf::int32 port1rxwordsquantity_;
+  ::google::protobuf::int32 port2txstartaddress_;
+  ::google::protobuf::int32 port2txwordsquantity_;
+  ::google::protobuf::int32 port2rxwordsquantity_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(19 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Connection* default_instance_;
 };
 // ===================================================================
 
@@ -16808,6 +17096,668 @@ inline ::google::protobuf::int64 AppSignalState::planttime() const {
 inline void AppSignalState::set_planttime(::google::protobuf::int64 value) {
   set_has_planttime();
   planttime_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Connection
+
+// optional int32 Index = 1 [default = 0];
+inline bool Connection::has_index() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Connection::set_has_index() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Connection::clear_has_index() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Connection::clear_index() {
+  index_ = 0;
+  clear_has_index();
+}
+inline ::google::protobuf::int32 Connection::index() const {
+  return index_;
+}
+inline void Connection::set_index(::google::protobuf::int32 value) {
+  set_has_index();
+  index_ = value;
+}
+
+// optional string ConnectionID = 2 [default = ""];
+inline bool Connection::has_connectionid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Connection::set_has_connectionid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Connection::clear_has_connectionid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Connection::clear_connectionid() {
+  if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+    connectionid_->clear();
+  }
+  clear_has_connectionid();
+}
+inline const ::std::string& Connection::connectionid() const {
+  return *connectionid_;
+}
+inline void Connection::set_connectionid(const ::std::string& value) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(value);
+}
+inline void Connection::set_connectionid(const char* value) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(value);
+}
+inline void Connection::set_connectionid(const char* value, size_t size) {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  connectionid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Connection::mutable_connectionid() {
+  set_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    connectionid_ = new ::std::string;
+  }
+  return connectionid_;
+}
+inline ::std::string* Connection::release_connectionid() {
+  clear_has_connectionid();
+  if (connectionid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = connectionid_;
+    connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Connection::set_allocated_connectionid(::std::string* connectionid) {
+  if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
+    delete connectionid_;
+  }
+  if (connectionid) {
+    set_has_connectionid();
+    connectionid_ = connectionid;
+  } else {
+    clear_has_connectionid();
+    connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string Port1EquipmentID = 3 [default = ""];
+inline bool Connection::has_port1equipmentid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Connection::set_has_port1equipmentid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Connection::clear_has_port1equipmentid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Connection::clear_port1equipmentid() {
+  if (port1equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    port1equipmentid_->clear();
+  }
+  clear_has_port1equipmentid();
+}
+inline const ::std::string& Connection::port1equipmentid() const {
+  return *port1equipmentid_;
+}
+inline void Connection::set_port1equipmentid(const ::std::string& value) {
+  set_has_port1equipmentid();
+  if (port1equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port1equipmentid_ = new ::std::string;
+  }
+  port1equipmentid_->assign(value);
+}
+inline void Connection::set_port1equipmentid(const char* value) {
+  set_has_port1equipmentid();
+  if (port1equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port1equipmentid_ = new ::std::string;
+  }
+  port1equipmentid_->assign(value);
+}
+inline void Connection::set_port1equipmentid(const char* value, size_t size) {
+  set_has_port1equipmentid();
+  if (port1equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port1equipmentid_ = new ::std::string;
+  }
+  port1equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Connection::mutable_port1equipmentid() {
+  set_has_port1equipmentid();
+  if (port1equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port1equipmentid_ = new ::std::string;
+  }
+  return port1equipmentid_;
+}
+inline ::std::string* Connection::release_port1equipmentid() {
+  clear_has_port1equipmentid();
+  if (port1equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = port1equipmentid_;
+    port1equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Connection::set_allocated_port1equipmentid(::std::string* port1equipmentid) {
+  if (port1equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete port1equipmentid_;
+  }
+  if (port1equipmentid) {
+    set_has_port1equipmentid();
+    port1equipmentid_ = port1equipmentid;
+  } else {
+    clear_has_port1equipmentid();
+    port1equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string Port2EquipmentID = 4 [default = ""];
+inline bool Connection::has_port2equipmentid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Connection::set_has_port2equipmentid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Connection::clear_has_port2equipmentid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Connection::clear_port2equipmentid() {
+  if (port2equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    port2equipmentid_->clear();
+  }
+  clear_has_port2equipmentid();
+}
+inline const ::std::string& Connection::port2equipmentid() const {
+  return *port2equipmentid_;
+}
+inline void Connection::set_port2equipmentid(const ::std::string& value) {
+  set_has_port2equipmentid();
+  if (port2equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port2equipmentid_ = new ::std::string;
+  }
+  port2equipmentid_->assign(value);
+}
+inline void Connection::set_port2equipmentid(const char* value) {
+  set_has_port2equipmentid();
+  if (port2equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port2equipmentid_ = new ::std::string;
+  }
+  port2equipmentid_->assign(value);
+}
+inline void Connection::set_port2equipmentid(const char* value, size_t size) {
+  set_has_port2equipmentid();
+  if (port2equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port2equipmentid_ = new ::std::string;
+  }
+  port2equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Connection::mutable_port2equipmentid() {
+  set_has_port2equipmentid();
+  if (port2equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    port2equipmentid_ = new ::std::string;
+  }
+  return port2equipmentid_;
+}
+inline ::std::string* Connection::release_port2equipmentid() {
+  clear_has_port2equipmentid();
+  if (port2equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = port2equipmentid_;
+    port2equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Connection::set_allocated_port2equipmentid(::std::string* port2equipmentid) {
+  if (port2equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete port2equipmentid_;
+  }
+  if (port2equipmentid) {
+    set_has_port2equipmentid();
+    port2equipmentid_ = port2equipmentid;
+  } else {
+    clear_has_port2equipmentid();
+    port2equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string Port1RawDataDescription = 5 [default = ""];
+inline bool Connection::has_port1rawdatadescription() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Connection::set_has_port1rawdatadescription() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Connection::clear_has_port1rawdatadescription() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Connection::clear_port1rawdatadescription() {
+  if (port1rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    port1rawdatadescription_->clear();
+  }
+  clear_has_port1rawdatadescription();
+}
+inline const ::std::string& Connection::port1rawdatadescription() const {
+  return *port1rawdatadescription_;
+}
+inline void Connection::set_port1rawdatadescription(const ::std::string& value) {
+  set_has_port1rawdatadescription();
+  if (port1rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port1rawdatadescription_ = new ::std::string;
+  }
+  port1rawdatadescription_->assign(value);
+}
+inline void Connection::set_port1rawdatadescription(const char* value) {
+  set_has_port1rawdatadescription();
+  if (port1rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port1rawdatadescription_ = new ::std::string;
+  }
+  port1rawdatadescription_->assign(value);
+}
+inline void Connection::set_port1rawdatadescription(const char* value, size_t size) {
+  set_has_port1rawdatadescription();
+  if (port1rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port1rawdatadescription_ = new ::std::string;
+  }
+  port1rawdatadescription_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Connection::mutable_port1rawdatadescription() {
+  set_has_port1rawdatadescription();
+  if (port1rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port1rawdatadescription_ = new ::std::string;
+  }
+  return port1rawdatadescription_;
+}
+inline ::std::string* Connection::release_port1rawdatadescription() {
+  clear_has_port1rawdatadescription();
+  if (port1rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = port1rawdatadescription_;
+    port1rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Connection::set_allocated_port1rawdatadescription(::std::string* port1rawdatadescription) {
+  if (port1rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete port1rawdatadescription_;
+  }
+  if (port1rawdatadescription) {
+    set_has_port1rawdatadescription();
+    port1rawdatadescription_ = port1rawdatadescription;
+  } else {
+    clear_has_port1rawdatadescription();
+    port1rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string Port2RawDataDescription = 6 [default = ""];
+inline bool Connection::has_port2rawdatadescription() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Connection::set_has_port2rawdatadescription() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Connection::clear_has_port2rawdatadescription() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Connection::clear_port2rawdatadescription() {
+  if (port2rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    port2rawdatadescription_->clear();
+  }
+  clear_has_port2rawdatadescription();
+}
+inline const ::std::string& Connection::port2rawdatadescription() const {
+  return *port2rawdatadescription_;
+}
+inline void Connection::set_port2rawdatadescription(const ::std::string& value) {
+  set_has_port2rawdatadescription();
+  if (port2rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port2rawdatadescription_ = new ::std::string;
+  }
+  port2rawdatadescription_->assign(value);
+}
+inline void Connection::set_port2rawdatadescription(const char* value) {
+  set_has_port2rawdatadescription();
+  if (port2rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port2rawdatadescription_ = new ::std::string;
+  }
+  port2rawdatadescription_->assign(value);
+}
+inline void Connection::set_port2rawdatadescription(const char* value, size_t size) {
+  set_has_port2rawdatadescription();
+  if (port2rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port2rawdatadescription_ = new ::std::string;
+  }
+  port2rawdatadescription_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Connection::mutable_port2rawdatadescription() {
+  set_has_port2rawdatadescription();
+  if (port2rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    port2rawdatadescription_ = new ::std::string;
+  }
+  return port2rawdatadescription_;
+}
+inline ::std::string* Connection::release_port2rawdatadescription() {
+  clear_has_port2rawdatadescription();
+  if (port2rawdatadescription_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = port2rawdatadescription_;
+    port2rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Connection::set_allocated_port2rawdatadescription(::std::string* port2rawdatadescription) {
+  if (port2rawdatadescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete port2rawdatadescription_;
+  }
+  if (port2rawdatadescription) {
+    set_has_port2rawdatadescription();
+    port2rawdatadescription_ = port2rawdatadescription;
+  } else {
+    clear_has_port2rawdatadescription();
+    port2rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 SerialMode = 7 [default = 0];
+inline bool Connection::has_serialmode() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Connection::set_has_serialmode() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Connection::clear_has_serialmode() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Connection::clear_serialmode() {
+  serialmode_ = 0;
+  clear_has_serialmode();
+}
+inline ::google::protobuf::int32 Connection::serialmode() const {
+  return serialmode_;
+}
+inline void Connection::set_serialmode(::google::protobuf::int32 value) {
+  set_has_serialmode();
+  serialmode_ = value;
+}
+
+// optional int32 Mode = 8 [default = 0];
+inline bool Connection::has_mode() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Connection::set_has_mode() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Connection::clear_has_mode() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Connection::clear_mode() {
+  mode_ = 0;
+  clear_has_mode();
+}
+inline ::google::protobuf::int32 Connection::mode() const {
+  return mode_;
+}
+inline void Connection::set_mode(::google::protobuf::int32 value) {
+  set_has_mode();
+  mode_ = value;
+}
+
+// optional bool EnableSerial = 9 [default = false];
+inline bool Connection::has_enableserial() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Connection::set_has_enableserial() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Connection::clear_has_enableserial() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Connection::clear_enableserial() {
+  enableserial_ = false;
+  clear_has_enableserial();
+}
+inline bool Connection::enableserial() const {
+  return enableserial_;
+}
+inline void Connection::set_enableserial(bool value) {
+  set_has_enableserial();
+  enableserial_ = value;
+}
+
+// optional bool EnableDuplex = 10 [default = false];
+inline bool Connection::has_enableduplex() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Connection::set_has_enableduplex() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Connection::clear_has_enableduplex() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Connection::clear_enableduplex() {
+  enableduplex_ = false;
+  clear_has_enableduplex();
+}
+inline bool Connection::enableduplex() const {
+  return enableduplex_;
+}
+inline void Connection::set_enableduplex(bool value) {
+  set_has_enableduplex();
+  enableduplex_ = value;
+}
+
+// optional bool ManualSettings = 11 [default = false];
+inline bool Connection::has_manualsettings() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Connection::set_has_manualsettings() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Connection::clear_has_manualsettings() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Connection::clear_manualsettings() {
+  manualsettings_ = false;
+  clear_has_manualsettings();
+}
+inline bool Connection::manualsettings() const {
+  return manualsettings_;
+}
+inline void Connection::set_manualsettings(bool value) {
+  set_has_manualsettings();
+  manualsettings_ = value;
+}
+
+// optional bool DisableDataID = 12 [default = false];
+inline bool Connection::has_disabledataid() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void Connection::set_has_disabledataid() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void Connection::clear_has_disabledataid() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void Connection::clear_disabledataid() {
+  disabledataid_ = false;
+  clear_has_disabledataid();
+}
+inline bool Connection::disabledataid() const {
+  return disabledataid_;
+}
+inline void Connection::set_disabledataid(bool value) {
+  set_has_disabledataid();
+  disabledataid_ = value;
+}
+
+// optional bool GenerateVHDFile = 13 [default = false];
+inline bool Connection::has_generatevhdfile() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void Connection::set_has_generatevhdfile() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void Connection::clear_has_generatevhdfile() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void Connection::clear_generatevhdfile() {
+  generatevhdfile_ = false;
+  clear_has_generatevhdfile();
+}
+inline bool Connection::generatevhdfile() const {
+  return generatevhdfile_;
+}
+inline void Connection::set_generatevhdfile(bool value) {
+  set_has_generatevhdfile();
+  generatevhdfile_ = value;
+}
+
+// optional int32 Port1TxStartAddress = 14 [default = 0];
+inline bool Connection::has_port1txstartaddress() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void Connection::set_has_port1txstartaddress() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void Connection::clear_has_port1txstartaddress() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void Connection::clear_port1txstartaddress() {
+  port1txstartaddress_ = 0;
+  clear_has_port1txstartaddress();
+}
+inline ::google::protobuf::int32 Connection::port1txstartaddress() const {
+  return port1txstartaddress_;
+}
+inline void Connection::set_port1txstartaddress(::google::protobuf::int32 value) {
+  set_has_port1txstartaddress();
+  port1txstartaddress_ = value;
+}
+
+// optional int32 Port1TxWordsQuantity = 15 [default = 479];
+inline bool Connection::has_port1txwordsquantity() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void Connection::set_has_port1txwordsquantity() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void Connection::clear_has_port1txwordsquantity() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void Connection::clear_port1txwordsquantity() {
+  port1txwordsquantity_ = 479;
+  clear_has_port1txwordsquantity();
+}
+inline ::google::protobuf::int32 Connection::port1txwordsquantity() const {
+  return port1txwordsquantity_;
+}
+inline void Connection::set_port1txwordsquantity(::google::protobuf::int32 value) {
+  set_has_port1txwordsquantity();
+  port1txwordsquantity_ = value;
+}
+
+// optional int32 Port1RxWordsQuantity = 16 [default = 479];
+inline bool Connection::has_port1rxwordsquantity() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Connection::set_has_port1rxwordsquantity() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Connection::clear_has_port1rxwordsquantity() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void Connection::clear_port1rxwordsquantity() {
+  port1rxwordsquantity_ = 479;
+  clear_has_port1rxwordsquantity();
+}
+inline ::google::protobuf::int32 Connection::port1rxwordsquantity() const {
+  return port1rxwordsquantity_;
+}
+inline void Connection::set_port1rxwordsquantity(::google::protobuf::int32 value) {
+  set_has_port1rxwordsquantity();
+  port1rxwordsquantity_ = value;
+}
+
+// optional int32 Port2TxStartAddress = 17 [default = 0];
+inline bool Connection::has_port2txstartaddress() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void Connection::set_has_port2txstartaddress() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void Connection::clear_has_port2txstartaddress() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void Connection::clear_port2txstartaddress() {
+  port2txstartaddress_ = 0;
+  clear_has_port2txstartaddress();
+}
+inline ::google::protobuf::int32 Connection::port2txstartaddress() const {
+  return port2txstartaddress_;
+}
+inline void Connection::set_port2txstartaddress(::google::protobuf::int32 value) {
+  set_has_port2txstartaddress();
+  port2txstartaddress_ = value;
+}
+
+// optional int32 Port2TxWordsQuantity = 18 [default = 479];
+inline bool Connection::has_port2txwordsquantity() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void Connection::set_has_port2txwordsquantity() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void Connection::clear_has_port2txwordsquantity() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void Connection::clear_port2txwordsquantity() {
+  port2txwordsquantity_ = 479;
+  clear_has_port2txwordsquantity();
+}
+inline ::google::protobuf::int32 Connection::port2txwordsquantity() const {
+  return port2txwordsquantity_;
+}
+inline void Connection::set_port2txwordsquantity(::google::protobuf::int32 value) {
+  set_has_port2txwordsquantity();
+  port2txwordsquantity_ = value;
+}
+
+// optional int32 Port2RxWordsQuantity = 19 [default = 479];
+inline bool Connection::has_port2rxwordsquantity() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void Connection::set_has_port2rxwordsquantity() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void Connection::clear_has_port2rxwordsquantity() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void Connection::clear_port2rxwordsquantity() {
+  port2rxwordsquantity_ = 479;
+  clear_has_port2rxwordsquantity();
+}
+inline ::google::protobuf::int32 Connection::port2rxwordsquantity() const {
+  return port2rxwordsquantity_;
+}
+inline void Connection::set_port2rxwordsquantity(::google::protobuf::int32 value) {
+  set_has_port2rxwordsquantity();
+  port2rxwordsquantity_ = value;
 }
 
 

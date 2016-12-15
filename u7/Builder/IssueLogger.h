@@ -236,6 +236,7 @@ namespace Builder
 		void errALC5067(int addrTo, int bit, int value);			// Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
 		void errALC5068(QString appSignalID);						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
 		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+		void wrnALC5070(QString appSignalID);						// Signal '%1' has Little Endian byte order.
 
 		// EQP			Equipment issues						6000-6999
 		//

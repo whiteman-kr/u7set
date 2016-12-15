@@ -79,13 +79,13 @@ void TuningObject::setAnalog(bool value)
 	m_analog = value;
 }
 
-double TuningObject::value() const
+float TuningObject::value() const
 {
 	return m_value;
 
 }
 
-void TuningObject::setValue(double value)
+void TuningObject::setValue(float value)
 {
     if (m_value != value)
     {
@@ -100,66 +100,63 @@ void TuningObject::setValue(double value)
 
 }
 
-double TuningObject::editValue() const
+float TuningObject::editValue() const
 {
 	return m_editValue;
 }
 
-void TuningObject::setEditValue(double value)
+void TuningObject::setEditValue(float value)
 {
-    if (m_editValue != value)
+    m_editValue = value;
+
+    if (m_value == m_editValue)
     {
-        m_editValue = value;
-
-        if (m_value == m_editValue)
-        {
-            m_userModified = false;
-        }
-        else
-        {
-            m_userModified = true;
-        }
-
-        m_redraw = true;
+        m_userModified = false;
     }
+    else
+    {
+        m_userModified = true;
+    }
+
+    m_redraw = true;
 }
 
-double TuningObject::defaultValue() const
+float TuningObject::defaultValue() const
 {
 	return m_defaultValue;
 }
 
-void TuningObject::setDefaultValue(double value)
+void TuningObject::setDefaultValue(float value)
 {
 	m_defaultValue = value;
 }
 
-double TuningObject::lowLimit() const
+float TuningObject::lowLimit() const
 {
 	return m_lowLimit;
 }
 
-void TuningObject::setLowLimit(double value)
+void TuningObject::setLowLimit(float value)
 {
 	m_lowLimit = value;
 }
 
-double TuningObject::highLimit() const
+float TuningObject::highLimit() const
 {
 	return m_highLimit;
 }
 
-void TuningObject::setHighLimit(double value)
+void TuningObject::setHighLimit(float value)
 {
 	m_highLimit = value;
 }
 
-double TuningObject::readLowLimit() const
+float TuningObject::readLowLimit() const
 {
     return m_readLowLimit;
 }
 
-void TuningObject::setReadLowLimit(double value)
+void TuningObject::setReadLowLimit(float value)
 {
     if (m_readLowLimit != value)
     {
@@ -169,12 +166,12 @@ void TuningObject::setReadLowLimit(double value)
     }
 }
 
-double TuningObject::readHighLimit() const
+float TuningObject::readHighLimit() const
 {
     return m_readHighLimit;
 }
 
-void TuningObject::setReadHighLimit(double value)
+void TuningObject::setReadHighLimit(float value)
 {
     if (m_readHighLimit != value)
     {

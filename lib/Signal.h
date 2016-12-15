@@ -388,6 +388,8 @@ public:
 
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size) const;
 
+	QString regValueAddrStr() const;
+
 	friend class DbWorker;
 };
 

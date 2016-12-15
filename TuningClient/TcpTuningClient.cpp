@@ -61,6 +61,8 @@ void TcpTuningClient::onDisconnection()
 {
 	theLogFile.writeMessage(tr("TcpTuningClient: connection failed."));
 
+    theObjects.invalidateSignals();
+
 	emit connectionFailed();
 }
 
@@ -588,7 +590,7 @@ bool TcpTuningClient::tuningSourceInfo(quint64 id, TuningSource& result)
     return true;
 }
 
-void TcpTuningClient::writeTuningSignal(Hash hash, double value)
+void TcpTuningClient::writeTuningSignal(Hash hash, float value)
 {
     QMutexLocker l(&m_mutex);
 

@@ -28,26 +28,26 @@ public:
 	bool analog() const;
 	void setAnalog(bool value);
 
-	double value() const;
-	void setValue(double value);
+    float value() const;
+    void setValue(float value);
 
-	double editValue() const;
-	void setEditValue(double value);
+    float editValue() const;
+    void setEditValue(float value);
 
-	double defaultValue() const;
-	void setDefaultValue(double value);
+    float defaultValue() const;
+    void setDefaultValue(float value);
 
-	double lowLimit() const;
-	void setLowLimit(double value);
+    float lowLimit() const;
+    void setLowLimit(float value);
 
-	double highLimit() const;
-	void setHighLimit(double value);
+    float highLimit() const;
+    void setHighLimit(float value);
 
-    double readLowLimit() const;
-    void setReadLowLimit(double value);
+    float readLowLimit() const;
+    void setReadLowLimit(float value);
 
-    double readHighLimit() const;
-    void setReadHighLimit(double value);
+    float readHighLimit() const;
+    void setReadHighLimit(float value);
 
     int decimalPlaces() const;
 	void setDecimalPlaces(int value);
@@ -78,15 +78,15 @@ private:
 
 	bool m_analog = false;
 
-	double m_defaultValue = 0;
-	double m_value = 0;
-	double m_editValue = 0;
+    float m_defaultValue = 0;
+    float m_value = 0;
+    float m_editValue = 0;
 
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
+    float m_lowLimit = 0;
+    float m_highLimit = 0;
 
-    double m_readLowLimit = 0;
-    double m_readHighLimit = 0;
+    float m_readLowLimit = 0;
+    float m_readHighLimit = 0;
 
     int m_decimalPlaces = 0;
 

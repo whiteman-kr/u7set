@@ -184,6 +184,12 @@ TuningItemModel::~TuningItemModel()
 		delete m_font;
 		m_font = nullptr;
 	}
+
+    if (m_importantFont != nullptr)
+    {
+        delete m_importantFont;
+        m_importantFont = nullptr;
+    }
 }
 
 void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int>& objectsIndexes)
@@ -316,7 +322,19 @@ void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBo
 	{
 		delete m_font;
 	}
-	m_font = new QFont(fontName, fontSize, fontBold);
+    m_font = new QFont(fontName, fontSize);
+    m_font->setBold(fontBold);
+}
+
+void TuningItemModel::setImportantFont(const QString& fontName, int fontSize, bool fontBold)
+{
+    if (m_importantFont != nullptr)
+    {
+        delete m_importantFont;
+    }
+    m_importantFont = new QFont(fontName, fontSize);
+    m_importantFont->setBold(fontBold);
+
 }
 
 void TuningItemModel::addColumn(Columns column)
@@ -383,10 +401,21 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		return foregroundColor(index);
 	}
 
-	if (m_font != nullptr && role == Qt::FontRole)
+    if (role == Qt::FontRole)
 	{
-		return *m_font;
-	}
+        int col = index.column();
+        int displayIndex = m_columnsIndexes[col];
+
+        if (m_importantFont != nullptr && displayIndex == Value)
+        {
+            return *m_importantFont;
+        }
+
+        if (m_font != nullptr)
+        {
+            return *m_font;
+        }
+    }
 
 	if (role == Qt::TextAlignmentRole)
 	{
@@ -644,11 +673,11 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 {
 	bool first = true;
 	bool analog = false;
-	double value = 0.0;
+    float value = 0.0;
 	bool sameValue = true;
 	int decimalPlaces = 0;
-    double lowLimit = 0;
-    double highLimit = 0;
+    float lowLimit = 0;
+    float highLimit = 0;
 
 	for (int i : selectedRows)
 	{
@@ -670,7 +699,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		if (first == true)
 		{
 			analog = o.analog();
-			value = o.editValue();
+            value = o.value();
             lowLimit = o.lowLimit();
             highLimit = o.highLimit();
             first = false;
@@ -692,7 +721,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
                 }
             }
 
-            if (value != o.editValue())
+            if (value != o.value())
 			{
 				sameValue = false;
 			}
@@ -705,10 +734,12 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		return;
 	}
 
+    float newValue = d.value();
+
 	for (int i : selectedRows)
 	{
 		TuningObject& o = m_objects[i];
-		o.setEditValue(d.value());
+        o.setEditValue(newValue);
 	}
 }
 
@@ -985,7 +1016,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 		TuningObject& o = m_objects[row];
 
 		bool ok = false;
-		double v = value.toDouble(&ok);
+        float v = value.toFloat(&ok);
 		if (ok == false)
 		{
 			return false;
@@ -1298,16 +1329,19 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	}
 
-	// Models and data
-	//
-	m_model = new TuningItemModelMain(m_tuningPageIndex, this);
-	//m_model->setFont("Ms Sans Serif", 10, true);
-
 	// Object List
 	//
     m_objectList = new TuningTableView();
 
-	// Button controls
+    QFont f = m_objectList->font();
+
+    // Models and data
+    //
+    m_model = new TuningItemModelMain(m_tuningPageIndex, this);
+    m_model->setFont(f.family(), f.pointSize(), false);
+    m_model->setImportantFont(f.family(), f.pointSize(), true);
+
+     // Button controls
 	//
 	m_maskTypeCombo = new QComboBox();
 	m_maskEdit = new QLineEdit();

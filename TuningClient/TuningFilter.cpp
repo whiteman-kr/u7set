@@ -58,32 +58,32 @@ void TuningFilterValue::setDecimalPlaces(int value)
 	m_decimalPlaces = value;
 }
 
-double TuningFilterValue::value() const
+float TuningFilterValue::value() const
 {
 	return m_value;
 }
 
-void TuningFilterValue::setValue(double value)
+void TuningFilterValue::setValue(float value)
 {
 	m_value = value;
 }
 
-double TuningFilterValue::lowLimit() const
+float TuningFilterValue::lowLimit() const
 {
     return m_lowLimit;
 }
 
-void TuningFilterValue::setLowLimit(double value)
+void TuningFilterValue::setLowLimit(float value)
 {
     m_lowLimit = value;
 }
 
-double TuningFilterValue::highLimit() const
+float TuningFilterValue::highLimit() const
 {
     return m_highLimit;
 }
 
-void TuningFilterValue::setHighLimit(double value)
+void TuningFilterValue::setHighLimit(float value)
 {
     m_highLimit = value;
 }
@@ -279,17 +279,17 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 
 				if (reader.attributes().hasAttribute("Value"))
 				{
-					ofv.setValue(reader.attributes().value("Value").toDouble());
+                    ofv.setValue(reader.attributes().value("Value").toFloat());
 				}
 
                 if (reader.attributes().hasAttribute("LowLimit"))
                 {
-                    ofv.setLowLimit(reader.attributes().value("LowLimit").toDouble());
+                    ofv.setLowLimit(reader.attributes().value("LowLimit").toFloat());
                 }
 
                 if (reader.attributes().hasAttribute("HighLimit"))
                 {
-                    ofv.setHighLimit(reader.attributes().value("HighLimit").toDouble());
+                    ofv.setHighLimit(reader.attributes().value("HighLimit").toFloat());
                 }
 
                 if (reader.attributes().hasAttribute("DecimalPlaces"))
@@ -529,7 +529,7 @@ void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
 	}
 }
 
-void TuningFilter::setValue(Hash hash, double value)
+void TuningFilter::setValue(Hash hash, float value)
 {
 	auto it = m_signalValuesMap.find(hash);
 
