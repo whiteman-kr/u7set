@@ -138,12 +138,12 @@ namespace FotipV2
 		Discrete = 1700
 	};
 
-	union ComparisonResult
+	union AnalogComparisonErrors
 	{
 		struct
 		{
-			quint16	lowBoundOk : 1;
-			quint16	highBoundOk : 1;
+			quint16	lowBoundCheckError : 1;
+			quint16	highBoundChekError : 1;
 		};
 
 		quint16 all;
@@ -198,7 +198,7 @@ namespace FotipV2
 			quint8 data[TX_RX_DATA_SIZE];
 		};
 
-		ComparisonResult cmpResult;
+		AnalogComparisonErrors analogCmpErrors;
 
 		quint8 reserv[DATA_RESERV_SIZE];
 	};

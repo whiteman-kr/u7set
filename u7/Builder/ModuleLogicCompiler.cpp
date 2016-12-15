@@ -2973,6 +2973,7 @@ namespace Builder
 
 				if (bitNoInBitAcc == SIZE_16BIT)
 				{
+					cmd.clearComment();
 					cmd.mov(regBufStartAddr + signalsRegOffset, bitAccAddr);
 					m_code.append(cmd);
 					m_code.newLine();
