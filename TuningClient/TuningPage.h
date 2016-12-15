@@ -67,6 +67,7 @@ public:
     void updateStates();
 
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
+    void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -87,6 +88,7 @@ private:
 	QStringList m_columnsNames;
 
 	QFont* m_font = nullptr;
+    QFont* m_importantFont = nullptr;
 
 protected:
 	std::vector<int> m_columnsIndexes;

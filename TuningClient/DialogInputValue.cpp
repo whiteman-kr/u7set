@@ -26,6 +26,7 @@ DialogInputValue::DialogInputValue(bool analog, double value, bool sameValue, do
         if (sameValue == true)
 		{
 			ui->m_lineEdit->setText(QString::number(value, 'f', decimalPlaces));
+            ui->m_lineEdit->selectAll();
 		}
 	}
 	else

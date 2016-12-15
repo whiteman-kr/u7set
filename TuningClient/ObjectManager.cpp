@@ -189,3 +189,16 @@ bool ObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
 	return !reader.hasError();
 }
 
+void ObjectManager::invalidateSignals()
+{
+    QMutexLocker l(&m_mutex);
+
+    int count = (int)m_objects.size();
+    for (int i = 0; i < count; i++)
+    {
+        TuningObject& object = m_objects[i];
+        object.setValid(false);
+    }
+
+}
+

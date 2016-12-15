@@ -107,21 +107,18 @@ double TuningObject::editValue() const
 
 void TuningObject::setEditValue(double value)
 {
-    if (m_editValue != value)
+    m_editValue = value;
+
+    if (m_value == m_editValue)
     {
-        m_editValue = value;
-
-        if (m_value == m_editValue)
-        {
-            m_userModified = false;
-        }
-        else
-        {
-            m_userModified = true;
-        }
-
-        m_redraw = true;
+        m_userModified = false;
     }
+    else
+    {
+        m_userModified = true;
+    }
+
+    m_redraw = true;
 }
 
 double TuningObject::defaultValue() const
