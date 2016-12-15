@@ -712,6 +712,18 @@ namespace Tuning
 
 		int signalCount = m_tuningSignals.count();
 
+		/*if (frameNo == 1)
+		{
+			int a = 0;
+			a++;
+		}
+
+		if (frameNo == 2)
+		{
+			int a = 0;
+			a++;
+		}*/
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];

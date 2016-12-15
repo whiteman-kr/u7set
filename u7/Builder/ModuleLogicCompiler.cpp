@@ -1705,8 +1705,16 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal &appSignal, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem)
 	{
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
 
@@ -2711,6 +2719,14 @@ namespace Builder
 		if (appSignal == nullptr)
 		{
 			ASSERT_RETURN_FALSE
+		}
+
+		if (appSignal->enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+			return false;
 		}
 
 		quint16 fbType = appFb.opcode();
