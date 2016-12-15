@@ -93,7 +93,7 @@ namespace Tuning
 			struct
 			{
 				qint32 signalIndex = 0;
-				double value = 0;
+				float value = 0;
 			} write;
 		};
 
@@ -103,10 +103,10 @@ namespace Tuning
 			void init(const Signal* s, int index, int tuningRomFraeSizeW);
 
 			bool valid() const { return m_valid; }
-			double value() const { return m_value; }
-			double defaultValue() const { return m_defaultValue; }
-			double readLowBound() const { return m_readLowBound; }
-			double readHighBound() const { return m_readHighBound; }
+			float value() const { return m_value; }
+			float defaultValue() const { return m_defaultValue; }
+			float readLowBound() const { return m_readLowBound; }
+			float readHighBound() const { return m_readHighBound; }
 
 			int offset() const { return m_offset; }
 			int bit() const { return m_bit; }
@@ -114,9 +114,9 @@ namespace Tuning
 
 			FotipV2::DataType type() const { return m_type; }
 
-			void setState(bool valid, double value);
-			void setReadLowBound(double readLowBound);
-			void setReadHighBound(double readHighBound);
+			void setState(bool valid, float value);
+			void setReadLowBound(float readLowBound);
+			void setReadHighBound(float readHighBound);
 
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);
@@ -125,7 +125,7 @@ namespace Tuning
 			// state fields
 			//
 			bool m_valid = false;
-			double m_value = 0;
+			float m_value = 0;
 
 			// static fields
 			//
@@ -140,14 +140,14 @@ namespace Tuning
 
 			// signal properties from RPCT Databse
 			//
-			double m_lowBound = 0;
-			double m_highBoud = 0;
-			double m_defaultValue = 0;
+			float m_lowBound = 0;
+			float m_highBoud = 0;
+			float m_defaultValue = 0;
 
 			// signal properties read from LM
 			//
-			double m_readLowBound = 0;
-			double m_readHighBound = 0;
+			float m_readLowBound = 0;
+			float m_readHighBound = 0;
 		};
 
 	public:
@@ -164,7 +164,7 @@ namespace Tuning
 		void getState(Network::TuningSourceState& tuningSourceState);
 
 		void readSignalState(Network::TuningSignalState& tss);
-		void writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult);
+		void writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult);
 		void applySignalStates();
 
 	signals:

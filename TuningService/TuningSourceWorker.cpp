@@ -98,20 +98,20 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::TuningSignal::setState(bool valid, double value)
+	void TuningSourceWorker::TuningSignal::setState(bool valid, float value)
 	{
 		m_valid = valid;
 		m_value = value;
 	}
 
 
-	void TuningSourceWorker::TuningSignal::setReadLowBound(double readLowBound)
+	void TuningSourceWorker::TuningSignal::setReadLowBound(float readLowBound)
 	{
 		m_readLowBound = readLowBound;
 	}
 
 
-	void TuningSourceWorker::TuningSignal::setReadHighBound(double readHighBound)
+	void TuningSourceWorker::TuningSignal::setReadHighBound(float readHighBound)
 	{
 		m_readHighBound = readHighBound;
 	}
@@ -246,7 +246,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::writeSignalState(Hash signalHash, double value, Network::TuningSignalWriteResult& writeResult)
+	void TuningSourceWorker::writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult)
 	{
 		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
 
@@ -722,7 +722,7 @@ namespace Tuning
 				continue;		// signal is not in this frame
 			}
 
-			double value = 0;
+			float value = 0;
 
 			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningRomFrameSizeW) * sizeof(quint16);
 
