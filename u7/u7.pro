@@ -136,11 +136,9 @@ SOURCES +=\
     ../lib/Types.cpp \
 	Builder/Parser.cpp \
     Connection.cpp \
-    DialogConnectionsEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     Builder/SoftwareCfgGenerator.cpp \
     ../lib/BuildInfo.cpp \
-    Rs232SignalListEditor.cpp \
     Builder/TuningBuilder.cpp \
     Builder/IssueLogger.cpp \
 	Builder/OptoModule.cpp \
@@ -251,12 +249,10 @@ HEADERS  += \
     ../lib/PropertyEditor.h \
 	Builder/Parser.h \
     Connection.h \
-    DialogConnectionsEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
     Builder/SoftwareCfgGenerator.h \
     ../lib/BuildInfo.h \
-    Rs232SignalListEditor.h \
     Builder/TuningBuilder.h \
     Builder/IssueLogger.h \
 	Builder/OptoModule.h \
@@ -320,7 +316,6 @@ FORMS    += \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
-    DialogConnectionsEditor.ui \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
     SchemaPropertiesDialog.ui \

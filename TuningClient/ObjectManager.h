@@ -26,6 +26,7 @@ public:
 
 	bool loadSignals(const QByteArray& data, QString *errorCode);
 
+    void invalidateSignals();
 
 public:
 

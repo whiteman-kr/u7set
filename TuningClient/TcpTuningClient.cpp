@@ -61,6 +61,8 @@ void TcpTuningClient::onDisconnection()
 {
 	theLogFile.writeMessage(tr("TcpTuningClient: connection failed."));
 
+    theObjects.invalidateSignals();
+
 	emit connectionFailed();
 }
 
