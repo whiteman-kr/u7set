@@ -34,14 +34,14 @@ public:
 	int decimalPlaces() const;
 	void setDecimalPlaces(int value);
 
-	double value() const;
-	void setValue(double value);
+    float value() const;
+    void setValue(float value);
 
-    double lowLimit() const;
-    void setLowLimit(double value);
+    float lowLimit() const;
+    void setLowLimit(float value);
 
-    double highLimit() const;
-    void setHighLimit(double value);
+    float highLimit() const;
+    void setHighLimit(float value);
 
     Hash hash() const;
 private:
@@ -51,9 +51,9 @@ private:
 	bool m_useValue = false;
 	bool m_analog = false;
 	int m_decimalPlaces = 0;
-	double m_value = 0;
-    double m_lowLimit = 0;
-    double m_highLimit = 0;
+    float m_value = 0;
+    float m_lowLimit = 0;
+    float m_highLimit = 0;
 
 	Hash m_hash = 0;
 };
@@ -118,7 +118,7 @@ public:
 	std::vector <TuningFilterValue> signalValues() const;
 	void setValues(const std::vector <TuningFilterValue>& values);
 
-	void setValue(Hash hash, double value);
+    void setValue(Hash hash, float value);
 
 	bool valueExists(Hash hash) const;
 	void addValue(const TuningFilterValue& value);

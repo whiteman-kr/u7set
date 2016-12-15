@@ -18,9 +18,9 @@ struct TuningSource
 struct WriteCommand
 {
     Hash m_hash = 0;
-    double m_value = 0;
+    float m_value = 0;
 
-    WriteCommand(Hash hash, double value)
+    WriteCommand(Hash hash, float value)
     {
         m_hash = hash;
         m_value = value;
@@ -41,7 +41,7 @@ public:
 
     bool tuningSourceInfo(quint64 id, TuningSource& result);
 
-    void writeTuningSignal(Hash hash, double value);
+    void writeTuningSignal(Hash hash, float value);
 
     void writeTuningSignals(std::vector<WriteCommand> signalsArray);
 

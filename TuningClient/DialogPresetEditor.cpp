@@ -676,8 +676,8 @@ void DialogPresetEditor::on_m_setValue_clicked()
 	bool first = true;
 	TuningFilterValue firstValue;
 
-    double lowLimit = 0;
-    double highLimit = 0;
+    float lowLimit = 0;
+    float highLimit = 0;
 
 
 	bool sameValue = true;

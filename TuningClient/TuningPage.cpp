@@ -673,11 +673,11 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 {
 	bool first = true;
 	bool analog = false;
-	double value = 0.0;
+    float value = 0.0;
 	bool sameValue = true;
 	int decimalPlaces = 0;
-    double lowLimit = 0;
-    double highLimit = 0;
+    float lowLimit = 0;
+    float highLimit = 0;
 
 	for (int i : selectedRows)
 	{
@@ -734,7 +734,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		return;
 	}
 
-    double newValue = d.value();
+    float newValue = d.value();
 
 	for (int i : selectedRows)
 	{
@@ -1016,7 +1016,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 		TuningObject& o = m_objects[row];
 
 		bool ok = false;
-		double v = value.toDouble(&ok);
+        float v = value.toFloat(&ok);
 		if (ok == false)
 		{
 			return false;
