@@ -780,7 +780,7 @@ namespace Tuning
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
-		reply.fotipFrame.cmpResult.all = reverseUint16(reply.fotipFrame.cmpResult.all);
+		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
 		int a = 0;
 		a++;

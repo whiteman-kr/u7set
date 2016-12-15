@@ -365,6 +365,7 @@ namespace Builder
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
 		bool enableTuning() const { return m_signal->enableTuning(); }
+		int ID() const { return m_signal->ID(); }
 
 		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
 
@@ -629,7 +630,9 @@ namespace Builder
 		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
 
+		bool copyTuningAnalogSignalsToRegBuf();
 		bool copyDiscreteSignalsToRegBuf();
+		bool copyTuningDiscreteSignalsToRegBuf();
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
 		bool setLmAppLANDataSize();
