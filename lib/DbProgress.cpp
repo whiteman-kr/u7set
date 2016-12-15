@@ -58,7 +58,7 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 		if (isGuiThread == true)
 		{
 #ifndef Q_CONSOLE_APP
-			QMessageBox mb;
+			QMessageBox mb(parentWidget);
 			mb.setText(errorMessage());
 			mb.exec();
 #else

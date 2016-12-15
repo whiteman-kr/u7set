@@ -61,6 +61,7 @@ public:
     int mvsFileId() const;
     int dvsFileId() const;
     int mcFileId() const;
+	int connectionsFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -183,6 +184,10 @@ public slots:
     //
 	bool addLogRecord(QSqlDatabase db, QString text);
 
+	bool db_logIn(QSqlDatabase db, QString username, QString password, QString* errorMessage);
+	bool db_logOut(QSqlDatabase db);
+
+	bool db_getCurrentUserId(QSqlDatabase db, int* userId);
     bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
     bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
     int db_getProjectVersion(QSqlDatabase db);
@@ -216,25 +221,31 @@ public:
     void setCurrentProject(const DbProject& project);
 
 private:
+	const QString& sessionKey() const;
+	void setSessionKey(QString value);
+
+private:
     mutable QMutex m_mutex;
 
     QString m_host;
     int m_port;
     QString m_serverUsername;
     QString m_serverPassword;
+	QString m_sessionKey;
     DbProgress* m_progress;
 
     DbUser m_currentUser;
     DbProject m_currentProject;
 
-    int m_afblFileId = -1;	// Application Functional Block Library
-	int m_ufblFileId = -1;	// User Functional Block Libabry
-    int m_alFileId = -1;	// Application Logic
-    int m_hcFileId = -1;	// Hardware Configuration
-    int m_hpFileId = -1;	// Hardware Presets
-    int m_mvsFileId = -1;	// Monitor Visualization Schemas
-    int m_dvsFileId = -1;	// Diagnostics Visualization Schemas
-    int m_mcFileId = -1;	// Module Configuration Template
+	int m_afblFileId = -1;			// Application Functional Block Library
+	int m_ufblFileId = -1;			// User Functional Block Libabry
+	int m_alFileId = -1;			// Application Logic
+	int m_hcFileId = -1;			// Hardware Configuration
+	int m_hpFileId = -1;			// Hardware Presets
+	int m_mvsFileId = -1;			// Monitor Visualization Schemas
+	int m_dvsFileId = -1;			// Diagnostics Visualization Schemas
+	int m_mcFileId = -1;			// Module Configuration Template
+	int m_connectionsFileId = -1;	// Connections
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 

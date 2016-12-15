@@ -24,10 +24,16 @@ namespace Hardware
 		int index() const;
 		void setIndex(int value);
 
-		QString connectionID() const;
-		void setConnectionID(const QString& value);
+        QString connectionID() const;
+        void setConnectionID(const QString& value);
 
-		QString port1EquipmentID() const;
+        QString fileID() const;
+        void setFileID(const QString& value);
+
+        QString fileName() const;
+        void setFileName(const QString& value);
+
+        QString port1EquipmentID() const;
 		void setPort1EquipmentID(const QString& value);
 
 		QString port2EquipmentID() const;
@@ -123,7 +129,9 @@ namespace Hardware
 		{
 			m_index = that.m_index;
 			m_connectionID = that.m_connectionID;
-			m_port1EquipmentID = that.m_port1EquipmentID;
+            m_fileID = that.m_fileID;
+            m_fileName = that.m_fileName;
+            m_port1EquipmentID = that.m_port1EquipmentID;
 			m_port2EquipmentID = that.m_port2EquipmentID;
 
 			m_port1ManualTxWordsQuantity = that.m_port1ManualTxWordsQuantity;
@@ -162,6 +170,9 @@ namespace Hardware
 	private:
 		int m_index = -1;
 		QString m_connectionID;
+
+        QString m_fileName;
+        QString m_fileID;
 
 		int m_port1TxStartAddress = 0;
 		QString m_port1EquipmentID;

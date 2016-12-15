@@ -186,7 +186,8 @@ SOURCES +=\
     Forms/ChangesetDetailsDialog.cpp \
     Forms/CompareDialog.cpp \
     Forms/ComparePropertyObjectDialog.cpp \
-    ../TuningIPEN/TuningIPENDataStorage.cpp
+    ../TuningIPEN/TuningIPENDataStorage.cpp \
+    DialogConnections.cpp
 
 
 HEADERS  += \
@@ -304,7 +305,8 @@ HEADERS  += \
     Forms/CompareDialog.h \
     Forms/ComparePropertyObjectDialog.h \
     ../lib/diff_match_patch.h \
-    ../TuningIPEN/TuningIPENDataStorage.h
+    ../TuningIPEN/TuningIPENDataStorage.h \
+    DialogConnections.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -341,7 +343,6 @@ OTHER_FILES += \
 	../Proto/serialization.proto \
 	Tools/afbschema.xsd \
 	../Proto/proto_compile.sh \
-	month-report.txt \
     DatabaseUpgrade/Upgrade0039.txt
 
 DISTFILES += \

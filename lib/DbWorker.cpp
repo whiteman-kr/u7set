@@ -139,6 +139,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0121.sql", "Upgrade to version 121, get_specific_copy() by time, changes in get_specific_copy by changeset"},
     {":/DatabaseUpgrade/Upgrade0122.sql", "Upgrade to version 122, default IP address computing algoruthm has been fixed in configuration"},
 	{":/DatabaseUpgrade/Upgrade0123.sql", "Upgrade to version 123, changes in function get_latest_signals_by_appsignalids()"},
+	{":/DatabaseUpgrade/Upgrade0124.sql", "Upgrade to version 124, Changing auths functions"},
+	{":/DatabaseUpgrade/Upgrade0125.sql", "Upgrade to version 125, CONNECTIONS system folder was added"},
 };
 
 
@@ -241,14 +243,22 @@ void DbWorker::emitError(QSqlDatabase db, const QSqlError& err, bool addLogRecor
 
 void DbWorker::emitError(QSqlDatabase db, const QString& err, bool addLogRecord)
 {
+	QString errorMessage = err;
+
+	if (sessionKey().isEmpty() == false &&
+		isProjectOpened() == true)
+	{
+		errorMessage.replace(sessionKey(), QLatin1String("xxx"));
+	}
+
 	if (db.isOpen() == true &&
 		addLogRecord == true)
 	{
-		this->addLogRecord(db, err);
+		this->addLogRecord(db, errorMessage);
 	}
 
-	qDebug() << err;
-	m_progress->setErrorMessage(err);
+	qDebug() << errorMessage;
+	m_progress->setErrorMessage(errorMessage);
 }
 
 int DbWorker::databaseVersion()
@@ -312,6 +322,12 @@ int DbWorker::mcFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_mcFileId;
+}
+
+int DbWorker::connectionsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_connectionsFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -733,6 +749,10 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
+	// It is possible to get into this function only if the project database is upgraded to actual state
+	// So, it is possible to use all the latest functions
+	//
+
 	// Check parameters
 	//
 	projectName = projectName.trimmed();
@@ -776,67 +796,49 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		return;
 	}
 
-	// Check username and password
+	// log in
 	//
-	QSqlQuery query(db);
+	QString errorMessage;
 
-	query.prepare("SELECT get_user_id(:username, :password);");
-	query.bindValue(":username", username);
-	query.bindValue(":password", password);
-
-	result = query.exec();
-
+	result = db_logIn(db, username, password, &errorMessage);
 	if (result == false)
 	{
-		emitError(db, query.lastError());
-
-		query.clear();
-		db.close();
-		return;
-	}
-
-	if (query.next() == false)
-	{
-		emitError(db, tr("Internal error. Can't check username and password."));
-
-		query.clear();
-		db.close();
-		return;
-	}
-
-	int userId = query.value(0).toInt();
-
-	if (userId <= 0)
-	{
-		emitError(db, tr("Can't open project. Wrong username or password."));
-
-		query.clear();
+		emitError(db, errorMessage);
 		db.close();
 		return;
 	}
 
 	// Set user data
 	//
+	int userId = -1;
+	result = db_getCurrentUserId(db, &userId);
+
+	if (result == false ||
+		userId == -1)
+	{
+		emitError(db, tr("Can't get current user id ") + db.lastError().text());
+		db.close();
+		return;
+	}
+
 	DbUser user;
 	result = db_getUserData(db, userId, &user);
 
 	if (result == false)
 	{
 		emitError(db, tr("Can't read user data ") + db.lastError().text());
-
-		query.clear();
 		db.close();
 		return;
 	}
 
 	if (user.isDisabled() == true)
 	{
-		emitError(db, tr("User %1 is not allowed to open the project. User is disabled, contact project administartor.").arg(username));
-
-		query.clear();
+		emitError(db, tr("User %1 is not allowed to open the project. User is disabled, contact the project administartor.").arg(username));
 		db.close();
 		return;
 	}
+
+	user.setPassword(password);		// This password will be used to open project for build
 
 	setCurrentUser(user);
 
@@ -869,6 +871,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_mvsFileId = -1;
 	m_dvsFileId = -1;
 	m_mcFileId = -1;
+	m_connectionsFileId = -1;
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -948,6 +951,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == ::ConnectionsFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_connectionsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -960,12 +971,12 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_mvsFileId != -1;
 	result &= m_dvsFileId != -1;
 	result &= m_mcFileId != -1;
+	result &= m_connectionsFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)
 	{
 		emitError(db, tr("Can't get system folder.") + db.lastError().text());
-		query.clear();
 		db.close();
 
 		// Lock is nit necessare, we will crash anyway!
@@ -1015,6 +1026,7 @@ void DbWorker::slot_closeProject()
 	//
 	setCurrentUser(DbUser());
 	setCurrentProject(DbProject());
+	setSessionKey(QString());
 
 	if (QSqlDatabase::contains(projectConnectionName()) == false)
 	{
@@ -1094,7 +1106,6 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 		addLogRecord(db, "About to delete project.");
 
 		result = db_checkUserPassword(db, username, password);
-
 		if (result == false)
 		{
 			emitError(db, "Wrong password.");
@@ -1153,7 +1164,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 
 		if (result == false)
 		{
-			emitError(db, query.lastError());
+			emitError(db, query.lastError(), false);
 			db.close();
 			return;
 		}
@@ -1390,12 +1401,30 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				addLogRecord(db, logMessage);
 			}
 
+			if (projectVersion >= 124)
+			{
+				// Log in to obtaine session key
+				//
+				QString errorMessage;
+				result = db_logIn(db, username, password, &errorMessage);
+
+				if (result == false)
+				{
+					emitError(db, errorMessage, true);
+					return;
+				}
+
+				assert(m_sessionKey.isEmpty() == false);
+			}
+
 			// Upgrade database
 			//
 			for (int i = projectVersion; i < databaseVersion(); i++)
 			{
 				m_progress->setValue(static_cast<int>(100.0 / (databaseVersion() - projectVersion) * (i - projectVersion)));
 
+				// Get  Update
+				//
 				const UpgradeItem& ui = upgradeItems[i];
 
 				// Perform upgade action
@@ -1413,6 +1442,15 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				}
 
 				QString upgradeScript = upgradeFile.readAll();
+
+				// Set Session key
+				//
+				if (i + 1 > 124)		// 'i' is index of update file, +1 to get project version
+				{
+					assert(m_sessionKey.isEmpty() == false);
+
+					upgradeScript.replace("$(SessionKey)", sessionKey());
+				}
 
 				// Run upgrade script
 				//
@@ -1457,6 +1495,24 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 						emitError(QSqlDatabase(), versionQuery.lastError(), false);
 						break;
 					}
+				}
+
+				// Function log_in is created in update 124, after it we need to log in
+				//
+				if (i + 1 == 124)	// 'i' is index of update file, +1 to get project version
+				{
+					// Log in to obtaine session key
+					//
+					QString errorMessage;
+					result = db_logIn(db, username, password, &errorMessage);
+
+					if (result == false)
+					{
+						emitError(db, errorMessage, true);
+						return;
+					}
+
+					assert(m_sessionKey.isEmpty() == false);
 				}
 
 				//qDebug() << "End upgrade item";
@@ -1707,13 +1763,12 @@ void DbWorker::slot_createUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	query.prepare("SELECT * FROM create_user(:userid, :username, :firstname, :lastname, :newpassword, :isadminstrator, :isreadonly, :isdisabled);");
-	query.bindValue(":userid", currentUser().userId());
+	query.prepare("SELECT * FROM user_api.create_user(:sessionkey, :username, :firstname, :lastname, :newpassword, :isreadonly, :isdisabled);");
+	query.bindValue(":sessionkey", sessionKey());
 	query.bindValue(":username", user.username());
 	query.bindValue(":firstname", user.firstName());
 	query.bindValue(":lastname", user.lastName());
 	query.bindValue(":newpassword", user.newPassword());
-	query.bindValue(":isadminstrator", user.isAdminstrator());
 	query.bindValue(":isreadonly", user.isReadonly());
 	query.bindValue(":isdisabled", user.isDisabled());
 
@@ -1729,7 +1784,6 @@ void DbWorker::slot_createUser(DbUser user)
 	{
 		result = query.next();
 		assert(result);
-
 		//int userID = query.value("UserID").toInt();
 	}
 
@@ -1777,8 +1831,8 @@ void DbWorker::slot_updateUser(DbUser user)
 	//
 	QSqlQuery query(db);
 
-	QString requestStr = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8);")
-						 .arg(currentUser().userId())
+	QString requestStr = QString("SELECT * FROM user_api.update_user('%1', '%2', '%3', '%4', '%5', '%6', %7, %8);")
+						 .arg(sessionKey())
 						 .arg(DbWorker::toSqlStr(user.username()))
 						 .arg(DbWorker::toSqlStr(user.firstName()))
 						 .arg(DbWorker::toSqlStr(user.lastName()))
@@ -1801,6 +1855,18 @@ void DbWorker::slot_updateUser(DbUser user)
 		assert(result);
 
 		//int userID = query.value("UserID").toInt();
+	}
+
+	// If update is ok AND user updates iself AND new password was set
+	// update password in m_currentUser, it will be used for opening project on build
+	//
+
+	if (user.newPassword().isEmpty() == false &&
+		currentUser().username() == user.username())
+	{
+		DbUser cu = currentUser();
+		cu.setPassword(user.newPassword());
+		setCurrentUser(cu);
 	}
 
 	return;
@@ -5217,17 +5283,105 @@ bool DbWorker::addLogRecord(QSqlDatabase db, QString text)
 	return true;
 }
 
-bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
+bool DbWorker::db_logIn(QSqlDatabase db, QString username, QString password, QString* errorMessage)
 {
-	if (user == nullptr)
+	if (db.isOpen() == false)
 	{
-		assert(user != nullptr);
+		return false;
+	}
+
+	int projectVersion = db_getProjectVersion(db);
+	if (projectVersion < 124)
+	{
+		// This function does not exists yet
+		//
+		assert(projectVersion >= 124);
 		return false;
 	}
 
 	QSqlQuery query(db);
 
-	bool result = query.exec(QString("SELECT * FROM Users WHERE UserID = %1").arg(userId));
+	query.prepare("SELECT * FROM user_api.log_in(:username, :password);");
+	query.bindValue(":username", username);
+	query.bindValue(":password", password);
+
+	bool result = query.exec();
+	if (result == false)
+	{
+		if (errorMessage != nullptr)
+		{
+			*errorMessage = query.lastError().text();
+		}
+		addLogRecord(db, QString("log_in error: ").arg(query.lastError().text()));
+		return false;
+	}
+
+	if (query.next() == false || query.isNull(0) == true)
+	{
+		return false;
+	}
+
+	QString sessionKey = query.value(0).toString();
+	if (sessionKey.isEmpty() == true)
+	{
+		if (errorMessage != nullptr)
+		{
+			*errorMessage = "LogIn Error, wrong session key";
+		}
+		addLogRecord(db, QString("log_in error: LogIn Error, wrong session key"));
+		return false;
+	}
+
+	setSessionKey(sessionKey);
+
+	addLogRecord(db, QString("Username %1 is logged in").arg(username));
+
+	return true;
+}
+
+bool DbWorker::db_logOut(QSqlDatabase db)
+{
+	if (db.isOpen() == false)
+	{
+		return false;
+	}
+
+	int projectVersion = db_getProjectVersion(db);
+	if (projectVersion < 124)
+	{
+		// This function does not exists yet
+		//
+		assert(projectVersion >= 124);
+		return false;
+	}
+
+	QSqlQuery query(db);
+
+	bool result = query.exec("SELECT * FROM user_api.log_out();");
+	if (result == false)
+	{
+		return false;
+	}
+
+	addLogRecord(db, QString("Username %1 is logged out").arg(currentUser().username()));
+
+	setSessionKey(QString());
+
+	return true;
+}
+
+bool DbWorker::db_getCurrentUserId(QSqlDatabase db, int* userId)
+{
+	if (userId == nullptr)
+	{
+		assert(userId != nullptr);
+		return false;
+	}
+
+	QSqlQuery query(db);
+
+	bool result = query.exec(QString("SELECT * FROM user_api.current_user_id('%1')")
+							 .arg(sessionKey()));
 
 	if (result == false)
 	{
@@ -5247,15 +5401,61 @@ bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 		return false;
 	}
 
-	user->setUserId(userId);
+	*userId = query.value(0).toInt();
 
-	user->setUsername(query.value("Username").toString());
-	user->setFirstName(query.value("FirstName").toString());
-	user->setLastName(query.value("LastName").toString());
-	user->setPassword(query.value("Password").toString());
-	user->setAdministrator(query.value("Administrator").toBool());
-	user->setReadonly(query.value("ReadOnly").toBool());
-	user->setDisabled(query.value("Disabled").toBool());
+	return true;
+}
+
+bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
+{
+	if (user == nullptr)
+	{
+		assert(user != nullptr);
+		return false;
+	}
+
+	QSqlQuery query(db);
+
+	bool result = query.exec(QString("SELECT * FROM user_api.get_user_data('%1', %2)")
+							 .arg(sessionKey())
+							 .arg(userId));
+
+	if (result == false)
+	{
+		qDebug() << Q_FUNC_INFO << query.lastError();
+		return false;
+	}
+
+	if (query.size() != 1)
+	{
+		qDebug() << Q_FUNC_INFO << " " << query.size();
+		return false;
+	}
+
+	if (query.next() == false)
+	{
+		qDebug() << Q_FUNC_INFO << " " << "query.next() == false";
+		return false;
+	}
+
+	int returnedUserId = query.value(0).toInt();
+
+	if (userId != returnedUserId)
+	{
+		emitError(QSqlDatabase(), QString("user_api.get_user_data error, the data was asked for UserID %1 but returned for UserID %2")
+				  .arg(userId)
+				  .arg(returnedUserId));
+		return false;
+	}
+
+	user->setUserId(returnedUserId);
+	user->setUsername(query.value(1).toString());
+	user->setFirstName(query.value(2).toString());
+	user->setLastName(query.value(3).toString());
+	user->setPassword(QString());
+	user->setAdministrator(query.value(4).toBool());
+	user->setReadonly(query.value(5).toBool());
+	user->setDisabled(query.value(6).toBool());
 
 	return true;
 }
@@ -5274,7 +5474,7 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		return false;
 	}
 
-	if (projectVersion < 4)		// Since version 4 database has stored procedure get_user_id
+	if (projectVersion < 4)
 	{
 		// Check by query
 		//
@@ -5295,14 +5495,18 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		{
 			return false;
 		}
+
+		return true;
 	}
 	else
+
+	if (projectVersion < 124)
 	{
 		// Check by store function
 		//
 		QSqlQuery query(db);
 
-		query.prepare("SELECT * FROM check_user_password(:username, :password);");
+		query.prepare("SELECT * FROM public.check_user_password(:username, :password);");
 		query.bindValue(":username", username);
 		query.bindValue(":password", password);
 
@@ -5314,6 +5518,31 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		}
 
 		if (query.next() == false || query.isNull(0) == true)
+		{
+			return false;
+		}
+
+		bool passwordCorrect = query.value(0).toBool();
+		return passwordCorrect;
+	}
+	else
+	{
+		// Check by store function
+		//
+		QSqlQuery query(db);
+
+		query.prepare("SELECT * FROM user_api.check_user_password(:username, :password);");
+		query.bindValue(":username", username);
+		query.bindValue(":password", password);
+
+		bool result = query.exec();
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (query.next() == false ||
+			query.isNull(0) == true)
 		{
 			return false;
 		}
@@ -5617,4 +5846,14 @@ void DbWorker::setCurrentProject(const DbProject& project)
 {
 	QMutexLocker locker(&m_mutex);
 	m_currentProject = project;
+}
+
+const QString& DbWorker::sessionKey() const
+{
+	return m_sessionKey;
+}
+
+void DbWorker::setSessionKey(QString value)
+{
+	m_sessionKey = value;
 }

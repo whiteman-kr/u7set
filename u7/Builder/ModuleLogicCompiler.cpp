@@ -85,6 +85,8 @@ namespace Builder
 
 			if (!prepareAppLogicGeneration()) break;
 
+			if (!buildTuningData()) break;
+
 			if (!buildRS232SignalLists()) break;
 
 			if (!buildOptoPortsSignalLists()) break;
@@ -153,8 +155,6 @@ namespace Builder
 			if (!copyOptoConnectionsTxData()) break;
 
 			if (!copyRS232Signals()) break;
-
-			if (!buildTuningData()) break;
 
 			if (!finishAppLogicCode()) break;
 
@@ -5763,12 +5763,15 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			if (processedSignalsMap.contains(appSignal->appSignalID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
 			{
 				continue;
 			}
 
-			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isAnalog())
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isAnalog() == true &&
+				appSignal->enableTuning() == false)
 			{
 				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
 
@@ -5781,17 +5784,50 @@ namespace Builder
 
 		m_memoryMap.recalculateAddresses();
 
-		// internal discrete registered
+		// internal tuning analog registered
 		//
-
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (processedSignalsMap.contains(appSignal->appSignalID()))
+			if (appSignal == nullptr)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
 			{
 				continue;
 			}
 
-			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isDiscrete())
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isAnalog() == true &&
+				appSignal->enableTuning() == true)
+			{
+				Address16 regAddr = m_memoryMap.addRegTuningAnalogSignal(appSignal->constSignal());
+
+				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
+
+				// ramAddr of tuningable signals is calculated in buildTuningData!
+
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
+			}
+		}
+
+		m_memoryMap.recalculateAddresses();
+
+		// internal discrete registered
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
+			{
+				continue;
+			}
+
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isDiscrete() == true &&
+				appSignal->enableTuning() == false)
 			{
 				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(appSignal->constSignal());
 
@@ -5807,17 +5843,49 @@ namespace Builder
 
 		m_memoryMap.recalculateAddresses();
 
-		// internal analog non-registered
+		// internal tuning discrete registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (processedSignalsMap.contains(appSignal->appSignalID()))
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
 			{
 				continue;
 			}
 
-			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isAnalog())
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == true &&
+				appSignal->isDiscrete() == true &&
+				appSignal->enableTuning() == true)
 			{
+				Address16 regAddr = m_memoryMap.addRegTuningDiscreteSignal(appSignal->constSignal());
+
+				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), regAddr.bit());
+
+				processedSignalsMap.insert(appSignal->appSignalID(), appSignal->appSignalID());
+			}
+		}
+
+		m_memoryMap.recalculateAddresses();
+
+		// internal analog non-registered
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (processedSignalsMap.contains(appSignal->appSignalID()) == true)
+			{
+				continue;
+			}
+
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == false &&
+				appSignal->isAnalog() == true &&
+				appSignal->enableTuning() == false)
+			{
+				// should not reserve memory for non-registered tuningable signals
+				// they placed in TuningInterface memory area
+				//
+				// tuningable signals ramAddr is calculate in buildTuningData: tuningData->buildTuningData();
+
 				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
@@ -5837,8 +5905,16 @@ namespace Builder
 				continue;
 			}
 
-			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isDiscrete())
+			if (appSignal->isInternal() == true &&
+				appSignal->isRegistered() == false &&
+				appSignal->isDiscrete() == true &&
+				appSignal->enableTuning() == false)
 			{
+				// should not reserve memory for non-registered tuningable signals
+				// they placed in TuningInterface memory area
+				//
+				// tuningable signals ramAddr is calculate in buildTuningData: tuningData->buildTuningData();
+
 				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;

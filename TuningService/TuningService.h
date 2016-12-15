@@ -31,6 +31,8 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
+		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
+
 	signals:
 
 	public slots:

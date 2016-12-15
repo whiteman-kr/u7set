@@ -119,6 +119,8 @@ public:
 	//
 	QPoint m_connectionEditorWindowPos;
 	QByteArray m_connectionEditorWindowGeometry;
+    QByteArray m_connectionEditorSplitterState;
+    int m_connectionEditorPeSplitterPosition = 0;
 	int m_connectionEditorSortColumn;
 	Qt::SortOrder m_connectionEditorSortOrder;
 	QStringList m_connectionEditorMasks;

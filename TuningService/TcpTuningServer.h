@@ -41,6 +41,8 @@ namespace Tuning
 		void onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize);
 
 	private:
+		static const char* SCM_CLIENT_ID;
+
 		TuningServiceWorker& m_service;
 
 		Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
@@ -54,6 +56,9 @@ namespace Tuning
 
 		Network::TuningSignalsWrite m_tuningSignalsWriteRequest;
 		Network::TuningSignalsWriteReply m_tuningSignalsWriteReply;
+
+		Network::TuningSignalsApply m_tuningSignalsApplyRequest;
+		Network::TuningSignalsApplyReply m_tuningSignalsApplyReply;
 	};
 
 
