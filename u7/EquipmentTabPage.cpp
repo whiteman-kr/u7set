@@ -5,7 +5,7 @@
 #include "CheckInDialog.h"
 #include "Subsystem.h"
 #include "EquipmentVcsDialog.h"
-#include "DialogConnectionsEditor.h"
+#include "DialogConnections.h"
 #include "DialogChoosePreset.h"
 #include "GlobalMessanger.h"
 #include "SignalsTabPage.h"
@@ -4268,14 +4268,14 @@ void EquipmentTabPage::editConnections()
         return;
     }
 
-	if (theDialogConnectionsEditor == nullptr)
+    if (theDialogConnections == nullptr)
 	{
-		theDialogConnectionsEditor = new DialogConnectionsEditor(dbController(), this);
-		theDialogConnectionsEditor->show();
+        theDialogConnections = new DialogConnections(dbController(), this);
+        theDialogConnections->show();
 	}
 	else
 	{
-		theDialogConnectionsEditor->activateWindow();
+        theDialogConnections->activateWindow();
 	}
 
 }

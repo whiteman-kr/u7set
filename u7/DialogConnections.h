@@ -16,16 +16,34 @@ public:
     ~DialogConnections();
 
 private slots:
-    void onMaskReturnPressed();
-    void onMaskApplyClicked();
-    void sortIndicatorChanged(int column, Qt::SortOrder order);
-    void onConnectionItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+    void onMaskReturn();
+    void onMaskApply();
 
+    void onSortIndicatorChanged(int column, Qt::SortOrder order);
+
+    void onItemSelectionChanged();
+    void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+    void onAdd();
+    void onRemove();
+    void onCheckOut();
+    void onCheckIn();
+    void onUndo();
+    void onExport();
+
+    void onCustomContextMenuRequested(const QPoint &pos);
 
 private:
     void fillConnectionsList();
+    void setPropertyEditorObjects();
     bool continueWithDuplicateCaptions();
     void setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection);
+    void updateButtonsEnableState();
+    void deleteConnections(std::vector<std::shared_ptr<Hardware::Connection>>& connectionsToDelete);
+
+protected:
+    virtual void closeEvent(QCloseEvent* e);
+    virtual void reject();
 
 private:
 
@@ -52,6 +70,14 @@ private:
     DbController *m_dbController = nullptr;
 
     Hardware::ConnectionStorage connections;
+
+    QMenu* m_popupMenu = nullptr;
+    QAction* m_addAction = nullptr;
+    QAction* m_removeAction = nullptr;
+    QAction* m_checkOutAction = nullptr;
+    QAction* m_checkInAction = nullptr;
+    QAction* m_undoAction = nullptr;
+
 
 };
 

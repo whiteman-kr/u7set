@@ -63,7 +63,6 @@ protected slots:
 	void showUfbLibraryTabPage(bool show);
 	void runSubsystemListEditor();
     void runConnectionsEditor();
-	void runRS232SignalListEditor();
     void showAbout();
 	void debug();
 	void startBuild();
@@ -92,7 +91,6 @@ private:
 	QAction* m_ufbLibraryAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
-	QAction* m_rs232SignalListEditorAction = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
