@@ -286,7 +286,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		signal = dynamic_cast<SignalProperties*>(m_objList[i].get())->signal();
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
-		if (signal.appSignalID()[0] != '#')
+		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
 		{
 			signal.setAppSignalID("#" + signal.appSignalID());
 		}

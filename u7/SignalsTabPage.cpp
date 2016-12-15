@@ -134,17 +134,11 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		// LineEdit
 		//
 		case SC_STR_ID:
-		{
-			QLineEdit* le = new QLineEdit(parent);
-			QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
-			le->setValidator(new QRegExpValidator(rx4ID, le));
-			return le;
-		}
 		case SC_EXT_STR_ID:
 		{
 			QLineEdit* le = new QLineEdit(parent);
-			QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
-			le->setValidator(new QRegExpValidator(rx4ExtID, le));
+			QRegExp rx4ID("^[#]?[A-Za-z\\d_]*$");
+			le->setValidator(new QRegExpValidator(rx4ID, le));
 			return le;
 		}
 		case SC_NAME:
@@ -320,8 +314,31 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	{
 		// LineEdit
 		//
-		case SC_STR_ID: if (le) s.setAppSignalID(le->text()); break;
-		case SC_EXT_STR_ID: if (le) s.setCustomAppSignalID(le->text()); break;
+		case SC_STR_ID:
+		{
+			if (le)
+			{
+				QString strId = le->text();
+				if (strId.isEmpty() || strId[0] != '#')
+				{
+					strId = '#' + strId;
+				}
+				s.setAppSignalID(strId);
+			}
+		}
+		break;
+		case SC_EXT_STR_ID:
+		{
+			if (le)
+			{
+				QString strId = le->text();
+				if (!strId.isEmpty() && strId[0] == '#')
+				{
+					strId = strId.mid(1);
+				}
+				s.setCustomAppSignalID(strId);
+			}
+		}
 		case SC_NAME: if (le) s.setCaption(le->text()); break;
 		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text()); break;
 
@@ -1086,7 +1103,7 @@ void SignalsModel::addSignal()
 
 				if (signalCount > 1)
 				{
-					suffix = "_SIG" + QString::number(s);
+					suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
 				}
 
 				if (channelCount > 1)

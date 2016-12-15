@@ -200,19 +200,19 @@ void UserManagementDialog::on_userChanged(const QString & username)
 		ui->isDisabled->setEnabled(m_currentUser.isAdminstrator());
 	}
 
-	if (username == "Administrator" && m_currentUser.username() != "Administrator")
-	{
-		ui->passwordConfirmationEdit->setEnabled(false);
-		ui->newPasswordEdit->setEnabled(false);
-		ui->firstNameEdit->setEnabled(false);
-		ui->lastNameEdit->setEnabled(false);
-	}
-	else
+	if (m_currentUser.username() == "Administrator" || m_currentUser.username() == username)
 	{
 		ui->passwordConfirmationEdit->setEnabled(true);
 		ui->newPasswordEdit->setEnabled(true);
 		ui->firstNameEdit->setEnabled(true);
 		ui->lastNameEdit->setEnabled(true);
+	}
+	else
+	{
+		ui->passwordConfirmationEdit->setEnabled(false);
+		ui->newPasswordEdit->setEnabled(false);
+		ui->firstNameEdit->setEnabled(false);
+		ui->lastNameEdit->setEnabled(false);
 	}
 
 	disableApply();
