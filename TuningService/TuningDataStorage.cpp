@@ -64,7 +64,6 @@ namespace  Tuning
 		{
 			for(Signal* signal : m_tuningSignals[type])
 			{
-				qDebug() << "Delete " << signal->appSignalID();
 				delete signal;
 			}
 
