@@ -5987,6 +5987,12 @@ namespace Builder
 
 		// internal tuning analog registered
 		//
+
+		// RPCT-1352
+		//
+		// make tuningable signals list here !!!
+		//
+
 		for(AppSignal* appSignal : m_appSignals)
 		{
 			if (appSignal == nullptr)
