@@ -375,7 +375,10 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 
 void SignalPropertiesDialog::showError(QString errorString)
 {
-	QMessageBox::warning(this, "Error", errorString);
+	if (!errorString.isEmpty())
+	{
+		QMessageBox::warning(this, "Error", errorString);
+	}
 }
 
 bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
