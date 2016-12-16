@@ -1,6 +1,7 @@
 #include "DialogTuningSourceInfo.h"
 #include "ui_DialogTuningSourceInfo.h"
-#include "TcpTuningClient.h"
+#include "MainWindow.h"
+#include "TuningObjectManager.h"
 
 DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSourceId) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -11,7 +12,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     TuningSource ts;
 
-    if (theTcpTuningClient->tuningSourceInfo(m_tuningSourceId, ts) == true)
+    if (theObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == true)
     {
         setWindowTitle(ts.m_info.equipmentid().c_str());
     }
@@ -144,7 +145,7 @@ void DialogTuningSourceInfo::updateData()
 {
     TuningSource ts;
 
-    if (theTcpTuningClient->tuningSourceInfo(m_tuningSourceId, ts) == false)
+    if (theObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == false)
     {
         return;
     }

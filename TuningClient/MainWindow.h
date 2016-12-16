@@ -5,10 +5,10 @@
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
-#include "TcpTuningClient.h"
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
+#include "TuningObjectManager.h"
 
 
 namespace Ui {
@@ -78,7 +78,7 @@ private:
 extern MainWindow* theMainWindow;
 extern LogFile theLogFile;
 
-extern ObjectManager theObjects;
+extern TuningObjectManager* theObjectManager;
 
 extern TuningFilterStorage theFilters;
 extern TuningFilterStorage theUserFilters;

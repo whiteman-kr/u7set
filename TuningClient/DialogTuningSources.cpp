@@ -1,6 +1,7 @@
 #include "DialogTuningSources.h"
 #include "ui_DialogTuningSources.h"
-#include "TcpTuningClient.h"
+#include "MainWindow.h"
+#include "TuningObjectManager.h"
 #include "DialogTuningSourceInfo.h"
 
 DialogTuningSources::DialogTuningSources(QWidget *parent) :
@@ -31,7 +32,7 @@ DialogTuningSources::DialogTuningSources(QWidget *parent) :
 
     update(false);
 
-    connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -59,7 +60,7 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-	std::vector<TuningSource> tsi = theTcpTuningClient->tuningSourcesInfo();
+    std::vector<TuningSource> tsi = theObjectManager->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
     if (ui->treeWidget->topLevelItemCount() != count)

@@ -130,7 +130,7 @@ void DialogPresetEditor::fillObjectsList()
 	QRegExp rx(mask);
 	rx.setPatternSyntax(QRegExp::Wildcard);
 
-	std::vector<TuningObject> objects = theObjects.objects();
+    std::vector<TuningObject> objects = theObjectManager->objects();
 
 	std::vector<int> objectsIndexes;
 

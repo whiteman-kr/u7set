@@ -97,7 +97,46 @@ void TuningObject::setValue(float value)
 
         m_overflow = m_value > m_highLimit;
     }
+}
 
+void TuningObject::onReceiveValue(float value, bool& writingFailed)
+{
+    setValue(value);
+
+    writingFailed = false;
+
+    if (m_writing == true)
+    {
+        if (value == m_editValue)
+        {
+            // Reset the writing flag
+            //
+            m_writing = false;
+
+            m_writingCounter = 0;
+
+            m_redraw = true;
+        }
+        else
+        {
+            const int MAX_TRY_WRITE_COUNT = 10;
+
+            // Increase the writing counter and reset it if value is wrong in MAX_TRY_WRITE_COUNT tries
+            //
+            m_writingCounter++;
+
+            if (m_writingCounter > MAX_TRY_WRITE_COUNT)
+            {
+                m_redraw = true;
+
+                m_writing = false;
+
+                m_writingCounter = 0;
+
+                writingFailed = true;
+            }
+        }
+    }
 }
 
 float TuningObject::editValue() const
@@ -240,6 +279,23 @@ bool TuningObject::userModified() const
 void TuningObject::clearUserModified()
 {
     m_userModified = false;
+}
+
+bool TuningObject::writing() const
+{
+    return m_writing;
+}
+
+void TuningObject::setWriting(bool value)
+{
+    if (m_writing != value)
+    {
+        m_redraw = true;
+
+        m_writing = value;
+
+        m_writingCounter = 0;
+    }
 }
 
 bool TuningObject::limitsUnbalance() const

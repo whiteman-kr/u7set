@@ -31,6 +31,8 @@ public:
     float value() const;
     void setValue(float value);
 
+    void onReceiveValue(float value, bool &writingFailed);
+
     float editValue() const;
     void setEditValue(float value);
 
@@ -55,7 +57,7 @@ public:
 	bool valid() const;
 	void setValid(bool value);
 
-	bool underflow() const;
+    bool underflow() const;
 
 	bool overflow() const;
 
@@ -65,6 +67,9 @@ public:
 
     bool userModified() const;
     void clearUserModified();
+
+    bool writing() const;
+    void setWriting(bool value);
 
     bool limitsUnbalance() const;
 
@@ -98,6 +103,10 @@ private:
 
     bool m_redraw = false;
     bool m_userModified = false;
+
+    bool m_writing = false;
+    int m_writingCounter = 0;
+
 };
 
 

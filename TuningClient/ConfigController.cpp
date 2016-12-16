@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "ConfigController.h"
 #include "TuningFilter.h"
-#include "ObjectManager.h"
+#include "TuningObjectManager.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
 
@@ -300,7 +300,7 @@ bool ConfigController::getTuningSignals()
 	}
 	else
 	{
-		if (theObjects.loadSignals(data, &errorStr) == false)
+        if (theObjectManager->loadSignals(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
 			theLogFile.writeError(completeErrorMessage);
