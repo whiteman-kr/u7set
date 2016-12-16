@@ -66,7 +66,7 @@ public:
 
     void writeTuningSignal(Hash hash, float value);
 
-    void writeTuningSignals(std::vector<WriteCommand> signalsArray);
+    void writeModifiedTuningObjects(std::vector<TuningObject>& objects);
 
 private:
 

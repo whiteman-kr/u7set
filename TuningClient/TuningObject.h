@@ -34,7 +34,9 @@ public:
     void onReceiveValue(float value, bool &writingFailed);
 
     float editValue() const;
-    void setEditValue(float value);
+    void onEditValue(float value);
+
+    void onSendValue(float value);
 
     float defaultValue() const;
     void setDefaultValue(float value);

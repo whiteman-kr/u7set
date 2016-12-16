@@ -144,7 +144,7 @@ float TuningObject::editValue() const
 	return m_editValue;
 }
 
-void TuningObject::setEditValue(float value)
+void TuningObject::onEditValue(float value)
 {
     m_editValue = value;
 
@@ -158,6 +158,11 @@ void TuningObject::setEditValue(float value)
     }
 
     m_redraw = true;
+}
+
+void TuningObject::onSendValue(float value)
+{
+    m_editValue = value;
 }
 
 float TuningObject::defaultValue() const

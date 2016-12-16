@@ -747,7 +747,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 	for (int i : selectedRows)
 	{
 		TuningObject& o = m_objects[i];
-        o.setEditValue(newValue);
+        o.onEditValue(newValue);
 	}
 }
 
@@ -766,11 +766,11 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 		{
 			if (o.editValue() == 0)
 			{
-				o.setEditValue(1);
+                o.onEditValue(1);
 			}
 			else
 			{
-				o.setEditValue(0);
+                o.onEditValue(0);
 			}
 		}
 	}
@@ -1030,7 +1030,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 			return false;
 		}
 
-		o.setEditValue(v);
+        o.onEditValue(v);
 		return true;
 	}
 
@@ -1040,12 +1040,12 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			o.setEditValue(1.0);
+            o.onEditValue(1.0);
 			return true;
 		}
 		else
 		{
-			o.setEditValue(0.0);
+            o.onEditValue(0.0);
 			return true;
 		}
     }
@@ -1063,7 +1063,7 @@ void TuningItemModelMain::slot_setDefaults()
 
 		if (o.analog() == true)
 		{
-			o.setEditValue(o.defaultValue());
+            o.onEditValue(o.defaultValue());
 		}
 	}
 }
@@ -1079,7 +1079,7 @@ void TuningItemModelMain::slot_setOn()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(1);
+            o.onEditValue(1);
 		}
 	}
 }
@@ -1095,7 +1095,7 @@ void TuningItemModelMain::slot_setOff()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(0);
+            o.onEditValue(0);
 		}
 	}
 }
@@ -1104,7 +1104,7 @@ void TuningItemModelMain::slot_undo()
 {
 	for (TuningObject& o : m_objects)
 	{
-		o.setEditValue(o.value());
+        o.onEditValue(o.value());
 	}
 }
 
@@ -1136,8 +1136,6 @@ void TuningItemModelMain::slot_Apply()
 	{
 		return;
 	}
-
-    std::vector<WriteCommand> signalsArray;
 
 	int listCount = 0;
 
@@ -1178,23 +1176,7 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
-    for (TuningObject& o : m_objects)
-    {
-        if (o.userModified() == false)
-        {
-            continue;
-        }
-
-        signalsArray.push_back(WriteCommand(o.appSignalHash(), o.editValue()));
-
-        o.clearUserModified();
-
-        o.setWriting(true);
-   }
-
-    theObjectManager->writeTuningSignals(signalsArray);
-
-
+    theObjectManager->writeModifiedTuningObjects(m_objects);
 }
 
 

@@ -810,36 +810,45 @@ void TuningObjectManager::writeTuningSignal(Hash hash, float value)
     l.unlock();
 }
 
-void TuningObjectManager::writeTuningSignals(std::vector<WriteCommand> signalsArray)
+void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& objects)
 {
-    // set edit values and writing flags to writing objects
-
     QMutexLocker l(&m_mutex);
 
-    for (WriteCommand& c : signalsArray)
+    for (TuningObject& editObject : objects)
     {
-        TuningObject* o = objectPtrByHash(c.m_hash);
-        if (o == nullptr)
+        if (editObject.userModified() == false)
         {
-            assert(o);
             continue;
         }
 
-        o->setEditValue(c.m_value);
+        // push command to the queue
+        //
 
-        o->setWriting(true);
-    }
+        WriteCommand cmd(editObject.appSignalHash(), editObject.editValue());
+        m_writeQueue.push(cmd);
 
-    // push all commands to write queue
+        // set edit value and writing flags to edit object
+        //
 
-    for (WriteCommand& c : signalsArray)
-    {
-        m_writeQueue.push(c);
+        editObject.clearUserModified();
+        editObject.setWriting(true);
+
+        // set edit value and writing flags to base object
+        //
+
+        TuningObject* baseObject = objectPtrByHash(cmd.m_hash);
+        if (baseObject == nullptr)
+        {
+            assert(baseObject);
+            continue;
+        }
+
+        baseObject->onSendValue(cmd.m_value);
+        baseObject->setWriting(true);
+
     }
 
     l.unlock();
-
-
 }
 
 QString TuningObjectManager::networkErrorStr(NetworkError error)
