@@ -278,7 +278,7 @@ void TuningItemModel::updateStates()
 		return;
 	}
 
-    QMutexLocker l(&theObjects.m_mutex);
+    QMutexLocker l(&theObjectManager->m_mutex);
 
     int count = (int)m_objects.size();
 
@@ -286,7 +286,7 @@ void TuningItemModel::updateStates()
 	{
         TuningObject& pageObject = m_objects[i];
 
-        TuningObject* baseObject = theObjects.objectPtrByHash(pageObject.appSignalHash());
+        TuningObject* baseObject = theObjectManager->objectPtrByHash(pageObject.appSignalHash());
 
         if (baseObject == nullptr)
         {
@@ -296,9 +296,9 @@ void TuningItemModel::updateStates()
 
         pageObject.setReadLowLimit(baseObject->readLowLimit());
         pageObject.setReadHighLimit(baseObject->readHighLimit());
-        pageObject.setValid(baseObject->valid());
         pageObject.setValue(baseObject->value());
-
+        pageObject.setValid(baseObject->valid());
+        pageObject.setWriting(baseObject->writing());
 	}
 
     l.unlock();
@@ -497,29 +497,37 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
 
-                    if (o.userModified() == false)
-					{
-						return valueString;
-					}
-					else
-					{
-						QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
-						return tr("%1 => %2").arg(valueString).arg(editValueString);
-					}
+                    if (o.userModified() == true)
+                    {
+                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        return tr("%1 => %2").arg(valueString).arg(editValueString);
+                    }
+
+                    if (o.writing() == true)
+                    {
+                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        return tr("Writing %1").arg(editValueString);
+                    }
+
+                    return valueString;
 				}
 				else
 				{
 					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-                    if (o.userModified() == false)
-					{
-						return valueString;
-					}
-					else
-					{
-						QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
-						return tr("%1 => %2").arg(valueString).arg(editValueString);
-					}
+                    if (o.userModified() == true)
+                    {
+                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+                        return tr("%1 => %2").arg(valueString).arg(editValueString);
+                    }
+
+                    if (o.writing() == true)
+                    {
+                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+                        return tr("Writing %1").arg(editValueString);
+                    }
+
+                    return valueString;
 				}
 			}
 			else
@@ -739,7 +747,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 	for (int i : selectedRows)
 	{
 		TuningObject& o = m_objects[i];
-        o.setEditValue(newValue);
+        o.onEditValue(newValue);
 	}
 }
 
@@ -758,11 +766,11 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 		{
 			if (o.editValue() == 0)
 			{
-				o.setEditValue(1);
+                o.onEditValue(1);
 			}
 			else
 			{
-				o.setEditValue(0);
+                o.onEditValue(0);
 			}
 		}
 	}
@@ -1022,7 +1030,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 			return false;
 		}
 
-		o.setEditValue(v);
+        o.onEditValue(v);
 		return true;
 	}
 
@@ -1032,12 +1040,12 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			o.setEditValue(1.0);
+            o.onEditValue(1.0);
 			return true;
 		}
 		else
 		{
-			o.setEditValue(0.0);
+            o.onEditValue(0.0);
 			return true;
 		}
     }
@@ -1055,7 +1063,7 @@ void TuningItemModelMain::slot_setDefaults()
 
 		if (o.analog() == true)
 		{
-			o.setEditValue(o.defaultValue());
+            o.onEditValue(o.defaultValue());
 		}
 	}
 }
@@ -1071,7 +1079,7 @@ void TuningItemModelMain::slot_setOn()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(1);
+            o.onEditValue(1);
 		}
 	}
 }
@@ -1087,7 +1095,7 @@ void TuningItemModelMain::slot_setOff()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(0);
+            o.onEditValue(0);
 		}
 	}
 }
@@ -1096,7 +1104,7 @@ void TuningItemModelMain::slot_undo()
 {
 	for (TuningObject& o : m_objects)
 	{
-		o.setEditValue(o.value());
+        o.onEditValue(o.value());
 	}
 }
 
@@ -1128,8 +1136,6 @@ void TuningItemModelMain::slot_Apply()
 	{
 		return;
 	}
-
-    std::vector<WriteCommand> signalsArray;
 
 	int listCount = 0;
 
@@ -1170,19 +1176,7 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
-    for (TuningObject& o : m_objects)
-    {
-        if (o.userModified() == false)
-        {
-            continue;
-        }
-
-        signalsArray.push_back(WriteCommand(o.appSignalHash(), o.editValue()));
-
-        o.clearUserModified(); // temporary solution!!!!!
-    }
-
-    theTcpTuningClient->writeTuningSignals(signalsArray);
+    theObjectManager->writeModifiedTuningObjects(m_objects);
 }
 
 
@@ -1459,7 +1453,7 @@ void TuningPage::fillObjectsList()
 {
 	std::vector<int> objectsIndexes;
 
-	std::vector<TuningObject> objects = theObjects.objects();
+    std::vector<TuningObject> objects = theObjectManager->objects();
 
 	for (int i = 0; i < objects.size(); i++)
 	{

@@ -38,13 +38,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	// TcpSignalClient
 	//
 	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-	theTcpTuningClient = new TcpTuningClient(&m_configController, fakeAddress, fakeAddress);
+    theObjectManager = new TuningObjectManager(&m_configController, fakeAddress, fakeAddress);
 
-	m_tcpClientThread = new SimpleThread(theTcpTuningClient);
+    m_tcpClientThread = new SimpleThread(theObjectManager);
 	m_tcpClientThread->start();
 
-	connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
-	connect(theTcpTuningClient, &TcpTuningClient::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
+    connect(theObjectManager, &TuningObjectManager::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
 
 	QString errorCode;
 	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
@@ -191,13 +191,13 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-	if  (event->timerId() == m_updateStatusBarTimerId && theTcpTuningClient != nullptr)
+    if  (event->timerId() == m_updateStatusBarTimerId && theObjectManager != nullptr)
 	{
 		assert(m_statusBarConnectionState);
 		assert(m_statusBarConnectionStatistics);
 
 		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState tuningClientState =  theTcpTuningClient->getConnectionState();
+        Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
 
 		// State
 		//
@@ -275,7 +275,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		emit signalsUpdated();
 	}
 
-	theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjects.tuningSourcesEquipmentIds());
+    theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
 	createWorkspace();
 
@@ -353,7 +353,7 @@ void MainWindow::showTuningSources()
 MainWindow* theMainWindow = nullptr;
 LogFile theLogFile("TuningClient", ".");
 
-ObjectManager theObjects;
+TuningObjectManager* theObjectManager = nullptr;
 
 TuningFilterStorage theFilters;
 TuningFilterStorage theUserFilters;

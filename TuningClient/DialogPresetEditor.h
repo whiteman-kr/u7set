@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "ObjectManager.h"
+#include "TuningObjectManager.h"
 #include "TuningObject.h"
 #include "TuningPage.h"
 
