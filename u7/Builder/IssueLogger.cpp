@@ -3192,6 +3192,27 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5070
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Signal '%1' has Little Endian byte order.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Specified signal has Little Endian byte order.
+	///
+	void IssueLogger::wrnALC5070(QString appSignalID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5070,
+				  QString(tr("Signal '%1' has Little Endian byte order.")).
+					arg(appSignalID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

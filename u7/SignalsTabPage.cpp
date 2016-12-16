@@ -128,6 +128,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	}
 
 	m_model->loadSignal(m_model->key(row), false);
+	m_model->checkoutSignal(row);
 
 	switch (col)
 	{
@@ -600,7 +601,11 @@ void SignalsModel::showError(const ObjectState& state) const
 {
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
-		QMessageBox::critical(m_parentWindow, tr("Error"), errorMessage(state));
+		QString message = errorMessage(state);
+		if (!message.isEmpty())
+		{
+			QMessageBox::critical(m_parentWindow, tr("Error"), errorMessage(state));
+		}
 	}
 }
 
@@ -834,7 +839,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 				assert(false);
 		}
 
-		emit dataChanged(index, index, QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+		loadSignal(signal.ID());
 	}
 	else
 	{
@@ -1147,7 +1152,10 @@ void SignalsModel::addSignal()
 
 void SignalsModel::showError(QString message)
 {
-	QMessageBox::critical(m_parentWindow, tr("Error"), message);
+	if (!message.isEmpty())
+	{
+		QMessageBox::critical(m_parentWindow, tr("Error"), message);
+	}
 }
 
 bool SignalsModel::editSignals(QVector<int> ids)
@@ -1199,6 +1207,8 @@ void SignalsModel::saveSignal(Signal& signal)
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		showError(state);
+		loadSignal(signal.ID());
+		return;
 	}
 	int row = m_signalSet.keyIndex(signal.ID());
 	emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1));
@@ -2099,7 +2109,10 @@ void SignalsTabPage::changeColumnVisibility(QAction* action)
 
 void SignalsTabPage::showError(QString message)
 {
-	QMessageBox::warning(this, "Error", message);
+	if (!message.isEmpty())
+	{
+		QMessageBox::warning(this, "Error", message);
+	}
 }
 
 void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compareData)

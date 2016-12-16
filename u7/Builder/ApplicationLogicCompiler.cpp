@@ -239,7 +239,14 @@ namespace Builder
 
 			// check other signal properties
 			//
-			if (s.isDiscrete())
+			if (s.byteOrder() != E::ByteOrder::BigEndian)
+			{
+				// Signal '%1' has Little Endian byte order.
+				//
+				m_log->wrnALC5070(s.appSignalID());
+			}
+
+			if (s.isDiscrete() == true)
 			{
 				if (s.dataSize() != 1)
 				{
