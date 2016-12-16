@@ -1813,6 +1813,14 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
 	{
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		if (appSignal.appSignalID() == srcSignal.appSignalID())
 		{
 			return true;
@@ -2448,6 +2456,14 @@ namespace Builder
 			// Receiver is linked to unknown opto connection '%1'.
 			//
 			m_log->errALC5025(receiver.connectionId(), receiver.guid());
+			return false;
+		}
+
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
 			return false;
 		}
 
