@@ -6,7 +6,9 @@
 
 namespace Hardware
 {
-	class Connection : public PropertyObject
+	class Connection :
+			public PropertyObject,
+			public Proto::ObjectSerialization<Connection>
 	{
 		Q_OBJECT
 
@@ -14,6 +16,27 @@ namespace Hardware
 		Connection();
 		Connection(const Connection& that);
 
+		// Serialization
+		//
+	public:
+		friend Proto::ObjectSerialization<Connection>;	// for call CreateObject from Proto::ObjectSerialization
+
+//		static std::shared_ptr<DeviceObject> fromDbFile(const DbFile& file);
+//		static std::vector<std::shared_ptr<DeviceObject>> fromDbFiles(std::vector<std::shared_ptr<DbFile>> files);
+
+	protected:
+		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
+		//
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		// Use this function only while serialization, as when object is created is not fully initialized
+		// and must be read before use
+		//
+		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope& message);
+
+	public:
         bool save(DbController *db);
         bool load(const QByteArray& data);
         bool loadFromXml(QXmlStreamReader& reader);
@@ -27,9 +50,11 @@ namespace Hardware
         // Properties
 		//
 	public:
-
 		int index() const;
 		void setIndex(int value);
+
+		const DbFileInfo& fileInfo() const;
+		void setFileInfo(const DbFileInfo& value);
 
         QString connectionID() const;
         void setConnectionID(const QString& value);
@@ -175,10 +200,11 @@ namespace Hardware
 		}
 
 	private:
-		int m_index = -1;
+		int m_index = -1;					// !!!!!!!!!!!!!!!!!!!!!! Delete Index
 		QString m_connectionID;
 
-        QString m_fileName;
+		DbFileInfo m_fileInfo;
+		QString m_fileName;					// !!!!!!!!!!!!!!!!!!!!!!!!!1 Add DbFileInfo
         int m_fileID = -1;
 
 		int m_port1TxStartAddress = 0;
@@ -211,7 +237,7 @@ namespace Hardware
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
 
-        QStringList m_signalList;
+		QStringList m_signalList;						// !!!!!!!!!!!!!!!!!!!! Delete It
     };
 
 
@@ -220,7 +246,6 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-
 		ConnectionStorage();
 
 		void add(std::shared_ptr<Connection> connection);

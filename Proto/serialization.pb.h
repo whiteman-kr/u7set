@@ -791,6 +791,15 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::Configuration* release_configuration();
   inline void set_allocated_configuration(::Proto::Configuration* configuration);
 
+  // optional .Proto.Connection connection = 104;
+  inline bool has_connection() const;
+  inline void clear_connection();
+  static const int kConnectionFieldNumber = 104;
+  inline const ::Proto::Connection& connection() const;
+  inline ::Proto::Connection* mutable_connection();
+  inline ::Proto::Connection* release_connection();
+  inline void set_allocated_connection(::Proto::Connection* connection);
+
   // @@protoc_insertion_point(class_scope:Proto.Envelope)
  private:
   inline void set_has_classnamehash();
@@ -807,6 +816,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_fblelement();
   inline void set_has_configuration();
   inline void clear_has_configuration();
+  inline void set_has_connection();
+  inline void clear_has_connection();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -816,10 +827,11 @@ class Envelope : public ::google::protobuf::Message {
   ::Proto::SchemaLayer* schemalayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
+  ::Proto::Connection* connection_;
   ::google::protobuf::uint32 classnamehash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -8584,6 +8596,44 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
     set_has_configuration();
   } else {
     clear_has_configuration();
+  }
+}
+
+// optional .Proto.Connection connection = 104;
+inline bool Envelope::has_connection() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Envelope::set_has_connection() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Envelope::clear_has_connection() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Envelope::clear_connection() {
+  if (connection_ != NULL) connection_->::Proto::Connection::Clear();
+  clear_has_connection();
+}
+inline const ::Proto::Connection& Envelope::connection() const {
+  return connection_ != NULL ? *connection_ : *default_instance_->connection_;
+}
+inline ::Proto::Connection* Envelope::mutable_connection() {
+  set_has_connection();
+  if (connection_ == NULL) connection_ = new ::Proto::Connection;
+  return connection_;
+}
+inline ::Proto::Connection* Envelope::release_connection() {
+  clear_has_connection();
+  ::Proto::Connection* temp = connection_;
+  connection_ = NULL;
+  return temp;
+}
+inline void Envelope::set_allocated_connection(::Proto::Connection* connection) {
+  delete connection_;
+  connection_ = connection;
+  if (connection) {
+    set_has_connection();
+  } else {
+    clear_has_connection();
   }
 }
 
