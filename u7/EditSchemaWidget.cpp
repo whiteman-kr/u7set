@@ -1296,6 +1296,15 @@ void EditSchemaView::drawGrid(QPainter* p)
 {
 	assert(p);
 
+	if (m_mouseSelectionStartPoint.isNull() == false &&
+		m_mouseSelectionEndPoint.isNull() == false)
+	{
+		// Don't draw grid if selection now,
+		// just speed optimization
+		//
+		return;
+	}
+
 	auto unit = schema()->unit();
 
 	double frameWidth = schema()->docWidth();
@@ -1336,8 +1345,8 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	QRegion visiblePart = visibleRegion();
 
-	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
-	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
+	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiX();
+	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiY();
 
 	for (int v = 0; v < vertGridCount; v++)
 	{
@@ -2901,7 +2910,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		editSchemaView()->clearSelection();
 	}
 
-	// Выделение элемента или области
+	// Selection item or area
 	//
 //	editSchemaView()->m_rubberBand->show();
 //	editSchemaView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));

@@ -131,13 +131,20 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p->device()->logicalDpiX(), zoom());
-		int heightInPixel = schema()->GetDocumentHeight(p->device()->logicalDpiY(), zoom());
+		int widthInPixel = schema()->GetDocumentWidth(p->device()->physicalDpiX(), zoom());
+		int heightInPixel = schema()->GetDocumentHeight(p->device()->physicalDpiY(), zoom());
 
 		// Clear device
 		//
 		p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-		p->setRenderHint(QPainter::Antialiasing);
+
+		if (p->device()->physicalDpiX() <= 96)
+		{
+			// If higher then 96 then most likely it is 4K display, no need to use Antialiasing
+			// Note, that font will be antialiased in anyway
+			//
+			p->setRenderHint(QPainter::Antialiasing);
+		}
 
 		// Ajust QPainter
 		//
@@ -160,8 +167,8 @@ namespace VFrame30
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(
-				(double)painter->device()->logicalDpiX() * zoom / 100.0,
-				(double)painter->device()->logicalDpiY() * zoom / 100.0);
+				(double)painter->device()->physicalDpiX() * zoom / 100.0,
+				(double)painter->device()->physicalDpiY() * zoom / 100.0);
 		}
 		else
 		{
@@ -215,8 +222,8 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
-		int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
+		int widthInPixel = schema()->GetDocumentWidth(p.device()->physicalDpiX(), 100.0);		// Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(p.device()->physicalDpiY(), 100.0);		// Export 100% zoom
 
 		// Clear device
 		//
@@ -258,8 +265,8 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
-			dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
+			dpiX = dpiX == 0 ? physicalDpiX() : dpiX;
+			dpiY = dpiY == 0 ? physicalDpiY() : dpiY;
 
 			pDestDocPos->setX(x / (dpiX * (m_zoom / 100.0)));
 			pDestDocPos->setY(y / (dpiY * (m_zoom / 100.0)));
@@ -285,8 +292,8 @@ namespace VFrame30
 
 		// Calc DPI
 		//
-		dpiX = (dpiX == 0) ? logicalDpiX() : dpiX;
-		dpiY = (dpiY == 0) ? logicalDpiY() : dpiY;
+		dpiX = (dpiX == 0) ? physicalDpiX() : dpiX;
+		dpiY = (dpiY == 0) ? physicalDpiY() : dpiY;
 
 		// resize widget
 		//

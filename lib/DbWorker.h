@@ -32,7 +32,7 @@ public:
     DbWorker(DbProgress* progress);
 
 protected:
-    QString postgresConnectionName() const;
+	QString postgresConnectionName() const;
     QString projectConnectionName() const;
 
     bool checkDatabaseFeatures(QSqlDatabase db);
