@@ -16,6 +16,10 @@ namespace Hardware
     //
     Connection::Connection()
     {
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, "ConnectionID", true, Connection::connectionID, Connection::setConnectionID);
         propConnId->setValidator("^[A-Za-z0-9_]+$");
 
@@ -90,6 +94,95 @@ namespace Hardware
     {
         *this = that;
     }
+
+	bool Connection::SaveData(Proto::Envelope* message) const
+	{
+		const std::string& className = this->metaObject()->className();
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
+
+		message->set_classnamehash(classnamehash);
+
+		::Proto::Connection* mutableConnection = message->mutable_connection();
+
+		mutableConnection->set_index(m_index);
+		mutableConnection->set_connectionid(m_connectionID.toUtf8());
+		mutableConnection->set_port1equipmentid(m_port1EquipmentID.toUtf8());
+		mutableConnection->set_port2equipmentid(m_port2EquipmentID.toUtf8());
+		mutableConnection->set_port1rawdatadescription(m_port1RawDataDescription.toUtf8());
+		mutableConnection->set_port2rawdatadescription(m_port2RawDataDescription.toUtf8());
+
+		mutableConnection->set_serialmode(static_cast<int>(serialMode()));
+		mutableConnection->set_mode(static_cast<int>(mode()));
+		mutableConnection->set_enableserial(m_enableSerial);
+		mutableConnection->set_enableduplex(m_enableDuplex);
+		mutableConnection->set_manualsettings(m_manualSettings);
+		mutableConnection->set_disabledataid(m_disableDataID);
+		mutableConnection->set_generatevhdfile(m_generateVHDFile);
+
+		mutableConnection->set_port1txstartaddress(m_port1TxStartAddress);
+		mutableConnection->set_port1txwordsquantity(m_port1ManualTxWordsQuantity);
+		mutableConnection->set_port1rxwordsquantity(m_port1ManualRxWordsQuantity);
+
+		mutableConnection->set_port2txstartaddress(m_port2TxStartAddress);
+		mutableConnection->set_port2txwordsquantity(m_port2ManualTxWordsQuantity);
+		mutableConnection->set_port2rxwordsquantity(m_port2ManualRxWordsQuantity);
+
+		return true;
+	}
+
+	bool Connection::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_connection() == false)
+		{
+			assert(message.has_connection());
+			return false;
+		}
+
+		const ::Proto::Connection& connection = message.connection();
+
+		m_index = connection.index();
+
+		m_connectionID = connection.connectionid().c_str();
+		m_port1EquipmentID = connection.port1equipmentid().c_str();
+		m_port2EquipmentID = connection.port2equipmentid().c_str();
+		m_port1RawDataDescription = connection.port1rawdatadescription().c_str();
+		m_port2RawDataDescription = connection.port2rawdatadescription().c_str();
+
+		m_serialMode = static_cast<OptoPort::SerialMode>(connection.serialmode());
+		m_mode = static_cast<OptoPort::Mode>(connection.mode());
+		m_enableSerial = connection.enableserial();
+		m_enableDuplex = connection.enableduplex();
+		m_manualSettings = connection.manualsettings();
+		m_disableDataID = connection.disabledataid();
+		m_generateVHDFile = connection.generatevhdfile();
+
+		m_port1TxStartAddress = connection.port1txstartaddress();
+		m_port1ManualTxWordsQuantity = connection.port1txwordsquantity();
+		m_port1ManualRxWordsQuantity = connection.port1rxwordsquantity();
+
+		m_port2TxStartAddress = connection.port2txstartaddress();
+		m_port2ManualTxWordsQuantity = connection.port2txwordsquantity();
+		m_port2ManualRxWordsQuantity = connection.port2rxwordsquantity();
+
+		return true;
+	}
+
+	std::shared_ptr<Connection> Connection::CreateObject(const Proto::Envelope& message)
+	{
+		// This func can create only one instance
+		//
+		if (message.has_connection() == false)
+		{
+			assert(message.has_connection());
+			return nullptr;
+		}
+
+		std::shared_ptr<Connection> connection = std::make_shared<Connection>();
+
+		connection->LoadData(message);
+
+		return connection;
+	}
 
     bool Connection::save(DbController *db)
     {
@@ -570,6 +663,16 @@ namespace Hardware
         m_index = value;
     }
 
+	const DbFileInfo& Connection::fileInfo() const
+	{
+		return m_fileInfo;
+	}
+
+	void Connection::setFileInfo(const DbFileInfo& value)
+	{
+		m_fileInfo = value;
+	}
+
 	QString Connection::connectionID() const
     {
 		return m_connectionID;
@@ -1027,7 +1130,7 @@ namespace Hardware
     }
 
 
-    bool ConnectionStorage::load(DbController *db, QString& errorCode)
+	bool ConnectionStorage::load(DbController *db, QString& errorCode)			// !!!!!!!!!!!!!!!1 Add widget parent
     {
         if (db == nullptr)
         {
@@ -1040,33 +1143,28 @@ namespace Hardware
         m_connections.clear();
 
         std::vector<DbFileInfo> fileList;
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), true, nullptr);
+		bool ok = db->getFileList(&fileList, db->connectionsFileId(), ::OclFileExtension, true, nullptr);		// !!!!!!!!!!!!!!!1 Add widget parent
         if (ok == false)
         {
             return true;
         }
 
-        for (DbFileInfo& dbfi : fileList)
+		for (DbFileInfo& fi : fileList)
         {
             std::shared_ptr<DbFile> file = nullptr;
-            ok = db->getLatestVersion(dbfi, &file, nullptr);
+
+			ok = db->getLatestVersion(fi, &file, nullptr);			// !!!!!!!!!!!!!!!1 Add widget parent
             if (ok == false || file == nullptr)
             {
-                errorCode = tr("Failed to load file %1").arg(dbfi.fileName());
                 return false;
             }
 
-            std::shared_ptr<Hardware::Connection> s = std::make_shared<Hardware::Connection>();
+			std::shared_ptr<Hardware::Connection> c = Hardware::Connection::Create(file->data());
 
-            QByteArray data;
-            file->swapData(data);
-
-            if (s->load(data) == true)
+			if (c != nullptr)
             {
-                s->setFileName(dbfi.fileName());
-                s->setFileID(dbfi.fileId());
-
-                m_connections.push_back(s);
+				c->setFileInfo(*file);
+				m_connections.push_back(c);
             }
             else
             {

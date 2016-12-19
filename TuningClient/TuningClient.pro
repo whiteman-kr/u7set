@@ -140,3 +140,5 @@ PRECOMPILED_HEADER = Stable.h
 # QtPropertyBrowser
 #
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
+
+TRANSLATIONS = languages/TuningClient_en.ts languages/TuningClient_ru.ts

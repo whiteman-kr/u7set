@@ -128,8 +128,8 @@ namespace VFrame30
 		double docX = 0;	// Result
 		double docY = 0;
 
-		double dpiX = logicalDpiX();
-		double dpiY = logicalDpiY();
+		double dpiX = physicalDpiX();
+		double dpiY = physicalDpiY();
 
 		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom());
 		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom());
@@ -196,8 +196,8 @@ namespace VFrame30
 			return false;
 		}
 
-		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
-		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
+		dpiX = dpiX == 0 ? physicalDpiX() : dpiX;
+		dpiY = dpiY == 0 ? physicalDpiY() : dpiY;
 
 		double zoom = schemaView()->zoom();
 
@@ -324,8 +324,8 @@ namespace VFrame30
 			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * zoom / 100.0);
 			break;
 		case VFrame30::SchemaUnit::Inch:
-			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * logicalDpiX());
-			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * logicalDpiY());
+			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * physicalDpiX());
+			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * physicalDpiY());
 			break;
 		default:
 			assert(false);

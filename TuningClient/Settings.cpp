@@ -7,7 +7,8 @@ Settings::Settings():
 	m_configuratorIpAddress1("127.0.0.1"),
 	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST)
+    m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
+    m_language("en")
 {
 }
 
@@ -91,6 +92,8 @@ void Settings::StoreUser()
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
 
+    s.setValue("MainWindow/language", m_language);
+
 }
 
 void Settings::RestoreUser()
@@ -131,6 +134,8 @@ void Settings::RestoreUser()
 		m_presetPropertiesSplitterState = 100;
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
+
+    m_language = s.value("MainWindow/language", m_language).toString();
 }
 
 QString Settings::instanceStrId()
@@ -187,6 +192,16 @@ bool Settings::filterBySchema() const
 void Settings::setFilterBySchema(bool value)
 {
 	m_filterBySchema = value;
+}
+
+QString Settings::language() const
+{
+    return m_language;
+}
+
+void Settings::setLanguage(const QString& value)
+{
+    m_language = value;
 }
 
 bool Settings::admin() const

@@ -32,7 +32,36 @@ DialogSettings::DialogSettings(QWidget *parent) :
 	ui->m_filterByEquipment->setChecked(theSettings.filterByEquipment());
 	ui->m_filterBySchema->setChecked(theSettings.filterBySchema());
 
+    createLanguagesList();
 }
+
+void DialogSettings::createLanguagesList()
+{
+    QString m_langPath = QApplication::applicationDirPath();
+    m_langPath.append("/languages");
+
+    QDir dir(m_langPath);
+
+    QStringList fileNames = dir.entryList(QStringList("TuningClient_*.qm"));
+
+    for (int i = 0; i < fileNames.size(); ++i)
+    {
+        QString locale;
+        locale = fileNames[i]; // "TuningClient_.qm"
+        locale.truncate(locale.lastIndexOf('.')); // "TuningClient_"
+        locale.remove(0, locale.indexOf('_') + 1); // "de"
+
+        QString lang = QLocale::languageToString(QLocale(locale).language());
+
+        ui->m_languageCombo->addItem(lang, locale);
+
+        if (theSettings.language() == locale)
+        {
+            ui->m_languageCombo->setCurrentIndex(i);
+        }
+    }
+}
+
 
 DialogSettings::~DialogSettings()
 {
@@ -60,6 +89,21 @@ void DialogSettings::on_DialogSettings_accepted()
 
 	theSettings.setFilterByEquipment(ui->m_filterByEquipment->checkState() == Qt::Checked);
 	theSettings.setFilterBySchema(ui->m_filterBySchema->checkState() == Qt::Checked);
+
+    // Language
+
+    QVariant data = ui->m_languageCombo->currentData();
+
+    QString lang = data.toString();
+
+    if (lang != theSettings.language())
+    {
+        theSettings.setLanguage(lang);
+
+        QMessageBox::warning(this, "TuningClient", tr("Language has been changed, please restart the application."));
+    }
+
+    //
 
 	if (theSettings.admin() == true)
 	{
