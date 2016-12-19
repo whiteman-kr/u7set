@@ -38,10 +38,10 @@ namespace VFrame30
 		switch (itemUnit())
 		{
 		case SchemaUnit::Display:
-			m_font.setSize(10.0, SchemaUnit::Display);
+			m_font.setSize(12.0, SchemaUnit::Display);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(mm2in(3.0), SchemaUnit::Inch);
+			m_font.setSize(1.0 / 8.0, SchemaUnit::Inch);
 			break;
 		case SchemaUnit::Millimeter:
 			m_font.setSize(3.0, SchemaUnit::Millimeter);
