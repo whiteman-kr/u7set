@@ -139,14 +139,14 @@ namespace VFrame30
 
 		painter->save();
 
-		int dpiX = 96;
-		int dpiY = 96;
+		double dpiX = 96;
+		double dpiY = 96;
 
 		QPaintDevice* pPaintDevice = painter->device();
 		if (pPaintDevice != nullptr)
 		{
-			dpiX = pPaintDevice->logicalDpiX();
-			dpiY = pPaintDevice->logicalDpiY();
+			dpiX = pPaintDevice->physicalDpiX();
+			dpiY = pPaintDevice->physicalDpiY();
 		}
 		else
 		{
@@ -157,29 +157,22 @@ namespace VFrame30
 
 		f.setBold(font.bold());
 		f.setItalic(font.italic());
-		f.setStyleStrategy(QFont::PreferDevice);
+		//f.setStyleStrategy(QFont::PreferDevice);
 
 		QRectF rc;
 
 		if (unit == SchemaUnit::Display)
 		{
-			f.setPointSize(static_cast<int>(font.drawSize()));
+			f.setPixelSize(static_cast<int>(font.drawSize()));
 			rc = rect;
 		}
 		else
 		{
 			assert(unit == SchemaUnit::Inch);
 								
-			painter->scale(1.0 / static_cast<double>(dpiX), 1.0 / static_cast<double>(dpiY));
+			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
-			// FontInfo is required to claculate point to pixels ratio
-			//
-			QFontInfo fi(f);
-			qreal pointsize = fi.pointSizeF();
-			qreal pixelsize = static_cast<qreal>(fi.pixelSize());
-			double p2p = pixelsize / pointsize;
-
-			int pixelSize = static_cast<int>(font.drawSize() * dpiY * p2p);
+			int pixelSize = static_cast<int>(font.drawSize() * dpiY);
 			f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
 
 			rc.setLeft(rect.left() * dpiX);
@@ -195,74 +188,5 @@ namespace VFrame30
 		painter->restore();
 		return;
 	}
-
-//	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, QPointF point, int flags)
-//	{
-//		if (painter == nullptr)
-//		{
-//			assert(painter);
-//			return;
-//		}
-
-//		if (str.isEmpty())
-//		{
-//			return;
-//		}
-
-//		painter->save();
-
-//		int dpiX = 96;
-//		int dpiY = 96;
-
-//		QPaintDevice* pPaintDevice = painter->device();
-//		if (pPaintDevice != nullptr)
-//		{
-//			dpiX = pPaintDevice->logicalDpiX();
-//			dpiY = pPaintDevice->logicalDpiY();
-//		}
-//		else
-//		{
-//			assert(pPaintDevice);
-//		}
-
-//		QFont f(font.name());
-
-//		f.setBold(font.bold());
-//		f.setItalic(font.italic());
-
-//		QPointF pt;
-
-//		if (unit == SchemaUnit::Display)
-//		{
-//			f.setPointSize(static_cast<int>(font.drawSize()));
-//			pt = point;
-//		}
-//		else
-//		{
-//			assert(unit == SchemaUnit::Inch);
-
-//			painter->scale(1.0 / dpiX, 1.0 / dpiY);
-
-//			// FontInfo is required to claculate point to pixels ratio
-//			//
-//			QFontInfo fi(f);
-//			qreal pointsize = fi.pointSizeF();
-//			qreal pixelsize = static_cast<qreal>(fi.pixelSize());
-//			double p2p = pixelsize / pointsize;
-
-//			int pixelSize = static_cast<int>(font.drawSize() * dpiY * p2p);
-//			f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
-
-//			pt.setX(point.x() * dpiX);
-//			pt.setY(point.y() * dpiY);
-//		}
-
-//		painter->setFont(f);
-
-//		painter->drawText(pt, str);
-
-//		painter->restore();
-//		return;
-//	}
 	
 }

@@ -164,6 +164,8 @@ namespace VFrame30
 	private:
 		std::vector<VFrame30::AfbPin> m_inputPoints;
 		std::vector<VFrame30::AfbPin> m_outputPoints;
+
+
 	};
 }
 
