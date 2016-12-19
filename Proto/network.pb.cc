@@ -507,7 +507,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesStates));
   TuningSourceState_descriptor_ = file->message_type(22);
-  static const int TuningSourceState_offsets_[38] = {
+  static const int TuningSourceState_offsets_[40] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, sourceid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, isreply_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, requestcount_),
@@ -546,6 +546,8 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, fotipflagoffseterr_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, fotipflagapplysuccess_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, fotipflagsetsor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, erranaloglowboundcheck_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, erranaloghighboundcheck_),
   };
   TuningSourceState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -934,7 +936,7 @@ void protobuf_AddDesc_network_2eproto() {
     "`\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001 "
     "\001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netwo"
     "rk.DataSourceInfo\"3\n\026GetTuningSourcesSta"
-    "tes\022\031\n\021clientEquipmentID\030\001 \001(\t\"\236\t\n\021Tunin"
+    "tes\022\031\n\021clientEquipmentID\030\001 \001(\t\"\345\t\n\021Tunin"
     "gSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isR"
     "eply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:"
     "\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueu"
@@ -964,29 +966,31 @@ void protobuf_AddDesc_network_2eproto() {
     "r\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:"
     "\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fot"
     "ipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlag"
-    "SetSOR\030& \001(\003:\0010\"g\n\033GetTuningSourcesState"
-    "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
-    "sState\030\002 \003(\0132\032.Network.TuningSourceState"
-    "\"B\n\021TuningSignalsRead\022\031\n\021clientEquipment"
-    "ID\030\001 \001(\t\022\022\n\nsignalHash\030\002 \003(\004\"\227\001\n\021TuningS"
-    "ignalState\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005err"
-    "or\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005val"
-    "ue\030\004 \001(\002:\0010\022\027\n\014readLowBound\030\005 \001(\002:\0010\022\030\n\r"
-    "readHighBound\030\006 \001(\002:\0010\"a\n\026TuningSignalsR"
-    "eadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSign"
-    "alState\030\002 \003(\0132\032.Network.TuningSignalStat"
-    "e\"<\n\021TuningSignalWrite\022\025\n\nsignalHash\030\001 \001"
-    "(\004:\0010\022\020\n\005value\030\002 \001(\002:\0010\"\200\001\n\022TuningSignal"
-    "sWrite\022\031\n\021clientEquipmentID\030\001 \001(\t\022\030\n\taut"
-    "oApply\030\002 \001(\010:\005false\0225\n\021tuningSignalWrite"
-    "\030\003 \003(\0132\032.Network.TuningSignalWrite\"B\n\027Tu"
-    "ningSignalWriteResult\022\025\n\nsignalHash\030\001 \001("
-    "\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsW"
-    "riteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResu"
-    "lt\030\002 \003(\0132 .Network.TuningSignalWriteResu"
-    "lt\"/\n\022TuningSignalsApply\022\031\n\021clientEquipm"
-    "entID\030\001 \001(\t\"+\n\027TuningSignalsApplyReply\022\020"
-    "\n\005error\030\001 \001(\005:\0010", 4256);
+    "SetSOR\030& \001(\003:\0010\022!\n\026errAnalogLowBoundChec"
+    "k\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( "
+    "\001(\003:\0010\"g\n\033GetTuningSourcesStatesReply\022\020\n"
+    "\005error\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 "
+    "\003(\0132\032.Network.TuningSourceState\"B\n\021Tunin"
+    "gSignalsRead\022\031\n\021clientEquipmentID\030\001 \001(\t\022"
+    "\022\n\nsignalHash\030\002 \003(\004\"\227\001\n\021TuningSignalStat"
+    "e\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:"
+    "\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005value\030\004 \001(\002:"
+    "\0010\022\027\n\014readLowBound\030\005 \001(\002:\0010\022\030\n\rreadHighB"
+    "ound\030\006 \001(\002:\0010\"a\n\026TuningSignalsReadReply\022"
+    "\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002"
+    " \003(\0132\032.Network.TuningSignalState\"<\n\021Tuni"
+    "ngSignalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005"
+    "value\030\002 \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n"
+    "\021clientEquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002 "
+    "\001(\010:\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032."
+    "Network.TuningSignalWrite\"B\n\027TuningSigna"
+    "lWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005e"
+    "rror\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply"
+    "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132"
+    " .Network.TuningSignalWriteResult\"/\n\022Tun"
+    "ingSignalsApply\022\031\n\021clientEquipmentID\030\001 \001"
+    "(\t\"+\n\027TuningSignalsApplyReply\022\020\n\005error\030\001"
+    " \001(\005:\0010", 4327);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -7684,6 +7688,8 @@ const int TuningSourceState::kFotipFlagUniueIDErrFieldNumber;
 const int TuningSourceState::kFotipFlagOffsetErrFieldNumber;
 const int TuningSourceState::kFotipFlagApplySuccessFieldNumber;
 const int TuningSourceState::kFotipFlagSetSORFieldNumber;
+const int TuningSourceState::kErrAnalogLowBoundCheckFieldNumber;
+const int TuningSourceState::kErrAnalogHighBoundCheckFieldNumber;
 #endif  // !_MSC_VER
 
 TuningSourceState::TuningSourceState()
@@ -7740,6 +7746,8 @@ void TuningSourceState::SharedCtor() {
   fotipflagoffseterr_ = GOOGLE_LONGLONG(0);
   fotipflagapplysuccess_ = GOOGLE_LONGLONG(0);
   fotipflagsetsor_ = GOOGLE_LONGLONG(0);
+  erranaloglowboundcheck_ = GOOGLE_LONGLONG(0);
+  erranaloghighboundcheck_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -7821,6 +7829,8 @@ void TuningSourceState::Clear() {
     fotipflagoffseterr_ = GOOGLE_LONGLONG(0);
     fotipflagapplysuccess_ = GOOGLE_LONGLONG(0);
     fotipflagsetsor_ = GOOGLE_LONGLONG(0);
+    erranaloglowboundcheck_ = GOOGLE_LONGLONG(0);
+    erranaloghighboundcheck_ = GOOGLE_LONGLONG(0);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -8435,6 +8445,38 @@ bool TuningSourceState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(312)) goto parse_errAnalogLowBoundCheck;
+        break;
+      }
+
+      // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+      case 39: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errAnalogLowBoundCheck:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &erranaloglowboundcheck_)));
+          set_has_erranaloglowboundcheck();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(320)) goto parse_errAnalogHighBoundCheck;
+        break;
+      }
+
+      // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+      case 40: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errAnalogHighBoundCheck:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &erranaloghighboundcheck_)));
+          set_has_erranaloghighboundcheck();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -8647,6 +8689,16 @@ void TuningSourceState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(38, this->fotipflagsetsor(), output);
   }
 
+  // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+  if (has_erranaloglowboundcheck()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(39, this->erranaloglowboundcheck(), output);
+  }
+
+  // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+  if (has_erranaloghighboundcheck()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(40, this->erranaloghighboundcheck(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -8843,6 +8895,16 @@ void TuningSourceState::SerializeWithCachedSizes(
   // optional int64 fotipFlagSetSOR = 38 [default = 0];
   if (has_fotipflagsetsor()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(38, this->fotipflagsetsor(), target);
+  }
+
+  // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+  if (has_erranaloglowboundcheck()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(39, this->erranaloglowboundcheck(), target);
+  }
+
+  // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+  if (has_erranaloghighboundcheck()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(40, this->erranaloghighboundcheck(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -9128,6 +9190,20 @@ int TuningSourceState::ByteSize() const {
           this->fotipflagsetsor());
     }
 
+    // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+    if (has_erranaloglowboundcheck()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->erranaloglowboundcheck());
+    }
+
+    // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+    if (has_erranaloghighboundcheck()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->erranaloghighboundcheck());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -9277,6 +9353,12 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
     if (from.has_fotipflagsetsor()) {
       set_fotipflagsetsor(from.fotipflagsetsor());
     }
+    if (from.has_erranaloglowboundcheck()) {
+      set_erranaloglowboundcheck(from.erranaloglowboundcheck());
+    }
+    if (from.has_erranaloghighboundcheck()) {
+      set_erranaloghighboundcheck(from.erranaloghighboundcheck());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -9338,6 +9420,8 @@ void TuningSourceState::Swap(TuningSourceState* other) {
     std::swap(fotipflagoffseterr_, other->fotipflagoffseterr_);
     std::swap(fotipflagapplysuccess_, other->fotipflagapplysuccess_);
     std::swap(fotipflagsetsor_, other->fotipflagsetsor_);
+    std::swap(erranaloglowboundcheck_, other->erranaloglowboundcheck_);
+    std::swap(erranaloghighboundcheck_, other->erranaloghighboundcheck_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_has_bits_[1], other->_has_bits_[1]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
