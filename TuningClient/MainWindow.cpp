@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	theLogFile.write("--");
 	theLogFile.writeMessage(tr("Application started."));
 
+    loadLanguage(theSettings.language());
+
 	createActions();
 	createMenu();
 	createStatusBar();
@@ -91,6 +93,7 @@ MainWindow::~MainWindow()
 
 	theLogFile.writeMessage(tr("Application finished."));
 }
+
 
 void MainWindow::createActions()
 {
@@ -264,22 +267,22 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		{
 
 		}
-	}
+    }
 
-	if (settings.updateSignals == true)
-	{
-		if (m_configController.getTuningSignals() == false)
-		{
+    if (settings.updateSignals == true)
+    {
+        if (m_configController.getTuningSignals() == false)
+        {
 
-		}
-		emit signalsUpdated();
-	}
+        }
+        emit signalsUpdated();
+    }
 
     theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
-	createWorkspace();
+    createWorkspace();
 
-	return;
+    return;
 }
 
 void MainWindow::slot_tuningSourcesArrived()
@@ -290,6 +293,30 @@ void MainWindow::slot_tuningSourcesArrived()
 void MainWindow::slot_tuningConnectionFailed()
 {
 
+}
+
+void MainWindow::loadLanguage(const QString& rLanguage)
+{
+    QLocale locale = QLocale(rLanguage);
+    QLocale::setDefault(locale);
+
+    QString langPath = QApplication::applicationDirPath();
+    langPath.append("/languages");
+
+    switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));
+    switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(rLanguage));
+}
+
+void MainWindow::switchTranslator(QTranslator& translator, const QString& filename)
+{
+    // remove the old translator
+    qApp->removeTranslator(&translator);
+
+    // load the new translator
+    if(translator.load(filename))
+    {
+        qApp->installTranslator(&translator);
+    }
 }
 
 void MainWindow::exit()
