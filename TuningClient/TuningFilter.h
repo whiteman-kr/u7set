@@ -118,9 +118,10 @@ public:
 	std::vector <TuningFilterValue> signalValues() const;
 	void setValues(const std::vector <TuningFilterValue>& values);
 
+    bool value(Hash hash, TuningFilterValue& value);
     void setValue(Hash hash, float value);
 
-	bool valueExists(Hash hash) const;
+    bool valueExists(Hash hash) const;
 	void addValue(const TuningFilterValue& value);
 
 	void removeValue(Hash hash);

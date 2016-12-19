@@ -676,10 +676,6 @@ void DialogPresetEditor::on_m_setValue_clicked()
 	bool first = true;
 	TuningFilterValue firstValue;
 
-    float lowLimit = 0;
-    float highLimit = 0;
-
-
 	bool sameValue = true;
 
 	QList<QTreeWidgetItem*> selectedItems = ui->m_presetsTree->selectedItems();
@@ -721,7 +717,7 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		}
 	}
 
-    DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, lowLimit, highLimit, firstValue.decimalPlaces());
+    DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, firstValue.lowLimit(), firstValue.highLimit(), firstValue.decimalPlaces());
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

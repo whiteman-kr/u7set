@@ -1335,13 +1335,21 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_model->setFont(f.family(), f.pointSize(), false);
     m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-     // Button controls
+    // Mask controls
 	//
-	m_maskTypeCombo = new QComboBox();
-	m_maskEdit = new QLineEdit();
-	m_maskButton = new QPushButton("Apply Mask");
+    //m_maskTypeCombo = new QComboBox();
+    //Vconnect(m_maskTypeCombo, &QLineEdit::selectionChanged, this, &TuningPage::slot_ApplyMask);
 
-	m_setValueButton = new QPushButton("Set Value");
+    m_maskEdit = new QLineEdit();
+    connect(m_maskEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyMask);
+
+    m_maskButton = new QPushButton("Apply Mask");
+    connect(m_maskButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyMask);
+
+    // Button controls
+    //
+
+    m_setValueButton = new QPushButton("Set Value");
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
 	m_setOnButton = new QPushButton("Set all to On");
@@ -1361,7 +1369,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	m_bottomLayout = new QHBoxLayout();
 
-	m_bottomLayout->addWidget(m_maskTypeCombo);
+    //m_bottomLayout->addWidget(m_maskTypeCombo);
 	m_bottomLayout->addWidget(m_maskEdit);
 	m_bottomLayout->addWidget(m_maskButton);
 	m_bottomLayout->addStretch();
@@ -1455,9 +1463,11 @@ void TuningPage::fillObjectsList()
 
     std::vector<TuningObject> objects = theObjectManager->objects();
 
+    QString mask = m_maskEdit->text();
+
 	for (int i = 0; i < objects.size(); i++)
 	{
-		const TuningObject& o = objects[i];
+        TuningObject& o = objects[i];
 
 		// Root filter
 		//
@@ -1487,6 +1497,18 @@ void TuningPage::fillObjectsList()
 			{
 				continue;
 			}
+
+            // Modify the default value from selected filter
+            //
+
+            TuningFilterValue filterValue;
+
+            bool hasValue = m_treeFilter->value(o.appSignalHash(), filterValue);
+
+            if (hasValue == true)
+            {
+                o.setDefaultValue(filterValue.value());
+            }
 		}
 
 		// Tab Filter
@@ -1510,6 +1532,26 @@ void TuningPage::fillObjectsList()
 				continue;
 			}
 		}
+
+        // Mask Filter
+        //
+
+        if (mask.length() != 0)
+        {
+            bool maskMatch = false;
+
+            if (o.appSignalID().contains(mask, Qt::CaseInsensitive) == true || o.customAppSignalID().contains(mask, Qt::CaseInsensitive) == true)
+            {
+                maskMatch = true;
+            }
+
+            if (maskMatch == false)
+            {
+                continue;
+            }
+        }
+
+
 
 		objectsIndexes.push_back(i);
 	}
@@ -1580,6 +1622,10 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex &index)
 	slot_setValue();
 }
 
+void TuningPage::slot_ApplyMask()
+{
+    fillObjectsList();
+}
 
 void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {

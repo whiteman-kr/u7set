@@ -529,6 +529,19 @@ void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
 	}
 }
 
+bool TuningFilter::value(Hash hash, TuningFilterValue& value)
+{
+    auto it = m_signalValuesMap.find(hash);
+    if (it == m_signalValuesMap.end())
+    {
+        return false;
+    }
+
+    value = it->second;
+    return true;
+
+}
+
 void TuningFilter::setValue(Hash hash, float value)
 {
 	auto it = m_signalValuesMap.find(hash);
