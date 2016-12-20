@@ -17,6 +17,13 @@ protected:
 	virtual void onThreadStarted() {}
 	virtual void onThreadFinished() {}
 
+	bool quitRequested() const { return m_quitRequested; }
+
+	void requestQuit() { m_quitRequested = true; }
+
+private:
+	bool m_quitRequested = false;
+
 	friend class SimpleThread;
 };
 

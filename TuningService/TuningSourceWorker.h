@@ -183,6 +183,8 @@ namespace Tuning
 		bool processCommandQueue();
 		bool processIdle();
 
+		void onNoReply();
+
 		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
 		void sendFotipRequest(RupFotipV2& request);
 
@@ -230,7 +232,7 @@ namespace Tuning
 
 		bool m_waitReply = false;
 
-		const int MAX_WAIT_REPLY_COUNTER = 3;
+		const int MAX_WAIT_REPLY_COUNTER = 2;
 
 		int m_waitReplyCounter = 0;
 
