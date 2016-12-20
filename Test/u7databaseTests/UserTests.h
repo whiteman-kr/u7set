@@ -24,7 +24,7 @@ private slots:
 	void logInOutTest();
 	void createUserTest();
 	void currentUserIdTest();
-	void isAdminTest();
+	void isCurrentUserAdminTest();
 	void check_user_passwordIntegerTextTest();
 	void check_user_passwordTextTextTest();
 	void update_userTest();
