@@ -1320,7 +1320,6 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(AppSignalState));
   Connection_descriptor_ = file->message_type(58);
   static const int Connection_offsets_[19] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, index_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2equipmentid_),
@@ -1339,6 +1338,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2txstartaddress_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2txwordsquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2rxwordsquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, uuid_),
   };
   Connection_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1840,27 +1840,27 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ddrBit\030\317\001 \001(\005\"\210\001\n\016AppSignalState\022\017\n\004hash"
     "\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001"
     "(\r:\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024\n\tlocalTim"
-    "e\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010\"\277\004\n\nCon"
-    "nection\022\020\n\005Index\030\001 \001(\005:\0010\022\026\n\014ConnectionI"
-    "D\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022\032\n"
-    "\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1RawDat"
-    "aDescription\030\005 \001(\t:\000\022!\n\027Port2RawDataDesc"
-    "ription\030\006 \001(\t:\000\022\025\n\nSerialMode\030\007 \001(\005:\0010\022\017"
-    "\n\004Mode\030\010 \001(\005:\0010\022\033\n\014EnableSerial\030\t \001(\010:\005f"
-    "alse\022\033\n\014EnableDuplex\030\n \001(\010:\005false\022\035\n\016Man"
-    "ualSettings\030\013 \001(\010:\005false\022\034\n\rDisableDataI"
-    "D\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001(\010:"
-    "\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022!"
-    "\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024Por"
-    "t1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2TxS"
-    "tartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuan"
-    "tity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuantity\030"
-    "\023 \001(\005:\003479*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n"
-    "\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDir"
-    "rection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSig"
-    "nalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFbl"
-    "DataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt"
-    "\020\001\022\t\n\005Float\020\002", 9733);
+    "e\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010\"\310\004\n\nCon"
+    "nection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1"
+    "EquipmentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030"
+    "\004 \001(\t:\000\022!\n\027Port1RawDataDescription\030\005 \001(\t"
+    ":\000\022!\n\027Port2RawDataDescription\030\006 \001(\t:\000\022\025\n"
+    "\nSerialMode\030\007 \001(\005:\0010\022\017\n\004Mode\030\010 \001(\005:\0010\022\033\n"
+    "\014EnableSerial\030\t \001(\010:\005false\022\033\n\014EnableDupl"
+    "ex\030\n \001(\010:\005false\022\035\n\016ManualSettings\030\013 \001(\010:"
+    "\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017"
+    "GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1TxS"
+    "tartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuan"
+    "tity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuantity\030"
+    "\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001(\005:"
+    "\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479\022!\n"
+    "\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid"
+    "\030\024 \001(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Dis"
+    "play\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conn"
+    "ectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*"
+    ")\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete"
+    "\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\t"
+    "SignedInt\020\001\022\t\n\005Float\020\002", 9742);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -3937,6 +3937,9 @@ bool Envelope::IsInitialized() const {
   }
   if (has_configuration()) {
     if (!this->configuration().IsInitialized()) return false;
+  }
+  if (has_connection()) {
+    if (!this->connection().IsInitialized()) return false;
   }
   return true;
 }
@@ -24516,7 +24519,6 @@ void AppSignalState::Swap(AppSignalState* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int Connection::kIndexFieldNumber;
 const int Connection::kConnectionIDFieldNumber;
 const int Connection::kPort1EquipmentIDFieldNumber;
 const int Connection::kPort2EquipmentIDFieldNumber;
@@ -24535,6 +24537,7 @@ const int Connection::kPort1RxWordsQuantityFieldNumber;
 const int Connection::kPort2TxStartAddressFieldNumber;
 const int Connection::kPort2TxWordsQuantityFieldNumber;
 const int Connection::kPort2RxWordsQuantityFieldNumber;
+const int Connection::kUuidFieldNumber;
 #endif  // !_MSC_VER
 
 Connection::Connection()
@@ -24543,6 +24546,7 @@ Connection::Connection()
 }
 
 void Connection::InitAsDefaultInstance() {
+  uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
 }
 
 Connection::Connection(const Connection& from)
@@ -24553,7 +24557,6 @@ Connection::Connection(const Connection& from)
 
 void Connection::SharedCtor() {
   _cached_size_ = 0;
-  index_ = 0;
   connectionid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   port1equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   port2equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
@@ -24572,6 +24575,7 @@ void Connection::SharedCtor() {
   port2txstartaddress_ = 0;
   port2txwordsquantity_ = 479;
   port2rxwordsquantity_ = 479;
+  uuid_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -24596,6 +24600,7 @@ void Connection::SharedDtor() {
     delete port2rawdatadescription_;
   }
   if (this != default_instance_) {
+    delete uuid_;
   }
 }
 
@@ -24622,7 +24627,6 @@ Connection* Connection::New() const {
 
 void Connection::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    index_ = 0;
     if (has_connectionid()) {
       if (connectionid_ != &::google::protobuf::internal::kEmptyString) {
         connectionid_->clear();
@@ -24650,9 +24654,9 @@ void Connection::Clear() {
     }
     serialmode_ = 0;
     mode_ = 0;
+    enableserial_ = false;
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    enableserial_ = false;
     enableduplex_ = false;
     manualsettings_ = false;
     disabledataid_ = false;
@@ -24660,11 +24664,14 @@ void Connection::Clear() {
     port1txstartaddress_ = 0;
     port1txwordsquantity_ = 479;
     port1rxwordsquantity_ = 479;
+    port2txstartaddress_ = 0;
   }
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    port2txstartaddress_ = 0;
     port2txwordsquantity_ = 479;
     port2rxwordsquantity_ = 479;
+    if (has_uuid()) {
+      if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -24676,26 +24683,10 @@ bool Connection::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 Index = 1 [default = 0];
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &index_)));
-          set_has_index();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(18)) goto parse_ConnectionID;
-        break;
-      }
-
       // optional string ConnectionID = 2 [default = ""];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_ConnectionID:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_connectionid()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -24980,6 +24971,20 @@ bool Connection::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(162)) goto parse_uuid;
+        break;
+      }
+
+      // optional .Proto.Uuid uuid = 20;
+      case 20: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_uuid:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_uuid()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -25002,11 +25007,6 @@ bool Connection::MergePartialFromCodedStream(
 
 void Connection::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional int32 Index = 1 [default = 0];
-  if (has_index()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->index(), output);
-  }
-
   // optional string ConnectionID = 2 [default = ""];
   if (has_connectionid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -25117,6 +25117,12 @@ void Connection::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(19, this->port2rxwordsquantity(), output);
   }
 
+  // optional .Proto.Uuid uuid = 20;
+  if (has_uuid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      20, this->uuid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -25125,11 +25131,6 @@ void Connection::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Connection::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional int32 Index = 1 [default = 0];
-  if (has_index()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->index(), target);
-  }
-
   // optional string ConnectionID = 2 [default = ""];
   if (has_connectionid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -25245,6 +25246,13 @@ void Connection::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(19, this->port2rxwordsquantity(), target);
   }
 
+  // optional .Proto.Uuid uuid = 20;
+  if (has_uuid()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        20, this->uuid(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -25256,13 +25264,6 @@ int Connection::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional int32 Index = 1 [default = 0];
-    if (has_index()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->index());
-    }
-
     // optional string ConnectionID = 2 [default = ""];
     if (has_connectionid()) {
       total_size += 1 +
@@ -25312,13 +25313,13 @@ int Connection::ByteSize() const {
           this->mode());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional bool EnableSerial = 9 [default = false];
     if (has_enableserial()) {
       total_size += 1 + 1;
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional bool EnableDuplex = 10 [default = false];
     if (has_enableduplex()) {
       total_size += 1 + 1;
@@ -25360,8 +25361,6 @@ int Connection::ByteSize() const {
           this->port1rxwordsquantity());
     }
 
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional int32 Port2TxStartAddress = 17 [default = 0];
     if (has_port2txstartaddress()) {
       total_size += 2 +
@@ -25369,6 +25368,8 @@ int Connection::ByteSize() const {
           this->port2txstartaddress());
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional int32 Port2TxWordsQuantity = 18 [default = 479];
     if (has_port2txwordsquantity()) {
       total_size += 2 +
@@ -25381,6 +25382,13 @@ int Connection::ByteSize() const {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->port2rxwordsquantity());
+    }
+
+    // optional .Proto.Uuid uuid = 20;
+    if (has_uuid()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->uuid());
     }
 
   }
@@ -25410,9 +25418,6 @@ void Connection::MergeFrom(const ::google::protobuf::Message& from) {
 void Connection::MergeFrom(const Connection& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_index()) {
-      set_index(from.index());
-    }
     if (from.has_connectionid()) {
       set_connectionid(from.connectionid());
     }
@@ -25434,11 +25439,11 @@ void Connection::MergeFrom(const Connection& from) {
     if (from.has_mode()) {
       set_mode(from.mode());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_enableserial()) {
       set_enableserial(from.enableserial());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_enableduplex()) {
       set_enableduplex(from.enableduplex());
     }
@@ -25460,16 +25465,19 @@ void Connection::MergeFrom(const Connection& from) {
     if (from.has_port1rxwordsquantity()) {
       set_port1rxwordsquantity(from.port1rxwordsquantity());
     }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_port2txstartaddress()) {
       set_port2txstartaddress(from.port2txstartaddress());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_port2txwordsquantity()) {
       set_port2txwordsquantity(from.port2txwordsquantity());
     }
     if (from.has_port2rxwordsquantity()) {
       set_port2rxwordsquantity(from.port2rxwordsquantity());
+    }
+    if (from.has_uuid()) {
+      mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -25489,12 +25497,14 @@ void Connection::CopyFrom(const Connection& from) {
 
 bool Connection::IsInitialized() const {
 
+  if (has_uuid()) {
+    if (!this->uuid().IsInitialized()) return false;
+  }
   return true;
 }
 
 void Connection::Swap(Connection* other) {
   if (other != this) {
-    std::swap(index_, other->index_);
     std::swap(connectionid_, other->connectionid_);
     std::swap(port1equipmentid_, other->port1equipmentid_);
     std::swap(port2equipmentid_, other->port2equipmentid_);
@@ -25513,6 +25523,7 @@ void Connection::Swap(Connection* other) {
     std::swap(port2txstartaddress_, other->port2txstartaddress_);
     std::swap(port2txwordsquantity_, other->port2txwordsquantity_);
     std::swap(port2rxwordsquantity_, other->port2rxwordsquantity_);
+    std::swap(uuid_, other->uuid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

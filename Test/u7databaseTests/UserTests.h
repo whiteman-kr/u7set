@@ -22,9 +22,11 @@ private slots:
 	void initTestCase();
 	void cleanupTestCase();
 	void logInOutTest();
+	void checkSessionKeyTest();
 	void createUserTest();
-	void getUserIDTest();
-	void isAdminTest();
+	void currentUserIdTest();
+	void isCurrentUserAdminTest();
+	void getUserDataTest();
 	void check_user_passwordIntegerTextTest();
 	void check_user_passwordTextTextTest();
 	void update_userTest();

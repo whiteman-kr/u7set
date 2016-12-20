@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "SchemaItemRect.h"
+#include "MacrosExpander.h"
 
 namespace VFrame30
 {
@@ -48,10 +49,10 @@ namespace VFrame30
 			m_font.setSize(12.0, unit);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(mm2in(2.5), unit);
+			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
 			break;
 		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(2.5), unit);
+			m_font.setSize(mm2in(3), unit);
 			break;
 		default:
 			assert(false);
@@ -145,7 +146,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
+	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -208,10 +209,13 @@ namespace VFrame30
 
 		// Drawing Text
 		//
+		MacrosExpander me;
+		QString text = me.parse(m_text, drawParam->session(), schema, this);
+
 		if (m_text.isEmpty() == false)
 		{
 			p->setPen(textColor());
-			DrawHelper::DrawText(p, m_font, itemUnit(), m_text, r, horzAlign() | vertAlign());
+			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
 		}
 
 		return;

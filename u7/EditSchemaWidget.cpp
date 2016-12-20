@@ -23,6 +23,7 @@
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/Session.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
@@ -123,6 +124,8 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 			schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 		drawParam.setInfoMode(theSettings.infoMode());
+
+		drawParam.session() = session();
 
 		draw(drawParam);
 	}

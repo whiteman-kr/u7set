@@ -262,6 +262,7 @@ public slots:
 	void showPendingChanges();
 	void checkIn();
 
+	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
 	void saveSelection();
@@ -271,8 +272,6 @@ public slots:
 	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);
 	void applySignalIdFilter();
 	void resetSignalIdFilter();
-
-	void changeColumnVisibility(QAction* action);
 
 	void showError(QString message);
 
@@ -288,7 +287,6 @@ private:
 	QComboBox* m_signalIdFieldCombo = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_completer = nullptr;
-	QActionGroup* m_tableHeadersContextMenuActions = nullptr;
 	QStringList m_filterHistory;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
@@ -299,6 +297,7 @@ private:
 	int m_focusedCellColumn = -1;
 
 	void saveColumnVisibility(int index, bool visible);
+	void saveColumnPosition(int index, int position);
 
 private slots:
 	void saveColumnWidth(int index);

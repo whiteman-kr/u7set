@@ -11,6 +11,8 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
       m_dbController(pDbController)
 {
 
+    m_connections = new Hardware::ConnectionStorage(m_dbController, parent);
+
     setWindowTitle(tr("Connections Editor"));
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -32,17 +34,15 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     m_connectionsTree = new QTreeWidget();
 
     QStringList l;
-    l << tr("#");
     l << tr("ConnectionID");
     l << tr("Type");
     l << tr("State");
-    l << tr("Action");
+    l << tr("User");
 
     m_connectionsTree->setColumnCount(l.size());
     m_connectionsTree->setHeaderLabels(l);
 
     int il = 0;
-    m_connectionsTree->setColumnWidth(il++, 50);
     m_connectionsTree->setColumnWidth(il++, 140);
     m_connectionsTree->setColumnWidth(il++, 80);
     m_connectionsTree->setColumnWidth(il++, 40);
@@ -70,7 +70,6 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
 
     m_splitter->setChildrenCollapsible(false);
 
-
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
 
     m_btnAdd = new QPushButton(tr("Add"));
@@ -78,7 +77,8 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     m_btnCheckOut = new QPushButton(tr("Check Out"));
     m_btnCheckIn = new QPushButton(tr("Check In"));
     m_btnUndo = new QPushButton(tr("Undo"));
-    m_btnExport = new QPushButton(tr("Export"));
+    m_btnRefresh = new QPushButton(tr("Refresh"));
+    m_btnReport = new QPushButton(tr("Report"));
     m_btnClose = new QPushButton(tr("Close"));
 
     buttonsLayout->addWidget(m_btnAdd);
@@ -86,8 +86,9 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     buttonsLayout->addWidget(m_btnCheckOut);
     buttonsLayout->addWidget(m_btnCheckIn);
     buttonsLayout->addWidget(m_btnUndo);
+    buttonsLayout->addWidget(m_btnRefresh);
     buttonsLayout->addStretch();
-    buttonsLayout->addWidget(m_btnExport);
+    buttonsLayout->addWidget(m_btnReport);
     buttonsLayout->addWidget(m_btnClose);
 
     connect (m_btnAdd, &QPushButton::clicked, this, &DialogConnections::onAdd);
@@ -95,7 +96,8 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     connect (m_btnCheckOut, &QPushButton::clicked, this, &DialogConnections::onCheckOut);
     connect (m_btnCheckIn, &QPushButton::clicked, this, &DialogConnections::onCheckIn);
     connect (m_btnUndo, &QPushButton::clicked, this, &DialogConnections::onUndo);
-    connect (m_btnExport, &QPushButton::clicked, this, &DialogConnections::onExport);
+    connect (m_btnRefresh, &QPushButton::clicked, this, &DialogConnections::onRefresh);
+    connect (m_btnReport, &QPushButton::clicked, this, &DialogConnections::onReport);
     connect (m_btnClose, &QPushButton::clicked, this, &DialogConnections::close);
 
     mainLayout->addLayout(maskLayout);
@@ -121,12 +123,14 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     m_checkOutAction = new QAction(tr("Check Out"), this);
     m_checkInAction = new QAction(tr("Check In"), this);
     m_undoAction = new QAction(tr("Undo"), this);
+    m_refreshAction = new QAction(tr("Refresh"), this);
 
     connect(m_addAction, &QAction::triggered, this, &DialogConnections::onAdd);
     connect(m_removeAction, &QAction::triggered, this, &DialogConnections::onRemove);
     connect(m_checkOutAction, &QAction::triggered, this, &DialogConnections::onCheckOut);
     connect(m_checkInAction, &QAction::triggered, this, &DialogConnections::onCheckIn);
     connect(m_undoAction, &QAction::triggered, this, &DialogConnections::onUndo);
+    connect(m_refreshAction, &QAction::triggered, this, &DialogConnections::onRefresh);
 
     m_popupMenu = new QMenu(this);
     m_popupMenu->addAction(m_addAction);
@@ -135,46 +139,44 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
     m_popupMenu->addAction(m_checkOutAction);
     m_popupMenu->addAction(m_checkInAction);
     m_popupMenu->addAction(m_undoAction);
+    m_popupMenu->addSeparator();
+    m_popupMenu->addAction(m_refreshAction);
 
 
     // Load connections
     //
-    QString errorCode;
 
-    if (connections.load(m_dbController, errorCode) == false)
+    if (m_connections->loadFromConnectionsFolder() == false)
     {
-        QMessageBox::critical(parent, QString("Error"), tr("Can't load connections!"));
         return;
     }
 
     // Load deprecated connections
     //
 
-    Hardware::ConnectionStorage xmlConnections;
+    Hardware::ConnectionStorage xmlConnections(m_dbController, parent);
 
-    if (xmlConnections.loadFromXmlDeprecated(m_dbController, errorCode) == false)
+    QString errorCode;
+    if (xmlConnections.loadFromXmlDeprecated(errorCode) == false)
     {
-        QMessageBox::critical(this, QString("Error"), tr("Can't load connections from Connections.xml!"));
         return;
     }
 
     if (xmlConnections.count() > 0)
     {
-        QMessageBox::warning(parent, QString("Warning"), tr("%1 connections have been imported from deprecated file Connections.xml.").arg(xmlConnections.count()));
+        QMessageBox::warning(parent, tr("Connections Editor"), tr("%1 connections have been imported from deprecated file Connections.xml.").arg(xmlConnections.count()));
 
         for (int i = 0; i < xmlConnections.count(); i++)
         {
             std::shared_ptr<Hardware::Connection> c = xmlConnections.get(i);
 
-            connections.add(c);
+            m_connections->add(c);
 
-            c->save(m_dbController);
+            m_connections->save(c->uuid());
+
         }
 
-        if (xmlConnections.deleteXmlDeprecated(m_dbController) == false)
-        {
-            QMessageBox::critical(this, QString("Error"), tr("Can't delete file Connections.xml!"));
-        }
+        xmlConnections.deleteXmlDeprecated();
     }
 
     // fill data
@@ -266,9 +268,11 @@ void DialogConnections::fillConnectionsList()
 {
     m_connectionsTree->clear();
 
-    for (int i = 0; i < connections.count(); i++)
+    int count = m_connections->count();
+
+    for (int i = 0; i < count; i++)
     {
-        std::shared_ptr<Hardware::Connection> connection = connections.get(i);
+        std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
         if (connection == nullptr)
         {
             assert(connection);
@@ -282,7 +286,6 @@ void DialogConnections::fillConnectionsList()
 
         if (m_masks.empty() == false)
         {
-            QString s;
             bool result = false;
             for (QString mask : m_masks)
             {
@@ -301,13 +304,11 @@ void DialogConnections::fillConnectionsList()
                     result = true;
                     break;
                 }
-                QString numIndex = QString::number(connection->index()).rightJustified(4, '0');
-                if (numIndex.contains(mask))
+                if (connection->fileName().contains(mask, Qt::CaseInsensitive))
                 {
                     result = true;
                     break;
                 }
-
             }
             if (result == false)
             {
@@ -317,10 +318,12 @@ void DialogConnections::fillConnectionsList()
 
 
         QTreeWidgetItem* item = new QTreeWidgetItem();
-        setConnectionText(item, connection.get());
 
-        item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
+        item->setData(0, Qt::UserRole, connection->uuid());
+
         m_connectionsTree->addTopLevelItem(item);
+
+        updateTreeItemText(item);
     }
 }
 
@@ -337,30 +340,24 @@ void DialogConnections::setPropertyEditorObjects()
         return;
     }
 
-    bool readOnly = true;
+    bool readOnly = false;
 
     QList<std::shared_ptr<PropertyObject>> objects;
 
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+        std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
         if (connection == nullptr)
         {
             assert(connection);
             return;
         }
 
-        VcsState state;
-        VcsItemAction action;
-        bool ok = connection->vcsStateAndAction(m_dbController, state, action);
-        if (ok == false)
+        if (connection->fileInfo().state() != VcsState::CheckedOut)
         {
-            continue;
-        }
-
-        if (state == VcsState::CheckedOut)
-        {
-            readOnly = false;
+            readOnly = true;
         }
 
         objects.push_back(connection);
@@ -378,17 +375,17 @@ bool DialogConnections::continueWithDuplicateCaptions()
     bool duplicated = false;
     QString duplicatedCaption;
 
-    for (int i = 0; i < connections.count(); i++)
+    for (int i = 0; i < m_connections->count(); i++)
     {
-        Hardware::Connection* c = connections.get(i).get();
+        Hardware::Connection* c = m_connections->get(i).get();
         if (c->mode() != Hardware::OptoPort::Mode::Optical)
         {
             continue;
         }
 
-        for (int j = 0; j < connections.count(); j++)
+        for (int j = 0; j < m_connections->count(); j++)
         {
-            Hardware::Connection* e = connections.get(j).get();
+            Hardware::Connection* e = m_connections->get(j).get();
 
             if (i == j)
             {
@@ -410,8 +407,8 @@ bool DialogConnections::continueWithDuplicateCaptions()
 
     if (duplicated == true)
     {
-        QString s = QString("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
-        if (QMessageBox::warning(this, "Connections Editor", s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
+        QString s = tr("Connection with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedCaption);
+        if (QMessageBox::warning(this, tr("Connections Editor"), s, QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
         {
             return false;
         }
@@ -436,6 +433,9 @@ void DialogConnections::onItemSelectionChanged()
 
 void DialogConnections::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+    // save modified objects
+    //
+
     for (auto object : objects)
     {
         Hardware::Connection* c = (Hardware::Connection*)object.get();
@@ -445,34 +445,22 @@ void DialogConnections::onPropertiesChanged(QList<std::shared_ptr<PropertyObject
             continue;
         }
 
-        if (c->save(m_dbController) == false)
+        if (m_connections->save(c->uuid()) == false)
         {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to save connection %1").arg(c->connectionID()));
+            QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(c->connectionID()));
             continue;
         }
 
-        for (int i = 0; i < m_connectionsTree->topLevelItemCount(); i++)
-        {
-            QTreeWidgetItem* item = m_connectionsTree->topLevelItem(i);
-            if (item == nullptr)
-            {
-                assert(item);
-                continue;
-            }
+    }
 
-            std::shared_ptr<Hardware::Connection> itemConnection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-            if (itemConnection == nullptr)
-            {
-                assert(itemConnection);
-                continue;
-            }
+    // update tree items
+    //
 
-            if (itemConnection->index() == c->index())
-            {
-                setConnectionText(item, c);
-                break;
-            }
-        }
+    QList <QTreeWidgetItem*> selectedItems = m_connectionsTree->selectedItems();
+    for (auto item : selectedItems)
+    {
+        updateTreeItemText(item);
+
     }
 }
 
@@ -480,24 +468,30 @@ void DialogConnections::onAdd()
 {
     std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
 
-    connection->setConnectionID(tr("Connection%1").arg(QString::number(m_dbController->nextCounterValue()).rightJustified(4, '0')));
+    connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_dbController->nextCounterValue()).rightJustified(4, '0')));
+    connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
+    connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
 
-    connections.add(connection);
+    m_connections->add(connection);
 
-    connection->save(m_dbController);
+    if (m_connections->save(connection->uuid()) == false)
+    {
+        QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(connection->connectionID()));
+    }
 
     QTreeWidgetItem* item = new QTreeWidgetItem();
-    setConnectionText(item, connection.get());
 
-    item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
+    item->setData(0, Qt::UserRole, connection->uuid());
+
     m_connectionsTree->addTopLevelItem(item);
+
+    updateTreeItemText(item);
 
     updateButtonsEnableState();
 }
 
 void DialogConnections::onRemove()
 {
-
     QList <QTreeWidgetItem*> selectedItems = m_connectionsTree->selectedItems();
 
     if (selectedItems.isEmpty() == true)
@@ -505,37 +499,55 @@ void DialogConnections::onRemove()
         return;
     }
 
-    if (QMessageBox::warning(this, tr("Warning"), tr("Are you sure you want to remove selected connections?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+    if (QMessageBox::warning(this, tr("Connections Editor"), tr("Are you sure you want to remove selected connections?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
     {
         return;
     }
 
-    std::vector<std::shared_ptr<Hardware::Connection>> connectionsToDelete;
-
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return;
-        }
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
         bool fileRemoved = false;
 
-        connection->remove(m_dbController, fileRemoved);
+        bool ok = m_connections->removeFile(uuid, fileRemoved);
+        if (ok == false)
+        {
+            assert(false);
+            continue;
+        }
 
         if (fileRemoved == true)
         {
-            connectionsToDelete.push_back(connection);
+            // File was removed, delete the connection from the list and from the storage
+            //
+            m_connections->remove(uuid);
+
+            int index = m_connectionsTree->indexOfTopLevelItem(item);
+            if (index == -1)
+            {
+                assert(false);
+                continue;
+            }
+
+            QTreeWidgetItem* deleteItem = m_connectionsTree->takeTopLevelItem(index);
+            if (deleteItem == nullptr)
+            {
+                assert(deleteItem);
+                continue;
+            }
+
+            delete deleteItem;
+
         }
         else
         {
-            setConnectionText(item, connection.get());
+            // File was marked as deleted
+            //
+            updateTreeItemText(item);
         }
-    }
 
-    deleteConnections(connectionsToDelete);
+    }
 
     updateButtonsEnableState();
 
@@ -553,20 +565,14 @@ void DialogConnections::onCheckOut()
 
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return;
-        }
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-        if (connection->checkOut(m_dbController) == false)
+        if (m_connections->checkOut(uuid) == false)
         {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to check out connection %1").arg(connection->connectionID()));
             continue;
         }
 
-        setConnectionText(item, connection.get());
+        updateTreeItemText(item);
     }
 
     updateButtonsEnableState();
@@ -585,7 +591,7 @@ void DialogConnections::onCheckIn()
 
     bool ok;
     QString comment = QInputDialog::getText(this, tr("Connections Editor"),
-                                            tr("Please enter comment:"), QLineEdit::Normal,
+                                            tr("Please enter the comment:"), QLineEdit::Normal,
                                             tr("comment"), &ok);
 
     if (ok == false)
@@ -594,26 +600,47 @@ void DialogConnections::onCheckIn()
     }
     if (comment.isEmpty())
     {
-        QMessageBox::warning(this, "Connections Editor", "No comment supplied!");
+        QMessageBox::warning(this, tr("Connections Editor"), tr("No comment supplied!"));
         return;
     }
 
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return;
-        }
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-        if (connection->checkIn(m_dbController, comment) == false)
+        bool fileWasRemoved = false;
+
+        if (m_connections->checkIn(uuid, comment, fileWasRemoved) == false)
         {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to check in connection %1").arg(connection->connectionID()));
             continue;
         }
 
-        setConnectionText(item, connection.get());
+        if (fileWasRemoved == true)
+        {
+            // File was removed, delete the connection from the list and from the storage
+            //
+            m_connections->remove(uuid);
+
+            int index = m_connectionsTree->indexOfTopLevelItem(item);
+            if (index == -1)
+            {
+                assert(false);
+                continue;
+            }
+
+            QTreeWidgetItem* deleteItem = m_connectionsTree->takeTopLevelItem(index);
+            if (deleteItem == nullptr)
+            {
+                assert(deleteItem);
+                continue;
+            }
+
+            delete deleteItem;
+        }
+        else
+        {
+            updateTreeItemText(item);
+        }
     }
 
     updateButtonsEnableState();
@@ -630,88 +657,67 @@ void DialogConnections::onUndo()
         return;
     }
 
-    if (QMessageBox::warning(this, tr("Warning"), tr("Are you sure you want to undo changes on selected connections?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+    if (QMessageBox::warning(this, tr("Connections Editor"), tr("Are you sure you want to undo changes on selected connections?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
     {
         return;
     }
 
-    std::vector<std::shared_ptr<Hardware::Connection>> connectionsToDelete;
-
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return;
-        }
-
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
         bool fileRemoved = false;
 
-        if (connection->undo(m_dbController, fileRemoved) == false)
+        if (m_connections->undo(uuid, fileRemoved) == false)
         {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to undo on connection %1").arg(connection->connectionID()));
             continue;
         }
 
         if (fileRemoved == true)
         {
-            connectionsToDelete.push_back(connection);
+            // File was removed, delete the connection from the list and from the storage
+            //
+            m_connections->remove(uuid);
+
+            int index = m_connectionsTree->indexOfTopLevelItem(item);
+            if (index == -1)
+            {
+                assert(false);
+                continue;
+            }
+
+            QTreeWidgetItem* deleteItem = m_connectionsTree->takeTopLevelItem(index);
+            if (deleteItem == nullptr)
+            {
+                assert(deleteItem);
+                continue;
+            }
+
+            delete deleteItem;
         }
         else
         {
-            setConnectionText(item, connection.get());
+            updateTreeItemText(item);
         }
     }
-
-    deleteConnections(connectionsToDelete);
 
     updateButtonsEnableState();
 
     setPropertyEditorObjects();
 }
 
-void DialogConnections::deleteConnections(std::vector<std::shared_ptr<Hardware::Connection>>& connectionsToDelete)
+void DialogConnections::onRefresh()
 {
+    m_connections->clear();
 
-    for (auto connectionToDelete : connectionsToDelete)
+    if (m_connections->load() == false)
     {
-        connections.remove(connectionToDelete);
-
-        bool found = false;
-
-        int count = m_connectionsTree->topLevelItemCount();
-        for (int i = 0; i < count; i++)
-        {
-
-            QTreeWidgetItem* item = m_connectionsTree->topLevelItem(i);
-
-            std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
-            if (connection == nullptr)
-            {
-                assert(connection);
-                return;
-            }
-
-            if (connection->index() == connectionToDelete->index())
-            {
-                QTreeWidgetItem* item = m_connectionsTree->takeTopLevelItem(i);
-                delete item;
-
-                found = true;
-
-                break;
-            }
-        }
-
-        if (found == false)
-        {
-            assert(false);
-        }
+        return;
     }
 
+    fillConnectionsList();
 
+    updateButtonsEnableState();
 }
 
 void DialogConnections::closeEvent(QCloseEvent* e)
@@ -734,7 +740,7 @@ void DialogConnections::reject()
     }
 }
 
-void DialogConnections::onExport()
+void DialogConnections::onReport()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
                                                     "./",
@@ -749,7 +755,7 @@ void DialogConnections::onExport()
 
     if (file.open(QFile::WriteOnly) == false)
     {
-        QMessageBox::critical(this, tr("Error"), tr("Failed to create file %1!").arg(fileName));
+        QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to create file %1!").arg(fileName));
         return;
     }
 
@@ -778,23 +784,21 @@ void DialogConnections::onExport()
     for (int i = 0; i < count; i++)
     {
         QTreeWidgetItem* item = m_connectionsTree->topLevelItem(i);
-        if (item == nullptr)
-        {
-            assert(item);
-            return;
-        }
 
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+        std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
         if (connection == nullptr)
         {
             assert(connection);
             return;
         }
 
-        textStream << tr("------------ Connection ") << connection->index() << tr(" ------------\r\n\r\n");
+        textStream << tr("------------ Connection ") << i + 1 << tr(" ------------\r\n\r\n");
         textStream << tr("ConnectionID: ") << connection->connectionID() << "\r\n\r\n";
         textStream << tr("Port1 EquipmentID: ") << connection->port1EquipmentID() << "\r\n";
         textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID() << "\r\n";
+        textStream << tr(connection->manualSettings() ? "\r\nMode: manual\r\n" : "\r\nMode: automatic\r\n");
 
         if (connection->mode() == Hardware::OptoPort::Mode::Optical)
         {
@@ -839,30 +843,42 @@ void DialogConnections::onCustomContextMenuRequested(const QPoint &pos)
 }
 
 
-void DialogConnections::setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection)
+void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 {
-    if (item == nullptr || connection == nullptr)
+    if (item == nullptr)
     {
         assert(item);
+        return;
+    }
+
+    QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+    std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
+    if (connection == nullptr)
+    {
         assert(connection);
         return;
     }
 
-    VcsState state;
-    VcsItemAction action;
-    bool ok = connection->vcsStateAndAction(m_dbController, state, action);
-    if (ok == false)
-    {
-        return;
-    }
-
     int c = 0;
-    QString numString = QString::number(connection->index()).rightJustified(4, '0');
-    item->setText(c++, numString);
     item->setText(c++, connection->connectionID());
     item->setText(c++, connection->manualSettings() ? tr("Manual") : tr("Auto"));
-    item->setText(c++, state.text());
-    item->setText(c++, action.text());
+
+    if (connection->fileInfo().state() == VcsState::CheckedOut)
+    {
+        item->setText(c++, connection->fileInfo().action().text());
+
+        int userId = connection->fileInfo().userId();
+        item->setText(c++, m_dbController->username(userId));
+    }
+    else
+    {
+        item->setText(c++, "");
+        item->setText(c++, "");
+    }
+
+
+
 }
 
 void DialogConnections::updateButtonsEnableState()
@@ -877,22 +893,16 @@ void DialogConnections::updateButtonsEnableState()
 
     for (auto item : selectedItems)
     {
-        std::shared_ptr<Hardware::Connection> connection = item->data(0, Qt::UserRole).value<std::shared_ptr<Hardware::Connection>>();
+        QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+        std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
         if (connection == nullptr)
         {
             assert(connection);
             return;
         }
 
-        VcsState state;
-        VcsItemAction action;
-        bool ok = connection->vcsStateAndAction(m_dbController, state, action);
-        if (ok == false)
-        {
-            continue;
-        }
-
-        if (state == VcsState::CheckedOut)
+        if (connection->fileInfo().state() == VcsState::CheckedOut)
         {
             checkedOutCount++;
         }

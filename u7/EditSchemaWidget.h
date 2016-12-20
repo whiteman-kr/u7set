@@ -1,5 +1,5 @@
 #pragma once
-
+#include <QHostInfo>
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaView.h"
@@ -104,7 +104,6 @@ public:
 	explicit EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent = nullptr);
 
 	virtual ~EditSchemaView();
-
 
 	// Painting
 	//
@@ -290,6 +289,12 @@ public:
 		// Mouse Right Button Up
 		//
 		m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightUp_None, this, std::placeholders::_1)));
+
+		// Init Session Variables
+		//
+		schemaView()->session().setProject(dbController->currentProject().projectName());
+		schemaView()->session().setUsername(dbController->currentUser().username());
+		schemaView()->session().setHost(QHostInfo::localHostName());
 
 		// --
 		//

@@ -21,11 +21,11 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 	ui->m_presetsTree->setExpandsOnDoubleClick(false);
 
 	QStringList headerLabels;
-	headerLabels<<"Caption";
-	headerLabels<<"Type";
-	headerLabels<<"AppSignalID";
-	headerLabels<<"AppSignalCaption";
-	headerLabels<<"Value";
+    headerLabels<<tr("Caption");
+    headerLabels<<tr("Type");
+    headerLabels<<tr("AppSignalID");
+    headerLabels<<tr("AppSignalCaption");
+    headerLabels<<tr("Value");
 
 	ui->m_presetsTree->setColumnCount(headerLabels.size());
 	ui->m_presetsTree->setHeaderLabels(headerLabels);
@@ -61,18 +61,18 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 	// Objects Filters
 	//
 	ui->m_signalTypeCombo->blockSignals(true);
-	ui->m_signalTypeCombo->addItem("All signals", static_cast<int>(SignalType::All));
-	ui->m_signalTypeCombo->addItem("Analog signals", static_cast<int>(SignalType::Analog));
-	ui->m_signalTypeCombo->addItem("Discrete signals", static_cast<int>(SignalType::Discrete));
+    ui->m_signalTypeCombo->addItem(tr("All signals"), static_cast<int>(SignalType::All));
+    ui->m_signalTypeCombo->addItem(tr("Analog signals"), static_cast<int>(SignalType::Analog));
+    ui->m_signalTypeCombo->addItem(tr("Discrete signals"), static_cast<int>(SignalType::Discrete));
 	ui->m_signalTypeCombo->setCurrentIndex(0);
 	ui->m_signalTypeCombo->blockSignals(false);
 
 	// Objects Masks
 	//
 	ui->m_maskTypeCombo->blockSignals(true);
-	ui->m_maskTypeCombo->addItem("AppSignalID", static_cast<int>(MaskType::AppSignalID));
-	ui->m_maskTypeCombo->addItem("CustomAppSignalID", static_cast<int>(MaskType::CustomAppSignalID));
-	ui->m_maskTypeCombo->addItem("EquipmentID", static_cast<int>(MaskType::EquipmentID));
+    ui->m_maskTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(MaskType::AppSignalID));
+    ui->m_maskTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(MaskType::CustomAppSignalID));
+    ui->m_maskTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(MaskType::EquipmentID));
 	ui->m_maskTypeCombo->setCurrentIndex(0);
 	ui->m_maskTypeCombo->blockSignals(false);
 
@@ -352,7 +352,7 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 
 	QStringList l;
 	l.push_back("-");
-	l.push_back("Signal");
+    l.push_back(tr("Signal"));
 	l.push_back(value.appSignalId());
 	l.push_back(value.caption());
 	if (value.useValue() == true)
@@ -380,7 +380,7 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 
 	QUuid uid = QUuid::createUuid();
 	newFilter->setStrID(uid.toString());
-	newFilter->setCaption("New Filter");
+    newFilter->setCaption(tr("New Filter"));
 
 	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
 	setFilterItemText(newPresetItem, newFilter.get());
@@ -523,7 +523,7 @@ void DialogPresetEditor::on_m_add_clicked()
 
 	if (selectedPresets.size() != 1)
 	{
-		QMessageBox::critical(this, "Error", "Select one preset to add signals!");
+        QMessageBox::critical(this, tr("Error"), tr("Select one preset to add signals!"));
 		return;
 	}
 
@@ -697,7 +697,7 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		{
 			if (ov.analog() != firstValue.analog())
 			{
-				QMessageBox::warning(this, "Preset Editor", "Please select signals of same type (analog or discrete).");
+                QMessageBox::warning(this, tr("Preset Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
 			}
 

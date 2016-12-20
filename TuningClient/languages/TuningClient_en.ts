@@ -708,6 +708,11 @@
 <context>
     <name>ConfigController</name>
     <message>
+        <location filename="../ConfigController.cpp" line="83"/>
+        <source>Cannot create or attach to shared memory to determine software instance no. Error: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ConfigController.cpp" line="120"/>
         <source>Cannot determine software instance no. It seems all slots are occupied</source>
         <translation type="unfinished"></translation>
@@ -800,6 +805,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ConfigController.cpp" line="453"/>
+        <source>The received file has different EquipmentID then expected.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ConfigController.cpp" line="465"/>
+        <source>The received file has different software type then expected.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ConfigController.cpp" line="504"/>
         <source>Cannot find TuningService tag %1
 </source>
@@ -873,6 +890,7 @@
     <name>DialogPresetEditor</name>
     <message>
         <location filename="../DialogPresetEditor.ui" line="14"/>
+        <location filename="../DialogPresetEditor.cpp" line="700"/>
         <location filename="../DialogPresetEditor.cpp" line="708"/>
         <source>Preset Editor</source>
         <translation type="unfinished"></translation>
@@ -929,8 +947,64 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../DialogPresetEditor.cpp" line="24"/>
+        <source>Caption</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="25"/>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="26"/>
+        <location filename="../DialogPresetEditor.cpp" line="73"/>
+        <source>AppSignalID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="27"/>
+        <source>AppSignalCaption</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="28"/>
+        <source>Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="64"/>
+        <source>All signals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="65"/>
+        <source>Analog signals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="66"/>
+        <source>Discrete signals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="74"/>
+        <source>CustomAppSignalID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="75"/>
+        <source>EquipmentID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../DialogPresetEditor.cpp" line="336"/>
         <source>Preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="355"/>
+        <source>Signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -944,8 +1018,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../DialogPresetEditor.cpp" line="383"/>
+        <source>New Filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../DialogPresetEditor.cpp" line="435"/>
         <source>Are you sure you want to remove selected presets?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="526"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="526"/>
+        <source>Select one preset to add signals!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPresetEditor.cpp" line="700"/>
+        <source>Please select signals of same type (analog or discrete).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1005,18 +1099,34 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.ui" line="106"/>
+        <location filename="../DialogSettings.ui" line="113"/>
         <source>Filter objects by equipment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.ui" line="113"/>
+        <location filename="../DialogSettings.ui" line="136"/>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogSettings.ui" line="106"/>
         <source>Filter objects by schema</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="58"/>
+        <location filename="../DialogSettings.cpp" line="87"/>
         <source>Configurator address has been changed, please restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogSettings.cpp" line="87"/>
+        <location filename="../DialogSettings.cpp" line="103"/>
+        <source>TuningClient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogSettings.cpp" line="103"/>
+        <source>Language has been changed, please restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1027,12 +1137,122 @@
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="25"/>
+        <source>Parameter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="26"/>
+        <source>Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="31"/>
+        <source>Source info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="53"/>
+        <source>Source State</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="70"/>
+        <source>errors in reply RupFrameHeader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="81"/>
+        <source>errors in reply FotipHeader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSourceInfo.cpp" line="95"/>
+        <source>errors reported by LM in reply FotipHeader.flags</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DialogTuningSources</name>
     <message>
         <location filename="../DialogTuningSources.ui" line="14"/>
         <source>Tuning Sources</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="15"/>
+        <source>Id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="16"/>
+        <source>EquipmentId</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="17"/>
+        <source>Caption</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="18"/>
+        <source>Ip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="19"/>
+        <source>Port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="20"/>
+        <source>Channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="21"/>
+        <source>SubsystemID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="22"/>
+        <source>Subsystem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="23"/>
+        <source>LmNumber</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="25"/>
+        <source>IsReply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="26"/>
+        <source>RequestCount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="27"/>
+        <source>ReplyCount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="28"/>
+        <source>CommandQueueSize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <source>No</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1059,8 +1279,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../DialogUsers.cpp" line="20"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogUsers.cpp" line="21"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogUsers.cpp" line="22"/>
+        <source>Administrator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../DialogUsers.cpp" line="75"/>
         <source>&lt;Enter password&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogUsers.cpp" line="156"/>
+        <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1080,117 +1320,144 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="53"/>
+        <location filename="../MainWindow.cpp" line="54"/>
         <source>Failed to load user filters: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="59"/>
+        <location filename="../MainWindow.cpp" line="60"/>
         <source>User Presets</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="84"/>
-        <location filename="../MainWindow.cpp" line="90"/>
-        <location filename="../MainWindow.cpp" line="436"/>
+        <location filename="../MainWindow.cpp" line="57"/>
+        <location filename="../MainWindow.cpp" line="85"/>
+        <location filename="../MainWindow.cpp" line="91"/>
+        <location filename="../MainWindow.cpp" line="360"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="93"/>
+        <location filename="../MainWindow.cpp" line="38"/>
+        <source>Waiting for configuration...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="94"/>
         <source>Application finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="140"/>
+        <location filename="../MainWindow.cpp" line="100"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="141"/>
+        <location filename="../MainWindow.cpp" line="101"/>
         <source>Quit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="149"/>
+        <location filename="../MainWindow.cpp" line="109"/>
         <source>Preset Editor...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="150"/>
+        <location filename="../MainWindow.cpp" line="110"/>
         <source>Edit user presets</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="155"/>
+        <location filename="../MainWindow.cpp" line="115"/>
         <source>Users...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="156"/>
+        <location filename="../MainWindow.cpp" line="116"/>
         <source>Edit users</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="161"/>
+        <location filename="../MainWindow.cpp" line="121"/>
         <source>Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="162"/>
+        <location filename="../MainWindow.cpp" line="122"/>
         <source>Change application settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="167"/>
+        <location filename="../MainWindow.cpp" line="127"/>
         <source>Tuning sources...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="168"/>
+        <location filename="../MainWindow.cpp" line="128"/>
         <source>View tuning sources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="173"/>
+        <location filename="../MainWindow.cpp" line="133"/>
         <source>Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="174"/>
+        <location filename="../MainWindow.cpp" line="134"/>
         <source>Show application log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="178"/>
+        <location filename="../MainWindow.cpp" line="138"/>
         <source>About...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="179"/>
+        <location filename="../MainWindow.cpp" line="139"/>
         <source>Show application information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="189"/>
+        <location filename="../MainWindow.cpp" line="149"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="195"/>
+        <location filename="../MainWindow.cpp" line="155"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="204"/>
+        <location filename="../MainWindow.cpp" line="164"/>
         <source>&amp;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="207"/>
+        <location filename="../MainWindow.cpp" line="215"/>
+        <source> ConfigSrv: %1   TuningSrv: %2 </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="208"/>
+        <location filename="../MainWindow.cpp" line="209"/>
+        <source>NoConnection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="231"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="231"/>
+        <source>Program configuration has been changed and will be updated.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../TuningFilter.cpp" line="331"/>
         <location filename="../TuningFilter.cpp" line="950"/>
         <location filename="../TuningFilter.cpp" line="1101"/>
         <location filename="../TuningObjectManager.cpp" line="126"/>
@@ -1217,13 +1484,38 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../TuningFilter.cpp" line="982"/>
+        <source>TuningFilterStorage::save: failed to save presets in file %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningFilter.cpp" line="1030"/>
         <source>The file is not an SchemasDetails file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../TuningFilter.cpp" line="1119"/>
+        <source>Schemas</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningFilter.cpp" line="1146"/>
+        <source>Equipment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningObjectManager.cpp" line="44"/>
         <source>The file is not an TuningSignals file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/OutputLog.h" line="16"/>
+        <source>Ok</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/OutputLog.h" line="18"/>
+        <source>Internal error! File: %1 Line: %2 Function: %3</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1738,6 +2030,11 @@
         <source>Unknown SignalType value: %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../TuningFilter.cpp" line="331"/>
+        <source>Unknown tag: </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TuningItemModel</name>
@@ -1807,6 +2104,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../TuningPage.cpp" line="485"/>
+        <source>Analog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="485"/>
+        <source>Discrete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningPage.cpp" line="498"/>
         <location filename="../TuningPage.cpp" line="502"/>
         <location filename="../TuningPage.cpp" line="508"/>
@@ -1824,7 +2131,6 @@
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="503"/>
-        <location filename="../TuningPage.cpp" line="521"/>
         <source>%1 =&gt; %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1832,11 +2138,6 @@
         <location filename="../TuningPage.cpp" line="509"/>
         <location filename="../TuningPage.cpp" line="527"/>
         <source>Writing %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="535"/>
-        <source>?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1881,9 +2182,18 @@
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1118"/>
-        <source>New values will be applied: 
-
+        <source>New values will be applied:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1164"/>
+        <source>%1 (%2) = %3
 </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1169"/>
+        <source>Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1899,18 +2209,6 @@
     <message>
         <location filename="../TuningPage.cpp" line="1161"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="1164"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="1169"/>
-        <source>
-Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1989,6 +2287,52 @@ Are you sure you want to continue?</source>
     <message>
         <location filename="../TuningObjectManager.cpp" line="752"/>
         <source>TcpTuningClient::slot_signalsUpdated</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TuningPage</name>
+    <message>
+        <location filename="../TuningPage.cpp" line="1346"/>
+        <source>Apply Mask</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1352"/>
+        <source>Set Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1355"/>
+        <source>Set all to On</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1358"/>
+        <source>Set all to Off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1361"/>
+        <source>Set to Defaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1364"/>
+        <source>Apply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1367"/>
+        <source>Undo</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TuningWorkspace</name>
+    <message>
+        <location filename="../TuningWorkspace.cpp" line="28"/>
+        <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

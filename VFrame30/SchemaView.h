@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Schema.h"
+#include "Session.h"
 
 namespace VFrame30
 {
@@ -51,11 +52,16 @@ namespace VFrame30
 		double zoom() const;
 		void setZoom(double value, bool repaint = true, int dpiX = 0, int dpiY = 0);
 
+		const Session& session() const;
+		Session& session();
+
 		// Data
 		//
 	private:
 		std::shared_ptr<VFrame30::Schema> m_schema;
 		double m_zoom = 100.0;
+
+		Session m_session;
 	};
 }
 
