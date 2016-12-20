@@ -115,6 +115,7 @@ message Envelope
 	optional SchemaLayer schemalayer = 101;			// VFrame30::SchemaLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
+	optional Connection connection = 104;			// Hardware::Connection
 }
 
 
@@ -904,7 +905,6 @@ message AppSignalState
 
 message Connection
 {
-    optional int32 Index = 1 [default = 0];
     optional string ConnectionID = 2 [default = ""];
 
     optional string Port1EquipmentID = 3 [default = ""];
@@ -914,7 +914,7 @@ message Connection
     optional string Port2RawDataDescription = 6 [default = ""];
 
     // Flags
-
+	//
     optional int32 SerialMode = 7 [default = 0];
     optional int32 Mode = 8 [default = 0];
     optional bool EnableSerial = 9 [default = false];
@@ -924,7 +924,7 @@ message Connection
     optional bool GenerateVHDFile = 13 [default = false];
 
     // Memory
-
+	//
     optional int32 Port1TxStartAddress = 14 [default = 0];
     optional int32 Port1TxWordsQuantity = 15 [default = 479];
     optional int32 Port1RxWordsQuantity = 16 [default = 479];
@@ -932,5 +932,8 @@ message Connection
     optional int32 Port2TxStartAddress = 17 [default = 0];
     optional int32 Port2TxWordsQuantity = 18 [default = 479];
     optional int32 Port2RxWordsQuantity = 19 [default = 479];
+
+    optional Uuid uuid = 20;
+
 }
 

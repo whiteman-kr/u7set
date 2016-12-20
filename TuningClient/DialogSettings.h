@@ -22,6 +22,9 @@ signals:
     void configServiceAddressChanged();
 
 private:
+    void createLanguagesList();
+
+private:
 	Ui::DialogSettings *ui;
 };
 

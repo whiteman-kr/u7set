@@ -102,7 +102,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = pPaintDevice->logicalDpiX();
+			dpiX = pPaintDevice->physicalDpiX();
 		}
 
 		// Draw the main part

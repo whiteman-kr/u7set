@@ -1,6 +1,7 @@
 #include "DialogTuningSources.h"
 #include "ui_DialogTuningSources.h"
-#include "TcpTuningClient.h"
+#include "MainWindow.h"
+#include "TuningObjectManager.h"
 #include "DialogTuningSourceInfo.h"
 
 DialogTuningSources::DialogTuningSources(QWidget *parent) :
@@ -11,27 +12,27 @@ DialogTuningSources::DialogTuningSources(QWidget *parent) :
 	ui->setupUi(this);
 
 	QStringList headerLabels;
-	headerLabels<<"Id";
-	headerLabels<<"EquipmentId";
-	headerLabels<<"Caption";
-	headerLabels<<"Ip";
-	headerLabels<<"Port";
-	headerLabels<<"Channel";
-	headerLabels<<"SubsystemID";
-	headerLabels<<"Subsystem";
-	headerLabels<<"LmNumber";
+    headerLabels<<tr("Id");
+    headerLabels<<tr("EquipmentId");
+    headerLabels<<tr("Caption");
+    headerLabels<<tr("Ip");
+    headerLabels<<tr("Port");
+    headerLabels<<tr("Channel");
+    headerLabels<<tr("SubsystemID");
+    headerLabels<<tr("Subsystem");
+    headerLabels<<tr("LmNumber");
 
-    headerLabels<<"IsReply";
-    headerLabels<<"RequestCount";
-    headerLabels<<"ReplyCount";
-    headerLabels<<"CommandQueueSize";
+    headerLabels<<tr("IsReply");
+    headerLabels<<tr("RequestCount");
+    headerLabels<<tr("ReplyCount");
+    headerLabels<<tr("CommandQueueSize");
 
     ui->treeWidget->setColumnCount(headerLabels.size());
     ui->treeWidget->setHeaderLabels(headerLabels);
 
     update(false);
 
-    connect(theTcpTuningClient, &TcpTuningClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -59,7 +60,7 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-	std::vector<TuningSource> tsi = theTcpTuningClient->tuningSourcesInfo();
+    std::vector<TuningSource> tsi = theObjectManager->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
     if (ui->treeWidget->topLevelItemCount() != count)
@@ -119,7 +120,7 @@ void DialogTuningSources::update(bool refreshOnly)
 
         int col = dynamicColumn;
 
-        item->setText(col++, ts.m_state.isreply() ? "Yes" : "No");
+        item->setText(col++, ts.m_state.isreply() ? tr("Yes") : tr("No"));
         item->setText(col++, QString::number(ts.m_state.requestcount()));
         item->setText(col++, QString::number(ts.m_state.replycount()));
         item->setText(col++, QString::number(ts.m_state.commandqueuesize()));

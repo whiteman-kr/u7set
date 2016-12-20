@@ -6,39 +6,54 @@
 
 namespace Hardware
 {
-	class Connection : public PropertyObject
+	class Connection :
+			public PropertyObject,
+			public Proto::ObjectSerialization<Connection>
 	{
 		Q_OBJECT
 
 	public:
 		Connection();
-		Connection(const Connection& that);
 
-        bool save(DbController *db);
-        bool load(const QByteArray& data);
+		// Serialization
+		//
+	public:
+		friend Proto::ObjectSerialization<Connection>;	// for call CreateObject from Proto::ObjectSerialization
+
+	protected:
+		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
+		//
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		// Use this function only while serialization, as when object is created is not fully initialized
+		// and must be read before use
+		//
+		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope& message);
+
+	public:
+
+        // Load connection from depreated XML document
+        //
         bool loadFromXml(QXmlStreamReader& reader);
-        bool remove(DbController *db, bool &fileRemoved);
-
-        bool checkOut(DbController* db);
-        bool checkIn(DbController* db, const QString &comment);
-        bool undo(DbController* db, bool &fileRemoved);
-        bool vcsStateAndAction(DbController* db, VcsState &state, VcsItemAction &action);
 
         // Properties
 		//
 	public:
 
-		int index() const;
-		void setIndex(int value);
+		const DbFileInfo& fileInfo() const;
+		void setFileInfo(const DbFileInfo& value);
+
+        QUuid uuid() const;
+        void setUuid(const QUuid& value);
 
         QString connectionID() const;
         void setConnectionID(const QString& value);
 
-        int fileID() const;
-        void setFileID(const int value);
-
         QString fileName() const;
-        void setFileName(const QString& value);
+
+        int fileID() const;
 
         QString port1EquipmentID() const;
 		void setPort1EquipmentID(const QString& value);
@@ -123,63 +138,17 @@ namespace Hardware
 		bool manualSettings() const;
 		void setManualSettings(bool value);
 
-        QStringList signalList() const;
-        void setSignalList(const QStringList& value);
-
 		bool disableDataID() const;
 		void setDisableDataID(bool value);
 
 		bool generateVHDFile() const;
 		void setGenerateVHDFile(bool value);
 
-		Hardware::Connection& operator = (const Hardware::Connection& that)
-		{
-			m_index = that.m_index;
-			m_connectionID = that.m_connectionID;
-            m_fileID = that.m_fileID;
-            m_fileName = that.m_fileName;
-            m_port1EquipmentID = that.m_port1EquipmentID;
-			m_port2EquipmentID = that.m_port2EquipmentID;
-
-			m_port1ManualTxWordsQuantity = that.m_port1ManualTxWordsQuantity;
-			m_port1ManualRxWordsQuantity = that.m_port1ManualRxWordsQuantity;
-			m_port1TxRxOptoID = that.m_port1TxRxOptoID;
-			m_port1TxRxOptoDataUID = that.m_port1TxRxOptoDataUID;
-			m_port1TxRsID = that.m_port1TxRsID;
-			m_port1TxRsDataUID = that.m_port1TxRsDataUID;
-			m_port1TxStartAddress = that.m_port1TxStartAddress;
-			m_port1RawDataDescription = that.m_port1RawDataDescription;
-
-
-			m_port2ManualTxWordsQuantity = that.m_port2ManualTxWordsQuantity;
-			m_port2ManualRxWordsQuantity = that.m_port2ManualRxWordsQuantity;
-			m_port2TxRxOptoID = that.m_port2TxRxOptoID;
-			m_port2TxRxOptoDataUID = that.m_port2TxRxOptoDataUID;
-			m_port2TxRsID = that.m_port2TxRsID;
-			m_port2TxRsDataUID = that.m_port2TxRsDataUID;
-			m_port2TxStartAddress = that.m_port2TxStartAddress;
-			m_port2RawDataDescription = that.m_port2RawDataDescription;
-
-			m_serialMode = that.m_serialMode;
-			m_enableSerial = that.m_enableSerial;
-			m_enableDuplex = that.m_enableDuplex;
-			m_manualSettings = that.m_manualSettings;
-
-			m_disableDataID = that.m_disableDataID;
-			m_generateVHDFile = that.m_generateVHDFile;
-
-			setMode(that.mode());
-            setSignalList(that.signalList());
-
-			return *this;
-		}
-
 	private:
-		int m_index = -1;
+        QUuid m_uuid;
 		QString m_connectionID;
 
-        QString m_fileName;
-        int m_fileID = -1;
+		DbFileInfo m_fileInfo;
 
 		int m_port1TxStartAddress = 0;
 		QString m_port1EquipmentID;
@@ -210,8 +179,6 @@ namespace Hardware
 
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
-
-        QStringList m_signalList;
     };
 
 
@@ -220,27 +187,48 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
+        ConnectionStorage(DbController* db, QWidget* parentWidget);
+        virtual ~ConnectionStorage();
 
-		ConnectionStorage();
+        void clear();
 
-		void add(std::shared_ptr<Connection> connection);
-		bool remove(std::shared_ptr<Connection> connection);
+        void add(std::shared_ptr<Connection> connection);
 
-		Q_INVOKABLE int count() const;
-		std::shared_ptr<Connection> get(int index) const;
-		Q_INVOKABLE QObject* jsGet(int index) const;
+        void remove(const QUuid& uuid);
 
-		void clear();
+        bool removeFile(const QUuid& uuid, bool &fileRemoved);
 
-        bool load(DbController* db, QString &errorCode);
+        Q_INVOKABLE int count() const;
 
-        bool loadFromXmlDeprecated(DbController* db, QString &errorCode);
-        bool deleteXmlDeprecated(DbController* db);
+        std::shared_ptr<Connection> get(const QUuid &uuid) const;
 
-	private:
-		std::vector<std::shared_ptr<Connection>> m_connections;
+        std::shared_ptr<Connection> get(int index) const;
+
+        Q_INVOKABLE QObject* jsGet(int index) const;
+
+        bool checkOut(const QUuid& uuid);
+        bool checkIn(const QUuid& uuid, const QString &comment, bool &fileRemoved);
+        bool undo(const QUuid& uuid, bool &fileRemoved);
+
+        bool load();
+        bool loadFromConnectionsFolder();
+        bool loadFromXmlDeprecated(QString &errorString);
+
+        bool save(const QUuid& uuid);
+
+        bool deleteXmlDeprecated();
+
+
+    private:
+        std::vector<std::shared_ptr<Connection>> m_connectionsVector;
+        std::map<QUuid, std::shared_ptr<Connection>> m_connections;
+
+        DbController* m_db = nullptr;
+
+        QWidget* m_parentWidget = nullptr;
 	};
 }
+
 Q_DECLARE_METATYPE (std::shared_ptr<Hardware::Connection>)
 
 #endif // CONNECTION_H

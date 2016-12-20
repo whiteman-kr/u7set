@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 122;
+const int DatabaseProjectVersion = 126;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -199,6 +199,12 @@ int main(int argc, char *argv[])
 		DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
 		DbControllerBuildTests dbControllerBuildTests;
 		DbControllerVersionControlTests dbControllerVersionTests;
+
+		userTests.setAdminPassword(ProjectAdministratorPassword);
+		userTests.setDatabaseHost(DatabaseHost);
+		userTests.setDatabaseUser(DatabaseUser);
+		userTests.setDatabaseUserPassword(DatabaseUserPassword);
+		userTests.setProjectName(ProjectName);
 
 		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
 

@@ -5,10 +5,11 @@
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
-#include "TcpTuningClient.h"
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
+#include "TuningObjectManager.h"
+#include <QTranslator>
 
 
 namespace Ui {
@@ -73,12 +74,23 @@ private:
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
+
+
+
+ private:
+  void loadLanguage(const QString& rLanguage);
+  void switchTranslator(QTranslator& translator, const QString& filename);
+
+
+  QTranslator m_translator; // contains the translations for this application
+  QTranslator m_translatorQt; // contains the translations for qt
+
 };
 
 extern MainWindow* theMainWindow;
 extern LogFile theLogFile;
 
-extern ObjectManager theObjects;
+extern TuningObjectManager* theObjectManager;
 
 extern TuningFilterStorage theFilters;
 extern TuningFilterStorage theUserFilters;

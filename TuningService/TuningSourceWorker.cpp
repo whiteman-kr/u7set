@@ -64,6 +64,9 @@ namespace Tuning
 		tss.set_fotipflagoffseterr(fotipFlagOffsetErr);
 		tss.set_fotipflagapplysuccess(fotipFlagApplySuccess);
 		tss.set_fotipflagsetsor(fotipFlagSetSOR);
+
+		tss.set_erranaloglowboundcheck(errAnalogLowBoundCheck);
+		tss.set_erranaloghighboundcheck(errAnalogHighBoundCheck);
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -712,6 +715,18 @@ namespace Tuning
 
 		int signalCount = m_tuningSignals.count();
 
+		/*if (frameNo == 1)
+		{
+			int a = 0;
+			a++;
+		}
+
+		if (frameNo == 2)
+		{
+			int a = 0;
+			a++;
+		}*/
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];
@@ -782,12 +797,19 @@ namespace Tuning
 	{
 		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
-		int a = 0;
-		a++;
+		if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
+		{
+			m_stat.errAnalogHighBoundCheck++;
+		}
+
+		if (reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 1)
+		{
+			m_stat.errAnalogLowBoundCheck++;
+		}
 	}
 
 
-	void TuningSourceWorker::processApplyReply(RupFotipV2& reply)
+	void TuningSourceWorker::processApplyReply(RupFotipV2&)
 	{
 	}
 

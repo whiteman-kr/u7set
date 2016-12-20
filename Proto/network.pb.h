@@ -2737,6 +2737,20 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 fotipflagsetsor() const;
   inline void set_fotipflagsetsor(::google::protobuf::int64 value);
 
+  // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+  inline bool has_erranaloglowboundcheck() const;
+  inline void clear_erranaloglowboundcheck();
+  static const int kErrAnalogLowBoundCheckFieldNumber = 39;
+  inline ::google::protobuf::int64 erranaloglowboundcheck() const;
+  inline void set_erranaloglowboundcheck(::google::protobuf::int64 value);
+
+  // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+  inline bool has_erranaloghighboundcheck() const;
+  inline void clear_erranaloghighboundcheck();
+  static const int kErrAnalogHighBoundCheckFieldNumber = 40;
+  inline ::google::protobuf::int64 erranaloghighboundcheck() const;
+  inline void set_erranaloghighboundcheck(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_sourceid();
@@ -2815,6 +2829,10 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_fotipflagapplysuccess();
   inline void set_has_fotipflagsetsor();
   inline void clear_has_fotipflagsetsor();
+  inline void set_has_erranaloglowboundcheck();
+  inline void clear_has_erranaloglowboundcheck();
+  inline void set_has_erranaloghighboundcheck();
+  inline void clear_has_erranaloghighboundcheck();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2856,9 +2874,11 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 fotipflagoffseterr_;
   ::google::protobuf::int64 fotipflagapplysuccess_;
   ::google::protobuf::int64 fotipflagsetsor_;
+  ::google::protobuf::int64 erranaloglowboundcheck_;
+  ::google::protobuf::int64 erranaloghighboundcheck_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(38 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(40 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -6740,6 +6760,50 @@ inline ::google::protobuf::int64 TuningSourceState::fotipflagsetsor() const {
 inline void TuningSourceState::set_fotipflagsetsor(::google::protobuf::int64 value) {
   set_has_fotipflagsetsor();
   fotipflagsetsor_ = value;
+}
+
+// optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+inline bool TuningSourceState::has_erranaloglowboundcheck() const {
+  return (_has_bits_[1] & 0x00000040u) != 0;
+}
+inline void TuningSourceState::set_has_erranaloglowboundcheck() {
+  _has_bits_[1] |= 0x00000040u;
+}
+inline void TuningSourceState::clear_has_erranaloglowboundcheck() {
+  _has_bits_[1] &= ~0x00000040u;
+}
+inline void TuningSourceState::clear_erranaloglowboundcheck() {
+  erranaloglowboundcheck_ = GOOGLE_LONGLONG(0);
+  clear_has_erranaloglowboundcheck();
+}
+inline ::google::protobuf::int64 TuningSourceState::erranaloglowboundcheck() const {
+  return erranaloglowboundcheck_;
+}
+inline void TuningSourceState::set_erranaloglowboundcheck(::google::protobuf::int64 value) {
+  set_has_erranaloglowboundcheck();
+  erranaloglowboundcheck_ = value;
+}
+
+// optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+inline bool TuningSourceState::has_erranaloghighboundcheck() const {
+  return (_has_bits_[1] & 0x00000080u) != 0;
+}
+inline void TuningSourceState::set_has_erranaloghighboundcheck() {
+  _has_bits_[1] |= 0x00000080u;
+}
+inline void TuningSourceState::clear_has_erranaloghighboundcheck() {
+  _has_bits_[1] &= ~0x00000080u;
+}
+inline void TuningSourceState::clear_erranaloghighboundcheck() {
+  erranaloghighboundcheck_ = GOOGLE_LONGLONG(0);
+  clear_has_erranaloghighboundcheck();
+}
+inline ::google::protobuf::int64 TuningSourceState::erranaloghighboundcheck() const {
+  return erranaloghighboundcheck_;
+}
+inline void TuningSourceState::set_erranaloghighboundcheck(::google::protobuf::int64 value) {
+  set_has_erranaloghighboundcheck();
+  erranaloghighboundcheck_ = value;
 }
 
 // -------------------------------------------------------------------

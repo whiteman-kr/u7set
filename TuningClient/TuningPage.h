@@ -189,6 +189,7 @@ private slots:
 
 	void slot_tableDoubleClicked(const QModelIndex &index);
 
+    void slot_ApplyMask();
 public slots:
 	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
 
@@ -227,7 +228,7 @@ private:
 
 	QLineEdit* m_maskEdit = nullptr;
 
-	QComboBox* m_maskTypeCombo = nullptr;
+    //QComboBox* m_maskTypeCombo = nullptr;
 
 	TuningItemModelMain *m_model = nullptr;
 

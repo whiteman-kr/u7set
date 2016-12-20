@@ -29,7 +29,8 @@ private slots:
     void onCheckOut();
     void onCheckIn();
     void onUndo();
-    void onExport();
+    void onReport();
+    void onRefresh();
 
     void onCustomContextMenuRequested(const QPoint &pos);
 
@@ -37,9 +38,8 @@ private:
     void fillConnectionsList();
     void setPropertyEditorObjects();
     bool continueWithDuplicateCaptions();
-    void setConnectionText(QTreeWidgetItem* item, Hardware::Connection* connection);
+    void updateTreeItemText(QTreeWidgetItem *item);
     void updateButtonsEnableState();
-    void deleteConnections(std::vector<std::shared_ptr<Hardware::Connection>>& connectionsToDelete);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -55,7 +55,8 @@ private:
     QPushButton* m_btnCheckOut = nullptr;
     QPushButton* m_btnCheckIn = nullptr;
     QPushButton* m_btnUndo = nullptr;
-    QPushButton* m_btnExport = nullptr;
+    QPushButton* m_btnRefresh = nullptr;
+    QPushButton* m_btnReport = nullptr;
     QPushButton* m_btnClose = nullptr;
 
     QTreeWidget* m_connectionsTree = nullptr;
@@ -69,7 +70,7 @@ private:
 
     DbController *m_dbController = nullptr;
 
-    Hardware::ConnectionStorage connections;
+    Hardware::ConnectionStorage *m_connections;
 
     QMenu* m_popupMenu = nullptr;
     QAction* m_addAction = nullptr;
@@ -77,6 +78,7 @@ private:
     QAction* m_checkOutAction = nullptr;
     QAction* m_checkInAction = nullptr;
     QAction* m_undoAction = nullptr;
+    QAction* m_refreshAction = nullptr;
 
 
 };

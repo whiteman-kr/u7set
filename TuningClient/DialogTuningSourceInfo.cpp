@@ -1,6 +1,7 @@
 #include "DialogTuningSourceInfo.h"
 #include "ui_DialogTuningSourceInfo.h"
-#include "TcpTuningClient.h"
+#include "MainWindow.h"
+#include "TuningObjectManager.h"
 
 DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSourceId) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -11,7 +12,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     TuningSource ts;
 
-    if (theTcpTuningClient->tuningSourceInfo(m_tuningSourceId, ts) == true)
+    if (theObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == true)
     {
         setWindowTitle(ts.m_info.equipmentid().c_str());
     }
@@ -21,13 +22,13 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
     }
 
     QStringList headerLabels;
-    headerLabels<<"Parameter";
-    headerLabels<<"Value";
+    headerLabels<<tr("Parameter");
+    headerLabels<<tr("Value");
 
     ui->treeWidget->setColumnCount(headerLabels.size());
     ui->treeWidget->setHeaderLabels(headerLabels);
 
-    QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList()<<"Source info");
+    QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList()<<tr("Source info"));
 
     infoItem->addChild(new QTreeWidgetItem(QStringList()<<"id"));
     infoItem->addChild(new QTreeWidgetItem(QStringList()<<"equipmentID"));
@@ -49,7 +50,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     infoItem->setExpanded(true);
 
-    QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList()<<"Source State");
+    QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList()<<tr("Source State"));
 
     stateItem->addChild(new QTreeWidgetItem(QStringList()<<"isReply"));
     stateItem->addChild(new QTreeWidgetItem(QStringList()<<"requestCount"));
@@ -66,7 +67,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     stateItem->setExpanded(true);
 
-    QTreeWidgetItem* errorsRUPItem = new QTreeWidgetItem(QStringList()<<"errors in reply RupFrameHeader");
+    QTreeWidgetItem* errorsRUPItem = new QTreeWidgetItem(QStringList()<<tr("errors in reply RupFrameHeader"));
 
     errorsRUPItem->addChild(new QTreeWidgetItem(QStringList()<<"errRupProtocolVersion"));
     errorsRUPItem->addChild(new QTreeWidgetItem(QStringList()<<"errRupFrameSize"));
@@ -77,7 +78,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     ui->treeWidget->addTopLevelItem(errorsRUPItem);
 
-    QTreeWidgetItem* errorsFotipItem = new QTreeWidgetItem(QStringList()<<"errors in reply FotipHeader");
+    QTreeWidgetItem* errorsFotipItem = new QTreeWidgetItem(QStringList()<<tr("errors in reply FotipHeader"));
 
     errorsFotipItem->addChild(new QTreeWidgetItem(QStringList()<<"errFotipProtocolVersion"));
     errorsFotipItem->addChild(new QTreeWidgetItem(QStringList()<<"errFotipUniqueID"));
@@ -91,7 +92,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSo
 
     ui->treeWidget->addTopLevelItem(errorsFotipItem);
 
-    QTreeWidgetItem* errorsFotipFlagItem = new QTreeWidgetItem(QStringList()<<"errors reported by LM in reply FotipHeader.flags");
+    QTreeWidgetItem* errorsFotipFlagItem = new QTreeWidgetItem(QStringList()<<tr("errors reported by LM in reply FotipHeader.flags"));
 
     errorsFotipFlagItem->addChild(new QTreeWidgetItem(QStringList()<<"fotipFlagBoundsCheckSuccess"));
     errorsFotipFlagItem->addChild(new QTreeWidgetItem(QStringList()<<"fotipFlagWriteSuccess"));
@@ -144,7 +145,7 @@ void DialogTuningSourceInfo::updateData()
 {
     TuningSource ts;
 
-    if (theTcpTuningClient->tuningSourceInfo(m_tuningSourceId, ts) == false)
+    if (theObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == false)
     {
         return;
     }

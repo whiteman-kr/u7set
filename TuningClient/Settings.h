@@ -37,6 +37,9 @@ public:
 	bool filterBySchema() const;
 	void setFilterBySchema(bool value);
 
+    QString language() const;
+    void setLanguage(const QString& value);
+
 	bool admin() const;
 
 	TuningPageSettings *tuningPageSettings(int index);
@@ -83,6 +86,8 @@ private:
 
 	bool m_filterByEquipment = true;
 	bool m_filterBySchema = true;
+
+    QString m_language = "en";
 
 	QMutex m;
 

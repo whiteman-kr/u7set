@@ -30,7 +30,7 @@ public:
 		static int dpiX = -1;
 		if (dpiX == -1)
 		{
-			dpiX = QApplication::desktop()->screen()->logicalDpiX();
+			dpiX = QApplication::desktop()->screen()->physicalDpiX();
 		}
 		return dpiX;
 	}
@@ -40,7 +40,7 @@ public:
 		static int dpiY = -1;
 		if (dpiY == -1)
 		{
-			dpiY = QApplication::desktop()->screen()->logicalDpiY();
+			dpiY = QApplication::desktop()->screen()->physicalDpiY();
 		}
 		return dpiY;
 	}

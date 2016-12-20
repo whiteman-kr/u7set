@@ -25,7 +25,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 		m_filterTree = new QTreeWidget();
 
 		QStringList headerLabels;
-		headerLabels<<"Caption";
+        headerLabels<<tr("Caption");
 
 		m_filterTree->setColumnCount(headerLabels.size());
 		m_filterTree->setHeaderLabels(headerLabels);

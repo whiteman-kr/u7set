@@ -41,10 +41,10 @@ namespace VFrame30
 			m_font.setSize(10.0, SchemaUnit::Display);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(mm2in(2.2), SchemaUnit::Inch);
+			m_font.setSize(mm2in(3.0), SchemaUnit::Inch);
 			break;
 		case SchemaUnit::Millimeter:
-			m_font.setSize(2.2, SchemaUnit::Millimeter);
+			m_font.setSize(3.0, SchemaUnit::Millimeter);
 			break;
 		default:
 			assert(false);
@@ -305,7 +305,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = pPaintDevice->logicalDpiX();
+			dpiX = pPaintDevice->physicalDpiX();
 		}
 
 		// Correct rect width
@@ -513,7 +513,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = paintDevice->logicalDpiX();
+			dpiX = paintDevice->physicalDpiX();
 		}
 
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());

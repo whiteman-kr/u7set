@@ -196,7 +196,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = pPaintDevice->logicalDpiX();
+			dpiX = pPaintDevice->physicalDpiX();
 		}
 
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
@@ -224,7 +224,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
+		DrawHelper::DrawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}
@@ -416,7 +416,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = pPaintDevice->logicalDpiX();
+			dpiX = pPaintDevice->physicalDpiX();
 		}
 
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);

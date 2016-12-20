@@ -58,7 +58,6 @@ CONFIG(release, debug|release) {
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    ObjectManager.cpp \
     TuningPage.cpp \
     TuningObject.cpp \
     Settings.cpp \
@@ -74,7 +73,6 @@ SOURCES += main.cpp\
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
     DialogTuningSources.cpp \
-    TcpTuningClient.cpp \
     ../Proto/network.pb.cc \
     ../lib/AppSignalState.cpp \
     ../Proto/serialization.pb.cc \
@@ -90,10 +88,10 @@ SOURCES += main.cpp\
     UserManager.cpp \
     DialogUsers.cpp \
     DialogProperties.cpp \
-    DialogTuningSourceInfo.cpp
+    DialogTuningSourceInfo.cpp \
+    TuningObjectManager.cpp
 
 HEADERS  += MainWindow.h \
-    ObjectManager.h \
     Stable.h \
     TuningPage.h \
     TuningObject.h \
@@ -110,7 +108,6 @@ HEADERS  += MainWindow.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
     DialogTuningSources.h \
-    TcpTuningClient.h \
     ../Proto/network.pb.h \
     ../lib/AppSignalState.h \
     ../Proto/serialization.pb.h \
@@ -126,7 +123,8 @@ HEADERS  += MainWindow.h \
     UserManager.h \
     DialogUsers.h \
     DialogProperties.h \
-    DialogTuningSourceInfo.h
+    DialogTuningSourceInfo.h \
+    TuningObjectManager.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -142,3 +140,5 @@ PRECOMPILED_HEADER = Stable.h
 # QtPropertyBrowser
 #
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
+
+TRANSLATIONS = languages/TuningClient_en.ts languages/TuningClient_ru.ts

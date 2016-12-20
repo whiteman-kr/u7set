@@ -278,7 +278,7 @@ void TuningItemModel::updateStates()
 		return;
 	}
 
-    QMutexLocker l(&theObjects.m_mutex);
+    QMutexLocker l(&theObjectManager->m_mutex);
 
     int count = (int)m_objects.size();
 
@@ -286,7 +286,7 @@ void TuningItemModel::updateStates()
 	{
         TuningObject& pageObject = m_objects[i];
 
-        TuningObject* baseObject = theObjects.objectPtrByHash(pageObject.appSignalHash());
+        TuningObject* baseObject = theObjectManager->objectPtrByHash(pageObject.appSignalHash());
 
         if (baseObject == nullptr)
         {
@@ -296,9 +296,9 @@ void TuningItemModel::updateStates()
 
         pageObject.setReadLowLimit(baseObject->readLowLimit());
         pageObject.setReadHighLimit(baseObject->readHighLimit());
-        pageObject.setValid(baseObject->valid());
         pageObject.setValue(baseObject->value());
-
+        pageObject.setValid(baseObject->valid());
+        pageObject.setWriting(baseObject->writing());
 	}
 
     l.unlock();
@@ -482,7 +482,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
 		if (displayIndex == Type)
 		{
-			return o.analog() ? "Analog" : "Discrete";
+            return o.analog() ? tr("Analog") : tr("Discrete");
 		}
 
 		//
@@ -497,34 +497,42 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
 
-                    if (o.userModified() == false)
-					{
-						return valueString;
-					}
-					else
-					{
-						QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
-						return tr("%1 => %2").arg(valueString).arg(editValueString);
-					}
+                    if (o.userModified() == true)
+                    {
+                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        return tr("%1 => %2").arg(valueString).arg(editValueString);
+                    }
+
+                    if (o.writing() == true)
+                    {
+                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        return tr("Writing %1").arg(editValueString);
+                    }
+
+                    return valueString;
 				}
 				else
 				{
 					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-                    if (o.userModified() == false)
-					{
-						return valueString;
-					}
-					else
-					{
-						QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
-						return tr("%1 => %2").arg(valueString).arg(editValueString);
-					}
+                    if (o.userModified() == true)
+                    {
+                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+                        return QString("%1 => %2").arg(valueString).arg(editValueString);
+                    }
+
+                    if (o.writing() == true)
+                    {
+                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+                        return tr("Writing %1").arg(editValueString);
+                    }
+
+                    return valueString;
 				}
 			}
 			else
 			{
-				return tr("?");
+                return "?";
 			}
 		}
 
@@ -739,7 +747,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 	for (int i : selectedRows)
 	{
 		TuningObject& o = m_objects[i];
-        o.setEditValue(newValue);
+        o.onEditValue(newValue);
 	}
 }
 
@@ -758,11 +766,11 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 		{
 			if (o.editValue() == 0)
 			{
-				o.setEditValue(1);
+                o.onEditValue(1);
 			}
 			else
 			{
-				o.setEditValue(0);
+                o.onEditValue(0);
 			}
 		}
 	}
@@ -1022,7 +1030,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 			return false;
 		}
 
-		o.setEditValue(v);
+        o.onEditValue(v);
 		return true;
 	}
 
@@ -1032,12 +1040,12 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			o.setEditValue(1.0);
+            o.onEditValue(1.0);
 			return true;
 		}
 		else
 		{
-			o.setEditValue(0.0);
+            o.onEditValue(0.0);
 			return true;
 		}
     }
@@ -1055,7 +1063,7 @@ void TuningItemModelMain::slot_setDefaults()
 
 		if (o.analog() == true)
 		{
-			o.setEditValue(o.defaultValue());
+            o.onEditValue(o.defaultValue());
 		}
 	}
 }
@@ -1071,7 +1079,7 @@ void TuningItemModelMain::slot_setOn()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(1);
+            o.onEditValue(1);
 		}
 	}
 }
@@ -1087,7 +1095,7 @@ void TuningItemModelMain::slot_setOff()
 
         if (o.analog() == false)
 		{
-			o.setEditValue(0);
+            o.onEditValue(0);
 		}
 	}
 }
@@ -1096,7 +1104,7 @@ void TuningItemModelMain::slot_undo()
 {
 	for (TuningObject& o : m_objects)
 	{
-		o.setEditValue(o.value());
+        o.onEditValue(o.value());
 	}
 }
 
@@ -1107,7 +1115,7 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
-	QString str = tr("New values will be applied: \r\n\r\n");
+    QString str = tr("New values will be applied:") + QString("\r\n\r\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -1128,8 +1136,6 @@ void TuningItemModelMain::slot_Apply()
 	{
 		return;
 	}
-
-    std::vector<WriteCommand> signalsArray;
 
 	int listCount = 0;
 
@@ -1160,7 +1166,7 @@ void TuningItemModelMain::slot_Apply()
 		listCount++;
 	}
 
-	str += tr("\r\nAre you sure you want to continue?");
+    str += QString("\r\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(m_parent, tr("Apply Changes"),
 							 str,
@@ -1170,19 +1176,7 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
-    for (TuningObject& o : m_objects)
-    {
-        if (o.userModified() == false)
-        {
-            continue;
-        }
-
-        signalsArray.push_back(WriteCommand(o.appSignalHash(), o.editValue()));
-
-        o.clearUserModified(); // temporary solution!!!!!
-    }
-
-    theTcpTuningClient->writeTuningSignals(signalsArray);
+    theObjectManager->writeModifiedTuningObjects(m_objects);
 }
 
 
@@ -1341,33 +1335,41 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_model->setFont(f.family(), f.pointSize(), false);
     m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-     // Button controls
+    // Mask controls
 	//
-	m_maskTypeCombo = new QComboBox();
-	m_maskEdit = new QLineEdit();
-	m_maskButton = new QPushButton("Apply Mask");
+    //m_maskTypeCombo = new QComboBox();
+    //Vconnect(m_maskTypeCombo, &QLineEdit::selectionChanged, this, &TuningPage::slot_ApplyMask);
 
-	m_setValueButton = new QPushButton("Set Value");
+    m_maskEdit = new QLineEdit();
+    connect(m_maskEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyMask);
+
+    m_maskButton = new QPushButton(tr("Apply Mask"));
+    connect(m_maskButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyMask);
+
+    // Button controls
+    //
+
+    m_setValueButton = new QPushButton(tr("Set Value"));
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
-	m_setOnButton = new QPushButton("Set all to On");
+    m_setOnButton = new QPushButton(tr("Set all to On"));
 	connect(m_setOnButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOn);
 
-	m_setOffButton = new QPushButton("Set all to Off");
+    m_setOffButton = new QPushButton(tr("Set all to Off"));
 	connect(m_setOffButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOff);
 
-	m_setToDefaultButton = new QPushButton("Set to Defaults");
+    m_setToDefaultButton = new QPushButton(tr("Set to Defaults"));
 	connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
 
-	m_applyButton = new QPushButton("Apply");
+    m_applyButton = new QPushButton(tr("Apply"));
 	connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
-	m_undoButton = new QPushButton("Undo");
+    m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
 	m_bottomLayout = new QHBoxLayout();
 
-	m_bottomLayout->addWidget(m_maskTypeCombo);
+    //m_bottomLayout->addWidget(m_maskTypeCombo);
 	m_bottomLayout->addWidget(m_maskEdit);
 	m_bottomLayout->addWidget(m_maskButton);
 	m_bottomLayout->addStretch();
@@ -1459,11 +1461,13 @@ void TuningPage::fillObjectsList()
 {
 	std::vector<int> objectsIndexes;
 
-	std::vector<TuningObject> objects = theObjects.objects();
+    std::vector<TuningObject> objects = theObjectManager->objects();
+
+    QString mask = m_maskEdit->text();
 
 	for (int i = 0; i < objects.size(); i++)
 	{
-		const TuningObject& o = objects[i];
+        TuningObject& o = objects[i];
 
 		// Root filter
 		//
@@ -1493,6 +1497,18 @@ void TuningPage::fillObjectsList()
 			{
 				continue;
 			}
+
+            // Modify the default value from selected filter
+            //
+
+            TuningFilterValue filterValue;
+
+            bool hasValue = m_treeFilter->value(o.appSignalHash(), filterValue);
+
+            if (hasValue == true)
+            {
+                o.setDefaultValue(filterValue.value());
+            }
 		}
 
 		// Tab Filter
@@ -1516,6 +1532,26 @@ void TuningPage::fillObjectsList()
 				continue;
 			}
 		}
+
+        // Mask Filter
+        //
+
+        if (mask.length() != 0)
+        {
+            bool maskMatch = false;
+
+            if (o.appSignalID().contains(mask, Qt::CaseInsensitive) == true || o.customAppSignalID().contains(mask, Qt::CaseInsensitive) == true)
+            {
+                maskMatch = true;
+            }
+
+            if (maskMatch == false)
+            {
+                continue;
+            }
+        }
+
+
 
 		objectsIndexes.push_back(i);
 	}
@@ -1586,6 +1622,10 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex &index)
 	slot_setValue();
 }
 
+void TuningPage::slot_ApplyMask()
+{
+    fillObjectsList();
+}
 
 void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
 {

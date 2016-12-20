@@ -1705,8 +1705,16 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal &appSignal, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem)
 	{
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
 
@@ -1805,6 +1813,14 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
 	{
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		if (appSignal.appSignalID() == srcSignal.appSignalID())
 		{
 			return true;
@@ -2443,6 +2459,14 @@ namespace Builder
 			return false;
 		}
 
+		if (appSignal.enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
 
 		if (destSignal == nullptr)
@@ -2711,6 +2735,14 @@ namespace Builder
 		if (appSignal == nullptr)
 		{
 			ASSERT_RETURN_FALSE
+		}
+
+		if (appSignal->enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+			return false;
 		}
 
 		quint16 fbType = appFb.opcode();
@@ -3369,6 +3401,11 @@ namespace Builder
 			return false;
 		}
 
+        return true;
+
+        /*
+
+
 		// build analog and discrete signals list
 		//
 		QStringList&& signslList = connection->signalList();
@@ -3423,7 +3460,7 @@ namespace Builder
 		int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
 		Q_UNUSED(discreteSignalsSizeW)
 
-		return result;
+        return result;*/
 	}
 
 

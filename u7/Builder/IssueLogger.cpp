@@ -3213,6 +3213,29 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5071
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't assign value to tuningable signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Can't assign value to tuningable signal. Such signals are read-only.
+	///
+	void IssueLogger::errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5071,
+				  QString(tr("Can't assign value to tuningable signal '%1' (Logic schema '%2').")).
+					arg(appSignalID).arg(schemaID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 
