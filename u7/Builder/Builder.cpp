@@ -224,9 +224,9 @@ namespace Builder
 			//
 			// Loading connections
 			//
-			Hardware::ConnectionStorage connections;
+            Hardware::ConnectionStorage connections(&db, nullptr);
 
-			ok = connections.load(&db, errorCode);
+            ok = connections.load();
 
 			if (ok == false)
 			{

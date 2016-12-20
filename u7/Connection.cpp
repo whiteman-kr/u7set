@@ -17,85 +17,120 @@ namespace Hardware
     Connection::Connection()
     {
 
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        QUuid uuid = QUuid::createUuid();
+        setUuid(uuid);
 
-        auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, "ConnectionID", true, Connection::connectionID, Connection::setConnectionID);
-        propConnId->setValidator("^[A-Za-z0-9_]+$");
+        QString f = QString("connection-%1.%2").arg(uuid.toString()).arg(::OclFileExtension);
+        f.remove('{');
+        f.remove('}');
+        m_fileInfo.setFileName(f);
 
-        auto propFileName = ADD_PROPERTY_GETTER(QString, "FileName", true, Connection::fileName);
+        static QString s_conectionId = "ConnectionID";
+        static QString s_fileName = "FileName";
+        static QString s_fileID = "FileID";
+        static QString s_port1EquipmentID = "Port1EquipmentID";
+        static QString s_port2EquipmentID = "Port2EquipmentID";
+        static QString s_port1RawDataDescription = "Port1RawDataDescription";
+        static QString s_port2RawDataDescription = "Port2RawDataDescription";
+
+        static QString s_port1TxStartAddress = "Port1TxStartAddress";
+        static QString s_port1TxWordsQuantity = "Port1TxWordsQuantity";
+        static QString s_port1RxWordsQuantity = "Port1RxWordsQuantity";
+        static QString s_port1TxRxOptoID = "Port1TxRxOptoID";
+        static QString s_port1TxRxOptoDataUID = "Port1TxRxOptoDataUID";
+        static QString s_port1TxRsID = "Port1TxRsID";
+        static QString s_port1TxRsDataUID = "Port1TxRsDataUID";
+
+        static QString s_port2TxStartAddress = "Port2TxStartAddress";
+        static QString s_port2TxWordsQuantity = "Port2TxWordsQuantity";
+        static QString s_port2RxWordsQuantity = "Port2RxWordsQuantity";
+        static QString s_port2TxRxOptoID = "Port2TxRxOptoID";
+        static QString s_port2TxRxOptoDataUID = "Port2TxRxOptoDataUID";
+        static QString s_port2TxRsID = "Port2TxRsID";
+        static QString s_port2TxRsDataUID = "Port2TxRsDataUID";
+
+        static QString s_enableSerial = "EnableSerial";
+        static QString s_serialMode = "SerialMode";
+        static QString s_enableDuplex = "EnableDuplex";
+        static QString s_enableManualSettings = "EnableManualSettings";
+        static QString s_mode = "Mode";
+        static QString s_disableDataIDControl = "Disable DataID Control";
+        static QString s_generateConnectionVHDfile = "Generate connection VHD file";
+
+        static QString s_miscellaneous = "Miscellaneous";
+        static QString s_manualSettings = "Manual Settings";
+        static QString s_serialCommunicationsOCM = "Serial Communications (OCM)";
+
+        auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, s_conectionId, true, Connection::connectionID, Connection::setConnectionID);
+        propConnId->setValidator("^[A-Z0-9_]+$");
+
+        auto propFileName = ADD_PROPERTY_GETTER(QString, s_fileName, true, Connection::fileName);
         propFileName->setExpert(true);
 
-        auto propFileID = ADD_PROPERTY_GETTER(int, "FileID", true, Connection::fileID);
+        auto propFileID = ADD_PROPERTY_GETTER(int, s_fileID, true, Connection::fileID);
         propFileID->setExpert(true);
 
-        ADD_PROPERTY_GETTER_SETTER(QString, "Port1EquipmentID", true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
-		ADD_PROPERTY_GETTER_SETTER(QString, "Port2EquipmentID", true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
+        ADD_PROPERTY_GETTER_SETTER(QString, s_port1EquipmentID, true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
+        ADD_PROPERTY_GETTER_SETTER(QString, s_port2EquipmentID, true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
-		auto propPort1RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, "Port1RawDataDescription", true, Connection::port1RawDataDescription, Connection::setPort1RawDataDescription);
-		propPort1RawDataDescription->setCategory(tr("Miscellaneous"));
+        auto propPort1RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, s_port1RawDataDescription, true, Connection::port1RawDataDescription, Connection::setPort1RawDataDescription);
+        propPort1RawDataDescription->setCategory(s_miscellaneous);
 
-		auto propPort2RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, "Port2RawDataDescription", true, Connection::port2RawDataDescription, Connection::setPort2RawDataDescription);
-		propPort2RawDataDescription->setCategory(tr("Miscellaneous"));
+        auto propPort2RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, s_port2RawDataDescription, true, Connection::port2RawDataDescription, Connection::setPort2RawDataDescription);
+        propPort2RawDataDescription->setCategory(s_miscellaneous);
 
-		auto proptx1sa = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxStartAddress", true, Connection::port1ManualTxStartAddress, Connection::setPort1ManualTxStartAddress);
-		proptx1sa->setCategory(tr("Manual Settings"));
+        auto proptx1sa = ADD_PROPERTY_GETTER_SETTER(int, s_port1TxStartAddress, true, Connection::port1ManualTxStartAddress, Connection::setPort1ManualTxStartAddress);
+        proptx1sa->setCategory(s_manualSettings);
 
-		auto proptx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1TxWordsQuantity", true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
-		proptx1wq->setCategory(tr("Manual Settings"));
+        auto proptx1wq = ADD_PROPERTY_GETTER_SETTER(int, s_port1TxWordsQuantity, true, Connection::port1ManualTxWordsQuantity, Connection::setPort1ManualTxWordsQuantity);
+        proptx1wq->setCategory(s_manualSettings);
 
-		auto proprx1wq = ADD_PROPERTY_GETTER_SETTER(int, "Port1RxWordsQuantity", true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
-		proprx1wq->setCategory(tr("Manual Settings"));
+        auto proprx1wq = ADD_PROPERTY_GETTER_SETTER(int, s_port1RxWordsQuantity, true, Connection::port1ManualRxWordsQuantity, Connection::setPort1ManualRxWordsQuantity);
+        proprx1wq->setCategory(s_manualSettings);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRxOptoID", false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
-		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRxOptoDataUID", false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, s_port1TxRxOptoID, false, Connection::port1TxRxOptoID, Connection::setPort1TxRxOptoID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, s_port1TxRxOptoDataUID, false, Connection::port1TxRxOptoDataUID, Connection::setPort1TxRxOptoDataUID);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port1TxRsID", false, Connection::port1TxRsID, Connection::setPort1TxRsID);
-		ADD_PROPERTY_GETTER_SETTER(quint32, "Port1TxRsDataUID", false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, s_port1TxRsID, false, Connection::port1TxRsID, Connection::setPort1TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, s_port1TxRsDataUID, false, Connection::port1TxRsDataUID, Connection::setPort1TxRsDataUID);
 
-		auto proptx2sa = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxStartAddress", true, Connection::port2ManualTxStartAddress, Connection::setPort2ManualTxStartAddress);
-		proptx2sa->setCategory(tr("Manual Settings"));
+        auto proptx2sa = ADD_PROPERTY_GETTER_SETTER(int, s_port2TxStartAddress, true, Connection::port2ManualTxStartAddress, Connection::setPort2ManualTxStartAddress);
+        proptx2sa->setCategory(s_manualSettings);
 
-		auto proptx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2TxWordsQuantity", true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
-		proptx2wq->setCategory(tr("Manual Settings"));
+        auto proptx2wq = ADD_PROPERTY_GETTER_SETTER(int, s_port2TxWordsQuantity, true, Connection::port2ManualTxWordsQuantity, Connection::setPort2ManualTxWordsQuantity);
+        proptx2wq->setCategory(s_manualSettings);
 
-		auto proprx2wq = ADD_PROPERTY_GETTER_SETTER(int, "Port2RxWordsQuantity", true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
-		proprx2wq->setCategory(tr("Manual Settings"));
+        auto proprx2wq = ADD_PROPERTY_GETTER_SETTER(int, s_port2RxWordsQuantity, true, Connection::port2ManualRxWordsQuantity, Connection::setPort2ManualRxWordsQuantity);
+        proprx2wq->setCategory(s_manualSettings);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRxOptoID", false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
-		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRxOptoDataUID", false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, s_port2TxRxOptoID, false, Connection::port2TxRxOptoID, Connection::setPort2TxRxOptoID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, s_port2TxRxOptoDataUID, false, Connection::port2TxRxOptoDataUID, Connection::setPort2TxRxOptoDataUID);
 
-		ADD_PROPERTY_GETTER_SETTER(int, "Port2TxRsID", false, Connection::port2TxRsID, Connection::setPort2TxRsID);
-		ADD_PROPERTY_GETTER_SETTER(quint32, "Port2TxRsDataUID", false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
+        ADD_PROPERTY_GETTER_SETTER(int, s_port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, s_port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-        auto propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, "EnableSerial", true, Connection::enableSerial, Connection::setEnableSerial);
-		propEnableSerial->setCategory(tr("Serial Communications (OCM)"));
+        auto propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, s_enableSerial, true, Connection::enableSerial, Connection::setEnableSerial);
+        propEnableSerial->setCategory(s_serialCommunicationsOCM);
 
-        auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, "SerialMode", true, Connection::serialMode, Connection::setSerialMode);
-		propSerialMode->setCategory(tr("Serial Communications (OCM)"));
+        auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, s_serialMode, true, Connection::serialMode, Connection::setSerialMode);
+        propSerialMode->setCategory(s_serialCommunicationsOCM);
 
-        auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, "EnableDuplex", true, Connection::enableDuplex, Connection::setEnableDuplex);
-		propEnableDuplex->setCategory(tr("Serial Communications (OCM)"));
+        auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, s_enableDuplex, true, Connection::enableDuplex, Connection::setEnableDuplex);
+        propEnableDuplex->setCategory(s_serialCommunicationsOCM);
 
-		auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, "EnableManualSettings", true, Connection::manualSettings, Connection::setManualSettings);
-		propManual->setCategory(tr("Manual Settings"));
+        auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, s_enableManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
+        propManual->setCategory(s_manualSettings);
 
-        auto propMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, "Mode", true, Connection::mode, Connection::setMode);
-        propMode->setCategory(tr("Serial Communications (OCM)"));
+        ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, s_mode, true, Connection::mode, Connection::setMode);
 
-		auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, "Disable DataID Control", true, Connection::disableDataID, Connection::setDisableDataID);
-		propDisableDataID->setCategory(tr("Miscellaneous"));
+        auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, s_disableDataIDControl, true, Connection::disableDataID, Connection::setDisableDataID);
+        propDisableDataID->setCategory(s_miscellaneous);
 
-		auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, "Generate connection VHD file", true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
-		propGenerateVHD->setCategory(tr("Miscellaneous"));
+        auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, s_generateConnectionVHDfile, true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
+        propGenerateVHD->setCategory(s_miscellaneous);
 	}
 
-    Connection::Connection(const Connection& that):Connection()
-    {
-        *this = that;
-    }
-
-	bool Connection::SaveData(Proto::Envelope* message) const
+    bool Connection::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
@@ -104,7 +139,7 @@ namespace Hardware
 
 		::Proto::Connection* mutableConnection = message->mutable_connection();
 
-		mutableConnection->set_index(m_index);
+        Proto::Write(mutableConnection->mutable_uuid(), m_uuid);
 		mutableConnection->set_connectionid(m_connectionID.toUtf8());
 		mutableConnection->set_port1equipmentid(m_port1EquipmentID.toUtf8());
 		mutableConnection->set_port2equipmentid(m_port2EquipmentID.toUtf8());
@@ -140,8 +175,7 @@ namespace Hardware
 
 		const ::Proto::Connection& connection = message.connection();
 
-		m_index = connection.index();
-
+        m_uuid = Proto::Read(connection.uuid());
 		m_connectionID = connection.connectionid().c_str();
 		m_port1EquipmentID = connection.port1equipmentid().c_str();
 		m_port2EquipmentID = connection.port2equipmentid().c_str();
@@ -184,145 +218,8 @@ namespace Hardware
 		return connection;
 	}
 
-    bool Connection::save(DbController *db)
-    {
-        ::Proto::Connection connectionProto;
-
-        connectionProto.set_index(m_index);
-        connectionProto.set_connectionid(m_connectionID.toUtf8());
-        connectionProto.set_port1equipmentid(m_port1EquipmentID.toUtf8());
-        connectionProto.set_port2equipmentid(m_port2EquipmentID.toUtf8());
-        connectionProto.set_port1rawdatadescription(m_port1RawDataDescription.toUtf8());
-        connectionProto.set_port2rawdatadescription(m_port2RawDataDescription.toUtf8());
-
-        connectionProto.set_serialmode(static_cast<int>(serialMode()));
-        connectionProto.set_mode(static_cast<int>(mode()));
-        connectionProto.set_enableserial(m_enableSerial);
-        connectionProto.set_enableduplex(m_enableDuplex);
-        connectionProto.set_manualsettings(m_manualSettings);
-        connectionProto.set_disabledataid(m_disableDataID);
-        connectionProto.set_generatevhdfile(m_generateVHDFile);
-
-        connectionProto.set_port1txstartaddress(m_port1TxStartAddress);
-        connectionProto.set_port1txwordsquantity(m_port1ManualTxWordsQuantity);
-        connectionProto.set_port1rxwordsquantity(m_port1ManualRxWordsQuantity);
-
-        connectionProto.set_port2txstartaddress(m_port2TxStartAddress);
-        connectionProto.set_port2txwordsquantity(m_port2ManualTxWordsQuantity);
-        connectionProto.set_port2rxwordsquantity(m_port2ManualRxWordsQuantity);
-
-        QByteArray data;
-
-        int size = connectionProto.ByteSize();
-        data.resize(size);
-
-        connectionProto.SerializeToArray(data.data(), size);
-
-        // save to db
-        //
-
-        if (m_fileName.isEmpty() == true)
-        {
-            QString sUUID = QUuid::createUuid().toString();
-            sUUID.remove('{');
-            sUUID.remove('}');
-
-            m_fileName = tr("connection-%1.%2").arg(sUUID).arg(::OclFileExtension);
-        }
-
-        std::vector<DbFileInfo> fileList;
-
-        std::shared_ptr<DbFile> file = nullptr;
-
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            // create a file, if it does not exists
-            //
-            file = std::make_shared<DbFile>();
-            file->setFileName(m_fileName);
-
-            file->swapData(data);
-
-            if (db->addFile(file, db->connectionsFileId(), nullptr) == false)
-            {
-                return false;
-            }
-
-        }
-        else
-        {
-            // save to existing file
-            //
-            ok = db->getLatestVersion(fileList[0], &file, nullptr);
-            if (ok == false || file == nullptr)
-            {
-                return false;
-            }
-
-            if (file->state() != VcsState::CheckedOut)
-            {
-                return false;
-            }
-
-            file->swapData(data);
-
-            if (db->setWorkcopy(file, nullptr) == false)
-            {
-                return false;
-            }
-        }
-
-        return true;
-
-    }
-
-    bool Connection::load(const QByteArray& data)
-    {
-        ::Proto::Connection connectionProto;
-
-        bool result = connectionProto.ParseFromArray(data.data(), data.size());
-        if (result == false)
-        {
-            return false;
-        }
-
-        m_index = connectionProto.index();
-
-        m_connectionID = connectionProto.connectionid().c_str();
-        m_port1EquipmentID = connectionProto.port1equipmentid().c_str();
-        m_port2EquipmentID = connectionProto.port2equipmentid().c_str();
-        m_port1RawDataDescription = connectionProto.port1rawdatadescription().c_str();
-        m_port2RawDataDescription = connectionProto.port2rawdatadescription().c_str();
-
-        m_serialMode = static_cast<OptoPort::SerialMode>(connectionProto.serialmode());
-        m_mode = static_cast<OptoPort::Mode>(connectionProto.mode());
-        m_enableSerial = connectionProto.enableserial();
-        m_enableDuplex = connectionProto.enableduplex();
-        m_manualSettings = connectionProto.manualsettings();
-        m_disableDataID = connectionProto.disabledataid();
-        m_generateVHDFile = connectionProto.generatevhdfile();
-
-        m_port1TxStartAddress = connectionProto.port1txstartaddress();
-        m_port1ManualTxWordsQuantity = connectionProto.port1txwordsquantity();
-        m_port1ManualRxWordsQuantity = connectionProto.port1rxwordsquantity();
-
-        m_port2TxStartAddress = connectionProto.port2txstartaddress();
-        m_port2ManualTxWordsQuantity = connectionProto.port2txwordsquantity();
-        m_port2ManualRxWordsQuantity = connectionProto.port2rxwordsquantity();
-
-
-        return true;
-    }
-
-
     bool Connection::loadFromXml(QXmlStreamReader& reader)
     {
-        if (reader.attributes().hasAttribute("Index"))
-        {
-            setIndex(reader.attributes().value("Index").toInt());
-        }
-
 		if (reader.attributes().hasAttribute("ConnectionID"))
         {
 			setConnectionID(reader.attributes().value("ConnectionID").toString());
@@ -361,11 +258,6 @@ namespace Hardware
         if (reader.attributes().hasAttribute("ManualSettings"))
         {
             setManualSettings(reader.attributes().value("ManualSettings").toString() == "true" ? true : false);
-        }
-
-        if (reader.attributes().hasAttribute("SignalList"))
-        {
-            setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
         }
 
         if (reader.attributes().hasAttribute("DisableDataID"))
@@ -433,235 +325,6 @@ namespace Hardware
         return true;
     }
 
-    bool Connection::remove(DbController *db, bool &fileRemoved)
-    {
-        if (db == nullptr)
-        {
-            assert(db);
-            return false;
-        }
-
-        fileRemoved = false;
-
-        // Load the file from the database
-        //
-        std::vector<DbFileInfo> fileList;
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        std::shared_ptr<DbFile> file = nullptr;
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        if (file->state() != VcsState::CheckedOut)
-        {
-            if (db->checkOut(fileList[0], nullptr) == false)
-            {
-                return false;
-            }
-        }
-
-        ok = db->deleteFiles(&fileList, nullptr);
-        if (ok == false)
-        {
-            return false;
-        }
-
-        // checkin file if it exists
-
-
-        ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            fileRemoved = true;
-        }
-
-        return true;
-    }
-
-    bool Connection::checkOut(DbController *db)
-    {
-        if (db == nullptr)
-        {
-            assert(db);
-            return false;
-        }
-        std::shared_ptr<DbFile> file = nullptr;
-
-        std::vector<DbFileInfo> fileList;
-
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        if (file->state() == VcsState::CheckedOut)
-        {
-            return false;
-        }
-
-        if (db->checkOut(fileList[0], nullptr) == false)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool Connection::checkIn(DbController *db, const QString& comment)
-    {
-        if (db == nullptr)
-        {
-            assert(db);
-            return false;
-        }
-        std::shared_ptr<DbFile> file = nullptr;
-
-        std::vector<DbFileInfo> fileList;
-
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        if (file->state() != VcsState::CheckedOut)
-        {
-            return false;
-        }
-
-        if (db->checkIn(fileList[0], comment, nullptr) == false)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool Connection::undo(DbController *db, bool& fileRemoved)
-    {
-        if (db == nullptr)
-        {
-            assert(db);
-            return false;
-        }
-
-        fileRemoved = false;
-
-        std::shared_ptr<DbFile> file = nullptr;
-
-        std::vector<DbFileInfo> fileList;
-
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        if (file->state() != VcsState::CheckedOut)
-        {
-            return false;
-        }
-
-        if (db->undoChanges(fileList[0], nullptr) == false)
-        {
-            return false;
-        }
-
-        // after undo operation, file can be removed, check this
-
-        ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            fileRemoved = true;
-
-            return true;
-        }
-
-        // read previous data from file
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        QByteArray data;
-        file->swapData(data);
-
-        if (load(data) == false)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool Connection::vcsStateAndAction(DbController *db, VcsState& state, VcsItemAction &action)
-    {
-        if (db == nullptr)
-        {
-            assert(db);
-            return false;
-        }
-        std::shared_ptr<DbFile> file = nullptr;
-
-        std::vector<DbFileInfo> fileList;
-
-        bool ok = db->getFileList(&fileList, db->connectionsFileId(), m_fileName, true, nullptr);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        state = file->state();
-
-        action = file->action();
-
-        return true;
-    }
-
-    int Connection::index() const
-    {
-        return m_index;
-    }
-
-    void Connection::setIndex(int value)
-    {
-        m_index = value;
-    }
 
 	const DbFileInfo& Connection::fileInfo() const
 	{
@@ -673,7 +336,17 @@ namespace Hardware
 		m_fileInfo = value;
 	}
 
-	QString Connection::connectionID() const
+    QUuid Connection::uuid() const
+    {
+        return m_uuid;
+    }
+
+    void Connection::setUuid(const QUuid& value)
+    {
+        m_uuid = value;
+    }
+
+    QString Connection::connectionID() const
     {
 		return m_connectionID;
     }
@@ -683,24 +356,14 @@ namespace Hardware
 		m_connectionID = value;
     }
 
-    int Connection::fileID() const
-    {
-        return m_fileID;
-    }
-
-    void Connection::setFileID(int value)
-    {
-        m_fileID = value;
-    }
-
     QString Connection::fileName() const
     {
-        return m_fileName;
+        return fileInfo().fileName();
     }
 
-    void Connection::setFileName(const QString& value)
+    int Connection::fileID() const
     {
-        m_fileName = value;
+        return fileInfo().fileId();
     }
 
 
@@ -933,41 +596,6 @@ namespace Hardware
     void Connection::setMode(const OptoPort::Mode value)
     {
         m_mode = value;
-        auto propertyVisibilityChanger = [this](const char* propertyName, bool visible) {
-            auto property = propertyByCaption(propertyName);
-            if (property != nullptr)
-            {
-                property->setVisible(visible);
-            }
-        };
-
-        switch(value)
-        {
-            case OptoPort::Mode::Optical:
-                propertyVisibilityChanger("SerialMode", false);
-				propertyVisibilityChanger("EnableSerial", false);
-                propertyVisibilityChanger("EnableDuplex", false);
-
-				propertyVisibilityChanger("Port2EquipmentID", true);
-				propertyVisibilityChanger("Port2TxStartAddress", true);
-                propertyVisibilityChanger("Port2TxWordsQuantity", true);
-                propertyVisibilityChanger("Port2RxWordsQuantity", true);
-
-
-                break;
-            case OptoPort::Mode::Serial:
-                propertyVisibilityChanger("SerialMode", true);
-				propertyVisibilityChanger("EnableSerial", true);
-                propertyVisibilityChanger("EnableDuplex", true);
-
-				propertyVisibilityChanger("Port2EquipmentID", false);
-				propertyVisibilityChanger("Port2TxStartAddress", false);
-                propertyVisibilityChanger("Port2TxWordsQuantity", false);
-                propertyVisibilityChanger("Port2RxWordsQuantity", false);
-                break;
-            default:
-                assert(false);
-        }
     }
 
 	bool Connection::enableSerial() const
@@ -1000,16 +628,6 @@ namespace Hardware
         m_manualSettings = value;
     }
 
-    QStringList Connection::signalList() const
-    {
-        return m_signalList;
-    }
-
-    void Connection::setSignalList(const QStringList &value)
-    {
-        m_signalList = value;
-    }
-
     bool Connection::disableDataID() const
 	{
 		return m_disableDataID;
@@ -1037,8 +655,22 @@ namespace Hardware
     //
     //
 
-    ConnectionStorage::ConnectionStorage()
+    ConnectionStorage::ConnectionStorage(DbController* db, QWidget *parentWidget)
+        :QObject(parentWidget),
+         m_db(db),
+         m_parentWidget(parentWidget)
     {
+    }
+
+    ConnectionStorage::~ConnectionStorage()
+    {
+
+    }
+
+    void ConnectionStorage::clear()
+    {
+        m_connections.clear();
+        m_connectionsVector.clear();
     }
 
     void ConnectionStorage::add(std::shared_ptr<Connection> connection)
@@ -1049,101 +681,335 @@ namespace Hardware
             return;
         }
 
-        m_connections.push_back(connection);
-
-		int i = 1;
-        for (auto c : m_connections)
+        if (m_connections.find(connection->uuid()) != m_connections.end())
         {
-            c->setIndex(i++);
+            assert(false);
+            return;
         }
+
+        m_connections[connection->uuid()] = connection;
+
+        m_connectionsVector.push_back(connection);
+
+        assert (m_connectionsVector.size() == m_connections.size());
     }
 
-    bool ConnectionStorage::remove(std::shared_ptr<Connection> connection)
+    void ConnectionStorage::remove(const QUuid &uuid)
     {
+        auto it = m_connections.find(uuid);
+        if (it == m_connections.end())
+        {
+            assert(false);
+            return;
+        }
+
+        m_connections.erase(it);
+
+        bool vectorFound = false;
+
+        int count = (int)m_connectionsVector.size();
+        for (int i = 0; i < count; i++)
+        {
+            if (m_connectionsVector[i]->uuid() == uuid)
+            {
+                m_connectionsVector.erase(m_connectionsVector.begin() + i);
+
+                vectorFound = true;
+
+                break;
+            }
+        }
+
+        if (vectorFound == false)
+        {
+            assert(false);
+        }
+
+        assert (m_connectionsVector.size() == m_connections.size());
+
+    }
+
+
+    bool ConnectionStorage::removeFile(const QUuid &uuid, bool &fileRemoved)
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+
+        auto it = m_connections.find(uuid);
+        if (it == m_connections.end())
+        {
+            assert(false);
+            return false;
+        }
+
+        std::shared_ptr<Connection> connection = it->second;
         if (connection == nullptr)
         {
             assert(connection);
             return false;
         }
 
-        bool result = false;
+        fileRemoved = false;
 
-        for (auto it = m_connections.begin(); it != m_connections.end(); it++)
+        std::vector<DbFileInfo> fileList;
+        bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), connection->fileName(), true, m_parentWidget);
+        if (ok == false || fileList.size() != 1)
         {
-            if ((*it)->index() == connection->index())
+            return false;
+        }
+
+        std::shared_ptr<DbFile> file = nullptr;
+
+        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        if (file->state() != VcsState::CheckedOut)
+        {
+            if (m_db->checkOut(fileList[0], m_parentWidget) == false)
             {
-                m_connections.erase(it);
-                result = true;
-                break;
+                return false;
             }
         }
 
-        if (result == true)
+        ok = m_db->deleteFiles(&fileList, m_parentWidget);
+        if (ok == false)
         {
-			int i = 1;
-            for (auto c : m_connections)
-            {
-                c->setIndex(i++);
-            }
+            return false;
         }
 
-        if (result == false)
+        // checkin file if it exists
+
+        DbFileInfo& fi = fileList[0];
+
+        if (fi.deleted() == true)
         {
-            assert(result);
+            fileRemoved = true;
         }
 
-        return result;
+        connection->setFileInfo(fi);
+
+        return true;
     }
+
 
     int ConnectionStorage::count() const
     {
         return static_cast<int>(m_connections.size());
     }
 
-    std::shared_ptr<Connection> ConnectionStorage::get(int index) const
+    std::shared_ptr<Connection> ConnectionStorage::get(const QUuid& uuid) const
     {
-        if (index < 0 || index >= count())
+        auto it = m_connections.find(uuid);
+        if (it == m_connections.end())
         {
             assert(false);
             return std::make_shared<Connection>();
         }
-        return m_connections[index];
+
+        return it->second;
     }
 
-    QObject* ConnectionStorage::jsGet(int index) const
+    std::shared_ptr<Connection> ConnectionStorage::get(int index) const
     {
-        if (index < 0 || index >= count())
+        if (index < 0 || index >= (int)m_connectionsVector.size())
         {
             assert(false);
             return nullptr;
         }
 
-        QObject* result = m_connections[index].get();
+        return m_connectionsVector[index];
+    }
+
+    QObject* ConnectionStorage::jsGet(int index) const
+    {
+        if (index < 0 || index >= (int)m_connectionsVector.size())
+        {
+            assert(false);
+            return nullptr;
+        }
+
+        if (m_connectionsVector.size() != m_connections.size())
+        {
+            assert(false);
+            nullptr;
+        }
+
+        QObject* result = m_connectionsVector[index].get();
         QQmlEngine::setObjectOwnership(result, QQmlEngine::CppOwnership);
 
         return result;
     }
 
-    void ConnectionStorage::clear()
+
+    bool ConnectionStorage::checkOut(const QUuid &uuid)
     {
-        m_connections.clear();
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+
+        std::shared_ptr<Connection> connection = get(uuid);
+        if (connection == nullptr)
+        {
+            assert(connection);
+            return false;
+        }
+
+        DbFileInfo fi = connection->fileInfo();
+
+        if (fi.state() == VcsState::CheckedOut)
+        {
+            return true;
+        }
+
+        if (m_db->checkOut(fi, m_parentWidget) == false)
+        {
+            return false;
+        }
+
+        connection->setFileInfo(fi);
+
+        return true;
     }
 
-
-	bool ConnectionStorage::load(DbController *db, QString& errorCode)			// !!!!!!!!!!!!!!!1 Add widget parent
+    bool ConnectionStorage::checkIn(const QUuid &uuid, const QString& comment, bool &fileRemoved)
     {
-        if (db == nullptr)
+        if (m_db == nullptr)
         {
-            assert(db);
+            assert(m_db);
+            return false;
+        }
+
+        std::shared_ptr<Connection> connection = get(uuid);
+        if (connection == nullptr)
+        {
+            assert(connection);
+            return false;
+        }
+
+        fileRemoved = false;
+
+        DbFileInfo fi = connection->fileInfo();
+
+        if (fi.state() == VcsState::CheckedIn)
+        {
+            return true;
+        }
+
+        if (m_db->checkIn(fi, comment, m_parentWidget) == false)
+        {
+            return false;
+        }
+
+        if (fi.deleted() == true)
+        {
+            fileRemoved = true;
+        }
+
+        connection->setFileInfo(fi);
+
+        return true;
+    }
+
+    bool ConnectionStorage::undo(const QUuid &uuid, bool &fileRemoved)
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+
+        std::shared_ptr<Connection> connection = get(uuid);
+        if (connection == nullptr)
+        {
+            assert(connection);
+            return false;
+        }
+
+        fileRemoved = false;
+
+        DbFileInfo fi = connection->fileInfo();
+
+        if (fi.state() != VcsState::CheckedOut)
+        {
+            return true;
+        }
+
+        if (m_db->undoChanges(fi, m_parentWidget) == false)
+        {
+            return false;
+        }
+
+        // after undo operation, file can be removed, check this
+
+        connection->setFileInfo(fi);
+
+        if (fi.deleted() == true)
+        {
+            fileRemoved = true;
+
+            return true;
+        }
+
+        // read previous data from file
+
+        std::shared_ptr<DbFile> file = nullptr;
+
+        bool ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        QByteArray data;
+        file->swapData(data);
+
+        if (connection->Load(data) == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool ConnectionStorage::load()
+    {
+        bool ok = loadFromConnectionsFolder();
+        if (ok == false)
+        {
+            return false;
+        }
+
+        QString errorCode;
+        ok = loadFromXmlDeprecated(errorCode);
+        if (ok == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool ConnectionStorage::loadFromConnectionsFolder()
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
             return false;
         }
 
         // Load the file from the database
         //
-        m_connections.clear();
 
         std::vector<DbFileInfo> fileList;
-		bool ok = db->getFileList(&fileList, db->connectionsFileId(), ::OclFileExtension, true, nullptr);		// !!!!!!!!!!!!!!!1 Add widget parent
+        bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, m_parentWidget);
         if (ok == false)
         {
             return true;
@@ -1153,7 +1019,7 @@ namespace Hardware
         {
             std::shared_ptr<DbFile> file = nullptr;
 
-			ok = db->getLatestVersion(fi, &file, nullptr);			// !!!!!!!!!!!!!!!1 Add widget parent
+            ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
             if (ok == false || file == nullptr)
             {
                 return false;
@@ -1164,7 +1030,7 @@ namespace Hardware
 			if (c != nullptr)
             {
 				c->setFileInfo(*file);
-				m_connections.push_back(c);
+                add(c);
             }
             else
             {
@@ -1175,28 +1041,111 @@ namespace Hardware
         return true;
     }
 
-
-    bool ConnectionStorage::loadFromXmlDeprecated(DbController* db, QString &errorCode)
+    bool ConnectionStorage::save(const QUuid &uuid)
     {
-        if (db == nullptr)
+        if (m_db == nullptr)
         {
-            assert(db);
+            assert(m_db);
+            return false;
+        }
+
+        auto it = m_connections.find(uuid);
+        if (it == m_connections.end())
+        {
+            assert(false);
+            return false;
+        }
+
+        std::shared_ptr<Connection> connection = it->second;
+        if (connection == nullptr)
+        {
+            assert(connection);
+            return false;
+        }
+
+        Proto::Envelope message;
+        connection->Save(&message);
+
+        QByteArray data;
+
+        int size = message.ByteSize();
+        data.resize(size);
+
+        message.SerializeToArray(data.data(), size);
+
+        // save to db
+        //
+
+
+
+        if (connection->fileInfo().isNull() == true)
+        {
+            // create a file, if it does not exists
+            //
+            std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+            file->setFileName(connection->fileName());
+
+            file->swapData(data);
+
+            if (m_db->addFile(file, m_db->connectionsFileId(), m_parentWidget) == false)
+            {
+                return false;
+            }
+
+            connection->setFileInfo(*file);
+        }
+        else
+        {
+            std::shared_ptr<DbFile> file = nullptr;
+
+            // save to existing file
+            //
+            bool ok = m_db->getLatestVersion(connection->fileInfo(), &file, m_parentWidget);
+            if (ok == false || file == nullptr)
+            {
+                return false;
+            }
+
+            if (file->state() != VcsState::CheckedOut)
+            {
+                return false;
+            }
+
+            file->swapData(data);
+
+            if (m_db->setWorkcopy(file, m_parentWidget) == false)
+            {
+                return false;
+            }
+
+            connection->setFileInfo(*file);
+        }
+
+        return true;
+
+    }
+
+    bool ConnectionStorage::loadFromXmlDeprecated(QString& errorCode)
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
             return false;
         }
 
         // Load the file from the database
         //
-        m_connections.clear();
 
         std::vector<DbFileInfo> fileList;
-        bool ok = db->getFileList(&fileList, db->mcFileId(), "Connections.xml", true, nullptr);
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, m_parentWidget);
         if (ok == false || fileList.size() != 1)
         {
             return true;
         }
 
         std::shared_ptr<DbFile> file = nullptr;
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
+        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
         if (ok == false || file == nullptr)
         {
             return false;
@@ -1230,11 +1179,11 @@ namespace Hardware
         {
             if (reader.name() == "Connection")
             {
-                std::shared_ptr<Hardware::Connection> s = std::make_shared<Hardware::Connection>();
+                std::shared_ptr<Hardware::Connection> c = std::make_shared<Hardware::Connection>();
 
-                if (s->loadFromXml(reader) == true)
+                if (c->loadFromXml(reader) == true)
                 {
-                    m_connections.push_back(s);
+                    add(c);
                 }
             }
             else
@@ -1248,18 +1197,18 @@ namespace Hardware
         return !reader.hasError();
     }
 
-    bool ConnectionStorage::deleteXmlDeprecated(DbController* db)
+    bool ConnectionStorage::deleteXmlDeprecated()
     {
-        if (db == nullptr)
+        if (m_db == nullptr)
         {
-            assert(db);
+            assert(m_db);
             return false;
         }
 
         // Load the file from the database
         //
         std::vector<DbFileInfo> fileList;
-        bool ok = db->getFileList(&fileList, db->mcFileId(), "Connections.xml", true, nullptr);
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, m_parentWidget);
         if (ok == false || fileList.size() != 1)
         {
             return true;
@@ -1267,7 +1216,7 @@ namespace Hardware
 
         std::shared_ptr<DbFile> file = nullptr;
 
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
+        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
         if (ok == false || file == nullptr)
         {
             return false;
@@ -1275,19 +1224,19 @@ namespace Hardware
 
         if (file->state() != VcsState::CheckedOut)
         {
-            if (db->checkOut(fileList[0], nullptr) == false)
+            if (m_db->checkOut(fileList[0], m_parentWidget) == false)
             {
                 return false;
             }
         }
 
-        ok = db->deleteFiles(&fileList, nullptr);
+        ok = m_db->deleteFiles(&fileList, m_parentWidget);
         if (ok == false)
         {
             return false;
         }
 
-        if (db->checkIn(fileList[0], "Deleted deprecated file Connections.xml", nullptr) == false)
+        if (m_db->checkIn(fileList[0], "Deleted deprecated file Connections.xml", m_parentWidget) == false)
         {
             return false;
         }
