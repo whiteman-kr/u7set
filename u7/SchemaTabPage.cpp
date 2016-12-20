@@ -2485,6 +2485,8 @@ void EditSchemaTabPage::setFileInfo(const DbFileInfo& fi)
 	assert(m_schemaWidget);
 	m_schemaWidget->setFileInfo(fi);
 
+	m_schemaWidget->schema()->setChangeset(fi.changeset());
+
 	setPageTitle();
 }
 
