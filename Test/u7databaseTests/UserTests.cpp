@@ -36,6 +36,21 @@ void UserTests::setAdminPassword(QString password)
 
 void UserTests::initTestCase()
 {
+	QSqlQuery query;
+
+	// Alter Administrator user. Set administrator password "123412341234"
+	//
+
+	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString passwordHashQuery = QString("user_api.password_hash('%1', '%2')").arg(query.value(0).toString()).arg(m_adminPassword);
+
+	ok = query.exec(QString("UPDATE users SET passwordhash = %1 WHERE username = 'Administrator'").arg(passwordHashQuery));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 }
 
 void UserTests::cleanupTestCase()
@@ -172,6 +187,78 @@ void UserTests::logInOutTest()
 
 	tempDbConnection.close();
 	QSqlDatabase::removeDatabase("tempConnection");
+}
+
+void UserTests::checkSessionKeyTest()
+{
+	QSqlQuery query;
+	QString session_key;
+
+	// Log in as Administrator
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	session_key = query.value(0).toString();
+
+	// Check with enabled error messages
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.check_session_key('%1', true)").arg(session_key));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function returned false with valid session_key (error messages enabled)"));
+
+	// Check with disabled error messages
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.check_session_key('%1', false)").arg(session_key));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == true, qPrintable("Error: function returned false with valid session_key (error messages disabled)"));
+
+	// Log out and check again
+	//
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM user_api.check_session_key('%1', true)").arg(session_key));
+
+	QVERIFY2(ok == false, qPrintable("Expected error: user is not logged in"));
+
+	ok = query.exec(QString("SELECT * FROM user_api.check_session_key('%1', false)").arg(session_key));
+
+	QVERIFY2(ok == false, qPrintable("Expected error: user is not logged in"));
+
+	// Check invalid session_key
+	//
+
+	ok = query.exec("SELECT * FROM user_api.check_session_key('1234',true)");
+
+	QVERIFY2(ok == false, qPrintable("Expected error: Invalid session_key"));
+
+	ok = query.exec("SELECT * FROM user_api.check_session_key('1234',false)");
+
+	QVERIFY2(ok == false, qPrintable("Expected error: Invalid session_key"));
+
+	// Check empty session_key
+	//
+
+	ok = query.exec("SELECT * FROM user_api.check_session_key('',true)");
+
+	QVERIFY2(ok == false, qPrintable("Expected error: Invalid session_key"));
+
+	ok = query.exec("SELECT * FROM user_api.check_session_key('',false)");
+
+	QVERIFY2(ok == false, qPrintable("Expected error: Invalid session_key"));
 }
 
 void UserTests::createUserTest()

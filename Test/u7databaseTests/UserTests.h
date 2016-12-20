@@ -22,6 +22,7 @@ private slots:
 	void initTestCase();
 	void cleanupTestCase();
 	void logInOutTest();
+	void checkSessionKeyTest();
 	void createUserTest();
 	void currentUserIdTest();
 	void isCurrentUserAdminTest();
