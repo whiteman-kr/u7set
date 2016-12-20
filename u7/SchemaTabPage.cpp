@@ -1934,6 +1934,8 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 
 	// Create controls
 	//
+	schema->setChangeset(fileInfo.changeset());
+
 	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
 
 	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPage::closeTab);

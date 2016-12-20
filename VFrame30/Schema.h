@@ -119,6 +119,9 @@ namespace VFrame30
 
 		LogicSchema* toLogicSchema();
 		const LogicSchema* toLogicSchema() const;
+
+		int changeset() const;
+		void setChangeset(int value);
 		
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;
@@ -137,6 +140,8 @@ namespace VFrame30
 		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 
 		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
+
+		int m_changeset = -1;					// Changeset, this field is not stored in file
 	};
 
 

@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "FontParam.h"
+#include "Session.h"
 #include "../lib/TypesAndEnums.h"
 
 class QPainter;
@@ -69,10 +70,15 @@ namespace VFrame30
 		AppSignalManager* appSignalManager();
 		void setAppSignalManager(AppSignalManager* value);
 
+		const Session& session() const;
+		Session& session();
+
 	private:
 		QPainter* m_painter = nullptr;
 		Schema* m_schema = nullptr;
 		AppSignalManager* m_appSignalmanager = nullptr;
+
+		Session m_session;
 
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;

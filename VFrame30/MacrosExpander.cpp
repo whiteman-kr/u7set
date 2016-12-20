@@ -1,5 +1,7 @@
 #include "MacrosExpander.h"
 #include "../lib/PropertyObject.h"
+#include "Session.h"
+#include "Schema.h"
 
 namespace VFrame30
 {
@@ -9,8 +11,19 @@ namespace VFrame30
 
 	}
 
-	QString MacrosExpander::parse(const QString& str, const PropertyObject* thisObject) const
+	QString MacrosExpander::parse(const QString& str,
+								  const Session& session,
+								  const Schema* schema,
+								  const PropertyObject* thisObject) const
 	{
+		if (schema == nullptr ||
+			thisObject == nullptr)
+		{
+			assert(schema);
+			assert(thisObject);
+			return QString();
+		}
+
 		QString result = str;
 
 		QRegExp reStartIndex("\\$\\([a-zA-Z0-9]+[\\.]?[a-zA-Z0-9]*");	// Search for $(SomeText[.][SomeText])
@@ -38,8 +51,55 @@ namespace VFrame30
 
 			// Get actual text
 			//
+			const PropertyObject* object = nullptr;
+			QString propName;
 
-			QString replaceText = "ReplaceDText";
+			do
+			{
+				if (macro.startsWith("this.", Qt::CaseInsensitive) == true ||
+					macro.startsWith("item.", Qt::CaseInsensitive) == true)
+				{
+					object = thisObject;
+					propName = macro.mid(macro.indexOf('.') + 1);
+					break;
+				}
+
+				if (macro.startsWith("schema.", Qt::CaseInsensitive) == true)
+				{
+					object = schema;
+					propName = macro.mid(macro.indexOf('.') + 1);
+					break;
+				}
+
+				if (macro.startsWith("session.", Qt::CaseInsensitive) == true)
+				{
+					object = &session;
+					propName = macro.mid(macro.indexOf('.') + 1);
+					break;
+				}
+			}
+			while (false);
+
+			QString replaceText;
+
+			if (object != nullptr &&
+				propName.isEmpty() == false)
+			{
+				QVariant value = object->propertyValue(propName);
+
+				if (value.isValid() == true)
+				{
+					replaceText = value.toString();
+				}
+				else
+				{
+					replaceText = QLatin1String("[UnknownProp]");
+				}
+			}
+			else
+			{
+				replaceText = QLatin1String("[UnknownObject]");
+			}
 
 			// Replace text in result
 			//

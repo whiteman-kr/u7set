@@ -133,7 +133,8 @@ HEADERS += VFrame30Lib_global.h \
     UfbSchema.h \
     SchemaItemUfb.h \
     SchemaItemTerminator.h \
-    MacrosExpander.h
+    MacrosExpander.h \
+    Session.h
 
 SOURCES += \
     Settings.cpp \
@@ -183,7 +184,8 @@ SOURCES += \
     UfbSchema.cpp \
     SchemaItemUfb.cpp \
     SchemaItemTerminator.cpp \
-    MacrosExpander.cpp
+    MacrosExpander.cpp \
+    Session.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

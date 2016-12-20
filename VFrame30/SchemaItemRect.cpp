@@ -146,7 +146,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -210,7 +210,7 @@ namespace VFrame30
 		// Drawing Text
 		//
 		MacrosExpander me;
-		QString text = me.parse(m_text, this);
+		QString text = me.parse(m_text, drawParam->session(), schema, this);
 
 		if (m_text.isEmpty() == false)
 		{

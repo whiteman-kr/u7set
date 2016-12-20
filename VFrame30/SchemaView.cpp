@@ -317,4 +317,15 @@ namespace VFrame30
 		return;
 	}
 
+	const Session& SchemaView::session() const
+	{
+		return m_session;
+	}
+
+	Session& SchemaView::session()
+	{
+		return m_session;
+	}
+
+
 }

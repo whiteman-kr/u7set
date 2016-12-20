@@ -29,6 +29,7 @@ namespace VFrame30
 	void Schema::Init(void)
 	{
 		ADD_PROPERTY_GETTER(QString, "SchemaID", true, Schema::schemaId);
+		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
@@ -912,6 +913,16 @@ namespace VFrame30
 	const LogicSchema* Schema::toLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
+	}
+
+	int Schema::changeset() const
+	{
+		return m_changeset;
+	}
+
+	void Schema::setChangeset(int value)
+	{
+		m_changeset = value;
 	}
 
 	//

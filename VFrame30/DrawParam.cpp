@@ -124,6 +124,16 @@ namespace VFrame30
 		m_appSignalmanager = value;
 	}
 
+	const Session& CDrawParam::session() const
+	{
+		return m_session;
+	}
+
+	Session& CDrawParam::session()
+	{
+		return m_session;
+	}
+
 	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
 		if (painter == nullptr)
