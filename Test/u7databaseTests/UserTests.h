@@ -23,7 +23,7 @@ private slots:
 	void cleanupTestCase();
 	void logInOutTest();
 	void createUserTest();
-	void getUserIDTest();
+	void currentUserIdTest();
 	void isAdminTest();
 	void check_user_passwordIntegerTextTest();
 	void check_user_passwordTextTextTest();
