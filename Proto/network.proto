@@ -248,6 +248,9 @@ message TuningSourceState
     optional int64 fotipFlagOffsetErr = 36 [default = 0];
     optional int64 fotipFlagApplySuccess = 37 [default = 0];
     optional int64 fotipFlagSetSOR = 38 [default = 0];
+
+    optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+    optional int64 errAnalogHighBoundCheck = 40 [default = 0];
 }
 
 message GetTuningSourcesStatesReply

@@ -15,6 +15,7 @@
 #include <QStringListModel>
 #include <QGroupBox>
 #include <QSet>
+#include <QStandardItemModel>
 
 #include "../lib/DbController.h"
 
@@ -1419,6 +1420,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	horizontalHeader->setHighlightSections(false);
+	horizontalHeader->setSectionsMovable(true);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	horizontalHeader->setDefaultSectionSize(150);
@@ -1430,30 +1432,27 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
 
-	for (int i = 0; i < COLUMNS_COUNT; i++)
-	{
-		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
-														m_signalsView->columnWidth(i)).toInt());
-	}
-
-	m_tableHeadersContextMenuActions = new QActionGroup(this);
-	m_tableHeadersContextMenuActions->setExclusive(false);
-	QAction* columnAction = m_tableHeadersContextMenuActions->addAction("All columns");
-	columnAction->setCheckable(true);
-	columnAction->setChecked(settings.value("SignalsTabPage/ColumnVisibility/All columns", true).toBool());
+	QMap<int, int> positionMap;
 
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		columnAction = m_tableHeadersContextMenuActions->addAction(QString(Columns[i]).replace("\n", " "));
-		columnAction->setCheckable(true);
-		bool checked = settings.value(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " "),
-									  defaultColumnVisibility.contains(i)).toBool();
-		columnAction->setChecked(checked);
-		m_signalsView->setColumnHidden(i, !checked);
+		QString columnName = QString("%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " ");
+		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/") + columnName, m_signalsView->columnWidth(i)).toInt());
+		horizontalHeader->setSectionHidden(i, !settings.value(QString("SignalsTabPage/ColumnVisibility/") + columnName, true).toBool());
+		int position = settings.value(QString("SignalsTabPage/ColumnPosition/") + columnName, i).toInt();
+		positionMap.insert(position, i);
 	}
 
-	m_signalsView->horizontalHeader()->addActions(m_tableHeadersContextMenuActions->actions());
-	connect(m_tableHeadersContextMenuActions, &QActionGroup::triggered, this, &SignalsTabPage::changeColumnVisibility);
+	for (int i = 0; i < COLUMNS_COUNT; i++)
+	{
+		int logicalIndex = positionMap[i];
+		int oldVisualIndex = horizontalHeader->visualIndex(logicalIndex);
+		horizontalHeader->moveSection(oldVisualIndex, i);
+	}
+
+	QAction* columnsAction = new QAction("Columns", m_signalsView);
+	connect(columnsAction, &QAction::triggered, this, &SignalsTabPage::editColumnsVisibilityAndOrder);
+	horizontalHeader->addAction(columnsAction);
 	connect(horizontalHeader, &QHeaderView::sectionResized, this, &SignalsTabPage::saveColumnWidth);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -1496,18 +1495,17 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
-
+	auto header = m_signalsView->horizontalHeader();
 	for (int i = 0; i < COLUMNS_COUNT; i++)
 	{
-		QAction* columnVisibilityAction = m_tableHeadersContextMenuActions->actions()[i + 1];
-		if (columnVisibilityAction->isChecked())
+		bool visible = !header->isSectionHidden(i);
+		if (visible)
 		{
 			saveColumnWidth(i);
 		}
-		saveColumnVisibility(i, columnVisibilityAction->isChecked());
+		saveColumnVisibility(i, visible);
+		saveColumnPosition(i, header->visualIndex(i));
 	}
-	settings.setValue("SignalsTabPage/ColumnVisibility/All columns", m_tableHeadersContextMenuActions->actions()[0]->isChecked());
 }
 
 QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
@@ -1861,6 +1859,142 @@ void SignalsTabPage::checkIn()
 	m_signalsModel->loadSignals();
 }
 
+void SignalsTabPage::editColumnsVisibilityAndOrder()
+{
+	QDialog dlg(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
+	QStandardItemModel *model = new QStandardItemModel(&dlg);
+	auto header = m_signalsView->horizontalHeader();
+	for (int i = 0; i < header->count(); i++)
+	{
+		auto item = new QStandardItem;
+		item->setCheckable(true);
+		model->setItem(i, item);
+	}
+
+	// Helper functions
+	//
+	auto isHidden = [header](int logicalIndex){
+		return header->isSectionHidden(logicalIndex) || header->sectionSize(logicalIndex) == 0;
+	};
+	auto updateHidden = [model](int visualIndex, bool hidden) {
+		model->setData(model->index(visualIndex, 0), hidden ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
+	};
+	auto setHidden = [header](int logicalIndex, bool hidden) {
+		header->setSectionHidden(logicalIndex, hidden);
+		if (!hidden && header->sectionSize(logicalIndex) == 0)
+		{
+			header->resizeSection(logicalIndex, header->defaultSectionSize());
+		}
+	};
+
+	// Update state of items from signal table header
+	//
+	auto updateItems = [=](){
+		for (int i = 0; i < header->count(); i++)
+		{
+			int logicalIndex = header->logicalIndex(i);
+			updateHidden(i, isHidden(logicalIndex));
+			model->setData(model->index(i, 0), m_signalsModel->headerData(logicalIndex, Qt::Horizontal, Qt::DisplayRole).toString().replace('\n', ' '), Qt::DisplayRole);
+		}
+	};
+	updateItems();
+
+	// Child widgets layout
+	//
+	QListView* listView = new QListView(&dlg);
+	listView->setModel(model);
+	listView->setCurrentIndex(model->index(0,0));
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addWidget(listView);
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+	QPushButton* upButton = new QPushButton("Up", &dlg);
+	vl->addWidget(upButton);
+	QPushButton* downButton = new QPushButton("Down", &dlg);
+	vl->addWidget(downButton);
+	vl->addStretch();
+	dlg.setLayout(hl);
+
+	//Window geometry
+	//
+	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
+	QPoint center = desktopRect.center();
+	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
+	desktopRect.moveCenter(center);
+	QSettings settings;
+	QRect windowRect = settings.value("ColumnsVisibilityDialog/geometry", desktopRect).toRect();
+	if (windowRect.height() > desktopRect.height())
+	{
+		windowRect.setHeight(desktopRect.height());
+	}
+	if (windowRect.width() > desktopRect.width())
+	{
+		windowRect.setWidth(desktopRect.width());
+	}
+	dlg.setGeometry(windowRect);
+
+	// Show/Hide column
+	//
+	connect(model, &QStandardItemModel::itemChanged, [=](QStandardItem* item){
+		int visualIndex = item->row();
+		int logicalIndex = header->logicalIndex(visualIndex);
+		setHidden(logicalIndex, item->checkState() != Qt::Checked);
+
+		saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
+
+		//Check if no visible column left
+		//
+		for (int i = 0; i < model->rowCount(); i++)
+		{
+			if (!isHidden(i))
+			{
+				return;
+			}
+		}
+		setHidden(0, false);
+		saveColumnVisibility(0, true);
+		updateHidden(header->visualIndex(0), false);
+	});
+
+	// Move column left (move item up)
+	//
+	connect(upButton, &QPushButton::pressed, [=](){
+		int visualIndex = listView->currentIndex().row();
+		if (visualIndex == 0)
+		{
+			return;
+		}
+
+		header->moveSection(visualIndex, visualIndex - 1);
+
+		listView->setCurrentIndex(model->index(visualIndex - 1, 0));
+		updateItems();
+		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
+		saveColumnPosition(header->logicalIndex(visualIndex - 1), visualIndex - 1);
+	});
+
+	// Move column right (move item down)
+	//
+	connect(downButton, &QPushButton::pressed, [=](){
+		int visualIndex = listView->currentIndex().row();
+		if (visualIndex == model->rowCount() - 1)
+		{
+			return;
+		}
+
+		header->moveSection(visualIndex, visualIndex + 1);
+
+		listView->setCurrentIndex(model->index(visualIndex + 1, 0));
+		updateItems();
+		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
+		saveColumnPosition(header->logicalIndex(visualIndex + 1), visualIndex + 1);
+	});
+
+	dlg.exec();
+
+	settings.setValue("ColumnsVisibilityDialog/geometry", dlg.geometry());
+}
+
 void SignalsTabPage::changeSignalActionsVisibility()
 {
 	if (m_changingSelectionManualy)
@@ -2063,50 +2197,6 @@ void SignalsTabPage::resetSignalIdFilter()
 	m_signalTypeFilterCombo->setCurrentIndex(0);
 }
 
-void SignalsTabPage::changeColumnVisibility(QAction* action)
-{
-	int actionIndex = m_tableHeadersContextMenuActions->actions().indexOf(action);
-	int columnIndex = actionIndex - 1;
-	if (actionIndex == 0)
-	{
-		for (int i = 0; i < COLUMNS_COUNT; i++)
-		{
-			if (!action->isChecked())
-			{
-				saveColumnWidth(i);
-			}
-			saveColumnVisibility(i, action->isChecked());
-			m_signalsView->setColumnHidden(i, !action->isChecked());
-			m_tableHeadersContextMenuActions->actions()[i + 1]->setChecked(action->isChecked());
-		}
-	}
-	else
-	{
-		if (!action->isChecked())
-		{
-			saveColumnWidth(columnIndex);
-		}
-		saveColumnVisibility(columnIndex, action->isChecked());
-		m_signalsView->setColumnHidden(columnIndex, !action->isChecked());
-		if (action->isChecked() && m_signalsView->columnWidth(columnIndex) == 0)
-		{
-			QSettings settings(QSettings::UserScope, qApp->organizationName());
-			int newValue = settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[columnIndex]).replace("/", "|")).replace("\n", " "), DEFAULT_COLUMN_WIDTH).toInt();
-			if (newValue == 0)
-			{
-				newValue = DEFAULT_COLUMN_WIDTH;
-			}
-			m_signalsView->setColumnWidth(columnIndex, newValue);
-		}
-	}
-	if (m_signalsView->horizontalHeader()->hiddenSectionCount() == COLUMNS_COUNT)
-	{
-		m_signalsView->showColumn(SC_STR_ID);
-		m_tableHeadersContextMenuActions->actions()[SC_STR_ID + 1]->setChecked(true);
-		saveColumnVisibility(SC_STR_ID, true);
-	}
-}
-
 void SignalsTabPage::showError(QString message)
 {
 	if (!message.isEmpty())
@@ -2236,6 +2326,12 @@ void SignalsTabPage::saveColumnVisibility(int index, bool visible)
 {
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
+}
+
+void SignalsTabPage::saveColumnPosition(int index, int position)
+{
+	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	settings.setValue(QString("SignalsTabPage/ColumnPosition/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), position);
 }
 
 

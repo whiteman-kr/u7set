@@ -143,7 +143,7 @@ namespace FotipV2
 		struct
 		{
 			quint16	lowBoundCheckError : 1;
-			quint16	highBoundChekError : 1;
+			quint16	highBoundCheckError : 1;
 		};
 
 		quint16 all;

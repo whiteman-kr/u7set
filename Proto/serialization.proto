@@ -905,7 +905,6 @@ message AppSignalState
 
 message Connection
 {
-    optional int32 Index = 1 [default = 0];
     optional string ConnectionID = 2 [default = ""];
 
     optional string Port1EquipmentID = 3 [default = ""];
@@ -933,5 +932,8 @@ message Connection
     optional int32 Port2TxStartAddress = 17 [default = 0];
     optional int32 Port2TxWordsQuantity = 18 [default = 479];
     optional int32 Port2RxWordsQuantity = 19 [default = 479];
+
+    optional Uuid uuid = 20;
+
 }
 

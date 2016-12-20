@@ -66,6 +66,9 @@ namespace Tuning
 		qint64 fotipFlagApplySuccess = 0;
 		qint64 fotipFlagSetSOR = 0;
 
+		qint64 errAnalogLowBoundCheck = 0;
+		qint64 errAnalogHighBoundCheck = 0;
+
 		void get(Network::TuningSourceState& tss);
 	};
 
@@ -189,7 +192,7 @@ namespace Tuning
 		void processReply(RupFotipV2& reply);
 		void processReadReply(RupFotipV2& reply);
 		void processWriteReply(RupFotipV2& reply);
-		void processApplyReply(RupFotipV2& reply);
+		void processApplyReply(RupFotipV2&);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);

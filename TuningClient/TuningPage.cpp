@@ -482,7 +482,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
 		if (displayIndex == Type)
 		{
-			return o.analog() ? "Analog" : "Discrete";
+            return o.analog() ? tr("Analog") : tr("Discrete");
 		}
 
 		//
@@ -518,7 +518,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
                     if (o.userModified() == true)
                     {
                         QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
-                        return tr("%1 => %2").arg(valueString).arg(editValueString);
+                        return QString("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
                     if (o.writing() == true)
@@ -532,7 +532,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 			else
 			{
-				return tr("?");
+                return "?";
 			}
 		}
 
@@ -1115,7 +1115,7 @@ void TuningItemModelMain::slot_Apply()
 		return;
 	}
 
-	QString str = tr("New values will be applied: \r\n\r\n");
+    QString str = tr("New values will be applied:") + QString("\r\n\r\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -1166,7 +1166,7 @@ void TuningItemModelMain::slot_Apply()
 		listCount++;
 	}
 
-	str += tr("\r\nAre you sure you want to continue?");
+    str += QString("\r\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(m_parent, tr("Apply Changes"),
 							 str,
@@ -1343,28 +1343,28 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_maskEdit = new QLineEdit();
     connect(m_maskEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyMask);
 
-    m_maskButton = new QPushButton("Apply Mask");
+    m_maskButton = new QPushButton(tr("Apply Mask"));
     connect(m_maskButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyMask);
 
     // Button controls
     //
 
-    m_setValueButton = new QPushButton("Set Value");
+    m_setValueButton = new QPushButton(tr("Set Value"));
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
-	m_setOnButton = new QPushButton("Set all to On");
+    m_setOnButton = new QPushButton(tr("Set all to On"));
 	connect(m_setOnButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOn);
 
-	m_setOffButton = new QPushButton("Set all to Off");
+    m_setOffButton = new QPushButton(tr("Set all to Off"));
 	connect(m_setOffButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOff);
 
-	m_setToDefaultButton = new QPushButton("Set to Defaults");
+    m_setToDefaultButton = new QPushButton(tr("Set to Defaults"));
 	connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
 
-	m_applyButton = new QPushButton("Apply");
+    m_applyButton = new QPushButton(tr("Apply"));
 	connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
-	m_undoButton = new QPushButton("Undo");
+    m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
 	m_bottomLayout = new QHBoxLayout();

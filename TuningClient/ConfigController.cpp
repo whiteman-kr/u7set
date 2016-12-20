@@ -80,7 +80,7 @@ ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, Ho
 		{
 			QMessageBox::critical(nullptr,
 								  qApp->applicationName(),
-								  QString("Cannot create or attach to shared memory to determine software instance no. Error: %1")
+                                  tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
 								  .arg(m_appInstanceSharedMemory.errorString()));
 
 			// Set "Some" Application Instance No
@@ -450,7 +450,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	{
 		// The received file has different StrID then expected
 		//
-		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
+        outSetting->errorMessage += tr("The received file has different EquipmentID then expected.\n");
 		return false;
 	}
 
@@ -462,7 +462,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	{
 		// The received file has different type then expected,
 		//
-		outSetting->errorMessage += "The received file has different software type then expected.\n";
+        outSetting->errorMessage += tr("The received file has different software type then expected.\n");
 		return false;
 	}
 

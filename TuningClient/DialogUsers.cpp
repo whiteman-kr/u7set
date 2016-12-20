@@ -17,9 +17,9 @@ DialogUsers::DialogUsers(const UserManager &userManager, QWidget *parent) :
 	ui->setupUi(this);
 
 	QStringList headerLabels;
-	headerLabels<<"Name";
-	headerLabels<<"Description";
-	headerLabels<<"Administrator";
+    headerLabels<<tr("Name");
+    headerLabels<<tr("Description");
+    headerLabels<<tr("Administrator");
 
 	ui->m_tree->setColumnCount(headerLabels.size());
 	ui->m_tree->setHeaderLabels(headerLabels);
@@ -153,7 +153,7 @@ void DialogUsers::showUserData(QTreeWidgetItem *item, const User& user)
 
 	l << user.name();
 	l << user.description();
-	l << (user.admin() ? "Yes" : "");
+    l << (user.admin() ? tr("Yes") : "");
 
 	int i = 0;
 	for (auto s: l)
