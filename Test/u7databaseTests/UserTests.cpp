@@ -594,6 +594,72 @@ void UserTests::isCurrentUserAdminTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 }
 
+void UserTests::getUserDataTest()
+{
+	QSqlQuery query;
+
+	QString session_key;
+	QString userName = "getUserDataName";
+	QString firstName = "getUserDataFirstName";
+	QString lastName = "getUserDataLastName";
+	QString password = "getUserDataPassword";
+
+	int userId = -1;
+
+	// Log in as Administrator to create new user for test
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	session_key = query.value(0).toString();
+
+	ok = query.exec(QString("SELECT user_api.create_user ('%1', '%2', '%3', '%4', '%5', false, false);")
+	                .arg(session_key)
+	                .arg(userName)
+	                .arg(firstName)
+	                .arg(lastName)
+	                .arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	userId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM user_api.get_user_data('%1', %2)").arg(session_key).arg(userId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("userId").toInt() == userId, qPrintable("Error: wrong userId returned"));
+	QVERIFY2(query.value("userName").toString() == userName, qPrintable("Error: wrong userName returned"));
+	QVERIFY2(query.value("firstName").toString() == firstName, qPrintable("Error: wrong firstName returned"));
+	QVERIFY2(query.value("lastName").toString() == lastName, qPrintable("Error: wrong lastName returned"));
+	QVERIFY2(query.value("admininstrator").toBool() == false, qPrintable("Error: wrong administrator value returned"));
+	QVERIFY2(query.value("readOnly").toBool() == false, qPrintable("Error: wrong readOnly value returned"));
+	QVERIFY2(query.value("disabled").toBool() == false, qPrintable("Error: wrong disabled value returned"));
+
+	// Try use function with invalid session_key
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.get_user_data('wrong', %1)").arg(userId));
+	QVERIFY2(ok == false, qPrintable("Expected error: wrong session_key"));
+
+	// Try use function with empty session_key
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.get_user_data('', %1)").arg(userId));
+	QVERIFY2(ok == false, qPrintable("Expected error: wrong session_key"));
+
+	// Try use function with wrong user
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.get_user_data('%1', -1)").arg(session_key));
+	QVERIFY2(ok == false, qPrintable("Expected error: invalid user"));
+}
+
 void UserTests::check_user_passwordIntegerTextTest()
 {
 	QSqlQuery query;
