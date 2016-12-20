@@ -84,7 +84,7 @@ void DialogSettings::on_DialogSettings_accepted()
         theSettings.setConfiguratorAddress1(configIP1, configPort1);
         theSettings.setConfiguratorAddress2(configIP2, configPort2);
 
-        QMessageBox::warning(this, "TuningClient", tr("Configurator address has been changed, please restart the application."));
+        QMessageBox::warning(this, tr("TuningClient"), tr("Configurator address has been changed, please restart the application."));
     }
 
 	theSettings.setFilterByEquipment(ui->m_filterByEquipment->checkState() == Qt::Checked);
@@ -100,7 +100,7 @@ void DialogSettings::on_DialogSettings_accepted()
     {
         theSettings.setLanguage(lang);
 
-        QMessageBox::warning(this, "TuningClient", tr("Language has been changed, please restart the application."));
+        QMessageBox::warning(this, tr("TuningClient"), tr("Language has been changed, please restart the application."));
     }
 
     //

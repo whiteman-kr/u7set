@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	createMenu();
 	createStatusBar();
 
-	setCentralWidget(new QLabel("Waiting for configuration..."));
+    setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
 	// TcpSignalClient
 	//
@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
 		theLogFile.writeError(msg);
-		QMessageBox::critical(this, "Error", msg);
+        QMessageBox::critical(this, tr("Error"), msg);
 	}
 
 	theUserFilters.m_root->setCaption(tr("User Presets"));
@@ -204,15 +204,15 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 		// State
 		//
-		QString text = QString(" ConfigSrv: %1   TuningSrv: %2 ")
-					   .arg(confiConnState.isConnected ? confiConnState.host.addressStr() : "NoConnection")
-						.arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : "NoConnection");
+        QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
+                       .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
+                        .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
 
 		m_statusBarConnectionState->setText(text);
 
 		// Statistics
 		//
-		text = QString(" ConfigSrv: %1   TuningSrv: %2 ")
+        text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
 			   .arg(QString::number(confiConnState.replyCount))
 			   .arg(QString::number(tuningClientState.replyCount));
 
@@ -228,7 +228,7 @@ void MainWindow::removeWorkspace()
 {
 	if (m_tuningWorkspace != nullptr)
 	{
-		QMessageBox::warning(this, "Warning", "Program configuration has been changed and will be updated.");
+        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 
 		delete m_tuningWorkspace;
 		m_tuningWorkspace = nullptr;

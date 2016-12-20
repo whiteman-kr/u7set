@@ -328,7 +328,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				continue;
 			}
 
-			reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+            reader.raiseError(tr("Unknown tag: ") + reader.name().toString());
 			return false;
 		}
 	}while (t != QXmlStreamReader::EndElement);
@@ -880,7 +880,7 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 
 	if (f.open(QFile::ReadOnly) == false)
 	{
-		*errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
+        *errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
 		return false;
 	}
 
@@ -979,7 +979,7 @@ bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
 
 	if (f.open(QFile::WriteOnly) == false)
 	{
-		*errorMsg = QString("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName);
+        *errorMsg = QObject::tr("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName);
 		return false;
 	}
 
@@ -1116,7 +1116,7 @@ void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipmen
 		//
 		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
-		ofSchema->setCaption("Schemas");
+        ofSchema->setCaption(QObject::tr("Schemas"));
 
 		for (const SchemaDetails& schemasDetails : m_schemasDetails)
 		{
@@ -1143,7 +1143,7 @@ void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipmen
 		//
 		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
-		ofEquipment->setCaption("Equipment");
+        ofEquipment->setCaption(QObject::tr("Equipment"));
 
 		for (const QString& ts : tuningSourcesEquipmentIds)
 		{
