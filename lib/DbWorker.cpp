@@ -142,6 +142,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0124.sql", "Upgrade to version 124, Changing auths functions"},
 	{":/DatabaseUpgrade/Upgrade0125.sql", "Upgrade to version 125, CONNECTIONS system folder was added"},
     {":/DatabaseUpgrade/Upgrade0126.sql", "Upgrade to version 126, LM-1 TxDiagDataSize changed to 176"},
+	{":/DatabaseUpgrade/Upgrade0127.sql", "Upgrade to version 127, Update AppLogic and UFB templates, macroses are added"},
 };
 
 
