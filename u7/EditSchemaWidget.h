@@ -314,6 +314,8 @@ public:
 		//
 		connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EditSchemaWidget::clipboardDataChanged);
 
+		clipboardDataChanged();		// Enable m_editPasteAction if somthing in clipborad
+
 		return;
 	}
 	virtual ~EditSchemaWidget();

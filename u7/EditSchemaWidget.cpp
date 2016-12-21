@@ -2095,7 +2095,7 @@ void EditSchemaWidget::createActions()
 	// Edit->Cut
 	//
 	m_editCutAction = new QAction(tr("Cut"), this);
-	m_editCutAction->setEnabled(true);
+	m_editCutAction->setEnabled(false);
 	m_editCutAction->setShortcuts(QKeySequence::Cut);
 	connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::editCut);
 	addAction(m_editCutAction);
@@ -2103,7 +2103,7 @@ void EditSchemaWidget::createActions()
 	// Edit->Copy
 	//
 	m_editCopyAction = new QAction(tr("Copy"), this);
-	m_editCopyAction->setEnabled(true);
+	m_editCopyAction->setEnabled(false);
 	m_editCopyAction->setShortcuts(QKeySequence::Copy);
 	connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::editCopy);
 	addAction(m_editCopyAction);
@@ -2116,8 +2116,6 @@ void EditSchemaWidget::createActions()
 	connect(m_editPasteAction, &QAction::triggered, this, &EditSchemaWidget::editPaste);
 	addAction(m_editPasteAction);
 
-	clipboardDataChanged();		// Enable m_editPasteAction if somthing in clipborad
-
 	// ------------------------------------
 	//
 	m_editSeparatorAction2 = new QAction(this);
@@ -2126,7 +2124,7 @@ void EditSchemaWidget::createActions()
 	// Edit->Delete
 	//
 	m_deleteAction = new QAction(tr("Delete"), this);
-	m_deleteAction->setEnabled(true);
+	m_deleteAction->setEnabled(false);
 	m_deleteAction->setMenuRole(QAction::NoRole);
 	m_deleteAction->setShortcut(QKeySequence(Qt::Key_Delete));
 	connect(m_deleteAction, &QAction::triggered, this, &EditSchemaWidget::deleteKey);
@@ -5911,9 +5909,28 @@ void EditSchemaWidget::selectionChanged()
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+
+	// Edit Menu
+	//
+	int selectionCount = static_cast<int>(editSchemaView()->selectedItems().size());
+	int lockedCound = 0;
+
+	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
+	{
+		if (si->isLocked() == true)
+		{
+			lockedCound ++;
+		}
+	}
+
+	m_deleteAction->setEnabled((selectionCount - lockedCound) > 0 && readOnly() == false);
+	m_editCutAction->setEnabled((selectionCount - lockedCound) > 0 && readOnly() == false);
+	m_editCopyAction->setEnabled(selectionCount > 0);
+
 	// Allign
 	//
-	bool allowAlign = selectedItems().size() >= 2;
+	bool allowAlign = selectedItems().size() >= 2 && readOnly() == false;
 
 	m_alignLeftAction->setEnabled(allowAlign);
 	m_alignRightAction->setEnabled(allowAlign);
@@ -5922,7 +5939,6 @@ void EditSchemaWidget::selectionChanged()
 
 	// Size
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
@@ -5934,7 +5950,7 @@ void EditSchemaWidget::selectionChanged()
 		}
 	}
 
-	bool allowSize = selectedFiltered.size() >= 2;
+	bool allowSize = selectedFiltered.size() >= 2 && readOnly() == false;
 
 	m_sameWidthAction->setEnabled(allowSize);
 	m_sameHeightAction->setEnabled(allowSize);
@@ -5942,7 +5958,7 @@ void EditSchemaWidget::selectionChanged()
 
 	// Order
 	//
-	bool allowSetOrder = selectedItems().empty() == false;
+	bool allowSetOrder = selectedItems().empty() == false  && readOnly() == false;
 	m_bringToFrontAction->setEnabled(allowSetOrder);
 	m_bringForwardAction->setEnabled(allowSetOrder);
 	m_sendToBackAction->setEnabled(allowSetOrder);
@@ -5960,11 +5976,11 @@ void EditSchemaWidget::selectionChanged()
 		}
 	}
 
-	m_toggleCommentAction->setEnabled(hasFblItems);
+	m_toggleCommentAction->setEnabled(hasFblItems && readOnly() == false);
 
 	// Lock action
 	//
-	m_lockAction->setEnabled(selected.empty() == false);
+	m_lockAction->setEnabled(selected.empty() == false && readOnly() == false);
 
 	// Compare SchemaItem
 	//
@@ -5979,6 +5995,12 @@ void EditSchemaWidget::selectionChanged()
 
 void EditSchemaWidget::clipboardDataChanged()
 {
+	if (readOnly() == true)
+	{
+		m_editPasteAction->setEnabled(false);
+		return;
+	}
+
 	const QClipboard* clipboard = QApplication::clipboard();
 	const QMimeData* mimeData = clipboard->mimeData();
 
@@ -6003,6 +6025,12 @@ void EditSchemaWidget::clipboardDataChanged()
 	// Specific items cases
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+
+	if (selected.empty() == true)
+	{
+		m_editPasteAction->setEnabled(false);
+		return;
+	}
 
 	// All Items are SchemaItemConsts
 	//
