@@ -278,7 +278,9 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
         emit signalsUpdated();
     }
 
-    theFilters.createAutomaticFilters(theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+    std::vector<TuningObject> objects = theObjectManager->objects();
+
+    theFilters.createAutomaticFilters(objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
     createWorkspace();
 

@@ -36,7 +36,10 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 			item->setExpanded(true);
 		}
 
-		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
+        m_filterTree->setSortingEnabled(true);
+        m_filterTree->sortItems(0, Qt::AscendingOrder);
+
+        connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
 
 		// Create splitter control
 		//
@@ -148,7 +151,7 @@ void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, Tuni
 		return;
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
 	item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 
 	addChildTreeObjects(f, item);

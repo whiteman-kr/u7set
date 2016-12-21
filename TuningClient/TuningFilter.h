@@ -124,6 +124,8 @@ public:
     bool valueExists(Hash hash) const;
 	void addValue(const TuningFilterValue& value);
 
+    int valuesCount() const;
+
 	void removeValue(Hash hash);
 
 	FilterType filterType() const;
@@ -193,7 +195,7 @@ public:
 	int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
 
-	void createAutomaticFilters(bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+    void createAutomaticFilters(const std::vector<TuningObject> &tuningObjects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;
 
