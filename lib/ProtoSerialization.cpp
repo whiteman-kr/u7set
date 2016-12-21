@@ -192,7 +192,7 @@ namespace Proto
 			}
 		}
 
-		protoProperty->set_value(valueStr.toLocal8Bit());
+		protoProperty->set_value(valueStr.toUtf8());
 	}
 
 	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property)
@@ -211,7 +211,7 @@ namespace Proto
 		}
 
 		bool ok = false;
-		QString sv(protoProperty.value().c_str());
+		QString sv = QString::fromUtf8(protoProperty.value().c_str());
 		QVariant value = property->value();
 
 		if (property->isEnum() == true)

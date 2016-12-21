@@ -1333,7 +1333,7 @@
         <location filename="../MainWindow.cpp" line="57"/>
         <location filename="../MainWindow.cpp" line="85"/>
         <location filename="../MainWindow.cpp" line="91"/>
-        <location filename="../MainWindow.cpp" line="360"/>
+        <location filename="../MainWindow.cpp" line="362"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -1458,50 +1458,55 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../TuningFilter.cpp" line="950"/>
-        <location filename="../TuningFilter.cpp" line="1101"/>
+        <location filename="../TuningFilter.cpp" line="955"/>
+        <location filename="../TuningFilter.cpp" line="1109"/>
         <location filename="../TuningObjectManager.cpp" line="126"/>
         <source>Unknown tag: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="883"/>
+        <location filename="../TuningFilter.cpp" line="888"/>
         <source>Error opening file:
 
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="907"/>
-        <location filename="../TuningFilter.cpp" line="1023"/>
+        <location filename="../TuningFilter.cpp" line="912"/>
+        <location filename="../TuningFilter.cpp" line="1028"/>
         <location filename="../TuningObjectManager.cpp" line="37"/>
         <source>Failed to load root element.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="914"/>
+        <location filename="../TuningFilter.cpp" line="919"/>
         <source>The file is not an ObjectFilterStorage file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="982"/>
+        <location filename="../TuningFilter.cpp" line="987"/>
         <source>TuningFilterStorage::save: failed to save presets in file %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1030"/>
+        <location filename="../TuningFilter.cpp" line="1035"/>
         <source>The file is not an SchemasDetails file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1119"/>
+        <location filename="../TuningFilter.cpp" line="1127"/>
         <source>Schemas</source>
         <translation>Алгоритмы</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1146"/>
+        <location filename="../TuningFilter.cpp" line="1185"/>
         <source>Equipment</source>
         <translation>Оборудование</translation>
+    </message>
+    <message>
+        <location filename="../TuningFilter.cpp" line="1200"/>
+        <source>Automatic presets</source>
+        <translation>Автоматические списки</translation>
     </message>
     <message>
         <location filename="../TuningObjectManager.cpp" line="44"/>
@@ -2197,12 +2202,6 @@
         <translation>Будут применены новые значения:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1164"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="1169"/>
         <source>Are you sure you want to continue?</source>
         <translation>Вы уверены, что хотите продолжить?</translation>
@@ -2232,6 +2231,12 @@ Are you sure you want to continue?</source>
         <location filename="../TuningPage.cpp" line="1161"/>
         <source>Yes</source>
         <translation>Да</translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1164"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1171"/>

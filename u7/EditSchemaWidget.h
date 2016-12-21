@@ -147,6 +147,8 @@ public:
 	// Selection
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedNonLockedItems() const;
+
 	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
 	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items);
 	void setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item);
@@ -313,6 +315,8 @@ public:
 		// Clipboard
 		//
 		connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EditSchemaWidget::clipboardDataChanged);
+
+		clipboardDataChanged();		// Enable m_editPasteAction if somthing in clipborad
 
 		return;
 	}
@@ -487,6 +491,7 @@ public:
 	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedNonLockedItems() const;
 
 	EditSchemaView* editSchemaView();
 	const EditSchemaView* editSchemaView() const;

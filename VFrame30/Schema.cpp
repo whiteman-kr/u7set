@@ -1023,11 +1023,14 @@ namespace VFrame30
 		jsonObject.insert("Version", QJsonValue(1));
 		jsonObject.insert("SchemaID", QJsonValue(schema->schemaId()));
 		jsonObject.insert("Caption", QJsonValue(schema->caption()));
+		jsonObject.insert("ExcludedFromBuild", QJsonValue(schema->excludeFromBuild()));
 
 		if (schema->isLogicSchema() == true)
 		{
 			assert(schema->toLogicSchema() != nullptr);
-			jsonObject.insert("EquipmentID", QJsonValue(schema->toLogicSchema()->equipmentIds()));
+			QString equipIds = schema->toLogicSchema()->equipmentIds();
+			equipIds = equipIds.replace('\n', ' ');
+			jsonObject.insert("EquipmentID", QJsonValue(equipIds));
 		}
 
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
@@ -1090,6 +1093,18 @@ namespace VFrame30
 				// Caption
 				//
 				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
+
+				// ExcludedeFromBuild
+				//
+				QJsonValue excFromBuild = jsonObject.value(QLatin1String("ExcludedFromBuild"));
+				if (excFromBuild.isUndefined() == false && excFromBuild.isBool() == true)
+				{
+					m_excludedFromBuild = excFromBuild.toBool();
+				}
+				else
+				{
+					m_excludedFromBuild = false;
+				}
 
 				// EquipmentID
 				//

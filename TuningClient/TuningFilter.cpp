@@ -575,6 +575,11 @@ void TuningFilter::addValue(const TuningFilterValue& value)
 	m_signalValuesMap[hash] = value;
 }
 
+int TuningFilter::valuesCount() const
+{
+    return (int)m_signalValuesVec.size();
+}
+
 void TuningFilter::removeValue(Hash hash)
 {
 	// remove from map
@@ -1092,7 +1097,10 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 					sd.m_appSignalIDs.push_back(array[i].toString());
 				}
 
-				m_schemasDetails.push_back(sd);
+                if (sd.m_appSignalIDs.empty() == false)
+                {
+                    m_schemasDetails.push_back(sd);
+                }
 			}
 
 			continue;
@@ -1107,7 +1115,7 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningFilterStorage::createAutomaticFilters(const std::vector<TuningObject>& tuningObjects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
 	if (bySchemas == true)
 	{
@@ -1123,13 +1131,44 @@ void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipmen
 			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 			for (const QString& appSignalID : schemasDetails.m_appSignalIDs)
 			{
+                // find if this signal is a tuning signal
+                //
+                Hash hash = ::calcHash(appSignalID);
+
+                bool found = false;
+
+                for (const TuningObject& o : tuningObjects)
+                {
+                    if (o.appSignalHash() == hash)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false)
+                {
+                    continue;
+                }
+
 				TuningFilterValue ofv;
 				ofv.setAppSignalId(appSignalID);
 				ofTs->addValue(ofv);
 			}
 
+            if (ofTs->valuesCount() == 0)
+            {
+                // Do not add empty filters
+                //
+                continue;
+            }
+
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_strId);
-			ofTs->setCaption(schemasDetails.m_caption);
+
+            QString s = QString("%1 - %2").arg(schemasDetails.m_strId).arg(schemasDetails.m_caption);
+            ofTs->setCaption(s);
+
+            //ofTs->setCaption(schemasDetails.m_strId + " - " + schemasDetails.m_caption);
 
 			ofSchema->addChild(ofTs);
 		}
@@ -1157,6 +1196,8 @@ void TuningFilterStorage::createAutomaticFilters(bool bySchemas, bool byEquipmen
 
 		m_root->addTopChild(ofEquipment);
 	}
+
+    m_root->setCaption(QObject::tr("Automatic presets"));
 
 }
 
