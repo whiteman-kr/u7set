@@ -66,14 +66,13 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role /*= Qt::Displa
 			case FileActionColumn:
 				return QVariant(fileInfo->action().text());
 
-//			case FileLastCheckInColumn:
-//				return QVariant(fileInfo->lastCheckIn().toString());
-
-//			case FileIdColumn:
-//				return QVariant(fileInfo->fileId());
-
 			case FileIssuesColumn:
 				{
+					if (excludedFromBuild(fileInfo->fileId()) == true)
+					{
+						return QString("Excluded From Build");
+					}
+
 					QStringList fn = fileInfo->fileName().split('.');
 
 					if (fn.isEmpty() == false)
@@ -167,6 +166,11 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role /*= Qt::Displa
 
 			if (col == FileIssuesColumn)
 			{
+				if (excludedFromBuild(fileInfo->fileId()) == true)
+				{
+					return QVariant();
+				}
+
 				QStringList fn = fileInfo->fileName().split('.');
 
 				if (fn.isEmpty() == false)
@@ -224,12 +228,6 @@ QVariant SchemaListModel::headerData(int section, Qt::Orientation orientation, i
 
 			case FileActionColumn:
 				return QObject::tr("Action");
-
-//			case FileLastCheckInColumn:
-//				return QObject::tr("Last Check In");
-
-//			case FileIdColumn:
-//				return QObject::tr("FileID");
 
 			case FileIssuesColumn:
 				return QObject::tr("Issues");
@@ -351,24 +349,6 @@ void SchemaListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrde
 			}
 		});
 		break;
-
-//	case FileLastCheckInColumn:
-//		std::sort(m_files.begin(), m_files.end(),
-//				  [order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
-//		{
-//			QDateTime c1 = f1->created();
-//			QDateTime c2 = f2->created();
-
-//			if (order == Qt::AscendingOrder)
-//			{
-//				return c2 < c1;
-//			}
-//			else
-//			{
-//				return c1 < c2;
-//			}
-//		});
-//		break;
 
 	case  FileDetailsColumn:
 		std::sort(m_files.begin(), m_files.end(),
@@ -621,5 +601,18 @@ QString SchemaListModel::fileCaption(int fileId) const
 	QString result = d.m_caption;
 
 	return result;
+}
+
+bool SchemaListModel::excludedFromBuild(int fileId) const
+{
+	auto it = m_details.find(fileId);
+	if (it == m_details.end())
+	{
+		return false;
+	}
+
+	const VFrame30::SchemaDetails& d = it->second;
+
+	return d.m_excludedFromBuild;
 }
 

@@ -42,6 +42,7 @@ public:
 
 	QString detailsColumnText(int fileId) const;
 	QString fileCaption(int fileId) const;
+	bool excludedFromBuild(int fileId) const;
 
 	// Data
 	//
@@ -53,8 +54,6 @@ public:
 		FileStateColumn,
 		FileUserColumn,
 		FileActionColumn,
-		//FileLastCheckInColumn,
-		//FileIdColumn,
 		FileIssuesColumn,
 		FileDetailsColumn,
 

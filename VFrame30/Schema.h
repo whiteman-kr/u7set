@@ -174,6 +174,7 @@ namespace VFrame30
 		int m_version = 0;
 		QString m_schemaId;
 		QString m_caption;
+		bool m_excludedFromBuild = false;
 		QString m_equipmentId;			// Valid for LogicSchemas
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
