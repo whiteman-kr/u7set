@@ -1670,6 +1670,23 @@ const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemaView::select
 	return m_selectedItems;
 }
 
+std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaView::selectedNonLockedItems() const
+{
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
+	result.reserve(m_selectedItems.size());
+
+	for (std::shared_ptr<VFrame30::SchemaItem> si : m_selectedItems)
+	{
+		if (si->isLocked() == false)
+		{
+			result.push_back(si);
+		}
+	}
+
+	return result;
+}
+
+
 void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
@@ -4272,6 +4289,11 @@ const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemaWidget::sele
 	return editSchemaView()->m_selectedItems;
 }
 
+std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaWidget::selectedNonLockedItems() const
+{
+	return editSchemaView()->selectedNonLockedItems();
+}
+
 std::shared_ptr<VFrame30::SchemaLayer> EditSchemaWidget::activeLayer()
 {
 	return editSchemaView()->activeLayer();
@@ -5411,13 +5433,9 @@ void EditSchemaWidget::f2Key()
 
 void EditSchemaWidget::deleteKey()
 {
-	auto selection = editSchemaView()->selectedItems();
+	auto items = editSchemaView()->selectedNonLockedItems();
 
-	if (mouseState() == MouseState::None &&
-		selection.empty() == false)
-	{
-		m_editEngine->runDeleteItem(selection, activeLayer());
-	}
+	m_editEngine->runDeleteItem(items, activeLayer());
 
 	return;
 }
@@ -5499,7 +5517,7 @@ void EditSchemaWidget::editCut()
 		return;
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedNonLockedItems();
 
 	// Save to protobuf message
 	//
@@ -5910,27 +5928,17 @@ void EditSchemaWidget::selectionChanged()
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+	auto selectectNotLocked = selectedNonLockedItems();
 
 	// Edit Menu
 	//
-	int selectionCount = static_cast<int>(editSchemaView()->selectedItems().size());
-	int lockedCound = 0;
-
-	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
-	{
-		if (si->isLocked() == true)
-		{
-			lockedCound ++;
-		}
-	}
-
-	m_deleteAction->setEnabled((selectionCount - lockedCound) > 0 && readOnly() == false);
-	m_editCutAction->setEnabled((selectionCount - lockedCound) > 0 && readOnly() == false);
-	m_editCopyAction->setEnabled(selectionCount > 0);
+	m_deleteAction->setEnabled(selectectNotLocked.empty() == false && readOnly() == false);
+	m_editCutAction->setEnabled(selectectNotLocked.empty() == false && readOnly() == false);
+	m_editCopyAction->setEnabled(selected.empty() == false);
 
 	// Allign
 	//
-	bool allowAlign = selectedItems().size() >= 2 && readOnly() == false;
+	bool allowAlign = selectectNotLocked.size() >= 2 && readOnly() == false;
 
 	m_alignLeftAction->setEnabled(allowAlign);
 	m_alignRightAction->setEnabled(allowAlign);
@@ -5941,7 +5949,7 @@ void EditSchemaWidget::selectionChanged()
 	//
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selectectNotLocked)
 	{
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
 			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
@@ -5958,7 +5966,8 @@ void EditSchemaWidget::selectionChanged()
 
 	// Order
 	//
-	bool allowSetOrder = selectedItems().empty() == false  && readOnly() == false;
+	bool allowSetOrder = selectectNotLocked.empty() == false  && readOnly() == false;
+
 	m_bringToFrontAction->setEnabled(allowSetOrder);
 	m_bringForwardAction->setEnabled(allowSetOrder);
 	m_sendToBackAction->setEnabled(allowSetOrder);
@@ -6239,12 +6248,12 @@ void EditSchemaWidget::addUfbElement()
 
 void EditSchemaWidget::onLeftKey()
 {
-	if (selectedItems().empty() == true)
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
 	{
 		return;
 	}
-
-	const auto& selected = selectedItems();
 
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
 	itemsForMove.reserve(selected.size());
@@ -6269,12 +6278,12 @@ void EditSchemaWidget::onLeftKey()
 
 void EditSchemaWidget::onRightKey()
 {
-	if (selectedItems().empty() == true)
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
 	{
 		return;
 	}
-
-	const auto& selected = selectedItems();
 
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
 	itemsForMove.reserve(selected.size());
@@ -6299,12 +6308,12 @@ void EditSchemaWidget::onRightKey()
 
 void EditSchemaWidget::onUpKey()
 {
-	if (selectedItems().empty() == true)
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
 	{
 		return;
 	}
-
-	const auto& selected = selectedItems();
 
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
 	itemsForMove.reserve(selected.size());
@@ -6329,12 +6338,12 @@ void EditSchemaWidget::onUpKey()
 
 void EditSchemaWidget::onDownKey()
 {
-	if (selectedItems().empty() == true)
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
 	{
 		return;
 	}
-
-	const auto& selected = selectedItems();
 
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
 	itemsForMove.reserve(selected.size());
@@ -6359,7 +6368,12 @@ void EditSchemaWidget::onDownKey()
 
 void EditSchemaWidget::sameWidth()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
@@ -6452,7 +6466,12 @@ void EditSchemaWidget::sameWidth()
 
 void EditSchemaWidget::sameHeight()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
@@ -6545,7 +6564,12 @@ void EditSchemaWidget::sameHeight()
 
 void EditSchemaWidget::sameSize()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
@@ -6668,7 +6692,7 @@ void EditSchemaWidget::sameSize()
 
 void EditSchemaWidget::alignLeft()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
 
 	if (selected.size() < 2)
 	{
@@ -6733,7 +6757,7 @@ void EditSchemaWidget::alignLeft()
 
 void EditSchemaWidget::alignRight()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
 
 	if (selected.size() < 2)
 	{
@@ -6798,7 +6822,7 @@ void EditSchemaWidget::alignRight()
 
 void EditSchemaWidget::alignTop()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
 
 	if (selected.size() < 2)
 	{
@@ -6863,7 +6887,7 @@ void EditSchemaWidget::alignTop()
 
 void EditSchemaWidget::alignBottom()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
 
 	if (selected.size() < 2)
 	{
@@ -6928,25 +6952,49 @@ void EditSchemaWidget::alignBottom()
 
 void EditSchemaWidget::bringToFront()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
+
 	m_editEngine->runSetOrder(EditEngine::SetOrder::BringToFront, selected, activeLayer());
 }
 
 void EditSchemaWidget::bringForward()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
+
 	m_editEngine->runSetOrder(EditEngine::SetOrder::BringForward, selected, activeLayer());
 }
 
 void EditSchemaWidget::sendToBack()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
+
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendToBack, selected, activeLayer());
 }
 
 void EditSchemaWidget::sendBackward()
 {
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	auto selected = selectedNonLockedItems();
+
+	if (selected.empty() == true)
+	{
+		return;
+	}
+
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
 }
 
