@@ -9,160 +9,15 @@
 #include <assert.h>
 
 
-CircularLogger logger;
+CircularLogger logger;		// global logger object
 
-
-const char* const MessageTypeStr[] =
-{
-	"USR",
-	"NET",
-	"APP"
-};
-
-const int MESSAGE_TYPE_COUNT = sizeof(MessageTypeStr) / sizeof(MessageTypeStr[0]);
-
-
-const char* CategoryTypeStr[] =
-{
-	"ERR",
-	"WRN",
-	"MSG",
-	"CFG"
-};
-
-const int CATEGORY_TYPE_COUNT = sizeof(CategoryTypeStr) / sizeof(CategoryTypeStr[0]);
-
-
-CircularLogger::CircularLogger(QObject *parent) :
-	QObject(parent)
-{
-
-}
-
-CircularLogger::~CircularLogger()
-{
-	if (m_thread != nullptr)
-	{
-		m_thread->quit();
-		m_thread->wait();
-	}
-
-	if (m_circularLoggerWorker != nullptr)
-	{
-		delete m_circularLoggerWorker;
-	}
-}
-
-void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
-{
-	if (placementPath.isEmpty())
-	{
-		placementPath = qApp->applicationDirPath();
-	}
-	assert(!placementPath.isEmpty());
-
-	QFileInfo fi(placementPath);
-	QString logPath;
-	if (fi.isRelative())
-	{
-		logPath = qApp->applicationDirPath() + "/" + placementPath;
-	}
-	else
-	{
-		if (fi.isDir())
-		{
-			logPath = fi.absoluteFilePath();
-		}
-		else
-		{
-			logPath = fi.absolutePath();
-		}
-	}
-
-	m_circularLoggerWorker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, logPath);
-	m_thread = new QThread(this);
-	m_thread->start();
-	m_circularLoggerWorker->moveToThread(m_thread);
-
-	connect(this, &CircularLogger::writeRecord,
-			m_circularLoggerWorker, &CircularLoggerWorker::writeRecord,
-			Qt::QueuedConnection);
-}
-
-void CircularLogger::initLog(int fileCount, int fileSizeInMB, QString placementPath)
-{
-	QString filePath;
-	if (qApp != nullptr && !qApp->applicationFilePath().isEmpty())
-	{
-		filePath = qApp->applicationFilePath();
-	}
-	if (filePath.isEmpty())
-	{
-		assert(!placementPath.isEmpty());
-		filePath = placementPath;
-	}
-
-	QFileInfo fi(filePath);
-
-	if (!fi.isFile())
-	{
-		assert(fi.isFile());
-		return;
-	}
-
-	initLog(fi.baseName(), fileCount, fileSizeInMB, placementPath);
-}
-
-QString CircularLogger::composeRecord(int type, int category, const QString &function, const QString &message)
-{
-	QString record;
-
-	if (type >= 0 && type < MESSAGE_TYPE_COUNT)
-	{
-		record = tr(MessageTypeStr[type]);
-	}
-	else
-	{
-		Q_ASSERT(false);
-		record = "???";
-	}
-
-	record += ' ';
-
-	if (category >= 0 && category < CATEGORY_TYPE_COUNT)
-	{
-		record += CategoryTypeStr[category];
-	}
-	else
-	{
-		Q_ASSERT(false);
-		record += "???";
-	}
-
-	record += "  ";
-	record += QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
-
-	record += "  \"";
-	record += message;
-	record += '\"';
-
-	if (!function.isEmpty())
-	{
-		record += " \"FN=";
-		record += function;
-		record += '\"';
-	}
-	else
-	{
-		Q_ASSERT(false);
-	}
-
-	return record;
-}
-
+// ----------------------------------------------------------------------------------
+//
+// CircularLoggerWorker class implementation
+//
+// ----------------------------------------------------------------------------------
 
 CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath) :
-	QObject(nullptr),
 	m_logName(logName),
 	m_path(placementPath.isEmpty() ? qApp->applicationDirPath() + "/Log" : placementPath),
 	m_fileCount(fileCount),
@@ -337,3 +192,183 @@ void CircularLoggerWorker::writeLastRecord()
 			  << "\"\n";
 	m_stream->flush();
 }
+
+
+// ----------------------------------------------------------------------------------
+//
+// CircularLogger class implementation
+//
+// ----------------------------------------------------------------------------------
+
+CircularLogger::CircularLogger()
+{
+}
+
+
+CircularLogger::~CircularLogger()
+{
+	quitAndWait();
+}
+
+
+void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
+{
+	if (m_loggerInitialized == true)
+	{
+		assert(false);			// Logger object is allready initialized.
+		return;
+	}
+
+	if (placementPath.isEmpty())
+	{
+		placementPath = qApp->applicationDirPath();
+	}
+
+	assert(placementPath.isEmpty() == false);
+
+	QFileInfo fi(placementPath);
+	QString logPath;
+
+	if (fi.isRelative())
+	{
+		logPath = qApp->applicationDirPath() + "/" + placementPath;
+	}
+	else
+	{
+		if (fi.isDir())
+		{
+			logPath = fi.absoluteFilePath();
+		}
+		else
+		{
+			logPath = fi.absolutePath();
+		}
+	}
+
+	CircularLoggerWorker* worker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, logPath);
+
+	addWorker(worker);
+
+	connect(this, &CircularLogger::writeRecord,
+			worker, &CircularLoggerWorker::writeRecord,
+			Qt::QueuedConnection);
+
+	start();
+
+	m_loggerInitialized = true;
+}
+
+
+void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath)
+{
+	if (m_loggerInitialized == true)
+	{
+		assert(false);			// Logger object is allready initialized.
+		return;
+	}
+
+	QString filePath;
+
+	if (qApp != nullptr && !qApp->applicationFilePath().isEmpty())
+	{
+		filePath = qApp->applicationFilePath();
+	}
+
+	if (filePath.isEmpty() == true)
+	{
+		assert(!placementPath.isEmpty());
+		filePath = placementPath;
+	}
+
+	QFileInfo fi(filePath);
+
+	if (!fi.isFile())
+	{
+		assert(fi.isFile());
+		return;
+	}
+
+	init(fi.baseName(), fileCount, fileSizeInMB, placementPath);
+}
+
+
+void CircularLogger::writeError(const QString& message, const char* function, const char* file, int line)
+{
+	composeAndWriteRecord(RecordType::Error, message, function, file, line);
+}
+
+
+void CircularLogger::writeWarning(const QString& message, const char* function, const char* file, int line)
+{
+	composeAndWriteRecord(RecordType::Warning, message, function, file, line);
+}
+
+
+void CircularLogger::writeMessage(const QString& message, const char* function, const char* file, int line)
+{
+	composeAndWriteRecord(RecordType::Message, message, function, file, line);
+}
+
+
+void CircularLogger::writeConfig(const QString& message, const char* function, const char* file, int line)
+{
+	composeAndWriteRecord(RecordType::Config, message, function, file, line);
+}
+
+
+QString CircularLogger::getRecordTypeStr(RecordType type)
+{
+	QString str;
+
+	switch(type)
+	{
+	case RecordType::Error:
+		str = "ERR";
+		break;
+
+	case RecordType::Warning:
+		str = "WRN";
+		break;
+
+	case RecordType::Message:
+		str = "MSG";
+		break;
+
+	case RecordType::Config:
+		str = "CFG";
+		break;
+
+	default:
+		str = "???";
+		assert(false);
+	}
+
+	return str;
+}
+
+
+QString CircularLogger::getCurrentDateTimeStr()
+{
+	return QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
+}
+
+
+void CircularLogger::composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line)
+{
+	if (m_loggerInitialized == false)
+	{
+		assert(false);		// Logger object isn't initialized. Call CircularLogger::init at first.
+		return;
+	}
+
+	QString record = QString("%1 %2 \"%3\" \"FUNC=%4\" \"POS=%5:%6\"").
+							arg(getCurrentDateTimeStr()).
+							arg(getRecordTypeStr(type)).
+							arg(message).
+							arg(function).
+							arg(file).
+							arg(line);
+
+	emit writeRecord(record);
+}
+
