@@ -215,6 +215,15 @@ void UserManagementDialog::on_userChanged(const QString & username)
 		ui->lastNameEdit->setEnabled(false);
 	}
 
+	if (m_currentUser.isAdminstrator() == true)
+	{
+		ui->createUserButton->setEnabled(true);
+	}
+	else
+	{
+		ui->createUserButton->setEnabled(false);
+	}
+
 	disableApply();
 
 	return;
