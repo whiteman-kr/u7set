@@ -222,6 +222,7 @@ namespace Tuning
 		int m_tuningRomFrameCount = 0;
 		int m_tuningRomFrameSizeW = 0;
 		int m_tuningRomSizeW = 0;
+		int m_tuningUsedFramesCount = 0;
 
 		//
 
