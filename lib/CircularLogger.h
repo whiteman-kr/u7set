@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QQueue>
 #include <QMap>
+#include <QTimer>
 
 #include "SimpleThread.h"
 
@@ -26,11 +27,10 @@ public:
 
 public slots:
 	void writeRecord(const QString record);
-	void flushStream();
 
 private:
-	QTextStream* m_stream = nullptr;
-	QFile* m_file = nullptr;
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
 
 	void detectFiles();
 	void removeOldFiles();
@@ -38,18 +38,28 @@ private:
 	int getFileID(int index);
 	QString fileName(int index);
 	void openFile(int index);
-	void writeFirstRecord();
-	void writeLastRecord();
+	void clearFileStream();
+
+private slots:
+	void flushStream();
+
+private:
+	QTextStream* m_stream = nullptr;
+	QFile* m_file = nullptr;
+	QTimer m_timer;
 
 	QString m_logName;
 	QString m_path;
 	QString m_logFileName;
-	int m_beginFileNumber = -1;
-	int m_endFileNumber = -1;
-	int m_fileCount;
-	int m_fileSizeLimit;	// in megabytes
-	qint64 m_beginFileID = -1;
-	qint64 m_endFileID = -1;
+
+	const int MAX_LOG_FILE_COUNT = 10;
+	int m_fileCount = 0;
+	int m_fileSizeLimit = 0;			// in megabytes
+
+	int m_firstFileNumber = -1;
+	int m_lastFileNumber = -1;
+	qint64 m_firstFileID = -1;
+	qint64 m_lastFileID = -1;
 };
 
 

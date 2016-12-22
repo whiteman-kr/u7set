@@ -21,176 +21,198 @@ CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int f
 	m_logName(logName),
 	m_path(placementPath.isEmpty() ? qApp->applicationDirPath() + "/Log" : placementPath),
 	m_fileCount(fileCount),
-	m_fileSizeLimit(fileSizeInMB)
+	m_fileSizeLimit(fileSizeInMB),
+	m_timer(this)
 {
 }
+
 
 CircularLoggerWorker::~CircularLoggerWorker()
 {
-	if (m_file != nullptr)
-	{
-		close();
-		delete m_stream;
-		delete m_file;
-	}
+	clearFileStream();
 }
+
 
 void CircularLoggerWorker::writeRecord(const QString record)
 {
-	if (m_file == nullptr)
+	if (m_stream != nullptr)
 	{
-		detectFiles();
+		*m_stream << record << '\n';
 	}
-	*m_stream << record << '\n';
-
-	//qDebug() << record;
 }
+
+
+void CircularLoggerWorker::onThreadStarted()
+{
+	detectFiles();
+
+	connect(&m_timer, &QTimer::timeout, this, &CircularLoggerWorker::flushStream);
+	m_timer.start(1000);
+}
+
+
+void CircularLoggerWorker::onThreadFinished()
+{
+	clearFileStream();
+}
+
 
 void CircularLoggerWorker::close()
 {
 	if (m_file != nullptr)
 	{
-		writeLastRecord();
 		m_file->close();
+		m_file = nullptr;
 	}
 }
+
 
 void CircularLoggerWorker::flushStream()
 {
 	m_stream->flush();
 }
 
+
 void CircularLoggerWorker::detectFiles()
 {
 	QDir dir;
-	if (!dir.exists(m_path))
+
+	if (dir.exists(m_path) == false)
 	{
 		dir.mkpath(m_path);
 	}
 
 	for (int i = 0; i < 1000; i++)
 	{
-		if (!QFile::exists(fileName(i)))
+		if (QFile::exists(fileName(i)) == false)
 		{
 			continue;
 		}
+
 		int id = getFileID(i);
-		if (m_beginFileID == -1 || id < m_beginFileID)
+
+		if (m_firstFileID == -1 || id < m_firstFileID)
 		{
-			m_beginFileID = id;
-			m_beginFileNumber = i;
+			m_firstFileID = id;
+			m_firstFileNumber = i;
 		}
-		if (m_endFileID == -1 || id > m_endFileID)
+
+		if (m_lastFileID == -1 || id > m_lastFileID)
 		{
-			m_endFileID = id;
-			m_endFileNumber = i;
+			m_lastFileID = id;
+			m_lastFileNumber = i;
 		}
 	}
 
-	if (m_beginFileID == -1)
+	if (m_firstFileID == -1)
 	{
-		m_beginFileID = 0;
-		m_beginFileNumber = 0;
+		m_firstFileID = 0;
+		m_firstFileNumber = 0;
 	}
-	if (m_endFileID == -1)
+	if (m_lastFileID == -1)
 	{
-		m_endFileID = 0;
-		m_endFileNumber = 0;
+		m_lastFileID = 0;
+		m_lastFileNumber = 0;
 	}
 
 	removeOldFiles();
-	openFile(m_endFileNumber);
+	openFile(m_lastFileNumber);
 }
+
 
 void CircularLoggerWorker::removeOldFiles()
 {
-	while (m_endFileID - m_beginFileID >= m_fileCount)
+	while (m_lastFileID - m_firstFileID >= m_fileCount)
 	{
-		QFile::remove(fileName(m_beginFileNumber));
-		m_beginFileNumber++;
-		m_beginFileID++;
-		if (m_beginFileNumber >= 1000)
+		QFile::remove(fileName(m_firstFileNumber));
+
+		m_firstFileNumber++;
+		m_firstFileID++;
+
+		if (m_firstFileNumber >= 1000)
 		{
-			m_beginFileNumber = 0;
+			m_firstFileNumber = 0;
 		}
 	}
 }
+
 
 void CircularLoggerWorker::checkFileSize()
 {
 	if (m_file->size() >= m_fileSizeLimit * 1024 * 1024)
 	{
 		close();
-		m_endFileNumber++;
-		m_endFileID++;
-		if (m_endFileNumber >= 1000)
+
+		m_lastFileNumber++;
+		m_lastFileID++;
+
+		if (m_lastFileNumber >= 1000)
 		{
-			m_endFileNumber = 0;
+			m_lastFileNumber = 0;
 		}
-		QString newFileName = fileName(m_endFileNumber);
+
+		QString newFileName = fileName(m_lastFileNumber);
+
 		if (QFile::exists(newFileName))
 		{
 			QFile::remove(newFileName);
 		}
+
 		removeOldFiles();
-		openFile(m_endFileNumber);
+
+		openFile(m_lastFileNumber);
 	}
 }
+
 
 int CircularLoggerWorker::getFileID(int index)
 {
 	QFile file(fileName(index));
+
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
+
 	QTextStream in(&file);
+
 	return in.readLine().toInt();
 }
+
 
 QString CircularLoggerWorker::fileName(int index)
 {
 	return m_path + '/' + m_logName + '_' + QString("%1").arg(index, 3, 10, QChar('0')) + ".log";
 }
 
+
 void CircularLoggerWorker::openFile(int index)
 {
-	if (m_file == nullptr)
-	{
-		m_file = new QFile(fileName(index));
-		m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-		m_stream = new QTextStream(m_file);
+	clearFileStream();
 
-		QTimer* timer = new QTimer(this);
-		connect(timer, &QTimer::timeout, this, &CircularLoggerWorker::flushStream);
-		timer->start(1000);
-	}
-	else
-	{
-		m_file->setFileName(fileName(index));
-		m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-	}
+	m_file = new QFile(fileName(index));
+	m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+	m_stream = new QTextStream(m_file);
+
 	if (m_file->size() == 0)
 	{
-		*m_stream << m_endFileID << '\n';
+		*m_stream << m_lastFileID << '\n';
 	}
-	writeFirstRecord();
 }
 
-void CircularLoggerWorker::writeFirstRecord()
-{
-	*m_stream << tr("\nLOG OPN  ")
-			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  \"by application "
-			  << qApp->applicationFilePath()
-			  << "\"\n";
-}
 
-void CircularLoggerWorker::writeLastRecord()
+void CircularLoggerWorker::clearFileStream()
 {
-	*m_stream << tr("LOG CLS  ")
-			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  \"by application "
-			  << qApp->applicationFilePath()
-			  << "\"\n";
-	m_stream->flush();
+	if (m_stream != nullptr)
+	{
+		m_stream->flush();
+		delete m_stream;
+		m_stream = nullptr;
+	}
+
+	if (m_file != nullptr)
+	{
+		m_file->close();
+		delete m_file;
+		m_file = nullptr;
+	}
 }
 
 
@@ -361,7 +383,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
-	QString record = QString("%1 %2 \"%3\" \"FUNC=%4\" \"POS=%5:%6\"").
+	QString record = QString("\"%1\" \"%2\" \"%3\" \"%4\" \"%5:%6\"").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
 							arg(message).
