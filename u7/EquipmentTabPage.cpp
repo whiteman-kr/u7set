@@ -3852,8 +3852,6 @@ void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QM
 
 void EquipmentTabPage::setActionState()
 {
-	qDebug() << "EquipmentTabPage::setActionState()";
-
 	assert(m_addFromPresetAction);
 	assert(m_addNewPresetAction);
 	assert(m_addSystemAction);

@@ -42,7 +42,10 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	//
 	verticalHeader()->hide();
 	verticalHeader()->setDefaultSectionSize(static_cast<int>(fontMetrics().height() * 1.4));
+	verticalHeader()->setResizeMode(QHeaderView::Fixed);
+
 	horizontalHeader()->setHighlightSections(false);
+
 
 	setColumnWidth(static_cast<int>(SchemaListModel::FileNameColumn), 180);
 	setColumnWidth(static_cast<int>(SchemaListModel::FileCaptionColumn), 400);
@@ -82,6 +85,8 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileView::filesViewSelectionChanged);
 
 	connect(this, &QTableView::doubleClicked, this, &SchemaFileView::slot_doubleClicked);
+
+	setFont(qApp->font());
 
 	return;
 }

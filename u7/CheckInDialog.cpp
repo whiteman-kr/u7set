@@ -10,6 +10,14 @@ CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, bool treeChec
 {
 	ui->setupUi(this);
 
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.30, screen.height() * 0.30);
+	move(screen.center() - rect().center());
+
 	// Fill the file list
 	//
 	assert(m_files.empty() == false);

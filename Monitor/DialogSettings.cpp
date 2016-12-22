@@ -16,6 +16,17 @@ DialogSettings::DialogSettings(QWidget *parent) :
 
 	connect (ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogSettings::ok_clicked);
 	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.23, height());
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 DialogSettings::~DialogSettings()

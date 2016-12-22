@@ -20,9 +20,7 @@ public:
 	
 private slots:
 	void on_ok_clicked();
-
 	void on_cancel_clicked();
-
 	void on_browseOutputPath_clicked();
 
 private:
