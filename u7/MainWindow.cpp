@@ -194,14 +194,19 @@ void MainWindow::restoreWindowState()
 	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
-	if (intersectRect.width() < size().width() ||
-		intersectRect.height() < size().height())
+	qDebug() << "Intr "  << intersectRect;
+	qDebug() << "size "  << size();
+
+	if (isMaximized() == false &&
+		(intersectRect.width() < size().width() ||
+		intersectRect.height() < size().height()))
 	{
 		move(screenRect.topLeft());
 	}
 
-	if (frameGeometry().width() > screenRect.width() ||
-		frameGeometry().height() > screenRect.height())
+	if (isMaximized() == false &&
+		(frameGeometry().width() > screenRect.width() ||
+		frameGeometry().height() > screenRect.height()))
 	{
 		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
 	}
