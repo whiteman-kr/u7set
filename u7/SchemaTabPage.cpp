@@ -1882,10 +1882,10 @@ void SchemaControlTabPage::search()
 	//
 	m_filesView->selectionModel()->clearSelection();
 
+	QModelIndex firstModeleIndexToScroll;						// The first found ModelIndex will be kept here, to scroll to it (EnsureVisible)
+
 	for (std::shared_ptr<DbFileInfo> f : foundFiles)
 	{
-		qDebug() << f->fileName();
-
 		int fileRow = m_filesView->filesModel().getFileRow(f->fileId());
 		assert(fileRow != -1);
 
@@ -1894,16 +1894,27 @@ void SchemaControlTabPage::search()
 			continue;
 		}
 
-		QModelIndex md = m_filesView->filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
+		QModelIndex md = m_filesView->filesModel().index(fileRow, 0);
 		assert(md.isValid() == true);
 
 		if (md.isValid() == true)
 		{
 			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+			if (firstModeleIndexToScroll.isValid() == false)	// Save only first time
+			{
+				firstModeleIndexToScroll = md;
+			}
 		}
 	}
 
 	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
+
+	if (firstModeleIndexToScroll.isValid() == true)
+	{
+		m_filesView->scrollTo(firstModeleIndexToScroll);
+	}
+
 	m_filesView->setFocus();
 
 	return;
