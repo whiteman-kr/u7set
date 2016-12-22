@@ -1181,6 +1181,16 @@
         <translation>Источники тюнинга</translation>
     </message>
     <message>
+        <location filename="../DialogTuningSources.ui" line="39"/>
+        <source>Details...</source>
+        <translation>Дополнительно...</translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.ui" line="59"/>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
         <location filename="../DialogTuningSources.cpp" line="15"/>
         <source>Id</source>
         <translation>ИД</translation>
@@ -1246,12 +1256,12 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <location filename="../DialogTuningSources.cpp" line="126"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <location filename="../DialogTuningSources.cpp" line="126"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
@@ -2202,6 +2212,12 @@
         <translation>Будут применены новые значения:</translation>
     </message>
     <message>
+        <location filename="../TuningPage.cpp" line="1164"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningPage.cpp" line="1169"/>
         <source>Are you sure you want to continue?</source>
         <translation>Вы уверены, что хотите продолжить?</translation>
@@ -2231,12 +2247,6 @@ Are you sure you want to continue?</source>
         <location filename="../TuningPage.cpp" line="1161"/>
         <source>Yes</source>
         <translation>Да</translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="1164"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1171"/>

@@ -1181,6 +1181,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../DialogTuningSources.ui" line="39"/>
+        <source>Details...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogTuningSources.ui" line="59"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../DialogTuningSources.cpp" line="15"/>
         <source>Id</source>
         <translation type="unfinished"></translation>
@@ -1246,12 +1256,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <location filename="../DialogTuningSources.cpp" line="126"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="123"/>
+        <location filename="../DialogTuningSources.cpp" line="126"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2191,6 +2201,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../TuningPage.cpp" line="1164"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningPage.cpp" line="1169"/>
         <source>Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
@@ -2208,12 +2224,6 @@
     <message>
         <location filename="../TuningPage.cpp" line="1161"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="1164"/>
-        <source>%1 (%2) = %3
-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
