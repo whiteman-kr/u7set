@@ -24,132 +24,177 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="commonLayout">
-     <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelIpAddress2">
-         <property name="text">
-          <string>Configurator IP address 2</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="editConfiguratorPort2">
-         <property name="inputMask">
-          <string>00000</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <widget class="QTabWidget" name="tabControl">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabConnection">
+      <attribute name="title">
+       <string>Connection</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="commonLayout">
          <item>
-          <widget class="QLineEdit" name="editConfiguratorPort1">
-           <property name="inputMask">
-            <string>00000</string>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="3" column="0">
+            <widget class="QLabel" name="labelIpAddress2">
+             <property name="text">
+              <string>Configurator IP address 2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="editConfiguratorPort2">
+             <property name="inputMask">
+              <string>00000</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLineEdit" name="editConfiguratorPort1">
+               <property name="inputMask">
+                <string>00000</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="editConfiguratorIpAddress2">
+             <property name="inputMask">
+              <string>000.000.000.000</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="labelPort1">
+             <property name="text">
+              <string>Configurator port 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelPort2">
+             <property name="text">
+              <string>Configurator port 2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelIpAddress1">
+             <property name="text">
+              <string>Configurator IP address 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="editConfiguratorIpAddress1">
+             <property name="inputMask">
+              <string>000.000.000.000</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelnstanceStrId">
+             <property name="text">
+              <string>Instance StrID</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="instanceStrId"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="editConfiguratorIpAddress2">
-         <property name="inputMask">
-          <string>000.000.000.000</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelPort1">
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabView">
+      <attribute name="title">
+       <string>View</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QCheckBox" name="checkShowLogo">
          <property name="text">
-          <string>Configurator port 1</string>
+          <string>Show Logo</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <spacer name="verticalSpacer_2">
+       <item>
+        <widget class="QCheckBox" name="checkShowItemsLabels">
+         <property name="text">
+          <string>Show Items Labels</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>86</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelPort2">
-         <property name="text">
-          <string>Configurator port 2</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelIpAddress1">
-         <property name="text">
-          <string>Configurator IP address 1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="editConfiguratorIpAddress1">
-         <property name="inputMask">
-          <string>000.000.000.000</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelnstanceStrId">
-         <property name="text">
-          <string>Instance StrID</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="instanceStrId"/>
-       </item>
       </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="rightButtonLayout">
+     </widget>
+     <widget class="QWidget" name="tabOther">
+      <attribute name="title">
+       <string>Other</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QPushButton" name="ok">
+        <widget class="QCheckBox" name="checkSingleInstance">
          <property name="text">
-          <string>Ok</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <property name="default">
-          <bool>true</bool>
+          <string>Single Instance</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="cancel">
-         <property name="text">
-          <string>Cancel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
+        <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>109</height>
           </size>
          </property>
         </spacer>
        </item>
       </layout>
-     </item>
-    </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -159,8 +204,6 @@
   <tabstop>editConfiguratorPort1</tabstop>
   <tabstop>editConfiguratorIpAddress2</tabstop>
   <tabstop>editConfiguratorPort2</tabstop>
-  <tabstop>ok</tabstop>
-  <tabstop>cancel</tabstop>
  </tabstops>
  <resources/>
  <connections/>
