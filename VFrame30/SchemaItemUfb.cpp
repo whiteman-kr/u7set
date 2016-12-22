@@ -60,18 +60,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		int dpiX = 96;
-		QPaintDevice* pPaintDevice = p->device();
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->physicalDpiX();
-		}
-
+		int dpiX = drawParam->dpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		FontParam smallFont = m_font;

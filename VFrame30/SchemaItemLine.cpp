@@ -130,7 +130,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -143,7 +143,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			m_weight = pt;
 		}
 	}
