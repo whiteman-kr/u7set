@@ -23,8 +23,6 @@ public:
 	CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 	~CircularLoggerWorker();
 
-	void close();
-
 public slots:
 	void writeRecord(const QString record);
 
@@ -53,8 +51,10 @@ private:
 	QString m_logFileName;
 
 	const int MAX_LOG_FILE_COUNT = 10;
+	const int MAX_LOG_FILE_SIZE = 10;		// in megabytes
+
 	int m_fileCount = 0;
-	int m_fileSizeLimit = 0;			// in megabytes
+	int m_fileSizeLimit = 0;				// in megabytes
 
 	int m_firstFileNumber = -1;
 	int m_lastFileNumber = -1;
@@ -74,7 +74,6 @@ class CircularLogger : public SimpleThread
 	Q_OBJECT
 
 public:
-
 	enum class RecordType
 	{
 		Error,
@@ -89,6 +88,8 @@ public:
 
 	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
+
+	bool isInitialized() const { return m_loggerInitialized; }
 
 signals:
 	void writeRecord(const QString record);

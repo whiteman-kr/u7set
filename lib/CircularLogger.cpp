@@ -24,6 +24,25 @@ CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int f
 	m_fileSizeLimit(fileSizeInMB),
 	m_timer(this)
 {
+	if (m_fileCount < 1)
+	{
+		m_fileCount = 1;
+	}
+
+	if (m_fileCount > MAX_LOG_FILE_COUNT)
+	{
+		m_fileCount = MAX_LOG_FILE_COUNT;
+	}
+
+	if (m_fileSizeLimit < 1)
+	{
+		m_fileSizeLimit = 1;
+	}
+
+	if (m_fileSizeLimit > MAX_LOG_FILE_SIZE)
+	{
+		m_fileSizeLimit = MAX_LOG_FILE_SIZE;
+	}
 }
 
 
@@ -54,16 +73,6 @@ void CircularLoggerWorker::onThreadStarted()
 void CircularLoggerWorker::onThreadFinished()
 {
 	clearFileStream();
-}
-
-
-void CircularLoggerWorker::close()
-{
-	if (m_file != nullptr)
-	{
-		m_file->close();
-		m_file = nullptr;
-	}
 }
 
 
@@ -141,7 +150,7 @@ void CircularLoggerWorker::checkFileSize()
 {
 	if (m_file->size() >= m_fileSizeLimit * 1024 * 1024)
 	{
-		close();
+		clearFileStream();
 
 		m_lastFileNumber++;
 		m_lastFileID++;

@@ -15,6 +15,8 @@ ServiceStarter::ServiceStarter(int argc, char ** argv, const QString& name, Serv
 	m_serviceWorker(serviceWorker)
 {
 	assert(serviceWorker != nullptr);
+
+	assert(logger.isInitialized() == true);
 }
 
 

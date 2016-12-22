@@ -10,7 +10,10 @@ int main(int argc, char *argv[])
 
 	INIT_LOGGER(argv[0]);
 
-	LOG_MSG("Start");
+	const char* appName = "RPCT Tuning Service";
+
+	QCoreApplication::setOrganizationName("Radiy");
+	QCoreApplication::setApplicationName(appName);
 
 	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
 	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
@@ -19,7 +22,7 @@ int main(int argc, char *argv[])
 
 	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath);
 
-	ServiceStarter serviceStarter(argc, argv, "RPCT Tuning Service", tuningServiceWorker);
+	ServiceStarter serviceStarter(argc, argv, appName, tuningServiceWorker);
 
 	int result = serviceStarter.exec();
 
