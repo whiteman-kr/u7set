@@ -11,7 +11,11 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	// --
 	//
 	tabBar()->setExpanding(true);
-	setStyleSheet("QTabBar::tab { min-width: 200px; height: 28px;}");
+
+	QSize sz = fontMetrics().size(Qt::TextSingleLine, "XEMPTYSCHEMAX");
+	sz.setHeight(sz.height() * 1.75);
+
+	setStyleSheet(QString("QTabBar::tab { min-width: %1px; min-height: %2px;})").arg(sz.width()).arg(sz.height()));
 
 	// On start create an empty MonitorSchema and add a tab with this schema
 	//
