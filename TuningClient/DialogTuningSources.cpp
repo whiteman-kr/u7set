@@ -32,6 +32,9 @@ DialogTuningSources::DialogTuningSources(QWidget *parent) :
 
     update(false);
 
+    ui->treeWidget->setSortingEnabled(true);
+    ui->treeWidget->sortByColumn(1, Qt::AscendingOrder);// sort by EquipmentID
+
     connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
@@ -132,11 +135,21 @@ DialogTuningSources* theDialogTuningSources = nullptr;
 
 void DialogTuningSources::on_treeWidget_doubleClicked(const QModelIndex &index)
 {
-    QTreeWidgetItem* item = ui->treeWidget->topLevelItem(index.row());
+    Q_UNUSED(index);
+    on_btnDetails_clicked();
+}
+
+void DialogTuningSources::on_btnClose_clicked()
+{
+    reject();
+}
+
+void DialogTuningSources::on_btnDetails_clicked()
+{
+    QTreeWidgetItem* item = ui->treeWidget->currentItem();
 
     if (item == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -144,4 +157,11 @@ void DialogTuningSources::on_treeWidget_doubleClicked(const QModelIndex &index)
 
     DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(this, id);
     dlg->exec();
+}
+
+void DialogTuningSources::on_treeWidget_itemSelectionChanged()
+{
+    QTreeWidgetItem* item = ui->treeWidget->currentItem();
+
+    ui->btnDetails->setEnabled(item != nullptr);
 }
