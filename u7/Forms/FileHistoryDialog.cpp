@@ -77,6 +77,15 @@ FileHistoryDialog::FileHistoryDialog(QString title, DbController* db, const std:
 		sm->select(mi, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 	}
 
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.40, screen.height() * 0.35);
+
+	move(screen.center() - rect().center());
+
 	return;
 }
 

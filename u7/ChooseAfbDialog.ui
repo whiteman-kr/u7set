@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Choose AFB element</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -144,8 +147,6 @@
     </layout>
    </item>
   </layout>
-  <zorder>label_2</zorder>
-  <zorder>label</zorder>
  </widget>
  <resources/>
  <connections/>
