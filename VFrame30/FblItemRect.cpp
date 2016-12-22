@@ -296,17 +296,7 @@ namespace VFrame30
 
 		// --
 		//
-		int dpiX = 96;
-		QPaintDevice* pPaintDevice = p->device();
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->physicalDpiX();
-		}
+		int dpiX = drawParam->dpiX();
 
 		// Correct rect width
 		//
@@ -504,21 +494,15 @@ namespace VFrame30
 
 	QRectF FblItemRect::itemRectPinIndent(QPaintDevice* paintDevice) const
 	{
-		int dpiX = 96;
-
 		if (paintDevice == nullptr)
 		{
 			assert(paintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = paintDevice->physicalDpiX();
+			return QRectF();
 		}
 
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		double pinWidth = GetPinWidth(itemUnit(), paintDevice->physicalDpiX());
 
 		if (inputsCount() > 0)
 		{
@@ -822,7 +806,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -835,7 +819,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			m_weight = pt;
 		}
 	}

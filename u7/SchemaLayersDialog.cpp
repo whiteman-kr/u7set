@@ -21,7 +21,6 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	QStringList header;
 	header << tr("Name");
 	header << tr("Active");
-	header << tr("Compile");
 	header << tr("Show");
 	header << tr("Print");
 	ui->m_layersList->setColumnCount(header.size());
@@ -33,19 +32,14 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	// Create context menu actions
 	//
 	m_activeAction = new QAction(QString("Active"), this);
-	m_compileAction = new QAction(QString("Compile"), this);
 	m_showAction = new QAction(QString("Show"), this);
 	m_printAction = new QAction(QString("Print"), this);
 
 	m_activeAction->setCheckable(true);
-	m_compileAction->setCheckable(true);
 	m_showAction->setCheckable(true);
 	m_printAction->setCheckable(true);
 
-	//m_compileAction->setEnabled(false);
-
 	connect(m_activeAction, &QAction::triggered, this, &SchemaLayersDialog::onActiveClick);
-	connect(m_compileAction, &QAction::triggered, this, &SchemaLayersDialog::onCompileClick);
 	connect(m_showAction, &QAction::triggered, this, &SchemaLayersDialog::onShowClick);
 	connect(m_printAction, &QAction::triggered, this, &SchemaLayersDialog::onPrintClick);
 
@@ -53,7 +47,6 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
 	{
 		m_name << l->name();
-		m_compile << l->compile();
 		m_show << l->show();
 		m_print << l->print();
 
@@ -65,6 +58,21 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	}
 
 	fillList(m_activeIndex);
+
+	ui->m_layersList->resizeColumnToContents(1);
+	ui->m_layersList->resizeColumnToContents(2);
+	ui->m_layersList->resizeColumnToContents(3);
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.20, screen.height() * 0.15);
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 void SchemaLayersDialog::fillList(int selectedIndex)
@@ -81,7 +89,6 @@ void SchemaLayersDialog::fillList(int selectedIndex)
 		QStringList s;
 		s << m_name[i];
 		s << QString(i == m_activeIndex ? tr("Yes") : tr(""));
-		s << QString(m_compile[i] ? tr("Yes") : tr(""));
 		s << QString(m_show[i] ? tr("Yes") : tr(""));
 		s << QString(m_print[i] ? tr("Yes") : tr(""));
 
@@ -116,7 +123,7 @@ void SchemaLayersDialog::onContextMenu(const QPoint &pos)
 	}
 
 	m_cmIndex = item->data(0, Qt::UserRole).toInt();
-	if (m_cmIndex == -1 || m_cmIndex >= m_show.size() || m_cmIndex >= m_compile.size() || m_cmIndex >= m_print.size())
+	if (m_cmIndex == -1 || m_cmIndex >= m_show.size() || m_cmIndex >= m_print.size())
 	{
 		assert(false);
 		return;
@@ -127,15 +134,12 @@ void SchemaLayersDialog::onContextMenu(const QPoint &pos)
 	m_activeAction->setChecked(m_cmIndex == m_activeIndex);
 	m_activeAction->setEnabled(m_show[m_cmIndex]);
 
-	m_compileAction->setChecked(m_compile[m_cmIndex]);
-
 	m_showAction->setChecked(m_show[m_cmIndex]);
 	m_showAction->setEnabled(m_cmIndex != m_activeIndex);
 
 	m_printAction->setChecked(m_print[m_cmIndex]);
 
 	menu->addAction(m_activeAction);
-	menu->addAction(m_compileAction);
 	menu->addAction(m_showAction);
 	menu->addAction(m_printAction);
 
@@ -152,18 +156,6 @@ void SchemaLayersDialog::onActiveClick(bool /*checked*/)
 	}
 
 	m_activeIndex = m_cmIndex;
-	fillList(m_cmIndex);
-}
-
-void SchemaLayersDialog::onCompileClick(bool checked)
-{
-	if (m_cmIndex < 0 || m_cmIndex >= m_compile.size())
-	{
-		assert(false);
-		return;
-	}
-
-	m_compile[m_cmIndex] = checked;
 	fillList(m_cmIndex);
 }
 
@@ -224,7 +216,6 @@ void SchemaLayersDialog::on_SchemaLayersDialog_accepted()
 	int index = 0;
 	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
 	{
-		l->setCompile(m_compile[index]);
 		l->setShow(m_show[index]);
 		l->setPrint(m_print[index]);
 		if (index == m_activeIndex)

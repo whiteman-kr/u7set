@@ -13,6 +13,20 @@ DialogSettings::DialogSettings(QWidget *parent) :
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	connect (ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogSettings::ok_clicked);
+	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.23, height());
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 DialogSettings::~DialogSettings()
@@ -37,10 +51,14 @@ void DialogSettings::setSettings(const Settings& value)
 	ui->editConfiguratorIpAddress2->setText(m_settings.configuratorIpAddress2());
 	ui->editConfiguratorPort2->setText(QString().setNum(m_settings.configuratorPort2()));
 
+	ui->checkShowLogo->setChecked(m_settings.showLogo());
+	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels());
+	ui->checkSingleInstance->setChecked(m_settings.singleInstance());
+
 	return;
 }
 
-void DialogSettings::on_ok_clicked()
+void DialogSettings::ok_clicked()
 {
 	// Check Instance StrID
 	//
@@ -130,11 +148,15 @@ void DialogSettings::on_ok_clicked()
 	m_settings.setConfiguratorIpAddress2(configuratorIpAddress2);
 	m_settings.setConfiguratorPort2(serverPort2);
 
+	m_settings.setShowLogo(ui->checkShowLogo->isChecked());
+	m_settings.setShowItemsLabels(ui->checkShowItemsLabels->isChecked());
+	m_settings.setSingleInstance(ui->checkSingleInstance->isChecked());
+
 	accept();
 	return;
 }
 
-void DialogSettings::on_cancel_clicked()
+void DialogSettings::cancel_clicked()
 {
 	reject();
 	return;

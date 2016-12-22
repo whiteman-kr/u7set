@@ -15,6 +15,8 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
+	// --
+	//
 	if (m_splitterState.isEmpty() == false)
 	{
 		ui->splitter->restoreState(m_splitterState);
@@ -30,6 +32,15 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 			{
 				m_splitterState = ui->splitter->saveState();
 			});
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.45);
+
+	move(screen.center() - rect().center());
 
 	// Fill objects table
 	//
@@ -87,6 +98,15 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 	}
 
 	ui->objects->insertTopLevelItems(0, items);
+
+	int listWidth = ui->objects->width();
+
+	assert(columns.size() == 5);
+	ui->objects->setColumnWidth(0, listWidth * 0.10);
+	ui->objects->setColumnWidth(1, listWidth * 0.25);
+	ui->objects->setColumnWidth(2, listWidth * 0.40);
+	ui->objects->setColumnWidth(3, listWidth * 0.10);
+	ui->objects->setColumnWidth(4, listWidth * 0.10);
 
 	ui->labelObjects->setText(tr("Objects, %1 file(s), %2 signal(s)").arg(fileCount).arg(signalCount));
 

@@ -25,26 +25,6 @@ public:
 	static const int InchesRoundDigits = 4;
 	static const int MillimetresRoundDigits = 2;
 
-	static int DpiX()
-	{
-		static int dpiX = -1;
-		if (dpiX == -1)
-		{
-			dpiX = QApplication::desktop()->screen()->physicalDpiX();
-		}
-		return dpiX;
-	}
-
-	static int DpiY()
-	{
-		static int dpiY = -1;
-		if (dpiY == -1)
-		{
-			dpiY = QApplication::desktop()->screen()->physicalDpiY();
-		}
-		return dpiY;
-	}
-
 	// Math functions
 	//
 
@@ -205,22 +185,21 @@ public:
 		}
 	}
 
-	static double ConvertPoint(double point, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, VFrame30::ConvertDirection convertDirection)
+	static double ConvertPoint(double point, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, int dpi)
 	{
 		if (convertFrom == convertTo)
 		{
 			return point;
 		}
 
-		int dpi = convertDirection == VFrame30::ConvertDirection::Horz ? DpiX() : DpiY();
-		if (dpi == 0)
-		{
-			assert(dpi != 0);
-			return 0.0;
-		}
-
 		if (convertFrom == VFrame30::SchemaUnit::Display)
 		{
+			if (dpi == 0)
+			{
+				assert(dpi != 0);
+				return 0.0;
+			}
+
 			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
 				point = point / dpi;
@@ -241,6 +220,12 @@ public:
 		{
 			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
+				if (dpi == 0)
+				{
+					assert(dpi != 0);
+					return 0.0;
+				}
+
 				point = point * dpi;
 				return point;
 			}
@@ -259,6 +244,12 @@ public:
 		{
 			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
+				if (dpi == 0)
+				{
+					assert(dpi != 0);
+					return 0.0;
+				}
+
 				point = point * dpi / 25.4;
 				return point;
 			}
@@ -277,20 +268,10 @@ public:
 		return 0.0;
 	}
 
-	static void ConvertPoint(double& x, double& y, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo)
+	static void ConvertPoint(double& x, double& y, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, int dpiX, int dpiY)
 	{
 		if (convertFrom == convertTo)
 		{
-			return;
-		}
-
-		int dpiX = DpiX();
-		int dpiY = DpiY();
-
-		if (dpiX == 0 || dpiY == 0)
-		{
-			assert(dpiX != 0);
-			assert(dpiY != 0);
 			return;
 		}
 
@@ -298,6 +279,13 @@ public:
 		{
 			if (convertTo == VFrame30::SchemaUnit::Inch)
 			{
+				if (dpiX == 0 || dpiY == 0)
+				{
+					assert(dpiX != 0);
+					assert(dpiY != 0);
+					return;
+				}
+
 				x = x / dpiX;
 				y = y / dpiY;
 				return;
@@ -305,6 +293,13 @@ public:
 
 			if (convertTo == VFrame30::SchemaUnit::Millimeter)
 			{
+				if (dpiX == 0 || dpiY == 0)
+				{
+					assert(dpiX != 0);
+					assert(dpiY != 0);
+					return;
+				}
+
 				x = x * 25.4 / dpiX;
 				y = y * 25.4 / dpiY;
 				return;
@@ -318,6 +313,13 @@ public:
 		{
 			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
+				if (dpiX == 0 || dpiY == 0)
+				{
+					assert(dpiX != 0);
+					assert(dpiY != 0);
+					return;
+				}
+
 				x = x * dpiX;
 				y = y * dpiY;
 				return;
@@ -338,6 +340,13 @@ public:
 		{
 			if (convertTo == VFrame30::SchemaUnit::Display)
 			{
+				if (dpiX == 0 || dpiY == 0)
+				{
+					assert(dpiX != 0);
+					assert(dpiY != 0);
+					return;
+				}
+
 				x = x * dpiX / 25.4;
 				y = y * dpiY / 25.4;
 				return;

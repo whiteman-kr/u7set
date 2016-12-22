@@ -129,6 +129,25 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 		item->setData(0, Qt::UserRole, i);
 		ui->m_list->insertTopLevelItem(i, item);
 	}
+
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.25, screen.height() * 0.50);
+	move(screen.center() - rect().center());
+
+	// --
+	//
+	assert(ui->m_list->columnCount() == 4);
+	ui->m_list->setColumnWidth(0, ui->m_list->width() * 0.15);
+	ui->m_list->setColumnWidth(1, ui->m_list->width() * 0.15);
+	ui->m_list->setColumnWidth(2, ui->m_list->width() * 0.30);
+	ui->m_list->setColumnWidth(3, ui->m_list->width() * 0.30);
+
+	return;
 }
 
 DialogSubsystemListEditor::~DialogSubsystemListEditor()

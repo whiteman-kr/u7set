@@ -84,6 +84,42 @@ namespace VFrame30
 		return m_cosmeticPenWidth;
 	}
 
+	int CDrawParam::dpiX()
+	{
+		if (m_dpiX == -1)
+		{
+			if (m_painter != nullptr && m_painter->device() != nullptr)
+			{
+				m_dpiX = m_painter->device()->physicalDpiX();
+			}
+			else
+			{
+				assert(m_painter);
+				m_dpiX = 96;
+			}
+		}
+
+		return m_dpiX;
+	}
+
+	int CDrawParam::dpiY()
+	{
+		if (m_dpiY == -1)
+		{
+			if (m_painter != nullptr && m_painter->device() != nullptr)
+			{
+				m_dpiY = m_painter->device()->physicalDpiY();
+			}
+			else
+			{
+				assert(m_painter);
+				m_dpiY = 96;
+			}
+		}
+
+		return m_dpiY;
+	}
+
 	bool CDrawParam::isEditMode() const
 	{
 		return m_isEditMode;

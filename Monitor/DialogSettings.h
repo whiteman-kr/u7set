@@ -18,8 +18,8 @@ public:
 	void setSettings(const Settings& value);
 	
 private slots:
-	void on_ok_clicked();
-	void on_cancel_clicked();
+	void ok_clicked();
+	void cancel_clicked();
 
 private:
 	Ui::DialogSettings *ui;

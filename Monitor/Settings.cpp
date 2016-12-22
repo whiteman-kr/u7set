@@ -31,6 +31,10 @@ Settings& Settings::operator = (const Settings& src)
 
 		setConfiguratorIpAddress2(src.configuratorIpAddress2());
 		setConfiguratorPort2(src.configuratorPort2());
+
+		setShowLogo(src.showLogo());
+		setShowItemsLabels(src.showItemsLabels());
+		setSingleInstance(src.singleInstance());
 	}
 
 	return *this;
@@ -114,6 +118,10 @@ void Settings::writeSystemScope() const
 	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
 	s.setValue("m_configuratorPort2", m_configuratorPort2);
 
+	s.setValue("m_showLogo", m_showLogo);
+	s.setValue("m_showItemsLabels", m_showItemsLabels);
+	s.setValue("m_singleInstance", m_singleInstance);
+
 	return;
 }
 void Settings::loadSystemScope()
@@ -127,6 +135,10 @@ void Settings::loadSystemScope()
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+	m_showLogo = s.value("m_showLogo", true).toBool();
+	m_showItemsLabels = s.value("m_showItemsLabels", false).toBool();
+	m_singleInstance = s.value("m_singleInstance", false).toBool();
 
 	return;
 }
@@ -224,4 +236,40 @@ void Settings::setRequestTimeInterval(int value)
 {
 	QMutexLocker l(&m_mutex);
 	m_requestTimeInterval = value;
+}
+
+bool Settings::showLogo() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_showLogo;
+}
+
+void Settings::setShowLogo(bool value)
+{
+	QMutexLocker l(&m_mutex);
+	m_showLogo = value;
+}
+
+bool Settings::showItemsLabels() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_showItemsLabels;
+}
+
+void Settings::setShowItemsLabels(bool value)
+{
+	QMutexLocker l(&m_mutex);
+	m_showItemsLabels = value;
+}
+
+bool Settings::singleInstance() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_singleInstance;
+}
+
+void Settings::setSingleInstance(bool value)
+{
+	QMutexLocker l(&m_mutex);
+	m_singleInstance = value;
 }

@@ -67,6 +67,15 @@ CompareDialog::CompareDialog(DbController* db, const DbChangesetObject& object, 
 	connect(ui->sourceTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CompareDialog::versionTypeChanged);
 	connect(ui->targetTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CompareDialog::versionTypeChanged);
 
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.25, rect().height());
+
+	move(screen.center() - rect().center());
+
 	return;
 }
 

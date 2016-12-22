@@ -511,7 +511,7 @@ namespace VFrame30
 		else
 		{
 			double pt = leftDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -523,7 +523,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setLeftDocPt(pt);
 		}
 	}
@@ -537,7 +537,7 @@ namespace VFrame30
 		else
 		{
 			double pt = topDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
@@ -550,7 +550,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setTopDocPt(pt);
 		}
 	}
@@ -564,7 +564,7 @@ namespace VFrame30
 		else
 		{
 			double pt = widthDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -581,7 +581,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setWidthDocPt(pt);
 		}
 	}
@@ -595,7 +595,7 @@ namespace VFrame30
 		else
 		{
 			double pt = heightDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
@@ -612,7 +612,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setHeightDocPt(pt);
 		}
 	}
