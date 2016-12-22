@@ -186,6 +186,27 @@ void MainWindow::restoreWindowState()
 	move(theSettings.m_mainWindowPos);
 	restoreGeometry(theSettings.m_mainWindowGeometry);
 	restoreState(theSettings.m_mainWindowState);
+
+	// Ensure widget is visible
+	//
+	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+
+	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect intersectRect = screenRect.intersected(frameGeometry());
+
+	if (intersectRect.width() < size().width() ||
+		intersectRect.height() < size().height())
+	{
+		move(screenRect.topLeft());
+	}
+
+	if (frameGeometry().width() > screenRect.width() ||
+		frameGeometry().height() > screenRect.height())
+	{
+		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+	}
+
+	return;
 }
 
 void MainWindow::createActions()
