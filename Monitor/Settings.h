@@ -48,6 +48,15 @@ public:
 	int requestTimeInterval() const;
 	void setRequestTimeInterval(int value);
 
+	bool showLogo() const;
+	void setShowLogo(bool value);
+
+	bool showItemsLabels() const;
+	void setShowItemsLabels(bool value);
+
+	bool singleInstance() const;
+	void setSingleInstance(bool value);
+
 	// Data	-- DO NOT FORGET TO ADD NEW MEMBERS TO ASSIGN OPERATOR
 	//
 public:
@@ -87,6 +96,10 @@ private:
 	int m_configuratorPort2;
 
 	int m_requestTimeInterval = 20;	// 20 ms
+
+	bool m_showLogo = true;
+	bool m_showItemsLabels = false;
+	bool m_singleInstance = false;
 };
 
 extern Settings theSettings;
