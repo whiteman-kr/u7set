@@ -21,6 +21,17 @@ LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget *parent)
 	{
 		ui->passwordEdit->setFocus();
 	}
+
+	// Resize depends on monitor size, DPI, resolution
+	//
+	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
+
+	QSize resizeTo = size();
+	resizeTo.setWidth(QDesktopWidget().availableGeometry(this).size().width() * 0.12);
+
+	resize(resizeTo);
+
+	return;
 }
 
 LoginDialog::~LoginDialog()
