@@ -23,6 +23,12 @@ private slots:
 
     void on_treeWidget_doubleClicked(const QModelIndex &index);
 
+    void on_btnClose_clicked();
+
+    void on_btnDetails_clicked();
+
+    void on_treeWidget_itemSelectionChanged();
+
 private:
 	void update(bool refreshOnly);
 
