@@ -2,6 +2,7 @@
 #include <QApplication>
 #include "Settings.h"
 #include "UserManager.h"
+#include <QCommandLineParser>
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
@@ -107,6 +108,7 @@ int main(int argc, char *argv[])
 	//prevHook = _CrtSetReportHook(reportingHook);
 #endif
 
+    int result = 0;
 
 	QApplication a(argc, argv);
 	a.setApplicationName("TuningClient");
@@ -117,10 +119,28 @@ int main(int argc, char *argv[])
 	theSettings.RestoreSystem();
 	theUserManager.Restore();
 
-    int result = 0;
-
     loadLanguage(theSettings.language());
 
+    // Parse the command line
+    //
+    QCommandLineParser parser;
+
+    QCommandLineOption idOption(QStringList() << "i" << "id",
+             QCoreApplication::translate("main", "Set the TuningClient ID."),
+             QCoreApplication::translate("main", "TuningClient ID"));
+    parser.addOption(idOption);
+
+    parser.process(*qApp);
+
+    QString clientID = parser.value(idOption);
+
+    if (clientID.isEmpty() == false)
+    {
+        theSettings.setInstanceId(clientID);
+    }
+
+    // Check to run the application in one instance
+    //
     QSharedMemory* sharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
 
     if(sharedMemorySingleApp->attach(QSharedMemory::ReadOnly) == false)
@@ -132,7 +152,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            // run the application
+            // Run the application
             //
             theMainWindow = new MainWindow();
             theMainWindow->show();
