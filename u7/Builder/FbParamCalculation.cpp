@@ -1171,30 +1171,42 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_ti");
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
+		if (caption() == "integratorc")
+		{
+			requiredParams.append("i_ti");
+			requiredParams.append("i_ki");
+		}
+
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
+		if (caption() == "integratorc")
+		{
+			AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
+			AppFbParamValue& i_ki = m_paramValuesArray["i_ki"];
+
+			CHECK_SIGNED_INT32(i_ti);
+			CHECK_FLOAT32(i_ki);
+
+			int i_ti_value = i_ti.signedIntValue();
+
+			if (i_ti_value < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_ti.caption(), guid());
+
+				return false;
+			}
+		}
+
 		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
 		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
 
-		CHECK_SIGNED_INT32(i_ti);
 		CHECK_FLOAT32(i_max);
 		CHECK_FLOAT32(i_min);
-
-		int i_ti_value = i_ti.signedIntValue();
-
-		if (i_ti_value < 0)
-		{
-			// Value of parameter '%1.%2' must be greater or equal to 0.
-			//
-			m_log->errALC5043(caption(), i_ti.caption(), guid());
-
-			return false;
-		}
 
 		float i_max_value = i_max.floatValue();
 		float i_min_value = i_min.floatValue();
@@ -1472,33 +1484,42 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_kd");
-		requiredParams.append("i_td");
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
+		if (caption() == "derivc")
+		{
+			requiredParams.append("i_kd");
+			requiredParams.append("i_td");
+		}
+
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
-		AppFbParamValue& i_td = m_paramValuesArray["i_td"];
+		if (caption() == "derivc")
+		{
+			AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
+			AppFbParamValue& i_td = m_paramValuesArray["i_td"];
+
+			CHECK_FLOAT32(i_kd);
+			CHECK_SIGNED_INT32(i_td);
+
+			int i_td_value = i_td.signedIntValue();
+
+			if (i_td_value < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_td.caption(), guid());
+
+				return false;
+			}
+		}
+
 		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
 		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
 
-		CHECK_FLOAT32(i_kd);
-		CHECK_SIGNED_INT32(i_td);
 		CHECK_FLOAT32(i_max);
 		CHECK_FLOAT32(i_min);
-
-		int i_td_value = i_td.signedIntValue();
-
-		if (i_td_value < 0)
-		{
-			// Value of parameter '%1.%2' must be greater or equal to 0.
-			//
-			m_log->errALC5043(caption(), i_td.caption(), guid());
-
-			return false;
-		}
 
 		float i_max_value = i_max.floatValue();
 		float i_min_value = i_min.floatValue();
