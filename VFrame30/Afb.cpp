@@ -491,6 +491,8 @@ namespace Afb
 			return false;
 		}
 
+		m_units.clear();
+
 		if (xmlReader->name() != "AfbElementParam")
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementParam expected."));
@@ -519,6 +521,7 @@ namespace Afb
 				setType(E::SignalType::Analog);
 			}
 			else
+			{
 				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
 				{
 					setType(E::SignalType::Discrete);
@@ -528,6 +531,7 @@ namespace Afb
 					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown Type"));
 					return false;
 				}
+			}
 		}
 
 		if (xmlReader->attributes().hasAttribute("DataFormat"))
@@ -542,6 +546,7 @@ namespace Afb
 					setDataFormat(E::DataFormat::SignedInt);
 				}
 				else
+				{
 					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
 					{
 						setDataFormat(E::DataFormat::Float);
@@ -551,6 +556,7 @@ namespace Afb
 						xmlReader->raiseError(QObject::tr("AfbElementParam, unknown DataFormat"));
 						return false;
 					}
+				}
 		}
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
@@ -594,7 +600,6 @@ namespace Afb
 				}
 			}
 
-
 			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
@@ -627,11 +632,7 @@ namespace Afb
 					val = str == "1" ? true : false;
 				}
 
-				if (val.isNull())
-				{
-					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown type, tag ") + valueName + QObject::tr(", data ") + str);
-				}
-				else
+				if (val.isNull() == false)
 				{
 					if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0)
 					{
@@ -650,11 +651,19 @@ namespace Afb
 						setHighLimit(val);
 					}
 				}
+				else
+				{
+					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown type, tag ") + valueName + QObject::tr(", data ") + str);
+				}
+			}
+
+			if (QString::compare(valueName, "Units", Qt::CaseInsensitive) == 0)
+			{
+				m_units = xmlReader->readElementText();
 			}
 		}
 
 		return !xmlReader->hasError();
-
 	}
 
 	bool AfbParam::saveToXml(QXmlStreamWriter* xmlWriter) const
@@ -717,6 +726,8 @@ namespace Afb
 		xmlWriter->writeStartElement("Script");
 		xmlWriter->writeTextElement("Changed", changedScript());
 		xmlWriter->writeEndElement();
+
+		xmlWriter->writeTextElement("Units", units());
 
 		xmlWriter->writeEndElement();
 
@@ -877,6 +888,16 @@ namespace Afb
 	void AfbParam::setChangedScript(const QString &value)
 	{
 		m_changedScript = value;
+	}
+
+	QString AfbParam::units() const
+	{
+		return m_units;
+	}
+
+	void AfbParam::setUnits(const QString& value)
+	{
+		m_units = value;
 	}
 
 	//

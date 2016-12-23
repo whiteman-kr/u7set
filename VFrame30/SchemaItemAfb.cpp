@@ -156,9 +156,11 @@ namespace VFrame30
 
 			// Param string LOWERCASED
 			//
-			QString paramStr = QString("%1: %2")
-				.arg(param.caption())
-				.arg(paramValue).toLower();
+			QString paramStr = QString("%1: %2 %3")
+							   .arg(param.caption())
+							   .arg(paramValue)
+							   .arg(param.units())
+									.toLower();
 
 			if (text.isEmpty() == true)
 			{
@@ -335,6 +337,18 @@ namespace VFrame30
 		return QVariant();
 	}
 
+	Afb::AfbParam SchemaItemAfb::afbParam(const QString& name)
+	{
+		for (Afb::AfbParam& p : m_afbElement.params())
+		{
+			if (p.caption() == name)
+			{
+				return p;
+			}
+		}
+
+		return Afb::AfbParam();
+	}
 
 	bool SchemaItemAfb::setAfbElementParams(Afb::AfbElement* afbElement) const
 	{

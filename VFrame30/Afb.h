@@ -163,7 +163,6 @@ private:
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
-
 		// Properties
 		//
 	public:
@@ -212,6 +211,9 @@ private:
 		QString changedScript() const;
 		void setChangedScript(const QString& value);
 
+		QString units() const;
+		void setUnits(const QString& value);
+
 		// Data
 		//
 	private:
@@ -232,6 +234,8 @@ private:
 
 		int m_operandIndex;
 		int m_size;
+
+		QString m_units;
 	};
 
 

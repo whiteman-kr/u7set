@@ -48,7 +48,7 @@ void LoginDialog::showEvent(QShowEvent* event)
 		//
 		QSize resizeTo = size();
 		QRect screen = QDesktopWidget().availableGeometry(this);
-		resizeTo.setWidth(screen.size().width() * 0.12);
+		resizeTo.setWidth(screen.size().width() * 0.20);
 
 		resize(resizeTo);
 		move(screen.center() - rect().center());
