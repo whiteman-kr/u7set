@@ -48,6 +48,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
+                <Units>ms</Units>
             </AfbElementParam>
             <AfbElementParam OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>

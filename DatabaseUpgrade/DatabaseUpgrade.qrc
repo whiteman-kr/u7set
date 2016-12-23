@@ -128,6 +128,7 @@
         <file>Upgrade0126.sql</file>
         <file>Upgrade0127.sql</file>
         <file>Upgrade0128.sql</file>
+        <file>Upgrade0129.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -144,6 +144,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0126.sql", "Upgrade to version 126, LM-1 TxDiagDataSize changed to 176"},
 	{":/DatabaseUpgrade/Upgrade0127.sql", "Upgrade to version 127, Update AppLogic and UFB templates, macroses are added"},
 	{":/DatabaseUpgrade/Upgrade0128.sql", "Upgrade to version 128, fix spelling administrator word in dbuser type"},
+    {":/DatabaseUpgrade/Upgrade0129.sql", "Upgrade to version 129, added Units to AfbElementParam in damper, int, der, tctc"},
 };
 
 
