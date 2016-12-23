@@ -661,11 +661,6 @@ namespace Afb
 			{
 				m_units = xmlReader->readElementText();
 			}
-
-            if (QString::compare(valueName, "Units", Qt::CaseInsensitive) == 0)
-            {
-                setUnits(xmlReader->readElementText());
-            }
 		}
 
 		return !xmlReader->hasError();
@@ -726,7 +721,6 @@ namespace Afb
 			xmlWriter->writeTextElement("Default", defaultValue().toString());
 			xmlWriter->writeTextElement("LowLimit", lowLimit().toString());
 			xmlWriter->writeTextElement("HighLimit", highLimit().toString());
-            xmlWriter->writeTextElement("Units", units());
         }
 
 		xmlWriter->writeStartElement("Script");
@@ -845,17 +839,6 @@ namespace Afb
 	{
 		m_highLimit = highLimit;
 	}
-
-    const QString& AfbParam::units() const
-    {
-        return m_units;
-    }
-
-    void AfbParam::setUnits(const QString& value)
-    {
-        m_units = value;
-    }
-
 
 	int AfbParam::operandIndex() const
 	{

@@ -196,9 +196,6 @@ private:
 		const QVariant& highLimit() const;
 		void setHighLimit(const QVariant& highLimit);
 
-        const QString& units() const;
-        void setUnits(const QString& value);
-
         int operandIndex() const;
 		void setOperandIndex(int value);
 
@@ -234,8 +231,6 @@ private:
 
 		QVariant m_lowLimit;		// Low limit for param
 		QVariant m_highLimit;		// High limit for param
-
-        QString m_units;
 
 		int m_operandIndex;
 		int m_size;
