@@ -73,6 +73,32 @@ int reportingHook(int, char* userMessage, int*)
 
 #endif
 
+QTranslator m_translator; // contains the translations for this application
+
+void switchTranslator(QTranslator& translator, const QString& filename)
+{
+    // remove the old translator
+    qApp->removeTranslator(&translator);
+
+    // load the new translator
+    if(translator.load(filename))
+    {
+        qApp->installTranslator(&translator);
+    }
+}
+
+void loadLanguage(const QString& rLanguage)
+{
+    QLocale locale = QLocale(rLanguage);
+    QLocale::setDefault(locale);
+
+    QString langPath = QApplication::applicationDirPath();
+    langPath.append("/languages");
+
+    switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));
+}
+
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
@@ -91,14 +117,40 @@ int main(int argc, char *argv[])
 	theSettings.RestoreSystem();
 	theUserManager.Restore();
 
-	theMainWindow = new MainWindow();
-	theMainWindow->show();
+    int result = 0;
 
-	int result = a.exec();
+    loadLanguage(theSettings.language());
 
-	delete theMainWindow;
+    QSharedMemory* sharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
 
-	theSettings.StoreUser();
+    if(sharedMemorySingleApp->attach(QSharedMemory::ReadOnly) == false)
+    {
+        if(sharedMemorySingleApp->create(1) == false)
+        {
+            QMessageBox::critical(nullptr, QObject::tr("Error"), QObject::tr("Failed to create QSharedMemory object!"));
+            assert(false);
+        }
+        else
+        {
+            // run the application
+            //
+            theMainWindow = new MainWindow();
+            theMainWindow->show();
+
+            result = a.exec();
+
+            delete theMainWindow;
+
+            theSettings.StoreUser();
+        }
+    }
+    else
+    {
+        QMessageBox::critical(nullptr, QObject::tr("Error"), QObject::tr("Application is already running!"));
+        sharedMemorySingleApp->detach();
+    }
+
+    delete sharedMemorySingleApp;
 
 	google::protobuf::ShutdownProtobufLibrary();
 
