@@ -1,38 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#integrator_v1">
+    <AfbElement StrId="#derivc_v1">
         <Properties>
-            <Caption>integrator</Caption>
+            <Caption>derivc</Caption>
             <Version>1.0004</Version>
-            <Implementation Version="1" OpIndex="29"/>
-            <Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
+            <Implementation Version="1" OpIndex="28"/>
+            <Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
             <Category>Other</Category>
-            <OpCode>17</OpCode>
+            <OpCode>26</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_x_tr" Caption="track_in" Type="Analog" DataFormat="Float" OpIndex="12" Size="32"/>
-            <AfbElementSignal OpName="i_x" Caption="in" Type="Analog" DataFormat="Float" OpIndex="14" Size="32"/>
-            <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="16" Size="1"/>
-            <AfbElementSignal OpName="i_pause" Caption="pause" Type="Discrete" OpIndex="17" Size="1"/>
-            <AfbElementSignal OpName="i_track" Caption="track" Type="Discrete" OpIndex="18" Size="1"/>
-            <AfbElementSignal OpName="i_ki" Caption="ki" Type="Analog" DataFormat="Float" OpIndex="0" Size="32"/>
-            <AfbElementSignal OpName="i_ti" Caption="ti" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+            <AfbElementSignal OpName="i_x" Caption="in" Type="Analog" DataFormat="Float" OpIndex="12" Size="32"/>
+            <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="14" Size="1"/>
+            <AfbElementSignal OpName="i_pause" Caption="pause" Type="Discrete" OpIndex="15" Size="1"/>           
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="20" Size="32"/>
-            <AfbElementSignal OpName="o_max" Caption="max" Type="Discrete" OpIndex="22" Size="1"/>
-            <AfbElementSignal OpName="o_min" Caption="min" Type="Discrete" OpIndex="23" Size="1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="19" Size="32"/>
+            <AfbElementSignal OpName="o_max" Caption="max" Type="Discrete" OpIndex="21" Size="1"/>
+            <AfbElementSignal OpName="o_min" Caption="min" Type="Discrete" OpIndex="22" Size="1"/>
 
-            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="24" Size="1"/>
-            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="25" Size="1"/>
-            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="26" Size="1"/>
-            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="27" Size="1"/>
-            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="28" Size="1"/>
+            <AfbElementSignal OpName="o_param_err" Caption="param_err" Type="Discrete" OpIndex="23" Size="1"/>
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="24" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="25" Size="1"/>
+            <AfbElementSignal OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="26" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="27" Size="1"/>
         </OutputSignals>
         <Params>
+            <AfbElementParam OpName="i_kd" Caption="Kd" Visible="true" OpIndex="0" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_td" Caption="Td" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+                <Units>ms</Units>
+            </AfbElementParam>
             <AfbElementParam OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
@@ -50,16 +65,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
-            </AfbElementParam>
-            <AfbElementParam OpName="i_ri_const" Caption="RIConst" Visible="true" OpIndex="8" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="Float">
-                <Value>0</Value>
-                <Default>0</Default>
-                <LowLimit>-3.40282e+38</LowLimit>
-                <HighLimit>3.40282e+38</HighLimit>
-                <Script>
-                    <Changed></Changed>
-                </Script>
-            </AfbElementParam>                             
+            </AfbElementParam>      
             <AfbElementParam OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
                 <Value>1</Value>
                 <Default>1</Default>
