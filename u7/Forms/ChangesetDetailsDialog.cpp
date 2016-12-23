@@ -33,15 +33,6 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 				m_splitterState = ui->splitter->saveState();
 			});
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.35, screen.height() * 0.45);
-
-	move(screen.center() - rect().center());
-
 	// Fill objects table
 	//
 	ui->objects->setColumnCount(4);
@@ -99,15 +90,6 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 
 	ui->objects->insertTopLevelItems(0, items);
 
-	int listWidth = ui->objects->width();
-
-	assert(columns.size() == 5);
-	ui->objects->setColumnWidth(0, listWidth * 0.10);
-	ui->objects->setColumnWidth(1, listWidth * 0.25);
-	ui->objects->setColumnWidth(2, listWidth * 0.40);
-	ui->objects->setColumnWidth(3, listWidth * 0.10);
-	ui->objects->setColumnWidth(4, listWidth * 0.10);
-
 	ui->labelObjects->setText(tr("Objects, %1 file(s), %2 signal(s)").arg(fileCount).arg(signalCount));
 
 	return;
@@ -148,6 +130,33 @@ void ChangesetDetailsDialog::showChangesetDetails(DbController* db, int changese
 
 	return;
 }
+
+void ChangesetDetailsDialog::showEvent(QShowEvent* event)
+{
+	if (event->spontaneous() == true)
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(this);
+		resize(screen.width() * 0.35, screen.height() * 0.45);
+
+		move(screen.center() - rect().center());
+
+		// --
+		//
+		int listWidth = ui->objects->width();
+
+		assert(ui->objects->columnCount() == 5);
+		ui->objects->setColumnWidth(0, listWidth * 0.10);
+		ui->objects->setColumnWidth(1, listWidth * 0.25);
+		ui->objects->setColumnWidth(2, listWidth * 0.40);
+		ui->objects->setColumnWidth(3, listWidth * 0.10);
+		ui->objects->setColumnWidth(4, listWidth * 0.10);
+	}
+
+	return;
+}
+
 
 void ChangesetDetailsDialog::on_objects_customContextMenuRequested(const QPoint& /*pos*/)
 {

@@ -18,10 +18,7 @@ public:
 	EditorDelegate(QObject *parent);
 	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
-
-
 private:
-
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
     void setEditorData(QWidget *editor, const QModelIndex &index) const override;
 
@@ -35,14 +32,8 @@ public:
 	explicit DialogSubsystemListEditor(DbController* pDbController, QWidget *parent = 0);
 	~DialogSubsystemListEditor();
 
-    enum Columns
-    {
-        Index,
-        Key,
-        SubsystemID,
-        Caption
-
-    };
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 
 private:
 	bool askForSaveChanged();
@@ -57,6 +48,15 @@ private slots:
 	void on_buttonOk_clicked();
 	void on_buttonCancel_clicked();
 	void on_m_list_itemChanged(QTreeWidgetItem *item, int column);
+
+public:
+	enum Columns
+	{
+		Index,
+		Key,
+		SubsystemID,
+		Caption
+	};
 
 private:
 	Ui::DialogSubsystemListEditor *ui;

@@ -77,15 +77,6 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, Db
 		sm->select(mi, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 	}
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.40, screen.height() * 0.35);
-
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -166,6 +157,19 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	{
 		return -1;
 	}
+}
+
+void SelectChangesetDialog::showEvent(QShowEvent* e)
+{
+	if (e->spontaneous() == true)
+	{
+		QRect screen = QDesktopWidget().availableGeometry(this);
+		resize(screen.width() * 0.40, screen.height() * 0.35);
+
+		move(screen.center() - rect().center());
+	}
+
+	return;
 }
 
 void SelectChangesetDialog::on_buttonBox_accepted()

@@ -27,19 +27,27 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 
 	fillTree();
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.35, screen.height() * 0.40);
-
-	move(screen.center() - rect().center());
+	return;
 }
 
 ChooseUfbDialog::~ChooseUfbDialog()
 {
 	delete ui;
+}
+
+void ChooseUfbDialog::showEvent(QShowEvent* event)
+{
+	if (event->spontaneous() == true)
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(this);
+		resize(screen.width() * 0.35, screen.height() * 0.40);
+
+		move(screen.center() - rect().center());
+	}
+
+	return;
 }
 
 void ChooseUfbDialog::fillTree()

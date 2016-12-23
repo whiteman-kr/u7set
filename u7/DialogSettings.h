@@ -17,6 +17,9 @@ public:
 
 	const Settings& settings() const;
 	void setSettings(const Settings& value);
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 	
 private slots:
 	void on_ok_clicked();

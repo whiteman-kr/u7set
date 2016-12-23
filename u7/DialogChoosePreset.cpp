@@ -155,14 +155,6 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 	ui->m_presetTree->sortItems(m_lastSortColumn, m_lastSortOrder);
 	ui->m_presetTree->setSortingEnabled(true);
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.26, screen.height() * 0.45);
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -171,6 +163,19 @@ DialogChoosePreset::~DialogChoosePreset()
 	delete ui;
 }
 
+void DialogChoosePreset::showEvent(QShowEvent* event)
+{
+	if (event->spontaneous() == true)
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(this);
+		resize(screen.width() * 0.26, screen.height() * 0.45);
+		move(screen.center() - rect().center());
+	}
+
+	return;
+}
 
 void DialogChoosePreset::on_DialogChoosePreset_accepted()
 {

@@ -22,6 +22,9 @@ public:
 
 	static int getFileChangeset(DbController* db, const DbFileInfo& file, bool onlySelectChangeset, QWidget* parent);
 	static int getSignalChangeset(DbController* db, DbChangesetObject signal, bool onlySelectChangeset, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent*) override;
 	
 private slots:
 	void on_buttonBox_accepted();

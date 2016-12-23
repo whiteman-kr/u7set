@@ -21,8 +21,10 @@ private:
 
 public:
 	~CompareDialog();
-
 	static void showCompare(DbController* db, const DbChangesetObject& object, int changeset, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 
 private slots:
 	void versionTypeChanged();
